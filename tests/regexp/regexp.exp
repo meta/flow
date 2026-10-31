@@ -205,19 +205,19 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    regexp.js:26:5
-     26| "a".toLocaleLowerCase(1); // error
-             ^^^^^^^^^^^^^^^^^
+    26| "a".toLocaleLowerCase(1); // error
+            ^^^^^^^^^^^^^^^^^
 
 References:
    regexp.js:26:23
-     26| "a".toLocaleLowerCase(1); // error
-                               ^ [1]
+    26| "a".toLocaleLowerCase(1); // error
+                              ^ [1]
    <BUILTINS>/lib.es2020.intl.js:99:59
-     99|     type LocalesArgument = UnicodeBCP47LocaleIdentifier | Locale | readonly (UnicodeBCP47LocaleIdentifier | Locale)[] | undefined;
-                                                                   ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1090:33
-   1090|     toLocaleLowerCase(locales?: string | string[]): string;
-                                         ^^^^^^ [3]
+    99|     type LocalesArgument = UnicodeBCP47LocaleIdentifier | Locale | readonly (UnicodeBCP47LocaleIdentifier | Locale)[] | undefined;
+                                                                  ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:383:33
+   383|     toLocaleLowerCase(locales?: string | string[]): string;
+                                        ^^^^^^ [3]
 
 
 

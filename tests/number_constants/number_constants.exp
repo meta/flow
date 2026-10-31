@@ -43,8 +43,8 @@ Cannot assign `Number.MAX_VALUE` to `f` because `number` [1] is incompatible wit
                         ^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:341:25
-   341|     readonly MAX_VALUE: number;
+   <BUILTINS>/lib.es5.js:455:25
+   455|     readonly MAX_VALUE: number;
                                 ^^^^^^ [1]
    number_constants.js:6:8
      6| var f: string = Number.MAX_VALUE;
@@ -60,8 +60,8 @@ Cannot assign `Number.MIN_VALUE` to `h` because `number` [1] is incompatible wit
                         ^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:343:25
-   343|     readonly MIN_VALUE: number;
+   <BUILTINS>/lib.es5.js:457:25
+   457|     readonly MIN_VALUE: number;
                                 ^^^^^^ [1]
    number_constants.js:8:8
      8| var h: string = Number.MIN_VALUE;
@@ -77,8 +77,8 @@ Cannot assign `Number.NaN` to `j` because `number` [1] is incompatible with `str
                         ^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:348:19
-   348|     readonly NaN: number;
+   <BUILTINS>/lib.es5.js:462:19
+   462|     readonly NaN: number;
                           ^^^^^^ [1]
    number_constants.js:10:8
     10| var j: string = Number.NaN;

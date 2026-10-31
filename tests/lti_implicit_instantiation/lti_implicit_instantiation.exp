@@ -358,8 +358,8 @@ the expression to your expected type. [underconstrained-implicit-instantiation]
             ^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:632:21
-   632| declare class Array<T> extends ReadonlyArray<T> {
+   <BUILTINS>/lib.es5.js:746:21
+   746| declare class Array<T> extends ReadonlyArray<T> {
                             ^ [1]
    underconstrained_class_constructor.js:18:1
     18| new Array(1); // Error
@@ -858,8 +858,8 @@ Cannot get `r1.bad` because property `bad` is missing in `Array<string>` [1]. [p
              ^^^
 
 References:
-   <BUILTINS>/lib.es5.js:632:15
-   632| declare class Array<T> extends ReadonlyArray<T> {
+   <BUILTINS>/lib.es5.js:746:15
+   746| declare class Array<T> extends ReadonlyArray<T> {
                       ^^^^^ [1]
 
 
@@ -893,8 +893,8 @@ Cannot get `r2.bad` because property `bad` is missing in `Array<1 | 2>` [1]. [pr
              ^^^
 
 References:
-   <BUILTINS>/lib.es5.js:632:15
-   632| declare class Array<T> extends ReadonlyArray<T> {
+   <BUILTINS>/lib.es5.js:746:15
+   746| declare class Array<T> extends ReadonlyArray<T> {
                       ^^^^^ [1]
 
 

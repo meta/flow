@@ -53,8 +53,8 @@ References:
    array_lib.js:13:14
     13| var e: Array<string> = a.reverse();
                      ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:722:16
-   722|     reverse(): Array<T>;
+   <BUILTINS>/lib.es5.js:836:16
+   836|     reverse(): Array<T>;
                        ^^^^^^^^ [3]
    array_lib.js:13:8
     13| var e: Array<string> = a.reverse();
@@ -76,14 +76,14 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
                                ^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:496:53
-   496|     >(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
+   <BUILTINS>/lib.es5.js:610:53
+   610|     >(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
                                                             ^^^^^ [1]
    array_lib.js:26:14
     26| var n: Array<number> = h.concat('a', 'b', 'c'); // Error
                      ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:496:47
-   496|     >(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
+   <BUILTINS>/lib.es5.js:610:47
+   610|     >(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
                                                       ^^^^^^^^^^^^ [3]
    array_lib.js:26:8
     26| var n: Array<number> = h.concat('a', 'b', 'c'); // Error
@@ -95,16 +95,16 @@ Error --------------------------------------------------------------------------
 Cannot use operator `*` with operands `string` [1] and `number` [2] [unsafe-arithmetic]
 
    array_lib.js:58:29
-     58|   [''].reduce((acc, str) => acc * str.length); // error, string ~> number
-                                     ^^^^^^^^^^^^^^^^
+    58|   [''].reduce((acc, str) => acc * str.length); // error, string ~> number
+                                    ^^^^^^^^^^^^^^^^
 
 References:
    array_lib.js:58:4
-     58|   [''].reduce((acc, str) => acc * str.length); // error, string ~> number
-            ^^ [1]
-   <BUILTINS>/lib.es5.js:1098:22
-   1098|     readonly length: number;
-                              ^^^^^^ [2]
+    58|   [''].reduce((acc, str) => acc * str.length); // error, string ~> number
+           ^^ [1]
+   <BUILTINS>/lib.es5.js:391:22
+   391|     readonly length: number;
+                             ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------- array_lib.js:59:34
@@ -112,16 +112,16 @@ Error --------------------------------------------------------------------------
 Cannot use operator `*` with operands `string` [1] and `number` [2] [unsafe-arithmetic]
 
    array_lib.js:59:34
-     59|   [''].reduceRight((acc, str) => acc * str.length); // error, string ~> number
-                                          ^^^^^^^^^^^^^^^^
+    59|   [''].reduceRight((acc, str) => acc * str.length); // error, string ~> number
+                                         ^^^^^^^^^^^^^^^^
 
 References:
    array_lib.js:59:4
-     59|   [''].reduceRight((acc, str) => acc * str.length); // error, string ~> number
-            ^^ [1]
-   <BUILTINS>/lib.es5.js:1098:22
-   1098|     readonly length: number;
-                              ^^^^^^ [2]
+    59|   [''].reduceRight((acc, str) => acc * str.length); // error, string ~> number
+           ^^ [1]
+   <BUILTINS>/lib.es5.js:391:22
+   391|     readonly length: number;
+                             ^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------ array_lib.js:71:3
@@ -139,14 +139,14 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
           ^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:769:37
-   769|     static from(str: string): Array<string>;
+   <BUILTINS>/lib.es5.js:883:37
+   883|     static from(str: string): Array<string>;
                                             ^^^^^^ [1]
    array_lib.js:71:31
     71|   Array.from('abcd') as Array<empty>; // ERROR
                                       ^^^^^ [2]
-   <BUILTINS>/lib.es5.js:769:31
-   769|     static from(str: string): Array<string>;
+   <BUILTINS>/lib.es5.js:883:31
+   883|     static from(str: string): Array<string>;
                                       ^^^^^^^^^^^^^ [3]
    array_lib.js:71:25
     71|   Array.from('abcd') as Array<empty>; // ERROR
@@ -179,8 +179,8 @@ References:
    array_lib.js:75:20
     75|   const arrayLike: ArrayLike<string> = {0: 'hello', length: 1};
                            ^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/lib.es5.js:764:31
-   764|     static from<A, This>(str: string, mapFn: (this: This, elem: string, index: number) => A, thisArg: This): Array<A>;
+   <BUILTINS>/lib.es5.js:878:31
+   878|     static from<A, This>(str: string, mapFn: (this: This, elem: string, index: number) => A, thisArg: This): Array<A>;
                                       ^^^^^^ [5]
 
 
@@ -402,22 +402,22 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    filter_error_msg_quality_test.js:3:9
-      3| str_arr.filter(s => s.length) as Array<boolean>;
-                 ^^^^^^
+     3| str_arr.filter(s => s.length) as Array<boolean>;
+                ^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1098:22
-   1098|     readonly length: number;
-                              ^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:659:109
-    659|     filter<This, S extends T>(callbackfn: (this: This, value: T, index: number, array: ReadonlyArray<T>) => implies value is S, thisArg: This): Array<S>;
-                                                                                                                     ^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:391:22
+   391|     readonly length: number;
+                             ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:773:109
+   773|     filter<This, S extends T>(callbackfn: (this: This, value: T, index: number, array: ReadonlyArray<T>) => implies value is S, thisArg: This): Array<S>;
+                                                                                                                    ^^^^^^^^^^^^^^^^^^ [2]
    filter_error_msg_quality_test.js:2:30
-      2| declare const str_arr: Array<string>;
-                                      ^^^^^^ [3]
+     2| declare const str_arr: Array<string>;
+                                     ^^^^^^ [3]
    filter_error_msg_quality_test.js:3:40
-      3| str_arr.filter(s => s.length) as Array<boolean>;
-                                                ^^^^^^^ [4]
+     3| str_arr.filter(s => s.length) as Array<boolean>;
+                                               ^^^^^^^ [4]
 
 
 Error ---------------------------------------------------------------------------- filter_error_msg_quality_test.js:7:18
@@ -443,8 +443,8 @@ References:
    filter_error_msg_quality_test.js:7:25
      7| nullable_str_arr.filter(s => !!s) as Array<string>;
                                 ^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:652:24
-   652|     filter(callbackfn: typeof Boolean): Array<NonNullable<T>>;
+   <BUILTINS>/lib.es5.js:766:24
+   766|     filter(callbackfn: typeof Boolean): Array<NonNullable<T>>;
                                ^^^^^^^^^^^^^^ [4]
 
 

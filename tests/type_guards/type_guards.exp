@@ -1110,16 +1110,16 @@ Error --------------------------------------------------------------------------
 Cannot cast `x.length` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    generic_unions.js:30:5
-     30|     x.length as empty; // error number ~> empty
-             ^^^^^^^^
+    30|     x.length as empty; // error number ~> empty
+            ^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1098:22
-   1098|     readonly length: number;
-                              ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:391:22
+   391|     readonly length: number;
+                             ^^^^^^ [1]
    generic_unions.js:30:17
-     30|     x.length as empty; // error number ~> empty
-                         ^^^^^ [2]
+    30|     x.length as empty; // error number ~> empty
+                        ^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------- generic_unions.js:36:5
@@ -1127,16 +1127,16 @@ Error --------------------------------------------------------------------------
 Cannot cast `x.length` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    generic_unions.js:36:5
-     36|     x.length as empty; // error number ~> empty
-             ^^^^^^^^
+    36|     x.length as empty; // error number ~> empty
+            ^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1098:22
-   1098|     readonly length: number;
-                              ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:391:22
+   391|     readonly length: number;
+                             ^^^^^^ [1]
    generic_unions.js:36:17
-     36|     x.length as empty; // error number ~> empty
-                         ^^^^^ [2]
+    36|     x.length as empty; // error number ~> empty
+                        ^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------ inferred.js:18:23

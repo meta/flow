@@ -4,16 +4,16 @@ Cannot assign `new String(...)` to `lengthTest2` because property `length` is re
 `IHasLength` [2]. [incompatible-variance]
 
    builtin.js:10:31
-     10| var lengthTest2: IHasLength = new String('hello');
-                                       ^^^^^^^^^^^^^^^^^^^
+    10| var lengthTest2: IHasLength = new String('hello');
+                                      ^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1113:24
-   1113|     new (value?: any): String;
-                                ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:406:24
+   406|     new (value?: any): String;
+                               ^^^^^^ [1]
    builtin.js:10:18
-     10| var lengthTest2: IHasLength = new String('hello');
-                          ^^^^^^^^^^ [2]
+    10| var lengthTest2: IHasLength = new String('hello');
+                         ^^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------- builtin.js:11:31

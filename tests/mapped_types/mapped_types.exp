@@ -1513,16 +1513,16 @@ Error --------------------------------------------------------------------------
 Cannot cast `keysLength` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
 
    import_values.js:32:1
-     32| keysLength as string; // ERROR
-         ^^^^^^^^^^
+    32| keysLength as string; // ERROR
+        ^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1098:22
-   1098|     readonly length: number;
-                              ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:391:22
+   391|     readonly length: number;
+                             ^^^^^^ [1]
    import_values.js:32:15
-     32| keysLength as string; // ERROR
-                       ^^^^^^ [2]
+    32| keysLength as string; // ERROR
+                      ^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------- import_values.js:34:1

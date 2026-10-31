@@ -61,8 +61,8 @@ Cannot call `arr1.push` because property `push` is missing in `ReadonlyArray<1 |
                ^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:482:15
-   482| declare class ReadonlyArray<out T> {
+   <BUILTINS>/lib.es5.js:596:15
+   596| declare class ReadonlyArray<out T> {
                       ^^^^^^^^^^^^^ [1]
 
 
