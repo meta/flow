@@ -189,11 +189,11 @@ with `number` [2]. [incompatible-type]
         ^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:270:16
-   270|     valueOf(): unknown;
+   <BUILTINS>/lib.es5.js:119:16
+   119|     valueOf(): unknown;
                        ^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:473:16
-   473|     valueOf(): number;
+   <BUILTINS>/lib.es5.js:472:16
+   472|     valueOf(): number;
                        ^^^^^^ [2]
 
 
@@ -206,8 +206,8 @@ Cannot call `z.charAt` because property `charAt` is missing in `Number` [1]. [pr
           ^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:116:25
-   116|     static (o: number): Number;
+   <BUILTINS>/lib.es5.js:137:25
+   137|     static (o: number): Number;
                                 ^^^^^^ [1]
 
 
@@ -403,8 +403,8 @@ Cannot cast `y['hasOwnProperty']` to `string` because `(prop: unknown) => boolea
         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:254:5
-   254|     hasOwnProperty(prop: unknown): boolean;
+   <BUILTINS>/lib.es5.js:124:5
+   124|     hasOwnProperty(prop: unknown): boolean;
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    objects.js:18:24
     18| y['hasOwnProperty'] as string; // error, prototype method is not a string

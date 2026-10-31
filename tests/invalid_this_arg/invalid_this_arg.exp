@@ -277,8 +277,8 @@ References:
    rejected.js:2:6
      2|   m: (this: {x: number, ...}, y: number) => void,
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:279:65
-   279|     proto call: <T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, ...args: A) => R;
+   <BUILTINS>/lib.es5.js:275:65
+   275|     proto call: <T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, ...args: A) => R;
                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 

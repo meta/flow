@@ -84,8 +84,8 @@ Cannot cast `o.toString()` to `boolean` because `string` [1] is incompatible wit
           ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:268:17
-   268|     toString(): string;
+   <BUILTINS>/lib.es5.js:115:17
+   115|     toString(): string;
                         ^^^^^^ [1]
    dictionary.js:79:19
     79|   o.toString() as boolean; // error: string ~> boolean
