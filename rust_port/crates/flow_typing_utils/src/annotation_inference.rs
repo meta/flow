@@ -72,6 +72,7 @@ use flow_typing_type::type_::constraint::forcing_state::ForcingState;
 use flow_typing_type::type_::constraint::forcing_state::ModuleTypeForcingState;
 use flow_typing_type::type_::properties;
 use flow_typing_type::type_::type_collector::TypeCollector;
+use flow_typing_type::type_::type_or_type_desc::TypeOrTypeDescT;
 use flow_typing_type::type_util;
 
 use crate::avar;
@@ -851,8 +852,23 @@ pub fn elab_t<'cx>(
                     };
                     let normalized = match result {
                         Normalization::Normalized(normalized) => normalized,
-                        Normalization::InvalidExact(normalized, invalid) => {
+                        Normalization::InvalidExact(normalized, mut invalid) => {
                             if *check_exact {
+                                // The error is reported on `annot_error_dst`, which cannot
+                                // read the property maps of this context.
+                                if let TypeOrTypeDescT::Type(exact_object) =
+                                    &invalid.exact_object_desc
+                                {
+                                    let genv =
+                                        flow_typing_ty_normalizer::no_flow::mk_default_genv(None);
+                                    invalid.exact_object_desc = TypeOrTypeDescT::TypeDesc(
+                                        flow_typing_ty_normalizer::no_flow::type_to_desc_for_errors(
+                                            cx,
+                                            &genv,
+                                            exact_object,
+                                        ),
+                                    );
+                                }
                                 flow_js_utils::add_annot_inference_error(
                                     cx,
                                     ErrorMessage::EInvalidExactObjectIntersection(invalid),
