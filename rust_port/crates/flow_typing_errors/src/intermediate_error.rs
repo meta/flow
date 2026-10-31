@@ -53,6 +53,7 @@ use flow_typing_type::type_::FunReturnData;
 use flow_typing_type::type_::ImplicitInstantiationReferenceKind;
 use flow_typing_type::type_::IndexedTypeAccessData;
 use flow_typing_type::type_::IndexerKeyCompatibilityData;
+use flow_typing_type::type_::InitFieldData;
 use flow_typing_type::type_::JSXCreateElementData;
 use flow_typing_type::type_::MappedTypeKeyCompatibilityData;
 use flow_typing_type::type_::MergedDeclarationConflict;
@@ -1679,16 +1680,18 @@ where
                                 custom_error_message,
                             ),
 
-                            VirtualRootUseOp::InitField { op, body } => root(
-                                loc,
-                                frames,
-                                op,
-                                RootMessage::RootCannotInitializeField {
-                                    field: op.desc.clone(),
-                                    body: body.desc.clone(),
-                                },
-                                custom_error_message,
-                            ),
+                            VirtualRootUseOp::InitField(box InitFieldData { op, field, body }) => {
+                                root(
+                                    loc,
+                                    frames,
+                                    op,
+                                    RootMessage::RootCannotInitializeField {
+                                        field: field.dupe(),
+                                        body: body.desc.clone(),
+                                    },
+                                    custom_error_message,
+                                )
+                            }
 
                             // Cast
                             VirtualRootUseOp::Cast { lower, upper } => root(
@@ -5593,7 +5596,9 @@ where
                     RootKind::OperationRoot,
                     friendly::Message(vec![
                         text("Cannot initialize "),
-                        friendly::desc_of_reason_desc(field.as_ref()),
+                        friendly::MessageFeature::Inline(friendly::message_inlines_of_string(
+                            &format!("property `{field}`"),
+                        )),
                         text(" with "),
                         friendly::desc_of_reason_desc(body.as_ref()),
                     ]),

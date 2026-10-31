@@ -1678,6 +1678,7 @@ pub fn primary_reason_of_use_op(use_op: &UseOp) -> Option<&Reason> {
     use flow_typing_type::type_::AssignVarDefaultData;
     use flow_typing_type::type_::AssignVarInit;
     use flow_typing_type::type_::AssignVarTarget;
+    use flow_typing_type::type_::InitFieldData;
     use flow_typing_type::type_::JSXCreateElementData;
     use flow_typing_type::type_::RootUseOp;
     use flow_typing_type::type_::TypeApplicationTarget;
@@ -1694,7 +1695,7 @@ pub fn primary_reason_of_use_op(use_op: &UseOp) -> Option<&Reason> {
         | RootUseOp::GeneratorYield { value: op }
         | RootUseOp::GetExport(op)
         | RootUseOp::GetProperty(op)
-        | RootUseOp::InitField { op, .. }
+        | RootUseOp::InitField(box InitFieldData { op, .. })
         | RootUseOp::ReactGetIntrinsic { literal: op }
         | RootUseOp::TypeApplication {
             type_:

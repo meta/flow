@@ -15,6 +15,7 @@ use flow_common::error_ref::FunctionReferenceKind;
 use flow_common::reason;
 use flow_common::reason::Name;
 use flow_common::reason::Reason;
+use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 use flow_parser::ast;
 use flow_parser::ast::function::Body as FunctionBody;
 use flow_parser::ast::function::Function;
@@ -285,6 +286,7 @@ pub fn default_constructor<C: ConfigTypes>(reason: Reason) -> Func<C> {
 
 pub fn field_initializer<C: ConfigTypes>(
     reason: Reason,
+    name: FlowSmolStr,
     expr: ast::expression::Expression<ALoc, ALoc>,
     annot_loc: ALoc,
     return_annot_or_inferred: AnnotatedOrInferred,
@@ -294,6 +296,7 @@ pub fn field_initializer<C: ConfigTypes>(
         reason,
         function_reference_kind: FunctionReferenceKind::FunctionType,
         kind: Kind::FieldInit {
+            name,
             expr,
             fills_annotated_symbol,
         },
@@ -758,6 +761,7 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
                 (use_op, t, None)
             }
             Kind::FieldInit {
+                name,
                 expr: e,
                 fills_annotated_symbol,
             } => {
@@ -778,10 +782,13 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
                     ast.loc().1.dupe()
                 };
                 let body = reason::mk_expression_reason(e);
-                let use_op = UseOp::Op(Arc::new(type_::RootUseOp::InitField {
-                    op: reason_fn.dupe(),
-                    body,
-                }));
+                let use_op = UseOp::Op(Arc::new(type_::RootUseOp::InitField(Box::new(
+                    type_::InitFieldData {
+                        op: reason_fn.dupe(),
+                        field: name.dupe(),
+                        body,
+                    },
+                ))));
                 (use_op, t, Some(ast))
             }
             Kind::TypeGuard(_) => {

@@ -15325,6 +15325,7 @@ pub fn mk_class_sig<'a>(
                     static_: bool,
                     polarity: Polarity,
                     name_hint: Option<FlowSmolStr>,
+                    field_name: FlowSmolStr,
                     tparams_map: &FlowOrdMap<SubstName, Type>,
                     reason: Reason,
                     annot: &ast::types::AnnotationOrHint<ALoc, ALoc>,
@@ -15606,6 +15607,7 @@ pub fn mk_class_sig<'a>(
                 };
                 let field_init_sig = crate::func_sig::field_initializer(
                     reason.dupe(),
+                    field_name,
                     expr.dupe(),
                     annot_loc,
                     annot_or_inferred,
@@ -17350,6 +17352,7 @@ pub fn mk_class_sig<'a>(
                                     static_,
                                     polarity,
                                     Some(name.dupe()),
+                                    name.dupe(),
                                     &tparams_map_with_this,
                                     field_reason,
                                     annot,
@@ -17565,6 +17568,7 @@ pub fn mk_class_sig<'a>(
                                     // A symbol key has no name to render the
                                     // field's own symbol after.
                                     name.as_smol_str_opt().duped(),
+                                    name.display_smol_str(),
                                     &tparams_map_with_this,
                                     field_reason,
                                     annot,
@@ -17705,6 +17709,7 @@ pub fn mk_class_sig<'a>(
                                 static_,
                                 polarity,
                                 Some(name.dupe()),
+                                FlowSmolStr::new(format!("#{name}")),
                                 &tparams_map_with_this,
                                 field_reason,
                                 annot,
@@ -18413,6 +18418,7 @@ pub fn mk_class_sig<'a>(
                                             false,
                                             polarity,
                                             Some(name.dupe()),
+                                            name.dupe(),
                                             &tparams_map_with_this,
                                             reason,
                                             annot,
@@ -18736,6 +18742,7 @@ pub fn mk_record_sig<'a>(
     let mk_record_field = |cx: &mut Context<'a>,
                            tparams_map: &FlowOrdMap<SubstName, Type>,
                            reason: Reason,
+                           name: FlowSmolStr,
                            annot: &ast::types::Annotation<ALoc, ALoc>,
                            default_value: Option<&expression::Expression<ALoc, ALoc>>|
      -> Result<
@@ -18775,6 +18782,7 @@ pub fn mk_record_sig<'a>(
                 let field = class_types::Field::Infer(
                     crate::func_sig::field_initializer(
                         reason,
+                        name,
                         expr.clone(),
                         annot_loc,
                         AnnotatedOrInferred::Annotated(annot_t.dupe()),
@@ -18800,6 +18808,7 @@ pub fn mk_record_sig<'a>(
     let mk_record_static_field = |cx: &mut Context<'a>,
                                   tparams_map: &FlowOrdMap<SubstName, Type>,
                                   reason: Reason,
+                                  name: FlowSmolStr,
                                   annot: &ast::types::Annotation<ALoc, ALoc>,
                                   value_expr: &expression::Expression<ALoc, ALoc>|
      -> Result<
@@ -18830,6 +18839,7 @@ pub fn mk_record_sig<'a>(
         let field = class_types::Field::Infer(
             crate::func_sig::field_initializer(
                 reason,
+                name,
                 value_expr.clone(),
                 annot_loc,
                 AnnotatedOrInferred::Annotated(annot_t.dupe()),
@@ -19366,6 +19376,7 @@ pub fn mk_record_sig<'a>(
                                 cx,
                                 &tparams_map_with_this,
                                 reason,
+                                name.dupe(),
                                 annot,
                                 default_value,
                             )?;
@@ -19429,6 +19440,7 @@ pub fn mk_record_sig<'a>(
                                 cx,
                                 &tparams_map_with_this,
                                 reason,
+                                name.dupe(),
                                 annot,
                                 value_expr,
                             )?;

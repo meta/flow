@@ -1373,7 +1373,7 @@ pub enum RootMessage<L: Dupe> {
         def: Option<VirtualReasonDesc<L>>,
     },
     RootCannotInitializeField {
-        field: Option<VirtualReasonDesc<L>>,
+        field: FlowSmolStr,
         body: Option<VirtualReasonDesc<L>>,
     },
     RootCannotInstantiateEval(MessageTypeReferenceData<L>),

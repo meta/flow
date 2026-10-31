@@ -60,6 +60,7 @@ use crate::type_::HasOwnPropTData;
 use crate::type_::ImplicitInstantiationTvarData;
 use crate::type_::IndexedTypeAccessData;
 use crate::type_::IndexerKeyCompatibilityData;
+use crate::type_::InitFieldData;
 use crate::type_::JSXCreateElementData;
 use crate::type_::MapTypeTData;
 use crate::type_::MappedTypeKeyCompatibilityData;
@@ -1065,10 +1066,13 @@ where
         use VirtualRootUseOp::*;
 
         match root {
-            InitField { op, body } => InitField {
-                op: mod_reason(op),
-                body: mod_reason(body),
-            },
+            InitField(box InitFieldData { op, field, body }) => {
+                InitField(Box::new(InitFieldData {
+                    op: mod_reason(op),
+                    field,
+                    body: mod_reason(body),
+                }))
+            }
             ObjectAddComputedProperty { op } => ObjectAddComputedProperty { op: mod_reason(op) },
             ObjectSpread { op } => ObjectSpread { op: mod_reason(op) },
             ObjectRest { op } => ObjectRest { op: mod_reason(op) },

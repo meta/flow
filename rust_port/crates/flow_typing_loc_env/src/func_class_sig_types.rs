@@ -110,6 +110,8 @@ pub mod func {
             return_loc: ALoc,
         },
         FieldInit {
+            /// The field's name as written, e.g. `x`, `#x` or `[sym]`.
+            name: FlowSmolStr,
             expr: Expression<ALoc, ALoc>,
             /// Whether the field is annotated with a bare `unique symbol`, in
             /// which case an initializer that calls the symbol constructor

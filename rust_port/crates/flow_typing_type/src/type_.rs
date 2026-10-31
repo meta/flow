@@ -1715,6 +1715,23 @@ pub struct MergedDeclarationData<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     serde::Serialize,
     serde::Deserialize
 )]
+pub struct InitFieldData<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
+    pub op: VirtualReason<L>,
+    pub field: FlowSmolStr,
+    pub body: VirtualReason<L>,
+}
+
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    serde::Serialize,
+    serde::Deserialize
+)]
 pub struct TypeofApplicationData<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     pub reason: VirtualReason<L>,
     pub name: FlowSmolStr,
@@ -1800,10 +1817,7 @@ pub enum VirtualRootUseOp<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     GetExport(VirtualReason<L>),
     GetProperty(VirtualReason<L>),
     IndexedTypeAccess(Box<IndexedTypeAccessData<L>>),
-    InitField {
-        op: VirtualReason<L>,
-        body: VirtualReason<L>,
-    },
+    InitField(Box<InitFieldData<L>>),
     InferBoundCompatibilityCheck {
         bound: VirtualReason<L>,
         infer: VirtualReason<L>,
