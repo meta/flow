@@ -984,8 +984,8 @@ References:
    object_prototype.js:150:23
     150| var xToLocaleString : number = x.toLocaleString; // error
                                ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:4391:5
-   4391|     toLocaleString(locales?: string | string[], options?: Intl.DateTimeFormatOptions): string;
+   <BUILTINS>/lib.es5.js:4390:5
+   4390|     toLocaleString(locales?: string | string[], options?: Intl.DateTimeFormatOptions): string;
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    <BUILTINS>/lib.es5.js:668:5
     668|     toLocaleString(): string;
