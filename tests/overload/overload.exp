@@ -51,16 +51,16 @@ Error --------------------------------------------------------------------------
 Cannot assign `"".match(...)[0]` to `x2` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
 
    overload.js:8:18
-     8| var x2: number = "".match(/pattern/)[0];
-                         ^^^^^^^^^^^^^^^^^^^^^^
+      8| var x2: number = "".match(/pattern/)[0];
+                          ^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:953:8
-   953|     0: string;
-               ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1145:8
+   1145|     0: string;
+                ^^^^^^ [1]
    overload.js:8:9
-     8| var x2: number = "".match(/pattern/)[0];
-                ^^^^^^ [2]
+      8| var x2: number = "".match(/pattern/)[0];
+                 ^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------- overload.js:8:38

@@ -43,22 +43,22 @@ The above-mentioned two types must be the same because arrays are invariantly ty
 See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
 
    array_lib.js:13:24
-    13| var e: Array<string> = a.reverse();
-                               ^^^^^^^^^^^
+     13| var e: Array<string> = a.reverse();
+                                ^^^^^^^^^^^
 
 References:
    array_lib.js:4:10
-     4| var a = [0];
-                 ^ [1]
+      4| var a = [0];
+                  ^ [1]
    array_lib.js:13:14
-    13| var e: Array<string> = a.reverse();
-                     ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:879:16
-   879|     reverse(): Array<T>;
-                       ^^^^^^^^ [3]
+     13| var e: Array<string> = a.reverse();
+                      ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:1071:16
+   1071|     reverse(): Array<T>;
+                        ^^^^^^^^ [3]
    array_lib.js:13:8
-    13| var e: Array<string> = a.reverse();
-               ^^^^^^^^^^^^^ [4]
+     13| var e: Array<string> = a.reverse();
+                ^^^^^^^^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------- array_lib.js:26:24
@@ -76,14 +76,14 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
                                ^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:653:53
-   653|     >(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
+   <BUILTINS>/lib.es5.js:845:53
+   845|     >(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
                                                             ^^^^^ [1]
    array_lib.js:26:14
     26| var n: Array<number> = h.concat('a', 'b', 'c'); // Error
                      ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:653:47
-   653|     >(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
+   <BUILTINS>/lib.es5.js:845:47
+   845|     >(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
                                                       ^^^^^^^^^^^^ [3]
    array_lib.js:26:8
     26| var n: Array<number> = h.concat('a', 'b', 'c'); // Error
@@ -135,22 +135,22 @@ The above-mentioned two types must be the same because arrays are invariantly ty
 See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
 
    array_lib.js:71:3
-    71|   Array.from('abcd') as Array<empty>; // ERROR
-          ^^^^^^^^^^^^^^^^^^
+     71|   Array.from('abcd') as Array<empty>; // ERROR
+           ^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:926:37
-   926|     static from(str: string): Array<string>;
-                                            ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1118:37
+   1118|     static from(str: string): Array<string>;
+                                             ^^^^^^ [1]
    array_lib.js:71:31
-    71|   Array.from('abcd') as Array<empty>; // ERROR
-                                      ^^^^^ [2]
-   <BUILTINS>/lib.es5.js:926:31
-   926|     static from(str: string): Array<string>;
-                                      ^^^^^^^^^^^^^ [3]
+     71|   Array.from('abcd') as Array<empty>; // ERROR
+                                       ^^^^^ [2]
+   <BUILTINS>/lib.es5.js:1118:31
+   1118|     static from(str: string): Array<string>;
+                                       ^^^^^^^^^^^^^ [3]
    array_lib.js:71:25
-    71|   Array.from('abcd') as Array<empty>; // ERROR
-                                ^^^^^^^^^^^^ [4]
+     71|   Array.from('abcd') as Array<empty>; // ERROR
+                                 ^^^^^^^^^^^^ [4]
 
 
 Error ------------------------------------------------------------------------------------------------ array_lib.js:79:9
@@ -163,25 +163,25 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    array_lib.js:79:9
-    79|   Array.from(arrayLike) as Array<number>; // ERROR
-                ^^^^
+     79|   Array.from(arrayLike) as Array<number>; // ERROR
+                 ^^^^
 
 References:
    <BUILTINS>/misc.js:396:25
-   396| interface ArrayLike<out T> {}
-                                ^ [1]
+    396| interface ArrayLike<out T> {}
+                                 ^ [1]
    array_lib.js:75:30
-    75|   const arrayLike: ArrayLike<string> = {0: 'hello', length: 1};
-                                     ^^^^^^ [2]
+     75|   const arrayLike: ArrayLike<string> = {0: 'hello', length: 1};
+                                      ^^^^^^ [2]
    array_lib.js:79:34
-    79|   Array.from(arrayLike) as Array<number>; // ERROR
-                                         ^^^^^^ [3]
+     79|   Array.from(arrayLike) as Array<number>; // ERROR
+                                          ^^^^^^ [3]
    array_lib.js:75:20
-    75|   const arrayLike: ArrayLike<string> = {0: 'hello', length: 1};
-                           ^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/lib.es5.js:921:31
-   921|     static from<A, This>(str: string, mapFn: (this: This, elem: string, index: number) => A, thisArg: This): Array<A>;
-                                      ^^^^^^ [5]
+     75|   const arrayLike: ArrayLike<string> = {0: 'hello', length: 1};
+                            ^^^^^^^^^^^^^^^^^ [4]
+   <BUILTINS>/lib.es5.js:1113:31
+   1113|     static from<A, This>(str: string, mapFn: (this: This, elem: string, index: number) => A, thisArg: This): Array<A>;
+                                       ^^^^^^ [5]
 
 
 Error ------------------------------------------------------------------------------------------------ array_lib.js:80:3
@@ -402,22 +402,22 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    filter_error_msg_quality_test.js:3:9
-     3| str_arr.filter(s => s.length) as Array<boolean>;
-                ^^^^^^
+      3| str_arr.filter(s => s.length) as Array<boolean>;
+                 ^^^^^^
 
 References:
    <BUILTINS>/lib.es5.js:391:22
-   391|     readonly length: number;
-                             ^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:816:109
-   816|     filter<This, S extends T>(callbackfn: (this: This, value: T, index: number, array: ReadonlyArray<T>) => implies value is S, thisArg: This): Array<S>;
-                                                                                                                    ^^^^^^^^^^^^^^^^^^ [2]
+    391|     readonly length: number;
+                              ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1008:109
+   1008|     filter<This, S extends T>(callbackfn: (this: This, value: T, index: number, array: ReadonlyArray<T>) => implies value is S, thisArg: This): Array<S>;
+                                                                                                                     ^^^^^^^^^^^^^^^^^^ [2]
    filter_error_msg_quality_test.js:2:30
-     2| declare const str_arr: Array<string>;
-                                     ^^^^^^ [3]
+      2| declare const str_arr: Array<string>;
+                                      ^^^^^^ [3]
    filter_error_msg_quality_test.js:3:40
-     3| str_arr.filter(s => s.length) as Array<boolean>;
-                                               ^^^^^^^ [4]
+      3| str_arr.filter(s => s.length) as Array<boolean>;
+                                                ^^^^^^^ [4]
 
 
 Error ---------------------------------------------------------------------------- filter_error_msg_quality_test.js:7:18
@@ -430,22 +430,22 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    filter_error_msg_quality_test.js:7:18
-     7| nullable_str_arr.filter(s => !!s) as Array<string>;
-                         ^^^^^^
+      7| nullable_str_arr.filter(s => !!s) as Array<string>;
+                          ^^^^^^
 
 References:
    filter_error_msg_quality_test.js:6:39
-     6| declare const nullable_str_arr: Array<?string>;
-                                              ^^^^^^^ [1]
+      6| declare const nullable_str_arr: Array<?string>;
+                                               ^^^^^^^ [1]
    filter_error_msg_quality_test.js:7:44
-     7| nullable_str_arr.filter(s => !!s) as Array<string>;
-                                                   ^^^^^^ [2]
+      7| nullable_str_arr.filter(s => !!s) as Array<string>;
+                                                    ^^^^^^ [2]
    filter_error_msg_quality_test.js:7:25
-     7| nullable_str_arr.filter(s => !!s) as Array<string>;
-                                ^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:809:24
-   809|     filter(callbackfn: typeof Boolean): Array<NonNullable<T>>;
-                               ^^^^^^^^^^^^^^ [4]
+      7| nullable_str_arr.filter(s => !!s) as Array<string>;
+                                 ^^^^^^^^ [3]
+   <BUILTINS>/lib.es5.js:1001:24
+   1001|     filter(callbackfn: typeof Boolean): Array<NonNullable<T>>;
+                                ^^^^^^^^^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- flat.js:3:34

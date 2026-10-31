@@ -3,16 +3,16 @@ Error --------------------------------------------------------------------------
 Cannot assign `d.getTime()` to `x` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
 
    date.js:2:16
-      2| var x:string = d.getTime(); // expect error
-                        ^^^^^^^^^^^
+     2| var x:string = d.getTime(); // expect error
+                       ^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1262:16
-   1262|     getTime(): number;
-                        ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:650:16
+   650|     getTime(): number;
+                       ^^^^^^ [1]
    date.js:2:7
-      2| var x:string = d.getTime(); // expect error
-               ^^^^^^ [2]
+     2| var x:string = d.getTime(); // expect error
+              ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- date.js:4:16
@@ -20,16 +20,16 @@ Error --------------------------------------------------------------------------
 Cannot assign `d` to `y` because `Date` [1] is incompatible with `number` [2]. [incompatible-type]
 
    date.js:4:16
-      4| var y:number = d; // expect error
-                        ^
+     4| var y:number = d; // expect error
+                       ^
 
 References:
-   <BUILTINS>/lib.es5.js:1401:35
-   1401|     new (value: number | string): Date;
-                                           ^^^^ [1]
+   <BUILTINS>/lib.es5.js:789:35
+   789|     new (value: number | string): Date;
+                                          ^^^^ [1]
    date.js:4:7
-      4| var y:number = d; // expect error
-               ^^^^^^ [2]
+     4| var y:number = d; // expect error
+              ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- date.js:18:5
@@ -44,25 +44,25 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    date.js:18:5
-     18| new Date({});
-             ^^^^
+    18| new Date({});
+            ^^^^
 
 References:
    date.js:18:10
-     18| new Date({});
-                  ^^ [1]
+    18| new Date({});
+                 ^^ [1]
    <BUILTINS>/lib.es2015.core.js:91:35
-     91|     new (value: number | string | Date): Date;
-                                           ^^^^ [2]
+    91|     new (value: number | string | Date): Date;
+                                          ^^^^ [2]
    <BUILTINS>/lib.es5.js:270:16
-    270|     valueOf(): unknown;
-                        ^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:1260:16
-   1260|     valueOf(): number;
-                        ^^^^^^ [4]
-   <BUILTINS>/lib.es5.js:1401:17
-   1401|     new (value: number | string): Date;
-                         ^^^^^^ [5]
+   270|     valueOf(): unknown;
+                       ^^^^^^^ [3]
+   <BUILTINS>/lib.es5.js:648:16
+   648|     valueOf(): number;
+                       ^^^^^^ [4]
+   <BUILTINS>/lib.es5.js:789:17
+   789|     new (value: number | string): Date;
+                        ^^^^^^ [5]
 
 
 Error ----------------------------------------------------------------------------------------------------- date.js:19:5
@@ -75,19 +75,19 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    date.js:19:5
-     19| new Date(2015, '6');
-             ^^^^
+    19| new Date(2015, '6');
+            ^^^^
 
 References:
    date.js:19:16
-     19| new Date(2015, '6');
-                        ^^^ [1]
-   <BUILTINS>/lib.es5.js:1412:36
-   1412|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
-                                            ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1400:5
-   1400|     new (): Date;
-             ^^^^^^^^^^^^ [3]
+    19| new Date(2015, '6');
+                       ^^^ [1]
+   <BUILTINS>/lib.es5.js:800:36
+   800|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
+                                           ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:788:5
+   788|     new (): Date;
+            ^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- date.js:20:5
@@ -100,19 +100,19 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    date.js:20:5
-     20| new Date(2015, 6, '18');
-             ^^^^
+    20| new Date(2015, 6, '18');
+            ^^^^
 
 References:
    date.js:20:19
-     20| new Date(2015, 6, '18');
-                           ^^^^ [1]
-   <BUILTINS>/lib.es5.js:1412:51
-   1412|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
-                                                           ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1400:5
-   1400|     new (): Date;
-             ^^^^^^^^^^^^ [3]
+    20| new Date(2015, 6, '18');
+                          ^^^^ [1]
+   <BUILTINS>/lib.es5.js:800:51
+   800|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
+                                                          ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:788:5
+   788|     new (): Date;
+            ^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- date.js:21:5
@@ -125,19 +125,19 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    date.js:21:5
-     21| new Date(2015, 6, 18, '11');
-             ^^^^
+    21| new Date(2015, 6, 18, '11');
+            ^^^^
 
 References:
    date.js:21:23
-     21| new Date(2015, 6, 18, '11');
-                               ^^^^ [1]
-   <BUILTINS>/lib.es5.js:1412:67
-   1412|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
-                                                                           ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1400:5
-   1400|     new (): Date;
-             ^^^^^^^^^^^^ [3]
+    21| new Date(2015, 6, 18, '11');
+                              ^^^^ [1]
+   <BUILTINS>/lib.es5.js:800:67
+   800|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
+                                                                          ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:788:5
+   788|     new (): Date;
+            ^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- date.js:22:5
@@ -150,19 +150,19 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    date.js:22:5
-     22| new Date(2015, 6, 18, 11, '55');
-             ^^^^
+    22| new Date(2015, 6, 18, 11, '55');
+            ^^^^
 
 References:
    date.js:22:27
-     22| new Date(2015, 6, 18, 11, '55');
-                                   ^^^^ [1]
-   <BUILTINS>/lib.es5.js:1412:85
-   1412|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
-                                                                                             ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1400:5
-   1400|     new (): Date;
-             ^^^^^^^^^^^^ [3]
+    22| new Date(2015, 6, 18, 11, '55');
+                                  ^^^^ [1]
+   <BUILTINS>/lib.es5.js:800:85
+   800|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
+                                                                                            ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:788:5
+   788|     new (): Date;
+            ^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- date.js:23:5
@@ -175,19 +175,19 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    date.js:23:5
-     23| new Date(2015, 6, 18, 11, 55, '42');
-             ^^^^
+    23| new Date(2015, 6, 18, 11, 55, '42');
+            ^^^^
 
 References:
    date.js:23:31
-     23| new Date(2015, 6, 18, 11, 55, '42');
-                                       ^^^^ [1]
-   <BUILTINS>/lib.es5.js:1412:103
-   1412|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
-                                                                                                               ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1400:5
-   1400|     new (): Date;
-             ^^^^^^^^^^^^ [3]
+    23| new Date(2015, 6, 18, 11, 55, '42');
+                                      ^^^^ [1]
+   <BUILTINS>/lib.es5.js:800:103
+   800|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
+                                                                                                              ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:788:5
+   788|     new (): Date;
+            ^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- date.js:24:5
@@ -200,19 +200,19 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    date.js:24:5
-     24| new Date(2015, 6, 18, 11, 55, 42, '999');
-             ^^^^
+    24| new Date(2015, 6, 18, 11, 55, 42, '999');
+            ^^^^
 
 References:
    date.js:24:35
-     24| new Date(2015, 6, 18, 11, 55, 42, '999');
-                                           ^^^^^ [1]
-   <BUILTINS>/lib.es5.js:1412:116
-   1412|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
-                                                                                                                            ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1400:5
-   1400|     new (): Date;
-             ^^^^^^^^^^^^ [3]
+    24| new Date(2015, 6, 18, 11, 55, 42, '999');
+                                          ^^^^^ [1]
+   <BUILTINS>/lib.es5.js:800:116
+   800|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
+                                                                                                                           ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:788:5
+   788|     new (): Date;
+            ^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- date.js:25:5
@@ -224,22 +224,22 @@ Cannot call `Date` because: [incompatible-type]
  - Or no more than 1 argument is expected by function type [4].
 
    date.js:25:5
-     25| new Date(2015, 6, 18, 11, 55, 42, 999, 'hahaha');
-             ^^^^
+    25| new Date(2015, 6, 18, 11, 55, 42, 999, 'hahaha');
+            ^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1400:5
-   1400|     new (): Date;
-             ^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:1401:5
-   1401|     new (value: number | string): Date;
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1412:5
-   1412|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es5.js:788:5
+   788|     new (): Date;
+            ^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:789:5
+   789|     new (value: number | string): Date;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:800:5
+   800|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    <BUILTINS>/lib.es2015.core.js:91:5
-     91|     new (value: number | string | Date): Date;
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+    91|     new (value: number | string | Date): Date;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- date.js:26:5
@@ -252,19 +252,19 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    date.js:26:5
-     26| new Date('2015', 6);
-             ^^^^
+    26| new Date('2015', 6);
+            ^^^^
 
 References:
    date.js:26:10
-     26| new Date('2015', 6);
-                  ^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:1412:16
-   1412|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
-                        ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1400:5
-   1400|     new (): Date;
-             ^^^^^^^^^^^^ [3]
+    26| new Date('2015', 6);
+                 ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:800:16
+   800|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
+                       ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:788:5
+   788|     new (): Date;
+            ^^^^^^^^^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- date.js:28:17
@@ -272,16 +272,16 @@ Error --------------------------------------------------------------------------
 Cannot compare `Date` [1] to `number` [2]. [invalid-compare]
 
    date.js:28:17
-     28| var b:boolean = d > 0; // expect error
-                         ^
+    28| var b:boolean = d > 0; // expect error
+                        ^
 
 References:
-   <BUILTINS>/lib.es5.js:1401:35
-   1401|     new (value: number | string): Date;
-                                           ^^^^ [1]
+   <BUILTINS>/lib.es5.js:789:35
+   789|     new (value: number | string): Date;
+                                          ^^^^ [1]
    date.js:28:21
-     28| var b:boolean = d > 0; // expect error
-                             ^ [2]
+    28| var b:boolean = d > 0; // expect error
+                            ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- date.js:29:17
@@ -289,16 +289,16 @@ Error --------------------------------------------------------------------------
 Cannot use operator `-` with operands `Date` [1] and `number` [2] [unsafe-arithmetic]
 
    date.js:29:17
-     29| var n1:number = d - 12; // expect error
-                         ^^^^^^
+    29| var n1:number = d - 12; // expect error
+                        ^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1401:35
-   1401|     new (value: number | string): Date;
-                                           ^^^^ [1]
+   <BUILTINS>/lib.es5.js:789:35
+   789|     new (value: number | string): Date;
+                                          ^^^^ [1]
    date.js:29:21
-     29| var n1:number = d - 12; // expect error
-                             ^^ [2]
+    29| var n1:number = d - 12; // expect error
+                            ^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- date.js:30:17
@@ -306,16 +306,16 @@ Error --------------------------------------------------------------------------
 Cannot use operator `&` with operands `Date` [1] and `number` [2] [unsafe-arithmetic]
 
    date.js:30:17
-     30| var n2:number = d & 255; // expect error
-                         ^^^^^^^
+    30| var n2:number = d & 255; // expect error
+                        ^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1401:35
-   1401|     new (value: number | string): Date;
-                                           ^^^^ [1]
+   <BUILTINS>/lib.es5.js:789:35
+   789|     new (value: number | string): Date;
+                                          ^^^^ [1]
    date.js:30:21
-     30| var n2:number = d & 255; // expect error
-                             ^^^ [2]
+    30| var n2:number = d & 255; // expect error
+                            ^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- date.js:31:17
@@ -323,16 +323,16 @@ Error --------------------------------------------------------------------------
 Cannot use operator `+` with operands `Date` [1] and `number` [2] [unsafe-addition]
 
    date.js:31:17
-     31| var n3:number = d + 12; // expect error
-                         ^^^^^^
+    31| var n3:number = d + 12; // expect error
+                        ^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1401:35
-   1401|     new (value: number | string): Date;
-                                           ^^^^ [1]
+   <BUILTINS>/lib.es5.js:789:35
+   789|     new (value: number | string): Date;
+                                          ^^^^ [1]
    date.js:31:21
-     31| var n3:number = d + 12; // expect error
-                             ^^ [2]
+    31| var n3:number = d + 12; // expect error
+                            ^^ [2]
 
 
 

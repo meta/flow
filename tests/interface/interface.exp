@@ -70,8 +70,8 @@ Cannot cast `numbers` to `StringArrayWithExtra` because in type argument `T` [1]
         ^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:789:21
-   789| declare class Array<T> extends ReadonlyArray<T> {
+   <BUILTINS>/lib.es5.js:981:21
+   981| declare class Array<T> extends ReadonlyArray<T> {
                             ^ [1]
    extends_class.js:12:30
     12| declare const numbers: Array<number>;
@@ -838,22 +838,22 @@ The above-mentioned two types must be the same because arrays are invariantly ty
 See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
 
    indexer.js:129:3
-   129|   values as Array<number>; // ERROR
-          ^^^^^^
+    129|   values as Array<number>; // ERROR
+           ^^^^^^
 
 References:
    indexer.js:122:22
-   122|   readonly [number]: string;
-                             ^^^^^^ [1]
+    122|   readonly [number]: string;
+                              ^^^^^^ [1]
    indexer.js:129:19
-   129|   values as Array<number>; // ERROR
-                          ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:907:59
-   907|     static from<T>(iterable: Iterable<T> | ArrayLike<T>): Array<T>;
-                                                                  ^^^^^^^^ [3]
+    129|   values as Array<number>; // ERROR
+                           ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:1099:59
+   1099|     static from<T>(iterable: Iterable<T> | ArrayLike<T>): Array<T>;
+                                                                   ^^^^^^^^ [3]
    indexer.js:129:13
-   129|   values as Array<number>; // ERROR
-                    ^^^^^^^^^^^^^ [4]
+    129|   values as Array<number>; // ERROR
+                     ^^^^^^^^^^^^^ [4]
 
 
 Error ------------------------------------------------------------------------------------------------- indexer.js:167:3

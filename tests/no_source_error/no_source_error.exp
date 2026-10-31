@@ -8,22 +8,22 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    no_source.js:16:7
-    16|     x.filter(this.z);
-              ^^^^^^
+     16|     x.filter(this.z);
+               ^^^^^^
 
 References:
    no_source.js:15:20
-    15|     const x: Array<Foo> = [];
-                           ^^^ [1]
+     15|     const x: Array<Foo> = [];
+                            ^^^ [1]
    no_source.js:13:20
-    13|   readonly z : (x: FooPlus) => boolean = (x) => { return true; }
-                           ^^^^^^^ [2]
+     13|   readonly z : (x: FooPlus) => boolean = (x) => { return true; }
+                            ^^^^^^^ [2]
    no_source.js:13:16
-    13|   readonly z : (x: FooPlus) => boolean = (x) => { return true; }
-                       ^^^^^^^^^^^^^^^^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:809:24
-   809|     filter(callbackfn: typeof Boolean): Array<NonNullable<T>>;
-                               ^^^^^^^^^^^^^^ [4]
+     13|   readonly z : (x: FooPlus) => boolean = (x) => { return true; }
+                        ^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es5.js:1001:24
+   1001|     filter(callbackfn: typeof Boolean): Array<NonNullable<T>>;
+                                ^^^^^^^^^^^^^^ [4]
 
 
 

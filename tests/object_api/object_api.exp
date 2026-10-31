@@ -624,16 +624,16 @@ Cannot assign `x.toString` to `xToString` because `(this: Date) => string` [1] i
 [incompatible-type]
 
    object_prototype.js:38:26
-     38| var xToString : number = x.toString; // error
-                                  ^^^^^^^^^^
+    38| var xToString : number = x.toString; // error
+                                 ^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1248:5
-   1248|     toString(): string;
-             ^^^^^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:636:5
+   636|     toString(): string;
+            ^^^^^^^^^^^^^^^^^^ [1]
    object_prototype.js:38:17
-     38| var xToString : number = x.toString; // error
-                         ^^^^^^ [2]
+    38| var xToString : number = x.toString; // error
+                        ^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------- object_prototype.js:39:33
@@ -642,13 +642,13 @@ Cannot assign `x.toString` to `xToString2` because in the `this` parameter: `Dat
 [incompatible-type]
 
    object_prototype.js:39:33
-     39| var xToString2 : () => number = x.toString; // error
-                                         ^^^^^^^^^^
+    39| var xToString2 : () => number = x.toString; // error
+                                        ^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1246:11
-   1246| interface Date {
-                   ^^^^ [1]
+   <BUILTINS>/lib.es5.js:634:11
+   634| interface Date {
+                  ^^^^ [1]
 
 
 Error ---------------------------------------------------------------------------------------- object_prototype.js:39:33
@@ -657,16 +657,16 @@ Cannot assign `x.toString` to `xToString2` because in the return value: `string`
 [incompatible-type]
 
    object_prototype.js:39:33
-     39| var xToString2 : () => number = x.toString; // error
-                                         ^^^^^^^^^^
+    39| var xToString2 : () => number = x.toString; // error
+                                        ^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1248:17
-   1248|     toString(): string;
-                         ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:636:17
+   636|     toString(): string;
+                        ^^^^^^ [1]
    object_prototype.js:39:24
-     39| var xToString2 : () => number = x.toString; // error
-                                ^^^^^^ [2]
+    39| var xToString2 : () => number = x.toString; // error
+                               ^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------- object_prototype.js:43:26
@@ -919,16 +919,16 @@ Cannot assign `x.valueOf` to `xValueOf` because `(this: Date) => number` [1] is 
 [incompatible-type]
 
    object_prototype.js:122:25
-    122| var xValueOf : number = x.valueOf; // error
-                                 ^^^^^^^^^
+   122| var xValueOf : number = x.valueOf; // error
+                                ^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1260:5
-   1260|     valueOf(): number;
-             ^^^^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:648:5
+   648|     valueOf(): number;
+            ^^^^^^^^^^^^^^^^^ [1]
    object_prototype.js:122:16
-    122| var xValueOf : number = x.valueOf; // error
-                        ^^^^^^ [2]
+   122| var xValueOf : number = x.valueOf; // error
+                       ^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------- object_prototype.js:126:25
@@ -987,8 +987,8 @@ References:
    <BUILTINS>/lib.es5.js:4462:5
    4462|     toLocaleString(locales?: string | string[], options?: Intl.DateTimeFormatOptions): string;
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:1254:5
-   1254|     toLocaleString(): string;
+   <BUILTINS>/lib.es5.js:642:5
+    642|     toLocaleString(): string;
              ^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
@@ -1000,13 +1000,13 @@ Cannot assign `x.toLocaleString` to `xToLocaleString2` because: [incompatible-ty
  - Or in the `this` parameter: `Date` [1] is incompatible with `unknown`.
 
    object_prototype.js:151:39
-    151| var xToLocaleString2 : () => number = x.toLocaleString; // error
-                                               ^^^^^^^^^^^^^^^^
+   151| var xToLocaleString2 : () => number = x.toLocaleString; // error
+                                              ^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1246:11
-   1246| interface Date {
-                   ^^^^ [1]
+   <BUILTINS>/lib.es5.js:634:11
+   634| interface Date {
+                  ^^^^ [1]
 
 
 Error --------------------------------------------------------------------------------------- object_prototype.js:155:32

@@ -111,13 +111,13 @@ Error --------------------------------------------------------------------------
 Cannot assign `0` to `arr[day]` because `Date` [1] is not an array index. [incompatible-use]
 
    numeric_elem.js:6:1
-      6| arr[day] = 0;
-         ^^^^^^^^
+     6| arr[day] = 0;
+        ^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1400:13
-   1400|     new (): Date;
-                     ^^^^ [1]
+   <BUILTINS>/lib.es5.js:788:13
+   788|     new (): Date;
+                    ^^^^ [1]
 
 
 Error ---------------------------------------------------------------------------------------------- numeric_elem.js:7:1
@@ -125,13 +125,13 @@ Error --------------------------------------------------------------------------
 Cannot get `arr[day]` because `Date` [1] is not an array index. [incompatible-use]
 
    numeric_elem.js:7:1
-      7| arr[day] as string; // error: number ~> string
-         ^^^^^^^^
+     7| arr[day] as string; // error: number ~> string
+        ^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1400:13
-   1400|     new (): Date;
-                     ^^^^ [1]
+   <BUILTINS>/lib.es5.js:788:13
+   788|     new (): Date;
+                    ^^^^ [1]
 
 
 Error --------------------------------------------------------------------------------------------------- spread.js:67:1

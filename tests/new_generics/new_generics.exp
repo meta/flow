@@ -1120,22 +1120,22 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    misc.js:68:28
-    68|   return Object.keys(data).reduce( // error: cannot satisfy generic mapped type
-                                   ^^^^^^
+     68|   return Object.keys(data).reduce( // error: cannot satisfy generic mapped type
+                                    ^^^^^^
 
 References:
    misc.js:72:5
-    72|     {},
-            ^^ [1]
+     72|     {},
+             ^^ [1]
    misc.js:69:38
-    69|     <K extends keyof TFormData>(acc: {[K in keyof TFormData]: ?string}, k: K): {[K in keyof TFormData]: ?string} =>
-                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:848:5
-            v------
-   848|     reduce(
-   849|       callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: Array<T>) => T,
-   850|     ): T;
-            ---^ [3]
+     69|     <K extends keyof TFormData>(acc: {[K in keyof TFormData]: ?string}, k: K): {[K in keyof TFormData]: ?string} =>
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:1040:5
+             v------
+   1040|     reduce(
+   1041|       callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: Array<T>) => T,
+   1042|     ): T;
+             ---^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- misc.js:134:3

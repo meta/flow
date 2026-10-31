@@ -2819,16 +2819,16 @@ The above-mentioned two types must be the same because arrays are invariantly ty
 See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
 
    nested_generic_calls.js:133:21
-   133|   id(xs[0].map(_ => 'a')); // TODO error 'a' and string are not exactly the same
-                            ^^^ [1]
+    133|   id(xs[0].map(_ => 'a')); // TODO error 'a' and string are not exactly the same
+                             ^^^ [1]
 
 References:
    nested_generic_calls.js:133:6
-   133|   id(xs[0].map(_ => 'a')); // TODO error 'a' and string are not exactly the same
-             ^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:834:108
-   834|     map<U, This>(callbackfn: (this : This, value: T, index: number, array: Array<T>) => U, thisArg: This): Array<U>;
-                                                                                                                   ^^^^^^^^ [3]
+    133|   id(xs[0].map(_ => 'a')); // TODO error 'a' and string are not exactly the same
+              ^^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:1026:108
+   1026|     map<U, This>(callbackfn: (this : This, value: T, index: number, array: Array<T>) => U, thisArg: This): Array<U>;
+                                                                                                                    ^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- react.js:7:9
