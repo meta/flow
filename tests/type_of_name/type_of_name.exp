@@ -359,12 +359,12 @@ where
 Found exact match 'RequiredUser' defined at complex_types.js:19:6,19:17 with type `type RequiredUser = Required<{age?: number, name?: string}>` 
 Found exact match 'UserSummary' defined at complex_types.js:22:6,22:16 with type `type UserSummary = Pick<User, "name" | "email">` 
 where
-'Pick' is defined at [LIB] lib.es5.js:4300:6-9
+'Pick' is defined at [LIB] lib.es5.js:4317:6-9
 'User' is defined at complex_types.js:5:6-9 = {age: number, email: string, isAdmin: boolean, name: string}
 
 Found exact match 'UserWithoutEmail' defined at complex_types.js:25:6,25:21 with type `type UserWithoutEmail = Omit<User, "email">` 
 where
-'Omit' is defined at [LIB] lib.es5.js:4307:6-9
+'Omit' is defined at [LIB] lib.es5.js:4324:6-9
 'User' is defined at complex_types.js:5:6-9 = {age: number, email: string, isAdmin: boolean, name: string}
 
 Found exact match 'UserKeys' defined at complex_types.js:28:6,28:13 with type `type UserKeys = "age" | "email" | "isAdmin" | "name"` 
@@ -374,7 +374,7 @@ where
 
 Found exact match 'StatusMap' defined at complex_types.js:32:6,32:14 with type `type StatusMap = Record<"active" | "inactive" | "pending", number>` 
 where
-'Record' is defined at [LIB] lib.es5.js:4312:6-11
+'Record' is defined at [LIB] lib.es5.js:4329:6-11
 
 
 === Nullable, NonNullable, Exclude, Extract ===
@@ -386,23 +386,23 @@ where
 Found exact match 'ActiveStatus' defined at complex_types.js:40:6,40:17 with type `type ActiveStatus = Exclude<AllStatus, "deleted">` 
 where
 'AllStatus' is defined at complex_types.js:39:6-14 = "active" | "inactive" | "pending" | "deleted"
-'Exclude' is defined at [LIB] lib.es5.js:4278:6-12
+'Exclude' is defined at [LIB] lib.es5.js:4295:6-12
 
 Found exact match 'DangerStatus' defined at complex_types.js:41:6,41:17 with type `type DangerStatus = Extract<AllStatus, "inactive" | "deleted">` 
 where
 'AllStatus' is defined at complex_types.js:39:6-14 = "active" | "inactive" | "pending" | "deleted"
-'Extract' is defined at [LIB] lib.es5.js:4283:6-12
+'Extract' is defined at [LIB] lib.es5.js:4300:6-12
 
 
 === ReturnType, Parameters, Class ===
 Found exact match 'SampleReturn' defined at complex_types.js:45:6,45:17 with type `type SampleReturn = ReturnType<SampleFn>` 
 where
-'ReturnType' is defined at [LIB] lib.es5.js:4258:6-15
+'ReturnType' is defined at [LIB] lib.es5.js:4275:6-15
 'SampleFn' is defined at complex_types.js:44:6-13 = (x: string, y: number) => boolean
 
 Found exact match 'SampleParams' defined at complex_types.js:46:6,46:17 with type `type SampleParams = Parameters<SampleFn>` 
 where
-'Parameters' is defined at [LIB] lib.es5.js:4263:6-15
+'Parameters' is defined at [LIB] lib.es5.js:4280:6-15
 'SampleFn' is defined at complex_types.js:44:6-13 = (x: string, y: number) => boolean
 
 Found exact match 'AnimalClass' defined at complex_types.js:55:6,55:16 with type `type AnimalClass = Class<Animal>` 

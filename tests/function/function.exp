@@ -496,8 +496,8 @@ References:
    apply.js:34:36
      34| test.bind.apply(test, [0, 123]) as (b: number) => number;
                                             ^^^^^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:4293:82
-   4293| type OmitThisParameter<T> = unknown extends ThisParameterType<T> ? T : T extends (this: infer This, ...args: infer A) => infer R ? (...args: A) => R : T;
+   <BUILTINS>/lib.es5.js:4310:82
+   4310| type OmitThisParameter<T> = unknown extends ThisParameterType<T> ? T : T extends (this: infer This, ...args: infer A) => infer R ? (...args: A) => R : T;
                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    apply.js:1:41
       1| function test(this: number | string, a: string, b: number): number {

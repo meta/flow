@@ -325,9 +325,9 @@ Cannot cast `arrayOnlyView` to `ArrayBufferView<SharedArrayBuffer>` because: [in
          ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:4318:26
-   4318| type ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> =
-                                  ^^^^^^^^^^^^ [1]
+   <BUILTINS>/misc.js:392:31
+    392| interface ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {}
+                                       ^^^^^^^^^^^^ [1]
    test.js:109:46
     109| declare const arrayOnlyView: ArrayBufferView<ArrayBuffer>;
                                                       ^^^^^^^^^^^ [2]
@@ -354,9 +354,9 @@ Cannot cast `arrayOnlyView` to `ArrayBufferView<SharedArrayBuffer>` because: [in
          ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:4318:26
-   4318| type ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> =
-                                  ^^^^^^^^^^^^ [1]
+   <BUILTINS>/misc.js:392:31
+    392| interface ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {}
+                                       ^^^^^^^^^^^^ [1]
    test.js:109:46
     109| declare const arrayOnlyView: ArrayBufferView<ArrayBuffer>;
                                                       ^^^^^^^^^^^ [2]
@@ -377,19 +377,19 @@ Cannot cast `arrayOnlyView` to `ArrayBufferView<SharedArrayBuffer>` because in t
 property `grow` is missing in `ArrayBuffer` [2] but exists in `SharedArrayBuffer` [3]. [incompatible-type]
 
    test.js:111:1
-    111| arrayOnlyView as ArrayBufferView<SharedArrayBuffer>; // ERROR
-         ^^^^^^^^^^^^^
+   111| arrayOnlyView as ArrayBufferView<SharedArrayBuffer>; // ERROR
+        ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:4318:26
-   4318| type ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> =
-                                  ^^^^^^^^^^^^ [1]
+   <BUILTINS>/misc.js:392:31
+   392| interface ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {}
+                                      ^^^^^^^^^^^^ [1]
    test.js:109:46
-    109| declare const arrayOnlyView: ArrayBufferView<ArrayBuffer>;
-                                                      ^^^^^^^^^^^ [2]
+   109| declare const arrayOnlyView: ArrayBufferView<ArrayBuffer>;
+                                                     ^^^^^^^^^^^ [2]
    test.js:111:34
-    111| arrayOnlyView as ArrayBufferView<SharedArrayBuffer>; // ERROR
-                                          ^^^^^^^^^^^^^^^^^ [3]
+   111| arrayOnlyView as ArrayBufferView<SharedArrayBuffer>; // ERROR
+                                         ^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:111:1
@@ -398,19 +398,19 @@ Cannot cast `arrayOnlyView` to `ArrayBufferView<SharedArrayBuffer>` because in t
 property `growable` is missing in `ArrayBuffer` [2] but exists in `SharedArrayBuffer` [3]. [incompatible-type]
 
    test.js:111:1
-    111| arrayOnlyView as ArrayBufferView<SharedArrayBuffer>; // ERROR
-         ^^^^^^^^^^^^^
+   111| arrayOnlyView as ArrayBufferView<SharedArrayBuffer>; // ERROR
+        ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:4318:26
-   4318| type ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> =
-                                  ^^^^^^^^^^^^ [1]
+   <BUILTINS>/misc.js:392:31
+   392| interface ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {}
+                                      ^^^^^^^^^^^^ [1]
    test.js:109:46
-    109| declare const arrayOnlyView: ArrayBufferView<ArrayBuffer>;
-                                                      ^^^^^^^^^^^ [2]
+   109| declare const arrayOnlyView: ArrayBufferView<ArrayBuffer>;
+                                                     ^^^^^^^^^^^ [2]
    test.js:111:34
-    111| arrayOnlyView as ArrayBufferView<SharedArrayBuffer>; // ERROR
-                                          ^^^^^^^^^^^^^^^^^ [3]
+   111| arrayOnlyView as ArrayBufferView<SharedArrayBuffer>; // ERROR
+                                         ^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:111:1
@@ -419,19 +419,19 @@ Cannot cast `arrayOnlyView` to `ArrayBufferView<SharedArrayBuffer>` because in t
 property `[toStringTag]`: `"ArrayBuffer"` [2] is incompatible with `"SharedArrayBuffer"` [3]. [incompatible-type]
 
    test.js:111:1
-    111| arrayOnlyView as ArrayBufferView<SharedArrayBuffer>; // ERROR
-         ^^^^^^^^^^^^^
+   111| arrayOnlyView as ArrayBufferView<SharedArrayBuffer>; // ERROR
+        ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:4318:26
-   4318| type ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> =
-                                  ^^^^^^^^^^^^ [1]
+   <BUILTINS>/misc.js:392:31
+   392| interface ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {}
+                                      ^^^^^^^^^^^^ [1]
    <BUILTINS>/lib.es2015.symbol.wellknown.js:273:36
-    273|     readonly [Symbol.toStringTag]: "ArrayBuffer";
-                                            ^^^^^^^^^^^^^ [2]
+   273|     readonly [Symbol.toStringTag]: "ArrayBuffer";
+                                           ^^^^^^^^^^^^^ [2]
    <BUILTINS>/lib.es2017.sharedmemory.js:33:36
-     33|     readonly [Symbol.toStringTag]: "SharedArrayBuffer";
-                                            ^^^^^^^^^^^^^^^^^^^ [3]
+    33|     readonly [Symbol.toStringTag]: "SharedArrayBuffer";
+                                           ^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:137:1
