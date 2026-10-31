@@ -64,16 +64,16 @@ Cannot cast `rendersHeaderList` to `renders Header` because `ReadonlyArray<rende
 `Header` [2]. [incompatible-type]
 
    -:17:1
-    17| rendersHeaderList as renders Header; // ERROR
-        ^^^^^^^^^^^^^^^^^
+     17| rendersHeaderList as renders Header; // ERROR
+         ^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:944:15
-   944| declare class ReadonlyArray<out T> {
-                      ^^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1056:15
+   1056| declare class ReadonlyArray<out T> {
+                       ^^^^^^^^^^^^^ [1]
    -:17:22
-    17| rendersHeaderList as renders Header; // ERROR
-                             ^^^^^^^^^^^^^^ [2]
+     17| rendersHeaderList as renders Header; // ERROR
+                              ^^^^^^^^^^^^^^ [2]
 
 Error ------------------------------------------------------------------------- -:17:1
 
@@ -98,16 +98,16 @@ Cannot cast `rendersHeaderList` to `renders? Header` because `ReadonlyArray<rend
 `Header` [2]. [incompatible-type]
 
    -:18:1
-    18| rendersHeaderList as renders? Header; // ERROR
-        ^^^^^^^^^^^^^^^^^
+     18| rendersHeaderList as renders? Header; // ERROR
+         ^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:944:15
-   944| declare class ReadonlyArray<out T> {
-                      ^^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1056:15
+   1056| declare class ReadonlyArray<out T> {
+                       ^^^^^^^^^^^^^ [1]
    -:18:22
-    18| rendersHeaderList as renders? Header; // ERROR
-                             ^^^^^^^^^^^^^^^ [2]
+     18| rendersHeaderList as renders? Header; // ERROR
+                              ^^^^^^^^^^^^^^^ [2]
 
 
 Found 4 errors

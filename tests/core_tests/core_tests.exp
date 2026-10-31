@@ -8,8 +8,8 @@ Cannot use `new` on `JSON` [1]. Only classes and interfaces with a construct sig
              ^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1562:19
-   1562| declare var JSON: JSON;
+   <BUILTINS>/lib.es5.js:1048:19
+   1048| declare var JSON: JSON;
                            ^^^^ [1]
 
 
@@ -30,8 +30,8 @@ Cannot cast `JSON.stringify(...)` to `string` because `void` [1] is incompatible
          ^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1556:19
-   1556|     ) => string | void);
+   <BUILTINS>/lib.es5.js:1042:19
+   1042|     ) => string | void);
                            ^^^^ [1]
    json_stringify.js:7:25
       7| JSON.stringify(bad1) as string;

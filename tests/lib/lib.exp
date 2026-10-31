@@ -38,16 +38,16 @@ Cannot assign `(new TypeError()).name` to `z` because `string` [1] is incompatib
 [incompatible-type]
 
    libtest.js:3:16
-      3| var z:number = new TypeError().name;
-                        ^^^^^^^^^^^^^^^^^^^^
+     3| var z:number = new TypeError().name;
+                       ^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1453:11
-   1453|     name: string;
-                   ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:939:11
+   939|     name: string;
+                  ^^^^^^ [1]
    libtest.js:3:7
-      3| var z:number = new TypeError().name;
-               ^^^^^^ [2]
+     3| var z:number = new TypeError().name;
+              ^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------------- libtest.js:4:16

@@ -21,16 +21,16 @@ Error --------------------------------------------------------------------------
 `Iterable<number, void, void>` [1] is incompatible with `ReadonlyArray<empty>` [2]. [incompatible-type]
 
    iterables.js:2:5
-     2| [...it]; // Error
-            ^^
+      2| [...it]; // Error
+             ^^
 
 References:
    iterables.js:1:11
-     1| const it: Iterable<number> = [7, 8, 9];
-                  ^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:944:15
-   944| declare class ReadonlyArray<out T> {
-                      ^^^^^^^^^^^^^ [2]
+      1| const it: Iterable<number> = [7, 8, 9];
+                   ^^^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1056:15
+   1056| declare class ReadonlyArray<out T> {
+                       ^^^^^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------- iterables.js:3:6
@@ -38,16 +38,16 @@ Error --------------------------------------------------------------------------
 `Iterable<number, void, void>` [1] is incompatible with `ReadonlyArray<empty>` [2]. [incompatible-type]
 
    iterables.js:3:6
-     3| f(...it); // Error
-             ^^
+      3| f(...it); // Error
+              ^^
 
 References:
    iterables.js:1:11
-     1| const it: Iterable<number> = [7, 8, 9];
-                  ^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:944:15
-   944| declare class ReadonlyArray<out T> {
-                      ^^^^^^^^^^^^^ [2]
+      1| const it: Iterable<number> = [7, 8, 9];
+                   ^^^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1056:15
+   1056| declare class ReadonlyArray<out T> {
+                       ^^^^^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------- iterables.js:4:3
@@ -56,16 +56,16 @@ Cannot call `f.bind` because `Iterable<number, void, void>` [1] is incompatible 
 [incompatible-type]
 
    iterables.js:4:3
-     4| f.bind(null, ...it); // Error
-          ^^^^
+      4| f.bind(null, ...it); // Error
+           ^^^^
 
 References:
    iterables.js:1:11
-     1| const it: Iterable<number> = [7, 8, 9];
-                  ^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:944:15
-   944| declare class ReadonlyArray<out T> {
-                      ^^^^^^^^^^^^^ [2]
+      1| const it: Iterable<number> = [7, 8, 9];
+                   ^^^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1056:15
+   1056| declare class ReadonlyArray<out T> {
+                       ^^^^^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------ iterables.js:12:5
@@ -73,16 +73,16 @@ Error --------------------------------------------------------------------------
 `Iterable<number, void, void>` [1] is incompatible with `ReadonlyArray<empty>` [2]. [incompatible-type]
 
    iterables.js:12:5
-    12| [...oit]; // Error
-            ^^^
+     12| [...oit]; // Error
+             ^^^
 
 References:
    opaque.js:6:30
-     6| export const opaqueIterable: OpaqueIterable = [];
-                                     ^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:944:15
-   944| declare class ReadonlyArray<out T> {
-                      ^^^^^^^^^^^^^ [2]
+      6| export const opaqueIterable: OpaqueIterable = [];
+                                      ^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1056:15
+   1056| declare class ReadonlyArray<out T> {
+                       ^^^^^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------ iterables.js:13:6
@@ -90,16 +90,16 @@ Error --------------------------------------------------------------------------
 `Iterable<number, void, void>` [1] is incompatible with `ReadonlyArray<empty>` [2]. [incompatible-type]
 
    iterables.js:13:6
-    13| f(...oit); // Error
-             ^^^
+     13| f(...oit); // Error
+              ^^^
 
 References:
    opaque.js:6:30
-     6| export const opaqueIterable: OpaqueIterable = [];
-                                     ^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:944:15
-   944| declare class ReadonlyArray<out T> {
-                      ^^^^^^^^^^^^^ [2]
+      6| export const opaqueIterable: OpaqueIterable = [];
+                                      ^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1056:15
+   1056| declare class ReadonlyArray<out T> {
+                       ^^^^^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------ iterables.js:14:3
@@ -108,16 +108,16 @@ Cannot call `f.bind` because `Iterable<number, void, void>` [1] is incompatible 
 [incompatible-type]
 
    iterables.js:14:3
-    14| f.bind(null, ...oit); // Error
-          ^^^^
+     14| f.bind(null, ...oit); // Error
+           ^^^^
 
 References:
    opaque.js:6:30
-     6| export const opaqueIterable: OpaqueIterable = [];
-                                     ^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:944:15
-   944| declare class ReadonlyArray<out T> {
-                      ^^^^^^^^^^^^^ [2]
+      6| export const opaqueIterable: OpaqueIterable = [];
+                                      ^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1056:15
+   1056| declare class ReadonlyArray<out T> {
+                       ^^^^^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------------ maps.js:4:6
@@ -125,16 +125,16 @@ Error --------------------------------------------------------------------------
 `Map<string, string>` [1] is incompatible with `ReadonlyArray<empty>` [2]. [incompatible-type]
 
    maps.js:4:6
-     4|   ...map1, // Error
-             ^^^^
+      4|   ...map1, // Error
+              ^^^^
 
 References:
    <BUILTINS>/lib.es2015.collection.js:50:76
-    50|     new <K, V>(entries?: ?Iterable<[readonly key: K, readonly value: V]>): Map<K, V>;
-                                                                                   ^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:944:15
-   944| declare class ReadonlyArray<out T> {
-                      ^^^^^^^^^^^^^ [2]
+     50|     new <K, V>(entries?: ?Iterable<[readonly key: K, readonly value: V]>): Map<K, V>;
+                                                                                    ^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1056:15
+   1056| declare class ReadonlyArray<out T> {
+                       ^^^^^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------------ maps.js:5:6
@@ -142,16 +142,16 @@ Error --------------------------------------------------------------------------
 `Map<string, string>` [1] is incompatible with `ReadonlyArray<empty>` [2]. [incompatible-type]
 
    maps.js:5:6
-     5|   ...map2, // Error
-             ^^^^
+      5|   ...map2, // Error
+              ^^^^
 
 References:
    <BUILTINS>/lib.es2015.collection.js:50:76
-    50|     new <K, V>(entries?: ?Iterable<[readonly key: K, readonly value: V]>): Map<K, V>;
-                                                                                   ^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:944:15
-   944| declare class ReadonlyArray<out T> {
-                      ^^^^^^^^^^^^^ [2]
+     50|     new <K, V>(entries?: ?Iterable<[readonly key: K, readonly value: V]>): Map<K, V>;
+                                                                                    ^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1056:15
+   1056| declare class ReadonlyArray<out T> {
+                       ^^^^^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------------ maps.js:9:6
@@ -159,16 +159,16 @@ Error --------------------------------------------------------------------------
 `Map<string, string>` [1] is incompatible with `ReadonlyArray<empty>` [2]. [incompatible-type]
 
    maps.js:9:6
-     9|   ...map1, // Error
-             ^^^^
+      9|   ...map1, // Error
+              ^^^^
 
 References:
    <BUILTINS>/lib.es2015.collection.js:50:76
-    50|     new <K, V>(entries?: ?Iterable<[readonly key: K, readonly value: V]>): Map<K, V>;
-                                                                                   ^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:944:15
-   944| declare class ReadonlyArray<out T> {
-                      ^^^^^^^^^^^^^ [2]
+     50|     new <K, V>(entries?: ?Iterable<[readonly key: K, readonly value: V]>): Map<K, V>;
+                                                                                    ^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1056:15
+   1056| declare class ReadonlyArray<out T> {
+                       ^^^^^^^^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- maps.js:10:6
@@ -176,16 +176,16 @@ Error --------------------------------------------------------------------------
 `Map<string, string>` [1] is incompatible with `ReadonlyArray<empty>` [2]. [incompatible-type]
 
    maps.js:10:6
-    10|   ...map2, // Error
-             ^^^^
+     10|   ...map2, // Error
+              ^^^^
 
 References:
    <BUILTINS>/lib.es2015.collection.js:50:76
-    50|     new <K, V>(entries?: ?Iterable<[readonly key: K, readonly value: V]>): Map<K, V>;
-                                                                                   ^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:944:15
-   944| declare class ReadonlyArray<out T> {
-                      ^^^^^^^^^^^^^ [2]
+     50|     new <K, V>(entries?: ?Iterable<[readonly key: K, readonly value: V]>): Map<K, V>;
+                                                                                    ^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1056:15
+   1056| declare class ReadonlyArray<out T> {
+                       ^^^^^^^^^^^^^ [2]
 
 
 

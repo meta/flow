@@ -1562,13 +1562,13 @@ Error --------------------------------------------------------------------------
 Cannot call `readOnlyRef.push` because property `push` is missing in `ReadonlyArray<1 | 2>` [1]. [prop-missing]
 
    readonly-array.js:26:17
-    26|     readOnlyRef.push(123); // error
-                        ^^^^
+     26|     readOnlyRef.push(123); // error
+                         ^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:997:77
-   997|     forEach<This>(callbackfn: (this : This, value: T, index: number, array: ReadonlyArray<T>) => unknown, thisArg: This): void;
-                                                                                    ^^^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1109:77
+   1109|     forEach<This>(callbackfn: (this : This, value: T, index: number, array: ReadonlyArray<T>) => unknown, thisArg: This): void;
+                                                                                     ^^^^^^^^^^^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------- readonly-array.js:27:5
