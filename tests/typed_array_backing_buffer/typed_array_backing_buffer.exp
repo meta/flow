@@ -89,8 +89,8 @@ is missing in `ArrayBuffer` [1] but exists in `SharedArrayBuffer` [2]. [incompat
          ^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1588:42
-   1588|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1382:42
+   1382|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [1]
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
@@ -107,8 +107,8 @@ Cannot cast `arrayBacked.buffer` to `SharedArrayBuffer` because in property `sli
          ^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1588:42
-   1588|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1382:42
+   1382|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [1]
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
@@ -236,8 +236,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:1588:42
-   1588|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1382:42
+   1382|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [2]
 
 
@@ -254,8 +254,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:1588:42
-   1588|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1382:42
+   1382|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [2]
 
 
@@ -272,8 +272,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:1588:42
-   1588|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1382:42
+   1382|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [2]
 
 
@@ -290,8 +290,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:1588:42
-   1588|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1382:42
+   1382|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [2]
 
 
@@ -308,8 +308,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:1588:42
-   1588|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1382:42
+   1382|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [2]
 
 
@@ -334,8 +334,8 @@ References:
    test.js:111:34
     111| arrayOnlyView as ArrayBufferView<SharedArrayBuffer>; // ERROR
                                           ^^^^^^^^^^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:1588:42
-   1588|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1382:42
+   1382|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [4]
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
@@ -363,8 +363,8 @@ References:
    test.js:111:34
     111| arrayOnlyView as ArrayBufferView<SharedArrayBuffer>; // ERROR
                                           ^^^^^^^^^^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:1588:42
-   1588|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1382:42
+   1382|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [4]
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
@@ -458,8 +458,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/lib.es5.js:1588:42
-   1588|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1382:42
+   1382|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [5]
 
 
@@ -487,8 +487,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/lib.es5.js:1588:42
-   1588|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1382:42
+   1382|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [5]
 
 
@@ -516,8 +516,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/lib.es5.js:1588:42
-   1588|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1382:42
+   1382|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [5]
 
 
@@ -545,8 +545,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/lib.es5.js:1588:42
-   1588|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1382:42
+   1382|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [5]
 
 
@@ -574,8 +574,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/lib.es5.js:1588:42
-   1588|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1382:42
+   1382|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [5]
 
 

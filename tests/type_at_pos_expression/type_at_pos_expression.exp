@@ -129,7 +129,7 @@ object-resolution.js:5:1,5:2
 object-resolution.js:10:2 = const diff: Omit<O2, "p">
 
 'O2' defined at object-resolution.js:8:5
-'Omit' defined at (lib) lib.es5.js:4356:5
+'Omit' defined at (lib) lib.es5.js:4150:5
 
 object-resolution.js:10:1,10:4
 object-resolution.js:13:5 = const spread: {p: number, q: string, ...}
