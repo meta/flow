@@ -397,12 +397,12 @@ where
 === ReturnType, Parameters, Class ===
 Found exact match 'SampleReturn' defined at complex_types.js:45:6,45:17 with type `type SampleReturn = ReturnType<SampleFn>` 
 where
-'ReturnType' is defined at [LIB] lib.es5.js:1574:6-15
+'ReturnType' is defined at [LIB] lib.es5.js:1580:6-15
 'SampleFn' is defined at complex_types.js:44:6-13 = (x: string, y: number) => boolean
 
 Found exact match 'SampleParams' defined at complex_types.js:46:6,46:17 with type `type SampleParams = Parameters<SampleFn>` 
 where
-'Parameters' is defined at [LIB] lib.es5.js:1565:6-15
+'Parameters' is defined at [LIB] lib.es5.js:1567:6-15
 'SampleFn' is defined at complex_types.js:44:6-13 = (x: string, y: number) => boolean
 
 Found exact match 'AnimalClass' defined at complex_types.js:55:6,55:16 with type `type AnimalClass = Class<Animal>` 

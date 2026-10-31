@@ -294,9 +294,9 @@ Operation `Omit` [1] is not allowed on record `R` [2]. To fix, turn the record t
                              ^ [2]
 
 References:
-   <BUILTINS>/lib.es5.js:1562:43
-   1562| type Omit<O extends interface {}, Keys> = $Omit<O, Keys>;
-                                                   ^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1562:40
+   1562| type Omit<T extends interface {}, K> = $Omit<T, K>;
+                                                ^^^^^^^^^^^ [1]
 
 
 Error -------------------------------------------------------------------------------------------- declaration.js:418:24

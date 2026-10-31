@@ -250,9 +250,9 @@ Cannot call `withDefaults` because `unknown` [1] is not a polymorphic type. [inc
          ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1562:43
-   1562| type Omit<O extends interface {}, Keys> = $Omit<O, Keys>;
-                                                   ^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1562:40
+   1562| type Omit<T extends interface {}, K> = $Omit<T, K>;
+                                                ^^^^^^^^^^^ [1]
 
 
 Error ---------------------------------------------------------------------------------------------- cond_havoc.js:10:10
