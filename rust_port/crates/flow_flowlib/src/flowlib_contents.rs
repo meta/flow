@@ -27,8 +27,8 @@ flowlib_file!(DOM_EXTRA_TO_BE_REMOVED_JS, "dom_extra_to_be_removed.js");
 
 /// A library from `tslib/` with the Flow-specific changes in `tslib_patches/<name>.diff` applied.
 macro_rules! tslib_patched_file {
-    ($name:ident, $filename:literal) => {
-        static $name: LazyLock<String> = LazyLock::new(|| {
+    ($vis:vis $name:ident, $filename:literal) => {
+        $vis static $name: LazyLock<String> = LazyLock::new(|| {
             apply_patch(
                 tslib_contents::$name,
                 include_str!(concat!("tslib_patches/", $filename, ".diff")),
@@ -55,6 +55,7 @@ tslib_patched_file!(LIB_ES2019_ARRAY_D_TS, "lib.es2019.array");
 tslib_patched_file!(LIB_ES2020_PROMISE_D_TS, "lib.es2020.promise");
 tslib_patched_file!(LIB_ESNEXT_COLLECTION_D_TS, "lib.esnext.collection");
 tslib_patched_file!(LIB_ESNEXT_ITERATOR_D_TS, "lib.esnext.iterator");
+tslib_patched_file!(pub(super) REACT_DOM_D_TS, "react-dom");
 
 /// The embedded flowlib file contents as (filename, contents) pairs.
 ///
@@ -373,6 +374,7 @@ mod tests {
                 &*LIB_ESNEXT_ITERATOR_D_TS,
                 tslib_contents::LIB_ESNEXT_ITERATOR_D_TS,
             ),
+            (&*REACT_DOM_D_TS, tslib_contents::REACT_DOM_D_TS),
         ] {
             assert_ne!(patched, original, "a patch should change its library");
         }

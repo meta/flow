@@ -1,0 +1,194 @@
+--- tslib/react-dom.d.ts
++++ rust_port/crates/flow_flowlib/src/tslib_patches/react-dom.d.ts
+@@ -285,7 +285,7 @@
+         dangerouslySetInnerHTML?: {
+             // Should be InnerHTML['innerHTML'].
+             // But unfortunately we're mixing renderer-specific type declarations.
+-            __html: string | TrustedHTML;
++            __html: ReactDOM$UserVisibleString | TrustedHTML;
+         } | undefined;
+ 
+         // Clipboard Events
+@@ -509,12 +509,12 @@
+          * Defines a string value that labels the current element, which is intended to be converted into Braille.
+          * @see aria-label.
+          */
+-        "aria-braillelabel"?: string | undefined;
++        "aria-braillelabel"?: ReactDOM$UserVisibleString | undefined;
+         /**
+          * Defines a human-readable, author-localized abbreviated description for the role of an element, which is intended to be converted into Braille.
+          * @see aria-roledescription.
+          */
+-        "aria-brailleroledescription"?: string | undefined;
++        "aria-brailleroledescription"?: ReactDOM$UserVisibleString | undefined;
+         "aria-busy"?: Booleanish | undefined;
+         /**
+          * Indicates the current "checked" state of checkboxes, radio buttons, and other widgets.
+@@ -535,7 +535,7 @@
+          * Defines a human readable text alternative of aria-colindex.
+          * @see aria-rowindextext.
+          */
+-        "aria-colindextext"?: string | undefined;
++        "aria-colindextext"?: ReactDOM$UserVisibleString | undefined;
+         /**
+          * Defines the number of columns spanned by a cell or gridcell within a table, grid, or treegrid.
+          * @see aria-colindex @see aria-rowspan.
+@@ -557,7 +557,7 @@
+          * Defines a string value that describes or annotates the current element.
+          * @see related aria-describedby.
+          */
+-        "aria-description"?: string | undefined;
++        "aria-description"?: ReactDOM$UserVisibleString | undefined;
+         /**
+          * Identifies the element that provides a detailed, extended description for the object.
+          * @see aria-describedby.
+@@ -608,7 +608,7 @@
+          * Defines a string value that labels the current element.
+          * @see aria-labelledby.
+          */
+-        "aria-label"?: string | undefined;
++        "aria-label"?: ReactDOM$UserVisibleString | undefined;
+         /**
+          * Identifies the element (or elements) that labels the current element.
+          * @see aria-describedby.
+@@ -636,7 +636,7 @@
+          * Defines a short hint (a word or short phrase) intended to aid the user with data entry when the control has no value.
+          * A hint could be a sample value or a brief description of the expected format.
+          */
+-        "aria-placeholder"?: string | undefined;
++        "aria-placeholder"?: ReactDOM$UserVisibleString | undefined;
+         /**
+          * Defines an element's number or position in the current set of listitems or treeitems. Not required if all elements in the set are present in the DOM.
+          * @see aria-setsize.
+@@ -671,7 +671,7 @@
+         /** Indicates that user input is required on the element before a form may be submitted. */
+         "aria-required"?: Booleanish | undefined;
+         /** Defines a human-readable, author-localized description for the role of an element. */
+-        "aria-roledescription"?: string | undefined;
++        "aria-roledescription"?: ReactDOM$UserVisibleString | undefined;
+         /**
+          * Defines the total number of rows in a table, grid, or treegrid.
+          * @see aria-rowindex.
+@@ -686,7 +686,7 @@
+          * Defines a human readable text alternative of aria-rowindex.
+          * @see aria-colindextext.
+          */
+-        "aria-rowindextext"?: string | undefined;
++        "aria-rowindextext"?: ReactDOM$UserVisibleString | undefined;
+         /**
+          * Defines the number of rows spanned by a cell or gridcell within a table, grid, or treegrid.
+          * @see aria-rowindex @see aria-colspan.
+@@ -714,7 +714,7 @@
+          */
+         "aria-valuenow"?: number | undefined;
+         /** Defines the human readable text alternative of aria-valuenow for a range widget. */
+-        "aria-valuetext"?: string | undefined;
++        "aria-valuetext"?: ReactDOM$UserVisibleString | undefined;
+     }
+ 
+     // All the WAI-ARIA 1.1 role attribute values from https://www.w3.org/TR/wai-aria-1.1/#role_definitions
+@@ -815,7 +815,7 @@
+         spellCheck?: Booleanish | undefined;
+         style?: CSSProperties | undefined;
+         tabIndex?: number | undefined;
+-        title?: string | undefined;
++        title?: ReactDOM$UserVisibleString | undefined;
+         translate?: "yes" | "no" | undefined;
+ 
+         // Unknown
+@@ -900,7 +900,7 @@
+             ];
+         allowFullScreen?: boolean | undefined;
+         allowTransparency?: boolean | undefined;
+-        alt?: string | undefined;
++        alt?: ReactDOM$UserVisibleString | undefined;
+         as?: string | undefined;
+         async?: boolean | undefined;
+         autoComplete?: string | undefined;
+@@ -949,7 +949,7 @@
+         keyParams?: string | undefined;
+         keyType?: string | undefined;
+         kind?: string | undefined;
+-        label?: string | undefined;
++        label?: ReactDOM$UserVisibleString | undefined;
+         list?: string | undefined;
+         loop?: boolean | undefined;
+         low?: number | undefined;
+@@ -970,7 +970,7 @@
+         open?: boolean | undefined;
+         optimum?: number | undefined;
+         pattern?: string | undefined;
+-        placeholder?: string | undefined;
++        placeholder?: ReactDOM$UserVisibleString | undefined;
+         playsInline?: boolean | undefined;
+         poster?: string | undefined;
+         preload?: string | undefined;
+@@ -1037,7 +1037,7 @@
+     interface AudioHTMLAttributes<T> extends MediaHTMLAttributes<T> {}
+ 
+     interface AreaHTMLAttributes<T> extends HTMLAttributes<T> {
+-        alt?: string | undefined;
++        alt?: ReactDOM$UserVisibleString | undefined;
+         coords?: string | undefined;
+         download?: any;
+         href?: string | undefined;
+@@ -1171,7 +1171,7 @@
+     interface DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_IMG_SRC_TYPES {}
+ 
+     interface ImgHTMLAttributes<T> extends HTMLAttributes<T> {
+-        alt?: string | undefined;
++        alt?: ReactDOM$UserVisibleString | undefined;
+         crossOrigin?: CrossOrigin;
+         decoding?: "async" | "auto" | "sync" | undefined;
+         fetchPriority?: "high" | "low" | "auto" | undefined;
+@@ -1284,7 +1284,7 @@
+ 
+     type InputHTMLAttributes<T> = Omit<HTMLAttributes<T>, "onChange"> & {
+         accept?: string | undefined;
+-        alt?: string | undefined;
++        alt?: ReactDOM$UserVisibleString | undefined;
+         autoComplete?: HTMLInputAutoCompleteAttribute | undefined;
+         capture?: boolean | "user" | "environment" | undefined; // https://www.w3.org/TR/html-media-capture/#the-capture-attribute
+         checked?: boolean | undefined;
+@@ -1310,7 +1310,7 @@
+         multiple?: boolean | undefined;
+         name?: string | undefined;
+         pattern?: string | undefined;
+-        placeholder?: string | undefined;
++        placeholder?: ReactDOM$UserVisibleString | undefined;
+         readOnly?: boolean | undefined;
+         required?: boolean | undefined;
+         size?: number | undefined;
+@@ -1433,12 +1433,12 @@
+ 
+     interface OptgroupHTMLAttributes<T> extends HTMLAttributes<T> {
+         disabled?: boolean | undefined;
+-        label?: string | undefined;
++        label?: ReactDOM$UserVisibleString | undefined;
+     }
+ 
+     interface OptionHTMLAttributes<T> extends HTMLAttributes<T> {
+         disabled?: boolean | undefined;
+-        label?: string | undefined;
++        label?: ReactDOM$UserVisibleString | undefined;
+         selected?: boolean | undefined;
+         value?: string | readonly string[] | number | undefined;
+     }
+@@ -1534,7 +1534,7 @@
+         maxLength?: number | undefined;
+         minLength?: number | undefined;
+         name?: string | undefined;
+-        placeholder?: string | undefined;
++        placeholder?: ReactDOM$UserVisibleString | undefined;
+         readOnly?: boolean | undefined;
+         required?: boolean | undefined;
+         rows?: number | undefined;
+@@ -1574,7 +1574,7 @@
+     interface TrackHTMLAttributes<T> extends HTMLAttributes<T> {
+         default?: boolean | undefined;
+         kind?: string | undefined;
+-        label?: string | undefined;
++        label?: ReactDOM$UserVisibleString | undefined;
+         src?: string | undefined;
+         srcLang?: string | undefined;
+     }

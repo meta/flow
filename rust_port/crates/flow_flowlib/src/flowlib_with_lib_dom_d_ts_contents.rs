@@ -25,7 +25,7 @@ pub static CONTENTS: LazyLock<Vec<(&str, &str)>> = LazyLock::new(|| {
             "lib.dom.iterable.d.ts",
             tslib_contents::LIB_DOM_ITERABLE_D_TS,
         ),
-        ("react-dom.d.ts", tslib_contents::REACT_DOM_D_TS),
+        ("react-dom.d.ts", flowlib_contents::REACT_DOM_D_TS.as_str()),
         ("react.global.d.ts", tslib_contents::REACT_GLOBAL_D_TS),
     ]);
     contents

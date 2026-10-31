@@ -1538,8 +1538,14 @@ pub(crate) mod scope {
             existing_binding: &BindingNode<'arena, 'ast>,
         ) {
             // For now, we allow $JSXIntrinsics, since we intentionally kept only a minimal version in
-            // the builtins, and let flow-typed supply a full one.
-            if in_global_scope && name != "$JSXIntrinsics" && !legal {
+            // the builtins, and let flow-typed supply a full one. Libraries may also widen the
+            // user-visible string attributes of the React DOM intrinsics by redeclaring
+            // ReactDOM$UserVisibleString (see lib/react.js).
+            if in_global_scope
+                && name != "$JSXIntrinsics"
+                && name != "ReactDOM$UserVisibleString"
+                && !legal
+            {
                 let override_binding_loc = loc_of_binding(existing_binding);
                 tbls.additional_errors
                     .push(signature_error::BindingValidation::NameOverride {
