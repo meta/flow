@@ -608,8 +608,8 @@ Cannot call `Reflect.defineProperty` with object literal bound to `attributes` b
                                                            ^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:104:25
-   104|     readonly writable?: boolean,
+   <BUILTINS>/lib.es5.js:105:25
+   105|     readonly writable?: boolean,
                                 ^^^^^^^ [2]
 
 
