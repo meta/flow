@@ -2141,12 +2141,15 @@ fn merge_annot<'cx>(
                 targs,
             } = inner.as_ref();
             let qname_str: FlowSmolStr = qname.join(".").into();
-            let reason = reason::mk_reason(RTypeof(qname_str), loc.dupe());
+            let reason = reason::mk_reason(RTypeof(qname_str.dupe()), loc.dupe());
             let t = merge_impl(env, cx, file, t, false, true);
             let targs = targs.as_ref().map(|ts| {
-                ts.iter()
-                    .map(|t| merge_impl(env, cx, file, t, false, false))
-                    .collect()
+                (
+                    qname_str,
+                    ts.iter()
+                        .map(|t| merge_impl(env, cx, file, t, false, false))
+                        .collect(),
+                )
             });
             type_util::typeof_annotation(reason, t, targs)
         }
@@ -2195,7 +2198,7 @@ fn merge_annot<'cx>(
             let AnnotPropertyType { loc, obj, prop } = inner.as_ref();
             let reason = reason::mk_reason(RType("$PropertyType".into()), loc.dupe());
             let use_op = type_::UseOp::Op(Arc::new(type_::RootUseOp::TypeApplication {
-                type_: reason.dupe(),
+                type_: type_::TypeApplicationTarget::Reason(reason.dupe()),
             }));
             let obj = merge_impl(env, cx, file, obj, false, false);
             let id = eval_id_of_aloc(cx, loc.dupe());
@@ -2215,7 +2218,7 @@ fn merge_annot<'cx>(
             let AnnotElementType { loc, obj, elem } = inner.as_ref();
             let reason = reason::mk_reason(RType("$ElementType".into()), loc.dupe());
             let use_op = type_::UseOp::Op(Arc::new(type_::RootUseOp::TypeApplication {
-                type_: reason.dupe(),
+                type_: type_::TypeApplicationTarget::Reason(reason.dupe()),
             }));
             let obj = merge_impl(env, cx, file, obj, false, false);
             let index_type = merge_impl(env, cx, file, elem, false, false);
@@ -2243,7 +2246,7 @@ fn merge_annot<'cx>(
         Annot::Enum(box (loc, t)) => {
             let reason = reason::mk_annot_reason(REnum { name: None }, loc.dupe());
             let use_op = type_::UseOp::Op(Arc::new(type_::RootUseOp::TypeApplication {
-                type_: reason.dupe(),
+                type_: type_::TypeApplicationTarget::Reason(reason.dupe()),
             }));
             let t = merge_impl(env, cx, file, t, false, false);
             let id = eval_id_of_aloc(cx, loc.dupe());
@@ -2317,7 +2320,7 @@ fn merge_annot<'cx>(
         Annot::NonMaybeType(box (loc, t)) => {
             let reason = reason::mk_reason(RType("$NonMaybeType".into()), loc.dupe());
             let use_op = type_::UseOp::Op(Arc::new(type_::RootUseOp::TypeApplication {
-                type_: reason.dupe(),
+                type_: type_::TypeApplicationTarget::Reason(reason.dupe()),
             }));
             let t = merge_impl(env, cx, file, t, false, false);
             let id = eval_id_of_aloc(cx, loc.dupe());
@@ -2334,7 +2337,7 @@ fn merge_annot<'cx>(
         Annot::Omit(box (loc, t1, t2)) => {
             let reason = reason::mk_reason(RType("Omit".into()), loc.dupe());
             let use_op = type_::UseOp::Op(Arc::new(type_::RootUseOp::TypeApplication {
-                type_: reason.dupe(),
+                type_: type_::TypeApplicationTarget::Reason(reason.dupe()),
             }));
             let t1 = merge_impl(env, cx, file, t1, false, false);
             let t2 = merge_impl(env, cx, file, t2, false, false);
@@ -2398,7 +2401,7 @@ fn merge_annot<'cx>(
                 loc.dupe(),
             );
             let use_op = type_::UseOp::Op(Arc::new(type_::RootUseOp::TypeApplication {
-                type_: reason.dupe(),
+                type_: type_::TypeApplicationTarget::Reason(reason.dupe()),
             }));
             let id = eval_id_of_aloc(cx, loc.dupe());
             Type::new(type_::TypeInner::EvalT {
@@ -2420,7 +2423,7 @@ fn merge_annot<'cx>(
                 loc.dupe(),
             );
             let use_op = type_::UseOp::Op(Arc::new(type_::RootUseOp::TypeApplication {
-                type_: reason.dupe(),
+                type_: type_::TypeApplicationTarget::Reason(reason.dupe()),
             }));
             let id = eval_id_of_aloc(cx, loc.dupe());
             Type::new(type_::TypeInner::EvalT {
@@ -2441,7 +2444,7 @@ fn merge_annot<'cx>(
         Annot::Values(box (loc, t)) => {
             let reason = reason::mk_reason(RType("$Values".into()), loc.dupe());
             let use_op = type_::UseOp::Op(Arc::new(type_::RootUseOp::TypeApplication {
-                type_: reason.dupe(),
+                type_: type_::TypeApplicationTarget::Reason(reason.dupe()),
             }));
             let t = merge_impl(env, cx, file, t, false, false);
             let id = eval_id_of_aloc(cx, loc.dupe());
@@ -2461,7 +2464,7 @@ fn merge_annot<'cx>(
             let reason = reason::mk_annot_reason(desc, loc.dupe());
             let t = type_util::push_type_alias_reason(&reason, t);
             let use_op = type_::UseOp::Op(Arc::new(type_::RootUseOp::TypeApplication {
-                type_: reason.dupe(),
+                type_: type_::TypeApplicationTarget::Reason(reason.dupe()),
             }));
             let id = eval_id_of_aloc(cx, loc.dupe());
             Type::new(type_::TypeInner::EvalT {
@@ -2589,9 +2592,11 @@ fn merge_annot<'cx>(
             let AnnotObjKeyMirror { loc, obj } = inner.as_ref();
             let reason = reason::mk_reason(None, loc.dupe());
             let use_op = type_::UseOp::Op(Arc::new(type_::RootUseOp::TypeApplication {
-                type_: reason
-                    .dupe()
-                    .replace_desc(RType(FlowSmolStr::new_inline("$KeyMirror"))),
+                type_: type_::TypeApplicationTarget::Reason(
+                    reason
+                        .dupe()
+                        .replace_desc(RType(FlowSmolStr::new_inline("$KeyMirror"))),
+                ),
             }));
             let obj = merge_impl(env, cx, file, obj, false, false);
             let id = eval_id_of_aloc(cx, loc.dupe());

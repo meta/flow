@@ -1327,16 +1327,16 @@ fn convert_inner<'a>(
         }
         TypeInner::Typeof { loc, inner } => {
             let (valtype, qualification_ast) = convert_typeof(cx, &inner.argument)?;
-            let desc =
-                reason::VirtualReasonDesc::RTypeof(FlowSmolStr::new(typeof_name(&inner.argument)));
-            let reason = reason::mk_reason(desc, loc.dupe());
+            let name = FlowSmolStr::new(typeof_name(&inner.argument));
+            let reason =
+                reason::mk_reason(reason::VirtualReasonDesc::RTypeof(name.dupe()), loc.dupe());
             let (targs, targs_ast) = match &inner.targs {
                 None => (None, None),
                 Some(type_args) => {
                     let (targs_vec, targs_ast_vec) =
                         convert_list_inner(cx, env, &type_args.arguments)?;
                     (
-                        Some(targs_vec),
+                        Some((name, targs_vec)),
                         Some(ast::types::TypeArgs::<ALoc, (ALoc, Type)> {
                             loc: type_args.loc.dupe(),
                             arguments: Arc::from(targs_ast_vec),
@@ -1977,7 +1977,7 @@ fn convert_inner<'a>(
 
                 let use_op = |reason: &Reason| -> type_::UseOp {
                     type_::UseOp::Op(Arc::new(type_::RootUseOp::TypeApplication {
-                        type_: reason.dupe(),
+                        type_: type_::TypeApplicationTarget::Reason(reason.dupe()),
                     }))
                 };
                 let local_generic_type =

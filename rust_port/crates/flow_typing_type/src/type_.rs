@@ -1715,6 +1715,38 @@ pub struct MergedDeclarationData<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     serde::Serialize,
     serde::Deserialize
 )]
+pub struct TypeofApplicationData<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
+    pub reason: VirtualReason<L>,
+    pub name: FlowSmolStr,
+}
+
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    serde::Serialize,
+    serde::Deserialize
+)]
+pub enum TypeApplicationTarget<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
+    Reason(VirtualReason<L>),
+    Typeof(Box<TypeofApplicationData<L>>),
+}
+
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    serde::Serialize,
+    serde::Deserialize
+)]
 pub enum VirtualRootUseOp<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     ObjectAddComputedProperty {
         op: VirtualReason<L>,
@@ -1784,7 +1816,7 @@ pub enum VirtualRootUseOp<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     RecordCreate(Box<RecordCreateData<L>>),
     Speculation(Arc<VirtualUseOp<L>>),
     TypeApplication {
-        type_: VirtualReason<L>,
+        type_: TypeApplicationTarget<L>,
     },
     MakeReadOnly {
         loc: Box<L>,

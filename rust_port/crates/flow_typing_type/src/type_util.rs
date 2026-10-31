@@ -93,12 +93,14 @@ use crate::type_::ThisTypeAppTData;
 use crate::type_::TupleElementCompatibilityData;
 use crate::type_::Type;
 use crate::type_::TypeAppTData;
+use crate::type_::TypeApplicationTarget;
 use crate::type_::TypeArgCompatibilityData;
 use crate::type_::TypeDestructorT;
 use crate::type_::TypeDestructorTInner;
 use crate::type_::TypeGuardIncompatibilityData;
 use crate::type_::TypeInner;
 use crate::type_::TypeStrictnessKind;
+use crate::type_::TypeofApplicationData;
 use crate::type_::UnionRepresentativeData;
 use crate::type_::UseOp;
 use crate::type_::UseT;
@@ -1274,7 +1276,17 @@ where
                 Speculation(Arc::new(mod_loc_of_virtual_use_op_rec(op.as_ref().clone())))
             }
             TypeApplication { type_ } => TypeApplication {
-                type_: mod_reason(type_),
+                type_: match type_ {
+                    TypeApplicationTarget::Reason(reason) => {
+                        TypeApplicationTarget::Reason(mod_reason(reason))
+                    }
+                    TypeApplicationTarget::Typeof(box TypeofApplicationData { reason, name }) => {
+                        TypeApplicationTarget::Typeof(Box::new(TypeofApplicationData {
+                            reason: mod_reason(reason),
+                            name,
+                        }))
+                    }
+                },
             },
             MakeReadOnly { loc: box loc } => MakeReadOnly {
                 loc: Box::new(f(loc)),
@@ -2454,7 +2466,7 @@ pub fn typeapp(
     targs: Vec<Type>,
 ) -> Type {
     let use_op = UseOp::Op(Arc::new(RootUseOp::TypeApplication {
-        type_: reason.dupe(),
+        type_: TypeApplicationTarget::Reason(reason.dupe()),
     }));
     typeapp_with_use_op(from_value, use_desc, reason, use_op, t, targs)
 }
@@ -2471,7 +2483,7 @@ pub fn typeapp_annot(
     let desc = desc_of_t(&t).cloned();
     let reason = mk_annot_reason(desc, loc);
     let use_op = UseOp::Op(Arc::new(RootUseOp::TypeApplication {
-        type_: reason.dupe(),
+        type_: TypeApplicationTarget::Reason(reason.dupe()),
     }));
     Type::new(TypeInner::TypeAppT(Box::new(TypeAppTData {
         reason,
@@ -2490,7 +2502,7 @@ pub fn implicit_typeapp(t: Type, targs: Vec<Type>, annot_loc: Option<ALoc>) -> T
         None => reason,
     };
     let use_op = UseOp::Op(Arc::new(RootUseOp::TypeApplication {
-        type_: reason.dupe(),
+        type_: TypeApplicationTarget::Reason(reason.dupe()),
     }));
     Type::new(TypeInner::TypeAppT(Box::new(TypeAppTData {
         reason,
@@ -2521,7 +2533,7 @@ pub fn this_typeapp(
     })))
 }
 
-pub fn typeof_annotation(reason: Reason, t: Type, targs: Option<Vec<Type>>) -> Type {
+pub fn typeof_annotation(reason: Reason, t: Type, targs: Option<(FlowSmolStr, Vec<Type>)>) -> Type {
     use flow_common::reason::mk_annot_reason;
 
     let annot_loc = reason.loc().dupe();
@@ -2533,9 +2545,14 @@ pub fn typeof_annotation(reason: Reason, t: Type, targs: Option<Vec<Type>>) -> T
     ));
     match targs {
         None => t_annot,
-        Some(targs) => {
+        Some((name, targs)) => {
             let reason_tapp = mk_annot_reason(desc_for_tapp, annot_loc.dupe());
-            let use_op = UseOp::Op(Arc::new(RootUseOp::TypeApplication { type_: reason_tapp }));
+            let use_op = UseOp::Op(Arc::new(RootUseOp::TypeApplication {
+                type_: TypeApplicationTarget::Typeof(Box::new(TypeofApplicationData {
+                    reason: reason_tapp,
+                    name,
+                })),
+            }));
             typeapp_with_use_op(true, false, reason, use_op, t_annot, targs)
         }
     }

@@ -66,9 +66,11 @@ use flow_typing_type::type_::SetPropertyData;
 use flow_typing_type::type_::StandaloneCallThisData;
 use flow_typing_type::type_::SwitchRefinementCheckData;
 use flow_typing_type::type_::TupleElementCompatibilityData;
+use flow_typing_type::type_::TypeApplicationTarget;
 use flow_typing_type::type_::TypeArgCompatibilityData;
 use flow_typing_type::type_::TypeGuardIncompatibilityData;
 use flow_typing_type::type_::TypeInner;
+use flow_typing_type::type_::TypeofApplicationData;
 use flow_typing_type::type_::UnionEnum;
 use flow_typing_type::type_::UnionRepresentativeData;
 use flow_typing_type::type_::VirtualFrameUseOp;
@@ -2086,11 +2088,27 @@ where
                                 )
                             }
 
-                            VirtualRootUseOp::TypeApplication { type_ } => root(
+                            VirtualRootUseOp::TypeApplication {
+                                type_: TypeApplicationTarget::Reason(type_),
+                            } => root(
                                 loc,
                                 frames,
                                 type_,
                                 RootMessage::RootCannotInstantiateTypeApp(type_.desc.clone()),
+                                custom_error_message,
+                            ),
+
+                            VirtualRootUseOp::TypeApplication {
+                                type_:
+                                    TypeApplicationTarget::Typeof(box TypeofApplicationData {
+                                        reason,
+                                        name,
+                                    }),
+                            } => root(
+                                loc,
+                                frames,
+                                reason,
+                                RootMessage::RootCannotInstantiateTypeof(name.dupe()),
                                 custom_error_message,
                             ),
 
@@ -5589,6 +5607,15 @@ where
                     friendly::Message(vec![
                         text("Cannot instantiate "),
                         friendly::desc_of_reason_desc(type_.as_ref()),
+                    ]),
+                ),
+                RootMessage::RootCannotInstantiateTypeof(name) => (
+                    RootKind::OperationRoot,
+                    friendly::Message(vec![
+                        text("Cannot instantiate "),
+                        friendly::MessageFeature::Inline(friendly::message_inlines_of_string(
+                            &format!("`typeof {name}`"),
+                        )),
                     ]),
                 ),
                 RootMessage::RootCannotMakeReadOnly => (

@@ -1379,6 +1379,7 @@ pub enum RootMessage<L: Dupe> {
     RootCannotInstantiateEval(MessageTypeReferenceData<L>),
     RootCannotInstantiateRenderType,
     RootCannotInstantiateTypeApp(Option<VirtualReasonDesc<L>>),
+    RootCannotInstantiateTypeof(FlowSmolStr),
     RootCannotMakeReadOnly,
     RootCannotReturn(Option<VirtualReasonDesc<L>>),
     RootCannotReturnFromAssertionFunction {

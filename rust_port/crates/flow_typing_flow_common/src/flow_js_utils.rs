@@ -1680,6 +1680,8 @@ pub fn primary_reason_of_use_op(use_op: &UseOp) -> Option<&Reason> {
     use flow_typing_type::type_::AssignVarTarget;
     use flow_typing_type::type_::JSXCreateElementData;
     use flow_typing_type::type_::RootUseOp;
+    use flow_typing_type::type_::TypeApplicationTarget;
+    use flow_typing_type::type_::TypeofApplicationData;
     use flow_typing_type::type_::root_of_use_op;
 
     match root_of_use_op(use_op) {
@@ -1694,7 +1696,11 @@ pub fn primary_reason_of_use_op(use_op: &UseOp) -> Option<&Reason> {
         | RootUseOp::GetProperty(op)
         | RootUseOp::InitField { op, .. }
         | RootUseOp::ReactGetIntrinsic { literal: op }
-        | RootUseOp::TypeApplication { type_: op }
+        | RootUseOp::TypeApplication {
+            type_:
+                TypeApplicationTarget::Reason(op)
+                | TypeApplicationTarget::Typeof(box TypeofApplicationData { reason: op, .. }),
+        }
         | RootUseOp::RenderTypeInstantiation { render_type: op } => Some(op),
         RootUseOp::JSXCreateElement(box JSXCreateElementData { op, .. }) => Some(op),
         RootUseOp::AssignVar { var, init } => match var.as_deref() {
