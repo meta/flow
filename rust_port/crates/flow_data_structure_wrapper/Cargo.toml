@@ -11,4 +11,4 @@ im = { version = "15.1", features = ["rayon", "serde"] }
 parking_lot = { version = "0.12.1", features = ["arc_lock", "send_guard"] }
 rpds = "1.2.1"
 serde = { version = "1.0.229", features = ["derive", "rc"] }
-smol_str = "0.3.6"
+smol_str = "0.3.7"
