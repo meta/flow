@@ -7,8 +7,8 @@ Cannot assign `patt.test(...)` to `match` because `boolean` [1] is incompatible 
                            ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:953:27
-   953|     test(string: string): boolean;
+   <BUILTINS>/lib.es5.js:959:27
+   959|     test(string: string): boolean;
                                   ^^^^^^^ [1]
    regexp.js:2:11
      2| var match:number = patt.test("Hello world!");
@@ -25,8 +25,8 @@ parameter: `RegExp` [1] is incompatible with `unknown`. [incompatible-type]
         ^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:942:11
-   942| interface RegExp {
+   <BUILTINS>/lib.es5.js:948:11
+   948| interface RegExp {
                   ^^^^^^ [1]
 
 
@@ -40,8 +40,8 @@ Cannot cast `regExp[Symbol.match]` to `(str: string) => Iterator<RegExp$matchRes
         ^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:942:11
-   942| interface RegExp {
+   <BUILTINS>/lib.es5.js:948:11
+   948| interface RegExp {
                   ^^^^^^ [1]
 
 
@@ -215,8 +215,8 @@ References:
    <BUILTINS>/lib.es2020.intl.js:99:59
     99|     type LocalesArgument = UnicodeBCP47LocaleIdentifier | Locale | readonly (UnicodeBCP47LocaleIdentifier | Locale)[] | undefined;
                                                                   ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:459:33
-   459|     toLocaleLowerCase(locales?: string | string[]): string;
+   <BUILTINS>/lib.es5.js:465:33
+   465|     toLocaleLowerCase(locales?: string | string[]): string;
                                         ^^^^^^ [3]
 
 

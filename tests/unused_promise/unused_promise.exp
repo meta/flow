@@ -164,8 +164,8 @@ out-of-bounds array accesses, etc.). If the check is valid, you might want to ma
              ^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1525:8
-   1525|     ): Promise<T | TResult>;
+   <BUILTINS>/lib.es5.js:1531:8
+   1531|     ): Promise<T | TResult>;
                 ^^^^^^^^^^^^^^^^^^^^ [1]
 
 

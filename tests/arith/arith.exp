@@ -647,8 +647,8 @@ Cannot get `(x + y).length` because property `length` is missing in `Number` [1]
                     ^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:508:11
-   508| interface Number {
+   <BUILTINS>/lib.es5.js:514:11
+   514| interface Number {
                   ^^^^^^ [1]
 
 
@@ -661,8 +661,8 @@ Cannot get `(1 + 2).length` because property `length` is missing in `Number` [1]
                     ^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:508:11
-   508| interface Number {
+   <BUILTINS>/lib.es5.js:514:11
+   514| interface Number {
                   ^^^^^^ [1]
 
 
