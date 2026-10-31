@@ -86,6 +86,8 @@ use flow_typing_type::type_::SpecializeTData;
 use flow_typing_type::type_::ThisInstanceTData;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeAppTData;
+use flow_typing_type::type_::TypeGuard;
+use flow_typing_type::type_::TypeGuardInner;
 use flow_typing_type::type_::TypeInner;
 use flow_typing_type::type_::TypeParam;
 use flow_typing_type::type_::TypeStrictnessKind;
@@ -1951,9 +1953,21 @@ pub fn value_as_type_reference_for_error(reason: &Reason) -> Option<ValueAsTypeR
 }
 
 /// Captures the semantic description and location of a type guard without retaining its reason.
-pub fn type_guard_reference_for_error(reason: &Reason) -> TypeGuardReferenceData<ALoc> {
+pub fn type_guard_reference_for_error(type_guard: &TypeGuard) -> TypeGuardReferenceData<ALoc> {
+    let TypeGuardInner {
+        reason,
+        inferred,
+        param_name: (param_loc, param_name),
+        ..
+    } = type_guard.deref();
+    // An inferred type guard is described by the parameter it refines.
+    if *inferred {
+        return TypeGuardReferenceData {
+            loc: param_loc.dupe(),
+            kind: TypeGuardReferenceKind::Parameter(Some(param_name.dupe())),
+        };
+    }
     let kind = match reason.desc(false) {
-        Some(VirtualReasonDesc::RParameter(name)) => TypeGuardReferenceKind::Parameter(name.dupe()),
         Some(VirtualReasonDesc::RIdentifier(name)) => {
             TypeGuardReferenceKind::Parameter(Some(name.dupe()))
         }

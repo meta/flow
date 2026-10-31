@@ -116,6 +116,7 @@ use flow_typing_type::type_::TupleElement;
 use flow_typing_type::type_::TupleElementCompatibilityData;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeAppTData;
+use flow_typing_type::type_::TypeGuard;
 use flow_typing_type::type_::TypeInner::*;
 use flow_typing_type::type_::TypeStrictnessKind;
 use flow_typing_type::type_::UnifyCause;
@@ -498,30 +499,30 @@ fn func_type_guard_compat<'cx>(
     trace: DepthTrace,
     use_op: UseOp,
     grd1: (
-        &Reason,
+        &TypeGuard,
         &[(Option<Name>, Type)],
         bool,
         (&ALoc, &Name),
         Option<&Type>,
     ),
     grd2: (
-        &Reason,
+        &TypeGuard,
         &[(Option<Name>, Type)],
         bool,
         (&ALoc, &Name),
         Option<&Type>,
     ),
 ) -> Result<(), FlowJsException> {
-    let (reason1, params1, impl1, (loc1, x1), t1) = grd1;
-    let (reason2, params2, impl2, (loc2, x2), t2) = grd2;
+    let (tg1, params1, impl1, (loc1, x1), t1) = grd1;
+    let (tg2, params2, impl2, (loc2, x2), t2) = grd2;
     if impl1 && !impl2 {
         flow_js_utils::add_output_with_env(
             cx,
             env,
             ErrorMessage::ETypeGuardImpliesMismatch {
                 use_op: use_op.dupe(),
-                lower: flow_js_utils::type_guard_reference_for_error(reason1),
-                upper: flow_js_utils::type_guard_reference_for_error(reason2),
+                lower: flow_js_utils::type_guard_reference_for_error(tg1),
+                upper: flow_js_utils::type_guard_reference_for_error(tg2),
             },
         )?;
     }
@@ -580,8 +581,8 @@ fn func_type_guard_compat<'cx>(
                 env,
                 ErrorMessage::ETypeGuardFuncIncompatibility {
                     use_op,
-                    lower: reference(t1, reason1),
-                    upper: reference(t2, reason2),
+                    lower: reference(t1, &tg1.reason),
+                    upper: reference(t2, &tg2.reason),
                 },
             )?;
             Ok(())
@@ -847,14 +848,14 @@ fn funt_to_funt_check<'cx>(
                 trace,
                 use_op.dupe(),
                 (
-                    &tg1.reason,
+                    tg1,
                     &params1,
                     tg1.one_sided(),
                     (&tg1.param_name.0, &name1),
                     tg1.type_guard.as_ref(),
                 ),
                 (
-                    &tg2.reason,
+                    tg2,
                     &params2,
                     tg2.one_sided(),
                     (&tg2.param_name.0, &name2),
