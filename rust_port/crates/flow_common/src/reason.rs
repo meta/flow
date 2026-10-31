@@ -348,7 +348,6 @@ pub enum VirtualReasonDesc<L: Dupe> {
         name_opt: Option<Name>,
         from_component_syntax: bool,
     },
-    RPossiblyMissingPropFromObj(Name, Arc<VirtualReasonDesc<L>>),
     RComponent(FlowSmolStr),
 }
 
@@ -443,9 +442,6 @@ impl<A: Dupe> VirtualReasonDesc<A> {
             RTypeParam(box (s, l1, l2)) => RTypeParam(Box::new((s.clone(), f(l1), f(l2)))),
             RPartialOf(d) => RPartialOf(Arc::new(d.map_locs(f))),
             RRequiredOf(d) => RRequiredOf(Arc::new(d.map_locs(f))),
-            RPossiblyMissingPropFromObj(n, d) => {
-                RPossiblyMissingPropFromObj(n.dupe(), Arc::new(d.map_locs(f)))
-            }
             REnumMember {
                 enum_desc,
                 member_name,
@@ -1243,13 +1239,6 @@ pub fn string_of_desc<L: Dupe>(desc: &VirtualReasonDesc<L>) -> String {
             None => "React element".to_string(),
         },
         RReactChildren => "children array".to_string(),
-        RPossiblyMissingPropFromObj(propname, desc) => {
-            format!(
-                "possibly missing property `{}` in {}",
-                propname,
-                string_of_desc(desc)
-            )
-        }
 
         // Uninitialized
         RUninitialized => "uninitialized variable".to_string(),

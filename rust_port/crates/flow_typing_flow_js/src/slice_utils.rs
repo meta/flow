@@ -266,58 +266,11 @@ fn object_type_of_slice<'cx>(cx: &mut Context<'cx>, slice: &object::Slice) -> Ty
     )
 }
 
-pub fn type_optionality_and_missing_property(prop: &Property) -> (Type, bool, bool) {
+pub fn type_optionality(prop: &Property) -> (Type, bool) {
     let prop_t = property::type_(prop);
     match prop_t.deref() {
-        TypeInner::OptionalT {
-            reason,
-            type_: t,
-            use_desc,
-        } => {
-            let is_missing_property_desc = matches!(
-                reason.desc(true),
-                Some(VirtualReasonDesc::RPossiblyMissingPropFromObj(..))
-            );
-            (t.dupe(), true, *use_desc && is_missing_property_desc)
-        }
-        _ => (prop_t.dupe(), false, false),
-    }
-}
-
-// Widening may create optional props because a property may not exist on some object. This
-// synthetic property lacks a good location in the code, since it represents the absence
-// of a key in some object. In order to point to a good location, we point to the object
-// missing the property in the reason desc.
-pub fn possibly_missing_prop(propname: &Name, obj_reason: &Reason, type_: Type) -> Type {
-    let reason = obj_reason.dupe().update_desc_new(|desc| {
-        desc.map(|desc| {
-            VirtualReasonDesc::RPossiblyMissingPropFromObj(propname.dupe(), Arc::new(desc))
-        })
-    });
-    Type::new(TypeInner::OptionalT {
-        reason,
-        type_,
-        use_desc: true,
-    })
-}
-
-// When a property is optional due to widening (see possibly_missing_prop), we want to make sure
-// that the reason it is missing persists through interactions with other optional properties.
-//
-// This function preserves the possibly missing prop reason if it existed on both
-// of the optional properties. Otherwise, we have an explicit optional property, which
-// is better to use.
-pub fn make_optional_with_possible_missing_props(
-    propname: &Name,
-    missing_prop1: bool,
-    missing_prop2: bool,
-    r: &Reason,
-    t: Type,
-) -> Type {
-    if missing_prop1 && missing_prop2 {
-        possibly_missing_prop(propname, r, t)
-    } else {
-        type_util::optional(t, None, false)
+        TypeInner::OptionalT { type_: t, .. } => (t.dupe(), true),
+        _ => (prop_t.dupe(), false),
     }
 }
 
@@ -657,22 +610,16 @@ fn spread2<'cx>(
             ),
         ))
     };
-    let merge_props = |propname: &Name, t1: &Property, t2: &Property| -> Property {
+    let merge_props = |t1: &Property, t2: &Property| -> Property {
         let method1 = property::is_method(t1);
         let method2 = property::is_method(t2);
         let kl2 = property::first_loc(t2);
-        let (t1_inner, opt1, missing_prop1) = type_optionality_and_missing_property(t1);
-        let (t2_inner, opt2, missing_prop2) = type_optionality_and_missing_property(t2);
+        let (t1_inner, opt1) = type_optionality(t1);
+        let (t2_inner, opt2) = type_optionality(t2);
         if !opt2 {
             mk_slice_prop(kl2, t2_inner, Polarity::Neutral, method2)
         } else if opt1 && opt2 {
-            let prop_t = make_optional_with_possible_missing_props(
-                propname,
-                missing_prop1,
-                missing_prop2,
-                r1,
-                union(t1_inner, t2_inner),
-            );
+            let prop_t = type_util::optional(union(t1_inner, t2_inner), None, false);
             // Since we cannot be sure which is spread, if either
             // are methods we must treat the result as a method
             mk_slice_prop(None, prop_t, Polarity::Neutral, method2 || method1)
@@ -692,7 +639,7 @@ fn spread2<'cx>(
             let merged = match (p1, p2) {
                 (None, None) => None,
                 (_, Some(p2)) if *inline2 => Some(p2.dupe()),
-                (Some(p1), Some(p2)) => Some(merge_props(x, p1, p2)),
+                (Some(p1), Some(p2)) => Some(merge_props(p1, p2)),
                 (Some(p1), None) => {
                     if exact2 || *inline2 || allow_inexact2 {
                         Some(p1.dupe())
@@ -730,7 +677,7 @@ fn spread2<'cx>(
                 //   3. o1 is exact: no problem, we don't need to worry about o1 having the
                 //      same property.
                 (None, Some(p2)) => {
-                    let (_, opt2, _) = type_optionality_and_missing_property(p2);
+                    let (_, opt2) = type_optionality(p2);
                     match (&flags1.obj_kind, opt2) {
                         (kind @ (ObjKind::Indexed(_) | ObjKind::Inexact), true)
                             if !allow_inexact1 || matches!(kind, ObjKind::Indexed(_)) =>
