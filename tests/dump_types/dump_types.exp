@@ -1335,7 +1335,7 @@
     "path":"predicates.js",
     "reasons":[],
     "start":5,
-    "type":"(arg: unknown) => boolean"
+    "type":"(arg: any) => arg is Array<any>"
   },
   {
     "end":24,
@@ -1365,7 +1365,7 @@
     "path":"predicates.js",
     "reasons":[],
     "start":11,
-    "type":"(arg: unknown) => boolean"
+    "type":"(arg: any) => arg is Array<any>"
   },
   {
     "end":19,
