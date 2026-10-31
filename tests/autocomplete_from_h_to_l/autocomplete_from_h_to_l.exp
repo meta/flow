@@ -2584,6 +2584,7 @@ Flags: --pretty
       "name":"?.toSpliced",
       "type":"void | (<S>(this: this, start: number, deleteCount?: number, ...items: Array<S>) => Array<T | S>)"
     },
+    {"name":"?.toString","type":"void | ((this: this) => string)"},
     {
       "name":"?.unshift",
       "type":"void | ((this: this, ...items: Array<T>) => number)"
@@ -2708,6 +2709,7 @@ Flags: --pretty
       "name":"toSpliced",
       "type":"<S>(this: this, start: number, deleteCount?: number, ...items: Array<S>) => Array<T | S>"
     },
+    {"name":"toString","type":"(this: this) => string"},
     {"name":"unshift","type":"(this: this, ...items: Array<T>) => number"},
     {"name":"values","type":"(this: this) => ArrayIterator<T>"},
     {"name":"with","type":"(this: this, index: number, value: T) => Array<T>"}

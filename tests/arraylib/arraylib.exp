@@ -53,8 +53,8 @@ References:
    array_lib.js:13:14
      13| var e: Array<string> = a.reverse();
                       ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1308:16
-   1308|     reverse(): T[];
+   <BUILTINS>/lib.es5.js:1327:16
+   1327|     reverse(): T[];
                         ^^^ [3]
    array_lib.js:13:8
      13| var e: Array<string> = a.reverse();
@@ -76,15 +76,15 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
                                 ^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1154:53
-   1154|     >(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
-                                                             ^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1317:65
+   1317|     concat<S = T>(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
+                                                                         ^^^^^ [1]
    array_lib.js:26:14
      26| var n: Array<number> = h.concat('a', 'b', 'c'); // Error
                       ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1154:47
-   1154|     >(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
-                                                       ^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es5.js:1317:59
+   1317|     concat<S = T>(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
+                                                                   ^^^^^^^^^^^^ [3]
    array_lib.js:26:8
      26| var n: Array<number> = h.concat('a', 'b', 'c'); // Error
                 ^^^^^^^^^^^^^ [4]
@@ -139,14 +139,14 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
            ^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1445:37
-   1445|     static from(str: string): Array<string>;
+   <BUILTINS>/lib.es5.js:1486:37
+   1486|     static from(str: string): Array<string>;
                                              ^^^^^^ [1]
    array_lib.js:71:31
      71|   Array.from('abcd') as Array<empty>; // ERROR
                                        ^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1445:31
-   1445|     static from(str: string): Array<string>;
+   <BUILTINS>/lib.es5.js:1486:31
+   1486|     static from(str: string): Array<string>;
                                        ^^^^^^^^^^^^^ [3]
    array_lib.js:71:25
      71|   Array.from('abcd') as Array<empty>; // ERROR
@@ -179,8 +179,8 @@ References:
    array_lib.js:75:20
      75|   const arrayLike: ArrayLike<string> = {0: 'hello', length: 1};
                             ^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/lib.es5.js:1440:31
-   1440|     static from<A, This>(str: string, mapFn: (this: This, elem: string, index: number) => A, thisArg: This): Array<A>;
+   <BUILTINS>/lib.es5.js:1481:31
+   1481|     static from<A, This>(str: string, mapFn: (this: This, elem: string, index: number) => A, thisArg: This): Array<A>;
                                        ^^^^^^ [5]
 
 
@@ -409,8 +409,8 @@ References:
    <BUILTINS>/lib.es5.js:470:22
     470|     readonly length: number;
                               ^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:1371:104
-   1371|     filter<This, S extends T>(predicate: (this: This, value: T, index: number, array: readonly T[]) => implies value is S, thisArg: This): S[];
+   <BUILTINS>/lib.es5.js:1412:104
+   1412|     filter<This, S extends T>(predicate: (this: This, value: T, index: number, array: readonly T[]) => implies value is S, thisArg: This): S[];
                                                                                                                 ^^^^^^^^^^^^^^^^^^ [2]
    filter_error_msg_quality_test.js:2:30
       2| declare const str_arr: Array<string>;
@@ -443,8 +443,8 @@ References:
    filter_error_msg_quality_test.js:7:25
       7| nullable_str_arr.filter(s => !!s) as Array<string>;
                                  ^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:1365:23
-   1365|     filter(predicate: typeof Boolean): NonNullable<T>[];
+   <BUILTINS>/lib.es5.js:1406:23
+   1406|     filter(predicate: typeof Boolean): NonNullable<T>[];
                                ^^^^^^^^^^^^^^ [4]
 
 
