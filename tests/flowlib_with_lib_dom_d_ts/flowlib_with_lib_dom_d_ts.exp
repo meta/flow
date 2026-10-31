@@ -52,7 +52,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:32:1
 
-Cannot cast `promise` to `Promise<string>` because in type argument `R` [1]: `HTMLDivElement` [2] is incompatible with
+Cannot cast `promise` to `Promise<string>` because in type argument `T` [1]: `HTMLDivElement` [2] is incompatible with
 `string` [3]. [incompatible-type]
 
    test.js:32:1
@@ -60,9 +60,9 @@ Cannot cast `promise` to `Promise<string>` because in type argument `R` [1]: `HT
         ^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    test.js:6:24
      6| const promise: Promise<HTMLDivElement> = Promise.resolve(element);
                                ^^^^^^^^^^^^^^ [2]

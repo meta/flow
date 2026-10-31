@@ -38,7 +38,7 @@ Cannot return `result` because `Promise<string>` [1] is incompatible with `strin
 
 References:
    <BUILTINS>/misc.js:216:11
-   216| interface Promise<R> {
+   216| interface Promise<out T = unknown> {
                   ^^^^^^^ [1]
    test.js:45:28
     45| async hook useAsyncHook(): string {
@@ -56,7 +56,7 @@ Cannot return `await Promise.resolve(...)` because `Promise<"hello">` [1] is inc
 
 References:
    <BUILTINS>/misc.js:216:11
-   216| interface Promise<R> {
+   216| interface Promise<out T = unknown> {
                   ^^^^^^^ [1]
    test.js:63:43
     63| export async hook useExportedAsyncHook(): string {

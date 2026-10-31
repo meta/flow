@@ -1,15 +1,15 @@
 Error --------------------------------------------------------------------------------------------------- async.js:10:10
 
-Cannot return `1` because in type argument `R` [1]: `1` [2] is incompatible with `boolean` [3]. [incompatible-type]
+Cannot return `1` because in type argument `T` [1]: `1` [2] is incompatible with `boolean` [3]. [incompatible-type]
 
    async.js:10:10
     10|   return 1;  // error, number != boolean
                  ^ [2]
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    async.js:9:30
      9| async function f1(): Promise<boolean> {
                                      ^^^^^^^ [3]
@@ -17,7 +17,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- async.js:29:10
 
-Cannot return `await p` because in type argument `R` [1]: `number` [2] is incompatible with `boolean` [3].
+Cannot return `await p` because in type argument `T` [1]: `number` [2] is incompatible with `boolean` [3].
 [incompatible-type]
 
    async.js:29:10
@@ -25,9 +25,9 @@ Cannot return `await p` because in type argument `R` [1]: `number` [2] is incomp
                  ^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    async.js:28:30
     28| async function f4(p: Promise<number>): Promise<boolean> {
                                      ^^^^^^ [2]
@@ -91,7 +91,7 @@ Cannot expect `void` as the return type of async function because `void` [1] is 
 
 Error --------------------------------------------------------------------------------------------------- async2.js:55:5
 
-Cannot expect `Promise<number>` as the return type of async function because in type argument `R` [1]: `number` [2] is
+Cannot expect `Promise<number>` as the return type of async function because in type argument `T` [1]: `number` [2] is
 incompatible with `void` [3]. [incompatible-type]
 
    async2.js:55:5
@@ -99,9 +99,9 @@ incompatible with `void` [3]. [incompatible-type]
             ^^^^^^^^^^^^^^^ [3]
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    async2.js:55:13
     55|   : Promise<number> { // error, number != void
                     ^^^^^^ [2]
@@ -134,7 +134,7 @@ Cannot use `await P` [1] as a superclass. Only variables and member expressions 
 
 Error ----------------------------------------------------------------------------------------- async_return_void.js:2:3
 
-Cannot return undefined because in type argument `R` [1]: `void` [2] is incompatible with `string` [3].
+Cannot return undefined because in type argument `T` [1]: `void` [2] is incompatible with `string` [3].
 [incompatible-type]
 
    async_return_void.js:2:3
@@ -142,9 +142,9 @@ Cannot return undefined because in type argument `R` [1]: `void` [2] is incompat
           ^^^^^^^ [2]
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    async_return_void.js:1:32
      1| async function foo1(): Promise<string> {
                                        ^^^^^^ [3]
@@ -152,7 +152,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------- async_return_void.js:6:10
 
-Cannot return `undefined` because in type argument `R` [1]: `void` [2] is incompatible with `string` [3].
+Cannot return `undefined` because in type argument `T` [1]: `void` [2] is incompatible with `string` [3].
 [incompatible-type]
 
    async_return_void.js:6:10
@@ -160,9 +160,9 @@ Cannot return `undefined` because in type argument `R` [1]: `void` [2] is incomp
                  ^^^^^^^^^ [2]
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    async_return_void.js:5:32
      5| async function foo2(): Promise<string> {
                                        ^^^^^^ [3]
@@ -170,7 +170,7 @@ References:
 
 Error --------------------------------------------------------------------------------------- async_return_void.js:11:10
 
-Cannot return `bar()` because in type argument `R` [1]: `void` [2] is incompatible with `string` [3].
+Cannot return `bar()` because in type argument `T` [1]: `void` [2] is incompatible with `string` [3].
 [incompatible-type]
 
    async_return_void.js:11:10
@@ -178,9 +178,9 @@ Cannot return `bar()` because in type argument `R` [1]: `void` [2] is incompatib
                  ^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    async_return_void.js:10:17
     10|   function bar() { }
                         ^ [2]

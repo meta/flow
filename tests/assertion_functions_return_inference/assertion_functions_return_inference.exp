@@ -1,6 +1,6 @@
 Error ----------------------------------------------------------------------------------------------------- test.js:12:3
 
-Cannot cast `result` to `Promise<void>` because in type argument `R` [1]: `number` [2] is incompatible with `void` [3].
+Cannot cast `result` to `Promise<void>` because in type argument `T` [1]: `number` [2] is incompatible with `void` [3].
 [incompatible-type]
 
    test.js:12:3
@@ -8,9 +8,9 @@ Cannot cast `result` to `Promise<void>` because in type argument `R` [1]: `numbe
           ^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    test.js:7:38
      7| function catchRepro(promise: Promise<number>) {
                                              ^^^^^^ [2]

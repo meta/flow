@@ -266,7 +266,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ any.js:23:3
 
-Cannot cast `Promise.any(...)` to `Promise<number>` because in type argument `R` [1]: `string` [2] is incompatible with
+Cannot cast `Promise.any(...)` to `Promise<number>` because in type argument `T` [1]: `string` [2] is incompatible with
 `number` [3]. [incompatible-type]
 
    any.js:23:3
@@ -274,9 +274,9 @@ Cannot cast `Promise.any(...)` to `Promise<number>` because in type argument `R`
           ^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    <BUILTINS>/lib.es2021.promise.js:48:59
     48|     any<T>(values: Iterable<T | PromiseLike<T>>): Promise<Awaited<T>>;
                                                                   ^^^^^^^^^^ [2]
@@ -309,7 +309,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- any.js:34:10
 
-Cannot return `Promise.any(...)` because in type argument `R` [1]: `unknown` [2] is incompatible with `empty` [3].
+Cannot return `Promise.any(...)` because in type argument `T` [1]: `unknown` [2] is incompatible with `empty` [3].
 [incompatible-type]
 
    any.js:34:10
@@ -317,9 +317,9 @@ Cannot return `Promise.any(...)` because in type argument `R` [1]: `unknown` [2]
                  ^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    <BUILTINS>/lib.es2021.promise.js:48:59
     48|     any<T>(values: Iterable<T | PromiseLike<T>>): Promise<Awaited<T>>;
                                                                   ^^^^^^^^^^ [2]
@@ -330,7 +330,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- finally.js:12:1
 
-Cannot cast `p.finally(...)` to `Promise<string>` because in type argument `R` [1]: `number` [2] is incompatible with
+Cannot cast `p.finally(...)` to `Promise<string>` because in type argument `T` [1]: `number` [2] is incompatible with
 `string` [3]. [incompatible-type]
 
    finally.js:12:1
@@ -338,9 +338,9 @@ Cannot cast `p.finally(...)` to `Promise<string>` because in type argument `R` [
         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    finally.js:1:26
      1| declare const p: Promise<number>;
                                  ^^^^^^ [2]
@@ -370,7 +370,7 @@ References:
     30|     finally(onfinally?: (() => void) | undefined | null): Promise<T>;
                                  ^^^^^^^^^^ [2]
    <BUILTINS>/misc.js:217:24
-   217|   finally(onfinally?: (() => unknown) | undefined | null): Promise<R>;
+   217|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
                                ^^^^^^^^^^^^^ [3]
 
 
@@ -466,7 +466,7 @@ References:
     19| }
         ^ [2]
    <BUILTINS>/misc.js:217:23
-   217|   finally(onfinally?: (() => unknown) | undefined | null): Promise<R>;
+   217|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
@@ -490,7 +490,7 @@ References:
     19| }
         ^ [2]
    <BUILTINS>/misc.js:217:41
-   217|   finally(onfinally?: (() => unknown) | undefined | null): Promise<R>;
+   217|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
                                                 ^^^^^^^^^ [4]
 
 
@@ -514,7 +514,7 @@ References:
     19| }
         ^ [2]
    <BUILTINS>/misc.js:217:53
-   217|   finally(onfinally?: (() => unknown) | undefined | null): Promise<R>;
+   217|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
                                                             ^^^^ [4]
 
 
@@ -923,7 +923,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- resolve_void.js:1:1
 
-Cannot cast `Promise.resolve()` to `Promise<number>` because in type argument `R` [1]: `void` [2] is incompatible with
+Cannot cast `Promise.resolve()` to `Promise<number>` because in type argument `T` [1]: `void` [2] is incompatible with
 `number` [3]. [incompatible-type]
 
    resolve_void.js:1:1
@@ -931,9 +931,9 @@ Cannot cast `Promise.resolve()` to `Promise<number>` because in type argument `R
         ^^^^^^^^^^^^^^^^^ [2]
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    resolve_void.js:1:30
      1| Promise.resolve() as Promise<number>; // error
                                      ^^^^^^ [3]
@@ -941,7 +941,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- resolve_void.js:3:17
 
-Cannot cast `Promise.resolve(...)` to `Promise<number>` because in type argument `R` [1]: `void` [2] is incompatible
+Cannot cast `Promise.resolve(...)` to `Promise<number>` because in type argument `T` [1]: `void` [2] is incompatible
 with `number` [3]. [incompatible-type]
 
    resolve_void.js:3:17
@@ -949,9 +949,9 @@ with `number` [3]. [incompatible-type]
                         ^^^^^^^^^ [2]
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    resolve_void.js:3:39
      3| Promise.resolve(undefined) as Promise<number>; // error
                                               ^^^^^^ [3]
@@ -960,7 +960,7 @@ References:
 Error ------------------------------------------------------------------------------------- typescript_allSettled.js:4:1
 
 Cannot cast `tupleResult` to `Promise<[PromiseSettledResult<string>, PromiseSettledResult<number>]>` because in index
-`0` of type argument `R` [1]: [incompatible-type]
+`0` of type argument `T` [1]: [incompatible-type]
  - Either in type argument `T` [2]: `number` [3] is incompatible with `string` [4].
  - Or property `reason` is missing in
    `PromiseFulfilledResult<$AllSettledAwaited<Readonly<[Promise<number>, string]>[0]>>` [5] but exists in
@@ -974,9 +974,9 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
         ^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    <BUILTINS>/lib.es2020.promise.js:20:34
     20| interface PromiseFulfilledResult<T> {
                                          ^ [2]
@@ -997,7 +997,7 @@ References:
 Error ------------------------------------------------------------------------------------- typescript_allSettled.js:4:1
 
 Cannot cast `tupleResult` to `Promise<[PromiseSettledResult<string>, PromiseSettledResult<number>]>` because in index
-`0` of type argument `R` [1]: [incompatible-type]
+`0` of type argument `T` [1]: [incompatible-type]
  - Either in type argument `T` [2]: `string` [3] is incompatible with `number` [4].
  - Or property `reason` is missing in `PromiseFulfilledResult<string>` [5] but exists in `PromiseRejectedResult` [6].
 
@@ -1009,9 +1009,9 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
         ^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    <BUILTINS>/lib.es2020.promise.js:20:34
     20| interface PromiseFulfilledResult<T> {
                                          ^ [2]
@@ -1032,7 +1032,7 @@ References:
 Error ------------------------------------------------------------------------------------- typescript_allSettled.js:4:1
 
 Cannot cast `tupleResult` to `Promise<[PromiseSettledResult<string>, PromiseSettledResult<number>]>` because in index
-`1` of type argument `R` [1]: [incompatible-type]
+`1` of type argument `T` [1]: [incompatible-type]
  - Either in type argument `T` [2]: `string` [3] is incompatible with `number` [4].
  - Or property `reason` is missing in
    `PromiseFulfilledResult<$AllSettledAwaited<Readonly<[Promise<number>, string]>[1]>>` [5] but exists in
@@ -1046,9 +1046,9 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
         ^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    <BUILTINS>/lib.es2020.promise.js:20:34
     20| interface PromiseFulfilledResult<T> {
                                          ^ [2]
@@ -1069,7 +1069,7 @@ References:
 Error ------------------------------------------------------------------------------------- typescript_allSettled.js:4:1
 
 Cannot cast `tupleResult` to `Promise<[PromiseSettledResult<string>, PromiseSettledResult<number>]>` because in index
-`1` of type argument `R` [1]: [incompatible-type]
+`1` of type argument `T` [1]: [incompatible-type]
  - Either in type argument `T` [2]: `number` [3] is incompatible with `string` [4].
  - Or property `reason` is missing in `PromiseFulfilledResult<number>` [5] but exists in `PromiseRejectedResult` [6].
 
@@ -1081,9 +1081,9 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
         ^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    <BUILTINS>/lib.es2020.promise.js:20:34
     20| interface PromiseFulfilledResult<T> {
                                          ^ [2]
@@ -1103,7 +1103,7 @@ References:
 
 Error ------------------------------------------------------------------------------------- typescript_allSettled.js:9:1
 
-Cannot cast `arrayResult` to `Promise<Array<PromiseSettledResult<string>>>` because in type argument `R` [1] > array
+Cannot cast `arrayResult` to `Promise<Array<PromiseSettledResult<string>>>` because in type argument `T` [1] > array
 element: `PromiseSettledResult<$AllSettledAwaited<ReadonlyArray<number | PromiseLike<number>>[number]>>` [2] is not
 exactly the same as `PromiseSettledResult<string>` [3]. [incompatible-type]
 
@@ -1118,9 +1118,9 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
         ^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    <BUILTINS>/lib.es2020.promise.js:43:99
     43|     allSettled<T extends readonly unknown[] | []>(values: T): Promise<{ -readonly [P in keyof T]: PromiseSettledResult<$AllSettledAwaited<T[P]>>; }>;
                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
@@ -1137,7 +1137,7 @@ References:
 
 Error ------------------------------------------------------------------------------------ typescript_allSettled.js:13:1
 
-Cannot cast `iterableResult` to `Promise<Array<PromiseSettledResult<string>>>` because in type argument `R` [1] > array
+Cannot cast `iterableResult` to `Promise<Array<PromiseSettledResult<string>>>` because in type argument `T` [1] > array
 element: `PromiseSettledResult<$AllSettledAwaited<Promise<number>>>` [2] is not exactly the same as
 `PromiseSettledResult<string>` [3]. [incompatible-type]
 
@@ -1152,9 +1152,9 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
         ^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    <BUILTINS>/lib.es2020.promise.js:51:66
     51|     allSettled<T>(values: Iterable<T | PromiseLike<T>>): Promise<PromiseSettledResult<$AllSettledAwaited<T>>[]>;
                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
@@ -1284,7 +1284,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- withResolvers.js:8:1
 
-Cannot cast `promise` to `Promise<string>` because in type argument `R` [1]: `number` [2] is incompatible with
+Cannot cast `promise` to `Promise<string>` because in type argument `T` [1]: `number` [2] is incompatible with
 `string` [3]. [incompatible-type]
 
    withResolvers.js:8:1
@@ -1292,9 +1292,9 @@ Cannot cast `promise` to `Promise<string>` because in type argument `R` [1]: `nu
         ^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    withResolvers.js:1:58
      1| const {promise, resolve, reject} = Promise.withResolvers<number>();
                                                                  ^^^^^^ [2]

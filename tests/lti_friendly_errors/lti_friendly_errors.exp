@@ -1,6 +1,6 @@
 Error ---------------------------------------------------------------------------------- reason_of_inferred_targs.js:2:1
 
-Cannot cast `p` to `Promise<string>` because in type argument `R` [1]: `unknown` [2] is incompatible with `string` [3].
+Cannot cast `p` to `Promise<string>` because in type argument `T` [1]: `unknown` [2] is incompatible with `string` [3].
 [incompatible-type]
 
    reason_of_inferred_targs.js:2:1
@@ -8,9 +8,9 @@ Cannot cast `p` to `Promise<string>` because in type argument `R` [1]: `unknown`
         ^
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    <BUILTINS>/lib.es2015.promise.js:32:14
     32|     new <T = unknown>(executor: (resolve: (value: Promise<T> | T) => void, reject: (reason: any) => void) => unknown): Promise<T>;
                      ^^^^^^^ [2]

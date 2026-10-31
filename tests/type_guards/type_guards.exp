@@ -1799,7 +1799,7 @@ Cannot return `(typeof x) == "number"` because `Promise<boolean>` [1] is incompa
 
 References:
    <BUILTINS>/misc.js:216:11
-   216| interface Promise<R> {
+   216| interface Promise<out T = unknown> {
                   ^^^^^^^ [1]
    invalid.js:28:35
     28| async function async(x: unknown): x is number { // error

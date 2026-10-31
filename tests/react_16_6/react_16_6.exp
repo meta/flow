@@ -160,7 +160,7 @@ Error --------------------------------------------------------------------------
 Cannot call `React.lazy` with function bound to `component` because: [incompatible-type]
  - `Promise<(x: Props) => React.Node>` [1] is incompatible with
    `Promise<Readonly<{default: component(...any) renders any, ...}>>` [2]
-    - in the return value > type argument `R` [3]: `(x: Props) => React.Node` [4] is incompatible with
+    - in the return value > type argument `T` [3]: `(x: Props) => React.Node` [4] is incompatible with
       `{readonly default: component(...any) renders any, ...}` [5]
 
 Functions without statics are not compatible with objects.
@@ -182,9 +182,9 @@ References:
    1189|         }>,
    1190|       >,
                ^ [2]
-   <BUILTINS>/misc.js:216:19
-    216| interface Promise<R> {
-                           ^ [3]
+   <BUILTINS>/misc.js:216:23
+    216| interface Promise<out T = unknown> {
+                               ^ [3]
    lazy.js:6:1
       6| function FunctionComponent(x: Props): React.Node { return null }
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
@@ -202,7 +202,7 @@ Error --------------------------------------------------------------------------
 Cannot call `React.lazy` with function bound to `component` because: [incompatible-type]
  - `Promise<typeof ClassComponent>` [1] is incompatible with
    `Promise<Readonly<{default: component(...any) renders any, ...}>>` [2]
-    - in the return value > type argument `R` [3]: property `default` is missing in `{name: string, ...}` [4] but exists
+    - in the return value > type argument `T` [3]: property `default` is missing in `{name: string, ...}` [4] but exists
       in `{readonly default: component(...any) renders any, ...}` [5]
 
    lazy.js:12:34
@@ -222,9 +222,9 @@ References:
    1189|         }>,
    1190|       >,
                ^ [2]
-   <BUILTINS>/misc.js:216:19
-    216| interface Promise<R> {
-                           ^ [3]
+   <BUILTINS>/misc.js:216:23
+    216| interface Promise<out T = unknown> {
+                               ^ [3]
    lazy.js:7:7
       7| class ClassComponent extends React.Component<Props> {}
                ^^^^^^^^^^^^^^ [4]

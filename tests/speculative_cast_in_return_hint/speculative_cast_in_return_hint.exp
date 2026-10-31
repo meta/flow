@@ -1,6 +1,6 @@
 Error ---------------------------------------------------------------------------------------------------- test.js:20:11
 
-Cannot cast `fetchLike()` to `Promise<ExpectedResponse>` because in type argument `R` [1]: `Response` [2] is
+Cannot cast `fetchLike()` to `Promise<ExpectedResponse>` because in type argument `T` [1]: `Response` [2] is
 incompatible with `ExpectedResponse` [3]. For example, property `constructor` is missing in `Headers` [4] but exists in
 `RequiredHeaders` [5]. [incompatible-type]
 
@@ -9,9 +9,9 @@ incompatible with `ExpectedResponse` [3]. For example, property `constructor` is
                   ^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    lib.d.ts:20:39
     20| declare function fetchLike(): Promise<Response>;
                                               ^^^^^^^^ [2]

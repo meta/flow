@@ -312,7 +312,7 @@ Cannot cast `f15()` to `empty` because `Promise<void>` [1] is incompatible with 
 
 References:
    <BUILTINS>/misc.js:216:11
-   216| interface Promise<R> {
+   216| interface Promise<out T = unknown> {
                   ^^^^^^^ [1]
    main.js:60:10
     60| f15() as empty;

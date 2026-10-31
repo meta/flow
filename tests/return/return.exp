@@ -32,7 +32,7 @@ Cannot expect `number` as the return type of async function because `number` [1]
 
 Error ------------------------------------------------------------------------------------------------- implicit.js:7:22
 
-Cannot expect `Promise<number>` as the return type of async function because in type argument `R` [1]: `number` [2] is
+Cannot expect `Promise<number>` as the return type of async function because in type argument `T` [1]: `number` [2] is
 incompatible with `void` [3]. [incompatible-type]
 
    implicit.js:7:22
@@ -40,9 +40,9 @@ incompatible with `void` [3]. [incompatible-type]
                              ^^^^^^^^^^^^^^^ [3]
 
 References:
-   <BUILTINS>/misc.js:216:19
-   216| interface Promise<R> {
-                          ^ [1]
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
    implicit.js:7:30
      7| async function g2(): Promise<number> {}
                                      ^^^^^^ [2]

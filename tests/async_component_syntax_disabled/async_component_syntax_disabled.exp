@@ -32,7 +32,7 @@ Cannot return `result` because `Promise<string>` [1] is incompatible with `strin
 
 References:
    <BUILTINS>/misc.js:216:11
-   216| interface Promise<R> {
+   216| interface Promise<out T = unknown> {
                   ^^^^^^^ [1]
    test.js:8:28
      8| async hook useAsyncHook(): string { // ERROR: async hook syntax not enabled
