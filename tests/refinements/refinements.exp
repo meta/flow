@@ -14127,8 +14127,8 @@ References:
    tagged_union.js:120:24
    120|     if (z.toString === 0) {} // Error
                                ^ [2]
-   <BUILTINS>/lib.es5.js:300:5
-   300|     toString(radix?: number): string;
+   <BUILTINS>/lib.es5.js:316:5
+   316|     toString(radix?: number): string;
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
@@ -14210,8 +14210,8 @@ References:
    tagged_union.js:125:23
    125|     if (q.valueOf === 0) {} // Error
                               ^ [2]
-   <BUILTINS>/lib.es5.js:291:5
-   291|     valueOf(): boolean;
+   <BUILTINS>/lib.es5.js:307:5
+   307|     valueOf(): boolean;
             ^^^^^^^^^^^^^^^^^^ [3]
 
 
@@ -17347,8 +17347,8 @@ Cannot get `x[0]` because property `0` is missing in `Boolean` [1]. [prop-missin
               ^
 
 References:
-   <BUILTINS>/lib.es5.js:287:15
-   287| declare class Boolean {
+   <BUILTINS>/lib.es5.js:303:15
+   303| declare class Boolean {
                       ^^^^^^^ [1]
 
 

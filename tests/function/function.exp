@@ -489,22 +489,22 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    apply.js:34:11
-     34| test.bind.apply(test, [0, 123]) as (b: number) => number;
-                   ^^^^^
+    34| test.bind.apply(test, [0, 123]) as (b: number) => number;
+                  ^^^^^
 
 References:
    apply.js:34:36
-     34| test.bind.apply(test, [0, 123]) as (b: number) => number;
-                                            ^^^^^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:4317:82
-   4317| type OmitThisParameter<T> = unknown extends ThisParameterType<T> ? T : T extends (this: infer This, ...args: infer A) => infer R ? (...args: A) => R : T;
-                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+    34| test.bind.apply(test, [0, 123]) as (b: number) => number;
+                                           ^^^^^^^^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:295:82
+   295| type OmitThisParameter<T> = unknown extends ThisParameterType<T> ? T : T extends (this: infer This, ...args: infer A) => infer R ? (...args: A) => R : T;
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    apply.js:1:41
-      1| function test(this: number | string, a: string, b: number): number {
-                                                 ^^^^^^ [3]
+     1| function test(this: number | string, a: string, b: number): number {
+                                                ^^^^^^ [3]
    apply.js:34:27
-     34| test.bind.apply(test, [0, 123]) as (b: number) => number;
-                                   ^^^ [4]
+    34| test.bind.apply(test, [0, 123]) as (b: number) => number;
+                                  ^^^ [4]
 
 
 Error ---------------------------------------------------------------------------------------------------- apply.js:44:5

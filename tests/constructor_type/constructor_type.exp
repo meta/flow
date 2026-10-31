@@ -331,8 +331,8 @@ it into an object and attempt to use it as a subtype of an interface. [incompati
                                            ^^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:4292:38
-   4292| type ConstructorParameters<T extends new (...args: ReadonlyArray<empty>) => unknown> =
+   <BUILTINS>/lib.es5.js:4308:38
+   4308| type ConstructorParameters<T extends new (...args: ReadonlyArray<empty>) => unknown> =
                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
@@ -347,8 +347,8 @@ return type is missing in `{...}` [1] but exists in `interface {new(...args: Rea
                                   ^^^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:4296:29
-   4296| type InstanceType<T extends new (...args: ReadonlyArray<empty>) => unknown> =
+   <BUILTINS>/lib.es5.js:4312:29
+   4312| type InstanceType<T extends new (...args: ReadonlyArray<empty>) => unknown> =
                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
