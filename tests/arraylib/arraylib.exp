@@ -167,8 +167,8 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
                 ^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:740:25
-   740| interface ArrayLike<out T> {
+   <BUILTINS>/misc.js:396:25
+   396| interface ArrayLike<out T> {}
                                 ^ [1]
    array_lib.js:75:30
     75|   const arrayLike: ArrayLike<string> = {0: 'hello', length: 1};
