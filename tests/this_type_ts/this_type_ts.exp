@@ -1,6 +1,6 @@
 Error ------------------------------------------------------------------------------------------ import_type_ts.ts:10:12
 
-Cannot implement exports [1] with `BadCMT` because in property `clone` > the return value: `I` [2] is incompatible with
+Cannot implement `I` [1] with `BadCMT` because in property `clone` > the return value: `I` [2] is incompatible with
 `empty` [3]. [incompatible-type]
 
    import_type_ts.ts:10:12
@@ -18,7 +18,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------- import_value_ts.ts:14:12
 
-Cannot implement exports [1] with `BadCM` because in property `clone` > the return value: `I` [2] is incompatible with
+Cannot implement `I` [1] with `BadCM` because in property `clone` > the return value: `I` [2] is incompatible with
 `empty` [3]. [incompatible-type]
 
    import_value_ts.ts:14:12
@@ -36,7 +36,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------- import_value_ts.ts:24:12
 
-Cannot implement exports [1] with `BadGen` because in property `clone` > the return value: `IBox<number>` [2] is
+Cannot implement `IBox<number>` [1] with `BadGen` because in property `clone` > the return value: `IBox<number>` [2] is
 incompatible with `empty` [3]. [incompatible-type]
 
    import_value_ts.ts:24:12

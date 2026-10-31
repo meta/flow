@@ -656,8 +656,8 @@ Cannot resolve name `non_ns_type`. [cannot-resolve-name]
 
 Error -------------------------------------------------------------------------------- polymorphic_this_extends.js:28:12
 
-Cannot implement `NS.NSCloneable` [1] with `NSBadImpl` because in property `clone` > the return value: `NSCloneable` [2]
-is incompatible with `empty` [3]. [incompatible-type]
+Cannot implement `NSCloneable` [1] with `NSBadImpl` because in property `clone` > the return value: `NSCloneable` [2] is
+incompatible with `empty` [3]. [incompatible-type]
 
    polymorphic_this_extends.js:28:12
    28|   clone(): NS.NSCloneable { return this; }  // ERROR — must return `this`

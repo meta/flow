@@ -811,7 +811,8 @@ pub enum StringMappingKind {
 pub struct ClassImplementsCheckData<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     pub def: VirtualReason<L>,
     pub name: VirtualReason<L>,
-    pub implements: VirtualReason<L>,
+    pub implements_loc: L,
+    pub implements: type_or_type_desc::TypeOrTypeDescT<L>,
 }
 
 /// Compared without `def_t`: the type is what the error prints, and must not tell apart errors or

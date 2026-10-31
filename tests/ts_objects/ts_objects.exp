@@ -1,6 +1,6 @@
 Error ---------------------------------------------------------------------------------- class_implements_object.ts:43:7
 
-Cannot implement `Omit` [1] with `Bad` because property `age` is missing in `Bad` [2] but exists in
+Cannot implement `Omit<Animal, "sound">` [1] with `Bad` because property `age` is missing in `Bad` [2] but exists in
 `{age: number, name: string}` [1]. [incompatible-type]
 
    class_implements_object.ts:43:7
@@ -15,8 +15,8 @@ References:
 
 Error --------------------------------------------------------------------------------- class_implements_object.ts:50:10
 
-Cannot implement `Box` [1] with `WrongType` because in property `value`: `number` [2] is incompatible with `string` [3].
-[incompatible-type]
+Cannot implement `Box<string>` [1] with `WrongType` because in property `value`: `number` [2] is incompatible with
+`string` [3]. [incompatible-type]
 
    class_implements_object.ts:50:10
    50|   value: number = 1; // ERROR: number incompatible with string

@@ -515,7 +515,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- import.js:57:12
 
-Cannot implement exports [1] with `BadCloneCM` because in property `clone` > the return value: `ICloneable` [2] is
+Cannot implement `ICloneable` [1] with `BadCloneCM` because in property `clone` > the return value: `ICloneable` [2] is
 incompatible with `empty` [3]. [incompatible-type]
 
    import.js:57:12

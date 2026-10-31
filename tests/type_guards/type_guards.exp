@@ -264,8 +264,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- classes.js:81:25
 
-Cannot implement `IP` [1] with `E2` because in property `n` > the type predicate: `string` [2] is incompatible with
-`number` [3]. [incompatible-type]
+Cannot implement `IP<number>` [1] with `E2` because in property `n` > the type predicate: `string` [2] is incompatible
+with `number` [3]. [incompatible-type]
 
    classes.js:81:25
    81|     n(x: unknown): x is string { // error number ~> string

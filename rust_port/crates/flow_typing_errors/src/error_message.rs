@@ -51,6 +51,7 @@ use flow_typing_type::type_::AssignVarDefaultData;
 use flow_typing_type::type_::AssignVarInit;
 use flow_typing_type::type_::AssignVarTarget;
 use flow_typing_type::type_::ClassExtendsCheckData;
+use flow_typing_type::type_::ClassImplementsCheckData;
 use flow_typing_type::type_::ComponentRestParamCompatibilityData;
 use flow_typing_type::type_::DroType;
 use flow_typing_type::type_::EvalMappedTypeData;
@@ -7025,6 +7026,19 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                             def: f(def.clone()),
                             extends_loc: extends_loc.dupe(),
                             extends: f(extends.clone()),
+                        }),
+                    ))),
+                    VirtualRootUseOp::ClassImplementsCheck(box ClassImplementsCheckData {
+                        def,
+                        name,
+                        implements_loc,
+                        implements,
+                    }) => VirtualUseOp::Op(Arc::new(VirtualRootUseOp::ClassImplementsCheck(
+                        Box::new(ClassImplementsCheckData {
+                            def: def.dupe(),
+                            name: name.dupe(),
+                            implements_loc: implements_loc.dupe(),
+                            implements: f(implements.clone()),
                         }),
                     ))),
                     VirtualRootUseOp::EvalMappedType(box EvalMappedTypeData {

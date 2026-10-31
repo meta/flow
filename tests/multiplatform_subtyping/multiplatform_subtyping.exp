@@ -340,7 +340,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- classes.ios.js:56:22
 
-Cannot implement `GenericVsNonGeneric` [1] with `GenericVsNonGeneric` because in property `foo`: `unknown` [2] is
+Cannot implement `GenericVsNonGeneric<T1>` [1] with `GenericVsNonGeneric` because in property `foo`: `unknown` [2] is
 incompatible with `number` [3]. [incompatible-type]
 
    classes.ios.js:56:22
@@ -361,7 +361,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- classes.ios.js:56:22
 
-Cannot implement `GenericVsNonGeneric` [1] with `GenericVsNonGeneric` because in property `foo`: `number` [2] is
+Cannot implement `GenericVsNonGeneric<T1>` [1] with `GenericVsNonGeneric` because in property `foo`: `number` [2] is
 incompatible with `empty` [3]. [incompatible-type]
 
 This property is invariantly typed. See
@@ -385,8 +385,8 @@ References:
 
 Error --------------------------------------------------------------------------------------------- classes.ios.js:60:22
 
-Cannot implement `GenericSwitchedTparams` [1] with `GenericSwitchedTparams` because in property `bar`: `unknown` [2] is
-incompatible with `empty` [3]. [incompatible-type]
+Cannot implement `GenericSwitchedTparams<T1, T2>` [1] with `GenericSwitchedTparams` because in property `bar`:
+`unknown` [2] is incompatible with `empty` [3]. [incompatible-type]
 
    classes.ios.js:60:22
    60| declare export class GenericSwitchedTparams<T1, T2> { // error
@@ -406,8 +406,8 @@ References:
 
 Error --------------------------------------------------------------------------------------------- classes.ios.js:60:22
 
-Cannot implement `GenericSwitchedTparams` [1] with `GenericSwitchedTparams` because in property `bar`: `unknown` [2] is
-incompatible with `empty` [3]. [incompatible-type]
+Cannot implement `GenericSwitchedTparams<T1, T2>` [1] with `GenericSwitchedTparams` because in property `bar`:
+`unknown` [2] is incompatible with `empty` [3]. [incompatible-type]
 
 This property is invariantly typed. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
@@ -430,8 +430,8 @@ References:
 
 Error --------------------------------------------------------------------------------------------- classes.ios.js:60:22
 
-Cannot implement `GenericSwitchedTparams` [1] with `GenericSwitchedTparams` because in property `foo`: `unknown` [2] is
-incompatible with `empty` [3]. [incompatible-type]
+Cannot implement `GenericSwitchedTparams<T1, T2>` [1] with `GenericSwitchedTparams` because in property `foo`:
+`unknown` [2] is incompatible with `empty` [3]. [incompatible-type]
 
    classes.ios.js:60:22
    60| declare export class GenericSwitchedTparams<T1, T2> { // error
@@ -451,8 +451,8 @@ References:
 
 Error --------------------------------------------------------------------------------------------- classes.ios.js:60:22
 
-Cannot implement `GenericSwitchedTparams` [1] with `GenericSwitchedTparams` because in property `foo`: `unknown` [2] is
-incompatible with `empty` [3]. [incompatible-type]
+Cannot implement `GenericSwitchedTparams<T1, T2>` [1] with `GenericSwitchedTparams` because in property `foo`:
+`unknown` [2] is incompatible with `empty` [3]. [incompatible-type]
 
 This property is invariantly typed. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
@@ -475,8 +475,8 @@ References:
 
 Error --------------------------------------------------------------------------------------------- classes.ios.js:73:40
 
-Cannot implement `Generic` [1] with `Generic` because in property `foo`: `string` [2] is incompatible with `number` [3].
-[incompatible-type]
+Cannot implement `Generic<number>` [1] with `Generic` because in property `foo`: `string` [2] is incompatible with
+`number` [3]. [incompatible-type]
 
    classes.ios.js:73:40
    73| declare export const generic1: Generic<string>; // error

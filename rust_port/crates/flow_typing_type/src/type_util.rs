@@ -1132,11 +1132,13 @@ where
             ClassImplementsCheck(box ClassImplementsCheckData {
                 def,
                 name,
+                implements_loc,
                 implements,
             }) => ClassImplementsCheck(Box::new(ClassImplementsCheckData {
                 def: mod_reason(def),
                 name: mod_reason(name),
-                implements: mod_reason(implements),
+                implements_loc: f(implements_loc),
+                implements: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), implements),
             })),
             ClassOwnProtoCheck(box ClassOwnProtoCheckData {
                 own_loc,

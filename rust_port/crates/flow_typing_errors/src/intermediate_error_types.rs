@@ -1369,7 +1369,7 @@ pub enum RootMessage<L: Dupe> {
     RootCannotGetProp(Option<VirtualReasonDesc<L>>),
     RootCannotGetRest(Option<VirtualReasonDesc<L>>),
     RootCannotImplementClass {
-        implements: VirtualReason<L>,
+        implements: MessageTypeReferenceData<L>,
         def: Option<VirtualReasonDesc<L>>,
     },
     RootCannotInitializeField {

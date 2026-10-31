@@ -1749,14 +1749,20 @@ where
 
                             VirtualRootUseOp::ClassImplementsCheck(
                                 box ClassImplementsCheckData {
-                                    implements, def, ..
+                                    implements_loc,
+                                    implements,
+                                    def,
+                                    ..
                                 },
                             ) => root(
                                 loc,
                                 frames,
                                 def,
                                 RootMessage::RootCannotImplementClass {
-                                    implements: implements.dupe(),
+                                    implements: MessageTypeReferenceData {
+                                        loc: implements_loc.dupe(),
+                                        desc: printed_type_desc(implements),
+                                    },
                                     def: def.desc.clone(),
                                 },
                                 custom_error_message,
@@ -5607,7 +5613,7 @@ where
                     RootKind::OperationRoot,
                     friendly::Message(vec![
                         text("Cannot implement "),
-                        ref_(implements),
+                        ref_of_type_desc(&implements.loc, &implements.desc),
                         text(" with "),
                         friendly::desc_of_reason_desc(def.as_ref()),
                     ]),

@@ -3517,28 +3517,28 @@ fn __flow_impl<'cx>(
         // structural subtype multiple inheritance
         (IntersectionT(_, rep), ImplementsT(use_op, this)) => {
             for t in rep.members_iter() {
-                let u_inner = match use_op {
-                    VirtualUseOp::Op(
-                        deref!(
-                            VirtualRootUseOp::ClassImplementsCheck(box ClassImplementsCheckData {
-                                def,
-                                name,
-                                implements: _,
-                            })
-                        ),
-                    ) => {
-                        let new_use_op =
-                            VirtualUseOp::Op(Arc::new(VirtualRootUseOp::ClassImplementsCheck(
-                                Box::new(ClassImplementsCheckData {
-                                    def: def.dupe(),
-                                    name: name.dupe(),
-                                    implements: reason_of_t(t).dupe(),
-                                }),
-                            )));
-                        UseT::new(ImplementsT(new_use_op, this.dupe()))
-                    }
-                    _ => u.dupe(),
-                };
+                let u_inner =
+                    match use_op {
+                        VirtualUseOp::Op(
+                            deref!(
+                                VirtualRootUseOp::ClassImplementsCheck(
+                                    box ClassImplementsCheckData { def, name, .. },
+                                )
+                            ),
+                        ) => {
+                            let new_use_op =
+                                VirtualUseOp::Op(Arc::new(VirtualRootUseOp::ClassImplementsCheck(
+                                    Box::new(ClassImplementsCheckData {
+                                        def: def.dupe(),
+                                        name: name.dupe(),
+                                        implements_loc: type_util::ref_loc_of_t(t).dupe(),
+                                        implements: TypeOrTypeDescT::Type(t.dupe()),
+                                    }),
+                                )));
+                            UseT::new(ImplementsT(new_use_op, this.dupe()))
+                        }
+                        _ => u.dupe(),
+                    };
                 rec_flow(cx, env, trace, (t, &u_inner))?;
             }
         }
@@ -5618,7 +5618,8 @@ fn __flow_impl<'cx>(
                             Box::new(ClassImplementsCheckData {
                                 def: reason.dupe(),
                                 name: reason.dupe(),
-                                implements: reason_u.dupe(),
+                                implements_loc: type_util::ref_loc_of_t(ext_u).dupe(),
+                                implements: TypeOrTypeDescT::Type(ext_u.dupe()),
                             }),
                         )));
                     // We need to ensure that the shape of the class instances match.

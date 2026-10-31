@@ -61,6 +61,7 @@ use flow_typing_flow_js_env::FlowJsEnv;
 use flow_typing_type::type_::AnySource;
 use flow_typing_type::type_::CallElemTData;
 use flow_typing_type::type_::ClassExtendsCheckData;
+use flow_typing_type::type_::ClassImplementsCheckData;
 use flow_typing_type::type_::ComponentRestParamCompatibilityData;
 use flow_typing_type::type_::DefTInner;
 use flow_typing_type::type_::DepthTrace;
@@ -1732,13 +1733,15 @@ pub fn primary_reason_of_use_op(use_op: &UseOp) -> Option<&Reason> {
             ..
         })
         | RootUseOp::ClassExtendsCheck(box ClassExtendsCheckData { extends: upper, .. })
+        | RootUseOp::ClassImplementsCheck(box ClassImplementsCheckData {
+            implements: upper, ..
+        })
         | RootUseOp::EvalMappedType(box EvalMappedTypeData {
             mapped_type: upper, ..
         }) => match upper {
             TypeOrTypeDescT::Type(t) => Some(reason_of_t(t)),
             TypeOrTypeDescT::TypeDesc(_) => None,
         },
-        RootUseOp::ClassImplementsCheck(data) => Some(&data.implements),
         RootUseOp::ClassOwnProtoCheck(_) => None,
         RootUseOp::MakeReadOnly { .. } => None,
         RootUseOp::ClassMethodDefinition(data) => Some(&data.name),

@@ -1639,7 +1639,8 @@ fn check_implements<'a, C: crate::func_params_intf::Config>(
                     ClassImplementsCheckData {
                         def: def_reason.dupe(),
                         name: reason.dupe(),
-                        implements: type_util::reason_of_t(&i).dupe(),
+                        implements_loc: type_util::ref_loc_of_t(&i).dupe(),
+                        implements: TypeOrTypeDescT::Type(i.dupe()),
                     },
                 ))));
                 cx.add_post_inference_validation_flow(

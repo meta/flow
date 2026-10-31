@@ -66,7 +66,7 @@ References:
 
 Error ----------------------------------------------------------------------------- class-extends-and-implements.js:35:6
 
-Cannot implement `F` [1] with `H` because in property `p`: `string` [2] is incompatible with `number` [3].
+Cannot implement `F<empty>` [1] with `H` because in property `p`: `string` [2] is incompatible with `number` [3].
 [incompatible-type]
 
    class-extends-and-implements.js:35:6
@@ -268,7 +268,7 @@ References:
 
 Error ---------------------------------------------------------------------------- class-extends-and-implements.js:102:7
 
-Cannot implement `R1` [1] with `T` because in property `p1`: `number` [2] is incompatible with `string` [3].
+Cannot implement `R1<empty>` [1] with `T` because in property `p1`: `number` [2] is incompatible with `string` [3].
 [incompatible-type]
 
    class-extends-and-implements.js:102:7
@@ -286,7 +286,7 @@ References:
 
 Error ---------------------------------------------------------------------------- class-extends-and-implements.js:103:7
 
-Cannot implement `R2` [1] with `T` because in property `p2`: `number` [2] is incompatible with `string` [3].
+Cannot implement `R2<empty>` [1] with `T` because in property `p2`: `number` [2] is incompatible with `string` [3].
 [incompatible-type]
 
    class-extends-and-implements.js:103:7
