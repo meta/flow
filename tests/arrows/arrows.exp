@@ -42,8 +42,8 @@ with `number` [2]. [incompatible-type]
                                             ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:1332:38
-   1332|     sort(compareFn?: (a: T, b: T) => number): this;
+   <BUILTINS>/lib.es5.js:1335:38
+   1335|     sort(compareFn?: (a: T, b: T) => number): this;
                                               ^^^^^^ [2]
 
 

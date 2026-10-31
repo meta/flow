@@ -7,8 +7,8 @@ Cannot cast `arr['length']` to `string` because `number` [1] is incompatible wit
          ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1345:13
-   1345|     length: number;
+   <BUILTINS>/lib.es5.js:1348:13
+   1348|     length: number;
                      ^^^^^^ [1]
    test.js:17:18
      17| arr['length'] as string; // ERROR: number is not string
@@ -38,8 +38,8 @@ Cannot assign `'x'` to `arr['length']` because `"x"` [1] is incompatible with `n
                          ^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:1345:13
-   1345|     length: number;
+   <BUILTINS>/lib.es5.js:1348:13
+   1348|     length: number;
                      ^^^^^^ [2]
 
 
