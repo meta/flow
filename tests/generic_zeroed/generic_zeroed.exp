@@ -85,7 +85,7 @@ References:
    <BUILTINS>/lib.es5.js:1382:5
              v------
    1382|     reduce(
-   1383|       callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: Array<T>) => T,
+   1383|       callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T,
    1384|     ): T;
              ---^ [3]
 

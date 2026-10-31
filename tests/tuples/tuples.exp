@@ -1567,8 +1567,8 @@ Cannot call `readOnlyRef.push` because property `push` is missing in `ReadonlyAr
 
 References:
    <BUILTINS>/lib.es5.js:1210:77
-   1210|     forEach<This>(callbackfn: (this : This, value: T, index: number, array: ReadonlyArray<T>) => unknown, thisArg: This): void;
-                                                                                     ^^^^^^^^^^^^^^^^ [1]
+   1210|     forEach<This>(callbackfn: (this : This, value: T, index: number, array: readonly T[]) => unknown, thisArg: This): void;
+                                                                                     ^^^^^^^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------- readonly-array.js:27:5

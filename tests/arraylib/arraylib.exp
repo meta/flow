@@ -54,8 +54,8 @@ References:
      13| var e: Array<string> = a.reverse();
                       ^^^^^^ [2]
    <BUILTINS>/lib.es5.js:1308:16
-   1308|     reverse(): Array<T>;
-                        ^^^^^^^^ [3]
+   1308|     reverse(): T[];
+                        ^^^ [3]
    array_lib.js:13:8
      13| var e: Array<string> = a.reverse();
                 ^^^^^^^^^^^^^ [4]
@@ -409,9 +409,9 @@ References:
    <BUILTINS>/lib.es5.js:470:22
     470|     readonly length: number;
                               ^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:1371:108
-   1371|     filter<This, S extends T>(predicate: (this: This, value: T, index: number, array: ReadonlyArray<T>) => implies value is S, thisArg: This): Array<S>;
-                                                                                                                    ^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:1371:104
+   1371|     filter<This, S extends T>(predicate: (this: This, value: T, index: number, array: readonly T[]) => implies value is S, thisArg: This): S[];
+                                                                                                                ^^^^^^^^^^^^^^^^^^ [2]
    filter_error_msg_quality_test.js:2:30
       2| declare const str_arr: Array<string>;
                                       ^^^^^^ [3]
@@ -444,7 +444,7 @@ References:
       7| nullable_str_arr.filter(s => !!s) as Array<string>;
                                  ^^^^^^^^ [3]
    <BUILTINS>/lib.es5.js:1365:23
-   1365|     filter(predicate: typeof Boolean): Array<NonNullable<T>>;
+   1365|     filter(predicate: typeof Boolean): NonNullable<T>[];
                                ^^^^^^^^^^^^^^ [4]
 
 

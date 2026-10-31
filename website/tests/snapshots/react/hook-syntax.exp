@@ -101,8 +101,8 @@ References:
       4| hook useMultiplier(x: number): number {
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    <BUILTINS>/lib.es5.js:1216:30
-   1216|     map<U, This>(callbackfn: (this : This, value: T, index: number, array: ReadonlyArray<T>) => U, thisArg: This): Array<U>;
-                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   1216|     map<U, This>(callbackfn: (this : This, value: T, index: number, array: readonly T[]) => U, thisArg: This): U[];
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    -:10:18
      10| component Mapper(args: Array<number>) {
                           ^^^^^^^^^^^^^^^^^^^ [3]
