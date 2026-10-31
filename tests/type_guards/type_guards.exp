@@ -1114,8 +1114,8 @@ Cannot cast `x.length` to `empty` because `number` [1] is incompatible with `emp
             ^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:391:22
-   391|     readonly length: number;
+   <BUILTINS>/lib.es5.js:410:22
+   410|     readonly length: number;
                              ^^^^^^ [1]
    generic_unions.js:30:17
     30|     x.length as empty; // error number ~> empty
@@ -1131,8 +1131,8 @@ Cannot cast `x.length` to `empty` because `number` [1] is incompatible with `emp
             ^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:391:22
-   391|     readonly length: number;
+   <BUILTINS>/lib.es5.js:410:22
+   410|     readonly length: number;
                              ^^^^^^ [1]
    generic_unions.js:36:17
     36|     x.length as empty; // error number ~> empty

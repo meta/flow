@@ -38,11 +38,11 @@ References:
    overload.js:7:27
      7| var x1: number = "".match(0)[0];
                                   ^ [1]
-   <BUILTINS>/lib.es5.js:342:19
-   342|     match(regexp: string | RegExp): RegExpMatchArray | null;
+   <BUILTINS>/lib.es5.js:349:19
+   349|     match(regexp: string | RegExp): RegExpMatchArray | null;
                           ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:342:28
-   342|     match(regexp: string | RegExp): RegExpMatchArray | null;
+   <BUILTINS>/lib.es5.js:349:28
+   349|     match(regexp: string | RegExp): RegExpMatchArray | null;
                                    ^^^^^^ [3]
 
 
@@ -55,8 +55,8 @@ Cannot assign `"".match(...)[0]` to `x2` because `string` [1] is incompatible wi
                          ^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:837:8
-   837|     0: string;
+   <BUILTINS>/lib.es5.js:867:8
+   867|     0: string;
                ^^^^^^ [1]
    overload.js:8:9
      8| var x2: number = "".match(/pattern/)[0];
@@ -72,8 +72,8 @@ Cannot get `"".match(...)[0]` because `null` [1] does not have properties. [inco
                                              ^
 
 References:
-   <BUILTINS>/lib.es5.js:342:56
-   342|     match(regexp: string | RegExp): RegExpMatchArray | null;
+   <BUILTINS>/lib.es5.js:349:56
+   349|     match(regexp: string | RegExp): RegExpMatchArray | null;
                                                                ^^^^ [1]
 
 
@@ -86,8 +86,8 @@ Cannot assign `"".split(...)[0]` to `x4` because `string` [1] is incompatible wi
                          ^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:372:56
-   372|     split(separator: string | RegExp, limit?: number): string[];
+   <BUILTINS>/lib.es5.js:384:56
+   384|     split(separator: string | RegExp, limit?: number): string[];
                                                                ^^^^^^ [1]
    overload.js:10:9
     10| var x4: number = "".split(/pattern/)[0];
