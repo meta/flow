@@ -16,19 +16,19 @@ export function foo(): {
   funProtoApply: <T, R, A extends ArrayLike<unknown> = Readonly<[]>>(
     this: (this: T, ...args: A) => R,
     thisArg: T,
-    args?: A
+    argArray?: A
   ) => R,
   funProtoBind: 
     & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
     & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(
       this: (this: T, ...args: [...A, ...B]) => R,
       thisArg: T,
-      ...args: A
+      ...argArray: A
     ) => (...args: B) => R),
   funProtoCall: <T, R, A extends ArrayLike<unknown> = Readonly<[]>>(
     this: (this: T, ...args: A) => R,
     thisArg: T,
-    ...args: A
+    ...argArray: A
   ) => R,
   objProto: typeof Object.prototype,
 } {
@@ -79,19 +79,19 @@ Warnings:
 <   funProtoApply: <T, R, A extends ArrayLike<unknown> = Readonly<[]>>(
 <     this: (this: T, ...args: A) => R,
 <     thisArg: T,
-<     args?: A
+<     argArray?: A
 <   ) => R,
 <   funProtoBind: 
 <     & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
 <     & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(
 <       this: (this: T, ...args: [...A, ...B]) => R,
 <       thisArg: T,
-<       ...args: A
+<       ...argArray: A
 <     ) => (...args: B) => R),
 <   funProtoCall: <T, R, A extends ArrayLike<unknown> = Readonly<[]>>(
 <     this: (this: T, ...args: A) => R,
 <     thisArg: T,
-<     ...args: A
+<     ...argArray: A
 <   ) => R,
 <   objProto: typeof Object.prototype,
 < } {

@@ -18,7 +18,7 @@ any.js:9:5,9:7
 At any.js:13:3
 Object
 
-'Object' defined at (lib) lib.es5.js:113:14
+'Object' defined at (lib) lib.es5.js:116:14
 
 any.js:13:1,13:7
 
@@ -34,14 +34,14 @@ array.js
 At array.js:3:19
 class Array<T>
 
-'Array' defined at (lib) lib.es5.js:1223:14
+'Array' defined at (lib) lib.es5.js:1285:14
 
 array.js:3:16,3:20
 
 At array.js:5:26
 class ReadonlyArray<out T>
 
-'ReadonlyArray' defined at (lib) lib.es5.js:1075:14
+'ReadonlyArray' defined at (lib) lib.es5.js:1137:14
 
 array.js:5:24,5:36
 

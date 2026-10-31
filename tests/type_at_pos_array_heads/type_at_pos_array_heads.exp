@@ -2,7 +2,7 @@ test.js:3:16
 Flags:
 class Array<T>
 
-'Array' defined at (lib) lib.es5.js:1223:14
+'Array' defined at (lib) lib.es5.js:1285:14
 
 test.js:3:16,3:20
 
@@ -10,7 +10,7 @@ test.js:6:16
 Flags:
 class ReadonlyArray<out T>
 
-'ReadonlyArray' defined at (lib) lib.es5.js:1075:14
+'ReadonlyArray' defined at (lib) lib.es5.js:1137:14
 
 test.js:6:16,6:28
 
