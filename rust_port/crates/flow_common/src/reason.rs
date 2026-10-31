@@ -319,7 +319,6 @@ pub enum VirtualReasonDesc<L: Dupe> {
         enum_desc: Arc<VirtualReasonDesc<L>>,
         member_name: FlowSmolStr,
     },
-    REnumUnknownMembers(Arc<VirtualReasonDesc<L>>),
     RRecordType(FlowSmolStr),
     RType(FlowSmolStr),
     RTypeAlias(Box<(FlowSmolStr, Option<L>, Option<Arc<VirtualReasonDesc<L>>>)>),
@@ -454,7 +453,6 @@ impl<A: Dupe> VirtualReasonDesc<A> {
                 enum_desc: Arc::new(enum_desc.map_locs(f)),
                 member_name: member_name.dupe(),
             },
-            REnumUnknownMembers(d) => REnumUnknownMembers(Arc::new(d.map_locs(f))),
         }
     }
 }
@@ -1177,12 +1175,6 @@ pub fn string_of_desc<L: Dupe>(desc: &VirtualReasonDesc<L>) -> String {
             format!(
                 "member {} of enum {}",
                 member_name,
-                string_of_desc(enum_desc)
-            )
-        }
-        REnumUnknownMembers(enum_desc) => {
-            format!(
-                "the unknown members of enum {} (specified using `...`)",
                 string_of_desc(enum_desc)
             )
         }

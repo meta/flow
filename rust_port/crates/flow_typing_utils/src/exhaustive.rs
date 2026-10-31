@@ -1038,14 +1038,7 @@ mod value_union_builder {
                                 ));
                             }
                             if has_unknown_members {
-                                let reason =
-                                    enum_reason
-                                        .dupe()
-                                        .replace_desc(enum_reason.desc(true).cloned().map(|desc| {
-                                        flow_common::reason::VirtualReasonDesc::REnumUnknownMembers(
-                                            Arc::new(desc),
-                                        )
-                                    }));
+                                let reason = enum_reason.dupe().replace_desc(None);
                                 value_union.enum_unknown_members.push((
                                     reason,
                                     enum_info.enum_name.dupe(),
