@@ -6692,8 +6692,44 @@ b.te
                       'member',
                       {
                         ac_type: 'Acmem',
-                        completion: 'toString',
+                        completion: 'prototype',
                         index: 11,
+                        session_requests: 1,
+                        token: 'AUTO332',
+                        typed_length: 0,
+                      },
+                    ],
+                    command: 'log:org.flow:<PLACEHOLDER_PROJECT_URL>',
+                    title: '',
+                  },
+                  detail: 'any',
+                  insertTextFormat: 1,
+                  kind: 6,
+                  label: 'prototype',
+                  sortText: '00000000000000000011',
+                  textEdit: {
+                    newText: 'prototype',
+                    range: {
+                      end: {
+                        character: 3,
+                        line: 14,
+                      },
+                      start: {
+                        character: 3,
+                        line: 14,
+                      },
+                    },
+                  },
+                },
+                {
+                  command: {
+                    arguments: [
+                      'textDocument/completion',
+                      'member',
+                      {
+                        ac_type: 'Acmem',
+                        completion: 'toString',
+                        index: 12,
                         session_requests: 1,
                         token: 'AUTO332',
                         typed_length: 0,
@@ -6710,7 +6746,7 @@ b.te
                   insertTextFormat: 1,
                   kind: 3,
                   label: 'toString',
-                  sortText: '00000000000000000011',
+                  sortText: '00000000000000000012',
                   textEdit: {
                     newText: 'toString',
                     range: {
@@ -7176,8 +7212,44 @@ b.te
                       'member',
                       {
                         ac_type: 'Acmem',
-                        completion: 'toString',
+                        completion: 'prototype',
                         index: 11,
+                        session_requests: 1,
+                        token: 'AUTO332',
+                        typed_length: 0,
+                      },
+                    ],
+                    command: 'log:org.flow:<PLACEHOLDER_PROJECT_URL>',
+                    title: '',
+                  },
+                  detail: 'any',
+                  insertTextFormat: 1,
+                  kind: 6,
+                  label: 'prototype',
+                  sortText: '00000000000000000011',
+                  textEdit: {
+                    newText: 'prototype',
+                    range: {
+                      end: {
+                        character: 2,
+                        line: 15,
+                      },
+                      start: {
+                        character: 2,
+                        line: 15,
+                      },
+                    },
+                  },
+                },
+                {
+                  command: {
+                    arguments: [
+                      'textDocument/completion',
+                      'member',
+                      {
+                        ac_type: 'Acmem',
+                        completion: 'toString',
+                        index: 12,
                         session_requests: 1,
                         token: 'AUTO332',
                         typed_length: 0,
@@ -7194,7 +7266,7 @@ b.te
                   insertTextFormat: 1,
                   kind: 3,
                   label: 'toString',
-                  sortText: '00000000000000000011',
+                  sortText: '00000000000000000012',
                   textEdit: {
                     newText: 'toString',
                     range: {

@@ -496,8 +496,8 @@ References:
    apply.js:34:36
     34| test.bind.apply(test, [0, 123]) as (b: number) => number;
                                            ^^^^^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:355:82
-   355| type OmitThisParameter<T> = unknown extends ThisParameterType<T> ? T : T extends (this: infer This, ...args: infer A) => infer R ? (...args: A) => R : T;
+   <BUILTINS>/lib.es5.js:356:82
+   356| type OmitThisParameter<T> = unknown extends ThisParameterType<T> ? T : T extends (this: infer This, ...args: infer A) => infer R ? (...args: A) => R : T;
                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    apply.js:1:41
      1| function test(this: number | string, a: string, b: number): number {
@@ -1001,8 +1001,8 @@ Cannot cast `x.length` to `empty` because `number` [1] is incompatible with `emp
         ^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:340:22
-   340|     readonly length: number;
+   <BUILTINS>/lib.es5.js:341:22
+   341|     readonly length: number;
                              ^^^^^^ [1]
    function.js:4:13
      4| x.length as empty; // ERROR
@@ -1018,8 +1018,8 @@ Cannot cast `y.length` to `empty` because `number` [1] is incompatible with `emp
         ^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:340:22
-   340|     readonly length: number;
+   <BUILTINS>/lib.es5.js:341:22
+   341|     readonly length: number;
                              ^^^^^^ [1]
    function.js:5:13
      5| y.length as empty; // ERROR

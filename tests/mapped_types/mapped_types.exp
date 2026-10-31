@@ -1517,8 +1517,8 @@ Cannot cast `keysLength` to `string` because `number` [1] is incompatible with `
         ^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:470:22
-   470|     readonly length: number;
+   <BUILTINS>/lib.es5.js:471:22
+   471|     readonly length: number;
                              ^^^^^^ [1]
    import_values.js:32:15
     32| keysLength as string; // ERROR

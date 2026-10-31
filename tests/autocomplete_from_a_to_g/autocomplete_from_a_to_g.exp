@@ -4,12 +4,7 @@ Flags: --pretty
 
 bool.js:3:6
 Flags: --pretty
-{
-  "result":[
-    {"name":"toString","type":"(this: Boolean) => string"},
-    {"name":"valueOf","type":"(this: Boolean) => boolean"}
-  ]
-}
+{"result":[{"name":"valueOf","type":"(this: Boolean) => boolean"}]}
 
 class_declaration_name.js:5:8
 Flags: --pretty
@@ -499,6 +494,7 @@ Flags: --pretty
     {"name":"caller","type":"any | null"},
     {"name":"length","type":"number"},
     {"name":"name","type":"string"},
+    {"name":"prototype","type":"any"},
     {"name":"toString","type":"(this: Function) => string"}
   ]
 }
@@ -523,6 +519,7 @@ Flags: --pretty
     {"name":"caller","type":"any | null"},
     {"name":"length","type":"number"},
     {"name":"name","type":"string"},
+    {"name":"prototype","type":"any"},
     {"name":"toString","type":"(this: Function) => string"}
   ]
 }
@@ -547,6 +544,7 @@ Flags: --pretty
     {"name":"caller","type":"any | null"},
     {"name":"length","type":"number"},
     {"name":"name","type":"string"},
+    {"name":"prototype","type":"any"},
     {"name":"toString","type":"(this: Function) => string"}
   ]
 }

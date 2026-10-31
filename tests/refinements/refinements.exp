@@ -14210,8 +14210,8 @@ References:
    tagged_union.js:125:23
    125|     if (q.valueOf === 0) {} // Error
                               ^ [2]
-   <BUILTINS>/lib.es5.js:501:5
-   501|     valueOf(): boolean;
+   <BUILTINS>/lib.es5.js:502:5
+   502|     valueOf(): boolean;
             ^^^^^^^^^^^^^^^^^^ [3]
 
 
@@ -17347,8 +17347,8 @@ Cannot get `x[0]` because property `0` is missing in `Boolean` [1]. [prop-missin
               ^
 
 References:
-   <BUILTINS>/lib.es5.js:499:15
-   499| declare class Boolean {
+   <BUILTINS>/lib.es5.js:500:15
+   500| declare class Boolean {
                       ^^^^^^^ [1]
 
 

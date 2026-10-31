@@ -2121,8 +2121,36 @@ Flags: --lsp
       "member",
       {
         "ac_type":"Acmem",
-        "completion":"toString",
+        "completion":"prototype",
         "index":9,
+        "session_requests":null,
+        "token":null,
+        "typed_length":null
+      }
+    ],
+    "command":"log:<PLACEHOLDER_PROJECT_URL>",
+    "title":""
+  },
+  "detail":"any",
+  "insertTextFormat":1,
+  "kind":6,
+  "label":"prototype",
+  "labelDetails":{"detail":": any"},
+  "sortText":"00000000000000000001",
+  "textEdit":{
+    "newText":"prototype",
+    "range":{"end":{"character":4,"line":4},"start":{"character":4,"line":4}}
+  }
+}
+{
+  "command":{
+    "arguments":[
+      "textDocument/completion",
+      "member",
+      {
+        "ac_type":"Acmem",
+        "completion":"toString",
+        "index":10,
         "session_requests":null,
         "token":null,
         "typed_length":null

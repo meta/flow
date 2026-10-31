@@ -832,8 +832,8 @@ References:
 
 Error ---------------------------------------------------------------------------------------- object_prototype.js:96:38
 
-Cannot assign `x.propertyIsEnumerable` to `xPropertyIsEnumerable` because `(this: Object, v: unknown) => boolean` [1] is
-incompatible with `number` [2]. [incompatible-type]
+Cannot assign `x.propertyIsEnumerable` to `xPropertyIsEnumerable` because
+`(this: Object, v: PropertyKey) => boolean` [1] is incompatible with `number` [2]. [incompatible-type]
 
    object_prototype.js:96:38
     96| var xPropertyIsEnumerable : number = x.propertyIsEnumerable; // error
@@ -841,8 +841,8 @@ incompatible with `number` [2]. [incompatible-type]
 
 References:
    <BUILTINS>/lib.es5.js:142:5
-   142|     propertyIsEnumerable(v: unknown): boolean;
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   142|     propertyIsEnumerable(v: PropertyKey): boolean;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    object_prototype.js:96:29
     96| var xPropertyIsEnumerable : number = x.propertyIsEnumerable; // error
                                     ^^^^^^ [2]
@@ -873,9 +873,9 @@ incompatible with `number` [2]. [incompatible-type]
           ^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:142:39
-   142|     propertyIsEnumerable(v: unknown): boolean;
-                                              ^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:142:43
+   142|     propertyIsEnumerable(v: PropertyKey): boolean;
+                                                  ^^^^^^^ [1]
    object_prototype.js:97:48
     97| var xPropertyIsEnumerable2 : (prop: string) => number =
                                                        ^^^^^^ [2]
@@ -883,8 +883,8 @@ References:
 
 Error --------------------------------------------------------------------------------------- object_prototype.js:102:38
 
-Cannot assign `y.propertyIsEnumerable` to `yPropertyIsEnumerable` because `(this: Object, v: unknown) => boolean` [1] is
-incompatible with `number` [2]. [incompatible-type]
+Cannot assign `y.propertyIsEnumerable` to `yPropertyIsEnumerable` because
+`(this: Object, v: PropertyKey) => boolean` [1] is incompatible with `number` [2]. [incompatible-type]
 
    object_prototype.js:102:38
    102| var yPropertyIsEnumerable : number = y.propertyIsEnumerable; // error
@@ -892,8 +892,8 @@ incompatible with `number` [2]. [incompatible-type]
 
 References:
    <BUILTINS>/lib.es5.js:142:5
-   142|     propertyIsEnumerable(v: unknown): boolean;
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   142|     propertyIsEnumerable(v: PropertyKey): boolean;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    object_prototype.js:102:29
    102| var yPropertyIsEnumerable : number = y.propertyIsEnumerable; // error
                                     ^^^^^^ [2]
