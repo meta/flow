@@ -110,8 +110,8 @@ Cannot cast `<StarFoo />` to `renders Foo` because `ReadonlyArray<renders* Foo>`
          ^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:596:15
-   596| declare class ReadonlyArray<out T> {
+   <BUILTINS>/lib.es5.js:639:15
+   639| declare class ReadonlyArray<out T> {
                       ^^^^^^^^^^^^^ [1]
    import.js:14:16
     14| <StarFoo /> as renders Foo; // ERROR
@@ -143,8 +143,8 @@ Cannot cast `<StarFoo />` to `renders? Foo` because `ReadonlyArray<renders* Foo>
          ^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:596:15
-   596| declare class ReadonlyArray<out T> {
+   <BUILTINS>/lib.es5.js:639:15
+   639| declare class ReadonlyArray<out T> {
                       ^^^^^^^^^^^^^ [1]
    import.js:15:16
     15| <StarFoo /> as renders? Foo; // ERROR

@@ -7,8 +7,8 @@ Cannot cast `arr['length']` to `string` because `number` [1] is incompatible wit
         ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:855:13
-   855|     length: number;
+   <BUILTINS>/lib.es5.js:898:13
+   898|     length: number;
                     ^^^^^^ [1]
    test.js:17:18
     17| arr['length'] as string; // ERROR: number is not string
@@ -38,8 +38,8 @@ Cannot assign `'x'` to `arr['length']` because `"x"` [1] is incompatible with `n
                         ^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:855:13
-   855|     length: number;
+   <BUILTINS>/lib.es5.js:898:13
+   898|     length: number;
                     ^^^^^^ [2]
 
 
@@ -149,8 +149,8 @@ Cannot get `arr['9007199254740993']` because `"9007199254740993"` [1] is incompa
         ^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:732:20
-   732|     readonly [key: number]: T;
+   <BUILTINS>/lib.es5.js:775:20
+   775|     readonly [key: number]: T;
                            ^^^^^^ [2]
 
 
@@ -163,8 +163,8 @@ Cannot get `arr['1.5']` because `"1.5"` [1] is incompatible with `number` [2]. [
         ^^^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:732:20
-   732|     readonly [key: number]: T;
+   <BUILTINS>/lib.es5.js:775:20
+   775|     readonly [key: number]: T;
                            ^^^^^^ [2]
 
 
@@ -177,8 +177,8 @@ Cannot get `arr['01']` because `"01"` [1] is incompatible with `number` [2]. [in
         ^^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:732:20
-   732|     readonly [key: number]: T;
+   <BUILTINS>/lib.es5.js:775:20
+   775|     readonly [key: number]: T;
                            ^^^^^^ [2]
 
 
@@ -191,8 +191,8 @@ Cannot get `arr['nope']` because `"nope"` [1] is incompatible with `number` [2].
         ^^^^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:732:20
-   732|     readonly [key: number]: T;
+   <BUILTINS>/lib.es5.js:775:20
+   775|     readonly [key: number]: T;
                            ^^^^^^ [2]
 
 
@@ -206,8 +206,8 @@ Cannot get `tup['9007199254740993']` because `"9007199254740993"` [1] is incompa
         ^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:732:20
-   732|     readonly [key: number]: T;
+   <BUILTINS>/lib.es5.js:775:20
+   775|     readonly [key: number]: T;
                            ^^^^^^ [2]
 
 

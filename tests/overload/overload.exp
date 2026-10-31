@@ -55,8 +55,8 @@ Cannot assign `"".match(...)[0]` to `x2` because `string` [1] is incompatible wi
                          ^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:910:8
-   910|     0: string;
+   <BUILTINS>/lib.es5.js:953:8
+   953|     0: string;
                ^^^^^^ [1]
    overload.js:8:9
      8| var x2: number = "".match(/pattern/)[0];
