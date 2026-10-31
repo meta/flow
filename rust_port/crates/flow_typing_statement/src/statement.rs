@@ -22,7 +22,6 @@ use dupe::IterDupedExt;
 use dupe::OptionDupedExt;
 use flow_aloc::ALoc;
 use flow_common::enclosing_context::EnclosingContext;
-use flow_common::error_ref::ErrorReference;
 use flow_common::flow_import_specifier;
 use flow_common::polarity::Polarity;
 use flow_common::reason::Name;
@@ -92,6 +91,7 @@ use flow_typing_errors::error_message::ErrorMessage;
 use flow_typing_errors::error_message::InternalError;
 use flow_typing_errors::error_message::MatchErrorKind;
 use flow_typing_errors::error_message::MatchInvalidCaseSyntaxData;
+use flow_typing_errors::error_message::MissingLocalAnnotationTarget;
 use flow_typing_errors::error_message::RecordErrorKind;
 use flow_typing_errors::error_message::TSSyntaxKind;
 use flow_typing_errors::error_message::UninitializedPropertyKind;
@@ -15357,10 +15357,10 @@ pub fn mk_class_sig<'a>(
                         flow_js::add_output_non_speculating(
                             cx,
                             ErrorMessage::EMissingLocalAnnotation {
-                                reason: reason.to_error_reference(),
+                                loc: reason.loc().dupe(),
+                                target: MissingLocalAnnotationTarget::Property(field_name.dupe()),
                                 hint_available: false,
                                 from_generic_function: false,
-                                is_return_annotation: false,
                             },
                         );
                     }
@@ -15555,13 +15555,10 @@ pub fn mk_class_sig<'a>(
                         flow_js::add_output_non_speculating(
                             cx,
                             ErrorMessage::EMissingLocalAnnotation {
-                                reason: ErrorReference::new(
-                                    annot_loc.dupe(),
-                                    reason.desc(false).cloned(),
-                                ),
+                                loc: annot_loc.dupe(),
+                                target: MissingLocalAnnotationTarget::Property(field_name.dupe()),
                                 hint_available: false,
                                 from_generic_function: false,
-                                is_return_annotation: false,
                             },
                         );
                         let t = any_t::make(
@@ -20421,10 +20418,10 @@ pub fn mk_func_sig<'a>(
             flow_js::add_output_non_speculating(
                 cx,
                 ErrorMessage::EMissingLocalAnnotation {
-                    reason: reason.to_error_reference(),
+                    loc: reason.loc().dupe(),
+                    target: MissingLocalAnnotationTarget::Return,
                     hint_available: false,
                     from_generic_function,
-                    is_return_annotation: true,
                 },
             );
             let t = any_t::make(

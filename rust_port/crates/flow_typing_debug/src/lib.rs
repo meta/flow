@@ -2992,15 +2992,15 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             format!("EUseArrayLiteral ({})", string_of_aloc(None, loc))
         }
         ErrorMessage::EMissingLocalAnnotation {
-            reason,
+            loc,
+            target,
             hint_available: _,
             from_generic_function: _,
-            is_return_annotation: _,
         } => {
             format!(
                 "EMissingLocalAnnotation ({} {:?})",
-                string_of_aloc(None, &reason.loc),
-                reason.desc
+                string_of_aloc(None, loc),
+                target
             )
         }
         ErrorMessage::EMissingThisAnnotation(loc) => {

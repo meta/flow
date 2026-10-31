@@ -3505,6 +3505,23 @@ pub enum UninitializedPropertyKind {
     serde::Serialize,
     serde::Deserialize
 )]
+pub enum MissingLocalAnnotationTarget {
+    /// A class or record property, by its name as written, e.g. `x` or `#x`.
+    Property(FlowSmolStr),
+    Return,
+}
+
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    serde::Serialize,
+    serde::Deserialize
+)]
 pub enum ErrorMessage<L: Dupe + PartialOrd + Ord + PartialEq + Eq> {
     EIncompatibleType(Box<EIncompatibleTypeData<L>>),
 
@@ -3721,10 +3738,10 @@ pub enum ErrorMessage<L: Dupe + PartialOrd + Ord + PartialEq + Eq> {
     EUseArrayLiteral(L),
 
     EMissingLocalAnnotation {
-        reason: ErrorReference<L>,
+        loc: L,
+        target: MissingLocalAnnotationTarget,
         hint_available: bool,
         from_generic_function: bool,
-        is_return_annotation: bool,
     },
 
     EMissingThisAnnotation(L),
@@ -5617,15 +5634,15 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             EUseArrayLiteral(loc) => EUseArrayLiteral(f(loc)),
 
             EMissingLocalAnnotation {
-                reason,
+                loc,
+                target,
                 hint_available,
                 from_generic_function,
-                is_return_annotation,
             } => EMissingLocalAnnotation {
-                reason: map_error_ref(reason),
+                loc: f(loc),
+                target,
                 hint_available,
                 from_generic_function,
-                is_return_annotation,
             },
 
             EMissingThisAnnotation(loc) => EMissingThisAnnotation(f(loc)),
@@ -8916,7 +8933,7 @@ impl<L: Dupe + PartialOrd + Ord + PartialEq + Eq> ErrorMessage<L> {
 
             Self::EUnsupportedImplements(type_) => Some(type_.loc.dupe()),
 
-            Self::EMissingLocalAnnotation { reason, .. } => Some(reason.loc.dupe()),
+            Self::EMissingLocalAnnotation { loc, .. } => Some(loc.dupe()),
 
             Self::EMissingThisAnnotation(loc) => Some(loc.dupe()),
 
@@ -11893,30 +11910,28 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             }
 
             ErrorMessage::EMissingLocalAnnotation {
-                reason,
+                loc: _,
+                target,
                 hint_available,
                 from_generic_function,
-                is_return_annotation,
-            } => {
-                let description = reason.desc;
-                if hint_available {
-                    Normal(
-                        Message::MessageMissingAnnotationDueToContextualTypingFailure(description),
-                    )
-                } else if from_generic_function {
-                    if is_return_annotation {
+            } => match target {
+                MissingLocalAnnotationTarget::Property(name) => {
+                    if hint_available {
+                        Normal(Message::MessageMissingAnnotationDueToContextualTypingFailure(name))
+                    } else if from_generic_function {
+                        Normal(Message::MessageMissingAnnotationForGenericFunction(name))
+                    } else {
+                        Normal(Message::MessageMissingAnnotation(name))
+                    }
+                }
+                MissingLocalAnnotationTarget::Return => {
+                    if from_generic_function {
                         Normal(Message::MessageMissingReturnAnnotationForGenericFunction)
                     } else {
-                        Normal(Message::MessageMissingAnnotationForGenericFunction(
-                            description,
-                        ))
+                        Normal(Message::MessageMissingReturnAnnotation)
                     }
-                } else if is_return_annotation {
-                    Normal(Message::MessageMissingReturnAnnotation)
-                } else {
-                    Normal(Message::MessageMissingAnnotation(description))
                 }
-            }
+            },
 
             ErrorMessage::EBindingError(box (binding_error, _, x, entry_loc)) => {
                 let binding = NamedReferenceData {

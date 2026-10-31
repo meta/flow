@@ -8579,9 +8579,11 @@ where
                 ref_of_type_desc(&arg.loc, &arg.desc),
                 text("."),
             ]),
-            MessageMissingAnnotation(d) => friendly::Message(vec![
+            MessageMissingAnnotation(name) => friendly::Message(vec![
                 text("Missing an annotation on "),
-                friendly::desc_of_reason_desc(d.as_ref()),
+                friendly::MessageFeature::Inline(friendly::message_inlines_of_string(&format!(
+                    "property `{name}`"
+                ))),
                 text("."),
             ]),
             MessageMissingThisAnnotation => friendly::Message(vec![
@@ -8607,14 +8609,18 @@ where
                     "An annotation on this parameter is required because Flow cannot infer its type from local context.",
                 )])
             }
-            MessageMissingAnnotationDueToContextualTypingFailure(d) => friendly::Message(vec![
+            MessageMissingAnnotationDueToContextualTypingFailure(name) => friendly::Message(vec![
                 text("An annotation on "),
-                friendly::desc_of_reason_desc(d.as_ref()),
+                friendly::MessageFeature::Inline(friendly::message_inlines_of_string(&format!(
+                    "property `{name}`"
+                ))),
                 text(" is required because Flow cannot infer its type from local context."),
             ]),
-            MessageMissingAnnotationForGenericFunction(d) => friendly::Message(vec![
+            MessageMissingAnnotationForGenericFunction(name) => friendly::Message(vec![
                 text("Missing an annotation on "),
-                friendly::desc_of_reason_desc(d.as_ref()),
+                friendly::MessageFeature::Inline(friendly::message_inlines_of_string(&format!(
+                    "property `{name}`"
+                ))),
                 text(" because generic functions must be fully annotated."),
             ]),
             MessageLowerIsNotReactComponent(lower) => {

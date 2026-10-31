@@ -2647,14 +2647,14 @@ pub enum Message<L: Dupe> {
 
     MessageLowerDoesNotHavePropertiesWithPrintedType(Box<MessageTypeReferenceData<L>>),
 
-    MessageMissingAnnotation(Option<VirtualReasonDesc<L>>),
+    MessageMissingAnnotation(FlowSmolStr),
     MessageMissingThisAnnotation,
     MessageMissingReturnAnnotation,
     MessageMissingReturnAnnotationForGenericFunction,
     MessageMissingParameterAnnotation,
     MessageMissingParameterAnnotationDueToContextualTypingFailure,
-    MessageMissingAnnotationDueToContextualTypingFailure(Option<VirtualReasonDesc<L>>),
-    MessageMissingAnnotationForGenericFunction(Option<VirtualReasonDesc<L>>),
+    MessageMissingAnnotationDueToContextualTypingFailure(FlowSmolStr),
+    MessageMissingAnnotationForGenericFunction(FlowSmolStr),
 
     MessageMissingPlatformSupportWithAvailablePlatforms(
         Box<MessageMissingPlatformSupportWithAvailablePlatformsData>,
