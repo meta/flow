@@ -1585,8 +1585,8 @@ Cannot cast `pickedG` to `string` because `void` [1] is incompatible with `strin
          ^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:4200:15
-   4200|     [P in K]: T[P];
+   <BUILTINS>/lib.es5.js:1420:15
+   1420|     [P in K]: T[P];
                        ^^^^ [1]
    import_values.js:40:12
      40| pickedG as string; // ERROR 2x
