@@ -622,7 +622,8 @@ pub fn destructor_default<'cx, Acc, V: TypeVisitor<Acc> + ?Sized>(
 ) -> Acc {
     use flow_typing_type::type_::Destructor::*;
     match destructor {
-        NonMaybeType
+        NormalizeIntersection { .. }
+        | NonMaybeType
         | ReactDRO(_)
         | OptionalIndexedAccessResultType { .. }
         | PropertyType { .. }

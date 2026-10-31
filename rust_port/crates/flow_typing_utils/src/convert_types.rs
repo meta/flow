@@ -1095,6 +1095,9 @@ fn json_of_destructor<'cx>(
     destructor: &Destructor,
 ) -> Json {
     match destructor {
+        Destructor::NormalizeIntersection { check_exact } => {
+            json!({"kind": "NormalizeIntersection", "check_exact": check_exact})
+        }
         Destructor::NonMaybeType => json!({"kind": "NonMaybeType"}),
         Destructor::PropertyType { name } => {
             json!({"kind": "PropertyType", "name": name.display_smol_str().to_string()})

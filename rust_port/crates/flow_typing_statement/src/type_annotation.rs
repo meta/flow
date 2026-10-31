@@ -46,11 +46,13 @@ use flow_typing_errors::intermediate_error_types::InternalType;
 use flow_typing_errors::intermediate_error_types::InvalidObjKey;
 use flow_typing_errors::intermediate_error_types::TsLibSyntaxKind;
 use flow_typing_flow_common::flow_js_utils;
+use flow_typing_flow_common::flow_js_utils::FlowJsException;
 use flow_typing_flow_common::obj_type;
 use flow_typing_flow_common::string_case_transform;
 use flow_typing_flow_common::type_subst;
 use flow_typing_flow_js::flow_js;
 use flow_typing_flow_js::flow_js::FlowJs;
+use flow_typing_flow_js::intersection_kit;
 use flow_typing_flow_js::template_literal_type;
 use flow_typing_loc_env::func_class_sig_types;
 use flow_typing_loc_env::func_class_sig_types::class::ClassLikeBindingKind;
@@ -70,6 +72,7 @@ use flow_typing_type::type_::unknown_use;
 use flow_typing_type::type_util;
 use flow_typing_utils::type_env;
 use flow_typing_utils::typed_ast_utils;
+use flow_utils_concurrency::job_error::JobError;
 
 use crate::class_sig;
 
@@ -687,11 +690,11 @@ fn resolve_computed_key_name(
         let concrete_keys =
             match FlowJs::possible_concrete_types_for_computed_object_keys(cx, reason, &key_t) {
                 Ok(v) => v,
-                Err(flow_typing_flow_common::flow_js_utils::FlowJsException::WorkerCanceled(c)) => {
-                    return Err(flow_utils_concurrency::job_error::JobError::Canceled(c));
+                Err(FlowJsException::WorkerCanceled(c)) => {
+                    return Err(JobError::Canceled(c));
                 }
-                Err(flow_typing_flow_common::flow_js_utils::FlowJsException::TimedOut(t)) => {
-                    return Err(flow_utils_concurrency::job_error::JobError::TimedOut(t));
+                Err(FlowJsException::TimedOut(t)) => {
+                    return Err(JobError::TimedOut(t));
                 }
                 Err(err) => panic!("Should not be under speculation: {:?}", err),
             };
@@ -1300,7 +1303,19 @@ fn convert_inner<'a>(
             let (ts, ts_ast) = convert_list_inner(cx, env, &inner.types.2)?;
             let rep = type_::inter_rep::make(t0, t1, ts.into());
             let reason = reason::mk_annot_reason(None, loc.dupe());
-            let rt = Type::new(type_::TypeInner::IntersectionT(reason, rep));
+            let intersection = Type::new(type_::TypeInner::IntersectionT(reason.dupe(), rep));
+            let rt = match intersection_kit::evaluate_annotation(cx, &reason, intersection, |cx| {
+                mk_eval_id(cx, loc.dupe())
+            }) {
+                Ok(v) => v,
+                Err(flow_typing_flow_common::flow_js_utils::FlowJsException::WorkerCanceled(c)) => {
+                    return Err(flow_utils_concurrency::job_error::JobError::Canceled(c));
+                }
+                Err(flow_typing_flow_common::flow_js_utils::FlowJsException::TimedOut(t)) => {
+                    return Err(flow_utils_concurrency::job_error::JobError::TimedOut(t));
+                }
+                Err(err) => panic!("Should not be under speculation: {:?}", err),
+            };
             ast::types::Type::new(TypeInner::Intersection {
                 loc: (loc.dupe(), rt),
                 inner: (ast::types::Intersection {

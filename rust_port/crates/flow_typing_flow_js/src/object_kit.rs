@@ -826,7 +826,7 @@ pub(super) fn run_with_env<'cx>(
             t0
         } else {
             let mut iter = rest.into_iter();
-            let t1 = iter.next().unwrap();
+            let t1 = iter.next().expect("non-empty object representation tail");
             let remaining: Rc<[Type]> = iter.collect();
             Type::new(TypeInner::UnionT(
                 reason.dupe(),

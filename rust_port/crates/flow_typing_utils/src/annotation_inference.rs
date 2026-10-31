@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+use std::convert::Infallible;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -33,6 +34,8 @@ use flow_typing_flow_common::flow_js_utils;
 use flow_typing_flow_common::flow_js_utils::CgLookupArgs;
 use flow_typing_flow_common::flow_js_utils::FlowJsException;
 use flow_typing_flow_common::flow_js_utils::get_prop_t_kit::IndexerFallbackMode;
+use flow_typing_flow_js::intersection_kit::Normalization;
+use flow_typing_flow_js::intersection_kit::Normalizer;
 use flow_typing_flow_js::object_kit::slice_of_keys;
 use flow_typing_flow_js::object_kit::split_mapped_type_keys;
 use flow_typing_flow_js::slice_utils;
@@ -819,6 +822,48 @@ pub fn elab_t<'cx>(
             let use_op = defer_use_t.0.dupe();
             let reason = defer_use_t.1.dupe();
             match defer_use_t.2.deref() {
+                // The sig merge counterpart of normalization in `eval_destructor`, with
+                // members concretized by `AnnotConcretizeForInspection`.
+                Destructor::NormalizeIntersection { check_exact } => {
+                    let TypeInner::IntersectionT(_, _) = inner_t.deref() else {
+                        return elab_t(cx, None, inner_t.dupe(), op);
+                    };
+                    let result = Normalizer::new(&FlowJsEnv::entry(), &reason).normalize(
+                        cx,
+                        inner_t,
+                        |cx, _, member| {
+                            let collector = TypeCollector::create();
+                            elab_t(
+                                cx,
+                                Some(seen.dupe()),
+                                member.dupe(),
+                                Op::new(OpInner::AnnotConcretizeForInspection {
+                                    reason: type_util::reason_of_t(member).dupe(),
+                                    collector: collector.clone(),
+                                }),
+                            );
+                            Ok::<Vec<Type>, Infallible>(collector.collect_to_vec())
+                        },
+                    );
+                    let result = match result {
+                        Ok(result) => result,
+                        Err(never) => match never {},
+                    };
+                    let normalized = match result {
+                        Normalization::Normalized(normalized) => normalized,
+                        Normalization::InvalidExact(normalized, invalid) => {
+                            if *check_exact {
+                                flow_js_utils::add_annot_inference_error(
+                                    cx,
+                                    ErrorMessage::EInvalidExactObjectIntersection(invalid),
+                                );
+                            }
+                            normalized
+                        }
+                        Normalization::Unchanged => inner_t.dupe(),
+                    };
+                    elab_t(cx, Some(seen), normalized, op)
+                }
                 Destructor::ReadOnlyType => {
                     let t = make_readonly(cx, use_op, reason, inner_t.dupe());
                     elab_t(cx, None, t, op)

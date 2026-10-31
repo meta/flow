@@ -1974,6 +1974,38 @@ pub fn object_update_optionality<'cx>(
     }
 }
 
+/// How [`intersect_slices`] combines what two slices share.
+pub(crate) trait SliceIntersection {
+    /// The type of a prop or indexer present in both slices.
+    fn intersect(&self, cx: &mut Context<'_>, left: Type, right: Type) -> Type;
+    /// The polarity of an indexer, merged or read for a named prop.
+    fn dict_polarity(&self, polarity: Polarity) -> Polarity;
+}
+
+/// Spreads and rests copy props into a new object, so indexers become neutral
+/// and shared types stay plain intersections.
+struct ObjectKitIntersection<'a> {
+    env: &'a FlowJsEnv,
+    reason: &'a Reason,
+}
+
+impl SliceIntersection for ObjectKitIntersection<'_> {
+    fn intersect(&self, cx: &mut Context<'_>, left: Type, right: Type) -> Type {
+        if flow_typing_flow_common::concrete_type_eq::eq_with_env(cx, self.env, &left, &right) {
+            left
+        } else {
+            Type::new(TypeInner::IntersectionT(
+                self.reason.dupe(),
+                inter_rep::make(left, right, Rc::from([])),
+            ))
+        }
+    }
+
+    fn dict_polarity(&self, _: Polarity) -> Polarity {
+        Polarity::Neutral
+    }
+}
+
 // Intersect two object slices into one slice.
 //
 // In general it is unsound to combine intersection types, but since object
@@ -1988,6 +2020,21 @@ pub fn intersect2<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     reason: &Reason,
+    x1: &object::Slice,
+    x2: &object::Slice,
+) -> (
+    properties::PropertiesMap,
+    Flags,
+    bool,
+    object::GenericSpreadId,
+    Rc<[(Type, Polarity)]>,
+) {
+    intersect_slice_contents(cx, &ObjectKitIntersection { env, reason }, x1, x2)
+}
+
+fn intersect_slice_contents<'cx>(
+    cx: &mut Context<'cx>,
+    policy: &impl SliceIntersection,
     object::Slice {
         reason: r1,
         strictness_kind: _,
@@ -2021,16 +2068,6 @@ pub fn intersect2<'cx>(
 ) {
     let dict1 = obj_type::get_dict_opt(&flags1.obj_kind);
     let dict2 = obj_type::get_dict_opt(&flags2.obj_kind);
-    let mut intersection = |t1: Type, t2: Type| -> Type {
-        if flow_typing_flow_common::concrete_type_eq::eq_with_env(cx, env, &t1, &t2) {
-            t1
-        } else {
-            Type::new(TypeInner::IntersectionT(
-                reason.dupe(),
-                inter_rep::make(t1, t2, Rc::from([])),
-            ))
-        }
-    };
     let mut merge_props = |q1: &Property, q2: &Property| -> Property {
         let t1 = property::type_(q1);
         let t2 = property::type_(q2);
@@ -2048,7 +2085,7 @@ pub fn intersect2<'cx>(
             (_, TypeInner::OptionalT { type_: t2_opt, .. }) => (t1.dupe(), t2_opt.dupe(), false),
             _ => (t1.dupe(), t2.dupe(), false),
         };
-        let t = intersection(t1_inner, t2_inner);
+        let t = policy.intersect(cx, t1_inner, t2_inner);
         let t = if opt {
             type_util::optional(t, None, false)
         } else {
@@ -2060,7 +2097,7 @@ pub fn intersect2<'cx>(
         mk_slice_prop(
             Some(type_util::loc_of_t(&d.key).dupe()),
             type_util::optional(read_dict(r, d), None, false),
-            Polarity::Neutral,
+            policy.dict_polarity(d.dict_polarity),
             false,
         )
     };
@@ -2085,9 +2122,9 @@ pub fn intersect2<'cx>(
     let dict = match (dict1, dict2) {
         (Some(d1), Some(d2)) => Some(DictType {
             dict_name: None,
-            key: intersection(d1.key.dupe(), d2.key.dupe()),
-            value: intersection(read_dict(r1, d1), read_dict(r2, d2)),
-            dict_polarity: Polarity::Neutral,
+            key: policy.intersect(cx, d1.key.dupe(), d2.key.dupe()),
+            value: policy.intersect(cx, read_dict(r1, d1), read_dict(r2, d2)),
+            dict_polarity: policy.dict_polarity(Polarity::mult(d1.dict_polarity, d2.dict_polarity)),
         }),
         (Some(d), None) | (None, Some(d)) => Some(d.clone()),
         (None, None) => None,
@@ -2120,10 +2157,28 @@ pub fn intersect2_with_reason<'cx>(
     x1: &object::Slice,
     x2: &object::Slice,
 ) -> object::Slice {
-    let (props, flags, frozen, generics, reachable_targs) = intersect2(cx, env, reason, x1, x2);
-    let reason = flow_common::reason::mk_reason(VirtualReasonDesc::RObjectType, intersection_loc);
+    let slice_reason =
+        flow_common::reason::mk_reason(VirtualReasonDesc::RObjectType, intersection_loc);
+    intersect_slices(
+        cx,
+        &ObjectKitIntersection { env, reason },
+        &slice_reason,
+        x1,
+        x2,
+    )
+}
+
+pub(crate) fn intersect_slices<'cx>(
+    cx: &mut Context<'cx>,
+    policy: &impl SliceIntersection,
+    reason: &Reason,
+    x1: &object::Slice,
+    x2: &object::Slice,
+) -> object::Slice {
+    let (props, flags, frozen, generics, reachable_targs) =
+        intersect_slice_contents(cx, policy, x1, x2);
     object::Slice {
-        reason,
+        reason: reason.dupe(),
         strictness_kind: x1.strictness_kind.join(x2.strictness_kind),
         props,
         flags,

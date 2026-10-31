@@ -188,6 +188,7 @@ fn config_options(config: Option<&Value>) -> Result<Options, String> {
         hook_compatibility: true,
         lint_severities,
         max_header_tokens: 10,
+        normalize_intersections: bool_config(config, "experimental.normalize_intersections", false),
         react_rules: Arc::from([
             ReactRule::ValidateRefAccessDuringRender,
             ReactRule::DeepReadOnlyProps,

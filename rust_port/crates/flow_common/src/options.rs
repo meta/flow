@@ -167,6 +167,7 @@ pub struct Options {
     pub munge_underscores: bool,
     pub no_implicit_override: bool,
     pub no_unchecked_indexed_access: bool,
+    pub normalize_intersections: bool,
     pub node_modules_errors: bool,
     pub node_main_fields: Arc<[String]>,
     pub node_package_export_conditions: Arc<[String]>,

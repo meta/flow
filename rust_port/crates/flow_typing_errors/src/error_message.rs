@@ -1904,6 +1904,24 @@ pub struct EUnsupportedExactData<L: Dupe + PartialOrd + Ord + PartialEq + Eq> {
     serde::Serialize,
     serde::Deserialize
 )]
+pub struct EInvalidExactObjectIntersectionData<L: Dupe + PartialOrd + Ord + PartialEq + Eq> {
+    pub loc: L,
+    pub prop: Name,
+    pub exact_object_loc: L,
+    pub exact_object_desc: TypeOrTypeDesc<L>,
+}
+
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    serde::Serialize,
+    serde::Deserialize
+)]
 pub struct ETooManyTypeArgsData<L: Dupe + PartialOrd + Ord + PartialEq + Eq> {
     pub reason_tapp: ErrorReference<L>,
     pub arity_loc: L,
@@ -3626,6 +3644,8 @@ pub enum ErrorMessage<L: Dupe + PartialOrd + Ord + PartialEq + Eq> {
 
     EUnsupportedExact(Box<EUnsupportedExactData<L>>),
 
+    EInvalidExactObjectIntersection(Box<EInvalidExactObjectIntersectionData<L>>),
+
     EUnexpectedThisType(L),
 
     ETypeParamArity(L, i32),
@@ -5326,6 +5346,21 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             }) => EUnsupportedExact(Box::new(EUnsupportedExactData {
                 value_loc: f(value_loc),
                 value_desc: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), value_desc),
+            })),
+
+            EInvalidExactObjectIntersection(box EInvalidExactObjectIntersectionData {
+                loc,
+                prop,
+                exact_object_loc,
+                exact_object_desc,
+            }) => EInvalidExactObjectIntersection(Box::new(EInvalidExactObjectIntersectionData {
+                loc: f(loc),
+                prop,
+                exact_object_loc: f(exact_object_loc),
+                exact_object_desc: type_or_type_desc::map_loc(
+                    |l: &L| f(l.dupe()),
+                    exact_object_desc,
+                ),
             })),
 
             EUnexpectedThisType(loc) => EUnexpectedThisType(f(loc)),
@@ -8259,6 +8294,18 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                 value_desc: f(value_desc),
             })),
 
+            EInvalidExactObjectIntersection(box EInvalidExactObjectIntersectionData {
+                loc,
+                prop,
+                exact_object_loc,
+                exact_object_desc,
+            }) => EInvalidExactObjectIntersection(Box::new(EInvalidExactObjectIntersectionData {
+                loc,
+                prop,
+                exact_object_loc,
+                exact_object_desc: f(exact_object_desc),
+            })),
+
             ECallTypeArity(box ECallTypeArityData {
                 call_loc,
                 is_new,
@@ -8852,6 +8899,10 @@ impl<L: Dupe + PartialOrd + Ord + PartialEq + Eq> ErrorMessage<L> {
 
             Self::EUnsupportedSetProto(loc)
             | Self::ERecursionLimit(loc)
+            | Self::EInvalidExactObjectIntersection(box EInvalidExactObjectIntersectionData {
+                loc,
+                ..
+            })
             | Self::ENestedComponent(loc)
             | Self::ENestedHook(loc)
             | Self::EPolarityMismatch(box EPolarityMismatchData { loc, .. })
@@ -10206,6 +10257,21 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                     desc: expect_type_desc(value_desc),
                 },
             ))),
+
+            ErrorMessage::EInvalidExactObjectIntersection(
+                box EInvalidExactObjectIntersectionData {
+                    prop,
+                    exact_object_loc,
+                    exact_object_desc,
+                    ..
+                },
+            ) => Normal(Message::MessageInvalidExactObjectIntersection {
+                prop: prop.display_smol_str(),
+                exact_object: MessageTypeReferenceData {
+                    loc: exact_object_loc,
+                    desc: expect_type_desc(exact_object_desc),
+                },
+            }),
 
             ErrorMessage::EUnexpectedThisType(_) => Normal(Message::MessageUnexpectedUseOfThisType),
 
@@ -13323,6 +13389,7 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             }) => Self::error_code_of_use_op(&Some(use_op.dupe()), IncompatibleType),
             ErrorMessage::EUnreachable { .. } => Some(UnreachableCode),
             ErrorMessage::EUnsupportedExact(box EUnsupportedExactData { .. }) => Some(InvalidExact),
+            ErrorMessage::EInvalidExactObjectIntersection(_) => Some(InvalidExact),
             ErrorMessage::EUnsupportedImplements(_) => Some(CannotImplement),
             ErrorMessage::EUnsupportedKeyInObject { .. } => Some(IllegalKey),
             ErrorMessage::EUnsupportedComputedKeyInClass(_) => Some(IllegalKey),

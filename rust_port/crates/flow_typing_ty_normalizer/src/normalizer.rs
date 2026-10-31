@@ -790,7 +790,8 @@ fn should_force_eval_to_avoid_giant_types<'cx>(
                 None => false,
             }
         }
-        D::NonMaybeType
+        D::NormalizeIntersection { .. }
+        | D::NonMaybeType
         | D::ElementType { .. }
         | D::ExactType
         | D::ReadOnlyType
@@ -851,9 +852,9 @@ fn should_evaluate_for_hover<'cx>(env: &mut Env<'_, 'cx>, t: &Type, d: &Destruct
         | D::OptionalIndexedAccessResultType { .. }
         | D::NonMaybeType
         | D::ConditionalType(..) => !operand_is_generic(env, t),
-        D::ValuesType | D::MappedType(box DestructorMappedTypeData { .. }) => {
-            !operand_is_generic(env, t)
-        }
+        D::NormalizeIntersection { .. }
+        | D::ValuesType
+        | D::MappedType(box DestructorMappedTypeData { .. }) => !operand_is_generic(env, t),
         // The written spelling is the one a reader wants, whatever the operand
         // looks like.
         D::ReadOnlyType
@@ -891,7 +892,8 @@ fn should_evaluate_destructor<'cx>(
         || match env.evaluate_type_destructors() {
             EvaluateTypeDestructorsMode::EvaluateNone => false,
             EvaluateTypeDestructorsMode::EvaluateSome => match d {
-                D::MappedType(box DestructorMappedTypeData { .. })
+                D::NormalizeIntersection { .. }
+                | D::MappedType(box DestructorMappedTypeData { .. })
                 | D::NonMaybeType
                 | D::PropertyType { .. }
                 | D::ElementType { .. }
@@ -3623,6 +3625,7 @@ mod type_converter {
         let ty = type__::<I>(env, state, None, t)?;
 
         match d {
+            D::NormalizeIntersection { .. } => Ok(ty),
             D::ReactDRO(_) => Ok(ty),
             D::NonMaybeType => Ok(Arc::new(ty::Ty::Utility(ty::Utility::NonMaybeType(ty)))),
             D::ExactType => Ok(Arc::new(ty::Ty::Utility(ty::Utility::Exact(ty)))),

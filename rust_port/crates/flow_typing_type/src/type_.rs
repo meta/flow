@@ -6565,6 +6565,12 @@ pub struct DestructorMappedTypeData {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Destructor {
+    // Merges the members of an intersection into one type, or evaluates to the
+    // intersection itself when they cannot be merged. `check_exact` reports
+    // intersections that exact Flow objects make impossible. Only created under
+    // `experimental.normalize_intersections`; see
+    // `flow_typing_flow_js::intersection_kit`.
+    NormalizeIntersection { check_exact: bool },
     NonMaybeType,
     PropertyType { name: Name },
     ElementType { index_type: Type },

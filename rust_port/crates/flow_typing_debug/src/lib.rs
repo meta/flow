@@ -78,6 +78,7 @@ use flow_typing_errors::error_message::EInstanceofRHSData;
 use flow_typing_errors::error_message::EInvalidBinaryArithData;
 use flow_typing_errors::error_message::EInvalidConstructorData;
 use flow_typing_errors::error_message::EInvalidDeclarationData;
+use flow_typing_errors::error_message::EInvalidExactObjectIntersectionData;
 use flow_typing_errors::error_message::EInvalidObjectKitData;
 use flow_typing_errors::error_message::EInvalidPrototypeData;
 use flow_typing_errors::error_message::EInvalidReactCreateElementData;
@@ -272,6 +273,9 @@ pub fn string_of_selector(selector: &Selector) -> String {
 
 pub fn string_of_destructor(destructor: &Destructor) -> String {
     match destructor {
+        Destructor::NormalizeIntersection { check_exact } => {
+            format!("NormalizeIntersection(check_exact={check_exact})")
+        }
         Destructor::NonMaybeType => "NonMaybeType".to_string(),
         Destructor::PropertyType { name, .. } => {
             format!("PropertyType {}", name)
@@ -2770,6 +2774,13 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             };
             format!("EUnsupportedExact(Box::new({}))", value)
         }
+        ErrorMessage::EInvalidExactObjectIntersection(
+            box EInvalidExactObjectIntersectionData { loc, prop, .. },
+        ) => format!(
+            "EInvalidExactObjectIntersection({}, {})",
+            string_of_aloc(None, loc),
+            prop.display_smol_str()
+        ),
         ErrorMessage::EUnexpectedThisType(loc) => {
             format!("EUnexpectedThisType ({})", string_of_aloc(None, loc))
         }

@@ -6247,6 +6247,17 @@ where
                 ref_of_type_desc(&value.loc, &value.desc),
                 text("."),
             ]),
+            MessageInvalidExactObjectIntersection { prop, exact_object } => {
+                use super::error_message::mk_prop_message;
+                let mut features = vec![text("Cannot normalize this intersection because ")];
+                features.extend(mk_prop_message(Some(prop.as_str())));
+                features.extend(vec![
+                    text(" is missing in exact object "),
+                    ref_of_type_desc(&exact_object.loc, &exact_object.desc),
+                    text("."),
+                ]);
+                friendly::Message(features)
+            }
             MessageCannotDeclareAlreadyBoundName(x) => friendly::Message(vec![
                 text("Cannot declare "),
                 render_named_reference(x),

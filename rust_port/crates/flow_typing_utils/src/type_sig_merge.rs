@@ -53,6 +53,7 @@ use flow_typing_context::SigFile;
 use flow_typing_context::SigFileId;
 use flow_typing_flow_common::flow_js_utils;
 use flow_typing_flow_common::obj_type;
+use flow_typing_flow_js::intersection_kit;
 use flow_typing_type::type_;
 use flow_typing_type::type_::ArrayATData;
 use flow_typing_type::type_::DestructorConditionalTypeData;
@@ -1929,10 +1930,13 @@ fn merge_annot<'cx>(
                 .iter()
                 .map(|t| merge_impl(env, cx, file, t, false, false))
                 .collect();
-            Type::new(type_::TypeInner::IntersectionT(
-                reason,
+            let intersection = Type::new(type_::TypeInner::IntersectionT(
+                reason.dupe(),
                 type_::inter_rep::make(t0, t1, ts.into()),
-            ))
+            ));
+            intersection_kit::defer_annotation(cx, reason, intersection, |cx| {
+                eval_id_of_aloc(cx, loc.dupe())
+            })
         }
         Annot::Tuple(inner) => {
             let AnnotTuple {

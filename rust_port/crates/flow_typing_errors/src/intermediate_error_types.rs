@@ -2183,6 +2183,11 @@ pub enum Message<L: Dupe> {
 
     MessageCannotCreateExactType(Box<MessageTypeReferenceData<L>>),
 
+    MessageInvalidExactObjectIntersection {
+        prop: FlowSmolStr,
+        exact_object: MessageTypeReferenceData<L>,
+    },
+
     MessageCannotDeclareAlreadyBoundName(NamedReferenceData<L>),
     MessageCannotDeclareAlreadyBoundNameInCoreJs(NamedReferenceData<L>),
 

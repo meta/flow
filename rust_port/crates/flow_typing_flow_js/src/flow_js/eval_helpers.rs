@@ -36,6 +36,8 @@ use super::constraint_helpers::frozen_implicit_instantiation_tvar;
 use super::helpers::mk_typeapp_instance_annot;
 use super::helpers::*;
 use super::*;
+use crate::intersection_kit::Normalization;
+use crate::intersection_kit::Normalizer;
 
 pub(super) fn eval_selector<'cx>(
     cx: &mut Context<'cx>,
@@ -444,6 +446,35 @@ pub(super) fn eval_destructor<'cx>(
     d: &Destructor,
     tout: &Tvar,
 ) -> Result<(), FlowJsException> {
+    // Normalization concretizes the members of the intersection itself instead of
+    // dispatching on the operand like the rest of this function, so we handle it upfront.
+    if let Destructor::NormalizeIntersection { check_exact } = d {
+        let normalized =
+            match Normalizer::new(env, reason).normalize(cx, t, |cx, member_reason, member| {
+                possible_concrete_types_for_inspection(cx, env, member_reason, member)
+            })? {
+                Normalization::Normalized(normalized) => normalized,
+                Normalization::InvalidExact(normalized, invalid) => {
+                    if *check_exact {
+                        flow_js_utils::add_output_with_env(
+                            cx,
+                            env,
+                            ErrorMessage::EInvalidExactObjectIntersection(invalid),
+                        )?;
+                    }
+                    normalized
+                }
+                Normalization::Unchanged => t.dupe(),
+            };
+        return rec_flow_t(
+            cx,
+            env,
+            trace,
+            unknown_use(),
+            (&normalized, &Type::new(TypeInner::OpenT(tout.dupe()))),
+        );
+    }
+
     if let Destructor::MappedType(box DestructorMappedTypeData {
         homomorphic: MappedTypeHomomorphicFlag::Unspecialized,
         mapped_type_flags,
@@ -1020,6 +1051,14 @@ pub(super) fn eval_destructor<'cx>(
         }
         _ => {
             match d {
+                // Already handled at the top of this function.
+                Destructor::NormalizeIntersection { .. } => rec_flow_t(
+                    cx,
+                    env,
+                    trace,
+                    unknown_use(),
+                    (t, &Type::new(TypeInner::OpenT(tout.dupe()))),
+                ),
                 Destructor::NonMaybeType => {
                     // We intentionally use `unknown_use` here! When we flow to a tout we never
                     // want to carry a `use_op`. We want whatever `use_op` the tout is used with

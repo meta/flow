@@ -10,6 +10,7 @@
 pub mod default_resolve;
 pub mod flow_js;
 pub mod implicit_instantiation;
+pub mod intersection_kit;
 pub mod marked;
 pub mod natural_inference;
 pub mod object_kit;

@@ -1,0 +1,393 @@
+Error ----------------------------------------------------------------------------------------------- regressions.js:5:6
+
+Cannot assign `'changed'` to `dict.key` because property `key` is not writable. [cannot-write]
+
+   5| dict.key = 'changed'; // ERROR
+           ^^^
+
+
+Error ---------------------------------------------------------------------------------------------- regressions.js:9:14
+
+Cannot assign `'changed'` to `propWithDict.key` because property `key` is not writable. [cannot-write]
+
+   9| propWithDict.key = 'changed'; // ERROR
+                   ^^^
+
+
+Error --------------------------------------------------------------------------------------------- regressions.js:18:10
+
+Cannot get `v.value` because: [incompatible-use]
+ - Either property `value` is not readable.
+ - Or property `value` is missing in `{other: number, ...}` [1].
+
+   regressions.js:18:10
+   18|   return v.value; // ERROR
+                ^^^^^^^
+
+References:
+   regressions.js:14:37
+   14| type WithSetter = SetterInterface & {other: number, ...};
+                                           ^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------- regressions.js:58:1
+
+Cannot assign `42` to `writeonlyProp.value` because: [incompatible-use]
+ - Either `42` [1] is incompatible with `string` [2].
+ - Or property `value` is missing in `{other: number, ...}` [3].
+
+   regressions.js:58:1
+   58| writeonlyProp.value = 42; // ERROR
+       ^^^^^^^^^^^^^^^^^^^
+
+References:
+   regressions.js:58:23
+   58| writeonlyProp.value = 42; // ERROR
+                             ^^ [1]
+   regressions.js:55:40
+   55| type WriteonlyProp = {writeonly value: string, ...} & {other: number, ...};
+                                              ^^^^^^ [2]
+   regressions.js:55:55
+   55| type WriteonlyProp = {writeonly value: string, ...} & {other: number, ...};
+                                                             ^^^^^^^^^^^^^^^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- regressions.js:60:10
+
+Cannot get `v.value` because: [incompatible-use]
+ - Either property `value` is not readable.
+ - Or property `value` is missing in `{other: number, ...}` [1].
+
+   regressions.js:60:10
+   60|   return v.value; // ERROR
+                ^^^^^^^
+
+References:
+   regressions.js:55:55
+   55| type WriteonlyProp = {writeonly value: string, ...} & {other: number, ...};
+                                                             ^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------- regressions.js:66:1
+
+Cannot assign `42` to `writeonlyDict.value` because: [incompatible-use]
+ - Either `42` [1] is incompatible with `string` [2].
+ - Or property `value` is missing in `{other: number, ...}` [3].
+
+   regressions.js:66:1
+   66| writeonlyDict.value = 42; // ERROR
+       ^^^^^^^^^^^^^^^^^^^
+
+References:
+   regressions.js:66:23
+   66| writeonlyDict.value = 42; // ERROR
+                             ^^ [1]
+   regressions.js:63:48
+   63| type WriteonlyDict = {writeonly [key: string]: string, ...} & {other: number, ...};
+                                                      ^^^^^^ [2]
+   regressions.js:63:63
+   63| type WriteonlyDict = {writeonly [key: string]: string, ...} & {other: number, ...};
+                                                                     ^^^^^^^^^^^^^^^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- regressions.js:68:10
+
+Cannot get `v.value` because: [incompatible-use]
+ - Either property `value` is not readable.
+ - Or property `value` is missing in `{other: number, ...}` [1].
+
+   regressions.js:68:10
+   68|   return v.value; // ERROR
+                ^^^^^^^
+
+References:
+   regressions.js:63:63
+   63| type WriteonlyDict = {writeonly [key: string]: string, ...} & {other: number, ...};
+                                                                     ^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------- regressions.js:73:28
+
+Cannot assign `'changed'` to `importedReadonlyDictionary.key` because property `key` is not writable. [cannot-write]
+
+   73| importedReadonlyDictionary.key = 'changed'; // ERROR
+                                  ^^^
+
+
+Error --------------------------------------------------------------------------------------------- regressions.js:79:10
+
+Cannot return `v.extra` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   regressions.js:79:10
+   79|   return v.extra; // ERROR
+                ^^^^^^^
+
+References:
+   regressions.js:75:65
+   75| type NumericDictionary = {[key: number]: string, ...} & {extra: number, ...};
+                                                                       ^^^^^^ [1]
+   regressions.js:78:55
+   78| function readNumericDictionary(v: NumericDictionary): empty {
+                                                             ^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- regressions.js:85:1
+
+Cannot cast `inexactShared` to `ExactAndTypeScript` because inexact `{other: number, shared: string, ...}` [1] is
+incompatible with exact `{shared: string}` [2]. [incompatible-exact]
+
+   regressions.js:85:1
+   85| inexactShared as ExactAndTypeScript; // ERROR
+       ^^^^^^^^^^^^^
+
+References:
+   regressions.js:84:30
+   84| declare const inexactShared: {shared: string, other: number, ...};
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   regressions.js:83:27
+   83| type ExactAndTypeScript = {|shared: string|} & ImportedTypeScriptMember;
+                                 ^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- regressions.js:85:1
+
+Cannot cast `inexactShared` to `ExactAndTypeScript` because property `other` is extra in
+`{other: number, shared: string, ...}` [1] but missing in `{shared: string}` [2]. Exact objects do not accept extra
+props. [incompatible-type]
+
+   regressions.js:85:1
+   85| inexactShared as ExactAndTypeScript; // ERROR
+       ^^^^^^^^^^^^^
+
+References:
+   regressions.js:84:30
+   84| declare const inexactShared: {shared: string, other: number, ...};
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   regressions.js:83:27
+   83| type ExactAndTypeScript = {|shared: string|} & ImportedTypeScriptMember;
+                                 ^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:13:1
+
+Cannot cast `mergedObject.shared` to `"other"` because `"shared"` [1] is incompatible with `"other"` [2].
+[incompatible-type]
+
+   test.js:13:1
+   13| mergedObject.shared as 'other'; // ERROR: the overlapping property was normalized
+       ^^^^^^^^^^^^^^^^^^^
+
+References:
+   test.js:3:21
+                           v-----------------------------------
+    3| type MergedObject = {a: string, shared: string, ...} & {
+    4|   b: number,
+    5|   shared: 'shared',
+    6|   ...,
+    7| };
+       ^ [1]
+   test.js:13:24
+   13| mergedObject.shared as 'other'; // ERROR: the overlapping property was normalized
+                              ^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:18:22
+
+Cannot assign `'changed'` to `mergedReadonlyObject.left` because property `left` is not writable. [cannot-write]
+
+   18| mergedReadonlyObject.left = 'changed'; // ERROR: normalization preserves property polarity
+                            ^^^^
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:94:1
+
+Cannot cast `mergedGenericInterface.genericValue` to `number` because `string` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   test.js:94:1
+   94| mergedGenericInterface.genericValue as number; // ERROR: generic interfaces retain their type arguments
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   test.js:91:20
+   91|   GenericInterface<string> & {object: number, ...};
+                          ^^^^^^ [1]
+   test.js:94:40
+   94| mergedGenericInterface.genericValue as number; // ERROR: generic interfaces retain their type arguments
+                                              ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:105:1
+
+Cannot cast `mergedDerivedFromGenericInterface.genericValue` to `number` because `string` [1] is incompatible with
+`number` [2]. [incompatible-type]
+
+   test.js:105:1
+   105| mergedDerivedFromGenericInterface.genericValue as number; // ERROR: generic interface ancestors retain their type arguments
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   test.js:97:64
+    97| interface DerivedFromGenericInterface extends GenericInterface<string> {
+                                                                       ^^^^^^ [1]
+   test.js:105:51
+   105| mergedDerivedFromGenericInterface.genericValue as number; // ERROR: generic interface ancestors retain their type arguments
+                                                          ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:124:1
+
+Cannot cast `mergedRecursive.next.next.left` to `number` because `string` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   test.js:124:1
+   124| mergedRecursive.next.next.left as number; // ERROR: recursive normalization terminated
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   test.js:111:9
+   111|   left: string,
+                ^^^^^^ [1]
+   test.js:124:35
+   124| mergedRecursive.next.next.left as number; // ERROR: recursive normalization terminated
+                                          ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:156:1
+
+Cannot cast `'other'` to `StringLiteral` because `"other"` [1] is incompatible with `"literal"` [2]. [incompatible-type]
+
+   test.js:156:1
+   156| 'other' as StringLiteral; // ERROR: string singleton is preserved
+        ^^^^^^^ [1]
+
+References:
+   test.js:156:12
+   156| 'other' as StringLiteral; // ERROR: string singleton is preserved
+                   ^^^^^^^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:160:1
+
+Cannot cast `41` to `NumberLiteral` because `41` [1] is incompatible with `42` [2]. [incompatible-type]
+
+   test.js:160:1
+   160| 41 as NumberLiteral; // ERROR: number singleton is preserved
+        ^^ [1]
+
+References:
+   test.js:160:7
+   160| 41 as NumberLiteral; // ERROR: number singleton is preserved
+              ^^^^^^^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:164:1
+
+Cannot cast `41n` to `BigIntLiteral` because `41n` [1] is incompatible with `42n` [2]. [incompatible-type]
+
+   test.js:164:1
+   164| 41n as BigIntLiteral; // ERROR: bigint singleton is preserved
+        ^^^ [1]
+
+References:
+   test.js:164:8
+   164| 41n as BigIntLiteral; // ERROR: bigint singleton is preserved
+               ^^^^^^^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:168:1
+
+Cannot cast `false` to `BooleanLiteral` because `false` [1] is incompatible with `true` [2]. [incompatible-type]
+
+   test.js:168:1
+   168| false as BooleanLiteral; // ERROR: boolean singleton is preserved
+        ^^^^^ [1]
+
+References:
+   test.js:168:10
+   168| false as BooleanLiteral; // ERROR: boolean singleton is preserved
+                 ^^^^^^^^^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------------- test.js:202:33
+
+Cannot normalize this intersection because property `exactLeft` is missing in exact object `{exactRight: number}` [1].
+[invalid-exact]
+
+   test.js:202:33
+                                        v-------------------------
+   202| type InvalidExactIntersection = {|exactLeft: string|} & {|
+   203|   exactRight: number,
+   204| |}; // ERROR: each exact object lacks the other's required property
+        -^
+
+References:
+   test.js:202:57
+                                                                v-
+   202| type InvalidExactIntersection = {|exactLeft: string|} & {|
+   203|   exactRight: number,
+   204| |}; // ERROR: each exact object lacks the other's required property
+        -^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:213:1
+
+Cannot cast `sameExactObjects.foo` to `number` because `string` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   test.js:213:1
+   213| sameExactObjects.foo as number; // ERROR: identical exact objects normalize
+        ^^^^^^^^^^^^^^^^^^^^
+
+References:
+   test.js:210:31
+   210| type SameExactObjects = {foo: string} & {foo: string};
+                                      ^^^^^^ [1]
+   test.js:213:25
+   213| sameExactObjects.foo as number; // ERROR: identical exact objects normalize
+                                ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:221:1
+
+Cannot cast `exactAndInexact.exactShared` to `"other"` because `"shared"` [1] is incompatible with `"other"` [2].
+[incompatible-type]
+
+   test.js:221:1
+   221| exactAndInexact.exactShared as 'other'; // ERROR: the overlapping property was normalized
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   test.js:215:24
+                               v---------------------------------------------
+   215| type ExactAndInexact = {|exactShared: string, exactOnly: number|} & {
+   216|   exactShared: 'shared',
+   217|   ...,
+   218| };
+        ^ [1]
+   test.js:221:32
+   221| exactAndInexact.exactShared as 'other'; // ERROR: the overlapping property was normalized
+                                       ^^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------------- test.js:235:36
+
+Cannot normalize this intersection because property `inexactRequired` is missing in exact object
+`{exactKey: string}` [1]. [invalid-exact]
+
+   test.js:235:36
+                                           v-----------------------
+   235| type ExactMissingInexactRequired = {|exactKey: string|} & {
+   236|   inexactRequired: number,
+   237|   ...,
+   238| }; // ERROR: the exact object lacks a required property
+        ^
+
+References:
+   test.js:235:36
+   235| type ExactMissingInexactRequired = {|exactKey: string|} & {
+                                           ^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+
+Found 24 errors

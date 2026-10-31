@@ -514,7 +514,8 @@ fn t_of_use_t<'cx>(
                         ))))
                     })
                 }
-                box Destructor::ExactType
+                box Destructor::NormalizeIntersection { .. }
+                | box Destructor::ExactType
                 | box Destructor::ReadOnlyType
                 | box Destructor::ReactDRO(_)
                 | box Destructor::PartialType

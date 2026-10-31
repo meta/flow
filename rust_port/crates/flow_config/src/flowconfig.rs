@@ -222,6 +222,7 @@ pub mod opts {
         pub node_resolver_allow_root_relative: bool,
         pub node_resolver_dirnames: Vec<String>,
         pub node_resolver_root_relative_dirnames: Vec<(Option<String>, String)>,
+        pub normalize_intersections: bool,
         pub pattern_matching: Option<bool>,
         pub projects: Vec<FlowSmolStr>,
         pub projects_overlap_mapping: BTreeMap<FlowSmolStr, BTreeSet<FlowSmolStr>>,
@@ -363,6 +364,7 @@ pub mod opts {
             node_resolver_allow_root_relative: false,
             node_resolver_dirnames: vec!["node_modules".to_owned()],
             node_resolver_root_relative_dirnames: vec![(None, String::new())],
+            normalize_intersections: false,
             pattern_matching: None,
             projects: vec![FlowSmolStr::new_inline("default")],
             projects_overlap_mapping: BTreeMap::new(),
@@ -2149,6 +2151,16 @@ pub mod opts {
                 "experimental.multi_platform.extension_group_mapping",
                 |values, config| multi_platform_extension_group_mapping_parser(values, config),
             ),
+            ("experimental.normalize_intersections", |values, config| {
+                parse_boolean(
+                    |opts, v| {
+                        opts.normalize_intersections = v;
+                        Ok(())
+                    },
+                    values,
+                    config,
+                )
+            }),
             ("experimental.projects", |values, config| {
                 projects_parser(values, config)
             }),

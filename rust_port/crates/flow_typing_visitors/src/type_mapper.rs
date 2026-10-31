@@ -1353,7 +1353,8 @@ pub fn destructor_default<'cx, A, M: TypeMapper<'cx, A> + ?Sized>(
                 Rc::new(Destructor::ReactCheckComponentConfig { props: props_prime })
             }
         }
-        Destructor::ReactDRO(_)
+        Destructor::NormalizeIntersection { .. }
+        | Destructor::ReactDRO(_)
         | Destructor::NonMaybeType
         | Destructor::PropertyType { .. }
         | Destructor::OptionalIndexedAccessResultType { .. } => t.dupe(),
