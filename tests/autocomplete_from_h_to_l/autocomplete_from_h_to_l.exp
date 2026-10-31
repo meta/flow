@@ -2572,7 +2572,7 @@ Flags: --pretty
     },
     {
       "name":"?.splice",
-      "type":"void | ((this: this, start: number, deleteCount?: number, ...items: Array<T>) => Array<T>)"
+      "type":"void | ((this: this, start: number, deleteCount: number, ...items: Array<T>) => Array<T>)"
     },
     {"name":"?.toLocaleString","type":"void | ((this: this) => string)"},
     {"name":"?.toReversed","type":"void | ((this: this) => Array<T>)"},
@@ -2697,7 +2697,7 @@ Flags: --pretty
     },
     {
       "name":"splice",
-      "type":"(this: this, start: number, deleteCount?: number, ...items: Array<T>) => Array<T>"
+      "type":"(this: this, start: number, deleteCount: number, ...items: Array<T>) => Array<T>"
     },
     {"name":"toLocaleString","type":"(this: this) => string"},
     {"name":"toReversed","type":"(this: this) => Array<T>"},
