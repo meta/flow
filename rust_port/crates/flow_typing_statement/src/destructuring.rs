@@ -392,8 +392,7 @@ fn identifier<'a>(
             let desc = r.desc(false);
             let new_desc = match desc {
                 Some(
-                    VirtualReasonDesc::RDefaultValue
-                    | VirtualReasonDesc::RArrayPatternRestProp
+                    VirtualReasonDesc::RArrayPatternRestProp
                     | VirtualReasonDesc::RObjectPatternRestProp,
                 ) => Some(VirtualReasonDesc::RIdentifier(name.dupe())),
                 _ => desc.cloned(),

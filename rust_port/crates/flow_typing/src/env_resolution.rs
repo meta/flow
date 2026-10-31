@@ -421,7 +421,7 @@ fn mk_selector_reason_has_default<'cx>(
         }
         Selector::Default => (
             type_::Selector::Default,
-            reason::mk_reason(reason::VirtualReasonDesc::RDefaultValue, loc.dupe()),
+            reason::mk_reason(None, loc.dupe()),
             false,
         ),
     })
