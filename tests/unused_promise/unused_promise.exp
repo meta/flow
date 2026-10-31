@@ -164,8 +164,8 @@ out-of-bounds array accesses, etc.). If the check is valid, you might want to ma
              ^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1523:107
-   1523|     catch<TResult = never>(onrejected: null | undefined | ((reason: any) => Promise<TResult> | TResult)): Promise<T | TResult>;
+   <BUILTINS>/lib.es5.js:1519:107
+   1519|     catch<TResult = never>(onrejected: null | undefined | ((reason: any) => Promise<TResult> | TResult)): Promise<T | TResult>;
                                                                                                                    ^^^^^^^^^^^^^^^^^^^^ [1]
 
 

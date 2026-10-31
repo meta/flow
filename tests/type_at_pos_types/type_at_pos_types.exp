@@ -34,14 +34,14 @@ array.js
 At array.js:3:19
 class Array<T>
 
-'Array' defined at (lib) lib.es5.js:1264:14
+'Array' defined at (lib) lib.es5.js:1260:14
 
 array.js:3:16,3:20
 
 At array.js:5:26
 class ReadonlyArray<out T>
 
-'ReadonlyArray' defined at (lib) lib.es5.js:1143:14
+'ReadonlyArray' defined at (lib) lib.es5.js:1139:14
 
 array.js:5:24,5:36
 
