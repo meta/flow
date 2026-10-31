@@ -1,4 +1,7 @@
-dro.js:2:9 = (method) sort(compareFn?: (a: number, b: number) => number): Array<number>
+dro.js:2:9 = 
+ Sorts an array in place.
+ This method mutates the array and returns a reference to the same array.
+(method) sort(compareFn?: (a: number, b: number) => number): Array<number>
 dro.js:2:9,2:12
 lazy_ref.js:14:9 = const x: {
   default: component(

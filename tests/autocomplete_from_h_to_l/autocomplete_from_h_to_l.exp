@@ -2489,7 +2489,7 @@ Flags: --pretty
     },
     {
       "name":"?.every",
-      "type":"void | (<This>(this: this, callbackfn: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => boolean)"
+      "type":"void | (<This>(this: this, predicate: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => boolean)"
     },
     {
       "name":"?.fill",
@@ -2497,7 +2497,7 @@ Flags: --pretty
     },
     {
       "name":"?.filter",
-      "type":"void | (<This>(this: this, callbackfn: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => Array<T>)"
+      "type":"void | (<This>(this: this, predicate: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => Array<T>)"
     },
     {
       "name":"?.find",
@@ -2564,7 +2564,7 @@ Flags: --pretty
     },
     {
       "name":"?.some",
-      "type":"void | (<This>(this: this, callbackfn: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => boolean)"
+      "type":"void | (<This>(this: this, predicate: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => boolean)"
     },
     {
       "name":"?.sort",
@@ -2613,7 +2613,7 @@ Flags: --pretty
     {"name":"entries","type":"(this: this) => ArrayIterator<[number, T]>"},
     {
       "name":"every",
-      "type":"<This>(this: this, callbackfn: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => boolean"
+      "type":"<This>(this: this, predicate: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => boolean"
     },
     {
       "name":"fill",
@@ -2621,7 +2621,7 @@ Flags: --pretty
     },
     {
       "name":"filter",
-      "type":"<This>(this: this, callbackfn: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => Array<T>"
+      "type":"<This>(this: this, predicate: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => Array<T>"
     },
     {
       "name":"find",
@@ -2688,7 +2688,7 @@ Flags: --pretty
     },
     {
       "name":"some",
-      "type":"<This>(this: this, callbackfn: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => boolean"
+      "type":"<This>(this: this, predicate: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => boolean"
     },
     {
       "name":"sort",

@@ -21,9 +21,9 @@ References:
    no_source.js:13:16
      13|   readonly z : (x: FooPlus) => boolean = (x) => { return true; }
                         ^^^^^^^^^^^^^^^^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:1286:24
-   1286|     filter(callbackfn: typeof Boolean): Array<NonNullable<T>>;
-                                ^^^^^^^^^^^^^^ [4]
+   <BUILTINS>/lib.es5.js:1303:23
+   1303|     filter(predicate: typeof Boolean): Array<NonNullable<T>>;
+                               ^^^^^^^^^^^^^^ [4]
 
 
 

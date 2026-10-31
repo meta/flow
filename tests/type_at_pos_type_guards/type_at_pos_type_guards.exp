@@ -13,7 +13,7 @@ Flags:
 
  Returns the elements of an array that meet the condition specified in a callback function.
 (method) filter(
-  callbackfn: (
+  predicate: (
     this: void,
     value: 0 | 1,
     index: number,
