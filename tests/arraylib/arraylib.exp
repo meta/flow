@@ -53,8 +53,8 @@ References:
    array_lib.js:13:14
      13| var e: Array<string> = a.reverse();
                       ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1071:16
-   1071|     reverse(): Array<T>;
+   <BUILTINS>/lib.es5.js:1184:16
+   1184|     reverse(): Array<T>;
                         ^^^^^^^^ [3]
    array_lib.js:13:8
      13| var e: Array<string> = a.reverse();
@@ -76,14 +76,14 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
                                ^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:845:53
-   845|     >(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
+   <BUILTINS>/lib.es5.js:958:53
+   958|     >(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
                                                             ^^^^^ [1]
    array_lib.js:26:14
     26| var n: Array<number> = h.concat('a', 'b', 'c'); // Error
                      ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:845:47
-   845|     >(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
+   <BUILTINS>/lib.es5.js:958:47
+   958|     >(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
                                                       ^^^^^^^^^^^^ [3]
    array_lib.js:26:8
     26| var n: Array<number> = h.concat('a', 'b', 'c'); // Error
@@ -139,14 +139,14 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
            ^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1118:37
-   1118|     static from(str: string): Array<string>;
+   <BUILTINS>/lib.es5.js:1231:37
+   1231|     static from(str: string): Array<string>;
                                              ^^^^^^ [1]
    array_lib.js:71:31
      71|   Array.from('abcd') as Array<empty>; // ERROR
                                        ^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1118:31
-   1118|     static from(str: string): Array<string>;
+   <BUILTINS>/lib.es5.js:1231:31
+   1231|     static from(str: string): Array<string>;
                                        ^^^^^^^^^^^^^ [3]
    array_lib.js:71:25
      71|   Array.from('abcd') as Array<empty>; // ERROR
@@ -179,8 +179,8 @@ References:
    array_lib.js:75:20
      75|   const arrayLike: ArrayLike<string> = {0: 'hello', length: 1};
                             ^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/lib.es5.js:1113:31
-   1113|     static from<A, This>(str: string, mapFn: (this: This, elem: string, index: number) => A, thisArg: This): Array<A>;
+   <BUILTINS>/lib.es5.js:1226:31
+   1226|     static from<A, This>(str: string, mapFn: (this: This, elem: string, index: number) => A, thisArg: This): Array<A>;
                                        ^^^^^^ [5]
 
 
@@ -409,8 +409,8 @@ References:
    <BUILTINS>/lib.es5.js:391:22
     391|     readonly length: number;
                               ^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:1008:109
-   1008|     filter<This, S extends T>(callbackfn: (this: This, value: T, index: number, array: ReadonlyArray<T>) => implies value is S, thisArg: This): Array<S>;
+   <BUILTINS>/lib.es5.js:1121:109
+   1121|     filter<This, S extends T>(callbackfn: (this: This, value: T, index: number, array: ReadonlyArray<T>) => implies value is S, thisArg: This): Array<S>;
                                                                                                                      ^^^^^^^^^^^^^^^^^^ [2]
    filter_error_msg_quality_test.js:2:30
       2| declare const str_arr: Array<string>;
@@ -443,8 +443,8 @@ References:
    filter_error_msg_quality_test.js:7:25
       7| nullable_str_arr.filter(s => !!s) as Array<string>;
                                  ^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:1001:24
-   1001|     filter(callbackfn: typeof Boolean): Array<NonNullable<T>>;
+   <BUILTINS>/lib.es5.js:1114:24
+   1114|     filter(callbackfn: typeof Boolean): Array<NonNullable<T>>;
                                 ^^^^^^^^^^^^^^ [4]
 
 

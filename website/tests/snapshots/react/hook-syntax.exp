@@ -93,19 +93,19 @@ React component properties [3] and their nested props and elements cannot be wri
 React hooks and other functions are not compatible with each other, because hooks cannot be called conditionally.
 
    -:11:29
-    11|   const multArgs = args.map(useMultiplier); // Error [react-rule-hook-incompatible]
-                                    ^^^^^^^^^^^^^
+     11|   const multArgs = args.map(useMultiplier); // Error [react-rule-hook-incompatible]
+                                     ^^^^^^^^^^^^^
 
 References:
    -:4:1
-     4| hook useMultiplier(x: number): number {
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:913:30
-   913|     map<U, This>(callbackfn: (this : This, value: T, index: number, array: ReadonlyArray<T>) => U, thisArg: This): Array<U>;
-                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+      4| hook useMultiplier(x: number): number {
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1026:30
+   1026|     map<U, This>(callbackfn: (this : This, value: T, index: number, array: ReadonlyArray<T>) => U, thisArg: This): Array<U>;
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    -:10:18
-    10| component Mapper(args: Array<number>) {
-                         ^^^^^^^^^^^^^^^^^^^ [3]
+     10| component Mapper(args: Array<number>) {
+                          ^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Found 1 error

@@ -445,8 +445,8 @@ Cannot assign `arr[0]()` to `y` because `number` [1] is incompatible with `strin
                            ^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1090:13
-   1090|     length: number;
+   <BUILTINS>/lib.es5.js:1203:13
+   1203|     length: number;
                      ^^^^^^ [1]
    test7.js:5:10
       5| const y: string = arr[0](); // errors: recursive function incompatibility and number ~> string

@@ -691,22 +691,22 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    type_only_react_namespace.js:5:3
-     5|   Array as React.Node; // error
-          ^^^^^
+      5|   Array as React.Node; // error
+           ^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:981:15
-   981| declare class Array<T> extends ReadonlyArray<T> {
-                      ^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1094:15
+   1094| declare class Array<T> extends ReadonlyArray<T> {
+                       ^^^^^ [1]
    <BUILTINS>/react.js:21:5
-    21|   | ExactReactElement_DEPRECATED<any>
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+     21|   | ExactReactElement_DEPRECATED<any>
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/react.js:22:5
-    22|   | React$Portal
-            ^^^^^^^^^^^^ [3]
+     22|   | React$Portal
+             ^^^^^^^^^^^^ [3]
    <BUILTINS>/react.js:23:5
-    23|   | Iterable<?React$Node>;
-            ^^^^^^^^^^^^^^^^^^^^^ [4]
+     23|   | Iterable<?React$Node>;
+             ^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error -------------------------------------------------------------------------------- type_only_react_namespace.js:12:3
@@ -720,22 +720,22 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    type_only_react_namespace.js:12:3
-    12|   Array as React.Node; // error
-          ^^^^^
+     12|   Array as React.Node; // error
+           ^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:981:15
-   981| declare class Array<T> extends ReadonlyArray<T> {
-                      ^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1094:15
+   1094| declare class Array<T> extends ReadonlyArray<T> {
+                       ^^^^^ [1]
    <BUILTINS>/react.js:21:5
-    21|   | ExactReactElement_DEPRECATED<any>
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+     21|   | ExactReactElement_DEPRECATED<any>
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/react.js:22:5
-    22|   | React$Portal
-            ^^^^^^^^^^^^ [3]
+     22|   | React$Portal
+             ^^^^^^^^^^^^ [3]
    <BUILTINS>/react.js:23:5
-    23|   | Iterable<?React$Node>;
-            ^^^^^^^^^^^^^^^^^^^^^ [4]
+     23|   | Iterable<?React$Node>;
+             ^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------- typing_test.js:7:1

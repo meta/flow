@@ -66,19 +66,19 @@ Cannot cast `numbers` to `StringArrayWithExtra` because in type argument `T` [1]
 `string` [3]. [incompatible-type]
 
    extends_class.js:13:1
-    13| numbers as StringArrayWithExtra; // Error: `extra` is missing, and `number` is not `string`
-        ^^^^^^^
+     13| numbers as StringArrayWithExtra; // Error: `extra` is missing, and `number` is not `string`
+         ^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:981:21
-   981| declare class Array<T> extends ReadonlyArray<T> {
-                            ^ [1]
+   <BUILTINS>/lib.es5.js:1094:21
+   1094| declare class Array<T> extends ReadonlyArray<T> {
+                             ^ [1]
    extends_class.js:12:30
-    12| declare const numbers: Array<number>;
-                                     ^^^^^^ [2]
+     12| declare const numbers: Array<number>;
+                                      ^^^^^^ [2]
    extends_class.js:5:46
-     5| interface StringArrayWithExtra extends Array<string> {
-                                                     ^^^^^^ [3]
+      5| interface StringArrayWithExtra extends Array<string> {
+                                                      ^^^^^^ [3]
 
 
 Error -------------------------------------------------------------------------------------------- extends_class.js:21:1
@@ -848,8 +848,8 @@ References:
    indexer.js:129:19
     129|   values as Array<number>; // ERROR
                            ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1099:59
-   1099|     static from<T>(iterable: Iterable<T> | ArrayLike<T>): Array<T>;
+   <BUILTINS>/lib.es5.js:1212:59
+   1212|     static from<T>(iterable: Iterable<T> | ArrayLike<T>): Array<T>;
                                                                    ^^^^^^^^ [3]
    indexer.js:129:13
     129|   values as Array<number>; // ERROR

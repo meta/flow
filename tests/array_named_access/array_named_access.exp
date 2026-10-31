@@ -7,8 +7,8 @@ Cannot cast `arr['length']` to `string` because `number` [1] is incompatible wit
          ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1090:13
-   1090|     length: number;
+   <BUILTINS>/lib.es5.js:1203:13
+   1203|     length: number;
                      ^^^^^^ [1]
    test.js:17:18
      17| arr['length'] as string; // ERROR: number is not string
@@ -38,8 +38,8 @@ Cannot assign `'x'` to `arr['length']` because `"x"` [1] is incompatible with `n
                          ^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:1090:13
-   1090|     length: number;
+   <BUILTINS>/lib.es5.js:1203:13
+   1203|     length: number;
                      ^^^^^^ [2]
 
 
@@ -145,13 +145,13 @@ Cannot get `arr['9007199254740993']` because `"9007199254740993"` [1] is incompa
 [incompatible-type]
 
    test.js:53:1
-    53| arr['9007199254740993']; // ERROR: outside the safe-integer range, so a named key
-        ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+     53| arr['9007199254740993']; // ERROR: outside the safe-integer range, so a named key
+         ^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:967:20
-   967|     readonly [key: number]: T;
-                           ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:1080:20
+   1080|     readonly [key: number]: T;
+                            ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:54:1
@@ -159,13 +159,13 @@ Error --------------------------------------------------------------------------
 Cannot get `arr['1.5']` because `"1.5"` [1] is incompatible with `number` [2]. [incompatible-type]
 
    test.js:54:1
-    54| arr['1.5']; // ERROR: not an integer, so a named key
-        ^^^^^^^^^^ [1]
+     54| arr['1.5']; // ERROR: not an integer, so a named key
+         ^^^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:967:20
-   967|     readonly [key: number]: T;
-                           ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:1080:20
+   1080|     readonly [key: number]: T;
+                            ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:55:1
@@ -173,13 +173,13 @@ Error --------------------------------------------------------------------------
 Cannot get `arr['01']` because `"01"` [1] is incompatible with `number` [2]. [incompatible-type]
 
    test.js:55:1
-    55| arr['01']; // ERROR: not a canonical integer, so a named key
-        ^^^^^^^^^ [1]
+     55| arr['01']; // ERROR: not a canonical integer, so a named key
+         ^^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:967:20
-   967|     readonly [key: number]: T;
-                           ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:1080:20
+   1080|     readonly [key: number]: T;
+                            ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:56:1
@@ -187,13 +187,13 @@ Error --------------------------------------------------------------------------
 Cannot get `arr['nope']` because `"nope"` [1] is incompatible with `number` [2]. [incompatible-type]
 
    test.js:56:1
-    56| arr['nope']; // ERROR: no such named member
-        ^^^^^^^^^^^ [1]
+     56| arr['nope']; // ERROR: no such named member
+         ^^^^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:967:20
-   967|     readonly [key: number]: T;
-                           ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:1080:20
+   1080|     readonly [key: number]: T;
+                            ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:57:1
@@ -202,13 +202,13 @@ Cannot get `tup['9007199254740993']` because `"9007199254740993"` [1] is incompa
 [incompatible-type]
 
    test.js:57:1
-    57| tup['9007199254740993']; // ERROR: outside the safe-integer range, so a named key
-        ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+     57| tup['9007199254740993']; // ERROR: outside the safe-integer range, so a named key
+         ^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:967:20
-   967|     readonly [key: number]: T;
-                           ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:1080:20
+   1080|     readonly [key: number]: T;
+                            ^^^^^^ [2]
 
 
 

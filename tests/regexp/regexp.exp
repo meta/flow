@@ -3,16 +3,16 @@ Error --------------------------------------------------------------------------
 Cannot assign `patt.test(...)` to `match` because `boolean` [1] is incompatible with `number` [2]. [incompatible-type]
 
    regexp.js:2:20
-      2| var match:number = patt.test("Hello world!");
-                            ^^^^^^^^^^^^^^^^^^^^^^^^^
+     2| var match:number = patt.test("Hello world!");
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1416:27
-   1416|     test(string: string): boolean;
-                                   ^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:867:27
+   867|     test(string: string): boolean;
+                                  ^^^^^^^ [1]
    regexp.js:2:11
-      2| var match:number = patt.test("Hello world!");
-                   ^^^^^^ [2]
+     2| var match:number = patt.test("Hello world!");
+                  ^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- regexp.js:5:1
@@ -21,13 +21,13 @@ Cannot cast `regExp[Symbol.matchAll]` to `(str: string) => Iterator<RegExp$match
 parameter: `RegExp` [1] is incompatible with `unknown`. [incompatible-type]
 
    regexp.js:5:1
-      5| regExp[Symbol.matchAll] as (str: string) => Iterator<RegExp$matchResult>; // error: the method's `this` is `RegExp`
-         ^^^^^^^^^^^^^^^^^^^^^^^
+     5| regExp[Symbol.matchAll] as (str: string) => Iterator<RegExp$matchResult>; // error: the method's `this` is `RegExp`
+        ^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1405:11
-   1405| interface RegExp {
-                   ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:856:11
+   856| interface RegExp {
+                  ^^^^^^ [1]
 
 
 Error ---------------------------------------------------------------------------------------------------- regexp.js:6:1
@@ -36,13 +36,13 @@ Cannot cast `regExp[Symbol.match]` to `(str: string) => Iterator<RegExp$matchRes
 `RegExp` [1] is incompatible with `unknown`. [incompatible-type]
 
    regexp.js:6:1
-      6| regExp[Symbol.match] as (str: string) => Iterator<RegExp$matchResult>; // error: the method's `this` is `RegExp` and it returns `RegExpMatchArray | null`
-         ^^^^^^^^^^^^^^^^^^^^
+     6| regExp[Symbol.match] as (str: string) => Iterator<RegExp$matchResult>; // error: the method's `this` is `RegExp` and it returns `RegExpMatchArray | null`
+        ^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1405:11
-   1405| interface RegExp {
-                   ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:856:11
+   856| interface RegExp {
+                  ^^^^^^ [1]
 
 
 Error ---------------------------------------------------------------------------------------------------- regexp.js:6:1

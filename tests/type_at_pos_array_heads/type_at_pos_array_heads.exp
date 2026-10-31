@@ -2,7 +2,7 @@ test.js:3:16
 Flags:
 class Array<T>
 
-'Array' defined at (lib) lib.es5.js:981:14
+'Array' defined at (lib) lib.es5.js:1094:14
 
 test.js:3:16,3:20
 
@@ -12,7 +12,7 @@ Flags:
  A class of Array methods and properties that don't mutate the array.
 class ReadonlyArray<out T>
 
-'ReadonlyArray' defined at (lib) lib.es5.js:831:14
+'ReadonlyArray' defined at (lib) lib.es5.js:944:14
 
 test.js:6:16,6:28
 

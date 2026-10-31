@@ -448,16 +448,16 @@ Cannot call `Array` because `T` [1] is underconstrained by new `Array` [2]. Eith
 the expression to your expected type. [underconstrained-implicit-instantiation]
 
    misc.js:3:13
-     3| var e = new Array(10);
-                    ^^^^^
+      3| var e = new Array(10);
+                     ^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:981:21
-   981| declare class Array<T> extends ReadonlyArray<T> {
-                            ^ [1]
+   <BUILTINS>/lib.es5.js:1094:21
+   1094| declare class Array<T> extends ReadonlyArray<T> {
+                             ^ [1]
    misc.js:3:9
-     3| var e = new Array(10);
-                ^^^^^^^^^^^^^ [2]
+      3| var e = new Array(10);
+                 ^^^^^^^^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- misc.js:15:7
