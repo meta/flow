@@ -1301,7 +1301,8 @@ pub struct ComponentRestParamCompatibilityData<L: Dupe + PartialEq + Eq + Partia
 pub struct PositiveTypeGuardConsistencyData<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     pub reason: VirtualReason<L>,
     pub return_reason: VirtualReason<L>,
-    pub param_reason: VirtualReason<L>,
+    pub param_loc: L,
+    pub param_name: FlowSmolStr,
     pub guard_type_reference_loc: L,
     pub guard_type: type_or_type_desc::TypeOrTypeDescT<L>,
     pub is_return_false_statement: bool,
@@ -1322,7 +1323,8 @@ pub struct AssertionFunctionConsistencyData<L: Dupe + PartialEq + Eq + PartialOr
     /// The `return`, or the `asserts` annotation when control reaches the end
     /// of the function body.
     pub exit_reason: VirtualReason<L>,
-    pub param_reason: VirtualReason<L>,
+    pub param_loc: L,
+    pub param_name: FlowSmolStr,
     pub guard_type_reference_loc: L,
     pub guard_type: type_or_type_desc::TypeOrTypeDescT<L>,
     pub implicit_return: bool,

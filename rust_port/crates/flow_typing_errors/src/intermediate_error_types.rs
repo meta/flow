@@ -1156,12 +1156,12 @@ pub enum Explanation<L: Dupe> {
     ExplanationReactHookReturnDeepReadOnly(L),
     ExplanationTypeGuardPositiveConsistency {
         return_: VirtualReason<L>,
-        param: VirtualReason<L>,
+        param: TypeGuardReferenceData<L>,
         guard_type: MessageTypeReferenceData<L>,
         is_return_false_statement: bool,
     },
     ExplanationAssertionFunctionConsistency {
-        param: VirtualReason<L>,
+        param: TypeGuardReferenceData<L>,
         guard_type: MessageTypeReferenceData<L>,
     },
     ExplanationAdditionalUnionMembers(Box<ExplanationAdditionalUnionMembersData<L>>),

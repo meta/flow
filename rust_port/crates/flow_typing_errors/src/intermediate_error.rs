@@ -2245,7 +2245,8 @@ where
                             VirtualRootUseOp::PositiveTypeGuardConsistency(
                                 box PositiveTypeGuardConsistencyData {
                                     return_reason,
-                                    param_reason,
+                                    param_loc,
+                                    param_name,
                                     guard_type_reference_loc,
                                     guard_type,
                                     is_return_false_statement,
@@ -2256,7 +2257,16 @@ where
                                 explanations.push(
                                     Explanation::ExplanationTypeGuardPositiveConsistency {
                                         return_: return_reason.dupe(),
-                                        param: param_reason.dupe(),
+                                        param: TypeGuardReferenceData {
+                                            loc: param_loc.dupe(),
+                                            kind: if param_name == "this" {
+                                                TypeGuardReferenceKind::This
+                                            } else {
+                                                TypeGuardReferenceKind::Parameter(Some(
+                                                    param_name.dupe(),
+                                                ))
+                                            },
+                                        },
                                         guard_type: MessageTypeReferenceData {
                                             loc: guard_type_reference_loc.dupe(),
                                             desc: printed_type_desc(guard_type),
@@ -2276,7 +2286,8 @@ where
                             VirtualRootUseOp::AssertionFunctionConsistency(
                                 box AssertionFunctionConsistencyData {
                                     exit_reason,
-                                    param_reason,
+                                    param_loc,
+                                    param_name,
                                     guard_type_reference_loc,
                                     guard_type,
                                     implicit_return,
@@ -2285,7 +2296,16 @@ where
                                 let (all_frames, mut explanations) = frames;
                                 explanations.push(
                                     Explanation::ExplanationAssertionFunctionConsistency {
-                                        param: param_reason.dupe(),
+                                        param: TypeGuardReferenceData {
+                                            loc: param_loc.dupe(),
+                                            kind: if param_name == "this" {
+                                                TypeGuardReferenceKind::This
+                                            } else {
+                                                TypeGuardReferenceKind::Parameter(Some(
+                                                    param_name.dupe(),
+                                                ))
+                                            },
+                                        },
                                         guard_type: MessageTypeReferenceData {
                                             loc: guard_type_reference_loc.dupe(),
                                             desc: printed_type_desc(guard_type),
@@ -4452,6 +4472,24 @@ where
             }
         };
 
+    let hardcoded_string_desc_ref = |s: &str, loc: &L| -> friendly::MessageFeature<Loc> {
+        friendly::hardcoded_string_desc_ref(s, loc_of_aloc(loc))
+    };
+
+    let type_guard_description = |kind: &TypeGuardReferenceKind| match kind {
+        TypeGuardReferenceKind::TypeGuard => "type guard".to_string(),
+        TypeGuardReferenceKind::Parameter(Some(name)) => format!("`{name}`"),
+        TypeGuardReferenceKind::Parameter(None) => "parameter".to_string(),
+        TypeGuardReferenceKind::TypeGuardParameter(name) => {
+            format!("type guard parameter `{name}`")
+        }
+        TypeGuardReferenceKind::This => "this".to_string(),
+    };
+
+    let type_guard_reference = |reference: &TypeGuardReferenceData<L>| {
+        hardcoded_string_desc_ref(&type_guard_description(&reference.kind), &reference.loc)
+    };
+
     let explanation_to_friendly_msgs = |explanation: &Explanation<L>| -> friendly::Message<Loc> {
         use super::intermediate_error_types::Explanation::*;
 
@@ -4515,7 +4553,7 @@ where
             } => {
                 let mut features = vec![
                     text("The type of "),
-                    ref_(param),
+                    type_guard_reference(param),
                     text(" at the return expression "),
                     ref_(return_),
                     text(" needs to be compatible with the guard type "),
@@ -4535,7 +4573,7 @@ where
             ExplanationAssertionFunctionConsistency { param, guard_type } => {
                 friendly::Message(vec![
                     text("The type of "),
-                    ref_(param),
+                    type_guard_reference(param),
                     text(" needs to be compatible with the asserted type "),
                     ref_of_type_desc(&guard_type.loc, &guard_type.desc),
                     text(" wherever the function returns normally. Throw an error or call "),
@@ -5170,24 +5208,6 @@ where
                 ]),
             ),
         }
-    };
-
-    let hardcoded_string_desc_ref = |s: &str, loc: &L| -> friendly::MessageFeature<Loc> {
-        friendly::hardcoded_string_desc_ref(s, loc_of_aloc(loc))
-    };
-
-    let type_guard_description = |kind: &TypeGuardReferenceKind| match kind {
-        TypeGuardReferenceKind::TypeGuard => "type guard".to_string(),
-        TypeGuardReferenceKind::Parameter(Some(name)) => format!("`{name}`"),
-        TypeGuardReferenceKind::Parameter(None) => "parameter".to_string(),
-        TypeGuardReferenceKind::TypeGuardParameter(name) => {
-            format!("type guard parameter `{name}`")
-        }
-        TypeGuardReferenceKind::This => "this".to_string(),
-    };
-
-    let type_guard_reference = |reference: &TypeGuardReferenceData<L>| {
-        hardcoded_string_desc_ref(&type_guard_description(&reference.kind), &reference.loc)
     };
 
     let type_guard_parameter_reference = |parameter: &TypeGuardParameterData<L>| {

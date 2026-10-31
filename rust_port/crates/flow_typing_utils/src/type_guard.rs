@@ -132,7 +132,8 @@ fn check_type_guard_consistency<'cx>(
                                 VirtualRootUseOp::PositiveTypeGuardConsistency(Box::new(
                                     PositiveTypeGuardConsistencyData {
                                         reason: reason.dupe(),
-                                        param_reason: param_reason.dupe(),
+                                        param_loc: param_loc.dupe(),
+                                        param_name: name.dupe(),
                                         guard_type_reference_loc: ref_loc_of_t(type_guard).dupe(),
                                         guard_type: flow_js_utils::type_or_type_desc_for_error(
                                             type_guard,
@@ -282,7 +283,8 @@ fn check_assertion_consistency<'cx>(
                 let use_op = UseOp::Op(Arc::new(VirtualRootUseOp::AssertionFunctionConsistency(
                     Box::new(AssertionFunctionConsistencyData {
                         exit_reason,
-                        param_reason: param_reason.dupe(),
+                        param_loc: param_loc.dupe(),
+                        param_name: name.dupe(),
                         guard_type_reference_loc: ref_loc_of_t(type_guard).dupe(),
                         guard_type: flow_js_utils::type_or_type_desc_for_error(type_guard),
                         implicit_return,

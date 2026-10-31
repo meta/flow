@@ -4589,7 +4589,10 @@ fn map_loc_of_explanation<L: Dupe, M: Dupe, F: Fn(&L) -> M>(
             is_return_false_statement,
         } => Explanation::ExplanationTypeGuardPositiveConsistency {
             return_: map_reason(return_),
-            param: map_reason(param),
+            param: TypeGuardReferenceData {
+                loc: f(&param.loc),
+                kind: param.kind,
+            },
             guard_type: MessageTypeReferenceData {
                 loc: f(&guard_type.loc),
                 desc: guard_type.desc.map_locs(f),
@@ -4598,7 +4601,10 @@ fn map_loc_of_explanation<L: Dupe, M: Dupe, F: Fn(&L) -> M>(
         },
         Explanation::ExplanationAssertionFunctionConsistency { param, guard_type } => {
             Explanation::ExplanationAssertionFunctionConsistency {
-                param: map_reason(param),
+                param: TypeGuardReferenceData {
+                    loc: f(&param.loc),
+                    kind: param.kind,
+                },
                 guard_type: MessageTypeReferenceData {
                     loc: f(&guard_type.loc),
                     desc: guard_type.desc.map_locs(f),
@@ -7134,7 +7140,8 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                         box PositiveTypeGuardConsistencyData {
                             reason,
                             return_reason,
-                            param_reason,
+                            param_loc,
+                            param_name,
                             guard_type_reference_loc,
                             guard_type,
                             is_return_false_statement,
@@ -7144,7 +7151,8 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                             Box::new(PositiveTypeGuardConsistencyData {
                                 reason: reason.dupe(),
                                 return_reason: return_reason.dupe(),
-                                param_reason: param_reason.dupe(),
+                                param_loc: param_loc.dupe(),
+                                param_name: param_name.dupe(),
                                 guard_type_reference_loc: guard_type_reference_loc.dupe(),
                                 guard_type: f(guard_type.clone()),
                                 is_return_false_statement: *is_return_false_statement,
@@ -7154,7 +7162,8 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                     VirtualRootUseOp::AssertionFunctionConsistency(
                         box AssertionFunctionConsistencyData {
                             exit_reason,
-                            param_reason,
+                            param_loc,
+                            param_name,
                             guard_type_reference_loc,
                             guard_type,
                             implicit_return,
@@ -7163,7 +7172,8 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                         VirtualUseOp::Op(Arc::new(VirtualRootUseOp::AssertionFunctionConsistency(
                             Box::new(AssertionFunctionConsistencyData {
                                 exit_reason: exit_reason.dupe(),
-                                param_reason: param_reason.dupe(),
+                                param_loc: param_loc.dupe(),
+                                param_name: param_name.dupe(),
                                 guard_type_reference_loc: guard_type_reference_loc.dupe(),
                                 guard_type: f(guard_type.clone()),
                                 implicit_return: *implicit_return,
