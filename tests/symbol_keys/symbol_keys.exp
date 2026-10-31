@@ -1068,13 +1068,13 @@ Error --------------------------------------------------------------------------
 Property `m` is missing in `Symbol` [1]. [prop-missing]
 
    position.js:85:8
-     85| const {m}: unique symbol = null as any; // ERROR
-                ^
+   85| const {m}: unique symbol = null as any; // ERROR
+              ^
 
 References:
-   <BUILTINS>/lib.es5.js:4394:11
-   4394| interface Symbol {
-                   ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:91:11
+   91| interface Symbol {
+                 ^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------------ position.js:85:12
@@ -1093,13 +1093,13 @@ Error --------------------------------------------------------------------------
 Property `0` is missing in `Symbol` [1]. [prop-missing]
 
    position.js:86:8
-     86| const [n]: unique symbol = null as any; // ERROR
-                ^
+   86| const [n]: unique symbol = null as any; // ERROR
+              ^
 
 References:
-   <BUILTINS>/lib.es5.js:4394:11
-   4394| interface Symbol {
-                   ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:91:11
+   91| interface Symbol {
+                 ^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------------ position.js:86:12

@@ -37,8 +37,8 @@ Cannot call `function () { ... }.apply` because no more than 2 arguments are exp
                                                     ^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:253:19
-   253|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
+   <BUILTINS>/lib.es5.js:275:19
+   275|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
@@ -56,8 +56,8 @@ References:
    test.js:1:16
      1| const arr = [1,2,3];  // badly-positioned error
                        ^ [1]
-   <BUILTINS>/lib.es5.js:253:36
-   253|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
+   <BUILTINS>/lib.es5.js:275:36
+   275|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
                                            ^^^^^^^^^^^^^^^^^^ [2]
 
 
@@ -70,8 +70,8 @@ Cannot call `function () { ... }.apply` because no more than 2 arguments are exp
                                                     ^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:253:19
-   253|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
+   <BUILTINS>/lib.es5.js:275:19
+   275|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
@@ -89,8 +89,8 @@ References:
    test.js:1:14
      1| const arr = [1,2,3];  // badly-positioned error
                      ^ [1]
-   <BUILTINS>/lib.es5.js:253:36
-   253|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
+   <BUILTINS>/lib.es5.js:275:36
+   275|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
                                            ^^^^^^^^^^^^^^^^^^ [2]
 
 
@@ -103,8 +103,8 @@ Cannot call `function () { ... }.apply` because no more than 2 arguments are exp
                                                     ^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:253:19
-   253|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
+   <BUILTINS>/lib.es5.js:275:19
+   275|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
@@ -122,8 +122,8 @@ References:
    test.js:1:16
      1| const arr = [1,2,3];  // badly-positioned error
                        ^ [1]
-   <BUILTINS>/lib.es5.js:253:36
-   253|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
+   <BUILTINS>/lib.es5.js:275:36
+   275|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
                                            ^^^^^^^^^^^^^^^^^^ [2]
 
 

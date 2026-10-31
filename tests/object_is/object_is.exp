@@ -7,8 +7,8 @@ Cannot assign `Object.is(...)` to `b` because `boolean` [1] is incompatible with
                         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:182:31
-   182|     static is<T>(a: T, b: T): boolean;
+   <BUILTINS>/lib.es5.js:204:31
+   204|     static is<T>(a: T, b: T): boolean;
                                       ^^^^^^^ [1]
    object_is.js:20:8
     20| var b: string = Object.is('a', 'a');
@@ -24,8 +24,8 @@ Cannot call method `is` because no more than 2 arguments are expected by functio
                                              ^^^
 
 References:
-   <BUILTINS>/lib.es5.js:182:5
-   182|     static is<T>(a: T, b: T): boolean;
+   <BUILTINS>/lib.es5.js:204:5
+   204|     static is<T>(a: T, b: T): boolean;
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 

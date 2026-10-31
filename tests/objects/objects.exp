@@ -189,11 +189,11 @@ with `number` [2]. [incompatible-type]
         ^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:248:16
-   248|     valueOf(): unknown;
+   <BUILTINS>/lib.es5.js:270:16
+   270|     valueOf(): unknown;
                        ^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:295:16
-   295|     valueOf(): number;
+   <BUILTINS>/lib.es5.js:317:16
+   317|     valueOf(): number;
                        ^^^^^^ [2]
 
 
@@ -202,13 +202,13 @@ Error --------------------------------------------------------------------------
 Cannot call `z.charAt` because property `charAt` is missing in `Number` [1]. [prop-missing]
 
    conversion.js:19:3
-   19| z.charAt(0) as string;
-         ^^^^^^
+    19| z.charAt(0) as string;
+          ^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:94:25
-   94|     static (o: number): Number;
-                               ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:116:25
+   116|     static (o: number): Number;
+                                ^^^^^^ [1]
 
 
 Error -------------------------------------------------------------------------- different_call_prop_no_fast_path.js:8:1
@@ -403,8 +403,8 @@ Cannot cast `y['hasOwnProperty']` to `string` because `(prop: unknown) => boolea
         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:232:5
-   232|     hasOwnProperty(prop: unknown): boolean;
+   <BUILTINS>/lib.es5.js:254:5
+   254|     hasOwnProperty(prop: unknown): boolean;
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    objects.js:18:24
     18| y['hasOwnProperty'] as string; // error, prototype method is not a string

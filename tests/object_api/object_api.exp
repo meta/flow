@@ -595,13 +595,13 @@ Cannot call method `doesNotExist` because property `doesNotExist` is missing in
 [prop-missing]
 
    object_missing.js:3:12
-    3|     Object.doesNotExist();
-                  ^^^^^^^^^^^^
+     3|     Object.doesNotExist();
+                   ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:91:15
-   91| declare class Object {
-                     ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:113:15
+   113| declare class Object {
+                      ^^^^^^ [1]
 
 
 Error ----------------------------------------------------------------------------------------- object_prototype.js:31:3
@@ -628,8 +628,8 @@ Cannot assign `x.toString` to `xToString` because `(this: Date) => string` [1] i
                                   ^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1171:5
-   1171|     toString(): string;
+   <BUILTINS>/lib.es5.js:1193:5
+   1193|     toString(): string;
              ^^^^^^^^^^^^^^^^^^ [1]
    object_prototype.js:38:17
      38| var xToString : number = x.toString; // error
@@ -646,8 +646,8 @@ Cannot assign `x.toString` to `xToString2` because in the `this` parameter: `Dat
                                          ^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1169:11
-   1169| interface Date {
+   <BUILTINS>/lib.es5.js:1191:11
+   1191| interface Date {
                    ^^^^ [1]
 
 
@@ -661,8 +661,8 @@ Cannot assign `x.toString` to `xToString2` because in the return value: `string`
                                          ^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1171:17
-   1171|     toString(): string;
+   <BUILTINS>/lib.es5.js:1193:17
+   1193|     toString(): string;
                          ^^^^^^ [1]
    object_prototype.js:39:24
      39| var xToString2 : () => number = x.toString; // error
@@ -679,8 +679,8 @@ Cannot assign `y.toString` to `yToString` because `(this: Object) => string` [1]
                                  ^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:246:5
-   246|     toString(): string;
+   <BUILTINS>/lib.es5.js:268:5
+   268|     toString(): string;
             ^^^^^^^^^^^^^^^^^^ [1]
    object_prototype.js:43:17
     43| var yToString : number = y.toString; // error
@@ -711,8 +711,8 @@ Cannot call `123.toString` with `'foo'` bound to `radix` because `"foo"` [1] is 
                        ^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:278:22
-   278|     toString(radix?: number): string;
+   <BUILTINS>/lib.es5.js:300:22
+   300|     toString(radix?: number): string;
                              ^^^^^^ [2]
 
 
@@ -726,8 +726,8 @@ Cannot call `123.toString` with `null` bound to `radix` because `null` [1] is in
                        ^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:278:22
-   278|     toString(radix?: number): string;
+   <BUILTINS>/lib.es5.js:300:22
+   300|     toString(radix?: number): string;
                              ^^^^^^ [2]
 
 
@@ -756,8 +756,8 @@ incompatible with `number` [2]. [incompatible-type]
                                        ^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:232:5
-   232|     hasOwnProperty(prop: unknown): boolean;
+   <BUILTINS>/lib.es5.js:254:5
+   254|     hasOwnProperty(prop: unknown): boolean;
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    object_prototype.js:71:23
     71| var xHasOwnProperty : number = x.hasOwnProperty; // error
@@ -770,13 +770,13 @@ Cannot assign `x.hasOwnProperty` to `xHasOwnProperty2` because in the `this` par
 with `unknown`. [incompatible-type]
 
    object_prototype.js:72:51
-   72| var xHasOwnProperty2 : (prop: string) => number = x.hasOwnProperty; // error
-                                                         ^^^^^^^^^^^^^^^^
+    72| var xHasOwnProperty2 : (prop: string) => number = x.hasOwnProperty; // error
+                                                          ^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:91:15
-   91| declare class Object {
-                     ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:113:15
+   113| declare class Object {
+                      ^^^^^^ [1]
 
 
 Error ---------------------------------------------------------------------------------------- object_prototype.js:72:51
@@ -789,8 +789,8 @@ Cannot assign `x.hasOwnProperty` to `xHasOwnProperty2` because in the return val
                                                           ^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:232:36
-   232|     hasOwnProperty(prop: unknown): boolean;
+   <BUILTINS>/lib.es5.js:254:36
+   254|     hasOwnProperty(prop: unknown): boolean;
                                            ^^^^^^^ [1]
    object_prototype.js:72:42
     72| var xHasOwnProperty2 : (prop: string) => number = x.hasOwnProperty; // error
@@ -807,8 +807,8 @@ incompatible with `number` [2]. [incompatible-type]
                                        ^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:232:5
-   232|     hasOwnProperty(prop: unknown): boolean;
+   <BUILTINS>/lib.es5.js:254:5
+   254|     hasOwnProperty(prop: unknown): boolean;
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    object_prototype.js:76:23
     76| var yHasOwnProperty : number = y.hasOwnProperty; // error
@@ -840,8 +840,8 @@ is incompatible with `number` [2]. [incompatible-type]
                                              ^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:242:5
-   242|     propertyIsEnumerable(prop: unknown): boolean;
+   <BUILTINS>/lib.es5.js:264:5
+   264|     propertyIsEnumerable(prop: unknown): boolean;
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    object_prototype.js:96:29
     96| var xPropertyIsEnumerable : number = x.propertyIsEnumerable; // error
@@ -854,13 +854,13 @@ Cannot assign `x.propertyIsEnumerable` to `xPropertyIsEnumerable2` because in th
 incompatible with `unknown`. [incompatible-type]
 
    object_prototype.js:98:3
-   98|   x.propertyIsEnumerable; // error
-         ^^^^^^^^^^^^^^^^^^^^^^
+    98|   x.propertyIsEnumerable; // error
+          ^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:91:15
-   91| declare class Object {
-                     ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:113:15
+   113| declare class Object {
+                      ^^^^^^ [1]
 
 
 Error ----------------------------------------------------------------------------------------- object_prototype.js:98:3
@@ -873,8 +873,8 @@ incompatible with `number` [2]. [incompatible-type]
           ^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:242:42
-   242|     propertyIsEnumerable(prop: unknown): boolean;
+   <BUILTINS>/lib.es5.js:264:42
+   264|     propertyIsEnumerable(prop: unknown): boolean;
                                                  ^^^^^^^ [1]
    object_prototype.js:97:48
     97| var xPropertyIsEnumerable2 : (prop: string) => number =
@@ -891,8 +891,8 @@ is incompatible with `number` [2]. [incompatible-type]
                                              ^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:242:5
-   242|     propertyIsEnumerable(prop: unknown): boolean;
+   <BUILTINS>/lib.es5.js:264:5
+   264|     propertyIsEnumerable(prop: unknown): boolean;
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    object_prototype.js:102:29
    102| var yPropertyIsEnumerable : number = y.propertyIsEnumerable; // error
@@ -923,8 +923,8 @@ Cannot assign `x.valueOf` to `xValueOf` because `(this: Date) => number` [1] is 
                                  ^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1183:5
-   1183|     valueOf(): number;
+   <BUILTINS>/lib.es5.js:1205:5
+   1205|     valueOf(): number;
              ^^^^^^^^^^^^^^^^^ [1]
    object_prototype.js:122:16
     122| var xValueOf : number = x.valueOf; // error
@@ -941,8 +941,8 @@ Cannot assign `y.valueOf` to `yValueOf` because `(this: Object) => unknown` [1] 
                                 ^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:248:5
-   248|     valueOf(): unknown;
+   <BUILTINS>/lib.es5.js:270:5
+   270|     valueOf(): unknown;
             ^^^^^^^^^^^^^^^^^^ [1]
    object_prototype.js:126:16
    126| var yValueOf : number = y.valueOf; // error
@@ -987,8 +987,8 @@ References:
    <BUILTINS>/lib.es5.js:4462:5
    4462|     toLocaleString(locales?: string | string[], options?: Intl.DateTimeFormatOptions): string;
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:1177:5
-   1177|     toLocaleString(): string;
+   <BUILTINS>/lib.es5.js:1199:5
+   1199|     toLocaleString(): string;
              ^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
@@ -1004,8 +1004,8 @@ Cannot assign `x.toLocaleString` to `xToLocaleString2` because: [incompatible-ty
                                                ^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1169:11
-   1169| interface Date {
+   <BUILTINS>/lib.es5.js:1191:11
+   1191| interface Date {
                    ^^^^ [1]
 
 
@@ -1019,8 +1019,8 @@ Cannot assign `y.toLocaleString` to `yToLocaleString` because `(this: Object) =>
                                        ^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:244:5
-   244|     toLocaleString(): string;
+   <BUILTINS>/lib.es5.js:266:5
+   266|     toLocaleString(): string;
             ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    object_prototype.js:155:23
    155| var yToLocaleString : number = y.toLocaleString; // error
@@ -1271,8 +1271,8 @@ Cannot cast `o1_proto.toString` to `empty` because `(this: Object) => string` [1
         ^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:246:5
-   246|     toString(): string;
+   <BUILTINS>/lib.es5.js:268:5
+   268|     toString(): string;
             ^^^^^^^^^^^^^^^^^^ [1]
    proto.js:3:22
      3| o1_proto.toString as empty; // error: function ~> empty
@@ -1309,14 +1309,14 @@ Cannot cast `C1_proto.bind` to `empty` because: [incompatible-type]
         ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:255:12
-   255|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
+   <BUILTINS>/lib.es5.js:277:12
+   277|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    proto.js:13:18
     13| C1_proto.bind as empty; // error: function ~> empty
                          ^^^^^ [2]
-   <BUILTINS>/lib.es5.js:256:12
-   256|         & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...args: A) => (...args: B) => R);
+   <BUILTINS>/lib.es5.js:278:12
+   278|         & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...args: A) => (...args: B) => R);
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 

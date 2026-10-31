@@ -1197,14 +1197,14 @@ Cannot call `myFun.bind` because: [incompatible-type]
               ^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:255:12
-   255|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
+   <BUILTINS>/lib.es5.js:277:12
+   277|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    declare_function.js:19:1
     19| myFun.bind(); // Error - void ~> number
         ^^^^^^^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:256:12
-   256|         & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...args: A) => (...args: B) => R);
+   <BUILTINS>/lib.es5.js:278:12
+   278|         & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...args: A) => (...args: B) => R);
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
@@ -1305,14 +1305,14 @@ Cannot call `myPolyFun.bind` because: [incompatible-type]
                   ^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:255:12
-   255|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
+   <BUILTINS>/lib.es5.js:277:12
+   277|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    declare_function.js:22:1
     22| myPolyFun.bind(); // Error - void ~> number
         ^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:256:12
-   256|         & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...args: A) => (...args: B) => R);
+   <BUILTINS>/lib.es5.js:278:12
+   278|         & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...args: A) => (...args: B) => R);
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
@@ -1430,8 +1430,8 @@ References:
    function_type.js:5:9
      5| (x.bind("")()); // error: number incompatible with string
                 ^^ [1]
-   <BUILTINS>/lib.es5.js:255:34
-   255|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
+   <BUILTINS>/lib.es5.js:277:34
+   277|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
                                          ^^^^^^^^^^^^^^^^^^^^ [2]
    function_type.js:2:27
      2| declare const x : (this : number) => void;
@@ -1484,8 +1484,8 @@ References:
    function_type.js:12:8
     12| y.bind(""); // error: number incompatible with string
                ^^ [1]
-   <BUILTINS>/lib.es5.js:255:34
-   255|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
+   <BUILTINS>/lib.es5.js:277:34
+   277|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
                                          ^^^^^^^^^^^^^^^^^^^^ [2]
    function_type.js:10:21
     10| declare const y : F<number>;
@@ -2469,8 +2469,8 @@ References:
    test.js:3:19
      3| declare const y : { y : string, ...};
                           ^^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:255:34
-   255|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
+   <BUILTINS>/lib.es5.js:277:34
+   277|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
                                          ^^^^^^^^^^^^^^^^^^^^ [2]
    test.js:12:22
     12| function bar (this : {f : number, ...}) : number {
@@ -2604,8 +2604,8 @@ References:
     32|     y : 3
     33| }
         ^ [1]
-   <BUILTINS>/lib.es5.js:255:34
-   255|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
+   <BUILTINS>/lib.es5.js:277:34
+   277|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
                                          ^^^^^^^^^^^^^^^^^^^^ [2]
    test.js:39:16
     39|     foo(this : {y : number}) {},

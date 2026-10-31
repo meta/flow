@@ -50,8 +50,8 @@ Cannot cast `quasis.raw` to `empty` because `ReadonlyArray<string>` [1] is incom
             ^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:763:17
-   763|   readonly raw: ReadonlyArray<string>;
+   <BUILTINS>/lib.es5.js:785:17
+   785|   readonly raw: ReadonlyArray<string>;
                         ^^^^^^^^^^^^^^^^^^^^^ [1]
    tagged_template.js:34:19
     34|     quasis.raw as empty; // ERROR

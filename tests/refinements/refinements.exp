@@ -14127,8 +14127,8 @@ References:
    tagged_union.js:120:24
    120|     if (z.toString === 0) {} // Error
                                ^ [2]
-   <BUILTINS>/lib.es5.js:278:5
-   278|     toString(radix?: number): string;
+   <BUILTINS>/lib.es5.js:300:5
+   300|     toString(radix?: number): string;
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
@@ -14210,8 +14210,8 @@ References:
    tagged_union.js:125:23
    125|     if (q.valueOf === 0) {} // Error
                               ^ [2]
-   <BUILTINS>/lib.es5.js:269:5
-   269|     valueOf(): boolean;
+   <BUILTINS>/lib.es5.js:291:5
+   291|     valueOf(): boolean;
             ^^^^^^^^^^^^^^^^^^ [3]
 
 
@@ -14296,8 +14296,8 @@ References:
    tagged_union.js:137:20
    137|     if (t.call === 0) {} // Error
                            ^ [2]
-   <BUILTINS>/lib.es5.js:257:17
-   257|     proto call: <T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, ...args: A) => R;
+   <BUILTINS>/lib.es5.js:279:17
+   279|     proto call: <T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, ...args: A) => R;
                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
@@ -17347,8 +17347,8 @@ Cannot get `x[0]` because property `0` is missing in `Boolean` [1]. [prop-missin
               ^
 
 References:
-   <BUILTINS>/lib.es5.js:265:15
-   265| declare class Boolean {
+   <BUILTINS>/lib.es5.js:287:15
+   287| declare class Boolean {
                       ^^^^^^^ [1]
 
 

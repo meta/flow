@@ -18,7 +18,7 @@ any.js:9:5,9:7
 At any.js:13:3
 Object
 
-'Object' defined at (lib) lib.es5.js:91:14
+'Object' defined at (lib) lib.es5.js:113:14
 
 any.js:13:1,13:7
 
@@ -34,7 +34,7 @@ array.js
 At array.js:3:19
 class Array<T>
 
-'Array' defined at (lib) lib.es5.js:594:14
+'Array' defined at (lib) lib.es5.js:616:14
 
 array.js:3:16,3:20
 
@@ -43,7 +43,7 @@ At array.js:5:26
  A class of Array methods and properties that don't mutate the array.
 class ReadonlyArray<out T>
 
-'ReadonlyArray' defined at (lib) lib.es5.js:444:14
+'ReadonlyArray' defined at (lib) lib.es5.js:466:14
 
 array.js:5:24,5:36
 

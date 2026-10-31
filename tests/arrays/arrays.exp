@@ -115,8 +115,8 @@ Cannot assign `0` to `arr[day]` because `Date` [1] is not an array index. [incom
          ^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1323:13
-   1323|     new (): Date;
+   <BUILTINS>/lib.es5.js:1345:13
+   1345|     new (): Date;
                      ^^^^ [1]
 
 
@@ -129,8 +129,8 @@ Cannot get `arr[day]` because `Date` [1] is not an array index. [incompatible-us
          ^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1323:13
-   1323|     new (): Date;
+   <BUILTINS>/lib.es5.js:1345:13
+   1345|     new (): Date;
                      ^^^^ [1]
 
 

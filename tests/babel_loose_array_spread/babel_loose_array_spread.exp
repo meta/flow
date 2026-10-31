@@ -11,8 +11,8 @@ References:
    apply.js:3:11
      3| const it: Iterable<number> = [7, 8, 9];
                   ^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:253:36
-   253|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
+   <BUILTINS>/lib.es5.js:275:36
+   275|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
                                            ^^^^^^^^^^^^^^^^^^ [2]
 
 
@@ -28,8 +28,8 @@ References:
    iterables.js:1:11
      1| const it: Iterable<number> = [7, 8, 9];
                   ^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:444:15
-   444| declare class ReadonlyArray<out T> {
+   <BUILTINS>/lib.es5.js:466:15
+   466| declare class ReadonlyArray<out T> {
                       ^^^^^^^^^^^^^ [2]
 
 
@@ -45,8 +45,8 @@ References:
    iterables.js:1:11
      1| const it: Iterable<number> = [7, 8, 9];
                   ^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:444:15
-   444| declare class ReadonlyArray<out T> {
+   <BUILTINS>/lib.es5.js:466:15
+   466| declare class ReadonlyArray<out T> {
                       ^^^^^^^^^^^^^ [2]
 
 
@@ -63,8 +63,8 @@ References:
    iterables.js:1:11
      1| const it: Iterable<number> = [7, 8, 9];
                   ^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:444:15
-   444| declare class ReadonlyArray<out T> {
+   <BUILTINS>/lib.es5.js:466:15
+   466| declare class ReadonlyArray<out T> {
                       ^^^^^^^^^^^^^ [2]
 
 
@@ -80,8 +80,8 @@ References:
    opaque.js:6:30
      6| export const opaqueIterable: OpaqueIterable = [];
                                      ^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:444:15
-   444| declare class ReadonlyArray<out T> {
+   <BUILTINS>/lib.es5.js:466:15
+   466| declare class ReadonlyArray<out T> {
                       ^^^^^^^^^^^^^ [2]
 
 
@@ -97,8 +97,8 @@ References:
    opaque.js:6:30
      6| export const opaqueIterable: OpaqueIterable = [];
                                      ^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:444:15
-   444| declare class ReadonlyArray<out T> {
+   <BUILTINS>/lib.es5.js:466:15
+   466| declare class ReadonlyArray<out T> {
                       ^^^^^^^^^^^^^ [2]
 
 
@@ -115,8 +115,8 @@ References:
    opaque.js:6:30
      6| export const opaqueIterable: OpaqueIterable = [];
                                      ^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:444:15
-   444| declare class ReadonlyArray<out T> {
+   <BUILTINS>/lib.es5.js:466:15
+   466| declare class ReadonlyArray<out T> {
                       ^^^^^^^^^^^^^ [2]
 
 
@@ -132,8 +132,8 @@ References:
    <BUILTINS>/lib.es2015.collection.js:50:76
     50|     new <K, V>(entries?: ?Iterable<[readonly key: K, readonly value: V]>): Map<K, V>;
                                                                                    ^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:444:15
-   444| declare class ReadonlyArray<out T> {
+   <BUILTINS>/lib.es5.js:466:15
+   466| declare class ReadonlyArray<out T> {
                       ^^^^^^^^^^^^^ [2]
 
 
@@ -149,8 +149,8 @@ References:
    <BUILTINS>/lib.es2015.collection.js:50:76
     50|     new <K, V>(entries?: ?Iterable<[readonly key: K, readonly value: V]>): Map<K, V>;
                                                                                    ^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:444:15
-   444| declare class ReadonlyArray<out T> {
+   <BUILTINS>/lib.es5.js:466:15
+   466| declare class ReadonlyArray<out T> {
                       ^^^^^^^^^^^^^ [2]
 
 
@@ -166,8 +166,8 @@ References:
    <BUILTINS>/lib.es2015.collection.js:50:76
     50|     new <K, V>(entries?: ?Iterable<[readonly key: K, readonly value: V]>): Map<K, V>;
                                                                                    ^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:444:15
-   444| declare class ReadonlyArray<out T> {
+   <BUILTINS>/lib.es5.js:466:15
+   466| declare class ReadonlyArray<out T> {
                       ^^^^^^^^^^^^^ [2]
 
 
@@ -183,8 +183,8 @@ References:
    <BUILTINS>/lib.es2015.collection.js:50:76
     50|     new <K, V>(entries?: ?Iterable<[readonly key: K, readonly value: V]>): Map<K, V>;
                                                                                    ^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:444:15
-   444| declare class ReadonlyArray<out T> {
+   <BUILTINS>/lib.es5.js:466:15
+   466| declare class ReadonlyArray<out T> {
                       ^^^^^^^^^^^^^ [2]
 
 

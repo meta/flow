@@ -53,8 +53,8 @@ References:
    array_lib.js:13:14
     13| var e: Array<string> = a.reverse();
                      ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:684:16
-   684|     reverse(): Array<T>;
+   <BUILTINS>/lib.es5.js:706:16
+   706|     reverse(): Array<T>;
                        ^^^^^^^^ [3]
    array_lib.js:13:8
     13| var e: Array<string> = a.reverse();
@@ -76,14 +76,14 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
                                ^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:458:53
-   458|     >(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
+   <BUILTINS>/lib.es5.js:480:53
+   480|     >(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
                                                             ^^^^^ [1]
    array_lib.js:26:14
     26| var n: Array<number> = h.concat('a', 'b', 'c'); // Error
                      ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:458:47
-   458|     >(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
+   <BUILTINS>/lib.es5.js:480:47
+   480|     >(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
                                                       ^^^^^^^^^^^^ [3]
    array_lib.js:26:8
     26| var n: Array<number> = h.concat('a', 'b', 'c'); // Error
@@ -102,8 +102,8 @@ References:
    array_lib.js:58:4
      58|   [''].reduce((acc, str) => acc * str.length); // error, string ~> number
             ^^ [1]
-   <BUILTINS>/lib.es5.js:1060:22
-   1060|     readonly length: number;
+   <BUILTINS>/lib.es5.js:1082:22
+   1082|     readonly length: number;
                               ^^^^^^ [2]
 
 
@@ -119,8 +119,8 @@ References:
    array_lib.js:59:4
      59|   [''].reduceRight((acc, str) => acc * str.length); // error, string ~> number
             ^^ [1]
-   <BUILTINS>/lib.es5.js:1060:22
-   1060|     readonly length: number;
+   <BUILTINS>/lib.es5.js:1082:22
+   1082|     readonly length: number;
                               ^^^^^^ [2]
 
 
@@ -139,14 +139,14 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
           ^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:731:37
-   731|     static from(str: string): Array<string>;
+   <BUILTINS>/lib.es5.js:753:37
+   753|     static from(str: string): Array<string>;
                                             ^^^^^^ [1]
    array_lib.js:71:31
     71|   Array.from('abcd') as Array<empty>; // ERROR
                                       ^^^^^ [2]
-   <BUILTINS>/lib.es5.js:731:31
-   731|     static from(str: string): Array<string>;
+   <BUILTINS>/lib.es5.js:753:31
+   753|     static from(str: string): Array<string>;
                                       ^^^^^^^^^^^^^ [3]
    array_lib.js:71:25
     71|   Array.from('abcd') as Array<empty>; // ERROR
@@ -179,8 +179,8 @@ References:
    array_lib.js:75:20
     75|   const arrayLike: ArrayLike<string> = {0: 'hello', length: 1};
                            ^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/lib.es5.js:726:31
-   726|     static from<A, This>(str: string, mapFn: (this: This, elem: string, index: number) => A, thisArg: This): Array<A>;
+   <BUILTINS>/lib.es5.js:748:31
+   748|     static from<A, This>(str: string, mapFn: (this: This, elem: string, index: number) => A, thisArg: This): Array<A>;
                                       ^^^^^^ [5]
 
 
@@ -406,11 +406,11 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
                  ^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1060:22
-   1060|     readonly length: number;
+   <BUILTINS>/lib.es5.js:1082:22
+   1082|     readonly length: number;
                               ^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:621:109
-    621|     filter<This, S extends T>(callbackfn: (this: This, value: T, index: number, array: ReadonlyArray<T>) => implies value is S, thisArg: This): Array<S>;
+   <BUILTINS>/lib.es5.js:643:109
+    643|     filter<This, S extends T>(callbackfn: (this: This, value: T, index: number, array: ReadonlyArray<T>) => implies value is S, thisArg: This): Array<S>;
                                                                                                                      ^^^^^^^^^^^^^^^^^^ [2]
    filter_error_msg_quality_test.js:2:30
       2| declare const str_arr: Array<string>;
@@ -443,8 +443,8 @@ References:
    filter_error_msg_quality_test.js:7:25
      7| nullable_str_arr.filter(s => !!s) as Array<string>;
                                 ^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:614:24
-   614|     filter(callbackfn: typeof Boolean): Array<NonNullable<T>>;
+   <BUILTINS>/lib.es5.js:636:24
+   636|     filter(callbackfn: typeof Boolean): Array<NonNullable<T>>;
                                ^^^^^^^^^^^^^^ [4]
 
 

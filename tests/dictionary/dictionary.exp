@@ -21,13 +21,13 @@ Cannot return `x` because in property `toString` > the `this` parameter: `Object
 [incompatible-type]
 
    compatible.js:14:10
-   14|   return x;
-                ^
+    14|   return x;
+                 ^
 
 References:
-   <BUILTINS>/lib.es5.js:91:15
-   91| declare class Object {
-                     ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:113:15
+   113| declare class Object {
+                      ^^^^^^ [1]
 
 
 Error ----------------------------------------------------------------------------------------------- dictionary.js:41:9
@@ -84,8 +84,8 @@ Cannot cast `o.toString()` to `boolean` because `string` [1] is incompatible wit
           ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:246:17
-   246|     toString(): string;
+   <BUILTINS>/lib.es5.js:268:17
+   268|     toString(): string;
                         ^^^^^^ [1]
    dictionary.js:79:19
     79|   o.toString() as boolean; // error: string ~> boolean
@@ -98,16 +98,16 @@ Cannot return `o` because in property `toString` > the `this` parameter: `Object
 `unknown` [2]. [incompatible-type]
 
    dictionary.js:80:10
-   80|   return o; // error: `Object.prototype.toString` requires an `Object` receiver
-                ^
+    80|   return o; // error: `Object.prototype.toString` requires an `Object` receiver
+                 ^
 
 References:
-   <BUILTINS>/lib.es5.js:91:15
-   91| declare class Object {
-                     ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:113:15
+   113| declare class Object {
+                      ^^^^^^ [1]
    dictionary.js:77:11
-   77|   toString(): string,
-                 ^^ [2]
+    77|   toString(): string,
+                  ^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------- dictionary.js:87:10

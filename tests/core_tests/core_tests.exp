@@ -8,8 +8,8 @@ Cannot use `new` on `JSON` [1]. Only classes and interfaces with a construct sig
              ^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1470:19
-   1470| declare var JSON: JSON;
+   <BUILTINS>/lib.es5.js:1492:19
+   1492| declare var JSON: JSON;
                            ^^^^ [1]
 
 
@@ -30,8 +30,8 @@ Cannot cast `JSON.stringify(...)` to `string` because `void` [1] is incompatible
          ^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1464:19
-   1464|     ) => string | void);
+   <BUILTINS>/lib.es5.js:1486:19
+   1486|     ) => string | void);
                            ^^^^ [1]
    json_stringify.js:7:25
       7| JSON.stringify(bad1) as string;
@@ -587,14 +587,14 @@ Cannot call `Reflect.deleteProperty` with `true` bound to `propertyKey` because:
                                       ^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:77:28
-   77| declare type PropertyKey = string | number | symbol;
+   <BUILTINS>/lib.es5.js:99:28
+   99| declare type PropertyKey = string | number | symbol;
                                   ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:77:37
-   77| declare type PropertyKey = string | number | symbol;
+   <BUILTINS>/lib.es5.js:99:37
+   99| declare type PropertyKey = string | number | symbol;
                                            ^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:77:46
-   77| declare type PropertyKey = string | number | symbol;
+   <BUILTINS>/lib.es5.js:99:46
+   99| declare type PropertyKey = string | number | symbol;
                                                     ^^^^^^ [4]
 
 
@@ -604,13 +604,13 @@ Cannot call `Reflect.defineProperty` with object literal bound to `attributes` b
 `"yes"` [1] is incompatible with `boolean` [2]. [incompatible-type]
 
    reflect.js:25:52
-   25| Reflect.defineProperty(target, 'value', {writable: 'yes'}); // ERROR
-                                                          ^^^^^ [1]
+    25| Reflect.defineProperty(target, 'value', {writable: 'yes'}); // ERROR
+                                                           ^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:82:25
-   82|     readonly writable?: boolean,
-                               ^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:104:25
+   104|     readonly writable?: boolean,
+                                ^^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------------- reflect.js:34:1
@@ -643,8 +643,8 @@ Cannot call `WeakRef` because in type argument `T`: [incompatible-type]
                                ^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:4358:13
-   4358|     object: object;
+   <BUILTINS>/lib.es5.js:4366:13
+   4366|     object: object;
                      ^^^^^^ [2]
    <BUILTINS>/lib.es2023.collection.js:21:13
      21|     symbol: symbol;
@@ -663,8 +663,8 @@ Cannot call `WeakRef` because in type argument `T`: [incompatible-type]
                                ^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:4358:13
-   4358|     object: object;
+   <BUILTINS>/lib.es5.js:4366:13
+   4366|     object: object;
                      ^^^^^^ [2]
    <BUILTINS>/lib.es2023.collection.js:21:13
      21|     symbol: symbol;
@@ -683,8 +683,8 @@ Cannot call `WeakRef` because in type argument `T`: [incompatible-type]
                                ^^^^^^^^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:4358:13
-   4358|     object: object;
+   <BUILTINS>/lib.es5.js:4366:13
+   4366|     object: object;
                      ^^^^^^ [2]
    <BUILTINS>/lib.es2023.collection.js:21:13
      21|     symbol: symbol;
@@ -703,8 +703,8 @@ Cannot call `WeakSet` because in type argument `T`: [incompatible-type]
                                 ^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:4358:13
-   4358|     object: object;
+   <BUILTINS>/lib.es5.js:4366:13
+   4366|     object: object;
                      ^^^^^^ [2]
    <BUILTINS>/lib.es2023.collection.js:21:13
      21|     symbol: symbol;
@@ -723,8 +723,8 @@ Cannot call `WeakSet` because in type argument `T`: [incompatible-type]
                                    ^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:4358:13
-   4358|     object: object;
+   <BUILTINS>/lib.es5.js:4366:13
+   4366|     object: object;
                      ^^^^^^ [2]
    <BUILTINS>/lib.es2023.collection.js:21:13
      21|     symbol: symbol;
@@ -743,8 +743,8 @@ Cannot call `WeakSet` because in type argument `T`: [incompatible-type]
                                       ^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:4358:13
-   4358|     object: object;
+   <BUILTINS>/lib.es5.js:4366:13
+   4366|     object: object;
                      ^^^^^^ [2]
    <BUILTINS>/lib.es2023.collection.js:21:13
      21|     symbol: symbol;
@@ -766,8 +766,8 @@ References:
    weakset.js:24:31
      24| function* numbers(): Iterable<number> {
                                        ^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:4358:13
-   4358|     object: object;
+   <BUILTINS>/lib.es5.js:4366:13
+   4366|     object: object;
                      ^^^^^^ [2]
    <BUILTINS>/lib.es2023.collection.js:21:13
      21|     symbol: symbol;

@@ -64,8 +64,8 @@ References:
    lint_settings.js:9:22
      9| declare const other: O;
                              ^ [1]
-   <BUILTINS>/lib.es5.js:255:34
-   255|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
+   <BUILTINS>/lib.es5.js:277:34
+   277|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
                                          ^^^^^^^^^^^^^^^^^^^^ [2]
    lint_settings.js:5:13
      5|   m: (this: {x: number, ...}, y: number) => void,
@@ -86,8 +86,8 @@ References:
    lint_settings.js:9:22
      9| declare const other: O;
                              ^ [1]
-   <BUILTINS>/lib.es5.js:255:34
-   255|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
+   <BUILTINS>/lib.es5.js:277:34
+   277|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
                                          ^^^^^^^^^^^^^^^^^^^^ [2]
    lint_settings.js:5:13
      5|   m: (this: {x: number, ...}, y: number) => void,
@@ -240,8 +240,8 @@ References:
    rejected.js:6:22
      6| declare const other: O;
                              ^ [1]
-   <BUILTINS>/lib.es5.js:255:34
-   255|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
+   <BUILTINS>/lib.es5.js:277:34
+   277|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
                                          ^^^^^^^^^^^^^^^^^^^^ [2]
    rejected.js:2:13
      2|   m: (this: {x: number, ...}, y: number) => void,
@@ -277,8 +277,8 @@ References:
    rejected.js:2:6
      2|   m: (this: {x: number, ...}, y: number) => void,
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:257:65
-   257|     proto call: <T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, ...args: A) => R;
+   <BUILTINS>/lib.es5.js:279:65
+   279|     proto call: <T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, ...args: A) => R;
                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
@@ -329,14 +329,14 @@ Cannot call `o.m.bind` because: [incompatible-type]
             ^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:255:12
-   255|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
+   <BUILTINS>/lib.es5.js:277:12
+   277|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    rejected.js:13:1
     13| o.m.bind(); // error: no first argument
         ^^^^^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:256:12
-   256|         & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...args: A) => (...args: B) => R);
+   <BUILTINS>/lib.es5.js:278:12
+   278|         & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...args: A) => (...args: B) => R);
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
@@ -505,8 +505,8 @@ References:
    rejected.js:5:18
      5| declare const o: O;
                          ^ [1]
-   <BUILTINS>/lib.es5.js:255:34
-   255|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
+   <BUILTINS>/lib.es5.js:277:34
+   277|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
                                          ^^^^^^^^^^^^^^^^^^^^ [2]
    rejected.js:21:26
     21| declare function f(this: {x: number, ...}, y: number): void;

@@ -28,8 +28,8 @@ subtype of an interface. [incompatible-type]
                        ^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:253:36
-   253|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
+   <BUILTINS>/lib.es5.js:275:36
+   275|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
                                            ^^^^^^^^^^^^^^^^^^ [2]
 
 
@@ -162,8 +162,8 @@ References:
    <BUILTINS>/misc.js:283:11
    283| interface Generator<out T = unknown, out TReturn = any, in TNext = any> {}
                   ^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:253:36
-   253|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
+   <BUILTINS>/lib.es5.js:275:36
+   275|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
                                            ^^^^^^^^^^^^^^^^^^ [2]
 
 
@@ -180,8 +180,8 @@ References:
    apply-array-like.js:16:17
     16| function * gen() {
                         ^ [1]
-   <BUILTINS>/lib.es5.js:253:36
-   253|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
+   <BUILTINS>/lib.es5.js:275:36
+   275|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
                                            ^^^^^^^^^^^^^^^^^^ [2]
 
 
@@ -224,8 +224,8 @@ Cannot call `test.apply` because no more than 2 arguments are expected by functi
                                 ^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:253:19
-   253|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
+   <BUILTINS>/lib.es5.js:275:19
+   275|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
@@ -290,8 +290,8 @@ References:
    apply.js:1:1
      1| function test(this: number | string, a: string, b: number): number {
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:253:67
-   253|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
+   <BUILTINS>/lib.es5.js:275:67
+   275|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
@@ -390,8 +390,8 @@ subtype of an interface. [incompatible-type]
                        ^^^^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:253:36
-   253|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
+   <BUILTINS>/lib.es5.js:275:36
+   275|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R);
                                            ^^^^^^^^^^^^^^^^^^ [2]
 
 
@@ -496,8 +496,8 @@ References:
    apply.js:34:36
      34| test.bind.apply(test, [0, 123]) as (b: number) => number;
                                             ^^^^^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:4309:82
-   4309| type OmitThisParameter<T> = unknown extends ThisParameterType<T> ? T : T extends (this: infer This, ...args: infer A) => infer R ? (...args: A) => R : T;
+   <BUILTINS>/lib.es5.js:4317:82
+   4317| type OmitThisParameter<T> = unknown extends ThisParameterType<T> ? T : T extends (this: infer This, ...args: infer A) => infer R ? (...args: A) => R : T;
                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    apply.js:1:41
       1| function test(this: number | string, a: string, b: number): number {
@@ -615,8 +615,8 @@ References:
    bind.js:42:32
     42| receiver.method.bind(receiver, 1); // ERROR
                                        ^ [2]
-   <BUILTINS>/lib.es5.js:255:12
-   255|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
+   <BUILTINS>/lib.es5.js:277:12
+   277|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
@@ -693,8 +693,8 @@ References:
    call.js:1:1
      1| function test(this: number | string, a: string, b: number): number {
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:257:65
-   257|     proto call: <T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, ...args: A) => R;
+   <BUILTINS>/lib.es5.js:279:65
+   279|     proto call: <T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, ...args: A) => R;
                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
@@ -1001,8 +1001,8 @@ Cannot cast `x.length` to `empty` because `number` [1] is incompatible with `emp
         ^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:262:22
-   262|     readonly length: number;
+   <BUILTINS>/lib.es5.js:284:22
+   284|     readonly length: number;
                              ^^^^^^ [1]
    function.js:4:13
      4| x.length as empty; // ERROR
@@ -1018,8 +1018,8 @@ Cannot cast `y.length` to `empty` because `number` [1] is incompatible with `emp
         ^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:262:22
-   262|     readonly length: number;
+   <BUILTINS>/lib.es5.js:284:22
+   284|     readonly length: number;
                              ^^^^^^ [1]
    function.js:5:13
      5| y.length as empty; // ERROR
