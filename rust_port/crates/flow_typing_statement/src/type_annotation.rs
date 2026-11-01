@@ -1328,8 +1328,7 @@ fn convert_inner<'a>(
         TypeInner::Typeof { loc, inner } => {
             let (valtype, qualification_ast) = convert_typeof(cx, &inner.argument)?;
             let name = FlowSmolStr::new(typeof_name(&inner.argument));
-            let reason =
-                reason::mk_reason(reason::VirtualReasonDesc::RTypeof(name.dupe()), loc.dupe());
+            let reason = reason::mk_reason(None, loc.dupe());
             let (targs, targs_ast) = match &inner.targs {
                 None => (None, None),
                 Some(type_args) => {

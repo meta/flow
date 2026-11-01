@@ -2141,7 +2141,7 @@ fn merge_annot<'cx>(
                 targs,
             } = inner.as_ref();
             let qname_str: FlowSmolStr = qname.join(".").into();
-            let reason = reason::mk_reason(RTypeof(qname_str.dupe()), loc.dupe());
+            let reason = reason::mk_reason(None, loc.dupe());
             let t = merge_impl(env, cx, file, t, false, true);
             let targs = targs.as_ref().map(|ts| {
                 (

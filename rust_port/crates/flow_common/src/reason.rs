@@ -324,7 +324,6 @@ pub enum VirtualReasonDesc<L: Dupe> {
     RTypeAlias(Box<(FlowSmolStr, Option<L>, Option<Arc<VirtualReasonDesc<L>>>)>),
     ROpaqueType(FlowSmolStr),
     RTypeParam(Box<(SubstName, L, L)>),
-    RTypeof(FlowSmolStr),
     RParameter(Option<FlowSmolStr>),
     RIdentifier(FlowSmolStr),
     RProperty(Option<Name>),
@@ -401,7 +400,6 @@ impl<A: Dupe> VirtualReasonDesc<A> {
             RRecordType(s) => RRecordType(s.dupe()),
             RDummyThis => RDummyThis,
             RType(n) => RType(n.dupe()),
-            RTypeof(s) => RTypeof(s.dupe()),
             RParameter(opt) => RParameter(opt.dupe()),
             RIdentifier(n) => RIdentifier(n.dupe()),
             RProperty(opt) => RProperty(opt.dupe()),
@@ -1187,7 +1185,6 @@ pub fn string_of_desc<L: Dupe>(desc: &VirtualReasonDesc<L>) -> String {
         RTypeAlias(box (x, _, _)) => format!("`{}`", prettify_react_util(x)),
         ROpaqueType(x) => format!("`{}`", prettify_react_util(x)),
         RTypeParam(box (x, _, _)) => x.formatted_string_of_subst_name(),
-        RTypeof(x) => format!("`typeof {}`", x),
 
         // Parameters
         RParameter(Some(x)) => format!("`{}`", x),
