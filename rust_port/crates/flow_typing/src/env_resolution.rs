@@ -629,7 +629,6 @@ fn resolve_hint<'cx>(
             HintNode::AnyErrorHint(reason) => type_::any_t::error(reason),
             HintNode::ComposedArrayPatternHint(hint_loc, elements) => {
                 let array_reason = reason::mk_reason(None, hint_loc.dupe());
-                let is_empty = elements.is_empty();
                 let elem_spread_list: flow_data_structure_wrapper::list::FlowOcamlList<
                     type_::UnresolvedParam,
                 > = elements
@@ -660,9 +659,9 @@ fn resolve_hint<'cx>(
                     .collect::<Result<_, JobError>>()?;
                 flow_typing_tvar::mk_where(cx, array_reason.dupe(), |cx, tout| {
                     let reason_op = array_reason.dupe();
-                    let element_reason = reason_op.dupe().replace_desc(
-                        reason::VirtualReasonDesc::RInferredUnionElemArray { is_empty },
-                    );
+                    let element_reason = reason_op
+                        .dupe()
+                        .replace_desc(reason::VirtualReasonDesc::RInferredUnionElemArray);
                     let elem_t = flow_typing_tvar::mk(cx, element_reason);
                     flow_js_exception_to_job_error(flow_js::FlowJs::resolve_spread_list(
                         cx,
@@ -1479,7 +1478,6 @@ fn resolve_binding<'cx>(
                     }
                     ast::expression::ExpressionInner::Array { loc, inner: arr } => {
                         let elements = &arr.elements;
-                        let is_empty = elements.is_empty();
                         // TODO merge code with statement.rs implementation
 
                         let elem_spread_list: flow_data_structure_wrapper::list::FlowOcamlList<
@@ -1543,9 +1541,9 @@ fn resolve_binding<'cx>(
                             reason::mk_reason(reason::VirtualReasonDesc::RArrayLit, loc.dupe());
                         flow_typing_tvar::mk_where(cx, arr_reason.dupe(), |cx, tout| {
                             let reason_op = arr_reason.dupe();
-                            let element_reason = reason_op.dupe().replace_desc(
-                                reason::VirtualReasonDesc::RInferredUnionElemArray { is_empty },
-                            );
+                            let element_reason = reason_op
+                                .dupe()
+                                .replace_desc(reason::VirtualReasonDesc::RInferredUnionElemArray);
                             let elem_t = flow_typing_tvar::mk(cx, element_reason);
                             flow_js_exception_to_job_error(flow_js::FlowJs::resolve_spread_list(
                                 cx,

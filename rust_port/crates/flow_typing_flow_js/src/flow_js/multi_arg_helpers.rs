@@ -347,12 +347,9 @@ fn multiflow_args<'cx>(
             {
                 let use_op = use_op.dupe();
                 flow_typing_tvar::mk_where(cx, reason_op.dupe(), |cx, tout| {
-                    let element_reason =
-                        reason_op
-                            .dupe()
-                            .replace_desc(VirtualReasonDesc::RInferredUnionElemArray {
-                                is_empty: elems.is_empty(),
-                            });
+                    let element_reason = reason_op
+                        .dupe()
+                        .replace_desc(VirtualReasonDesc::RInferredUnionElemArray);
                     let elem_t = flow_typing_tvar::mk(cx, element_reason);
                     let resolve_to = SpreadResolve::ResolveSpreadsToArrayLiteral {
                         literal: true,

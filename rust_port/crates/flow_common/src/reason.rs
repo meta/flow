@@ -306,9 +306,7 @@ pub enum VirtualReasonDesc<L: Dupe> {
     RNumberLit(FlowSmolStr),
     RBigIntLit(FlowSmolStr),
     RBooleanLit(bool),
-    RInferredUnionElemArray {
-        is_empty: bool,
-    },
+    RInferredUnionElemArray,
     RTupleOutOfBoundsAccess(i32),
     RFunction(ReasonDescFunction),
     REnum {
@@ -385,9 +383,7 @@ impl<A: Dupe> VirtualReasonDesc<A> {
             RUninitialized => RUninitialized,
             RPossiblyUninitialized => RPossiblyUninitialized,
             RComponent(n) => RComponent(n.dupe()),
-            RInferredUnionElemArray { is_empty } => RInferredUnionElemArray {
-                is_empty: *is_empty,
-            },
+            RInferredUnionElemArray => RInferredUnionElemArray,
             REnum { name } => REnum { name: name.dupe() },
             RThis => RThis,
             RThisType => RThisType,
@@ -1130,7 +1126,7 @@ pub fn string_of_desc<L: Dupe>(desc: &VirtualReasonDesc<L>) -> String {
         // Arrays
         RArrayLit => "array literal".to_string(),
         RArrayType => "array type".to_string(),
-        RInferredUnionElemArray { .. } => "inferred union of array element types \
+        RInferredUnionElemArray => "inferred union of array element types \
 (alternatively, provide an annotation to summarize the array element type)"
             .to_string(),
         RROArrayType => "read-only array type".to_string(),

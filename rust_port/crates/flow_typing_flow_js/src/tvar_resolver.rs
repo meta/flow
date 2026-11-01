@@ -132,19 +132,12 @@ where
     t
 }
 
-struct AbortableResolver<F>
-where
-    F: Fn(&Reason) -> Option<Type>,
-{
-    no_lowers: F,
+struct AbortableResolver {
     filter_empty: bool,
     aborted: bool,
 }
 
-impl<F> AbortableResolver<F>
-where
-    F: Fn(&Reason) -> Option<Type>,
-{
+impl AbortableResolver {
     fn constraint_node<'cx>(
         &mut self,
         cx: &mut Context<'cx>,
@@ -173,13 +166,10 @@ where
                     root_id,
                 ) {
                     Some(t) => t,
-                    None => match (self.no_lowers)(r) {
-                        Some(t) => t,
-                        None => {
-                            self.aborted = true;
-                            return (seen_tvars, seen_placeholders);
-                        }
-                    },
+                    None => {
+                        self.aborted = true;
+                        return (seen_tvars, seen_placeholders);
+                    }
                 };
                 let (mut seen_tvars, seen_placeholders_in_t) =
                     self.type_(cx, pole, (seen_tvars, false), &t);
@@ -199,10 +189,7 @@ where
     }
 }
 
-impl<F> TypeVisitor<Acc> for AbortableResolver<F>
-where
-    F: Fn(&Reason) -> Option<Type>,
-{
+impl TypeVisitor<Acc> for AbortableResolver {
     fn type_<'cx>(&mut self, cx: &mut Context<'cx>, pole: Polarity, seen: Acc, t: &Type) -> Acc {
         if self.aborted {
             return seen;
@@ -231,17 +218,12 @@ where
     }
 }
 
-pub fn resolved_t_abortable<'cx, F>(
-    no_lowers: F,
+pub fn resolved_t_abortable<'cx>(
     filter_empty: bool,
     cx: &mut Context<'cx>,
     t: Type,
-) -> Option<Type>
-where
-    F: Fn(&Reason) -> Option<Type>,
-{
+) -> Option<Type> {
     let mut resolver = AbortableResolver {
-        no_lowers,
         filter_empty,
         aborted: false,
     };

@@ -7311,7 +7311,7 @@ fn expression_<'a>(
                         |cx, tout| {
                             let reason_op = reason_clone.dupe();
                             let element_reason = mk_reason(
-                                VirtualReasonDesc::RInferredUnionElemArray { is_empty: false },
+                                VirtualReasonDesc::RInferredUnionElemArray,
                                 reason_op.loc().dupe(),
                             );
                             let elem_t = flow_typing_tvar::mk(cx, element_reason);

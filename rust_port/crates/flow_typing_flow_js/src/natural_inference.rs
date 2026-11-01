@@ -38,8 +38,10 @@ use flow_typing_type::type_::NumberLiteral;
 use flow_typing_type::type_::PolyTData;
 use flow_typing_type::type_::Property;
 use flow_typing_type::type_::PropertyInner;
+use flow_typing_type::type_::ROArrayATData;
 use flow_typing_type::type_::TupleATData;
 use flow_typing_type::type_::TupleElement;
+use flow_typing_type::type_::Tvar;
 use flow_typing_type::type_::TvarSeenSet;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeAppTData;
@@ -48,6 +50,7 @@ use flow_typing_type::type_::TypeDestructorTInner;
 use flow_typing_type::type_::TypeInner;
 use flow_typing_type::type_::UniqueSymbolTData;
 use flow_typing_type::type_::constraint;
+use flow_typing_type::type_::elemt_of_arrtype;
 use flow_typing_type::type_::eval;
 use flow_typing_type::type_::exports;
 use flow_typing_type::type_::properties;
@@ -141,17 +144,12 @@ fn is_builtin_promise<'cx>(cx: &mut Context<'cx>, t: &Type) -> bool {
     loop_(cx, &mut seen, t)
 }
 
-fn is_literal_union(r: &Reason, rep: &union_rep::UnionRep) -> bool {
+fn is_literal_union(rep: &union_rep::UnionRep) -> bool {
     match rep.union_kind() {
         UnionKind::ConditionalKind
         | UnionKind::ImplicitInstantiationKind
         | UnionKind::LogicalKind => true,
-        UnionKind::ProvidersKind | UnionKind::ResolvedKind | UnionKind::UnknownKind => {
-            match r.desc(true) {
-                Some(VirtualReasonDesc::RInferredUnionElemArray { .. }) => true,
-                _ => false,
-            }
-        }
+        UnionKind::ProvidersKind | UnionKind::ResolvedKind | UnionKind::UnknownKind => false,
     }
 }
 
@@ -335,6 +333,77 @@ enum LiteralMapAction {
     Done(Type),
     // Call type_default on this type
     TypeDefault(Type),
+    // Call map_literal_array on this type
+    LiteralArray(Type),
+}
+
+// The element type of a literal array with several element types resolves to
+// their union, so it is generalized along with them.
+fn literal_array_elem_t<'cx, M: TypeMapper<'cx, LiteralMapCx>>(
+    mapper: &mut M,
+    cx: &mut Context<'cx>,
+    map_cx: &LiteralMapCx,
+    elem_t: Type,
+) -> Type {
+    if let TypeInner::OpenT(tvar) = elem_t.deref()
+        && let (root_id, constraint::Constraints::FullyResolved(s)) =
+            cx.find_constraints(tvar.id() as i32)
+        && !map_cx.contains(&root_id)
+    {
+        let t = cx.force_fully_resolved_tvar(&s);
+        if let TypeInner::UnionT(_, rep) = t.deref()
+            && let UnionKind::ResolvedKind = rep.union_kind()
+        {
+            return map_cx.with_added(root_id, || {
+                let t_prime = type_mapper::type_default(mapper, cx, map_cx, t.dupe());
+                if t.ptr_eq(&t_prime) {
+                    elem_t.dupe()
+                } else {
+                    let id = flow_typing_tvar::mk_fully_resolved_no_wrap(cx, t_prime) as u32;
+                    Type::new(TypeInner::OpenT(Tvar::new(tvar.reason().dupe(), id)))
+                }
+            });
+        }
+    }
+    mapper.type_(cx, map_cx, elem_t)
+}
+
+fn map_literal_array<'cx, M: TypeMapper<'cx, LiteralMapCx>>(
+    mapper: &mut M,
+    cx: &mut Context<'cx>,
+    map_cx: &LiteralMapCx,
+    t: Type,
+) -> Type {
+    let t = match t.deref() {
+        TypeInner::DefT(r, def_t) if let DefTInner::ArrT(arr) = def_t.deref() => {
+            let elem_t = elemt_of_arrtype(arr);
+            let elem_t_prime = literal_array_elem_t(mapper, cx, map_cx, elem_t.dupe());
+            if elem_t.ptr_eq(&elem_t_prime) {
+                t
+            } else {
+                let arr_prime = match arr.deref() {
+                    ArrType::ArrayAT(box data) => ArrType::ArrayAT(Box::new(ArrayATData {
+                        elem_t: elem_t_prime,
+                        ..data.clone()
+                    })),
+                    ArrType::TupleAT(box data) => ArrType::TupleAT(Box::new(TupleATData {
+                        elem_t: elem_t_prime,
+                        ..data.clone()
+                    })),
+                    ArrType::ROArrayAT(box data) => ArrType::ROArrayAT(Box::new(ROArrayATData {
+                        elem_t: elem_t_prime,
+                        ..data.clone()
+                    })),
+                };
+                Type::new(TypeInner::DefT(
+                    r.dupe(),
+                    DefT::new(DefTInner::ArrT(Rc::new(arr_prime))),
+                ))
+            }
+        }
+        _ => t,
+    };
+    type_mapper::type_default(mapper, cx, map_cx, t)
 }
 
 // Both LiteralTypeMapper and ConvertLiteralTypeToConstMapper delegate to this.
@@ -357,7 +426,7 @@ fn literal_type_mapper_type_dispatch<'cx>(
             } else {
                 t.dupe()
             };
-            LiteralMapAction::TypeDefault(t)
+            LiteralMapAction::LiteralArray(t)
         }
         TypeInner::DefT(r, def_t)
             if let DefTInner::ObjT(o) = def_t.deref()
@@ -392,7 +461,7 @@ fn literal_type_mapper_type_dispatch<'cx>(
             // async expressions will wrap result in Promise<>, so we need to descend here
             LiteralMapAction::TypeDefault(t.dupe())
         }
-        TypeInner::UnionT(r, rep) if is_literal_union(r, rep) => {
+        TypeInner::UnionT(_, rep) if is_literal_union(rep) => {
             LiteralMapAction::TypeDefault(t.dupe())
         }
         TypeInner::DefT(r, def_t) => match def_t.deref() {
@@ -509,6 +578,7 @@ impl<'cx, F: Fn(&Context<'_>, &ALoc) -> SingletonAction> TypeMapper<'cx, Literal
         match literal_type_mapper_type_dispatch(&self.singleton_action, cx, &t) {
             LiteralMapAction::Done(t) => t,
             LiteralMapAction::TypeDefault(t) => type_mapper::type_default(self, cx, map_cx, t),
+            LiteralMapAction::LiteralArray(t) => map_literal_array(self, cx, map_cx, t),
         }
     }
 }
@@ -715,7 +785,8 @@ impl<'cx> TypeMapper<'cx, LiteralMapCx> for ConvertLiteralTypeToConstMapper {
                         ..
                     }) => {
                         if arr.literal() && self.reason_def_loc_within_call(r) {
-                            let elem_t_prime = self.type_(cx, map_cx, elem_t.dupe());
+                            let elem_t_prime =
+                                literal_array_elem_t(self, cx, map_cx, elem_t.dupe());
                             let elements: Vec<TupleElement> = tv
                                 .elements
                                 .iter()
@@ -813,6 +884,7 @@ impl ConvertLiteralTypeToConstMapper {
         match literal_type_mapper_type_dispatch(&|_, _| SingletonAction::KeepAsConst, cx, &t) {
             LiteralMapAction::Done(t) => t,
             LiteralMapAction::TypeDefault(t) => type_mapper::type_default(self, cx, map_cx, t),
+            LiteralMapAction::LiteralArray(t) => map_literal_array(self, cx, map_cx, t),
         }
     }
 }

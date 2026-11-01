@@ -28,7 +28,6 @@ use flow_common::hint::SentinelRefinement;
 use flow_common::options::JsxMode;
 use flow_common::reason::Name;
 use flow_common::reason::Reason;
-use flow_common::reason::VirtualReasonDesc;
 use flow_common::subst_name::SubstName;
 use flow_data_structure_wrapper::ord_map::FlowOrdMap;
 use flow_data_structure_wrapper::smol_str::FlowSmolStr;
@@ -251,17 +250,7 @@ fn in_sandbox_cx<'cx>(
     cx.run_and_rolled_back_cache(|cx| {
         let original_errors = cx.errors();
         cx.reset_errors(ErrorSet::empty());
-        let resolved = tvar_resolver::resolved_t_abortable(
-            |r| match r.desc(true) {
-                Some(VirtualReasonDesc::RInferredUnionElemArray { is_empty: true, .. }) => {
-                    Some(tvar_resolver::default_no_lowers(r))
-                }
-                _ => None,
-            },
-            false,
-            cx,
-            t.dupe(),
-        );
+        let resolved = tvar_resolver::resolved_t_abortable(false, cx, t.dupe());
         let resolved = match resolved {
             None => {
                 cx.reset_errors(original_errors);
@@ -1723,14 +1712,9 @@ fn fully_resolve_final_result<'cx>(
                 flow_typing_debug::dump_t(Some(3), cx, &t),
             )]
         });
-        HintEvalResult::EncounteredPlaceholder(tvar_resolver::resolved_t_abortable(
-            |_| None,
-            false,
-            cx,
-            t,
-        ))
+        HintEvalResult::EncounteredPlaceholder(tvar_resolver::resolved_t_abortable(false, cx, t))
     } else {
-        match tvar_resolver::resolved_t_abortable(|_| None, false, cx, t) {
+        match tvar_resolver::resolved_t_abortable(false, cx, t) {
             None => HintEvalResult::DecompositionError,
             Some(resolved) => HintEvalResult::HintAvailable(resolved, kind),
         }
