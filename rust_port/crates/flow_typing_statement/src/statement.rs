@@ -848,7 +848,7 @@ fn convert_call_targs<'a>(
             }
             Implicit(implicit) => {
                 let loc = implicit.loc.dupe();
-                let reason = mk_reason(VirtualReasonDesc::RImplicitInstantiation, loc.dupe());
+                let reason = mk_reason(None, loc.dupe());
                 let id = flow_typing_tvar::mk_no_wrap(cx, &reason);
                 ts.push(Targ::ImplicitArg(Tvar::new(reason.dupe(), id as u32)));
                 let open_t = Type::new(TypeInner::OpenT(Tvar::new(reason, id as u32)));

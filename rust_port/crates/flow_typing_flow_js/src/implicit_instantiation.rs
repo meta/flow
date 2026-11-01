@@ -17,7 +17,6 @@ use flow_common::alpha_rename;
 use flow_common::enclosing_context::EnclosingContext;
 use flow_common::polarity::Polarity;
 use flow_common::reason::Reason;
-use flow_common::reason::VirtualReasonDesc;
 use flow_common::reason::mk_id;
 use flow_common::subst_name;
 use flow_common::subst_name::SubstName;
@@ -1871,10 +1870,7 @@ fn check_instantiation<'cx>(
                     inferred: false,
                 },
                 Some(Some(Targ::ImplicitArg(tvar))) => {
-                    let reason = flow_common::reason::mk_reason(
-                        VirtualReasonDesc::RImplicitInstantiation,
-                        tvar.reason().loc().dupe(),
-                    );
+                    let reason = flow_common::reason::mk_reason(None, tvar.reason().loc().dupe());
                     let t = mk_inference_targ(cx, env, tparam, &reason, reason_tapp);
                     FlowJs::flow_with_env(
                         cx,

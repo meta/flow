@@ -294,7 +294,6 @@ pub enum VirtualReasonDesc<L: Dupe> {
     RFunctionType,
     RThis,
     RThisType,
-    RImplicitInstantiation,
     RDummyThis,
     RObjectPatternRestProp,
     RArrayPatternRestProp,
@@ -387,7 +386,6 @@ impl<A: Dupe> VirtualReasonDesc<A> {
             REnum { name } => REnum { name: name.dupe() },
             RThis => RThis,
             RThisType => RThisType,
-            RImplicitInstantiation => RImplicitInstantiation,
             RRecordType(s) => RRecordType(s.dupe()),
             RDummyThis => RDummyThis,
             RType(n) => RType(n.dupe()),
@@ -1163,7 +1161,6 @@ pub fn string_of_desc<L: Dupe>(desc: &VirtualReasonDesc<L>) -> String {
         // This and types
         RThis => "this".to_string(),
         RThisType => "`this` type".to_string(),
-        RImplicitInstantiation => "implicit instantiation".to_string(),
 
         // Records
         RRecordType(name) => format!("record `{}`", name),
