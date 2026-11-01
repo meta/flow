@@ -37,7 +37,7 @@ Error --------------------------------------------------------------------------
 Cannot call `Date` because: [incompatible-type]
  - Either 
     - object literal [1] is incompatible with `Date` [2]
-       - in property `valueOf` > the return value: `unknown` [3] is incompatible with `number` [4]
+       - in property `valueOf` > the return value: `Object` [3] is incompatible with `number` [4]
  - Or object literal [1] is incompatible with `number` [5].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
@@ -55,8 +55,8 @@ References:
     91|     new (value: number | string | Date): Date;
                                           ^^^^ [2]
    <BUILTINS>/lib.es5.js:124:16
-   124|     valueOf(): unknown;
-                       ^^^^^^^ [3]
+   124|     valueOf(): Object;
+                       ^^^^^^ [3]
    <BUILTINS>/lib.es5.js:737:16
    737|     valueOf(): number;
                        ^^^^^^ [4]

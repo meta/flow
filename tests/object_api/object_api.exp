@@ -933,7 +933,7 @@ References:
 
 Error --------------------------------------------------------------------------------------- object_prototype.js:126:25
 
-Cannot assign `y.valueOf` to `yValueOf` because `(this: Object) => unknown` [1] is incompatible with `number` [2].
+Cannot assign `y.valueOf` to `yValueOf` because `(this: Object) => Object` [1] is incompatible with `number` [2].
 [incompatible-type]
 
    object_prototype.js:126:25
@@ -942,8 +942,8 @@ Cannot assign `y.valueOf` to `yValueOf` because `(this: Object) => unknown` [1] 
 
 References:
    <BUILTINS>/lib.es5.js:124:5
-   124|     valueOf(): unknown;
-            ^^^^^^^^^^^^^^^^^^ [1]
+   124|     valueOf(): Object;
+            ^^^^^^^^^^^^^^^^^ [1]
    object_prototype.js:126:16
    126| var yValueOf : number = y.valueOf; // error
                        ^^^^^^ [2]
