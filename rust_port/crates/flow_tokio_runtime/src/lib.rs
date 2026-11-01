@@ -17,7 +17,10 @@ use tokio::task::JoinHandle;
 static RUNTIME: OnceLock<Runtime> = OnceLock::new();
 
 fn build_runtime(worker_threads: Option<NonZeroUsize>) -> Runtime {
+    #[cfg(not(target_os = "emscripten"))]
     let mut builder = tokio::runtime::Builder::new_multi_thread();
+    #[cfg(target_os = "emscripten")]
+    let mut builder = tokio::runtime::Builder::new_current_thread();
     builder.enable_all().thread_name("flow-tokio-runtime");
     if let Some(worker_threads) = worker_threads {
         builder.worker_threads(worker_threads.get());
