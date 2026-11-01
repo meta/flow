@@ -1874,22 +1874,13 @@ pub fn object_update_optionality<'cx>(
         let call = None;
         let id = cx.generate_property_map(props_map);
         let proto = Type::new(TypeInner::ObjProtoT(reason.dupe()));
-        let (reason, literal) = match (reason.desc(false), kind) {
-            (Some(VirtualReasonDesc::RPartialOf(_)), ObjectUpdateOptionalityKind::Partial) => {
-                (r.dupe(), *literal)
-            }
-            (Some(VirtualReasonDesc::RRequiredOf(_)), ObjectUpdateOptionalityKind::Required) => {
-                (r.dupe(), *literal)
-            }
-            _ => (reason.dupe(), false),
-        };
         let op_kind = match kind {
             ObjectUpdateOptionalityKind::Partial => flow_common::subst_name::OpKind::Partial,
             ObjectUpdateOptionalityKind::Required => flow_common::subst_name::OpKind::Required,
         };
         mk_object_type(
             cx,
-            &reason,
+            r,
             false,
             true,
             interface.clone(),
@@ -1901,7 +1892,7 @@ pub fn object_update_optionality<'cx>(
             proto,
             generics.clone(),
             *strictness_kind,
-            literal,
+            *literal,
         )
     };
     let mapped: Vec<Type> = x.iter().map(mk_object).collect();
@@ -2814,10 +2805,6 @@ fn resolve_with_env<'cx, A>(
                         ),
                         ..elem.clone()
                     });
-                    let def_reason = match reason.desc(false) {
-                        Some(VirtualReasonDesc::RPartialOf(_)) => r.dupe(),
-                        _ => reason.dupe(),
-                    };
                     let elem_t = type_util::union_of_ts(
                         type_util::reason_of_t(elem_t).dupe(),
                         elements
@@ -2833,7 +2820,7 @@ fn resolve_with_env<'cx, A>(
                         cx,
                         use_op,
                         Type::new(TypeInner::DefT(
-                            def_reason,
+                            r.dupe(),
                             DefT::new(DefTInner::ArrT(Rc::new(ArrType::TupleAT(Box::new(
                                 TupleATData {
                                     elem_t,
@@ -2876,10 +2863,6 @@ fn resolve_with_env<'cx, A>(
                             }
                         })
                         .collect();
-                    let def_reason = match reason.desc(false) {
-                        Some(VirtualReasonDesc::RRequiredOf(_)) => r.dupe(),
-                        _ => reason.dupe(),
-                    };
                     let elem_t = type_util::union_of_ts(
                         type_util::reason_of_t(elem_t).dupe(),
                         elements
@@ -2895,7 +2878,7 @@ fn resolve_with_env<'cx, A>(
                         cx,
                         use_op,
                         Type::new(TypeInner::DefT(
-                            def_reason,
+                            r.dupe(),
                             DefT::new(DefTInner::ArrT(Rc::new(ArrType::TupleAT(Box::new(
                                 TupleATData {
                                     elem_t,
