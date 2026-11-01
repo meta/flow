@@ -307,7 +307,6 @@ pub enum VirtualReasonDesc<L: Dupe> {
     RBigIntLit(FlowSmolStr),
     RBooleanLit(bool),
     RInferredUnionElemArray {
-        instantiable: bool,
         is_empty: bool,
     },
     RTupleOutOfBoundsAccess(i32),
@@ -386,11 +385,7 @@ impl<A: Dupe> VirtualReasonDesc<A> {
             RUninitialized => RUninitialized,
             RPossiblyUninitialized => RPossiblyUninitialized,
             RComponent(n) => RComponent(n.dupe()),
-            RInferredUnionElemArray {
-                instantiable,
-                is_empty,
-            } => RInferredUnionElemArray {
-                instantiable: *instantiable,
+            RInferredUnionElemArray { is_empty } => RInferredUnionElemArray {
                 is_empty: *is_empty,
             },
             REnum { name } => REnum { name: name.dupe() },
@@ -1259,25 +1254,6 @@ pub fn dump_reason(strip_root: Option<&str>, r: &Reason) -> String {
         string_of_aloc(strip_root, &r.loc),
         r.desc.as_ref().map(string_of_desc).unwrap_or_default()
     )
-}
-
-/// Instantiable reasons identify tvars that are created for the purpose of
-/// instantiation: they are fresh rather than shared, and should become types
-/// that flow to them. We assume these characteristics when performing
-/// speculative matching (even though we don't yet enforce them).
-pub fn is_instantiable_reason<L: Dupe>(r: &VirtualReason<L>) -> bool {
-    match r.desc(true) {
-        Some(
-            VirtualReasonDesc::RTypeParam(..)
-            | VirtualReasonDesc::RThisType
-            | VirtualReasonDesc::RImplicitInstantiation,
-        ) => true,
-        Some(VirtualReasonDesc::RInferredUnionElemArray {
-            instantiable,
-            is_empty: _,
-        }) => *instantiable,
-        _ => false,
-    }
 }
 
 pub fn is_record_reason<L: Dupe>(r: &VirtualReason<L>) -> bool {

@@ -1885,7 +1885,6 @@ pub(super) fn reposition<'cx>(
     use std::ops::Deref;
     use std::rc::Rc;
 
-    use flow_common::reason::is_instantiable_reason;
     use flow_data_structure_wrapper::int_map::IntHashMap;
     use flow_typing_flow_common::flow_cache;
     use flow_typing_flow_common::flow_js_utils;
@@ -2003,10 +2002,13 @@ pub(super) fn reposition<'cx>(
                             Ok(t)
                         }
                     },
-                    Constraints::Unresolved(_) => {
-                        if is_instantiable_reason(r) && env.in_implicit_instantiation() {
+                    Constraints::Unresolved(_) => match t_node.deref() {
+                        TypeInner::ImplicitInstantiationTvar(_)
+                            if env.in_implicit_instantiation() =>
+                        {
                             Ok(t_node.dupe())
-                        } else {
+                        }
+                        _ => {
                             let reason_for_repos = reason.dupe();
                             flow_typing_tvar::mk_where(cx, reason, |cx, tvar| {
                                 flow_opt(
@@ -2027,7 +2029,7 @@ pub(super) fn reposition<'cx>(
                                 )
                             })
                         }
-                    }
+                    },
                 }
             }
             TypeInner::EvalT {

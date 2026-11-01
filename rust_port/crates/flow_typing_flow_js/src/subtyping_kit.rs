@@ -4388,9 +4388,7 @@ pub fn rec_sub_t<'cx>(
                         match cx.find_constraints(node.id()).1 {
                             Constraints::Resolved(_) | Constraints::FullyResolved(_) => false,
                             Constraints::Unresolved(_) => {
-                                flow_common::reason::is_instantiable_reason(
-                                    type_util::reason_of_t(t),
-                                )
+                                matches!(t.deref(), ImplicitInstantiationTvar(_))
                             }
                         }
                     } else {

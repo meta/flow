@@ -661,10 +661,7 @@ fn resolve_hint<'cx>(
                 flow_typing_tvar::mk_where(cx, array_reason.dupe(), |cx, tout| {
                     let reason_op = array_reason.dupe();
                     let element_reason = reason_op.dupe().replace_desc(
-                        reason::VirtualReasonDesc::RInferredUnionElemArray {
-                            instantiable: false,
-                            is_empty,
-                        },
+                        reason::VirtualReasonDesc::RInferredUnionElemArray { is_empty },
                     );
                     let elem_t = flow_typing_tvar::mk(cx, element_reason);
                     flow_js_exception_to_job_error(flow_js::FlowJs::resolve_spread_list(
@@ -1547,10 +1544,7 @@ fn resolve_binding<'cx>(
                         flow_typing_tvar::mk_where(cx, arr_reason.dupe(), |cx, tout| {
                             let reason_op = arr_reason.dupe();
                             let element_reason = reason_op.dupe().replace_desc(
-                                reason::VirtualReasonDesc::RInferredUnionElemArray {
-                                    instantiable: false,
-                                    is_empty,
-                                },
+                                reason::VirtualReasonDesc::RInferredUnionElemArray { is_empty },
                             );
                             let elem_t = flow_typing_tvar::mk(cx, element_reason);
                             flow_js_exception_to_job_error(flow_js::FlowJs::resolve_spread_list(

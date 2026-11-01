@@ -347,12 +347,10 @@ fn multiflow_args<'cx>(
             {
                 let use_op = use_op.dupe();
                 flow_typing_tvar::mk_where(cx, reason_op.dupe(), |cx, tout| {
-                    let instantiable = flow_common::reason::is_instantiable_reason(rest_reason);
                     let element_reason =
                         reason_op
                             .dupe()
                             .replace_desc(VirtualReasonDesc::RInferredUnionElemArray {
-                                instantiable,
                                 is_empty: elems.is_empty(),
                             });
                     let elem_t = flow_typing_tvar::mk(cx, element_reason);

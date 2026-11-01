@@ -12492,27 +12492,15 @@ pub fn ro_of_arrtype(arrtype: &ArrType) -> flow_typing_generics::array_spread::R
 
 pub fn annot(in_implicit_instantiation: bool, use_desc: bool, t: &Type) -> Type {
     match &**t {
-        TypeInner::ImplicitInstantiationTvar(data) => {
-            let reason = &data.reason;
-            if !(flow_common::reason::is_instantiable_reason(reason) && in_implicit_instantiation) {
-                Type(Rc::new(TypeInner::AnnotT(
-                    reason.dupe(),
-                    t.dupe(),
-                    use_desc,
-                )))
-            } else {
-                t.dupe()
-            }
-        }
-        TypeInner::OpenT(tvar) => {
-            if !(flow_common::reason::is_instantiable_reason(&tvar.0) && in_implicit_instantiation)
-            {
-                let reason = tvar.0.dupe();
-                Type(Rc::new(TypeInner::AnnotT(reason, t.dupe(), use_desc)))
-            } else {
-                t.dupe()
-            }
-        }
+        TypeInner::ImplicitInstantiationTvar(_) if in_implicit_instantiation => t.dupe(),
+        TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            reason, ..
+        })
+        | TypeInner::OpenT(Tvar(reason, _)) => Type(Rc::new(TypeInner::AnnotT(
+            reason.dupe(),
+            t.dupe(),
+            use_desc,
+        ))),
         _ => t.dupe(),
     }
 }
