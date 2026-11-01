@@ -89,7 +89,7 @@ Flags: --pretty
     },
     {
       "name":"matchAll",
-      "type":"(this: String, regexp: string | RegExp) => RegExpStringIterator<RegExpMatchArray>"
+      "type":"(this: String, regexp: string | RegExp) => RegExpStringIterator<RegExpExecArray>"
     },
     {"name":"normalize","type":"(this: String, form?: string) => string"},
     {

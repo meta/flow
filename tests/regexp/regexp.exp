@@ -187,10 +187,10 @@ References:
     30|     matchAll(regexp: RegExp): RegExpStringIterator<RegExpExecArray>;
                              ^^^^^^ [2]
    <BUILTINS>/misc.js:221:20
-   221|   matchAll(regexp: string | RegExp): RegExpStringIterator<RegExpMatchArray>;
+   221|   matchAll(regexp: string | RegExp): RegExpStringIterator<RegExpExecArray>;
                            ^^^^^^ [3]
    <BUILTINS>/misc.js:221:29
-   221|   matchAll(regexp: string | RegExp): RegExpStringIterator<RegExpMatchArray>;
+   221|   matchAll(regexp: string | RegExp): RegExpStringIterator<RegExpExecArray>;
                                     ^^^^^^ [4]
 
 
