@@ -243,16 +243,56 @@ References:
 
 Error ------------------------------------------------------------------------------------------ callback_writes.js:26:1
 
-Cannot call `withDefaults` because `unknown` [1] is not a polymorphic type. [incompatible-use]
+Cannot cast `withDefaults(...)` to `({b: string}) => () => string` because in the first parameter: property `b` is extra
+in `{b: string}` [1] but missing in `{}` [2]. Exact objects do not accept extra props. [incompatible-type]
 
    callback_writes.js:26:1
-     26| withDefaults(
-         ^^^^^^^^^^^^
+       v------------
+   26| withDefaults(
+   27|   {a: 1},
+   28|   ({a, b}) => () => b,
+   29| ) as ({b: string}) => () => string; // ERROR
+       ^
 
 References:
-   <BUILTINS>/lib.es5.js:1556:40
-   1556| type Omit<T extends interface {}, K> = $Omit<T, K>;
-                                                ^^^^^^^^^^^ [1]
+   callback_writes.js:29:7
+   29| ) as ({b: string}) => () => string; // ERROR
+             ^^^^^^^^^^^ [1]
+   callback_writes_helper.js:8:5
+    8| ): (Omit<TArgs, keyof TDefaults>) => TResult {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------- callback_writes.js:28:21
+
+Cannot cast `withDefaults(...)` to `({b: string}) => () => string` because in the return value > the return value:
+`void` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   callback_writes.js:28:21
+   28|   ({a, b}) => () => b,
+                           ^
+
+References:
+   callback_writes.js:28:8
+   28|   ({a, b}) => () => b,
+              ^ [1]
+   callback_writes.js:29:29
+   29| ) as ({b: string}) => () => string; // ERROR
+                                   ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------ callback_writes.js:28:8
+
+Property `b` is missing in object literal [1]. [prop-missing]
+
+   callback_writes.js:28:8
+   28|   ({a, b}) => () => b,
+              ^
+
+References:
+   callback_writes.js:27:3
+   27|   {a: 1},
+         ^^^^^^ [1]
 
 
 Error ---------------------------------------------------------------------------------------------- cond_havoc.js:10:10
@@ -307,4 +347,4 @@ References:
 
 
 
-Found 19 errors
+Found 21 errors

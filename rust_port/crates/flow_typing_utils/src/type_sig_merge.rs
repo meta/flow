@@ -2394,44 +2394,56 @@ fn merge_annot<'cx>(
         }
         Annot::Partial(box (loc, t)) => {
             let t = merge_impl(env, cx, file, t, false, false);
-            let reason = reason::mk_reason(
-                type_util::desc_of_t(&t)
-                    .cloned()
-                    .map(|desc| RPartialOf(Arc::new(desc))),
-                loc.dupe(),
-            );
-            let use_op = type_::UseOp::Op(Arc::new(type_::RootUseOp::TypeApplication {
-                type_: type_::TypeApplicationTarget::Reason(reason.dupe()),
-            }));
+            let reason = reason::mk_reason(None, loc.dupe());
             let id = eval_id_of_aloc(cx, loc.dupe());
+            let destructor = Rc::new(type_::Destructor::PartialType);
+            let partial_t = Type::new(type_::TypeInner::EvalT {
+                type_: t.dupe(),
+                defer_use_t: type_::TypeDestructorT::new(type_::TypeDestructorTInner(
+                    type_::unknown_use(),
+                    reason.dupe(),
+                    destructor.dupe(),
+                )),
+                id: id.dupe(),
+            });
+            let use_op = type_::UseOp::Op(Arc::new(type_::RootUseOp::EvalMappedType(Box::new(
+                type_::EvalMappedTypeData {
+                    mapped_type_loc: loc.dupe(),
+                    mapped_type: flow_js_utils::type_or_type_desc_for_error(&partial_t),
+                },
+            ))));
             Type::new(type_::TypeInner::EvalT {
                 type_: t,
                 defer_use_t: type_::TypeDestructorT::new(type_::TypeDestructorTInner(
-                    use_op,
-                    reason,
-                    Rc::new(type_::Destructor::PartialType),
+                    use_op, reason, destructor,
                 )),
                 id,
             })
         }
         Annot::Required(box (loc, t)) => {
             let t = merge_impl(env, cx, file, t, false, false);
-            let reason = reason::mk_reason(
-                type_util::desc_of_t(&t)
-                    .cloned()
-                    .map(|desc| RRequiredOf(Arc::new(desc))),
-                loc.dupe(),
-            );
-            let use_op = type_::UseOp::Op(Arc::new(type_::RootUseOp::TypeApplication {
-                type_: type_::TypeApplicationTarget::Reason(reason.dupe()),
-            }));
+            let reason = reason::mk_reason(None, loc.dupe());
             let id = eval_id_of_aloc(cx, loc.dupe());
+            let destructor = Rc::new(type_::Destructor::RequiredType);
+            let required_t = Type::new(type_::TypeInner::EvalT {
+                type_: t.dupe(),
+                defer_use_t: type_::TypeDestructorT::new(type_::TypeDestructorTInner(
+                    type_::unknown_use(),
+                    reason.dupe(),
+                    destructor.dupe(),
+                )),
+                id: id.dupe(),
+            });
+            let use_op = type_::UseOp::Op(Arc::new(type_::RootUseOp::EvalMappedType(Box::new(
+                type_::EvalMappedTypeData {
+                    mapped_type_loc: loc.dupe(),
+                    mapped_type: flow_js_utils::type_or_type_desc_for_error(&required_t),
+                },
+            ))));
             Type::new(type_::TypeInner::EvalT {
                 type_: t,
                 defer_use_t: type_::TypeDestructorT::new(type_::TypeDestructorTInner(
-                    use_op,
-                    reason,
-                    Rc::new(type_::Destructor::RequiredType),
+                    use_op, reason, destructor,
                 )),
                 id,
             })

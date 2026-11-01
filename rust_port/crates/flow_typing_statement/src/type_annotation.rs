@@ -2353,20 +2353,21 @@ fn convert_inner<'a>(
                             let (ts, targs_ast) =
                                 convert_type_params(cx, env, inner.targs.as_ref())?;
                             let tp = ts.into_iter().next().unwrap();
-                            let reason = reason::mk_reason(
-                                type_util::desc_of_t(&tp).cloned().map(|desc| {
-                                    reason::VirtualReasonDesc::RPartialOf(Arc::new(desc))
-                                }),
-                                type_util::loc_of_t(&tp).dupe(),
-                            );
+                            let reason = reason::mk_reason(None, type_util::loc_of_t(&tp).dupe());
+                            let eval_id = mk_eval_id(cx, loc.dupe());
                             let result_t =
                                 FlowJs::mk_possibly_evaluated_destructor_for_annotations(
                                     cx,
-                                    use_op(&reason),
+                                    mapped_type_use_op(
+                                        &reason,
+                                        &tp,
+                                        &type_::Destructor::PartialType,
+                                        eval_id.dupe(),
+                                    ),
                                     &reason,
                                     &tp,
                                     &type_::Destructor::PartialType,
-                                    mk_eval_id(cx, loc.dupe()),
+                                    eval_id,
                                 )
                                 .expect("mk_type_destructor should not fail");
                             Ok(reconstruct_ast(result_t, None, targs_ast))
@@ -2378,20 +2379,21 @@ fn convert_inner<'a>(
                             let (ts, targs_ast) =
                                 convert_type_params(cx, env, inner.targs.as_ref())?;
                             let tp = ts.into_iter().next().unwrap();
-                            let reason = reason::mk_reason(
-                                type_util::desc_of_t(&tp).cloned().map(|desc| {
-                                    reason::VirtualReasonDesc::RRequiredOf(Arc::new(desc))
-                                }),
-                                type_util::loc_of_t(&tp).dupe(),
-                            );
+                            let reason = reason::mk_reason(None, type_util::loc_of_t(&tp).dupe());
+                            let eval_id = mk_eval_id(cx, loc.dupe());
                             let result_t =
                                 FlowJs::mk_possibly_evaluated_destructor_for_annotations(
                                     cx,
-                                    use_op(&reason),
+                                    mapped_type_use_op(
+                                        &reason,
+                                        &tp,
+                                        &type_::Destructor::RequiredType,
+                                        eval_id.dupe(),
+                                    ),
                                     &reason,
                                     &tp,
                                     &type_::Destructor::RequiredType,
-                                    mk_eval_id(cx, loc.dupe()),
+                                    eval_id,
                                 )
                                 .expect("mk_type_destructor should not fail");
                             Ok(reconstruct_ast(result_t, None, targs_ast))

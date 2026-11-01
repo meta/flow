@@ -340,8 +340,6 @@ pub enum VirtualReasonDesc<L: Dupe> {
     RImportStar(FlowSmolStr),
     RDefaultImportedType(FlowSmolStr, Userland),
     RCode(FlowSmolStr),
-    RPartialOf(Arc<VirtualReasonDesc<L>>),
-    RRequiredOf(Arc<VirtualReasonDesc<L>>),
     RModule(Userland),
     // TODO React element names should not allow internal names
     RReactElement {
@@ -440,8 +438,6 @@ impl<A: Dupe> VirtualReasonDesc<A> {
                 d.as_ref().map(|d| Arc::new(d.map_locs(f))),
             ))),
             RTypeParam(box (s, l1, l2)) => RTypeParam(Box::new((s.clone(), f(l1), f(l2)))),
-            RPartialOf(d) => RPartialOf(Arc::new(d.map_locs(f))),
-            RRequiredOf(d) => RRequiredOf(Arc::new(d.map_locs(f))),
             REnumMember {
                 enum_desc,
                 member_name,
@@ -1221,10 +1217,6 @@ pub fn string_of_desc<L: Dupe>(desc: &VirtualReasonDesc<L>) -> String {
             format!("Default import from `{}`", module_name.display())
         }
         RCode(x) => code_span(x),
-
-        // Type wrappers
-        RPartialOf(d) => format!("partial {}", string_of_desc(d)),
-        RRequiredOf(d) => format!("required of {}", string_of_desc(d)),
 
         // Pattern rest props
         RObjectPatternRestProp => "rest of object pattern".to_string(),

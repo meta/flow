@@ -167,7 +167,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:30:20
 
-Cannot instantiate partial number because `number` [1] is not an object. [not-an-object]
+Cannot instantiate `Partial<number>` [1] because `number` [1] is not an object. [not-an-object]
 
    30| type Err = Partial<number> // error
                           ^^^^^^ [1]

@@ -238,7 +238,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:36:21
 
-Cannot instantiate required of number because `number` [1] is not an object. [not-an-object]
+Cannot instantiate `Required<number>` [1] because `number` [1] is not an object. [not-an-object]
 
    36| type Err = Required<number>; // ERROR
                            ^^^^^^ [1]

@@ -223,7 +223,7 @@ Cannot make this type read-only because `string` [1] is not an object, array, or
 
 Error ------------------------------------------------------------------------------------------------- invalid.js:15:28
 
-Cannot instantiate partial number because `number` [1] is not an object. [not-an-object]
+Cannot instantiate `Partial<number>` [1] because `number` [1] is not an object. [not-an-object]
 
    15|   declare const x: Partial<number>; // ERROR: still requires an object
                                   ^^^^^^ [1]
@@ -231,7 +231,7 @@ Cannot instantiate partial number because `number` [1] is not an object. [not-an
 
 Error ------------------------------------------------------------------------------------------------- invalid.js:16:29
 
-Cannot instantiate required of number because `number` [1] is not an object. [not-an-object]
+Cannot instantiate `Required<number>` [1] because `number` [1] is not an object. [not-an-object]
 
    16|   declare const y: Required<number>; // ERROR: still requires an object
                                    ^^^^^^ [1]
