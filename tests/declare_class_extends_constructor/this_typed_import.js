@@ -3,5 +3,5 @@
 import type {UserBufferType} from './this_typed';
 
 declare const buffer: UserBufferType;
-buffer.subarray(0) as UserBufferType; // ok
-buffer.subarray(0).toString('hex') as string; // ok
+buffer.fill(0) as UserBufferType; // ok
+buffer.fill(0).toString('hex') as string; // ok

@@ -50,20 +50,20 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- this_typed.js:19:1
 
-Cannot cast `(new UserBuffer(...)).subarray(...)` to `DeclaredBuffer` because `UserBuffer` [1] is incompatible with
+Cannot cast `(new UserBuffer(...)).fill(...)` to `DeclaredBuffer` because `UserBuffer` [1] is incompatible with
 `DeclaredBuffer` [2]. [incompatible-type]
 
    this_typed.js:19:1
-   19| new UserBuffer(2).subarray(0) as DeclaredBuffer; // error: `UserBuffer` ~> `DeclaredBuffer`
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   19| new UserBuffer(2).fill(0) as DeclaredBuffer; // error: `UserBuffer` ~> `DeclaredBuffer`
+       ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    this_typed.js:12:7
    12| class UserBuffer extends Uint8Array {
              ^^^^^^^^^^ [1]
-   this_typed.js:19:34
-   19| new UserBuffer(2).subarray(0) as DeclaredBuffer; // error: `UserBuffer` ~> `DeclaredBuffer`
-                                        ^^^^^^^^^^^^^^ [2]
+   this_typed.js:19:30
+   19| new UserBuffer(2).fill(0) as DeclaredBuffer; // error: `UserBuffer` ~> `DeclaredBuffer`
+                                    ^^^^^^^^^^^^^^ [2]
 
 
 
