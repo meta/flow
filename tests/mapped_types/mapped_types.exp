@@ -1517,8 +1517,8 @@ Cannot cast `keysLength` to `string` because `number` [1] is incompatible with `
         ^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:473:22
-   473|     readonly length: number;
+   <BUILTINS>/lib.es5.js:472:22
+   472|     readonly length: number;
                              ^^^^^^ [1]
    import_values.js:32:15
     32| keysLength as string; // ERROR
@@ -1585,8 +1585,8 @@ Cannot cast `pickedG` to `string` because `void` [1] is incompatible with `strin
          ^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1541:15
-   1541|     [P in K]: T[P];
+   <BUILTINS>/lib.es5.js:1540:15
+   1540|     [P in K]: T[P];
                        ^^^^ [1]
    import_values.js:40:12
      40| pickedG as string; // ERROR 2x

@@ -9,8 +9,8 @@ Cannot call `listen` with `1` bound to `e` because `Number` [1] is incompatible 
                ^
 
 References:
-   <BUILTINS>/lib.es5.js:510:11
-   510| interface Number {
+   <BUILTINS>/lib.es5.js:509:11
+   509| interface Number {
                   ^^^^^^ [1]
    lib/legacy.js:1:28
      1| declare function listen(e: Event): void;
@@ -30,8 +30,8 @@ Cannot call `listen` with `1` bound to `e` because `Number` [1] is incompatible 
                ^
 
 References:
-   <BUILTINS>/lib.es5.js:510:11
-   510| interface Number {
+   <BUILTINS>/lib.es5.js:509:11
+   509| interface Number {
                   ^^^^^^ [1]
    lib/legacy.js:1:28
      1| declare function listen(e: Event): void;
