@@ -3414,15 +3414,16 @@ pub fn load_saved_state(
             saved_state_filename,
             changed_files,
         } => {
-            let (saved_state, loaded_heap) =
-                match flow_saved_state::load(&saved_state_filename, options) {
-                    Ok(loaded) => loaded,
-                    Err(reason) => {
-                        let msg = format!("Failed to load saved state: {}", reason);
-                        exit_if_no_fallback(Some(&msg), options);
-                        return Err(msg);
-                    }
-                };
+            let (saved_state, loaded_heap) = match with_timer(options, "LoadSavedState", || {
+                flow_saved_state::load(&saved_state_filename, options)
+            }) {
+                Ok(loaded) => loaded,
+                Err(reason) => {
+                    let msg = format!("Failed to load saved state: {}", reason);
+                    exit_if_no_fallback(Some(&msg), options);
+                    return Err(msg);
+                }
+            };
             // The saved state arrives as a heap of its own, so everything from here runs against
             // that heap, and nothing publishes it until the orchestrator adopts it.
             let transaction = ActiveTransaction::new(loaded_heap.dupe());
