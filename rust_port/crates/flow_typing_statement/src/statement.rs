@@ -36,7 +36,6 @@ use flow_common::reason::mk_expression_reason;
 use flow_common::reason::mk_expression_reference;
 use flow_common::reason::mk_id;
 use flow_common::reason::mk_initial_arguments_reference;
-use flow_common::reason::mk_obj_lit_reason;
 use flow_common::reason::mk_pattern_reason;
 use flow_common::reason::mk_reason;
 use flow_common::subst_name::SubstName;
@@ -5948,7 +5947,7 @@ fn object_<'a>(
     } else {
         type_::ObjLiteral::of_expression(*has_hint.get_forced(cx))
     };
-    let reason = mk_obj_lit_reason(as_const, frozen, loc.dupe());
+    let reason = mk_reason(None, loc.dupe());
     // Use the same reason for proto and the ObjT so we can walk the proto chain
     // and use the root proto reason to build an error.
     let obj_proto = Type::new(TypeInner::ObjProtoT(reason.dupe()));
@@ -7308,11 +7307,7 @@ fn expression_<'a>(
                         }))
                     };
                     let literal = !as_const && *has_hint.get_forced(cx);
-                    let reason = if as_const {
-                        mk_reason(None, loc.dupe())
-                    } else {
-                        mk_reason(VirtualReasonDesc::RArrayLit, loc.dupe())
-                    };
+                    let reason = mk_reason(None, loc.dupe());
                     let (elem_spread_list, elements) =
                         array_elements(cx, as_const, has_hint, &inner.elements)?;
                     let reason_clone = reason.dupe();

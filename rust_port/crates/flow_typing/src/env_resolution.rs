@@ -1543,8 +1543,7 @@ fn resolve_binding<'cx>(
                                 }
                             })
                             .collect::<Result<_, _>>()?;
-                        let arr_reason =
-                            reason::mk_reason(reason::VirtualReasonDesc::RArrayLit, loc.dupe());
+                        let arr_reason = reason::mk_reason(None, loc.dupe());
                         flow_typing_tvar::mk_where(cx, arr_reason.dupe(), |cx, tout| {
                             let reason_op = arr_reason.dupe();
                             let element_reason = reason_op
@@ -1611,8 +1610,7 @@ fn resolve_binding<'cx>(
                 obj_loc: ALoc,
                 obj: &ast::expression::Object<ALoc, ALoc>,
             ) -> Result<Type, CheckExprError> {
-                let obj_reason =
-                    reason::mk_reason(reason::VirtualReasonDesc::RObjectLit, obj_loc.dupe());
+                let obj_reason = reason::mk_reason(None, obj_loc.dupe());
                 let obj_proto = Type::new(TypeInner::ObjProtoT(obj_reason.dupe()));
                 let acc = obj.properties.iter().try_fold(
                     statement::object_expression_acc::ObjectExpressionAcc::empty(),

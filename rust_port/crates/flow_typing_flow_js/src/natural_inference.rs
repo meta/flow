@@ -422,10 +422,9 @@ fn literal_type_mapper_type_dispatch<'cx>(
                 && arr.literal().is_literal() =>
         {
             let t = match arr.literal() {
-                ArrLiteral::LiteralExpression => non_literal_of_t(&mod_reason_of_t(
-                    &|r| r.replace_desc_new(VirtualReasonDesc::RArrayLit),
-                    t,
-                )),
+                ArrLiteral::LiteralExpression => {
+                    non_literal_of_t(&mod_reason_of_t(&|r| r.replace_desc_new(None), t))
+                }
                 ArrLiteral::NonLiteral | ArrLiteral::Literal | ArrLiteral::Expression => t.dupe(),
             };
             LiteralMapAction::LiteralArray(t)
@@ -435,10 +434,9 @@ fn literal_type_mapper_type_dispatch<'cx>(
                 && o.literal.is_literal() =>
         {
             let t = match o.literal {
-                ObjLiteral::LiteralExpression => non_literal_of_t(&mod_reason_of_t(
-                    &|r| r.replace_desc_new(VirtualReasonDesc::RObjectLit),
-                    t,
-                )),
+                ObjLiteral::LiteralExpression => {
+                    non_literal_of_t(&mod_reason_of_t(&|r| r.replace_desc_new(None), t))
+                }
                 ObjLiteral::NonLiteral | ObjLiteral::Literal | ObjLiteral::Expression => t.dupe(),
             };
             LiteralMapAction::TypeDefault(t)

@@ -3327,11 +3327,7 @@ fn merge_value<'cx>(
         }
         Value::ArrayLit(inner) => {
             let loc = &inner.loc;
-            let reason = if as_const {
-                reason::mk_reason(None, loc.dupe())
-            } else {
-                reason::mk_reason(RArrayLit, loc.dupe())
-            };
+            let reason = reason::mk_reason(None, loc.dupe());
             let t = merge_impl(env, cx, file, &inner.elem_t, as_const, false);
             let ts: Vec<Type> = inner
                 .elements
@@ -3362,7 +3358,7 @@ fn merge_value<'cx>(
                 let elements: Vec<type_::TupleElement> = all_ts
                     .iter()
                     .map(|t| {
-                        let reason = reason::mk_reason(RArrayLit, type_util::loc_of_t(t).dupe());
+                        let reason = reason::mk_reason(None, type_util::loc_of_t(t).dupe());
                         type_util::mk_tuple_element(
                             reason,
                             t.dupe(),
@@ -3449,7 +3445,7 @@ fn merge_object_lit<'cx>(
     as_const: bool,
     strictness_kind: TypeStrictnessKind,
 ) -> Type {
-    let reason = reason::mk_obj_lit_reason(as_const, frozen, loc.dupe());
+    let reason = reason::mk_reason(None, loc.dupe());
     let proto_t = match proto {
         None => Type::new(type_::TypeInner::ObjProtoT(reason.dupe())),
         Some((proto_loc, t)) => {
@@ -3496,7 +3492,7 @@ fn merge_obj_spread_lit<'cx>(
     as_const: bool,
     strictness_kind: TypeStrictnessKind,
 ) -> Type {
-    let reason = reason::mk_obj_lit_reason(as_const, frozen, loc.dupe());
+    let reason = reason::mk_reason(None, loc.dupe());
     // TODO: fix spread to use provided __proto__ prop
     let merge_slice =
         |cx: &mut Context<'cx>,

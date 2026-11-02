@@ -642,11 +642,11 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- flat.js:29:41
 
-Cannot assign `arr4.flat()` to `result4_1` because in array element: `FlatArray<Array<number | Array<number>>, 1>` [1]
+Cannot assign `arr4.flat()` to `result4_1` because in array element: `FlatArray<Array<Array<number> | number>, 1>` [1]
 is not exactly the same as `Array<number>` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
-- Either make `Array<FlatArray<Array<number | Array<number>>, 1>>` [3] and `Array<Array<number>>` [4] exactly the same
+- Either make `Array<FlatArray<Array<Array<number> | number>, 1>>` [3] and `Array<Array<number>>` [4] exactly the same
 - Or make `Array<Array<number>>` [4] a `ReadonlyArray`.
 See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
 

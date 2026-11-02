@@ -287,9 +287,7 @@ pub enum VirtualReasonDesc<L: Dupe> {
     RUniqueSymbol,
     RExports,
     RNullOrVoid,
-    RObjectLit,
     RObjectType,
-    RArrayLit,
     RArrayType,
     RROArrayType,
     RTupleType,
@@ -372,9 +370,7 @@ impl<A: Dupe> VirtualReasonDesc<A> {
             RNumberLit(s) => RNumberLit(s.dupe()),
             RBigIntLit(s) => RBigIntLit(s.dupe()),
             RBooleanLit(b) => RBooleanLit(*b),
-            RObjectLit => RObjectLit,
             RObjectType => RObjectType,
-            RArrayLit => RArrayLit,
             RArrayType => RArrayType,
             RROArrayType => RROArrayType,
             RTupleType => RTupleType,
@@ -463,9 +459,7 @@ impl<L: Dupe> VirtualReasonDesc<L> {
                 RVoid | RNull | RVoidedNull | RUninitialized | RPossiblyUninitialized | RNullOrVoid,
             ) => Nullish,
 
-            Some(RArrayLit | RArrayType | RROArrayType | RTupleType | RArrayPatternRestProp) => {
-                Array
-            }
+            Some(RArrayType | RROArrayType | RTupleType | RArrayPatternRestProp) => Array,
 
             _ => Unclassified,
         }
@@ -1075,15 +1069,6 @@ pub fn func_reason(async_: bool, generator: bool, loc: ALoc) -> Reason {
     mk_reason(VirtualReasonDesc::RFunction(desc), loc)
 }
 
-pub fn mk_obj_lit_reason(as_const: bool, frozen: bool, loc: ALoc) -> Reason {
-    let desc = if frozen || as_const {
-        None
-    } else {
-        Some(VirtualReasonDesc::RObjectLit)
-    };
-    mk_reason(desc, loc)
-}
-
 /// Prettify React utility names (React$ -> React.)
 fn prettify_react_util(s: &str) -> String {
     if s.len() >= 6 && s.starts_with("React$") {
@@ -1121,11 +1106,9 @@ pub fn string_of_desc<L: Dupe>(desc: &VirtualReasonDesc<L>) -> String {
         RBooleanLit(b) => format!("boolean literal `{}`", b),
 
         // Objects
-        RObjectLit => "object literal".to_string(),
         RObjectType => "object type".to_string(),
 
         // Arrays
-        RArrayLit => "array literal".to_string(),
         RArrayType => "array type".to_string(),
         RInferredUnionElemArray => "inferred union of array element types \
 (alternatively, provide an annotation to summarize the array element type)"
@@ -1729,8 +1712,9 @@ pub fn mk_expression_reason<M: Dupe + PartialEq, T: Dupe + PartialEq>(
             let inner_reason = mk_expression_reason(&inner.expression);
             inner_reason.reposition(loc.dupe())
         }
-        ExpressionInner::Object { loc, .. } => mk_reason(VirtualReasonDesc::RObjectLit, loc.dupe()),
-        ExpressionInner::Array { loc, .. } => mk_reason(VirtualReasonDesc::RArrayLit, loc.dupe()),
+        ExpressionInner::Object { loc, .. } | ExpressionInner::Array { loc, .. } => {
+            mk_reason(None, loc.dupe())
+        }
         ExpressionInner::ArrowFunction { loc, inner } => {
             let desc = if inner.async_ {
                 VirtualReasonDesc::RFunction(ReasonDescFunction::RAsync)
@@ -1816,10 +1800,9 @@ pub fn mk_typed_expression_reason<M: Dupe + PartialEq, T: Dupe>(
             let inner_reason = mk_typed_expression_reason(&inner.expression);
             inner_reason.reposition(loc.0.dupe())
         }
-        ExpressionInner::Object { loc, .. } => {
-            mk_reason(VirtualReasonDesc::RObjectLit, loc.0.dupe())
+        ExpressionInner::Object { loc, .. } | ExpressionInner::Array { loc, .. } => {
+            mk_reason(None, loc.0.dupe())
         }
-        ExpressionInner::Array { loc, .. } => mk_reason(VirtualReasonDesc::RArrayLit, loc.0.dupe()),
         ExpressionInner::ArrowFunction { loc, inner } => {
             let desc = if inner.async_ {
                 VirtualReasonDesc::RFunction(ReasonDescFunction::RAsync)
