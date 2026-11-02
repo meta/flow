@@ -590,7 +590,7 @@ fn add_record_constructor<'cx>(
         Some(props),
         None,
         Type::new(type_::TypeInner::NullProtoT(record_reason)),
-        false,
+        type_::ObjLiteral::NonLiteral,
     );
     let funtype = type_::mk_boundfunctiontype(
         type_::mixed_t::make(reason.dupe()),
@@ -1418,7 +1418,7 @@ pub fn merge_exports<'cx>(
                         None,
                         None,
                         Type::new(type_::TypeInner::ObjProtoT(reason.dupe())),
-                        false,
+                        type_::ObjLiteral::NonLiteral,
                     ),
                 ),
             };
@@ -2737,7 +2737,7 @@ fn merge_annot<'cx>(
                     id,
                     proto,
                     *strictness_kind,
-                    false,
+                    type_::ObjLiteral::NonLiteral,
                 );
                 if obj_kind == type_::ObjKind::Exact {
                     let reason_op = reason::mk_annot_reason(RObjectType, loc.dupe());
@@ -3431,7 +3431,7 @@ fn merge_declare_module_implicitly_exported_object<'cx>(
         None,
         proto,
         strictness_kind,
-        false,
+        type_::ObjLiteral::NonLiteral,
     )
 }
 
@@ -3474,7 +3474,11 @@ fn merge_object_lit<'cx>(
         None,
         proto_t,
         strictness_kind,
-        false,
+        if frozen || as_const {
+            type_::ObjLiteral::NonLiteral
+        } else {
+            type_::ObjLiteral::Expression
+        },
     )
 }
 
@@ -3543,7 +3547,11 @@ fn merge_obj_spread_lit<'cx>(
     let target = type_::object::spread::Target::Value {
         make_seal,
         strictness_kind,
-        literal: false,
+        literal: if frozen || as_const {
+            type_::ObjLiteral::NonLiteral
+        } else {
+            type_::ObjLiteral::Expression
+        },
     };
     let use_op = type_::UseOp::Op(Arc::new(type_::RootUseOp::ObjectSpread {
         op: reason.dupe(),
@@ -4201,7 +4209,7 @@ fn merge_interface<'cx>(
             Some(props),
             None,
             proto,
-            false,
+            type_::ObjLiteral::NonLiteral,
         )
     };
     // Inline interfaces use the same polymorphic receiver as named interfaces.
@@ -4635,7 +4643,7 @@ fn merge_this_class_t<'cx>(
                 Some(props),
                 None,
                 static_proto,
-                false,
+                type_::ObjLiteral::NonLiteral,
             )
         };
         let mut own_props_map: BTreeMap<Name, type_::Property> = BTreeMap::new();
@@ -4867,7 +4875,7 @@ fn merge_fun_statics<'cx, 'sig>(
         Some(props),
         None,
         Type::new(type_::TypeInner::FunProtoT(reason)),
-        literal,
+        type_::ObjLiteral::of_literal(literal),
     )
 }
 
@@ -5076,7 +5084,7 @@ fn merge_component<'cx>(
                 None,
                 None,
                 Type::new(type_::TypeInner::ObjProtoT(config_reason.dupe())),
-                false,
+                type_::ObjLiteral::NonLiteral,
             ),
             Some(ComponentRestParam { t }) => merge_impl(env, cx, file, t, false, false),
         };
@@ -5380,7 +5388,7 @@ fn merge_declare_class<'cx>(
                 Some(props),
                 None,
                 static_proto,
-                false,
+                type_::ObjLiteral::NonLiteral,
             )
         };
         // The two sides are folded apart, since a `declare class` is not

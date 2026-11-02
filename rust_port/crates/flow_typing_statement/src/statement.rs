@@ -587,7 +587,7 @@ pub mod object_expression_acc {
             as_const: bool,
             frozen: bool,
             default_proto: Type,
-            literal: bool,
+            literal: type_::ObjLiteral,
         ) -> Result<Type, JobError> {
             use object::spread;
 
@@ -5939,7 +5939,11 @@ fn object_<'a>(
             *has_hint.get_forced(cx) || natural_inference::loc_has_hint(cx, &loc)
         }))
     };
-    let literal = !frozen && !as_const && *has_hint.get_forced(cx);
+    let literal = if frozen || as_const {
+        type_::ObjLiteral::NonLiteral
+    } else {
+        type_::ObjLiteral::of_expression(*has_hint.get_forced(cx))
+    };
     let reason = mk_obj_lit_reason(as_const, frozen, loc.dupe());
     // Use the same reason for proto and the ObjT so we can walk the proto chain
     // and use the root proto reason to build an error.
@@ -7162,7 +7166,7 @@ fn expression_<'a>(
                     props_loc.dupe(),
                     &props_obj.properties,
                 )?;
-                let props_t = non_literal_of_t(&mod_reason_of_t(
+                let props_t = non_object_literal_of_t(&mod_reason_of_t(
                     &|r: Reason| r.replace_desc(None),
                     &props_t,
                 ));
@@ -12778,7 +12782,7 @@ fn jsx_fragment<'a>(
                     Some(props_map),
                     None,
                     proto,
-                    true,
+                    type_::ObjLiteral::Literal,
                 )
             }
         }
@@ -13599,7 +13603,15 @@ pub fn jsx_mk_props<'a>(
         }
         _ => acc,
     };
-    let t = acc.mk_object_from_spread_acc(cx, reason_props, reason, false, false, proto, true)?;
+    let t = acc.mk_object_from_spread_acc(
+        cx,
+        reason_props,
+        reason,
+        false,
+        false,
+        proto,
+        type_::ObjLiteral::Literal,
+    )?;
     Ok((t, attributes, unresolved_params, children))
 }
 
@@ -14517,7 +14529,7 @@ fn static_method_call_object<'a>(
                 None,
                 None,
                 proto,
-                false,
+                type_::ObjLiteral::NonLiteral,
             );
             (
                 t,
@@ -14621,7 +14633,7 @@ fn static_method_call_object<'a>(
                 Some(props),
                 None,
                 proto,
-                false,
+                type_::ObjLiteral::NonLiteral,
             );
             (
                 t,
@@ -16259,7 +16271,7 @@ pub fn mk_class_sig<'a>(
                             Some(props),
                             None,
                             null_proto,
-                            false,
+                            type_::ObjLiteral::NonLiteral,
                         );
                         let param = flow_typing_loc_env::func_stmt_config_types::Param {
                             t: obj_t.dupe(),
@@ -19087,7 +19099,7 @@ pub fn mk_record_sig<'a>(
                             Some(props),
                             None,
                             null_proto,
-                            false,
+                            type_::ObjLiteral::NonLiteral,
                         );
                         let param = flow_typing_loc_env::func_stmt_config_types::Param {
                             t: obj_t.dupe(),
@@ -20602,7 +20614,7 @@ pub fn mk_func_sig<'a>(
             Some(props),
             None,
             Type::new(TypeInner::FunProtoT(reason.dupe())),
-            literal,
+            type_::ObjLiteral::of_literal(literal),
         )
     };
     let effect = match effect_ {

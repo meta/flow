@@ -1756,7 +1756,7 @@ fn flow_obj_to_obj<'cx>(
 
     // if inflowing type is literal (thus guaranteed to be
     // unaliased), propertywise subtyping is sound
-    let lit = l_obj.literal;
+    let lit = l_obj.literal.is_literal();
     // If both are dictionaries, ensure the keys and values are compatible
     // with each other.
     let ldict = obj_type::get_dict_opt(&lflags.obj_kind);
@@ -1877,7 +1877,9 @@ fn flow_obj_to_obj<'cx>(
     // values, but this also suppresses Flow's usual excess-property check for
     // object literals like `{a: 1, b: 2} as {a: number}`. TypeScript still
     // reports those as excess properties, so this is a known compatibility gap.
-    if rflags.obj_kind == ObjKind::Exact && !u_obj.literal && !strictness_kind.is_typescript_loose()
+    if rflags.obj_kind == ObjKind::Exact
+        && !u_obj.literal.is_literal()
+        && !strictness_kind.is_typescript_loose()
     {
         if !obj_type::is_exact(&lflags.obj_kind) {
             let l_t = Type::new(DefT(lreason.dupe(), DefT::new(ObjT(l_obj.dupe()))));
@@ -5631,11 +5633,8 @@ pub fn rec_sub_t<'cx>(
         }
         // If passing in an object literal where a record is expected,
         // provide an additional explanation.
-        (DefT(lreason, deref!(ObjT(_))), DefT(_, deref!(InstanceT(inst))))
-            if matches!(
-                    lreason.desc(true),
-                    Some(VirtualReasonDesc::RObjectLit)
-                )
+        (DefT(_, deref!(ObjT(l_obj))), DefT(_, deref!(InstanceT(inst))))
+            if l_obj.literal.is_expression()
                 && matches!(inst.inst.inst_kind, InstanceKind::RecordKind { .. })
                 && let Some(record_name) = &inst.inst.class_name =>
         {

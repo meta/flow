@@ -2212,7 +2212,7 @@ fn visit_mixed<'cx>(
             None,
             id,
             flow_typing_type::type_::dummy_prototype(),
-            false,
+            flow_typing_type::type_::ObjLiteral::NonLiteral,
         );
         let obj_t = Type::new(TypeInner::DefT(
             reason.dupe(),

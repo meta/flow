@@ -109,6 +109,7 @@ use flow_typing_type::type_::NominalType;
 use flow_typing_type::type_::NominalTypeInner;
 use flow_typing_type::type_::NumberLiteral;
 use flow_typing_type::type_::ObjKind;
+use flow_typing_type::type_::ObjLiteral;
 use flow_typing_type::type_::ObjType;
 use flow_typing_type::type_::OptionalIndexedAccessIndex;
 use flow_typing_type::type_::PolyTData;

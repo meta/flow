@@ -31,6 +31,7 @@ use flow_typing_type::type_::Flags;
 use flow_typing_type::type_::MappedTypeFlags;
 use flow_typing_type::type_::MappedTypeKeyCompatibilityData;
 use flow_typing_type::type_::ObjKind;
+use flow_typing_type::type_::ObjLiteral;
 use flow_typing_type::type_::Property;
 use flow_typing_type::type_::Tvar;
 use flow_typing_type::type_::Type;
@@ -440,7 +441,7 @@ pub fn slice_of_keys(
         generics,
         interface,
         reachable_targs: Rc::from([]),
-        literal: false,
+        literal: ObjLiteral::NonLiteral,
         exact_object_type: false,
     }
 }
@@ -1123,7 +1124,7 @@ pub(super) fn run_with_env<'cx>(
                 proto,
                 generics,
                 strictness_kind,
-                literal,
+                ObjLiteral::of_literal(literal),
             ))
         };
 

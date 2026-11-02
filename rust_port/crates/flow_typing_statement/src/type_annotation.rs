@@ -3170,7 +3170,7 @@ fn convert_inner<'a>(
                 None,
                 None,
                 fun_proto_t,
-                false,
+                type_::ObjLiteral::NonLiteral,
             );
             let effect_flag = match effect_ {
                 ast::function::Effect::Hook => type_::ReactEffectType::HookAnnot,
@@ -4514,7 +4514,7 @@ fn convert_object<'a>(
             pmap_id,
             proto,
             strictness_kind,
-            false,
+            type_::ObjLiteral::NonLiteral,
         );
         (reason, obj_t)
     }

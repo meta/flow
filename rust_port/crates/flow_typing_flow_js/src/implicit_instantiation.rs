@@ -83,6 +83,7 @@ use flow_typing_type::type_::MethodTData;
 use flow_typing_type::type_::NominalType;
 use flow_typing_type::type_::NominalTypeInner;
 use flow_typing_type::type_::ObjKind;
+use flow_typing_type::type_::ObjLiteral;
 use flow_typing_type::type_::PolyTData;
 use flow_typing_type::type_::Property;
 use flow_typing_type::type_::PropertyInner;
@@ -546,8 +547,15 @@ fn t_of_use_t<'cx>(
                     let result = merge_lower_or_upper_bounds(cx, env, seen, &tout_t)?;
                     let todo_rev = todo_rev.dupe();
                     bind_use_t_result(cx, result, |cx, t: Type| {
-                        let reversed =
-                            reverse_obj_spread(cx, env, r, &todo_rev, &acc_elements, &t, false)?;
+                        let reversed = reverse_obj_spread(
+                            cx,
+                            env,
+                            r,
+                            &todo_rev,
+                            &acc_elements,
+                            &t,
+                            ObjLiteral::NonLiteral,
+                        )?;
                         use_t_result_of_t_option(merge_lower_bounds(cx, env, false, &reversed))
                     })
                 }
@@ -926,7 +934,7 @@ fn reverse_obj_spread<'cx>(
     todo_rev: &flow_data_structure_wrapper::list::FlowOcamlList<object::spread::Operand>,
     acc_elements: &flow_data_structure_wrapper::list::FlowOcamlList<object::spread::AccElement>,
     tout: &Type,
-    literal: bool,
+    literal: ObjLiteral,
 ) -> Result<Type, FlowJsException> {
     let inline_slice_to_t = |cx: &mut Context<'cx>, s: &object::spread::OperandSlice| -> Type {
         let obj_kind = obj_type::obj_kind_from_optional_dict(s.dict.clone(), ObjKind::Exact);
@@ -1028,7 +1036,7 @@ fn reverse_component_check_config<'cx>(
             Some(pmap.dupe()),
             None,
             Type::new(TypeInner::ObjProtoT(reason.dupe())),
-            literal,
+            ObjLiteral::of_literal(literal),
         );
         let u_inner = UseTInner::ObjKitT(
             unknown_use(),
@@ -1058,7 +1066,7 @@ fn reverse_obj_kit_rest<'cx>(
         let options = object::spread::Target::Value {
             make_seal: obj_type::mk_seal(false, false),
             strictness_kind: cx.type_strictness_kind(),
-            literal,
+            literal: ObjLiteral::of_literal(literal),
         };
         let state = object::spread::State {
             todo_rev: flow_data_structure_wrapper::list::FlowOcamlList::unit(

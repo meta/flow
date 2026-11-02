@@ -79,6 +79,7 @@ use flow_typing_type::type_::AnySource;
 use flow_typing_type::type_::ArrayATData;
 use flow_typing_type::type_::DefT;
 use flow_typing_type::type_::DefTInner;
+use flow_typing_type::type_::ObjLiteral;
 use flow_typing_type::type_::Tvar;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeInner;
@@ -722,7 +723,7 @@ fn resolve_hint<'cx>(
                             false,
                             false,
                             default_proto,
-                            false,
+                            ObjLiteral::NonLiteral,
                         )
                     },
                 )
@@ -1035,7 +1036,7 @@ fn resolve_function_statics<'cx>(
         Some(props),
         None,
         Type::new(TypeInner::FunProtoT(reason)),
-        false,
+        ObjLiteral::NonLiteral,
     )
 }
 
@@ -1714,7 +1715,7 @@ fn resolve_binding<'cx>(
                     false,
                     false,
                     obj_proto,
-                    false,
+                    ObjLiteral::Expression,
                 )?)
             }
 

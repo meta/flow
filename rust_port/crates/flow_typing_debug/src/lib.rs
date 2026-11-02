@@ -1108,7 +1108,7 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             generics: flow_typing_generics::spread_empty(),
             interface: None,
             reachable_targs: Rc::from([]),
-            literal: false,
+            literal: type_::ObjLiteral::NonLiteral,
             exact_object_type: false,
         };
         slice(&s)

@@ -37,6 +37,7 @@ use flow_typing_type::type_::NominalType;
 use flow_typing_type::type_::NominalTypeInner;
 use flow_typing_type::type_::NumberLiteral;
 use flow_typing_type::type_::ObjKind;
+use flow_typing_type::type_::ObjLiteral;
 use flow_typing_type::type_::PolyTData;
 use flow_typing_type::type_::ROArrayATData;
 use flow_typing_type::type_::ThisInstanceTData;
@@ -1446,7 +1447,7 @@ pub fn object_<'cx>(cx: &mut Context<'cx>, t: Type) -> FilterResult {
                     None,
                     None,
                     proto,
-                    false,
+                    ObjLiteral::NonLiteral,
                 );
                 match flavor {
                     MixedFlavor::MixedTruthy

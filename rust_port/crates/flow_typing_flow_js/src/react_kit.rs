@@ -49,6 +49,7 @@ use flow_typing_type::type_::MethodCallType;
 use flow_typing_type::type_::MethodTData;
 use flow_typing_type::type_::NonstrictReturningData;
 use flow_typing_type::type_::ObjKind;
+use flow_typing_type::type_::ObjLiteral;
 use flow_typing_type::type_::PropRef;
 use flow_typing_type::type_::Property;
 use flow_typing_type::type_::PropertyInner;
@@ -503,7 +504,12 @@ fn props_to_tout<'cx>(
                     {
                         // Contravariance
                         let t = ft.params.first().map(|p| p.1.dupe()).unwrap_or_else(|| {
-                            obj_type::mk(ObjKind::Exact, cx, r.dupe(), ft.literal)
+                            obj_type::mk(
+                                ObjKind::Exact,
+                                cx,
+                                r.dupe(),
+                                ObjLiteral::of_literal(ft.literal),
+                            )
                         });
                         FlowJs::rec_flow_t_with_env(cx, env, trace, unknown_use(), &t, &tout)?;
                     }
@@ -795,7 +801,7 @@ pub fn get_config<'cx>(
                     object::spread::Target::Value {
                         make_seal: object::spread::SealType::Sealed,
                         strictness_kind,
-                        literal: false,
+                        literal: ObjLiteral::NonLiteral,
                     },
                     Default::default(),
                     Some(ref_slice),
@@ -1055,7 +1061,7 @@ pub(super) fn run_with_env<'cx>(
                         object::spread::Target::Value {
                             make_seal: object::spread::SealType::Sealed,
                             strictness_kind,
-                            literal: false,
+                            literal: ObjLiteral::NonLiteral,
                         },
                         Default::default(),
                         Some(ref_slice),
@@ -1095,7 +1101,12 @@ pub(super) fn run_with_env<'cx>(
                         {
                             // Contravariance
                             let t = ft.params.first().map(|p| p.1.dupe()).unwrap_or_else(|| {
-                                obj_type::mk(ObjKind::Exact, cx, r.dupe(), ft.literal)
+                                obj_type::mk(
+                                    ObjKind::Exact,
+                                    cx,
+                                    r.dupe(),
+                                    ObjLiteral::of_literal(ft.literal),
+                                )
                             });
                             FlowJs::rec_flow_t_with_env(cx, env, trace, unknown_use(), tin, &t)?;
                             if !env.in_implicit_instantiation() {

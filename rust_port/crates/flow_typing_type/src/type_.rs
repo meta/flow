@@ -5673,7 +5673,60 @@ pub struct ObjType {
     /// and instead pollute the reachable_targs directly.
     pub reachable_targs: Rc<[(Type, Polarity)]>,
     pub strictness_kind: TypeStrictnessKind,
-    pub literal: bool,
+    pub literal: ObjLiteral,
+}
+
+/// Whether an object type is literal (natural inference can generalize it), and whether it is
+/// the type of an object literal expression.
+#[derive(Debug, Clone, Copy, Dupe, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum ObjLiteral {
+    NonLiteral,
+    /// A literal object that is not written as an object literal, like a JSX props object or the
+    /// rest of an object pattern.
+    Literal,
+    /// An object literal that is not literal: it has no hint, or natural inference generalized it.
+    Expression,
+    /// An object literal with a hint.
+    LiteralExpression,
+}
+
+impl ObjLiteral {
+    pub fn of_literal(literal: bool) -> Self {
+        if literal {
+            ObjLiteral::Literal
+        } else {
+            ObjLiteral::NonLiteral
+        }
+    }
+
+    pub fn of_expression(literal: bool) -> Self {
+        if literal {
+            ObjLiteral::LiteralExpression
+        } else {
+            ObjLiteral::Expression
+        }
+    }
+
+    pub fn is_literal(self) -> bool {
+        match self {
+            ObjLiteral::Literal | ObjLiteral::LiteralExpression => true,
+            ObjLiteral::NonLiteral | ObjLiteral::Expression => false,
+        }
+    }
+
+    pub fn is_expression(self) -> bool {
+        match self {
+            ObjLiteral::Expression | ObjLiteral::LiteralExpression => true,
+            ObjLiteral::NonLiteral | ObjLiteral::Literal => false,
+        }
+    }
+
+    pub fn non_literal(self) -> Self {
+        match self {
+            ObjLiteral::NonLiteral | ObjLiteral::Literal => ObjLiteral::NonLiteral,
+            ObjLiteral::Expression | ObjLiteral::LiteralExpression => ObjLiteral::Expression,
+        }
+    }
 }
 
 /// Object.assign(target, source1, ...source2) first resolves target then the sources.
@@ -9321,7 +9374,7 @@ pub mod object {
         pub generics: GenericSpreadId,
         pub interface: Option<(Type, InstType)>,
         pub reachable_targs: Rc<[(Type, Polarity)]>,
-        pub literal: bool,
+        pub literal: ObjLiteral,
         /// The props beyond `props` of an inexact slice belong to an exact object, an
         /// `ExactObjectType`.
         pub exact_object_type: bool,
@@ -9400,7 +9453,7 @@ pub mod object {
             Value {
                 make_seal: SealType,
                 strictness_kind: TypeStrictnessKind,
-                literal: bool,
+                literal: ObjLiteral,
             },
             // Type spreads use the declared shape of inexact inputs. The annotation
             // determines whether the resulting object is exact.
@@ -9422,10 +9475,10 @@ pub mod object {
                 }
             }
 
-            pub fn literal(&self) -> bool {
+            pub fn literal(&self) -> ObjLiteral {
                 match self {
                     Target::Value { literal, .. } => *literal,
-                    Target::Annot { .. } => false,
+                    Target::Annot { .. } => ObjLiteral::NonLiteral,
                 }
             }
         }
@@ -12741,7 +12794,7 @@ pub fn mk_objecttype(
     call: Option<i32>,
     pmap: properties::Id,
     proto: Type,
-    literal: bool,
+    literal: ObjLiteral,
 ) -> ObjType {
     mk_objecttype_with_strictness(
         flags,
@@ -12761,7 +12814,7 @@ pub fn mk_objecttype_with_strictness(
     pmap: properties::Id,
     proto: Type,
     strictness_kind: TypeStrictnessKind,
-    literal: bool,
+    literal: ObjLiteral,
 ) -> ObjType {
     ObjType {
         flags: flags.unwrap_or_else(default_flags),
@@ -12785,7 +12838,12 @@ pub fn mk_object_def_type(
     TypeInner::DefT(
         reason,
         DefT::new(DefTInner::ObjT(Rc::new(mk_objecttype(
-            flags, None, call, pmap, proto, false,
+            flags,
+            None,
+            call,
+            pmap,
+            proto,
+            ObjLiteral::NonLiteral,
         )))),
     )
 }

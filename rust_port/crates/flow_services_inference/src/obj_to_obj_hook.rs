@@ -12,7 +12,6 @@ use std::ops::Deref;
 
 use dupe::Dupe;
 use flow_aloc::ALoc;
-use flow_common::reason::VirtualReasonDesc;
 use flow_parser::loc::Loc;
 use flow_typing_flow_js::type_inference_hooks_js;
 use flow_typing_type::type_::DefTInner;
@@ -28,9 +27,13 @@ thread_local! {
 // If the given type refers to an object literal, return the location of the object literal.
 // Otherwise return None
 fn get_object_literal_loc(ty: &Type) -> Option<ALoc> {
-    let reason_desc = type_util::reason_of_t(ty).desc(false);
-    match reason_desc {
-        Some(VirtualReasonDesc::RObjectLit) => Some(type_util::def_loc_of_t(ty).dupe()),
+    match ty.deref() {
+        TypeInner::DefT(_, def_t)
+            if let DefTInner::ObjT(o) = def_t.deref()
+                && o.literal.is_expression() =>
+        {
+            Some(type_util::def_loc_of_t(ty).dupe())
+        }
         _ => None,
     }
 }

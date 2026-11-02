@@ -390,17 +390,38 @@ pub fn non_literal_of_t(t: &Type) -> Type {
         }
         TypeInner::DefT(reason, def)
             if let DefTInner::ObjT(o) = def.deref()
-                && o.literal =>
+                && o.literal.is_literal() =>
         {
             Type::new(TypeInner::DefT(
                 reason.dupe(),
                 DefT::new(DefTInner::ObjT(Rc::new(ObjType {
-                    literal: false,
+                    literal: o.literal.non_literal(),
                     ..o.as_ref().clone()
                 }))),
             ))
         }
         _ => t.dupe(),
+    }
+}
+
+/// Like `non_literal_of_t`, and a top-level object type is no longer that of an object literal.
+pub fn non_object_literal_of_t(t: &Type) -> Type {
+    use crate::type_::DefT;
+    use crate::type_::DefTInner;
+    use crate::type_::ObjLiteral;
+    use crate::type_::ObjType;
+
+    match t.deref() {
+        TypeInner::DefT(reason, def) if let DefTInner::ObjT(o) = def.deref() => {
+            Type::new(TypeInner::DefT(
+                reason.dupe(),
+                DefT::new(DefTInner::ObjT(Rc::new(ObjType {
+                    literal: ObjLiteral::NonLiteral,
+                    ..o.as_ref().clone()
+                }))),
+            ))
+        }
+        _ => non_literal_of_t(t),
     }
 }
 

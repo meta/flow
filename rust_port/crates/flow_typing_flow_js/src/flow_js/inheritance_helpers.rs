@@ -140,7 +140,7 @@ pub(super) fn inst_type_to_obj_type<'cx>(
         call_t: call_id,
         reachable_targs: Rc::from([]),
         strictness_kind,
-        literal: false,
+        literal: ObjLiteral::NonLiteral,
     };
     Type::new(TypeInner::DefT(
         reason_struct,
@@ -251,7 +251,7 @@ pub(super) fn inst_structural_subtype<'cx>(
     let reason_struct = reason_of_t(upper);
     let lit = match lower.deref() {
         TypeInner::DefT(_, def_t) => match def_t.deref() {
-            DefTInner::ObjT(o) => o.literal,
+            DefTInner::ObjT(o) => o.literal.is_literal(),
             DefTInner::FunT(_, ft) => ft.literal,
             _ => false,
         },

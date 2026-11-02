@@ -11,7 +11,6 @@ use std::ops::Deref;
 
 use dupe::Dupe;
 use flow_aloc::ALoc;
-use flow_common::reason::VirtualReasonDesc;
 use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 use flow_parser::ast;
 use flow_parser::ast::expression;
@@ -24,7 +23,6 @@ use flow_typing_context::Context;
 use flow_typing_type::type_::ThisInstanceTData;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeInner;
-use flow_typing_type::type_util;
 use flow_typing_utils::members;
 use flow_typing_utils::members::GenericT;
 use vec1::Vec1;
@@ -32,16 +30,6 @@ use vec1::Vec1;
 use crate::get_def_types::DefInfo;
 use crate::get_def_types::PropertyDefInfo;
 use crate::get_def_types::SinglePropertyDefInfo;
-
-/// If the given type refers to an object literal, return the location of the object literal.
-/// Otherwise return None
-pub fn get_object_literal_loc(ty: &Type) -> Option<ALoc> {
-    let reason_desc = type_util::reason_of_t(ty).desc(false);
-    match reason_desc {
-        Some(VirtualReasonDesc::RObjectLit) => Some(type_util::def_loc_of_t(ty).dupe()),
-        _ => None,
-    }
-}
 
 #[derive(Debug, Clone)]
 pub enum DefKind<Loc> {

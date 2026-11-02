@@ -19,6 +19,7 @@ use flow_typing_type::type_::Flags;
 use flow_typing_type::type_::NominalType;
 use flow_typing_type::type_::NominalTypeInner;
 use flow_typing_type::type_::ObjKind;
+use flow_typing_type::type_::ObjLiteral;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeInner;
 use flow_typing_type::type_::TypeStrictnessKind;
@@ -47,7 +48,7 @@ pub fn mk_with_proto(
     props: Option<properties::PropertiesMap>,
     id: Option<properties::Id>,
     proto: Type,
-    literal: bool,
+    literal: ObjLiteral,
 ) -> Type {
     mk_with_proto_and_strictness(
         cx,
@@ -73,7 +74,7 @@ pub fn mk_with_proto_and_strictness(
     id: Option<properties::Id>,
     proto: Type,
     strictness_kind: TypeStrictnessKind,
-    literal: bool,
+    literal: ObjLiteral,
 ) -> Type {
     let flags = Flags {
         obj_kind,
@@ -105,7 +106,7 @@ pub fn mk_with_proto_and_strictness(
     ))
 }
 
-pub fn mk(obj_kind: ObjKind, cx: &mut Context, reason: Reason, literal: bool) -> Type {
+pub fn mk(obj_kind: ObjKind, cx: &mut Context, reason: Reason, literal: ObjLiteral) -> Type {
     mk_with_proto(
         cx,
         reason.dupe(),
@@ -125,7 +126,7 @@ pub fn mk_exact_object_type(cx: &mut Context, reason: Reason) -> Type {
         ObjKind::Inexact,
         cx,
         reason.dupe().replace_desc(VirtualReasonDesc::RObjectType),
-        false,
+        ObjLiteral::NonLiteral,
     );
     mk_exact_object_type_with_upper(reason, upper_t)
 }

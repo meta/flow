@@ -79,6 +79,7 @@ use flow_typing_type::type_::MergedDeclarationData;
 use flow_typing_type::type_::MethodTData;
 use flow_typing_type::type_::MixedFlavor;
 use flow_typing_type::type_::NamedSymbol;
+use flow_typing_type::type_::ObjLiteral;
 use flow_typing_type::type_::PolyTData;
 use flow_typing_type::type_::ROArrayATData;
 use flow_typing_type::type_::ResolveUnionTData;
@@ -3413,7 +3414,7 @@ pub fn obj_key_mirror<'cx>(
                 call_t: o.call_t,
                 reachable_targs: o.reachable_targs.dupe(),
                 strictness_kind: o.strictness_kind,
-                literal: false,
+                literal: ObjLiteral::NonLiteral,
             }
             .into(),
         )),
@@ -3492,7 +3493,7 @@ pub fn namespace_type<'cx>(
         Some(props),
         None,
         proto,
-        false,
+        ObjLiteral::NonLiteral,
     );
     namespace_type_with_values_type(cx, namespace_symbol, values_type, types)
 }
@@ -4818,6 +4819,7 @@ pub mod cjs_require_t_kit {
     use flow_typing_type::type_::NamedSymbol;
     use flow_typing_type::type_::NamespaceType;
     use flow_typing_type::type_::ObjKind;
+    use flow_typing_type::type_::ObjLiteral;
     use flow_typing_type::type_::Property;
     use flow_typing_type::type_::PropertyInner;
     use flow_typing_type::type_::Type;
@@ -4895,7 +4897,7 @@ pub mod cjs_require_t_kit {
                         Some(value_props),
                         None,
                         proto,
-                        false,
+                        ObjLiteral::NonLiteral,
                     );
                     let types_tmap = cx.generate_property_map(type_props);
                     Type::new(TypeInner::NamespaceT(Rc::new(NamespaceType {
@@ -4979,6 +4981,7 @@ pub mod import_module_ns_t_kit {
     use flow_typing_type::type_::ModuleTypeInner;
     use flow_typing_type::type_::NamedSymbol;
     use flow_typing_type::type_::ObjKind;
+    use flow_typing_type::type_::ObjLiteral;
     use flow_typing_type::type_::Property;
     use flow_typing_type::type_::PropertyInner;
     use flow_typing_type::type_::Type;
@@ -5088,7 +5091,7 @@ pub mod import_module_ns_t_kit {
             Some(value_props),
             None,
             proto,
-            false,
+            ObjLiteral::NonLiteral,
         );
         let types_tmap = cx.generate_property_map(type_props);
         Ok((values_type, types_tmap))
@@ -8638,7 +8641,7 @@ pub fn objt_to_obj_rest<'cx>(
         Some(props),
         None,
         proto,
-        literal,
+        ObjLiteral::of_literal(literal),
     ))
 }
 

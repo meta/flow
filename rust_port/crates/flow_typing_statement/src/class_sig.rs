@@ -1070,7 +1070,7 @@ fn statictype<'a, C: crate::func_params_intf::Config>(
         Some(props),
         None,
         static_proto,
-        false,
+        ObjLiteral::NonLiteral,
     );
     match static_.deref() {
         TypeInner::DefT(_, def_t) => match def_t.deref() {

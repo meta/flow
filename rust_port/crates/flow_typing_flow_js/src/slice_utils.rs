@@ -64,6 +64,7 @@ use flow_typing_type::type_::MixedFlavor;
 use flow_typing_type::type_::NominalType;
 use flow_typing_type::type_::NominalTypeInner;
 use flow_typing_type::type_::ObjKind;
+use flow_typing_type::type_::ObjLiteral;
 use flow_typing_type::type_::Property;
 use flow_typing_type::type_::PropertyInner;
 use flow_typing_type::type_::ROArrayATData;
@@ -111,7 +112,7 @@ pub fn mk_object_type<'cx>(
     proto: Type,
     generics: object::GenericSpreadId,
     strictness_kind: TypeStrictnessKind,
-    literal: bool,
+    literal: ObjLiteral,
 ) -> Type {
     let reason = if invalidate_aliases {
         reason
@@ -396,7 +397,7 @@ pub fn object_slice<'cx>(
     reachable_targs: Rc<[(Type, Polarity)]>,
     generics: object::GenericSpreadId,
     strictness_kind: TypeStrictnessKind,
-    literal: bool,
+    literal: ObjLiteral,
 ) -> object::Slice {
     let props_map = cx.find_props(id);
     let props: properties::PropertiesMap = props_map
@@ -521,7 +522,7 @@ fn spread2<'cx>(
     use_op: &UseOp,
     reason: &Reason,
     allow_inexact: bool,
-    literal: bool,
+    literal: ObjLiteral,
     (
         _inline1,
         inexact_slice1,
@@ -783,7 +784,7 @@ pub fn spread<'cx>(
     reason: &Reason,
     allow_inexact: bool,
     strictness_kind: TypeStrictnessKind,
-    literal: bool,
+    literal: ObjLiteral,
     nel: (
         object::spread::AccElement,
         flow_data_structure_wrapper::list::FlowOcamlList<object::spread::AccElement>,
@@ -1577,7 +1578,9 @@ pub fn object_rest_with_env<'cx, A>(
         let proto = Type::new(TypeInner::ObjProtoT(r1.dupe()));
         let call = None;
         let (rest_reason, rest_interface, rest_literal) = match merge_mode {
-            object::rest::MergeMode::Omit => (reason.dupe(), interface.clone(), false),
+            object::rest::MergeMode::Omit => {
+                (reason.dupe(), interface.clone(), ObjLiteral::NonLiteral)
+            }
             _ => (r1.dupe(), None, *literal1),
         };
         Ok(mk_object_type(
@@ -2124,7 +2127,7 @@ pub(crate) fn intersect_slices<'cx>(
         generics,
         interface: None,
         reachable_targs,
-        literal: false,
+        literal: ObjLiteral::NonLiteral,
         exact_object_type: false,
     }
 }
@@ -2248,7 +2251,7 @@ pub fn interface_slice<'cx>(
         Rc::from([]),
         generics,
         strictness_kind,
-        false,
+        ObjLiteral::NonLiteral,
     )
 }
 
@@ -2344,8 +2347,10 @@ fn resolve_with_env<'cx, A>(
     let dict_polarity_override = object_tool_dict_polarity_override(tool);
     let literal = match tool {
         object::Tool::Spread(box (target, _)) => target.literal(),
-        object::Tool::ReactConfig(box ObjectToolReactConfigData { literal, .. }) => *literal,
-        _ => false,
+        object::Tool::ReactConfig(box ObjectToolReactConfigData { literal, .. }) => {
+            ObjLiteral::of_literal(*literal)
+        }
+        _ => ObjLiteral::NonLiteral,
     };
     let (t_generic_id, t) = {
         fn loop_generic<'cx>(
@@ -3669,7 +3674,7 @@ pub fn map_object<'cx>(
         proto,
         generics.clone(),
         *strictness_kind,
-        false,
+        ObjLiteral::NonLiteral,
     ))
 }
 

@@ -73,6 +73,7 @@ use flow_typing_type::type_::Literal;
 use flow_typing_type::type_::MethodAction;
 use flow_typing_type::type_::NumberLiteral;
 use flow_typing_type::type_::ObjKind;
+use flow_typing_type::type_::ObjLiteral;
 use flow_typing_type::type_::PolyTData;
 use flow_typing_type::type_::Predicate;
 use flow_typing_type::type_::PredicateInner;
@@ -847,7 +848,7 @@ fn type_of_hint_decomposition<'cx>(
             None,
             None,
             Type::new(TypeInner::FunProtoT(reason.dupe())),
-            true,
+            ObjLiteral::Literal,
         );
         let type_guard = type_guard.as_ref().map(|tg| match tg {
             PredicateKind::TypeGuardKind(param_loc, param_name) => TypeGuard::new(TypeGuardInner {

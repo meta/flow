@@ -150,7 +150,7 @@ pub fn config<'a, C: Config>(
             None,
             None,
             Type::new(TypeInner::ObjProtoT(config_reason.dupe())),
-            false,
+            ObjLiteral::NonLiteral,
         ),
         Some(rest) => {
             let t = C::rest_type(rest);

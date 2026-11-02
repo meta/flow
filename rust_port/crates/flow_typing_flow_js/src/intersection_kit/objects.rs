@@ -29,6 +29,7 @@ use flow_typing_type::type_::InstType;
 use flow_typing_type::type_::InstanceKind;
 use flow_typing_type::type_::Literal;
 use flow_typing_type::type_::ObjKind;
+use flow_typing_type::type_::ObjLiteral;
 use flow_typing_type::type_::PropertyInner;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeInner;
@@ -130,7 +131,7 @@ impl<F> Collector<F> {
                         obj.reachable_targs.dupe(),
                         spread_empty(),
                         obj.strictness_kind,
-                        false,
+                        ObjLiteral::NonLiteral,
                     )]))
                 }
                 DefTInner::InstanceT(instance) if supported_object(t).is_some() => {
@@ -369,7 +370,7 @@ pub(super) fn normalize<'cx, E>(
         proto,
         merged.generics,
         merged.strictness_kind,
-        false,
+        ObjLiteral::NonLiteral,
     );
     Ok(match invalid_exact {
         Some(invalid) => Normalization::InvalidExact(t, invalid),

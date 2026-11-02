@@ -6753,7 +6753,7 @@ fn __flow_impl<'cx>(
             let spread_target = object::spread::Target::Value {
                 make_seal: obj_type::mk_seal(false, false),
                 strictness_kind: cx.type_strictness_kind(),
-                literal: *literal,
+                literal: ObjLiteral::of_literal(*literal),
             };
             let spread_state = object::spread::State {
                 todo_rev: flow_data_structure_wrapper::list::FlowOcamlList::unit(
@@ -6805,12 +6805,17 @@ fn __flow_impl<'cx>(
                 None,
                 None,
                 l.dupe(),
-                *literal,
+                ObjLiteral::of_literal(*literal),
             );
             rec_flow_t(cx, env, trace, unknown_use(), (&obj, t))?;
         }
         (DefT(_, deref!(NullT | VoidT)), ObjRestT(reason, _, t, _, literal)) => {
-            let o = obj_type::mk(ObjKind::Exact, cx, reason.dupe(), *literal);
+            let o = obj_type::mk(
+                ObjKind::Exact,
+                cx,
+                reason.dupe(),
+                ObjLiteral::of_literal(*literal),
+            );
             rec_flow_t(cx, env, trace, unknown_use(), (&o, t))?;
         }
         // *******************************************

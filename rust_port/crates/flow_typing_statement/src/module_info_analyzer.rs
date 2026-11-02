@@ -39,6 +39,7 @@ use flow_typing_type::type_::ModuleType;
 use flow_typing_type::type_::ModuleTypeInner;
 use flow_typing_type::type_::NamedSymbol;
 use flow_typing_type::type_::ObjKind;
+use flow_typing_type::type_::ObjLiteral;
 use flow_typing_type::type_::Property;
 use flow_typing_type::type_::PropertyInner;
 use flow_typing_type::type_::Type;
@@ -1088,7 +1089,7 @@ fn mk_module_type<'a>(
                         Some(props),
                         None,
                         proto,
-                        false,
+                        ObjLiteral::NonLiteral,
                     ),
                 )
             }

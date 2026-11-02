@@ -60,6 +60,7 @@ use flow_typing_type::type_::EnumInfoInner;
 use flow_typing_type::type_::GenericTData;
 use flow_typing_type::type_::MixedFlavor;
 use flow_typing_type::type_::ObjKind;
+use flow_typing_type::type_::ObjLiteral;
 use flow_typing_type::type_::Predicate;
 use flow_typing_type::type_::ROArrayATData;
 use flow_typing_type::type_::RootUseOp;
@@ -1763,7 +1764,7 @@ pub mod special_cased_functions {
                         None,
                         None,
                         proto,
-                        false,
+                        ObjLiteral::NonLiteral,
                     );
                     assign_from_after_concretization(
                         cx, env, reason, fix_cache, &o, use_op, reason_op, to_obj, t, kind,
