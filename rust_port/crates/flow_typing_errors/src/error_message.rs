@@ -4449,8 +4449,6 @@ fn map_loc_of_explanation<L: Dupe, M: Dupe, F: Fn(&L) -> M>(
     f: &F,
     explanation: Explanation<L>,
 ) -> Explanation<M> {
-    let map_reason = |r: VirtualReason<L>| -> VirtualReason<M> { r.map_locs(f) };
-
     match explanation {
         Explanation::ExplanationAbstractEnumCasting => Explanation::ExplanationAbstractEnumCasting,
         Explanation::ExplanationArrayInvariantTyping => {
