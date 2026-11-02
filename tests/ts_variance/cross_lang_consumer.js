@@ -16,10 +16,14 @@ import {
   type ReadonlyValue,
   type WideValue,
   Box,
+  InvariantBox,
 } from "./cross_lang_lib";
 
 declare const dogBox: Box<Dog>;
 const a: Box<Animal> = dogBox; // OK: Box comes from .ts
+
+type BoxView<out T> = Box<T>; // OK: Box comes from .ts
+type InvariantBoxView<out T> = InvariantBox<T>; // ERROR: `in out` is invariant
 
 declare const dogMethod: DogMethod;
 const animalMethod: AnimalMethod = dogMethod; // OK: methods come from .ts

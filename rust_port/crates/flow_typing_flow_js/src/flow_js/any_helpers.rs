@@ -256,10 +256,10 @@ pub(super) fn any_prop_to_type_args<'cx>(
     any: &Type,
     covariant_flow: &dyn Fn(&mut Context<'cx>, &UseOp, &Type) -> Result<(), FlowJsException>,
     contravariant_flow: &dyn Fn(&mut Context<'cx>, &UseOp, &Type) -> Result<(), FlowJsException>,
-    targs: &[(SubstName, Reason, Type, Polarity)],
+    targs: &[(SubstName, Reason, Type, Option<Polarity>)],
 ) -> Result<(), FlowJsException> {
     for (_, _, t, polarity) in targs {
-        match polarity {
+        match polarity.unwrap_or(Polarity::Neutral) {
             Polarity::Positive => covariant_flow(cx, use_op, t)?,
             Polarity::Negative => contravariant_flow(cx, use_op, t)?,
             Polarity::Neutral => {

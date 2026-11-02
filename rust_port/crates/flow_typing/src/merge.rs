@@ -1197,7 +1197,7 @@ fn enforce_optimize<'cx>(cx: &mut Context<'cx>, loc: &ALoc, t: &Type) -> Result<
                 flow_common::subst_name::SubstName,
                 Reason,
                 Type,
-                Polarity,
+                Option<Polarity>,
             )>::new()),
         })),
     });

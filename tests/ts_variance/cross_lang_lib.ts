@@ -15,6 +15,10 @@ export declare class Box<T> {
   value: T;
 }
 
+export declare class InvariantBox<in out T> {
+  value: T;
+}
+
 export type AnimalMethod = {
   cb(x: Animal): void;
 };

@@ -35,8 +35,8 @@ pub(super) fn flow_type_args<'cx>(
     use_op: UseOp,
     lreason: &Reason,
     ureason: &Reason,
-    targs1: Rc<[(SubstName, Reason, Type, Polarity)]>,
-    targs2: Rc<[(SubstName, Reason, Type, Polarity)]>,
+    targs1: Rc<[(SubstName, Reason, Type, Option<Polarity>)]>,
+    targs2: Rc<[(SubstName, Reason, Type, Option<Polarity>)]>,
     strictness_kind: TypeStrictnessKind,
 ) -> Result<(), FlowJsException> {
     use flow_typing_type::type_::TypeArgCompatibilityData;
@@ -56,13 +56,13 @@ pub(super) fn flow_type_args<'cx>(
                     targ: targ_reason,
                     lower: lreason.dupe(),
                     upper: ureason.dupe(),
-                    polarity,
+                    polarity: polarity.unwrap_or(Polarity::Neutral),
                 },
             ))),
             std::sync::Arc::new(use_op.dupe()),
         );
         match polarity {
-            Polarity::Negative => {
+            Some(Polarity::Negative) => {
                 rec_flow(
                     cx,
                     env,
@@ -70,7 +70,7 @@ pub(super) fn flow_type_args<'cx>(
                     (&t2, &UseT::new(UseTInner::UseT(use_op, t1))),
                 )?;
             }
-            Polarity::Positive => {
+            Some(Polarity::Positive) => {
                 rec_flow(
                     cx,
                     env,
@@ -78,9 +78,9 @@ pub(super) fn flow_type_args<'cx>(
                     (&t1, &UseT::new(UseTInner::UseT(use_op, t2))),
                 )?;
             }
-            // As in `type_app_variance_check`, TS treats Neutral (read-write) tparam slots
-            // as covariant in instantiation, not invariant.
-            Polarity::Neutral if strictness_kind.is_typescript_loose() => {
+            // As in `type_app_variance_check`, TS treats unannotated tparam slots as covariant
+            // in instantiation, not invariant.
+            None if strictness_kind.is_typescript_loose() => {
                 rec_flow(
                     cx,
                     env,
@@ -88,7 +88,7 @@ pub(super) fn flow_type_args<'cx>(
                     (&t1, &UseT::new(UseTInner::UseT(use_op, t2))),
                 )?;
             }
-            Polarity::Neutral => {
+            None | Some(Polarity::Neutral) => {
                 rec_unify(
                     cx,
                     env,

@@ -345,7 +345,8 @@ impl ImplicitInstantiationVisitor<'_> {
                     loop_(visitor, cx, pole, acc, None, rest)
                 }
                 (Some([tparam, rest_tparams @ ..]), [targ, rest_targs @ ..]) => {
-                    let param_polarity = Polarity::mult(pole, tparam.polarity);
+                    let param_polarity =
+                        Polarity::mult(pole, tparam.polarity.unwrap_or(Polarity::Neutral));
                     acc = visitor.type_(cx, param_polarity, acc, targ);
                     loop_(visitor, cx, pole, acc, Some(rest_tparams), rest_targs)
                 }
@@ -2239,7 +2240,10 @@ fn implicitly_instantiate<'cx>(
                 if matches!(inner.deref(), TypeInner::ThisInstanceT(..)) =>
             {
                 tparams.iter().fold(Marked::new(), |mut marked, tparam| {
-                    marked.add(tparam.name.dupe(), tparam.polarity);
+                    marked.add(
+                        tparam.name.dupe(),
+                        tparam.polarity.unwrap_or(Polarity::Neutral),
+                    );
                     marked
                 })
             }
@@ -3459,7 +3463,7 @@ pub mod kit {
             reason: reason.dupe(),
             name,
             bound,
-            polarity: Polarity::Positive,
+            polarity: Some(Polarity::Positive),
             default: None,
             is_this: false,
             is_const: false,
@@ -3825,7 +3829,7 @@ pub mod kit {
                                                     ),
                                                     type_util::reason_of_t(t).dupe(),
                                                     (*t).dupe(),
-                                                    Polarity::Neutral,
+                                                    Some(Polarity::Neutral),
                                                 )
                                             })
                                             .collect();

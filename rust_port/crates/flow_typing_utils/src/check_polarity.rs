@@ -104,7 +104,8 @@ fn check_polarity_impl<'cx>(
         }) => match tparams.get(name) {
             None => check_polarity_impl(cx, env, trace, seen, tparams, polarity, bound)?,
             Some(tp) => {
-                if !Polarity::compat(tp.polarity, polarity)
+                let tp_polarity = tp.polarity.unwrap_or(Polarity::Neutral);
+                if !Polarity::compat(tp_polarity, polarity)
                     && !flow_common::files::has_ts_ext(cx.file())
                 {
                     flow_js_utils::add_output_with_env(
@@ -114,7 +115,7 @@ fn check_polarity_impl<'cx>(
                             loc: reason.loc().dupe(),
                             type_param_loc: reason.def_loc().dupe(),
                             name: name.string_of_subst_name().dupe(),
-                            expected_polarity: tp.polarity,
+                            expected_polarity: tp_polarity,
                             actual_polarity: polarity,
                         })),
                     )?;
@@ -786,7 +787,7 @@ fn check_polarity_typeparam<'cx>(
         is_this: _,
         is_const: _,
     } = tp.deref();
-    let mult_polarity = Polarity::mult(polarity, *tp_polarity);
+    let mult_polarity = Polarity::mult(polarity, tp_polarity.unwrap_or(Polarity::Neutral));
     check_polarity_impl(cx, env, trace, seen, tparams, mult_polarity, bound)?;
     if let Some(default) = default {
         check_polarity_impl(cx, env, trace, seen, tparams, mult_polarity, default)?;
@@ -891,10 +892,10 @@ fn variance_check<'cx>(
 ) -> Result<(), FlowJsException> {
     // ignore typeapp arity mismatch, since it's handled elsewhere
     for (tp, targ) in tps.iter().zip(targs.iter()) {
-        // As in `type_app_variance_check`, TS treats Neutral tparam slots as covariant.
+        // As in `type_app_variance_check`, TS treats unannotated tparam slots as covariant.
         let tp_polarity = match tp.polarity {
-            Polarity::Neutral if strictness_kind.is_typescript_loose() => Polarity::Positive,
-            tp_polarity => tp_polarity,
+            None if strictness_kind.is_typescript_loose() => Polarity::Positive,
+            tp_polarity => tp_polarity.unwrap_or(Polarity::Neutral),
         };
         check_polarity_impl(
             cx,

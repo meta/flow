@@ -63,7 +63,10 @@ pub mod insertion_point_collectors {
             reason,
             name: SubstName::name(name.dupe()),
             bound,
-            polarity: typed_ast_utils::polarity(tparam.variance.as_ref()),
+            polarity: tparam
+                .variance
+                .as_ref()
+                .map(|variance| typed_ast_utils::polarity(Some(variance))),
             default,
             is_this: false,
             is_const: tparam.const_.is_some(),
@@ -97,7 +100,7 @@ pub mod insertion_point_collectors {
                 .dupe()
                 .replace_desc(VirtualReasonDesc::RThisType),
             bound,
-            polarity: Polarity::Positive,
+            polarity: Some(Polarity::Positive),
             default: None,
             is_this: true,
             is_const: false,

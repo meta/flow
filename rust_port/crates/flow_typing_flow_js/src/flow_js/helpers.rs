@@ -2613,28 +2613,28 @@ pub(super) fn type_app_variance_check<'cx>(
                                 targ: reason.dupe(),
                                 lower: reason_op.dupe(),
                                 upper: reason_tapp.dupe(),
-                                polarity,
+                                polarity: polarity.unwrap_or(Polarity::Neutral),
                             },
                         ))),
                         Arc::new(use_op.dupe()),
                     );
                     match polarity {
-                        Polarity::Positive => rec_flow(
+                        Some(Polarity::Positive) => rec_flow(
                             cx,
                             env,
                             trace,
                             (t1, &UseT::new(UseTInner::UseT(use_op, t2.dupe()))),
                         ),
-                        Polarity::Negative => rec_flow(
+                        Some(Polarity::Negative) => rec_flow(
                             cx,
                             env,
                             trace,
                             (t2, &UseT::new(UseTInner::UseT(use_op, t1.dupe()))),
                         ),
-                        Polarity::Neutral if strictness_kind.is_typescript_loose() => {
-                            // TS treats Neutral (read-write) tparam slots as covariant in
-                            // instantiation, not invariant. Match that by doing a covariant
-                            // subtype check in .ts instead of unification.
+                        None if strictness_kind.is_typescript_loose() => {
+                            // TS treats unannotated tparam slots as covariant in instantiation,
+                            // not invariant. Match that by doing a covariant subtype check in .ts
+                            // instead of unification. An explicit `in out` stays invariant.
                             rec_flow(
                                 cx,
                                 env,
@@ -2642,7 +2642,7 @@ pub(super) fn type_app_variance_check<'cx>(
                                 (t1, &UseT::new(UseTInner::UseT(use_op, t2.dupe()))),
                             )
                         }
-                        Polarity::Neutral => rec_unify(
+                        None | Some(Polarity::Neutral) => rec_unify(
                             cx,
                             env,
                             trace,

@@ -581,8 +581,8 @@ impl FlowJs {
         use_op: UseOp,
         reason1: &Reason,
         reason2: &Reason,
-        targs1: Rc<[(SubstName, Reason, Type, Polarity)]>,
-        targs2: Rc<[(SubstName, Reason, Type, Polarity)]>,
+        targs1: Rc<[(SubstName, Reason, Type, Option<Polarity>)]>,
+        targs2: Rc<[(SubstName, Reason, Type, Option<Polarity>)]>,
         strictness_kind: TypeStrictnessKind,
     ) -> Result<(), FlowJsException> {
         inheritance_helpers::flow_type_args(

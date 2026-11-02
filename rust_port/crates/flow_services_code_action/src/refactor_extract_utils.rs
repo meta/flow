@@ -1328,13 +1328,13 @@ pub mod type_synthesizer {
                 };
 
                 let variance = match tparam.polarity {
-                    Polarity::Neutral => None,
-                    Polarity::Positive => Some(ast::Variance {
+                    None | Some(Polarity::Neutral) => None,
+                    Some(Polarity::Positive) => Some(ast::Variance {
                         loc: Loc::default(),
                         kind: ast::VarianceKind::Out,
                         comments: None,
                     }),
-                    Polarity::Negative => Some(ast::Variance {
+                    Some(Polarity::Negative) => Some(ast::Variance {
                         loc: Loc::default(),
                         kind: ast::VarianceKind::In,
                         comments: None,

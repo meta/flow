@@ -41,3 +41,17 @@ declare const animalConsumer: Consumer<Animal>;
 const c_ok: Consumer<Dog> = animalConsumer; // OK: standard contravariance, not affected by gate
 declare const dogConsumer: Consumer<Dog>;
 const c_err: Consumer<Animal> = dogConsumer; // ERROR: Dog not assignable to Animal (contravariance)
+
+// Explicit `in out` tparam: invariant, as in TS. The gate does not apply.
+declare class InvariantBox<in out T> {
+  value: T;
+}
+declare const dogInvariantBox: InvariantBox<Dog>;
+const i_err: InvariantBox<Animal> = dogInvariantBox; // ERROR: invariant
+declare class DogInvariantBox extends InvariantBox<Dog> {}
+declare const dogInvariantBoxSub: DogInvariantBox;
+const i_sub_err: InvariantBox<Animal> = dogInvariantBoxSub; // ERROR: invariant
+
+type InvariantValue<in out T> = {value: T};
+declare const dogValue: InvariantValue<Dog>;
+const v_err: InvariantValue<Animal> = dogValue; // ERROR: invariant

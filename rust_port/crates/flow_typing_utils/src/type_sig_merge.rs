@@ -3872,7 +3872,11 @@ fn merge_tparams_targs<'cx>(
     cx: &mut Context<'cx>,
     file: &SigFile,
     reason: Reason,
-    t: impl FnOnce(&mut Context<'cx>, &MergeEnv, Vec<(SubstName, Reason, Type, Polarity)>) -> Type,
+    t: impl FnOnce(
+        &mut Context<'cx>,
+        &MergeEnv,
+        Vec<(SubstName, Reason, Type, Option<Polarity>)>,
+    ) -> Type,
     tparams: &TParams<ALoc, Pack::Packed<ALoc>>,
     strictness_kind: type_::TypeStrictnessKind,
 ) -> Type {
@@ -3927,7 +3931,10 @@ fn merge_tparam_bound<'cx>(
     file: &SigFile,
     tp: &TParam<ALoc, Pack::Packed<ALoc>>,
     from_infer: bool,
-) -> (type_::TypeParam, (SubstName, Reason, Type, Polarity)) {
+) -> (
+    type_::TypeParam,
+    (SubstName, Reason, Type, Option<Polarity>),
+) {
     use flow_common::reason::VirtualReasonDesc::*;
     use flow_common::subst_name::SubstName;
 
@@ -3939,7 +3946,7 @@ fn merge_tparam_bound<'cx>(
         default: _,
         is_const,
     } = tp;
-    let polarity = polarity.unwrap_or(Polarity::Neutral);
+    let polarity = *polarity;
     let reason = reason::mk_reason(RType(name.dupe()), name_loc.dupe());
     let bound = match bound {
         None => {
@@ -3979,8 +3986,14 @@ fn finish_merged_tparam<'cx>(
     cx: &mut Context<'cx>,
     file: &SigFile,
     packed: &TParam<ALoc, Pack::Packed<ALoc>>,
-    partial: (type_::TypeParam, (SubstName, Reason, Type, Polarity)),
-) -> (type_::TypeParam, (SubstName, Reason, Type, Polarity)) {
+    partial: (
+        type_::TypeParam,
+        (SubstName, Reason, Type, Option<Polarity>),
+    ),
+) -> (
+    type_::TypeParam,
+    (SubstName, Reason, Type, Option<Polarity>),
+) {
     let (type_param, tuple) = partial;
     let default = packed
         .default
@@ -4004,7 +4017,10 @@ fn merge_tparam<'cx>(
     file: &SigFile,
     tp: &TParam<ALoc, Pack::Packed<ALoc>>,
     from_infer: bool,
-) -> (type_::TypeParam, (SubstName, Reason, Type, Polarity)) {
+) -> (
+    type_::TypeParam,
+    (SubstName, Reason, Type, Option<Polarity>),
+) {
     let partial = merge_tparam_bound(env, cx, file, tp, from_infer);
     finish_merged_tparam(env, cx, file, tp, partial)
 }
@@ -4179,7 +4195,7 @@ fn merge_interface<'cx>(
     def: &InterfaceSig<ALoc, Pack::Packed<ALoc>>,
     inline: bool,
     reject_primitives: bool,
-    targs: Vec<(SubstName, Reason, Type, Polarity)>,
+    targs: Vec<(SubstName, Reason, Type, Option<Polarity>)>,
 ) -> Type {
     use flow_common::reason::VirtualReasonDesc::*;
 
@@ -4217,7 +4233,7 @@ fn merge_interface<'cx>(
     // inline instance types.
     let build = |cx: &mut Context<'cx>,
                  env: &MergeEnv,
-                 targs: Vec<(SubstName, Reason, Type, Polarity)>|
+                 targs: Vec<(SubstName, Reason, Type, Option<Polarity>)>|
      -> (type_::InstType, Box<dyn FnOnce(Option<Type>) -> Type + 'cx>) {
         let extends_resolved: Vec<(Type, bool, Option<Vec<Type>>)> = extends
             .iter()
@@ -4402,7 +4418,7 @@ fn merge_interface<'cx>(
         name: this_name.dupe(),
         reason: this_reason_c,
         bound: rec_type,
-        polarity: Polarity::Positive,
+        polarity: Some(Polarity::Positive),
         default: None,
         is_this: true,
         is_const: false,
@@ -4565,8 +4581,12 @@ fn merge_this_class_t<'cx>(
     def: ClassSig<ALoc, Pack::Packed<ALoc>>,
     this_reason: Reason,
     inst_kind: type_::InstanceKind,
-) -> impl FnOnce(&mut Context<'cx>, &MergeEnv, Vec<(SubstName, Reason, Type, Polarity)>, Type) -> Type
-{
+) -> impl FnOnce(
+    &mut Context<'cx>,
+    &MergeEnv,
+    Vec<(SubstName, Reason, Type, Option<Polarity>)>,
+    Type,
+) -> Type {
     use flow_common::subst_name::SubstName;
 
     let ClassSig {
@@ -4587,14 +4607,14 @@ fn merge_this_class_t<'cx>(
     let class_name_owned = class_name;
     move |cx: &mut Context<'cx>,
           env: &MergeEnv,
-          targs: Vec<(SubstName, Reason, Type, Polarity)>,
+          targs: Vec<(SubstName, Reason, Type, Option<Polarity>)>,
           rec_type: Type| {
         let this = {
             let this_tp = type_::TypeParam::new(type_::TypeParamInner {
                 name: SubstName::name(FlowSmolStr::new_inline("this")),
                 reason: this_reason.dupe(),
                 bound: rec_type,
-                polarity: Polarity::Positive,
+                polarity: Some(Polarity::Positive),
                 default: None,
                 is_this: true,
                 is_const: false,
@@ -4769,7 +4789,7 @@ fn merge_class<'cx>(
     let this_reason_c = this_reason.dupe();
     let t = move |cx: &mut Context<'cx>,
                   env: &MergeEnv,
-                  targs: Vec<(SubstName, Reason, Type, Polarity)>| {
+                  targs: Vec<(SubstName, Reason, Type, Option<Polarity>)>| {
         let result_cell: Rc<RefCell<Option<Type>>> = Rc::new(RefCell::new(None));
         let result_cell_c = result_cell.dupe();
         let this_reason_for_lazy = this_reason_c.dupe();
@@ -4817,7 +4837,7 @@ fn merge_record<'cx>(
     let this_reason_c = this_reason.dupe();
     let t = move |cx: &mut Context<'cx>,
                   env: &MergeEnv,
-                  targs: Vec<(SubstName, Reason, Type, Polarity)>| {
+                  targs: Vec<(SubstName, Reason, Type, Option<Polarity>)>| {
         let result_cell: Rc<RefCell<Option<Type>>> = Rc::new(RefCell::new(None));
         let result_cell_c = result_cell.dupe();
         let this_reason_for_lazy = this_reason_c.dupe();
@@ -4941,7 +4961,7 @@ fn merge_fun<'cx>(
     let def_ref = def;
     let t = |cx: &mut Context<'cx>,
              env: &MergeEnv,
-             _tparam_tuples: Vec<(SubstName, Reason, Type, Polarity)>| {
+             _tparam_tuples: Vec<(SubstName, Reason, Type, Option<Polarity>)>| {
         let params: Vec<type_::FunParam> = def_ref
             .params
             .iter()
@@ -5054,7 +5074,7 @@ fn merge_component<'cx>(
     let reason2 = reason.dupe();
     let t = |cx: &mut Context<'cx>,
              env: &MergeEnv,
-             _: Vec<(SubstName, Reason, Type, Polarity)>|
+             _: Vec<(SubstName, Reason, Type, Option<Polarity>)>|
      -> Type {
         let pmap: type_::properties::PropertiesMap = def
             .params
@@ -5135,7 +5155,7 @@ fn merge_type_alias<'cx>(
     let reason_clone = reason.dupe();
     let t = move |cx: &mut Context<'cx>,
                   env: &MergeEnv,
-                  targs: Vec<(SubstName, Reason, Type, Polarity)>| {
+                  targs: Vec<(SubstName, Reason, Type, Option<Polarity>)>| {
         let t = merge_impl(env, cx, file, body, false, false);
         match custom_error_loc_opt {
             Some(custom_error_loc) => {
@@ -5228,7 +5248,7 @@ fn merge_opaque_type<'cx>(
     let reason_clone = reason.dupe();
     let t = move |cx: &mut Context<'cx>,
                   env: &MergeEnv,
-                  targs: Vec<(SubstName, Reason, Type, Polarity)>| {
+                  targs: Vec<(SubstName, Reason, Type, Option<Polarity>)>| {
         let opaque_reason = reason_clone
             .dupe()
             .replace_desc(ROpaqueType(name_owned.dupe()));
@@ -5308,14 +5328,14 @@ fn merge_declare_class<'cx>(
     let this_reason_c = this_reason.dupe();
     let this_class_t = move |cx: &mut Context<'cx>,
                              env: &MergeEnv,
-                             targs: Vec<(SubstName, Reason, Type, Polarity)>,
+                             targs: Vec<(SubstName, Reason, Type, Option<Polarity>)>,
                              rec_type: Type| {
         let this = {
             let this_tp = type_::TypeParam::new(type_::TypeParamInner {
                 name: SubstName::name(FlowSmolStr::new_inline("this")),
                 reason: this_reason_c.dupe(),
                 bound: rec_type,
-                polarity: Polarity::Positive,
+                polarity: Some(Polarity::Positive),
                 default: None,
                 is_this: true,
                 is_const: false,
@@ -5534,7 +5554,7 @@ fn merge_declare_class<'cx>(
     let this_reason_t = this_reason.dupe();
     let t = move |cx: &mut Context<'cx>,
                   env: &MergeEnv,
-                  targs: Vec<(SubstName, Reason, Type, Polarity)>| {
+                  targs: Vec<(SubstName, Reason, Type, Option<Polarity>)>| {
         let result_cell: Rc<RefCell<Option<Type>>> = Rc::new(RefCell::new(None));
         let result_cell_c = result_cell.dupe();
         let this_reason_for_lazy = this_reason_t.dupe();
@@ -5665,7 +5685,7 @@ pub fn merge_def<'cx>(
             let tparams = &inner.tparams;
             let t = |cx: &mut Context<'cx>,
                      env: &MergeEnv,
-                     targs: Vec<(SubstName, Reason, Type, Polarity)>| {
+                     targs: Vec<(SubstName, Reason, Type, Option<Polarity>)>| {
                 let t = merge_interface(
                     env,
                     cx,
@@ -5812,7 +5832,7 @@ pub fn merge_def<'cx>(
             let tparams = &inner.tparams;
             let t = |cx: &mut Context<'cx>,
                      env: &MergeEnv,
-                     _targs: Vec<(SubstName, Reason, Type, Polarity)>| {
+                     _targs: Vec<(SubstName, Reason, Type, Option<Polarity>)>| {
                 merge_impl(env, cx, file, def, false, const_decl)
             };
             merge_tparams_targs(

@@ -227,7 +227,7 @@ fn wrap_generics(
                     underlying_t: nominal::UnderlyingT::FullyOpaque,
                     lower_t: None,
                     upper_t: Some(t.dupe()),
-                    nominal_type_args: vec![(name, reason, t, Polarity::Neutral)].into(),
+                    nominal_type_args: vec![(name, reason, t, Some(Polarity::Neutral))].into(),
                 })),
             })
         }

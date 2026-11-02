@@ -523,7 +523,7 @@ fn type_to_json_uncached<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, t: &Type
                         json!({
                             "name": name.string_of_subst_name().to_string(),
                             "type": type_to_json(cx, depth - 1, t),
-                            "polarity": polarity_to_string(polarity),
+                            "polarity": polarity_to_string(&polarity.unwrap_or(Polarity::Neutral)),
                         })
                     })
                     .collect(),
@@ -620,7 +620,7 @@ fn json_of_typeparams<'cx>(
                 json!({
                     "name": typeparam.name.string_of_subst_name().to_string(),
                     "bound": type_to_json(cx, depth - 1, &typeparam.bound),
-                    "polarity": polarity_to_string(&typeparam.polarity),
+                    "polarity": polarity_to_string(&typeparam.polarity.unwrap_or(Polarity::Neutral)),
                     "default": default_json,
                 })
             })
@@ -732,7 +732,7 @@ fn json_of_insttype<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, inst: &InstTy
                 json!({
                     "name": name.string_of_subst_name().to_string(),
                     "type": type_to_json(cx, depth - 1, t),
-                    "polarity": polarity_to_string(polarity),
+                    "polarity": polarity_to_string(&polarity.unwrap_or(Polarity::Neutral)),
                 })
             })
             .collect(),

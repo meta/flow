@@ -1120,7 +1120,7 @@ fn insttype<'a, C: crate::func_params_intf::Config>(
             }
         }
     };
-    let type_args: Vec<(SubstName, Reason, Type, Polarity)> = match &s.tparams {
+    let type_args: Vec<(SubstName, Reason, Type, Option<Polarity>)> = match &s.tparams {
         None => Vec::new(),
         Some((_, nel)) => nel
             .iter()
@@ -1197,7 +1197,7 @@ pub fn mk_this<'a>(self_: Type, cx: &mut Context<'a>, reason: Reason) -> (TypePa
         name: SubstName::name(FlowSmolStr::new("this")),
         reason: this_reason,
         bound: self_,
-        polarity: Polarity::Positive,
+        polarity: Some(Polarity::Positive),
         default: None,
         is_this: true,
         is_const: false,
@@ -2513,9 +2513,9 @@ fn merge_tparam_polarities(cx: &mut Context, name_loc: &ALoc, tparams: &TypePara
                         }
                         Some(_) => {}
                     }
-                    if tparam.polarity == Polarity::Neutral {
+                    if tparam.polarity.is_none() {
                         let mut merged_tparam = (**tparam).clone();
-                        merged_tparam.polarity = polarity;
+                        merged_tparam.polarity = Some(polarity);
                         *tparam = TypeParam::new(merged_tparam);
                     }
                 }

@@ -1,3 +1,18 @@
+Error ------------------------------------------------------------------------------------- cross_lang_consumer.js:26:45
+
+Cannot use `T` [1] in an input/output position because `T` [1] is expected to occur only in output positions.
+[incompatible-variance]
+
+   cross_lang_consumer.js:26:45
+   26| type InvariantBoxView<out T> = InvariantBox<T>; // ERROR: `in out` is invariant
+                                                   ^
+
+References:
+   cross_lang_consumer.js:26:27
+   26| type InvariantBoxView<out T> = InvariantBox<T>; // ERROR: `in out` is invariant
+                                 ^ [1]
+
+
 Error --------------------------------------------------------------------------------------- extends_implements.ts:36:8
 
 Cannot extend `Parent` [1] with `Child` [2] because in property `tag`: `"c"` [3] is incompatible with `"a" | "b"` [4].
@@ -442,5 +457,68 @@ References:
                                            ^^^ [3]
 
 
+Error --------------------------------------------------------------------------------------- type_arg_variance.ts:50:37
 
-Found 22 errors
+Cannot assign `dogInvariantBox` to `i_err` because in type argument `T` [1]: `Animal` [2] is incompatible with
+`Dog` [3]. For example, property `bark` is missing in `Animal` [2] but exists in `Dog` [3]. [incompatible-type]
+
+   type_arg_variance.ts:50:37
+   50| const i_err: InvariantBox<Animal> = dogInvariantBox; // ERROR: invariant
+                                           ^^^^^^^^^^^^^^^
+
+References:
+   type_arg_variance.ts:46:35
+   46| declare class InvariantBox<in out T> {
+                                         ^ [1]
+   type_arg_variance.ts:50:27
+   50| const i_err: InvariantBox<Animal> = dogInvariantBox; // ERROR: invariant
+                                 ^^^^^^ [2]
+   type_arg_variance.ts:49:45
+   49| declare const dogInvariantBox: InvariantBox<Dog>;
+                                                   ^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------- type_arg_variance.ts:53:41
+
+Cannot assign `dogInvariantBoxSub` to `i_sub_err` because in type argument `T` [1]: `Animal` [2] is incompatible with
+`Dog` [3]. For example, property `bark` is missing in `Animal` [2] but exists in `Dog` [3]. [incompatible-type]
+
+   type_arg_variance.ts:53:41
+   53| const i_sub_err: InvariantBox<Animal> = dogInvariantBoxSub; // ERROR: invariant
+                                               ^^^^^^^^^^^^^^^^^^
+
+References:
+   type_arg_variance.ts:46:35
+   46| declare class InvariantBox<in out T> {
+                                         ^ [1]
+   type_arg_variance.ts:53:31
+   53| const i_sub_err: InvariantBox<Animal> = dogInvariantBoxSub; // ERROR: invariant
+                                     ^^^^^^ [2]
+   type_arg_variance.ts:51:52
+   51| declare class DogInvariantBox extends InvariantBox<Dog> {}
+                                                          ^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------- type_arg_variance.ts:57:39
+
+Cannot assign `dogValue` to `v_err` because in type argument `T` [1]: `Animal` [2] is incompatible with `Dog` [3]. For
+example, property `bark` is missing in `Animal` [2] but exists in `Dog` [3]. [incompatible-type]
+
+   type_arg_variance.ts:57:39
+   57| const v_err: InvariantValue<Animal> = dogValue; // ERROR: invariant
+                                             ^^^^^^^^
+
+References:
+   type_arg_variance.ts:55:28
+   55| type InvariantValue<in out T> = {value: T};
+                                  ^ [1]
+   type_arg_variance.ts:57:29
+   57| const v_err: InvariantValue<Animal> = dogValue; // ERROR: invariant
+                                   ^^^^^^ [2]
+   type_arg_variance.ts:56:40
+   56| declare const dogValue: InvariantValue<Dog>;
+                                              ^^^ [3]
+
+
+
+Found 26 errors

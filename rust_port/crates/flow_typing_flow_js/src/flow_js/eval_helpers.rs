@@ -1623,7 +1623,7 @@ pub(super) fn mk_possibly_evaluated_destructor_for_annotations<'cx>(
                                     | Err(FlowJsException::SpeculationSingletonError)
                                     | Err(FlowJsException::LimitExceeded) => {
                                         let nominal_type_args: Rc<
-                                            [(SubstName, Reason, Type, Polarity)],
+                                            [(SubstName, Reason, Type, Option<Polarity>)],
                                         > = stuck_eval_targs
                                             .iter()
                                             .enumerate()
@@ -1636,7 +1636,7 @@ pub(super) fn mk_possibly_evaluated_destructor_for_annotations<'cx>(
                                                     ),
                                                     reason_of_t(t_arg).dupe(),
                                                     t_arg.dupe(),
-                                                    Polarity::Neutral,
+                                                    Some(Polarity::Neutral),
                                                 )
                                             })
                                             .collect();

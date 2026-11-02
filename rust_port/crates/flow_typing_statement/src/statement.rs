@@ -1854,7 +1854,7 @@ pub fn opaque_type<'a>(
                     );
                 }
             }
-            let nominal_type_args: Vec<(SubstName, Reason, Type, Polarity)> =
+            let nominal_type_args: Vec<(SubstName, Reason, Type, Option<Polarity>)> =
                 type_params::to_list(&tparams)
                     .into_iter()
                     .map(|tp| {
@@ -4667,16 +4667,18 @@ pub fn type_alias<'a>(
                     .any(|(tag_name, _)| tag_name == "flowCustomError") =>
             {
                 // Convert to opaque type with custom error variant
-                let nominal_type_args: Vec<(SubstName, Reason, Type, Polarity)> = match &tparams {
-                    Some((_, tps)) => tps
-                        .iter()
-                        .map(|tp| {
-                            let tp_t = tparams_map_for_custom_error.get(&tp.name).unwrap().dupe();
-                            (tp.name.dupe(), tp.reason.dupe(), tp_t, tp.polarity)
-                        })
-                        .collect(),
-                    None => vec![],
-                };
+                let nominal_type_args: Vec<(SubstName, Reason, Type, Option<Polarity>)> =
+                    match &tparams {
+                        Some((_, tps)) => tps
+                            .iter()
+                            .map(|tp| {
+                                let tp_t =
+                                    tparams_map_for_custom_error.get(&tp.name).unwrap().dupe();
+                                (tp.name.dupe(), tp.reason.dupe(), tp_t, tp.polarity)
+                            })
+                            .collect(),
+                        None => vec![],
+                    };
                 let nominal_id = type_::nominal::Id::UserDefinedOpaqueTypeId(Box::new(
                     type_::nominal::UserDefinedOpaqueTypeIdData(
                         cx.make_aloc_id(&name_loc),

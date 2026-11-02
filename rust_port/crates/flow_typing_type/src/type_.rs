@@ -6465,7 +6465,7 @@ pub struct ClassBinding {
 pub struct InstTypeInner {
     pub class_name: Option<FlowSmolStr>,
     pub class_id: ALocId,
-    pub type_args: Rc<[(SubstName, Reason, Type, Polarity)]>,
+    pub type_args: Rc<[(SubstName, Reason, Type, Option<Polarity>)]>,
     pub own_props: properties::Id,
     pub proto_props: properties::Id,
     pub inst_call_t: Option<i32>,
@@ -6557,7 +6557,7 @@ pub struct NominalTypeInner {
     pub underlying_t: nominal::UnderlyingT,
     pub lower_t: Option<Type>,
     pub upper_t: Option<Type>,
-    pub nominal_type_args: Rc<[(SubstName, Reason, Type, Polarity)]>,
+    pub nominal_type_args: Rc<[(SubstName, Reason, Type, Option<Polarity>)]>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -6617,7 +6617,8 @@ pub struct TypeParamInner {
     pub reason: Reason,
     pub name: SubstName,
     pub bound: Type,
-    pub polarity: Polarity,
+    /// `None` is unannotated; `Some(Neutral)` is explicitly invariant.
+    pub polarity: Option<Polarity>,
     pub default: Option<Type>,
     pub is_this: bool,
     pub is_const: bool,

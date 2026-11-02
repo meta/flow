@@ -3252,7 +3252,7 @@ mod type_converter {
         state: &mut State,
         tp: &flow_typing_type::type_::TypeParam,
     ) -> Result<ty::TypeParam<ALoc>, Error> {
-        let tp_polarity = type_polarity(tp.polarity);
+        let tp_polarity = type_polarity(tp.polarity.unwrap_or(Polarity::Neutral));
         let tp_bound = param_bound::<I>(env, state, &tp.bound)?;
         let tp_default = match &tp.default {
             Some(d) => Some(type__::<I>(env, state, None, d)?),

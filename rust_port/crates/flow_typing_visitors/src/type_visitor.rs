@@ -338,7 +338,8 @@ pub fn type_default<'cx, Acc, V: TypeVisitor<Acc> + ?Sized>(
                     .nominal_type_args
                     .iter()
                     .fold(acc, |acc, (_, _, t, pole_prime)| {
-                        visitor.type_(cx, Polarity::mult(pole, *pole_prime), acc, t)
+                        let pole_prime = pole_prime.unwrap_or(Polarity::Neutral);
+                        visitor.type_(cx, Polarity::mult(pole, pole_prime), acc, t)
                     });
             let acc = match &nominal_type.underlying_t {
                 flow_typing_type::type_::nominal::UnderlyingT::OpaqueWithLocal { t }
@@ -837,7 +838,7 @@ pub fn type_param_default<'cx, Acc, V: TypeVisitor<Acc> + ?Sized>(
     acc: Acc,
     tp: &TypeParam,
 ) -> Acc {
-    let pole = Polarity::mult(pole, tp.polarity);
+    let pole = Polarity::mult(pole, tp.polarity.unwrap_or(Polarity::Neutral));
     let acc = visitor.type_(cx, pole, acc, &tp.bound);
     if let Some(ref default) = tp.default {
         visitor.type_(cx, pole, acc, default)
@@ -1012,7 +1013,8 @@ pub fn inst_type_default<'cx, Acc, V: TypeVisitor<Acc> + ?Sized>(
         .type_args
         .iter()
         .fold(acc, |acc, (_, _, t, pole_prime)| {
-            visitor.type_(cx, Polarity::mult(pole, *pole_prime), acc, t)
+            let pole_prime = pole_prime.unwrap_or(Polarity::Neutral);
+            visitor.type_(cx, Polarity::mult(pole, pole_prime), acc, t)
         });
     let acc = visitor.props(cx, pole, acc, inst.own_props.dupe());
     let acc = visitor.props(cx, pole, acc, inst.proto_props.dupe());
