@@ -10071,6 +10071,10 @@ pub mod type_or_type_desc {
     pub enum ErrorTypeDesc<L: Dupe> {
         Normalized(ALocElt),
         ReasonDesc(VirtualReasonDesc<L>),
+        /// The type of an object literal expression, printed as "object literal".
+        ObjectLiteral,
+        /// The type of an array literal expression, printed as "array literal".
+        ArrayLiteral,
         Unknown,
     }
 
@@ -10079,6 +10083,8 @@ pub mod type_or_type_desc {
             match self {
                 Self::Normalized(ty) => ErrorTypeDesc::Normalized(ty),
                 Self::ReasonDesc(desc) => ErrorTypeDesc::ReasonDesc(desc.map_locs(&f)),
+                Self::ObjectLiteral => ErrorTypeDesc::ObjectLiteral,
+                Self::ArrayLiteral => ErrorTypeDesc::ArrayLiteral,
                 Self::Unknown => ErrorTypeDesc::Unknown,
             }
         }

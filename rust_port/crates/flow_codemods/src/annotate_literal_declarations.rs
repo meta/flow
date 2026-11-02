@@ -6,7 +6,6 @@
  */
 
 use dupe::Dupe;
-use flow_common::reason::VirtualReasonDesc;
 use flow_common_ty::ty::ALocTy;
 use flow_common_ty::ty::Elt;
 use flow_parser::ast;
@@ -175,33 +174,28 @@ impl<'a, 'cx> AnnotateLiteralDeclarationsMapper<'a, 'cx> {
             match error.msg_of_error() {
                 ErrorMessage::EInvariantSubtypingWithUseOp(data) if data.explanation.is_some() => {
                     let explanation = data.explanation.as_ref().unwrap();
-                    let extracted: Option<(&flow_aloc::ALoc, &VirtualReasonDesc<flow_aloc::ALoc>, ALocTy)> = match explanation {
+                    let extracted: Option<(&flow_aloc::ALoc, ALocTy)> = match explanation {
                         ExplanationWithLazyParts::LazyExplanationInvariantSubtypingDueToMutableArray {
                             lower_array_loc,
-                            lower_array_desc: TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::ReasonDesc(lower_desc)),
+                            lower_array_desc: TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::ObjectLiteral | ErrorTypeDesc::ArrayLiteral),
                             upper_array_desc: TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::Normalized(Elt::Type(upper_ty))),
                             ..
-                        } => Some((lower_array_loc, lower_desc, upper_ty.dupe())),
+                        } => Some((lower_array_loc, upper_ty.dupe())),
                         ExplanationWithLazyParts::LazyExplanationInvariantSubtypingDueToMutableProperty {
                             lower_obj_loc,
-                            lower_obj_desc: TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::ReasonDesc(lower_desc)),
+                            lower_obj_desc: TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::ObjectLiteral | ErrorTypeDesc::ArrayLiteral),
                             upper_obj_desc: TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::Normalized(Elt::Type(upper_ty))),
                             ..
-                        } => Some((lower_obj_loc, lower_desc, upper_ty.dupe())),
+                        } => Some((lower_obj_loc, upper_ty.dupe())),
                         ExplanationWithLazyParts::LazyExplanationInvariantSubtypingDueToMutableProperties {
                             lower_obj_loc,
-                            lower_obj_desc: TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::ReasonDesc(lower_desc)),
+                            lower_obj_desc: TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::ObjectLiteral | ErrorTypeDesc::ArrayLiteral),
                             upper_obj_desc: TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::Normalized(Elt::Type(upper_ty))),
                             ..
-                        } => Some((lower_obj_loc, lower_desc, upper_ty.dupe())),
+                        } => Some((lower_obj_loc, upper_ty.dupe())),
                         _ => None,
                     };
-                    if let Some((
-                        lower_loc,
-                        VirtualReasonDesc::RObjectLit
-                        | VirtualReasonDesc::RArrayLit,
-                        upper_ty,
-                    )) = extracted
+                    if let Some((lower_loc, upper_ty)) = extracted
                     {
                         acc.push((loc_of_aloc(lower_loc), upper_ty));
                     }

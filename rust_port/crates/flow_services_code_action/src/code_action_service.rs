@@ -1428,6 +1428,12 @@ pub fn ast_transforms_of_error(
                     TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::ReasonDesc(desc)) => {
                         flow_common::reason::string_of_desc::<Loc>(desc)
                     }
+                    TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::ObjectLiteral) => {
+                        "object literal".to_string()
+                    }
+                    TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::ArrayLiteral) => {
+                        "array literal".to_string()
+                    }
                     TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::Normalized(Elt::Type(ty)))
                         if matches!(ty.as_ref(), Ty::Obj(_)) =>
                     {
@@ -2225,26 +2231,23 @@ pub fn ast_transforms_of_error(
                 explanation,
                 Some(
                     ExplanationWithLazyParts::LazyExplanationInvariantSubtypingDueToMutableArray {
-                        lower_array_desc: TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::ReasonDesc(
-                            VirtualReasonDesc::RObjectLit
-                            | VirtualReasonDesc::RArrayLit,
-                        )),
+                        lower_array_desc: TypeOrTypeDescT::TypeDesc(
+                            ErrorTypeDesc::ObjectLiteral | ErrorTypeDesc::ArrayLiteral,
+                        ),
                         upper_array_desc: TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::Normalized(Elt::Type(_))),
                         ..
                     }
                     | ExplanationWithLazyParts::LazyExplanationInvariantSubtypingDueToMutableProperty {
-                        lower_obj_desc: TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::ReasonDesc(
-                            VirtualReasonDesc::RObjectLit
-                            | VirtualReasonDesc::RArrayLit,
-                        )),
+                        lower_obj_desc: TypeOrTypeDescT::TypeDesc(
+                            ErrorTypeDesc::ObjectLiteral | ErrorTypeDesc::ArrayLiteral,
+                        ),
                         upper_obj_desc: TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::Normalized(Elt::Type(_))),
                         ..
                     }
                     | ExplanationWithLazyParts::LazyExplanationInvariantSubtypingDueToMutableProperties {
-                        lower_obj_desc: TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::ReasonDesc(
-                            VirtualReasonDesc::RObjectLit
-                            | VirtualReasonDesc::RArrayLit,
-                        )),
+                        lower_obj_desc: TypeOrTypeDescT::TypeDesc(
+                            ErrorTypeDesc::ObjectLiteral | ErrorTypeDesc::ArrayLiteral,
+                        ),
                         upper_obj_desc: TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::Normalized(Elt::Type(_))),
                         ..
                     }
@@ -2300,9 +2303,9 @@ pub fn ast_transforms_of_error(
                     ErrorTypeReferenceWithLocData {
                         definition_loc: lower_obj_loc,
                         type_desc:
-                            TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::ReasonDesc(
-                                VirtualReasonDesc::RObjectLit | VirtualReasonDesc::RArrayLit,
-                            )),
+                            TypeOrTypeDescT::TypeDesc(
+                                ErrorTypeDesc::ObjectLiteral | ErrorTypeDesc::ArrayLiteral,
+                            ),
                         ..
                     },
                 upper:

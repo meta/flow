@@ -353,6 +353,12 @@ fn dump_loc_type_desc(cx: &Context, loc: &ALoc, type_desc: &TypeOrTypeDescT<ALoc
         TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::ReasonDesc(desc)) => {
             format!("{} {desc:?}", string_of_aloc(None, loc))
         }
+        TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::ObjectLiteral) => {
+            format!("{} ObjectLiteral", string_of_aloc(None, loc))
+        }
+        TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::ArrayLiteral) => {
+            format!("{} ArrayLiteral", string_of_aloc(None, loc))
+        }
         TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::Normalized(desc)) => {
             format!("{desc:?} at {loc:?}")
         }

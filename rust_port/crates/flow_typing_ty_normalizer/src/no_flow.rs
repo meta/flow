@@ -199,11 +199,18 @@ pub fn type_to_desc_for_errors<'cx>(
     genv: &Genv<'_, 'cx>,
     t: &Type,
 ) -> ErrorTypeDesc<ALoc> {
-    use flow_common::reason::VirtualReasonDesc;
-    let desc = flow_typing_type::type_util::desc_of_t(t);
-    match desc {
-        Some(desc @ (VirtualReasonDesc::RArrayLit | VirtualReasonDesc::RObjectLit)) => {
-            ErrorTypeDesc::ReasonDesc(desc.clone())
+    match t.deref() {
+        TypeInner::DefT(_, def_t)
+            if let DefTInner::ObjT(o) = def_t.deref()
+                && o.literal.is_expression() =>
+        {
+            ErrorTypeDesc::ObjectLiteral
+        }
+        TypeInner::DefT(_, def_t)
+            if let DefTInner::ArrT(arr) = def_t.deref()
+                && arr.literal().is_expression() =>
+        {
+            ErrorTypeDesc::ArrayLiteral
         }
         // Why do we try to use the printed types? For these non-leaf-node types, it's
         // reference locations can be spread across multiple locations, but the reason infra

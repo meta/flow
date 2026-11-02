@@ -14,7 +14,6 @@ use flow_common::polarity::Polarity;
 use flow_common::reason::Name;
 use flow_common::reason::VirtualReason;
 use flow_common::reason::VirtualReasonDesc;
-use flow_common::reason::mk_reason;
 use flow_common_errors::error_codes::ErrorCode;
 use flow_common_errors::error_utils::ConcreteLocPrintableErrorSet;
 use flow_common_errors::error_utils::ErrorKind;
@@ -355,6 +354,8 @@ pub fn score_of_msg<L: Dupe + PartialEq + Eq + PartialOrd + Ord>(msg: &FlowError
             TypeOrTypeDescT::TypeDesc(
                 ErrorTypeDesc::Normalized(Elt::Decl(_))
                 | ErrorTypeDesc::ReasonDesc(_)
+                | ErrorTypeDesc::ObjectLiteral
+                | ErrorTypeDesc::ArrayLiteral
                 | ErrorTypeDesc::Unknown,
             ) => TypeCategory::Other,
         }
@@ -866,6 +867,8 @@ fn rendered_type_desc<L: Dupe + PartialEq + Eq + PartialOrd + Ord + Clone + std:
             _ => desc.clone(),
         },
         ErrorTypeDesc::ReasonDesc(_)
+        | ErrorTypeDesc::ObjectLiteral
+        | ErrorTypeDesc::ArrayLiteral
         | ErrorTypeDesc::Normalized(Elt::Decl(_))
         | ErrorTypeDesc::Unknown => desc.clone(),
     }
@@ -4426,12 +4429,21 @@ where
                 let reason = mk_reason(desc.clone(), loc.dupe());
                 friendly::ref_map(&loc_of_aloc, &reason)
             }
+            ErrorTypeDesc::ObjectLiteral => {
+                friendly::hardcoded_string_desc_ref("object literal", loc_of_aloc(loc))
+            }
+            ErrorTypeDesc::ArrayLiteral => {
+                friendly::hardcoded_string_desc_ref("array literal", loc_of_aloc(loc))
+            }
             ErrorTypeDesc::Unknown => friendly::hardcoded_string_desc_ref("`?`", loc_of_aloc(loc)),
         }
     };
 
     let ref_of_type = |type_: &MessageTypeReferenceData<L>| match &type_.desc {
-        ErrorTypeDesc::Unknown | ErrorTypeDesc::ReasonDesc(_) => {
+        ErrorTypeDesc::Unknown
+        | ErrorTypeDesc::ReasonDesc(_)
+        | ErrorTypeDesc::ObjectLiteral
+        | ErrorTypeDesc::ArrayLiteral => {
             friendly::hardcoded_string_desc_ref("this type", loc_of_aloc(&type_.loc))
         }
         desc => ref_of_type_desc(&type_.loc, desc),
@@ -4451,6 +4463,12 @@ where
         }
         ErrorTypeDesc::ReasonDesc(desc) => {
             friendly::desc_of_reason_desc(Some(&desc.map_locs(&loc_of_aloc)))
+        }
+        ErrorTypeDesc::ObjectLiteral => {
+            friendly::MessageFeature::Inline(friendly::message_inlines_of_string("object literal"))
+        }
+        ErrorTypeDesc::ArrayLiteral => {
+            friendly::MessageFeature::Inline(friendly::message_inlines_of_string("array literal"))
         }
         ErrorTypeDesc::Unknown => code("?"),
     };
@@ -4774,7 +4792,6 @@ where
                     upper_obj_desc,
                     upper_object_loc,
                 } = data.as_ref();
-                use flow_common::reason::VirtualReasonDesc::*;
 
                 let prefix = if *props_plural {
                     vec![
@@ -4794,15 +4811,12 @@ where
                     match (lower_obj_desc, upper_obj_desc) {
                         // lower is literal, upper is type
                         (
-                            ErrorTypeDesc::ReasonDesc(lower_desc),
+                            ErrorTypeDesc::ObjectLiteral | ErrorTypeDesc::ArrayLiteral,
                             ErrorTypeDesc::Normalized(Elt::Type(_)),
-                        ) if matches!(lower_desc, RObjectLit | RArrayLit) => {
+                        ) => {
                             vec![
                                 text("annotate "),
-                                friendly::ref_map(
-                                    &loc_of_aloc,
-                                    &mk_reason(lower_desc.clone(), lower_obj_loc.dupe()),
-                                ),
+                                ref_of_type_desc(lower_obj_loc, lower_obj_desc),
                                 text(" with "),
                                 ref_of_type_desc(upper_obj_loc, upper_obj_desc),
                             ]
@@ -4810,14 +4824,11 @@ where
                         // upper is literal, lower is type
                         (
                             ErrorTypeDesc::Normalized(Elt::Type(_)),
-                            ErrorTypeDesc::ReasonDesc(upper_desc),
-                        ) if matches!(upper_desc, RObjectLit | RArrayLit) => {
+                            ErrorTypeDesc::ObjectLiteral | ErrorTypeDesc::ArrayLiteral,
+                        ) => {
                             vec![
                                 text("annotate "),
-                                friendly::ref_map(
-                                    &loc_of_aloc,
-                                    &mk_reason(upper_desc.clone(), upper_obj_loc.dupe()),
-                                ),
+                                ref_of_type_desc(upper_obj_loc, upper_obj_desc),
                                 text(" with "),
                                 ref_of_type_desc(lower_obj_loc, lower_obj_desc),
                             ]
@@ -4850,34 +4861,27 @@ where
                     upper_array_desc,
                     upper_array_reference_loc,
                 } = data.as_ref();
-                use flow_common::reason::VirtualReasonDesc::*;
 
                 let fix_suggestion: Vec<friendly::MessageFeature<Loc>> =
                     match (lower_array_desc, upper_array_desc) {
                         (
-                            ErrorTypeDesc::ReasonDesc(lower_desc),
+                            ErrorTypeDesc::ObjectLiteral | ErrorTypeDesc::ArrayLiteral,
                             ErrorTypeDesc::Normalized(Elt::Type(_)),
-                        ) if matches!(lower_desc, RObjectLit | RArrayLit) => {
+                        ) => {
                             vec![
                                 text("annotate "),
-                                friendly::ref_map(
-                                    &loc_of_aloc,
-                                    &mk_reason(lower_desc.clone(), lower_array_loc.dupe()),
-                                ),
+                                ref_of_type_desc(lower_array_loc, lower_array_desc),
                                 text(" with "),
                                 ref_of_type_desc(upper_array_loc, upper_array_desc),
                             ]
                         }
                         (
                             ErrorTypeDesc::Normalized(Elt::Type(_)),
-                            ErrorTypeDesc::ReasonDesc(upper_desc),
-                        ) if matches!(upper_desc, RObjectLit | RArrayLit) => {
+                            ErrorTypeDesc::ObjectLiteral | ErrorTypeDesc::ArrayLiteral,
+                        ) => {
                             vec![
                                 text("annotate "),
-                                friendly::ref_map(
-                                    &loc_of_aloc,
-                                    &mk_reason(upper_desc.clone(), upper_array_loc.dupe()),
-                                ),
+                                ref_of_type_desc(upper_array_loc, upper_array_desc),
                                 text(" with "),
                                 ref_of_type_desc(lower_array_loc, lower_array_desc),
                             ]
@@ -4920,7 +4924,6 @@ where
                     upper_object_loc,
                     property_name,
                 } = data.as_ref();
-                use flow_common::reason::VirtualReasonDesc::*;
 
                 let prop: Vec<friendly::MessageFeature<Loc>> = match property_name {
                     None => vec![text("the indexer")],
@@ -4930,29 +4933,23 @@ where
                 let fix_suggestion: Vec<friendly::MessageFeature<Loc>> =
                     match (lower_obj_desc, upper_obj_desc) {
                         (
-                            ErrorTypeDesc::ReasonDesc(lower_desc),
+                            ErrorTypeDesc::ObjectLiteral | ErrorTypeDesc::ArrayLiteral,
                             ErrorTypeDesc::Normalized(Elt::Type(_)),
-                        ) if matches!(lower_desc, RObjectLit | RArrayLit) => {
+                        ) => {
                             vec![
                                 text("annotate "),
-                                friendly::ref_map(
-                                    &loc_of_aloc,
-                                    &mk_reason(lower_desc.clone(), lower_obj_loc.dupe()),
-                                ),
+                                ref_of_type_desc(lower_obj_loc, lower_obj_desc),
                                 text(" with "),
                                 ref_of_type_desc(upper_obj_loc, upper_obj_desc),
                             ]
                         }
                         (
                             ErrorTypeDesc::Normalized(Elt::Type(_)),
-                            ErrorTypeDesc::ReasonDesc(upper_desc),
-                        ) if matches!(upper_desc, RObjectLit | RArrayLit) => {
+                            ErrorTypeDesc::ObjectLiteral | ErrorTypeDesc::ArrayLiteral,
+                        ) => {
                             vec![
                                 text("annotate "),
-                                friendly::ref_map(
-                                    &loc_of_aloc,
-                                    &mk_reason(upper_desc.clone(), upper_obj_loc.dupe()),
-                                ),
+                                ref_of_type_desc(upper_obj_loc, upper_obj_desc),
                                 text(" with "),
                                 ref_of_type_desc(lower_obj_loc, lower_obj_desc),
                             ]
@@ -4991,7 +4988,6 @@ where
                     upper_object_loc,
                     properties,
                 } = data.as_ref();
-                use flow_common::reason::VirtualReasonDesc::*;
 
                 let prop_codes: Vec<friendly::Message<Loc>> = properties
                     .iter()
@@ -5003,29 +4999,23 @@ where
                 let fix_suggestion: Vec<friendly::MessageFeature<Loc>> =
                     match (lower_obj_desc, upper_obj_desc) {
                         (
-                            ErrorTypeDesc::ReasonDesc(lower_desc),
+                            ErrorTypeDesc::ObjectLiteral | ErrorTypeDesc::ArrayLiteral,
                             ErrorTypeDesc::Normalized(Elt::Type(_)),
-                        ) if matches!(lower_desc, RObjectLit | RArrayLit) => {
+                        ) => {
                             vec![
                                 text("annotate "),
-                                friendly::ref_map(
-                                    &loc_of_aloc,
-                                    &mk_reason(lower_desc.clone(), lower_obj_loc.dupe()),
-                                ),
+                                ref_of_type_desc(lower_obj_loc, lower_obj_desc),
                                 text(" with "),
                                 ref_of_type_desc(upper_obj_loc, upper_obj_desc),
                             ]
                         }
                         (
                             ErrorTypeDesc::Normalized(Elt::Type(_)),
-                            ErrorTypeDesc::ReasonDesc(upper_desc),
-                        ) if matches!(upper_desc, RObjectLit | RArrayLit) => {
+                            ErrorTypeDesc::ObjectLiteral | ErrorTypeDesc::ArrayLiteral,
+                        ) => {
                             vec![
                                 text("annotate "),
-                                friendly::ref_map(
-                                    &loc_of_aloc,
-                                    &mk_reason(upper_desc.clone(), upper_obj_loc.dupe()),
-                                ),
+                                ref_of_type_desc(upper_obj_loc, upper_obj_desc),
                                 text(" with "),
                                 ref_of_type_desc(lower_obj_loc, lower_obj_desc),
                             ]
