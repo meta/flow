@@ -785,7 +785,7 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
                 } else {
                     ast.loc().1.dupe()
                 };
-                let body = reason::mk_expression_reason(e);
+                let body = reason::mk_expression_reference(e);
                 let use_op = UseOp::Op(Arc::new(type_::RootUseOp::InitField(Box::new(
                     type_::InitFieldData {
                         op: reason_fn.dupe(),

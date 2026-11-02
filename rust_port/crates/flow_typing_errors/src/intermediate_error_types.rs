@@ -1375,7 +1375,7 @@ pub enum RootMessage<L: Dupe> {
     },
     RootCannotInitializeField {
         field: FlowSmolStr,
-        body: Option<VirtualReasonDesc<L>>,
+        body: ExpressionReferenceKind,
     },
     RootCannotInstantiateEval(MessageTypeReferenceData<L>),
     RootCannotInstantiateRenderType,

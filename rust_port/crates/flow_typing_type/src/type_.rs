@@ -1739,7 +1739,7 @@ pub struct MergedDeclarationData<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
 pub struct InitFieldData<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     pub op: VirtualReason<L>,
     pub field: FlowSmolStr,
-    pub body: VirtualReason<L>,
+    pub body: ExpressionReferenceData<L>,
 }
 
 #[derive(

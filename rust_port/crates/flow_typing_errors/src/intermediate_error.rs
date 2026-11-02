@@ -1704,7 +1704,7 @@ where
                                     op,
                                     RootMessage::RootCannotInitializeField {
                                         field: field.dupe(),
-                                        body: body.desc.clone(),
+                                        body: body.kind.dupe(),
                                     },
                                     custom_error_message,
                                 )
@@ -5647,7 +5647,7 @@ where
                             &format!("property `{field}`"),
                         )),
                         text(" with "),
-                        friendly::desc_of_reason_desc(body.as_ref()),
+                        desc_of_expression(body),
                     ]),
                 ),
                 RootMessage::RootCannotInstantiateEval(type_) => (

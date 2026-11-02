@@ -1099,13 +1099,15 @@ where
         };
 
         match root {
-            InitField(box InitFieldData { op, field, body }) => {
-                InitField(Box::new(InitFieldData {
-                    op: mod_reason(op),
-                    field,
-                    body: mod_reason(body),
-                }))
-            }
+            InitField(box InitFieldData {
+                op,
+                field,
+                body: ExpressionReferenceData { loc, kind },
+            }) => InitField(Box::new(InitFieldData {
+                op: mod_reason(op),
+                field,
+                body: ExpressionReferenceData { loc: f(loc), kind },
+            })),
             ObjectAddComputedProperty { op } => ObjectAddComputedProperty { op: mod_reason(op) },
             ObjectSpread { op } => ObjectSpread { op: mod_reason(op) },
             ObjectRest { op } => ObjectRest { op: mod_reason(op) },
