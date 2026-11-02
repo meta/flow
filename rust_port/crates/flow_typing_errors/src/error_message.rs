@@ -7121,7 +7121,7 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                         lower,
                         upper: box upper,
                     } => VirtualUseOp::Op(Arc::new(VirtualRootUseOp::Cast {
-                        lower: lower.dupe(),
+                        lower: lower.clone(),
                         upper: Box::new(f(upper.clone())),
                     })),
                     VirtualRootUseOp::IndexedTypeAccess(box IndexedTypeAccessData {

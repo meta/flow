@@ -17,6 +17,7 @@ use std::sync::Arc;
 use dupe::Dupe;
 use flow_aloc::ALoc;
 use flow_aloc::ALocId;
+use flow_common::error_ref::ExpressionReferenceData;
 use flow_common::reason::Reason;
 use flow_common::reason::ReasonDesc;
 use flow_common::reason::VirtualReason;
@@ -1127,10 +1128,10 @@ where
                 },
             },
             Cast {
-                lower,
+                lower: box ExpressionReferenceData { loc, kind },
                 upper: box upper,
             } => Cast {
-                lower: mod_reason(lower),
+                lower: Box::new(ExpressionReferenceData { loc: f(loc), kind }),
                 upper: Box::new(type_or_type_desc::map_loc(|l: &L| f(l.dupe()), upper)),
             },
             ClassExtendsCheck(box ClassExtendsCheckData {

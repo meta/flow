@@ -1697,12 +1697,12 @@ where
                             }
 
                             // Cast
-                            VirtualRootUseOp::Cast { lower, upper } => root(
+                            VirtualRootUseOp::Cast { lower, upper } => root_at_loc(
                                 loc,
                                 frames,
-                                lower,
+                                loc_of_aloc(&lower.loc),
                                 RootMessage::RootCannotCast {
-                                    lower: lower.desc.clone(),
+                                    lower: lower.kind.dupe(),
                                     upper: printed_type_desc(upper),
                                 },
                                 custom_error_message,
@@ -4473,6 +4473,11 @@ where
         ErrorTypeDesc::Unknown => code("?"),
     };
 
+    let desc_of_expression = |kind: &ExpressionReferenceKind| match kind {
+        ExpressionReferenceKind::Code(c) => code(c),
+        kind => text(&expression_description(kind)),
+    };
+
     let desc_of_value_desc = |value: &ValueDesc<L>| match value {
         ValueDesc::Reason(desc) => friendly::desc_of_reason_desc(desc.as_ref()),
         ValueDesc::Type(desc) => desc_of_type_desc(desc),
@@ -5259,8 +5264,8 @@ where
         }
     }
 
-    let render_expression_reference = |reference: &ExpressionReferenceData<L>| {
-        let description = match &reference.kind {
+    fn expression_description(kind: &ExpressionReferenceKind) -> String {
+        match kind {
             ExpressionReferenceKind::Code(code) => flow_common::string_utils::code_span(code),
             ExpressionReferenceKind::ObjectLiteral => "object literal".to_string(),
             ExpressionReferenceKind::ArrayLiteral => "array literal".to_string(),
@@ -5274,8 +5279,11 @@ where
             ExpressionReferenceKind::EmptyString => "empty string".to_string(),
             ExpressionReferenceKind::TemplateString => "template string".to_string(),
             ExpressionReferenceKind::Expression => "expression".to_string(),
-        };
-        hardcoded_string_desc_ref(&description, &reference.loc)
+        }
+    }
+
+    let render_expression_reference = |reference: &ExpressionReferenceData<L>| {
+        hardcoded_string_desc_ref(&expression_description(&reference.kind), &reference.loc)
     };
 
     let render_function_reference = |reference: &FunctionReferenceData<L>| {
@@ -5441,7 +5449,7 @@ where
                     RootKind::OperationRoot,
                     friendly::Message(vec![
                         text("Cannot cast "),
-                        friendly::desc_of_reason_desc(lower.as_ref()),
+                        desc_of_expression(lower),
                         text(" to "),
                         desc_of_type_desc(upper),
                     ]),

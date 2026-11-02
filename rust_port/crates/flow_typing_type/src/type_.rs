@@ -1785,7 +1785,7 @@ pub enum VirtualRootUseOp<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
         init: AssignVarInit<L>,
     },
     Cast {
-        lower: VirtualReason<L>,
+        lower: Box<ExpressionReferenceData<L>>,
         upper: Box<type_or_type_desc::TypeOrTypeDescT<L>>,
     },
     ClassExtendsCheck(Box<ClassExtendsCheckData<L>>),

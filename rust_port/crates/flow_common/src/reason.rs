@@ -53,6 +53,9 @@ use flow_parser::loc_sig::LocSig;
 use flow_parser::offset_utils::OffsetTable;
 
 use crate::error_ref::ErrorReference;
+use crate::error_ref::ExpressionFunctionKind;
+use crate::error_ref::ExpressionReferenceData;
+use crate::error_ref::ExpressionReferenceKind;
 use crate::flow_import_specifier::Userland;
 use crate::string_utils::code_span;
 use crate::subst_name::SubstName;
@@ -1767,6 +1770,40 @@ pub fn mk_expression_reason<M: Dupe + PartialEq, T: Dupe + PartialEq>(
             let loc = expr.loc();
             mk_reason(VirtualReasonDesc::RCode(code), loc.dupe())
         }
+    }
+}
+
+/// Describes an expression the way [`mk_expression_reason`] does, without a reason.
+pub fn mk_expression_reference<M: Dupe, T: Dupe>(
+    expr: &ast::expression::Expression<M, T>,
+) -> ExpressionReferenceData<T> {
+    let kind = match expr.deref() {
+        ExpressionInner::TypeCast { inner, .. } => mk_expression_reference(&inner.expression).kind,
+        ExpressionInner::Object { .. } => ExpressionReferenceKind::ObjectLiteral,
+        ExpressionInner::Array { .. } => ExpressionReferenceKind::ArrayLiteral,
+        ExpressionInner::ArrowFunction { inner, .. } => {
+            ExpressionReferenceKind::Function(if inner.async_ {
+                ExpressionFunctionKind::Async
+            } else {
+                ExpressionFunctionKind::Normal
+            })
+        }
+        ExpressionInner::Function { inner, .. } => {
+            ExpressionReferenceKind::Function(match (inner.async_, inner.generator) {
+                (false, false) => ExpressionFunctionKind::Normal,
+                (true, false) => ExpressionFunctionKind::Async,
+                (false, true) => ExpressionFunctionKind::Generator,
+                (true, true) => ExpressionFunctionKind::AsyncGenerator,
+            })
+        }
+        ExpressionInner::StringLiteral { inner, .. } if inner.value.is_empty() => {
+            ExpressionReferenceKind::EmptyString
+        }
+        _ => ExpressionReferenceKind::Code(code_desc_of_expression(false, expr).into()),
+    };
+    ExpressionReferenceData {
+        loc: expr.loc().dupe(),
+        kind,
     }
 }
 
