@@ -9649,12 +9649,9 @@ where
                 text(" is incompatible with default "),
                 type_guard_reference(upper),
             ]),
-            MessageNegativeTypeGuardConsistency {
-                return_desc,
-                type_,
-            } => friendly::Message(vec![
+            MessageNegativeTypeGuardConsistency { return_, type_ } => friendly::Message(vec![
                 text("Cannot return "),
-                friendly::desc_of_reason_desc(return_desc.as_ref()),
+                desc_of_expression(return_),
                 text(" because the negation of the predicate encoded in this expression"),
                 text(" needs to completely refine away the guard type "),
                 ref_of_type_desc(&type_.loc, &type_.desc),

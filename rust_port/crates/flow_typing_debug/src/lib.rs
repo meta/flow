@@ -4400,12 +4400,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             format!("ECannotCallReactComponent ({component})")
         }
         ErrorMessage::ENegativeTypeGuardConsistency(box ENegativeTypeGuardConsistencyData {
-            return_reason,
+            return_expression,
             ..
         }) => {
             format!(
                 "ENegativeTypeGuardConsistency ({})",
-                string_of_aloc(None, &return_reason.loc)
+                string_of_aloc(None, &return_expression.loc)
             )
         }
         ErrorMessage::EAssertionFunctionFalsyAtExit(box EAssertionFunctionFalsyAtExitData {

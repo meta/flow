@@ -2118,7 +2118,7 @@ pub struct EUnrecognizedAssertionCallData<L: Dupe + PartialOrd + Ord + PartialEq
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct ENegativeTypeGuardConsistencyData<L: Dupe + PartialOrd + Ord + PartialEq + Eq> {
-    pub return_reason: ErrorReference<L>,
+    pub return_expression: ExpressionReferenceData<L>,
     pub type_: ErrorTypeReferenceData<L>,
 }
 
@@ -2126,7 +2126,7 @@ impl<L: Dupe + PartialOrd + Ord + PartialEq + Eq> PartialEq
     for ENegativeTypeGuardConsistencyData<L>
 {
     fn eq(&self, other: &Self) -> bool {
-        self.return_reason == other.return_reason && self.type_ == other.type_
+        self.return_expression == other.return_expression && self.type_ == other.type_
     }
 }
 
@@ -2136,7 +2136,7 @@ impl<L: Dupe + PartialOrd + Ord + PartialEq + Eq + Hash> Hash
     for ENegativeTypeGuardConsistencyData<L>
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.return_reason.hash(state);
+        self.return_expression.hash(state);
         self.type_.hash(state);
     }
 }
@@ -2151,8 +2151,8 @@ impl<L: Dupe + PartialOrd + Ord + PartialEq + Eq> PartialOrd
 
 impl<L: Dupe + PartialOrd + Ord + PartialEq + Eq> Ord for ENegativeTypeGuardConsistencyData<L> {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.return_reason
-            .cmp(&other.return_reason)
+        self.return_expression
+            .cmp(&other.return_expression)
             .then_with(|| self.type_.cmp(&other.type_))
     }
 }
@@ -5577,10 +5577,13 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             )),
 
             ENegativeTypeGuardConsistency(box ENegativeTypeGuardConsistencyData {
-                return_reason,
+                return_expression,
                 type_,
             }) => ENegativeTypeGuardConsistency(Box::new(ENegativeTypeGuardConsistencyData {
-                return_reason: map_error_ref(return_reason),
+                return_expression: ExpressionReferenceData {
+                    loc: f(return_expression.loc),
+                    kind: return_expression.kind,
+                },
                 type_: map_error_type_ref(type_),
             })),
 
@@ -8236,10 +8239,10 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             })),
 
             ENegativeTypeGuardConsistency(box ENegativeTypeGuardConsistencyData {
-                return_reason,
+                return_expression,
                 type_,
             }) => ENegativeTypeGuardConsistency(Box::new(ENegativeTypeGuardConsistencyData {
-                return_reason,
+                return_expression,
                 type_: map_error_type_ref(f, type_),
             })),
 
@@ -9103,9 +9106,9 @@ impl<L: Dupe + PartialOrd + Ord + PartialEq + Eq> ErrorMessage<L> {
             }) => Some(loc.dupe()),
 
             Self::ENegativeTypeGuardConsistency(box ENegativeTypeGuardConsistencyData {
-                return_reason,
+                return_expression,
                 ..
-            }) => Some(return_reason.loc.dupe()),
+            }) => Some(return_expression.loc.dupe()),
 
             Self::ETypeGuardFunctionParamHavoced(box ETypeGuardFunctionParamHavocedData {
                 type_guard,
@@ -11831,11 +11834,11 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
 
             ErrorMessage::ENegativeTypeGuardConsistency(
                 box ENegativeTypeGuardConsistencyData {
-                    return_reason,
+                    return_expression,
                     type_,
                 },
             ) => Normal(Message::MessageNegativeTypeGuardConsistency {
-                return_desc: return_reason.desc,
+                return_: return_expression.kind,
                 type_: Box::new(expect_error_type_reference(type_)),
             }),
 

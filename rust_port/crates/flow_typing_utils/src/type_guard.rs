@@ -169,7 +169,7 @@ fn check_type_guard_consistency<'cx>(
                                     cx,
                                     ErrorMessage::ENegativeTypeGuardConsistency(Box::new(
                                         ENegativeTypeGuardConsistencyData {
-                                            return_reason: return_reason.to_error_reference(),
+                                            return_expression: mk_expression_reference(ret_expr),
                                             type_: flow_js_utils::type_reference_for_error(
                                                 type_guard,
                                             ),

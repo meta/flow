@@ -2616,7 +2616,7 @@ pub enum Message<L: Dupe> {
     },
 
     MessageNegativeTypeGuardConsistency {
-        return_desc: Option<VirtualReasonDesc<L>>,
+        return_: ExpressionReferenceKind,
         type_: Box<MessageTypeReferenceData<L>>,
     },
 
