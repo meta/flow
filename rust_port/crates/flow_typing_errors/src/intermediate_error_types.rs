@@ -1336,7 +1336,7 @@ pub enum RootMessage<L: Dupe> {
     },
     RootCannotCheckAgainstSwitchDiscriminant(L),
     RootCannotCoerce {
-        from: Option<VirtualReasonDesc<L>>,
+        from: ExpressionReferenceKind,
         target: Option<VirtualReasonDesc<L>>,
     },
     RootCannotConformToCommonInterface {

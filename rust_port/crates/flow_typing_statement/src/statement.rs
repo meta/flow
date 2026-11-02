@@ -8093,7 +8093,7 @@ fn expression_<'a>(
                                 );
                                 if !is_numeric {
                                     let use_op = UseOp::Op(Arc::new(type_::RootUseOp::Coercion {
-                                        from: mk_expression_reason(expr),
+                                        from: Box::new(mk_expression_reference(expr)),
                                         target: reason_of_t(&t_out).dupe(),
                                     }));
                                     flow_js::flow_non_speculating(

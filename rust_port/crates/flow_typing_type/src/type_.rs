@@ -1811,7 +1811,7 @@ pub enum VirtualRootUseOp<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     ClassOwnProtoCheck(Box<ClassOwnProtoCheckData<L>>),
     ClassMethodDefinition(Box<ClassMethodDefinitionData<L>>),
     Coercion {
-        from: VirtualReason<L>,
+        from: Box<ExpressionReferenceData<L>>,
         target: VirtualReason<L>,
     },
     ConformToCommonInterface(Box<ConformToCommonInterfaceData<L>>),

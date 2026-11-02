@@ -1184,8 +1184,11 @@ where
                 own_loc: own_loc.map(f),
                 proto_loc: proto_loc.map(f),
             })),
-            Coercion { from, target } => Coercion {
-                from: mod_reason(from),
+            Coercion {
+                from: box ExpressionReferenceData { loc, kind },
+                target,
+            } => Coercion {
+                from: Box::new(ExpressionReferenceData { loc: f(loc), kind }),
                 target: mod_reason(target),
             },
             ConformToCommonInterface(box ConformToCommonInterfaceData {

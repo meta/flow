@@ -1820,12 +1820,12 @@ where
                                 ),
                             },
 
-                            VirtualRootUseOp::Coercion { from, target } => root(
+                            VirtualRootUseOp::Coercion { from, target } => root_at_loc(
                                 loc,
                                 frames,
-                                from,
+                                loc_of_aloc(&from.loc),
                                 RootMessage::RootCannotCoerce {
-                                    from: from.desc.clone(),
+                                    from: from.kind.dupe(),
                                     target: target.desc.clone(),
                                 },
                                 custom_error_message,
@@ -3704,8 +3704,8 @@ where
 
         match &use_op {
             VirtualUseOp::Op(root) => match root.as_ref() {
-                VirtualRootUseOp::Coercion { from, .. } => mk_use_op_error_reason(
-                    from,
+                VirtualRootUseOp::Coercion { from, .. } => mk_use_op_error(
+                    loc_of_aloc(&from.loc),
                     use_op.clone(),
                     additional_explanation.clone(),
                     Message::MessageShouldNotBeCoerced(lower.dupe()),
@@ -5498,7 +5498,7 @@ where
                     RootKind::OperationRoot,
                     friendly::Message(vec![
                         text("Cannot coerce "),
-                        friendly::desc_of_reason_desc(from.as_ref()),
+                        desc_of_expression(from),
                         text(" to "),
                         friendly::desc_of_reason_desc(target.as_ref()),
                     ]),
