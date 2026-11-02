@@ -1679,7 +1679,9 @@ pub fn error_message_loc_of_upper<CX: ContextFamily>(u: &UseT<CX>) -> ALoc {
     }
 }
 
-pub fn primary_reason_of_use_op(use_op: &UseOp) -> Option<&Reason> {
+pub fn primary_reason_of_use_op(use_op: &UseOp) -> Option<Reason> {
+    use dupe::OptionDupedExt;
+    use flow_common::reason::mk_reason;
     use flow_typing_type::type_::AssignVarDefaultData;
     use flow_typing_type::type_::AssignVarInit;
     use flow_typing_type::type_::AssignVarTarget;
@@ -1688,16 +1690,23 @@ pub fn primary_reason_of_use_op(use_op: &UseOp) -> Option<&Reason> {
     use flow_typing_type::type_::RootUseOp;
     use flow_typing_type::type_::TypeApplicationTarget;
     use flow_typing_type::type_::TypeofApplicationData;
+    use flow_typing_type::type_::ValueReference;
     use flow_typing_type::type_::root_of_use_op;
 
-    match root_of_use_op(use_op) {
+    let reason = match root_of_use_op(use_op) {
+        RootUseOp::FunReturnStatement { value } | RootUseOp::GeneratorYield { value } => {
+            match value {
+                ValueReference::Expression(expression) => {
+                    return Some(mk_reason(None, expression.loc.dupe()));
+                }
+                ValueReference::Reason(reason) => Some(reason),
+            }
+        }
         RootUseOp::ObjectAddComputedProperty { op }
         | RootUseOp::ObjectSpread { op }
         | RootUseOp::ObjectRest { op }
         | RootUseOp::ObjectChain { op }
         | RootUseOp::DeclareComponentRef { op }
-        | RootUseOp::FunReturnStatement { value: op }
-        | RootUseOp::GeneratorYield { value: op }
         | RootUseOp::GetExport(op)
         | RootUseOp::GetProperty(op)
         | RootUseOp::InitField(box InitFieldData { op, .. })
@@ -1768,7 +1777,7 @@ pub fn primary_reason_of_use_op(use_op: &UseOp) -> Option<&Reason> {
         RootUseOp::InferBoundCompatibilityCheck { infer, .. } => Some(infer),
         RootUseOp::ReactCreateElementCall(data) => Some(&data.op),
         RootUseOp::RecordCreate(data) => Some(&data.op),
-        RootUseOp::Speculation(use_op) => primary_reason_of_use_op(use_op),
+        RootUseOp::Speculation(use_op) => return primary_reason_of_use_op(use_op),
         RootUseOp::SetProperty(data) => Some(&data.prop),
         RootUseOp::UpdateProperty { prop, .. } => Some(prop),
         RootUseOp::RefinementCheck { test, .. } => Some(test),
@@ -1776,7 +1785,8 @@ pub fn primary_reason_of_use_op(use_op: &UseOp) -> Option<&Reason> {
         RootUseOp::PositiveTypeGuardConsistency(data) => Some(&data.reason),
         RootUseOp::AssertionFunctionConsistency(data) => Some(&data.exit_reason),
         RootUseOp::UnknownUse => None,
-    }
+    };
+    reason.duped()
 }
 
 pub fn use_op_of_lookup_action(action: &flow_typing_type::type_::LookupAction) -> UseOp {

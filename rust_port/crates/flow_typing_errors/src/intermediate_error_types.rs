@@ -1272,6 +1272,7 @@ pub enum AssignTargetDesc<L: Dupe> {
 )]
 pub enum ValueDesc<L: Dupe> {
     Reason(Option<VirtualReasonDesc<L>>),
+    Expression(ExpressionReferenceKind),
     Type(ErrorTypeDesc<L>),
 }
 
@@ -1381,7 +1382,7 @@ pub enum RootMessage<L: Dupe> {
     RootCannotInstantiateTypeApp(Option<VirtualReasonDesc<L>>),
     RootCannotInstantiateTypeof(FlowSmolStr),
     RootCannotMakeReadOnly,
-    RootCannotReturn(Option<VirtualReasonDesc<L>>),
+    RootCannotReturn(ValueDesc<L>),
     RootCannotReturnFromAssertionFunction {
         implicit_return: bool,
     },
@@ -1396,7 +1397,7 @@ pub enum RootMessage<L: Dupe> {
         guard_type: MessageTypeReferenceData<L>,
         param_name: FlowSmolStr,
     },
-    RootCannotYield(Option<VirtualReasonDesc<L>>),
+    RootCannotYield(ValueDesc<L>),
 }
 
 pub type UnionEnumMap<L> = BTreeMap<UnionEnum, Vec1<L>>;

@@ -2395,9 +2395,9 @@ pub(super) fn flow<'cx>(
         Ok(()) => Ok(()),
         Err(FlowJsException::LimitExceeded) => {
             let rl = reason_of_t(lower).dupe();
-            let ru = match type_util::use_op_of_use_t(upper).and_then(|use_op| {
-                flow_js_utils::primary_reason_of_use_op(&use_op).map(|reason| reason.dupe())
-            }) {
+            let ru = match type_util::use_op_of_use_t(upper)
+                .and_then(|use_op| flow_js_utils::primary_reason_of_use_op(&use_op))
+            {
                 Some(reason) => reason,
                 None => match upper.deref() {
                     UseTInner::UseT(_, t) => reason_of_t(t).dupe(),

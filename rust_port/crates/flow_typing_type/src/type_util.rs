@@ -108,6 +108,7 @@ use crate::type_::UnionRepresentativeData;
 use crate::type_::UseOp;
 use crate::type_::UseT;
 use crate::type_::UseTInner;
+use crate::type_::ValueReference;
 use crate::type_::ValueToTypeReferenceTData;
 use crate::type_::VirtualFrameUseOp;
 use crate::type_::VirtualRootUseOp;
@@ -1090,6 +1091,13 @@ where
     {
         use VirtualRootUseOp::*;
 
+        let mod_value = |value: ValueReference<L>| match value {
+            ValueReference::Expression(box ExpressionReferenceData { loc, kind }) => {
+                ValueReference::Expression(Box::new(ExpressionReferenceData { loc: f(loc), kind }))
+            }
+            ValueReference::Reason(reason) => ValueReference::Reason(mod_reason(reason)),
+        };
+
         match root {
             InitField(box InitFieldData { op, field, body }) => {
                 InitField(Box::new(InitFieldData {
@@ -1240,7 +1248,7 @@ where
                 implicit_instantiation_reference,
             })),
             FunReturnStatement { value } => FunReturnStatement {
-                value: mod_reason(value),
+                value: mod_value(value),
             },
             FunImplicitReturn(box FunImplicitReturnData {
                 fn_,
@@ -1254,7 +1262,7 @@ where
                 type_guard,
             })),
             GeneratorYield { value } => GeneratorYield {
-                value: mod_reason(value),
+                value: mod_value(value),
             },
             GetExport(reason) => GetExport(mod_reason(reason)),
             GetProperty(reason) => GetProperty(mod_reason(reason)),

@@ -73,6 +73,7 @@ use flow_typing_type::type_::TypeInner;
 use flow_typing_type::type_::TypeofApplicationData;
 use flow_typing_type::type_::UnionEnum;
 use flow_typing_type::type_::UnionRepresentativeData;
+use flow_typing_type::type_::ValueReference;
 use flow_typing_type::type_::VirtualFrameUseOp;
 use flow_typing_type::type_::VirtualRootUseOp;
 use flow_typing_type::type_::VirtualUseOp;
@@ -843,6 +844,19 @@ fn method_callee_desc<L: Dupe + PartialEq + Eq + PartialOrd + Ord>(
     match fn_ {
         FunCallMethodCallee::Reason(reason) => CalleeDesc::Reason(reason.desc.clone()),
         FunCallMethodCallee::Method(name) => CalleeDesc::Method(name.dupe()),
+    }
+}
+
+/// The location of a referenced value, and its description.
+fn value_desc_of_reference<L: Dupe + PartialEq + Eq + PartialOrd + Ord>(
+    value: &ValueReference<L>,
+) -> (&L, ValueDesc<L>) {
+    match value {
+        ValueReference::Expression(expression) => (
+            &expression.loc,
+            ValueDesc::Expression(expression.kind.dupe()),
+        ),
+        ValueReference::Reason(reason) => (&reason.loc, ValueDesc::Reason(reason.desc.clone())),
     }
 }
 
@@ -1940,13 +1954,16 @@ where
                                 custom_error_message,
                             ),
 
-                            VirtualRootUseOp::FunReturnStatement { value } => root(
-                                loc,
-                                frames,
-                                value,
-                                RootMessage::RootCannotReturn(value.desc.clone()),
-                                custom_error_message,
-                            ),
+                            VirtualRootUseOp::FunReturnStatement { value } => {
+                                let (value_loc, value) = value_desc_of_reference(value);
+                                root_at_loc(
+                                    loc,
+                                    frames,
+                                    loc_of_aloc(value_loc),
+                                    RootMessage::RootCannotReturn(value),
+                                    custom_error_message,
+                                )
+                            }
 
                             VirtualRootUseOp::FunImplicitReturn(box FunImplicitReturnData {
                                 upper,
@@ -1980,13 +1997,16 @@ where
                                 custom_error_message,
                             ),
 
-                            VirtualRootUseOp::GeneratorYield { value } => root(
-                                loc,
-                                frames,
-                                value,
-                                RootMessage::RootCannotYield(value.desc.clone()),
-                                custom_error_message,
-                            ),
+                            VirtualRootUseOp::GeneratorYield { value } => {
+                                let (value_loc, value) = value_desc_of_reference(value);
+                                root_at_loc(
+                                    loc,
+                                    frames,
+                                    loc_of_aloc(value_loc),
+                                    RootMessage::RootCannotYield(value),
+                                    custom_error_message,
+                                )
+                            }
 
                             VirtualRootUseOp::GetExport(prop) => root(
                                 loc,
@@ -2287,7 +2307,9 @@ where
                                     loc,
                                     (all_frames, explanations),
                                     return_reason,
-                                    RootMessage::RootCannotReturn(return_reason.desc.clone()),
+                                    RootMessage::RootCannotReturn(ValueDesc::Reason(
+                                        return_reason.desc.clone(),
+                                    )),
                                     custom_error_message,
                                 )
                             }
@@ -4480,6 +4502,7 @@ where
 
     let desc_of_value_desc = |value: &ValueDesc<L>| match value {
         ValueDesc::Reason(desc) => friendly::desc_of_reason_desc(desc.as_ref()),
+        ValueDesc::Expression(kind) => desc_of_expression(kind),
         ValueDesc::Type(desc) => desc_of_type_desc(desc),
     };
 
@@ -5661,10 +5684,7 @@ where
                 ),
                 RootMessage::RootCannotReturn(value) => (
                     RootKind::OperationRoot,
-                    friendly::Message(vec![
-                        text("Cannot return "),
-                        friendly::desc_of_reason_desc(value.as_ref()),
-                    ]),
+                    friendly::Message(vec![text("Cannot return "), desc_of_value_desc(value)]),
                 ),
                 RootMessage::RootCannotReturnFromAssertionFunction { implicit_return } => (
                     RootKind::OperationRoot,
@@ -5725,10 +5745,7 @@ where
                 ),
                 RootMessage::RootCannotYield(value) => (
                     RootKind::OperationRoot,
-                    friendly::Message(vec![
-                        text("Cannot yield "),
-                        friendly::desc_of_reason_desc(value.as_ref()),
-                    ]),
+                    friendly::Message(vec![text("Cannot yield "), desc_of_value_desc(value)]),
                 ),
             }
         };

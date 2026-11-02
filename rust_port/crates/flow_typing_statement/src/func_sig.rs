@@ -117,9 +117,11 @@ impl<'ast> AstVisitor<'ast, ALoc, (ALoc, Type), &'ast ALoc, JobError>
                 Some(expr) => {
                     let mut mapper = flow_typing_utils::typed_ast_utils::UntypedAstMapper;
                     let Ok(untyped_expr) = polymorphic_ast_mapper::expression(&mut mapper, expr);
-                    reason::mk_expression_reason(&untyped_expr)
+                    type_::ValueReference::Expression(Box::new(reason::mk_expression_reference(
+                        &untyped_expr,
+                    )))
                 }
-                None => type_util::reason_of_t(t).dupe(),
+                None => type_::ValueReference::Reason(type_util::reason_of_t(t).dupe()),
             },
         }));
         flow_js::flow_non_speculating(
@@ -243,9 +245,11 @@ impl FuncScopeVisitor<'_, '_, '_> {
                 Some(expr) => {
                     let mut mapper = flow_typing_utils::typed_ast_utils::UntypedAstMapper;
                     let Ok(untyped_expr) = polymorphic_ast_mapper::expression(&mut mapper, expr);
-                    reason::mk_expression_reason(&untyped_expr)
+                    type_::ValueReference::Expression(Box::new(reason::mk_expression_reference(
+                        &untyped_expr,
+                    )))
                 }
-                None => type_util::reason_of_t(&t).dupe(),
+                None => type_::ValueReference::Reason(type_util::reason_of_t(&t).dupe()),
             },
         }));
         if !self.has_return_annot {

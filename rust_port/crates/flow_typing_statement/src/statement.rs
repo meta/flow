@@ -8242,8 +8242,10 @@ fn expression_<'a>(
             let yield_t = flow_typing_tvar::mk(cx, reason.dupe());
             let use_op = UseOp::Op(Arc::new(type_::RootUseOp::GeneratorYield {
                 value: match &inner.argument {
-                    Some(expr) => mk_expression_reason(expr),
-                    None => reason_of_t(&t).dupe(),
+                    Some(expr) => {
+                        type_::ValueReference::Expression(Box::new(mk_expression_reference(expr)))
+                    }
+                    None => type_::ValueReference::Reason(reason_of_t(&t).dupe()),
                 },
             }));
             // widen yield with the element type of the delegated-to iterable
@@ -20580,7 +20582,7 @@ pub fn mk_func_sig<'a>(
         (_, func::Kind::Ctor) => {
             let return_type = type_t_of_annotated_or_inferred(&return_t);
             let use_op = UseOp::Op(Arc::new(type_::RootUseOp::FunReturnStatement {
-                value: reason_of_t(return_type).dupe(),
+                value: type_::ValueReference::Reason(reason_of_t(return_type).dupe()),
             }));
             cx.add_post_inference_subtyping_check(
                 return_type.dupe(),

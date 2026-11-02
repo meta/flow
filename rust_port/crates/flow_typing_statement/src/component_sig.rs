@@ -126,9 +126,11 @@ pub mod component_declaration_body {
                         let mut mapper = typed_ast_utils::UntypedAstMapper;
                         let Ok(untyped_expr) =
                             polymorphic_ast_mapper::expression(&mut mapper, expr);
-                        reason::mk_expression_reason(&untyped_expr)
+                        type_::ValueReference::Expression(Box::new(
+                            reason::mk_expression_reference(&untyped_expr),
+                        ))
                     }
-                    None => type_util::reason_of_t(t).dupe(),
+                    None => type_::ValueReference::Reason(type_util::reason_of_t(t).dupe()),
                 },
             }));
             self.cx

@@ -125,8 +125,8 @@ enum TailCall {
 }
 
 fn upper_operation_reason_or<CX: ContextFamily>(u: &UseT<CX>, fallback: &Reason) -> Reason {
-    if let Some(reason) = use_op_of_use_t(u)
-        .and_then(|use_op| flow_js_utils::primary_reason_of_use_op(&use_op).map(|r| r.dupe()))
+    if let Some(reason) =
+        use_op_of_use_t(u).and_then(|use_op| flow_js_utils::primary_reason_of_use_op(&use_op))
     {
         return reason;
     }

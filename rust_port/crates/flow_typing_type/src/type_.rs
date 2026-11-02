@@ -1169,6 +1169,24 @@ pub enum AssignVarInit<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     Default(Box<AssignVarDefaultData<L>>),
 }
 
+/// A value that a root use-op describes: the expression that produces it, or the reason of the
+/// value when there is no such expression, as in `return;`.
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    serde::Serialize,
+    serde::Deserialize
+)]
+pub enum ValueReference<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
+    Expression(Box<ExpressionReferenceData<L>>),
+    Reason(VirtualReason<L>),
+}
+
 /// Compared by location only: the type is what the error prints, and must not tell apart errors
 /// that are otherwise the same.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -1811,11 +1829,11 @@ pub enum VirtualRootUseOp<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     FunCall(Box<FunCallData<L>>),
     FunCallMethod(Box<FunCallMethodData<L>>),
     FunReturnStatement {
-        value: VirtualReason<L>,
+        value: ValueReference<L>,
     },
     FunImplicitReturn(Box<FunImplicitReturnData<L>>),
     GeneratorYield {
-        value: VirtualReason<L>,
+        value: ValueReference<L>,
     },
     GetExport(VirtualReason<L>),
     GetProperty(VirtualReason<L>),
