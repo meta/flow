@@ -13,7 +13,10 @@ echo {} > package.json
 printf "\nAdd trivial error to file.js:\n"
 echo "0 as 1;" > file.js
 
-assert_ok "$FLOW" force-recheck --focus --no-auto-start package.json file.js
+# Server dies on incompatible package.json change, so force-recheck may or
+# may not return successfully depending on whether the response reaches the
+# client before the server exits. Ignore the exit code.
+"$FLOW" force-recheck --focus --no-auto-start package.json file.js || true
 
 # sleep added to ensure server has died
 sleep 2
