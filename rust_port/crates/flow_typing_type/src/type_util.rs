@@ -1394,7 +1394,7 @@ where
             })),
             PositiveTypeGuardConsistency(box PositiveTypeGuardConsistencyData {
                 reason,
-                return_reason,
+                return_expression: ExpressionReferenceData { loc, kind },
                 param_loc,
                 param_name,
                 guard_type_reference_loc,
@@ -1402,7 +1402,7 @@ where
                 is_return_false_statement,
             }) => PositiveTypeGuardConsistency(Box::new(PositiveTypeGuardConsistencyData {
                 reason: mod_reason(reason),
-                return_reason: mod_reason(return_reason),
+                return_expression: ExpressionReferenceData { loc: f(loc), kind },
                 param_loc: f(param_loc),
                 param_name,
                 guard_type_reference_loc: f(guard_type_reference_loc),

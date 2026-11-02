@@ -13,6 +13,7 @@ use dupe::Dupe;
 use flow_aloc::ALoc;
 use flow_common::reason::Reason;
 use flow_common::reason::VirtualReasonDesc::*;
+use flow_common::reason::mk_expression_reference;
 use flow_common::reason::mk_reason;
 use flow_env_builder::env_api;
 use flow_env_builder::env_api::AssertionConsistencyInfo;
@@ -138,7 +139,7 @@ fn check_type_guard_consistency<'cx>(
                                         guard_type: flow_js_utils::type_or_type_desc_for_error(
                                             type_guard,
                                         ),
-                                        return_reason: return_reason.dupe(),
+                                        return_expression: mk_expression_reference(ret_expr),
                                         is_return_false_statement,
                                     },
                                 )),

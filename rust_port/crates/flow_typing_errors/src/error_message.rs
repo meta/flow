@@ -4589,7 +4589,10 @@ fn map_loc_of_explanation<L: Dupe, M: Dupe, F: Fn(&L) -> M>(
             guard_type,
             is_return_false_statement,
         } => Explanation::ExplanationTypeGuardPositiveConsistency {
-            return_: map_reason(return_),
+            return_: ExpressionReferenceData {
+                loc: f(&return_.loc),
+                kind: return_.kind,
+            },
             param: TypeGuardReferenceData {
                 loc: f(&param.loc),
                 kind: param.kind,
@@ -7156,7 +7159,7 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                     VirtualRootUseOp::PositiveTypeGuardConsistency(
                         box PositiveTypeGuardConsistencyData {
                             reason,
-                            return_reason,
+                            return_expression,
                             param_loc,
                             param_name,
                             guard_type_reference_loc,
@@ -7167,7 +7170,7 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                         VirtualUseOp::Op(Arc::new(VirtualRootUseOp::PositiveTypeGuardConsistency(
                             Box::new(PositiveTypeGuardConsistencyData {
                                 reason: reason.dupe(),
-                                return_reason: return_reason.dupe(),
+                                return_expression: return_expression.clone(),
                                 param_loc: param_loc.dupe(),
                                 param_name: param_name.dupe(),
                                 guard_type_reference_loc: guard_type_reference_loc.dupe(),

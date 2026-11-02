@@ -1320,7 +1320,7 @@ pub struct ComponentRestParamCompatibilityData<L: Dupe + PartialEq + Eq + Partia
 )]
 pub struct PositiveTypeGuardConsistencyData<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     pub reason: VirtualReason<L>,
-    pub return_reason: VirtualReason<L>,
+    pub return_expression: ExpressionReferenceData<L>,
     pub param_loc: L,
     pub param_name: FlowSmolStr,
     pub guard_type_reference_loc: L,

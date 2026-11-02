@@ -2281,7 +2281,7 @@ where
 
                             VirtualRootUseOp::PositiveTypeGuardConsistency(
                                 box PositiveTypeGuardConsistencyData {
-                                    return_reason,
+                                    return_expression,
                                     param_loc,
                                     param_name,
                                     guard_type_reference_loc,
@@ -2293,7 +2293,7 @@ where
                                 let (all_frames, mut explanations) = frames;
                                 explanations.push(
                                     Explanation::ExplanationTypeGuardPositiveConsistency {
-                                        return_: return_reason.dupe(),
+                                        return_: return_expression.clone(),
                                         param: TypeGuardReferenceData {
                                             loc: param_loc.dupe(),
                                             kind: if param_name == "this" {
@@ -2311,12 +2311,12 @@ where
                                         is_return_false_statement: *is_return_false_statement,
                                     },
                                 );
-                                root(
+                                root_at_loc(
                                     loc,
                                     (all_frames, explanations),
-                                    return_reason,
-                                    RootMessage::RootCannotReturn(ValueDesc::Reason(
-                                        return_reason.desc.clone(),
+                                    loc_of_aloc(&return_expression.loc),
+                                    RootMessage::RootCannotReturn(ValueDesc::Expression(
+                                        return_expression.kind.dupe(),
                                     )),
                                     custom_error_message,
                                 )
@@ -4623,7 +4623,7 @@ where
                     text("The type of "),
                     type_guard_reference(param),
                     text(" at the return expression "),
-                    ref_(return_),
+                    hardcoded_string_desc_ref(&expression_description(&return_.kind), &return_.loc),
                     text(" needs to be compatible with the guard type "),
                     ref_of_type_desc(&guard_type.loc, &guard_type.desc),
                     text("."),

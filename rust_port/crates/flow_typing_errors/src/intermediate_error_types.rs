@@ -1155,7 +1155,7 @@ pub enum Explanation<L: Dupe> {
     ExplanationReactHookIncompatibleWithNormalFunctions,
     ExplanationReactHookReturnDeepReadOnly(L),
     ExplanationTypeGuardPositiveConsistency {
-        return_: VirtualReason<L>,
+        return_: ExpressionReferenceData<L>,
         param: TypeGuardReferenceData<L>,
         guard_type: MessageTypeReferenceData<L>,
         is_return_false_statement: bool,
