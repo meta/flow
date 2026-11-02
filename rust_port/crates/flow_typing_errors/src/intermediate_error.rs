@@ -2406,17 +2406,19 @@ where
                             ) =>
                     {
                         let fun_param_root =
-                            |args: &[VirtualReason<L>],
+                            |args: &[ValueReference<L>],
                              fn_: CalleeDesc<L>,
                              frames: (Vec<ErrorFrame<L>>, Vec<Explanation<L>>),
                              custom_error_message: Option<Message<L>>| {
                                 // Get the actual argument at position n-1, or fallback to the
                                 // type of lower_prime
-                                let (lower, lower_desc) = if (*n as usize) <= args.len() {
-                                    let arg = &args[(*n as usize) - 1];
-                                    (arg, ValueDesc::Reason(arg.desc.clone()))
+                                let (lower_loc, lower_desc) = if (*n as usize) <= args.len() {
+                                    value_desc_of_reference(&args[(*n as usize) - 1])
                                 } else {
-                                    (lower_prime, ValueDesc::Type(printed_type_desc(lower_t)))
+                                    (
+                                        &lower_prime.loc,
+                                        ValueDesc::Type(printed_type_desc(lower_t)),
+                                    )
                                 };
 
                                 let root_msg = match name {
@@ -2431,7 +2433,13 @@ where
                                         n: *n,
                                     },
                                 };
-                                root(loc.dupe(), frames, lower, root_msg, custom_error_message)
+                                root_at_loc(
+                                    loc.dupe(),
+                                    frames,
+                                    loc_of_aloc(lower_loc),
+                                    root_msg,
+                                    custom_error_message,
+                                )
                             };
                         match op_rc.as_ref() {
                             VirtualRootUseOp::FunCall(box FunCallData { args, fn_, .. }) => {

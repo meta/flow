@@ -1865,15 +1865,15 @@ pub fn mk_typed_expression_reason<M: Dupe + PartialEq, T: Dupe>(
     }
 }
 
-pub fn mk_initial_arguments_reason<M: Dupe + PartialEq, T: Dupe + PartialEq>(
+pub fn mk_initial_arguments_reference<M: Dupe, T: Dupe>(
     arg_list: &ast::expression::ArgList<M, T>,
-) -> Vec<VirtualReason<T>> {
+) -> Vec<ExpressionReferenceData<T>> {
     use ast::expression::ExpressionOrSpread;
     let mut result = Vec::new();
     for arg in arg_list.arguments.iter() {
         match arg {
             ExpressionOrSpread::Expression(expr) => {
-                result.push(mk_expression_reason(expr));
+                result.push(mk_expression_reference(expr));
             }
             ExpressionOrSpread::Spread(_) => {
                 // Stop collecting at spread

@@ -888,7 +888,7 @@ pub fn resolve_pred_func<'cx>(
             type_::FunCallData {
                 op: reason::mk_expression_reason(&info.call_expr),
                 fn_: reason::mk_expression_reason(&info.callee),
-                args: reason::mk_initial_arguments_reason(&info.arguments).into(),
+                args: statement::initial_argument_references(&info.arguments),
                 implicit_instantiation_reference: type_::ImplicitInstantiationReferenceKind::Call(
                     Some(reason::code_desc_of_expression(false, &info.callee).into()),
                 ),

@@ -1229,7 +1229,7 @@ where
                 local,
                 op: mod_reason(op),
                 fn_: mod_reason(fn_),
-                args: args.iter().map(|a| mod_reason(a.dupe())).collect(),
+                args: args.iter().map(|a| mod_value(a.clone())).collect(),
                 implicit_instantiation_reference,
             })),
             FunCallMethod(box FunCallMethodData {
@@ -1249,7 +1249,7 @@ where
                     FunCallMethodCallee::Method(name) => FunCallMethodCallee::Method(name),
                 },
                 prop: mod_reason(prop),
-                args: args.iter().map(|a| mod_reason(a.dupe())).collect(),
+                args: args.iter().map(|a| mod_value(a.clone())).collect(),
                 implicit_instantiation_reference,
             })),
             FunReturnStatement { value } => FunReturnStatement {

@@ -1000,7 +1000,7 @@ pub enum ImplicitInstantiationReferenceKind {
 pub struct FunCallData<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     pub op: VirtualReason<L>,
     pub fn_: VirtualReason<L>,
-    pub args: Arc<[VirtualReason<L>]>,
+    pub args: Arc<[ValueReference<L>]>,
     pub implicit_instantiation_reference: ImplicitInstantiationReferenceKind,
     pub local: bool,
 }
@@ -1054,7 +1054,7 @@ pub struct FunCallMethodData<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     pub op: VirtualReason<L>,
     pub fn_: FunCallMethodCallee<L>,
     pub prop: VirtualReason<L>,
-    pub args: Arc<[VirtualReason<L>]>,
+    pub args: Arc<[ValueReference<L>]>,
     pub implicit_instantiation_reference: ImplicitInstantiationReferenceKind,
     pub local: bool,
 }

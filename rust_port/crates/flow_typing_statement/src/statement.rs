@@ -35,7 +35,7 @@ use flow_common::reason::mk_annot_reason;
 use flow_common::reason::mk_expression_reason;
 use flow_common::reason::mk_expression_reference;
 use flow_common::reason::mk_id;
-use flow_common::reason::mk_initial_arguments_reason;
+use flow_common::reason::mk_initial_arguments_reference;
 use flow_common::reason::mk_obj_lit_reason;
 use flow_common::reason::mk_pattern_reason;
 use flow_common::reason::mk_reason;
@@ -7542,7 +7542,8 @@ fn expression_<'a>(
                         UseOp::Op(Arc::new(type_::RootUseOp::FunCall(Box::new(FunCallData {
                             op: reason.dupe(),
                             fn_: reason_of_t(&id_t).dupe(),
-                            args: vec![reason_of_t(&arg_t).dupe()].into(),
+                            args: vec![type_::ValueReference::Reason(reason_of_t(&arg_t).dupe())]
+                                .into(),
                             implicit_instantiation_reference:
                                 ImplicitInstantiationReferenceKind::Constructor(Some(n.dupe())),
                             local: true,
@@ -7591,19 +7592,19 @@ fn expression_<'a>(
             let callee_ast = expression(None, None, None, cx, &inner.callee)?;
             let class_ = callee_ast.loc().1.dupe();
             let (targts, targs_ast) = convert_call_targs_opt(cx, inner.targs.as_ref())?;
-            let (argts, args_reasons, arguments_ast) = match &inner.arguments {
+            let (argts, args_references, arguments_ast) = match &inner.arguments {
                 Some(arguments) => {
                     let (argst, arguments_ast) = arg_list(cx, arguments)?;
-                    let args_reasons = mk_initial_arguments_reason(arguments);
-                    (argst, args_reasons, Some(arguments_ast))
+                    let args_references = initial_argument_references(arguments);
+                    (argst, args_references, Some(arguments_ast))
                 }
-                None => (vec![], vec![], None),
+                None => (vec![], Arc::from([]), None),
             };
             let reason = mk_reason(None, loc.dupe());
             let use_op = UseOp::Op(Arc::new(type_::RootUseOp::FunCall(Box::new(FunCallData {
                 op: mk_expression_reason(e),
                 fn_: mk_expression_reason(&inner.callee),
-                args: args_reasons.into(),
+                args: args_references,
                 implicit_instantiation_reference: ImplicitInstantiationReferenceKind::Constructor(
                     Some(code_desc_of_expression(false, &inner.callee).into()),
                 ),
@@ -9097,7 +9098,7 @@ pub fn optional_chain<'a>(
                                     &inner.callee,
                                 )),
                                 prop: reason_prop.dupe(),
-                                args: mk_initial_arguments_reason(&inner.arguments).into(),
+                                args: initial_argument_references(&inner.arguments),
                                 implicit_instantiation_reference:
                                     ImplicitInstantiationReferenceKind::Method(Some(id.name.dupe())),
                                 local: true,
@@ -9189,7 +9190,7 @@ pub fn optional_chain<'a>(
                             UseOp::Op(Arc::new(type_::RootUseOp::FunCall(Box::new(FunCallData {
                                 op: mk_expression_reason(ex),
                                 fn_: mk_expression_reason(&inner.callee),
-                                args: mk_initial_arguments_reason(&inner.arguments).into(),
+                                args: initial_argument_references(&inner.arguments),
                                 implicit_instantiation_reference:
                                     ImplicitInstantiationReferenceKind::SuperCall,
                                 local: true,
@@ -10186,7 +10187,7 @@ pub fn optional_chain<'a>(
                             op: expr_reason.dupe(),
                             fn_: FunCallMethodCallee::Reason(mk_expression_reason(orig_receiver)),
                             prop: reason_prop.dupe(),
-                            args: mk_initial_arguments_reason(arguments).into(),
+                            args: initial_argument_references(arguments),
                             implicit_instantiation_reference:
                                 ImplicitInstantiationReferenceKind::Method(Some(name_str.dupe())),
                             local: true,
@@ -10439,7 +10440,7 @@ pub fn optional_chain<'a>(
                             op: expr_reason.dupe(),
                             fn_: FunCallMethodCallee::Reason(mk_expression_reason(orig_receiver)),
                             prop: mk_expression_reason(prop_expr),
-                            args: mk_initial_arguments_reason(arguments).into(),
+                            args: initial_argument_references(arguments),
                             implicit_instantiation_reference:
                                 ImplicitInstantiationReferenceKind::Method(None),
                             local: true,
@@ -10625,7 +10626,7 @@ pub fn optional_chain<'a>(
             let use_op = UseOp::Op(Arc::new(type_::RootUseOp::FunCall(Box::new(FunCallData {
                 op: mk_expression_reason(ex),
                 fn_: mk_expression_reason(callee),
-                args: mk_initial_arguments_reason(arguments).into(),
+                args: initial_argument_references(arguments),
                 implicit_instantiation_reference: ImplicitInstantiationReferenceKind::Call(Some(
                     code_desc_of_expression(false, callee).into(),
                 )),
@@ -10782,6 +10783,16 @@ pub fn optional_chain<'a>(
         return Err(AbnormalControlFlow(abnormal_loc, result.2).into());
     }
     Ok(result)
+}
+
+/// The arguments of a call, up to the first spread, as a call use-op describes them.
+pub fn initial_argument_references(
+    args: &expression::ArgList<ALoc, ALoc>,
+) -> Arc<[type_::ValueReference<ALoc>]> {
+    mk_initial_arguments_reference(args)
+        .into_iter()
+        .map(|arg| type_::ValueReference::Expression(Box::new(arg)))
+        .collect()
 }
 
 fn arg_list<'a>(
@@ -14334,7 +14345,7 @@ fn static_method_call_object<'a>(
             op: reason.dupe(),
             fn_: FunCallMethodCallee::Method(m.dupe()),
             prop: mk_reason(RProperty(Some(Name::new(m.dupe()))), prop_loc.dupe()),
-            args: mk_initial_arguments_reason(args).into(),
+            args: initial_argument_references(args),
             implicit_instantiation_reference: ImplicitInstantiationReferenceKind::Method(Some(
                 m.dupe(),
             )),
@@ -15066,7 +15077,7 @@ fn static_method_call_object<'a>(
                     op: method_reason.dupe(),
                     fn_: FunCallMethodCallee::Method(m.dupe()),
                     prop: mk_reason(RProperty(Some(Name::new(m.dupe()))), prop_loc.dupe()),
-                    args: mk_initial_arguments_reason(args).into(),
+                    args: initial_argument_references(args),
                     implicit_instantiation_reference: ImplicitInstantiationReferenceKind::Method(
                         Some(m.dupe()),
                     ),
