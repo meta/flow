@@ -5348,7 +5348,7 @@ fn __flow_impl<'cx>(
                     Arc::new(FrameUseOp::StandaloneCallThis(Box::new(
                         StandaloneCallThisData {
                             op: data.op.dupe(),
-                            fn_: data.fn_.dupe(),
+                            fn_: data.fn_.clone(),
                             receiver_loc: type_util::ref_loc_of_t(o1).dupe(),
                             receiver: Box::new(TypeOrTypeDescT::Type(o1.dupe())),
                         },

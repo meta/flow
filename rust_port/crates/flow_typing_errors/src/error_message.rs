@@ -7220,7 +7220,7 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                         }) => Arc::new(VirtualFrameUseOp::StandaloneCallThis(Box::new(
                             StandaloneCallThisData {
                                 op: op.dupe(),
-                                fn_: fn_.dupe(),
+                                fn_: fn_.clone(),
                                 receiver_loc: receiver_loc.dupe(),
                                 receiver: Box::new(f(receiver.clone())),
                             },

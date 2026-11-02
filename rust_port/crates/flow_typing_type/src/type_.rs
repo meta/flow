@@ -999,7 +999,7 @@ pub enum ImplicitInstantiationReferenceKind {
 )]
 pub struct FunCallData<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     pub op: VirtualReason<L>,
-    pub fn_: VirtualReason<L>,
+    pub fn_: ValueReference<L>,
     pub args: Arc<[ValueReference<L>]>,
     pub implicit_instantiation_reference: ImplicitInstantiationReferenceKind,
     pub local: bool,
@@ -1018,7 +1018,7 @@ pub struct FunCallData<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
 )]
 pub struct StandaloneCallThisData<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     pub op: VirtualReason<L>,
-    pub fn_: VirtualReason<L>,
+    pub fn_: ValueReference<L>,
     pub receiver_loc: L,
     pub receiver: Box<type_or_type_desc::TypeOrTypeDescT<L>>,
 }

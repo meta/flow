@@ -1234,7 +1234,7 @@ where
             }) => FunCall(Box::new(FunCallData {
                 local,
                 op: mod_reason(op),
-                fn_: mod_reason(fn_),
+                fn_: mod_value(fn_),
                 args: args.iter().map(|a| mod_value(a.clone())).collect(),
                 implicit_instantiation_reference,
             })),
@@ -1474,7 +1474,15 @@ where
                 receiver: box receiver,
             }) => StandaloneCallThis(Box::new(StandaloneCallThisData {
                 op: mod_reason(op),
-                fn_: mod_reason(fn_),
+                fn_: match fn_ {
+                    ValueReference::Expression(box ExpressionReferenceData { loc, kind }) => {
+                        ValueReference::Expression(Box::new(ExpressionReferenceData {
+                            loc: f(loc),
+                            kind,
+                        }))
+                    }
+                    ValueReference::Reason(reason) => ValueReference::Reason(mod_reason(reason)),
+                },
                 receiver_loc: f(receiver_loc),
                 receiver: Box::new(type_or_type_desc::map_loc(|l: &L| f(l.dupe()), receiver)),
             })),

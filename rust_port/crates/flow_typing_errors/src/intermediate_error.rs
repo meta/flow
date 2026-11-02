@@ -847,6 +847,19 @@ fn method_callee_desc<L: Dupe + PartialEq + Eq + PartialOrd + Ord>(
     }
 }
 
+/// The location of a called value, and its description.
+fn callee_desc_of_reference<L: Dupe + PartialEq + Eq + PartialOrd + Ord>(
+    fn_: &ValueReference<L>,
+) -> (&L, CalleeDesc<L>) {
+    match fn_ {
+        ValueReference::Expression(expression) => (
+            &expression.loc,
+            CalleeDesc::Expression(expression.kind.dupe()),
+        ),
+        ValueReference::Reason(reason) => (&reason.loc, CalleeDesc::Reason(reason.desc.clone())),
+    }
+}
+
 /// The location of a referenced value, and its description.
 fn value_desc_of_reference<L: Dupe + PartialEq + Eq + PartialOrd + Ord>(
     value: &ValueReference<L>,
@@ -1901,8 +1914,9 @@ where
                             ),
 
                             VirtualRootUseOp::FunCall(box FunCallData { op, fn_, .. }) => {
+                                let (fn_loc, fn_) = callee_desc_of_reference(fn_);
                                 let root_loc = loc_of_aloc(&op.loc);
-                                let specific_loc = loc_of_aloc(&fn_.loc);
+                                let specific_loc = loc_of_aloc(fn_loc);
 
                                 let final_loc = if root_loc.contains(&loc) && root_loc != loc {
                                     loc
@@ -1912,12 +1926,7 @@ where
 
                                 let (all_frames, explanations) = frames;
                                 (
-                                    Some((
-                                        root_loc,
-                                        RootMessage::RootCannotCall(CalleeDesc::Reason(
-                                            fn_.desc.clone(),
-                                        )),
-                                    )),
+                                    Some((root_loc, RootMessage::RootCannotCall(fn_))),
                                     custom_error_message,
                                     final_loc,
                                     all_frames,
@@ -2452,7 +2461,7 @@ where
                             VirtualRootUseOp::FunCall(box FunCallData { args, fn_, .. }) => {
                                 fun_param_root(
                                     args,
-                                    CalleeDesc::Reason(fn_.desc.clone()),
+                                    callee_desc_of_reference(fn_).1,
                                     frames,
                                     custom_error_message,
                                 )
@@ -2537,11 +2546,12 @@ where
                             receiver_loc,
                             receiver: box receiver,
                         }) => {
+                            let (fn_loc, fn_) = callee_desc_of_reference(fn_);
                             let (all_frames, explanations) = frames;
                             (
                                 Some((
                                     loc_of_aloc(&op.loc),
-                                    RootMessage::RootCannotCallStandalone(fn_.desc.clone()),
+                                    RootMessage::RootCannotCallStandalone(fn_),
                                 )),
                                 Some(Message::MessageStandaloneCallRequiresReceiver(
                                     MessageTypeReferenceData {
@@ -2549,7 +2559,7 @@ where
                                         desc: printed_type_desc(receiver),
                                     },
                                 )),
-                                loc_of_aloc(&fn_.loc),
+                                loc_of_aloc(fn_loc),
                                 all_frames,
                                 explanations,
                             )
@@ -4524,6 +4534,7 @@ where
 
     let desc_of_callee_desc = |fn_: &CalleeDesc<L>| match fn_ {
         CalleeDesc::Reason(desc) => friendly::desc_of_reason_desc(desc.as_ref()),
+        CalleeDesc::Expression(kind) => desc_of_expression(kind),
         CalleeDesc::Method(name) => friendly::MessageFeature::Inline(
             friendly::message_inlines_of_string(&format!("method `{name}`")),
         ),
@@ -5451,7 +5462,7 @@ where
                     RootKind::OperationRoot,
                     friendly::Message(vec![
                         text("Cannot call "),
-                        friendly::desc_of_reason_desc(fn_.as_ref()),
+                        desc_of_callee_desc(fn_),
                         text(" as a standalone function"),
                     ]),
                 ),

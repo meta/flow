@@ -889,7 +889,9 @@ pub fn resolve_pred_func<'cx>(
         let use_op = type_::VirtualUseOp::Op(Arc::new(type_::VirtualRootUseOp::FunCall(Box::new(
             type_::FunCallData {
                 op: reason::mk_expression_reason(&info.call_expr),
-                fn_: reason::mk_expression_reason(&info.callee),
+                fn_: type_::ValueReference::Expression(Box::new(reason::mk_expression_reference(
+                    &info.callee,
+                ))),
                 args: statement::initial_argument_references(&info.arguments),
                 implicit_instantiation_reference: type_::ImplicitInstantiationReferenceKind::Call(
                     Some(reason::code_desc_of_expression(false, &info.callee).into()),

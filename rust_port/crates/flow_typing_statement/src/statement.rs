@@ -7545,7 +7545,7 @@ fn expression_<'a>(
                     let use_op =
                         UseOp::Op(Arc::new(type_::RootUseOp::FunCall(Box::new(FunCallData {
                             op: reason.dupe(),
-                            fn_: reason_of_t(&id_t).dupe(),
+                            fn_: type_::ValueReference::Reason(reason_of_t(&id_t).dupe()),
                             args: vec![type_::ValueReference::Reason(reason_of_t(&arg_t).dupe())]
                                 .into(),
                             implicit_instantiation_reference:
@@ -7607,7 +7607,9 @@ fn expression_<'a>(
             let reason = mk_reason(None, loc.dupe());
             let use_op = UseOp::Op(Arc::new(type_::RootUseOp::FunCall(Box::new(FunCallData {
                 op: mk_expression_reason(e),
-                fn_: mk_expression_reason(&inner.callee),
+                fn_: type_::ValueReference::Expression(Box::new(mk_expression_reference(
+                    &inner.callee,
+                ))),
                 args: args_references,
                 implicit_instantiation_reference: ImplicitInstantiationReferenceKind::Constructor(
                     Some(code_desc_of_expression(false, &inner.callee).into()),
@@ -8016,7 +8018,9 @@ fn expression_<'a>(
             );
             let use_op = UseOp::Op(Arc::new(type_::RootUseOp::FunCall(Box::new(FunCallData {
                 op: mk_expression_reason(e),
-                fn_: mk_expression_reason(&inner.tag),
+                fn_: type_::ValueReference::Expression(Box::new(mk_expression_reference(
+                    &inner.tag,
+                ))),
                 args: vec![].into(),
                 implicit_instantiation_reference: ImplicitInstantiationReferenceKind::Call(Some(
                     code_desc_of_expression(false, &inner.tag).into(),
@@ -9193,7 +9197,9 @@ pub fn optional_chain<'a>(
                         let use_op =
                             UseOp::Op(Arc::new(type_::RootUseOp::FunCall(Box::new(FunCallData {
                                 op: mk_expression_reason(ex),
-                                fn_: mk_expression_reason(&inner.callee),
+                                fn_: type_::ValueReference::Expression(Box::new(
+                                    mk_expression_reference(&inner.callee),
+                                )),
                                 args: initial_argument_references(&inner.arguments),
                                 implicit_instantiation_reference:
                                     ImplicitInstantiationReferenceKind::SuperCall,
@@ -10629,7 +10635,7 @@ pub fn optional_chain<'a>(
             let (targts, typed_targs) = convert_call_targs_opt(cx, targs.as_ref())?;
             let use_op = UseOp::Op(Arc::new(type_::RootUseOp::FunCall(Box::new(FunCallData {
                 op: mk_expression_reason(ex),
-                fn_: mk_expression_reason(callee),
+                fn_: type_::ValueReference::Expression(Box::new(mk_expression_reference(callee))),
                 args: initial_argument_references(arguments),
                 implicit_instantiation_reference: ImplicitInstantiationReferenceKind::Call(Some(
                     code_desc_of_expression(false, callee).into(),

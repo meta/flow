@@ -1289,6 +1289,7 @@ pub enum ValueDesc<L: Dupe> {
 )]
 pub enum CalleeDesc<L: Dupe> {
     Reason(Option<VirtualReasonDesc<L>>),
+    Expression(ExpressionReferenceKind),
     Method(FlowSmolStr),
 }
 
@@ -1314,7 +1315,7 @@ pub enum RootMessage<L: Dupe> {
         target: Option<AssignTargetDesc<L>>,
     },
     RootCannotCall(CalleeDesc<L>),
-    RootCannotCallStandalone(Option<VirtualReasonDesc<L>>),
+    RootCannotCallStandalone(CalleeDesc<L>),
     RootCannotCallWithNamedParam {
         fn_: CalleeDesc<L>,
         lower: ValueDesc<L>,
