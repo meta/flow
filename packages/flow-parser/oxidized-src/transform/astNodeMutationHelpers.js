@@ -151,7 +151,9 @@ export function setParentPointersInDirectChildren(
       node[key].parent = node;
     } else if (Array.isArray(node[key])) {
       for (const child of node[key]) {
-        child.parent = node;
+        if (child != null) {
+          child.parent = node;
+        }
       }
     }
   }

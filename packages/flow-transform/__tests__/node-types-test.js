@@ -40,6 +40,39 @@ describe('generated node builders', () => {
     expect(operator).toHaveProperty('typeAnnotation.parent', operator); // OK
   });
 
+  // Sparse-array builders preserve holes and parent only the existing nodes.
+  test('builds array expressions with null holes', () => {
+    const array = t.ArrayExpression({
+      elements: [
+        t.NumericLiteral({value: 1, raw: '1'}),
+        null,
+        t.SpreadElement({argument: t.Identifier({name: 'rest'})}),
+      ],
+      trailingComma: false,
+    });
+    expect(array).toMatchObject({
+      type: 'ArrayExpression',
+      elements: [{type: 'Literal', value: 1}, null, {type: 'SpreadElement'}],
+    }); // OK
+    expect(array).toHaveProperty('elements.0.parent', array); // OK
+    expect(array).toHaveProperty('elements.2.parent', array); // OK
+  });
+
+  // Destructuring-array builders preserve the same null-hole representation.
+  test('builds array patterns with null holes', () => {
+    const array = t.ArrayPattern({
+      elements: [
+        t.Identifier({name: 'first'}),
+        null,
+        t.Identifier({name: 'last'}),
+      ],
+      typeAnnotation: null,
+    });
+    expect(array).toHaveProperty('elements.1', null); // OK
+    expect(array).toHaveProperty('elements.0.parent', array); // OK
+    expect(array).toHaveProperty('elements.2.parent', array); // OK
+  });
+
   // Nullable field values remain null; annotated values still gain a parent.
   test('builds object type properties with and without annotations', () => {
     const unannotated = t.ObjectTypePropertySignature({

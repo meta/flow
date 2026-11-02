@@ -516,7 +516,7 @@ export interface ThisExpression extends BaseNode {
 
 export interface ArrayExpression extends BaseNode {
   readonly type: 'ArrayExpression';
-  readonly elements: ReadonlyArray<Expression | SpreadElement>;
+  readonly elements: ReadonlyArray<Expression | SpreadElement | null>;
   // this is not part of the ESTree spec, but hermes emits it
   readonly trailingComma: boolean;
 }

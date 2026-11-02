@@ -15,6 +15,32 @@ import type {ScopeManager} from '../src/scope-manager/ScopeManager';
 import {parseForESLint} from '../src';
 import {DefinitionType, ScopeType} from '../src';
 import {verifyHasScopes} from '../__test_utils__/verifyHasScopes';
+import {PatternVisitor} from '../src/scope-manager/referencer/PatternVisitor';
+
+// Pattern traversal visits sparse-array identifiers without treating holes as nodes.
+test('pattern visitor accepts sparse array expressions', () => {
+  const {ast} = parseForESLint('const value = [first,,...rest];');
+  const declaration = ast.body[0];
+  if (declaration.type !== 'VariableDeclaration') {
+    throw new Error('Expected a variable declaration');
+  }
+  const array = declaration.declarations[0].init;
+  if (array?.type !== 'ArrayExpression') {
+    throw new Error('Expected an array expression');
+  }
+  const names = [];
+  const visitor = new PatternVisitor(
+    {},
+    array,
+    identifier => {
+      names.push(identifier.name);
+    },
+    () => {},
+  );
+  visitor.visit(array);
+  expect(names).toEqual(['first', 'rest']); // OK
+  expect(array.elements[1]).toBeNull(); // OK
+});
 
 describe('Source type option', () => {
   test('script', () => {

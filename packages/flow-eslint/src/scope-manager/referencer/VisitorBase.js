@@ -25,7 +25,7 @@ function isNode(node: unknown) /*: implies node is {readonly [string]: unknown} 
   );
 }
 type NodeChildValue = string | boolean | number | ESNode;
-type NodeChildValueOrArray = NodeChildValue | ReadonlyArray<NodeChildValue>;
+type NodeChildValueOrArray = NodeChildValue | ReadonlyArray<?NodeChildValue>;
 
 /* abstract */ class VisitorBase {
   readonly _childVisitorKeys: VisitorKeysType;
@@ -87,7 +87,7 @@ type NodeChildValueOrArray = NodeChildValue | ReadonlyArray<NodeChildValue>;
     this.visitChildren(node);
   }
 
-  visitArray: (?ReadonlyArray<ESNode>) => void = (arr): void => {
+  visitArray: (?ReadonlyArray<?ESNode>) => void = (arr): void => {
     if (arr == null) {
       return;
     }
