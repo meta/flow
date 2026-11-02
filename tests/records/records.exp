@@ -279,8 +279,8 @@ Operation mapped type [1] is not allowed on record `R` [2]. To fix, turn the rec
                              ^ [2]
 
 References:
-   <BUILTINS>/lib.es5.js:1533:5
-   1533|     [P in K]: T[P];
+   <BUILTINS>/lib.es5.js:1537:5
+   1537|     [P in K]: T[P];
              ^^^^^^^^^^^^^^ [1]
 
 
@@ -294,8 +294,8 @@ Operation `Omit` [1] is not allowed on record `R` [2]. To fix, turn the record t
                              ^ [2]
 
 References:
-   <BUILTINS>/lib.es5.js:1556:40
-   1556| type Omit<T extends interface {}, K> = $Omit<T, K>;
+   <BUILTINS>/lib.es5.js:1560:40
+   1560| type Omit<T extends interface {}, K> = $Omit<T, K>;
                                                 ^^^^^^^^^^^ [1]
 
 

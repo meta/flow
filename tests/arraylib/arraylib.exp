@@ -53,8 +53,8 @@ References:
    array_lib.js:13:14
      13| var e: Array<string> = a.reverse();
                       ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1298:16
-   1298|     reverse(): T[];
+   <BUILTINS>/lib.es5.js:1300:16
+   1300|     reverse(): T[];
                         ^^^ [3]
    array_lib.js:13:8
      13| var e: Array<string> = a.reverse();
@@ -76,14 +76,14 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
                                 ^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1288:65
-   1288|     concat<S = T>(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
+   <BUILTINS>/lib.es5.js:1290:65
+   1290|     concat<S = T>(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
                                                                          ^^^^^ [1]
    array_lib.js:26:14
      26| var n: Array<number> = h.concat('a', 'b', 'c'); // Error
                       ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1288:59
-   1288|     concat<S = T>(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
+   <BUILTINS>/lib.es5.js:1290:59
+   1290|     concat<S = T>(...items: Array<ReadonlyArray<S> | S>): Array<T | S>;
                                                                    ^^^^^^^^^^^^ [3]
    array_lib.js:26:8
      26| var n: Array<number> = h.concat('a', 'b', 'c'); // Error
@@ -139,14 +139,14 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
            ^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1465:37
-   1465|     static from(str: string): Array<string>;
+   <BUILTINS>/lib.es5.js:1469:37
+   1469|     static from(str: string): Array<string>;
                                              ^^^^^^ [1]
    array_lib.js:71:31
      71|   Array.from('abcd') as Array<empty>; // ERROR
                                        ^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1465:31
-   1465|     static from(str: string): Array<string>;
+   <BUILTINS>/lib.es5.js:1469:31
+   1469|     static from(str: string): Array<string>;
                                        ^^^^^^^^^^^^^ [3]
    array_lib.js:71:25
      71|   Array.from('abcd') as Array<empty>; // ERROR
@@ -179,8 +179,8 @@ References:
    array_lib.js:75:20
      75|   const arrayLike: ArrayLike<string> = {0: 'hello', length: 1};
                             ^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/lib.es5.js:1460:31
-   1460|     static from<A, This>(str: string, mapFn: (this: This, elem: string, index: number) => A, thisArg: This): Array<A>;
+   <BUILTINS>/lib.es5.js:1464:31
+   1464|     static from<A, This>(str: string, mapFn: (this: This, elem: string, index: number) => A, thisArg: This): Array<A>;
                                        ^^^^^^ [5]
 
 
@@ -409,8 +409,8 @@ References:
    <BUILTINS>/lib.es5.js:473:22
     473|     readonly length: number;
                               ^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:1401:95
-   1401|     filter<This, S extends T>(predicate: (this: This, value: T, index: number, array: T[]) => implies value is S, thisArg: This): S[];
+   <BUILTINS>/lib.es5.js:1403:95
+   1403|     filter<This, S extends T>(predicate: (this: This, value: T, index: number, array: T[]) => implies value is S, thisArg: This): S[];
                                                                                                        ^^^^^^^^^^^^^^^^^^ [2]
    filter_error_msg_quality_test.js:2:30
       2| declare const str_arr: Array<string>;
@@ -443,8 +443,8 @@ References:
    filter_error_msg_quality_test.js:7:25
       7| nullable_str_arr.filter(s => !!s) as Array<string>;
                                  ^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:1395:23
-   1395|     filter(predicate: typeof Boolean): NonNullable<T>[];
+   <BUILTINS>/lib.es5.js:1397:23
+   1397|     filter(predicate: typeof Boolean): NonNullable<T>[];
                                ^^^^^^^^^^^^^^ [4]
 
 
@@ -824,6 +824,23 @@ References:
                ^ [2]
 
 
+Error ----------------------------------------------------------------------------------------------- issue_6656.js:2:36
+
+Cannot use operator `*` with operands `string` [1] and `number` [2] [unsafe-arithmetic]
+
+   issue_6656.js:2:36
+   2| const b = ["a", "b"].reduce(acc => acc * 2, 1.0 as any); // error: `any` matches the `initialValue: T` overload
+                                         ^^^^^^^
+
+References:
+   issue_6656.js:2:12
+   2| const b = ["a", "b"].reduce(acc => acc * 2, 1.0 as any); // error: `any` matches the `initialValue: T` overload
+                 ^^^ [1]
+   issue_6656.js:2:42
+   2| const b = ["a", "b"].reduce(acc => acc * 2, 1.0 as any); // error: `any` matches the `initialValue: T` overload
+                                               ^ [2]
+
+
 Error ---------------------------------------------------------------------------------------------------- length.js:7:3
 
 Cannot assign `6` to `r.length` because property `length` is not writable. [cannot-write]
@@ -1131,4 +1148,4 @@ References:
 
 
 
-Found 53 errors
+Found 54 errors

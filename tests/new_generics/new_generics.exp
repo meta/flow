@@ -1113,26 +1113,29 @@ References:
 Error ---------------------------------------------------------------------------------------------------- misc.js:68:28
 
 Cannot call `Object.keys(...).reduce` because: [incompatible-type]
- - Either object literal [1] is incompatible with `{...}` [2].
- - Or no more than 1 argument is expected by function type [3].
+ - Either in the return value: `{...}` [1] is incompatible with `empty` [2].
+ - Or object literal [3] is incompatible with `{...}` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    misc.js:68:28
-     68|   return Object.keys(data).reduce( // error: cannot satisfy generic mapped type
-                                    ^^^^^^
+   68|   return Object.keys(data).reduce( // error: cannot satisfy generic mapped type
+                                  ^^^^^^
 
 References:
+   misc.js:69:80
+   69|     <K extends keyof TFormData>(acc: {[K in keyof TFormData]: ?string}, k: K): {[K in keyof TFormData]: ?string} =>
+                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   misc.js:68:10
+   68|   return Object.keys(data).reduce( // error: cannot satisfy generic mapped type
+                ^^^^^^^^^^^^^^^^^ [2]
    misc.js:72:5
-     72|     {},
-             ^^ [1]
+   72|     {},
+           ^^ [3]
    misc.js:69:38
-     69|     <K extends keyof TFormData>(acc: {[K in keyof TFormData]: ?string}, k: K): {[K in keyof TFormData]: ?string} =>
-                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1412:5
-   1412|     reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T): T;
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   69|     <K extends keyof TFormData>(acc: {[K in keyof TFormData]: ?string}, k: K): {[K in keyof TFormData]: ?string} =>
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ---------------------------------------------------------------------------------------------------- misc.js:134:3
