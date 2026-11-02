@@ -2160,17 +2160,18 @@ where
                                 lhs,
                                 ..
                             }) => {
-                                let loc_reason = if loc_of_aloc(&lhs.loc).contains(&loc) {
-                                    &lhs
+                                let lhs_loc = loc_of_aloc(&lhs.loc);
+                                let root_loc = if lhs_loc.contains(&loc) {
+                                    lhs_loc
                                 } else {
-                                    &value
+                                    loc_of_aloc(&value.loc)
                                 };
-                                root(
+                                root_at_loc(
                                     loc,
                                     frames,
-                                    loc_reason,
+                                    root_loc,
                                     RootMessage::RootCannotAssign {
-                                        init: ValueDesc::Reason(value.desc.clone()),
+                                        init: ValueDesc::Expression(value.kind.dupe()),
                                         target: Some(AssignTargetDesc::Variable(prop.desc.clone())),
                                     },
                                     custom_error_message,

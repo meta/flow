@@ -1332,13 +1332,15 @@ where
             MakeReadOnly { loc: box loc } => MakeReadOnly {
                 loc: Box::new(f(loc)),
             },
-            SetProperty(box SetPropertyData { lhs, prop, value }) => {
-                SetProperty(Box::new(SetPropertyData {
-                    lhs: mod_reason(lhs),
-                    prop: mod_reason(prop),
-                    value: mod_reason(value),
-                }))
-            }
+            SetProperty(box SetPropertyData {
+                lhs,
+                prop,
+                value: ExpressionReferenceData { loc, kind },
+            }) => SetProperty(Box::new(SetPropertyData {
+                lhs: mod_reason(lhs),
+                prop: mod_reason(prop),
+                value: ExpressionReferenceData { loc: f(loc), kind },
+            })),
             UpdateProperty { lhs, prop } => UpdateProperty {
                 lhs: mod_reason(lhs),
                 prop: mod_reason(prop),

@@ -911,7 +911,7 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> Ord for FunImplicitReturnData<
 pub struct SetPropertyData<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     pub lhs: VirtualReason<L>,
     pub prop: VirtualReason<L>,
-    pub value: VirtualReason<L>,
+    pub value: ExpressionReferenceData<L>,
 }
 
 #[derive(

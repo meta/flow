@@ -12183,7 +12183,7 @@ fn simple_assignment<'a>(
                             type_::SetPropertyData {
                                 lhs: lhs_r,
                                 prop,
-                                value: mk_expression_reason(rhs),
+                                value: mk_expression_reference(rhs),
                             },
                         ))))
                     };
