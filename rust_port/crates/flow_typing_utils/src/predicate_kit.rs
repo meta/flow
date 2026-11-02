@@ -30,6 +30,7 @@ use flow_typing_flow_common::flow_js_utils::FlowJsException;
 use flow_typing_flow_common::obj_type;
 use flow_typing_flow_js::flow_js;
 use flow_typing_flow_js::flow_js::FlowJs;
+use flow_typing_flow_js::intersection_kit::disjoint;
 use flow_typing_flow_js::slice_utils::is_prop_optional;
 use flow_typing_flow_js::speculation_kit;
 use flow_typing_flow_js_env::FlowJsEnv;
@@ -1592,39 +1593,6 @@ fn intersect_type_guard<'cx>(
         }
     }
 
-    fn tags_differ<'cx>(cx: &mut Context<'cx>, t1: &ConcretizedType, t2: &ConcretizedType) -> bool {
-        match (
-            type_filter::tag_of_t(cx, t1.unwrap()),
-            type_filter::tag_of_t(cx, t2.unwrap()),
-        ) {
-            (Some(ref t1_tags), Some(ref t2_tags)) => !type_filter::tags_overlap(t1_tags, t2_tags),
-            _ => false,
-        }
-    }
-
-    // Singleton primitive types are not captured in the tag overlap checks. We are
-    // handling a few cases here explicitly.
-    fn ground_types_differ(t1: &ConcretizedType, t2: &ConcretizedType) -> bool {
-        match (t1.unwrap().deref(), t2.unwrap().deref()) {
-            (TypeInner::DefT(_, d1), TypeInner::DefT(_, d2)) => match (d1.deref(), d2.deref()) {
-                (
-                    DefTInner::SingletonStrT { value: v1, .. },
-                    DefTInner::SingletonStrT { value: v2, .. },
-                ) => v1 != v2,
-                (
-                    DefTInner::SingletonNumT { value: v1, .. },
-                    DefTInner::SingletonNumT { value: v2, .. },
-                ) => v1 != v2,
-                (
-                    DefTInner::SingletonBoolT { value: v1, .. },
-                    DefTInner::SingletonBoolT { value: v2, .. },
-                ) => v1 != v2,
-                _ => false,
-            },
-            _ => false,
-        }
-    }
-
     fn type_tags_differ<'cx>(
         cx: &mut Context<'cx>,
         env: &FlowJsEnv,
@@ -1709,7 +1677,7 @@ fn intersect_type_guard<'cx>(
             ts.is_empty()
                 || ts
                     .iter()
-                    .any(|t| type_filter::tag_of_t(cx, t).is_some_and(|tags| tags.is_empty()))
+                    .any(|t| disjoint::tag_of_t(cx, t).is_some_and(|tags| tags.is_empty()))
         };
         let (Ok(ts), Ok(us)) = (
             concrete_types_for_inspection(cx, env, reason_of_t(t), t),
@@ -1862,8 +1830,8 @@ fn intersect_type_guard<'cx>(
         t1: &ConcretizedType,
         t2: &ConcretizedType,
     ) -> bool {
-        tags_differ(cx, t1, t2)
-            || ground_types_differ(t1, t2)
+        disjoint::tags_differ(cx, t1.unwrap(), t2.unwrap())
+            || disjoint::ground_types_differ(t1.unwrap(), t2.unwrap())
             || instance_tags_differ(cx, env, depth, t1, t2)
             || arr_tags_differ(cx, env, depth, t1, t2)
             || props_differ(cx, env, depth, t1, t2)

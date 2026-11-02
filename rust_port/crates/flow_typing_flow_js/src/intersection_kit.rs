@@ -13,7 +13,8 @@
 //! intersection with a single type when its concrete members allow it:
 //!
 //! - Scalars (`scalars`): `string & 'a'` is `'a'`, `number & number` is
-//!   `number`, and `'a' & 'b'` or `string & number` is `empty`.
+//!   `number`, and `'a' & 'b'` or `string & number` is `empty`, by the
+//!   disjointness checks shared with type guard refinement (`disjoint`).
 //! - Objects and interfaces (`objects`): `{a: A, ...} & {b: B, ...}` is
 //!   `{a: A, b: B, ...}`. A prop in several members gets the intersection of
 //!   their types, itself normalized by a nested `EvalT`.
@@ -46,6 +47,7 @@ use flow_typing_type::type_::unknown_use;
 
 use crate::flow_js::FlowJs;
 
+pub mod disjoint;
 mod objects;
 mod scalars;
 
