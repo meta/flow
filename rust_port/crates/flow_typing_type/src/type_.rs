@@ -5580,7 +5580,7 @@ pub struct ArrayATData {
     pub tuple_view: Option<TupleView>,
     pub strictness_kind: TypeStrictnessKind,
     /// Literal elements can be generalized by natural inference.
-    pub literal: bool,
+    pub literal: ArrLiteral,
     /// Fresh mutable arrays can be checked covariantly.
     pub fresh: bool,
 }
@@ -5599,7 +5599,7 @@ pub struct TupleATData {
     /// element type `T`, and it is never `optional`. A tuple with a rest element is not `inexact`.
     pub rest: Option<TupleElement>,
     pub strictness_kind: TypeStrictnessKind,
-    pub literal: bool,
+    pub literal: ArrLiteral,
     pub fresh: bool,
 }
 
@@ -5619,11 +5619,64 @@ pub enum ArrType {
 pub struct ROArrayATData {
     pub elem_t: Type,
     pub react_dro: Option<ReactDro>,
-    pub literal: bool,
+    pub literal: ArrLiteral,
+}
+
+/// Whether an array type is literal (natural inference can generalize its elements), and whether
+/// it is the type of an array literal expression.
+#[derive(Debug, Clone, Copy, Dupe, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum ArrLiteral {
+    NonLiteral,
+    /// A literal array that is not written as an array literal, like the rest arguments of a call
+    /// or JSX children.
+    Literal,
+    /// An array literal that is not literal: it has no hint, or natural inference generalized it.
+    Expression,
+    /// An array literal with a hint.
+    LiteralExpression,
+}
+
+impl ArrLiteral {
+    pub fn of_literal(literal: bool) -> Self {
+        if literal {
+            ArrLiteral::Literal
+        } else {
+            ArrLiteral::NonLiteral
+        }
+    }
+
+    pub fn of_expression(literal: bool) -> Self {
+        if literal {
+            ArrLiteral::LiteralExpression
+        } else {
+            ArrLiteral::Expression
+        }
+    }
+
+    pub fn is_literal(self) -> bool {
+        match self {
+            ArrLiteral::Literal | ArrLiteral::LiteralExpression => true,
+            ArrLiteral::NonLiteral | ArrLiteral::Expression => false,
+        }
+    }
+
+    pub fn is_expression(self) -> bool {
+        match self {
+            ArrLiteral::Expression | ArrLiteral::LiteralExpression => true,
+            ArrLiteral::NonLiteral | ArrLiteral::Literal => false,
+        }
+    }
+
+    pub fn non_literal(self) -> Self {
+        match self {
+            ArrLiteral::NonLiteral | ArrLiteral::Literal => ArrLiteral::NonLiteral,
+            ArrLiteral::Expression | ArrLiteral::LiteralExpression => ArrLiteral::Expression,
+        }
+    }
 }
 
 impl ArrType {
-    pub fn literal(&self) -> bool {
+    pub fn literal(&self) -> ArrLiteral {
         match self {
             Self::ArrayAT(a) => a.literal,
             Self::TupleAT(a) => a.literal,
@@ -5637,7 +5690,7 @@ impl ArrType {
             Self::ROArrayAT(_) => false,
         }
     }
-    pub fn with_literal(mut self, literal: bool, fresh: bool) -> Self {
+    pub fn with_literal(mut self, literal: ArrLiteral, fresh: bool) -> Self {
         match &mut self {
             Self::ArrayAT(a) => {
                 a.literal = literal;
@@ -6812,7 +6865,7 @@ pub enum SpreadResolve {
     ResolveSpreadsToArrayLiteral {
         id: i32,
         kind: ArrayLiteralKind,
-        literal: bool,
+        literal: ArrLiteral,
         fresh: bool,
         elem_t: Type,
         tout: Type,
@@ -6821,7 +6874,7 @@ pub enum SpreadResolve {
     ResolveSpreadsToArray {
         elem_t: Type,
         tout: Type,
-        literal: bool,
+        literal: ArrLiteral,
         fresh: bool,
     },
     /// Once we've finished resolving spreads for a function's arguments, call the
@@ -6834,11 +6887,11 @@ pub enum SpreadResolve {
 pub enum SpreadArrayResolveTo {
     ResolveToArrayLiteral {
         kind: ArrayLiteralKind,
-        literal: bool,
+        literal: ArrLiteral,
         fresh: bool,
     },
     ResolveToArray {
-        literal: bool,
+        literal: ArrLiteral,
         fresh: bool,
     },
     ResolveToTupleType {

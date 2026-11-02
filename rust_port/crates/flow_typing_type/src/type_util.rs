@@ -25,6 +25,7 @@ use flow_common::reason::mk_reason;
 use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 use flow_lazy::ContextFamily;
 
+use crate::type_::ArrLiteral;
 use crate::type_::ArrRestTData;
 use crate::type_::ArrayElementCompatibilityData;
 use crate::type_::AssertionFunctionConsistencyData;
@@ -379,12 +380,14 @@ pub fn non_literal_of_t(t: &Type) -> Type {
     match t.deref() {
         TypeInner::DefT(reason, def)
             if let DefTInner::ArrT(arr) = def.deref()
-                && (arr.literal() || arr.fresh()) =>
+                && (arr.literal().is_literal() || arr.fresh()) =>
         {
             Type::new(TypeInner::DefT(
                 reason.dupe(),
                 DefT::new(DefTInner::ArrT(Rc::new(
-                    arr.as_ref().clone().with_literal(false, false),
+                    arr.as_ref()
+                        .clone()
+                        .with_literal(arr.literal().non_literal(), false),
                 ))),
             ))
         }
@@ -2881,7 +2884,7 @@ pub fn normalize_jsx_children_prop(
                         }),
                         react_dro: None,
                         strictness_kind: TypeStrictnessKind::Flow,
-                        literal: true,
+                        literal: ArrLiteral::Literal,
                         fresh: true,
                     },
                 ))))),

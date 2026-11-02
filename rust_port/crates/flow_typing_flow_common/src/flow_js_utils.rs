@@ -59,6 +59,7 @@ use flow_typing_errors::intermediate_error_types::TypeGuardReferenceKind;
 use flow_typing_errors::intermediate_error_types::ValueAsTypeReference;
 use flow_typing_flow_js_env::FlowJsEnv;
 use flow_typing_type::type_::AnySource;
+use flow_typing_type::type_::ArrLiteral;
 use flow_typing_type::type_::CallElemTData;
 use flow_typing_type::type_::ClassExtendsCheckData;
 use flow_typing_type::type_::ClassImplementsCheckData;
@@ -9370,7 +9371,7 @@ where
                             rest: None,
                             react_dro: None,
                             strictness_kind,
-                            literal: false,
+                            literal: ArrLiteral::NonLiteral,
                             fresh: false,
                         }),
                     )))),

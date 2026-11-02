@@ -2167,7 +2167,7 @@ fn visit_mixed<'cx>(
                 flow_typing_type::type_::ArrType::ROArrayAT(Box::new(ROArrayATData {
                     elem_t: mixed_t,
                     react_dro: None,
-                    literal: false,
+                    literal: flow_typing_type::type_::ArrLiteral::NonLiteral,
                 })),
             ))),
         ));

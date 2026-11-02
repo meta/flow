@@ -25,6 +25,7 @@ use flow_typing_context::Cx;
 use flow_typing_context::TypingMode;
 use flow_typing_flow_common::type_subst;
 use flow_typing_tvar;
+use flow_typing_type::type_::ArrLiteral;
 use flow_typing_type::type_::ArrType;
 use flow_typing_type::type_::ArrayATData;
 use flow_typing_type::type_::BigIntLiteral;
@@ -416,17 +417,16 @@ fn literal_type_mapper_type_dispatch<'cx>(
 ) -> LiteralMapAction {
     match t.deref() {
         TypeInner::OpenT(_) => LiteralMapAction::TypeDefault(t.dupe()),
-        TypeInner::DefT(r, def_t)
+        TypeInner::DefT(_, def_t)
             if let DefTInner::ArrT(arr) = def_t.deref()
-                && arr.literal() =>
+                && arr.literal().is_literal() =>
         {
-            let t = if matches!(r.desc(true), Some(VirtualReasonDesc::RArrayLit)) {
-                non_literal_of_t(&mod_reason_of_t(
+            let t = match arr.literal() {
+                ArrLiteral::LiteralExpression => non_literal_of_t(&mod_reason_of_t(
                     &|r| r.replace_desc_new(VirtualReasonDesc::RArrayLit),
                     t,
-                ))
-            } else {
-                t.dupe()
+                )),
+                ArrLiteral::NonLiteral | ArrLiteral::Literal | ArrLiteral::Expression => t.dupe(),
             };
             LiteralMapAction::LiteralArray(t)
         }
@@ -610,7 +610,7 @@ fn is_literal_type<'cx>(cx: &mut Context<'cx>, seen: &mut BTreeSet<i32>, t: &Typ
             _ => false,
         },
         TypeInner::DefT(_, def_t) => match def_t.deref() {
-            DefTInner::ArrT(arr) => arr.literal(),
+            DefTInner::ArrT(arr) => arr.literal().is_literal(),
             DefTInner::ObjT(o) => o.literal.is_literal(),
             DefTInner::FunT(_, ft) => ft.literal,
             DefTInner::SingletonStrT {
@@ -785,7 +785,7 @@ impl<'cx> TypeMapper<'cx, LiteralMapCx> for ConvertLiteralTypeToConstMapper {
                         tuple_view: Some(tv),
                         ..
                     }) => {
-                        if arr.literal() && self.reason_def_loc_within_call(r) {
+                        if arr.literal().is_literal() && self.reason_def_loc_within_call(r) {
                             let elem_t_prime =
                                 literal_array_elem_t(self, cx, map_cx, elem_t.dupe());
                             let elements: Vec<TupleElement> = tv
@@ -819,7 +819,7 @@ impl<'cx> TypeMapper<'cx, LiteralMapCx> for ConvertLiteralTypeToConstMapper {
                                         inexact: false,
                                         rest,
                                         strictness_kind: cx.type_strictness_kind(),
-                                        literal: false,
+                                        literal: ArrLiteral::NonLiteral,
                                         fresh: false,
                                     },
                                 ))))),

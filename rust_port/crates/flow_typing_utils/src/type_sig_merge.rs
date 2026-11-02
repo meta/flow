@@ -2021,7 +2021,7 @@ fn merge_annot<'cx>(
                         strictness_kind: TypeStrictnessKind::from_is_typescript(
                             loc.source().is_some_and(flow_common::files::has_ts_ext),
                         ),
-                        literal: false,
+                        literal: type_::ArrLiteral::NonLiteral,
                         fresh: false,
                     }),
                 )))),
@@ -2036,7 +2036,7 @@ fn merge_annot<'cx>(
                     Box::new(ROArrayATData {
                         elem_t: t,
                         react_dro: None,
-                        literal: false,
+                        literal: type_::ArrLiteral::NonLiteral,
                     }),
                 )))),
             ))
@@ -3315,7 +3315,7 @@ fn merge_value<'cx>(
                 inexact: false,
                 rest: None,
                 strictness_kind: inner.strictness_kind,
-                literal: false,
+                literal: type_::ArrLiteral::NonLiteral,
                 fresh: false,
             }));
             Type::new(type_::TypeInner::DefT(
@@ -3379,7 +3379,7 @@ fn merge_value<'cx>(
                     inexact: false,
                     rest: None,
                     strictness_kind: inner.strictness_kind,
-                    literal: false,
+                    literal: type_::ArrLiteral::NonLiteral,
                     fresh: false,
                 }))
             } else {
@@ -3388,7 +3388,7 @@ fn merge_value<'cx>(
                     tuple_view: None,
                     react_dro: None,
                     strictness_kind: inner.strictness_kind,
-                    literal: false,
+                    literal: type_::ArrLiteral::Expression,
                     fresh: false,
                 }))
             };

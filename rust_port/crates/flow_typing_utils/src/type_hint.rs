@@ -48,6 +48,7 @@ use flow_typing_flow_js::tvar_resolver;
 use flow_typing_flow_js_env::FlowJsEnv;
 use flow_typing_implicit_instantiation_check::ImplicitInstantiationCheck;
 use flow_typing_type::type_::AnySource;
+use flow_typing_type::type_::ArrLiteral;
 use flow_typing_type::type_::ArrRestTData;
 use flow_typing_type::type_::ArrType;
 use flow_typing_type::type_::ArrayATData;
@@ -1092,7 +1093,7 @@ fn type_of_hint_decomposition<'cx>(
                                 tuple_view: Some(empty_tuple_view()),
                                 react_dro: None,
                                 strictness_kind: cx.type_strictness_kind(),
-                                literal: false,
+                                literal: ArrLiteral::NonLiteral,
                                 fresh: false,
                             },
                         ))))),

@@ -22,6 +22,7 @@ use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 use flow_typing_context::Context;
 use flow_typing_flow_common::obj_type;
 use flow_typing_flow_js::template_literal_type;
+use flow_typing_type::type_::ArrLiteral;
 use flow_typing_type::type_::ArrType;
 use flow_typing_type::type_::ArrayATData;
 use flow_typing_type::type_::ArrayLengthOp;
@@ -1561,7 +1562,7 @@ pub fn array(t: Type) -> FilterResult {
                                 DefT::new(DefTInner::MixedT(MixedFlavor::MixedEverything)),
                             )),
                             react_dro: None,
-                            literal: false,
+                            literal: ArrLiteral::NonLiteral,
                         },
                     ))))),
                 )))

@@ -1448,7 +1448,7 @@ fn convert_inner<'a>(
                             elem_t: elem_t.dupe(),
                             tuple_view: None,
                             strictness_kind: cx.type_strictness_kind(),
-                            literal: false,
+                            literal: type_::ArrLiteral::NonLiteral,
                             fresh: false,
                         }),
                     )))),
@@ -1459,7 +1459,7 @@ fn convert_inner<'a>(
                         Box::new(ROArrayATData {
                             elem_t: elem_t.dupe(),
                             react_dro: None,
-                            literal: false,
+                            literal: type_::ArrLiteral::NonLiteral,
                         }),
                     )))),
                 ));
@@ -1560,7 +1560,7 @@ fn convert_inner<'a>(
                         tuple_view: None,
                         react_dro: None,
                         strictness_kind: cx.type_strictness_kind(),
-                        literal: false,
+                        literal: type_::ArrLiteral::NonLiteral,
                         fresh: false,
                     }),
                 )))),
@@ -2254,7 +2254,7 @@ fn convert_inner<'a>(
                                             elem_t,
                                             tuple_view: None,
                                             strictness_kind: cx.type_strictness_kind(),
-                                            literal: false,
+                                            literal: type_::ArrLiteral::NonLiteral,
                                             fresh: false,
                                         })),
                                     ))),
@@ -2290,7 +2290,7 @@ fn convert_inner<'a>(
                                         type_::ArrType::ROArrayAT(Box::new(ROArrayATData {
                                             elem_t: elemt,
                                             react_dro: None,
-                                            literal: false,
+                                            literal: type_::ArrLiteral::NonLiteral,
                                         })),
                                     ))),
                                 )),
@@ -2897,7 +2897,7 @@ fn convert_inner<'a>(
                                         type_::ArrType::ROArrayAT(Box::new(ROArrayATData {
                                             elem_t: elemt,
                                             react_dro: None,
-                                            literal: false,
+                                            literal: type_::ArrLiteral::NonLiteral,
                                         })),
                                     ))),
                                 )),

@@ -7220,7 +7220,7 @@ fn expression_<'a>(
                         inexact: false,
                         rest: None,
                         strictness_kind: cx.type_strictness_kind(),
-                        literal: false,
+                        literal: type_::ArrLiteral::NonLiteral,
                         fresh: false,
                     }));
                     let t = Type::new(TypeInner::DefT(
@@ -7250,7 +7250,7 @@ fn expression_<'a>(
                         tuple_view: Some(type_::empty_tuple_view()),
                         react_dro: None,
                         strictness_kind: cx.type_strictness_kind(),
-                        literal: true,
+                        literal: type_::ArrLiteral::Literal,
                         fresh: false,
                     }));
                     let t = Type::new(TypeInner::DefT(
@@ -7274,7 +7274,7 @@ fn expression_<'a>(
                         tuple_view: Some(type_::empty_tuple_view()),
                         react_dro: None,
                         strictness_kind: cx.type_strictness_kind(),
-                        literal: true,
+                        literal: type_::ArrLiteral::Literal,
                         fresh: false,
                     }));
                     let t = Type::new(TypeInner::DefT(
@@ -7320,7 +7320,11 @@ fn expression_<'a>(
                             );
                             let elem_t = flow_typing_tvar::mk(cx, element_reason);
                             let resolve_to = type_::SpreadResolve::ResolveSpreadsToArrayLiteral {
-                                literal,
+                                literal: if as_const {
+                                    type_::ArrLiteral::NonLiteral
+                                } else {
+                                    type_::ArrLiteral::of_expression(literal)
+                                },
                                 fresh: literal,
                                 id: mk_id() as i32,
                                 kind: if as_const {
@@ -13431,7 +13435,7 @@ pub fn jsx_mk_props<'a>(
                         Box::new(ROArrayATData {
                             elem_t: elem_t.dupe(),
                             react_dro: None,
-                            literal: false,
+                            literal: type_::ArrLiteral::NonLiteral,
                         }),
                     )))),
                 ));
@@ -14672,7 +14676,7 @@ fn static_method_call_object<'a>(
                         tuple_view: None,
                         react_dro: None,
                         strictness_kind: cx.type_strictness_kind(),
-                        literal: false,
+                        literal: type_::ArrLiteral::NonLiteral,
                         fresh: false,
                     },
                 ))))),
@@ -14700,7 +14704,7 @@ fn static_method_call_object<'a>(
                         tuple_view: None,
                         react_dro: None,
                         strictness_kind: cx.type_strictness_kind(),
-                        literal: false,
+                        literal: type_::ArrLiteral::NonLiteral,
                         fresh: false,
                     },
                 ))))),
@@ -14759,7 +14763,7 @@ fn static_method_call_object<'a>(
                         inexact: false,
                         rest: None,
                         strictness_kind: cx.type_strictness_kind(),
-                        literal: false,
+                        literal: type_::ArrLiteral::NonLiteral,
                         fresh: false,
                     },
                 ))))),
@@ -14772,7 +14776,7 @@ fn static_method_call_object<'a>(
                         tuple_view: None,
                         react_dro: None,
                         strictness_kind: cx.type_strictness_kind(),
-                        literal: false,
+                        literal: type_::ArrLiteral::NonLiteral,
                         fresh: false,
                     },
                 ))))),

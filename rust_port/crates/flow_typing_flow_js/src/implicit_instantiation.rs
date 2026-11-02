@@ -43,6 +43,7 @@ use flow_typing_flow_js_env::FlowJsEnv;
 use flow_typing_implicit_instantiation_check::ImplicitInstantiationCheck;
 use flow_typing_implicit_instantiation_check::Operation;
 use flow_typing_type::type_::AnySource;
+use flow_typing_type::type_::ArrLiteral;
 use flow_typing_type::type_::ArrRestTData;
 use flow_typing_type::type_::ArrType;
 use flow_typing_type::type_::ArrayATData;
@@ -1156,7 +1157,7 @@ fn reverse_resolve_spread_multiflow_subtype_full_no_resolution<'cx>(
                 rest: None,
                 react_dro: None,
                 strictness_kind: Default::default(),
-                literal: false,
+                literal: ArrLiteral::NonLiteral,
                 fresh: false,
             }));
             let reason_out = reason

@@ -352,7 +352,7 @@ fn multiflow_args<'cx>(
                         .replace_desc(VirtualReasonDesc::RInferredUnionElemArray);
                     let elem_t = flow_typing_tvar::mk(cx, element_reason);
                     let resolve_to = SpreadResolve::ResolveSpreadsToArrayLiteral {
-                        literal: true,
+                        literal: ArrLiteral::Literal,
                         fresh: true,
                         kind: ArrayLiteralKind::RestArguments,
                         id: flow_common::reason::mk_id() as i32,
@@ -647,7 +647,7 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                                                 tuple_view: None,
                                                 react_dro: None,
                                                 strictness_kind: *strictness_kind,
-                                                literal: false,
+                                                literal: ArrLiteral::NonLiteral,
                                                 fresh: false,
                                             })),
                                             generic.clone(),
@@ -684,7 +684,7 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                                         ArrType::ROArrayAT(Box::new(ROArrayATData {
                                             elem_t,
                                             react_dro: None,
-                                            literal: false,
+                                            literal: ArrLiteral::NonLiteral,
                                         }))
                                     } else {
                                         ArrType::ArrayAT(Box::new(ArrayATData {
@@ -692,7 +692,7 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                                             tuple_view: None,
                                             react_dro: None,
                                             strictness_kind: *strictness_kind,
-                                            literal: false,
+                                            literal: ArrLiteral::NonLiteral,
                                             fresh: false,
                                         }))
                                     };
@@ -755,7 +755,7 @@ pub(super) fn finish_resolve_spread_list<'cx>(
         let (literal, fresh) = match resolve_to {
             SpreadArrayResolveTo::ResolveToArrayLiteral { literal, fresh, .. }
             | SpreadArrayResolveTo::ResolveToArray { literal, fresh } => (literal, fresh),
-            SpreadArrayResolveTo::ResolveToTupleType { .. } => (false, false),
+            SpreadArrayResolveTo::ResolveToTupleType { .. } => (ArrLiteral::NonLiteral, false),
         };
         let result = match spread_resolved_to_any_src(resolved) {
             Some(any_src) => match resolve_to {
@@ -1443,7 +1443,7 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                         tuple_view: None,
                         react_dro: None,
                         strictness_kind: cx.type_strictness_kind(),
-                        literal: false,
+                        literal: ArrLiteral::NonLiteral,
                         fresh: false,
                     }))
                 }

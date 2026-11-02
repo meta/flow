@@ -62,6 +62,7 @@ use flow_typing_implicit_instantiation_check::ImplicitInstantiationCheck;
 use flow_typing_implicit_instantiation_check::Operation;
 use flow_typing_type::type_::AnyErrorKind;
 use flow_typing_type::type_::AnySource;
+use flow_typing_type::type_::ArrLiteral;
 use flow_typing_type::type_::ArrType::*;
 use flow_typing_type::type_::ArrayATData;
 use flow_typing_type::type_::ArrayElementCompatibilityData;
@@ -5800,7 +5801,7 @@ pub fn rec_sub_t<'cx>(
                                             optional1: bool,
                                             optional2: bool|
                  -> Result<(), FlowJsException> {
-                    if !(*fresh || Polarity::compat(p1, p2)) {
+                    if !(fresh.is_literal() || Polarity::compat(p1, p2)) {
                         flow_js_utils::add_output_with_env(
                             cx,env,
                             ErrorMessage::ETupleElementPolarityMismatch(Box::new(
@@ -5858,7 +5859,7 @@ pub fn rec_sub_t<'cx>(
                     } else {
                         t2
                     };
-                    match (*fresh, p2) {
+                    match (fresh.is_literal(), p2) {
                         (true, _) | (_, Polarity::Positive) => {
                             FlowJs::rec_flow_t_with_env(cx, env, trace, elem_use_op, t1, t2_inner)?;
                         }
@@ -6097,7 +6098,7 @@ pub fn rec_sub_t<'cx>(
                     elem_t: elem_t.dupe(),
                     tuple_view: None,
                     strictness_kind: inst.inst.strictness_kind,
-                    literal: false,
+                    literal: ArrLiteral::NonLiteral,
                     fresh: false,
                 }))))),
             ));
@@ -6115,7 +6116,7 @@ pub fn rec_sub_t<'cx>(
                 DefT::new(ArrT(Rc::new(ROArrayAT(Box::new(ROArrayATData {
                     elem_t: elem_t.dupe(),
                     react_dro: inst.inst.inst_react_dro.clone(),
-                    literal: false,
+                    literal: ArrLiteral::NonLiteral,
                 }))))),
             ));
             FlowJs::rec_flow_with_env(cx, env, trace, l, &UseT::new(UseT(use_op, arrt)))

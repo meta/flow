@@ -76,6 +76,7 @@ use flow_typing_statement::type_annotation;
 use flow_typing_statement::type_annotation::BindsSingleValue;
 use flow_typing_type::type_;
 use flow_typing_type::type_::AnySource;
+use flow_typing_type::type_::ArrLiteral;
 use flow_typing_type::type_::ArrayATData;
 use flow_typing_type::type_::DefT;
 use flow_typing_type::type_::DefTInner;
@@ -670,7 +671,7 @@ fn resolve_hint<'cx>(
                         &reason_op,
                         elem_spread_list,
                         type_::SpreadResolve::ResolveSpreadsToArrayLiteral {
-                            literal: false,
+                            literal: ArrLiteral::NonLiteral,
                             fresh: false,
                             id: reason::mk_id() as i32,
                             kind: type_::ArrayLiteralKind::Mutable,
@@ -1471,7 +1472,7 @@ fn resolve_binding<'cx>(
                                     tuple_view: Some(type_::empty_tuple_view()),
                                     react_dro: None,
                                     strictness_kind: cx.type_strictness_kind(),
-                                    literal: false,
+                                    literal: ArrLiteral::NonLiteral,
                                     fresh: false,
                                 },
                             ))))),
@@ -1552,7 +1553,7 @@ fn resolve_binding<'cx>(
                                 &reason_op,
                                 elem_spread_list,
                                 type_::SpreadResolve::ResolveSpreadsToArrayLiteral {
-                                    literal: false,
+                                    literal: ArrLiteral::Expression,
                                     fresh: false,
                                     id: reason::mk_id() as i32,
                                     kind: type_::ArrayLiteralKind::Mutable,
@@ -1902,7 +1903,7 @@ fn resolve_binding<'cx>(
                         tuple_view,
                         react_dro: None,
                         strictness_kind: cx.type_strictness_kind(),
-                        literal: array_providers.is_empty(),
+                        literal: ArrLiteral::of_literal(array_providers.is_empty()),
                         fresh: false,
                     },
                 ))))),

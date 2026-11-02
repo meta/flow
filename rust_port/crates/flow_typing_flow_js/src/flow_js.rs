@@ -61,6 +61,7 @@ use flow_typing_flow_js_env::type_app_expansion;
 use flow_typing_generics::GenericId;
 use flow_typing_type::type_::AnyErrorKind;
 use flow_typing_type::type_::AnySource;
+use flow_typing_type::type_::ArrLiteral;
 use flow_typing_type::type_::ArrType;
 use flow_typing_type::type_::ArrayATData;
 use flow_typing_type::type_::CallAction;

@@ -3797,7 +3797,7 @@ fn __flow_impl<'cx>(
                                 DefT::new(ArrT(Rc::new(ROArrayAT(Box::new(ROArrayATData {
                                     elem_t: elem_t.dupe(),
                                     react_dro: None,
-                                    literal: false,
+                                    literal: ArrLiteral::NonLiteral,
                                 }))))),
                             ))
                         }
@@ -3833,7 +3833,7 @@ fn __flow_impl<'cx>(
                         tuple_view: None,
                         react_dro: None,
                         strictness_kind: cx.type_strictness_kind(),
-                        literal: false,
+                        literal: ArrLiteral::NonLiteral,
                         fresh: false,
                     }))
                 }
@@ -3907,7 +3907,7 @@ fn __flow_impl<'cx>(
                                             fresh,
                                             ..
                                         } => (*literal, *fresh),
-                                        _ => (false, false),
+                                        _ => (ArrLiteral::NonLiteral, false),
                                     };
                                     // To avoid infinite recursion, let's deconstruct to a simpler case
                                     // where we no longer resolve to a tuple but instead just resolve to
@@ -7652,7 +7652,7 @@ fn __flow_impl<'cx>(
                         tuple_view,
                         react_dro: react_dro.clone(),
                         strictness_kind: *strictness_kind,
-                        literal: *literal,
+                        literal: ArrLiteral::of_literal(*literal),
                         fresh: false,
                     }))
                 }
@@ -7688,7 +7688,7 @@ fn __flow_impl<'cx>(
                             tuple_view: None,
                             react_dro: react_dro.clone(),
                             strictness_kind: *strictness_kind,
-                            literal: *literal,
+                            literal: ArrLiteral::of_literal(*literal),
                             fresh: false,
                         })),
                         _ => TupleAT(Box::new(TupleATData {
@@ -7702,7 +7702,7 @@ fn __flow_impl<'cx>(
                             rest: rest.dupe(),
                             react_dro: react_dro.clone(),
                             strictness_kind: *strictness_kind,
-                            literal: *literal,
+                            literal: ArrLiteral::of_literal(*literal),
                             fresh: false,
                         })),
                     }
@@ -7710,7 +7710,9 @@ fn __flow_impl<'cx>(
             };
             let a = Type::new(DefT(
                 reason.dupe(),
-                DefT::new(ArrT(Rc::new(arrtype.with_literal(*literal, false)))),
+                DefT::new(ArrT(Rc::new(
+                    arrtype.with_literal(ArrLiteral::of_literal(*literal), false),
+                ))),
             ));
             rec_flow_t(cx, env, trace, unknown_use(), (&a, tout))?;
         }
@@ -7793,7 +7795,7 @@ fn __flow_impl<'cx>(
                                 DefT::new(MixedT(MixedFlavor::MixedEverything)),
                             )),
                             react_dro: None,
-                            literal: false,
+                            literal: ArrLiteral::NonLiteral,
                         }))))),
                     ));
                     speculative_subtyping_succeeds(cx, env, bound, &roarray_bound)?
@@ -7851,7 +7853,7 @@ fn __flow_impl<'cx>(
                         DefT::new(MixedT(MixedFlavor::MixedEverything)),
                     )),
                     react_dro: None,
-                    literal: false,
+                    literal: ArrLiteral::NonLiteral,
                 }))))),
             ));
             speculative_subtyping_succeeds(cx, env, bound, &roarray_bound)?
@@ -8030,7 +8032,7 @@ fn __flow_impl<'cx>(
                     ROArrayAT(Box::new(ROArrayATData {
                         elem_t: array_elem(cx, mapped_elem_t)?,
                         react_dro: react_dro.clone(),
-                        literal: false,
+                        literal: ArrLiteral::NonLiteral,
                     }))
                 }
                 ArrayAT(box ArrayATData {
@@ -8086,7 +8088,7 @@ fn __flow_impl<'cx>(
                         react_dro: react_dro.clone(),
                         tuple_view: mapped_tuple_view,
                         strictness_kind: *strictness_kind,
-                        literal: false,
+                        literal: ArrLiteral::NonLiteral,
                         fresh: false,
                     }))
                 }
@@ -8132,7 +8134,7 @@ fn __flow_impl<'cx>(
                             })
                             .transpose()?,
                         strictness_kind: *strictness_kind,
-                        literal: false,
+                        literal: ArrLiteral::NonLiteral,
                         fresh: false,
                     }))
                 }
@@ -8147,7 +8149,7 @@ fn __flow_impl<'cx>(
                         react_dro: dro.clone(),
                         tuple_view: None,
                         strictness_kind: TypeStrictnessKind::Flow,
-                        literal: false,
+                        literal: ArrLiteral::NonLiteral,
                         fresh: false,
                     }))
                 }
@@ -8160,7 +8162,7 @@ fn __flow_impl<'cx>(
                     ROArrayAT(Box::new(ROArrayATData {
                         elem_t: array_elem(cx, mapped_elem_t)?,
                         react_dro: dro.clone(),
-                        literal: false,
+                        literal: ArrLiteral::NonLiteral,
                     }))
                 }
             };
@@ -10512,7 +10514,7 @@ fn __flow_impl<'cx>(
                         elem_t: elem_t.dupe(),
                         tuple_view: None,
                         strictness_kind: *strictness_kind,
-                        literal: false,
+                        literal: ArrLiteral::NonLiteral,
                         fresh: false,
                     },
                 ))))),

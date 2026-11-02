@@ -24,6 +24,7 @@ use flow_typing_context::Context;
 use flow_typing_flow_common::flow_js_utils;
 use flow_typing_flow_common::obj_type;
 use flow_typing_flow_js::flow_js;
+use flow_typing_type::type_::ArrLiteral;
 use flow_typing_type::type_::ArrType;
 use flow_typing_type::type_::ArrayATData;
 use flow_typing_type::type_::DefT;
@@ -388,7 +389,7 @@ fn merge_type<'cx>(cx: &mut Context<'cx>, pair: (Type, Type)) -> Type {
                                         None
                                     },
                                     strictness_kind: strictness_kind1.join(*strictness_kind2),
-                                    literal: false,
+                                    literal: ArrLiteral::NonLiteral,
                                     fresh: false,
                                 },
                             ))))),
@@ -419,7 +420,7 @@ fn merge_type<'cx>(cx: &mut Context<'cx>, pair: (Type, Type)) -> Type {
                                     None
                                 },
                                 strictness_kind: strictness_kind1.join(*strictness_kind2),
-                                literal: false,
+                                literal: ArrLiteral::NonLiteral,
                                 fresh: false,
                             },
                         ))))),
@@ -486,7 +487,7 @@ fn merge_type<'cx>(cx: &mut Context<'cx>, pair: (Type, Type)) -> Type {
                                     inexact: *inexact1,
                                     rest: None,
                                     strictness_kind: strictness_kind1.join(*strictness_kind2),
-                                    literal: false,
+                                    literal: ArrLiteral::NonLiteral,
                                     fresh: false,
                                 },
                             ))))),
@@ -513,7 +514,7 @@ fn merge_type<'cx>(cx: &mut Context<'cx>, pair: (Type, Type)) -> Type {
                                 } else {
                                     None
                                 },
-                                literal: false,
+                                literal: ArrLiteral::NonLiteral,
                             },
                         ))))),
                     )),
