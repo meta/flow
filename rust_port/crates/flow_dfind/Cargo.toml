@@ -11,7 +11,7 @@ flow_hh_logger = { path = "../flow_hh_logger" }
 notify = "9.0.0-rc.6"
 regex = "1.13.1"
 serde = { version = "1.0.229", features = ["derive", "rc"] }
-tokio = { version = "1.53.2", features = ["full", "test-util", "tracing"] }
+tokio = { version = "1.54.1", features = ["full", "test-util", "tracing"] }
 tracing = { version = "0.1.41", features = ["attributes", "valuable"] }
 
 [dev-dependencies]

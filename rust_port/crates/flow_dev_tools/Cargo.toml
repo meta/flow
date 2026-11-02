@@ -14,7 +14,7 @@ regex = "1.13.1"
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 serde_json = { version = "1.0.154", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
 similar = { version = "3.2.1", features = ["bytes", "inline", "unicode"] }
-tokio = { version = "1.53.2", features = ["full", "test-util", "tracing"] }
+tokio = { version = "1.54.1", features = ["full", "test-util", "tracing"] }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 tempfile = "3.27.0"

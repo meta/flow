@@ -36,7 +36,7 @@ nix = { version = "0.31.3", features = ["dir", "event", "hostname", "inotify", "
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 serde_json = { version = "1.0.154", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
 signal-hook = "0.3.18"
-tokio = { version = "1.53.2", features = ["full", "test-util", "tracing"] }
+tokio = { version = "1.54.1", features = ["full", "test-util", "tracing"] }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 filedescriptor = "0.8"

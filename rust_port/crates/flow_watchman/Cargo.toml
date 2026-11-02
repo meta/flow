@@ -11,4 +11,4 @@ flow_event_logger = { path = "../flow_event_logger" }
 flow_hh_json = { path = "../flow_hh_json" }
 flow_hh_logger = { path = "../flow_hh_logger" }
 serde_json = { version = "1.0.154", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
-tokio = { version = "1.53.2", features = ["full", "test-util", "tracing"] }
+tokio = { version = "1.54.1", features = ["full", "test-util", "tracing"] }

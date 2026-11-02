@@ -13,4 +13,4 @@ socket2 = { version = "0.6.5", features = ["all"] }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 flow_tokio_runtime = { path = "../flow_tokio_runtime" }
-tokio = { version = "1.53.2", features = ["full", "test-util", "tracing"] }
+tokio = { version = "1.54.1", features = ["full", "test-util", "tracing"] }

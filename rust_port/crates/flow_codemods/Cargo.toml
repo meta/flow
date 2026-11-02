@@ -40,6 +40,6 @@ flow_typing_errors = { path = "../flow_typing_errors" }
 flow_typing_ty_normalizer = { path = "../flow_typing_ty_normalizer" }
 flow_typing_type = { path = "../flow_typing_type" }
 flow_utils_concurrency = { path = "../flow_utils_concurrency" }
-tokio = { version = "1.53.2", features = ["full", "test-util", "tracing"] }
+tokio = { version = "1.54.1", features = ["full", "test-util", "tracing"] }
 tracing = { version = "0.1.41", features = ["attributes", "valuable"] }
 vec1 = { version = "1.12.1", features = ["serde"] }

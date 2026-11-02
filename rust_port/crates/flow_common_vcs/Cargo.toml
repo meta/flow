@@ -6,4 +6,4 @@ version = "0.0.0"
 edition = "2024"
 
 [dependencies]
-tokio = { version = "1.53.2", features = ["full", "test-util", "tracing"] }
+tokio = { version = "1.54.1", features = ["full", "test-util", "tracing"] }
