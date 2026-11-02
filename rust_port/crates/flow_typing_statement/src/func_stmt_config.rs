@@ -182,8 +182,8 @@ fn eval_default<'a>(
 ) -> Result<Option<ast::expression::Expression<ALoc, (ALoc, Type)>>, CheckExprError> {
     default
         .map(|e| {
-            let e = statement::expression(None, None, None, cx, &e)?;
-            let (loc, default_t) = e.loc().dupe();
+            let (e, default_t) = statement::default_value(cx, &e)?;
+            let loc = e.loc().0.dupe();
             if has_anno {
                 flow_default(cx, target, annot_t, &default_t)?;
                 let mut inner = (*e.0).clone();

@@ -87,8 +87,7 @@ fn pattern_default<'a>(
         None => Ok(None),
         Some(e) => {
             let prev_default = acc.default.take();
-            let e = statement::expression(None, None, None, cx, e)?;
-            let t = e.loc().1.dupe();
+            let (e, t) = statement::default_value(cx, e)?;
             let new_default = Some(default::expr(t, prev_default));
             acc.default = new_default;
             Ok(Some(e))

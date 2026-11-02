@@ -21973,6 +21973,24 @@ pub fn expression<'a>(
     )
 }
 
+/// Types a default value as the branch it is: `value === undefined ? default : value`. Like a
+/// conditional's branch, a default that always throws makes only its own path throw, so it
+/// produces `empty` and the throw does not escape to the pattern or function around it.
+pub fn default_value<'a>(
+    cx: &mut Context<'a>,
+    expr: &expression::Expression<ALoc, ALoc>,
+) -> Result<(expression::Expression<ALoc, (ALoc, Type)>, Type), JobError> {
+    let (typed, throws) = flow_typing_utils::abnormal::catch_expr_control_flow_exception(|| {
+        expression(None, None, None, cx, expr)
+    })?;
+    let t = if throws {
+        empty_t::at(typed.loc().0.dupe())
+    } else {
+        typed.loc().1.dupe()
+    };
+    Ok((typed, t))
+}
+
 pub fn identifier<'a>(
     encl_ctx: EnclosingContext,
     cx: &mut Context<'a>,

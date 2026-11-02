@@ -43,3 +43,14 @@ function defaultMaySkipThrow() {
   let x: number = 1;
   x as number;
 }
+
+function throwingParameterDefault(value: number = match (kind) { _ => invariant(false) }) {
+  value as string; // error: the body is checked
+}
+throwingParameterDefault as number; // error: a function is not a number
+throwingParameterDefault('not a number'); // error
+
+function throwingDestructuringDefault() {
+  const {value = match (kind) { _ => invariant(false) }} = object;
+  value as string; // error: `value` is a number when the default is skipped
+}

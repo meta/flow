@@ -138,5 +138,72 @@ References:
               ^^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------------------- defaults.js:48:3
 
-Found 8 errors
+Cannot cast `value` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   defaults.js:48:3
+   48|   value as string; // error: the body is checked
+         ^^^^^
+
+References:
+   defaults.js:47:42
+   47| function throwingParameterDefault(value: number = match (kind) { _ => invariant(false) }) {
+                                                ^^^^^^ [1]
+   defaults.js:48:12
+   48|   value as string; // error: the body is checked
+                  ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- defaults.js:50:1
+
+Cannot cast `throwingParameterDefault` to `number` because `(value?: number) => void` [1] is incompatible with
+`number` [2]. [incompatible-type]
+
+   defaults.js:50:1
+   50| throwingParameterDefault as number; // error: a function is not a number
+       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   defaults.js:47:1
+   47| function throwingParameterDefault(value: number = match (kind) { _ => invariant(false) }) {
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   defaults.js:50:29
+   50| throwingParameterDefault as number; // error: a function is not a number
+                                   ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ defaults.js:51:26
+
+Cannot call `throwingParameterDefault` with `'not a number'` bound to `value` because `"not a number"` [1] is
+incompatible with `number` [2]. [incompatible-type]
+
+   defaults.js:51:26
+   51| throwingParameterDefault('not a number'); // error
+                                ^^^^^^^^^^^^^^ [1]
+
+References:
+   defaults.js:47:42
+   47| function throwingParameterDefault(value: number = match (kind) { _ => invariant(false) }) {
+                                                ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- defaults.js:55:3
+
+Cannot cast `value` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   defaults.js:55:3
+   55|   value as string; // error: `value` is a number when the default is skipped
+         ^^^^^
+
+References:
+   defaults.js:1:32
+    1| declare const object: {value?: number};
+                                      ^^^^^^ [1]
+   defaults.js:55:12
+   55|   value as string; // error: `value` is a number when the default is skipped
+                  ^^^^^^ [2]
+
+
+
+Found 12 errors
