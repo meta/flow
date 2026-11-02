@@ -84,20 +84,20 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- regexp.js:13:1
 
-Cannot cast `matches` to `RegExpStringIterator<RegExpMatchArray | null>` because in type argument `T` [1]: `null` [2] is
+Cannot cast `matches` to `RegExpStringIterator<RegExpExecArray | null>` because in type argument `T` [1]: `null` [2] is
 incompatible with `RegExpExecArray` [3]. [incompatible-type]
 
    regexp.js:13:1
-   13| matches as RegExpStringIterator<RegExpMatchArray | null>; // error: invariant
+   13| matches as RegExpStringIterator<RegExpExecArray | null>; // error: invariant
        ^^^^^^^
 
 References:
    <BUILTINS>/lib.es2020.symbol.wellknown.js:31:32
    31| interface RegExpStringIterator<T> extends IteratorObject<T, BuiltinIteratorReturn, unknown> {
                                       ^ [1]
-   regexp.js:13:52
-   13| matches as RegExpStringIterator<RegExpMatchArray | null>; // error: invariant
-                                                          ^^^^ [2]
+   regexp.js:13:51
+   13| matches as RegExpStringIterator<RegExpExecArray | null>; // error: invariant
+                                                         ^^^^ [2]
    <BUILTINS>/lib.es2020.string.js:30:52
    30|     matchAll(regexp: RegExp): RegExpStringIterator<RegExpExecArray>;
                                                           ^^^^^^^^^^^^^^^ [3]
