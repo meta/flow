@@ -284,6 +284,7 @@ pub(super) fn inst_structural_subtype<'cx>(
             lower: lower.dupe(),
             upper: upper.dupe(),
             strictness_kind,
+            upper_strictness_kind: strictness_kind,
             lit: false,
             lower_upper_subtyping_obj_ts: None,
         };

@@ -193,6 +193,72 @@ References:
             ^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------- indexer_key_pattern_usage.js:23:18
+
+Cannot cast object literal to `DataAttributes` because in property `data-testid`: [incompatible-type]
+ - Either `1` [1] is incompatible with `string` [2].
+ - Or `1` [1] is incompatible with `void` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   indexer_key_pattern_usage.js:23:18
+   23| ({'data-testid': 1}) as DataAttributes; // ERROR: number vs string
+                        ^ [1]
+
+References:
+   indexer_key_pattern_lib.ts:3:56
+    3| export type DataAttributes = {[key: `data-${string}`]: string | undefined};
+                                                              ^^^^^^ [2]
+   indexer_key_pattern_lib.ts:3:65
+    3| export type DataAttributes = {[key: `data-${string}`]: string | undefined};
+                                                                       ^^^^^^^^^ [3]
+
+
+Error -------------------------------------------------------------------------------- indexer_key_pattern_usage.js:24:2
+
+Cannot cast object literal to `ButtonProps` because object literal [1] is incompatible with `ButtonProps` [2]. For
+example, `1` [3] is incompatible with `void` [4]. [incompatible-type]
+
+   indexer_key_pattern_usage.js:24:2
+   24| ({label: 'x', 'data-testid': 1}) as ButtonProps; // ERROR: number vs string
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+References:
+   indexer_key_pattern_usage.js:24:37
+   24| ({label: 'x', 'data-testid': 1}) as ButtonProps; // ERROR: number vs string
+                                           ^^^^^^^^^^^ [2]
+   indexer_key_pattern_usage.js:24:30
+   24| ({label: 'x', 'data-testid': 1}) as ButtonProps; // ERROR: number vs string
+                                    ^ [3]
+   indexer_key_pattern_lib.ts:8:37
+    8|   [key: `data-${string}`]: string | undefined;
+                                           ^^^^^^^^^ [4]
+
+
+Error -------------------------------------------------------------------------------- indexer_key_pattern_usage.js:27:1
+
+Cannot cast `labeled` to `{[key: "data-a" | "data-b"]: string}` because property `label` is missing in
+`{[key: "data-a" | "data-b"]: string}` [1] but exists in `{label: string}` [2]. Any property that does not exist in
+`{[key: "data-a" | "data-b"]: string}` [1] must be compatible with its indexer `"data-a" | "data-b"` [3].
+[incompatible-type]
+
+   indexer_key_pattern_usage.js:27:1
+   27| labeled as {[key: 'data-a' | 'data-b']: string, ...}; // ERROR: `label` vs indexer
+       ^^^^^^^
+
+References:
+   indexer_key_pattern_usage.js:27:12
+   27| labeled as {[key: 'data-a' | 'data-b']: string, ...}; // ERROR: `label` vs indexer
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   indexer_key_pattern_usage.js:14:24
+   14| declare const labeled: {label: string};
+                              ^^^^^^^^^^^^^^^ [2]
+   indexer_key_pattern_usage.js:27:19
+   27| labeled as {[key: 'data-a' | 'data-b']: string, ...}; // ERROR: `label` vs indexer
+                         ^^^^^^^^^^^^^^^^^^^ [3]
+
+
 Error ----------------------------------------------------------------------------- indexer_optional_props_usage.js:16:1
 
 Cannot cast `dict` to `SomeRequired` because in property `a`: `number` [1] is incompatible with `string` [2].
@@ -524,4 +590,4 @@ References:
 
 
 
-Found 31 errors
+Found 34 errors

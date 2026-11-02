@@ -1542,6 +1542,7 @@ pub(super) struct PropsToIndexerContext<'a> {
     pub(super) lower: Type,
     pub(super) upper: Type,
     pub(super) strictness_kind: TypeStrictnessKind,
+    pub(super) upper_strictness_kind: TypeStrictnessKind,
     pub(super) lit: bool,
     pub(super) lower_upper_subtyping_obj_ts: Option<(Type, Type)>,
 }
@@ -1658,6 +1659,10 @@ impl PropsToIndexerContext<'_> {
                 if FlowJs::speculative_subtyping_succeeds_with_flow_errors(cx, env, &key_type, key)?
                 {
                     flow_prop_to_indexer(cx, lp, name)?;
+                } else if self.upper_strictness_kind.is_typescript_loose() {
+                    // A TypeScript index signature only constrains the properties whose key it
+                    // applies to.
+                    continue;
                 } else {
                     // Without object types (`inst_structural_subtype`), the caller only passes
                     // props whose key already passed this check.
@@ -2599,6 +2604,7 @@ fn flow_obj_to_obj<'cx>(
                 lower: l.dupe(),
                 upper: u.dupe(),
                 strictness_kind,
+                upper_strictness_kind: *ustrictness_kind,
                 lit,
                 lower_upper_subtyping_obj_ts: Some((lower, upper)),
             }
