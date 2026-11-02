@@ -1388,7 +1388,7 @@ pub enum RootMessage<L: Dupe> {
     },
     RootCannotShadowProto(NamedReferenceData<L>),
     RootCannotShadowProtoProperty,
-    RootCannotSpread(Option<VirtualReasonDesc<L>>),
+    RootCannotSpread(ValueDesc<L>),
     RootCannotUpdate(Option<VirtualReasonDesc<L>>),
     RootCannotUseInferTypeBound {
         infer: Option<VirtualReasonDesc<L>>,

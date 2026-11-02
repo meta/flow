@@ -1109,7 +1109,7 @@ where
                 body: ExpressionReferenceData { loc: f(loc), kind },
             })),
             ObjectAddComputedProperty { op } => ObjectAddComputedProperty { op: mod_reason(op) },
-            ObjectSpread { op } => ObjectSpread { op: mod_reason(op) },
+            ObjectSpread { op } => ObjectSpread { op: mod_value(op) },
             ObjectRest { op } => ObjectRest { op: mod_reason(op) },
             ObjectChain { op } => ObjectChain { op: mod_reason(op) },
             AssignVar { var, init } => AssignVar {

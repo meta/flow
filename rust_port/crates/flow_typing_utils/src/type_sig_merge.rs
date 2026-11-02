@@ -19,6 +19,8 @@ use flow_aloc::ALoc;
 use flow_aloc::ALocTable;
 use flow_aloc::aloc_representation_do_not_use;
 use flow_common::alpha_rename;
+use flow_common::error_ref::ExpressionReferenceData;
+use flow_common::error_ref::ExpressionReferenceKind;
 use flow_common::error_ref::FunctionReferenceKind;
 use flow_common::flow_import_specifier::FlowImportSpecifier;
 use flow_common::flow_import_specifier::Userland;
@@ -3554,7 +3556,10 @@ fn merge_obj_spread_lit<'cx>(
         },
     };
     let use_op = type_::UseOp::Op(Arc::new(type_::RootUseOp::ObjectSpread {
-        op: reason.dupe(),
+        op: type_::ValueReference::Expression(Box::new(ExpressionReferenceData {
+            loc: loc.dupe(),
+            kind: ExpressionReferenceKind::ObjectLiteral,
+        })),
     }));
     let acc: flow_data_structure_wrapper::list::FlowOcamlList<
         flow_typing_type::type_::object::spread::AccElement,

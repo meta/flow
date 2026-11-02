@@ -100,6 +100,7 @@ use flow_typing_errors::intermediate_error_types;
 use flow_typing_errors::intermediate_error_types::ContextDependentUnsupportedStatement;
 use flow_typing_errors::intermediate_error_types::DeclareComponentInvalidParamKind;
 use flow_typing_errors::intermediate_error_types::ExpressionReferenceData;
+use flow_typing_errors::intermediate_error_types::ExpressionReferenceKind;
 use flow_typing_errors::intermediate_error_types::MatchInvalidCaseSyntax;
 use flow_typing_errors::intermediate_error_types::NamedReferenceData;
 use flow_typing_errors::intermediate_error_types::NamespaceExportDeclarationKind;
@@ -584,7 +585,7 @@ pub mod object_expression_acc {
             self,
             cx: &mut Context<'a>,
             reason: Reason,
-            spread_op: Reason,
+            spread_op: type_::ValueReference<ALoc>,
             as_const: bool,
             frozen: bool,
             default_proto: Type,
@@ -730,7 +731,7 @@ pub mod object_expression_acc {
                     >(cx, reason.dupe(), |cx, tout| {
                         let use_op =
                             UseOp::Op(std::sync::Arc::new(type_::RootUseOp::ObjectSpread {
-                                op: spread_op.dupe(),
+                                op: spread_op.clone(),
                             }));
                         flow_js::flow_non_speculating(
                             cx,
@@ -6140,8 +6141,11 @@ fn object_<'a>(
     )?;
     let t = acc.mk_object_from_spread_acc(
         cx,
-        reason.dupe(),
         reason,
+        type_::ValueReference::Expression(Box::new(ExpressionReferenceData {
+            loc,
+            kind: ExpressionReferenceKind::ObjectLiteral,
+        })),
         as_const,
         frozen,
         obj_proto,
@@ -13626,7 +13630,7 @@ pub fn jsx_mk_props<'a>(
     let t = acc.mk_object_from_spread_acc(
         cx,
         reason_props,
-        reason,
+        type_::ValueReference::Reason(reason),
         false,
         false,
         proto,

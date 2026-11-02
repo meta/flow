@@ -1694,16 +1694,15 @@ pub fn primary_reason_of_use_op(use_op: &UseOp) -> Option<Reason> {
     use flow_typing_type::type_::root_of_use_op;
 
     let reason = match root_of_use_op(use_op) {
-        RootUseOp::FunReturnStatement { value } | RootUseOp::GeneratorYield { value } => {
-            match value {
-                ValueReference::Expression(expression) => {
-                    return Some(mk_reason(None, expression.loc.dupe()));
-                }
-                ValueReference::Reason(reason) => Some(reason),
+        RootUseOp::FunReturnStatement { value }
+        | RootUseOp::GeneratorYield { value }
+        | RootUseOp::ObjectSpread { op: value } => match value {
+            ValueReference::Expression(expression) => {
+                return Some(mk_reason(None, expression.loc.dupe()));
             }
-        }
+            ValueReference::Reason(reason) => Some(reason),
+        },
         RootUseOp::ObjectAddComputedProperty { op }
-        | RootUseOp::ObjectSpread { op }
         | RootUseOp::ObjectRest { op }
         | RootUseOp::ObjectChain { op }
         | RootUseOp::DeclareComponentRef { op }

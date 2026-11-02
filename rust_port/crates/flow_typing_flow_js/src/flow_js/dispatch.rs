@@ -82,6 +82,7 @@ use flow_typing_type::type_::TypeStrictnessKind;
 use flow_typing_type::type_::UnresolvedArgData;
 use flow_typing_type::type_::UseT;
 use flow_typing_type::type_::UseTInner::*;
+use flow_typing_type::type_::ValueReference;
 use flow_typing_type::type_::ValueToTypeReferenceTData;
 use flow_typing_type::type_::WriteElemData;
 use flow_typing_type::type_::object::ObjectToolObjectMapData;
@@ -6747,7 +6748,7 @@ fn __flow_impl<'cx>(
             );
             // Combine super and own props.
             let use_op = UseOp::Op(std::sync::Arc::new(VirtualRootUseOp::ObjectSpread {
-                op: reason_op.dupe(),
+                op: ValueReference::Reason(reason_op.dupe()),
             }));
             let spread_tool = object::ResolveTool::Resolve(object::Resolve::Next);
             let spread_target = object::spread::Target::Value {

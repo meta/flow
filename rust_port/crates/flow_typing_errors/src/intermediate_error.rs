@@ -1633,13 +1633,16 @@ where
                                 custom_error_message,
                             ),
 
-                            VirtualRootUseOp::ObjectSpread { op } => root(
-                                loc,
-                                frames,
-                                op,
-                                RootMessage::RootCannotSpread(op.desc.clone()),
-                                custom_error_message,
-                            ),
+                            VirtualRootUseOp::ObjectSpread { op } => {
+                                let (op_loc, op) = value_desc_of_reference(op);
+                                root_at_loc(
+                                    loc,
+                                    frames,
+                                    loc_of_aloc(op_loc),
+                                    RootMessage::RootCannotSpread(op),
+                                    custom_error_message,
+                                )
+                            }
 
                             VirtualRootUseOp::ObjectRest { op } => root(
                                 loc,
@@ -5723,10 +5726,7 @@ where
                 ),
                 RootMessage::RootCannotSpread(op) => (
                     RootKind::OperationRoot,
-                    friendly::Message(vec![
-                        text("Cannot spread "),
-                        friendly::desc_of_reason_desc(op.as_ref()),
-                    ]),
+                    friendly::Message(vec![text("Cannot spread "), desc_of_value_desc(op)]),
                 ),
                 RootMessage::RootCannotUpdate(prop) => (
                     RootKind::OperationRoot,

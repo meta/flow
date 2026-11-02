@@ -23,6 +23,8 @@ use dupe::OptionDupedExt;
 use flow_aloc::ALoc;
 use flow_analysis::bindings::Kind;
 use flow_common::enclosing_context::EnclosingContext;
+use flow_common::error_ref::ExpressionReferenceData;
+use flow_common::error_ref::ExpressionReferenceKind;
 use flow_common::files;
 use flow_common::flow_import_specifier;
 use flow_common::polarity::Polarity;
@@ -720,7 +722,7 @@ fn resolve_hint<'cx>(
                         acc.mk_object_from_spread_acc(
                             cx,
                             obj_reason.dupe(),
-                            obj_reason,
+                            type_::ValueReference::Reason(obj_reason),
                             false,
                             false,
                             default_proto,
@@ -1711,8 +1713,11 @@ fn resolve_binding<'cx>(
                 )?;
                 Ok(acc.mk_object_from_spread_acc(
                     cx,
-                    obj_reason.dupe(),
                     obj_reason,
+                    type_::ValueReference::Expression(Box::new(ExpressionReferenceData {
+                        loc: obj_loc,
+                        kind: ExpressionReferenceKind::ObjectLiteral,
+                    })),
                     false,
                     false,
                     obj_proto,

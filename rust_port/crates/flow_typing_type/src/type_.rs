@@ -1791,7 +1791,7 @@ pub enum VirtualRootUseOp<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
         op: VirtualReason<L>,
     },
     ObjectSpread {
-        op: VirtualReason<L>,
+        op: ValueReference<L>,
     },
     ObjectRest {
         op: VirtualReason<L>,
