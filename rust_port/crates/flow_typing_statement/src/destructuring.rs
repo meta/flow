@@ -407,7 +407,9 @@ fn identifier<'a>(
                 default: flow_js_utils::type_or_type_desc_for_error(t),
             }))
         }
-        (_, Some(init)) => AssignVarInit::Reason(flow_common::reason::mk_expression_reason(init)),
+        (_, Some(init)) => {
+            AssignVarInit::Expression(Box::new(flow_common::reason::mk_expression_reference(init)))
+        }
         _ => AssignVarInit::Reason(type_util::reason_of_t(&current).dupe()),
     };
     let use_op = UseOp::Op(Arc::new(RootUseOp::AssignVar {

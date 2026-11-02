@@ -1659,6 +1659,10 @@ where
 
                             VirtualRootUseOp::AssignVar { var, init } => {
                                 let (init_loc, init) = match init {
+                                    AssignVarInit::Expression(expression) => (
+                                        &expression.loc,
+                                        ValueDesc::Expression(expression.kind.dupe()),
+                                    ),
                                     AssignVarInit::Reason(reason) => {
                                         (&reason.loc, ValueDesc::Reason(reason.desc.clone()))
                                     }

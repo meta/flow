@@ -7094,6 +7094,9 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                             })
                         });
                         let init = match init {
+                            AssignVarInit::Expression(expression) => {
+                                AssignVarInit::Expression(expression.clone())
+                            }
                             AssignVarInit::Reason(reason) => AssignVarInit::Reason(reason.dupe()),
                             AssignVarInit::Default(box AssignVarDefaultData { loc, default }) => {
                                 AssignVarInit::Default(Box::new(AssignVarDefaultData {

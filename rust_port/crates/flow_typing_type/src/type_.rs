@@ -1151,8 +1151,8 @@ pub enum AssignVarTarget<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     },
 }
 
-/// What an `AssignVar` assigns: a value referenced by its reason, or a default value, which is
-/// printed as its type.
+/// What an `AssignVar` assigns: an expression, a value referenced by its reason, or a default
+/// value, which is printed as its type.
 #[derive(
     Debug,
     Clone,
@@ -1165,6 +1165,7 @@ pub enum AssignVarTarget<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
     serde::Deserialize
 )]
 pub enum AssignVarInit<L: Dupe + PartialEq + Eq + PartialOrd + Ord> {
+    Expression(Box<ExpressionReferenceData<L>>),
     Reason(VirtualReason<L>),
     Default(Box<AssignVarDefaultData<L>>),
 }

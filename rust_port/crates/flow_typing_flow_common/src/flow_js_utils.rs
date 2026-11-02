@@ -1725,6 +1725,9 @@ pub fn primary_reason_of_use_op(use_op: &UseOp) -> Option<Reason> {
             Some(AssignVarTarget::Annotation(TypeOrTypeDescT::Type(t))) => Some(reason_of_t(t)),
             Some(AssignVarTarget::Annotation(TypeOrTypeDescT::TypeDesc(_))) => None,
             None => match init {
+                AssignVarInit::Expression(expression) => {
+                    return Some(mk_reason(None, expression.loc.dupe()));
+                }
                 AssignVarInit::Reason(reason) => Some(reason),
                 AssignVarInit::Default(box AssignVarDefaultData {
                     default: TypeOrTypeDescT::Type(t),

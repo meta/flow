@@ -13,7 +13,7 @@ use flow_aloc::ALoc;
 use flow_common::enclosing_context::EnclosingContext;
 use flow_common::js_number;
 use flow_common::reason::VirtualReasonDesc;
-use flow_common::reason::mk_expression_reason;
+use flow_common::reason::mk_expression_reference;
 use flow_common::reason::mk_reason;
 use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 use flow_env_builder::env_api::DefLocType;
@@ -212,7 +212,7 @@ fn binding<'a>(
     let use_op = UseOp::Op(std::sync::Arc::new(
         flow_typing_type::type_::RootUseOp::AssignVar {
             var: Some(Box::new(AssignVarTarget::Variable(reason.dupe()))),
-            init: AssignVarInit::Reason(mk_expression_reason(acc)),
+            init: AssignVarInit::Expression(Box::new(mk_expression_reference(acc))),
         },
     ));
     on_binding(cx, &use_op, name_loc, kind, name, current)

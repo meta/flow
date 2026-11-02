@@ -6210,27 +6210,27 @@ fn variable<'a>(
     // be initialized, since their declaration involves some operation on the
     // right hand side, like a property access.
     let (init_opt, init_ast): (
-        Option<(Type, Reason)>,
+        Option<(Type, type_::AssignVarInit<ALoc>)>,
         Option<expression::Expression<ALoc, (ALoc, Type)>>,
     ) = match (id, init, &if_uninitialized) {
         (ast::pattern::Pattern::Identifier { .. }, None, None) => (None, None),
         (_, Some(expr), _) => {
             let init_ast = expression(None, None, None, cx, expr)?;
             let t = init_ast.loc().1.dupe();
-            let r = mk_expression_reason(expr);
-            (Some((t, r)), Some(init_ast))
+            let init = type_::AssignVarInit::Expression(Box::new(mk_expression_reference(expr)));
+            (Some((t, init)), Some(init_ast))
         }
         (_, None, Some(f)) => {
             let ploc = id.loc().dupe();
             let t = f(ploc);
-            let r = reason_of_t(&t).dupe();
-            (Some((t, r)), None)
+            let init = type_::AssignVarInit::Reason(reason_of_t(&t).dupe());
+            (Some((t, init)), None)
         }
         (_, None, None) => {
             let ploc = id.loc().dupe();
             let t = type_::void::at(ploc);
-            let r = reason_of_t(&t).dupe();
-            (Some((t, r)), None)
+            let init = type_::AssignVarInit::Reason(reason_of_t(&t).dupe());
+            (Some((t, init)), None)
         }
     };
 
@@ -6270,10 +6270,10 @@ fn variable<'a>(
                     (t, ast::types::AnnotationOrHint::Available(ast_annot))
                 }
             };
-            if let Some((ref init_t, ref init_reason)) = init_opt {
+            if let Some((ref init_t, ref init)) = init_opt {
                 let use_op = UseOp::Op(Arc::new(type_::RootUseOp::AssignVar {
                     var: Some(Box::new(type_::AssignVarTarget::Variable(id_reason.dupe()))),
-                    init: type_::AssignVarInit::Reason(init_reason.dupe()),
+                    init: init.clone(),
                 }));
                 let init_t = if init_fills_annotated_symbol {
                     &annot_t
@@ -6307,13 +6307,13 @@ fn variable<'a>(
                         avail_annot,
                         BindsSingleValue::No,
                     )?;
-                    if let Some((ref init_t, ref init_reason)) = init_opt {
+                    if let Some((ref init_t, ref init)) = init_opt {
                         let use_op = UseOp::Op(Arc::new(type_::RootUseOp::AssignVar {
                             var: Some(Box::new(type_::AssignVarTarget::Pattern {
                                 reason: id_reason.dupe(),
                                 annot: flow_js_utils::type_or_type_desc_for_error(&annot_t),
                             })),
-                            init: type_::AssignVarInit::Reason(init_reason.dupe()),
+                            init: init.clone(),
                         }));
                         flow_js::flow_non_speculating(
                             cx,
@@ -12288,7 +12288,7 @@ fn op_assignment<'a>(
     CheckExprError,
 > {
     let reason = mk_reason(None, loc.dupe());
-    let rhs_reason = mk_expression_reason(rhs);
+    let rhs_reference = mk_expression_reference(rhs);
     let update_env = |cx: &mut Context<'a>, result_t: &Type| -> Result<(), CheckExprError> {
         let (lhs, _) = flow_parser::ast_utils::unwrap_nonnull_lhs(lhs);
         match lhs.as_ref() {
@@ -12300,7 +12300,7 @@ fn op_assignment<'a>(
                         VirtualReasonDesc::RIdentifier(name.name.dupe()),
                         id_loc.dupe(),
                     )))),
-                    init: type_::AssignVarInit::Reason(rhs_reason.dupe()),
+                    init: type_::AssignVarInit::Expression(Box::new(rhs_reference.clone())),
                 }));
                 type_env::set_var(cx, &use_op, &name.name, result_t, id_loc)?;
             }

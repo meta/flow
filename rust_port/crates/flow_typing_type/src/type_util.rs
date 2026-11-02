@@ -1128,6 +1128,12 @@ where
                     })
                 }),
                 init: match init {
+                    AssignVarInit::Expression(box ExpressionReferenceData { loc, kind }) => {
+                        AssignVarInit::Expression(Box::new(ExpressionReferenceData {
+                            loc: f(loc),
+                            kind,
+                        }))
+                    }
                     AssignVarInit::Reason(reason) => AssignVarInit::Reason(mod_reason(reason)),
                     AssignVarInit::Default(box AssignVarDefaultData { loc, default }) => {
                         AssignVarInit::Default(Box::new(AssignVarDefaultData {
