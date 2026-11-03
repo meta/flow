@@ -3642,10 +3642,10 @@ pub mod kit {
         // placeholder.
         let deferred =
             |cx: &mut Context<'cx>| cx.mk_placeholder(reason.dupe(), mixed_t::why(reason.dupe()));
+        // Only the types that decide the branch matter. A placeholder in a branch is carried by
+        // the result when that branch is chosen.
         if flow_js_utils::tvar_visitors::has_placeholders(cx, check_t)
             || flow_js_utils::tvar_visitors::has_placeholders(cx, extends_t)
-            || flow_js_utils::tvar_visitors::has_placeholders(cx, true_t)
-            || flow_js_utils::tvar_visitors::has_placeholders(cx, false_t)
         {
             flow_typing_debug::verbose::print_if_verbose(
                 cx,

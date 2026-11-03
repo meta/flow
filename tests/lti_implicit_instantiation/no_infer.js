@@ -35,3 +35,10 @@ declare function f6<T>(
 ): void;
 f6({a: ''}, {a: ''}); // ok
 f6({a: ''}, {a: 3}); // error: number ~> string
+
+declare function f10<T>(
+  x: string extends string ? {a: T, b: NoInfer<T>} : null,
+): T;
+const r10 = f10({a: '', b: ''}); // ok
+r10 as string; // ok
+f10({a: '', b: 1}); // error: number ~> string
