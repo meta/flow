@@ -7,6 +7,9 @@ description: Detailed guides, tips, and resources on how to integrate Flow with 
 
 import DocCardList from '@theme/DocCardList';
 
+[flow-parser](https://www.npmjs.com/package/flow-parser) is the recommended parser for Flow code and supports the latest Flow syntax.
+Prettier includes it by default; see [our Prettier guide](./prettier.md) for configuration.
+
 <DocCardList items={[
   {type: 'link', label: 'Babel', href: '/en/docs/tools/babel'},
   {type: 'link', label: 'SWC', href: '/en/docs/tools/swc'},

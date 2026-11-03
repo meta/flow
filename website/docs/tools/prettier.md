@@ -4,21 +4,22 @@ slug: /tools/prettier
 description: "How to set up Prettier to format Flow-typed JavaScript code, including support for the latest Flow features."
 ---
 
-All Flow features are supported by [Prettier](https://prettier.io/).
+The latest version of [Prettier](https://prettier.io/) supports Flow syntax, including pattern matching, component syntax, and type guards.
+Prettier includes [flow-parser](https://www.npmjs.com/package/flow-parser) by default, so no separate parser package or plugin is needed.
 See [these instructions](https://prettier.io/docs/install) on how to install Prettier to your project.
 
-To enable full support for the latest Flow features (e.g. pattern matching and type guards) make
-sure to also install the [@prettier/plugin-hermes](https://www.npmjs.com/package/@prettier/plugin-hermes) plugin,
-for example with:
+To use the built-in `flow` parser instead of Prettier's default `babel` parser for JavaScript files, add this override to your `.prettierrc`:
+
+```json
+{
+  "overrides": [
+    {
+      "files": ["*.js", "*.jsx"],
+      "options": {"parser": "flow"}
+    }
+  ]
+}
 ```
-yarn add --dev @prettier/plugin-hermes
-```
-and include
-```
-plugins:
-  - "@prettier/plugin-hermes"
-```
-to your `.prettierrc` file.
 
 ## See Also {#toc-see-also}
 
