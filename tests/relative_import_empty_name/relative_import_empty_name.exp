@@ -1,0 +1,19 @@
+Error ------------------------------------------------------------------------------------------------------ test.js:8:1
+
+Cannot cast `value` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:8:1
+   8| value as string; // ERROR
+      ^^^^^
+
+References:
+   dep.js:1:21
+   1| export const value: number = 1;
+                          ^^^^^^ [1]
+   test.js:8:10
+   8| value as string; // ERROR
+               ^^^^^^ [2]
+
+
+
+Found 1 error

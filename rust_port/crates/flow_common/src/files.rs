@@ -1244,7 +1244,18 @@ pub fn normalize_path(dir: &str, file: &str) -> String {
     };
 
     let parts: Vec<&str> = file.split(&['/', '\\'][..]).collect();
-    normalize_path_parts(dir, &parts)
+    match parts.as_slice() {
+        ["", rest @ ..] if !rest.is_empty() => {
+            // /<names> => /<names>
+            construct_path(std::path::MAIN_SEPARATOR_STR, rest)
+        }
+        [root, rest @ ..] if is_windows_root(root) => {
+            // c:\<names> => C:\<names>
+            let root = root.to_uppercase();
+            construct_path(&format!("{}{}", root, std::path::MAIN_SEPARATOR), rest)
+        }
+        _ => normalize_path_parts(dir, &parts),
+    }
 }
 
 fn normalize_path_parts(dir: &str, parts: &[&str]) -> String {
@@ -1262,13 +1273,8 @@ fn normalize_path_parts(dir: &str, parts: &[&str]) -> String {
             normalize_path_parts(&parent, rest)
         }
         ["", rest @ ..] if !rest.is_empty() => {
-            // /<names> => /<names>
-            construct_path(std::path::MAIN_SEPARATOR_STR, rest)
-        }
-        [root, rest @ ..] if is_windows_root(root) => {
-            // c:\<names> => C:\<names>
-            let root = root.to_uppercase();
-            construct_path(&format!("{}{}", root, std::path::MAIN_SEPARATOR), rest)
+            // .//<names> => dir/<names>
+            normalize_path_parts(dir, rest)
         }
         _ => {
             // <names> => dir/<names>
@@ -1765,6 +1771,23 @@ mod tests {
         };
 
         assert_eq!(super::absolute_path(root, "../outside/helper.js"), expected);
+    }
+
+    #[cfg(not(windows))]
+    #[test]
+    fn normalize_path_ignores_empty_names_after_the_first() {
+        assert_eq!(
+            super::normalize_path("/project/dist", ".//index.js"),
+            "/project/dist/index.js"
+        );
+        assert_eq!(
+            super::normalize_path("/project/dist", "..//lib/index.js"),
+            "/project/lib/index.js"
+        );
+        assert_eq!(
+            super::normalize_path("/project/dist", "/lib/index.js"),
+            "/lib/index.js"
+        );
     }
 
     #[cfg(windows)]
