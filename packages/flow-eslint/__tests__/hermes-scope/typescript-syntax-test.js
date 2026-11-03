@@ -23,6 +23,50 @@ function references(scope: Scope) {
 }
 
 describe('TypeScript-compatible syntax', () => {
+  test('visits class member decorators', () => {
+    const {scopeManager} = parseForESLint(
+      'class A { @OnEvent(EVENT) handle() {} @Column() name = ""; }',
+    );
+    const classScope = scopeManager.scopes.find(
+      scope => scope.type === ScopeType.Class,
+    );
+
+    expect(classScope == null ? null : references(classScope)).toEqual([
+      {name: 'OnEvent', type: false, value: true},
+      {name: 'EVENT', type: false, value: true},
+      {name: 'Column', type: false, value: true},
+    ]);
+  });
+
+  test('visits parameter property annotations and defaults', () => {
+    const {scopeManager} = parseForESLint(
+      'class A { constructor(private readonly s: Service = fallback) {} }',
+      {sourceFilename: 'file.ts'},
+    );
+    const functionScope = scopeManager.scopes.find(
+      scope => scope.type === ScopeType.Function,
+    );
+
+    expect(functionScope?.variables.map(variable => variable.name)).toContain(
+      's',
+    );
+    expect(functionScope == null ? null : references(functionScope)).toEqual([
+      {name: 'Service', type: true, value: false},
+      {name: 'fallback', type: false, value: true},
+    ]);
+  });
+
+  test('`declare global` augments the global scope without binding a name', () => {
+    const {scopeManager} = parseForESLint(
+      'declare global { interface Window { foo: string } }\ndeclare namespace NS { const x: number; }',
+    );
+    const moduleScope = scopeManager.scopes[1];
+
+    expect(moduleScope.variables.map(variable => variable.name)).toEqual([
+      'NS',
+    ]);
+  });
+
   test('visits satisfies annotations as types', () => {
     const {scopeManager} = parseForESLint(
       'const result = value satisfies SomeType;',

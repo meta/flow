@@ -331,6 +331,22 @@ class Referencer extends Visitor {
 
     // Process parameter declarations.
     for (const param of node.params) {
+      // TypeScript `constructor(private x: T = v)`: an ordinary parameter that
+      // also declares a class property. Not yet part of the flow-estree types.
+      // $FlowFixMe[unclear-type]
+      const parameterProperty: any = param;
+      if (parameterProperty.type === 'ParameterProperty') {
+        this.currentScope().defineIdentifier(
+          parameterProperty.key,
+          new ParameterDefinition(parameterProperty.key, node, false),
+        );
+        this.visitType(parameterProperty.typeAnnotation);
+        this.visit(parameterProperty.value);
+        for (const decorator of parameterProperty.decorators ?? []) {
+          this.visit(decorator);
+        }
+        continue;
+      }
       if (param.type === 'Identifier' && param.name === 'this') {
         // `this` parameters don't declare variables, nor can they have default values
         // but will have an annotation

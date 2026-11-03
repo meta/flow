@@ -104,6 +104,8 @@ class ClassVisitor extends Visitor {
   }
 
   visitProperty(node: PropertyDefinition): void {
+    node.decorators?.forEach(d => this._referencer.visit(d));
+
     if (node.computed) {
       this._referencer.visit(node.key);
     }
@@ -123,6 +125,8 @@ class ClassVisitor extends Visitor {
   }
 
   visitMethod(node: MethodDefinition): void {
+    node.decorators?.forEach(d => this._referencer.visit(d));
+
     if (node.computed) {
       this._referencer.visit(node.key);
     }

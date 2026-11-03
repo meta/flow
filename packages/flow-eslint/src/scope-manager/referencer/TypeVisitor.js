@@ -289,9 +289,12 @@ class TypeVisitor extends Visitor {
   }
 
   DeclareNamespace(node: DeclareNamespace): void {
-    this._referencer
-      .currentScope()
-      .defineIdentifier(node.id, new NamespaceNameDefinition(node.id, node));
+    // `declare global {}` augments the global scope; it binds no name.
+    if (node.global !== true) {
+      this._referencer
+        .currentScope()
+        .defineIdentifier(node.id, new NamespaceNameDefinition(node.id, node));
+    }
 
     this._referencer.scopeManager.nestDeclareNamespaceScope(node);
     this.visit(node.body);

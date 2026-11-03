@@ -19,6 +19,11 @@ import {analyze} from './scope-manager';
 
 type ParseForESLintOptions = Readonly<{
   ...PartialAnalyzeOptions,
+  /**
+   * Path of the file being parsed; lets the parser recognise ambient files
+   * (`.d.ts`, `.js.flow`) by extension.
+   */
+  sourceFilename?: string,
 }>;
 
 function parse(code: string, options?: ParseForESLintOptions): Program {
@@ -33,6 +38,9 @@ function parse(code: string, options?: ParseForESLintOptions): Program {
       options?.enableExperimentalFlowMatchSyntax ?? true,
     enableExperimentalFlowRecordSyntax:
       options?.enableExperimentalFlowRecordSyntax ?? true,
+    ...(options?.sourceFilename != null
+      ? {sourceFilename: options.sourceFilename}
+      : null),
   };
 
   try {
@@ -79,7 +87,8 @@ function parseForESLint(
     leave() {},
   });
 
-  const scopeManager = analyze(ast, options);
+  const {sourceFilename: _sourceFilename, ...analyzeOptions} = options ?? {};
+  const scopeManager = analyze(ast, analyzeOptions);
 
   return {
     ast,
