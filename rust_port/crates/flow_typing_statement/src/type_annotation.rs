@@ -7169,6 +7169,28 @@ impl DeferredMethod {
     }
 }
 
+/// Whether `expr` is a literal that a `declare` variable or a declared class property may be
+/// initialized with: a string, number, bigint or boolean literal, or a negated number or
+/// bigint literal.
+pub(crate) fn is_literal_init(expr: &ast::expression::Expression<ALoc, ALoc>) -> bool {
+    match &*expr.0 {
+        ast::expression::ExpressionInner::StringLiteral { .. }
+        | ast::expression::ExpressionInner::NumberLiteral { .. }
+        | ast::expression::ExpressionInner::BigIntLiteral { .. }
+        | ast::expression::ExpressionInner::BooleanLiteral { .. } => true,
+        ast::expression::ExpressionInner::Unary { inner, .. }
+            if inner.operator == ast::expression::UnaryOperator::Minus =>
+        {
+            matches!(
+                &*inner.argument.0,
+                ast::expression::ExpressionInner::NumberLiteral { .. }
+                    | ast::expression::ExpressionInner::BigIntLiteral { .. }
+            )
+        }
+        _ => false,
+    }
+}
+
 fn add_interface_properties<'a>(
     cx: &mut Context<'a>,
     env: &mut ConvertEnv,
@@ -7414,24 +7436,6 @@ fn add_interface_properties<'a>(
                         )
                     }
                     None => false,
-                };
-                let is_literal_init = |expr: &ast::expression::Expression<ALoc, ALoc>| -> bool {
-                    match &*expr.0 {
-                        ast::expression::ExpressionInner::StringLiteral { .. }
-                        | ast::expression::ExpressionInner::NumberLiteral { .. }
-                        | ast::expression::ExpressionInner::BigIntLiteral { .. }
-                        | ast::expression::ExpressionInner::BooleanLiteral { .. } => true,
-                        ast::expression::ExpressionInner::Unary { inner, .. }
-                            if inner.operator == ast::expression::UnaryOperator::Minus =>
-                        {
-                            matches!(
-                                &*inner.argument.0,
-                                ast::expression::ExpressionInner::NumberLiteral { .. }
-                                    | ast::expression::ExpressionInner::BigIntLiteral { .. }
-                            )
-                        }
-                        _ => false,
-                    }
                 };
                 match (init_, &np.value) {
                     (Some(_), _) if !cx.ts_syntax() => {

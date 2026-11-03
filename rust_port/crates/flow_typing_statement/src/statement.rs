@@ -4856,52 +4856,47 @@ fn declare_variable<'a>(
                             init: None,
                         })
                     }
-                    (ast::types::AnnotationOrHint::Missing(missing_loc), Some(init_expr)) => {
-                        match &**init_expr {
-                            ast::expression::ExpressionInner::StringLiteral { .. }
-                            | ast::expression::ExpressionInner::NumberLiteral { .. }
-                            | ast::expression::ExpressionInner::BigIntLiteral { .. }
-                            | ast::expression::ExpressionInner::BooleanLiteral { .. } => {
-                                let init_ast = expression(None, None, Some(true), cx, init_expr)?;
-                                let t = init_ast.loc().1.dupe();
-                                let typed_id = ast::pattern::Pattern::Identifier {
-                                    loc: (pat_loc.dupe(), t.dupe()),
-                                    inner: ast::pattern::Identifier {
-                                        name: ast::Identifier::new(ast::IdentifierInner {
-                                            loc: (id_loc.dupe(), t.dupe()),
-                                            name: id_name.name.dupe(),
-                                            comments: id_name.comments.clone(),
-                                        }),
-                                        annot: ast::types::AnnotationOrHint::Missing((
-                                            missing_loc.dupe(),
-                                            t.dupe(),
-                                        )),
-                                        optional: false,
-                                    }
-                                    .into(),
-                                };
-                                Ok(ast::statement::variable::Declarator {
-                                    loc: decl_loc,
-                                    id: typed_id,
-                                    init: Some(init_ast),
-                                })
+                    (ast::types::AnnotationOrHint::Missing(missing_loc), Some(init_expr))
+                        if type_annotation::is_literal_init(init_expr) =>
+                    {
+                        let init_ast = expression(None, None, Some(true), cx, init_expr)?;
+                        let t = init_ast.loc().1.dupe();
+                        let typed_id = ast::pattern::Pattern::Identifier {
+                            loc: (pat_loc.dupe(), t.dupe()),
+                            inner: ast::pattern::Identifier {
+                                name: ast::Identifier::new(ast::IdentifierInner {
+                                    loc: (id_loc.dupe(), t.dupe()),
+                                    name: id_name.name.dupe(),
+                                    comments: id_name.comments.clone(),
+                                }),
+                                annot: ast::types::AnnotationOrHint::Missing((
+                                    missing_loc.dupe(),
+                                    t.dupe(),
+                                )),
+                                optional: false,
                             }
-                            _ => {
-                                flow_js::add_output_non_speculating(
-                                    cx,
-                                    ErrorMessage::EUnsupportedSyntax(Box::new((
-                                        init_expr.loc().dupe(),
-                                        UnsupportedSyntax::DeclareVariableNonLiteralInit,
-                                    ))),
-                                );
-                                let Ok(v) = polymorphic_ast_mapper::declare_variable_declarator(
-                                    &mut typed_ast_utils::ErrorMapper,
-                                    *kind,
-                                    d,
-                                );
-                                Ok(v)
-                            }
-                        }
+                            .into(),
+                        };
+                        Ok(ast::statement::variable::Declarator {
+                            loc: decl_loc,
+                            id: typed_id,
+                            init: Some(init_ast),
+                        })
+                    }
+                    (ast::types::AnnotationOrHint::Missing(_), Some(init_expr)) => {
+                        flow_js::add_output_non_speculating(
+                            cx,
+                            ErrorMessage::EUnsupportedSyntax(Box::new((
+                                init_expr.loc().dupe(),
+                                UnsupportedSyntax::DeclareVariableNonLiteralInit,
+                            ))),
+                        );
+                        let Ok(v) = polymorphic_ast_mapper::declare_variable_declarator(
+                            &mut typed_ast_utils::ErrorMapper,
+                            *kind,
+                            d,
+                        );
+                        Ok(v)
                     }
                     (ast::types::AnnotationOrHint::Available(_), Some(init_expr)) => {
                         flow_js::add_output_non_speculating(

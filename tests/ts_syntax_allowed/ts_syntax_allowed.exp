@@ -143,6 +143,23 @@ Destructuring is not supported in `declare` variable declarations. [unsupported-
                      ^^^
 
 
+Error ------------------------------------------------------------------------------ declare_var_negative_literal.js:7:1
+
+Cannot cast `neg` to `8` because `-8` [1] is incompatible with `8` [2]. [incompatible-type]
+
+   declare_var_negative_literal.js:7:1
+   7| neg as 8; // ERROR - -8 !== 8
+      ^^^
+
+References:
+   declare_var_negative_literal.js:2:21
+   2| declare const neg = -8;
+                          ^^ [1]
+   declare_var_negative_literal.js:7:8
+   7| neg as 8; // ERROR - -8 !== 8
+             ^ [2]
+
+
 Error ------------------------------------------------------------------------------------------------ exported.js:10:20
 
 Cannot use `T` [1] in an input position because `T` [1] is expected to occur only in output positions.
@@ -1234,4 +1251,4 @@ Cannot assign empty string to `exported_with_ts_typenames.e.foo` because propert
 
 
 
-Found 91 errors
+Found 92 errors
