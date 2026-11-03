@@ -359,6 +359,47 @@ References:
                                                       ^^^^^^ [2]
 
 
+Error ----------------------------------------------------------------------------------- recursive_tuple_spread.ts:9:23
+
+Cannot spread non-tuple
+(`Rest extends Readonly<[infer Head, ...infer Rest]> ? SubTuples<Rest> | [Head, ...SubTuples<Rest>] : ...` [1]) into
+tuple type. [tuple-invalid-type-spread]
+
+   recursive_tuple_spread.ts:9:23
+   9|   ? SubTuples<Rest> | [Head, ...SubTuples<Rest>] // ERROR
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   recursive_tuple_spread.ts:9:33
+   9|   ? SubTuples<Rest> | [Head, ...SubTuples<Rest>] // ERROR
+                                      ^^^^^^^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------- recursive_tuple_spread.ts:18:44
+
+Cannot assign array literal to `invalid` because: [incompatible-type]
+ - Either in index `0`: `false` [1] is incompatible with `string` [2].
+ - Or in index `0`: `false` [1] is incompatible with `number` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   recursive_tuple_spread.ts:18:44
+   18| const invalid: Sampled<[number, string]> = [false]; // ERROR
+                                                  ^^^^^^^
+
+References:
+   recursive_tuple_spread.ts:18:45
+   18| const invalid: Sampled<[number, string]> = [false]; // ERROR
+                                                   ^^^^^ [1]
+   recursive_tuple_spread.ts:18:33
+   18| const invalid: Sampled<[number, string]> = [false]; // ERROR
+                                       ^^^^^^ [2]
+   recursive_tuple_spread.ts:18:25
+   18| const invalid: Sampled<[number, string]> = [false]; // ERROR
+                               ^^^^^^ [3]
+
+
 Error ------------------------------------------------------------------------------------------ tuple_polarity.ts:14:30
 
 Cannot assign `ro` to `must_error` because tuple element at index `0` is read-only in `Readonly<[string]>` [1] but
@@ -521,4 +562,4 @@ References:
 
 
 
-Found 26 errors
+Found 28 errors

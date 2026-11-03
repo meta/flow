@@ -1308,8 +1308,10 @@ pub mod tvar_visitors {
     use flow_typing_type::type_::Type;
     use flow_typing_type::type_::TypeInner;
     use flow_typing_type::type_::constraint::Constraints;
+    use flow_typing_type::type_::eval;
     use flow_typing_type::type_util;
     use flow_typing_visitors::type_visitor::TypeVisitor;
+    use flow_typing_visitors::type_visitor::eval_id_default;
     use flow_typing_visitors::type_visitor::type_default;
 
     enum TvarVisitorResult {
@@ -1390,7 +1392,9 @@ pub mod tvar_visitors {
         }
     }
 
-    struct HasUnresolvedTvarsVisitor;
+    struct HasUnresolvedTvarsVisitor {
+        visit_eval_cache: bool,
+    }
 
     impl HasUnresolvedTvarsVisitor {
         fn constraint_node<'cx>(
@@ -1438,6 +1442,20 @@ pub mod tvar_visitors {
             id: u32,
         ) -> Result<Seen, TvarVisitorResult> {
             self.constraint_node(cx, pole, acc, id as i32)
+        }
+
+        fn eval_id<'cx>(
+            &mut self,
+            cx: &mut Context<'cx>,
+            pole: Polarity,
+            acc: Result<Seen, TvarVisitorResult>,
+            id: eval::Id,
+        ) -> Result<Seen, TvarVisitorResult> {
+            if self.visit_eval_cache {
+                eval_id_default(self, cx, pole, acc, id)
+            } else {
+                acc
+            }
         }
     }
 
@@ -1509,7 +1527,21 @@ pub mod tvar_visitors {
     }
 
     pub fn has_unresolved_tvars<'cx>(cx: &mut Context<'cx>, t: &Type) -> bool {
-        let mut visitor = HasUnresolvedTvarsVisitor;
+        has_unresolved_tvars_with_eval_cache(cx, t, true)
+    }
+
+    /// Checks evaluation inputs without visiting cached results, which can still be
+    /// under construction during recursive evaluation.
+    pub fn has_unresolved_tvars_in_inputs<'cx>(cx: &mut Context<'cx>, t: &Type) -> bool {
+        has_unresolved_tvars_with_eval_cache(cx, t, false)
+    }
+
+    fn has_unresolved_tvars_with_eval_cache<'cx>(
+        cx: &mut Context<'cx>,
+        t: &Type,
+        visit_eval_cache: bool,
+    ) -> bool {
+        let mut visitor = HasUnresolvedTvarsVisitor { visit_eval_cache };
         match visitor.type_(cx, Polarity::Positive, Ok(BTreeSet::new()), t) {
             Err(TvarVisitorResult::EncounteredUnresolvedTvar) => true,
             _ => false,
@@ -1517,7 +1549,9 @@ pub mod tvar_visitors {
     }
 
     pub fn has_unresolved_tvars_in_destructors<'cx>(cx: &mut Context<'cx>, d: &Destructor) -> bool {
-        let mut visitor = HasUnresolvedTvarsVisitor;
+        let mut visitor = HasUnresolvedTvarsVisitor {
+            visit_eval_cache: true,
+        };
         match visitor.destructor(cx, Ok(BTreeSet::new()), d) {
             Err(TvarVisitorResult::EncounteredUnresolvedTvar) => true,
             _ => false,

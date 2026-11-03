@@ -3700,10 +3700,17 @@ pub mod kit {
         let deferred =
             |cx: &mut Context<'cx>| cx.mk_placeholder(reason.dupe(), mixed_t::why(reason.dupe()));
         let nested_env = env.solving_implicit_instantiation();
-        let has_unresolved_tvars = flow_js_utils::tvar_visitors::has_unresolved_tvars(cx, check_t)
-            || flow_js_utils::tvar_visitors::has_unresolved_tvars(cx, extends_t)
-            || flow_js_utils::tvar_visitors::has_unresolved_tvars(cx, true_t)
-            || flow_js_utils::tvar_visitors::has_unresolved_tvars(cx, false_t);
+        let has_unresolved_tvars = if env.in_implicit_instantiation() {
+            flow_js_utils::tvar_visitors::has_unresolved_tvars(cx, check_t)
+                || flow_js_utils::tvar_visitors::has_unresolved_tvars(cx, extends_t)
+                || flow_js_utils::tvar_visitors::has_unresolved_tvars(cx, true_t)
+                || flow_js_utils::tvar_visitors::has_unresolved_tvars(cx, false_t)
+        } else {
+            flow_js_utils::tvar_visitors::has_unresolved_tvars_in_inputs(cx, check_t)
+                || flow_js_utils::tvar_visitors::has_unresolved_tvars_in_inputs(cx, extends_t)
+                || flow_js_utils::tvar_visitors::has_unresolved_tvars_in_inputs(cx, true_t)
+                || flow_js_utils::tvar_visitors::has_unresolved_tvars_in_inputs(cx, false_t)
+        };
         if has_unresolved_tvars && !env.in_implicit_instantiation() {
             flow_js_utils::add_output_non_speculating(
                 cx,

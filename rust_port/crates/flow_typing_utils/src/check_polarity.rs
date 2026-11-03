@@ -86,12 +86,12 @@ fn check_polarity_with_env<'cx>(
 }
 
 // TODO: flesh this out
-// [seen] is the set of visited EvalT ids
+// [seen] records evaluated types at each polarity, including across type arguments.
 fn check_polarity_impl<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     trace: Option<DepthTrace>,
-    seen: &mut HashSet<eval::Id>,
+    seen: &mut HashSet<(eval::Id, Polarity)>,
     tparams: &BTreeMap<SubstName, TypeParam>,
     polarity: Polarity,
     t: &Type,
@@ -217,6 +217,7 @@ fn check_polarity_impl<'cx>(
                                     cx,
                                     env,
                                     trace,
+                                    seen,
                                     tparams,
                                     polarity,
                                     tps,
@@ -253,6 +254,7 @@ fn check_polarity_impl<'cx>(
                                         cx,
                                         env,
                                         trace,
+                                        seen,
                                         tparams,
                                         polarity,
                                         tps,
@@ -298,7 +300,7 @@ fn check_polarity_impl<'cx>(
             type_::TypeDestructorTInner(_, _, d) if matches!(d.deref(), Destructor::ReadOnlyType)
         ) =>
         {
-            if seen.insert(id.dupe()) {
+            if seen.insert((id.dupe(), polarity)) {
                 // `$ReadOnly` makes the elements of a tuple type spread read-only.
                 if let TypeInner::EvalT {
                     type_: first_spread,
@@ -335,21 +337,23 @@ fn check_polarity_impl<'cx>(
         TypeInner::EvalT {
             type_: first_spread,
             defer_use_t,
-            ..
+            id,
         } if let type_::TypeDestructorTInner(_, _, d) = defer_use_t.deref()
             && let Destructor::SpreadTupleType(spread) = d.deref() =>
         {
-            check_tuple_spread_polarity(
-                cx,
-                env,
-                trace,
-                seen,
-                tparams,
-                polarity,
-                Polarity::Neutral,
-                first_spread,
-                spread,
-            )?;
+            if seen.insert((id.dupe(), polarity)) {
+                check_tuple_spread_polarity(
+                    cx,
+                    env,
+                    trace,
+                    seen,
+                    tparams,
+                    polarity,
+                    Polarity::Neutral,
+                    first_spread,
+                    spread,
+                )?;
+            }
         }
         TypeInner::NominalT { nominal_type, .. } => {
             let mut tps_list = Vec::new();
@@ -370,6 +374,7 @@ fn check_polarity_impl<'cx>(
                 cx,
                 env,
                 trace,
+                seen,
                 tparams,
                 polarity,
                 &tps_list,
@@ -672,7 +677,7 @@ fn check_polarity_propmap<'cx>(
     env: &FlowJsEnv,
     trace: Option<DepthTrace>,
     skip_ctor: bool,
-    seen: &mut HashSet<eval::Id>,
+    seen: &mut HashSet<(eval::Id, Polarity)>,
     tparams: &BTreeMap<SubstName, TypeParam>,
     polarity: Polarity,
     id: type_::properties::Id,
@@ -691,7 +696,7 @@ fn check_polarity_prop<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     trace: Option<DepthTrace>,
-    seen: &mut HashSet<eval::Id>,
+    seen: &mut HashSet<(eval::Id, Polarity)>,
     tparams: &BTreeMap<SubstName, TypeParam>,
     polarity: Polarity,
     prop: &Property,
@@ -740,7 +745,7 @@ fn check_polarity_dict<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     trace: Option<DepthTrace>,
-    seen: &mut HashSet<eval::Id>,
+    seen: &mut HashSet<(eval::Id, Polarity)>,
     tparams: &BTreeMap<SubstName, TypeParam>,
     polarity: Polarity,
     d: &DictType,
@@ -768,7 +773,7 @@ fn check_polarity_call<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     trace: Option<DepthTrace>,
-    seen: &mut HashSet<eval::Id>,
+    seen: &mut HashSet<(eval::Id, Polarity)>,
     tparams: &BTreeMap<SubstName, TypeParam>,
     polarity: Polarity,
     id: i32,
@@ -781,7 +786,7 @@ fn check_polarity_typeparam<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     trace: Option<DepthTrace>,
-    seen: &mut HashSet<eval::Id>,
+    seen: &mut HashSet<(eval::Id, Polarity)>,
     tparams: &BTreeMap<SubstName, TypeParam>,
     polarity: Polarity,
     tp: &TypeParam,
@@ -812,7 +817,7 @@ fn check_tuple_spread_polarity<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     trace: Option<DepthTrace>,
-    seen: &mut HashSet<eval::Id>,
+    seen: &mut HashSet<(eval::Id, Polarity)>,
     tparams: &BTreeMap<SubstName, TypeParam>,
     polarity: Polarity,
     elem_polarity: Polarity,
@@ -854,7 +859,7 @@ fn check_spread_argument_polarity<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     trace: Option<DepthTrace>,
-    seen: &mut HashSet<eval::Id>,
+    seen: &mut HashSet<(eval::Id, Polarity)>,
     tparams: &BTreeMap<SubstName, TypeParam>,
     elem_polarity: Polarity,
     t: &Type,
@@ -892,6 +897,7 @@ fn variance_check<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     trace: Option<DepthTrace>,
+    seen: &HashSet<(eval::Id, Polarity)>,
     tparams: &BTreeMap<SubstName, TypeParam>,
     polarity: Polarity,
     tps: &[TypeParam],
@@ -909,7 +915,7 @@ fn variance_check<'cx>(
             cx,
             env,
             trace,
-            &mut HashSet::new(),
+            &mut seen.clone(),
             tparams,
             Polarity::mult(polarity, tp_polarity),
             targ,
