@@ -26,7 +26,31 @@ export async function print(
 ): Promise<string> {
   // $FlowExpectedError[incompatible-type] This is now safe to access.
   const program: Program = ast;
+  const printed = await printProgram(
+    program,
+    originalCode,
+    prettierOptions,
+    visitorKeys,
+  );
 
+  // The parser reports a leading `#!` line as `program.interpreter`, not as a
+  // comment, so nothing else prints it.
+  const interpreter = program.interpreter;
+  if (interpreter == null) {
+    return printed;
+  }
+  const blankLineAfter = /^\r?\n[ \t]*\r?\n/.test(
+    originalCode.slice(interpreter.range[1]),
+  );
+  return `#!${interpreter.value}\n${blankLineAfter ? '\n' : ''}${printed}`;
+}
+
+async function printProgram(
+  program: Program,
+  originalCode: string,
+  prettierOptions: {...},
+  visitorKeys: ?VisitorKeysType,
+): Promise<string> {
   // If the AST body is empty, we can skip the cost of prettier by returning a static string of the contents.
   if (program.body.length === 0) {
     // If the program had a docblock comment, we need to create the string manually.

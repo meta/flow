@@ -20,6 +20,17 @@ function transform(code: string, visitors: TransformVisitor) {
 }
 
 describe('transform', () => {
+  it('keeps a leading hashbang when the file is printed', async () => {
+    const code = '#!/usr/bin/env node\n\nconst x = 1';
+    const result = await transform(code, context => ({
+      Identifier(node) {
+        context.replaceNode(node, t.Identifier({name: 'y'}));
+      },
+    }));
+
+    expect(result).toBe('#!/usr/bin/env node\n\nconst y = 1;\n');
+  });
+
   it('should do nothing (including no formatting) if no mutations are applied', async () => {
     const code = 'const x = 1'; // no semi to ensure no formatting
     const result = await transform(code, () => ({}));
