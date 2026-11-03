@@ -12,9 +12,52 @@
 
 import {parse} from '../../__test_utils__/parse';
 import {print} from 'flow-transform';
+// $FlowExpectedError[cannot-resolve-module]
+import {runInNewContext} from 'vm';
 import {transformProgram as stripFlowTypes} from '../../oxidized-src/estree/StripFlowTypes';
 
 describe('StripFlowTypes', () => {
+  // Defaults survive for every function form and for destructured bindings.
+  test.each([
+    'function f(x: number = 42): number { return x; }',
+    'const f = function(x: number = 42): number { return x; };',
+    'const f = (x: number = 42): number => x;',
+    'function f(x? = 42): number { return x; }',
+    'function f(x?: number = 42): number { return x; }',
+    'function f({x}: {x: number} = {x: 42}): number { return x; }',
+    'function f([x]: Array<number> = [42]): number { return x; }',
+    'function f(this: mixed, x: number = 42): number { return x; }',
+  ])('preserves parameter defaults in %s', async code => {
+    const stripped = stripFlowTypes(parse(code), {});
+    const output = await print(stripped, code);
+
+    expect(runInNewContext(`${output}\nf()`)).toBe(42); // OK
+    expect(runInNewContext(`${output}\nf(undefined)`)).toBe(42); // OK
+    expect(runInNewContext(`${output}\nf.length`)).toBe(0); // OK
+  });
+
+  test('preserves default side effects and strips types in initializers', async () => {
+    // Initializers run only for missing/undefined arguments, not explicit values.
+    const code = `
+      let calls = 0;
+      function f(x: number = (++calls: number)): number { return x; }
+    `;
+    const stripped = stripFlowTypes(parse(code), {});
+    const output = await print(stripped, code);
+
+    expect(
+      runInNewContext(`${output}\n[f(7), calls, f(), f(undefined), calls]`),
+    ).toEqual([7, 0, 1, 2, 2]); // OK
+  });
+
+  test('still strips this and optional parameters', async () => {
+    // Type-only parameters and optional markers do not survive erasure.
+    const code = 'function f(this: mixed, x?: number): void {}';
+    const stripped = stripFlowTypes(parse(code), {});
+
+    expect((await print(stripped, code)).trim()).toBe('function f(x) {}'); // OK
+  });
+
   test('strips non-null expressions', () => {
     // Removing the assertion preserves the expression and its original location.
     const ast = parse('value!;');

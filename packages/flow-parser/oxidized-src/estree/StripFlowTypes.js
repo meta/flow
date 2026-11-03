@@ -51,8 +51,8 @@ export function transformProgram(
         case 'ObjectPattern':
         case 'ArrayPattern':
         case 'Identifier': {
-          if (node.typeAnnotation != null) {
-            return nodeWith(node, {typeAnnotation: null});
+          if (node.typeAnnotation != null || node.optional === true) {
+            return nodeWith(node, {typeAnnotation: null, optional: false});
           }
           return node;
         }
@@ -85,14 +85,7 @@ export function transformProgram(
               continue;
             }
 
-            let param = node.params[i];
-            if (param.type === 'AssignmentPattern') {
-              param = param.left;
-            }
-            if (param.optional === true) {
-              param = nodeWith(param, {optional: false});
-            }
-            newParams.push(param);
+            newParams.push(node.params[i]);
           }
 
           return nodeWith(node, {
