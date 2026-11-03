@@ -210,16 +210,18 @@
     gap: 8px;
 }
 
-/* The recover prompt and the Clear button are mutually exclusive and share this
-   slot. Both are stacked in one grid cell and right-aligned, so the slot keeps
-   the width of the wider (recover) group and the Copy buttons to its right don't
-   shift when the two swap; the swap itself cross-fades (see .swapActive below). */
+/* Inactive actions fade out without reserving width beside the visible action. */
 .swapSlot {
+    position: relative;
     display: grid;
     justify-items: end;
 }
 .swapSlot > * {
     grid-area: 1 / 1;
+}
+.swapSlot > .swapInactive {
+    position: absolute;
+    right: 0;
 }
 .swapActive {
     opacity: 1;
@@ -228,6 +230,7 @@
 }
 .swapInactive {
     opacity: 0;
+    pointer-events: none;
     /* Stay rendered through the fade-out, then drop from the tab order and the
        accessibility tree (visibility flips after the opacity transition). */
     visibility: hidden;
@@ -695,6 +698,43 @@
     color: #fff;
 }
 
+.toolbarButton:disabled {
+    cursor: default;
+    opacity: 0.5;
+}
+
+.formatSpinner,
+.formatStateIcon {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    box-sizing: border-box;
+}
+
+.formatSpinner {
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: tf-spin 0.7s linear infinite;
+}
+
+.formatStateIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.formatStatus {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
 /* When the results pane is narrow, "Copy errors" collapses to just its icon
    (keyed to the results pane's own width). Each error card still has its own copy
    button, so the action isn't lost. */
@@ -722,6 +762,18 @@
 @container tf-editor (max-width: 500px) {
     .iconOnly .toolbarButtonLabel {
         display: none;
+    }
+    .copyCode {
+        display: none;
+    }
+    .tab {
+        padding-inline: 8px;
+    }
+    .toolbarActions {
+        gap: 4px;
+    }
+    .toolbarButton {
+        padding-inline: 8px;
     }
 }
 
@@ -768,7 +820,7 @@
 }
 
 /* Editor pane <=380px: drop the Clear/recover slot and Copy code; keep the
-   Code/Config tabs and Copy link (the primary sharing action). */
+   Code/Config tabs, Format, and Copy link. */
 @container tf-editor (max-width: 380px) {
     .swapSlot,
     .copyCode {
@@ -883,7 +935,8 @@
         transition-duration: 0.01ms;
     }
     .spinner,
-    .suspenseSpinner {
+    .suspenseSpinner,
+    .formatSpinner {
         animation: tf-pulse 1.2s ease-in-out infinite;
     }
 }

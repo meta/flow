@@ -10,7 +10,7 @@
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
-    "test:try-flow": "node --test tests/try-flow-ast-test.cjs tests/try-flow-loader-test.cjs tests/try-flow-results-test.cjs"
+    "test:try-flow": "node --test tests/try-flow-ast-test.cjs tests/try-flow-loader-test.cjs tests/try-flow-results-test.cjs tests/try-flow-format-test.cjs"
   },
   "dependencies": {
     "@docusaurus/core": "3.7.0",
@@ -21,13 +21,17 @@
     "@mdx-js/react": "^3.1.0",
     "@monaco-editor/react": "^4.4.5",
     "@svgr/webpack": "^5.5.0",
+    "buffer": "^6.0.3",
     "clsx": "^1.2.1",
     "docusaurus-plugin-internaldocs-fb": "1.19.1",
     "file-loader": "^6.2.0",
+    "flow-parser": "0.338.0",
     "lz-string": "^1.4.4",
     "monaco-editor": "^0.34.0",
     "monaco-editor-webpack-plugin": "^7.1.0",
+    "prettier": "3.9.10",
     "prism-react-renderer": "^2.4.1",
+    "process": "^0.11.10",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-json-view": "^1.21.3",

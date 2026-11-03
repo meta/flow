@@ -24,6 +24,7 @@ import {
 } from './configured-monaco';
 import FlowJsServices from './flow-services';
 import copyText from './clipboard';
+import {formatEditor, preloadFormatter} from './formatEditor';
 import createTokensProvider from './tokens-theme-provider';
 import flowLanguageConfiguration from './flow-configuration.json';
 
@@ -203,6 +204,22 @@ component CopyIcon() {
   );
 }
 
+component FormatIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true">
+      <path d="M4 6h16M8 10h12M8 14h12M4 18h16" />
+      <path d="m2 10 2 2-2 2" />
+    </svg>
+  );
+}
+
 component ClearIcon() {
   return (
     <svg
@@ -264,7 +281,7 @@ export default component TryFlow(
   const [flowVersion, setFlowVersion] = useState(
     initialState.version || defaultFlowVersion,
   );
-  const editorRef = useRef(null);
+  const editorRef = useRef<any>(null);
   const tryEditorRef = useRef<HTMLDivElement | null>(null);
   const [splitRatio, setSplitRatio] = useState(0.5);
   const previousDecorationsRef = useRef(null);
@@ -279,6 +296,22 @@ export default component TryFlow(
     'code' as 'code' | 'config',
   );
   const [copied, setCopied] = useState(null as ?('link' | 'code'));
+  const [editorReady, setEditorReady] = useState(false);
+  const [hasCode, setHasCode] = useState(
+    (initialState.code ?? '').trim() !== '',
+  );
+  const [formatting, setFormatting] = useState(false);
+  const [formatLabel, setFormatLabel] = useState('Format');
+  const [formatNotice, setFormatNotice] = useState('');
+  const formattingRef = useRef(false);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -308,6 +341,20 @@ export default component TryFlow(
       cancelled = true;
     };
   }, [flowVersion]);
+
+  useEffect(() => {
+    if (
+      formatNotice !== 'Code formatted.' &&
+      formatNotice !== 'Code is already formatted.'
+    ) {
+      return;
+    }
+    const timer = setTimeout(() => {
+      setFormatLabel('Format');
+      setFormatNotice('');
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [formatNotice]);
 
   useEffect(() => {
     forceRecheck();
@@ -343,6 +390,57 @@ export default component TryFlow(
       });
     }
     model.setValue('');
+  }
+
+  async function formatCurrentCode() {
+    if (formattingRef.current || activeToolbarTab !== 'code') return;
+    const editor = editorRef.current;
+    if (editor == null || editor.getModel() == null) return;
+    const isCurrent = () => mountedRef.current && editorRef.current === editor;
+    formattingRef.current = true;
+    setFormatting(true);
+    setFormatLabel('Loading…');
+    setFormatNotice('Loading formatter…');
+    try {
+      const result = await formatEditor(editor, isCurrent, undefined, () => {
+        if (!isCurrent()) return;
+        setFormatLabel('Formatting…');
+        setFormatNotice('Formatting code…');
+      });
+      if (!isCurrent()) return;
+      setFormatLabel(
+        result === 'stale'
+          ? 'Retry'
+          : result === 'formatted'
+            ? 'Formatted'
+            : 'No change',
+      );
+      setFormatNotice(
+        result === 'stale'
+          ? 'Code changed; press Format again.'
+          : result === 'formatted'
+            ? 'Code formatted.'
+            : 'Code is already formatted.',
+      );
+    } catch (error) {
+      if (isCurrent()) {
+        const message = error instanceof Error ? error.message : String(error);
+        setFormatLabel('Failed');
+        setFormatNotice(`Could not format code: ${message}`);
+      }
+    } finally {
+      formattingRef.current = false;
+      if (isCurrent()) setFormatting(false);
+    }
+  }
+
+  function onCodeChange(value: ?string) {
+    setHasCode((value ?? '').trim() !== '');
+    if (!formattingRef.current) {
+      setFormatLabel('Format');
+      setFormatNotice('');
+    }
+    forceRecheck();
   }
 
   function copyToClipboard(kind: 'link' | 'code', text: string) {
@@ -527,6 +625,7 @@ export default component TryFlow(
       setCursorPosition(e.position);
     });
     editorRef.current = editor;
+    setEditorReady(true);
 
     // The editor fills its pane via flexbox (height: 100%), but Monaco only
     // re-renders its canvas to a new size when layout() is called. We call it on
@@ -592,9 +691,47 @@ export default component TryFlow(
               </button>
             </div>
             <div className={styles.toolbarActions}>
-              {/* The recover prompt and the Clear button are mutually exclusive
-                  and share one slot: they're stacked and cross-fade between each
-                  other so swapping doesn't jump the layout. */}
+              <button
+                type="button"
+                className={clsx(styles.toolbarButton, styles.iconOnly)}
+                onClick={formatCurrentCode}
+                onMouseEnter={() => preloadFormatter()}
+                onFocus={() => preloadFormatter()}
+                disabled={
+                  !editorReady ||
+                  !hasCode ||
+                  formatting ||
+                  activeToolbarTab !== 'code'
+                }
+                aria-label="Format code with Prettier"
+                aria-describedby={
+                  formatNotice ? 'try-flow-format-status' : undefined
+                }
+                aria-busy={formatting}
+                title={formatNotice || 'Format code with Prettier'}>
+                {formatting ? (
+                  <span className={styles.formatSpinner} aria-hidden="true" />
+                ) : formatLabel === 'Formatted' ||
+                  formatLabel === 'No change' ? (
+                  <span className={styles.formatStateIcon} aria-hidden="true">
+                    ✓
+                  </span>
+                ) : formatLabel === 'Failed' || formatLabel === 'Retry' ? (
+                  <span className={styles.formatStateIcon} aria-hidden="true">
+                    !
+                  </span>
+                ) : (
+                  <FormatIcon />
+                )}
+                <span className={styles.toolbarButtonLabel}>{formatLabel}</span>
+                <span
+                  id="try-flow-format-status"
+                  className={styles.formatStatus}
+                  role="status"
+                  aria-live="polite">
+                  {formatNotice}
+                </span>
+              </button>
               <div className={styles.swapSlot}>
                 <div
                   className={clsx(
@@ -684,7 +821,7 @@ export default component TryFlow(
               defaultLanguage="flow"
               theme="vs-light"
               height="100%"
-              onChange={forceRecheck}
+              onChange={onCodeChange}
               onMount={onMount}
               options={{
                 minimap: {enabled: false},

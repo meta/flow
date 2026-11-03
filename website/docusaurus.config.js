@@ -39,8 +39,18 @@ module.exports = async () => {
       function polyfillNodeBuiltinsForFlowJS(context, options) {
         return {
           name: 'polyfillNodeBuiltinsForFlowJS',
-          configureWebpack() {
-            return {resolve: {fallback: {fs: false, constants: false}}};
+          configureWebpack(_config, isServer) {
+            return {
+              resolve: {fallback: {fs: false, constants: false, crypto: false}},
+              plugins: isServer
+                ? []
+                : [
+                    new webpack.ProvidePlugin({
+                      Buffer: ['buffer', 'Buffer'],
+                      process: require.resolve('process/browser'),
+                    }),
+                  ],
+            };
           },
         };
       },
