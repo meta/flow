@@ -646,5 +646,57 @@ References:
                           ^^^^^^ [2]
 
 
+Error ---------------------------------------------------------------------------- static_method_override_usage.js:21:27
 
-Found 37 errors
+Cannot extend `Node` [1] with `BadNode` [2] because in property `importJSON` > the first parameter: property `type` is
+missing in `Number` [3] but exists in `{type: string}` [4]. [incompatible-type]
+
+   static_method_override_usage.js:21:27
+   21|   static importJSON(json: number): BadNode { // ERROR: unrelated parameter
+                                 ^^^^^^ [3]
+
+References:
+   static_method_override_usage.js:20:23
+   20| class BadNode extends Node {
+                             ^^^^ [1]
+   static_method_override_usage.js:20:1
+       v---------------------------
+   20| class BadNode extends Node {
+   21|   static importJSON(json: number): BadNode { // ERROR: unrelated parameter
+   22|     return new BadNode();
+   23|   }
+   24| }
+       ^ [2]
+   static_method_override_lib.ts:7:27
+    7|   static importJSON(json: {type: string}): Node;
+                                 ^^^^^^^^^^^^^^ [4]
+
+
+Error ---------------------------------------------------------------------------- static_method_override_usage.js:31:22
+
+Cannot extend `FlowNode` [1] with `FlowTextNode` [2] because in property `clone` > the first parameter:
+`FlowTextNode` [3] is incompatible with `unknown` [4]. [incompatible-type]
+
+   static_method_override_usage.js:31:22
+   31|   static clone(node: FlowTextNode): FlowTextNode { // ERROR: narrower parameter
+                            ^^^^^^^^^^^^ [3]
+
+References:
+   static_method_override_usage.js:30:28
+   30| class FlowTextNode extends FlowNode {
+                                  ^^^^^^^^ [1]
+   static_method_override_usage.js:30:1
+       v------------------------------------
+   30| class FlowTextNode extends FlowNode {
+   31|   static clone(node: FlowTextNode): FlowTextNode { // ERROR: narrower parameter
+   32|     return new FlowTextNode();
+   33|   }
+   34| }
+       ^ [2]
+   static_method_override_usage.js:28:22
+   28|   static clone(data: unknown): FlowNode;
+                            ^^^^^^^ [4]
+
+
+
+Found 39 errors

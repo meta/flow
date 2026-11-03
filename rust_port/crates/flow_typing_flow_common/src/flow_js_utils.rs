@@ -7808,7 +7808,7 @@ pub mod get_prop_t_kit {
         o: &ObjType,
         propref: &PropRef,
         reason_op: &Reason,
-    ) -> Result<Option<(PropertyType, PropertySource)>, FlowJsException> {
+    ) -> Result<Option<(Property, PropertySource)>, FlowJsException> {
         let named_prop = match propref {
             PropRef::Named { name, .. } => cx.get_prop(o.props_tmap.dupe(), name),
             PropRef::Computed(_) => None,
@@ -7835,21 +7835,21 @@ pub mod get_prop_t_kit {
         match (propref, &named_prop, dict_t) {
             (_, Some(prop), _) => {
                 // Property exists on this property map
-                let field = match property::property_type(prop) {
-                    PropertyType::OrdinaryField { type_, polarity } if skip_optional => {
-                        match type_.deref() {
-                            TypeInner::OptionalT {
-                                type_: inner_type, ..
-                            } => PropertyType::OrdinaryField {
-                                type_: inner_type.dupe(),
-                                polarity,
-                            },
-                            _ => PropertyType::OrdinaryField { type_, polarity },
-                        }
-                    }
-                    field => field,
+                let prop = match prop.deref() {
+                    PropertyInner::Field(field) if skip_optional => match field.type_.deref() {
+                        TypeInner::OptionalT {
+                            type_: inner_type, ..
+                        } => Property::new(PropertyInner::Field(Box::new(FieldData {
+                            preferred_def_locs: field.preferred_def_locs.clone(),
+                            key_loc: field.key_loc.dupe(),
+                            type_: inner_type.dupe(),
+                            polarity: field.polarity,
+                        }))),
+                        _ => prop.dupe(),
+                    },
+                    _ => prop.dupe(),
                 };
-                Ok(Some((field, PropertySource::PropertyMapProperty)))
+                Ok(Some((prop, PropertySource::PropertyMapProperty)))
             }
             (
                 PropRef::Named { name, .. },
@@ -7867,10 +7867,12 @@ pub mod get_prop_t_kit {
                 }
                 let type_ = union_void_if_instructed(value.dupe());
                 Ok(Some((
-                    PropertyType::OrdinaryField {
+                    Property::new(PropertyInner::Field(Box::new(FieldData {
+                        preferred_def_locs: None,
+                        key_loc: None,
                         type_,
                         polarity: *dict_polarity,
-                    },
+                    }))),
                     PropertySource::IndexerProperty,
                 )))
             }
@@ -7887,10 +7889,12 @@ pub mod get_prop_t_kit {
                 F::dict_read_check(cx, env, *trace, use_op, (k, key))?;
                 let type_ = union_void_if_instructed(value.dupe());
                 Ok(Some((
-                    PropertyType::OrdinaryField {
+                    Property::new(PropertyInner::Field(Box::new(FieldData {
+                        preferred_def_locs: None,
+                        key_loc: None,
                         type_,
                         polarity: *dict_polarity,
-                    },
+                    }))),
                     PropertySource::IndexerProperty,
                 )))
             }
@@ -7936,7 +7940,7 @@ pub mod get_prop_t_kit {
                     trace,
                     use_op,
                     propref,
-                    p,
+                    property::property_type(&p),
                     &reason_op,
                     &o.flags.react_dro,
                 )

@@ -2320,7 +2320,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                                 &trace,
                                 use_op.dupe(),
                                 propref,
-                                p,
+                                property::property_type(&p),
                                 reason_op,
                                 &react_dro,
                             )
