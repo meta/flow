@@ -1408,6 +1408,24 @@ fn merge_upper_bounds<'cx>(
     }
 }
 
+/// Whether types have flowed into `t` and each of them mentions a placeholder.
+fn lowers_only_mention_placeholders<'cx>(cx: &mut Context<'cx>, env: &FlowJsEnv, t: &Type) -> bool {
+    let lowers: Vec<Type> = match pinning_source(cx, env, t) {
+        PinningSource::Constraints { constraints, .. } => match constraints {
+            constraint::Constraints::FullyResolved(s) => vec![cx.force_fully_resolved_tvar(&s)],
+            constraint::Constraints::Resolved(t) => vec![t],
+            constraint::Constraints::Unresolved(bounds) => {
+                bounds.borrow().lower.keys().duped().collect()
+            }
+        },
+        PinningSource::Concrete(_) => return false,
+    };
+    !lowers.is_empty()
+        && lowers
+            .iter()
+            .all(|t| flow_js_utils::tvar_visitors::has_placeholders(cx, t))
+}
+
 fn merge_lower_bounds<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
@@ -2655,17 +2673,27 @@ pub mod instantiation_solver {
                             Some(tp) => tp,
                             None => return Ok(()),
                         };
-                        let inferred = pin_type(
-                            cx,
-                            env,
-                            UnmarkedFallback::Bound,
-                            use_op,
-                            tparam,
-                            marked_tparams.get(name),
-                            Some(bound.dupe()),
-                            reason,
-                            targ,
-                        )?;
+                        // Pinning ignores the types that mention a placeholder. When they are all
+                        // that flowed in, the inferred type isn't known yet: it is a placeholder,
+                        // not what pinning falls back to without evidence.
+                        let inferred = if lowers_only_mention_placeholders(cx, env, targ) {
+                            cx.mk_placeholder(
+                                tparam.reason.dupe(),
+                                mixed_t::why(tparam.reason.dupe()),
+                            )
+                        } else {
+                            pin_type(
+                                cx,
+                                env,
+                                UnmarkedFallback::Bound,
+                                use_op,
+                                tparam,
+                                marked_tparams.get(name),
+                                Some(bound.dupe()),
+                                reason,
+                                targ,
+                            )?
+                        };
                         if speculative_subtyping_succeeds(
                             cx,
                             env,
@@ -2683,10 +2711,39 @@ pub mod instantiation_solver {
                     Ok(())
                 }),
             );
-            match pinning {
-                Ok(()) => Ok(solution),
-                Err(FlowJsException::SpeculationSingletonError) => Ok(None),
-                Err(e) => Err(e),
+            let solution = match pinning {
+                Ok(()) => solution,
+                Err(FlowJsException::SpeculationSingletonError) => None,
+                Err(e) => return Err(e),
+            };
+            match solution {
+                // Pinning skips placeholders, as TypeScript's inference skips `NoInfer`, so it
+                // doesn't finish a check that waits on what a placeholder flows into. As in
+                // TypeScript, the extends type with the pinned type arguments is checked instead.
+                Some(solution)
+                    if restrictive_frozen_tvars
+                        && flow_js_utils::tvar_visitors::has_placeholders(cx, check_t) =>
+                {
+                    let pinned_extends_t = type_subst::subst(
+                        cx,
+                        Some(unknown_use()),
+                        true,
+                        false,
+                        type_subst::Purpose::Normal,
+                        &solution,
+                        extends_t.dupe(),
+                    );
+                    Ok(speculative_subtyping_succeeds(
+                        cx,
+                        &check_env,
+                        trace,
+                        use_op.dupe(),
+                        check_t,
+                        &pinned_extends_t,
+                    )?
+                    .then_some(solution))
+                }
+                solution => Ok(solution),
             }
         } else {
             Ok(None)
@@ -3642,23 +3699,6 @@ pub mod kit {
         // placeholder.
         let deferred =
             |cx: &mut Context<'cx>| cx.mk_placeholder(reason.dupe(), mixed_t::why(reason.dupe()));
-        // Only the types that decide the branch matter. A placeholder in a branch is carried by
-        // the result when that branch is chosen.
-        if flow_js_utils::tvar_visitors::has_placeholders(cx, check_t)
-            || flow_js_utils::tvar_visitors::has_placeholders(cx, extends_t)
-        {
-            flow_typing_debug::verbose::print_if_verbose(
-                cx,
-                None,
-                None,
-                None,
-                vec![
-                    "Conditional type refuses to evaluate because we have placeholders".to_string(),
-                ],
-            );
-            // Placeholder in, placeholder out
-            return Ok(deferred(cx));
-        }
         let nested_env = env.solving_implicit_instantiation();
         let has_unresolved_tvars = flow_js_utils::tvar_visitors::has_unresolved_tvars(cx, check_t)
             || flow_js_utils::tvar_visitors::has_unresolved_tvars(cx, extends_t)
@@ -3761,7 +3801,12 @@ pub mod kit {
                     let condition_frozen_tvar_ids =
                         frozen_tvar_substituter.replaced_frozen_tvar_ids;
                     let replaced_frozen_tvar = !condition_frozen_tvar_ids.is_empty();
-                    if free_vars.is_empty() && !replaced_frozen_tvar {
+                    // A placeholder in the condition is decided like a frozen tvar. The check
+                    // below already sees it as `any`.
+                    let condition_has_placeholder =
+                        flow_js_utils::tvar_visitors::has_placeholders(cx, check_t)
+                            || flow_js_utils::tvar_visitors::has_placeholders(cx, extends_t);
+                    if free_vars.is_empty() && !replaced_frozen_tvar && !condition_has_placeholder {
                         flow_typing_debug::verbose::print_if_verbose(
                             cx,
                             None,
@@ -3807,7 +3852,7 @@ pub mod kit {
 
                         match speculation_kit::try_singleton_throw_on_failure(
                             cx,
-                            env,
+                            &env.without_restrictive_frozen_tvars(),
                             trace,
                             any_check,
                             UseT::new(UseTInner::UseT(use_op.dupe(), any_extends)),
@@ -3826,7 +3871,9 @@ pub mod kit {
                                 false_t.dupe()
                             }
                             Ok(()) => {
-                                if replaced_frozen_tvar && !infer_through_frozen_tvar {
+                                if (replaced_frozen_tvar || condition_has_placeholder)
+                                    && !infer_through_frozen_tvar
+                                {
                                     deferred(cx)
                                 } else {
                                     flow_typing_debug::verbose::print_if_verbose(

@@ -559,16 +559,18 @@ fn __flow_impl<'cx>(
         return Ok(None);
     }
     if match u.deref() {
+        UseT(use_op, any @ deref!(AnyT(_, _))) => {
+            any_propagated_use(cx, env, trace, use_op, any, l)?
+        }
         UseT(
             use_op,
             any @ deref!(
-                AnyT(_, _)
-                    | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                        kind: ImplicitInstantiationTvarKind::Placeholder,
-                        ..
-                    })
+                ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                    kind: ImplicitInstantiationTvarKind::Placeholder,
+                    ..
+                })
             ),
-        ) => any_propagated_use(cx, env, trace, use_op, any, l)?,
+        ) if !env.restrictive_frozen_tvars() => any_propagated_use(cx, env, trace, use_op, any, l)?,
         _ => false,
     } {
         return Ok(None);
@@ -758,6 +760,36 @@ fn __flow_impl<'cx>(
                 flow_type_to_constraint_node(cx, env, trace, use_op.dupe(), l, node)?
             {
                 return Ok(Some(TailCall::RecFlow(l, u, DepthTrace::rec_trace(trace))));
+            }
+        }
+        // A restrictive check sees a placeholder as it sees a frozen tvar: only the placeholder
+        // itself flows into it.
+        (
+            _,
+            UseT(
+                use_op,
+                placeholder @ deref!(
+                    ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                        kind: ImplicitInstantiationTvarKind::Placeholder,
+                        id,
+                        ..
+                    })
+                ),
+            ),
+        ) if env.restrictive_frozen_tvars() => {
+            if !matches!(
+                l.deref(),
+                ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                    kind: ImplicitInstantiationTvarKind::Placeholder,
+                    id: lower_id,
+                    ..
+                }) if lower_id == id
+            ) {
+                flow_js_utils::add_output_with_env(
+                    cx,
+                    env,
+                    flow_js_utils::incompatible_types_error(l, placeholder, use_op.dupe(), None),
+                )?;
             }
         }
         // ************************
@@ -9627,15 +9659,11 @@ fn __flow_impl<'cx>(
             let repos = helpers::reposition_reason(cx, env, None, reason, false, bound)?;
             rec_flow(cx, env, trace, (&repos, u))?;
         }
-        (
-            ImplicitInstantiationTvar(
-                data @ box ImplicitInstantiationTvarData {
-                    kind: ImplicitInstantiationTvarKind::Inferred,
-                    ..
-                },
-            ),
-            _,
-        ) => {
+        // A restrictive check sees a placeholder as a frozen tvar too.
+        (ImplicitInstantiationTvar(data), _)
+            if matches!(data.kind, ImplicitInstantiationTvarKind::Inferred)
+                || env.restrictive_frozen_tvars() =>
+        {
             rec_flow(cx, env, trace, (&env.frozen_tvar_bound(data), u))?;
         }
         (

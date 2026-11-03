@@ -1218,12 +1218,45 @@ pub(super) fn handle_frozen_tvar<'cx>(
             use_op.dupe(),
             tout,
         ),
-        (ImplicitInstantiationTvarKind::Placeholder, _) => any_propagated(cx, env, trace, l, u),
+        (ImplicitInstantiationTvarKind::Placeholder, _) if !env.restrictive_frozen_tvars() => {
+            any_propagated(cx, env, trace, l, u)
+        }
+        // A restrictive check sees a placeholder as it sees a frozen tvar. These uses would
+        // otherwise be caught by the cases for `any` in __flow.
+        (
+            ImplicitInstantiationTvarKind::Placeholder,
+            UseTInner::HasOwnPropT(..)
+            | UseTInner::GetKeysT { .. }
+            | UseTInner::GetValuesT(..)
+            | UseTInner::GetDictValuesT(..)
+            | UseTInner::ResolveSpreadT(..)
+            | UseTInner::MixinT(..)
+            | UseTInner::SpecializeT(..)
+            | UseTInner::ThisSpecializeT(..)
+            | UseTInner::CallT(..)
+            | UseTInner::ObjTestProtoT(..)
+            | UseTInner::MethodT(..)
+            | UseTInner::PrivateMethodT(..)
+            | UseTInner::GetStaticsT(..)
+            | UseTInner::GetProtoT(..)
+            | UseTInner::ObjRestT(..)
+            | UseTInner::LookupT(..)
+            | UseTInner::SetPropT(..)
+            | UseTInner::GetPropT(..)
+            | UseTInner::GetPrivatePropT(..)
+            | UseTInner::SetElemT(..)
+            | UseTInner::GetElemT(..)
+            | UseTInner::CallElemT(..)
+            | UseTInner::ElemT(..)
+            | UseTInner::ArrRestT(..)
+            | UseTInner::MapTypeT(..)
+            | UseTInner::ExtendsUseT(..),
+        )
         // These would otherwise be caught by wildcard cases in __flow. A generic
         // is seen through its bound here too, either by `handle_generic` or by
         // the react kit itself.
-        (
-            ImplicitInstantiationTvarKind::Inferred,
+        | (
+            _,
             UseTInner::ReactKitT(..)
             | UseTInner::ConstructorT(..)
             | UseTInner::ConcretizeT(box ConcretizeTData {
@@ -1241,7 +1274,7 @@ pub(super) fn handle_frozen_tvar<'cx>(
             rec_flow(cx, env, trace, (&repos_bound, u))?;
             Ok(true)
         }
-        (ImplicitInstantiationTvarKind::Inferred, _) => Ok(false),
+        (_, _) => Ok(false),
     }
 }
 

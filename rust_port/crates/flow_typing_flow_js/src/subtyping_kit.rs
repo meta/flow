@@ -6940,15 +6940,11 @@ pub fn rec_sub_t<'cx>(
             let t = FlowJs::reposition_reason(cx, env, Some(trace), reason, None, bound)?;
             FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &t, u)
         }
-        (
-            ImplicitInstantiationTvar(
-                data @ box ImplicitInstantiationTvarData {
-                    kind: ImplicitInstantiationTvarKind::Inferred,
-                    ..
-                },
-            ),
-            _,
-        ) => {
+        // A restrictive check sees a placeholder as a frozen tvar too.
+        (ImplicitInstantiationTvar(data), _)
+            if matches!(data.kind, ImplicitInstantiationTvarKind::Inferred)
+                || env.restrictive_frozen_tvars() =>
+        {
             FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &env.frozen_tvar_bound(data), u)
         }
         (_, GenericT(box GenericTData { reason, .. })) => {

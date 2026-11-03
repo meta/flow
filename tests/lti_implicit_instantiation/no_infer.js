@@ -42,3 +42,15 @@ declare function f10<T>(
 const r10 = f10({a: '', b: ''}); // ok
 r10 as string; // ok
 f10({a: '', b: 1}); // error: number ~> string
+
+declare function f11<T>(x: NoInfer<T> extends unknown ? T : null): T;
+const r11 = f11(''); // ok
+r11 as string; // ok
+r11 as number; // error: string ~> number
+
+declare function f12<T>(
+  x: [NoInfer<T>, string] extends [unknown, number] ? null : T,
+): T;
+const r12 = f12(''); // ok
+r12 as string; // ok
+r12 as number; // error: string ~> number

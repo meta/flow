@@ -175,9 +175,9 @@ pub struct FlowJsEnv {
     polymorphic_lower_stack: Option<Rc<PolymorphicLowerFrame>>,
     /// The innermost implicit-instantiation solve.
     implicit_instantiation: Option<Rc<ImplicitInstantiationFrame>>,
-    /// Whether frozen tvars are seen without their bounds, as TypeScript's
-    /// restrictive instantiation sees type parameters when it decides that a
-    /// conditional type definitely holds.
+    /// Whether frozen tvars, placeholders included, are seen without their
+    /// bounds, as TypeScript's restrictive instantiation sees type parameters
+    /// when it decides that a conditional type definitely holds.
     restrictive_frozen_tvars: bool,
 }
 
@@ -329,6 +329,20 @@ impl FlowJsEnv {
             restrictive_frozen_tvars: true,
             ..self.dupe()
         }
+    }
+
+    /// The same env, but seeing frozen tvars with their bounds and placeholders as `any`, as the
+    /// check that a conditional type definitely fails does, even when that conditional type is
+    /// evaluated inside a restrictive check.
+    pub fn without_restrictive_frozen_tvars(&self) -> Self {
+        Self {
+            restrictive_frozen_tvars: false,
+            ..self.dupe()
+        }
+    }
+
+    pub fn restrictive_frozen_tvars(&self) -> bool {
+        self.restrictive_frozen_tvars
     }
 
     /// What a use sees a frozen tvar as.
