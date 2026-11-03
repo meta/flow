@@ -57,6 +57,14 @@ tslib_patched_file!(LIB_ESNEXT_COLLECTION_D_TS, "lib.esnext.collection");
 tslib_patched_file!(LIB_ESNEXT_ITERATOR_D_TS, "lib.esnext.iterator");
 tslib_patched_file!(pub(super) REACT_DOM_D_TS, "react-dom");
 
+/// `react.js` under `experimental.jsx_intrinsic_elements`, with `flowlib_patches/react.diff`
+/// applied: the type-level helpers read JSX intrinsics from `React$JSXIntrinsicElements` instead of
+/// `$JSXIntrinsics`.
+pub(super) static REACT_JS_JSX_INTRINSIC_ELEMENTS: LazyLock<String> = LazyLock::new(|| {
+    apply_patch(REACT_JS, include_str!("flowlib_patches/react.diff"))
+        .expect("flowlib_patches/react.diff should apply to lib/react.js")
+});
+
 /// The embedded flowlib file contents as (filename, contents) pairs.
 ///
 /// Files taken from `tslib/`, verbatim or patched, keep a `.js` name so they are checked as Flow

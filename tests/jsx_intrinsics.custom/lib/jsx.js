@@ -1,7 +1,8 @@
-type $JSXIntrinsic<T> = {props: T, instance: any, ...};
-
-type $JSXIntrinsics = {
-  div: $JSXIntrinsic<{id: string, [StringPrefix<'data-'>]: string}>,
-  span: $JSXIntrinsic<{id: string, class: string, ...}>,
-  ...
-};
+declare namespace React {
+  declare namespace JSX {
+    interface IntrinsicElements {
+      testdiv: {id: string, [StringPrefix<'data-'>]: string};
+      testspan: {id: string, class: string, ...};
+    }
+  }
+}

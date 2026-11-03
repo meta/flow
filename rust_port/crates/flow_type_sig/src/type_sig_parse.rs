@@ -1538,11 +1538,14 @@ pub(crate) mod scope {
             existing_binding: &BindingNode<'arena, 'ast>,
         ) {
             // For now, we allow $JSXIntrinsics, since we intentionally kept only a minimal version in
-            // the builtins, and let flow-typed supply a full one. Libraries may also widen the
+            // the builtins, and let flow-typed supply a full one. Under
+            // experimental.jsx_intrinsic_elements, libraries may instead replace the JSX intrinsics
+            // wholesale by redeclaring React$JSXIntrinsicElements. They may also widen the
             // user-visible string attributes of the React DOM intrinsics by redeclaring
             // ReactDOM$UserVisibleString (see lib/react.js).
             if in_global_scope
                 && name != "$JSXIntrinsics"
+                && name != "React$JSXIntrinsicElements"
                 && name != "ReactDOM$UserVisibleString"
                 && !legal
             {

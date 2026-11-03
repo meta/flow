@@ -1010,7 +1010,11 @@ pub fn file_options(
             .and_then(config_builtin_lib_of_arg)
             .unwrap_or(flowconfig.options.builtin_lib),
     );
-    let flowlib_dir = flow_flowlib::libdir(builtin_lib, temp_dir);
+    let flowlib_dir = flow_flowlib::libdir(
+        builtin_lib,
+        flowconfig.options.jsx_intrinsic_elements,
+        temp_dir,
+    );
     let default_lib_dir = Some(match flowlib_dir {
         flow_flowlib::LibDir::Prelude(path) => flow_common::files::LibDir::Prelude(path),
         flow_flowlib::LibDir::Flowlib(path) => flow_common::files::LibDir::Flowlib(path),
@@ -2212,6 +2216,7 @@ pub fn make_options(
                 ignore_non_literal_requires,
                 include_warnings,
                 jest_integration,
+                jsx_intrinsic_elements,
                 lazy_mode,
                 log_per_error_typing_telemetry,
                 log_saving,
@@ -2363,8 +2368,12 @@ pub fn make_options(
             .and_then(config_builtin_lib_of_arg)
             .unwrap_or(builtin_lib),
     );
-    let flowlib_dir = flow_flowlib::libdir(builtin_lib, &std::path::PathBuf::from(&temp_dir));
-    flow_flowlib::extract(&flowlib_dir);
+    let flowlib_dir = flow_flowlib::libdir(
+        builtin_lib,
+        jsx_intrinsic_elements,
+        &std::path::PathBuf::from(&temp_dir),
+    );
+    flow_flowlib::extract(&flowlib_dir, jsx_intrinsic_elements);
     let flowlib_path = flow_flowlib::path_of_libdir(&flowlib_dir).to_path_buf();
 
     // Initialize File_key root prefixes for relative path storage
@@ -2553,6 +2562,7 @@ pub fn make_options(
         include_warnings: include_warnings_override
             || max_warnings_override.is_some()
             || include_warnings,
+        jsx_intrinsic_elements,
         lazy_mode,
         log_per_error_typing_telemetry,
         lint_severities,
@@ -3103,6 +3113,7 @@ fn connect_and_make_request_inner(
     flow_parser::file_key::set_project_root(&root.to_string_lossy());
     let flowlib_dir = flow_flowlib::libdir(
         flowlib_builtin_lib(flowconfig.options.builtin_lib),
+        flowconfig.options.jsx_intrinsic_elements,
         &tmp_dir_normalized,
     );
     flow_parser::file_key::set_flowlib_root(

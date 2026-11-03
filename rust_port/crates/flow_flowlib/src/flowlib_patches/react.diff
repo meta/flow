@@ -1,0 +1,61 @@
+--- lib/react.js
++++ rust_port/crates/flow_flowlib/src/flowlib_patches/react.js
+@@ -90,7 +90,7 @@
+   type ComponentType<in P extends {...}> = component(...P);
+   type PropsOf<E extends string | MixedElement | React$RendersExactly<React$ElementType>> = E extends ExactReactElement_DEPRECATED<infer C> ? ComponentProps<C> : E extends React$RendersExactly<infer C> ? ComponentProps<C> : (E extends string ? ComponentProps<E> : empty);
+   type PropOf<E extends string | MixedElement | React$RendersExactly<React$ElementType>, K extends string> = PropsOf<E>[K]
+-  type RefOf<E extends string | MixedElement | React$RendersExactly<React$ElementType>> = E extends ExactReactElement_DEPRECATED<infer C> ? ElementRef<C> : E extends React$RendersExactly<infer C> ? ElementRef<C> : (E extends string ? $JSXIntrinsics[E]['instance'] : empty);
++  type RefOf<E extends string | MixedElement | React$RendersExactly<React$ElementType>> = E extends ExactReactElement_DEPRECATED<infer C> ? ElementRef<C> : E extends React$RendersExactly<infer C> ? ElementRef<C> : (E extends string ? ElementRef<E> : empty);
+   /**
+    * @flowCustomError
+    */
+@@ -126,7 +126,11 @@
+ 
+   type ElementRef<C extends string | component(...empty)> =
+     C extends empty ? any :
+-    C extends (infer S extends string) ? $JSXIntrinsics[S]['instance'] :
++    C extends (infer S extends string)
++      ? ('ref' extends keyof React$JSXIntrinsicElements[S]
++        ? (React$JSXIntrinsicElements[S] extends {readonly ref?: RefSetter<infer I>, ...} ? NonNullable<I> : unknown)
++        : void
++      ) :
+     C extends component(...infer Props extends {...})
+       ? ('ref' extends keyof Props
+         ? (Props extends {readonly ref?: RefSetter<infer I>, ...} ? I : unknown)
+@@ -237,7 +241,7 @@
+   /**
+    * The props accepted by a component or JSX intrinsic, including its ref prop.
+    */
+-  type ComponentProps<T extends React$ElementType> = T extends component(...infer Props extends {...}) ? Props : T extends keyof $JSXIntrinsics ? {...$JSXIntrinsics[T]['props'], ref?: RefSetter<$JSXIntrinsics[T]['instance']>} : empty;
++  type ComponentProps<T extends React$ElementType> = T extends component(...infer Props extends {...}) ? Props : T extends keyof React$JSXIntrinsicElements ? React$JSXIntrinsicElements[T] : empty;
+   /**
+    * @deprecated TypeScript compatibility alias. Use `React.ComponentProps` instead.
+    */
+@@ -348,9 +352,9 @@
+ declare opaque type React$CreateElement;
+ 
+ type React$CloneElement =
+-  & (<C extends keyof $JSXIntrinsics, E extends ExactReactElement_DEPRECATED<C>>(
++  & (<C extends keyof React$JSXIntrinsicElements, E extends ExactReactElement_DEPRECATED<C>>(
+     element: E,
+-    props?: ?Partial<$JSXIntrinsics[C]['props']>,
++    props?: ?Partial<React$JSXIntrinsicElements[C]>,
+     ...children: ReadonlyArray<React$Node>
+   ) => E)
+   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+@@ -1833,14 +1837,7 @@
+   }
+ }
+ 
+-// We only keep a bare-bone jsx intrinsics definition. Everything else is moved to flow-typed
+-declare type $JSXIntrinsics = {
+-  [key: string]: {
+-    instance: any,
+-    props: any,
+-    ...
+-  },
+-};
++declare type React$JSXIntrinsicElements = React.JSX.IntrinsicElements;
+ 
+ // This is really shameful. `tslib_patches/react-dom.diff` forks @types/react so
+ // that its user-visible string attributes (`aria-label`, `title`, `alt`,

@@ -1,7 +1,10 @@
 var React = require('react');
 
-<div id="asdf" />;
-<div id={42} />; // Error: (`id` prop) number ~> string
+<testdiv id="asdf" />;
+<testdiv id={42} />; // ERROR
 
 const dataProps: {[StringPrefix<'data-'>]: string} = {};
-const d = <div {...dataProps} />; // OK with data props, but missing id
+const d = <testdiv {...dataProps} />; // ERROR
+
+<testspan id="ok" class="ok" />;
+<testspan id="ok" />; // ERROR

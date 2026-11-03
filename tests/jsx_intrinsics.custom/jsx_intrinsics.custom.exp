@@ -1,168 +1,100 @@
-Error ----------------------------------------------------------------------------------------------------- main.js:4:10
+Error ----------------------------------------------------------------------------------------------------- main.js:4:14
 
-Cannot create `div` element because in property `id`: `42` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot create `testdiv` element because in property `id`: `42` [1] is incompatible with `string` [2].
+[incompatible-type]
 
-   main.js:4:10
-   4| <div id={42} />; // Error: (`id` prop) number ~> string
-               ^^ [1]
+   main.js:4:14
+   4| <testdiv id={42} />; // ERROR
+                   ^^ [1]
 
 References:
-   lib/jsx.js:4:27
-   4|   div: $JSXIntrinsic<{id: string, [StringPrefix<'data-'>]: string}>,
-                                ^^^^^^ [2]
+   lib/jsx.js:4:21
+   4|       testdiv: {id: string, [StringPrefix<'data-'>]: string};
+                          ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- main.js:7:12
 
-Cannot create `div` element because in the indexer property's key: `"id"` [1] is incompatible with
+Cannot create `testdiv` element because in the indexer property's key: `"id"` [1] is incompatible with
 `` `${"data-"}${string}` `` [2]. [incompatible-type]
 
    main.js:7:12
-   7| const d = <div {...dataProps} />; // OK with data props, but missing id
-                 ^^^ [1]
+   7| const d = <testdiv {...dataProps} />; // ERROR
+                 ^^^^^^^
 
 References:
+   lib/jsx.js:4:16
+   4|       testdiv: {id: string, [StringPrefix<'data-'>]: string};
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    main.js:6:20
    6| const dataProps: {[StringPrefix<'data-'>]: string} = {};
                          ^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
-Error -------------------------------------------------------------------------------------------------- strings.js:10:2
+Error ----------------------------------------------------------------------------------------------------- main.js:10:2
 
-Cannot create `bad` element because property `bad` is missing in `$JSXIntrinsics` [1]. [prop-missing]
+Cannot create `testspan` element because property `class` is missing in `{id: "ok"}` [1] but exists in
+`{readonly class: string, readonly id: string, ...}` [2]. [incompatible-type]
 
-   strings.js:10:2
-   10| <Bad />; // Error: 'bad' not in JSXIntrinsics
-        ^^^
+   main.js:10:2
+   10| <testspan id="ok" />; // ERROR
+        ^^^^^^^^
 
 References:
-   lib/jsx.js:3:23
-                             v
-    3| type $JSXIntrinsics = {
-    4|   div: $JSXIntrinsic<{id: string, [StringPrefix<'data-'>]: string}>,
-    5|   span: $JSXIntrinsic<{id: string, class: string, ...}>,
-    6|   ...
-    7| };
-       ^ [1]
+   main.js:10:1
+   10| <testspan id="ok" />; // ERROR
+       ^^^^^^^^^^^^^^^^^^^^ [1]
+   lib/jsx.js:5:17
+    5|       testspan: {id: string, class: string, ...};
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------------- strings.js:11:2
 
 Cannot create string element because an index signature declaring the expected key / value type is missing in
-`$JSXIntrinsics` [1]. [prop-missing]
+`IntrinsicElements` [1]. [prop-missing]
 
    strings.js:11:2
-   11| <Str />; // Error: string ~> keys of JSXIntrinsics
-        ^^^
+     11| <Str />; // ERROR
+          ^^^
 
 References:
-   lib/jsx.js:3:23
-                             v
-    3| type $JSXIntrinsics = {
-    4|   div: $JSXIntrinsic<{id: string, [StringPrefix<'data-'>]: string}>,
-    5|   span: $JSXIntrinsic<{id: string, class: string, ...}>,
-    6|   ...
-    7| };
-       ^ [1]
-
-
-Error -------------------------------------------------------------------------------------------------- strings.js:11:2
-
-Cannot access `$JSXIntrinsics` [1] with computed property using `string` [2]. [invalid-computed-prop]
-
-   strings.js:11:2
-   11| <Str />; // Error: string ~> keys of JSXIntrinsics
-        ^^^
-
-References:
-   lib/jsx.js:3:23
-                             v
-    3| type $JSXIntrinsics = {
-    4|   div: $JSXIntrinsic<{id: string, [StringPrefix<'data-'>]: string}>,
-    5|   span: $JSXIntrinsic<{id: string, class: string, ...}>,
-    6|   ...
-    7| };
-       ^ [1]
-   strings.js:7:10
-    7| var Str: string = 'str';
-                ^^^^^^ [2]
+   <BUILTINS>/react.js:1840:43
+   1840| declare type React$JSXIntrinsicElements = React.JSX.IntrinsicElements;
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error -------------------------------------------------------------------------------------------------- strings.js:13:2
 
-Cannot create `div` element because property `id` is missing in `{}` [1] but exists in
-`{readonly [StringPrefix<"data-">]: string, readonly id: string, readonly ref?: React.RefSetter<any>}` [2].
-[incompatible-type]
+Cannot create `testdiv` element because property `id` is missing in `{}` [1] but exists in
+`{readonly [StringPrefix<"data-">]: string, readonly id: string}` [2]. [incompatible-type]
 
    strings.js:13:2
-   13| <div />; // This is not fine
-        ^^^ [2]
+   13| <testdiv />; // ERROR
+        ^^^^^^^
 
 References:
    strings.js:13:1
-   13| <div />; // This is not fine
-       ^^^^^^^ [1]
-
-
-Error -------------------------------------------------------------------------------------------------- strings.js:14:2
-
-Cannot create `bad` element because property `bad` is missing in `$JSXIntrinsics` [1]. [prop-missing]
-
-   strings.js:14:2
-   14| <bad />; // Error: 'bad' not in JSXIntrinsics
-        ^^^
-
-References:
-   lib/jsx.js:3:23
-                             v
-    3| type $JSXIntrinsics = {
-    4|   div: $JSXIntrinsic<{id: string, [StringPrefix<'data-'>]: string}>,
-    5|   span: $JSXIntrinsic<{id: string, class: string, ...}>,
-    6|   ...
-    7| };
-       ^ [1]
+   13| <testdiv />; // ERROR
+       ^^^^^^^^^^^ [1]
+   lib/jsx.js:4:16
+    4|       testdiv: {id: string, [StringPrefix<'data-'>]: string};
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------------- strings.js:15:2
 
 Cannot create string element because an index signature declaring the expected key / value type is missing in
-`$JSXIntrinsics` [1]. [prop-missing]
+`IntrinsicElements` [1]. [prop-missing]
 
    strings.js:15:2
-   15| <Str />; // Error: string ~> keys of JSXIntrinsics
-        ^^^
+     15| <Str />; // ERROR
+          ^^^
 
 References:
-   lib/jsx.js:3:23
-                             v
-    3| type $JSXIntrinsics = {
-    4|   div: $JSXIntrinsic<{id: string, [StringPrefix<'data-'>]: string}>,
-    5|   span: $JSXIntrinsic<{id: string, class: string, ...}>,
-    6|   ...
-    7| };
-       ^ [1]
-
-
-Error -------------------------------------------------------------------------------------------------- strings.js:15:2
-
-Cannot access `$JSXIntrinsics` [1] with computed property using `string` [2]. [invalid-computed-prop]
-
-   strings.js:15:2
-   15| <Str />; // Error: string ~> keys of JSXIntrinsics
-        ^^^
-
-References:
-   lib/jsx.js:3:23
-                             v
-    3| type $JSXIntrinsics = {
-    4|   div: $JSXIntrinsic<{id: string, [StringPrefix<'data-'>]: string}>,
-    5|   span: $JSXIntrinsic<{id: string, class: string, ...}>,
-    6|   ...
-    7| };
-       ^ [1]
-   strings.js:7:10
-    7| var Str: string = 'str';
-                ^^^^^^ [2]
+   <BUILTINS>/react.js:1840:43
+   1840| declare type React$JSXIntrinsicElements = React.JSX.IntrinsicElements;
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------------- strings.js:17:10
@@ -174,10 +106,10 @@ Cannot create `Div` element because in property `id`: `42` [1] is incompatible w
                 ^^ [1]
 
 References:
-   lib/jsx.js:4:27
-    4|   div: $JSXIntrinsic<{id: string, [StringPrefix<'data-'>]: string}>,
-                                 ^^^^^^ [2]
+   lib/jsx.js:4:21
+    4|       testdiv: {id: string, [StringPrefix<'data-'>]: string};
+                           ^^^^^^ [2]
 
 
 
-Found 10 errors
+Found 7 errors

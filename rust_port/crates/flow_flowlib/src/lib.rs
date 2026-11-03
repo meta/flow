@@ -10,6 +10,7 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use flow_common::sys_utils;
+use flow_common_xx as xx;
 
 mod flowlib_contents;
 mod flowlib_with_lib_dom_d_ts_contents;
@@ -24,26 +25,45 @@ pub enum BuiltinLib {
     Tslib,
 }
 
-fn hash(lib: BuiltinLib) -> String {
-    match lib {
+fn hash(lib: BuiltinLib, jsx_intrinsic_elements: bool) -> String {
+    let hash = match lib {
         BuiltinLib::Flowlib => flowlib_contents::HASH.to_string(),
         BuiltinLib::FlowlibWithLibDomDts => flowlib_with_lib_dom_d_ts_contents::HASH.to_string(),
         BuiltinLib::Prelude => prelude_contents::HASH.to_string(),
         BuiltinLib::Tslib => tslib_contents::HASH.to_string(),
+    };
+    if !jsx_intrinsic_elements {
+        return hash;
     }
+    let mut state = xx::State::new(0);
+    state.update(hash.as_bytes());
+    state.update(flowlib_contents::REACT_JS_JSX_INTRINSIC_ELEMENTS.as_bytes());
+    format!("{:016x}", state.digest())
 }
 
-fn contents(lib: BuiltinLib) -> &'static [(&'static str, &'static str)] {
-    match lib {
+/// The flowlib files of `lib`. Under `experimental.jsx_intrinsic_elements`, `react.js` is the
+/// patched one.
+fn contents(lib: BuiltinLib, jsx_intrinsic_elements: bool) -> Vec<(&'static str, &'static str)> {
+    let contents = match lib {
         BuiltinLib::Flowlib => flowlib_contents::CONTENTS.as_slice(),
         BuiltinLib::FlowlibWithLibDomDts => flowlib_with_lib_dom_d_ts_contents::CONTENTS.as_slice(),
         BuiltinLib::Prelude => prelude_contents::CONTENTS,
         BuiltinLib::Tslib => tslib_contents::CONTENTS,
-    }
+    };
+    contents
+        .iter()
+        .map(|&(filename, text)| match filename {
+            "react.js" if jsx_intrinsic_elements => (
+                filename,
+                flowlib_contents::REACT_JS_JSX_INTRINSIC_ELEMENTS.as_str(),
+            ),
+            _ => (filename, text),
+        })
+        .collect()
 }
 
 pub fn contents_list(lib: BuiltinLib) -> Vec<(&'static str, &'static str)> {
-    contents(lib).to_vec()
+    contents(lib, false)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -68,9 +88,13 @@ fn get_euid() -> u32 {
 /// be extracted. This directory is named uniquely based on the flowlib contents, as well as the effective
 /// user ID (euid) of the current process. The euid is used to ensure that
 /// the directory is writable by the current user.
-pub fn libdir(builtin_lib: BuiltinLib, parent_dir: &Path) -> LibDir {
+pub fn libdir(builtin_lib: BuiltinLib, jsx_intrinsic_elements: bool, parent_dir: &Path) -> LibDir {
     let euid = get_euid();
-    let basename = format!("flowlib_{}_{}", hash(builtin_lib), euid);
+    let basename = format!(
+        "flowlib_{}_{}",
+        hash(builtin_lib, jsx_intrinsic_elements),
+        euid
+    );
     let path = parent_dir.join(&basename);
     match builtin_lib {
         BuiltinLib::Flowlib => LibDir::Flowlib(path),
@@ -102,7 +126,7 @@ fn write_flowlib(dir: &Path, (filename, contents): &(&str, &str)) {
     fs::write(&file, contents).expect("failed to write flowlib file");
 }
 
-pub fn extract(libdir: &LibDir) {
+pub fn extract(libdir: &LibDir, jsx_intrinsic_elements: bool) {
     mkdir(libdir);
     let (path, lib) = match libdir {
         LibDir::Prelude(path) => (path.as_path(), BuiltinLib::Prelude),
@@ -110,12 +134,12 @@ pub fn extract(libdir: &LibDir) {
         LibDir::FlowlibWithLibDomDts(path) => (path.as_path(), BuiltinLib::FlowlibWithLibDomDts),
         LibDir::Tslib(path) => (path.as_path(), BuiltinLib::Tslib),
     };
-    for entry in contents(lib) {
-        write_flowlib(path, entry);
+    for entry in contents(lib, jsx_intrinsic_elements) {
+        write_flowlib(path, &entry);
     }
 }
 
-pub fn extract_if_missing(libdir: &LibDir) {
+pub fn extract_if_missing(libdir: &LibDir, jsx_intrinsic_elements: bool) {
     let sentinel_name = match libdir {
         LibDir::Flowlib(_) => "lib.es5.js",
         LibDir::FlowlibWithLibDomDts(_) => "lib.dom.d.ts",
@@ -125,7 +149,7 @@ pub fn extract_if_missing(libdir: &LibDir) {
     let libdir_path = path_of_libdir(libdir);
     let sentinel = libdir_path.join(sentinel_name);
     if !sentinel.exists() {
-        extract(libdir);
+        extract(libdir, jsx_intrinsic_elements);
     }
 }
 
@@ -140,12 +164,15 @@ fn libdir_from_files_libdir(files_libdir: &flow_common::files::LibDir) -> LibDir
     }
 }
 
-pub fn extract_if_missing_or_exit(files_libdir_opt: Option<&flow_common::files::LibDir>) {
+pub fn extract_if_missing_or_exit(
+    files_libdir_opt: Option<&flow_common::files::LibDir>,
+    jsx_intrinsic_elements: bool,
+) {
     let Some(files_libdir) = files_libdir_opt else {
         return;
     };
     let libdir = libdir_from_files_libdir(files_libdir);
-    match std::panic::catch_unwind(|| extract_if_missing(&libdir)) {
+    match std::panic::catch_unwind(|| extract_if_missing(&libdir, jsx_intrinsic_elements)) {
         Ok(()) => {}
         Err(err) => {
             let panic_msg = err
@@ -174,7 +201,7 @@ mod tests {
     #[test]
     fn dom_extra_to_be_removed_is_only_in_flowlib() {
         let contains_dom_extra = |lib| {
-            contents(lib)
+            contents(lib, false)
                 .iter()
                 .any(|(filename, _)| *filename == "dom_extra_to_be_removed.js")
         };

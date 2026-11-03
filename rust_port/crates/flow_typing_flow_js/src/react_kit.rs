@@ -266,6 +266,65 @@ fn get_intrinsic<'cx>(
     )
 }
 
+fn get_intrinsic_props<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    trace: DepthTrace,
+    component: &Type,
+) -> Result<Type, FlowJsException> {
+    let reason = type_util::reason_of_t(component);
+    let intrinsics_reason = mk_reason(
+        VirtualReasonDesc::RType("React.JSX.IntrinsicElements".into()),
+        reason.loc().dupe(),
+    );
+    let intrinsics = FlowJs::get_builtin_type_with_env(
+        cx,
+        env,
+        None,
+        &intrinsics_reason,
+        None,
+        "React$JSXIntrinsicElements",
+    )?;
+    let use_op = VirtualUseOp::Op(Arc::new(VirtualRootUseOp::ReactGetIntrinsic {
+        literal: if let TypeInner::DefT(_, def_t) = component.deref()
+            && let DefTInner::SingletonStrT { value: name, .. } = def_t.deref()
+        {
+            reason
+                .dupe()
+                .replace_desc(VirtualReasonDesc::RIdentifier(name.dupe()))
+        } else {
+            reason.dupe()
+        },
+    }));
+    if let TypeInner::DefT(_, def_t) = component.deref()
+        && let DefTInner::StrGeneralT(_) = def_t.deref()
+    {
+        FlowJs::rec_flow_with_env(
+            cx,
+            env,
+            trace,
+            &intrinsics,
+            &UseT::new(UseTInner::HasOwnPropT(Box::new(HasOwnPropTData {
+                use_op: use_op.dupe(),
+                reason: reason.dupe(),
+                type_: component.dupe(),
+            }))),
+        )?;
+    }
+    FlowJs::mk_type_destructor_with_env(
+        cx,
+        env,
+        trace,
+        use_op,
+        reason,
+        &intrinsics,
+        &Destructor::ElementType {
+            index_type: component.dupe(),
+        },
+        eval::Id::generate_id(),
+    )
+}
+
 pub fn subtype_class_component_render<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
@@ -557,6 +616,12 @@ fn props_to_tout<'cx>(
                 Ok(())
             }
             // Special case for intrinsic components.
+            DefTInner::SingletonStrT { .. } | DefTInner::StrGeneralT(_)
+                if cx.jsx_intrinsic_elements() =>
+            {
+                let props = get_intrinsic_props(cx, env, trace, component)?;
+                FlowJs::rec_flow_t_with_env(cx, env, trace, unknown_use(), &props, &tout)
+            }
             DefTInner::SingletonStrT { value: name, .. } => {
                 let props = flow_typing_tvar::mk(cx, reason_op.dupe());
                 get_intrinsic(
@@ -630,6 +695,10 @@ fn props_to_tout<'cx>(
                 Ok(())
             }
         },
+        TypeInner::TemplateLiteralT { .. } if cx.jsx_intrinsic_elements() => {
+            let props = get_intrinsic_props(cx, env, trace, component)?;
+            FlowJs::rec_flow_t_with_env(cx, env, trace, unknown_use(), &props, &tout)
+        }
         TypeInner::TemplateLiteralT { quasis, .. } => general_intrinsic(
             cx,
             if quasis.iter().any(|q| !q.is_empty()) {
@@ -957,6 +1026,13 @@ pub(super) fn run_with_env<'cx>(
                     eval::Id::generate_id(),
                 )
             };
+            if cx.jsx_intrinsic_elements() {
+                // type Config = Readonly<React$JSXIntrinsicElements[T]>;
+                let props = get_intrinsic_props(cx, env, trace, component)?;
+                let props = eval(cx, props, Destructor::ReadOnlyType)?;
+                FlowJs::rec_flow_t_with_env(cx, env, trace, unknown_use(), tin, &props)?;
+                return Ok(props);
+            }
             // type Intrinsic = Intrinsics[T];
             let intrinsic = {
                 // type Intrinsics = $JSXIntrinsics;

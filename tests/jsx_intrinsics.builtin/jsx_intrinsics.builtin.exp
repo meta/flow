@@ -1,1 +1,605 @@
-Found 0 errors
+Error -------------------------------------------------------------------------------------------------- strings.js:12:2
+
+Cannot create `bad` element because property `bad` is missing in `IntrinsicElements` [1]. [prop-missing]
+
+   strings.js:12:2
+     12| <Bad />; // ERROR
+          ^^^
+
+References:
+   <BUILTINS>/react.js:1840:43
+   1840| declare type React$JSXIntrinsicElements = React.JSX.IntrinsicElements;
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------------- strings.js:13:2
+
+Cannot create `Str` element because `{}` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   strings.js:13:2
+   13| <Str />; // ERROR
+        ^^^
+
+References:
+   strings.js:13:1
+   13| <Str />; // ERROR
+       ^^^^^^^ [1]
+   strings.js:7:20
+    7| declare const Str: string;
+                          ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------------- strings.js:13:2
+
+Cannot create string element because an index signature declaring the expected key / value type is missing in
+`IntrinsicElements` [1]. [prop-missing]
+
+   strings.js:13:2
+     13| <Str />; // ERROR
+          ^^^
+
+References:
+   <BUILTINS>/react.js:1840:43
+   1840| declare type React$JSXIntrinsicElements = React.JSX.IntrinsicElements;
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------------- strings.js:16:2
+
+Cannot create `bad` element because property `bad` is missing in `IntrinsicElements` [1]. [prop-missing]
+
+   strings.js:16:2
+     16| <bad {...empty_exact} />; // ERROR
+          ^^^
+
+References:
+   <BUILTINS>/react.js:1840:43
+   1840| declare type React$JSXIntrinsicElements = React.JSX.IntrinsicElements;
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------- strings.js:19:10
+
+Cannot create `Div` element because in property `id`: [incompatible-type]
+ - Either `42` [1] is incompatible with `string` [2].
+ - Or `42` [1] is incompatible with `void` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   strings.js:19:10
+    19| <Div id={42} />; // ERROR
+                 ^^ [1]
+
+References:
+   <BUILTINS>/react-dom.d.ts:811:14
+   811|         id?: string | undefined;
+                     ^^^^^^ [2]
+   <BUILTINS>/react-dom.d.ts:811:23
+   811|         id?: string | undefined;
+                              ^^^^^^^^^ [3]
+
+
+Error ------------------------------------------------------------------------------------------------- strings.js:21:17
+
+Cannot create `input` element because in property `disabled`: [incompatible-type]
+ - Either `"yes"` [1] is incompatible with `boolean` [2].
+ - Or `"yes"` [1] is incompatible with `void` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   strings.js:21:17
+     21| <input disabled="yes" />; // ERROR
+                         ^^^^^ [1]
+
+References:
+   <BUILTINS>/react-dom.d.ts:1291:20
+   1291|         disabled?: boolean | undefined;
+                            ^^^^^^^ [2]
+   <BUILTINS>/react-dom.d.ts:1291:30
+   1291|         disabled?: boolean | undefined;
+                                      ^^^^^^^^^ [3]
+
+
+Error ------------------------------------------------------------------------------------------------- strings.js:22:12
+
+Cannot create `input` element because in property `id`: [incompatible-type]
+ - Either `42` [1] is incompatible with `string` [2].
+ - Or `42` [1] is incompatible with `void` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   strings.js:22:12
+    22| <input id={42} />; // ERROR
+                   ^^ [1]
+
+References:
+   <BUILTINS>/react-dom.d.ts:811:14
+   811|         id?: string | undefined;
+                     ^^^^^^ [2]
+   <BUILTINS>/react-dom.d.ts:811:23
+   811|         id?: string | undefined;
+                              ^^^^^^^^^ [3]
+
+
+Error ------------------------------------------------------------------------------------------------- strings.js:23:21
+
+Cannot create `select` element because in property `aria-hidden`: [incompatible-type]
+ - Either `"yes"` [1] is incompatible with `boolean` [2].
+ - Or `"yes"` [1] is incompatible with `"true"` [3].
+ - Or `"yes"` [1] is incompatible with `"false"` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   strings.js:23:21
+   23| <select aria-hidden="yes" />; // ERROR
+                           ^^^^^ [1]
+
+References:
+   <BUILTINS>/react-dom.d.ts:33:23
+   33|     type Booleanish = boolean | "true" | "false";
+                             ^^^^^^^ [2]
+   <BUILTINS>/react-dom.d.ts:33:33
+   33|     type Booleanish = boolean | "true" | "false";
+                                       ^^^^^^ [3]
+   <BUILTINS>/react-dom.d.ts:33:42
+   33|     type Booleanish = boolean | "true" | "false";
+                                                ^^^^^^^ [4]
+
+
+Error ------------------------------------------------------------------------------------------------- strings.js:24:20
+
+Cannot create `textarea` element because in property `onClick`: [incompatible-type]
+ - Either in the first parameter: `number` [1] is incompatible with `MouseEvent<HTMLTextAreaElement, MouseEvent>` [2].
+ - Or `(event: number) => void` [3] is incompatible with `void` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   strings.js:24:20
+    24| <textarea onClick={(event: number) => {}} />; // ERROR
+                           ^^^^^^^^^^^^^^^^^^^^^ [3]
+
+References:
+   strings.js:24:28
+    24| <textarea onClick={(event: number) => {}} />; // ERROR
+                                   ^^^^^^ [1]
+   <BUILTINS>/react-dom.d.ts:260:56
+   260|     type MouseEventHandler<T = Element> = EventHandler<MouseEvent<T>>;
+                                                               ^^^^^^^^^^^^^ [2]
+   <BUILTINS>/react-dom.d.ts:392:42
+   392|         onClick?: MouseEventHandler<T> | undefined;
+                                                 ^^^^^^^^^ [4]
+
+
+Error ------------------------------------------------------------------------------------------------- strings.js:26:14
+
+Cannot create `button` element because in property `type`: `"invalid"` [1] is incompatible with
+`"submit" | "reset" | "button" | void` [2]. [incompatible-type]
+
+   strings.js:26:14
+     26| <button type="invalid" />; // ERROR
+                      ^^^^^^^^^ [1]
+
+References:
+   <BUILTINS>/react-dom.d.ts:1075:16
+   1075|         type?: "submit" | "reset" | "button" | undefined;
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- strings.js:28:15
+
+Cannot create `svg` element because in property `viewBox`: [incompatible-type]
+ - Either `42` [1] is incompatible with `string` [2].
+ - Or `42` [1] is incompatible with `void` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   strings.js:28:15
+     28| <svg viewBox={42} />; // ERROR
+                       ^^ [1]
+
+References:
+   <BUILTINS>/react-dom.d.ts:1872:19
+   1872|         viewBox?: string | undefined;
+                           ^^^^^^ [2]
+   <BUILTINS>/react-dom.d.ts:1872:28
+   1872|         viewBox?: string | undefined;
+                                    ^^^^^^^^^ [3]
+
+
+Error ------------------------------------------------------------------------------------------------- strings.js:30:18
+
+Cannot create `div` element because in property `aria-hidden`: [incompatible-type]
+ - Either `"yes"` [1] is incompatible with `boolean` [2].
+ - Or `"yes"` [1] is incompatible with `"true"` [3].
+ - Or `"yes"` [1] is incompatible with `"false"` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   strings.js:30:18
+   30| <div aria-hidden="yes" />; // ERROR
+                        ^^^^^ [1]
+
+References:
+   <BUILTINS>/react-dom.d.ts:33:23
+   33|     type Booleanish = boolean | "true" | "false";
+                             ^^^^^^^ [2]
+   <BUILTINS>/react-dom.d.ts:33:33
+   33|     type Booleanish = boolean | "true" | "false";
+                                       ^^^^^^ [3]
+   <BUILTINS>/react-dom.d.ts:33:42
+   33|     type Booleanish = boolean | "true" | "false";
+                                                ^^^^^^^ [4]
+
+
+Error ------------------------------------------------------------------------------------------------- strings.js:32:13
+
+Cannot create `div` element because in property `style`: [incompatible-type]
+ - Either in property `opacity`: `false` [1] is incompatible with `string` [2].
+ - Or in property `opacity`: `false` [1] is incompatible with `number` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   strings.js:32:13
+      32| <div style={{opacity: false}} />; // ERROR
+                      ^^^^^^^^^^^^^^^^
+
+References:
+   strings.js:32:23
+      32| <div style={{opacity: false}} />; // ERROR
+                                ^^^^^ [1]
+   <BUILTINS>/csstype.d.ts:21078:36
+   21078|   export type Opacity = Globals | (string & {}) | (number & {});
+                                             ^^^^^^ [2]
+   <BUILTINS>/csstype.d.ts:21078:52
+   21078|   export type Opacity = Globals | (string & {}) | (number & {});
+                                                             ^^^^^^ [3]
+
+
+Error ------------------------------------------------------------------------------------------------- strings.js:36:13
+
+Cannot cast object literal to `React.ComponentProps<"input">` because in property `disabled`: [incompatible-type]
+ - Either `"yes"` [1] is incompatible with `boolean` [2].
+ - Or `"yes"` [1] is incompatible with `void` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   strings.js:36:13
+     36| ({disabled: 'yes'}) as React.ComponentProps<'input'>; // ERROR
+                     ^^^^^ [1]
+
+References:
+   <BUILTINS>/react-dom.d.ts:1291:20
+   1291|         disabled?: boolean | undefined;
+                            ^^^^^^^ [2]
+   <BUILTINS>/react-dom.d.ts:1291:30
+   1291|         disabled?: boolean | undefined;
+                                      ^^^^^^^^^ [3]
+
+
+Error -------------------------------------------------------------------------------------------------- strings.js:38:2
+
+Cannot cast object literal to `IntrinsicElements["svg"]` because object literal [1] is incompatible with
+`SVGAttributes<SVGSVGElement>` [2]. For example, `42` [3] is incompatible with `void` [4]. [incompatible-type]
+
+   strings.js:38:2
+     38| ({viewBox: 42}) as React.JSX.IntrinsicElements['svg']; // ERROR
+          ^^^^^^^^^^^^^ [1]
+
+References:
+   <BUILTINS>/react-dom.d.ts:278:24
+    278|     type SVGProps<T> = SVGAttributes<T> & ClassAttributes<T>;
+                                ^^^^^^^^^^^^^^^^ [2]
+   strings.js:38:12
+     38| ({viewBox: 42}) as React.JSX.IntrinsicElements['svg']; // ERROR
+                    ^^ [3]
+   <BUILTINS>/react-dom.d.ts:1872:28
+   1872|         viewBox?: string | undefined;
+                                    ^^^^^^^^^ [4]
+
+
+Error -------------------------------------------------------------------------------------------------- strings.js:40:2
+
+Cannot cast object literal to `React.ButtonHTMLAttributes<HTMLButtonElement>` because object literal [1] is incompatible
+with `ButtonHTMLAttributes<HTMLButtonElement>` [2]. For example, `"invalid"` [3] is incompatible with
+`"submit" | "reset" | "button" | void` [4]. [incompatible-type]
+
+   strings.js:40:2
+     40| ({type: 'invalid'}) as React.ButtonHTMLAttributes<HTMLButtonElement>; // ERROR
+          ^^^^^^^^^^^^^^^^^ [1]
+
+References:
+   strings.js:40:24
+     40| ({type: 'invalid'}) as React.ButtonHTMLAttributes<HTMLButtonElement>; // ERROR
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   strings.js:40:9
+     40| ({type: 'invalid'}) as React.ButtonHTMLAttributes<HTMLButtonElement>; // ERROR
+                 ^^^^^^^^^ [3]
+   <BUILTINS>/react-dom.d.ts:1075:16
+   1075|         type?: "submit" | "reset" | "button" | undefined;
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+Error ------------------------------------------------------------------------------------------------- strings.js:41:12
+
+Cannot cast object literal to `Readonly<React.ComponentProps<"svg">>` because in property `viewBox`: [incompatible-type]
+ - Either `42` [1] is incompatible with `string` [2].
+ - Or `42` [1] is incompatible with `void` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   strings.js:41:12
+     41| ({viewBox: 42}) as Readonly<React.ComponentProps<'svg'>>; // ERROR
+                    ^^ [1]
+
+References:
+   <BUILTINS>/react-dom.d.ts:1872:19
+   1872|         viewBox?: string | undefined;
+                           ^^^^^^ [2]
+   <BUILTINS>/react-dom.d.ts:1872:28
+   1872|         viewBox?: string | undefined;
+                                    ^^^^^^^^^ [3]
+
+
+Error ------------------------------------------------------------------------------------------------- strings.js:42:18
+
+Cannot cast object literal to `Partial<React.ComponentProps<"div">>` because in property `aria-hidden`:
+[incompatible-type]
+ - Either `"yes"` [1] is incompatible with `boolean` [2].
+ - Or `"yes"` [1] is incompatible with `"true"` [3].
+ - Or `"yes"` [1] is incompatible with `"false"` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   strings.js:42:18
+   42| ({'aria-hidden': 'yes'}) as Partial<React.ComponentProps<'div'>>; // ERROR
+                        ^^^^^ [1]
+
+References:
+   <BUILTINS>/react-dom.d.ts:33:23
+   33|     type Booleanish = boolean | "true" | "false";
+                             ^^^^^^^ [2]
+   <BUILTINS>/react-dom.d.ts:33:33
+   33|     type Booleanish = boolean | "true" | "false";
+                                       ^^^^^^ [3]
+   <BUILTINS>/react-dom.d.ts:33:42
+   33|     type Booleanish = boolean | "true" | "false";
+                                                ^^^^^^^ [4]
+
+
+Error ------------------------------------------------------------------------------------------------- strings.js:43:12
+
+Cannot cast object literal to `Readonly<React.ComponentProps<"button">>` because in property `onClick`:
+[incompatible-type]
+ - Either in the first parameter: `number` [1] is incompatible with `MouseEvent<HTMLButtonElement, MouseEvent>` [2].
+ - Or `(event: number) => void` [3] is incompatible with `void` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   strings.js:43:12
+    43| ({onClick: (event: number) => {}}) as Readonly<React.ComponentProps<'button'>>; // ERROR
+                   ^^^^^^^^^^^^^^^^^^^^^ [3]
+
+References:
+   strings.js:43:20
+    43| ({onClick: (event: number) => {}}) as Readonly<React.ComponentProps<'button'>>; // ERROR
+                           ^^^^^^ [1]
+   <BUILTINS>/react-dom.d.ts:260:56
+   260|     type MouseEventHandler<T = Element> = EventHandler<MouseEvent<T>>;
+                                                               ^^^^^^^^^^^^^ [2]
+   <BUILTINS>/react-dom.d.ts:392:42
+   392|         onClick?: MouseEventHandler<T> | undefined;
+                                                 ^^^^^^^^^ [4]
+
+
+Error ------------------------------------------------------------------------------------------------- strings.js:47:11
+
+Cannot create `div` element because in property `ref`: [incompatible-type]
+ - Either in the first parameter: `HTMLDivElement` [1] is incompatible with `number` [2].
+ - Or in the first parameter: `HTMLDivElement` [1] is incompatible with `null` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   strings.js:47:11
+     47| <div ref={(node: number | null) => {}} />; // ERROR
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   <BUILTINS>/react-dom.d.ts:2163:80
+   2163|             div: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
+                                                                                        ^^^^^^^^^^^^^^ [1]
+   strings.js:47:18
+     47| <div ref={(node: number | null) => {}} />; // ERROR
+                          ^^^^^^ [2]
+   strings.js:47:27
+     47| <div ref={(node: number | null) => {}} />; // ERROR
+                                   ^^^^ [3]
+
+
+Error -------------------------------------------------------------------------------------------------- strings.js:51:1
+
+Cannot cast `instance` to `number` because `HTMLDivElement` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   strings.js:51:1
+   51| instance as number; // ERROR
+       ^^^^^^^^
+
+References:
+   strings.js:49:25
+   49| declare const instance: React.ElementRef<'div'>;
+                               ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   strings.js:51:13
+   51| instance as number; // ERROR
+                   ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- strings.js:57:18
+
+Cannot create `button` element because in property `onClick`: [incompatible-type]
+ - Either in the first parameter: `number` [1] is incompatible with `MouseEvent<HTMLButtonElement, MouseEvent>` [2].
+ - Or `(event: number) => void` [3] is incompatible with `void` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   strings.js:57:18
+    57| <button onClick={(event: number) => {}} />; // ERROR
+                         ^^^^^^^^^^^^^^^^^^^^^ [3]
+
+References:
+   strings.js:57:26
+    57| <button onClick={(event: number) => {}} />; // ERROR
+                                 ^^^^^^ [1]
+   <BUILTINS>/react-dom.d.ts:260:56
+   260|     type MouseEventHandler<T = Element> = EventHandler<MouseEvent<T>>;
+                                                               ^^^^^^^^^^^^^ [2]
+   <BUILTINS>/react-dom.d.ts:392:42
+   392|         onClick?: MouseEventHandler<T> | undefined;
+                                                 ^^^^^^^^^ [4]
+
+
+Error -------------------------------------------------------------------------------------------------- strings.js:60:1
+
+Cannot cast `style.opacity` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   strings.js:60:1
+     60| style.opacity as empty; // ERROR
+         ^^^^^^^^^^^^^
+
+References:
+   <BUILTINS>/csstype.d.ts:3604:13
+   3604|   opacity?: Property.Opacity | undefined;
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   strings.js:60:18
+     60| style.opacity as empty; // ERROR
+                          ^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------------- strings.js:60:1
+
+Cannot cast `style.opacity` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   strings.js:60:1
+     60| style.opacity as empty; // ERROR
+         ^^^^^^^^^^^^^
+
+References:
+   <BUILTINS>/csstype.d.ts:3604:32
+   3604|   opacity?: Property.Opacity | undefined;
+                                        ^^^^^^^^^ [1]
+   strings.js:60:18
+     60| style.opacity as empty; // ERROR
+                          ^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------------- strings.js:60:1
+
+Cannot cast `style.opacity` to `empty` because in at least one member of `Globals` [1]: `"-moz-initial"` [1] is
+incompatible with `empty` [2]. [incompatible-type]
+
+   strings.js:60:1
+     60| style.opacity as empty; // ERROR
+         ^^^^^^^^^^^^^
+
+References:
+   <BUILTINS>/csstype.d.ts:3604:13
+   3604|   opacity?: Property.Opacity | undefined;
+                     ^^^^^^^^^^^^^^^^ [1]
+   strings.js:60:18
+     60| style.opacity as empty; // ERROR
+                          ^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------------- strings.js:60:1
+
+Cannot cast `style.opacity` to `empty` because: [incompatible-type]
+ - Either `{}` [1] is incompatible with `empty` [2].
+ - Or `string` [3] is incompatible with `empty` [2].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   strings.js:60:1
+      60| style.opacity as empty; // ERROR
+          ^^^^^^^^^^^^^
+
+References:
+   <BUILTINS>/csstype.d.ts:21078:45
+   21078|   export type Opacity = Globals | (string & {}) | (number & {});
+                                                      ^^ [1]
+   strings.js:60:18
+      60| style.opacity as empty; // ERROR
+                           ^^^^^ [2]
+   <BUILTINS>/csstype.d.ts:21078:36
+   21078|   export type Opacity = Globals | (string & {}) | (number & {});
+                                             ^^^^^^ [3]
+
+
+Error -------------------------------------------------------------------------------------------------- strings.js:60:1
+
+Cannot cast `style.opacity` to `empty` because: [incompatible-type]
+ - Either `{}` [1] is incompatible with `empty` [2].
+ - Or `number` [3] is incompatible with `empty` [2].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   strings.js:60:1
+      60| style.opacity as empty; // ERROR
+          ^^^^^^^^^^^^^
+
+References:
+   <BUILTINS>/csstype.d.ts:21078:61
+   21078|   export type Opacity = Globals | (string & {}) | (number & {});
+                                                                      ^^ [1]
+   strings.js:60:18
+      60| style.opacity as empty; // ERROR
+                           ^^^^^ [2]
+   <BUILTINS>/csstype.d.ts:21078:52
+   21078|   export type Opacity = Globals | (string & {}) | (number & {});
+                                                             ^^^^^^ [3]
+
+
+Error -------------------------------------------------------------------------------------------------- strings.js:65:2
+
+Cannot create `Union` element because in property `id` of at least one member of `"div" | "input"` [1]:
+[incompatible-type]
+ - Either `false` [2] is incompatible with `string` [3].
+ - Or `false` [2] is incompatible with `void` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   strings.js:65:2
+    65| <Union id={false} />; // ERROR
+         ^^^^^
+
+References:
+   strings.js:62:22
+    62| declare const union: 'div' | 'input';
+                             ^^^^^^^^^^^^^^^ [1]
+   strings.js:65:12
+    65| <Union id={false} />; // ERROR
+                   ^^^^^ [2]
+   <BUILTINS>/react-dom.d.ts:811:14
+   811|         id?: string | undefined;
+                     ^^^^^^ [3]
+   <BUILTINS>/react-dom.d.ts:811:23
+   811|         id?: string | undefined;
+                              ^^^^^^^^^ [4]
+
+
+
+Found 28 errors

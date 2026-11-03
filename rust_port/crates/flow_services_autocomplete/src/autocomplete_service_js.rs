@@ -2392,15 +2392,20 @@ fn autocomplete_jsx_intrinsic(
     ac_loc: &Loc,
     edit_locs: &(Loc, Loc),
 ) -> Result<AcResult<ac_completion::T>, flow_utils_concurrency::job_error::JobError> {
+    let (desc, intrinsics_name) = if typing.cx.jsx_intrinsic_elements() {
+        ("React.JSX.IntrinsicElements", "React$JSXIntrinsicElements")
+    } else {
+        ("$JSXIntrinsics", "$JSXIntrinsics")
+    };
     let reason = flow_common::reason::mk_reason(
-        VirtualReasonDesc::RType("$JSXIntrinsics".into()),
+        VirtualReasonDesc::RType(desc.into()),
         ALoc::of_loc(ac_loc.clone()),
     );
     let intrinsics_t = flow_typing_flow_js::flow_js::get_builtin_type_non_speculating(
         typing.cx,
         &reason,
         None,
-        "$JSXIntrinsics",
+        intrinsics_name,
     )?;
     let (items, errors_to_log) =
         match members_of_type(typing, true, false, false, &BTreeSet::new(), &intrinsics_t) {
@@ -2419,7 +2424,7 @@ fn autocomplete_jsx_intrinsic(
                             sort_text: sort_text_of_rank(400),
                             preselect: false,
                             documentation_and_tags,
-                            log_info: "$JSXIntrinsics member".to_string(),
+                            log_info: format!("{desc} member"),
                             insert_text_format: LspInsertTextFormat::PLAIN_TEXT,
                         },
                     )

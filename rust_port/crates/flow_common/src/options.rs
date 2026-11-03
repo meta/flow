@@ -150,6 +150,7 @@ pub struct Options {
     pub ignore_non_literal_requires: bool,
     pub include_suppressions: bool,
     pub include_warnings: bool,
+    pub jsx_intrinsic_elements: bool,
     pub lazy_mode: bool,
     pub log_per_error_typing_telemetry: bool,
     pub lint_severities: LintSettings<Severity>,

@@ -190,6 +190,7 @@ pub mod opts {
         pub ignore_non_literal_requires: bool,
         pub include_warnings: bool,
         pub jest_integration: bool,
+        pub jsx_intrinsic_elements: bool,
         pub lazy_mode: Option<LazyMode>,
         pub log_per_error_typing_telemetry: bool,
         pub log_saving: BTreeMap<String, LogSaving>,
@@ -330,6 +331,7 @@ pub mod opts {
             ignore_non_literal_requires: false,
             include_warnings: false,
             jest_integration: false,
+            jsx_intrinsic_elements: false,
             lazy_mode: None,
             log_per_error_typing_telemetry: false,
             log_saving: BTreeMap::new(),
@@ -2107,6 +2109,16 @@ pub mod opts {
             ),
             ("experimental.facebook_module_interop", |values, config| {
                 facebook_module_interop_parser(values, config)
+            }),
+            ("experimental.jsx_intrinsic_elements", |values, config| {
+                parse_boolean(
+                    |opts, v| {
+                        opts.jsx_intrinsic_elements = v;
+                        Ok(())
+                    },
+                    values,
+                    config,
+                )
             }),
             (
                 "experimental.log_per_error_typing_telemetry",

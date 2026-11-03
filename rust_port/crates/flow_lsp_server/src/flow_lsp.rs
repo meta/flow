@@ -3296,7 +3296,7 @@ fn main_handle_unsafe(
             let lsp_temp_dir: FilePath =
                 flow_command_utils::normalize_temp_dir(&i_connect_params.temp_dir);
 
-            match flow_flowlib::libdir(flow_flowlib::BuiltinLib::Flowlib, &lsp_temp_dir) {
+            match flow_flowlib::libdir(flow_flowlib::BuiltinLib::Flowlib, false, &lsp_temp_dir) {
                 flow_flowlib::LibDir::Prelude(path) => {
                     flow_parser::file_key::set_flowlib_root(&path.to_string_lossy());
                 }
