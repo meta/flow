@@ -18,14 +18,14 @@ flow_parser = { path = "../flow_parser" }
 globset = { version = "0.4.20", features = ["serde1"] }
 jwalk = "0.8.1"
 regex = "1.13.1"
-rustix = { version = "1.1.5", features = ["event", "fs", "mm", "mount", "net", "pipe", "process", "thread", "time", "use-libc"] }
+rustix = { version = "1.1.6", features = ["event", "fs", "mm", "mount", "net", "pipe", "process", "thread", "time", "use-libc"] }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 serde_json = { version = "1.0.154", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
 vec1 = { version = "1.12.1", features = ["serde"] }
 
 [target.'cfg(all(unix, not(target_arch = "wasm32")))'.dependencies]
 nix = { version = "0.31.3", features = ["dir", "event", "hostname", "inotify", "ioctl", "mman", "mount", "net", "poll", "ptrace", "reboot", "resource", "sched", "signal", "term", "time", "user", "zerocopy"] }
-rustix = { version = "1.1.5", features = ["event", "fs", "mm", "mount", "net", "pipe", "process", "thread", "time", "use-libc"] }
+rustix = { version = "1.1.6", features = ["event", "fs", "mm", "mount", "net", "pipe", "process", "thread", "time", "use-libc"] }
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ["cfg(fbcode_build)"]}
