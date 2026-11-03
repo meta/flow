@@ -885,8 +885,20 @@ pub mod edenfs_file_watcher {
             #[cfg(unix)]
             let fd = env.notification_fd;
             #[cfg(unix)]
-            let wait_result =
-                match tokio::io::unix::AsyncFd::with_interest(fd, tokio::io::Interest::READABLE) {
+            let wait_result = {
+                // SAFETY: `fd` is the EdenFS notification fd owned by the watcher
+                // instance held in `env.instance`, which outlives this call, so the
+                // fd stays open and refers to the same file description for the
+                // lifetime of the temporary `AsyncFd` below (dropped before
+                // returning). A concurrently destroyed instance surfaces as EBADF,
+                // which is handled as shutdown below.
+                let registration = unsafe {
+                    tokio::io::unix::AsyncFd::register_with_interest(
+                        fd,
+                        tokio::io::Interest::READABLE,
+                    )
+                };
+                match registration.map_err(|e| e.into_parts().1) {
                     Ok(async_fd) => match async_fd.readable().await {
                         Ok(mut guard) => {
                             guard.clear_ready();
@@ -909,7 +921,8 @@ pub mod edenfs_file_watcher {
                     Err(e) => Err(flow_edenfs_watcher::EdenfsWatcherError::EdenfsWatcherError(
                         format!("AsyncFd registration error: {}", e),
                     )),
-                };
+                }
+            };
             #[cfg(windows)]
             let wait_result: Result<(), flow_edenfs_watcher::EdenfsWatcherError> = {
                 // On Windows the notification handle is an AF_INET/SOCK_STREAM socket
