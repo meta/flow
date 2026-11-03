@@ -748,7 +748,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------- object_prototype.js:71:32
 
-Cannot assign `x.hasOwnProperty` to `xHasOwnProperty` because `(this: Object, v: unknown) => boolean` [1] is
+Cannot assign `x.hasOwnProperty` to `xHasOwnProperty` because `(this: Object, v: PropertyKey) => boolean` [1] is
 incompatible with `number` [2]. [incompatible-type]
 
    object_prototype.js:71:32
@@ -757,8 +757,8 @@ incompatible with `number` [2]. [incompatible-type]
 
 References:
    <BUILTINS>/lib.es5.js:130:5
-   130|     hasOwnProperty(v: unknown): boolean;
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   130|     hasOwnProperty(v: PropertyKey): boolean;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    object_prototype.js:71:23
     71| var xHasOwnProperty : number = x.hasOwnProperty; // error
                               ^^^^^^ [2]
@@ -789,9 +789,9 @@ Cannot assign `x.hasOwnProperty` to `xHasOwnProperty2` because in the return val
                                                           ^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:130:33
-   130|     hasOwnProperty(v: unknown): boolean;
-                                        ^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:130:37
+   130|     hasOwnProperty(v: PropertyKey): boolean;
+                                            ^^^^^^^ [1]
    object_prototype.js:72:42
     72| var xHasOwnProperty2 : (prop: string) => number = x.hasOwnProperty; // error
                                                  ^^^^^^ [2]
@@ -799,7 +799,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------- object_prototype.js:76:32
 
-Cannot assign `y.hasOwnProperty` to `yHasOwnProperty` because `(this: Object, v: unknown) => boolean` [1] is
+Cannot assign `y.hasOwnProperty` to `yHasOwnProperty` because `(this: Object, v: PropertyKey) => boolean` [1] is
 incompatible with `number` [2]. [incompatible-type]
 
    object_prototype.js:76:32
@@ -808,8 +808,8 @@ incompatible with `number` [2]. [incompatible-type]
 
 References:
    <BUILTINS>/lib.es5.js:130:5
-   130|     hasOwnProperty(v: unknown): boolean;
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   130|     hasOwnProperty(v: PropertyKey): boolean;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    object_prototype.js:76:23
     76| var yHasOwnProperty : number = y.hasOwnProperty; // error
                               ^^^^^^ [2]

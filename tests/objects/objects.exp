@@ -395,8 +395,8 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- objects.js:18:1
 
-Cannot cast `y['hasOwnProperty']` to `string` because `(v: unknown) => boolean` [1] is incompatible with `string` [2].
-[incompatible-type]
+Cannot cast `y['hasOwnProperty']` to `string` because `(v: PropertyKey) => boolean` [1] is incompatible with
+`string` [2]. [incompatible-type]
 
    objects.js:18:1
     18| y['hasOwnProperty'] as string; // error, prototype method is not a string
@@ -404,8 +404,8 @@ Cannot cast `y['hasOwnProperty']` to `string` because `(v: unknown) => boolean` 
 
 References:
    <BUILTINS>/lib.es5.js:130:5
-   130|     hasOwnProperty(v: unknown): boolean;
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   130|     hasOwnProperty(v: PropertyKey): boolean;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    objects.js:18:24
     18| y['hasOwnProperty'] as string; // error, prototype method is not a string
                                ^^^^^^ [2]
