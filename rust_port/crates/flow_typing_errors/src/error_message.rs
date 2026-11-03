@@ -3747,6 +3747,8 @@ pub enum ErrorMessage<L: Dupe + PartialOrd + Ord + PartialEq + Eq> {
 
     EMissingThisAnnotation(L),
 
+    EMissingFunctionTypeParamName(L),
+
     EMissingParameterAnnotation {
         loc: L,
         hint_available: bool,
@@ -5657,6 +5659,8 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             },
 
             EMissingThisAnnotation(loc) => EMissingThisAnnotation(f(loc)),
+
+            EMissingFunctionTypeParamName(loc) => EMissingFunctionTypeParamName(f(loc)),
 
             EMissingParameterAnnotation {
                 loc,
@@ -8968,6 +8972,8 @@ impl<L: Dupe + PartialOrd + Ord + PartialEq + Eq> ErrorMessage<L> {
 
             Self::EMissingThisAnnotation(loc) => Some(loc.dupe()),
 
+            Self::EMissingFunctionTypeParamName(loc) => Some(loc.dupe()),
+
             Self::EMissingParameterAnnotation { loc, .. } => Some(loc.dupe()),
 
             Self::ESketchyNumberLint(_, value) => Some(value.loc.dupe()),
@@ -11932,6 +11938,10 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                 Normal(Message::MessageMissingThisAnnotation)
             }
 
+            ErrorMessage::EMissingFunctionTypeParamName(_) => {
+                Normal(Message::MessageMissingFunctionTypeParamName)
+            }
+
             ErrorMessage::EMissingParameterAnnotation { hint_available, .. } => {
                 if hint_available {
                     Normal(Message::MessageMissingParameterAnnotationDueToContextualTypingFailure)
@@ -13291,6 +13301,7 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             ErrorMessage::EMissingLocalAnnotation { .. } => Some(MissingLocalAnnot),
             ErrorMessage::EMissingParameterAnnotation { .. } => Some(MissingLocalAnnot),
             ErrorMessage::EMissingThisAnnotation(_) => Some(MissingThisAnnot),
+            ErrorMessage::EMissingFunctionTypeParamName(_) => Some(MissingFunctionTypeParamName),
             ErrorMessage::EMissingTypeArgs(box EMissingTypeArgsData { .. }) => Some(MissingTypeArg),
             ErrorMessage::EMixedImportAndRequire { .. } => Some(MixedImportAndRequire),
             ErrorMessage::EUnsupportedVarianceAnnotation { .. } => {

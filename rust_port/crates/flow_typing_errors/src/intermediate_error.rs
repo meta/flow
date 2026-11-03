@@ -8656,6 +8656,11 @@ where
                 code("this"),
                 text("."),
             ]),
+            MessageMissingFunctionTypeParamName => friendly::Message(vec![
+                text("Missing a name on this function type parameter. Write it as "),
+                code("name: Type"),
+                text("."),
+            ]),
             MessageMissingReturnAnnotation => friendly::Message(vec![
                 text("Missing an annotation on "),
                 text("return"),

@@ -1,0 +1,186 @@
+Error ----------------------------------------------------------------------------------------- declare_function.js:1:26
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   1| declare function unnamed(string): void; // error
+                               ^^^^^^
+
+
+Error ----------------------------------------------------------------------------------------- declare_function.js:3:35
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   3| declare function mixed(x: string, number): void; // error on `number`
+                                        ^^^^^^
+
+
+Error ----------------------------------------------------------------------------------------- declare_function.js:4:33
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   4| declare function unnamedRest(...Array<string>): void; // error
+                                      ^^^^^^^^^^^^^
+
+
+Error ----------------------------------------------------------------------------------------- declare_function.js:6:29
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   6| declare function overloaded(string): void; // error
+                                  ^^^^^^
+
+
+Error ----------------------------------------------------------------------------------------- declare_function.js:8:36
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   8| declare function withCallback(cb: (string) => void): void; // error on the callback param
+                                         ^^^^^^
+
+
+Error ----------------------------------------------------------------------------------------- declare_function.js:9:25
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   9| declare hook useUnnamed(string): void; // error
+                              ^^^^^^
+
+
+Error -------------------------------------------------------------------------------------------- function_type.js:1:17
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   1| type Unnamed = (string) => void; // error
+                      ^^^^^^
+
+
+Error -------------------------------------------------------------------------------------------- function_type.js:4:26
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   4| type Mixed = (x: string, number, y: boolean) => void; // error on `number`
+                               ^^^^^^
+
+
+Error -------------------------------------------------------------------------------------------- function_type.js:5:21
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   5| type UnnamedRest = (string, ...Array<number>) => void; // error on `string` and the rest
+                          ^^^^^^
+
+
+Error -------------------------------------------------------------------------------------------- function_type.js:5:32
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   5| type UnnamedRest = (string, ...Array<number>) => void; // error on `string` and the rest
+                                     ^^^^^^^^^^^^^
+
+
+Error -------------------------------------------------------------------------------------------- function_type.js:7:34
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   7| type ThisParam = (this: unknown, string) => void; // error on `string` only
+                                       ^^^^^^
+
+
+Error -------------------------------------------------------------------------------------------- function_type.js:8:16
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   8| type Nested = ((string) => void) => void; // error on both params
+                     ^^^^^^^^^^^^^^^^
+
+
+Error -------------------------------------------------------------------------------------------- function_type.js:8:17
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   8| type Nested = ((string) => void) => void; // error on both params
+                      ^^^^^^
+
+
+Error ------------------------------------------------------------------------------------------- function_type.js:10:20
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   10| type Generic = <T>(T) => T; // error
+                          ^
+
+
+Error ------------------------------------------------------------------------------------------- function_type.js:11:19
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   11| type Hook = hook (string) => void; // error
+                         ^^^^^^
+
+
+Error ------------------------------------------------------------------------------------------- function_type.js:14:13
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   14| let annot: (string) => void = (s: string) => {}; // error
+                   ^^^^^^
+
+
+Error ------------------------------------------------------------------------------------------- function_type.js:16:25
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   16| export type Exported = (number) => void; // error
+                               ^^^^^^
+
+
+Error -------------------------------------------------------------------------------------------------- methods.js:2:10
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   2|   method(string): void, // error
+               ^^^^^^
+
+
+Error --------------------------------------------------------------------------------------------------- methods.js:4:4
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   4|   (number): void, // error: call property
+         ^^^^^^
+
+
+Error -------------------------------------------------------------------------------------------------- methods.js:5:10
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   5|   prop: (boolean) => void, // error
+               ^^^^^^^
+
+
+Error -------------------------------------------------------------------------------------------------- methods.js:9:10
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   9|   method(string): void; // error
+               ^^^^^^
+
+
+Error ------------------------------------------------------------------------------------------------- methods.js:10:23
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   10|   static staticMethod(number): void; // error
+                             ^^^^^^
+
+
+Error ------------------------------------------------------------------------------------------------- methods.js:15:10
+
+Missing a name on this function type parameter. Write it as `name: Type`. [missing-function-type-param-name]
+
+   15|   method(string): void; // error
+                ^^^^^^
+
+
+
+Found 23 errors

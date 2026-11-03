@@ -216,6 +216,7 @@ pub struct FrozenMetadata {
     pub relay_integration_excludes: Arc<[Regex]>,
     pub relay_integration_module_prefix: Option<FlowSmolStr>,
     pub relay_integration_module_prefix_includes: Arc<[Regex]>,
+    pub require_function_type_param_name: bool,
     pub root: Arc<PathBuf>,
     pub strict_es6_import_export: bool,
     pub strict_property_initialization: bool,
@@ -278,6 +279,7 @@ impl Default for FrozenMetadata {
             relay_integration_excludes: Arc::from([]),
             relay_integration_module_prefix: None,
             relay_integration_module_prefix_includes: Arc::from([]),
+            require_function_type_param_name: false,
             root: Arc::new(PathBuf::new()),
             strict_es6_import_export: false,
             strict_property_initialization: false,
@@ -940,6 +942,7 @@ pub fn mk_context_metadata(options: &Options, global_libdefs: Arc<BTreeSet<FileK
             relay_integration_module_prefix_includes: options
                 .relay_integration_module_prefix_includes
                 .dupe(),
+            require_function_type_param_name: options.require_function_type_param_name,
             root: options.root.dupe(),
             strict_es6_import_export: options.strict_es6_import_export,
             strict_property_initialization: options.strict_property_initialization,
@@ -1403,6 +1406,13 @@ impl<'a> Context<'a> {
 
     pub fn strict_property_initialization(&self) -> bool {
         self.inner().metadata.frozen.strict_property_initialization
+    }
+
+    pub fn require_function_type_param_name(&self) -> bool {
+        self.inner()
+            .metadata
+            .frozen
+            .require_function_type_param_name
     }
 
     pub fn enable_custom_error(&self) -> bool {

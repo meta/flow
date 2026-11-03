@@ -3017,6 +3017,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
         ErrorMessage::EMissingThisAnnotation(loc) => {
             format!("EMissingThisAnnotation ({})", string_of_aloc(None, loc))
         }
+        ErrorMessage::EMissingFunctionTypeParamName(loc) => {
+            format!(
+                "EMissingFunctionTypeParamName ({})",
+                string_of_aloc(None, loc)
+            )
+        }
         ErrorMessage::EMissingParameterAnnotation {
             loc,
             hint_available,

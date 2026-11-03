@@ -2651,6 +2651,7 @@ pub enum Message<L: Dupe> {
 
     MessageMissingAnnotation(FlowSmolStr),
     MessageMissingThisAnnotation,
+    MessageMissingFunctionTypeParamName,
     MessageMissingReturnAnnotation,
     MessageMissingReturnAnnotationForGenericFunction,
     MessageMissingParameterAnnotation,

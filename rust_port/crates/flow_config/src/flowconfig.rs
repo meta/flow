@@ -242,6 +242,7 @@ pub mod opts {
         pub relay_integration_excludes: Vec<String>,
         pub relay_integration_module_prefix: Option<String>,
         pub relay_integration_module_prefix_includes: Vec<String>,
+        pub require_function_type_param_name: bool,
         pub root_name: Option<String>,
         pub saved_state_parallel_decompress: bool,
         pub saved_state_fetcher: SavedStateFetcher,
@@ -396,6 +397,7 @@ pub mod opts {
             relay_integration_module_prefix_includes: vec![ocaml_str_to_rust_regex(
                 "<PROJECT_ROOT>/.*",
             )],
+            require_function_type_param_name: false,
             root_name: None,
             saved_state_parallel_decompress: false,
             saved_state_fetcher: SavedStateFetcher::DummyFetcher,
@@ -2224,6 +2226,19 @@ pub mod opts {
                     config,
                 )
             }),
+            (
+                "experimental.require_function_type_param_name",
+                |values, config| {
+                    parse_boolean(
+                        |opts, v| {
+                            opts.require_function_type_param_name = v;
+                            Ok(())
+                        },
+                        values,
+                        config,
+                    )
+                },
+            ),
             ("experimental.strict_es6_import_export", |values, config| {
                 strict_es6_import_export_parser(values, config)
             }),

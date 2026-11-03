@@ -16750,6 +16750,7 @@ pub fn mk_class_sig<'a>(
                         type_annotation::method_kind_to_string(meth_kind),
                         func_tparams,
                     );
+                    type_annotation::error_on_unnamed_function_type_params(cx, params);
                     let (tparams, tparams_map_prime, tparams_ast) =
                         type_annotation::mk_type_param_declarations(
                             cx,

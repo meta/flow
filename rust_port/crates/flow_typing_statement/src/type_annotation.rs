@@ -594,6 +594,29 @@ pub fn error_on_unsupported_variance_annotation<'a>(
     }
 }
 
+/// Under `experimental.require_function_type_param_name`, every parameter of a
+/// function type, including its rest parameter, must be named. Library
+/// definitions are exempt, as they are from `unclear-type`.
+pub fn error_on_unnamed_function_type_params<'a>(
+    cx: &mut Context<'a>,
+    params: &ast::types::function::Params<ALoc, ALoc>,
+) {
+    if !cx.require_function_type_param_name() || cx.is_global_lib_context() {
+        return;
+    }
+    params
+        .params
+        .iter()
+        .chain(params.rest.iter().map(|rest| &rest.argument))
+        .filter(|param| matches!(param.param, ast::types::function::ParamKind::Anonymous(_)))
+        .for_each(|param| {
+            flow_js_utils::add_output_non_speculating(
+                cx,
+                ErrorMessage::EMissingFunctionTypeParamName(param.loc.dupe()),
+            );
+        });
+}
+
 /// Whether an annotation is the type of a position that binds exactly one
 /// value. That is the only kind of position where a bare `unique symbol` may be
 /// written: the annotation *is* the identity of one symbol, so anywhere one
@@ -3055,6 +3078,7 @@ fn convert_inner<'a>(
             let func_comments = &inner.comments;
             let effect_ = &inner.effect;
             error_on_unsupported_variance_annotation(cx, "function type", inner.tparams.as_ref());
+            error_on_unnamed_function_type_params(cx, &inner.params);
             let saved_tparams_map = env.tparams_map.dupe();
             let (tparams, tparams_ast) = mk_type_param_declarations_inner(
                 cx,
@@ -6106,6 +6130,7 @@ fn mk_method_func_sig<'a>(
         method_kind_to_string(meth_kind),
         func.tparams.as_ref(),
     );
+    error_on_unnamed_function_type_params(cx, &func.params);
     let saved_tparams_map = env.tparams_map.dupe();
     let (tparams, tparams_ast) = mk_type_param_declarations_inner(
         cx,

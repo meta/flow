@@ -1,0 +1,7 @@
+[libs]
+lib.js
+
+[options]
+all=true
+builtin_lib=core-only
+experimental.require_function_type_param_name=true
