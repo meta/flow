@@ -89,6 +89,14 @@ impl TypeVisitor<FvAcc> for FreeVarVisitor {
             TypeInner::ImplicitInstantiationTvar(_) => acc,
             TypeInner::GenericT(box GenericTData { name, .. }) if !acc.bound.contains(name) => {
                 acc.free.insert(name.dupe());
+                // A synthetic generic also refers to the generics it was built from.
+                if let SubstNameInner::Synthetic { ts, .. } = name.deref() {
+                    acc.free.extend(
+                        ts.iter()
+                            .filter(|n| !acc.bound.contains(*n))
+                            .map(Dupe::dupe),
+                    );
+                }
                 flow_typing_visitors::type_visitor::type_default(self, cx, pole, acc, t)
             }
             TypeInner::DefT(_, def_t) => {
