@@ -62,6 +62,8 @@ use flow_typing_type::type_::DestructorSpreadTupleTypeData;
 use flow_typing_type::type_::DestructorSpreadTypeData;
 use flow_typing_type::type_::EnumInfoInner;
 use flow_typing_type::type_::GenericTData;
+use flow_typing_type::type_::ImplicitInstantiationTvarData;
+use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::ModuleType;
 use flow_typing_type::type_::NominalType;
 use flow_typing_type::type_::OptionalIndexedAccessIndex;
@@ -1412,6 +1414,10 @@ mod type_converter {
     ) -> Result<ALocTy, Error> {
         match t.deref() {
             TypeInner::OpenT(tvar) => constraint_node::<I>(env, state, id, tvar.id() as i32),
+            TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }) => Ok(Arc::new(ty::Ty::Any(ty::AnyKind::Placeholder))),
             TypeInner::ImplicitInstantiationTvar(data) => {
                 constraint_node::<I>(env, state, id, data.id)
             }
@@ -1752,7 +1758,6 @@ mod type_converter {
             AnySource::AnyError(k) => ty::AnyKind::AnyError(any_error_kind(k.as_ref())),
             AnySource::Unsound(k) => ty::AnyKind::Unsound(unsoundness_any_t(k)),
             AnySource::Untyped => ty::AnyKind::Untyped,
-            AnySource::Placeholder => ty::AnyKind::Placeholder,
         }
     }
 
@@ -2852,7 +2857,11 @@ mod type_converter {
                 );
             }
             match t.deref() {
-                TypeInner::AnyT(_, _) => type__::<I>(env, state, None, t),
+                TypeInner::AnyT(_, _)
+                | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                    kind: ImplicitInstantiationTvarKind::Placeholder,
+                    ..
+                }) => type__::<I>(env, state, None, t),
                 TypeInner::DefT(_, def_t) => match def_t.deref() {
                     DefTInner::PolyT(box PolyTData { tparams, t_out, .. }) => {
                         singleton_poly::<I>(env, state, targs, tparams, t_out)
@@ -3465,8 +3474,12 @@ mod type_converter {
                         head.push(ty::TupleElement::TupleSpread { name: None, t });
                     }
                 },
-                ResolvedParam::ResolvedAnySpreadArg(reason, src) => {
-                    let t = Arc::new(ty::Ty::Any(any_t(reason, src)));
+                ResolvedParam::ResolvedAnySpreadArg(any) => {
+                    let kind = match any.deref() {
+                        TypeInner::AnyT(reason, src) => any_t(reason, src),
+                        _ => ty::AnyKind::Placeholder,
+                    };
+                    let t = Arc::new(ty::Ty::Any(kind));
                     head.push(ty::TupleElement::TupleSpread { name: None, t });
                 }
             }

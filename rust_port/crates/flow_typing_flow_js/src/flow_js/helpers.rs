@@ -29,6 +29,7 @@ use flow_typing_type::type_::DerivedReference;
 use flow_typing_type::type_::EvalTypeDestructorTData;
 use flow_typing_type::type_::GenericTData;
 use flow_typing_type::type_::ImplicitInstantiationTvarData;
+use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::LookupActionMatchPropData;
 use flow_typing_type::type_::LookupDefaultResult;
 use flow_typing_type::type_::LookupPropsForSubtypingData;
@@ -48,6 +49,7 @@ use flow_typing_type::type_::ValueToTypeReferenceTData;
 use flow_typing_type::type_::WriteElemData;
 use flow_typing_type::type_::WritePropData;
 
+use super::any_helpers::any_propagated;
 use super::constraint_helpers::constraint_node_constraints;
 use super::constraint_helpers::constraint_node_id;
 use super::constraint_helpers::resolve_id;
@@ -1065,6 +1067,10 @@ pub(super) fn handle_generic<'cx>(
 /// must still see it in what is computed here. So it is rigid like a generic:
 /// a use sees it through its bound, and what a type destructor or the object
 /// kit computes from it is a frozen tvar derived from it.
+///
+/// A placeholder is frozen in every solve. What a type destructor or the object
+/// kit computes from it is a placeholder too, and every other use sees it as its
+/// permissive instantiation, as it would see `any`.
 pub(super) fn handle_frozen_tvar<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
@@ -1074,75 +1080,113 @@ pub(super) fn handle_frozen_tvar<'cx>(
     u: &UseT<Cx>,
 ) -> Result<bool, FlowJsException> {
     let ImplicitInstantiationTvarData {
-        reason, bound, id, ..
+        reason,
+        bound,
+        id,
+        kind,
+        ..
     } = tvar;
-    // The derived tvar is owned by the solve owning this one. Here it is bounded
-    // by what the use computes from the bound. In the owning solve it is what
-    // the use computes from this tvar, so that solve infers through it.
     let derive = |cx: &mut Context<'cx>,
                   use_reason: &Reason,
                   mk_use_t: &dyn Fn(Tvar) -> UseT<Cx>,
                   use_op: UseOp,
                   tout: &Type|
      -> Result<bool, FlowJsException> {
-        let root_id = cx.find_constraints(*id).0;
-        let mut is_tvar = |frozen_id: i32| cx.find_constraints(frozen_id).0 == root_id;
-        let owner_env = env.implicit_instantiation_owner(&mut is_tvar);
-        let frozen = env.frozen_implicit_instantiation_tvar_with_default(&mut is_tvar);
-        let (Some(owner_env), Some((_, has_default))) = (owner_env, frozen) else {
-            return Ok(false);
-        };
-        let rigid = Tvar::new(
-            use_reason.dupe(),
-            flow_typing_tvar::mk_no_wrap(cx, use_reason) as u32,
-        );
-        let repos_bound = reposition_reason(cx, env, Some(trace), reason, false, bound)?;
-        rec_flow(cx, env, trace, (&repos_bound, &mk_use_t(rigid.dupe())))?;
-        let thawed = Tvar::new(
-            use_reason.dupe(),
-            flow_typing_tvar::mk_no_wrap(cx, use_reason) as u32,
-        );
-        rec_flow(cx, &owner_env, trace, (l, &mk_use_t(thawed.dupe())))?;
-        let derived_id = flow_common::reason::mk_id() as i32;
-        cx.add_inference_node(derived_id);
-        let derived = Type::new(TypeInner::ImplicitInstantiationTvar(Box::new(
-            ImplicitInstantiationTvarData {
-                reason: use_reason.dupe(),
-                name: SubstName::name(
-                    use_reason
-                        .desc(true)
-                        .map(flow_common::reason::string_of_desc)
-                        .unwrap_or_default()
-                        .into(),
-                ),
-                bound: Type::new(TypeInner::OpenT(rigid)),
-                id: derived_id,
-            },
-        )));
-        rec_unify(
-            cx,
-            &owner_env,
-            trace,
-            unknown_use(),
-            UnifyCause::Uncategorized,
-            None,
-            &derived,
-            &Type::new(TypeInner::OpenT(thawed)),
-        )?;
-        owner_env.add_implicit_instantiation_tvar(derived_id, derived.dupe(), has_default);
-        rec_flow_t(cx, env, trace, use_op, (&derived, tout))?;
-        Ok(true)
+        match kind {
+            // The derived placeholder is bounded by what the use computes from the bound.
+            // Whether the use holds for the placeholder is left to the final check, so a use
+            // that fails on the bound computes a placeholder bounded by `mixed`.
+            ImplicitInstantiationTvarKind::Placeholder => {
+                let rigid = Tvar::new(
+                    use_reason.dupe(),
+                    flow_typing_tvar::mk_no_wrap(cx, use_reason) as u32,
+                );
+                let repos_bound = reposition_reason(cx, env, Some(trace), reason, false, bound)?;
+                let bound = match speculation_kit::try_singleton_throw_on_failure(
+                    cx,
+                    env,
+                    trace,
+                    repos_bound,
+                    mk_use_t(rigid.dupe()),
+                ) {
+                    Ok(()) => Type::new(TypeInner::OpenT(rigid)),
+                    Err(FlowJsException::SpeculationSingletonError) => {
+                        mixed_t::make(use_reason.dupe())
+                    }
+                    Err(e) => return Err(e),
+                };
+                let derived = cx.mk_placeholder(use_reason.dupe(), bound);
+                rec_flow_t(cx, env, trace, use_op, (&derived, tout))?;
+                Ok(true)
+            }
+            // The derived tvar is owned by the solve owning this one. Here it is bounded
+            // by what the use computes from the bound. In the owning solve it is what
+            // the use computes from this tvar, so that solve infers through it.
+            ImplicitInstantiationTvarKind::Inferred => {
+                let root_id = cx.find_constraints(*id).0;
+                let mut is_tvar = |frozen_id: i32| cx.find_constraints(frozen_id).0 == root_id;
+                let owner_env = env.implicit_instantiation_owner(&mut is_tvar);
+                let frozen = env.frozen_implicit_instantiation_tvar_with_default(&mut is_tvar);
+                let (Some(owner_env), Some((_, has_default))) = (owner_env, frozen) else {
+                    return Ok(false);
+                };
+                let rigid = Tvar::new(
+                    use_reason.dupe(),
+                    flow_typing_tvar::mk_no_wrap(cx, use_reason) as u32,
+                );
+                let repos_bound = reposition_reason(cx, env, Some(trace), reason, false, bound)?;
+                rec_flow(cx, env, trace, (&repos_bound, &mk_use_t(rigid.dupe())))?;
+                let thawed = Tvar::new(
+                    use_reason.dupe(),
+                    flow_typing_tvar::mk_no_wrap(cx, use_reason) as u32,
+                );
+                rec_flow(cx, &owner_env, trace, (l, &mk_use_t(thawed.dupe())))?;
+                let derived_id = flow_common::reason::mk_id() as i32;
+                cx.add_inference_node(derived_id);
+                let derived = Type::new(TypeInner::ImplicitInstantiationTvar(Box::new(
+                    ImplicitInstantiationTvarData {
+                        reason: use_reason.dupe(),
+                        name: SubstName::name(
+                            use_reason
+                                .desc(true)
+                                .map(flow_common::reason::string_of_desc)
+                                .unwrap_or_default()
+                                .into(),
+                        ),
+                        bound: Type::new(TypeInner::OpenT(rigid)),
+                        id: derived_id,
+                        kind: ImplicitInstantiationTvarKind::Inferred,
+                    },
+                )));
+                rec_unify(
+                    cx,
+                    &owner_env,
+                    trace,
+                    unknown_use(),
+                    UnifyCause::Uncategorized,
+                    None,
+                    &derived,
+                    &Type::new(TypeInner::OpenT(thawed)),
+                )?;
+                owner_env.add_implicit_instantiation_tvar(derived_id, derived.dupe(), has_default);
+                rec_flow_t(cx, env, trace, use_op, (&derived, tout))?;
+                Ok(true)
+            }
+        }
     };
-    match u.deref() {
+    match (kind, u.deref()) {
         // Whether a conditional holds for the bound says nothing about the tvar.
         // `run_conditional` decides one over a frozen tvar itself.
-        UseTInner::EvalTypeDestructorT(box EvalTypeDestructorTData {
-            destructor_use_op,
-            reason: use_reason,
-            repos,
-            destructor,
-            tout,
-        }) if !matches!(**destructor, Destructor::ConditionalType(_)) => derive(
+        (
+            _,
+            UseTInner::EvalTypeDestructorT(box EvalTypeDestructorTData {
+                destructor_use_op,
+                reason: use_reason,
+                repos,
+                destructor,
+                tout,
+            }),
+        ) if !matches!(**destructor, Destructor::ConditionalType(_)) => derive(
             cx,
             use_reason,
             &|tout| {
@@ -1159,7 +1203,7 @@ pub(super) fn handle_frozen_tvar<'cx>(
             destructor_use_op.dupe(),
             &Type::new(TypeInner::OpenT((**tout).dupe())),
         ),
-        UseTInner::ObjKitT(use_op, reason_op, resolve_tool, tool, tout) => derive(
+        (_, UseTInner::ObjKitT(use_op, reason_op, resolve_tool, tool, tout)) => derive(
             cx,
             reason_op,
             &|tout| {
@@ -1174,26 +1218,30 @@ pub(super) fn handle_frozen_tvar<'cx>(
             use_op.dupe(),
             tout,
         ),
+        (ImplicitInstantiationTvarKind::Placeholder, _) => any_propagated(cx, env, trace, l, u),
         // These would otherwise be caught by wildcard cases in __flow. A generic
         // is seen through its bound here too, either by `handle_generic` or by
         // the react kit itself.
-        UseTInner::ReactKitT(..)
-        | UseTInner::ConstructorT(..)
-        | UseTInner::ConcretizeT(box ConcretizeTData {
-            kind:
-                ConcretizationKind::ConcretizeForOperatorsChecking
-                | ConcretizationKind::ConcretizeForComputedObjectKeys
-                | ConcretizationKind::ConcretizeForOptionalChain,
-            ..
-        })
-        | UseTInner::TestPropT(..)
-        | UseTInner::OptionalIndexedAccessT(..) => {
+        (
+            ImplicitInstantiationTvarKind::Inferred,
+            UseTInner::ReactKitT(..)
+            | UseTInner::ConstructorT(..)
+            | UseTInner::ConcretizeT(box ConcretizeTData {
+                kind:
+                    ConcretizationKind::ConcretizeForOperatorsChecking
+                    | ConcretizationKind::ConcretizeForComputedObjectKeys
+                    | ConcretizationKind::ConcretizeForOptionalChain,
+                ..
+            })
+            | UseTInner::TestPropT(..)
+            | UseTInner::OptionalIndexedAccessT(..),
+        ) => {
             let bound = env.frozen_tvar_bound(tvar);
             let repos_bound = reposition_reason(cx, env, Some(trace), reason, false, &bound)?;
             rec_flow(cx, env, trace, (&repos_bound, u))?;
             Ok(true)
         }
-        _ => Ok(false),
+        (ImplicitInstantiationTvarKind::Inferred, _) => Ok(false),
     }
 }
 

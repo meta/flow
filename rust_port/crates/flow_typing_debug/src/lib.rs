@@ -215,6 +215,8 @@ use flow_typing_type::type_::GenericTData;
 use flow_typing_type::type_::GetElemTData;
 use flow_typing_type::type_::GetEnumTData;
 use flow_typing_type::type_::HasOwnPropTData;
+use flow_typing_type::type_::ImplicitInstantiationTvarData;
+use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::InstanceT;
 use flow_typing_type::type_::Literal;
 use flow_typing_type::type_::LookupTData;
@@ -484,7 +486,6 @@ fn dump_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, t: &Type) -> Str
             AnySource::AnyError(_) => "Error",
             AnySource::Unsound(_) => "Unsound",
             AnySource::Untyped => "Untyped",
-            AnySource::Placeholder => "Placeholder",
         }
     }
 
@@ -525,6 +526,10 @@ fn dump_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, t: &Type) -> Str
             let extra = tvar(tvars, tv.id() as i32);
             p(cx, t, true, &extra)
         }
+        TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => p(cx, t, true, "Placeholder"),
         TypeInner::ImplicitInstantiationTvar(data) => {
             let extra = tvar(tvars, data.id);
             p(cx, t, true, &extra)

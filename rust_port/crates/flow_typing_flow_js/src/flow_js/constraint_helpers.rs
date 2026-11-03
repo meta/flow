@@ -379,8 +379,14 @@ fn flow_type_to_frozen_constraint_node<'cx>(
     l: &Type,
     frozen: &FrozenConstraintNode,
 ) -> Result<(), FlowJsException> {
-    if matches!(l.deref(), TypeInner::AnyT(..))
-        || matches!(l.deref(), TypeInner::DefT(_, def_t) if matches!(def_t.deref(), DefTInner::EmptyT))
+    if matches!(
+        l.deref(),
+        TypeInner::AnyT(..)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            })
+    ) || matches!(l.deref(), TypeInner::DefT(_, def_t) if matches!(def_t.deref(), DefTInner::EmptyT))
     {
         return Ok(());
     }

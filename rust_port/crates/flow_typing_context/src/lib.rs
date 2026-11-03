@@ -110,6 +110,7 @@ use flow_typing_type::type_::arith_kind::ArithKind;
 use flow_typing_type::type_::constraint::forcing_state::ForcingState;
 use flow_typing_type::type_::object::ResolveTool;
 use flow_typing_type::type_::object::Tool;
+use flow_typing_type::type_::placeholder_t;
 use flow_typing_type::type_::type_or_type_desc::ErrorTypeDesc;
 use flow_typing_type::type_::type_or_type_desc::TypeOrTypeDescT;
 use flow_utils_concurrency::check_budget::CheckBudget;
@@ -2354,9 +2355,9 @@ impl<'a> Context<'a> {
         }
     }
 
-    pub fn mk_placeholder(&mut self, reason: Reason) -> Type {
+    pub fn mk_placeholder(&mut self, reason: Reason, bound: Type) -> Type {
         self.set_synthesis_produced_uncacheable_result();
-        any_t::placeholder(reason)
+        placeholder_t::why(reason, bound)
     }
 
     pub fn add_post_component_tvar_forcing_state(&mut self, id: i32, state: ForcingState<Cx>) {

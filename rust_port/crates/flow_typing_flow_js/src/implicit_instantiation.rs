@@ -77,6 +77,7 @@ use flow_typing_type::type_::GetEnumTData;
 use flow_typing_type::type_::HintEvalResult;
 use flow_typing_type::type_::ImplicitInstantiationReferenceKind;
 use flow_typing_type::type_::ImplicitInstantiationTvarData;
+use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::LazyHintT;
 use flow_typing_type::type_::MethodAction;
 use flow_typing_type::type_::MethodCallType;
@@ -128,6 +129,7 @@ use flow_typing_type::type_::object;
 use flow_typing_type::type_::object::ObjectToolObjectMapData;
 use flow_typing_type::type_::object::ObjectToolReactConfigData;
 use flow_typing_type::type_::open_tvar;
+use flow_typing_type::type_::placeholder_t;
 use flow_typing_type::type_::properties;
 use flow_typing_type::type_::react;
 use flow_typing_type::type_::string_of_use_ctor;
@@ -1535,8 +1537,13 @@ fn placeholders_leaked_into_bounds<'cx>(
             | PinningSource::Concrete(_) => continue,
         };
         for t in bounds {
-            if !matches!(t.deref(), TypeInner::AnyT(_, AnySource::Placeholder))
-                && flow_js_utils::tvar_visitors::has_placeholders(cx, &t)
+            if !matches!(
+                t.deref(),
+                TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                    kind: ImplicitInstantiationTvarKind::Placeholder,
+                    ..
+                })
+            ) && flow_js_utils::tvar_visitors::has_placeholders(cx, &t)
             {
                 return true;
             }
@@ -1621,7 +1628,10 @@ fn underconstrained<'cx>(
     instantiation_reason: &Reason,
 ) -> Result<Type, FlowJsException> {
     if !matches!(*cx.typing_mode(), TypingMode::CheckingMode) {
-        return Ok(cx.mk_placeholder(tparam_binder_reason.dupe()));
+        return Ok(cx.mk_placeholder(
+            tparam_binder_reason.dupe(),
+            mixed_t::why(tparam_binder_reason.dupe()),
+        ));
     }
     flow_js_utils::add_output_with_env(
         cx,
@@ -1760,6 +1770,7 @@ fn mk_inference_targ<'cx>(
             name: typeparam.name.dupe(),
             bound: typeparam.bound.dupe(),
             id: inference_id,
+            kind: ImplicitInstantiationTvarKind::Inferred,
         },
     )));
     env.add_implicit_instantiation_tvar(inference_id, tvar.dupe(), typeparam.default.is_some());
@@ -2124,7 +2135,7 @@ fn pin_types<'cx>(
                 match *cx.typing_mode() {
                     TypingMode::CheckingMode => any_t::error(reason),
                     TypingMode::SynthesisMode { .. } | TypingMode::HintEvaluationMode => {
-                        any_t::placeholder(reason)
+                        placeholder_t::why(reason.dupe(), mixed_t::why(reason))
                     }
                 }
             });
@@ -2886,7 +2897,9 @@ pub mod kit {
             Some(targs) if targs.len() == tparams.len() => targs.to_vec(),
             _ => tparams
                 .iter()
-                .map(|tparam| cx.mk_placeholder(tparam.reason.dupe()))
+                .map(|tparam| {
+                    cx.mk_placeholder(tparam.reason.dupe(), mixed_t::why(tparam.reason.dupe()))
+                })
                 .collect(),
         }))
     }
@@ -2933,7 +2946,9 @@ pub mod kit {
         let placeholders = || {
             tparams
                 .iter()
-                .map(|tparam| any_t::placeholder(tparam.reason.dupe()))
+                .map(|tparam| {
+                    placeholder_t::why(tparam.reason.dupe(), mixed_t::why(tparam.reason.dupe()))
+                })
                 .collect()
         };
         let nested_env = env.without_speculation().checking_polymorphic_lower();
@@ -2946,7 +2961,9 @@ pub mod kit {
                     solution
                         .get(&data.name)
                         .map(|t| t.dupe())
-                        .unwrap_or_else(|| any_t::placeholder(data.reason.dupe())),
+                        .unwrap_or_else(|| {
+                            placeholder_t::why(data.reason.dupe(), mixed_t::why(data.reason.dupe()))
+                        }),
                 )),
                 _ => None,
             })
@@ -2958,7 +2975,10 @@ pub mod kit {
         let mut substituter = FrozenTvarSubstituter {
             env: &nested_env,
             substitution: &substitution,
-            unresolved: Some(any_t::placeholder(type_util::reason_of_t(u).dupe())),
+            unresolved: Some(placeholder_t::why(
+                type_util::reason_of_t(u).dupe(),
+                mixed_t::why(type_util::reason_of_t(u).dupe()),
+            )),
             expanding: BTreeSet::new(),
             replaced_frozen_tvar_ids: BTreeSet::new(),
         };
@@ -3006,7 +3026,9 @@ pub mod kit {
             .iter()
             .map(|tparam| match solution.get(&tparam.name) {
                 Some(targ) => targ.generalized.dupe(),
-                None => any_t::placeholder(tparam.reason.dupe()),
+                None => {
+                    placeholder_t::why(tparam.reason.dupe(), mixed_t::why(tparam.reason.dupe()))
+                }
             })
             .collect())
     }
@@ -3616,6 +3638,10 @@ pub mod kit {
         true_t: &Type,
         false_t: &Type,
     ) -> Result<Type, FlowJsException> {
+        // A conditional type that a solve can't decide is deferred, as in TypeScript: a new
+        // placeholder.
+        let deferred =
+            |cx: &mut Context<'cx>| cx.mk_placeholder(reason.dupe(), mixed_t::why(reason.dupe()));
         if flow_js_utils::tvar_visitors::has_placeholders(cx, check_t)
             || flow_js_utils::tvar_visitors::has_placeholders(cx, extends_t)
             || flow_js_utils::tvar_visitors::has_placeholders(cx, true_t)
@@ -3631,7 +3657,7 @@ pub mod kit {
                 ],
             );
             // Placeholder in, placeholder out
-            return Ok(cx.mk_placeholder(reason.dupe()));
+            return Ok(deferred(cx));
         }
         let nested_env = env.solving_implicit_instantiation();
         let has_unresolved_tvars = flow_js_utils::tvar_visitors::has_unresolved_tvars(cx, check_t)
@@ -3677,7 +3703,7 @@ pub mod kit {
             (false, false)
         };
         if has_unresolved_tvars && env.in_implicit_instantiation() && !can_run_nested_solve {
-            return Ok(cx.mk_placeholder(reason.dupe()));
+            return Ok(deferred(cx));
         }
 
         let t = {
@@ -3722,7 +3748,7 @@ pub mod kit {
                         let fv2 = type_subst::free_var_finder(cx, Some(bound), extends_t);
                         fv1.union(fv2)
                     };
-                    let any_t = any_t::placeholder(reason.dupe());
+                    let any_t = placeholder_t::why(reason.dupe(), mixed_t::why(reason.dupe()));
                     let mut frozen_tvar_substituter = FrozenTvarSubstituter {
                         env: &nested_env,
                         substitution: &|_| Some(any_t.dupe()),
@@ -3747,10 +3773,18 @@ pub mod kit {
                     } else {
                         let mut any_subst_map: FlowOrdMap<SubstName, Type> = free_vars
                             .iter()
-                            .map(|name| (name.dupe(), any_t::placeholder(reason.dupe())))
+                            .map(|name| {
+                                (
+                                    name.dupe(),
+                                    placeholder_t::why(reason.dupe(), mixed_t::why(reason.dupe())),
+                                )
+                            })
                             .collect();
                         for tp in tparams {
-                            any_subst_map.insert(tp.name.dupe(), any_t::placeholder(reason.dupe()));
+                            any_subst_map.insert(
+                                tp.name.dupe(),
+                                placeholder_t::why(reason.dupe(), mixed_t::why(reason.dupe())),
+                            );
                         }
                         let any_check = type_subst::subst(
                             cx,
@@ -3793,7 +3827,7 @@ pub mod kit {
                             }
                             Ok(()) => {
                                 if replaced_frozen_tvar && !infer_through_frozen_tvar {
-                                    cx.mk_placeholder(reason.dupe())
+                                    deferred(cx)
                                 } else {
                                     flow_typing_debug::verbose::print_if_verbose(
                                         cx,

@@ -14,6 +14,8 @@ use std::ops::Deref;
 
 use flow_typing_context::Context;
 use flow_typing_type::type_::DefTInner;
+use flow_typing_type::type_::ImplicitInstantiationTvarData;
+use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::InstType;
 use flow_typing_type::type_::InstanceKind;
 use flow_typing_type::type_::PolyTData;
@@ -134,7 +136,10 @@ pub fn tag_of_t<'cx>(cx: &mut Context<'cx>, t: &Type) -> Option<TypeTagSet> {
             tag_of_inst(&instance.inst)
         }
         TypeInner::OpenT(_)
-        | TypeInner::ImplicitInstantiationTvar(_)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Inferred,
+            ..
+        })
         | TypeInner::AnnotT(_, _, _) => cx
             .find_resolved(t)
             .and_then(|resolved| tag_of_t(cx, &resolved)),
@@ -172,7 +177,11 @@ pub fn tag_of_t<'cx>(cx: &mut Context<'cx>, t: &Type) -> Option<TypeTagSet> {
         | TypeInner::MaybeT(_, _)
         | TypeInner::OptionalT { .. }
         | TypeInner::KeysT(_, _)
-        | TypeInner::AnyT(_, _) => None,
+        | TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => None,
     }
 }
 

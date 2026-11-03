@@ -285,10 +285,13 @@ fn strict_computed_lookup_failed<'cx>(
                 ))),
             )?;
         }
-        AnyT(_, src) => {
-            let src = flow_js_utils::any_mod_src_keep_placeholder(AnySource::Untyped, src);
+        AnyT(_, _)
+        | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => {
             let p = PropertyType::OrdinaryField {
-                type_: any_t::why(src, reason_op.dupe()),
+                type_: flow_js_utils::untyped_any_result(elem_t, reason_op.dupe()),
                 polarity: Polarity::Neutral,
             };
             for (propref, up) in lookup_targets(propref, action) {
@@ -538,6 +541,13 @@ fn __flow_impl<'cx>(
             id,
             no_infer,
         }) => handle_generic(cx, env, trace, *no_infer, bound, reason, id, name, u)?,
+        // No solve infers a placeholder.
+        ImplicitInstantiationTvar(
+            data @ box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            },
+        ) => handle_frozen_tvar(cx, env, trace, l, data, u)?,
         ImplicitInstantiationTvar(data)
             if frozen_implicit_instantiation_tvar(cx, env, l).is_some() =>
         {
@@ -549,9 +559,16 @@ fn __flow_impl<'cx>(
         return Ok(None);
     }
     if match u.deref() {
-        UseT(use_op, any @ deref!(AnyT(_, _))) => {
-            any_propagated_use(cx, env, trace, use_op, any, l)?
-        }
+        UseT(
+            use_op,
+            any @ deref!(
+                AnyT(_, _)
+                    | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                        kind: ImplicitInstantiationTvarKind::Placeholder,
+                        ..
+                    })
+            ),
+        ) => any_propagated_use(cx, env, trace, use_op, any, l)?,
         _ => false,
     } {
         return Ok(None);
@@ -2844,7 +2861,11 @@ fn __flow_impl<'cx>(
         }
         // AnyT has every prop
         (
-            AnyT(_, _),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             HasOwnPropT(box HasOwnPropTData {
                 use_op: _,
                 reason: _,
@@ -2911,14 +2932,18 @@ fn __flow_impl<'cx>(
         }
         // keyof any -> any: any in any out.
         (
-            AnyT(_, src),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             GetKeysT {
                 reason: reason_op,
                 t_out: keys,
                 include_symbols: _,
             },
         ) => {
-            let any = any_t::why(*src, reason_op.dupe());
+            let any = flow_js_utils::any_result(l, reason_op.dupe());
             rec_flow(cx, env, trace, (&any, keys))?;
         }
 
@@ -2954,8 +2979,15 @@ fn __flow_impl<'cx>(
             rec_flow_t(cx, env, trace, unknown_use(), (&mod_elem, t_out))?;
         }
         // Any will always be ok
-        (AnyT(_, src), GetValuesT(reason, values)) => {
-            let any = any_t::why(*src, reason.dupe());
+        (
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            GetValuesT(reason, values),
+        ) => {
+            let any = flow_js_utils::any_result(l, reason.dupe());
             rec_flow_t(cx, env, trace, unknown_use(), (&any, values))?;
         }
 
@@ -2983,8 +3015,15 @@ fn __flow_impl<'cx>(
             rec_flow(cx, env, trace, (&mixed, result))?;
         }
         // Any will always be ok
-        (AnyT(_, src), GetDictValuesT(reason, result)) => {
-            let any = any_t::why(*src, reason.dupe());
+        (
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            GetDictValuesT(reason, result),
+        ) => {
+            let any = flow_js_utils::any_result(l, reason.dupe());
             rec_flow(cx, env, trace, (&any, result))?;
         }
 
@@ -3661,7 +3700,11 @@ fn __flow_impl<'cx>(
         // any Iterable can be spread, and `Object` is the any type that covers
         // iterable objects.
         (
-            AnyT(r, src),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             ResolveSpreadT(box ResolveSpreadTData {
                 use_op,
                 reason: reason_op,
@@ -3669,7 +3712,7 @@ fn __flow_impl<'cx>(
             }),
         ) => {
             let mut rrt_resolved = resolve_spread.rrt_resolved.dupe();
-            rrt_resolved.push_front(ResolvedParam::ResolvedAnySpreadArg(r.dupe(), *src));
+            rrt_resolved.push_front(ResolvedParam::ResolvedAnySpreadArg(l.dupe()));
             resolve_spread_list_rec(
                 cx,
                 env,
@@ -4296,8 +4339,15 @@ fn __flow_impl<'cx>(
             );
             collector.add(poly_t);
         }
-        (AnyT(_, src), MixinT(r, collector)) => {
-            let any = any_t::why(*src, r.dupe());
+        (
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            MixinT(r, collector),
+        ) => {
+            let any = flow_js_utils::any_result(l, r.dupe());
             collector.add(any);
         }
         // TODO: it is conceivable that other things (e.g. functions) could also be
@@ -4514,7 +4564,11 @@ fn __flow_impl<'cx>(
             }
         }
         (
-            AnyT(_, _),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             SpecializeT(box SpecializeTData {
                 use_op: _,
                 reason: _,
@@ -4586,7 +4640,14 @@ fn __flow_impl<'cx>(
                 }
             }
         }
-        (AnyT(_, _), ThisSpecializeT(r, _, k)) => {
+        (
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            ThisSpecializeT(r, _, k),
+        ) => {
             continue_repos(cx, env, trace, r, false, l, k)?;
         }
         (
@@ -5425,7 +5486,11 @@ fn __flow_impl<'cx>(
             rec_flow_t(cx, env, trace, unknown_use(), (&repos_t1, &open_t2))?;
         }
         (
-            AnyT(_, _),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             CallT(box CallTData {
                 call_action: box CallAction::ConcretizeCallee(tout),
                 ..
@@ -5434,7 +5499,11 @@ fn __flow_impl<'cx>(
             tout.add(l.dupe());
         }
         (
-            AnyT(reason_fundef, src),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             CallT(box CallTData {
                 use_op,
                 reason: reason_op,
@@ -5453,8 +5522,7 @@ fn __flow_impl<'cx>(
                 l.dupe(),
                 call_specialized_callee.as_ref(),
             );
-            let src = flow_js_utils::any_mod_src_keep_placeholder(AnySource::Untyped, src);
-            let any = any_t::why(src, reason_fundef.dupe());
+            let any = flow_js_utils::untyped_any_result(l, reason_of_t(l).dupe());
             rec_flow_t(cx, env, trace, use_op.dupe(), (call_this_t, &any))?;
             call_args_iter(
                 |t| {
@@ -5468,7 +5536,7 @@ fn __flow_impl<'cx>(
                 },
                 call_args_tlist,
             )?;
-            let any_op = any_t::why(src, reason_op.dupe());
+            let any_op = flow_js_utils::untyped_any_result(l, reason_op.dupe());
             let open_tout = Type::new(OpenT(call_tout.dupe()));
             rec_flow_t(cx, env, trace, use_op.dupe(), (&any_op, &open_tout))?;
         }
@@ -5538,8 +5606,15 @@ fn __flow_impl<'cx>(
         ) => {
             collector.add(l.dupe());
         }
-        (AnyT(_, src), ObjTestProtoT(reason_op, u_inner)) => {
-            let any = any_t::why(*src, reason_op.dupe());
+        (
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            ObjTestProtoT(reason_op, u_inner),
+        ) => {
+            let any = flow_js_utils::any_result(l, reason_op.dupe());
             u_inner.add(any);
         }
         (DefT(_, deref!(NullT)), ObjTestProtoT(reason_op, u_inner)) => {
@@ -5820,8 +5895,13 @@ fn __flow_impl<'cx>(
             for ret_t in
                 helpers::possible_concrete_types_for_constructor_return(cx, env, reason_op, &ret)?
             {
-                if let AnyT(_, src) = ret_t.deref() {
-                    let any = any_t::why(*src, annot_r.dupe());
+                if let AnyT(_, _)
+                | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                    kind: ImplicitInstantiationTvarKind::Placeholder,
+                    ..
+                }) = ret_t.deref()
+                {
+                    let any = flow_js_utils::any_result(&ret_t, annot_r.dupe());
                     rec_flow_t(cx, env, trace, unknown_use(), (&any, t))?;
                 } else {
                     let repos_use = UseT::new(ReposLowerT {
@@ -5838,9 +5918,15 @@ fn __flow_impl<'cx>(
                 }
             }
         }
-        (AnyT(_, src), ConstructorT(box ctor_data)) => {
-            let src = flow_js_utils::any_mod_src_keep_placeholder(AnySource::Untyped, src);
-            let any_op = any_t::why(src, ctor_data.reason.dupe());
+        (
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            ConstructorT(box ctor_data),
+        ) => {
+            let any_op = flow_js_utils::untyped_any_result(l, ctor_data.reason.dupe());
             // An untyped receiver can't do anything with type args
             call_args_iter(
                 |arg_t| {
@@ -5960,7 +6046,11 @@ fn __flow_impl<'cx>(
         // Since we don't know the signature of a method on AnyT, assume every
         // parameter is an AnyT.
         (
-            AnyT(_, src),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             MethodT(box MethodTData {
                 use_op: _,
                 reason: _,
@@ -5969,12 +6059,16 @@ fn __flow_impl<'cx>(
                 method_action: box MethodAction::NoMethodAction(prop_t),
             }),
         ) => {
-            let src = flow_js_utils::any_mod_src_keep_placeholder(AnySource::Untyped, src);
-            let any = any_t::why(src, type_util::reason_of_propref(propref).dupe());
+            let any =
+                flow_js_utils::untyped_any_result(l, type_util::reason_of_propref(propref).dupe());
             prop_t.add(any);
         }
         (
-            AnyT(_, src),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             PrivateMethodT(
                 box pm_data @ PrivateMethodTData {
                     method_action: box MethodAction::NoMethodAction(prop_t),
@@ -5982,12 +6076,15 @@ fn __flow_impl<'cx>(
                 },
             ),
         ) => {
-            let src = flow_js_utils::any_mod_src_keep_placeholder(AnySource::Untyped, src);
-            let any = any_t::why(src, pm_data.prop_reason.dupe());
+            let any = flow_js_utils::untyped_any_result(l, pm_data.prop_reason.dupe());
             prop_t.add(any);
         }
         (
-            AnyT(_, src),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             MethodT(box MethodTData {
                 use_op,
                 reason: reason_op,
@@ -6001,8 +6098,7 @@ fn __flow_impl<'cx>(
                     }),
             }),
         ) => {
-            let src = flow_js_utils::any_mod_src_keep_placeholder(AnySource::Untyped, src);
-            let any = any_t::why(src, reason_op.dupe());
+            let any = flow_js_utils::untyped_any_result(l, reason_op.dupe());
             call_args_iter(
                 |t| {
                     rec_flow(
@@ -6025,7 +6121,11 @@ fn __flow_impl<'cx>(
             rec_flow_t(cx, env, trace, unknown_use(), (&any, &open_tout))?;
         }
         (
-            AnyT(_, src),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             PrivateMethodT(
                 box pm_data @ PrivateMethodTData {
                     method_action:
@@ -6038,8 +6138,7 @@ fn __flow_impl<'cx>(
                 },
             ),
         ) => {
-            let src = flow_js_utils::any_mod_src_keep_placeholder(AnySource::Untyped, src);
-            let any = any_t::why(src, pm_data.reason.dupe());
+            let any = flow_js_utils::untyped_any_result(l, pm_data.reason.dupe());
             call_args_iter(
                 |t| {
                     rec_flow(
@@ -6062,7 +6161,11 @@ fn __flow_impl<'cx>(
             rec_flow_t(cx, env, trace, unknown_use(), (&any, &open_tout))?;
         }
         (
-            AnyT(_, src),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             MethodT(box MethodTData {
                 use_op,
                 reason: reason_op,
@@ -6071,8 +6174,7 @@ fn __flow_impl<'cx>(
                 method_action: box chain @ MethodAction::ChainM(..),
             }),
         ) => {
-            let src = flow_js_utils::any_mod_src_keep_placeholder(AnySource::Untyped, src);
-            let any = any_t::why(src, reason_op.dupe());
+            let any = flow_js_utils::untyped_any_result(l, reason_op.dupe());
             apply_method_action(
                 cx,
                 env,
@@ -6085,7 +6187,11 @@ fn __flow_impl<'cx>(
             )?;
         }
         (
-            AnyT(_, src),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             PrivateMethodT(
                 box pm_data @ PrivateMethodTData {
                     method_action: box chain @ MethodAction::ChainM(..),
@@ -6093,8 +6199,7 @@ fn __flow_impl<'cx>(
                 },
             ),
         ) => {
-            let src = flow_js_utils::any_mod_src_keep_placeholder(AnySource::Untyped, src);
-            let any = any_t::why(src, pm_data.reason.dupe());
+            let any = flow_js_utils::untyped_any_result(l, pm_data.reason.dupe());
             apply_method_action(
                 cx,
                 env,
@@ -6130,8 +6235,15 @@ fn __flow_impl<'cx>(
                 collector.add(static_);
             }
         }
-        (AnyT(_, src), GetStaticsT(reason_op, collector)) => {
-            collector.add(any_t::why(*src, reason_op.dupe()));
+        (
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            GetStaticsT(reason_op, collector),
+        ) => {
+            collector.add(flow_js_utils::any_result(l, reason_op.dupe()));
         }
         (ObjProtoT(_), GetStaticsT(reason_op, collector)) => {
             collector.add(helpers::reposition_reason(
@@ -6192,9 +6304,15 @@ fn __flow_impl<'cx>(
             let proto = Type::new(ObjProtoT(reason.dupe().reposition(reason_op.loc().dupe())));
             t.add(proto);
         }
-        (AnyT(_, src), GetProtoT(reason_op, t)) => {
-            let src = flow_js_utils::any_mod_src_keep_placeholder(AnySource::Untyped, src);
-            let proto = any_t::why(src, reason_op.dupe());
+        (
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            GetProtoT(reason_op, t),
+        ) => {
+            let proto = flow_js_utils::untyped_any_result(l, reason_op.dupe());
             t.add(proto);
         }
 
@@ -6787,13 +6905,20 @@ fn __flow_impl<'cx>(
             })?;
             rec_flow_t(cx, env, trace, use_op, (&o2, t))?;
         }
-        (AnyT(_, src), ObjRestT(reason, _, t, _, _)) => {
+        (
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            ObjRestT(reason, _, t, _, _),
+        ) => {
             rec_flow_t(
                 cx,
                 env,
                 trace,
                 unknown_use(),
-                (&any_t::why(*src, reason.dupe()), t),
+                (&flow_js_utils::any_result(l, reason.dupe()), t),
             )?;
         }
         (ObjProtoT(_), ObjRestT(reason, _, t, _, literal)) => {
@@ -6902,7 +7027,11 @@ fn __flow_impl<'cx>(
             }
         }
         (
-            AnyT(_, src),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             LookupT(box LookupTData {
                 reason: reason_op,
                 lookup_kind,
@@ -6921,9 +7050,8 @@ fn __flow_impl<'cx>(
                     // covariant props, which would always flow into `any`.
                 }
                 _ => {
-                    let src = flow_js_utils::any_mod_src_keep_placeholder(AnySource::Untyped, src);
                     let p = PropertyType::OrdinaryField {
-                        type_: any_t::why(src, reason_op.dupe()),
+                        type_: flow_js_utils::untyped_any_result(l, reason_op.dupe()),
                         polarity: Polarity::Neutral,
                     };
                     if let LookupKind::NonstrictReturning(box NonstrictReturningData(
@@ -6993,26 +7121,19 @@ fn __flow_impl<'cx>(
         }
 
         // Since we don't know the type of the prop, use AnyT.
-        (AnyT(_, src), SetPropT(use_op, reason_op, _, _, _, t, prop_t)) => {
-            let src = flow_js_utils::any_mod_src_keep_placeholder(AnySource::Untyped, src);
+        (
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            SetPropT(use_op, reason_op, _, _, _, t, prop_t),
+        ) => {
+            let any = flow_js_utils::untyped_any_result(l, reason_op.dupe());
             if let Some(prop_t) = prop_t {
-                rec_flow_t(
-                    cx,
-                    env,
-                    trace,
-                    unknown_use(),
-                    (&any_t::why(src, reason_op.dupe()), prop_t),
-                )?;
+                rec_flow_t(cx, env, trace, unknown_use(), (&any, prop_t))?;
             }
-            rec_flow(
-                cx,
-                env,
-                trace,
-                (
-                    t,
-                    &UseT::new(UseT(use_op.dupe(), any_t::why(src, reason_op.dupe()))),
-                ),
-            )?;
+            rec_flow(cx, env, trace, (t, &UseT::new(UseT(use_op.dupe(), any))))?;
         }
 
         // *****************************
@@ -7062,31 +7183,43 @@ fn __flow_impl<'cx>(
                 lookup_info,
             )?(cx, (*data.tout).dupe())?;
         }
-        (AnyT(_, src), GetPropT(box data)) => {
+        (
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            GetPropT(box data),
+        ) => {
             if let Some(id) = data.id {
                 cx.test_prop_hit(id);
             }
-            let src = flow_js_utils::any_mod_src_keep_placeholder(AnySource::Untyped, src);
             rec_flow_t(
                 cx,
                 env,
                 trace,
                 unknown_use(),
                 (
-                    &any_t::why(src, data.reason.dupe()),
+                    &flow_js_utils::untyped_any_result(l, data.reason.dupe()),
                     &Type::new(OpenT((*data.tout).dupe())),
                 ),
             )?;
         }
-        (AnyT(_, src), GetPrivatePropT(box gpp_data)) => {
-            let src = flow_js_utils::any_mod_src_keep_placeholder(AnySource::Untyped, src);
+        (
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            GetPrivatePropT(box gpp_data),
+        ) => {
             rec_flow_t(
                 cx,
                 env,
                 trace,
                 unknown_use(),
                 (
-                    &any_t::why(src, gpp_data.reason.dupe()),
+                    &flow_js_utils::untyped_any_result(l, gpp_data.reason.dupe()),
                     &Type::new(OpenT((*gpp_data.tout).dupe())),
                 ),
             )?;
@@ -7221,7 +7354,11 @@ fn __flow_impl<'cx>(
             )?;
         }
         (
-            AnyT(_, _),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             SetElemT(box SetElemTData {
                 use_op,
                 reason,
@@ -7287,7 +7424,11 @@ fn __flow_impl<'cx>(
             )?;
         }
         (
-            AnyT(_, _),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             GetElemT(box GetElemTData {
                 use_op,
                 reason,
@@ -7348,7 +7489,11 @@ fn __flow_impl<'cx>(
             )?;
         }
         (
-            AnyT(_, _),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             CallElemT(box CallElemTData {
                 use_op,
                 reason: reason_call,
@@ -7417,11 +7562,18 @@ fn __flow_impl<'cx>(
             ElemT(box ElemTData {
                 use_op,
                 reason,
-                obj: obj @ deref!(AnyT(_, src)),
+                obj:
+                    obj @ deref!(
+                        AnyT(_, _)
+                            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                                kind: ImplicitInstantiationTvarKind::Placeholder,
+                                ..
+                            })
+                    ),
                 action,
             }),
         ) => {
-            let value = any_t::why(*src, reason.dupe());
+            let value = flow_js_utils::any_result(obj, reason.dupe());
             perform_elem_action(
                 cx,
                 env,
@@ -7438,7 +7590,11 @@ fn __flow_impl<'cx>(
         // a source of unsoundness, so that's ok. `tup[(0: any)] = 123` should not
         // error when `tup[0] = 123` does not.
         (
-            AnyT(_, _),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             ElemT(box ElemTData {
                 use_op,
                 reason: reason_op,
@@ -7718,7 +7874,11 @@ fn __flow_impl<'cx>(
             rec_flow_t(cx, env, trace, unknown_use(), (&a, tout))?;
         }
         (
-            AnyT(_, src),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             ArrRestT(box ArrRestTData {
                 use_op: _,
                 reason,
@@ -7732,14 +7892,18 @@ fn __flow_impl<'cx>(
                 env,
                 trace,
                 unknown_use(),
-                (&any_t::why(*src, reason.dupe()), tout),
+                (&flow_js_utils::any_result(l, reason.dupe()), tout),
             )?;
         }
         // **************************************************
         // * function types can be mapped over a structure  *
         // **************************************************
         (
-            AnyT(_, src),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             MapTypeT(box MapTypeTData {
                 use_op: _,
                 reason: reason_op,
@@ -7747,13 +7911,15 @@ fn __flow_impl<'cx>(
                 tout,
             }),
         ) => {
-            let src = flow_js_utils::any_mod_src_keep_placeholder(AnySource::Untyped, src);
             rec_flow_t(
                 cx,
                 env,
                 trace,
                 unknown_use(),
-                (&any_t::why(src, reason_op.dupe()), tout),
+                (
+                    &flow_js_utils::untyped_any_result(l, reason_op.dupe()),
+                    tout,
+                ),
             )?;
         }
         (
@@ -9461,7 +9627,15 @@ fn __flow_impl<'cx>(
             let repos = helpers::reposition_reason(cx, env, None, reason, false, bound)?;
             rec_flow(cx, env, trace, (&repos, u))?;
         }
-        (ImplicitInstantiationTvar(data), _) => {
+        (
+            ImplicitInstantiationTvar(
+                data @ box ImplicitInstantiationTvarData {
+                    kind: ImplicitInstantiationTvarKind::Inferred,
+                    ..
+                },
+            ),
+            _,
+        ) => {
             rec_flow(cx, env, trace, (&env.frozen_tvar_bound(data), u))?;
         }
         (
@@ -9933,7 +10107,11 @@ fn __flow_impl<'cx>(
         // ExtendsUseT searches for a nominal superclass. The search terminates with
         // either failure at the root or a structural subtype check.
         (
-            AnyT(_, src),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             ExtendsUseT(box ExtendsUseTData {
                 use_op,
                 reason: reason_op,
@@ -9943,12 +10121,12 @@ fn __flow_impl<'cx>(
             }),
         ) => {
             for t in ts.iter() {
-                let any = any_t::why(*src, reason_op.dupe());
+                let any = flow_js_utils::any_result(l, reason_op.dupe());
                 rec_flow_t(cx, env, trace, use_op.dupe(), (&any, t))?;
             }
-            let any1 = any_t::why(*src, reason_op.dupe());
+            let any1 = flow_js_utils::any_result(l, reason_op.dupe());
             rec_flow_t(cx, env, trace, use_op.dupe(), (&any1, t1))?;
-            let any2 = any_t::why(*src, reason_op.dupe());
+            let any2 = flow_js_utils::any_result(l, reason_op.dupe());
             rec_flow_t(cx, env, trace, use_op.dupe(), (&any2, t2))?;
         }
         (DefT(lreason, deref!(ObjT(obj))), ExtendsUseT(..)) => {

@@ -343,7 +343,8 @@ pub fn functiontype<'a, C: crate::func_params_intf::Config>(
                 fparams.rest.as_ref(),
             ) =>
         {
-            cx.mk_placeholder(type_util::reason_of_t(t).dupe())
+            let reason = type_util::reason_of_t(t);
+            cx.mk_placeholder(reason.dupe(), type_::mixed_t::why(reason.dupe()))
         }
         _ => type_util::type_t_of_annotated_or_inferred(return_t).dupe(),
     };

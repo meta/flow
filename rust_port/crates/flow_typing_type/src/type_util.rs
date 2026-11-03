@@ -60,6 +60,7 @@ use crate::type_::GetPrivatePropTData;
 use crate::type_::GetPropTData;
 use crate::type_::HasOwnPropTData;
 use crate::type_::ImplicitInstantiationTvarData;
+use crate::type_::ImplicitInstantiationTvarKind;
 use crate::type_::IndexedTypeAccessData;
 use crate::type_::IndexerKeyCompatibilityData;
 use crate::type_::InitFieldData;
@@ -163,7 +164,12 @@ impl ConstraintNodeId {
 pub fn constraint_node_id(t: &Type) -> Option<ConstraintNodeId> {
     match t.deref() {
         TypeInner::OpenT(tvar) => Some(ConstraintNodeId::OpenT(tvar.id() as i32)),
-        TypeInner::ImplicitInstantiationTvar(data) => Some(ConstraintNodeId::Inference(data.id)),
+        TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            id,
+            kind: ImplicitInstantiationTvarKind::Inferred,
+            ..
+        }) => Some(ConstraintNodeId::Inference(*id)),
+        // No solve infers a placeholder, so it never takes bounds and has no node.
         _ => None,
     }
 }
@@ -291,12 +297,14 @@ pub fn mod_reason_of_t(f: &dyn Fn(Reason) -> Reason, t: &Type) -> Type {
             name,
             bound,
             id,
+            kind,
         }) => Type::new(TypeInner::ImplicitInstantiationTvar(Box::new(
             ImplicitInstantiationTvarData {
                 reason: f(reason.dupe()),
                 name: name.dupe(),
                 bound: bound.dupe(),
                 id: *id,
+                kind: *kind,
             },
         ))),
         TypeInner::FunProtoT(reason) => Type::new(TypeInner::FunProtoT(f(reason.dupe()))),
@@ -1940,7 +1948,10 @@ pub fn is_falsy(t: &Type) -> bool {
 pub fn is_concrete(t: &Type) -> bool {
     match t.deref() {
         TypeInner::OpenT(_)
-        | TypeInner::ImplicitInstantiationTvar(_)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Inferred,
+            ..
+        })
         | TypeInner::EvalT { .. }
         | TypeInner::TypeAppT(box TypeAppTData { .. })
         | TypeInner::KeysT(_, _)
@@ -2815,7 +2826,7 @@ pub fn reason_of_resolved_param(param: &crate::type_::ResolvedParam) -> &Reason 
 
     match param {
         ResolvedSpreadArg(box crate::type_::ResolvedSpreadArgData(reason, _, _)) => reason,
-        ResolvedAnySpreadArg(reason, _) => reason,
+        ResolvedAnySpreadArg(t) => reason_of_t(t),
         ResolvedArg(box crate::type_::ResolvedArgData(tuple_elem, _)) => &tuple_elem.reason,
     }
 }

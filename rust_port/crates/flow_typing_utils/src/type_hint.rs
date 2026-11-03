@@ -1082,7 +1082,10 @@ fn type_of_hint_decomposition<'cx>(
                             flow_typing_debug::dump_t(Some(3), cx, &t),
                         )]
                     });
-                    Ok(cx.mk_placeholder(reason.dupe()))
+                    Ok(cx.mk_placeholder(
+                        reason.dupe(),
+                        flow_typing_type::type_::mixed_t::why(reason.dupe()),
+                    ))
                 } else {
                     let elem_t = flow_typing_tvar::mk(cx, reason.dupe());
                     let arr_t = Type::new(TypeInner::DefT(

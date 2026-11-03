@@ -20,6 +20,8 @@ use flow_parser::loc::Loc;
 use flow_typing_context::Context;
 use flow_typing_type::type_::DefTInner;
 use flow_typing_type::type_::GenericTData;
+use flow_typing_type::type_::ImplicitInstantiationTvarData;
+use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::PolyTData;
 use flow_typing_type::type_::ThisTypeAppTData;
 use flow_typing_type::type_::Type as FlowType;
@@ -194,7 +196,12 @@ impl CoverageVisitor {
     pub fn type_<'a>(&mut self, cx: &mut Context<'a>, t: &FlowType) -> Kind {
         match t.deref() {
             TypeInner::OpenT(tvar) => self.tvar(cx, tvar.id()),
-            TypeInner::ImplicitInstantiationTvar(data) => self.tvar(cx, data.id as u32),
+            TypeInner::ImplicitInstantiationTvar(
+                data @ box ImplicitInstantiationTvarData {
+                    kind: ImplicitInstantiationTvarKind::Inferred,
+                    ..
+                },
+            ) => self.tvar(cx, data.id as u32),
             TypeInner::EvalT { type_, id, .. } => self.eval_t(cx, type_, id),
             // Non-concrete (fallthrough) constructors
             TypeInner::AnnotT(_, t, _)
@@ -258,7 +265,11 @@ impl CoverageVisitor {
             | TypeInner::ObjProtoT(_)
             | TypeInner::OptionalT { .. } => Kind::Checked,
             // Concrete uncovered constructors
-            TypeInner::AnyT(..) => Kind::Any,
+            TypeInner::AnyT(..)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }) => Kind::Any,
         }
     }
 

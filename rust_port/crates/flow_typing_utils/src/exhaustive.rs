@@ -53,6 +53,8 @@ use flow_typing_loc_env::match_pattern_ir::pattern_union;
 use flow_typing_loc_env::match_pattern_ir::value_object;
 use flow_typing_loc_env::match_pattern_ir::value_union;
 use flow_typing_type::type_::DefTInner;
+use flow_typing_type::type_::ImplicitInstantiationTvarData;
+use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::ROArrayATData;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeInner;
@@ -457,7 +459,11 @@ pub mod pattern_union_builder {
                 _ => {}
             },
             // Ignore any-typed patterns.
-            TypeInner::AnyT(_, _) => return None,
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }) => return None,
             _ => {}
         }
         if raise_errors {
@@ -1458,7 +1464,11 @@ fn is_object_subtype_of_inexhaustible(inexhaustible: &FlowVector<Type>) -> Optio
             DefTInner::MixedT(_) => Some(t.dupe()),
             _ => None,
         },
-        TypeInner::AnyT(_, _) => Some(t.dupe()),
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => Some(t.dupe()),
         _ => None,
     })
 }

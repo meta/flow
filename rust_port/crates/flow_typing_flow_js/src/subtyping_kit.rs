@@ -81,6 +81,8 @@ use flow_typing_type::type_::FunRestParam;
 use flow_typing_type::type_::FunReturnData;
 use flow_typing_type::type_::GenericTData;
 use flow_typing_type::type_::HasOwnPropTData;
+use flow_typing_type::type_::ImplicitInstantiationTvarData;
+use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::IndexerKeyCompatibilityData;
 use flow_typing_type::type_::InstType;
 use flow_typing_type::type_::InstTypeInner;
@@ -6644,7 +6646,14 @@ pub fn rec_sub_t<'cx>(
         // *********************
         // functions statics
         // *********************
-        (DefT(reason, deref!(FunT(static_, _))), AnyT(_, _)) => {
+        (
+            DefT(reason, deref!(FunT(static_, _))),
+            AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+        ) => {
             FlowJs::rec_flow_with_env(
                 cx, env,
                 trace,
@@ -6660,7 +6669,15 @@ pub fn rec_sub_t<'cx>(
         // *****************
         // class statics
         // *****************
-        (DefT(reason, deref!(ClassT(instance))), DefT(_, deref!(ObjT(_))) | AnyT(_, _)) => {
+        (
+            DefT(reason, deref!(ClassT(instance))),
+            DefT(_, deref!(ObjT(_)))
+            | AnyT(_, _)
+            | ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+        ) => {
             let collector = TypeCollector::create();
             FlowJs::rec_flow_with_env(
                 cx, env, trace, instance,
@@ -6923,7 +6940,15 @@ pub fn rec_sub_t<'cx>(
             let t = FlowJs::reposition_reason(cx, env, Some(trace), reason, None, bound)?;
             FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &t, u)
         }
-        (ImplicitInstantiationTvar(data), _) => {
+        (
+            ImplicitInstantiationTvar(
+                data @ box ImplicitInstantiationTvarData {
+                    kind: ImplicitInstantiationTvarKind::Inferred,
+                    ..
+                },
+            ),
+            _,
+        ) => {
             FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &env.frozen_tvar_bound(data), u)
         }
         (_, GenericT(box GenericTData { reason, .. })) => {

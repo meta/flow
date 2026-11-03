@@ -20,6 +20,8 @@ use flow_typing_type::type_::DefT;
 use flow_typing_type::type_::DefTInner;
 use flow_typing_type::type_::DepthTrace;
 use flow_typing_type::type_::GetPropTData;
+use flow_typing_type::type_::ImplicitInstantiationTvarData;
+use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::TestPropTData;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeInner;
@@ -177,7 +179,11 @@ fn run_on_concretized<'cx>(
     let useful = match l.deref() {
         TypeInner::AnyT(_, AnySource::AnyError(_)) => false,
         TypeInner::DefT(_, def_t) if matches!(def_t.deref(), DefTInner::MixedT(_)) => true,
-        TypeInner::AnyT(_, _) => true,
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => true,
         _ => false,
     };
     cx.mark_optional_chain(reason.loc().dupe(), lhs_expression.dupe(), useful);

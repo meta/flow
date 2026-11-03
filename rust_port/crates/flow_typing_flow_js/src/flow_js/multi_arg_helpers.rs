@@ -11,7 +11,6 @@ use std::sync::Arc;
 use flow_typing_errors::error_message::EFunctionCallExtraArgData;
 use flow_typing_errors::intermediate_error_types::FunctionReferenceData;
 use flow_typing_flow_js_env::FlowJsEnv;
-use flow_typing_type::type_::AnySource;
 use flow_typing_type::type_::ArrRestTData;
 use flow_typing_type::type_::ArrayLiteralKind;
 use flow_typing_type::type_::FunMissingArgData;
@@ -713,7 +712,7 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                         };
                         Ok((args, spread_after_opt, seen_opt, inexact_spread))
                     }
-                    ResolvedParam::ResolvedAnySpreadArg(_, _) => {
+                    ResolvedParam::ResolvedAnySpreadArg(_) => {
                         args.push(arg.clone());
                         Ok((args, spread_after_opt, seen_opt, inexact_spread))
                     }
@@ -731,11 +730,11 @@ pub(super) fn finish_resolve_spread_list<'cx>(
         Ok((args, spread_after_opt, inexact_spread))
     }
 
-    fn spread_resolved_to_any_src(
+    fn spread_resolved_to_any(
         resolved: &flow_data_structure_wrapper::list::FlowOcamlList<ResolvedParam>,
-    ) -> Option<AnySource> {
+    ) -> Option<&Type> {
         resolved.iter().find_map(|arg| match arg {
-            ResolvedParam::ResolvedAnySpreadArg(_, src) => Some(*src),
+            ResolvedParam::ResolvedAnySpreadArg(any) => Some(any),
             ResolvedParam::ResolvedArg(box ResolvedArgData(_, _))
             | ResolvedParam::ResolvedSpreadArg(box ResolvedSpreadArgData(_, _, _)) => None,
         })
@@ -757,14 +756,14 @@ pub(super) fn finish_resolve_spread_list<'cx>(
             | SpreadArrayResolveTo::ResolveToArray { literal, fresh } => (literal, fresh),
             SpreadArrayResolveTo::ResolveToTupleType { .. } => (ArrLiteral::NonLiteral, false),
         };
-        let result = match spread_resolved_to_any_src(resolved) {
-            Some(any_src) => match resolve_to {
+        let result = match spread_resolved_to_any(resolved) {
+            Some(any) => match resolve_to {
                 // Array<any> is a good enough any type for arrays
                 SpreadArrayResolveTo::ResolveToArray { .. } => Type::new(TypeInner::DefT(
                     reason_op.dupe(),
                     DefT::new(DefTInner::ArrT(Rc::new(ArrType::ArrayAT(Box::new(
                         ArrayATData {
-                            elem_t: any_t::why(any_src, reason_op.dupe()),
+                            elem_t: flow_js_utils::any_result(any, reason_op.dupe()),
                             tuple_view: None,
                             react_dro: None,
                             strictness_kind: cx.type_strictness_kind(),
@@ -778,11 +777,11 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                 // we might get a new error. Since introducing `any`'s shouldn't cause
                 // errors, this is bad. Instead, let's degrade array literals to `any`
                 SpreadArrayResolveTo::ResolveToArrayLiteral { .. } => {
-                    any_t::why(any_src, reason_op.dupe())
+                    flow_js_utils::any_result(any, reason_op.dupe())
                 }
                 // There is no AnyTupleT type, so let's degrade to `any`.
                 SpreadArrayResolveTo::ResolveToTupleType { .. } => {
-                    any_t::why(any_src, reason_op.dupe())
+                    flow_js_utils::any_result(any, reason_op.dupe())
                 }
             },
             None => {
@@ -896,7 +895,7 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                                     };
                                     tuple_elements.push(new_elem);
                                 }
-                                ResolvedParam::ResolvedAnySpreadArg(_, _) => {
+                                ResolvedParam::ResolvedAnySpreadArg(_) => {
                                     panic!("Should not be hit")
                                 }
                             }
@@ -933,7 +932,7 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                                 generic.as_ref(),
                                 array_spread::RoStatus::NonROSpread,
                             ),
-                            ResolvedParam::ResolvedAnySpreadArg(_, _) => {
+                            ResolvedParam::ResolvedAnySpreadArg(_) => {
                                 panic!("Should not be hit")
                             }
                         };
@@ -1310,7 +1309,7 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                             }
                         }
                         ResolvedParam::ResolvedSpreadArg(box ResolvedSpreadArgData(_, _, _))
-                        | ResolvedParam::ResolvedAnySpreadArg(_, _) => {
+                        | ResolvedParam::ResolvedAnySpreadArg(_) => {
                             // We weren't able to flatten the call argument list to remove all
                             // spreads. This means we need to build a spread argument, with
                             // unknown arity.
@@ -1374,8 +1373,11 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                                 rest,
                             )
                         }
-                        ResolvedParam::ResolvedAnySpreadArg(reason, any_src) => {
-                            type_ex_set::add(any_t::why(*any_src, reason.dupe()), &mut tset);
+                        ResolvedParam::ResolvedAnySpreadArg(any) => {
+                            type_ex_set::add(
+                                flow_js_utils::any_result(any, reason_of_t(any).dupe()),
+                                &mut tset,
+                            );
                             let mut rest = resolved.dupe();
                             rest.drop_first();
                             (

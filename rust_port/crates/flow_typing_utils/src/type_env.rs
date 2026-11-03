@@ -869,6 +869,8 @@ fn maybe_predicate_function<'cx>(
 
     use flow_typing_flow_common::flow_js_utils::FlowJsException;
     use flow_typing_type::type_::DefTInner;
+    use flow_typing_type::type_::ImplicitInstantiationTvarData;
+    use flow_typing_type::type_::ImplicitInstantiationTvarKind;
     use flow_typing_type::type_::PolyTData;
     use flow_typing_type::type_::TypeInner;
 
@@ -911,7 +913,11 @@ fn maybe_predicate_function<'cx>(
 
     fn on_ground(t: &Type, assertion: bool) -> bool {
         match t.deref() {
-            TypeInner::AnyT(_, _) => false,
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }) => false,
             TypeInner::DefT(_, def_t) => match def_t.deref() {
                 DefTInner::FunT(_, fun_t) => matches_position(fun_t, assertion),
                 DefTInner::PolyT(box PolyTData { t_out, .. }) => match t_out.deref() {
@@ -2708,6 +2714,8 @@ pub fn init_env<'cx>(cx: &mut Context<'cx>, toplevel_scope_kind: ScopeKind) {
     use flow_typing_errors::error_message::ErrorMessage;
     use flow_typing_errors::error_message::InternalError;
     use flow_typing_type::type_::any_t;
+    use flow_typing_type::type_::mixed_t;
+    use flow_typing_type::type_::placeholder_t;
     let entries: Vec<_> = {
         let env = cx.environment();
         env.var_info
@@ -2738,7 +2746,7 @@ pub fn init_env<'cx>(cx: &mut Context<'cx>, toplevel_scope_kind: ScopeKind) {
                         match cx.typing_mode() {
                             TypingMode::CheckingMode => any_t::error(reason_clone),
                             TypingMode::SynthesisMode { .. } | TypingMode::HintEvaluationMode => {
-                                any_t::placeholder(reason_clone)
+                                placeholder_t::why(reason_clone.dupe(), mixed_t::why(reason_clone))
                             }
                         }
                     });

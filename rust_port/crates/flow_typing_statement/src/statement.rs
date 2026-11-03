@@ -4581,8 +4581,8 @@ pub fn for_of_elemt<'a>(
         let targs = if await_ {
             vec![
                 elem_t.dupe(),
-                any_t::placeholder(reason.dupe()),
-                any_t::placeholder(reason.dupe()),
+                placeholder_t::why(reason.dupe(), mixed_t::why(reason.dupe())),
+                placeholder_t::why(reason.dupe(), mixed_t::why(reason.dupe())),
             ]
         } else {
             vec![
@@ -5707,7 +5707,11 @@ fn create_computed_prop<'a>(
                 DefTInner::StrGeneralT(_) | DefTInner::NumGeneralT(_) | DefTInner::EnumValueT(_)
             ),
             TypeInner::TemplateLiteralT { .. } => true,
-            TypeInner::AnyT(_, _) => true,
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }) => true,
             _ => false,
         }
     };
@@ -7245,7 +7249,8 @@ fn expression_<'a>(
                 {
                     let reason = mk_reason(None, loc.dupe());
                     let element_reason = mk_reason(None, loc.dupe());
-                    let elem_t = cx.mk_placeholder(element_reason);
+                    let elem_t =
+                        cx.mk_placeholder(element_reason.dupe(), mixed_t::why(element_reason));
                     let arrtype = type_::ArrType::ArrayAT(Box::new(ArrayATData {
                         elem_t,
                         tuple_view: Some(type_::empty_tuple_view()),
@@ -8479,7 +8484,11 @@ fn check_unnecessary_assertion(
         // code below tries to report.
         TypeInner::DefT(_, def_t) if matches!(def_t.deref(), DefTInner::EmptyT) => {}
         // any will fail the test below, but it's not always truthy.
-        TypeInner::AnyT(_, _) => {}
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => {}
         _ => {
             let filter_result =
                 flow_typing_utils::type_filter::not_truthy(cx, concretized_cond_t.dupe());
@@ -19654,7 +19663,7 @@ pub fn mk_component_sig<'a>(
                     flow_typing_context::TypingMode::CheckingMode
                 ) =>
             {
-                let t = cx.mk_placeholder(reason);
+                let t = cx.mk_placeholder(reason.dupe(), mixed_t::why(reason));
                 (
                     t.dupe(),
                     ast::types::AnnotationOrHint::Missing((loc.dupe(), t)),
@@ -20072,7 +20081,7 @@ pub fn mk_func_sig<'a>(
                     flow_typing_context::TypingMode::CheckingMode
                 ) =>
             {
-                let t = cx.mk_placeholder(reason);
+                let t = cx.mk_placeholder(reason.dupe(), mixed_t::why(reason));
                 (
                     t.dupe(),
                     ast::types::AnnotationOrHint::Missing((loc.dupe(), t)),
@@ -20480,7 +20489,7 @@ pub fn mk_func_sig<'a>(
                 cx.typing_mode(),
                 flow_typing_context::TypingMode::CheckingMode
             ) {
-                cx.mk_placeholder(ret_reason.dupe())
+                cx.mk_placeholder(ret_reason.dupe(), mixed_t::why(ret_reason.dupe()))
             } else {
                 flow_typing_tvar::mk(cx, ret_reason.dupe())
             };

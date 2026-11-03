@@ -2853,8 +2853,14 @@ fn resolve_generator_next<'cx>(
             flow_typing_tvar::mk_where(cx, reason.dupe(), |cx, next| {
                 let yield_reason = reason.dupe().replace_desc(None);
                 let return_reason = reason.dupe().replace_desc(None);
-                let yield_t = any_t::placeholder(yield_reason);
-                let return_targ = any_t::placeholder(return_reason);
+                let yield_t = type_::placeholder_t::why(
+                    yield_reason.dupe(),
+                    type_::mixed_t::why(yield_reason),
+                );
+                let return_targ = type_::placeholder_t::why(
+                    return_reason.dupe(),
+                    type_::mixed_t::why(return_reason),
+                );
                 let t = flow_js::FlowJs::get_builtin_typeapp(
                     cx,
                     &reason,

@@ -31,6 +31,8 @@ use flow_typing_type::type_::DestructorSpreadTupleTypeData;
 use flow_typing_type::type_::DictType;
 use flow_typing_type::type_::FunType;
 use flow_typing_type::type_::GenericTData;
+use flow_typing_type::type_::ImplicitInstantiationTvarData;
+use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::InstTypeInner;
 use flow_typing_type::type_::NamespaceType;
 use flow_typing_type::type_::ObjKind;
@@ -197,7 +199,13 @@ fn check_polarity_impl<'cx>(
                 &|_, reason| reason.loc().dupe(),
                 &|cx, env, l| {
                     match l.deref() {
-                        TypeInner::AnyT(..) => return Ok(()),
+                        TypeInner::AnyT(..)
+                        | TypeInner::ImplicitInstantiationTvar(
+                            box ImplicitInstantiationTvarData {
+                                kind: ImplicitInstantiationTvarKind::Placeholder,
+                                ..
+                            },
+                        ) => return Ok(()),
                         TypeInner::DefT(_, d) => {
                             if let DefTInner::PolyT(box PolyTData {
                                 tparams: tps,

@@ -44,6 +44,8 @@ use flow_typing_type::type_::DepthTrace;
 use flow_typing_type::type_::ExtendsUseTData;
 use flow_typing_type::type_::FunParam;
 use flow_typing_type::type_::GenericTData;
+use flow_typing_type::type_::ImplicitInstantiationTvarData;
+use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::InstanceKind;
 use flow_typing_type::type_::InstanceT;
 use flow_typing_type::type_::NominalType;
@@ -1567,7 +1569,16 @@ fn unrelated_classes<'cx>(
 
 fn is_any<'cx>(cx: &mut Context<'cx>, env: &FlowJsEnv, t: &Type) -> Result<bool, JobError> {
     let ts = concrete_types_for_inspection(cx, env, reason_of_t(t), t)?;
-    Ok(ts.iter().any(|t| matches!(t.deref(), TypeInner::AnyT(..))))
+    Ok(ts.iter().any(|t| {
+        matches!(
+            t.deref(),
+            TypeInner::AnyT(..)
+                | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                    kind: ImplicitInstantiationTvarKind::Placeholder,
+                    ..
+                })
+        )
+    }))
 }
 
 /// Refines `t1` by the type guard `t2`. A member of `t1` that is an instance of a class unrelated
@@ -2099,7 +2110,14 @@ fn intersect_type_guard<'cx>(
 }
 
 fn is_any_t(t: &Type) -> bool {
-    matches!(t.deref(), TypeInner::AnyT(..))
+    matches!(
+        t.deref(),
+        TypeInner::AnyT(..)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            })
+    )
 }
 
 fn is_bool_general_t(t: &Type) -> bool {
@@ -3084,9 +3102,16 @@ fn instanceof_test<'cx>(
                 FlowJs::reposition_with_env(cx, env, Some(trace), loc, Some(desc), None, a.dupe())?;
             report_changed_filtering_result_to_predicate_result(repositioned, result_collector);
         }
-        (true, TypeInner::AnyT(..), InstanceofRhs::TypeOperand(right_t))
-            if let TypeInner::DefT(class_reason, right_def) = right_t.deref()
-                && let DefTInner::ClassT(a) = right_def.deref() =>
+        (
+            true,
+            TypeInner::AnyT(..)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            InstanceofRhs::TypeOperand(right_t),
+        ) if let TypeInner::DefT(class_reason, right_def) = right_t.deref()
+            && let DefTInner::ClassT(a) = right_def.deref() =>
         {
             let desc = reason_of_t(a).desc(true);
             let loc = class_reason.loc().dupe();

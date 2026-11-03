@@ -26,6 +26,8 @@ use flow_typing_type::type_::Destructor;
 use flow_typing_type::type_::DestructorConditionalTypeData;
 use flow_typing_type::type_::DestructorMappedTypeData;
 use flow_typing_type::type_::GenericTData;
+use flow_typing_type::type_::ImplicitInstantiationTvarData;
+use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::InstanceT;
 use flow_typing_type::type_::MappedTypeHomomorphicFlag;
 use flow_typing_type::type_::NamedSymbol;
@@ -41,6 +43,7 @@ use flow_typing_type::type_::TypeParam;
 use flow_typing_type::type_::TypeParamInner;
 use flow_typing_type::type_::UseOp;
 use flow_typing_type::type_::exports;
+use flow_typing_type::type_::mixed_t;
 use flow_typing_type::type_::poly;
 use flow_typing_type::type_::properties;
 use flow_typing_type::type_::property;
@@ -585,11 +588,24 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
                     None => type_mapper::type_default(self, cx, map_cx, t.dupe()),
                     Some(Replacement::TypeSubst(param_t, _)) => {
                         self.change_id = true;
-                        if *placeholder_no_infer && *no_infer {
-                            cx.mk_placeholder(reason_of_t(param_t).dupe())
-                        } else {
-                            match (&mut self.obj_reachable_targs, &**param_t) {
-                                (obj_reachable_targs, TypeInner::ImplicitInstantiationTvar(_)) => {
+                        match (*placeholder_no_infer, *no_infer, &**param_t) {
+                            (true, true, TypeInner::ImplicitInstantiationTvar(data)) => {
+                                cx.mk_placeholder(reason_of_t(param_t).dupe(), data.bound.dupe())
+                            }
+                            (true, true, _) => {
+                                let reason = reason_of_t(param_t);
+                                cx.mk_placeholder(reason.dupe(), mixed_t::why(reason.dupe()))
+                            }
+                            _ => match (&mut self.obj_reachable_targs, &**param_t) {
+                                (
+                                    obj_reachable_targs,
+                                    TypeInner::ImplicitInstantiationTvar(
+                                        box ImplicitInstantiationTvarData {
+                                            kind: ImplicitInstantiationTvarKind::Inferred,
+                                            ..
+                                        },
+                                    ),
+                                ) => {
                                     if let Some(targs) = obj_reachable_targs {
                                         targs.push((param_t.dupe(), Polarity::Neutral));
                                     }
@@ -608,7 +624,7 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
                                     param_t.dupe()
                                 }
                                 _ => param_t.dupe(),
-                            }
+                            },
                         }
                     }
                     Some(Replacement::AlphaRename(name_prime)) => {

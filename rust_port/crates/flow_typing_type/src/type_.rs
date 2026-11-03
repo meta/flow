@@ -207,6 +207,19 @@ pub struct ImplicitInstantiationTvarData {
     pub name: SubstName,
     pub bound: Type,
     pub id: i32,
+    pub kind: ImplicitInstantiationTvarKind,
+}
+
+#[derive(Debug, Clone, Copy, Dupe, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum ImplicitInstantiationTvarKind {
+    /// A type argument, which the solve that made it infers.
+    Inferred,
+    /// A type that implicit instantiation or synthesis doesn't know, such as `NoInfer<T>` while
+    /// `T` is being solved, or the return type of a function whose body isn't synthesized. No
+    /// solve infers it, so it never takes bounds, and pinning never takes it as evidence. Every
+    /// other use sees it as its permissive instantiation, and what a use computes from it is a
+    /// placeholder too.
+    Placeholder,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -5204,7 +5217,6 @@ pub enum AnySource {
     AnyError(Option<AnyErrorKind>),
     Unsound(UnsoundnessKind),
     Untyped,
-    Placeholder,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -6870,7 +6882,8 @@ pub struct ResolvedSpreadArgData(
 pub enum ResolvedParam {
     ResolvedArg(Box<ResolvedArgData>),
     ResolvedSpreadArg(Box<ResolvedSpreadArgData>),
-    ResolvedAnySpreadArg(Reason, AnySource),
+    /// A spread of `any` or of a placeholder, which is the type held.
+    ResolvedAnySpreadArg(Type),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -8891,7 +8904,10 @@ pub mod union_rep {
         for t in ts {
             match &**t {
                 TypeInner::OpenT(_)
-                | TypeInner::ImplicitInstantiationTvar(_)
+                | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                    kind: ImplicitInstantiationTvarKind::Inferred,
+                    ..
+                })
                 | TypeInner::EvalT { .. }
                 | TypeInner::TypeAppT(..)
                 | TypeInner::KeysT(_, _)
@@ -11722,13 +11738,26 @@ pub mod any_t {
         why(AnySource::Untyped, reason)
     }
 
-    pub fn placeholder(reason: Reason) -> Type {
-        why(AnySource::Placeholder, reason)
-    }
-
     pub fn locationless(source: AnySource) -> Type {
         let reason = flow_common::reason::locationless_reason(None);
         make(source, reason)
+    }
+}
+
+pub mod placeholder_t {
+    use super::*;
+
+    /// A placeholder that a use sees through `bound`. An unknown type is bounded by `mixed`.
+    pub fn why(reason: Reason, bound: Type) -> Type {
+        Type::new(TypeInner::ImplicitInstantiationTvar(Box::new(
+            ImplicitInstantiationTvarData {
+                reason: reason.replace_desc(None),
+                name: SubstName::name("placeholder".into()),
+                bound,
+                id: flow_common::reason::mk_id() as i32,
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+            },
+        )))
     }
 }
 
@@ -12182,7 +12211,6 @@ pub fn string_of_ctor(t: &Type) -> &'static str {
         TypeInner::AnyT(_, AnySource::AnyError(_)) => "AnyT (error)",
         TypeInner::AnyT(_, AnySource::Unsound(_)) => "AnyT (unsound)",
         TypeInner::AnyT(_, AnySource::Untyped) => "AnyT (untyped)",
-        TypeInner::AnyT(_, AnySource::Placeholder) => "AnyT (placeholder)",
         TypeInner::AnnotT(_, _, _) => "AnnotT",
         TypeInner::DefT(_, def) => string_of_def_ctor(def),
         TypeInner::EvalT { .. } => "EvalT",
@@ -12626,7 +12654,9 @@ pub fn annot(in_implicit_instantiation: bool, use_desc: bool, t: &Type) -> Type 
     match &**t {
         TypeInner::ImplicitInstantiationTvar(_) if in_implicit_instantiation => t.dupe(),
         TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-            reason, ..
+            reason,
+            kind: ImplicitInstantiationTvarKind::Inferred,
+            ..
         })
         | TypeInner::OpenT(Tvar(reason, _)) => Type(Rc::new(TypeInner::AnnotT(
             reason.dupe(),

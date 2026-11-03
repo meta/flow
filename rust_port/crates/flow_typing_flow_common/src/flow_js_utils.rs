@@ -58,7 +58,6 @@ use flow_typing_errors::intermediate_error_types::TypeGuardReferenceData;
 use flow_typing_errors::intermediate_error_types::TypeGuardReferenceKind;
 use flow_typing_errors::intermediate_error_types::ValueAsTypeReference;
 use flow_typing_flow_js_env::FlowJsEnv;
-use flow_typing_type::type_::AnySource;
 use flow_typing_type::type_::ArrLiteral;
 use flow_typing_type::type_::CallElemTData;
 use flow_typing_type::type_::ClassExtendsCheckData;
@@ -72,6 +71,8 @@ use flow_typing_type::type_::ExportKind;
 use flow_typing_type::type_::GenericTData;
 use flow_typing_type::type_::GetElemTData;
 use flow_typing_type::type_::HasOwnPropTData;
+use flow_typing_type::type_::ImplicitInstantiationTvarData;
+use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::InstType;
 use flow_typing_type::type_::InstanceKind;
 use flow_typing_type::type_::InstanceT;
@@ -402,10 +403,18 @@ pub fn collect_prototype_t<'cx>(
                 {
                     // As in TypeScript, a `prototype` of type `any` says nothing
                     // about the instance.
-                    if concretize(cx, &prototype)?
-                        .iter()
-                        .all(|t| matches!(t.deref(), TypeInner::AnyT(..)))
-                    {
+                    if concretize(cx, &prototype)?.iter().all(|t| {
+                        matches!(
+                            t.deref(),
+                            TypeInner::AnyT(..)
+                                | TypeInner::ImplicitInstantiationTvar(
+                                    box ImplicitInstantiationTvarData {
+                                        kind: ImplicitInstantiationTvarKind::Placeholder,
+                                        ..
+                                    }
+                                )
+                        )
+                    }) {
                         return Ok(None);
                     }
                     return Ok(Some(prototype));
@@ -1229,7 +1238,11 @@ pub fn object_like(t: &Type) -> bool {
         TypeInner::ThisInstanceT(..) => true,
         TypeInner::ObjProtoT(_) => true,
         TypeInner::FunProtoT(_) => true,
-        TypeInner::AnyT(_, _) => true,
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => true,
         _ => function_like(t),
     }
 }
@@ -1250,7 +1263,14 @@ pub fn object_like_op<CX: ContextFamily>(u: &UseT<CX>) -> bool {
         | UseTInner::ObjRestT(..)
         | UseTInner::SetElemT(..)
         | UseTInner::GetElemT(..) => true,
-        UseTInner::UseT(_, t) => matches!(t.deref(), TypeInner::AnyT(_, _)),
+        UseTInner::UseT(_, t) => matches!(
+            t.deref(),
+            TypeInner::AnyT(_, _)
+                | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                    kind: ImplicitInstantiationTvarKind::Placeholder,
+                    ..
+                })
+        ),
         _ => false,
     }
 }
@@ -1259,7 +1279,14 @@ pub fn function_like_op(u: &UseT) -> bool {
     match u.deref() {
         UseTInner::CallT(..) => true,
         UseTInner::ConstructorT(..) => true,
-        UseTInner::UseT(_, t) => matches!(t.deref(), TypeInner::AnyT(_, _)),
+        UseTInner::UseT(_, t) => matches!(
+            t.deref(),
+            TypeInner::AnyT(_, _)
+                | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                    kind: ImplicitInstantiationTvarKind::Placeholder,
+                    ..
+                })
+        ),
         _ => object_like_op(u),
     }
 }
@@ -1275,8 +1302,9 @@ pub mod tvar_visitors {
 
     use flow_common::polarity::Polarity;
     use flow_typing_context::Context;
-    use flow_typing_type::type_::AnySource;
     use flow_typing_type::type_::Destructor;
+    use flow_typing_type::type_::ImplicitInstantiationTvarData;
+    use flow_typing_type::type_::ImplicitInstantiationTvarKind;
     use flow_typing_type::type_::Type;
     use flow_typing_type::type_::TypeInner;
     use flow_typing_type::type_::constraint::Constraints;
@@ -1331,9 +1359,10 @@ pub mod tvar_visitors {
         ) -> Result<Seen, TvarVisitorResult> {
             let seen = acc?;
             match t.deref() {
-                TypeInner::AnyT(_, AnySource::Placeholder) => {
-                    Err(TvarVisitorResult::EncounteredPlaceholderType)
-                }
+                TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                    kind: ImplicitInstantiationTvarKind::Placeholder,
+                    ..
+                }) => Err(TvarVisitorResult::EncounteredPlaceholderType),
                 _ if let Some(node) = type_util::constraint_node_id(t) => {
                     self.constraint_node(cx, pole, Ok(seen), node.id())
                 }
@@ -1447,9 +1476,10 @@ pub mod tvar_visitors {
         ) -> Result<Seen, TvarVisitorResult> {
             let seen = acc?;
             match t.deref() {
-                TypeInner::AnyT(_, AnySource::Placeholder) => {
-                    Err(TvarVisitorResult::EncounteredPlaceholderType)
-                }
+                TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                    kind: ImplicitInstantiationTvarKind::Placeholder,
+                    ..
+                }) => Err(TvarVisitorResult::EncounteredPlaceholderType),
                 _ if let Some(node) = type_util::constraint_node_id(t) => {
                     self.constraint_node(cx, pole, Ok(seen), node.id())
                 }
@@ -2815,7 +2845,11 @@ pub fn quick_error_fun_as_obj<'cx>(
             DefTInner::MixedT(_) => Some(PropertiesMap::new()),
             _ => None,
         },
-        TypeInner::AnyT(_, _) => Some(PropertiesMap::new()),
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => Some(PropertiesMap::new()),
         _ => None,
     };
 
@@ -4108,6 +4142,8 @@ pub mod value_to_type_reference_transform {
     use flow_typing_flow_js_env::FlowJsEnv;
     use flow_typing_type::type_::AnyErrorKind;
     use flow_typing_type::type_::DefTInner;
+    use flow_typing_type::type_::ImplicitInstantiationTvarData;
+    use flow_typing_type::type_::ImplicitInstantiationTvarKind;
     use flow_typing_type::type_::PolyTData;
     use flow_typing_type::type_::ThisInstanceTData;
     use flow_typing_type::type_::Type;
@@ -4393,7 +4429,12 @@ pub mod value_to_type_reference_transform {
 
             // Short-circut as we already error on the unresolved name.
             TypeInner::AnyT(_, AnySource::AnyError(_)) => Ok(t),
-            TypeInner::AnyT(r, _) => {
+            TypeInner::AnyT(r, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                reason: r,
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }) => {
                 add_output_with_env(
                     cx,
                     env,
@@ -4520,6 +4561,8 @@ pub mod import_type_t_kit {
     use flow_typing_type::type_::AnySource;
     use flow_typing_type::type_::DefT;
     use flow_typing_type::type_::DefTInner;
+    use flow_typing_type::type_::ImplicitInstantiationTvarData;
+    use flow_typing_type::type_::ImplicitInstantiationTvarKind;
     use flow_typing_type::type_::InstanceKind;
     use flow_typing_type::type_::PolyTData;
     use flow_typing_type::type_::ThisInstanceTData;
@@ -4650,7 +4693,11 @@ pub mod import_type_t_kit {
             },
 
             TypeInner::NamespaceT(_) => Some(t.dupe()),
-            TypeInner::AnyT(_, _) => Some(t.dupe()),
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }) => Some(t.dupe()),
             _ => None,
         }
     }
@@ -5843,6 +5890,8 @@ pub mod assert_export_is_type_t_kit {
     use flow_typing_flow_js_env::FlowJsEnv;
     use flow_typing_type::type_::AnySource;
     use flow_typing_type::type_::DefTInner;
+    use flow_typing_type::type_::ImplicitInstantiationTvarData;
+    use flow_typing_type::type_::ImplicitInstantiationTvarKind;
     use flow_typing_type::type_::PolyTData;
     use flow_typing_type::type_::Type;
     use flow_typing_type::type_::TypeInner;
@@ -5861,7 +5910,11 @@ pub mod assert_export_is_type_t_kit {
                 _ => false,
             },
             TypeInner::NamespaceT { .. } => true,
-            TypeInner::AnyT(_, _) => true,
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }) => true,
             _ => false,
         }
     }
@@ -6056,6 +6109,8 @@ pub mod cjs_extract_named_exports_t_kit {
     use flow_typing_context::Context;
     use flow_typing_type::type_::DefTInner;
     use flow_typing_type::type_::ExportKind;
+    use flow_typing_type::type_::ImplicitInstantiationTvarData;
+    use flow_typing_type::type_::ImplicitInstantiationTvarKind;
     use flow_typing_type::type_::ModuleType;
     use flow_typing_type::type_::ModuleTypeInner;
     use flow_typing_type::type_::NamedSymbol;
@@ -6238,7 +6293,11 @@ pub mod cjs_extract_named_exports_t_kit {
                 }
             }
             // If the module is exporting any or Object, then we allow any named import.
-            TypeInner::AnyT(_, _) => {
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }) => {
                 let mut module_export_types = local_module.module_export_types.clone();
                 module_export_types.has_every_named_export = true;
                 Ok(ModuleType::new(ModuleTypeInner {
@@ -7148,6 +7207,8 @@ pub mod get_prop_t_kit {
     use flow_typing_type::type_::DictType;
     use flow_typing_type::type_::FieldData;
     use flow_typing_type::type_::GenericTData;
+    use flow_typing_type::type_::ImplicitInstantiationTvarData;
+    use flow_typing_type::type_::ImplicitInstantiationTvarKind;
     use flow_typing_type::type_::IndexerFallbackData;
     use flow_typing_type::type_::InstType;
     use flow_typing_type::type_::LookupDefaultResult;
@@ -7177,6 +7238,7 @@ pub mod get_prop_t_kit {
     use super::FlowJsException;
     use super::GetPropHelper;
     use super::add_output_with_env;
+    use super::any_result;
     use super::enum_proto;
     use super::is_dictionary_exempt;
     use super::is_exception_to_react_dro;
@@ -7884,7 +7946,11 @@ pub mod get_prop_t_kit {
                     F::cg_lookup(cx, env, *trace, l, true, o.proto_t.dupe(), data)
                 }
                 PropRef::Computed(elem_t) => match elem_t.deref() {
-                    TypeInner::OpenT(_) | TypeInner::ImplicitInstantiationTvar(_) => {
+                    TypeInner::OpenT(_)
+                    | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                        kind: ImplicitInstantiationTvarKind::Inferred,
+                        ..
+                    }) => {
                         let loc = type_util::loc_of_t(elem_t).dupe();
                         add_output_with_env(
                                     cx,
@@ -7971,9 +8037,17 @@ pub mod get_prop_t_kit {
                                 )?;
                         F::error_type(cx, env, *trace, reason_op)
                     }
-                    TypeInner::AnyT(_, src) => {
-                        F::return_(cx, env, unknown_use(), *trace, any_t::why(*src, reason_op))
-                    }
+                    TypeInner::AnyT(_, _)
+                    | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                        kind: ImplicitInstantiationTvarKind::Placeholder,
+                        ..
+                    }) => F::return_(
+                        cx,
+                        env,
+                        unknown_use(),
+                        *trace,
+                        any_result(elem_t, reason_op),
+                    ),
                     _ => {
                         let reason_prop = reason_of_t(elem_t).dupe();
                         add_output_with_env(
@@ -8721,14 +8795,29 @@ pub fn get_values_type_of_instance_t<'cx>(
     union_of_ts(reason, ts, None)
 }
 
-pub fn any_mod_src_keep_placeholder(
-    new_src: flow_typing_type::type_::AnySource,
-    src: &flow_typing_type::type_::AnySource,
-) -> flow_typing_type::type_::AnySource {
-    use flow_typing_type::type_::AnySource;
-    match src {
-        AnySource::Placeholder => AnySource::Placeholder,
-        _ => new_src,
+/// The result of an operation on `l`, which is `any` or a placeholder: a placeholder for a
+/// placeholder, and `any` of the same source otherwise.
+pub fn any_result(l: &Type, reason: Reason) -> Type {
+    use flow_typing_type::type_::any_t;
+    use flow_typing_type::type_::mixed_t;
+    use flow_typing_type::type_::placeholder_t;
+    match l.deref() {
+        TypeInner::AnyT(_, src) => any_t::why(*src, reason),
+        _ => placeholder_t::why(reason.dupe(), mixed_t::why(reason)),
+    }
+}
+
+/// Like `any_result`, but the result of an operation on `any` is untyped `any`.
+pub fn untyped_any_result(l: &Type, reason: Reason) -> Type {
+    use flow_typing_type::type_::any_t;
+    use flow_typing_type::type_::mixed_t;
+    use flow_typing_type::type_::placeholder_t;
+    match l.deref() {
+        TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => placeholder_t::why(reason.dupe(), mixed_t::why(reason)),
+        _ => any_t::untyped(reason),
     }
 }
 
@@ -8886,10 +8975,14 @@ pub fn flow_unary_arith<'cx>(
         {
             Ok(bigint_module_t::why(reason))
         }
-        (_, TypeInner::AnyT(_, src)) => {
-            let src = any_mod_src_keep_placeholder(AnySource::Untyped, src);
-            Ok(any_t::why(src, reason))
-        }
+        (
+            _,
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+        ) => Ok(untyped_any_result(l, reason)),
         (_, _) => {
             add_output_with_env(cx, env, arithmetic_operand_error(l))?;
             Ok(any_t::error(reason))
@@ -8916,7 +9009,22 @@ pub fn flow_arith<'cx>(
     let op = kind.1;
 
     match (l.deref(), r.deref()) {
-        (TypeInner::AnyT(_, src), _) | (_, TypeInner::AnyT(_, src)) => Ok(any_t::why(*src, reason)),
+        (
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            _,
+        ) => Ok(any_result(l, reason)),
+        (
+            _,
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+        ) => Ok(any_result(r, reason)),
         // empty <> _ , _ <> empty
         (TypeInner::DefT(_, def_t), _) if matches!(def_t.deref(), DefTInner::EmptyT) => {
             Ok(empty_t::why(reason))

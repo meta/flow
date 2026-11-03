@@ -13,7 +13,8 @@ use flow_common::polarity::Polarity;
 use flow_common::reason::Reason;
 use flow_typing_context::Context;
 use flow_typing_flow_common::flow_js_utils;
-use flow_typing_type::type_::AnySource;
+use flow_typing_type::type_::ImplicitInstantiationTvarData;
+use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeInner;
 use flow_typing_type::type_::constraint::Constraints;
@@ -90,7 +91,10 @@ where
 {
     fn type_<'cx>(&mut self, cx: &mut Context<'cx>, pole: Polarity, seen: Acc, t: &Type) -> Acc {
         match t.deref() {
-            TypeInner::AnyT(_, AnySource::Placeholder) => {
+            TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }) => {
                 let (seen_tvars, _) = seen;
                 (seen_tvars, true)
             }
@@ -195,7 +199,10 @@ impl TypeVisitor<Acc> for AbortableResolver {
             return seen;
         }
         match t.deref() {
-            TypeInner::AnyT(_, AnySource::Placeholder) => {
+            TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }) => {
                 let (seen_tvars, _) = seen;
                 (seen_tvars, true)
             }

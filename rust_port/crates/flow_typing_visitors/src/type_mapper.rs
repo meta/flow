@@ -1487,7 +1487,7 @@ pub fn destructor_default<'cx, A, M: TypeMapper<'cx, A> + ?Sized>(
                                 generic.clone(),
                             )))
                         }
-                        ResolvedParam::ResolvedAnySpreadArg(_, _) => el.clone(),
+                        ResolvedParam::ResolvedAnySpreadArg(_) => el.clone(),
                     })
                     .collect();
             if !unresolved_changed && !resolved_changed {

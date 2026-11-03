@@ -45,6 +45,8 @@ use flow_typing_type::type_::ArrayATData;
 use flow_typing_type::type_::DepthTrace;
 use flow_typing_type::type_::Destructor;
 use flow_typing_type::type_::DestructorSpreadTypeData;
+use flow_typing_type::type_::ImplicitInstantiationTvarData;
+use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::ROArrayATData;
 use flow_typing_type::type_::ThisInstanceTData;
 use flow_typing_type::type_::ThisTypeAppTData;
@@ -1381,7 +1383,14 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             // Short-circuit as we already error on the unresolved name.
             any_t::error(reason.dupe())
         }
-        (TypeInner::AnyT(_, _), OpInner::AnnotUseTTypeT { reason, .. }) => {
+        (
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            OpInner::AnnotUseTTypeT { reason, .. },
+        ) => {
             let reason_use = reason.dupe();
             flow_js_utils::add_output_non_speculating(
                 cx,
@@ -1631,9 +1640,14 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             type_util::union_of_ts(reason_op.dupe(), keylist, None)
         }
         // keyof any -> any: any in any out.
-        (TypeInner::AnyT(_, src), OpInner::AnnotGetKeysT(reason_op)) => {
-            type_::any_t::why(*src, reason_op.dupe())
-        }
+        (
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            OpInner::AnnotGetKeysT(reason_op),
+        ) => flow_js_utils::any_result(&t, reason_op.dupe()),
         // **********
         //  $Values
         // **********
@@ -1658,9 +1672,14 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             let elem_t = type_::elemt_of_arrtype(arr.as_ref());
             type_util::mod_reason_of_t(&|_| reason.dupe(), &elem_t)
         }
-        (TypeInner::AnyT(_, src), OpInner::AnnotGetValuesT(reason)) => {
-            any_t::why(src.clone(), reason.dupe())
-        }
+        (
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            OpInner::AnnotGetValuesT(reason),
+        ) => flow_js_utils::any_result(&t, reason.dupe()),
         // ******************************
         //  Union and intersection types
         // ******************************
@@ -1716,7 +1735,11 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         (_, OpInner::AnnotNotT(reason)) => {
             match t.deref() {
                 // any propagation
-                TypeInner::AnyT(_, _) => return t,
+                TypeInner::AnyT(_, _)
+                | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                    kind: ImplicitInstantiationTvarKind::Placeholder,
+                    ..
+                }) => return t,
                 TypeInner::DefT(_, def_t) => {
                     match def_t.deref() {
                         DefTInner::BoolGeneralT
@@ -1783,7 +1806,14 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         // ********
         //  Mixins
         // ********
-        (TypeInner::AnyT(_, src), OpInner::AnnotMixinT(r)) => any_t::why(*src, r.dupe()),
+        (
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            OpInner::AnnotMixinT(r),
+        ) => flow_js_utils::any_result(&t, r.dupe()),
         (_, OpInner::AnnotMixinT(r)) => {
             let make_mixin_instance = |inst_r: &Reason,
                                        inst: &type_::InstanceT,
@@ -1909,7 +1939,14 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         {
             t
         }
-        (TypeInner::AnyT(_, _), OpInner::AnnotSpecializeT(_)) => t,
+        (
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            OpInner::AnnotSpecializeT(_),
+        ) => t,
         // Mirrors the [SpecializeT] rule for a value with a construct
         // signature or a `prototype`: it is class-like, so extending it is
         // allowed and there is nothing to specialize. Without this a
@@ -2055,9 +2092,14 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 None => any_t::error(reason.dupe()),
             }
         }
-        (TypeInner::AnyT(_, _), OpInner::AnnotThisSpecializeT { reason, .. }) => {
-            reposition(cx, reason.loc().dupe(), t)
-        }
+        (
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            OpInner::AnnotThisSpecializeT { reason, .. },
+        ) => reposition(cx, reason.loc().dupe(), t),
 
         // *********************
         //  Type instantiation
@@ -2123,9 +2165,14 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         // ***************
         //  ObjTestProtoT
         // ***************
-        (TypeInner::AnyT(_, src), OpInner::AnnotObjTestProtoT(reason_op)) => {
-            any_t::why(src.clone(), reason_op.dupe())
-        }
+        (
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            OpInner::AnnotObjTestProtoT(reason_op),
+        ) => flow_js_utils::any_result(&t, reason_op.dupe()),
         (TypeInner::DefT(_, def_t), OpInner::AnnotObjTestProtoT(reason_op))
             if matches!(def_t.deref(), DefTInner::NullT) =>
         {
@@ -2150,9 +2197,14 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         {
             reposition(cx, reason_op.loc().dupe(), inst.static_.dupe())
         }
-        (TypeInner::AnyT(_, src), OpInner::AnnotGetStaticsT(reason_op)) => {
-            any_t::why(src.clone(), reason_op.dupe())
-        }
+        (
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            OpInner::AnnotGetStaticsT(reason_op),
+        ) => flow_js_utils::any_result(&t, reason_op.dupe()),
         (TypeInner::ObjProtoT(_), OpInner::AnnotGetStaticsT(reason_op)) => {
             // ObjProtoT not only serves as the instance type of the root class, but
             // also as the statics of the root class.
@@ -2162,7 +2214,14 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         // *************
         //  LookupT pt1
         // *************
-        (TypeInner::AnyT(_, _), OpInner::AnnotLookupT(data)) => any_t::untyped(data.reason.dupe()),
+        (
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            OpInner::AnnotLookupT(data),
+        ) => any_t::untyped(data.reason.dupe()),
         (_, OpInner::AnnotLookupT(data)) => {
             let AnnotLookupTData {
                 reason: reason_op,
@@ -2423,9 +2482,14 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         // **********
         //  ObjRestT
         // **********
-        (TypeInner::AnyT(_, src), OpInner::AnnotObjRestT { reason, .. }) => {
-            any_t::why(src.clone(), reason.dupe())
-        }
+        (
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            OpInner::AnnotObjRestT { reason, .. },
+        ) => flow_js_utils::any_result(&t, reason.dupe()),
         (
             _,
             OpInner::AnnotObjRestT {
@@ -2555,7 +2619,14 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         // **********
         //  GetPropT
         // **********
-        (TypeInner::AnyT(_, _), OpInner::AnnotGetPropT(data)) => Type::new(TypeInner::AnyT(
+        (
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            OpInner::AnnotGetPropT(data),
+        ) => Type::new(TypeInner::AnyT(
             data.reason.dupe(),
             type_::AnySource::Untyped,
         )),
@@ -2744,7 +2815,11 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             type_::str_module_t::why(reason.dupe())
         }
         (
-            TypeInner::AnyT(_, _),
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
             OpInner::AnnotGetElemT {
                 reason,
                 use_op,
@@ -2819,13 +2894,25 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                         }))),
                     )
                 }
-                (_, TypeInner::AnyT(_, _)) => {
+                (
+                    _,
+                    TypeInner::AnyT(_, _)
+                    | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                        kind: ImplicitInstantiationTvarKind::Placeholder,
+                        ..
+                    }),
+                ) => {
                     let value = type_::any_t::untyped(reason_op.dupe());
                     reposition(cx, reason_op.loc().dupe(), value)
                 }
-                (TypeInner::AnyT(_, _), TypeInner::DefT(_, source_def_t))
-                    if let DefTInner::ArrT(arrtype) = source_def_t.deref() =>
-                {
+                (
+                    TypeInner::AnyT(_, _)
+                    | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                        kind: ImplicitInstantiationTvarKind::Placeholder,
+                        ..
+                    }),
+                    TypeInner::DefT(_, source_def_t),
+                ) if let DefTInner::ArrT(arrtype) = source_def_t.deref() => {
                     let value = type_::elemt_of_arrtype(arrtype.as_ref());
                     reposition(cx, reason_op.loc().dupe(), value)
                 }
@@ -4122,7 +4209,11 @@ fn partition_mapped_type_keys<'cx>(
                 | DefTInner::SingletonNumT { .. }
                 | DefTInner::SymbolT
         ),
-        TypeInner::AnyT(..) => true,
+        TypeInner::AnyT(..)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => true,
         _ => false,
     });
     all_valid.then(|| split_mapped_type_keys(keys))

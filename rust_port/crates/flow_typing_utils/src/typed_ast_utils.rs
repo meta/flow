@@ -165,10 +165,11 @@ impl LocMapper<ALoc, ALoc, ALoc, (ALoc, Type)> for PlaceholderMapper<'_, '_> {
     }
 
     fn on_type_annot(&mut self, loc: &ALoc) -> Result<(ALoc, Type), !> {
+        let reason = flow_common::reason::mk_reason(None, loc.dupe());
         Ok((
             loc.dupe(),
             self.cx
-                .mk_placeholder(flow_common::reason::mk_reason(None, loc.dupe())),
+                .mk_placeholder(reason.dupe(), flow_typing_type::type_::mixed_t::why(reason)),
         ))
     }
 }

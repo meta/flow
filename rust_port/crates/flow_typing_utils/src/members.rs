@@ -35,6 +35,8 @@ use flow_typing_type::type_::Flags;
 use flow_typing_type::type_::FunParam;
 use flow_typing_type::type_::FunRestParam;
 use flow_typing_type::type_::GenericTData;
+use flow_typing_type::type_::ImplicitInstantiationTvarData;
+use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::ObjKind;
 use flow_typing_type::type_::PolyTData;
 use flow_typing_type::type_::Property;
@@ -540,8 +542,22 @@ fn merge_type<'cx>(cx: &mut Context<'cx>, pair: (Type, Type)) -> Type {
             )),
         },
         (TypeInner::ObjProtoT(_), TypeInner::ObjProtoT(_)) => t2,
-        (TypeInner::AnyT(_, _), _) => t2,
-        (_, TypeInner::AnyT(_, _)) => t1,
+        (
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+            _,
+        ) => t2,
+        (
+            _,
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }),
+        ) => t1,
         (TypeInner::DefT(_, d), _) if matches!(d.deref(), DefTInner::EmptyT) => t2,
         (_, TypeInner::DefT(_, d)) if matches!(d.deref(), DefTInner::EmptyT) => t1,
         (_, TypeInner::DefT(_, d)) if matches!(d.deref(), DefTInner::MixedT(_)) => t2,
@@ -647,7 +663,18 @@ fn instantiate_poly_t<'cx>(cx: &mut Context<'cx>, t: Type, args: Option<&[Type]>
                 }
             }
             DefTInner::EmptyT | DefTInner::MixedT(_) => t,
-            DefTInner::TypeT(_, inner_t) if matches!(inner_t.deref(), TypeInner::AnyT(_, _)) => t,
+            DefTInner::TypeT(_, inner_t)
+                if matches!(
+                    inner_t.deref(),
+                    TypeInner::AnyT(_, _)
+                        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                            kind: ImplicitInstantiationTvarKind::Placeholder,
+                            ..
+                        })
+                ) =>
+            {
+                t
+            }
             _ => match args {
                 None => t,
                 Some(_) => panic!(
@@ -656,7 +683,11 @@ fn instantiate_poly_t<'cx>(cx: &mut Context<'cx>, t: Type, args: Option<&[Type]>
                 ),
             },
         },
-        TypeInner::AnyT(_, _) => t,
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => t,
         _ => match args {
             None => t,
             Some(_) => panic!(
@@ -721,7 +752,11 @@ fn instantiate_type(t: Type) -> Type {
             DefTInner::EmptyT => t,
             _ => panic!("cannot instantiate non-class type {}", string_of_ctor(&t)),
         },
-        TypeInner::AnyT(_, _) => t,
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => t,
         _ => panic!("cannot instantiate non-class type {}", string_of_ctor(&t)),
     }
 }
@@ -803,7 +838,12 @@ pub fn resolve_type<'cx>(cx: &mut Context<'cx>, t: Type) -> Type {
             let resolved = resolve_tvar(cx, tvar.id() as i32);
             resolve_type(cx, resolved)
         }
-        TypeInner::ImplicitInstantiationTvar(data) => {
+        TypeInner::ImplicitInstantiationTvar(
+            data @ box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Inferred,
+                ..
+            },
+        ) => {
             let resolved = resolve_tvar(cx, data.id);
             resolve_type(cx, resolved)
         }
@@ -815,14 +855,21 @@ pub fn resolve_type<'cx>(cx: &mut Context<'cx>, t: Type) -> Type {
 pub fn extract_type<'cx>(cx: &mut Context<'cx>, this_t: Type) -> GenericT<Type, Type> {
     match this_t.deref() {
         TypeInner::OpenT(_)
-        | TypeInner::ImplicitInstantiationTvar(_)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Inferred,
+            ..
+        })
         | TypeInner::AnnotT(_, _, _) => {
             let resolved = resolve_type(cx, this_t);
             extract_type(cx, resolved)
         }
         TypeInner::OptionalT { type_, .. } => extract_type(cx, type_.dupe()),
         TypeInner::MaybeT(_, ty) => extract_type(cx, ty.dupe()),
-        TypeInner::AnyT(_, _) => GenericT::FailureAnyType,
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => GenericT::FailureAnyType,
         TypeInner::ThisInstanceT(box ThisInstanceTData {
             reason, instance, ..
         }) => GenericT::Success(Type::new(TypeInner::DefT(
@@ -1165,7 +1212,13 @@ pub fn extract_members<'cx>(
                             TypeInner::DefT(_, d) => {
                                 !matches!(d.deref(), DefTInner::NullT | DefTInner::VoidT)
                             }
-                            TypeInner::AnyT(_, _) => false,
+                            TypeInner::AnyT(_, _)
+                            | TypeInner::ImplicitInstantiationTvar(
+                                box ImplicitInstantiationTvarData {
+                                    kind: ImplicitInstantiationTvarKind::Placeholder,
+                                    ..
+                                },
+                            ) => false,
                             _ => true,
                         })
                         .map(|t| extract_members_as_map(exclude_proto_members, cx, t.dupe()))

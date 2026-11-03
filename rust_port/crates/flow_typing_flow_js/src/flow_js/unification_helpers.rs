@@ -37,7 +37,11 @@ use super::*;
 // However, unifying with any-like types is sometimes desirable / intentional.
 pub(super) fn ok_unify(unify_any: bool, t: &Type) -> bool {
     match t.deref() {
-        TypeInner::AnyT(_, _) => unify_any,
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => unify_any,
         _ => true,
     }
 }

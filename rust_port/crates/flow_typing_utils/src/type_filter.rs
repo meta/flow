@@ -29,6 +29,8 @@ use flow_typing_type::type_::BigIntLiteral;
 use flow_typing_type::type_::DefT;
 use flow_typing_type::type_::DefTInner;
 use flow_typing_type::type_::DictType;
+use flow_typing_type::type_::ImplicitInstantiationTvarData;
+use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::Literal;
 use flow_typing_type::type_::MixedFlavor;
 use flow_typing_type::type_::NominalType;
@@ -384,7 +386,12 @@ pub fn not_truthy<'cx>(cx: &mut Context<'cx>, t: Type) -> FilterResult {
             reason,
             nominal_type,
         } => filter_opaque(&mut |t| not_truthy(cx, t), reason.dupe(), nominal_type),
-        TypeInner::AnyT(r, _) => changed_result(empty_t::why(r.dupe())),
+        TypeInner::AnyT(r, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            reason: r,
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => changed_result(empty_t::why(r.dupe())),
         TypeInner::UnionT(r, rep) => recurse_into_union(
             cx,
             &not_truthy,
@@ -546,7 +553,11 @@ pub fn maybe<'cx>(cx: &mut Context<'cx>, t: Type) -> FilterResult {
         TypeInner::OptionalT {
             reason, use_desc, ..
         } => changed_result(void::why_with_use_desc(*use_desc, reason.dupe())),
-        TypeInner::AnyT(_, _) => unchanged_result(t),
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => unchanged_result(t),
         _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
     }
 }
@@ -600,7 +611,11 @@ pub fn null_filter(t: Type) -> FilterResult {
             | DefTInner::MixedT(MixedFlavor::MixedNonVoid) => changed_result(null::why(r.dupe())),
             _ => changed_result(empty_t::why(r.dupe())),
         },
-        TypeInner::AnyT(_, _) => changed_result(t),
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => changed_result(t),
         _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
     }
 }
@@ -681,7 +696,11 @@ pub fn undefined(t: Type) -> FilterResult {
             | DefTInner::MixedT(MixedFlavor::MixedNonNull) => changed_result(void::why(r.dupe())),
             _ => changed_result(empty_t::why(r.dupe())),
         },
-        TypeInner::AnyT(_, _) => unchanged_result(t),
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => unchanged_result(t),
         _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
     }
 }
@@ -766,7 +785,11 @@ pub fn string_literal(expected_loc: ALoc, expected: FlowSmolStr, t: Type) -> Fil
             }
             _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
         },
-        TypeInner::AnyT(_, _) => unchanged_result(t),
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => unchanged_result(t),
         TypeInner::TemplateLiteralT { quasis, types, .. } => {
             // `x === 'lit'` keeps the literal when it matches the template
             // shape, and empties only on certain mismatch. Placeholders that
@@ -848,7 +871,11 @@ pub fn number_literal(expected_loc: ALoc, expected: NumberLiteral, t: Type) -> F
             }
             _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
         },
-        TypeInner::AnyT(_, _) => unchanged_result(t),
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => unchanged_result(t),
         _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
     }
 }
@@ -903,7 +930,11 @@ pub fn bigint_literal(expected_loc: ALoc, expected: BigIntLiteral, t: Type) -> F
             }
             _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
         },
-        TypeInner::AnyT(_, _) => unchanged_result(t),
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => unchanged_result(t),
         _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
     }
 }
@@ -945,7 +976,11 @@ pub fn true_(t: Type) -> FilterResult {
             }
             _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
         },
-        TypeInner::AnyT(_, _) => unchanged_result(t),
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => unchanged_result(t),
         _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
     }
 }
@@ -993,7 +1028,11 @@ pub fn false_(t: Type) -> FilterResult {
             }
             _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
         },
-        TypeInner::AnyT(_, _) => unchanged_result(t),
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => unchanged_result(t),
         _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
     }
 }
@@ -1064,7 +1103,11 @@ pub fn boolean(loc: ALoc, t: Type) -> FilterResult {
             }
             _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
         },
-        TypeInner::AnyT(_, _) => changed_result(Type::new(TypeInner::DefT(
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => changed_result(Type::new(TypeInner::DefT(
             mk_reason(VirtualReasonDesc::RBoolean, loc),
             DefT::new(DefTInner::BoolGeneralT),
         ))),
@@ -1157,7 +1200,11 @@ pub fn string(loc: ALoc, t: Type) -> FilterResult {
         TypeInner::TemplateLiteralT { .. } | TypeInner::StringMappingT { .. } => {
             unchanged_result(t)
         }
-        TypeInner::AnyT(_, _) => changed_result(Type::new(TypeInner::DefT(
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => changed_result(Type::new(TypeInner::DefT(
             mk_reason(VirtualReasonDesc::RString, loc),
             DefT::new(DefTInner::StrGeneralT(Literal::AnyLiteral)),
         ))),
@@ -1217,9 +1264,11 @@ pub fn symbol(loc: ALoc, t: Type) -> FilterResult {
         TypeInner::DefT(_, d) if matches!(&**d, DefTInner::MixedT(_)) => {
             changed_result(symbol_t::why(mk_reason(VirtualReasonDesc::RSymbol, loc)))
         }
-        TypeInner::AnyT(_, _) => {
-            changed_result(symbol_t::why(mk_reason(VirtualReasonDesc::RSymbol, loc)))
-        }
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => changed_result(symbol_t::why(mk_reason(VirtualReasonDesc::RSymbol, loc))),
         _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
     }
 }
@@ -1278,7 +1327,11 @@ pub fn number(loc: ALoc, t: Type) -> FilterResult {
             }
             _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
         },
-        TypeInner::AnyT(_, _) => changed_result(Type::new(TypeInner::DefT(
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => changed_result(Type::new(TypeInner::DefT(
             mk_reason(VirtualReasonDesc::RNumber, loc),
             DefT::new(DefTInner::NumGeneralT(Literal::AnyLiteral)),
         ))),
@@ -1370,7 +1423,11 @@ pub fn bigint(loc: ALoc, t: Type) -> FilterResult {
             }
             _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
         },
-        TypeInner::AnyT(_, _) => changed_result(Type::new(TypeInner::DefT(
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => changed_result(Type::new(TypeInner::DefT(
             mk_reason(VirtualReasonDesc::RBigInt, loc),
             DefT::new(DefTInner::BigIntGeneralT(Literal::AnyLiteral)),
         ))),
@@ -1476,7 +1533,11 @@ pub fn object_<'cx>(cx: &mut Context<'cx>, t: Type) -> FilterResult {
             | DefTInner::EnumObjectT { .. } => unchanged_result(t),
             _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
         },
-        TypeInner::AnyT(_, _) => unchanged_result(t),
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => unchanged_result(t),
         _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
     }
 }
@@ -1486,7 +1547,11 @@ pub fn not_object(t: Type) -> FilterResult {
         TypeInner::DefT(_, d) if matches!(&**d, DefTInner::PolyT(_)) => {
             map_poly(&mut not_object, t)
         }
-        TypeInner::AnyT(_, _) => changed_result(empty_t::why(reason_of_t(&t).dupe())),
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => changed_result(empty_t::why(reason_of_t(&t).dupe())),
         TypeInner::DefT(_, d) => match d.deref() {
             DefTInner::ObjT(_)
             | DefTInner::ArrT(_)
@@ -1519,7 +1584,11 @@ pub fn function_(t: Type) -> FilterResult {
             }
             _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
         },
-        TypeInner::AnyT(_, _) => unchanged_result(t),
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => unchanged_result(t),
         _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
     }
 }
@@ -1529,7 +1598,11 @@ pub fn not_function(t: Type) -> FilterResult {
         TypeInner::DefT(_, d) if matches!(&**d, DefTInner::PolyT(_)) => {
             map_poly(&mut not_function, t)
         }
-        TypeInner::AnyT(_, _) => changed_result(empty_t::why(reason_of_t(&t).dupe())),
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => changed_result(empty_t::why(reason_of_t(&t).dupe())),
         TypeInner::DefT(_, d) => match d.deref() {
             DefTInner::FunT(_, _) | DefTInner::ClassT(_) => {
                 changed_result(empty_t::why(reason_of_t(&t).dupe()))
@@ -1567,14 +1640,22 @@ pub fn array(t: Type) -> FilterResult {
             DefTInner::ArrT(_) => unchanged_result(t),
             _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
         },
-        TypeInner::AnyT(_, _) => unchanged_result(t),
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => unchanged_result(t),
         _ => changed_result(empty_t::why(reason_of_t(&t).dupe())),
     }
 }
 
 pub fn not_array(t: Type) -> FilterResult {
     match t.deref() {
-        TypeInner::AnyT(_, _) => changed_result(empty_t::why(reason_of_t(&t).dupe())),
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => changed_result(empty_t::why(reason_of_t(&t).dupe())),
         TypeInner::DefT(_, d) if matches!(&**d, DefTInner::ArrT(_)) => {
             changed_result(empty_t::why(reason_of_t(&t).dupe()))
         }

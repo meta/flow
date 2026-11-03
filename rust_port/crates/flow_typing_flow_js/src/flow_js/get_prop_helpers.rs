@@ -439,9 +439,12 @@ pub(super) fn write_computed_obj_prop<'cx>(
                 )?;
                 Ok(())
             }
-            TypeInner::AnyT(_, src) => {
-                let src = flow_js_utils::any_mod_src_keep_placeholder(AnySource::Untyped, src);
-                let any = any_t::why(src, reason.dupe());
+            TypeInner::AnyT(_, _)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Placeholder,
+                ..
+            }) => {
+                let any = flow_js_utils::untyped_any_result(elem_t, reason.dupe());
                 rec_flow_t(cx, env, trace, unknown_use(), (tin, &any))
             }
             TypeInner::DefT(_, def_t) if matches!(def_t.deref(), DefTInner::StrGeneralT(_)) => {

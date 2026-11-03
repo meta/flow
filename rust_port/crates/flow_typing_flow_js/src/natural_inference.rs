@@ -55,6 +55,7 @@ use flow_typing_type::type_::constraint;
 use flow_typing_type::type_::elemt_of_arrtype;
 use flow_typing_type::type_::eval;
 use flow_typing_type::type_::exports;
+use flow_typing_type::type_::mixed_t;
 use flow_typing_type::type_::properties;
 use flow_typing_type::type_::property;
 use flow_typing_type::type_::union_rep;
@@ -1048,7 +1049,8 @@ fn choose_precision<'cx>(
         } if aloc_contains(target_loc, loc)
     ) {
         let general_t = general(cx);
-        return cx.mk_placeholder(reason_of_t(&general_t).dupe());
+        let reason = reason_of_t(&general_t);
+        return cx.mk_placeholder(reason.dupe(), mixed_t::why(reason.dupe()));
     }
     if matches!(&typing_mode, TypingMode::SynthesisMode { .. }) {
         cx.set_synthesis_produced_uncacheable_result();
