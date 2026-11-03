@@ -418,29 +418,6 @@ export default component TryFlowResults(
             </div>
           )}
           {activeToolbarTab === 'ast' && (
-            <div
-              role="group"
-              aria-label="AST format"
-              className={styles.formatPills}>
-              {(['tree', 'json'] as const).map(value => (
-                <button
-                  key={value}
-                  type="button"
-                  className={clsx(
-                    styles.formatPill,
-                    astFormat === value && styles.selectedTab,
-                  )}
-                  aria-pressed={astFormat === value}
-                  onClick={() => {
-                    setAstFormat(value);
-                    setCollapsed(false);
-                  }}>
-                  {value === 'tree' ? 'Tree' : 'JSON'}
-                </button>
-              ))}
-            </div>
-          )}
-          {activeToolbarTab === 'ast' && (
             <div className={styles.astOptions}>
               <label className={styles.astOption}>
                 <input
@@ -468,6 +445,29 @@ export default component TryFlowResults(
                   Hide empty<span className={styles.labelExtra}> fields</span>
                 </span>
               </label>
+            </div>
+          )}
+          {activeToolbarTab === 'ast' && (
+            <div
+              role="group"
+              aria-label="AST format"
+              className={styles.formatPills}>
+              {(['tree', 'json'] as const).map(value => (
+                <button
+                  key={value}
+                  type="button"
+                  className={clsx(
+                    styles.formatPill,
+                    astFormat === value && styles.selectedTab,
+                  )}
+                  aria-pressed={astFormat === value}
+                  onClick={() => {
+                    setAstFormat(value);
+                    setCollapsed(false);
+                  }}>
+                  {value === 'tree' ? 'Tree' : 'JSON'}
+                </button>
+              ))}
             </div>
           )}
           {isOldFlowVersion ? (
