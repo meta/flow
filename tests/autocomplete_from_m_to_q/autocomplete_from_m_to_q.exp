@@ -118,7 +118,7 @@ Flags: --pretty
       "name":"call",
       "type":"<T, R, A extends ArrayLike<unknown> = Readonly<[]>>(this: (this: T, ...args: A) => R, thisArg: T, ...argArray: A) => R"
     },
-    {"name":"caller","type":"any | null"},
+    {"name":"caller","type":"Function"},
     {"name":"length","type":"number"},
     {"name":"name","type":"string"},
     {"name":"prototype","type":"any"},

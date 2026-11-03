@@ -6589,9 +6589,9 @@ b.te
                     command: 'log:org.flow:<PLACEHOLDER_PROJECT_URL>',
                     title: '',
                   },
-                  detail: 'any | null',
+                  detail: 'Function',
                   insertTextFormat: 1,
-                  kind: 13,
+                  kind: 6,
                   label: 'caller',
                   sortText: '00000000000000000008',
                   textEdit: {
@@ -7109,9 +7109,9 @@ b.te
                     command: 'log:org.flow:<PLACEHOLDER_PROJECT_URL>',
                     title: '',
                   },
-                  detail: 'any | null',
+                  detail: 'Function',
                   insertTextFormat: 1,
-                  kind: 13,
+                  kind: 6,
                   label: 'caller',
                   sortText: '00000000000000000008',
                   textEdit: {

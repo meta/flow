@@ -2043,11 +2043,11 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"any | null",
+  "detail":"Function",
   "insertTextFormat":1,
-  "kind":13,
+  "kind":6,
   "label":"caller",
-  "labelDetails":{"detail":": any | null"},
+  "labelDetails":{"detail":": Function"},
   "sortText":"00000000000000000001",
   "textEdit":{
     "newText":"caller",
