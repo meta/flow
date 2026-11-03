@@ -134,6 +134,14 @@ Property `value` has no initializer and is not definitely assigned in the constr
              ^^^^^
 
 
+Error --------------------------------------------------------------------------------------------- control_flow.js:67:3
+
+Property `value` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   67|   value: string; // error
+         ^^^^^
+
+
 Error ---------------------------------------------------------------------------------------------- field_types.js:13:3
 
 Property `x` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
@@ -383,4 +391,4 @@ Property `value` is used before being assigned. [uninitialized-property]
 
 
 
-Found 48 errors
+Found 49 errors

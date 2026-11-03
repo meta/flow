@@ -41,6 +41,99 @@ Invalid catch parameter type annotation. Annotation must be `any` or `unknown` i
                    ^^^^^
 
 
+Error -------------------------------------------------------------------------------------------- finally-jumps.js:7:10
+
+Cannot return `value` because possibly uninitialized variable [1] is incompatible with `number` [2]. [incompatible-type]
+
+   finally-jumps.js:7:10
+   7|   return value; // error
+               ^^^^^
+
+References:
+   finally-jumps.js:2:7
+   2|   let value: number;
+            ^^^^^ [1]
+   finally-jumps.js:1:41
+   1| function withoutFinally(skip: boolean): number {
+                                              ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------- finally-jumps.js:16:10
+
+Cannot return `value` because possibly uninitialized variable [1] is incompatible with `number` [2]. [incompatible-type]
+
+   finally-jumps.js:16:10
+   16|   return value; // error
+                ^^^^^
+
+References:
+   finally-jumps.js:11:7
+   11|   let value: number;
+             ^^^^^ [1]
+   finally-jumps.js:10:38
+   10| function withFinally(skip: boolean): number {
+                                            ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------- finally-jumps.js:23:12
+
+Cannot get `x.length` because property `length` is missing in `null` [1]. [incompatible-use]
+
+   finally-jumps.js:23:12
+   23|   return x.length; // error
+                  ^^^^^^
+
+References:
+   finally-jumps.js:19:30
+   19| function nullCheckSkipped(x: ?string): number {
+                                    ^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------- finally-jumps.js:23:12
+
+Cannot get `x.length` because property `length` is missing in `void` [1]. [incompatible-use]
+
+   finally-jumps.js:23:12
+   23|   return x.length; // error
+                  ^^^^^^
+
+References:
+   finally-jumps.js:19:30
+   19| function nullCheckSkipped(x: ?string): number {
+                                    ^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------- finally-jumps.js:34:10
+
+Cannot return `value` because possibly uninitialized variable [1] is incompatible with `number` [2]. [incompatible-type]
+
+   finally-jumps.js:34:10
+   34|   return value; // error
+                ^^^^^
+
+References:
+   finally-jumps.js:27:7
+   27|   let value: number;
+             ^^^^^ [1]
+   finally-jumps.js:26:49
+   26| function continueThroughFinally(skip: boolean): number {
+                                                       ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------- finally-jumps.js:65:11
+
+Cannot get `value.length` because property `length` is missing in `null` [1]. [incompatible-use]
+
+   finally-jumps.js:65:11
+   65|     value.length; // error
+                 ^^^^^^
+
+References:
+   finally-jumps.js:61:15
+   61|       value = null;
+                     ^^^^ [1]
+
+
 Error -------------------------------------------------------------------------------------------- finally-merge.js:11:5
 
 Cannot cast `p` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
@@ -423,4 +516,4 @@ References:
 
 
 
-Found 27 errors
+Found 33 errors

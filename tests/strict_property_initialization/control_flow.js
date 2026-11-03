@@ -62,3 +62,25 @@ class Outer {
     this.value = 'hi';
   }
 }
+
+class ReturnThroughEmptyFinally {
+  value: string; // error
+  constructor(ready: boolean) {
+    try {
+      if (!ready) return;
+    } finally {}
+    this.value = 'hi';
+  }
+}
+
+class ReturnThroughAssigningFinally {
+  value: string;
+  constructor(ready: boolean) {
+    try {
+      if (!ready) return;
+    } finally {
+      this.value = 'hi';
+    }
+    this.value = 'bye';
+  }
+}

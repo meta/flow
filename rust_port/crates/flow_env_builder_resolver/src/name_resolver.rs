@@ -760,7 +760,7 @@ fn heap_map_find(x: &FlowVector<Proj>, t: &HeapRefinementMap) -> Val<ALoc> {
 mod abrupt_completion {
     use super::*;
 
-    #[derive(Debug, Clone, Dupe, PartialEq, Eq, Hash)]
+    #[derive(Debug, Clone, Dupe, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct Label(FlowSmolStr);
 
     impl std::ops::Deref for Label {
@@ -782,7 +782,7 @@ mod abrupt_completion {
         }
     }
 
-    #[derive(Debug, Clone, Dupe, PartialEq, Eq)]
+    #[derive(Debug, Clone, Dupe, PartialEq, Eq, PartialOrd, Ord)]
     pub enum AbruptCompletion {
         Break(Option<Label>),
         Continue(Option<Label>),
@@ -5199,6 +5199,57 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         // refs. We need to call reset_env to _fully_ reset the env_state
         self.reset_env(&pre_env);
         result
+    }
+
+    /// Like `with_env_state`, but keeps the refinements made by `f`, which the envs it returns
+    /// may refer to.
+    fn with_env_state_preserving_refinements<T>(&mut self, f: impl FnOnce(&mut Self) -> T) -> T {
+        let (result, refinement_heap, curr_id) = self.with_env_state(|r| {
+            let result = f(r);
+            let refinement_heap = r.env_state.refinement_heap.borrow().dupe();
+            (result, refinement_heap, r.env_state.curr_id)
+        });
+        *self.env_state.refinement_heap.borrow_mut() = refinement_heap;
+        self.env_state.curr_id = curr_id;
+        result
+    }
+
+    /// Runs a `finally` block once for each target of a pending `break`, `continue` or `return`,
+    /// entered from the envs that jump there, and returns the jumps that leave the block: the same
+    /// target when the block completes, or else the block's own jumps.
+    fn jumps_through_finally(
+        &mut self,
+        fin_loc: &ALoc,
+        fin_block: &flow_parser::ast::statement::Block<ALoc, ALoc>,
+    ) -> Vec<AbruptEnv> {
+        let pending = self.env_state.abrupt_completion_envs.dupe();
+        let targets: BTreeSet<&AbruptCompletion> = pending
+            .iter()
+            .map(|(completion, _)| completion)
+            .filter(|completion| **completion != AbruptCompletion::Throw)
+            .collect();
+        targets
+            .into_iter()
+            .flat_map(|target| {
+                self.with_env_state_preserving_refinements(|r| {
+                    r.reset_to_unreachable_env();
+                    for (_, env) in pending
+                        .iter()
+                        .filter(|(completion, _)| completion == target)
+                    {
+                        r.merge_remote_env(env);
+                    }
+                    r.expecting_abrupt_completions(|r| {
+                        if r.run_to_completion(|r| r.block(fin_loc, fin_block))
+                            .is_none()
+                        {
+                            r.run_to_completion(|r| r.raise_abrupt_completion(target.dupe()));
+                        }
+                        std::mem::take(&mut r.env_state.abrupt_completion_envs)
+                    })
+                })
+            })
+            .collect()
     }
 
     // Functions called inside scout_changed_refinement_keys are responsible for popping any refinement
@@ -10485,15 +10536,23 @@ impl<'ast, 'a, Cx: Context, Fl: Flow<Cx = Cx>>
                 _ => None,
             };
 
-            // Finalizers must be checked twice under two environments. We need one to determine
+            // Finalizers are checked under several environments. We need one to determine
             // what the env should be after the try/catch/finally, which assumes that either try or
             // catch did not throw. This assumption, however, is too optimistic, so checking the
             // finally under this assumption would be unsound. To soundly check the finally, we make
             // no assumptions about throws. In that case, the entry env here is a merge of the try
             // start env, try exit env, and catch exit env, along with every abrupt completion env
-            // from both the try and the catch.
+            // from both the try and the catch. Each pending `break`, `continue` and `return` also
+            // runs the finally block and then continues to its target, and a pending `throw`
+            // continues from the conservative check.
             let finally_completion_state = match finalizer {
-                Some((_fin_loc, fin_block)) => {
+                Some((fin_loc, fin_block)) => {
+                    let has_throw = resolver
+                        .env_state
+                        .abrupt_completion_envs
+                        .iter()
+                        .any(|(completion, _)| *completion == AbruptCompletion::Throw);
+                    let jumps = resolver.jumps_through_finally(fin_loc, fin_block);
                     resolver.expecting_abrupt_completions(|r| {
                         match &catch_completion_state {
                             None => r.merge_env(&try_exit_env, &catch_exit_env),
@@ -10513,7 +10572,13 @@ impl<'ast, 'a, Cx: Context, Fl: Flow<Cx = Cx>>
                         completion_state.as_ref(),
                     )?;
                     let completion_state = resolver.run_to_completion(|r| r.block(loc, fin_block));
+                    if has_throw && completion_state.is_none() {
+                        resolver.run_to_completion(|r| {
+                            r.raise_abrupt_completion(AbruptCompletion::Throw)
+                        });
+                    }
                     resolver.reset_env(&exit_env);
+                    resolver.env_state.abrupt_completion_envs.extend(jumps);
                     completion_state
                 }
                 None => {
