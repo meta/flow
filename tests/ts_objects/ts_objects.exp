@@ -328,6 +328,63 @@ References:
                                       ^^^^^^ [2]
 
 
+Error -------------------------------------------------------------------------- interface_extends_indexed_usage.js:12:2
+
+Cannot cast object literal to `InputProps` because object literal [1] is incompatible with `InputProps` [2]. For
+example, `1` [3] is incompatible with `void` [4]. [incompatible-type]
+
+   interface_extends_indexed_usage.js:12:2
+   12| ({label: 'x', 'data-testid': 1}) as InputProps; // ERROR: number vs string
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+References:
+   interface_extends_indexed_usage.js:12:37
+   12| ({label: 'x', 'data-testid': 1}) as InputProps; // ERROR: number vs string
+                                           ^^^^^^^^^^ [2]
+   interface_extends_indexed_usage.js:12:30
+   12| ({label: 'x', 'data-testid': 1}) as InputProps; // ERROR: number vs string
+                                    ^ [3]
+   interface_extends_indexed_lib.ts:5:37
+    5|   [key: `data-${string}`]: string | undefined;
+                                           ^^^^^^^^^ [4]
+
+
+Error -------------------------------------------------------------------------- interface_extends_indexed_usage.js:13:2
+
+Cannot cast object literal to `InputProps` because object literal [1] is incompatible with `InputProps` [2]. For
+example, `1` [3] is incompatible with `string` [4]. [incompatible-type]
+
+   interface_extends_indexed_usage.js:13:2
+   13| ({label: 'x', className: 1}) as InputProps; // ERROR: number vs string
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+References:
+   interface_extends_indexed_usage.js:13:33
+   13| ({label: 'x', className: 1}) as InputProps; // ERROR: number vs string
+                                       ^^^^^^^^^^ [2]
+   interface_extends_indexed_usage.js:13:26
+   13| ({label: 'x', className: 1}) as InputProps; // ERROR: number vs string
+                                ^ [3]
+   interface_extends_indexed_lib.ts:6:15
+    6|   className?: string;
+                     ^^^^^^ [4]
+
+
+Error -------------------------------------------------------------------------- interface_extends_indexed_usage.js:14:2
+
+Cannot cast object literal to `InputProps` because object literal [1] is incompatible with `InputProps` [2]. For
+example, property `label` is missing in object literal [1] but exists in `{label: string, ...}` [2]. [incompatible-type]
+
+   interface_extends_indexed_usage.js:14:2
+   14| ({}) as InputProps; // ERROR: missing `label`
+        ^^ [1]
+
+References:
+   interface_extends_indexed_usage.js:14:9
+   14| ({}) as InputProps; // ERROR: missing `label`
+               ^^^^^^^^^^ [2]
+
+
 Error ---------------------------------------------------------------------------------- interface_extends_jslib.js:8:11
 
 Cannot extend `Omit<Base, "b">` [1] with `JsExt` [2] because `{a: number}` [1] is not inheritable. [incompatible-use]
@@ -590,4 +647,4 @@ References:
 
 
 
-Found 34 errors
+Found 37 errors

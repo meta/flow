@@ -8558,6 +8558,16 @@ fn __flow_impl<'cx>(
         }
         (DefT(_, deref!(ObjT(obj))), ImplementsT(use_op, implementor))
             if obj.strictness_kind.is_typescript_loose()
+                && obj_type::get_dict_opt(&obj.flags.obj_kind).is_some()
+                && matches!(implementor.deref(), DefT(_, deref!(ObjT(_)))) =>
+        {
+            // TS-mode: an interface may extend an indexed object type (e.g. an `Omit` of a type
+            // with an index signature). The structural check below would skip the indexer, so an
+            // object is checked against the object type with ordinary subtyping instead.
+            rec_flow_t(cx, env, trace, use_op.dupe(), (implementor, l))?;
+        }
+        (DefT(_, deref!(ObjT(obj))), ImplementsT(use_op, implementor))
+            if obj.strictness_kind.is_typescript_loose()
                 && obj_type::get_dict_opt(&obj.flags.obj_kind).is_none() =>
         {
             // TS-mode: a class may `implements` a resolved object type
