@@ -124,11 +124,11 @@ export function transformProgram(
               s.type !== 'ImportSpecifier' ||
               (s.importKind !== 'type' && s.importKind !== 'typeof'),
           );
-          if (nonTypeSpecifiers.length === 0) {
-            return null;
-          }
           if (nonTypeSpecifiers.length === node.specifiers.length) {
             return node;
+          }
+          if (nonTypeSpecifiers.length === 0) {
+            return null;
           }
 
           return nodeWith(node, {

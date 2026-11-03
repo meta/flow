@@ -13,10 +13,58 @@
 import {parse} from '../../__test_utils__/parse';
 import {print} from 'flow-transform';
 // $FlowExpectedError[cannot-resolve-module]
-import {runInNewContext} from 'vm';
+import {createContext, runInNewContext, SourceTextModule} from 'vm';
 import {transformProgram as stripFlowTypes} from '../../oxidized-src/estree/StripFlowTypes';
 
 describe('StripFlowTypes', () => {
+  // Imports without bindings still load the module for its side effects.
+  test.each(["import 'side-effect';", "import {} from 'side-effect';"])(
+    'preserves side effects for %s',
+    async code => {
+      const stripped = stripFlowTypes(parse(code), {});
+      expect(stripped.body).toHaveLength(1); // OK
+      expect(stripped.body[0]).toMatchObject({
+        type: 'ImportDeclaration',
+        importKind: 'value',
+        specifiers: [],
+        source: {value: 'side-effect'},
+      }); // OK
+
+      const output = await print(stripped, code);
+      const context = createContext({calls: 0});
+      const module = new SourceTextModule(output, {context});
+      await module.link(() => new SourceTextModule('calls++;', {context}));
+      await module.evaluate();
+
+      expect(context.calls).toBe(1); // OK
+    },
+  );
+
+  // Erasing all type bindings must not turn a type-only import into a bare import.
+  test.each([
+    "import type T from 'types';",
+    "import typeof T from 'types';",
+    "import type {T} from 'types';",
+    "import typeof {T} from 'types';",
+    "import {type T} from 'types';",
+    "import {typeof T} from 'types';",
+    "import {type T, typeof U} from 'types';",
+  ])('still removes type-only imports in %s', code => {
+    const stripped = stripFlowTypes(parse(code), {});
+
+    expect(stripped.body).toEqual([]); // OK
+  });
+
+  // Mixed imports retain their value bindings while removing type/typeof bindings.
+  test('retains value specifiers in mixed imports', async () => {
+    const code = "import value, {type T, typeof U, other} from 'mixed';";
+    const stripped = stripFlowTypes(parse(code), {});
+
+    expect((await print(stripped, code)).trim()).toBe(
+      'import value, { other } from "mixed";',
+    ); // OK
+  });
+
   // Defaults survive for every function form and for destructured bindings.
   test.each([
     'function f(x: number = 42): number { return x; }',
