@@ -771,6 +771,7 @@ export default component TryFlow(
                       : styles.swapActive,
                   )}
                   onClick={clearEditor}
+                  disabled={!editorReady || !hasCode}
                   title="Clear the editor">
                   <ClearIcon />
                   <span className={styles.toolbarButtonLabel}>Clear</span>
@@ -788,6 +789,7 @@ export default component TryFlow(
                     monaco.editor.getModels()[0]?.getValue() ?? '',
                   )
                 }
+                disabled={!editorReady || !hasCode}
                 title="Copy the code">
                 <CopyIcon />
                 <span className={styles.toolbarButtonLabel}>
