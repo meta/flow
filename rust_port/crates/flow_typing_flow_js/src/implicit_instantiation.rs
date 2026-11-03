@@ -3713,35 +3713,31 @@ pub mod kit {
                 ))),
             );
         }
-        let (can_run_nested_solve, infer_through_frozen_tvar) = if env.in_implicit_instantiation()
-            && has_unresolved_tvars
-        {
-            let mut condition_collector = FrozenTvarCollector {
-                env: &nested_env,
-                frozen_tvars: BTreeMap::new(),
-            };
-            condition_collector.type_(cx, Polarity::Positive, (), check_t);
-            condition_collector.type_(cx, Polarity::Positive, (), extends_t);
+        let (can_run_nested_solve, infer_through_frozen_tvar) =
+            if env.in_implicit_instantiation() && has_unresolved_tvars {
+                let mut condition_collector = FrozenTvarCollector {
+                    env: &nested_env,
+                    frozen_tvars: BTreeMap::new(),
+                };
+                condition_collector.type_(cx, Polarity::Positive, (), check_t);
+                condition_collector.type_(cx, Polarity::Positive, (), extends_t);
 
-            let mut branch_collector = FrozenTvarCollector {
-                env: &nested_env,
-                frozen_tvars: BTreeMap::new(),
+                let mut branch_collector = FrozenTvarCollector {
+                    env: &nested_env,
+                    frozen_tvars: BTreeMap::new(),
+                };
+                branch_collector.type_(cx, Polarity::Positive, (), true_t);
+                branch_collector.type_(cx, Polarity::Positive, (), false_t);
+                let infer_through_frozen_tvar =
+                    branch_collector.frozen_tvars.iter().any(|(id, info)| {
+                        info.has_default && !condition_collector.frozen_tvars.contains_key(id)
+                    });
+                let can_run_nested_solve = !condition_collector.frozen_tvars.is_empty()
+                    || !branch_collector.frozen_tvars.is_empty();
+                (can_run_nested_solve, infer_through_frozen_tvar)
+            } else {
+                (false, false)
             };
-            branch_collector.type_(cx, Polarity::Positive, (), true_t);
-            branch_collector.type_(cx, Polarity::Positive, (), false_t);
-            let infer_through_frozen_tvar =
-                branch_collector.frozen_tvars.iter().any(|(id, info)| {
-                    info.has_default && !condition_collector.frozen_tvars.contains_key(id)
-                });
-            let condition_has_frozen_tvar = !condition_collector.frozen_tvars.is_empty();
-            let branch_has_frozen_tvar = !branch_collector.frozen_tvars.is_empty();
-            let can_run_nested_solve = infer_through_frozen_tvar
-                || (!tparams.is_empty() && (condition_has_frozen_tvar || branch_has_frozen_tvar))
-                || (!condition_has_frozen_tvar && branch_has_frozen_tvar);
-            (can_run_nested_solve, infer_through_frozen_tvar)
-        } else {
-            (false, false)
-        };
         if has_unresolved_tvars && env.in_implicit_instantiation() && !can_run_nested_solve {
             return Ok(deferred(cx));
         }

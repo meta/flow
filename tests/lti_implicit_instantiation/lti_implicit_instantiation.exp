@@ -16,7 +16,7 @@ References:
 Error ------------------------------------------------------------------------------ conditional_type_placeholder.js:9:1
 
 Cannot call `render` because: [incompatible-type]
- - Either in the first parameter > property `s`: `number` [1] is incompatible with `string` [2].
+ - Either in the return value: `string` [1] is incompatible with `number` [2].
  - Or `(props: Unbox<Box<{readonly s: empty}>>) => empty` [3] is incompatible with `number` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
@@ -27,12 +27,12 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
       ^^^^^^
 
 References:
-   conditional_type_placeholder.js:9:24
-   9| render(renderUnbox) as number; // error: string ~> number
-                             ^^^^^^ [1]
    conditional_type_placeholder.js:4:29
    4|   (<R>((props: {readonly s: string}) => R) => R);
-                                  ^^^^^^ [2]
+                                  ^^^^^^ [1]
+   conditional_type_placeholder.js:9:24
+   9| render(renderUnbox) as number; // error: string ~> number
+                             ^^^^^^ [2]
    conditional_type_placeholder.js:7:29
    7| declare function renderUnbox<S>(props: Unbox<Box<{readonly s: S}>>): S;
                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
@@ -44,7 +44,7 @@ References:
 Error ----------------------------------------------------------------------------- conditional_type_placeholder.js:15:1
 
 Cannot call `render` because: [incompatible-type]
- - Either in the first parameter > property `s`: `number` [1] is incompatible with `string` [2].
+ - Either in the return value: `string` [1] is incompatible with `number` [2].
  - Or `(props: ParamOf<Box<(x: {readonly s: empty}) => void>>) => empty` [3] is incompatible with `number` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
@@ -55,18 +55,58 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
        ^^^^^^
 
 References:
-   conditional_type_placeholder.js:15:24
-   15| render(renderParam) as number; // error: string ~> number
-                              ^^^^^^ [1]
    conditional_type_placeholder.js:4:29
     4|   (<R>((props: {readonly s: string}) => R) => R);
-                                   ^^^^^^ [2]
+                                   ^^^^^^ [1]
+   conditional_type_placeholder.js:15:24
+   15| render(renderParam) as number; // error: string ~> number
+                              ^^^^^^ [2]
    conditional_type_placeholder.js:13:29
    13| declare function renderParam<S>(props: ParamOf<Box<(x: {readonly s: S}) => void>>): S;
                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    conditional_type_placeholder.js:3:37
     3| declare const render: ((overrides?: number) => void) &
                                            ^^^^^^ [4]
+
+
+Error ---------------------------------------------------------------------------- conditional_type_without_infer.js:6:1
+
+Cannot cast `r` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   conditional_type_without_infer.js:6:1
+   6| r as empty; // error: number ~> empty
+      ^
+
+References:
+   conditional_type_without_infer.js:4:17
+   4| const r = f({v: 1});
+                      ^ [1]
+   conditional_type_without_infer.js:6:6
+   6| r as empty; // error: number ~> empty
+           ^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------- conditional_type_without_infer.js:12:3
+
+Cannot call `g` with `xs` bound to `x` because: [incompatible-type]
+ - Either in array element: `string` [1] is incompatible with `number` [2].
+    - Arrays are invariantly typed. See
+      https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
+ - Or in array element: `number` [2] is incompatible with `string` [1].
+    - Arrays are invariantly typed. See
+      https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
+
+   conditional_type_without_infer.js:12:3
+   12| g(xs); // error
+         ^^
+
+References:
+   conditional_type_without_infer.js:11:34
+   11| declare const xs: Array<number | string>;
+                                        ^^^^^^ [1]
+   conditional_type_without_infer.js:11:25
+   11| declare const xs: Array<number | string>;
+                               ^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------ contextual_ctor.js:5:13
@@ -1094,4 +1134,4 @@ References:
 
 
 
-Found 68 errors
+Found 70 errors
