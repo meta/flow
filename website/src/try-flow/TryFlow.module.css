@@ -214,10 +214,13 @@
 .swapSlot {
     position: relative;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     justify-items: end;
+    min-width: 0;
 }
 .swapSlot > * {
     grid-area: 1 / 1;
+    max-width: 100%;
 }
 .swapSlot > .swapInactive {
     position: absolute;
@@ -837,9 +840,18 @@
 .toolbarActions {
     margin-left: auto;
     margin-right: 8px;
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(36px, 1fr) minmax(0, max-content);
+    min-width: 0;
     align-items: center;
     gap: 8px;
+}
+
+.toolbarFixedActions {
+    display: flex;
+    grid-column: 2;
+    min-width: 0;
+    gap: inherit;
 }
 
 /* Version dropdown: a pill on the slate bar, the same shape as the config's

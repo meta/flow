@@ -691,47 +691,6 @@ export default component TryFlow(
               </button>
             </div>
             <div className={styles.toolbarActions}>
-              <button
-                type="button"
-                className={clsx(styles.toolbarButton, styles.iconOnly)}
-                onClick={formatCurrentCode}
-                onMouseEnter={() => preloadFormatter()}
-                onFocus={() => preloadFormatter()}
-                disabled={
-                  !editorReady ||
-                  !hasCode ||
-                  formatting ||
-                  activeToolbarTab !== 'code'
-                }
-                aria-label="Format code with Prettier"
-                aria-describedby={
-                  formatNotice ? 'try-flow-format-status' : undefined
-                }
-                aria-busy={formatting}
-                title={formatNotice || 'Format code with Prettier'}>
-                {formatting ? (
-                  <span className={styles.formatSpinner} aria-hidden="true" />
-                ) : formatLabel === 'Formatted' ||
-                  formatLabel === 'No change' ? (
-                  <span className={styles.formatStateIcon} aria-hidden="true">
-                    ✓
-                  </span>
-                ) : formatLabel === 'Failed' || formatLabel === 'Retry' ? (
-                  <span className={styles.formatStateIcon} aria-hidden="true">
-                    !
-                  </span>
-                ) : (
-                  <FormatIcon />
-                )}
-                <span className={styles.toolbarButtonLabel}>{formatLabel}</span>
-                <span
-                  id="try-flow-format-status"
-                  className={styles.formatStatus}
-                  role="status"
-                  aria-live="polite">
-                  {formatNotice}
-                </span>
-              </button>
               <div className={styles.swapSlot}>
                 <div
                   className={clsx(
@@ -777,34 +736,79 @@ export default component TryFlow(
                   <span className={styles.toolbarButtonLabel}>Clear</span>
                 </button>
               </div>
-              <button
-                className={clsx(
-                  styles.toolbarButton,
-                  styles.iconOnly,
-                  styles.copyCode,
-                )}
-                onClick={() =>
-                  copyToClipboard(
-                    'code',
-                    monaco.editor.getModels()[0]?.getValue() ?? '',
-                  )
-                }
-                disabled={!editorReady || !hasCode}
-                title="Copy the code">
-                <CopyIcon />
-                <span className={styles.toolbarButtonLabel}>
-                  {copied === 'code' ? 'Copied!' : 'Copy code'}
-                </span>
-              </button>
-              <button
-                className={styles.toolbarButton}
-                onClick={() => copyToClipboard('link', window.location.href)}
-                title="Copy a shareable link to this code">
-                <CopyLinkIcon />
-                <span className={styles.toolbarButtonLabel}>
-                  {copied === 'link' ? 'Copied!' : 'Copy link'}
-                </span>
-              </button>
+              <div className={styles.toolbarFixedActions}>
+                <button
+                  type="button"
+                  className={clsx(styles.toolbarButton, styles.iconOnly)}
+                  onClick={formatCurrentCode}
+                  onMouseEnter={() => preloadFormatter()}
+                  onFocus={() => preloadFormatter()}
+                  disabled={
+                    !editorReady ||
+                    !hasCode ||
+                    formatting ||
+                    activeToolbarTab !== 'code'
+                  }
+                  aria-label="Format code with Prettier"
+                  aria-describedby={
+                    formatNotice ? 'try-flow-format-status' : undefined
+                  }
+                  aria-busy={formatting}
+                  title={formatNotice || 'Format code with Prettier'}>
+                  {formatting ? (
+                    <span className={styles.formatSpinner} aria-hidden="true" />
+                  ) : formatLabel === 'Formatted' ||
+                    formatLabel === 'No change' ? (
+                    <span className={styles.formatStateIcon} aria-hidden="true">
+                      ✓
+                    </span>
+                  ) : formatLabel === 'Failed' || formatLabel === 'Retry' ? (
+                    <span className={styles.formatStateIcon} aria-hidden="true">
+                      !
+                    </span>
+                  ) : (
+                    <FormatIcon />
+                  )}
+                  <span className={styles.toolbarButtonLabel}>
+                    {formatLabel}
+                  </span>
+                  <span
+                    id="try-flow-format-status"
+                    className={styles.formatStatus}
+                    role="status"
+                    aria-live="polite">
+                    {formatNotice}
+                  </span>
+                </button>
+                <button
+                  className={clsx(
+                    styles.toolbarButton,
+                    styles.iconOnly,
+                    styles.copyCode,
+                  )}
+                  onClick={() =>
+                    copyToClipboard(
+                      'code',
+                      monaco.editor.getModels()[0]?.getValue() ?? '',
+                    )
+                  }
+                  disabled={!editorReady || !hasCode}
+                  title="Copy the code">
+                  <CopyIcon />
+                  <span className={styles.toolbarButtonLabel}>
+                    {copied === 'code' ? 'Copied!' : 'Copy code'}
+                  </span>
+                </button>
+                <button
+                  className={styles.toolbarButton}
+                  onClick={() => copyToClipboard('link', window.location.href)}
+                  title="Copy a shareable link to this code">
+                  <CopyLinkIcon />
+                  <span className={styles.toolbarButtonLabel}>
+                    {copied === 'link' ? 'Copied!' : 'Copy link'}
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
           <div
