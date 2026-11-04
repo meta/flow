@@ -466,6 +466,23 @@ References:
                  ^^^^^^^^^ [2]
 
 
+Error --------------------------------------------------------------------- pinning_repos_use_through_repos_lower.js:8:1
+
+Cannot cast `r` to `empty` because `"a"` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   pinning_repos_use_through_repos_lower.js:8:1
+   8| r as empty; // error: string ~> empty
+      ^
+
+References:
+   pinning_repos_use_through_repos_lower.js:6:42
+   6| const r = f({selectedValue: null, value: 'a'});
+                                               ^^^ [1]
+   pinning_repos_use_through_repos_lower.js:8:6
+   8| r as empty; // error: string ~> empty
+           ^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------------------ polyt_flow_error.js:2:7
 
 Cannot call `first` with `1` bound to `x` because `1` [1] is incompatible with `Array<any>` [2]. [incompatible-type]
@@ -507,6 +524,23 @@ References:
    typeapp_expansion.js:40:13
    40|   ): Opaque<{...P2, ...}>;
                    ^^^^^^^^^^^^ [3]
+
+
+Error ---------------------------------------------------------------------------------- typeapp_expansion_upper.js:10:1
+
+Cannot cast `r` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   typeapp_expansion_upper.js:10:1
+   10| r as empty; // error: number ~> empty
+       ^
+
+References:
+   typeapp_expansion_upper.js:7:31
+    7| declare const aliased: Column<number>;
+                                     ^^^^^^ [1]
+   typeapp_expansion_upper.js:10:6
+   10| r as empty; // error: number ~> empty
+            ^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------ underconstrained_class_constructor.js:5:5
@@ -1168,4 +1202,4 @@ References:
 
 
 
-Found 72 errors
+Found 74 errors

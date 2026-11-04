@@ -2130,6 +2130,12 @@ pub(super) fn reposition<'cx>(
                 let use_desc = desc.is_some();
                 let no_unresolved = !flow_js_utils::tvar_visitors::has_unresolved_tvars(cx, root)
                     && !flow_js_utils::tvar_visitors::has_unresolved_tvars_in_destructors(cx, d);
+                // During implicit instantiation, an `EvalT` over unresolved tvars is left as is,
+                // like the solve's own tvars. A tvar fed with its repositioned result would take
+                // what flows into it as more lower bounds, without checking it against the result.
+                if !no_unresolved && env.in_implicit_instantiation() {
+                    return Ok(t.dupe());
+                }
                 match flow_cache::eval::find_repos(cx, root, &new_defer_use_t, eval_id) {
                     Some(cached_tvar) => match &*cached_tvar {
                         TypeInner::OpenT(cached_open_tvar)
