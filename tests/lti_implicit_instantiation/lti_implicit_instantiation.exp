@@ -13,6 +13,40 @@ References:
              ^ [1]
 
 
+Error ---------------------------------------------------------------------- conditional_type_distributive_nested.js:7:1
+
+Cannot cast `r` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   conditional_type_distributive_nested.js:7:1
+   7| r as empty; // error: number ~> empty
+      ^
+
+References:
+   conditional_type_distributive_nested.js:5:17
+   5| const r = f({v: 1});
+                      ^ [1]
+   conditional_type_distributive_nested.js:7:6
+   7| r as empty; // error: number ~> empty
+           ^^^^^ [2]
+
+
+Error --------------------------------------------------------------------- conditional_type_distributive_nested.js:14:1
+
+Cannot cast `s` to `empty` because `unknown` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   conditional_type_distributive_nested.js:14:1
+   14| s as empty; // error: unknown ~> empty
+       ^
+
+References:
+   conditional_type_distributive_nested.js:12:24
+   12| declare function g<T = unknown>(x: InExtends<{readonly v: T}>): T;
+                              ^^^^^^^ [1]
+   conditional_type_distributive_nested.js:14:6
+   14| s as empty; // error: unknown ~> empty
+            ^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------ conditional_type_placeholder.js:9:1
 
 Cannot call `render` because: [incompatible-type]
@@ -1134,4 +1168,4 @@ References:
 
 
 
-Found 70 errors
+Found 72 errors

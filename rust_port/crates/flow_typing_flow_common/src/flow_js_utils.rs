@@ -4093,22 +4093,16 @@ pub fn mk_distributive_tparam_subst_fn<'cx>(
 
     let distributed_t = match distributed_t.deref() {
         _ if type_util::constraint_node_id(&distributed_t).is_some() => distributed_t.dupe(),
-        _ if !free_var_finder(cx, None, &distributed_t).is_empty() => distributed_t.dupe(),
-        _ => {
-            if has_unresolved_tvars(cx, &distributed_t) {
-                flow_typing_tvar::mk_resolved(
-                    cx,
-                    reason_of_t(&distributed_t).dupe(),
-                    distributed_t.dupe(),
-                )
-            } else {
-                flow_typing_tvar::mk_fully_resolved(
-                    cx,
-                    reason_of_t(&distributed_t).dupe(),
-                    distributed_t.dupe(),
-                )
-            }
+        _ if !free_var_finder(cx, None, &distributed_t).is_empty()
+            || has_unresolved_tvars(cx, &distributed_t) =>
+        {
+            distributed_t.dupe()
         }
+        _ => flow_typing_tvar::mk_fully_resolved(
+            cx,
+            reason_of_t(&distributed_t).dupe(),
+            distributed_t.dupe(),
+        ),
     };
 
     let subst_map: FlowOrdMap<flow_common::subst_name::SubstName, Type> =
