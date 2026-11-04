@@ -42,9 +42,11 @@ use flow_typing_context::Context;
 use flow_typing_context::Cx;
 use flow_typing_context::PossiblyRefinedWriteState;
 use flow_typing_context::TypingMode;
+use flow_typing_flow_common::flow_js_utils;
 use flow_typing_flow_js::flow_js;
 use flow_typing_flow_js::flow_js::FlowJs;
 use flow_typing_flow_js::tvar_resolver;
+use flow_typing_flow_js_env::FlowJsEnv;
 use flow_typing_key::Key;
 use flow_typing_loc_env::loc_env::LocEnv;
 use flow_typing_loc_env::loc_env::TypeEntry;
@@ -2222,9 +2224,22 @@ pub fn sig_var_ref<'cx>(
     };
     let reason = flow_common::reason::mk_reason(desc, loc.dupe());
     let t = query_var(Some(lookup_mode), cx, name, None, loc)?;
-    Ok(Type::new(flow_typing_type::type_::TypeInner::AnnotT(
-        reason, t, true,
-    )))
+    let repos_reason = reason.dupe();
+    Ok(flow_js_utils::map_on_resolved_type(
+        cx,
+        reason,
+        t,
+        move |cx, t| {
+            flow_js_utils::flow_js_result_to_job_error(FlowJs::reposition_reason(
+                cx,
+                &FlowJsEnv::entry(),
+                None,
+                &repos_reason,
+                Some(true),
+                &t,
+            ))
+        },
+    ))
 }
 
 pub fn read_class_self_type<'cx>(cx: &mut Context<'cx>, loc: ALoc) -> Type {
