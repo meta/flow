@@ -1,0 +1,6 @@
+[libs]
+lib
+
+[options]
+all=true
+file_watcher=none

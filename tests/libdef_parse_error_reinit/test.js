@@ -1,0 +1,1 @@
+myGlobal as number;

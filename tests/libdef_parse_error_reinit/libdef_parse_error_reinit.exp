@@ -1,0 +1,17 @@
+No errors initially:
+No errors!
+
+A libdef that no longer parses is reported after the reinit:
+Error ----------------------------------------------------------------------------------------------- lib/globals.js:2:1
+
+Unexpected token `<<` [ParseError]
+
+   2| <<<<<<< local
+      ^^
+
+
+
+Found 1 error
+
+Fixing the libdef removes the error:
+No errors!

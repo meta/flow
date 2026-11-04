@@ -2786,6 +2786,7 @@ fn init_with_initial_state(
         .chain(saved_discovered_global_libdefs)
         .chain(saved_global_augmentations.iter().duped())
         .collect();
+    let reparsed_lib_files: FlowOrdSet<FileKey> = additional_lib_files.iter().duped().collect();
     let next: parsing_service::Next = {
         let mut files = Some(additional_lib_files);
         Box::new(move || files.take().filter(|files| !files.is_empty()))
@@ -2827,14 +2828,19 @@ fn init_with_initial_state(
         ErrorSuppressions::empty(),
     );
 
+    // The caller's sets may still place a library where it was before the parse above:
+    // `reinit_full_check` passes the previous environment's, and a saved state lists discovered
+    // globals among its parsed files. That parse decides where each library belongs now.
     let parsed = FlowOrdSet::from(
         parsed
             .into_inner()
+            .relative_complement(reparsed_lib_files.dupe().into_inner())
             .union(additional_parsed.dupe().into_inner()),
     );
     let unparsed = FlowOrdSet::from(
         unparsed
             .into_inner()
+            .relative_complement(reparsed_lib_files.into_inner())
             .union(additional_unparsed.into_inner()),
     );
     let dirty_modules: flow_common_modulename::ModulenameSet = dirty_modules
@@ -3663,10 +3669,10 @@ fn reinit_full_check(
     let transaction = ActiveTransaction::new(committed_heap.dupe());
     transaction.committed_heap().clear_reader_cache();
 
-    let (new_env, log_recheck_event): (Env, Box<dyn FnOnce(&serde_json::Value)>) =
+    let (new_env, libs_ok, log_recheck_event): (Env, bool, Box<dyn FnOnce(&serde_json::Value)>) =
         if changed_declaration_files.is_empty() {
             flow_hh_logger::info!("Reiniting with a full check.");
-            let (new_env, _libs_ok) = with_transaction("partial-reinit", |_side_effects| {
+            let (new_env, libs_ok) = with_transaction("partial-reinit", |_side_effects| {
                 init_with_initial_state(
                     pool,
                     &transaction.handle(),
@@ -3687,7 +3693,7 @@ fn reinit_full_check(
             let log: Box<dyn FnOnce(&serde_json::Value)> = Box::new(|profiling| {
                 flow_event_logger::reinit_full_check(profiling);
             });
-            (new_env, log)
+            (new_env, libs_ok, log)
         } else {
             // Note from samzhou19815:
             //
@@ -3707,7 +3713,7 @@ fn reinit_full_check(
             flow_hh_logger::info!(
                 "Reiniting with a full check after {changed_file_count} TypeScript global declaration changes."
             );
-            let (new_env, _libs_ok) = init_from_scratch(
+            let (new_env, libs_ok) = init_from_scratch(
                 options,
                 pool,
                 &transaction.handle(),
@@ -3735,25 +3741,30 @@ fn reinit_full_check(
                     profiling,
                 );
             });
-            (new_env, log)
+            (new_env, libs_ok, log)
         };
 
-    // schedule a recheck of all changes since saved state -- both the upstream
-    // changes between when the saved state was generated and master, and local
-    // updates since master.
-    let mut all_checked_set = CheckedSet::empty();
-    all_checked_set.add(Some(new_env.files.dupe()), None, None);
-    all_checked_set.union(files_to_force);
-    all_checked_set.union(updates.dupe());
-    *will_be_checked_files = all_checked_set.dupe();
+    // A server that starts with libraries that fail checks nothing (see `init`), so do the same
+    // until a library change makes them work again. Otherwise schedule a recheck of all changes
+    // since saved state -- both the upstream changes between when the saved state was generated
+    // and master, and local updates since master.
+    if libs_ok {
+        let mut all_checked_set = CheckedSet::empty();
+        all_checked_set.add(Some(new_env.files.dupe()), None, None);
+        all_checked_set.union(files_to_force);
+        all_checked_set.union(updates.dupe());
+        *will_be_checked_files = all_checked_set.dupe();
 
-    if let Some(orchestrator) = orchestrator {
-        flow_server_env::server_monitor_listener_state::push_after_reinit(
-            orchestrator.recheck(),
-            Some(all_checked_set.focused().dupe()),
-            Some(all_checked_set.focused().dupe()),
-            Some(all_checked_set),
-        );
+        if let Some(orchestrator) = orchestrator {
+            flow_server_env::server_monitor_listener_state::push_after_reinit(
+                orchestrator.recheck(),
+                Some(all_checked_set.focused().dupe()),
+                Some(all_checked_set.focused().dupe()),
+                Some(all_checked_set),
+            );
+        }
+    } else {
+        *will_be_checked_files = CheckedSet::empty();
     }
 
     let recheck_stats = RecheckStats {
