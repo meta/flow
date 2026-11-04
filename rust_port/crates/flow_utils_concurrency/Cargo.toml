@@ -14,7 +14,7 @@ flow_common_utils = { path = "../flow_common_utils" }
 hashbrown = "0.17.1"
 itertools = "0.15.0"
 lock_free_hashtable = "0.1.4"
-parking_lot = { version = "0.12.1", features = ["arc_lock", "send_guard"] }
+parking_lot = { version = "0.12.1", features = ["arc_lock", "send_guard", "serde"] }
 starlark_map = "0.14.2"
 
 [target.'cfg(any(target_os = "linux", target_os = "freebsd", target_os = "openbsd"))'.dependencies]
