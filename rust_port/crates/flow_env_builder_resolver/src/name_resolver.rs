@@ -12467,6 +12467,16 @@ impl<'ast, 'a, Cx: Context> AstVisitor<'ast, ALoc, ALoc, &'ast ALoc, !> for Dead
         ast_visitor::yield_default(self, loc, yield_)
     }
 
+    fn match_<B>(
+        &mut self,
+        loc: &'ast ALoc,
+        m: &'ast flow_parser::ast::match_::Match<ALoc, ALoc, B>,
+        on_case_body: impl FnMut(&mut Self, &'ast B) -> Result<(), !>,
+    ) -> Result<(), !> {
+        let Ok(()) = self.identifier(&ast_utils::match_root_ident(m.match_keyword_loc.dupe()));
+        ast_visitor::match_default(self, loc, m, on_case_body)
+    }
+
     fn class_(
         &mut self,
         loc: &ALoc,

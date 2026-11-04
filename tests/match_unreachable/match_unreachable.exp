@@ -1,0 +1,92 @@
+Error ----------------------------------------------------------------------------------------- match_unreachable.js:6:3
+
+Unreachable code. [unreachable-code]
+
+        v--------------------------
+   6|   return match (x) { // ERROR
+   7|     'a' => 'a', // ERROR
+   8|     _ => 'b', // ERROR
+   9|   };
+        -^
+
+
+Error ----------------------------------------------------------------------------------------- match_unreachable.js:7:5
+
+This match pattern [1] is unused. The values it matches are either already covered by previous patterns, or are not part
+of the input type. To fix, either remove this pattern or restructure previous patterns. [match-unused-pattern]
+
+   7|     'a' => 'a', // ERROR
+          ^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- match_unreachable.js:8:5
+
+This match wildcard [1] is unused. The values it matches are either already covered by previous patterns, or are not
+part of the input type. To fix, either remove this pattern or restructure previous patterns. [match-unused-pattern]
+
+   8|     _ => 'b', // ERROR
+          ^ [1]
+
+
+Error ---------------------------------------------------------------------------------------- match_unreachable.js:14:3
+
+Unreachable code. [unreachable-code]
+
+         v--------------------------
+   14|   return match (x) { // ERROR
+   15|     'a' => 'a', // ERROR
+   16|     _ => 'b', // ERROR
+   17|   };
+         -^
+
+
+Error ---------------------------------------------------------------------------------------- match_unreachable.js:15:5
+
+This match pattern [1] is unused. The values it matches are either already covered by previous patterns, or are not part
+of the input type. To fix, either remove this pattern or restructure previous patterns. [match-unused-pattern]
+
+   15|     'a' => 'a', // ERROR
+           ^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------- match_unreachable.js:16:5
+
+This match wildcard [1] is unused. The values it matches are either already covered by previous patterns, or are not
+part of the input type. To fix, either remove this pattern or restructure previous patterns. [match-unused-pattern]
+
+   16|     _ => 'b', // ERROR
+           ^ [1]
+
+
+Error ---------------------------------------------------------------------------------------- match_unreachable.js:22:3
+
+Unreachable code. [unreachable-code]
+
+         v-------------------
+   22|   match (x) { // ERROR
+   23|     'a' => {} // ERROR
+   24|     _ => {} // ERROR
+   25|   }
+         ^
+
+
+Error ---------------------------------------------------------------------------------------- match_unreachable.js:23:5
+
+This match pattern [1] is unused. The values it matches are either already covered by previous patterns, or are not part
+of the input type. To fix, either remove this pattern or restructure previous patterns. [match-unused-pattern]
+
+   23|     'a' => {} // ERROR
+           ^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------- match_unreachable.js:24:5
+
+This match wildcard [1] is unused. The values it matches are either already covered by previous patterns, or are not
+part of the input type. To fix, either remove this pattern or restructure previous patterns. [match-unused-pattern]
+
+   24|     _ => {} // ERROR
+           ^ [1]
+
+
+
+Found 9 errors
