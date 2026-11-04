@@ -6501,6 +6501,45 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         self.arrow_function(loc, func)
     }
 
+    // A method with a `this` parameter binds `this` like a function expression, but its value
+    // belongs to the class def, so unlike a function expression it records no write of its own.
+    fn this_binding_method(
+        &mut self,
+        loc: &ALoc,
+        func: &flow_parser::ast::function::Function<ALoc, ALoc>,
+    ) -> Result<(), AbruptCompletion> {
+        scope_builder::function_expression_without_name(
+            self,
+            self.enable_enums,
+            true,
+            false,
+            loc,
+            func,
+            &|this, f| this.hoist_annotations(|this_inner| f(this_inner)),
+            |_, _, _, _| Ok(()),
+            |this,
+             _enable_enums,
+             _with_types,
+             is_arrow,
+             fun_loc,
+             generator_return_loc,
+             params,
+             return_,
+             predicate,
+             body| {
+                this.lambda(
+                    is_arrow,
+                    fun_loc,
+                    generator_return_loc,
+                    params,
+                    return_,
+                    predicate,
+                    body,
+                )
+            },
+        )
+    }
+
     fn delete(&mut self, loc: ALoc, argument: &Expression<ALoc, ALoc>) {
         use flow_common::reason::VirtualReasonDesc;
         use flow_common::reason::mk_reason;
@@ -11160,7 +11199,7 @@ impl<'ast, 'a, Cx: Context, Fl: Flow<Cx = Cx>>
         let has_this_param = f.params.this_.is_some();
         // Use the method key loc as the loc of the function.
         if has_this_param {
-            self.function_expression_or_method(f_loc, f)?;
+            self.this_binding_method(f_loc, f)?;
         } else {
             self.non_this_binding_function(f_loc, f)?;
         }
