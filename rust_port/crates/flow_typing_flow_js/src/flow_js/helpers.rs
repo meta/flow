@@ -2997,10 +2997,14 @@ pub(super) fn singleton_concrete_type_for_type_cast<'cx>(
     t: &Type,
 ) -> Result<Type, FlowJsException> {
     use flow_typing_type::type_::constraint::Constraints;
-    fn resolve<'cx>(cx: &mut Context<'cx>, env: &FlowJsEnv, t: &Type) -> Type {
+    fn resolve<'cx>(
+        cx: &mut Context<'cx>,
+        env: &FlowJsEnv,
+        t: &Type,
+    ) -> Result<Type, FlowJsException> {
         match t.deref() {
             TypeInner::AnnotT(r, inner, use_desc) => {
-                let repositioned = reposition_reason(cx, env, None, r, *use_desc, inner).unwrap();
+                let repositioned = reposition_reason(cx, env, None, r, *use_desc, inner)?;
                 resolve(cx, env, &repositioned)
             }
             _ if let Some(node) = type_util::constraint_node_id(t) => {
@@ -3011,13 +3015,13 @@ pub(super) fn singleton_concrete_type_for_type_cast<'cx>(
                         let t1 = cx.force_fully_resolved_tvar(&s1);
                         resolve(cx, env, &t1)
                     }
-                    Constraints::Unresolved(_) => t.dupe(),
+                    Constraints::Unresolved(_) => Ok(t.dupe()),
                 }
             }
-            _ => t.dupe(),
+            _ => Ok(t.dupe()),
         }
     }
-    Ok(resolve(cx, env, t))
+    resolve(cx, env, t)
 }
 
 pub(super) fn add_specialized_callee_method_action(
