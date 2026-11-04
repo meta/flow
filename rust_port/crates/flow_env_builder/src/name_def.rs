@@ -1647,6 +1647,11 @@ fn collect_declared_namespace_members(
     for stmt in statements {
         collect_one(stmt.deref(), &mut values, &mut types, env_info);
     }
+    // A declaration is a member only if it binds its name. A redeclaration that the name
+    // resolver rejected, e.g. `namespace Foo` after `interface Foo`, has no assigning write,
+    // so there is no env entry to read the member from.
+    values.retain(|_, key| has_assigning_write(key.dupe(), &env_info.env_entries));
+    types.retain(|_, key| has_assigning_write(key.dupe(), &env_info.env_entries));
 
     (values, types)
 }
@@ -5411,21 +5416,10 @@ impl<'a, 'ast> AstVisitor<'ast, ALoc, ALoc, &'ast ALoc, EnvInvariant<ALoc>> for 
                                     .or_insert(Some(env_key));
                             }
                             for (member_name, env_key) in namespace_types {
-                                // Declaration-merged interfaces (e.g. `interface Foo`
-                                // after `class Foo` or `function Foo`) are marked as
-                                // NonAssigningWrite and have no env entry, which causes
-                                // a crash in resolve_namespace_types. Only add namespace
-                                // type entries that have an assigning write.
-                                if let std::collections::btree_map::Entry::Vacant(entry) =
-                                    function_state.namespace_types.entry(member_name)
-                                {
-                                    if has_assigning_write(
-                                        env_key.dupe(),
-                                        &self.env_info.env_entries,
-                                    ) {
-                                        entry.insert(env_key);
-                                    }
-                                }
+                                function_state
+                                    .namespace_types
+                                    .entry(member_name)
+                                    .or_insert(env_key);
                             }
                             self.visit_merged_declare_namespace_body(inner)?;
                             continue;

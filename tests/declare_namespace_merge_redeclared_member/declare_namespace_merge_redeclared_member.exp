@@ -1,0 +1,44 @@
+Error ---------------------------------------------------------------------------------------------------- class.js:4:21
+
+Cannot declare `Legend` [1] because the name is already bound. [name-already-bound]
+
+   class.js:4:21
+   4|   declare namespace Legend {} // ERROR
+                          ^^^^^^
+
+References:
+   class.js:3:8
+   3|   type Legend = number;
+             ^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------- declare_class.js:4:21
+
+Cannot declare `Legend` [1] because the name is already bound. [name-already-bound]
+
+   declare_class.js:4:21
+   4|   declare namespace Legend {} // ERROR
+                          ^^^^^^
+
+References:
+   declare_class.js:3:13
+   3|   interface Legend {}
+                  ^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- declare_function.js:4:21
+
+Cannot declare `Legend` [1] because the name is already bound. [name-already-bound]
+
+   declare_function.js:4:21
+   4|   declare namespace Legend {} // ERROR
+                          ^^^^^^
+
+References:
+   declare_function.js:3:13
+   3|   interface Legend {}
+                  ^^^^^^ [1]
+
+
+
+Found 3 errors
