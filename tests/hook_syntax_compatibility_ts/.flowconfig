@@ -1,0 +1,11 @@
+[libs]
+lib.d.ts
+
+[options]
+component_syntax=true
+experimental.component_syntax.hook_compatibility=false
+experimental.typescript_library_definition_support=true
+module.file_ext=.js
+module.file_ext=.ts
+all=true
+builtin_lib=core-only

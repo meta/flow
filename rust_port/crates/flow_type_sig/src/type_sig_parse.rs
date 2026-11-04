@@ -7641,13 +7641,17 @@ fn return_annot<'arena, 'ast>(
     }
 }
 
+/// TypeScript has no hook syntax, so a function declared in TypeScript is read in hook
+/// compatibility mode whatever the configuration says.
 fn convert_effect<Loc>(
     opts: &TypeSigOptions,
+    strictness_kind: TypeStrictnessKind,
     effect_: &ast::function::Effect,
     fun_loc_opt: Option<Loc>,
     name_opt: Option<&FlowSmolStr>,
 ) -> ReactEffect<Loc> {
     use ast::function::Effect;
+    let hook_compatibility = opts.hook_compatibility || strictness_kind.is_typescript_loose();
     match (effect_, fun_loc_opt) {
         (Effect::Hook, Some(loc)) if opts.component_syntax_enabled_in_config => {
             ReactEffect::HookDecl(Box::new(loc))
@@ -7655,8 +7659,7 @@ fn convert_effect<Loc>(
         (Effect::Hook, None) if opts.component_syntax_enabled_in_config => ReactEffect::HookAnnot,
         (Effect::Hook, _) => ReactEffect::ArbitraryEffect,
         (Effect::Arbitrary, _)
-            if opts.hook_compatibility
-                && matches!(name_opt, Some(n) if ast_utils::hook_name(n)) =>
+            if hook_compatibility && matches!(name_opt, Some(n) if ast_utils::hook_name(n)) =>
         {
             ReactEffect::HookAnnot
         }
@@ -7679,7 +7682,7 @@ fn function_type<'arena, 'ast>(
     let params = function_type_params(opts, scope, scopes, tbls, xs, &f.params.params);
     let rest_param = function_type_rest_param(opts, scope, scopes, tbls, xs, &f.params.rest);
     let (return_, type_guard) = return_annot(is_method, opts, scope, scopes, tbls, xs, &f.return_);
-    let effect_ = convert_effect(opts, &f.effect, None, None);
+    let effect_ = convert_effect(opts, tbls.strictness_kind, &f.effect, None, None);
     xs.pop_frame();
 
     FunSig {
@@ -11509,7 +11512,13 @@ fn function_def_helper<'arena: 'ast, 'ast>(
         type_guard,
         kind,
     });
-    let effect_ = convert_effect(opts, effect_, Some(fn_loc), id.as_ref().map(|id| &id.name));
+    let effect_ = convert_effect(
+        opts,
+        tbls.strictness_kind,
+        effect_,
+        Some(fn_loc),
+        id.as_ref().map(|id| &id.name),
+    );
     FunSig {
         tparams,
         params: params_vec,
@@ -13723,7 +13732,13 @@ fn declare_function_decl<'arena: 'ast, 'ast>(
                             );
                             let (return_, type_guard) =
                                 return_annot(false, opts, scope, scopes, tbls, &mut xs, r);
-                            let effect_val = convert_effect(opts, effect, None, Some(name));
+                            let effect_val = convert_effect(
+                                opts,
+                                tbls.strictness_kind,
+                                effect,
+                                None,
+                                Some(name),
+                            );
                             FunSig {
                                 tparams,
                                 params,

@@ -1372,8 +1372,10 @@ impl<'a> Context<'a> {
             || self.inner().metadata.frozen.async_component_syntax
     }
 
+    /// TypeScript has no hook syntax, so TypeScript files are always in hook compatibility mode.
     pub fn hook_compatibility(&self) -> bool {
-        self.in_dirlist(&self.inner().metadata.frozen.hook_compatibility_includes)
+        self.is_ts_file()
+            || self.in_dirlist(&self.inner().metadata.frozen.hook_compatibility_includes)
             || (self.inner().metadata.frozen.hook_compatibility
                 && !self.in_dirlist(&self.inner().metadata.frozen.hook_compatibility_excludes))
     }

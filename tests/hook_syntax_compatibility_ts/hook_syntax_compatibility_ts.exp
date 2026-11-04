@@ -1,0 +1,49 @@
+Error ------------------------------------------------------------------------------------------------ consumer.js:28:10
+
+Cannot call hook [1] because React hooks can only be called within components or hooks. This hook is definitely not
+called in a component or hook. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-definitely-not-in-component-or-hook]
+
+   consumer.js:28:10
+   28|   return useValue(); // ERROR: hooks can only be called in components and hooks
+                ^^^^^^^^^^
+
+References:
+   consumer.js:28:10
+   28|   return useValue(); // ERROR: hooks can only be called in components and hooks
+                ^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------ consumer.js:33:10
+
+Cannot call function because callee [1] has a name that indicates it is a React hook (starting with `use`) but it is not
+defined with hook syntax. (https://react.dev/reference/rules/rules-of-hooks) [react-rule-hook-non-hook-syntax]
+
+   consumer.js:33:10
+   33|   return useFlowValue(); // ERROR
+                ^^^^^^^^^^^^^^
+
+References:
+   consumer.js:33:10
+   33|   return useFlowValue(); // ERROR
+                ^^^^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------------- impl.ts:10:10
+
+Cannot call hook [1] because React hooks can only be called within components or hooks. This hook is definitely not
+called in a component or hook. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-definitely-not-in-component-or-hook]
+
+   impl.ts:10:10
+   10|   return useValue() * 2; // ERROR: hooks can only be called in components and hooks
+                ^^^^^^^^^^
+
+References:
+   impl.ts:10:10
+   10|   return useValue() * 2; // ERROR: hooks can only be called in components and hooks
+                ^^^^^^^^ [1]
+
+
+
+Found 3 errors
