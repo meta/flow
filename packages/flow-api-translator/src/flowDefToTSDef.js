@@ -3657,7 +3657,7 @@ const getTransforms = (
     InterfaceTypeAnnotation(
       node: FlowESTree.InterfaceTypeAnnotation,
     ): TSESTree.TypeNode {
-      if (node.extends) {
+      if (node.extends != null && node.extends.length > 0) {
         // type T = interface extends U, V { ... }
         // to
         // type T = U & V & { ... }
@@ -3668,8 +3668,10 @@ const getTransforms = (
             ...node.extends.map(ex => ({
               type: 'TSTypeReference',
               loc: DUMMY_LOC,
-              // Bug: ex.id can be qualified
-              typeName: transform.Identifier(ex.id as $FlowFixMe, false),
+              typeName:
+                ex.id.type === 'QualifiedTypeIdentifier'
+                  ? transform.QualifiedTypeIdentifier(ex.id)
+                  : transform.Identifier(ex.id, false),
               typeArguments: transform.TypeParameterInstantiation(
                 ex.typeParameters,
               ),
