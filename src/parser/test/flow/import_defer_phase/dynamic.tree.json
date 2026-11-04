@@ -390,8 +390,8 @@
   "comments": [],
   "loc": {
     "end": {
-      "column": 1,
-      "line": 4
+      "column": 0,
+      "line": 5
     },
     "source": null,
     "start": {
@@ -401,7 +401,7 @@
   },
   "range": [
     0,
-    123
+    124
   ],
   "type": "Program"
 }

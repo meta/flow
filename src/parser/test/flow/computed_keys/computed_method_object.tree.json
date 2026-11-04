@@ -903,8 +903,8 @@
   "comments": [],
   "loc": {
     "end": {
-      "column": 31,
-      "line": 4
+      "column": 0,
+      "line": 5
     },
     "source": null,
     "start": {
@@ -914,7 +914,7 @@
   },
   "range": [
     0,
-    120
+    121
   ],
   "type": "Program"
 }

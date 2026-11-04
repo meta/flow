@@ -1,7 +1,7 @@
 {
   "type":"Program",
-  "loc":{"source":null,"start":{"line":1,"column":17},"end":{"line":21,"column":1}},
-  "range":[17,573],
+  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":22,"column":0}},
+  "range":[0,574],
   "body":[
     {
       "type":"EnumDeclaration",

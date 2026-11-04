@@ -6,8 +6,8 @@
     }
   ],
   "type":"Program",
-  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":5,"column":15}},
-  "range":[0,83],
+  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":6,"column":0}},
+  "range":[0,93],
   "body":[
     {
       "type":"TypeAlias",

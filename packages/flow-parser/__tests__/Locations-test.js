@@ -188,12 +188,12 @@ describe('Locations', () => {
 A;
 /*comment*/`;
 
-    // ESTree program location only includes program body
+    // ESTree programs include the full source, not just the program body.
     expect(parse(source)).toMatchObject({
       type: 'Program',
-      loc: loc(2, 0, 2, 2),
-      range: [1, 3],
-    });
+      loc: loc(1, 0, 3, 11),
+      range: [0, 15],
+    }); // OK
 
     // Babel program location starts at beginning of source and includes trailing comments
     expect(parse(source, {babel: true})).toMatchObject({
@@ -207,6 +207,68 @@ A;
         start: 0,
         end: 15,
       },
-    });
+    }); // OK
+  });
+
+  test.each([
+    [' a ', 1, 3],
+    ['', 1, 0],
+    [' \t\r\n ', 2, 1],
+    [' /* comment */ \n', 2, 0],
+    ['#!/usr/bin/env node\n a \n', 3, 0],
+    ['\n/* leading */\na;\n/* trailing */\n ', 5, 1],
+    ['\uFEFFa \u2028\u2029 ', 3, 1],
+    [" '\u{1F6A6}' ", 1, 6],
+  ])('Program spans the full source: %p', (source, endLine, endColumn) => {
+    // Both output formats use full-source, UTF-16 bounds in scripts and modules.
+    for (const sourceType of ['script', 'module']) {
+      const options = {sourceType, sourceFilename: 'test.js'};
+      const expectedLoc = {
+        ...loc(1, 0, endLine, endColumn),
+        source: 'test.js',
+      };
+      expect(parse(source, options)).toMatchObject({
+        type: 'Program',
+        loc: expectedLoc,
+        range: [0, source.length],
+      }); // OK
+      expect(parse(source, {...options, babel: true})).toMatchObject({
+        type: 'File',
+        start: 0,
+        end: source.length,
+        program: {
+          type: 'Program',
+          start: 0,
+          end: source.length,
+          loc: loc(1, 0, endLine, endColumn),
+        },
+      }); // OK
+    }
+  });
+
+  test('Full-source program bounds preserve statement bounds', () => {
+    // The issue's original example expands only the root, not its children.
+    expect(parse(' a ')).toMatchObject({
+      range: [0, 3],
+      body: [{range: [1, 2], loc: loc(1, 1, 1, 2)}],
+    }); // OK
+    expect(parse(' a ', {babel: true})).toMatchObject({
+      start: 0,
+      end: 3,
+      program: {
+        body: [{start: 1, end: 2, loc: loc(1, 1, 1, 2)}],
+      },
+    }); // OK
+  });
+
+  test('Recovered programs still span the full source', () => {
+    // Keeping a partial AST must not truncate its range at the last recovered token.
+    const source = ' const = ; \n';
+    const program = parse(source, {throwOnParseErrors: false});
+    expect(program.errors?.length).toBeGreaterThan(0); // OK
+    expect(program).toMatchObject({
+      loc: loc(1, 0, 2, 0),
+      range: [0, source.length],
+    }); // OK
   });
 });

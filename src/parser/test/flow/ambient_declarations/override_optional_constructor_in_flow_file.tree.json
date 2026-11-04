@@ -72,7 +72,7 @@
       "message":"'override' modifier cannot appear on a constructor declaration"
     }
   ],
-  "loc":{"end":{"column":1,"line":3},"source":null,"start":{"column":0,"line":1}},
-  "range":[0,44],
+  "loc":{"end":{"column":0,"line":4},"source":null,"start":{"column":0,"line":1}},
+  "range":[0,45],
   "type":"Program"
 }

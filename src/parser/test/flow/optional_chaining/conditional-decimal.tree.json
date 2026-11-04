@@ -14,8 +14,8 @@
     }
   ],
   "type":"Program",
-  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":5,"column":13}},
-  "range":[0,39],
+  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":6,"column":0}},
+  "range":[0,40],
   "body":[
     {
       "type":"ExpressionStatement",

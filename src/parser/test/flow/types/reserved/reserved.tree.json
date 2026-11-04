@@ -421,7 +421,7 @@
       "message":"Unexpected reserved type"
     }
   ],
-  "loc":{"end":{"column":38,"line":11},"source":null,"start":{"column":0,"line":1}},
-  "range":[0,471],
+  "loc":{"end":{"column":0,"line":12},"source":null,"start":{"column":0,"line":1}},
+  "range":[0,488],
   "type":"Program"
 }

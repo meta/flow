@@ -135,8 +135,8 @@ module.exports = (suite(({addFile, addFiles, addCode}) => [
             "errors": [],
             "loc": {
               "end": {
-                "column": 19,
-                "line": 1
+                "column": 0,
+                "line": 2
               },
               "source": null,
               "start": {
@@ -146,7 +146,7 @@ module.exports = (suite(({addFile, addFiles, addCode}) => [
             },
             "range": [
               0,
-              19
+              20
             ],
             "tokens": [
               {

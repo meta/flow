@@ -150,7 +150,7 @@
     "sourceType": "script",
     "range": [
         0,
-        22
+        23
     ],
     "loc": {
         "start": {
@@ -158,8 +158,8 @@
             "column": 0
         },
         "end": {
-            "line": 1,
-            "column": 22
+            "line": 2,
+            "column": 0
         }
     },
     "tokens": [

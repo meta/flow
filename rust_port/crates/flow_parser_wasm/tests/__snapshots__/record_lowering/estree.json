@@ -1335,8 +1335,8 @@
   "comments": [],
   "loc": {
     "end": {
-      "column": 48,
-      "line": 9
+      "column": 0,
+      "line": 10
     },
     "source": "lowering-test.js",
     "start": {
@@ -1346,7 +1346,7 @@
   },
   "range": [
     0,
-    174
+    175
   ],
   "type": "Program"
 }

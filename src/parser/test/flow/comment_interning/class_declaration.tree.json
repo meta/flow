@@ -14,8 +14,8 @@
     }
   ],
   "type":"Program",
-  "loc":{"source":null,"start":{"line":1,"column":18},"end":{"line":35,"column":121}},
-  "range":[18,1479],
+  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":36,"column":0}},
+  "range":[0,1480],
   "body":[
     {
       "type":"ClassDeclaration",

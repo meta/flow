@@ -39,7 +39,7 @@
     }
   ],
   "comments":[],
-  "loc":{"end":{"column":28,"line":1},"source":null,"start":{"column":0,"line":1}},
-  "range":[0,28],
+  "loc":{"end":{"column":0,"line":2},"source":null,"start":{"column":0,"line":1}},
+  "range":[0,29],
   "type":"Program"
 }

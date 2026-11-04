@@ -44,13 +44,13 @@
     ],
     "tokens": [],
     "range": [
-        8,
+        0,
         8
     ],
     "loc": {
         "start": {
             "line": 1,
-            "column": 8
+            "column": 0
         },
         "end": {
             "line": 1,

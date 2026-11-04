@@ -6,8 +6,8 @@
     }
   ],
   "type":"Program",
-  "loc":{"source":null,"start":{"line":2,"column":0},"end":{"line":2,"column":12}},
-  "range":[6,18],
+  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":3,"column":0}},
+  "range":[0,19],
   "body":[
     {
       "type":"VariableDeclaration",

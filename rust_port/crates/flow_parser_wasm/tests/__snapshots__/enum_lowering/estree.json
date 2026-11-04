@@ -668,8 +668,8 @@
   "comments": [],
   "loc": {
     "end": {
-      "column": 1,
-      "line": 8
+      "column": 0,
+      "line": 9
     },
     "source": "lowering-test.js",
     "start": {
@@ -679,7 +679,7 @@
   },
   "range": [
     0,
-    80
+    81
   ],
   "type": "Program"
 }

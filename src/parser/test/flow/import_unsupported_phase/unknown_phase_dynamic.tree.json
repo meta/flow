@@ -118,8 +118,8 @@
   ],
   "loc": {
     "end": {
-      "column": 37,
-      "line": 1
+      "column": 0,
+      "line": 2
     },
     "source": null,
     "start": {
@@ -129,7 +129,7 @@
   },
   "range": [
     0,
-    37
+    38
   ],
   "type": "Program"
 }

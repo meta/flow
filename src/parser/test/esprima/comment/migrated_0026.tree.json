@@ -136,12 +136,12 @@
         }
     ],
     "range": [
-        37,
+        0,
         39
     ],
     "loc": {
         "start": {
-            "line": 4,
+            "line": 1,
             "column": 0
         },
         "end": {

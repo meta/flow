@@ -43,26 +43,14 @@ module.exports = suite(
                       parent: {
                         parent: {
                           parent: {
-                            parent: {
-                              range: {
-                                end: {
-                                  character: 2,
-                                  line: 10,
-                                },
-                                start: {
-                                  character: 0,
-                                  line: 0,
-                                },
-                              },
-                            },
                             range: {
                               end: {
-                                character: 2,
-                                line: 10,
+                                character: 0,
+                                line: 11,
                               },
                               start: {
                                 character: 0,
-                                line: 2,
+                                line: 0,
                               },
                             },
                           },
@@ -146,26 +134,14 @@ module.exports = suite(
                           parent: {
                             parent: {
                               parent: {
-                                parent: {
-                                  range: {
-                                    end: {
-                                      character: 2,
-                                      line: 10,
-                                    },
-                                    start: {
-                                      character: 0,
-                                      line: 0,
-                                    },
-                                  },
-                                },
                                 range: {
                                   end: {
-                                    character: 2,
-                                    line: 10,
+                                    character: 0,
+                                    line: 11,
                                   },
                                   start: {
                                     character: 0,
-                                    line: 2,
+                                    line: 0,
                                   },
                                 },
                               },
@@ -271,26 +247,14 @@ module.exports = suite(
                           parent: {
                             parent: {
                               parent: {
-                                parent: {
-                                  range: {
-                                    end: {
-                                      character: 2,
-                                      line: 10,
-                                    },
-                                    start: {
-                                      character: 0,
-                                      line: 0,
-                                    },
-                                  },
-                                },
                                 range: {
                                   end: {
-                                    character: 2,
-                                    line: 10,
+                                    character: 0,
+                                    line: 11,
                                   },
                                   start: {
                                     character: 0,
-                                    line: 2,
+                                    line: 0,
                                   },
                                 },
                               },
@@ -397,26 +361,14 @@ module.exports = suite(
                             parent: {
                               parent: {
                                 parent: {
-                                  parent: {
-                                    range: {
-                                      end: {
-                                        character: 2,
-                                        line: 10,
-                                      },
-                                      start: {
-                                        character: 0,
-                                        line: 0,
-                                      },
-                                    },
-                                  },
                                   range: {
                                     end: {
-                                      character: 2,
-                                      line: 10,
+                                      character: 0,
+                                      line: 11,
                                     },
                                     start: {
                                       character: 0,
-                                      line: 2,
+                                      line: 0,
                                     },
                                   },
                                 },
@@ -534,26 +486,14 @@ module.exports = suite(
                     parent: {
                       parent: {
                         parent: {
-                          parent: {
-                            range: {
-                              end: {
-                                character: 19,
-                                line: 4,
-                              },
-                              start: {
-                                character: 0,
-                                line: 0,
-                              },
-                            },
-                          },
                           range: {
                             end: {
-                              character: 19,
-                              line: 4,
+                              character: 0,
+                              line: 5,
                             },
                             start: {
                               character: 0,
-                              line: 2,
+                              line: 0,
                             },
                           },
                         },
@@ -626,26 +566,14 @@ module.exports = suite(
                 {
                   parent: {
                     parent: {
-                      parent: {
-                        range: {
-                          end: {
-                            character: 2,
-                            line: 8,
-                          },
-                          start: {
-                            character: 0,
-                            line: 0,
-                          },
-                        },
-                      },
                       range: {
                         end: {
-                          character: 2,
-                          line: 8,
+                          character: 0,
+                          line: 9,
                         },
                         start: {
                           character: 0,
-                          line: 2,
+                          line: 0,
                         },
                       },
                     },
@@ -693,26 +621,14 @@ module.exports = suite(
                   parent: {
                     parent: {
                       parent: {
-                        parent: {
-                          range: {
-                            end: {
-                              character: 2,
-                              line: 8,
-                            },
-                            start: {
-                              character: 0,
-                              line: 0,
-                            },
-                          },
-                        },
                         range: {
                           end: {
-                            character: 2,
-                            line: 8,
+                            character: 0,
+                            line: 9,
                           },
                           start: {
                             character: 0,
-                            line: 2,
+                            line: 0,
                           },
                         },
                       },
@@ -773,26 +689,14 @@ module.exports = suite(
                       parent: {
                         parent: {
                           parent: {
-                            parent: {
-                              range: {
-                                end: {
-                                  character: 2,
-                                  line: 8,
-                                },
-                                start: {
-                                  character: 0,
-                                  line: 0,
-                                },
-                              },
-                            },
                             range: {
                               end: {
-                                character: 2,
-                                line: 8,
+                                character: 0,
+                                line: 9,
                               },
                               start: {
                                 character: 0,
-                                line: 2,
+                                line: 0,
                               },
                             },
                           },
@@ -876,26 +780,14 @@ module.exports = suite(
                   parent: {
                     parent: {
                       parent: {
-                        parent: {
-                          range: {
-                            end: {
-                              character: 17,
-                              line: 4,
-                            },
-                            start: {
-                              character: 0,
-                              line: 0,
-                            },
-                          },
-                        },
                         range: {
                           end: {
-                            character: 17,
-                            line: 4,
+                            character: 0,
+                            line: 5,
                           },
                           start: {
                             character: 0,
-                            line: 2,
+                            line: 0,
                           },
                         },
                       },
@@ -955,26 +847,14 @@ module.exports = suite(
                       parent: {
                         parent: {
                           parent: {
-                            parent: {
-                              range: {
-                                end: {
-                                  character: 17,
-                                  line: 4,
-                                },
-                                start: {
-                                  character: 0,
-                                  line: 0,
-                                },
-                              },
-                            },
                             range: {
                               end: {
-                                character: 17,
-                                line: 4,
+                                character: 0,
+                                line: 5,
                               },
                               start: {
                                 character: 0,
-                                line: 2,
+                                line: 0,
                               },
                             },
                           },
@@ -1058,8 +938,8 @@ module.exports = suite(
                   parent: {
                     range: {
                       end: {
-                        character: 30,
-                        line: 2,
+                        character: 0,
+                        line: 3,
                       },
                       start: {
                         character: 0,
@@ -1101,26 +981,14 @@ module.exports = suite(
               result: [
                 {
                   parent: {
-                    parent: {
-                      range: {
-                        end: {
-                          character: 1,
-                          line: 22,
-                        },
-                        start: {
-                          character: 0,
-                          line: 0,
-                        },
-                      },
-                    },
                     range: {
                       end: {
-                        character: 1,
-                        line: 22,
+                        character: 0,
+                        line: 23,
                       },
                       start: {
                         character: 0,
-                        line: 2,
+                        line: 0,
                       },
                     },
                   },
@@ -1158,26 +1026,14 @@ module.exports = suite(
                   {
                     parent: {
                       parent: {
-                        parent: {
-                          range: {
-                            end: {
-                              character: 1,
-                              line: 22,
-                            },
-                            start: {
-                              character: 0,
-                              line: 0,
-                            },
-                          },
-                        },
                         range: {
                           end: {
-                            character: 1,
-                            line: 22,
+                            character: 0,
+                            line: 23,
                           },
                           start: {
                             character: 0,
-                            line: 2,
+                            line: 0,
                           },
                         },
                       },
@@ -1224,26 +1080,14 @@ module.exports = suite(
                   parent: {
                     parent: {
                       parent: {
-                        parent: {
-                          range: {
-                            end: {
-                              character: 1,
-                              line: 22,
-                            },
-                            start: {
-                              character: 0,
-                              line: 0,
-                            },
-                          },
-                        },
                         range: {
                           end: {
-                            character: 1,
-                            line: 22,
+                            character: 0,
+                            line: 23,
                           },
                           start: {
                             character: 0,
-                            line: 2,
+                            line: 0,
                           },
                         },
                       },
@@ -1304,26 +1148,14 @@ module.exports = suite(
                         parent: {
                           parent: {
                             parent: {
-                              parent: {
-                                range: {
-                                  end: {
-                                    character: 1,
-                                    line: 22,
-                                  },
-                                  start: {
-                                    character: 0,
-                                    line: 0,
-                                  },
-                                },
-                              },
                               range: {
                                 end: {
-                                  character: 1,
-                                  line: 22,
+                                  character: 0,
+                                  line: 23,
                                 },
                                 start: {
                                   character: 0,
-                                  line: 2,
+                                  line: 0,
                                 },
                               },
                             },
@@ -1415,26 +1247,14 @@ module.exports = suite(
                     parent: {
                       parent: {
                         parent: {
-                          parent: {
-                            range: {
-                              end: {
-                                character: 1,
-                                line: 22,
-                              },
-                              start: {
-                                character: 0,
-                                line: 0,
-                              },
-                            },
-                          },
                           range: {
                             end: {
-                              character: 1,
-                              line: 22,
+                              character: 0,
+                              line: 23,
                             },
                             start: {
                               character: 0,
-                              line: 2,
+                              line: 0,
                             },
                           },
                         },
@@ -1506,26 +1326,14 @@ module.exports = suite(
                       parent: {
                         parent: {
                           parent: {
-                            parent: {
-                              range: {
-                                end: {
-                                  character: 1,
-                                  line: 22,
-                                },
-                                start: {
-                                  character: 0,
-                                  line: 0,
-                                },
-                              },
-                            },
                             range: {
                               end: {
-                                character: 1,
-                                line: 22,
+                                character: 0,
+                                line: 23,
                               },
                               start: {
                                 character: 0,
-                                line: 2,
+                                line: 0,
                               },
                             },
                           },
@@ -1599,26 +1407,14 @@ module.exports = suite(
                           parent: {
                             parent: {
                               parent: {
-                                parent: {
-                                  range: {
-                                    end: {
-                                      character: 1,
-                                      line: 22,
-                                    },
-                                    start: {
-                                      character: 0,
-                                      line: 0,
-                                    },
-                                  },
-                                },
                                 range: {
                                   end: {
-                                    character: 1,
-                                    line: 22,
+                                    character: 0,
+                                    line: 23,
                                   },
                                   start: {
                                     character: 0,
-                                    line: 2,
+                                    line: 0,
                                   },
                                 },
                               },
@@ -1710,26 +1506,14 @@ module.exports = suite(
                     parent: {
                       parent: {
                         parent: {
-                          parent: {
-                            range: {
-                              end: {
-                                character: 1,
-                                line: 22,
-                              },
-                              start: {
-                                character: 0,
-                                line: 0,
-                              },
-                            },
-                          },
                           range: {
                             end: {
-                              character: 1,
-                              line: 22,
+                              character: 0,
+                              line: 23,
                             },
                             start: {
                               character: 0,
-                              line: 2,
+                              line: 0,
                             },
                           },
                         },
@@ -1800,26 +1584,14 @@ module.exports = suite(
                       parent: {
                         parent: {
                           parent: {
-                            parent: {
-                              range: {
-                                end: {
-                                  character: 1,
-                                  line: 22,
-                                },
-                                start: {
-                                  character: 0,
-                                  line: 0,
-                                },
-                              },
-                            },
                             range: {
                               end: {
-                                character: 1,
-                                line: 22,
+                                character: 0,
+                                line: 23,
                               },
                               start: {
                                 character: 0,
-                                line: 2,
+                                line: 0,
                               },
                             },
                           },
@@ -1900,26 +1672,14 @@ module.exports = suite(
                     parent: {
                       parent: {
                         parent: {
-                          parent: {
-                            range: {
-                              end: {
-                                character: 1,
-                                line: 22,
-                              },
-                              start: {
-                                character: 0,
-                                line: 0,
-                              },
-                            },
-                          },
                           range: {
                             end: {
-                              character: 1,
-                              line: 22,
+                              character: 0,
+                              line: 23,
                             },
                             start: {
                               character: 0,
-                              line: 2,
+                              line: 0,
                             },
                           },
                         },
@@ -1991,26 +1751,14 @@ module.exports = suite(
                   parent: {
                     parent: {
                       parent: {
-                        parent: {
-                          range: {
-                            end: {
-                              character: 2,
-                              line: 14,
-                            },
-                            start: {
-                              character: 0,
-                              line: 0,
-                            },
-                          },
-                        },
                         range: {
                           end: {
-                            character: 2,
-                            line: 14,
+                            character: 0,
+                            line: 15,
                           },
                           start: {
                             character: 0,
-                            line: 2,
+                            line: 0,
                           },
                         },
                       },
@@ -2068,26 +1816,14 @@ module.exports = suite(
                     parent: {
                       parent: {
                         parent: {
-                          parent: {
-                            range: {
-                              end: {
-                                character: 2,
-                                line: 14,
-                              },
-                              start: {
-                                character: 0,
-                                line: 0,
-                              },
-                            },
-                          },
                           range: {
                             end: {
-                              character: 2,
-                              line: 14,
+                              character: 0,
+                              line: 15,
                             },
                             start: {
                               character: 0,
-                              line: 2,
+                              line: 0,
                             },
                           },
                         },
@@ -2156,26 +1892,14 @@ module.exports = suite(
                     parent: {
                       parent: {
                         parent: {
-                          parent: {
-                            range: {
-                              end: {
-                                character: 2,
-                                line: 14,
-                              },
-                              start: {
-                                character: 0,
-                                line: 0,
-                              },
-                            },
-                          },
                           range: {
                             end: {
-                              character: 2,
-                              line: 14,
+                              character: 0,
+                              line: 15,
                             },
                             start: {
                               character: 0,
-                              line: 2,
+                              line: 0,
                             },
                           },
                         },

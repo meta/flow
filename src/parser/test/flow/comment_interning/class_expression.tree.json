@@ -8,8 +8,8 @@
       "value":" @flow "
     }
   ],
-  "loc":{"source":null,"start":{"line":3,"column":0},"end":{"line":5,"column":87}},
-  "range":[13,236],
+  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":6,"column":0}},
+  "range":[0,259],
   "body":[
     {
       "type":"ExpressionStatement",

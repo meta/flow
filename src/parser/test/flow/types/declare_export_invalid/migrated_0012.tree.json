@@ -10,8 +10,8 @@
     }
   ],
   "type":"Program",
-  "loc":{"source":null,"start":{"line":2,"column":0},"end":{"line":2,"column":30}},
-  "range":[34,64],
+  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":3,"column":0}},
+  "range":[0,65],
   "body":[
     {
       "type":"DeclareExportDeclaration",

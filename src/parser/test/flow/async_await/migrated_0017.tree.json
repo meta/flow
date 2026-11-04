@@ -6,8 +6,8 @@
     }
   ],
   "type":"Program",
-  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":1,"column":39}},
-  "range":[0,39],
+  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":2,"column":0}},
+  "range":[0,40],
   "body":[
     {
       "type":"FunctionDeclaration",

@@ -27,8 +27,10 @@ Read the docs on Flow's multi-platform support for more information: https://flo
 
 References:
    shadowing.ios.js:1:1
+      v---------------------------
    1| export const iosOnly = true;
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   2|
+      ^ [1]
    shadowing.js.flow
    ^^^^^^^^^^^^^^^^^ [2]
 

@@ -1,7 +1,7 @@
 {
   "type":"Program",
-  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":55,"column":12}},
-  "range":[0,550],
+  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":56,"column":0}},
+  "range":[0,551],
   "body":[
     {
       "type":"TypeAlias",

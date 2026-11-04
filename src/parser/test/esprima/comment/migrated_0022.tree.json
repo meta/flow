@@ -24,13 +24,13 @@
     ],
     "tokens": [],
     "range": [
-        2,
+        0,
         2
     ],
     "loc": {
         "start": {
             "line": 1,
-            "column": 2
+            "column": 0
         },
         "end": {
             "line": 1,

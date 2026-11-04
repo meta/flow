@@ -253,7 +253,7 @@
     "sourceType": "script",
     "range": [
         0,
-        58
+        59
     ],
     "loc": {
         "start": {
@@ -261,8 +261,8 @@
             "column": 0
         },
         "end": {
-            "line": 1,
-            "column": 58
+            "line": 2,
+            "column": 0
         }
     },
     "tokens": [

@@ -481,14 +481,7 @@ fn parse_program_inner(env: &mut ParserEnv) -> Result<ast::Program<Loc, Loc>, Ro
 
         check_for_duplicate_exports(env, &stmts);
 
-        let loc = {
-            let first = stmts.first().map(|s| s.loc().dupe());
-            let last = stmts.last().map(|s| s.loc().dupe());
-            match (first, last) {
-                (Some(f), Some(l)) => Loc::between(&f, &l),
-                _ => end_loc,
-            }
-        };
+        let loc = Loc::between(&Loc::cursor(env.source(), 1, 0), &end_loc);
 
         let all_comments = env.take_comments();
 
@@ -747,6 +740,45 @@ mod tests {
     use super::*;
     use crate::ast::statement::StatementInner;
     use crate::file_key::FileKeyInner;
+
+    #[test]
+    fn program_location_spans_source() {
+        // Programs include whitespace, comments, and interpreter directives, even without statements.
+        for (source, end_line, end_column) in [
+            (" a ", 1, 3),
+            ("", 1, 0),
+            (" \t\r\n ", 2, 1),
+            (" /* comment */ \n", 2, 0),
+            ("#!/usr/bin/env node\n a \n", 3, 0),
+            ("\n/* leading */\na;\n/* trailing */\n ", 5, 1),
+            ("\u{feff}a \u{2028}\u{2029} ", 3, 1),
+            (" '\u{1f6a6}' ", 1, 8),
+        ] {
+            for filename in [None, Some("test.js")] {
+                let file =
+                    filename.map(|name| FileKey::new(FileKeyInner::SourceFile(name.to_owned())));
+                let (program, errors) = parse_program(false, None, None, file.dupe(), Ok(source));
+                assert!(errors.is_empty(), "{source:?}: {errors:?}"); // OK
+                assert_eq!(program.loc, Loc::mk(file, 1, 0, end_line, end_column)); // OK
+            }
+        }
+
+        // Statement locations remain token-based within the full-source program.
+        let (program, errors) = parse_program_without_file(false, None, None, Ok(" a "));
+        assert!(errors.is_empty()); // OK
+        assert_eq!(program.statements[0].loc(), &Loc::mk(None, 1, 1, 1, 2)); // OK
+
+        // Module parsing shares the same program bounds.
+        let file = FileKey::new(FileKeyInner::SourceFile("test.mjs".to_owned()));
+        let program =
+            parse_module_file(ParseOptions::default(), file.dupe(), " a \n").expect("valid module");
+        assert_eq!(program.loc, Loc::mk(Some(file), 1, 0, 2, 0)); // OK
+
+        // Recoverable errors do not truncate the program at the last statement.
+        let (program, errors) = parse_program_without_file(false, None, None, Ok(" const = ; \n"));
+        assert!(!errors.is_empty()); // OK
+        assert_eq!(program.loc, Loc::mk(None, 1, 0, 2, 0)); // OK
+    }
 
     #[test]
     fn type_syntax_requires_types() {

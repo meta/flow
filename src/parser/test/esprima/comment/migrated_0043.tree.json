@@ -204,13 +204,13 @@
         }
     ],
     "range": [
-        16,
+        0,
         23
     ],
     "loc": {
         "start": {
             "line": 1,
-            "column": 16
+            "column": 0
         },
         "end": {
             "line": 1,

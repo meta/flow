@@ -176,11 +176,11 @@ Non-ASCII characters without specifying offset style:
   ],
   "errors":[],
   "loc":{
-    "end":{"column":16,"line":4},
+    "end":{"column":0,"line":5},
     "source":"nonascii.js",
-    "start":{"column":0,"line":4}
+    "start":{"column":0,"line":1}
   },
-  "range":[84,100],
+  "range":[0,101],
   "tokens":[],
   "type":"Program"
 }
@@ -280,11 +280,11 @@ Non-ASCII characters with utf8-bytes offset style:
   ],
   "errors":[],
   "loc":{
-    "end":{"column":16,"line":4},
+    "end":{"column":0,"line":5},
     "source":"nonascii.js",
-    "start":{"column":0,"line":4}
+    "start":{"column":0,"line":1}
   },
-  "range":[84,100],
+  "range":[0,101],
   "tokens":[],
   "type":"Program"
 }
@@ -384,11 +384,11 @@ Non-ASCII characters with js-indices offset style:
   ],
   "errors":[],
   "loc":{
-    "end":{"column":16,"line":4},
+    "end":{"column":0,"line":5},
     "source":"nonascii.js",
-    "start":{"column":0,"line":4}
+    "start":{"column":0,"line":1}
   },
-  "range":[82,98],
+  "range":[0,99],
   "tokens":[],
   "type":"Program"
 }

@@ -46,7 +46,7 @@
       "value":" ok, a type named `as`, renamed to `x`"
     }
   ],
-  "loc":{"end":{"column":42,"line":2},"source":null,"start":{"column":0,"line":2}},
-  "range":[41,83],
+  "loc":{"end":{"column":0,"line":3},"source":null,"start":{"column":0,"line":1}},
+  "range":[0,84],
   "type":"Program"
 }

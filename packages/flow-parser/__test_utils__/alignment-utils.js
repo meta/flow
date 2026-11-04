@@ -96,11 +96,7 @@ function cleanBabelAst(ast: $FlowFixMe): unknown {
 }
 
 export function parseBabel(source: string): unknown {
-  // Trim end of string as Babel includes all whitespace in the
-  // range but Hermes parser does not.
-  const sourceTrimmed = source.trimEnd();
-
-  const ast = parseBabelOriginal(sourceTrimmed, {
+  const ast = parseBabelOriginal(source, {
     attachComment: false,
     errorRecovery: false,
     plugins: [

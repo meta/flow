@@ -555,13 +555,13 @@
         }
     ],
     "range": [
-        13,
+        0,
         56
     ],
     "loc": {
         "start": {
             "line": 1,
-            "column": 13
+            "column": 0
         },
         "end": {
             "line": 1,

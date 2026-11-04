@@ -276,7 +276,7 @@
     ],
     "range": [
         0,
-        21
+        22
     ],
     "loc": {
         "start": {
@@ -284,8 +284,8 @@
             "column": 0
         },
         "end": {
-            "line": 1,
-            "column": 21
+            "line": 2,
+            "column": 0
         }
     }
 }

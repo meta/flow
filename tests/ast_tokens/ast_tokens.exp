@@ -293,8 +293,8 @@
       "message":"Unexpected reserved word"
     }
   ],
-  "loc":{"end":{"column":2,"line":15},"source":null,"start":{"column":0,"line":2}},
-  "range":[46,343],
+  "loc":{"end":{"column":0,"line":16},"source":null,"start":{"column":0,"line":1}},
+  "range":[0,344],
   "tokens":[
     {
       "context":"regexp",

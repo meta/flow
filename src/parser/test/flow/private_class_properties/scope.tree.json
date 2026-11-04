@@ -10,8 +10,8 @@
     }
   ],
   "type":"Program",
-  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":45,"column":8}},
-  "range":[0,686],
+  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":46,"column":0}},
+  "range":[0,697],
   "body":[
     {
       "type":"ClassDeclaration",

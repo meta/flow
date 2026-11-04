@@ -18,8 +18,8 @@
     }
   ],
   "type":"Program",
-  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":31,"column":1}},
-  "range":[0,730],
+  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":32,"column":0}},
+  "range":[0,731],
   "body":[
     {
       "type":"FunctionDeclaration",

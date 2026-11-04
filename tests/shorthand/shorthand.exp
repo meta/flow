@@ -70,8 +70,8 @@
   ],
   "comments":[],
   "errors":[],
-  "loc":{"end":{"column":34,"line":3},"source":"a.js","start":{"column":0,"line":3}},
-  "range":[9,43],
+  "loc":{"end":{"column":0,"line":4},"source":"a.js","start":{"column":0,"line":1}},
+  "range":[0,44],
   "tokens":[],
   "type":"Program"
 }

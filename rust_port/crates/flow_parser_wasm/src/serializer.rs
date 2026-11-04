@@ -361,15 +361,9 @@ impl<'a> Serializer<'a> {
         errors: &[(Loc, ParseError)],
         tokens: Option<&[TokenSinkResult]>,
     ) -> SerializerBuffers {
-        let program_loc = if self.is_babel() {
-            self.babel_program_loc(program)
-        } else {
-            program.loc.clone()
-        };
-
         if self.is_babel() {
-            self.write_node_header(NodeKind::BabelFile, &program_loc);
-            self.write_node_header(NodeKind::BabelProgram, &program_loc);
+            self.write_node_header(NodeKind::BabelFile, &program.loc);
+            self.write_node_header(NodeKind::BabelProgram, &program.loc);
             self.serialize_program_body(program);
             self.serialize_directives(program);
             self.write_str(if self.babel_source_type(program) {
@@ -380,7 +374,7 @@ impl<'a> Serializer<'a> {
             self.serialize_interpreter(program);
             self.serialize_comments(program);
         } else {
-            let loc_id = self.add_loc(&program_loc);
+            let loc_id = self.add_loc(&program.loc);
             self.buf.push(loc_id);
             self.serialize_program_body(program);
             self.serialize_comments(program);
@@ -481,24 +475,6 @@ impl<'a> Serializer<'a> {
             self.buf.push(loc_id);
             let msg = format!("{}", err);
             self.write_str(&msg);
-        }
-    }
-
-    fn babel_program_loc(&self, program: &ast::Program<Loc, Loc>) -> Loc {
-        let end = program
-            .all_comments
-            .last()
-            .map_or(program.loc.end, |comment| {
-                if comment.loc.end > program.loc.end {
-                    comment.loc.end
-                } else {
-                    program.loc.end
-                }
-            });
-        Loc {
-            source: program.loc.source.clone(),
-            start: Position { line: 1, column: 0 },
-            end,
         }
     }
 

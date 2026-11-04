@@ -8,8 +8,8 @@
       "value":"*\n * A docblock\n "
     }
   ],
-  "loc":{"source":null,"start":{"line":9,"column":0},"end":{"line":18,"column":1}},
-  "range":[50,174],
+  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":19,"column":0}},
+  "range":[0,175],
   "body":[
     {
       "type":"RecordDeclaration",

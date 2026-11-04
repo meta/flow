@@ -100,13 +100,13 @@
         }
     ],
     "range": [
-        4,
+        0,
         6
     ],
     "loc": {
         "start": {
             "line": 1,
-            "column": 4
+            "column": 0
         },
         "end": {
             "line": 1,

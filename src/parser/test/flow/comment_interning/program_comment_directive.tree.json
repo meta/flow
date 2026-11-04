@@ -14,8 +14,8 @@
       "value":" @flow"
     }
   ],
-  "loc":{"source":null,"start":{"line":8,"column":0},"end":{"line":8,"column":13}},
-  "range":[49,62],
+  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":9,"column":0}},
+  "range":[0,63],
   "body":[
     {
       "type":"TypeAlias",

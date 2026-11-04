@@ -46,7 +46,7 @@
       "value":" ok, `switch` is a reserved value but not reserved type name"
     }
   ],
-  "loc":{"end":{"column":36,"line":2},"source":null,"start":{"column":0,"line":2}},
-  "range":[63,99],
+  "loc":{"end":{"column":0,"line":3},"source":null,"start":{"column":0,"line":1}},
+  "range":[0,100],
   "type":"Program"
 }

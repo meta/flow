@@ -104,7 +104,8 @@ References:
    2|
    3| declare export function foo(): boolean;
    4| declare export function foo(): number;
-      -------------------------------------^ [1]
+   5|
+      ^ [1]
    esm_conformance_errors.js.flow
    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 

@@ -32,12 +32,12 @@
         }
     ],
     "range": [
-        9,
+        0,
         9
     ],
     "loc": {
         "start": {
-            "line": 3,
+            "line": 1,
             "column": 0
         },
         "end": {

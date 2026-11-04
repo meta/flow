@@ -13,9 +13,9 @@
   "loc":{
     "source":null,
     "start":{"line":1,"column":0},
-    "end":{"line":4,"column":6}
+    "end":{"line":5,"column":0}
   },
-  "range":[0,55],
+  "range":[0,56],
   "body":[
     {
       "type":"ExpressionStatement",

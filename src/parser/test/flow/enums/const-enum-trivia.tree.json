@@ -85,18 +85,18 @@
   ],
   "loc": {
     "end": {
-      "column": 13,
-      "line": 2
+      "column": 0,
+      "line": 3
     },
     "source": null,
     "start": {
-      "column": 2,
+      "column": 0,
       "line": 1
     }
   },
   "range": [
-    2,
-    31
+    0,
+    32
   ],
   "type": "Program"
 }

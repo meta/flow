@@ -38,8 +38,8 @@
     }
   ],
   "type":"Program",
-  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":13,"column":12}},
-  "range":[0,92],
+  "loc":{"source":null,"start":{"line":1,"column":0},"end":{"line":14,"column":0}},
+  "range":[0,93],
   "body":[
     {
       "type":"ExpressionStatement",

@@ -956,8 +956,8 @@
   "comments": [],
   "loc": {
     "end": {
-      "column": 47,
-      "line": 6
+      "column": 0,
+      "line": 7
     },
     "source": null,
     "start": {
@@ -967,7 +967,7 @@
   },
   "range": [
     0,
-    214
+    215
   ],
   "type": "Program"
 }

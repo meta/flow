@@ -2312,8 +2312,8 @@
   "comments": [],
   "loc": {
     "end": {
-      "column": 1,
-      "line": 14
+      "column": 0,
+      "line": 15
     },
     "source": "lowering-test.js",
     "start": {
@@ -2323,7 +2323,7 @@
   },
   "range": [
     0,
-    260
+    261
   ],
   "type": "Program"
 }

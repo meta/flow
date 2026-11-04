@@ -65,8 +65,8 @@
   "comments": [],
   "loc": {
     "end": {
-      "column": 15,
-      "line": 1
+      "column": 0,
+      "line": 2
     },
     "source": null,
     "start": {
@@ -76,7 +76,7 @@
   },
   "range": [
     0,
-    15
+    16
   ],
   "type": "Program"
 }

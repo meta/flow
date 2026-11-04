@@ -312,7 +312,7 @@
     ],
     "range": [
         0,
-        18
+        19
     ],
     "loc": {
         "start": {
@@ -320,8 +320,8 @@
             "column": 0
         },
         "end": {
-            "line": 1,
-            "column": 18
+            "line": 2,
+            "column": 0
         }
     }
 }
