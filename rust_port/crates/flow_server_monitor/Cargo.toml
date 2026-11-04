@@ -35,7 +35,7 @@ lsp-types = "0.97"
 nix = { version = "0.31.3", features = ["dir", "event", "hostname", "inotify", "ioctl", "mman", "mount", "net", "poll", "ptrace", "reboot", "resource", "sched", "signal", "term", "time", "user", "zerocopy"] }
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 serde_json = { version = "1.0.154", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
-signal-hook = "0.3.18"
+signal-hook = "0.4.6"
 tokio = { version = "1.54.1", features = ["full", "test-util", "tracing"] }
 
 [target.'cfg(target_os = "windows")'.dependencies]
