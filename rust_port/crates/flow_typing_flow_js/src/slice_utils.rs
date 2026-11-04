@@ -666,8 +666,8 @@ fn spread2<'cx>(
                         ))));
                     }
                 }
-                // For value spreads, an inexact left-hand slice may contain p2 even though
-                // it is not explicitly specified. Type spreads use only the declared shape.
+                // For value spreads, an inexact or indexed left-hand slice may contain p2 even
+                // though it is not explicitly specified. Type spreads use only the declared shape.
                 //
                 // If p2 is not optional, then we don't have to worry because it definitely
                 // overwrites a property with a matching key on the left.
@@ -683,7 +683,8 @@ fn spread2<'cx>(
                     let (_, opt2) = type_optionality(p2);
                     match (&flags1.obj_kind, opt2) {
                         (kind @ (ObjKind::Indexed(_) | ObjKind::Inexact), true)
-                            if !allow_inexact1 || matches!(kind, ObjKind::Indexed(_)) =>
+                            if !allow_inexact1
+                                || (matches!(kind, ObjKind::Indexed(_)) && !allow_inexact) =>
                         {
                             let error_kind = if obj_type::get_dict_opt(&flags1.obj_kind).is_some() {
                                 intermediate_error_types::ExactnessErrorKind::UnexpectedIndexer

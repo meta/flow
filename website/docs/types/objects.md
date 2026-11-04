@@ -329,8 +329,9 @@ type ObjB = {
 const x: ObjB = {a:1, b: 'hi', c: true};
 ```
 
-Objects with [indexers](#toc-objects-as-maps) remain restricted because their
-unknown keys participate in the spread:
+The same applies to the unknown keys of an [indexer](#toc-objects-as-maps):
+properties spread after it keep their declared types. An object with an indexer
+still can't be spread after other properties, because its keys may overwrite them:
 
 ```js flow-check
 type Dict = {

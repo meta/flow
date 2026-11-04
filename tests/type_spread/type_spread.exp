@@ -32,42 +32,132 @@ References:
                   ^^^^^^ [3]
 
 
-Error ----------------------------------------------------------------------------------------------- all_cases.js:87:11
+Error ------------------------------------------------------------------------------------------------ all_cases.js:93:1
 
-Flow cannot determine a type for the spread [1]. `A7` [2] has an indexer, so it may contain `p` with a type that
-conflicts with `p`'s definition in `B7` [3]. Try removing the indexer in `A7` [2] or make `p` a required property.
-[cannot-spread-indexer]
+Cannot cast `X7` to `C7` because in property `p`: `void | string | number` [1] is not exactly the same as
+`void | string` [2]. [incompatible-type]
 
+The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
+- Either make `D7` [3] and `{[string]: number, p?: string}` [4] exactly the same
+- Or make property `p` in `{[string]: number, p?: string}` [5] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   all_cases.js:93:1
+   93| X7 as C7; // Error
+       ^^
+
+References:
+   all_cases.js:88:34
+   88| type D7 = {[string]: number, p?: string | number};
+                                        ^^^^^^^^^^^^^^^ [1]
+   all_cases.js:86:16
+   86| type B7 = {p?: string};
+                      ^^^^^^ [2]
+   all_cases.js:88:11
+   88| type D7 = {[string]: number, p?: string | number};
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    all_cases.js:87:11
-   87| type C7 = {...A7, ...B7, ...}; // Error, A7 has an indexer and p? is optional
-                 ^^^^^^^^^^^^^^^^^^^ [1]
+   87| type C7 = {...A7, ...B7, ...}; // OK
+                 ^^^^^^^^^^^^^^^^^^^ [4]
+   all_cases.js:93:7
+   93| X7 as C7; // Error
+             ^^ [5]
+
+
+Error ------------------------------------------------------------------------------------------------ all_cases.js:94:1
+
+Cannot cast `Y7` to `D7` because in property `p`: `void | string` [1] is not exactly the same as
+`void | string | number` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
+- Either make `{[string]: number, p?: string}` [3] and `D7` [4] exactly the same
+- Or make property `p` in `D7` [5] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   all_cases.js:94:1
+   94| Y7 as D7; // Error
+       ^^
 
 References:
-   all_cases.js:87:15
-   87| type C7 = {...A7, ...B7, ...}; // Error, A7 has an indexer and p? is optional
-                     ^^ [2]
-   all_cases.js:87:22
-   87| type C7 = {...A7, ...B7, ...}; // Error, A7 has an indexer and p? is optional
-                            ^^ [3]
+   all_cases.js:86:16
+   86| type B7 = {p?: string};
+                      ^^^^^^ [1]
+   all_cases.js:88:34
+   88| type D7 = {[string]: number, p?: string | number};
+                                        ^^^^^^^^^^^^^^^ [2]
+   all_cases.js:87:11
+   87| type C7 = {...A7, ...B7, ...}; // OK
+                 ^^^^^^^^^^^^^^^^^^^ [3]
+   all_cases.js:88:11
+   88| type D7 = {[string]: number, p?: string | number};
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   all_cases.js:94:7
+   94| Y7 as D7; // Error
+             ^^ [5]
 
 
-Error ---------------------------------------------------------------------------------------------- all_cases.js:177:12
+Error ----------------------------------------------------------------------------------------------- all_cases.js:182:1
 
-Flow cannot determine a type for the spread [1]. `A15` [2] has an indexer, so it may contain `p` with a type that
-conflicts with `p`'s definition in `B15` [3]. Try removing the indexer in `A15` [2] or make `p` a required property.
-[cannot-spread-indexer]
+Cannot cast `X15` to `C15` because in property `p`: `void | string | number` [1] is not exactly the same as
+`void | string` [2]. [incompatible-type]
 
+The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
+- Either make `D15` [3] and `{[string]: number, p?: string}` [4] exactly the same
+- Or make property `p` in `{[string]: number, p?: string}` [5] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   all_cases.js:182:1
+   182| X15 as C15; // Error
+        ^^^
+
+References:
+   all_cases.js:178:35
+   178| type D15 = {[string]: number, p?: string | number};
+                                          ^^^^^^^^^^^^^^^ [1]
+   all_cases.js:176:17
+   176| type B15 = {p?: string};
+                        ^^^^^^ [2]
+   all_cases.js:178:12
+   178| type D15 = {[string]: number, p?: string | number};
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    all_cases.js:177:12
-   177| type C15 = {...A15, ...B15, ...}; // Error, A15 has an indexer and p? is optional
-                   ^^^^^^^^^^^^^^^^^^^^^ [1]
+   177| type C15 = {...A15, ...B15, ...}; // OK
+                   ^^^^^^^^^^^^^^^^^^^^^ [4]
+   all_cases.js:182:8
+   182| X15 as C15; // Error
+               ^^^ [5]
+
+
+Error ----------------------------------------------------------------------------------------------- all_cases.js:183:1
+
+Cannot cast `Y15` to `D15` because in property `p`: `void | string` [1] is not exactly the same as
+`void | string | number` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
+- Either make `{[string]: number, p?: string}` [3] and `D15` [4] exactly the same
+- Or make property `p` in `D15` [5] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   all_cases.js:183:1
+   183| Y15 as D15; // Error
+        ^^^
 
 References:
-   all_cases.js:177:16
-   177| type C15 = {...A15, ...B15, ...}; // Error, A15 has an indexer and p? is optional
-                       ^^^ [2]
-   all_cases.js:177:24
-   177| type C15 = {...A15, ...B15, ...}; // Error, A15 has an indexer and p? is optional
-                               ^^^ [3]
+   all_cases.js:176:17
+   176| type B15 = {p?: string};
+                        ^^^^^^ [1]
+   all_cases.js:178:35
+   178| type D15 = {[string]: number, p?: string | number};
+                                          ^^^^^^^^^^^^^^^ [2]
+   all_cases.js:177:12
+   177| type C15 = {...A15, ...B15, ...}; // OK
+                   ^^^^^^^^^^^^^^^^^^^^^ [3]
+   all_cases.js:178:12
+   178| type D15 = {[string]: number, p?: string | number};
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   all_cases.js:183:8
+   183| Y15 as D15; // Error
+               ^^^ [5]
 
 
 Error ----------------------------------------------------------------------------------------------- all_cases.js:193:1
@@ -149,42 +239,132 @@ References:
                ^^^ [5]
 
 
-Error ---------------------------------------------------------------------------------------------- all_cases.js:267:12
+Error ----------------------------------------------------------------------------------------------- all_cases.js:273:1
 
-Flow cannot determine a type for the spread [1]. `A23` [2] has an indexer, so it may contain `p` with a type that
-conflicts with `p`'s definition in `B23` [3]. Try removing the indexer in `A23` [2] or make `p` a required property.
-[cannot-spread-indexer]
+Cannot cast `X23` to `C23` because in property `p`: `void | string | number` [1] is not exactly the same as
+`void | string` [2]. [incompatible-type]
 
+The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
+- Either make `D23` [3] and `{[string]: number, p?: string}` [4] exactly the same
+- Or make property `p` in `{[string]: number, p?: string}` [5] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   all_cases.js:273:1
+   273| X23 as C23; // Error
+        ^^^
+
+References:
+   all_cases.js:268:35
+   268| type D23 = {[string]: number, p?: string | number};
+                                          ^^^^^^^^^^^^^^^ [1]
+   all_cases.js:266:17
+   266| type B23 = {p?: string, ...};
+                        ^^^^^^ [2]
+   all_cases.js:268:12
+   268| type D23 = {[string]: number, p?: string | number};
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    all_cases.js:267:12
-   267| type C23 = {...A23, ...B23, ...}; // Error: A23's indexer conflicts with optional p
-                   ^^^^^^^^^^^^^^^^^^^^^ [1]
+   267| type C23 = {...A23, ...B23, ...}; // OK
+                   ^^^^^^^^^^^^^^^^^^^^^ [4]
+   all_cases.js:273:8
+   273| X23 as C23; // Error
+               ^^^ [5]
+
+
+Error ----------------------------------------------------------------------------------------------- all_cases.js:274:1
+
+Cannot cast `Y23` to `D23` because in property `p`: `void | string` [1] is not exactly the same as
+`void | string | number` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
+- Either make `{[string]: number, p?: string}` [3] and `D23` [4] exactly the same
+- Or make property `p` in `D23` [5] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   all_cases.js:274:1
+   274| Y23 as D23; // Error
+        ^^^
 
 References:
-   all_cases.js:267:16
-   267| type C23 = {...A23, ...B23, ...}; // Error: A23's indexer conflicts with optional p
-                       ^^^ [2]
-   all_cases.js:267:24
-   267| type C23 = {...A23, ...B23, ...}; // Error: A23's indexer conflicts with optional p
-                               ^^^ [3]
+   all_cases.js:266:17
+   266| type B23 = {p?: string, ...};
+                        ^^^^^^ [1]
+   all_cases.js:268:35
+   268| type D23 = {[string]: number, p?: string | number};
+                                          ^^^^^^^^^^^^^^^ [2]
+   all_cases.js:267:12
+   267| type C23 = {...A23, ...B23, ...}; // OK
+                   ^^^^^^^^^^^^^^^^^^^^^ [3]
+   all_cases.js:268:12
+   268| type D23 = {[string]: number, p?: string | number};
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   all_cases.js:274:8
+   274| Y23 as D23; // Error
+               ^^^ [5]
 
 
-Error ---------------------------------------------------------------------------------------------- all_cases.js:359:12
+Error ----------------------------------------------------------------------------------------------- all_cases.js:365:1
 
-Flow cannot determine a type for the spread [1]. `A31` [2] has an indexer, so it may contain `p` with a type that
-conflicts with `p`'s definition in `B31` [3]. Try removing the indexer in `A31` [2] or make `p` a required property.
-[cannot-spread-indexer]
+Cannot cast `X31` to `C31` because in property `p`: `void | string | number` [1] is not exactly the same as
+`void | string` [2]. [incompatible-type]
 
+The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
+- Either make `D31` [3] and `{[string]: number, p?: string}` [4] exactly the same
+- Or make property `p` in `{[string]: number, p?: string}` [5] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   all_cases.js:365:1
+   365| X31 as C31; // Error
+        ^^^
+
+References:
+   all_cases.js:360:35
+   360| type D31 = {[string]: number, p?: string | number};
+                                          ^^^^^^^^^^^^^^^ [1]
+   all_cases.js:358:17
+   358| type B31 = {p?: string, ...};
+                        ^^^^^^ [2]
+   all_cases.js:360:12
+   360| type D31 = {[string]: number, p?: string | number};
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    all_cases.js:359:12
-   359| type C31 = {...A31, ...B31, ...}; // Error: A31's indexer conflicts with optional p
-                   ^^^^^^^^^^^^^^^^^^^^^ [1]
+   359| type C31 = {...A31, ...B31, ...}; // OK
+                   ^^^^^^^^^^^^^^^^^^^^^ [4]
+   all_cases.js:365:8
+   365| X31 as C31; // Error
+               ^^^ [5]
+
+
+Error ----------------------------------------------------------------------------------------------- all_cases.js:366:1
+
+Cannot cast `Y31` to `D31` because in property `p`: `void | string` [1] is not exactly the same as
+`void | string | number` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
+- Either make `{[string]: number, p?: string}` [3] and `D31` [4] exactly the same
+- Or make property `p` in `D31` [5] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   all_cases.js:366:1
+   366| Y31 as D31; // Error
+        ^^^
 
 References:
-   all_cases.js:359:16
-   359| type C31 = {...A31, ...B31, ...}; // Error: A31's indexer conflicts with optional p
-                       ^^^ [2]
-   all_cases.js:359:24
-   359| type C31 = {...A31, ...B31, ...}; // Error: A31's indexer conflicts with optional p
-                               ^^^ [3]
+   all_cases.js:358:17
+   358| type B31 = {p?: string, ...};
+                        ^^^^^^ [1]
+   all_cases.js:360:35
+   360| type D31 = {[string]: number, p?: string | number};
+                                          ^^^^^^^^^^^^^^^ [2]
+   all_cases.js:359:12
+   359| type C31 = {...A31, ...B31, ...}; // OK
+                   ^^^^^^^^^^^^^^^^^^^^^ [3]
+   all_cases.js:360:12
+   360| type D31 = {[string]: number, p?: string | number};
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   all_cases.js:366:8
+   366| Y31 as D31; // Error
+               ^^^ [5]
 
 
 Error -------------------------------------------------------------------------------------------- error_messages.js:5:1
@@ -332,4 +512,4 @@ References:
 
 
 
-Found 17 errors
+Found 21 errors
