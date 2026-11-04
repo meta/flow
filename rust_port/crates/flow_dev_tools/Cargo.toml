@@ -7,7 +7,10 @@ edition = "2024"
 
 [dependencies]
 fancy-regex = "0.19.2"
+flow_common_vcs = { path = "../flow_common_vcs" }
 flow_parser = { path = "../flow_parser" }
+flow_parser_utils_output = { path = "../flow_parser_utils_output" }
+flow_parser_wasm = { path = "../flow_parser_wasm" }
 flow_tokio_runtime = { path = "../flow_tokio_runtime" }
 futures = { version = "0.3.34", features = ["async-await", "compat"] }
 regex = "1.13.1"

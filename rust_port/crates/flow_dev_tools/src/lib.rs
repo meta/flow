@@ -5,6 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#![feature(never_type)]
+
+pub mod check_type_only_changes;
 pub mod comment;
 mod errors;
 mod flow_result;

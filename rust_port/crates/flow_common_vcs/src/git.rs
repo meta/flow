@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+use crate::vcs::FileChange;
 pub use crate::vcs_utils::ErrorStatus;
 use crate::vcs_utils::exec;
 use crate::vcs_utils::split_null_terminated_lines;
@@ -70,4 +71,43 @@ pub async fn files_changed_since_mergebase_with(
             Err(err) => Err(err),
         },
     }
+}
+
+/// Files changed between `base` and `rev`, or the working tree when `rev` is `None`.
+pub async fn files_changed_between(
+    cwd: Option<&str>,
+    base: &str,
+    rev: Option<&str>,
+) -> Result<Vec<(FileChange, String)>, ErrorStatus> {
+    let mut args = vec!["diff", "-z", "--name-status", "--no-renames", base];
+    if let Some(rev) = rev {
+        args.push(rev);
+    }
+    let stdout = git(cwd, &args).await?;
+    split_null_terminated_lines(&stdout)
+        .chunks(2)
+        .map(|entry| match entry {
+            ["M" | "T" | "U", path] => Ok((FileChange::Modified, path.to_string())),
+            ["A", path] => Ok((FileChange::Added, path.to_string())),
+            ["D", path] => Ok((FileChange::Removed, path.to_string())),
+            _ => Err(ErrorStatus::Errored(format!(
+                "Malformed diff entry {:?}",
+                entry
+            ))),
+        })
+        .collect()
+}
+
+/// Contents of the files at the repository-relative `paths` in `rev`, as `(path, contents)`.
+pub async fn cat_files(
+    cwd: Option<&str>,
+    rev: &str,
+    paths: &[&str],
+) -> Result<Vec<(String, String)>, ErrorStatus> {
+    let mut files = Vec::with_capacity(paths.len());
+    for path in paths {
+        let contents = git(cwd, &["cat-file", "blob", &format!("{}:{}", rev, path)]).await?;
+        files.push((path.to_string(), contents));
+    }
+    Ok(files)
 }

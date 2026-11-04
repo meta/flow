@@ -6,6 +6,7 @@ use dupe::Dupe;
 use dupe::OptionDupedExt;
 use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 use flow_parser::ParseOptions;
+use flow_parser::ast;
 use flow_parser::file_key::FileKey;
 use flow_parser::file_key::FileKeyInner;
 use flow_parser::loc::Loc;
@@ -83,13 +84,12 @@ fn syntax_error(
     Ok(RunnableError::Syntax { message, loc })
 }
 
-/// Parse Flow source, lower its runtime constructs, erase types, and emit
-/// indented JavaScript with a source map. Both outputs retain `source_filename`.
-pub fn flow_to_runnable_js_with_source_map(
+/// Parse Flow source, lower its runtime constructs, and erase types.
+pub fn flow_to_runnable_program(
     source: &str,
     source_filename: &str,
     options: &RunnableOptions,
-) -> Result<RunnableJs, RunnableError> {
+) -> Result<ast::Program<Loc, Loc>, RunnableError> {
     let file = FileKey::new(FileKeyInner::SourceFile(source_filename.to_owned()));
     let parse_options = ParseOptions {
         components: true,
@@ -133,7 +133,7 @@ pub fn flow_to_runnable_js_with_source_map(
         .as_ref()
         .duped()
         .unwrap_or_else(|| "flow-enums-runtime".into());
-    let program = match babel_adapter::lower_program(
+    match babel_adapter::lower_program(
         source,
         &program,
         &BabelLoweringOptions {
@@ -145,11 +145,22 @@ pub fn flow_to_runnable_js_with_source_map(
             react_runtime_target: options.react_runtime_target,
         },
     ) {
-        Ok(lowered) => strip_flow::lower_program(&lowered.program),
+        Ok(lowered) => Ok(strip_flow::lower_program(&lowered.program)),
         Err(BabelLoweringError::Syntax { message, loc }) => {
-            return Err(syntax_error(source, &loc, message)?);
+            Err(syntax_error(source, &loc, message)?)
         }
-    };
+    }
+}
+
+/// Parse Flow source, lower its runtime constructs, erase types, and emit
+/// indented JavaScript with a source map. Both outputs retain `source_filename`.
+pub fn flow_to_runnable_js_with_source_map(
+    source: &str,
+    source_filename: &str,
+    options: &RunnableOptions,
+) -> Result<RunnableJs, RunnableError> {
+    let program = flow_to_runnable_program(source, source_filename, options)?;
+    let file = FileKey::new(FileKeyInner::SourceFile(source_filename.to_owned()));
     let (code, map) = indented_printer::print_with_source_map(&program, &file, source)?;
     Ok(RunnableJs {
         code: code.contents(),

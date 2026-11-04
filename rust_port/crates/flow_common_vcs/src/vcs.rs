@@ -14,6 +14,14 @@ pub enum Vcs {
     Git,
 }
 
+/// How a file differs between two states of a repository.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FileChange {
+    Added,
+    Modified,
+    Removed,
+}
+
 pub fn find_root(recursion_limit: Option<usize>, dir: &Path) -> Option<(Vcs, PathBuf)> {
     let recursion_limit = recursion_limit.unwrap_or(100);
     fn walk(recursion_limit: usize, dir: &Path) -> Option<(Vcs, PathBuf)> {

@@ -10,12 +10,14 @@ use std::path::PathBuf;
 
 use flow_command_spec::arg_spec;
 use flow_dev_tools::ErrorCheckCommand;
+use flow_dev_tools::check_type_only_changes;
 use flow_dev_tools::runtests;
 use flow_dev_tools::update_suppressions::Only;
 
 #[derive(Clone)]
 enum DevToolsSubcommand {
     AddComments,
+    CheckTypeOnlyChanges,
     Runtests,
     UpdateSuppressions,
 }
@@ -158,6 +160,59 @@ fn add_comments_spec() -> flow_command_spec::Spec {
         None,
     )
     .anon("ROOT", &arg_spec::string())
+}
+
+fn check_type_only_changes_spec() -> flow_command_spec::Spec {
+    flow_command_spec::Spec::new(
+        "check-type-only-changes",
+        "Checks that changes to JavaScript files only change types",
+        flow_command_spec::Visibility::Public,
+        format!(
+            r#"Usage: {exe} dev-tools check-type-only-changes [OPTION]...
+
+Compiles both sides of every changed JavaScript file to runnable JavaScript, erasing types and
+lowering Flow runtime syntax as Babel would, and compares the results with locations and comments
+stripped. Exits with code 1 if the runtime code of any file changed or failed to compile.
+
+By default, the working copy is compared against the current commit.
+
+Examples (Mercurial revisions; use HEAD and origin/main with Git):
+  Uncommitted changes:
+    {exe} dev-tools check-type-only-changes
+  The current commit:
+    {exe} dev-tools check-type-only-changes --rev .
+  The stack and uncommitted changes since master:
+    {exe} dev-tools check-type-only-changes --mergebase-with master
+  Between two revisions:
+    {exe} dev-tools check-type-only-changes --base REV1 --rev REV2
+"#,
+            exe = flow_command_utils::exe_name()
+        ),
+    )
+    .flag(
+        "--base",
+        &arg_spec::optional(arg_spec::string()),
+        "Revision to compare against (default: the parent of the checked revision, or the current commit for the working copy)",
+        None,
+    )
+    .flag(
+        "--mergebase-with",
+        &arg_spec::optional(arg_spec::string()),
+        "Compare against the merge base of the checked revision and this revision",
+        None,
+    )
+    .flag(
+        "--rev",
+        &arg_spec::optional(arg_spec::string()),
+        "Revision to check (default: the working copy)",
+        None,
+    )
+    .flag(
+        "--show-diff",
+        &arg_spec::truthy(),
+        "Print a diff of the compiled runtime code of each file whose runtime code changed",
+        None,
+    )
 }
 
 fn update_suppressions_spec() -> flow_command_spec::Spec {
@@ -344,6 +399,10 @@ fn root_spec() -> flow_command_spec::Spec {
                 1,
                 &[
                     ("add-comments".to_string(), "Adds flow comments".to_string(),),
+                    (
+                        "check-type-only-changes".to_string(),
+                        "Checks that changes to JavaScript files only change types".to_string(),
+                    ),
                     ("runtests".to_string(), "Runs Flow check tests".to_string()),
                     (
                         "update-suppressions".to_string(),
@@ -359,6 +418,10 @@ fn root_spec() -> flow_command_spec::Spec {
             None,
             arg_spec::command_flag(vec![
                 ("add-comments", DevToolsSubcommand::AddComments),
+                (
+                    "check-type-only-changes",
+                    DevToolsSubcommand::CheckTypeOnlyChanges,
+                ),
                 ("runtests", DevToolsSubcommand::Runtests),
                 (
                     "update-suppressions",
@@ -378,6 +441,10 @@ pub(crate) fn command() -> flow_command_spec::Command {
                 None,
                 arg_spec::command_flag(vec![
                     ("add-comments", DevToolsSubcommand::AddComments),
+                    (
+                        "check-type-only-changes",
+                        DevToolsSubcommand::CheckTypeOnlyChanges,
+                    ),
                     ("runtests", DevToolsSubcommand::Runtests),
                     (
                         "update-suppressions",
@@ -393,6 +460,10 @@ pub(crate) fn command() -> flow_command_spec::Command {
                     run_or_exit(run_add_comments(args))
                 })
             }
+            DevToolsSubcommand::CheckTypeOnlyChanges => flow_command_spec::command(
+                check_type_only_changes_spec(),
+                run_check_type_only_changes,
+            ),
             DevToolsSubcommand::Runtests => {
                 flow_command_spec::command(runtests_spec(), run_runtests)
             }
@@ -448,6 +519,37 @@ fn run_runtests(args: &arg_spec::Values) {
         Err(err) => flow_common_exit_status::exit_with_msg(
             flow_common_exit_status::FlowExitStatus::UnknownError,
             &format!("runtests failed: {err}"),
+        ),
+    }
+}
+
+fn run_check_type_only_changes(args: &arg_spec::Values) {
+    let base = match (
+        get_optional_string(args, "--base"),
+        get_optional_string(args, "--mergebase-with"),
+    ) {
+        (None, None) => check_type_only_changes::Base::Parent,
+        (Some(base), None) => check_type_only_changes::Base::Revision(base),
+        (None, Some(other)) => check_type_only_changes::Base::MergeBaseWith(other),
+        (Some(_), Some(_)) => flow_common_exit_status::exit_with_msg(
+            flow_common_exit_status::FlowExitStatus::CommandlineUsageError,
+            "--base and --mergebase-with cannot be used together",
+        ),
+    };
+    let result = std::env::current_dir().and_then(|dir| {
+        check_type_only_changes::run(check_type_only_changes::Args {
+            dir,
+            base,
+            rev: get_optional_string(args, "--rev"),
+            show_diff: flow_command_spec::get(args, "--show-diff", &arg_spec::truthy()).unwrap(),
+        })
+    });
+    match result {
+        Ok(true) => {}
+        Ok(false) => std::process::exit(1),
+        Err(err) => flow_common_exit_status::exit_with_msg(
+            flow_common_exit_status::FlowExitStatus::UnknownError,
+            &format!("check-type-only-changes failed: {err}"),
         ),
     }
 }

@@ -6,4 +6,6 @@ version = "0.0.0"
 edition = "2024"
 
 [dependencies]
+serde = { version = "1.0.229", features = ["derive", "rc"] }
+serde_json = { version = "1.0.154", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
 tokio = { version = "1.54.1", features = ["full", "test-util", "tracing"] }

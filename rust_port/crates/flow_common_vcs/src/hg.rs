@@ -5,6 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+use serde::Deserialize;
+
+use crate::vcs::FileChange;
 use crate::vcs_utils::Env;
 pub use crate::vcs_utils::ErrorStatus;
 use crate::vcs_utils::exec;
@@ -77,4 +80,62 @@ pub async fn files_changed_since_mergebase_with(
             Err(err) => Err(err),
         },
     }
+}
+
+/// Files changed between `base` and `rev`, or the working copy when `rev` is `None`.
+pub async fn files_changed_between(
+    cwd: Option<&str>,
+    base: &str,
+    rev: Option<&str>,
+) -> Result<Vec<(FileChange, String)>, ErrorStatus> {
+    let mut args = vec![
+        "status",
+        "--print0",
+        "--modified",
+        "--added",
+        "--removed",
+        "--deleted",
+        "--rev",
+        base,
+    ];
+    if let Some(rev) = rev {
+        args.extend(["--rev", rev]);
+    }
+    let stdout = hg(cwd, &args).await?;
+    split_null_terminated_lines(&stdout)
+        .into_iter()
+        .map(|line| match line.split_once(' ') {
+            Some(("M", path)) => Ok((FileChange::Modified, path.to_string())),
+            Some(("A", path)) => Ok((FileChange::Added, path.to_string())),
+            Some(("R" | "!", path)) => Ok((FileChange::Removed, path.to_string())),
+            _ => Err(ErrorStatus::Errored(format!(
+                "Malformed status line {:?}",
+                line
+            ))),
+        })
+        .collect()
+}
+
+#[derive(Deserialize)]
+struct CatEntry {
+    abspath: String,
+    data: String,
+}
+
+/// Contents of the files at the repository-relative `paths` in `rev`, as `(path, contents)`.
+pub async fn cat_files(
+    cwd: Option<&str>,
+    rev: &str,
+    paths: &[&str],
+) -> Result<Vec<(String, String)>, ErrorStatus> {
+    let patterns: Vec<String> = paths.iter().map(|path| format!("path:{}", path)).collect();
+    let mut args = vec!["cat", "--rev", rev, "--template", "json"];
+    args.extend(patterns.iter().map(String::as_str));
+    let stdout = hg(cwd, &args).await?;
+    let entries: Vec<CatEntry> = serde_json::from_str(&stdout)
+        .map_err(|err| ErrorStatus::Errored(format!("Malformed cat output: {}", err)))?;
+    Ok(entries
+        .into_iter()
+        .map(|entry| (entry.abspath, entry.data))
+        .collect())
 }

@@ -808,6 +808,8 @@ dependencies = [
 name = "flow_common_vcs"
 version = "0.0.0"
 dependencies = [
+ "serde",
+ "serde_json",
  "tokio",
 ]
 
@@ -864,7 +866,10 @@ name = "flow_dev_tools"
 version = "0.0.0"
 dependencies = [
  "fancy-regex",
+ "flow_common_vcs",
  "flow_parser",
+ "flow_parser_utils_output",
+ "flow_parser_wasm",
  "flow_tokio_runtime",
  "futures 0.3.34",
  "regex",
