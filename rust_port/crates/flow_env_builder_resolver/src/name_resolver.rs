@@ -2845,8 +2845,6 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                     })
                 }
                 BindingsKind::Import { .. } => {
-                    let desc = VirtualReasonDesc::RIdentifier(name.dupe());
-                    let reason = VirtualReason::new(desc, loc.dupe());
                     // A namespace import keeps its kind. `TsImport` says the
                     // binding covers both namespaces without saying it is one,
                     // and being one is what decides `X.Y`.
@@ -2857,11 +2855,12 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                     } else {
                         *kind
                     };
+                    let (havoc, _) = self.providers_of_def_loc(loc.dupe(), &self.provider_info);
                     let val =
                         ssa_val::undeclared(&mut *self.cache.borrow_mut(), name.dupe(), loc.dupe());
                     EnvVal::new(EnvValInner {
                         val_ref: Rc::new(RefCell::new(val)),
-                        havoc: ssa_val::one(&mut *self.cache.borrow_mut(), reason),
+                        havoc,
                         writes_by_closure_provider_val: None,
                         def_loc: Some(loc.dupe()),
                         heap_refinements: empty_heap_refinements(),

@@ -1,0 +1,42 @@
+Error ------------------------------------------------------------------------------------------ component_import.js:1:9
+
+Cannot declare `Widget` [1] because the name is already bound. [name-already-bound]
+
+   1| import {Widget} from './exports'; // ERROR
+              ^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------- default_import.js:1:8
+
+Cannot declare `defaultHelper` [1] because the name is already bound. [name-already-bound]
+
+   1| import defaultHelper from './exports'; // ERROR
+             ^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------- hook_import.js:1:9
+
+Cannot declare `useHelper` [1] because the name is already bound. [name-already-bound]
+
+   1| import {useHelper} from './exports'; // ERROR
+              ^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------- named_import.js:1:9
+
+Cannot declare `helper` [1] because the name is already bound. [name-already-bound]
+
+   1| import {helper} from './exports'; // ERROR
+              ^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- namespace_import.js:1:13
+
+Cannot declare `helpers` [1] because the name is already bound. [name-already-bound]
+
+   1| import * as helpers from './exports'; // ERROR
+                  ^^^^^^^ [1]
+
+
+
+Found 5 errors
