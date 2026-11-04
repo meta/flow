@@ -270,6 +270,20 @@ export default component TryFlowResults(
   const [copiedAll, setCopiedAll] = useState(false);
   // Index of the error card whose "Copy" button is currently showing "Copied!".
   const [copiedError, setCopiedError] = useState(null as ?number);
+  const [copiedAst, setCopiedAst] = useState(false);
+  function copyAst() {
+    const text = JSON.stringify(
+      formatAstForDisplay(ast, hideLocations, hideEmptyFields),
+      null,
+      2,
+    );
+    if (text == null) return;
+    copyText(text).then(ok => {
+      if (!ok) return;
+      setCopiedAst(true);
+      setTimeout(() => setCopiedAst(false), 1500);
+    });
+  }
   function copyAll() {
     // Only show the "Copied!" confirmation if the write actually succeeds.
     // copyText falls back to execCommand where the async Clipboard API is
@@ -416,6 +430,23 @@ export default component TryFlowResults(
                 </button>
               ))}
             </div>
+          )}
+          {activeToolbarTab === 'ast' && astFormat === 'json' && (
+            <button
+              type="button"
+              className={clsx(styles.toolbarButton, styles.iconOnly)}
+              onClick={copyAst}
+              disabled={
+                loading ||
+                typeof ast === 'string' ||
+                Object.keys(ast).length === 0
+              }
+              title="Copy JSON">
+              <CopyIcon />
+              <span className={styles.toolbarButtonLabel}>
+                {copiedAst ? 'Copied!' : 'Copy JSON'}
+              </span>
+            </button>
           )}
           {activeToolbarTab === 'ast' && (
             <div className={styles.astOptions}>
