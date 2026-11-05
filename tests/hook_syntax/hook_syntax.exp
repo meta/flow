@@ -1117,6 +1117,203 @@ References:
             ^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------- hooks_in_nested_callback_or_class.js:8:7
+
+Cannot call hook [1] because React hooks cannot be called in conditional contexts.
+(https://react.dev/reference/rules/rules-of-hooks) [react-rule-hook-conditional]
+
+   hooks_in_nested_callback_or_class.js:8:7
+   8|       useState(); // error: react-rule-hook-conditional
+            ^^^^^^^^^^
+
+References:
+   hooks_in_nested_callback_or_class.js:8:7
+   8|       useState(); // error: react-rule-hook-conditional
+            ^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------ hooks_in_nested_callback_or_class.js:19:9
+
+Cannot call hook [1] because React hooks cannot be called in conditional contexts.
+(https://react.dev/reference/rules/rules-of-hooks) [react-rule-hook-conditional]
+
+   hooks_in_nested_callback_or_class.js:19:9
+   19|         useState(); // error: react-rule-hook-conditional
+               ^^^^^^^^^^
+
+References:
+   hooks_in_nested_callback_or_class.js:19:9
+   19|         useState(); // error: react-rule-hook-conditional
+               ^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------ hooks_in_nested_callback_or_class.js:31:9
+
+Cannot call hook [1] because React hooks cannot be called in conditional contexts.
+(https://react.dev/reference/rules/rules-of-hooks) [react-rule-hook-conditional]
+
+   hooks_in_nested_callback_or_class.js:31:9
+   31|         useState(); // error: react-rule-hook-conditional
+               ^^^^^^^^^^
+
+References:
+   hooks_in_nested_callback_or_class.js:31:9
+   31|         useState(); // error: react-rule-hook-conditional
+               ^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------ hooks_in_nested_callback_or_class.js:41:7
+
+Cannot call hook [1] because React hooks can only be called within components or hooks. This hook is definitely not
+called in a component or hook. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-definitely-not-in-component-or-hook]
+
+   hooks_in_nested_callback_or_class.js:41:7
+   41|       useState(); // error: react-rule-hook-definitely-not-in-component-or-hook
+             ^^^^^^^^^^
+
+References:
+   hooks_in_nested_callback_or_class.js:41:7
+   41|       useState(); // error: react-rule-hook-definitely-not-in-component-or-hook
+             ^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------ hooks_in_nested_callback_or_class.js:50:5
+
+Cannot call hook [1] because React hooks can only be called within components or hooks.
+(https://react.dev/reference/rules/rules-of-hooks) [react-rule-hook]
+
+   hooks_in_nested_callback_or_class.js:50:5
+   50|     useState(); // error: react-rule-hook
+           ^^^^^^^^^^
+
+References:
+   hooks_in_nested_callback_or_class.js:50:5
+   50|     useState(); // error: react-rule-hook
+           ^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------- hooks_in_nested_callback_or_class.js:55:26
+
+Cannot call hook [1] because React hooks cannot be called in classes. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-class]
+
+   hooks_in_nested_callback_or_class.js:55:26
+   55|   initializer: unknown = useState(); // error: react-rule-hook-class
+                                ^^^^^^^^^^
+
+References:
+   hooks_in_nested_callback_or_class.js:55:26
+   55|   initializer: unknown = useState(); // error: react-rule-hook-class
+                                ^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------ hooks_in_nested_callback_or_class.js:57:5
+
+Cannot call hook [1] because React hooks cannot be called in classes. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-class]
+
+   hooks_in_nested_callback_or_class.js:57:5
+   57|     useState(); // error: react-rule-hook-class
+           ^^^^^^^^^^
+
+References:
+   hooks_in_nested_callback_or_class.js:57:5
+   57|     useState(); // error: react-rule-hook-class
+           ^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------ hooks_in_nested_callback_or_class.js:61:5
+
+Cannot call hook [1] because React hooks cannot be called in classes. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-class]
+
+   hooks_in_nested_callback_or_class.js:61:5
+   61|     useState(); // error: react-rule-hook-class
+           ^^^^^^^^^^
+
+References:
+   hooks_in_nested_callback_or_class.js:61:5
+   61|     useState(); // error: react-rule-hook-class
+           ^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------ hooks_in_nested_callback_or_class.js:64:9
+
+Cannot call hook [1] because React hooks cannot be called in classes. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-class]
+
+   hooks_in_nested_callback_or_class.js:64:9
+   64|         useState(); // error: react-rule-hook-class
+               ^^^^^^^^^^
+
+References:
+   hooks_in_nested_callback_or_class.js:64:9
+   64|         useState(); // error: react-rule-hook-class
+               ^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------ hooks_in_nested_callback_or_class.js:71:5
+
+Cannot call hook [1] because React hooks cannot be called in classes. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-class]
+
+   hooks_in_nested_callback_or_class.js:71:5
+   71|     useState(); // error: react-rule-hook-class
+           ^^^^^^^^^^
+
+References:
+   hooks_in_nested_callback_or_class.js:71:5
+   71|     useState(); // error: react-rule-hook-class
+           ^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------ hooks_in_nested_callback_or_class.js:73:7
+
+Cannot call hook [1] because React hooks cannot be called in classes. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-class]
+
+   hooks_in_nested_callback_or_class.js:73:7
+   73|       useState(); // error: react-rule-hook-class
+             ^^^^^^^^^^
+
+References:
+   hooks_in_nested_callback_or_class.js:73:7
+   73|       useState(); // error: react-rule-hook-class
+             ^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------ hooks_in_nested_callback_or_class.js:76:7
+
+Cannot call hook [1] because React hooks can only be called within components or hooks. This hook is definitely not
+called in a component or hook. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-definitely-not-in-component-or-hook]
+
+   hooks_in_nested_callback_or_class.js:76:7
+   76|       useState(); // error: react-rule-hook-definitely-not-in-component-or-hook
+             ^^^^^^^^^^
+
+References:
+   hooks_in_nested_callback_or_class.js:76:7
+   76|       useState(); // error: react-rule-hook-definitely-not-in-component-or-hook
+             ^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------ hooks_in_nested_callback_or_class.js:85:7
+
+Cannot call hook [1] because React hooks cannot be called in classes. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-class]
+
+   hooks_in_nested_callback_or_class.js:85:7
+   85|       useState(); // error: react-rule-hook-class
+             ^^^^^^^^^^
+
+References:
+   hooks_in_nested_callback_or_class.js:85:7
+   85|       useState(); // error: react-rule-hook-class
+             ^^^^^^^^ [1]
+
+
 Error ------------------------------------------------------------------------- hooks_in_nested_component_or_hook.js:4:3
 
 Hooks may not be nested directly within other components or hooks. [nested-hook]
@@ -1449,8 +1646,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------ rules_of_hooks.js:550:5
 
-Cannot call hook [1] because React hooks can only be called within components or hooks.
-(https://react.dev/reference/rules/rules-of-hooks) [react-rule-hook]
+Cannot call hook [1] because React hooks cannot be called in classes. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-class]
 
    rules_of_hooks.js:550:5
    550|     This.useHook(); // error
@@ -1464,8 +1661,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------ rules_of_hooks.js:551:5
 
-Cannot call hook [1] because React hooks can only be called within components or hooks.
-(https://react.dev/reference/rules/rules-of-hooks) [react-rule-hook]
+Cannot call hook [1] because React hooks cannot be called in classes. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-class]
 
    rules_of_hooks.js:551:5
    551|     Super.useHook(); // error
@@ -2233,8 +2430,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------ rules_of_hooks.js:975:7
 
-Cannot call hook [1] because React hooks can only be called within components or hooks.
-(https://react.dev/reference/rules/rules-of-hooks) [react-rule-hook]
+Cannot call hook [1] because React hooks cannot be called in classes. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-class]
 
    rules_of_hooks.js:975:7
    975|       useFeatureFlag(); // error
@@ -2248,8 +2445,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------ rules_of_hooks.js:983:5
 
-Cannot call hook [1] because React hooks can only be called within components or hooks.
-(https://react.dev/reference/rules/rules-of-hooks) [react-rule-hook]
+Cannot call hook [1] because React hooks cannot be called in classes. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-class]
 
    rules_of_hooks.js:983:5
    983|     ReactWithHooks.useState(); // error
@@ -2263,8 +2460,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------ rules_of_hooks.js:990:5
 
-Cannot call hook [1] because React hooks can only be called within components or hooks.
-(https://react.dev/reference/rules/rules-of-hooks) [react-rule-hook]
+Cannot call hook [1] because React hooks cannot be called in classes. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-class]
 
    rules_of_hooks.js:990:5
    990|     useState(); // error
@@ -2278,8 +2475,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------ rules_of_hooks.js:997:5
 
-Cannot call hook [1] because React hooks can only be called within components or hooks.
-(https://react.dev/reference/rules/rules-of-hooks) [react-rule-hook]
+Cannot call hook [1] because React hooks cannot be called in classes. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-class]
 
    rules_of_hooks.js:997:5
    997|     useState(); // error
@@ -2293,8 +2490,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------- rules_of_hooks.js:1004:5
 
-Cannot call hook [1] because React hooks can only be called within components or hooks.
-(https://react.dev/reference/rules/rules-of-hooks) [react-rule-hook]
+Cannot call hook [1] because React hooks cannot be called in classes. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-class]
 
    rules_of_hooks.js:1004:5
    1004|     useState(); // error
@@ -2308,8 +2505,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------- rules_of_hooks.js:1011:5
 
-Cannot call hook [1] because React hooks can only be called within components or hooks.
-(https://react.dev/reference/rules/rules-of-hooks) [react-rule-hook]
+Cannot call hook [1] because React hooks cannot be called in classes. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-class]
 
    rules_of_hooks.js:1011:5
    1011|     useState(); // error
@@ -2370,8 +2567,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------- rules_of_hooks.js:1035:5
 
-Cannot call hook [1] because React hooks can only be called within components or hooks.
-(https://react.dev/reference/rules/rules-of-hooks) [react-rule-hook]
+Cannot call hook [1] because React hooks cannot be called in classes. (https://react.dev/reference/rules/rules-of-hooks)
+[react-rule-hook-class]
 
    rules_of_hooks.js:1035:5
    1035|     use(promise); // error
@@ -2645,4 +2842,4 @@ References:
 
 
 
-Found 171 errors
+Found 184 errors

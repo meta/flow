@@ -6235,6 +6235,12 @@ where
                     text("(https://react.dev/reference/rules/rules-of-hooks)"),
                 ])
             }
+            MessageCannotCallReactHookInClass(callee_loc) => friendly::Message(vec![
+                text("Cannot call "),
+                friendly::hardcoded_string_desc_ref("hook", loc_of_aloc(callee_loc)),
+                text(" because React hooks cannot be called in classes. "),
+                text("(https://react.dev/reference/rules/rules-of-hooks)"),
+            ]),
             MessageCannotCallReactHookInUnknownContext(callee_loc) => friendly::Message(vec![
                 text("Cannot call "),
                 friendly::hardcoded_string_desc_ref("hook", loc_of_aloc(callee_loc)),

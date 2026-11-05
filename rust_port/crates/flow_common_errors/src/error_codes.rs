@@ -24,6 +24,7 @@ use flow_lint_settings::lints::SketchyNumberKind;
 pub enum ErrorCode {
     AmbiguousObjectType,
     ReactRuleUnsafeMutation,
+    ReactRuleHookClass,
     ReactRuleHookConditional,
     ReactRuleHookDefinitelyNotInComponentOrHook,
     ReactRuleHookMixedWithNonHoook,
@@ -273,6 +274,7 @@ impl ErrorCode {
         use ErrorCode::*;
         match self {
             ReactRuleUnsafeMutation => "react-rule-unsafe-mutation",
+            ReactRuleHookClass => "react-rule-hook-class",
             ReactRuleHookConditional => "react-rule-hook-conditional",
             ReactRuleHookDefinitelyNotInComponentOrHook => {
                 "react-rule-hook-definitely-not-in-component-or-hook"

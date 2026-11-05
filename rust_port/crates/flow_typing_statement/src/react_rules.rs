@@ -1371,6 +1371,9 @@ enum HookCallContext {
     /// e.g. Calling hooks in things like `function Foo(...) {...}` or `function useFoo(...) {...}`,
     /// strictly disallowed because hook compatibility mode is off
     HookCallStrictlyDisallowedWithoutCompatibilityMode,
+    /// e.g. Calling hooks in a class constructor, method or property initializer, or in an
+    /// anonymous function nested in one.
+    HookCallNotAllowedInClass,
 }
 
 struct WholeAstVisitor<'b, 'cx, 't> {
@@ -1500,6 +1503,8 @@ impl<'b, 'cx, 't> WholeAstVisitor<'b, 'cx, 't> {
                 _ => None,
             };
 
+            let enclosing_hook_call_context = cur_hook_call_context.dupe();
+
             self.hook_call_context = Rc::new(flow_lazy::Lazy::new(move |cx: &mut Context<'_>| {
                 let is_definitely_non_component_due_to_typing = |cx: &mut Context<'_>| -> Result<
                     bool,
@@ -1600,7 +1605,15 @@ impl<'b, 'cx, 't> WholeAstVisitor<'b, 'cx, 't> {
                 } {
                     HookCallContext::HookCallDefinitelyNotAllowed
                 } else {
-                    HookCallContext::HookCallNotAllowedUnderUnknownContext
+                    // An anonymous function inside a component, hook or class keeps that context.
+                    match enclosing_hook_call_context.get_forced(cx) {
+                        Ok(
+                            enclosing @ (HookCallContext::HookCallNotAllowedUnderNormalFunctionInComponentOrHooks
+                            | HookCallContext::HookCallNotAllowedInClass),
+                        ) => *enclosing,
+                        Ok(_) => HookCallContext::HookCallNotAllowedUnderUnknownContext,
+                        Err(e) => return Err(e.dupe()),
+                    }
                 })
             }));
             ast_visitor::function_default(self, &fn_.sig_loc, fn_)?;
@@ -1743,6 +1756,14 @@ impl<'b, 'cx, 't>
                             error_message::HookRule::HookNotInComponentSyntaxComponentOrHookSyntaxHook,
                         );
                     }
+                    Ok(HookCallContext::HookCallNotAllowedInClass) => {
+                        hook_error(
+                            self.cx,
+                            call_loc.dupe(),
+                            callee_loc.dupe(),
+                            error_message::HookRule::HookInClass,
+                        );
+                    }
                     Ok(HookCallContext::HookCallPermissivelyAllowedUnderCompatibilityMode) => {}
                     Err(c) => return Err(c.dupe()),
                 }
@@ -1826,6 +1847,19 @@ impl<'b, 'cx, 't>
         self.in_context_possibly_expecting_fn_component_or_hook = next_in_context;
         ast_visitor::object_property_default(self, prop)?;
         self.in_context_possibly_expecting_fn_component_or_hook = cur_in_context;
+        Ok(())
+    }
+
+    fn class_body(
+        &mut self,
+        cls_body: &'t ast::class::Body<ALoc, (ALoc, Type)>,
+    ) -> Result<(), flow_utils_concurrency::job_error::JobError> {
+        let cur_hook_call_context = self.hook_call_context.dupe();
+        self.hook_call_context = Rc::new(flow_lazy::Lazy::new_forced(Ok(
+            HookCallContext::HookCallNotAllowedInClass,
+        )));
+        ast_visitor::class_body_default(self, cls_body)?;
+        self.hook_call_context = cur_hook_call_context;
         Ok(())
     }
 
@@ -2313,7 +2347,7 @@ impl<'b, 'cx, 't>
         let mut wav = WholeAstVisitor::new(
             self.tast,
             true,
-            HookCallContext::HookCallNotAllowedUnderUnknownContext,
+            HookCallContext::HookCallNotAllowedInClass,
             self.cx,
             self.rrid.clone(),
         );

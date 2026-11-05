@@ -4306,6 +4306,7 @@ pub enum HookRule<L: Dupe> {
     MaybeHook { hooks: Vec<L>, non_hooks: Vec<L> },
     HookDefinitelyNotInComponentOrHook,
     HookInUnknownContext,
+    HookInClass,
     HookNotInComponentSyntaxComponentOrHookSyntaxHook,
 }
 
@@ -6359,6 +6360,7 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                         HookRule::HookDefinitelyNotInComponentOrHook
                     }
                     HookRule::HookInUnknownContext => HookRule::HookInUnknownContext,
+                    HookRule::HookInClass => HookRule::HookInClass,
                     HookRule::HookNotInComponentSyntaxComponentOrHookSyntaxHook => {
                         HookRule::HookNotInComponentSyntaxComponentOrHookSyntaxHook
                     }
@@ -12628,6 +12630,9 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                             callee_loc,
                         ))
                     }
+                    HookRule::HookInClass => {
+                        Normal(Message::MessageCannotCallReactHookInClass(callee_loc))
+                    }
                 }
             }
 
@@ -13508,6 +13513,10 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                 hook_rule: HookRule::NotHookSyntaxHook,
                 ..
             }) => Some(ReactRuleHookNonHookSyntax),
+            ErrorMessage::EHookRuleViolation(box EHookRuleViolationData {
+                hook_rule: HookRule::HookInClass,
+                ..
+            }) => Some(ReactRuleHookClass),
             ErrorMessage::EHookRuleViolation(box EHookRuleViolationData {
                 hook_rule:
                     HookRule::HookInUnknownContext
