@@ -1,0 +1,5 @@
+[libs]
+lib.d.ts
+
+[options]
+all=true

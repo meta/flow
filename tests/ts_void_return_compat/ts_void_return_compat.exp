@@ -1,0 +1,53 @@
+Error ---------------------------------------------------------------------------------------------------- test.js:12:27
+
+Cannot call `takeTsVoidHandler` with function bound to `handler` because in the first parameter: `number` [1] is
+incompatible with `string` [2]. [incompatible-type]
+
+   test.js:12:27
+   12| takeTsVoidHandler((event: number) => {}); // ERROR: params are still checked.
+                                 ^^^^^^ [1]
+
+References:
+   lib.d.ts:8:30
+    8| type TsVoidHandler = (event: string) => void;
+                                    ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:13:21
+
+Cannot call `takeTsNumberHandler` with `returnsUnknown` bound to `handler` because in the return value: `unknown` [1] is
+incompatible with `number` [2]. [incompatible-type]
+
+   test.js:13:21
+   13| takeTsNumberHandler(returnsUnknown); // ERROR: only `void` returns are relaxed.
+                           ^^^^^^^^^^^^^^
+
+References:
+   test.js:4:50
+    4| declare const returnsUnknown: (event: string) => unknown;
+                                                        ^^^^^^^ [1]
+   lib.d.ts:9:43
+    9| type TsNumberHandler = (event: string) => number;
+                                                 ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:14:21
+
+Cannot call `takeFlowVoidHandler` with `returnsUnknown` bound to `handler` because in the return value: `unknown` [1] is
+incompatible with `void` [2]. [incompatible-type]
+
+   test.js:14:21
+   14| takeFlowVoidHandler(returnsUnknown); // ERROR: a Flow `=> void` keeps Flow's rule.
+                           ^^^^^^^^^^^^^^
+
+References:
+   test.js:4:50
+    4| declare const returnsUnknown: (event: string) => unknown;
+                                                        ^^^^^^^ [1]
+   test.js:1:43
+    1| type FlowVoidHandler = (event: string) => void;
+                                                 ^^^^ [2]
+
+
+
+Found 3 errors

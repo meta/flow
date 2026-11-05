@@ -772,7 +772,11 @@ fn funt_to_funt_check<'cx>(
     }
     let assertion_kind_mismatch =
         is_asserts(&ft1.type_guard) != is_asserts(&ft2.type_guard) && ft2.type_guard.is_some();
-    if !assertion_kind_mismatch {
+    // As in TypeScript, a TS-declared function type returning `void` accepts
+    // functions with any return type.
+    let ts_void_return = ft2.strictness_kind.is_typescript_loose()
+        && matches!(ft2.return_t.deref(), DefT(_, d) if matches!(d.deref(), VoidT));
+    if !assertion_kind_mismatch && !ts_void_return {
         let ret_use_op = VirtualUseOp::Frame(
             Arc::new(VirtualFrameUseOp::FunReturn(Box::new(FunReturnData {
                 lower: type_util::reason_of_t(&ft1.return_t).clone(),
