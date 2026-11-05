@@ -199,6 +199,9 @@ pub(crate) fn prop_typo_suggestion<'cx>(
             cx.find_props(id.dupe())
                 .iter()
                 .filter_map(|(k, _)| k.as_smol_str_opt().map(Dupe::dupe))
+                // A class's `constructor` method isn't a member, so a missing member of
+                // that name is never its own typo.
+                .filter(|k| k != name)
                 .collect::<Vec<_>>()
         })
         .collect();
@@ -571,6 +574,20 @@ pub(super) fn write_obj_prop<'cx>(
             None,
         ),
         None => match propref {
+            // An object isn't a class instance, so its constructor is the member of that name.
+            PropRef::Constructor(reason) => write_obj_prop(
+                cx,
+                env,
+                trace,
+                use_op,
+                mode,
+                o,
+                &mk_named_prop(reason.dupe(), false, Name::new("constructor")),
+                reason_obj,
+                reason_op,
+                tin,
+                prop_tout,
+            ),
             PropRef::Named { reason, name, .. } if *name == Name::new("constructor") => {
                 let reason = reason.dupe().replace_desc(VirtualReasonDesc::RFunction(
                     flow_common::reason::ReasonDescFunction::RNormal,

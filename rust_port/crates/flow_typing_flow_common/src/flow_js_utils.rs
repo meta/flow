@@ -1581,27 +1581,28 @@ pub fn error_message_kind_of_upper<CX: ContextFamily>(
 ) -> flow_typing_errors::error_message::UpperKind<ALoc> {
     use flow_typing_errors::error_message::UpperKind;
     use flow_typing_type::type_::PropRef;
+    use flow_typing_type::type_::name_of_propref;
     use flow_typing_type::type_::string_of_use_ctor;
     use flow_typing_type::type_util::loc_of_t;
 
     match u.deref() {
         UseTInner::GetPropT(data) => match data.propref.as_ref() {
-            PropRef::Named { reason, name, .. } => {
-                UpperKind::IncompatibleGetPropT(reason.loc().dupe(), Some(name.dupe()))
+            PropRef::Named { reason, .. } | PropRef::Constructor(reason) => {
+                UpperKind::IncompatibleGetPropT(reason.loc().dupe(), name_of_propref(&data.propref))
             }
             PropRef::Computed(t) => UpperKind::IncompatibleGetPropT(loc_of_t(t).dupe(), None),
         },
         UseTInner::GetPrivatePropT(..) => UpperKind::IncompatibleGetPrivatePropT,
         UseTInner::SetPropT(_, _, propref, _, _, _, _) => match propref.as_ref() {
-            PropRef::Named { reason, name, .. } => {
-                UpperKind::IncompatibleSetPropT(reason.loc().dupe(), Some(name.dupe()))
+            PropRef::Named { reason, .. } | PropRef::Constructor(reason) => {
+                UpperKind::IncompatibleSetPropT(reason.loc().dupe(), name_of_propref(propref))
             }
             PropRef::Computed(t) => UpperKind::IncompatibleSetPropT(loc_of_t(t).dupe(), None),
         },
         UseTInner::SetPrivatePropT(..) => UpperKind::IncompatibleSetPrivatePropT,
         UseTInner::MethodT(box MethodTData { propref, .. }) => match propref.as_ref() {
-            PropRef::Named { reason, name, .. } => {
-                UpperKind::IncompatibleMethodT(reason.loc().dupe(), Some(name.dupe()))
+            PropRef::Named { reason, .. } | PropRef::Constructor(reason) => {
+                UpperKind::IncompatibleMethodT(reason.loc().dupe(), name_of_propref(propref))
             }
             PropRef::Computed(t) => UpperKind::IncompatibleMethodT(loc_of_t(t).dupe(), None),
         },
@@ -7239,6 +7240,7 @@ pub mod get_prop_t_kit {
     use flow_typing_type::type_::ImplicitInstantiationTvarKind;
     use flow_typing_type::type_::IndexerFallbackData;
     use flow_typing_type::type_::InstType;
+    use flow_typing_type::type_::InstanceKind;
     use flow_typing_type::type_::LookupDefaultResult;
     use flow_typing_type::type_::LookupKind;
     use flow_typing_type::type_::NonstrictReturningData;
@@ -7312,6 +7314,7 @@ pub mod get_prop_t_kit {
                         from_indexed_access: true,
                     } => (reason.dupe(), None),
                     PropRef::Computed(t) => (reason_of_t(t).dupe(), None),
+                    PropRef::Constructor(reason) => (reason.dupe(), name_of_propref(propref)),
                 };
                 let msg = flow_typing_errors::error_message::ErrorMessage::EPropNotReadable(
                     Box::new(EPropNotReadableData {
@@ -7388,10 +7391,21 @@ pub mod get_prop_t_kit {
             PropRef::Named { name, .. } => {
                 let own_props = cx.find_props(inst.own_props.dupe());
                 let proto_props = cx.find_props(inst.proto_props.dupe());
-                own_props
-                    .get(name)
-                    .duped()
-                    .or_else(|| proto_props.get(name).duped())
+                match &inst.inst_kind {
+                    // A class's `constructor` method is its constructor, not a member.
+                    InstanceKind::ClassKind | InstanceKind::RecordKind { .. }
+                        if name.matches_str("constructor") =>
+                    {
+                        own_props.get(name).duped()
+                    }
+                    _ => own_props
+                        .get(name)
+                        .duped()
+                        .or_else(|| proto_props.get(name).duped()),
+                }
+            }
+            PropRef::Constructor(_) => {
+                cx.get_prop(inst.proto_props.dupe(), &Name::new("constructor"))
             }
             PropRef::Computed(_) => None,
         };
@@ -7552,6 +7566,7 @@ pub mod get_prop_t_kit {
                 PropRef::Computed(prop) => {
                     computed_prop_matches_indexer::<F>(cx, env, trace, use_op, prop, key)?
                 }
+                PropRef::Constructor(_) => false,
             };
             if matches_indexer {
                 property = Some((
@@ -7805,7 +7820,8 @@ pub mod get_prop_t_kit {
     ) -> Result<Option<(Property, PropertySource)>, FlowJsException> {
         let named_prop = match propref {
             PropRef::Named { name, .. } => cx.get_prop(o.props_tmap.dupe(), name),
-            PropRef::Computed(_) => None,
+            // An object isn't a class instance, so it has no class constructor.
+            PropRef::Computed(_) | PropRef::Constructor(_) => None,
         };
         let no_unchecked_indexed_access = cx.no_unchecked_indexed_access();
         let union_void_if_instructed = |t: Type| -> Type {
@@ -7944,7 +7960,8 @@ pub mod get_prop_t_kit {
                     reason: reason_prop,
                     name: _,
                     from_indexed_access: _,
-                } => {
+                }
+                | PropRef::Constructor(reason_prop) => {
                     let lookup_kind = match &lookup_info {
                         Some((id, lookup_default_tout))
                             if obj_type::is_exact(&o.flags.obj_kind) =>

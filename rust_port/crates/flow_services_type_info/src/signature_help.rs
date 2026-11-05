@@ -39,6 +39,7 @@ use flow_typing_type::type_::DefTInner;
 use flow_typing_type::type_::GenericTData;
 use flow_typing_type::type_::MethodTData;
 use flow_typing_type::type_::PolyTData;
+use flow_typing_type::type_::PropRef;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeInner;
 use flow_typing_type::type_::UseT;
@@ -617,11 +618,7 @@ pub mod callee_finder {
                                 Ok(())
                             },
                         )?;
-                        let propref = type_util::mk_named_prop(
-                            ctor_reason.dupe(),
-                            false,
-                            Name::new("constructor"),
-                        );
+                        let propref = PropRef::Constructor(ctor_reason.dupe());
                         let collector = TypeCollector::create();
                         let use_t = UseT::new(UseTInner::MethodT(Box::new(MethodTData {
                             use_op: unknown_use(),

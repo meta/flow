@@ -2236,7 +2236,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             match t.deref() {
                 TypeInner::DefT(_, def_t) if let DefTInner::InstanceT(inst_t) = def_t.deref() => {
                     match propref {
-                        type_::PropRef::Named { .. } => {
+                        type_::PropRef::Named { .. } | type_::PropRef::Constructor(_) => {
                             let react_dro = match objt.deref() {
                                 TypeInner::DefT(_, d) => match d.deref() {
                                     DefTInner::ObjT(o) => o.flags.react_dro.clone(),
@@ -2352,6 +2352,15 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                         && flow_js_utils::is_function_prototype(name) =>
                 {
                     flow_js_utils::lookup_builtin_value(cx, "Function", reason_op.dupe())
+                }
+                // `x.constructor` is the class, unless a field of that name types it.
+                TypeInner::ObjProtoT(_)
+                    if let type_::PropRef::Named { name, .. } = propref
+                        && name.matches_str("constructor")
+                        && let TypeInner::DefT(r, def_t) = objt.deref()
+                        && let DefTInner::InstanceT(_) = def_t.deref() =>
+                {
+                    type_util::class_type(objt.dupe(), r.annot_loc().map(|a| a.dupe()))
                 }
                 TypeInner::DefT(_, def_t)
                     if matches!(def_t.deref(), DefTInner::NullT)
@@ -2642,7 +2651,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             match t.deref() {
                 TypeInner::DefT(_, def_t) if let DefTInner::InstanceT(inst_t) = def_t.deref() => {
                     match propref {
-                        type_::PropRef::Named { .. } => {
+                        type_::PropRef::Named { .. } | type_::PropRef::Constructor(_) => {
                             let trace = dummy_trace();
                             get_prop_t_kit::read_instance_prop::<AnnotGetPropHelper>(
                                 cx,

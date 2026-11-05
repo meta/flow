@@ -906,7 +906,7 @@ fn type_of_hint_decomposition<'cx>(
                     env,
                     t,
                     reason.dupe(),
-                    type_util::mk_named_prop(reason.dupe(), false, Name::new("constructor")),
+                    PropRef::Constructor(reason.dupe()),
                 )
             };
         let mod_ctor_return = |cx: &mut Context<'cx>, instance_type: &Type, t: &Type| -> Type {

@@ -725,7 +725,7 @@ fn resolve_computed_key_name(
         let resolved_name = match concrete_keys.as_slice() {
             [key] => match flow_js_utils::propref_for_elem_t(cx, key) {
                 type_::PropRef::Named { name, .. } => Some(name),
-                type_::PropRef::Computed(_) => None,
+                type_::PropRef::Computed(_) | type_::PropRef::Constructor(_) => None,
             },
             _ => None,
         };
@@ -746,7 +746,7 @@ fn resolve_key_type_name(
     Ok(match concrete_keys.as_slice() {
         [key] => match flow_js_utils::propref_for_elem_t(cx, key) {
             type_::PropRef::Named { name, .. } => Some(name),
-            type_::PropRef::Computed(_) => None,
+            type_::PropRef::Computed(_) | type_::PropRef::Constructor(_) => None,
         },
         _ => None,
     })

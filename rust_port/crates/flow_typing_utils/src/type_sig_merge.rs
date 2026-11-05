@@ -1658,7 +1658,7 @@ fn resolve_computed_key<'cx>(
     match cx.find_resolved(&key_t) {
         Some(resolved_t) => match flow_js_utils::propref_for_elem_t(cx, &resolved_t) {
             type_::PropRef::Named { name, .. } => Some(name),
-            type_::PropRef::Computed(_) => None,
+            type_::PropRef::Computed(_) | type_::PropRef::Constructor(_) => None,
         },
         None => None,
     }

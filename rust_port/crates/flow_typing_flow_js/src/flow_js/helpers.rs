@@ -6,6 +6,7 @@
  */
 
 use std::cell::Cell;
+use std::collections::BTreeSet;
 use std::collections::VecDeque;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -85,6 +86,36 @@ pub(super) fn check_canceled<'cx>(
 
 pub(super) fn inherited_method(name: &Name) -> bool {
     !name.matches_str("constructor")
+}
+
+/// The nearest field named `constructor` on the instance `t` or its supers, as in TypeScript's
+/// `['constructor']: KlassConstructor<typeof Node>`.
+pub(super) fn constructor_field<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    t: &Type,
+) -> Result<Option<Property>, FlowJsException> {
+    let name = Name::new(FlowSmolStr::new_inline("constructor"));
+    let mut seen_classes = BTreeSet::new();
+    let mut ts = VecDeque::from([t.dupe()]);
+    while let Some(t) = ts.pop_front() {
+        for t in possible_concrete_types_for_inspection(cx, env, reason_of_t(&t), &t)? {
+            match t.deref() {
+                TypeInner::IntersectionT(_, rep) => ts.extend(rep.members_iter().duped()),
+                TypeInner::DefT(_, def_t)
+                    if let DefTInner::InstanceT(inst_t) = def_t.deref()
+                        && seen_classes.insert(inst_t.inst.class_id.dupe()) =>
+                {
+                    if let Some(p) = cx.get_prop(inst_t.inst.own_props.dupe(), &name) {
+                        return Ok(Some(p));
+                    }
+                    ts.push_back(inst_t.super_.dupe());
+                }
+                _ => {}
+            }
+        }
+    }
+    Ok(None)
 }
 
 pub(super) fn speculative_subtyping_succeeds<'cx>(

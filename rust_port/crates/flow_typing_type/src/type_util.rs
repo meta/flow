@@ -2324,7 +2324,7 @@ where
 pub fn reason_of_propref(propref: &crate::type_::PropRef) -> &Reason {
     use crate::type_::PropRef;
     match propref {
-        PropRef::Named { reason, .. } => reason,
+        PropRef::Named { reason, .. } | PropRef::Constructor(reason) => reason,
         PropRef::Computed(t) => reason_of_t(t),
     }
 }

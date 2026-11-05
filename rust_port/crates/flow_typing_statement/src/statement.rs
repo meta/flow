@@ -5871,6 +5871,10 @@ fn create_computed_prop<'a>(
                 })));
                 object_expression_acc::ComputedProp::Named { name, prop }
             }
+            // A key names a property, never a class's constructor.
+            PropRef::Constructor(_) => {
+                object_expression_acc::ComputedProp::IgnoredInvalidNonLiteralKey
+            }
         }
     };
     match concretized_keys.len() {
@@ -9188,11 +9192,6 @@ pub fn optional_chain<'a>(
                             true,
                             tvar,
                         );
-                        let propref = mk_named_prop(
-                            super_reason.dupe(),
-                            false,
-                            Name::new(FlowSmolStr::new_inline("constructor")),
-                        );
                         let use_op =
                             UseOp::Op(Arc::new(type_::RootUseOp::FunCall(Box::new(FunCallData {
                                 op: mk_expression_reason(ex),
@@ -9208,7 +9207,7 @@ pub fn optional_chain<'a>(
                             use_op,
                             reason: reason.dupe(),
                             prop_reason: super_reason.dupe(),
-                            propref: Box::new(propref),
+                            propref: Box::new(type_::PropRef::Constructor(super_reason.dupe())),
                             method_action: Box::new(type_::MethodAction::CallM(Box::new(
                                 type_::CallMData {
                                     methodcalltype,
@@ -17252,7 +17251,8 @@ pub fn mk_class_sig<'a>(
                                                     PropRef::Named { name, .. } => {
                                                         Some(name.dupe())
                                                     }
-                                                    PropRef::Computed(_) => None,
+                                                    PropRef::Computed(_)
+                                                    | PropRef::Constructor(_) => None,
                                                 }
                                             }
                                             _ => None,
@@ -17573,7 +17573,7 @@ pub fn mk_class_sig<'a>(
                                         // its identity instead of collapsing onto the string
                                         // placeholder.
                                         PropRef::Named { name, .. } => Some(name.dupe()),
-                                        PropRef::Computed(_) => None,
+                                        PropRef::Computed(_) | PropRef::Constructor(_) => None,
                                     },
                                     _ => None,
                                 };

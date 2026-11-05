@@ -963,6 +963,9 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
                 format!("{:?} {}", dump_reason(cx, reason), name)
             }
             type_::PropRef::Computed(t) => kid(tvars, t),
+            type_::PropRef::Constructor(reason) => {
+                format!("{:?} (constructor)", dump_reason(cx, reason))
+            }
         }
     };
 

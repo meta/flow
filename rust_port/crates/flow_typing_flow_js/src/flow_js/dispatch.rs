@@ -190,7 +190,9 @@ fn strict_lookup_failed<'cx>(
             }
             _ => {
                 let (prop_loc, prop_name) = match propref {
-                    PropRef::Named { reason, name, .. } => (reason.loc().dupe(), Some(name.dupe())),
+                    PropRef::Named { reason, .. } | PropRef::Constructor(reason) => {
+                        (reason.loc().dupe(), name_of_propref(propref))
+                    }
                     PropRef::Computed(_) => (reason_op.loc().dupe(), None),
                 };
                 let suggestion = prop_name.as_ref().zip(ids).and_then(|(name, ids)| {
@@ -337,12 +339,35 @@ fn strict_computed_lookup_failed<'cx>(
 
 /// Whether a lookup that reached `terminal`, the root of a prototype chain, has
 /// run out of places to find `propref`.
-fn prop_missing_from_lookup_terminal(terminal: &Type, propref: &PropRef) -> bool {
+fn prop_missing_from_lookup_terminal(
+    terminal: &Type,
+    lookup_kind: &LookupKind,
+    propref: &PropRef,
+) -> bool {
+    if is_instance_constructor_member(terminal, lookup_kind, propref) {
+        return false;
+    }
     match name_of_propref(propref) {
         Some(name) => subtyping_kit::property_is_missing_from_lookup_terminal(terminal, &name),
         // A computed key is never one of the prototype's own methods.
         None => true,
     }
+}
+
+/// Whether a strict lookup of an instance's `constructor` member reached
+/// `Object.prototype` without finding a field of that name. There,
+/// `constructor` is the instance's constructor.
+fn is_instance_constructor_member(
+    terminal: &Type,
+    lookup_kind: &LookupKind,
+    propref: &PropRef,
+) -> bool {
+    matches!(terminal.deref(), ObjProtoT(_))
+        && matches!(
+            lookup_kind,
+            LookupKind::Strict(deref!(DefT(_, deref!(InstanceT(_)))))
+        )
+        && matches!(propref, PropRef::Named { name, .. } if name.matches_str("constructor"))
 }
 
 /// The propref and action to keep looking up on the prototype of a type that
@@ -5895,11 +5920,6 @@ fn __flow_impl<'cx>(
                         meth_tout: tout,
                         meth_strict_arity: true,
                     };
-                    let propref = mk_named_prop(
-                        reason_o.dupe(),
-                        false,
-                        Name::new(FlowSmolStr::new_inline("constructor")),
-                    );
                     rec_flow(
                         cx,
                         env,
@@ -5910,7 +5930,7 @@ fn __flow_impl<'cx>(
                                 use_op: use_op.dupe(),
                                 reason: reason_op.dupe(),
                                 prop_reason: reason_o.dupe(),
-                                propref: Box::new(propref),
+                                propref: Box::new(PropRef::Constructor(reason_o.dupe())),
                                 method_action: Box::new(MethodAction::CallM(Box::new(CallMData {
                                     methodcalltype: funtype,
                                     return_hint: return_hint.clone(),
@@ -6623,6 +6643,7 @@ fn __flow_impl<'cx>(
         // *****************************
         // * ... and their fields read *
         // *****************************
+        // `x.constructor` is the class, unless a field of that name types it.
         (
             DefT(r, deref!(InstanceT(_))),
             GetPropT(
@@ -6632,7 +6653,10 @@ fn __flow_impl<'cx>(
                 },
             ),
         ) if name.matches_str("constructor") => {
-            let t = type_util::class_type(l.dupe(), r.annot_loc().map(|a| a.dupe()));
+            let t = match helpers::constructor_field(cx, env, l)? {
+                Some(p) if let Some(t) = property::read_t(&p) => t,
+                _ => type_util::class_type(l.dupe(), r.annot_loc().map(|a| a.dupe())),
+            };
             rec_flow_t(
                 cx,
                 env,
@@ -7171,15 +7195,10 @@ fn __flow_impl<'cx>(
         // *****************************
         // * ... and their fields read *
         // *****************************
-        (
-            DefT(_, deref!(ObjT(_))),
-            GetPropT(
-                box data @ GetPropTData {
-                    propref: box PropRef::Named { name, .. },
-                    ..
-                },
-            ),
-        ) if name.matches_str("constructor") => {
+        (DefT(_, deref!(ObjT(_))), GetPropT(box data))
+            if name_of_propref(&data.propref)
+                .is_some_and(|name| name.matches_str("constructor")) =>
+        {
             rec_flow_t(
                 cx,
                 env,
@@ -7265,10 +7284,10 @@ fn __flow_impl<'cx>(
                 use_op: _,
                 reason: reason_call,
                 prop_reason: _,
-                propref: box PropRef::Named { name, .. },
+                propref,
                 method_action: action,
             }),
-        ) if name.matches_str("constructor") => {
+        ) if name_of_propref(propref).is_some_and(|name| name.matches_str("constructor")) => {
             add_specialized_callee_method_action(env, &any_t::untyped(reason_call.dupe()), action)?;
         }
         (
@@ -7758,15 +7777,10 @@ fn __flow_impl<'cx>(
         {
             elem_action_on_obj(cx, env, trace, use_op, propref, obj, reason, action)?;
         }
-        (
-            DefT(_, deref!(ArrT(_))),
-            GetPropT(
-                box data @ GetPropTData {
-                    propref: box PropRef::Named { name, .. },
-                    ..
-                },
-            ),
-        ) if name.matches_str("constructor") => {
+        (DefT(_, deref!(ArrT(_))), GetPropT(box data))
+            if name_of_propref(&data.propref)
+                .is_some_and(|name| name.matches_str("constructor")) =>
+        {
             rec_flow_t(
                 cx,
                 env,
@@ -7786,10 +7800,10 @@ fn __flow_impl<'cx>(
                 use_op: _,
                 reason: reason_call,
                 prop_reason: _,
-                propref: box PropRef::Named { name, .. },
+                propref,
                 method_action: action,
             }),
-        ) if name.matches_str("constructor") => {
+        ) if name_of_propref(propref).is_some_and(|name| name.matches_str("constructor")) => {
             add_specialized_callee_method_action(env, &any_t::untyped(reason_call.dupe()), action)?;
         }
         // **************************************************
@@ -9543,7 +9557,7 @@ fn __flow_impl<'cx>(
                 tout: Type::new(OpenT((**tout).dupe())),
             };
             let reason_prop = match &**propref {
-                PropRef::Named { reason, .. } => reason,
+                PropRef::Named { reason, .. } | PropRef::Constructor(reason) => reason,
                 PropRef::Computed(_) => reason_op,
             };
             let test_info = Some((*id, (reason_prop.dupe(), l.dupe())));
@@ -9815,15 +9829,14 @@ fn __flow_impl<'cx>(
         ) if is_extends_use_t_root(l.deref())
             && try_ts_on_failure.is_empty()
             && lookup_props_data.props.len() > 1
-            && lookup_props_data
-                .props
-                .iter()
-                .any(|(propref, _)| !prop_missing_from_lookup_terminal(l, propref)) =>
+            && lookup_props_data.props.iter().any(|(propref, _)| {
+                !prop_missing_from_lookup_terminal(l, lookup_kind, propref)
+            }) =>
         {
-            let (missing, provided): (Vec<_>, Vec<_>) = lookup_props_data
-                .props
-                .iter()
-                .partition(|(propref, _)| prop_missing_from_lookup_terminal(l, propref));
+            let (missing, provided): (Vec<_>, Vec<_>) =
+                lookup_props_data.props.iter().partition(|(propref, _)| {
+                    prop_missing_from_lookup_terminal(l, lookup_kind, propref)
+                });
             let mut relookup = |props: Rc<[(PropRef, Property)]>| -> Result<(), FlowJsException> {
                 let Some((propref, _)) = props.first() else {
                     return Ok(());
@@ -9960,7 +9973,7 @@ fn __flow_impl<'cx>(
                 lookup_kind: box LookupKind::Strict(strict_obj),
                 indexer_fallback,
                 try_ts_on_failure,
-                propref: propref @ box PropRef::Named { .. },
+                propref: propref @ box (PropRef::Named { .. } | PropRef::Constructor(_)),
                 lookup_action: action,
                 method_accessible: _,
                 ids,
@@ -9982,13 +9995,55 @@ fn __flow_impl<'cx>(
         }
 
         (
+            ObjProtoT(_),
+            LookupT(
+                box data @ LookupTData {
+                    lookup_kind: box LookupKind::Strict(strict_obj),
+                    try_ts_on_failure,
+                    propref,
+                    lookup_action: action,
+                    ..
+                },
+            ),
+        ) if try_ts_on_failure.is_empty()
+            && is_instance_constructor_member(l, &data.lookup_kind, propref) =>
+        {
+            let propref = PropRef::Constructor(type_util::reason_of_propref(propref).dupe());
+            let action = match &**action {
+                LookupAction::LookupPropsForSubtyping(box props_data) => {
+                    LookupAction::LookupPropsForSubtyping(Box::new(LookupPropsForSubtypingData {
+                        props: props_data
+                            .props
+                            .iter()
+                            .map(|(_, up)| (propref.clone(), up.dupe()))
+                            .collect(),
+                        ..props_data.clone()
+                    }))
+                }
+                action => action.clone(),
+            };
+            rec_flow(
+                cx,
+                env,
+                trace,
+                (
+                    strict_obj,
+                    &UseT::new(LookupT(Box::new(LookupTData {
+                        propref: Box::new(propref),
+                        lookup_action: Box::new(action),
+                        ..data.clone()
+                    }))),
+                ),
+            )?;
+        }
+        (
             ObjProtoT(_) | FunProtoT(_),
             LookupT(box LookupTData {
                 reason: reason_op,
                 lookup_kind: box LookupKind::Strict(strict_obj),
                 indexer_fallback,
                 try_ts_on_failure,
-                propref: propref @ box PropRef::Named { .. },
+                propref: propref @ box (PropRef::Named { .. } | PropRef::Constructor(_)),
                 lookup_action: action,
                 method_accessible: _,
                 ids,

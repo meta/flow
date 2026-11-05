@@ -427,10 +427,8 @@ fn rec_flow_p_inner<'cx>(
             let unify_cause = match lower_upper_subtyping_obj_ts {
                 None => UnifyCause::Uncategorized,
                 Some((lower_obj_t, upper_obj_t)) => {
-                    let property_name = match propref {
-                        PropRef::Named { name, .. } => Some(name.display_smol_str()),
-                        PropRef::Computed(_) => None,
-                    };
+                    let property_name =
+                        name_of_propref(propref).map(|name| name.display_smol_str());
                     UnifyCause::MutableProperty {
                         lower_obj_t: lower_obj_t.dupe(),
                         upper_obj_t: upper_obj_t.dupe(),

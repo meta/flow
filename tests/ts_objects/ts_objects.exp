@@ -75,6 +75,106 @@ References:
                           ^^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------ constructor_field_lib.ts:43:1
+
+Cannot cast `(new TextNode(...)).constructor` to `number` because `interface {new(...args: Array<any>): TextNode}` [1]
+is incompatible with `number` [2]. [incompatible-type]
+
+   constructor_field_lib.ts:43:1
+   43| new TextNode('text').constructor satisfies number; // ERROR
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   constructor_field_lib.ts:13:20
+   13|   ['constructor']: Ctor<TextNode>;
+                          ^^^^^^^^^^^^^^ [1]
+   constructor_field_lib.ts:43:44
+   43| new TextNode('text').constructor satisfies number; // ERROR
+                                                  ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------- constructor_field_usage.js:24:14
+
+Cannot call `TextNode` with `1` bound to `text` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   constructor_field_usage.js:24:14
+   24| new TextNode(1); // ERROR: number vs string
+                    ^ [1]
+
+References:
+   constructor_field_lib.ts:14:21
+   14|   constructor(text: string, key?: string);
+                           ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------- constructor_field_usage.js:35:11
+
+Cannot call `super` with `1` bound to `text` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   constructor_field_usage.js:35:11
+   35|     super(1); // ERROR: number vs string
+                 ^ [1]
+
+References:
+   constructor_field_lib.ts:14:21
+   14|   constructor(text: string, key?: string);
+                           ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------- constructor_field_usage.js:42:1
+
+Cannot cast `text.constructor` to `number` because `interface {new(...args: Array<any>): TextNode}` [1] is incompatible
+with `number` [2]. [incompatible-type]
+
+   constructor_field_usage.js:42:1
+   42| text.constructor as number; // ERROR
+       ^^^^^^^^^^^^^^^^
+
+References:
+   constructor_field_lib.ts:13:20
+   13|   ['constructor']: Ctor<TextNode>;
+                          ^^^^^^^^^^^^^^ [1]
+   constructor_field_usage.js:42:21
+   42| text.constructor as number; // ERROR
+                           ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------- constructor_field_usage.js:43:1
+
+Cannot cast `emoji.constructor` to `number` because `interface {new(...args: Array<any>): TextNode}` [1] is incompatible
+with `number` [2]. [incompatible-type]
+
+   constructor_field_usage.js:43:1
+   43| emoji.constructor as number; // ERROR: inherited field
+       ^^^^^^^^^^^^^^^^^
+
+References:
+   constructor_field_lib.ts:13:20
+   13|   ['constructor']: Ctor<TextNode>;
+                          ^^^^^^^^^^^^^^ [1]
+   constructor_field_usage.js:43:22
+   43| emoji.constructor as number; // ERROR: inherited field
+                            ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------- constructor_field_usage.js:59:1
+
+Cannot cast `callable.constructor()` to `string` because `number` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   constructor_field_usage.js:59:1
+   59| callable.constructor() as string; // ERROR: number
+       ^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   constructor_field_lib.ts:46:26
+   46|   ['constructor']: () => number;
+                                ^^^^^^ [1]
+   constructor_field_usage.js:59:27
+   59| callable.constructor() as string; // ERROR: number
+                                 ^^^^^^ [2]
+
+
 Error ---------------------------------------------------------------------------------------- exact_constraint.ts:28:27
 
 Cannot instantiate `Constrained` because in type argument `T`: property `a` is missing in `NoA` [1] but exists in
@@ -699,4 +799,4 @@ References:
 
 
 
-Found 39 errors
+Found 45 errors

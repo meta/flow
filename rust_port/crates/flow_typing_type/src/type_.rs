@@ -6285,6 +6285,9 @@ pub enum PropRef {
         from_indexed_access: bool,
     },
     Computed(Type),
+    /// The constructor of a class, which `new` and `super()` call. It is the class's
+    /// `constructor` method, never a member, like a field, that is named `constructor`.
+    Constructor(Reason),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -10207,6 +10210,7 @@ pub fn name_of_propref(propref: &PropRef) -> Option<Name> {
     match propref {
         PropRef::Named { name, .. } => Some(name.dupe()),
         PropRef::Computed(_) => None,
+        PropRef::Constructor(_) => Some(Name::new(FlowSmolStr::new_inline("constructor"))),
     }
 }
 
