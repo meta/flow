@@ -427,6 +427,54 @@ fn is_placeholder(t: &Type) -> bool {
     )
 }
 
+/// Whether `l` and `u` are the same opaque type, which subtyping compares by its type arguments.
+fn same_nominal(l: &Type, u: &Type) -> bool {
+    matches!(
+        (l.deref(), u.deref()),
+        (TypeInner::NominalT { nominal_type: a, .. }, TypeInner::NominalT { nominal_type: b, .. })
+            if a.nominal_id == b.nominal_id
+    )
+}
+
+/// The underlying type of an opaque type `t` in the file that defines it, where subtyping sees it.
+fn local_underlying(cx: &Context<'_>, t: &Type) -> Option<Type> {
+    match t.deref() {
+        TypeInner::NominalT { nominal_type, .. }
+            if let nominal::Id::UserDefinedOpaqueTypeId(
+                box nominal::UserDefinedOpaqueTypeIdData(id, _),
+            ) = &nominal_type.nominal_id
+                && id.0.source() == Some(cx.file())
+                && let nominal::UnderlyingT::OpaqueWithLocal { t } = &nominal_type.underlying_t =>
+        {
+            Some(t.dupe())
+        }
+        _ => None,
+    }
+}
+
+/// A property as subtyping compares it with an indexer: an optional field with its inner type.
+fn field_for_indexer(p: &Property) -> PropertyType {
+    match p.deref() {
+        PropertyInner::Field(f) if let TypeInner::OptionalT { type_, .. } = f.type_.deref() => {
+            PropertyType::OrdinaryField {
+                type_: type_.dupe(),
+                polarity: f.polarity,
+            }
+        }
+        _ => property::property_type(p),
+    }
+}
+
+/// The variance subtyping compares a type argument at: an unannotated type parameter is invariant,
+/// but covariant in TypeScript (`type_app_variance_check`).
+fn unannotated_variance(polarity: Option<Polarity>, strictness: TypeStrictnessKind) -> Polarity {
+    match polarity {
+        Some(p) => p,
+        None if strictness.is_typescript_loose() => Polarity::Positive,
+        None => Polarity::Neutral,
+    }
+}
+
 /// The coarse shape of a type, used to pick the members of a union that an argument can match.
 #[derive(PartialEq, Eq)]
 enum Head {
@@ -958,24 +1006,18 @@ impl<'e> Walker<'e> {
         t
     }
 
-    /// Walks a position of the given variance. `unify` says whether the flow-based solve unifies
-    /// invariant positions of this kind (type arguments do, tuple elements and indexers don't).
+    /// Walks a position of the given variance. An invariant one is unified, as subtyping does.
     fn walk_by_polarity<'cx>(
         &mut self,
         cx: &mut Context<'cx>,
         l: &Type,
         u: &Type,
         polarity: Polarity,
-        unify: bool,
     ) -> Result<(), FlowJsException> {
         match polarity {
             Polarity::Positive => self.walk(cx, l, u),
             Polarity::Negative => self.walk(cx, u, l),
-            Polarity::Neutral if unify => self.walk_invariant(cx, l, u),
-            Polarity::Neutral => {
-                self.walk(cx, l, u)?;
-                self.walk(cx, u, l)
-            }
+            Polarity::Neutral => self.walk_invariant(cx, l, u),
         }
     }
 
@@ -1112,6 +1154,45 @@ impl<'e> Walker<'e> {
             }
             (_, TypeInner::EvalT { .. }) => self.walk_to_eval(cx, &l, &u),
             (TypeInner::EvalT { .. }, _) => self.walk_from_eval(cx, &l, &u),
+            // As in subtyping, an opaque type stands for its underlying type in the file that
+            // defines it, unless the other side is the same opaque type.
+            (TypeInner::NominalT { .. }, _)
+                if !same_nominal(&l, &u)
+                    && let Some(t) = local_underlying(cx, &l) =>
+            {
+                self.walk(cx, &t, &u)
+            }
+            (_, TypeInner::NominalT { .. })
+                if !same_nominal(&l, &u)
+                    && let Some(t) = local_underlying(cx, &u) =>
+            {
+                self.walk(cx, &l, &t)
+            }
+            // The opaque type of an alias with a custom error is transparent, as in subtyping.
+            (
+                TypeInner::NominalT {
+                    nominal_type: a, ..
+                },
+                _,
+            ) if let nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+                t, ..
+            }) = &a.underlying_t =>
+            {
+                let t = t.dupe();
+                self.walk(cx, &t, &u)
+            }
+            (
+                _,
+                TypeInner::NominalT {
+                    nominal_type: b, ..
+                },
+            ) if let nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+                t, ..
+            }) = &b.underlying_t =>
+            {
+                let t = t.dupe();
+                self.walk(cx, &l, &t)
+            }
             // As in subtyping, an application above a union is expanded before the union is split,
             // so that its members meet the expanded type, not the application itself.
             (TypeInner::UnionT(..), TypeInner::TypeAppT(_) | TypeInner::ThisTypeAppT(_))
@@ -1400,8 +1481,10 @@ impl<'e> Walker<'e> {
                 let ud = obj_type::get_dict_opt(&uo.flags.obj_kind).cloned();
                 self.walk_props(cx, &lp, None, &up, ud.as_ref(), false, false)
             }
-            // A bare marker among the members of an intersection (here, in a contravariant
-            // position, as a parameter type) gets evidence only if it is the only one.
+            // Any other intersection meets the other type through its first member that fits it
+            // with the markers open and whose evidence agrees, as in speculation. A bare marker
+            // among the members (here, in a contravariant position, as a parameter type) is a
+            // candidate only if it is the only one.
             (TypeInner::IntersectionT(_, rep), _) => {
                 let members: Vec<Type> = rep.members_iter().duped().collect();
                 let bare = (members.iter())
@@ -1411,7 +1494,15 @@ impl<'e> Walker<'e> {
                     if bare > 1 && self.marker_through_identity(cx, &m).is_some() {
                         continue;
                     }
+                    if !self.fits_open(cx, &m, &u)? {
+                        continue;
+                    }
+                    let snapshot = self.snapshot();
                     self.walk(cx, &m, &u)?;
+                    if self.agrees_with(cx, &snapshot.vars)? {
+                        return Ok(());
+                    }
+                    self.restore(snapshot);
                 }
                 Ok(())
             }
@@ -1435,7 +1526,7 @@ impl<'e> Walker<'e> {
                         .map(|((l, u), p)| (l.dupe(), u.dupe(), p))
                         .collect();
                     for (l, u, p) in pairs {
-                        self.walk_by_polarity(cx, &l, &u, p, true)?;
+                        self.walk_by_polarity(cx, &l, &u, p)?;
                     }
                     Ok(())
                 } else {
@@ -1505,7 +1596,7 @@ impl<'e> Walker<'e> {
                     })
                     .collect();
                 for (l, u, p) in pairs {
-                    self.walk_by_polarity(cx, &l, &u, p, true)?;
+                    self.walk_by_polarity(cx, &l, &u, p)?;
                 }
                 Ok(())
             }
@@ -1527,24 +1618,19 @@ impl<'e> Walker<'e> {
                 }
                 None => Ok(()),
             },
-            // A type flows to an opaque type through what the opaque type lets in: its lower bound,
-            // or its underlying type where it is visible.
+            // Elsewhere, a type flows to an opaque type through its lower bound.
             (
                 _,
                 TypeInner::NominalT {
                     nominal_type: b, ..
                 },
-            ) => {
-                let target = match (&b.lower_t, &b.underlying_t) {
-                    (Some(lower), _) => Some(lower.dupe()),
-                    (None, nominal::UnderlyingT::OpaqueWithLocal { t }) => Some(t.dupe()),
-                    _ => None,
-                };
-                match target {
-                    Some(target) => self.walk(cx, &l, &target),
-                    None => Ok(()),
+            ) => match &b.lower_t {
+                Some(lower) => {
+                    let lower = lower.dupe();
+                    self.walk(cx, &l, &lower)
                 }
-            }
+                None => Ok(()),
+            },
             (TypeInner::DefT(_, ld), TypeInner::DefT(_, ud)) => self.walk_def(cx, &l, ld, &u, ud),
             // A string literal against a template literal type: the parts of the string that the
             // placeholders match go to them.
@@ -2757,10 +2843,16 @@ impl<'e> Walker<'e> {
             (Some(urest), Some(lrest)) => self.walk(cx, urest, lrest)?,
             _ => {}
         }
+        // As in subtyping, the types of two type guards are unified unless the upper one is
+        // one-sided.
         if let (Some(lg), Some(ug)) = (&lf.type_guard, &uf.type_guard)
             && let (Some(lt), Some(ut)) = (&lg.type_guard, &ug.type_guard)
         {
-            self.walk(cx, lt, ut)?;
+            if ug.one_sided() {
+                self.walk(cx, lt, ut)?;
+            } else {
+                self.walk_invariant(cx, lt, ut)?;
+            }
         }
         // As in subtyping, receivers are compared unless both are methods.
         if !(lf.this_t.1.is_method() && uf.this_t.1.is_method()) {
@@ -2776,6 +2868,18 @@ impl<'e> Walker<'e> {
         up: &Property,
         lower_is_literal: bool,
     ) -> Result<(), FlowJsException> {
+        let (lp, up) = (property::property_type(lp), property::property_type(up));
+        self.walk_property_type(cx, &lp, &up, lower_is_literal)
+    }
+
+    /// Two properties, as subtyping compares them (`rec_flow_p`).
+    fn walk_property_type<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        lp: &PropertyType,
+        up: &PropertyType,
+        lower_is_literal: bool,
+    ) -> Result<(), FlowJsException> {
         // Read-write fields are unified, as subtyping does.
         if !lower_is_literal
             && let (
@@ -2787,16 +2891,22 @@ impl<'e> Walker<'e> {
                     type_: ut,
                     polarity: Polarity::Neutral,
                 },
-            ) = (property::property_type(lp), property::property_type(up))
+            ) = (lp, up)
         {
-            return self.walk_invariant(cx, &lt, &ut);
+            return self.walk_invariant(cx, lt, ut);
         }
-        if let (Some(lr), Some(ur)) = (property::read_t(lp), property::read_t(up)) {
+        if let (Some(lr), Some(ur)) = (
+            property::read_t_of_property_type(lp),
+            property::read_t_of_property_type(up),
+        ) {
             self.walk(cx, &lr, &ur)?;
         }
         // The properties of an object literal are checked covariantly.
         if !lower_is_literal
-            && let (Some(lw), Some(uw)) = (property::write_t(lp), property::write_t(up))
+            && let (Some(lw), Some(uw)) = (
+                property::write_t_of_property_type(lp, None),
+                property::write_t_of_property_type(up, None),
+            )
         {
             self.walk(cx, &uw, &lw)?;
         }
@@ -2851,11 +2961,15 @@ impl<'e> Walker<'e> {
         for (name, uprop) in others.into_iter().chain(generic_values) {
             match lp.get(name) {
                 Some(lprop) => self.walk_prop(cx, lprop, uprop, lower_is_literal)?,
+                // The indexer of `l` against the property, as two fields, as in subtyping.
                 None => {
-                    if let Some(ld) = ld
-                        && let Some(ur) = property::read_t(uprop)
-                    {
-                        self.walk(cx, &ld.value, &ur)?;
+                    if let Some(ld) = ld {
+                        let lfield = PropertyType::OrdinaryField {
+                            type_: ld.value.dupe(),
+                            polarity: ld.dict_polarity,
+                        };
+                        let ufield = field_for_indexer(uprop);
+                        self.walk_property_type(cx, &lfield, &ufield, lower_is_literal)?;
                     }
                 }
             }
@@ -2863,14 +2977,13 @@ impl<'e> Walker<'e> {
         if let Some(ud) = ud {
             for (name, lprop) in lp.iter().filter(|_| lower_is_object) {
                 if !up.contains_key(name) {
-                    if let Some(lr) = property::read_t(lprop) {
-                        // An optional property gives the indexer its type, as in subtyping.
-                        let lr = match lr.deref() {
-                            TypeInner::OptionalT { type_, .. } => type_.dupe(),
-                            _ => lr,
-                        };
-                        self.walk(cx, &lr, &ud.value)?;
-                    }
+                    // The property against the indexer of `u`, as two fields, as in subtyping.
+                    let ufield = PropertyType::OrdinaryField {
+                        type_: ud.value.dupe(),
+                        polarity: ud.dict_polarity,
+                    };
+                    let lfield = field_for_indexer(lprop);
+                    self.walk_property_type(cx, &lfield, &ufield, lower_is_literal)?;
                     let reason = type_util::reason_of_t(&ud.key).dupe();
                     let key_t =
                         flow_js_utils::type_of_key_name_with_env(self.env, name.dupe(), &reason);
@@ -3128,17 +3241,18 @@ impl<'e> Walker<'e> {
             .into_iter()
             .find(|a| a.inst.class_id == ui.inst.class_id);
         if let Some(a) = ancestor {
+            let loose = a.inst.strictness_kind.join(ui.inst.strictness_kind);
             let pairs: Vec<(Type, Type, Polarity)> = a
                 .inst
                 .type_args
                 .iter()
                 .zip(ui.inst.type_args.iter())
                 .map(|((_, _, l, _), (_, _, u, p))| {
-                    (l.dupe(), u.dupe(), p.unwrap_or(Polarity::Neutral))
+                    (l.dupe(), u.dupe(), unannotated_variance(*p, loose))
                 })
                 .collect();
             for (l, u, p) in pairs {
-                self.walk_by_polarity(cx, &l, &u, p, true)?;
+                self.walk_by_polarity(cx, &l, &u, p)?;
             }
             return Ok(());
         }
@@ -3183,14 +3297,15 @@ impl<'e> Walker<'e> {
         ua: &ArrType,
     ) -> Result<(), FlowJsException> {
         match (la, ua) {
-            // As in subtyping, the elements of a fresh literal are compared covariantly.
+            // As in subtyping, the elements of a literal are compared covariantly, and read-write
+            // elements of other tuples are unified.
             (ArrType::TupleAT(lt), ArrType::TupleAT(ut)) => {
                 let pairs: Vec<(Type, Type, Polarity)> = lt
                     .elements
                     .iter()
                     .zip(ut.elements.iter())
                     .map(|(l, u)| {
-                        let p = if lt.fresh {
+                        let p = if lt.literal.is_literal() {
                             Polarity::Positive
                         } else {
                             u.polarity
@@ -3199,7 +3314,7 @@ impl<'e> Walker<'e> {
                     })
                     .collect();
                 for (l, u, p) in pairs {
-                    self.walk_by_polarity(cx, &l, &u, p, false)?;
+                    self.walk_by_polarity(cx, &l, &u, p)?;
                 }
                 Ok(())
             }
@@ -3220,13 +3335,13 @@ impl<'e> Walker<'e> {
             }
             (ArrType::ArrayAT(l), ArrType::TupleAT(u)) => match &l.tuple_view {
                 Some(view) => {
-                    let fresh = l.fresh;
+                    let literal = l.literal.is_literal();
                     let pairs: Vec<(Type, Type, Polarity)> = view
                         .elements
                         .iter()
                         .zip(u.elements.iter())
                         .map(|(l, u)| {
-                            let p = if fresh {
+                            let p = if literal {
                                 Polarity::Positive
                             } else {
                                 u.polarity
@@ -3235,7 +3350,7 @@ impl<'e> Walker<'e> {
                         })
                         .collect();
                     for (l, u, p) in pairs {
-                        self.walk_by_polarity(cx, &l, &u, p, false)?;
+                        self.walk_by_polarity(cx, &l, &u, p)?;
                     }
                     Ok(())
                 }
@@ -3787,14 +3902,16 @@ impl<'e> Walker<'e> {
         let b = self.resolve(cx, b);
         match (a.deref(), b.deref()) {
             (TypeInner::DefT(_, da), TypeInner::DefT(_, db)) => match (da.deref(), db.deref()) {
-                // As in subtyping, an alias of a utility type is compared by its expansion.
+                // As in subtyping, an alias of a utility type is compared by its expansion, and a
+                // type parameter without a variance is invariant, but covariant in TypeScript.
                 (DefTInner::PolyT(pa), DefTInner::PolyT(pb))
                     if pa.id == pb.id && !flow_js_utils::wraps_utility_type(cx, &pa.t_out) =>
                 {
+                    let loose = pa.strictness_kind.join(pb.strictness_kind);
                     Some(
                         pa.tparams
                             .iter()
-                            .map(|tp| tp.polarity.unwrap_or(Polarity::Neutral))
+                            .map(|tp| unannotated_variance(tp.polarity, loose))
                             .collect(),
                     )
                 }
@@ -4944,8 +5061,8 @@ impl<'e> Walker<'e> {
 
     /// The branch a conditional type takes, if it is known. First with the markers rigid, as for
     /// a type parameter in a signature: a branch taken for every solution. Then with the solution
-    /// so far (or the default) in place of the markers of the check type. `None` if neither
-    /// decides, or a marker of the check type has no solution yet.
+    /// so far (or, on the second pass, the default) in place of the markers of the check type.
+    /// `None` if neither decides, or a marker of the check type has no solution yet.
     fn eval_conditional<'cx>(
         &mut self,
         cx: &mut Context<'cx>,
@@ -4989,7 +5106,13 @@ impl<'e> Walker<'e> {
         let reason = type_util::reason_of_t(check).dupe();
         let mut fixed = FlowOrdMap::new();
         for name in names {
-            let solution = self.current_solution(cx, &name, &reason);
+            // A default stands in for a marker without evidence only on the second pass, once the
+            // later arguments have given theirs.
+            let solution = match self.solution_so_far(cx, &name, &reason) {
+                Some(solution) => solution,
+                None if !self.second_pass => return Ok(None),
+                None => self.current_solution(cx, &name, &reason),
+            };
             if is_placeholder(&solution) {
                 return Ok(None);
             }
@@ -5240,27 +5363,39 @@ impl<'e> Walker<'e> {
 
     /// What a marker stands for so far, for instantiating a generic value against it: the union
     /// of its lower bounds, otherwise its first upper bound (of the highest priority, but `Soft`),
-    /// otherwise a placeholder.
+    /// otherwise its default or a placeholder.
     fn current_solution<'cx>(
         &self,
         cx: &mut Context<'cx>,
         name: &SubstName,
         reason: &Reason,
     ) -> Type {
+        match self.solution_so_far(cx, name, reason) {
+            Some(t) => t,
+            None => match self.defaults.get(name) {
+                Some(default) => default.dupe(),
+                None => placeholder_t::why(reason.dupe(), mixed_t::why(reason.dupe())),
+            },
+        }
+    }
+
+    /// What the evidence of a marker says it stands for so far, if anything.
+    fn solution_so_far<'cx>(
+        &self,
+        cx: &mut Context<'cx>,
+        name: &SubstName,
+        reason: &Reason,
+    ) -> Option<Type> {
         let bounds = &self.vars[name];
         let lower = best(&bounds.lower);
         let upper = best(&bounds.upper);
         if let Some(t) = bounds.exact.first() {
-            t.dupe()
+            Some(t.dupe())
         } else if !lower.is_empty() {
             let t = type_util::union_of_ts(reason.dupe(), lower, None);
-            generalize_singletons(cx, &self.call_loc, false, t)
-        } else if let Some(u) = upper.first() {
-            u.dupe()
-        } else if let Some(default) = self.defaults.get(name) {
-            default.dupe()
+            Some(generalize_singletons(cx, &self.call_loc, false, t))
         } else {
-            placeholder_t::why(reason.dupe(), mixed_t::why(reason.dupe()))
+            upper.into_iter().next()
         }
     }
 

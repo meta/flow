@@ -70,6 +70,40 @@ References:
                                                                 ^^^^^^ [2]
 
 
+Error --------------------------------------------------------------------------------------- conditional_default.js:5:1
+
+Cannot cast `c(...)` to `empty` because `1` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   conditional_default.js:5:1
+   5| c([1], 1) as empty; // error: `number`
+      ^^^^^^^^^
+
+References:
+   conditional_default.js:5:4
+   5| c([1], 1) as empty; // error: `number`
+         ^ [1]
+   conditional_default.js:5:14
+   5| c([1], 1) as empty; // error: `number`
+                   ^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------- conditional_default.js:5:1
+
+Cannot cast `c(...)` to `empty` because `1` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   conditional_default.js:5:1
+   5| c([1], 1) as empty; // error: `number`
+      ^^^^^^^^^
+
+References:
+   conditional_default.js:5:8
+   5| c([1], 1) as empty; // error: `number`
+             ^ [1]
+   conditional_default.js:5:14
+   5| c([1], 1) as empty; // error: `number`
+                   ^^^^^ [2]
+
+
 Error ----------------------------------------------------------------------------------- failed_operations_any.js:22:15
 
 Cannot call `f` with `o` bound to `g` because `{a: string}` [1] is incompatible with `() => any` [2].
@@ -155,6 +189,34 @@ References:
                              ^^^^^ [2]
 
 
+Error ----------------------------------------------------------------------------------------- indexer_invariant.js:5:6
+
+Cannot call `d` with `'x'` bound to `v` because `"x"` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   indexer_invariant.js:5:6
+   5| d(o, 'x'); // error: `string` is not `number`
+           ^^^ [1]
+
+References:
+   indexer_invariant.js:2:22
+   2| declare const o: {a: number};
+                           ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------- indexer_invariant.js:14:6
+
+Cannot call `e` with `'x'` bound to `v` because `"x"` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   indexer_invariant.js:14:6
+   14| e(p, 'x'); // error: `string` is not `number`
+            ^^^ [1]
+
+References:
+   indexer_invariant.js:11:29
+   11| declare const p: {[string]: number};
+                                   ^^^^^^ [2]
+
+
 Error ---------------------------------------------------------------------------- interface_construct_signature.js:18:1
 
 Cannot cast `box` to `string` because `Box` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -170,6 +232,23 @@ References:
    interface_construct_signature.js:18:8
    18| box as string; // error
               ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------- intersection_lower.js:6:1
+
+Cannot cast `i(...)` to `empty` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   intersection_lower.js:6:1
+   6| i(a) as empty; // error: `string`
+      ^^^^
+
+References:
+   intersection_lower.js:2:24
+   2| declare const a: Array<string> & Array<number>;
+                             ^^^^^^ [1]
+   intersection_lower.js:6:9
+   6| i(a) as empty; // error: `string`
+              ^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------- jsx_props.js:45:34
@@ -256,6 +335,38 @@ References:
               ^^^^^^^^^^^^^ [4]
 
 
+Error ------------------------------------------------------------------------------------ opaque_type_underlying.js:9:1
+
+Cannot cast `g(...)` to `empty` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   opaque_type_underlying.js:9:1
+   9| g(o) as empty; // error: `string`
+      ^^^^
+
+References:
+   opaque_type_underlying.js:1:28
+   1| export opaque type O = {a: string};
+                                 ^^^^^^ [1]
+   opaque_type_underlying.js:9:9
+   9| g(o) as empty; // error: `string`
+              ^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------- opaque_type_underlying_import.js:6:3
+
+Cannot call `f` with object literal bound to `x` because object literal [1] is incompatible with `Op<empty>` [2].
+[incompatible-type]
+
+   opaque_type_underlying_import.js:6:3
+   6| f({v: 1}) as empty; // error: the object is not an `Op`
+        ^^^^^^ [1]
+
+References:
+   opaque_type_underlying_import.js:3:26
+   3| declare function f<T>(x: Op<T>): T;
+                               ^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------ overloads_against_signature.js:10:1
 
 Cannot cast `n` to `number` because `ReadonlyArray<number>` [1] is incompatible with `number` [2]. [incompatible-type]
@@ -328,6 +439,34 @@ References:
                ^ [1]
 
 
+Error ------------------------------------------------------------------------------------------- tuple_invariant.js:5:8
+
+Cannot call `t` with `'x'` bound to `y` because `"x"` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   tuple_invariant.js:5:8
+   5| t(tup, 'x'); // error: `string` is not `number`
+             ^^^ [1]
+
+References:
+   tuple_invariant.js:2:21
+   2| declare const tup: [number];
+                          ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------- type_guard_invariant.js:6:10
+
+Cannot call `h` with `'a'` bound to `v` because `"a"` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   type_guard_invariant.js:6:10
+   6| h(isNum, 'a'); // error: `string` is not `number`
+               ^^^ [1]
+
+References:
+   type_guard_invariant.js:1:42
+   1| declare function isNum(x: unknown): x is number;
+                                               ^^^^^^ [2]
+
+
 Error -------------------------------------------------------------------------------------- union_same_class_fit.js:9:1
 
 Cannot cast `f(...)` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
@@ -346,4 +485,4 @@ References:
 
 
 
-Found 19 errors
+Found 28 errors
