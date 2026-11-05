@@ -39,8 +39,8 @@ Cannot return empty string because in type argument `TReturn` [1]: `string` [2] 
                    ^^ [2]
 
 References:
-   <BUILTINS>/misc.js:283:42
-   283| interface Generator<out T = unknown, out TReturn = any, in TNext = any> {}
+   <BUILTINS>/misc.js:276:42
+   276| interface Generator<out T = unknown, out TReturn = any, in TNext = any> {}
                                                  ^^^^^^^ [1]
    class.js:23:39
     23|   *stmt_return_err(): Generator<void, number, void> {
@@ -415,8 +415,8 @@ Cannot return empty string because in type argument `TReturn` [1]: `string` [2] 
                  ^^ [2]
 
 References:
-   <BUILTINS>/misc.js:283:42
-   283| interface Generator<out T = unknown, out TReturn = any, in TNext = any> {}
+   <BUILTINS>/misc.js:276:42
+   276| interface Generator<out T = unknown, out TReturn = any, in TNext = any> {}
                                                  ^^^^^^^ [1]
    generators.js:22:46
     22| function *stmt_return_err(): Generator<void, number, void> {

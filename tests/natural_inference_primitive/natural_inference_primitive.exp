@@ -2664,8 +2664,8 @@ References:
    <BUILTINS>/lib.es2015.iterable.js:50:26
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/misc.js:309:24
-   309| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:302:24
+   302| interface Iterator<out T, out TReturn = void, in TNext = void> {}
                                ^ [5]
    local.js:658:21
    658|   fn(() => new Set(['C'])); // error 'C' ~> 'A' | 'B'

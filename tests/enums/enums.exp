@@ -2218,8 +2218,8 @@ Cannot expect `Generator<void, number, void>` as the return type of generator fu
                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 References:
-   <BUILTINS>/misc.js:283:42
-   283| interface Generator<out T = unknown, out TReturn = any, in TNext = any> {}
+   <BUILTINS>/misc.js:276:42
+   276| interface Generator<out T = unknown, out TReturn = any, in TNext = any> {}
                                                  ^^^^^^^ [1]
    exhaustive-check-implicit-return.js:201:36
    201| function* u(x: E): Generator<void, number, void> { // Error: switch isn't exhaustive

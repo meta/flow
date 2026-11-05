@@ -334,8 +334,8 @@ References:
    any.js:33:41
      33| function test6<X>(a: Array<X>): Promise<X> {
                                                  ^ [3]
-   <BUILTINS>/lib.es5.js:1529:43
-   1529| type Awaited<T> = T extends Promise<infer U> ? U : T;
+   <BUILTINS>/lib.es5.js:1522:43
+   1522| type Awaited<T> = T extends Promise<infer U> ? U : T;
                                                    ^ [4]
 
 

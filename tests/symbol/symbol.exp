@@ -15,8 +15,8 @@ References:
    <BUILTINS>/lib.es2015.iterable.js:50:26
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/misc.js:309:24
-   309| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:302:24
+   302| interface Iterator<out T, out TReturn = void, in TNext = void> {}
                                ^ [3]
    class_iterator.js:35:40
     35|   *[Symbol.iterator](): IteratorObject<string> {
@@ -657,8 +657,8 @@ References:
    <BUILTINS>/lib.es2015.iterable.js:50:26
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/misc.js:309:24
-   309| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:302:24
+   302| interface Iterator<out T, out TReturn = void, in TNext = void> {}
                                ^ [3]
    type_well_known_symbol.js:16:44
     16| type Bad = { [Symbol.iterator](): Iterator<string> };

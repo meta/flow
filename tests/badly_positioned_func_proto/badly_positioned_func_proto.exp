@@ -8,8 +8,8 @@ Error --------------------------------------------------------------------------
                      ^ [1]
 
 References:
-   <BUILTINS>/misc.js:311:11
-   311| interface Iterable<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:304:11
+   304| interface Iterable<out T, out TReturn = void, in TNext = void> {}
                   ^^^^^^^^ [2]
 
 
@@ -23,8 +23,8 @@ Error --------------------------------------------------------------------------
                        ^ [1]
 
 References:
-   <BUILTINS>/misc.js:311:11
-   311| interface Iterable<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:304:11
+   304| interface Iterable<out T, out TReturn = void, in TNext = void> {}
                   ^^^^^^^^ [2]
 
 

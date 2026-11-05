@@ -1725,8 +1725,8 @@ Error --------------------------------------------------------------------------
                                          ^^^^^^^^^^^ [2]
 
 References:
-   <BUILTINS>/misc.js:283:11
-   283| interface Generator<out T = unknown, out TReturn = any, in TNext = any> {}
+   <BUILTINS>/misc.js:276:11
+   276| interface Generator<out T = unknown, out TReturn = any, in TNext = any> {}
                   ^^^^^^^^^ [1]
 
 
@@ -1740,8 +1740,8 @@ Error --------------------------------------------------------------------------
                                          ^^^^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/misc.js:311:11
-   311| interface Iterable<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:304:11
+   304| interface Iterable<out T, out TReturn = void, in TNext = void> {}
                   ^^^^^^^^ [2]
 
 
@@ -1755,8 +1755,8 @@ Cannot return `(typeof x) == "number"` because `Generator<empty, boolean, empty>
                  ^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:283:11
-   283| interface Generator<out T = unknown, out TReturn = any, in TNext = any> {}
+   <BUILTINS>/misc.js:276:11
+   276| interface Generator<out T = unknown, out TReturn = any, in TNext = any> {}
                   ^^^^^^^^^ [1]
    invalid.js:19:34
     19| function *generator(x: unknown): x is number { // error

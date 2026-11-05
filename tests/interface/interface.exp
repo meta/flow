@@ -1617,8 +1617,8 @@ References:
    string.js:1:18
      1| declare const s: string;
                          ^^^^^^ [1]
-   <BUILTINS>/misc.js:311:11
-   311| interface Iterable<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:304:11
+   304| interface Iterable<out T, out TReturn = void, in TNext = void> {}
                   ^^^^^^^^ [2]
 
 
