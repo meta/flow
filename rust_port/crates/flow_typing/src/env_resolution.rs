@@ -3663,7 +3663,7 @@ pub fn resolve_component<'cx>(
                 }
             }
         }
-        cx.force_post_component_tvars();
+        cx.force_post_component_tvars()?;
         flow_typing_debug::verbose::print_if_verbose_lazy(cx, None, None, None, || {
             vec!["Forced all lazy tvars after resolving component".to_string()]
         });

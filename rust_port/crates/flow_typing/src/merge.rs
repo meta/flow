@@ -132,8 +132,8 @@ use flow_typing_visitors::type_visitor::TypeVisitor;
 use flow_utils_concurrency::job_error::JobError;
 use flow_utils_union_find::Node;
 
-fn force_lazy_tvars<'cx>(cx: &mut Context<'cx>) {
-    cx.force_post_component_tvars();
+fn force_lazy_tvars<'cx>(cx: &mut Context<'cx>) -> Result<(), JobError> {
+    cx.force_post_component_tvars()
 }
 
 fn detect_sketchy_null_checks<'cx>(cx: &mut Context<'cx>, tast: &ast::Program<ALoc, (ALoc, Type)>) {
@@ -1996,7 +1996,7 @@ pub fn post_merge_checks<'cx>(
     tast: &ast::Program<ALoc, (ALoc, Type)>,
     metadata: &Metadata,
 ) -> Result<(), JobError> {
-    force_lazy_tvars(cx);
+    force_lazy_tvars(cx)?;
     check_react_rules_fn(cx, tast)?;
     if !cx.is_global_lib_context() {
         check_multiplatform_conformance(cx, ast, tast)?;

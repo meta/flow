@@ -1746,16 +1746,17 @@ impl<'a> Context<'a> {
         std::mem::take(&mut self.ccx_mut().post_component_tvar_forcing_states)
     }
 
-    pub fn force_post_component_tvars(&mut self) {
+    pub fn force_post_component_tvars(&mut self) -> Result<(), JobError> {
         for state in self.post_component_tvar_forcing_states().iter() {
             if self.is_active_tvar_forcing_state(state) {
                 self.ccx_mut()
                     .post_component_tvar_forcing_states
                     .push_back(state.clone());
             } else {
-                self.force_fully_resolved_tvar(state);
+                self.try_force_fully_resolved_tvar(state)?;
             }
         }
+        Ok(())
     }
 
     pub fn is_fully_forced_tvar(&self, root_id: i32) -> bool {
@@ -3323,6 +3324,17 @@ impl<'a> Context<'a> {
         let len = self.ccx().active_tvar_forcing_states.len();
         self.ccx_mut().active_tvar_forcing_states.push(s.clone());
         let t = s.force(self, |cx, reason| cx.on_cyclic_tvar_error(reason.dupe()));
+        self.ccx_mut().active_tvar_forcing_states.truncate(len);
+        t
+    }
+
+    pub fn try_force_fully_resolved_tvar(
+        &mut self,
+        s: &ForcingState<Cx>,
+    ) -> Result<Type, JobError> {
+        let len = self.ccx().active_tvar_forcing_states.len();
+        self.ccx_mut().active_tvar_forcing_states.push(s.clone());
+        let t = s.try_force(self, |cx, reason| cx.on_cyclic_tvar_error(reason.dupe()));
         self.ccx_mut().active_tvar_forcing_states.truncate(len);
         t
     }

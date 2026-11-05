@@ -382,6 +382,9 @@ pub(super) fn mk_type_destructor<'cx>(
                     },
                 ) {
                     Ok(result) => Ok(result),
+                    Err(FlowJsException::WorkerCanceled(c)) => Err(JobError::Canceled(c)),
+                    Err(FlowJsException::TimedOut(t)) => Err(JobError::TimedOut(t)),
+                    Err(FlowJsException::DebugThrow { loc }) => Err(JobError::DebugThrow { loc }),
                     Err(err) => {
                         *evaluation_error_for_map.borrow_mut() = Some(err);
                         Ok(eval_t_fallback.dupe())
@@ -1524,6 +1527,11 @@ pub(super) fn mk_possibly_evaluated_destructor_for_annotations<'cx>(
                         },
                     ) {
                         Ok(result) => Ok(result),
+                        Err(FlowJsException::WorkerCanceled(c)) => Err(JobError::Canceled(c)),
+                        Err(FlowJsException::TimedOut(t)) => Err(JobError::TimedOut(t)),
+                        Err(FlowJsException::DebugThrow { loc }) => {
+                            Err(JobError::DebugThrow { loc })
+                        }
                         Err(err) => {
                             *evaluation_error_for_map.borrow_mut() = Some(err);
                             Ok(eval_t_fallback.dupe())
@@ -1536,18 +1544,7 @@ pub(super) fn mk_possibly_evaluated_destructor_for_annotations<'cx>(
                 evaluated.insert(id, result);
                 cx.set_evaluated(evaluated);
             }
-            if matches!(
-                evaluation_error.borrow().as_ref(),
-                Some(FlowJsException::WorkerCanceled(_))
-                    | Some(FlowJsException::TimedOut(_))
-                    | Some(FlowJsException::DebugThrow { .. })
-            ) {
-                if let Some(err) = evaluation_error.borrow_mut().take() {
-                    return Err(err);
-                }
-            }
         } else {
-            // Hoisted out of try_evaluate so the post-loop check below can read it.
             let evaluation_error: Rc<RefCell<Option<FlowJsException>>> =
                 Rc::new(RefCell::new(None));
             let mut try_evaluate = |stuck_eval_kind: nominal::StuckEvalKind,
@@ -1666,6 +1663,13 @@ pub(super) fn mk_possibly_evaluated_destructor_for_annotations<'cx>(
                             },
                         ) {
                             Ok(result) => Ok(result),
+                            Err(FlowJsException::WorkerCanceled(c)) => {
+                                Err(JobError::Canceled(c))
+                            }
+                            Err(FlowJsException::TimedOut(t)) => Err(JobError::TimedOut(t)),
+                            Err(FlowJsException::DebugThrow { loc }) => {
+                                Err(JobError::DebugThrow { loc })
+                            }
                             Err(err) => {
                                 *evaluation_error_for_map.borrow_mut() = Some(err);
                                 Ok(eval_t_fallback.dupe())
@@ -1678,23 +1682,6 @@ pub(super) fn mk_possibly_evaluated_destructor_for_annotations<'cx>(
                     evaluated.insert(id.dupe(), result);
                     cx.set_evaluated(evaluated);
                 }
-            };
-
-            // After try_evaluate runs, surface any latched WorkerCanceled,
-            // TimedOut, or DebugThrow. Other FlowJsException variants stay in
-            // evaluation_error and the existing fallback behavior is preserved.
-            let check_canceled_evaluation_error = || -> Result<(), FlowJsException> {
-                if matches!(
-                    evaluation_error.borrow().as_ref(),
-                    Some(FlowJsException::WorkerCanceled(_))
-                        | Some(FlowJsException::TimedOut(_))
-                        | Some(FlowJsException::DebugThrow { .. })
-                ) {
-                    if let Some(err) = evaluation_error.borrow_mut().take() {
-                        return Err(err);
-                    }
-                }
-                Ok(())
             };
 
             match d {
@@ -1813,7 +1800,6 @@ pub(super) fn mk_possibly_evaluated_destructor_for_annotations<'cx>(
                 }
                 _ => {}
             }
-            check_canceled_evaluation_error()?;
         }
     }
     Ok(eval_t)
