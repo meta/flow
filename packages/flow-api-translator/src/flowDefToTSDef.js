@@ -4090,6 +4090,12 @@ const getTransforms = (
       node: FlowESTree.ObjectTypeIndexer,
     ): TSESTree.TSIndexSignature | TSESTree.TSPropertySignatureComputedName {
       if (node.key.type === 'GenericTypeAnnotation') {
+        if (!opts.recoverFromErrors) {
+          throw translationError(
+            node.key,
+            unsupportedFeatureMessage('generic indexer keys'),
+          );
+        }
         if (node.key.id.type === 'ImportType') {
           throw translationError(node, 'Unsupported import type indexer key');
         }
