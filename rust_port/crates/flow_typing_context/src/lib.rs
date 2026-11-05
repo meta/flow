@@ -1422,7 +1422,7 @@ impl<'a> Context<'a> {
     }
 
     pub fn enable_enums(&self) -> bool {
-        self.inner().metadata.frozen.enable_enums
+        self.is_ts_file() || self.inner().metadata.frozen.enable_enums
     }
 
     pub fn enable_jest_integration(&self) -> bool {
