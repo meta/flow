@@ -3102,7 +3102,7 @@ impl<'a> Serializer<'a> {
                 self.serialize_expression(expr);
             }
         }
-        self.write_str_opt((!self.is_babel()).then_some("value"));
+        self.write_str_opt((!self.is_babel()).then_some(export_kind_str(decl.export_kind())));
     }
 
     fn serialize_export_assignment(

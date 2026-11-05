@@ -425,7 +425,7 @@ function detectSourceType(program: FlowParserProgram): 'script' | 'module' {
         }
         break;
       case 'ExportDefaultDeclaration':
-        if (stmt.declaration?.type !== 'InterfaceDeclaration') {
+        if (stmt.exportKind !== 'type') {
           return 'module';
         }
         break;

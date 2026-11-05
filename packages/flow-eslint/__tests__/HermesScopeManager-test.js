@@ -185,6 +185,20 @@ describe('Type definitions', () => {
     `);
     verifyTypeDefinition(scopeManager);
   });
+
+  // Default interfaces define and reference types without introducing value reads.
+  test('default interface exports keep type-only scope semantics', () => {
+    const {ast, scopeManager} = parseForESLint(
+      'export default interface T {} (1: T);',
+    );
+    expect(ast.body[0]).toMatchObject({
+      type: 'ExportDefaultDeclaration',
+      exportKind: 'type',
+      declaration: {type: 'InterfaceDeclaration'},
+    }); // OK
+    verifyTypeDefinition(scopeManager);
+    expect(scopeManager.scopes[1].references[0].isValueReference).toBe(false); // OK
+  });
 });
 
 describe('Enums', () => {

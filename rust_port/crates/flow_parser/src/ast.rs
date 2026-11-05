@@ -2981,6 +2981,21 @@ pub mod statement {
         pub comments: Option<Syntax<M, ()>>,
     }
 
+    impl<M: Dupe, T: Dupe> ExportDefaultDeclaration<M, T> {
+        pub fn export_kind(&self) -> ExportKind {
+            use export_default_declaration::Declaration;
+
+            match &self.declaration {
+                Declaration::Declaration(declaration)
+                    if matches!(&**declaration, StatementInner::InterfaceDeclaration { .. }) =>
+                {
+                    ExportKind::ExportType
+                }
+                _ => ExportKind::ExportValue,
+            }
+        }
+    }
+
     pub mod declare_export_declaration {
         use super::*;
 

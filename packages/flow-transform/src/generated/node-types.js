@@ -228,6 +228,7 @@ import type {
 } from 'flow-estree';
 import type {DetachedNode, MaybeDetachedNode} from '../detachedNode';
 
+import {isNode} from 'flow-parser';
 import {
   asDetachedNodeForCodeGen,
   detachedProps,
@@ -2434,7 +2435,11 @@ export function ExportDefaultDeclaration(props: {
     {
       type: 'ExportDefaultDeclaration',
       declaration: asDetachedNodeForCodeGen(props.declaration),
-      exportKind: 'value',
+      exportKind:
+        isNode(props.declaration) &&
+        props.declaration.type === 'InterfaceDeclaration'
+          ? 'type'
+          : 'value',
     },
   );
   setParentPointersInDirectChildren(node as $FlowFixMe);

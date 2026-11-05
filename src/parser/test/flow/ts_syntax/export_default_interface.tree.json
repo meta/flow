@@ -383,7 +383,7 @@
           "type": "TypeParameterDeclaration"
         }
       },
-      "exportKind": "value",
+      "exportKind": "type",
       "loc": {
         "end": {
           "column": 1,

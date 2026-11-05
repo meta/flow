@@ -1271,8 +1271,8 @@ export interface NamespaceExportDeclaration extends BaseNode {
 
 export interface ExportDefaultDeclaration extends BaseNode {
   readonly type: 'ExportDefaultDeclaration';
-  readonly declaration: DefaultDeclaration | Expression;
-  readonly exportKind: 'value';
+  readonly declaration: DefaultDeclaration | InterfaceDeclaration | Expression;
+  readonly exportKind: 'value' | 'type';
 }
 
 export interface ExportAllDeclaration extends BaseNode {

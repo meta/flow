@@ -106,6 +106,27 @@ describe('StripFlowTypes', () => {
     expect((await print(stripped, code)).trim()).toBe('function f(x) {}'); // OK
   });
 
+  // Type-only default exports are removed as whole wrappers.
+  test('strips default interface exports', () => {
+    const stripped = stripFlowTypes(parse('export default interface I {}'), {});
+    expect(stripped.body).toEqual([]); // OK
+  });
+
+  // A runtime default export survives erasure beside a type-only default.
+  test('preserves runtime defaults alongside default interfaces', () => {
+    const stripped = stripFlowTypes(
+      parse('export default interface I {} export default 1;'),
+      {},
+    );
+    expect(stripped.body).toMatchObject([
+      {
+        type: 'ExportDefaultDeclaration',
+        exportKind: 'value',
+        declaration: {type: 'Literal', value: 1},
+      },
+    ]); // OK
+  });
+
   test('strips non-null expressions', () => {
     // Removing the assertion preserves the expression and its original location.
     const ast = parse('value!;');

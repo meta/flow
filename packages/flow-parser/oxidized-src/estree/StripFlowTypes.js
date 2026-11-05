@@ -137,6 +137,7 @@ export function transformProgram(
         }
 
         case 'ExportAllDeclaration':
+        case 'ExportDefaultDeclaration':
         case 'ExportNamedDeclaration': {
           if (node.exportKind === 'type') {
             return null;

@@ -372,4 +372,6 @@ export {Something as type} from 'some-module';
 
 
 
+// Type-only default exports are erased without leaving a runtime wrapper.
+
 //# sourceMappingURL=source.js.map

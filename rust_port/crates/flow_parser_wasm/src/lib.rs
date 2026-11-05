@@ -34,7 +34,6 @@ use flow_parser::ast;
 use flow_parser::ast::statement::ExportKind;
 use flow_parser::ast::statement::ImportKind;
 use flow_parser::ast::statement::StatementInner;
-use flow_parser::ast::statement::export_default_declaration::Declaration as DefaultExportDeclaration;
 use flow_parser::ast::statement::export_named_declaration::Specifier as ExportSpecifier;
 use flow_parser::ast::statement::import_declaration::Specifier as ImportSpecifier;
 use flow_parser::loc::Loc;
@@ -672,11 +671,9 @@ pub(crate) fn is_module(program: &ast::Program<Loc, Loc>) -> bool {
                             _ => true,
                         })
             }
-            StatementInner::ExportDefaultDeclaration { inner, .. } => !matches!(
-                &inner.declaration,
-                DefaultExportDeclaration::Declaration(declaration)
-                    if matches!(&**declaration, StatementInner::InterfaceDeclaration { .. })
-            ),
+            StatementInner::ExportDefaultDeclaration { inner, .. } => {
+                matches!(inner.export_kind(), ExportKind::ExportValue)
+            }
             StatementInner::ExportNamedDeclaration { inner, .. } => {
                 matches!(inner.export_kind, ExportKind::ExportValue)
                     && match &inner.specifiers {
@@ -777,6 +774,30 @@ mod tests {
                 flow_parser::parse_program_without_file(false, None, None, Ok(source));
             assert!(errors.is_empty(), "parse errors for {source}: {errors:?}"); // OK
             assert!(super::is_module(&program)); // OK
+        }
+    }
+
+    #[test]
+    fn default_exports_serialize_type_and_value_kinds() {
+        // Only interface declarations are type-only default exports.
+        for (source, expected) in [
+            ("export default interface I {}", "type"),
+            ("export default function F() {}", "value"),
+            ("export default class C {}", "value"),
+            ("export default I;", "value"),
+            ("export default 1;", "value"),
+            ("export default null;", "value"),
+            ("export default true;", "value"),
+            ("export default 'text';", "value"),
+            ("export default 1n;", "value"),
+            ("export default /x/;", "value"),
+        ] {
+            let buffers = parse_and_serialize_with_filename(source, "");
+            assert_eq!(
+                string_prop(&buffers, NodeKind::ExportDefaultDeclaration, "exportKind"),
+                expected,
+                "{source}",
+            ); // OK
         }
     }
 
@@ -909,6 +930,22 @@ mod tests {
         }
 
         let kind_id = buf[idx] - 1;
+        if kind_id == NodeKind::Literal as u32 {
+            // Literals use a value discriminator rather than schema properties.
+            let mut cursor = idx + 3;
+            cursor = match buf[idx + 2] {
+                0 => cursor,
+                1 => skip_property(buf, cursor, PropType::Boolean),
+                2 => skip_property(buf, cursor, PropType::Number),
+                3 => skip_property(buf, cursor, PropType::String),
+                kind => panic!("unknown literal value kind {kind}"),
+            };
+            // literalType, raw, bigint, regex pattern, and regex flags follow.
+            for _ in 0..5 {
+                cursor = skip_string(buf, cursor);
+            }
+            return cursor;
+        }
         let def = SCHEMA
             .iter()
             .find(|def| def.kind_id == kind_id)

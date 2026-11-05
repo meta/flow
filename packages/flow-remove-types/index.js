@@ -267,6 +267,12 @@ var removeFlowVisitor = {
     }
   },
 
+  ExportDefaultDeclaration: function (context, node) {
+    if (node.exportKind === 'type') {
+      return removeNode(context, node);
+    }
+  },
+
   ImportEqualsDeclaration: function (context, node) {
     if (node.importKind === 'type' || node.importKind === 'typeof') {
       return removeNode(context, node);

@@ -131,7 +131,7 @@
         "type": "InterfaceDeclaration",
         "typeParameters": null
       },
-      "exportKind": "value",
+      "exportKind": "type",
       "loc": {
         "end": {
           "column": 59,

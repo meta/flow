@@ -26,7 +26,15 @@ const FIXED_NODE_PROPERTIES: ReadonlyMap<
   string,
   ReadonlyMap<string, string>,
 > = new Map([
-  ['ExportDefaultDeclaration', new Map([['exportKind', "'value'"]])],
+  [
+    'ExportDefaultDeclaration',
+    new Map([
+      [
+        'exportKind',
+        "isNode(props.declaration) && props.declaration.type === 'InterfaceDeclaration' ? 'type' : 'value'",
+      ],
+    ]),
+  ],
   ['FunctionDeclaration', new Map([['expression', 'false']])],
   ['FunctionExpression', new Map([['expression', 'false']])],
   [
@@ -160,6 +168,7 @@ ${imports.map(imp => `${imp} as ${imp}Type`).join(',\n')}
 } from '${TransformESTreePackage}';
 import type {DetachedNode, MaybeDetachedNode} from '../detachedNode';
 
+import {isNode} from 'flow-parser';
 import {
   asDetachedNodeForCodeGen,
   detachedProps,

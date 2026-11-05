@@ -10,7 +10,34 @@
 
 'use strict';
 
+import type {ExportDefaultDeclaration, InterfaceDeclaration} from 'flow-estree';
+
 import {parse} from '../__test_utils__/parse';
+
+// Ordinary declarations and expressions remain value-kind default exports.
+test.each([
+  'export default function F() {}',
+  'export default class C {}',
+  'export default I;',
+  'export default 1;',
+])('preserves value default kind for %s', source => {
+  expect(parse(source).body[0]).toMatchObject({
+    type: 'ExportDefaultDeclaration',
+    exportKind: 'value',
+  }); // OK
+});
+
+// Default type and value exports occupy separate validation namespaces.
+test('validates separate default-export namespaces', () => {
+  expect(
+    parse('export default interface I {} export default 1;').body.map(node =>
+      node.type === 'ExportDefaultDeclaration' ? node.exportKind : null,
+    ),
+  ).toEqual(['type', 'value']); // OK
+  expect(() =>
+    parse('export default interface I {} export default interface J {}'),
+  ).toThrow(); // ERROR
+});
 
 test('Can parse simple file', () => {
   expect(parse('const x = 1')).toMatchObject({
@@ -186,6 +213,19 @@ describe('Program source type', () => {
   test('default interface exports in ESTree', () => {
     const source = 'export default interface I {value: number;}';
 
+    // Public types admit interface declarations with a type export kind.
+    const exported = parse(source).body[0];
+    if (
+      exported.type !== 'ExportDefaultDeclaration' ||
+      exported.declaration.type !== 'InterfaceDeclaration'
+    ) {
+      throw new Error('Expected a default interface export');
+    }
+    const declaration: InterfaceDeclaration = exported.declaration;
+    const exportKind: ExportDefaultDeclaration['exportKind'] = 'type';
+    expect(declaration.id.name).toBe('I'); // OK
+    expect(exported.exportKind).toBe(exportKind); // OK
+
     // Type-only default exports retain script metadata during content detection.
     for (const sourceOptions of [{}, {sourceType: 'unambiguous'}]) {
       expect(parse(source, sourceOptions).sourceType).toBe('script'); // OK
@@ -252,6 +292,13 @@ describe('Program source type', () => {
 
   test('default interface exports in Babel', () => {
     const source = 'export default interface I {value: number;}';
+
+    // Babel default exports deliberately omit the ESTree export-kind field.
+    for (const code of [source, 'export default 1;']) {
+      const exported = parse(code, {babel: true}).program.body[0];
+      expect(exported).toMatchObject({type: 'ExportDefaultDeclaration'}); // OK
+      expect(exported).not.toHaveProperty('exportKind'); // OK
+    }
 
     // Type-only default exports retain script metadata during content detection.
     for (const sourceOptions of [{}, {sourceType: 'unambiguous'}]) {

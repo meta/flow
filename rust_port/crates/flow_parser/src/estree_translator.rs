@@ -16,6 +16,7 @@ use serde_json::Value;
 use serde_json::json;
 
 use crate::ast;
+use crate::ast::statement::ExportKind;
 use crate::ast_utils;
 use crate::comment_attachment;
 use crate::loc::Loc;
@@ -895,7 +896,13 @@ fn statement(
                 inner.comments.as_ref(),
                 vec![
                     ("declaration", declaration),
-                    ("exportKind", string("value")),
+                    (
+                        "exportKind",
+                        string(match inner.export_kind() {
+                            ExportKind::ExportType => "type",
+                            ExportKind::ExportValue => "value",
+                        }),
+                    ),
                 ],
             )
         }

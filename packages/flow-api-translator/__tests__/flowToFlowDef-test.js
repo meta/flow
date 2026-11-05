@@ -200,6 +200,13 @@ describe('flowToFlowDef', () => {
     });
   });
   describe('ExportDefaultDeclaration', () => {
+    // Valid default interfaces get a support diagnostic, not an invalid-AST error.
+    it('reports unsupported default interface translation', async () => {
+      await expect(translate('export default interface I {}')).rejects.toThrow(
+        'Default interface exports are not supported',
+      ); // ERROR
+    });
+
     it('export default function', async () => {
       await expectTranslate(
         `export default function Foo() {}`,

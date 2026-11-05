@@ -467,3 +467,8 @@ import type QualifiedType = Namespace.Types;
 export import type ExportedModuleTypes = require('exported-module-types');
 export import type ExportedQualifiedType = Namespace.Types;
 import type SemicolonlessType = require('semicolonless-types')
+
+// Type-only default exports are erased without leaving a runtime wrapper.
+export default interface DefaultInterface {
+  value: number;
+}

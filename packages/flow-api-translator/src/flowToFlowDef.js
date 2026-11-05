@@ -964,7 +964,7 @@ function convertExportDeclaration(
       if (opts.default) {
         throw translationError(
           decl,
-          'ExportDeclaration: Default interface found, invalid AST.',
+          'ExportDeclaration: Default interface exports are not supported.',
           context,
         );
       }

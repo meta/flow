@@ -9,6 +9,28 @@
  */
 
 import * as t from '../src/generated/node-types';
+import {parse} from 'flow-parser';
+import {asDetachedNode} from '../src/detachedNode';
+
+// Fresh and detached interface declarations keep type-only default export kinds.
+test('derives default-interface builder kinds from the declaration', () => {
+  const parsed = parse('export default interface I {}', {flow: 'all'}).body[0];
+  if (
+    parsed.type !== 'ExportDefaultDeclaration' ||
+    parsed.declaration.type !== 'InterfaceDeclaration'
+  ) {
+    throw new Error('Expected a default interface export');
+  }
+  for (const declaration of [
+    parsed.declaration,
+    asDetachedNode(parsed.declaration),
+  ]) {
+    const exported = t.ExportDefaultDeclaration({declaration});
+    expect(exported).toHaveProperty('exportKind', 'type'); // OK
+    expect(exported).toHaveProperty('declaration.parent', exported); // OK
+  }
+  expect(asDetachedNode(parsed)).toHaveProperty('exportKind', 'type'); // OK
+});
 
 describe('generated node builders', () => {
   // Detached programs retain their empty token-array default.

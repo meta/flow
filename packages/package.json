@@ -25,7 +25,8 @@
     "jest-specific-snapshot": "^5.0.0",
     "mkdirp": "^1.0.4",
     "patch-package": "^6.5.0",
-    "prettier": "3.9.4"
+    "prettier": "3.9.4",
+    "vlq": "^0.2.1"
   },
   "scripts": {
     "build": "./scripts/build.sh",
