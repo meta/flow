@@ -252,6 +252,7 @@ pub mod opts {
         pub strict_es6_import_export: bool,
         pub strict_property_initialization: bool,
         pub export_star_excludes_default: Option<bool>,
+        pub implicit_instantiation_walk: bool,
         pub ts_syntax: Option<bool>,
         pub ts_utility_syntax: bool,
         pub tslib_syntax: Option<bool>,
@@ -407,6 +408,7 @@ pub mod opts {
             strict_es6_import_export: false,
             strict_property_initialization: false,
             export_star_excludes_default: None,
+            implicit_instantiation_walk: false,
             ts_syntax: None,
             ts_utility_syntax: true,
             tslib_syntax: None,
@@ -2261,6 +2263,19 @@ pub mod opts {
                     parse_boolean(
                         |opts, v| {
                             opts.export_star_excludes_default = Some(v);
+                            Ok(())
+                        },
+                        values,
+                        config,
+                    )
+                },
+            ),
+            (
+                "experimental.implicit_instantiation_walk",
+                |values, config| {
+                    parse_boolean(
+                        |opts, v| {
+                            opts.implicit_instantiation_walk = v;
                             Ok(())
                         },
                         values,

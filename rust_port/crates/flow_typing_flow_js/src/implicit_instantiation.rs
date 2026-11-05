@@ -2223,13 +2223,26 @@ fn implicitly_instantiate<'cx>(
     env: &FlowJsEnv,
     check: &ImplicitInstantiationCheck,
 ) -> Result<(Vec<SolveTarg>, Marked<SubstName>, Option<Type>), FlowJsException> {
-    let (_, ref tparams, ref t) = check.poly_t;
-    let (_, _, ref op) = check.operation;
-    let resolved_t = get_t(cx, t);
     // There are no other valid cases of implicit instantiation, but it is still possible
     // reach them via non-sensical cases that usually are downstream of some other error.
     // Since there's no reasonable thing to do in these cases we just ignore them.
-    let bail_out = Ok((Vec::new(), Marked::new(), None));
+    let Some(marked_tparams) = marks_of_check(cx, check) else {
+        return Ok((Vec::new(), Marked::new(), None));
+    };
+    let (targs, tout) = check_instantiation(cx, env, check)?;
+    Ok((targs, marked_tparams, tout))
+}
+
+/// The polarity of each type parameter that the result of `check`'s operation mentions, or `None`
+/// for an operation that implicit instantiation ignores.
+fn marks_of_check<'cx>(
+    cx: &mut Context<'cx>,
+    check: &ImplicitInstantiationCheck,
+) -> Option<Marked<SubstName>> {
+    let (_, ref tparams, ref t) = check.poly_t;
+    let (_, _, ref op) = check.operation;
+    let resolved_t = get_t(cx, t);
+    let bail_out = None;
     let marked_tparams = match (resolved_t.deref(), op) {
         (_, Operation::SubtypeLowerPoly(_) | Operation::Method { .. }) => Marked::new(),
         (TypeInner::DefT(_, def_t), _) => match (def_t.deref(), op) {
@@ -2280,8 +2293,7 @@ fn implicitly_instantiate<'cx>(
         },
         _ => return bail_out,
     };
-    let (targs, tout) = check_instantiation(cx, env, check)?;
-    Ok((targs, marked_tparams, tout))
+    Some(marked_tparams)
 }
 
 /// Pins `t`, the element type of an empty array literal decomposed from its hint, to the merge of
@@ -2306,6 +2318,8 @@ pub fn pin_tvar<'cx>(
         }
     }
 }
+
+mod walk;
 
 pub mod instantiation_solver {
 
@@ -2377,6 +2391,17 @@ pub mod instantiation_solver {
         ),
         FlowJsException,
     > {
+        if cx.implicit_instantiation_walk() {
+            return super::walk::solve_targs(
+                cx,
+                env,
+                &use_op,
+                allow_underconstrained,
+                has_syntactic_hint,
+                &return_hint,
+                check,
+            );
+        }
         let init_errors = cx.errors();
         let init_deferred_errors = env.deferred_error_count();
         let solution = solve_targs_once(

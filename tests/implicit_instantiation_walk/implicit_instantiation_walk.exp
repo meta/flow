@@ -1,0 +1,139 @@
+Error ---------------------------------------------------------------------------------------------- conditional.js:21:5
+
+Cannot call `g` with array literal bound to `x` because array literal [1] is incompatible with `Box<string>` [2].
+[incompatible-type]
+
+   conditional.js:21:5
+   21|   g(['a']); // error: the parameter is a `Box`
+           ^^^^^ [1]
+
+References:
+   conditional.js:18:62
+   18|   declare function g<T extends string>(x: T extends string ? Box<T> : Array<T>): T;
+                                                                    ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- core.js:14:3
+
+Cannot cast `piped.value.value` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   core.js:14:3
+   14|   piped.value.value as number; // error
+         ^^^^^^^^^^^^^^^^^
+
+References:
+   core.js:12:22
+   12|   const piped = pipe('a', wrap, wrap);
+                            ^^^ [1]
+   core.js:14:24
+   14|   piped.value.value as number; // error
+                              ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- core.js:21:3
+
+Cannot cast `boxed.value` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   core.js:21:3
+   21|   boxed.value as number; // error
+         ^^^^^^^^^^^
+
+References:
+   core.js:19:33
+   19|   const boxed = wrap.call(null, 'a');
+                                       ^^^ [1]
+   core.js:21:18
+   21|   boxed.value as number; // error
+                        ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- core.js:28:3
+
+Cannot cast `xs` to `Array<number>` because in array element: `string` [1] is not exactly the same as `number` [2].
+[incompatible-type]
+
+The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
+- Either make `Array<string>` [3] and `Array<number>` [4] exactly the same
+- Or make `Array<number>` [4] a `ReadonlyArray`.
+See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
+
+   core.js:28:3
+   28|   xs as Array<number>; // error
+         ^^
+
+References:
+   core.js:27:19
+   27|   const xs: Array<string> = empty();
+                         ^^^^^^ [1]
+   core.js:28:15
+   28|   xs as Array<number>; // error
+                     ^^^^^^ [2]
+   core.js:27:13
+   27|   const xs: Array<string> = empty();
+                   ^^^^^^^^^^^^^ [3]
+   core.js:28:9
+   28|   xs as Array<number>; // error
+               ^^^^^^^^^^^^^ [4]
+
+
+Error ----------------------------------------------------------------------------------------------------- core.js:46:5
+
+Cannot call `d` because in index `0`: `1` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   core.js:46:5
+   46|   d(1, 'a'); // error
+           ^ [1]
+
+References:
+   core.js:44:26
+   44|   const d = debounce((s: string, n: number) => {});
+                                ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- core.js:46:8
+
+Cannot call `d` because in index `1`: `"a"` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   core.js:46:8
+   46|   d(1, 'a'); // error
+              ^^^ [1]
+
+References:
+   core.js:44:37
+   44|   const d = debounce((s: string, n: number) => {});
+                                           ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- core.js:59:14
+
+Cannot call `first` with `1` bound to `y` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   core.js:59:14
+   59|   first('a', 1); // error
+                    ^ [1]
+
+References:
+   core.js:59:9
+   59|   first('a', 1); // error
+               ^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- core.js:80:3
+
+Cannot cast `(new B(...)).p` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   core.js:80:3
+   80|   new B('a').p as number; // error
+         ^^^^^^^^^^^^
+
+References:
+   core.js:80:9
+   80|   new B('a').p as number; // error
+               ^^^ [1]
+   core.js:80:19
+   80|   new B('a').p as number; // error
+                         ^^^^^^ [2]
+
+
+
+Found 8 errors

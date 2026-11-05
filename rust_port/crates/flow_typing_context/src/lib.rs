@@ -223,6 +223,7 @@ pub struct FrozenMetadata {
     pub strip_root: bool,
     pub stylex_shorthand_prop: Option<String>,
     pub export_star_excludes_default: bool,
+    pub implicit_instantiation_walk: bool,
     pub ts_syntax: bool,
     pub ts_utility_syntax: bool,
     pub tslib_syntax: bool,
@@ -286,6 +287,7 @@ impl Default for FrozenMetadata {
             strip_root: true,
             stylex_shorthand_prop: None,
             export_star_excludes_default: false,
+            implicit_instantiation_walk: false,
             ts_syntax: false,
             ts_utility_syntax: false,
             tslib_syntax: false,
@@ -949,6 +951,7 @@ pub fn mk_context_metadata(options: &Options, global_libdefs: Arc<BTreeSet<FileK
             strip_root: options.strip_root,
             stylex_shorthand_prop: options.stylex_shorthand_prop.clone(),
             export_star_excludes_default: options.export_star_excludes_default,
+            implicit_instantiation_walk: options.implicit_instantiation_walk,
             ts_syntax: options.ts_syntax,
             ts_utility_syntax: options.ts_utility_syntax,
             tslib_syntax: options.tslib_syntax,
@@ -1695,6 +1698,10 @@ impl<'a> Context<'a> {
 
     pub fn normalize_intersections(&self) -> bool {
         self.inner().metadata.frozen.normalize_intersections
+    }
+
+    pub fn implicit_instantiation_walk(&self) -> bool {
+        self.inner().metadata.frozen.implicit_instantiation_walk
     }
 
     pub fn ts_syntax(&self) -> bool {
