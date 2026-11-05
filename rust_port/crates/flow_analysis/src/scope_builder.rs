@@ -754,7 +754,7 @@ where
     extends_in_infer_type(visitor, extends_type)?;
     let tparams: Vec<_> = infer_type_hoister::hoist_infer_types(extends_type)
         .into_iter()
-        .map(|(_, infer)| infer.tparam)
+        .map(|(_, infer, _)| infer.tparam)
         .collect();
     scoped_infer_type_params(visitor, extends_type.loc(), &tparams, &|this| {
         this.type_(true_type)

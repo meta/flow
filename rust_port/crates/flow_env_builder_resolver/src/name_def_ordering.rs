@@ -3653,6 +3653,7 @@ fn depends<'a, 'cx, Cx: Context, Fl: Flow<Cx = Cx>>(
         Def::TypeParam(box TypeParamData {
             tparams_map,
             kind: _,
+            implied_bound: _,
             tparam,
         }) => depends_of_tparam::<Cx, Fl>(
             cx,

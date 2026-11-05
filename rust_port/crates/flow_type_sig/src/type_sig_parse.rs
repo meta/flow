@@ -26,6 +26,7 @@ use std::ops::Deref;
 use std::rc::Rc;
 
 use dupe::Dupe;
+use flow_analysis::infer_type_hoister::ImpliedBound;
 use flow_common::alpha_rename;
 use flow_common::flow_import_specifier::Userland;
 use flow_common::platform_set::PlatformSet;
@@ -1049,7 +1050,7 @@ pub(crate) mod scope {
     }
 
     pub(crate) struct ConditionalTypeExtends<'arena, 'ast> {
-        pub(super) infer_type_names: BTreeMap<FlowSmolStr, Loc>,
+        pub(super) infer_type_names: BTreeMap<FlowSmolStr, (Loc, ImpliedBound)>,
         pub(super) infer_tparams: Vec<TParam<LocNode<'arena>, Parsed<'arena, 'ast>>>,
         pub(super) parent: ScopeId,
     }
@@ -2005,7 +2006,7 @@ pub(crate) mod scope {
         mut id: ScopeId,
         name: &FlowSmolStr,
         loc: &Loc,
-    ) -> Option<&'a ConditionalTypeExtends<'arena, 'ast>> {
+    ) -> Option<(&'a ConditionalTypeExtends<'arena, 'ast>, ImpliedBound)> {
         loop {
             match scopes.get(id) {
                 Scope::Global { .. }
@@ -2016,7 +2017,7 @@ pub(crate) mod scope {
                 Scope::Lexical { parent, .. } => id = *parent,
                 Scope::ConditionalTypeExtends(cond_scope) => {
                     return match cond_scope.infer_type_names.get(name) {
-                        Some(l) if l == loc => Some(cond_scope),
+                        Some((l, implied_bound)) if l == loc => Some((cond_scope, *implied_bound)),
                         _ => None,
                     };
                 }
@@ -9642,6 +9643,31 @@ fn tparam<'arena, 'ast>(
     }
 }
 
+fn infer_tparam<'arena, 'ast>(
+    opts: &TypeSigOptions,
+    scope: ScopeId,
+    scopes: &mut scope::Scopes<'arena, 'ast>,
+    tbls: &mut Tables<'arena, 'ast>,
+    xs: &mut tparam_stack::TParamStack,
+    param: &ast::types::TypeParam<Loc, Loc>,
+    implied_bound: ImpliedBound,
+) -> TParam<LocNode<'arena>, Parsed<'arena, 'ast>> {
+    let tp = tparam(opts, scope, scopes, tbls, xs, param, true);
+    match implied_bound {
+        ImpliedBound::Mixed => tp,
+        ImpliedBound::ReadonlyArray => {
+            let loc = tbls.push_loc(param.loc.dupe());
+            let mixed = Parsed::Annot(Box::new(ParsedAnnot::Mixed(Box::new(loc.dupe()))));
+            TParam {
+                bound: Some(Parsed::Annot(Box::new(ParsedAnnot::ReadOnlyArray(
+                    Box::new((loc, mixed)),
+                )))),
+                ..tp
+            }
+        }
+    }
+}
+
 fn tparams<'arena, 'ast>(
     opts: &TypeSigOptions,
     scope: ScopeId,
@@ -9722,9 +9748,14 @@ fn conditional_type<'arena, 'ast>(
         None
     };
     let hoisted_infer_types = flow_analysis::infer_type_hoister::hoist_infer_types(&t.extends_type);
-    let infer_type_names: BTreeMap<FlowSmolStr, Loc> = hoisted_infer_types
+    let infer_type_names: BTreeMap<FlowSmolStr, (Loc, ImpliedBound)> = hoisted_infer_types
         .iter()
-        .map(|(_loc, infer)| (infer.tparam.name.name.dupe(), infer.tparam.loc.dupe()))
+        .map(|(_loc, infer, implied_bound)| {
+            (
+                infer.tparam.name.name.dupe(),
+                (infer.tparam.loc.dupe(), *implied_bound),
+            )
+        })
         .collect();
     let extends_scope = scopes.push(scope::Scope::ConditionalTypeExtends(
         scope::ConditionalTypeExtends {
@@ -9738,7 +9769,7 @@ fn conditional_type<'arena, 'ast>(
     // Ensure all hoisted infer type parameters get registered, even if they were
     // inside constructs that short-circuited to Any without visiting their children
     // (e.g. $Shape, $Partial, unsupported TS utilities, TemplateLiteral, etc.).
-    for (_, infer) in &hoisted_infer_types {
+    for (_, infer, implied_bound) in &hoisted_infer_types {
         let name = &infer.tparam.name.name;
         let already_registered = match scopes.get(extends_scope) {
             scope::Scope::ConditionalTypeExtends(cond_scope) => {
@@ -9747,7 +9778,7 @@ fn conditional_type<'arena, 'ast>(
             _ => unreachable!(),
         };
         if !already_registered {
-            let tp = tparam(opts, scope, scopes, tbls, xs, &infer.tparam, true);
+            let tp = infer_tparam(opts, scope, scopes, tbls, xs, &infer.tparam, *implied_bound);
             if let scope::Scope::ConditionalTypeExtends(cond_scope) = scopes.get_mut(extends_scope)
             {
                 cond_scope.infer_tparams.push(tp);
@@ -9770,7 +9801,7 @@ fn conditional_type<'arena, 'ast>(
         _ => unreachable!(),
     };
     xs.push_new_frame();
-    for (_, infer) in &hoisted_infer_types {
+    for (_, infer, _) in &hoisted_infer_types {
         xs.insert(infer.tparam.name.name.dupe());
     }
     let true_type = annot(opts, scope, scopes, tbls, xs, &t.true_type);
@@ -9802,7 +9833,7 @@ fn infer_type<'arena, 'ast>(
     let name = &t.tparam.name.name;
     match scope::scope_of_infer_name(scopes, scope, name, tp_loc) {
         None => Parsed::Annot(Box::new(ParsedAnnot::Any(Box::new(loc)))),
-        Some(infer_scope) => {
+        Some((infer_scope, implied_bound)) => {
             let name_loc = if let Some(name_loc) = infer_scope
                 .infer_tparams
                 .iter()
@@ -9811,7 +9842,7 @@ fn infer_type<'arena, 'ast>(
             {
                 name_loc
             } else {
-                let tp = tparam(opts, scope, scopes, tbls, xs, &t.tparam, true);
+                let tp = infer_tparam(opts, scope, scopes, tbls, xs, &t.tparam, implied_bound);
                 let name_loc = tp.name_loc.dupe();
                 if let scope::Scope::ConditionalTypeExtends(cond_scope) = scopes.get_mut(scope) {
                     cond_scope.infer_tparams.push(tp);

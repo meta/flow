@@ -6,7 +6,7 @@ type Parts<T extends readonly unknown[], Prefix extends unknown[] = []> =
 
 // Recursive spreads reached through a type argument terminate during variance checking.
 type SubTuples<T> = T extends readonly [infer Head, ...infer Rest]
-  ? SubTuples<Rest> | [Head, ...SubTuples<Rest>] // ERROR
+  ? SubTuples<Rest> | [Head, ...SubTuples<Rest>] // OK
   : [];
 type Sampled<T extends readonly unknown[]> = [...SubTuples<Parts<T>['required']>]; // OK
 

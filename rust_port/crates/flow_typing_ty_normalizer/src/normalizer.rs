@@ -1272,6 +1272,10 @@ mod reason_utils {
 }
 
 mod type_converter {
+    use flow_common_ty::ty::TyEndoTy;
+    use flow_common_ty::ty::TyIterTy;
+    use flow_common_ty::ty_ancestors::TyEndoBase;
+    use flow_common_ty::ty_ancestors::TyIterBase;
     use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 
     use super::*;
@@ -3191,6 +3195,80 @@ mod type_converter {
         }
     }
 
+    // An `infer` type of a tuple spread or a rest parameter without a bound of its own is bounded
+    // by `ReadonlyArray<unknown>`, and so are the other `infer` types of the same name. As in
+    // TypeScript, that bound is not printed.
+    fn omit_implied_infer_bounds(t: ALocTy) -> ALocTy {
+        let mut rest_infers = RestInfers(BTreeSet::new());
+        rest_infers.on_t(&(), &t);
+        OmitImpliedInferBounds(rest_infers.0).on_t(&(), t)
+    }
+
+    // The symbol of an `infer` type bounded by `ReadonlyArray<unknown>`.
+    fn infer_with_implied_bound(t: &ty::Ty<ALoc>) -> Option<&ALocSymbol> {
+        match t {
+            ty::Ty::Infer(box (symbol, Some(bound)))
+                if let ty::Ty::Arr(ty::ArrT {
+                    arr_readonly: true,
+                    arr_elt_t,
+                }) = bound.as_ref()
+                    && let ty::Ty::Top = arr_elt_t.as_ref() =>
+            {
+                Some(symbol)
+            }
+            _ => None,
+        }
+    }
+
+    // The `infer` types of tuple spreads and rest parameters that are bounded by
+    // `ReadonlyArray<unknown>`.
+    struct RestInfers(BTreeSet<ALocSymbol>);
+
+    impl TyIterBase<(), ALoc> for RestInfers {}
+
+    impl TyIterTy<ALoc, ()> for RestInfers {
+        fn on_t(&mut self, env: &(), t: &ty::Ty<ALoc>) {
+            match t {
+                ty::Ty::Tup { elements, .. } => {
+                    self.0.extend(
+                        elements
+                            .iter()
+                            .filter_map(|element| match element {
+                                ty::TupleElement::TupleSpread { t, .. } => {
+                                    infer_with_implied_bound(t)
+                                }
+                                ty::TupleElement::TupleElement { .. } => None,
+                            })
+                            .cloned(),
+                    );
+                }
+                ty::Ty::Fun(box f) => self.0.extend(
+                    f.fun_rest_param
+                        .iter()
+                        .filter_map(|(_, t)| infer_with_implied_bound(t))
+                        .cloned(),
+                ),
+                _ => {}
+            }
+            self.default_on_t(env, t)
+        }
+    }
+
+    struct OmitImpliedInferBounds(BTreeSet<ALocSymbol>);
+
+    impl TyEndoBase<(), ALoc> for OmitImpliedInferBounds {}
+
+    impl TyEndoTy<ALoc, ()> for OmitImpliedInferBounds {
+        fn on_t(&mut self, env: &(), t: ALocTy) -> ALocTy {
+            match infer_with_implied_bound(&t) {
+                Some(symbol) if self.0.contains(symbol) => {
+                    Arc::new(ty::Ty::Infer(Box::new((symbol.clone(), None))))
+                }
+                _ => self.default_on_t(env, t),
+            }
+        }
+    }
+
     struct ConditionalTypeInput<'a> {
         check_type: ALocTy,
         infer_tparam_ids: Rc<Vec<ALocId>>,
@@ -3214,7 +3292,7 @@ mod type_converter {
         let old_infer = std::mem::replace(&mut env.infer_tparam_ids, infer_tparam_ids);
         let extends_type = type__::<I>(env, state, None, extends_t);
         env.infer_tparam_ids = old_infer;
-        let extends_type = extends_type?;
+        let extends_type = omit_implied_infer_bounds(extends_type?);
         let true_type = type__::<I>(env, state, None, true_t)?;
         let false_type = type__::<I>(env, state, None, false_t)?;
         Ok(Arc::new(ty::Ty::Conditional {

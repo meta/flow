@@ -33,3 +33,10 @@ type T8<T> = T extends {foo: infer T, bar: <T>(T) => void, ...} ? string : numbe
 declare function Distributive<T>(x: T, y: T): T extends string ? string : number;
 let x = Distributive(3, 'str');
 //  ^
+
+// An `infer` type of a tuple spread is bounded by `ReadonlyArray<unknown>`, and so are the other
+// `infer` types of the same name. That bound is not printed, even when it is written.
+type T9<T> = T extends [unknown, ...infer R extends ReadonlyArray<unknown>] ? R : empty;
+//   ^
+type T10<T> = T extends [infer R, ...infer R] ? R : empty;
+//   ^

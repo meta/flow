@@ -806,6 +806,23 @@ References:
                           ^^^^^^^ [3]
 
 
+Error ---------------------------------------------------------------------------------------- infer_rest_bound.js:22:10
+
+Cannot return `x` because `unknown` [1] is incompatible with `ReadonlyArray<unknown>` [2]. [incompatible-type]
+
+   infer_rest_bound.js:22:10
+   22|   return x; // error: unknown ~> ReadonlyArray<unknown>
+                ^
+
+References:
+   infer_rest_bound.js:21:31
+   21| function boundedElement<T>(x: BoundedElement<T>): ReadonlyArray<unknown> {
+                                     ^^^^^^^^^^^^^^^^^ [1]
+   infer_rest_bound.js:21:51
+   21| function boundedElement<T>(x: BoundedElement<T>): ReadonlyArray<unknown> {
+                                                         ^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
 Error -------------------------------------------------------------------------------------------- invalid_infer.js:2:10
 
 Invalid infer type declaration. `infer` declarations are only permitted in the `extends` clause of a conditional type.
@@ -1702,4 +1719,4 @@ References:
 
 
 
-Found 108 errors
+Found 109 errors

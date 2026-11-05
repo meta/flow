@@ -3312,6 +3312,7 @@ fn init_type_param<'cx>(
             Def::TypeParam(box TypeParamData {
                 tparams_map: tparams_locs,
                 kind,
+                implied_bound,
                 tparam,
             }),
             _,
@@ -3321,7 +3322,13 @@ fn init_type_param<'cx>(
         )) => {
             let tparams_map = mk_tparams_map_from_graph(cx, graph, tparams_locs)?;
             let (_, tparam_inner) = tparam;
-            let info = type_annotation::mk_type_param(cx, tparams_map, *kind, tparam_inner)?;
+            let info = type_annotation::mk_type_param(
+                cx,
+                tparams_map,
+                *kind,
+                *implied_bound,
+                tparam_inner,
+            )?;
             let (_, ref tparam_result, ref t) = info;
             let result = (tparam_result.name.dupe(), tparam_result.dupe(), t.dupe());
             cx.node_cache_mut().set_tparam(info);

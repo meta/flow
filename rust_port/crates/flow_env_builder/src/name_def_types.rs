@@ -11,6 +11,7 @@ use std::collections::BTreeSet;
 use dupe::Dupe;
 use flow_aloc::ALoc;
 use flow_aloc::ALocMap;
+use flow_analysis::infer_type_hoister::ImpliedBound;
 use flow_common::enclosing_context::EnclosingContext;
 use flow_common::hint::Hint;
 use flow_common::reason::Reason;
@@ -371,6 +372,7 @@ pub struct RecordDefData {
 pub struct TypeParamData {
     pub tparams_map: TparamsMap,
     pub kind: TypeParamsContext,
+    pub implied_bound: ImpliedBound,
     pub tparam: (ALoc, ast::types::TypeParam<ALoc, ALoc>),
 }
 

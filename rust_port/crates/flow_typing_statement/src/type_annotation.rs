@@ -13,6 +13,7 @@ use std::sync::Arc;
 use dupe::Dupe;
 use flow_aloc::ALoc;
 use flow_aloc::ALocMap;
+use flow_analysis::infer_type_hoister::ImpliedBound;
 use flow_common::alpha_rename;
 use flow_common::flow_import_specifier::Userland;
 use flow_common::flow_symbol::Symbol;
@@ -1625,7 +1626,7 @@ fn convert_inner<'a>(
                 FlowOrdMap::default();
             let mut extends_infer_tparams_map = ALocMap::new();
             let mut infer_bounds_map: FlowOrdMap<SubstName, Type> = FlowOrdMap::default();
-            for (_infer_loc, infer) in hoisted_infer_types.iter() {
+            for (_infer_loc, infer, implied_bound) in hoisted_infer_types.iter() {
                 let subst_name = SubstName::name(infer.tparam.name.name.dupe());
                 let old_infer_tparams_map =
                     std::mem::replace(&mut env.infer_tparams_map, Rc::new(ALocMap::new()));
@@ -1633,6 +1634,7 @@ fn convert_inner<'a>(
                     cx,
                     &mut *env,
                     flow_parser::ast_visitor::TypeParamsContext::Infer,
+                    *implied_bound,
                     &infer.tparam,
                 )?;
                 env.infer_tparams_map = old_infer_tparams_map;
@@ -3445,6 +3447,7 @@ fn convert_inner<'a>(
                     cx,
                     env,
                     flow_parser::ast_visitor::TypeParamsContext::ObjectMappedType,
+                    ImpliedBound::Mixed,
                     key_tparam,
                 )?;
                 let tparam_name = tparam.name.dupe();
@@ -6392,6 +6395,7 @@ fn mk_type_param_inner<'a>(
     cx: &mut Context<'a>,
     env: &mut ConvertEnv,
     kind: flow_parser::ast_visitor::TypeParamsContext,
+    implied_bound: ImpliedBound,
     type_param: &ast::types::TypeParam<ALoc, ALoc>,
 ) -> Result<
     (ast::types::TypeParam<ALoc, (ALoc, Type)>, TypeParam, Type),
@@ -6458,7 +6462,7 @@ fn mk_type_param_inner<'a>(
     }
     let (bound_t, bound_ast) = match bound {
         ast::types::AnnotationOrHint::Missing(missing_loc) => {
-            let t = type_::Type::new(type_::TypeInner::DefT(
+            let mixed = type_::Type::new(type_::TypeInner::DefT(
                 reason
                     .dupe()
                     .replace_desc(reason::VirtualReasonDesc::RMixed),
@@ -6466,6 +6470,21 @@ fn mk_type_param_inner<'a>(
                     type_::MixedFlavor::MixedEverything,
                 )),
             ));
+            let t = match implied_bound {
+                ImpliedBound::Mixed => mixed,
+                ImpliedBound::ReadonlyArray => type_::Type::new(type_::TypeInner::DefT(
+                    reason
+                        .dupe()
+                        .replace_desc(reason::VirtualReasonDesc::RROArrayType),
+                    type_::DefT::new(type_::DefTInner::ArrT(Rc::new(type_::ArrType::ROArrayAT(
+                        Box::new(type_::ROArrayATData {
+                            elem_t: mixed,
+                            react_dro: None,
+                            literal: type_::ArrLiteral::NonLiteral,
+                        }),
+                    )))),
+                )),
+            };
             (
                 t.dupe(),
                 ast::types::AnnotationOrHint::Missing((missing_loc.dupe(), t)),
@@ -6557,7 +6576,7 @@ fn mk_type_param_declarations_inner<'a>(
             let mut bounds_map: FlowOrdMap<SubstName, Type> = FlowOrdMap::default();
             let mut asts: Vec<ast::types::TypeParam<ALoc, (ALoc, Type)>> = Vec::new();
             for tp in tparams_node.params.iter() {
-                let (ast, tparam, t) = mk_type_param_inner(cx, env, kind, tp)?;
+                let (ast, tparam, t) = mk_type_param_inner(cx, env, kind, ImpliedBound::Mixed, tp)?;
                 let name = tparam.name.dupe();
                 let bound = tparam.bound.dupe();
                 tparams.push(tparam);
@@ -9850,13 +9869,14 @@ pub fn mk_type_param<'a>(
     cx: &mut Context<'a>,
     tparams_map: FlowOrdMap<SubstName, Type>,
     kind: flow_parser::ast_visitor::TypeParamsContext,
+    implied_bound: ImpliedBound,
     type_param: &ast::types::TypeParam<ALoc, ALoc>,
 ) -> Result<
     (ast::types::TypeParam<ALoc, (ALoc, Type)>, TypeParam, Type),
     flow_utils_concurrency::job_error::JobError,
 > {
     let mut env = ConvertEnv::new(None, None, None, tparams_map, BindsSingleValue::No);
-    mk_type_param_inner(cx, &mut env, kind, type_param)
+    mk_type_param_inner(cx, &mut env, kind, implied_bound, type_param)
 }
 
 pub fn mk_type_param_declarations<'a>(

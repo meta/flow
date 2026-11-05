@@ -56,6 +56,22 @@ Flags:
 let x: string | number
 conditional-types.js:34:5,34:5
 
+conditional-types.js:39:6
+Flags:
+type T9<T> = T extends [unknown, ...infer R] ? R : empty
+
+'R' defined at conditional-types.js:39:42
+
+conditional-types.js:39:6,39:7
+
+conditional-types.js:41:6
+Flags:
+type T10<T> = T extends [infer R, ...infer R] ? R : empty
+
+'R' defined at conditional-types.js:41:31
+
+conditional-types.js:41:6,41:8
+
 exact.js:4:6
 Flags:
 type B = $Exact<A>

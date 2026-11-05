@@ -13,6 +13,8 @@ use std::sync::Arc;
 use dupe::Dupe;
 use flow_aloc::ALoc;
 use flow_aloc::ALocMap;
+use flow_analysis::infer_type_hoister;
+use flow_analysis::infer_type_hoister::ImpliedBound;
 use flow_common::enclosing_context::EnclosingContext;
 use flow_common::hint::Hint;
 use flow_common::hint::HintDecomposition;
@@ -1770,6 +1772,30 @@ impl<'a> DefFinder<'a> {
 
     fn add_tparam(&mut self, loc: ALoc, name: FlowSmolStr) {
         self.tparams.insert(loc, name);
+    }
+
+    fn add_type_param(
+        &mut self,
+        kind: &ast_visitor::TypeParamsContext,
+        implied_bound: ImpliedBound,
+        tparam: &ast::types::TypeParam<ALoc, ALoc>,
+    ) -> Result<(), EnvInvariant<ALoc>> {
+        let name_loc = tparam.name.loc.dupe();
+        let name = &tparam.name.name;
+
+        self.force_add_binding(
+            EnvKey::ordinary(name_loc.dupe()),
+            mk_reason(VirtualReasonDesc::RType(name.dupe()), name_loc.dupe()),
+            Def::TypeParam(Box::new(TypeParamData {
+                tparams_map: self.tparams.clone(),
+                kind: *kind,
+                implied_bound,
+                tparam: (tparam.loc.dupe(), tparam.clone()),
+            })),
+        );
+        self.add_tparam(name_loc, name.dupe());
+
+        ast_visitor::type_param_default(self, kind, tparam)
     }
 
     // Compute the sibling environments needed by each parameter.
@@ -6444,21 +6470,40 @@ impl<'a, 'ast> AstVisitor<'ast, ALoc, ALoc, &'ast ALoc, EnvInvariant<ALoc>> for 
         kind: &ast_visitor::TypeParamsContext,
         tparam: &ast::types::TypeParam<ALoc, ALoc>,
     ) -> Result<(), EnvInvariant<ALoc>> {
-        let name_loc = tparam.name.loc.dupe();
-        let name = &tparam.name.name;
+        self.add_type_param(kind, ImpliedBound::Mixed, tparam)
+    }
 
-        self.force_add_binding(
-            EnvKey::ordinary(name_loc.dupe()),
-            mk_reason(VirtualReasonDesc::RType(name.dupe()), name_loc.dupe()),
-            Def::TypeParam(Box::new(TypeParamData {
-                tparams_map: self.tparams.clone(),
-                kind: *kind,
-                tparam: (tparam.loc.dupe(), tparam.clone()),
-            })),
-        );
-        self.add_tparam(name_loc, name.dupe());
+    fn conditional_type(
+        &mut self,
+        conditional: &ast::types::Conditional<ALoc, ALoc>,
+    ) -> Result<(), EnvInvariant<ALoc>> {
+        let ast::types::Conditional {
+            check_type,
+            extends_type,
+            true_type,
+            false_type,
+            comments,
+        } = conditional;
+        self.type_(check_type)?;
+        for (_, infer, implied_bound) in infer_type_hoister::hoist_infer_types(extends_type) {
+            self.add_type_param(
+                &ast_visitor::TypeParamsContext::Infer,
+                implied_bound,
+                &infer.tparam,
+            )?;
+        }
+        self.type_(extends_type)?;
+        self.type_(true_type)?;
+        self.type_(false_type)?;
+        self.syntax_opt(comments.as_ref())
+    }
 
-        ast_visitor::type_param_default(self, kind, tparam)
+    // The type parameter of an `infer` type is added by its conditional type.
+    fn infer_type(
+        &mut self,
+        _infer: &ast::types::Infer<ALoc, ALoc>,
+    ) -> Result<(), EnvInvariant<ALoc>> {
+        Ok(())
     }
 
     fn type_params(
@@ -6476,6 +6521,7 @@ impl<'a, 'ast> AstVisitor<'ast, ALoc, ALoc, &'ast ALoc, EnvInvariant<ALoc>> for 
                 Def::TypeParam(Box::new(TypeParamData {
                     tparams_map,
                     kind: *kind,
+                    implied_bound: ImpliedBound::Mixed,
                     tparam: (tparam.loc.dupe(), tparam.clone()),
                 })),
             );
