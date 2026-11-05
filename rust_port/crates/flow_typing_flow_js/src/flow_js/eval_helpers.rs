@@ -160,7 +160,10 @@ pub(super) fn eval_selector<'cx>(
             Type::new(TypeInner::OpenT(tvar.dupe())),
         )),
     };
-    flow_opt(cx, env, trace, (curr_t, &use_t))
+    match trace {
+        None => helpers::flow(cx, env, (curr_t, &use_t)),
+        Some(_) => flow_opt(cx, env, trace, (curr_t, &use_t)),
+    }
 }
 
 pub(super) fn evaluate_type_destructor<'cx>(

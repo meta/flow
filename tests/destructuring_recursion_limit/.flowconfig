@@ -1,0 +1,3 @@
+[options]
+all=true
+recursion_limit=100

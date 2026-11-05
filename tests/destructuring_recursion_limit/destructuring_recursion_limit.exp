@@ -1,0 +1,18 @@
+Error ------------------------------------------------------------------------------------------------------ test.js:4:1
+
+*** Recursion limit exceeded *** [RecursionLimitError]
+
+   4| C.missing; // ERROR
+      ^
+
+
+Error ------------------------------------------------------------------------------------------------------ test.js:5:7
+
+*** Recursion limit exceeded *** [RecursionLimitError]
+
+   5| const {missing} = C; // ERROR
+            ^^^^^^^^^
+
+
+
+Found 2 errors

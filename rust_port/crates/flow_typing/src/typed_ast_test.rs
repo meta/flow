@@ -306,13 +306,14 @@ fn test_case(relative_path: &str, file_name: &str) {
 }
 
 // This list includes files for which the produced Typed AST differs in structure
-// from the parsed AST.
+// from the parsed AST, and files that only check within their own `recursion_limit`.
 fn blocklist() -> BTreeSet<&'static str> {
     BTreeSet::from([
         "invariant_reachability/index.js",
         "return/implicit_void.js",
         "sealed_tvars/abnormal.js",
         "abnormal/return-throw.js",
+        "destructuring_recursion_limit/test.js",
     ])
 }
 
