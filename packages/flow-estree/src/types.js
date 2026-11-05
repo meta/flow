@@ -2160,7 +2160,7 @@ export type JSXNode =
 
 export interface JSXAttribute extends BaseNode {
   readonly type: 'JSXAttribute';
-  readonly name: JSXIdentifier;
+  readonly name: JSXIdentifier | JSXNamespacedName;
   readonly value: Literal | JSXExpression | null;
 
   readonly parent: JSXOpeningElement;

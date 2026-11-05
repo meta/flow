@@ -62,6 +62,19 @@ describe('generated node builders', () => {
     expect(operator).toHaveProperty('typeAnnotation.parent', operator); // OK
   });
 
+  // Namespaced attribute builders parent the compound name like ordinary names.
+  test('builds JSX namespaced attributes', () => {
+    const attribute = t.JSXAttribute({
+      name: t.JSXNamespacedName({
+        namespace: t.JSXIdentifier({name: 'ns'}),
+        name: t.JSXIdentifier({name: 'flag'}),
+      }),
+      value: t.StringLiteral({value: 'yes', raw: '"yes"'}),
+    });
+    expect(attribute).toHaveProperty('name.type', 'JSXNamespacedName'); // OK
+    expect(attribute).toHaveProperty('name.parent', attribute); // OK
+  });
+
   // Sparse-array builders preserve holes and parent only the existing nodes.
   test('builds array expressions with null holes', () => {
     const array = t.ArrayExpression({
