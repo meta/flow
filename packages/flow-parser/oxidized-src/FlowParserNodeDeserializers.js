@@ -1621,12 +1621,16 @@ module.exports = [
 
   // 142: TypeofTypeAnnotation
   function () {
-    return {
+    const node = {
       type: 'TypeofTypeAnnotation',
       loc: this.addEmptyLoc(),
-      argument: this.deserializeNode(),
-      typeArguments: this.deserializeNode(),
     };
+    node.argument = this.deserializeNode();
+    {
+      const value = this.deserializeNode();
+      if (value != null) node['typeArguments'] = value;
+    }
+    return node;
   },
 
   // 143: ImportType

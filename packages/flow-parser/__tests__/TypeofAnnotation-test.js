@@ -11,10 +11,41 @@
 'use strict';
 
 import {
+  parse,
   parseForSnapshotBabel,
   parseForSnapshotESTree,
   printForSnapshotBabel,
 } from '../__test_utils__/parse';
+
+// Absent arguments are omitted for each supported typeof target shape.
+test.each([
+  'type T = typeof f;',
+  'type T = typeof NS.f;',
+  "type T = typeof import('module');",
+])('omits absent typeof arguments in %s', source => {
+  const declaration = parse(source).body[0];
+  if (
+    declaration.type !== 'TypeAlias' ||
+    declaration.right.type !== 'TypeofTypeAnnotation'
+  ) {
+    throw new Error('Expected a typeof type annotation');
+  }
+  expect(declaration.right).not.toHaveProperty('typeArguments'); // OK
+});
+
+// Consuming an absent argument slot does not disturb later nodes or arguments.
+test('preserves decoding after omitted typeof arguments', () => {
+  const ast = parse(
+    'type A = typeof f; type B = typeof g<number>; const value = 1;',
+  );
+  expect(ast.body).toHaveLength(3); // OK
+  expect(ast.body[0]).not.toHaveProperty('right.typeArguments'); // OK
+  expect(ast.body[1]).toHaveProperty(
+    'right.typeArguments.params.0.type',
+    'NumberTypeAnnotation',
+  ); // OK
+  expect(ast.body[2]).toHaveProperty('declarations.0.init.value', 1); // OK
+});
 
 describe('typeof expression', () => {
   const code1 = 'type T = typeof f;';

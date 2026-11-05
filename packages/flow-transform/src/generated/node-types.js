@@ -207,7 +207,6 @@ import type {
   TypeAlias as TypeAliasType,
   TypeAnnotation as TypeAnnotationType,
   TypeCastExpression as TypeCastExpressionType,
-  TypeofTypeAnnotation as TypeofTypeAnnotationType,
   TypeOperator as TypeOperatorType,
   TypeParameter as TypeParameterType,
   TypeParameterDeclaration as TypeParameterDeclarationType,
@@ -1469,13 +1468,6 @@ export type TypeCastExpressionProps = {
   readonly expression: MaybeDetachedNode<TypeCastExpressionType['expression']>,
   readonly typeAnnotation: MaybeDetachedNode<
     TypeCastExpressionType['typeAnnotation'],
-  >,
-};
-
-export type TypeofTypeAnnotationProps = {
-  readonly argument: MaybeDetachedNode<TypeofTypeAnnotationType['argument']>,
-  readonly typeArguments?: ?MaybeDetachedNode<
-    TypeofTypeAnnotationType['typeArguments'],
   >,
 };
 
@@ -4287,22 +4279,6 @@ export function TypeCastExpression(props: {
       type: 'TypeCastExpression',
       expression: asDetachedNodeForCodeGen(props.expression),
       typeAnnotation: asDetachedNodeForCodeGen(props.typeAnnotation),
-    },
-  );
-  setParentPointersInDirectChildren(node as $FlowFixMe);
-  return node;
-}
-
-export function TypeofTypeAnnotation(props: {
-  ...TypeofTypeAnnotationProps,
-  readonly parent?: ESNode,
-}): DetachedNode<TypeofTypeAnnotationType> {
-  const node = detachedProps<TypeofTypeAnnotationType>(
-    props.parent as $FlowFixMe,
-    {
-      type: 'TypeofTypeAnnotation',
-      argument: asDetachedNodeForCodeGen(props.argument),
-      typeArguments: asDetachedNodeForCodeGen(props.typeArguments),
     },
   );
   setParentPointersInDirectChildren(node as $FlowFixMe);

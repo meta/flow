@@ -581,31 +581,30 @@ describe('TypeofTypeAnnotation', () => {
 
     test('ESTree', () => {
       expect(parseForSnapshot(testCase.code)).toMatchInlineSnapshot(`
-        {
-          "body": [
-            {
-              "id": {
-                "name": "T1",
-                "optional": false,
-                "type": "Identifier",
-                "typeAnnotation": null,
-              },
-              "right": {
-                "argument": {
-                  "name": "a",
-                  "optional": false,
-                  "type": "Identifier",
-                  "typeAnnotation": null,
-                },
-                "type": "TypeofTypeAnnotation",
-                "typeArguments": null,
-              },
-              "type": "TypeAlias",
-              "typeParameters": null,
-            },
-          ],
-          "type": "Program",
-        }
+       {
+         "body": [
+           {
+             "id": {
+               "name": "T1",
+               "optional": false,
+               "type": "Identifier",
+               "typeAnnotation": null,
+             },
+             "right": {
+               "argument": {
+                 "name": "a",
+                 "optional": false,
+                 "type": "Identifier",
+                 "typeAnnotation": null,
+               },
+               "type": "TypeofTypeAnnotation",
+             },
+             "type": "TypeAlias",
+             "typeParameters": null,
+           },
+         ],
+         "type": "Program",
+       }
       `);
       expectEspreeAlignment(testCase);
     });
@@ -656,40 +655,39 @@ describe('TypeofTypeAnnotation', () => {
 
     test('ESTree', () => {
       expect(parseForSnapshot(testCase.code)).toMatchInlineSnapshot(`
-        {
-          "body": [
-            {
-              "id": {
-                "name": "T1",
-                "optional": false,
-                "type": "Identifier",
-                "typeAnnotation": null,
-              },
-              "right": {
-                "argument": {
-                  "id": {
-                    "name": "a",
-                    "optional": false,
-                    "type": "Identifier",
-                    "typeAnnotation": null,
-                  },
-                  "qualification": {
-                    "name": "a",
-                    "optional": false,
-                    "type": "Identifier",
-                    "typeAnnotation": null,
-                  },
-                  "type": "QualifiedTypeofIdentifier",
-                },
-                "type": "TypeofTypeAnnotation",
-                "typeArguments": null,
-              },
-              "type": "TypeAlias",
-              "typeParameters": null,
-            },
-          ],
-          "type": "Program",
-        }
+       {
+         "body": [
+           {
+             "id": {
+               "name": "T1",
+               "optional": false,
+               "type": "Identifier",
+               "typeAnnotation": null,
+             },
+             "right": {
+               "argument": {
+                 "id": {
+                   "name": "a",
+                   "optional": false,
+                   "type": "Identifier",
+                   "typeAnnotation": null,
+                 },
+                 "qualification": {
+                   "name": "a",
+                   "optional": false,
+                   "type": "Identifier",
+                   "typeAnnotation": null,
+                 },
+                 "type": "QualifiedTypeofIdentifier",
+               },
+               "type": "TypeofTypeAnnotation",
+             },
+             "type": "TypeAlias",
+             "typeParameters": null,
+           },
+         ],
+         "type": "Program",
+       }
       `);
       expectEspreeAlignment(testCase);
     });

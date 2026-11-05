@@ -1024,6 +1024,30 @@ mod tests {
     }
 
     #[test]
+    fn typeof_argument_omission_preserves_the_wire_slot() {
+        // Missing arguments still occupy the existing null-node slot on the wire.
+        let buffers = parse_and_serialize_with_filename("type T = typeof f;", "");
+        let index = node_property_idx(
+            &buffers.program_buffer,
+            NodeKind::TypeofTypeAnnotation,
+            "typeArguments",
+        );
+        assert_eq!(buffers.program_buffer[index], 0); // OK
+
+        // Present arguments continue to use the same node slot.
+        let buffers = parse_and_serialize_with_filename("type T = typeof f<number>;", "");
+        let index = node_property_idx(
+            &buffers.program_buffer,
+            NodeKind::TypeofTypeAnnotation,
+            "typeArguments",
+        );
+        assert_eq!(
+            buffers.program_buffer[index],
+            encoded_kind(NodeKind::TypeParameterInstantiation),
+        ); // OK
+    }
+
+    #[test]
     fn variance_serializes_in_out_with_space() {
         let buffers = parse_and_serialize_with_filename("type T<in out A> = A;", "");
         assert_eq!(string_prop(&buffers, NodeKind::Variance, "kind"), "in out");

@@ -62,6 +62,37 @@ describe('generated node builders', () => {
     expect(operator).toHaveProperty('typeAnnotation.parent', operator); // OK
   });
 
+  // Typeof builders omit absent arguments instead of constructing a null field.
+  test('omits absent typeof builder arguments', () => {
+    for (const props of [
+      {},
+      {typeArguments: undefined},
+      {typeArguments: null},
+    ]) {
+      expect(
+        t.TypeofTypeAnnotation({
+          argument: t.Identifier({name: 'f'}),
+          ...props,
+        }),
+      ).not.toHaveProperty('typeArguments'); // OK
+    }
+  });
+
+  // Supplied typeof arguments retain their declaration and parent pointer.
+  test('preserves supplied typeof builder arguments', () => {
+    const annotation = t.TypeofTypeAnnotation({
+      argument: t.Identifier({name: 'f'}),
+      typeArguments: t.TypeParameterInstantiation({
+        params: [t.NumberTypeAnnotation()],
+      }),
+    });
+    expect(annotation).toHaveProperty(
+      'typeArguments.params.0.type',
+      'NumberTypeAnnotation',
+    ); // OK
+    expect(annotation).toHaveProperty('typeArguments.parent', annotation); // OK
+  });
+
   // Namespaced attribute builders parent the compound name like ordinary names.
   test('builds JSX namespaced attributes', () => {
     const attribute = t.JSXAttribute({

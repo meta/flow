@@ -24,6 +24,8 @@ import type {
   Program as ProgramType,
   DocblockMetadata as DocblockMetadataType,
   MemberExpression as MemberExpressionType,
+  TypeofTypeAnnotation as TypeofTypeAnnotationType,
+  TypeParameterInstantiation as TypeParameterInstantiationType,
 } from 'flow-estree';
 import type {DetachedNode, MaybeDetachedNode} from '../../detachedNode';
 
@@ -118,6 +120,30 @@ export function ClassDeclaration(props: {
     decorators: (props.decorators ?? []).map(n => asDetachedNode(n)),
     implements: (props.implements ?? []).map(n => asDetachedNode(n)),
     body: asDetachedNode(props.body),
+  });
+  setParentPointersInDirectChildren(node);
+  return node;
+}
+
+// Missing typeof arguments are omitted, including explicitly null builder inputs.
+export type TypeofTypeAnnotationProps = {
+  readonly argument: MaybeDetachedNode<TypeofTypeAnnotationType['argument']>,
+  readonly typeArguments?: ?MaybeDetachedNode<TypeParameterInstantiationType>,
+};
+export function TypeofTypeAnnotation(props: {
+  ...Readonly<TypeofTypeAnnotationProps>,
+  readonly parent?: ESNode,
+}): DetachedNode<TypeofTypeAnnotationType> {
+  const typeArguments = props.typeArguments;
+  const node = detachedProps<TypeofTypeAnnotationType>(props.parent, {
+    type: 'TypeofTypeAnnotation',
+    argument: asDetachedNode(props.argument),
+    ...(typeArguments == null
+      ? null
+      : {
+          typeArguments:
+            asDetachedNode<TypeParameterInstantiationType>(typeArguments),
+        }),
   });
   setParentPointersInDirectChildren(node);
   return node;

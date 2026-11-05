@@ -72,7 +72,6 @@ exports[`typeof expression ESTree 1`] = `
           "typeAnnotation": null,
         },
         "type": "TypeofTypeAnnotation",
-        "typeArguments": null,
       },
       "type": "TypeAlias",
       "typeParameters": null,

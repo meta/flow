@@ -1329,7 +1329,7 @@ define_nodes! {
     },
     TypeofTypeAnnotation = 142 {
         argument: Node,
-        typeArguments: Node,
+        typeArguments: OptionalNode,
     } from Type::Typeof { loc, inner } {
             self.serialize_typeof_target(&inner.argument),
             self.serialize_type_args_opt(&inner.targs),

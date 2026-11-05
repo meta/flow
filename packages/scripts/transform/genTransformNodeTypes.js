@@ -66,6 +66,7 @@ const NODES_WITH_SPECIAL_HANDLING = new Set([
   'RegExpLiteral',
   'StringLiteral',
   'TemplateElement',
+  'TypeofTypeAnnotation',
 ]);
 
 for (const node of GetTransformESTreeJSON()) {
