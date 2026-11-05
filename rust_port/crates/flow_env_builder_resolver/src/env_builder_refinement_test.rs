@@ -264,6 +264,7 @@ fn print_ssa_assertion_test(contents: &str) -> String {
         assertion_calls,
         &file_sig,
         &ast,
+        &ast,
     );
     print_values(|id| result.refinement_of_id.get(id))(
         &result.env_values,

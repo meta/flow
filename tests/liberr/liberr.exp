@@ -10,6 +10,38 @@ module! [module-type-conflict]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Error ------------------------------------------------------------------------------ libs/ignored-statement-reads.js:4:1
+
+Cannot use expression statements in a library file. The statement will be ignored. [unsupported-syntax]
+
+   4| f(); // error: expression statements are ignored
+      ^^^^
+
+
+Error ------------------------------------------------------------------------------ libs/ignored-statement-reads.js:5:1
+
+Cannot use if statements in a library file. The statement will be ignored. [unsupported-syntax]
+
+   5| if (f()) {} // error: if statements are ignored
+      ^^^^^^^^^^^
+
+
+Error ------------------------------------------------------------------------------ libs/ignored-statement-reads.js:8:3
+
+Cannot use expression statements in a library file. The statement will be ignored. [unsupported-syntax]
+
+   8|   g(); // error: expression statements are ignored
+        ^^^^
+
+
+Error ------------------------------------------------------------------------------ libs/ignored-statement-reads.js:8:3
+
+Cannot use expression statements with in `declare module`. The statement will be ignored. [unsupported-syntax]
+
+   8|   g(); // error: expression statements are ignored
+        ^^^^
+
+
 Error ---------------------------------------------------------------------------------------------- libs/imports.js:3:1
 
 Cannot use an import statement at the toplevel of a library file. Import statements may only appear inside a
@@ -243,7 +275,7 @@ References:
 
 
 
-Found 24 errors
+Found 28 errors
 
 ============================================
 With warnings:
@@ -257,6 +289,38 @@ module! [module-type-conflict]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Error ------------------------------------------------------------------------------ libs/ignored-statement-reads.js:4:1
+
+Cannot use expression statements in a library file. The statement will be ignored. [unsupported-syntax]
+
+   4| f(); // error: expression statements are ignored
+      ^^^^
+
+
+Error ------------------------------------------------------------------------------ libs/ignored-statement-reads.js:5:1
+
+Cannot use if statements in a library file. The statement will be ignored. [unsupported-syntax]
+
+   5| if (f()) {} // error: if statements are ignored
+      ^^^^^^^^^^^
+
+
+Error ------------------------------------------------------------------------------ libs/ignored-statement-reads.js:8:3
+
+Cannot use expression statements in a library file. The statement will be ignored. [unsupported-syntax]
+
+   8|   g(); // error: expression statements are ignored
+        ^^^^
+
+
+Error ------------------------------------------------------------------------------ libs/ignored-statement-reads.js:8:3
+
+Cannot use expression statements with in `declare module`. The statement will be ignored. [unsupported-syntax]
+
+   8|   g(); // error: expression statements are ignored
+        ^^^^
+
+
 Error ---------------------------------------------------------------------------------------------- libs/imports.js:3:1
 
 Cannot use an import statement at the toplevel of a library file. Import statements may only appear inside a
@@ -490,4 +554,4 @@ References:
 
 
 
-Found 24 errors
+Found 28 errors

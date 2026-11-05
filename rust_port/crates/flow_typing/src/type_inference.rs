@@ -715,10 +715,13 @@ enum DeclaredTypesMode<'a> {
     },
 }
 
+/// `typed_aloc_ast` is the program whose typed AST is checked, as described at
+/// `name_resolver::walk_with_prepass`.
 fn initialize_env_with_mode<'cx>(
     cx: &mut Context<'cx>,
     exclude_syms: Option<BTreeSet<FlowSmolStr>>,
     aloc_ast: &ast::Program<ALoc, ALoc>,
+    typed_aloc_ast: &ast::Program<ALoc, ALoc>,
     declared_types_mode: DeclaredTypesMode<'_>,
 ) -> Result<Option<declared_types::ResolvedAnalysis>, flow_utils_concurrency::job_error::JobError> {
     let lib = cx.is_global_lib_context();
@@ -777,6 +780,7 @@ fn initialize_env_with_mode<'cx>(
                 assertion_calls.clone(),
                 file_sig,
                 aloc_ast,
+                typed_aloc_ast,
             );
         let info = info.to_env_info();
         let autocomplete_hooks = AutocompleteHooks {
@@ -897,6 +901,7 @@ pub fn initialize_env<'cx>(
         cx,
         exclude_syms,
         aloc_ast,
+        aloc_ast,
         DeclaredTypesMode::Compute {
             ast,
             type_sig_options,
@@ -945,6 +950,7 @@ pub fn infer_ast<'a>(
         let _resolved_declared_types = initialize_env_with_mode(
             cx,
             None,
+            aloc_ast,
             aloc_ast,
             DeclaredTypesMode::Compute {
                 ast,
@@ -1204,6 +1210,7 @@ fn infer_lib_file<'a>(
         cx,
         Some(exclude_syms),
         &filtered_aloc_ast,
+        aloc_ast,
         DeclaredTypesMode::Skip,
     )?;
     let (severity_cover, suppressions, suppression_errors) =

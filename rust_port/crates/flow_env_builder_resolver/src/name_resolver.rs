@@ -12927,10 +12927,16 @@ pub fn program_with_scope<Cx: Context, Fl: Flow<Cx = Cx>>(
         BTreeMap::new(),
         file_sig,
         program,
+        program,
     )
 }
 
 /// Used when the targeted callee analysis must run between the prepass and this walk.
+///
+/// `typed_program` is the program whose typed AST is checked. It is `program`, except in a
+/// library file, where `program` lacks the statements the library validator ignores. Those
+/// statements are not walked, but they stay in the typed AST, so their reads are filled in as
+/// unreachable, like the reads in dead code.
 #[allow(clippy::too_many_arguments)]
 pub fn walk_with_prepass<Cx: Context, Fl: Flow<Cx = Cx>>(
     cx: &mut Cx,
@@ -12944,6 +12950,7 @@ pub fn walk_with_prepass<Cx: Context, Fl: Flow<Cx = Cx>>(
     assertion_calls: BTreeMap<ALoc, AssertionInfo>,
     file_sig: &FileSig,
     program: &Program<ALoc, ALoc>,
+    typed_program: &Program<ALoc, ALoc>,
 ) -> (Option<AbruptCompletion>, NameResolverResult) {
     let prepass = (&scopes, &ssa_values, &unbound_names);
 
@@ -12965,7 +12972,7 @@ pub fn walk_with_prepass<Cx: Context, Fl: Flow<Cx = Cx>>(
     let write_entries = env_walk.take_write_entries();
     let mut dead_code_marker =
         DeadCodeMarker::new(env_walk.cx, jsx_base_name, values, write_entries);
-    dead_code_marker.run(program);
+    dead_code_marker.run(typed_program);
     let (env_values, env_entries) = dead_code_marker.into_values_and_entries();
     let env_refinement_invalidation_info = env_walk.refinement_invalidation_info();
     let type_guard_consistency_maps = env_walk.take_type_guard_consistency_maps();
