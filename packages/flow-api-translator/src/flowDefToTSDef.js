@@ -3259,11 +3259,7 @@ const getTransforms = (
                 left: {
                   type: 'TSQualifiedName',
                   loc: DUMMY_LOC,
-                  left: {
-                    type: 'Identifier',
-                    loc: DUMMY_LOC,
-                    name: 'React',
-                  },
+                  left: getReactIdentifier(hasReactImport),
                   right: {
                     type: 'Identifier',
                     loc: DUMMY_LOC,
@@ -3424,11 +3420,7 @@ const getTransforms = (
                 left: {
                   type: 'TSQualifiedName',
                   loc: DUMMY_LOC,
-                  left: {
-                    type: 'Identifier',
-                    loc: DUMMY_LOC,
-                    name: 'React',
-                  },
+                  left: getReactIdentifier(hasReactImport),
                   right: {
                     type: 'Identifier',
                     loc: DUMMY_LOC,
