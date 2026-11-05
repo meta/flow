@@ -212,6 +212,42 @@
             }
           }
         }
+      },
+      {
+        "command": {
+          "arguments": [
+            "textDocument/completion",
+            "global",
+            {
+              "ac_type": "Actype",
+              "completion": "TypedPropertyDescriptor",
+              "index": 5,
+              "session_requests": 1,
+              "token": "TAUTO332",
+              "typed_length": 1
+            }
+          ],
+          "command": "log:org.flow:<PLACEHOLDER_PROJECT_URL>",
+          "title": ""
+        },
+        "detail": "(global)",
+        "insertTextFormat": 1,
+        "kind": 6,
+        "label": "TypedPropertyDescriptor",
+        "sortText": "00000000000000000005",
+        "textEdit": {
+          "newText": "TypedPropertyDescriptor",
+          "range": {
+            "end": {
+              "character": 13,
+              "line": 2
+            },
+            "start": {
+              "character": 12,
+              "line": 2
+            }
+          }
+        }
       }
     ]
   }

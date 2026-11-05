@@ -7,7 +7,7 @@
 
 declare var undefined: void;
 
-type PropertyDescriptor<T> = any;
+type TypedPropertyDescriptor<T> = any;
 
 declare class Object {}
 

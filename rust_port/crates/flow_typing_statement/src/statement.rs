@@ -14330,6 +14330,28 @@ pub fn get_prop<'a>(
     })
 }
 
+// `Readonly<TypedPropertyDescriptor<t>>`: a descriptor is only read, so `t` stays covariant in
+// `value` and `get`.
+fn readonly_property_descriptor(
+    propdesc_type: Type,
+    t: Type,
+    reason: &Reason,
+    annot_loc: ALoc,
+) -> Type {
+    let propdesc = implicit_typeapp(propdesc_type, vec![t], Some(annot_loc.dupe()));
+    Type::new(TypeInner::EvalT {
+        type_: propdesc,
+        defer_use_t: TypeDestructorT::new(TypeDestructorTInner(
+            UseOp::Op(Arc::new(RootUseOp::MakeReadOnly {
+                loc: Box::new(annot_loc),
+            })),
+            reason.dupe(),
+            Rc::new(Destructor::ReadOnlyType),
+        )),
+        id: eval::Id::generate_id(),
+    })
+}
+
 fn static_method_call_object<'a>(
     cx: &mut Context<'a>,
     loc: ALoc,
@@ -14602,7 +14624,7 @@ fn static_method_call_object<'a>(
                 tvar_resolver::resolved_t(tvar_resolver::default_no_lowers, true, cx, proto);
             let (pmap, properties_typed) = prop_map_of_object(cx, obj_properties)?;
             let propdesc_type =
-                flow_js_utils::lookup_builtin_type(cx, "PropertyDescriptor", reason.dupe());
+                flow_js_utils::lookup_builtin_type(cx, "TypedPropertyDescriptor", reason.dupe());
             let mut props_entries: BTreeMap<Name, Property> = BTreeMap::new();
             for (x, p) in pmap.iter() {
                 let key_loc = property::read_loc(p);
@@ -14627,10 +14649,11 @@ fn static_method_call_object<'a>(
                             prop_reason.dupe(),
                             |cx, tvar| {
                                 let annot_loc = prop_reason.loc().dupe();
-                                let propdesc = implicit_typeapp(
+                                let propdesc = readonly_property_descriptor(
                                     propdesc_type_clone.dupe(),
-                                    vec![tvar.dupe()],
-                                    Some(annot_loc),
+                                    tvar.dupe(),
+                                    &prop_reason,
+                                    annot_loc,
                                 );
                                 flow_js::flow_non_speculating(
                                     cx,
@@ -14857,8 +14880,9 @@ fn static_method_call_object<'a>(
                 };
             let reason_loc = reason.loc().dupe();
             let propdesc_type =
-                flow_js_utils::lookup_builtin_type(cx, "PropertyDescriptor", reason.dupe());
-            let propdesc = implicit_typeapp(propdesc_type, vec![ty.dupe()], Some(reason_loc));
+                flow_js_utils::lookup_builtin_type(cx, "TypedPropertyDescriptor", reason.dupe());
+            let propdesc =
+                readonly_property_descriptor(propdesc_type, ty.dupe(), &reason, reason_loc);
             let e_ast = expression(None, None, None, cx, e)?;
             let o = e_ast.loc().1.dupe();
             let key_ast = expression(None, None, None, cx, key_expr)?;
@@ -14915,7 +14939,7 @@ fn static_method_call_object<'a>(
             let o = e_ast.loc().1.dupe();
             let (pmap, properties_typed) = prop_map_of_object(cx, obj_properties)?;
             let propdesc_type =
-                flow_js_utils::lookup_builtin_type(cx, "PropertyDescriptor", reason.dupe());
+                flow_js_utils::lookup_builtin_type(cx, "TypedPropertyDescriptor", reason.dupe());
             for (x, p) in pmap.iter() {
                 match property::read_t(p) {
                     None => {
@@ -14933,10 +14957,11 @@ fn static_method_call_object<'a>(
                         let prop_reason = reason.dupe().replace_desc_new(None);
                         let tvar = flow_typing_tvar::mk(cx, prop_reason.dupe());
                         let annot_loc = prop_reason.loc().dupe();
-                        let propdesc = implicit_typeapp(
+                        let propdesc = readonly_property_descriptor(
                             propdesc_type.dupe(),
-                            vec![tvar.dupe()],
-                            Some(annot_loc),
+                            tvar.dupe(),
+                            &prop_reason,
+                            annot_loc,
                         );
                         flow_js::flow_non_speculating(
                             cx,
