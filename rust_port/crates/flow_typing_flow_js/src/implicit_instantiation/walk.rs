@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-//! Candidate-based implicit instantiation (`experimental.implicit_instantiation_walk`).
+//! Implicit instantiation by a walk (`experimental.implicit_instantiation_walk`).
 //!
 //! Instead of running the operation's flows against fresh tvars and pinning what reaches them,
 //! the solve walks the argument types against the parameter types, and the return type against
@@ -26,9 +26,10 @@
 //! A destructor whose result the flow-based solve's pinning reverses (a spread, a rest, the config
 //! of a component) gives the marker under it the reversal of the other side, computed directly. A
 //! pair that the walk has no rule for, such as a destructor stuck on a marker (`T[K]` with `T` a
-//! marker), says nothing about the markers: the walk makes no type variables for it, and the
-//! flow-based solve, whose variable would be just as stuck, is not consulted. With the flag on, the
-//! walk solves every implicit instantiation: there is no fallback to the flow-based solve.
+//! marker), says nothing about the markers: the walk makes no type variables for it. With the flag
+//! on, the walk solves every implicit instantiation: there is no fallback to the flow-based solve.
+//! Only whether the operation fails anyway, which keeps a type parameter without evidence from
+//! being underconstrained, is found by flowing its arguments (`check_instantiation`).
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -66,10 +67,13 @@ use flow_typing_type::type_::TypeTKind;
 use flow_typing_type::type_::UnionEnum;
 use flow_typing_type::type_::UnresolvedArgData;
 use flow_typing_type::type_::UnresolvedParam;
+use flow_typing_type::type_::UnsoundnessKind;
 use flow_typing_type::type_::inter_rep;
 use flow_typing_type::type_::mixed_t;
+use flow_typing_type::type_::null;
 use flow_typing_type::type_::object::ObjectToolReactConfigData;
 use flow_typing_type::type_::placeholder_t;
+use flow_typing_type::type_::poly;
 use flow_typing_type::type_::property;
 
 use super::*;
@@ -305,7 +309,7 @@ fn mk_marker<'cx>(cx: &mut Context<'cx>, tparam: &TypeParam) -> (SubstName, Type
     let t = Type::new(TypeInner::GenericT(Box::new(GenericTData {
         reason: tparam.reason.dupe(),
         name: name.dupe(),
-        bound: flow_typing_type::type_::mixed_t::make(tparam.reason.dupe()),
+        bound: mixed_t::make(tparam.reason.dupe()),
         no_infer: false,
         id,
     })));
@@ -517,10 +521,7 @@ enum Nesting {
     /// A pair of classes, `None` for an object.
     Classes(Option<ALocId>, Option<ALocId>),
     /// A pair of type aliases, compared by their expansions.
-    Aliases(
-        flow_typing_type::type_::poly::Id,
-        flow_typing_type::type_::poly::Id,
-    ),
+    Aliases(poly::Id, poly::Id),
 }
 
 struct Walker<'e> {
@@ -643,6 +644,79 @@ struct Snapshot {
     spread_tuple_pairs: Vec<(Type, Type)>,
 }
 
+/// Finds the markers in a type. An instance has them only through its type arguments, so its
+/// members (often a large library class) are not visited.
+struct MarkerVisitor<'a> {
+    names: &'a BTreeMap<SubstName, Bounds>,
+    /// For `mentions`, which stops at the first marker: whether each type visited mentions one.
+    cache: Option<&'a mut BTreeMap<usize, (Type, bool)>>,
+    found: BTreeSet<SubstName>,
+    mentions: bool,
+}
+
+impl TypeVisitor<()> for MarkerVisitor<'_> {
+    fn type_<'cx>(&mut self, cx: &mut Context<'cx>, pole: Polarity, _acc: (), t: &Type) {
+        if let Some(cache) = &self.cache {
+            if self.mentions {
+                return;
+            }
+            if let Some((_, found)) = cache.get(&addr(t)) {
+                self.mentions = *found;
+                return;
+            }
+        }
+        match t.deref() {
+            TypeInner::GenericT(box GenericTData { name, .. }) if self.names.contains_key(name) => {
+                self.found.insert(name.dupe());
+                self.mentions = true;
+            }
+            TypeInner::DefT(_, d)
+                if let DefTInner::InstanceT(i) = d.deref()
+                    && i.inst.class_name.is_some()
+                    && !matches!(
+                        i.inst.inst_kind,
+                        InstanceKind::InterfaceKind { inline: true, .. }
+                    ) =>
+            {
+                for (_, _, t, _) in i.inst.type_args.iter() {
+                    self.type_(cx, pole, (), t);
+                }
+            }
+            TypeInner::ThisInstanceT(d) => {
+                for (_, _, t, _) in d.instance.inst.type_args.iter() {
+                    self.type_(cx, pole, (), t);
+                }
+            }
+            _ => type_visitor::type_default(self, cx, pole, (), t),
+        }
+        // Unless a marker was found, the whole of `t` was visited.
+        if let Some(cache) = &mut self.cache {
+            cache.insert(addr(t), (t.dupe(), self.mentions));
+        }
+    }
+}
+
+/// Why `method_type_of` finds no method.
+enum NoMethod {
+    NotAnObject,
+    Static,
+    OfFunction,
+    OfGenericValue,
+    NotReadable,
+}
+
+impl NoMethod {
+    fn why(&self) -> &'static str {
+        match self {
+            NoMethod::NotAnObject => "receiver is not an object",
+            NoMethod::Static => "static method",
+            NoMethod::OfFunction => "method of a function",
+            NoMethod::OfGenericValue => "method of a generic value",
+            NoMethod::NotReadable => "method is not readable",
+        }
+    }
+}
+
 /// What the reversal of a destructor bounds.
 enum ReversalTarget {
     Marker(SubstName),
@@ -688,8 +762,14 @@ impl<'e> Walker<'e> {
     }
 
     /// A pair the walk can't read evidence from but that mentions markers: the solve keeps the
-    /// evidence it has.
-    fn give_up<'cx>(&self, cx: &mut Context<'cx>, what: &str, l: &Type, u: &Type) {
+    /// evidence it has, and the walk goes on.
+    fn give_up<'cx>(
+        &self,
+        cx: &mut Context<'cx>,
+        what: &str,
+        l: &Type,
+        u: &Type,
+    ) -> Result<(), FlowJsException> {
         log(cx, || {
             format!(
                 "Implicit instantiation walk gives up ({}): {} <: {}",
@@ -698,6 +778,7 @@ impl<'e> Walker<'e> {
                 flow_typing_debug::dump_t(Some(1), cx, u)
             )
         });
+        Ok(())
     }
 
     fn walk_deferred<'cx>(&mut self, cx: &mut Context<'cx>) -> Result<(), FlowJsException> {
@@ -724,104 +805,30 @@ impl<'e> Walker<'e> {
 
     /// The markers that occur in `t`.
     fn markers_in<'cx>(&self, cx: &mut Context<'cx>, t: &Type) -> BTreeSet<SubstName> {
-        struct Visitor<'a> {
-            names: &'a BTreeMap<SubstName, Bounds>,
-            found: BTreeSet<SubstName>,
-        }
-        impl TypeVisitor<()> for Visitor<'_> {
-            fn type_<'cx>(&mut self, cx: &mut Context<'cx>, pole: Polarity, _acc: (), t: &Type) {
-                match t.deref() {
-                    TypeInner::GenericT(box GenericTData { name, .. })
-                        if self.names.contains_key(name) =>
-                    {
-                        self.found.insert(name.dupe());
-                    }
-                    TypeInner::DefT(_, d)
-                        if let DefTInner::InstanceT(i) = d.deref()
-                            && i.inst.class_name.is_some()
-                            && !matches!(
-                                i.inst.inst_kind,
-                                InstanceKind::InterfaceKind { inline: true, .. }
-                            ) =>
-                    {
-                        for (_, _, t, _) in i.inst.type_args.iter() {
-                            self.type_(cx, pole, (), t);
-                        }
-                    }
-                    TypeInner::ThisInstanceT(d) => {
-                        for (_, _, t, _) in d.instance.inst.type_args.iter() {
-                            self.type_(cx, pole, (), t);
-                        }
-                    }
-                    _ => type_visitor::type_default(self, cx, pole, (), t),
-                }
-            }
-        }
-        let mut visitor = Visitor {
+        let mut visitor = MarkerVisitor {
             names: &self.vars,
+            cache: None,
             found: BTreeSet::new(),
+            mentions: false,
         };
         visitor.type_(cx, Polarity::Positive, (), t);
         visitor.found
     }
 
-    /// Whether `t` mentions a marker. An instance mentions one only through its type arguments,
-    /// so its members (often a large library class) are not visited. Each type the check visits
-    /// is remembered, so that the walk, which asks again at every level, visits each type once.
+    /// Whether `t` mentions a marker. Each type the check visits is remembered, so that the walk,
+    /// which asks again at every level, visits each type once.
     fn mentions<'cx>(&mut self, cx: &mut Context<'cx>, t: &Type) -> bool {
-        struct Visitor<'a> {
-            names: &'a BTreeMap<SubstName, Bounds>,
-            cache: &'a mut BTreeMap<usize, (Type, bool)>,
-            found: bool,
-        }
-        impl TypeVisitor<()> for Visitor<'_> {
-            fn type_<'cx>(&mut self, cx: &mut Context<'cx>, pole: Polarity, _acc: (), t: &Type) {
-                if self.found {
-                    return;
-                }
-                if let Some((_, found)) = self.cache.get(&addr(t)) {
-                    self.found = *found;
-                    return;
-                }
-                match t.deref() {
-                    TypeInner::GenericT(box GenericTData { name, .. })
-                        if self.names.contains_key(name) =>
-                    {
-                        self.found = true;
-                    }
-                    TypeInner::DefT(_, d)
-                        if let DefTInner::InstanceT(i) = d.deref()
-                            && i.inst.class_name.is_some()
-                            && !matches!(
-                                i.inst.inst_kind,
-                                InstanceKind::InterfaceKind { inline: true, .. }
-                            ) =>
-                    {
-                        for (_, _, t, _) in i.inst.type_args.iter() {
-                            self.type_(cx, pole, (), t);
-                        }
-                    }
-                    TypeInner::ThisInstanceT(d) => {
-                        for (_, _, t, _) in d.instance.inst.type_args.iter() {
-                            self.type_(cx, pole, (), t);
-                        }
-                    }
-                    _ => type_visitor::type_default(self, cx, pole, (), t),
-                }
-                // Unless a marker was found, the whole of `t` was visited.
-                self.cache.insert(addr(t), (t.dupe(), self.found));
-            }
-        }
         if let Some((_, found)) = self.mentions_cache.get(&addr(t)) {
             return *found;
         }
-        let mut visitor = Visitor {
+        let mut visitor = MarkerVisitor {
             names: &self.vars,
-            cache: &mut self.mentions_cache,
-            found: false,
+            cache: Some(&mut self.mentions_cache),
+            found: BTreeSet::new(),
+            mentions: false,
         };
         visitor.type_(cx, Polarity::Positive, (), t);
-        visitor.found
+        visitor.mentions
     }
 
     /// A bound as subtyping would see it: a `this`-abstracted instance is fixed first.
@@ -928,8 +935,8 @@ impl<'e> Walker<'e> {
             self.add_exact(cx, &name, u);
             return Ok(());
         }
-        // As the flow-based solve unifies two function types with as many parameters parameter by
-        // parameter, so that a marker met there is exact.
+        // As unification unifies two function types with as many parameters receiver by receiver
+        // and parameter by parameter, so that a marker met there is exact.
         let (lr, ur) = (self.resolve(cx, l), self.resolve(cx, u));
         if let (TypeInner::DefT(_, ld), TypeInner::DefT(_, ud)) = (lr.deref(), ur.deref())
             && let (DefTInner::FunT(_, lf), DefTInner::FunT(_, uf)) = (ld.deref(), ud.deref())
@@ -937,6 +944,9 @@ impl<'e> Walker<'e> {
             && uf.type_guard.is_none()
             && lf.params.len() == uf.params.len()
         {
+            let lthis = type_util::subtype_this_of_function(lf);
+            let uthis = type_util::subtype_this_of_function(uf);
+            self.walk_invariant(cx, &lthis, &uthis)?;
             for (FunParam(_, lt), FunParam(_, ut)) in lf.params.iter().zip(uf.params.iter()) {
                 self.walk_invariant(cx, lt, ut)?;
             }
@@ -1029,8 +1039,7 @@ impl<'e> Walker<'e> {
         u: &Type,
     ) -> Result<(), FlowJsException> {
         if self.depth > MAX_DEPTH {
-            self.give_up(cx, "depth limit", l, u);
-            return Ok(());
+            return self.give_up(cx, "depth limit", l, u);
         }
         if let Some(name) = self.marker_of(u) {
             if self.marker_of(l).is_none() {
@@ -1058,8 +1067,7 @@ impl<'e> Walker<'e> {
         // can, stops with the evidence it has, as the flow-based solve stops at its own limits.
         self.steps += 1;
         if self.steps > MAX_STEPS {
-            self.give_up(cx, "step limit", l, u);
-            return Ok(());
+            return self.give_up(cx, "step limit", l, u);
         }
         self.depth += 1;
         let result = self.walk_structural(cx, l, u);
@@ -1330,14 +1338,13 @@ impl<'e> Walker<'e> {
                     nominal_type: a, ..
                 },
                 TypeInner::MaybeT(..) | TypeInner::OptionalT { .. } | TypeInner::UnionT(..),
-            ) if a.upper_t.as_ref().is_some_and(|sup| {
-                matches!(
+            ) if let Some(sup) = &a.upper_t
+                && matches!(
                     self.resolve(cx, sup).deref(),
                     TypeInner::MaybeT(..) | TypeInner::OptionalT { .. } | TypeInner::UnionT(..)
-                )
-            }) =>
+                ) =>
             {
-                let sup = a.upper_t.as_ref().expect("checked").dupe();
+                let sup = sup.dupe();
                 self.walk(cx, &sup, &u)
             }
             (_, TypeInner::MaybeT(r, ui)) => match l.deref() {
@@ -1369,7 +1376,7 @@ impl<'e> Walker<'e> {
             },
             (_, TypeInner::OptionalT { type_: ui, .. }) => match l.deref() {
                 TypeInner::MaybeT(r, li) => {
-                    self.walk(cx, &flow_typing_type::type_::null::make(r.dupe()), ui)?;
+                    self.walk(cx, &null::make(r.dupe()), ui)?;
                     self.walk(cx, li, &u)
                 }
                 _ if matches!(self.head(cx, &l), Head::Void) => {
@@ -1384,7 +1391,7 @@ impl<'e> Walker<'e> {
             },
             // A maybe or optional lower bound is the union of its parts.
             (TypeInner::MaybeT(r, li), _) => {
-                self.walk(cx, &flow_typing_type::type_::null::make(r.dupe()), &u)?;
+                self.walk(cx, &null::make(r.dupe()), &u)?;
                 self.walk(cx, &void::why(r.dupe()), &u)?;
                 self.walk(cx, li, &u)
             }
@@ -1552,13 +1559,13 @@ impl<'e> Walker<'e> {
             (TypeInner::TypeAppT(_) | TypeInner::ThisTypeAppT(_), _) => {
                 match self.expand_typeapp(cx, &l) {
                     Some(l) => self.walk(cx, &l, &u),
-                    None => self.no_rule(cx, "type application", &l, &u),
+                    None => self.give_up(cx, "type application", &l, &u),
                 }
             }
             (_, TypeInner::TypeAppT(_) | TypeInner::ThisTypeAppT(_)) => {
                 match self.expand_typeapp(cx, &u) {
                     Some(u) => self.walk(cx, &l, &u),
-                    None => self.no_rule(cx, "type application", &l, &u),
+                    None => self.give_up(cx, "type application", &l, &u),
                 }
             }
             (TypeInner::ThisInstanceT(d), _) => {
@@ -1670,12 +1677,12 @@ impl<'e> Walker<'e> {
             (TypeInner::TemplateLiteralT { .. }, _)
             | (_, TypeInner::TemplateLiteralT { .. })
             | (_, TypeInner::KeysT(..))
-            | (TypeInner::KeysT(..), _) => self.no_rule(cx, "unhandled pair", &l, &u),
+            | (TypeInner::KeysT(..), _) => self.give_up(cx, "unhandled pair", &l, &u),
             (TypeInner::DefT(_, ld), _) => match ld.deref() {
                 DefTInner::PolyT(p) => self.walk_generic_value(cx, p, &u),
-                _ => self.no_rule(cx, "unhandled pair", &l, &u),
+                _ => self.give_up(cx, "unhandled pair", &l, &u),
             },
-            _ => self.no_rule(cx, "unhandled pair", &l, &u),
+            _ => self.give_up(cx, "unhandled pair", &l, &u),
         }
     }
 
@@ -1792,9 +1799,9 @@ impl<'e> Walker<'e> {
             }
             // A class flows to a construct signature: its instance is what the signature returns.
             (DefTInner::ClassT(inst), DefTInner::InstanceT(ui))
-                if ui.inst.inst_construct_t.is_some() =>
+                if let Some(ctor) = ui.inst.inst_construct_t =>
             {
-                let ctor = cx.find_call(ui.inst.inst_construct_t.expect("checked"));
+                let ctor = cx.find_call(ctor);
                 let ctor = self.resolve(cx, &ctor);
                 let inst = inst.dupe();
                 match ctor.deref() {
@@ -1803,15 +1810,9 @@ impl<'e> Walker<'e> {
                             let ret = uf.return_t.dupe();
                             self.walk(cx, &inst, &ret)
                         }
-                        _ => {
-                            self.give_up(cx, "construct signature", l, u);
-                            Ok(())
-                        }
+                        _ => self.give_up(cx, "construct signature", l, u),
                     },
-                    _ => {
-                        self.give_up(cx, "construct signature", l, u);
-                        Ok(())
-                    }
+                    _ => self.give_up(cx, "construct signature", l, u),
                 }
             }
             // A value with a construct signature (`declare var HTMLElement: {new(): HTMLElement}`)
@@ -1845,11 +1846,7 @@ impl<'e> Walker<'e> {
                 // A component of component syntax against a structural one renders itself.
                 let lrenders = match (&lc.component_kind, &uc.component_kind) {
                     (
-                        flow_typing_type::type_::ComponentKind::Nominal(
-                            renders_id,
-                            renders_name,
-                            _,
-                        ),
+                        ComponentKind::Nominal(renders_id, renders_name, _),
                         ComponentKind::Structural,
                     ) => {
                         let reason = type_util::reason_of_t(l).dupe().replace_desc(
@@ -2016,10 +2013,7 @@ impl<'e> Walker<'e> {
             // reverse) says nothing about them; the check of the operation reports it.
             (l_def, u_def) if is_atomic(l_def) || is_atomic(u_def) => Ok(()),
             // Anything else, such as a component against anything but a component: no evidence.
-            _ => {
-                self.give_up(cx, "unhandled def pair", l, u);
-                Ok(())
-            }
+            _ => self.give_up(cx, "unhandled def pair", l, u),
         }
     }
 
@@ -2215,12 +2209,7 @@ impl<'e> Walker<'e> {
             no_infer: false,
             id,
         })));
-        let any = || {
-            unsoundness::why(
-                flow_typing_type::type_::UnsoundnessKind::ResolveSpread,
-                reason.dupe(),
-            )
-        };
+        let any = || unsoundness::why(UnsoundnessKind::ResolveSpread, reason.dupe());
         let iterable = FlowJs::get_builtin_typeapp_with_env(
             cx,
             self.env,
@@ -2243,16 +2232,20 @@ impl<'e> Walker<'e> {
 
     /// The type read from the property `name` of `receiver`, an instance or an object.
     fn prop_of<'cx>(&self, cx: &mut Context<'cx>, receiver: &Type, name: &str) -> Option<Type> {
+        let name = Name::new(FlowSmolStr::new(name));
         let receiver = self.resolve(cx, receiver);
         let TypeInner::DefT(_, d) = receiver.deref() else {
             return None;
         };
-        let props = match d.deref() {
-            DefTInner::InstanceT(i) => self.inst_props(cx, i),
-            DefTInner::ObjT(o) => cx.find_props(o.props_tmap.dupe()),
+        let prop = match d.deref() {
+            DefTInner::InstanceT(i) => self.inst_prop(cx, i, &name)?,
+            DefTInner::ObjT(o) => cx
+                .find_props(o.props_tmap.dupe())
+                .get(&name)
+                .map(|p| p.dupe())?,
             _ => return None,
         };
-        property::read_t(props.get(&Name::new(FlowSmolStr::new(name)))?)
+        property::read_t(&prop)
     }
 
     /// The props of a class component, as the flow-based solve reads them when it checks the class
@@ -2392,48 +2385,47 @@ impl<'e> Walker<'e> {
         cx: &mut Context<'cx>,
         receiver: &Type,
         name: &str,
-    ) -> Result<Option<Type>, &'static str> {
+    ) -> Result<Option<Type>, NoMethod> {
+        let name = Name::new(FlowSmolStr::new(name));
         let receiver = self.resolve(cx, receiver);
         let TypeInner::DefT(_, d) = receiver.deref() else {
-            return Err("receiver is not an object");
+            return Err(NoMethod::NotAnObject);
         };
-        let props = match d.deref() {
-            DefTInner::InstanceT(i) => self.inst_props(cx, i),
-            DefTInner::ObjT(o) => cx.find_props(o.props_tmap.dupe()),
+        let prop = match d.deref() {
+            DefTInner::InstanceT(i) => self.inst_prop(cx, i, &name),
+            DefTInner::ObjT(o) => cx
+                .find_props(o.props_tmap.dupe())
+                .get(&name)
+                .map(|p| p.dupe()),
             // A static method of a generic class: the statics of its instance, its own or
             // inherited.
             DefTInner::ClassT(inner) => {
                 let instance = self.normalize(cx, inner);
                 let TypeInner::DefT(_, d) = instance.deref() else {
-                    return Err("static method");
+                    return Err(NoMethod::Static);
                 };
                 let DefTInner::InstanceT(i) = d.deref() else {
-                    return Err("static method");
+                    return Err(NoMethod::Static);
                 };
-                let mut map = BTreeMap::new();
-                for ancestor in self.ancestors(cx, i) {
-                    let statics = self.resolve(cx, &ancestor.static_);
-                    let TypeInner::DefT(_, d) = statics.deref() else {
-                        continue;
-                    };
-                    let DefTInner::ObjT(o) = d.deref() else {
-                        continue;
-                    };
-                    for (name, prop) in cx.find_props(o.props_tmap.dupe()).iter() {
-                        map.entry(name.dupe()).or_insert_with(|| prop.dupe());
+                self.ancestors(cx, i).iter().find_map(|ancestor| {
+                    match self.resolve(cx, &ancestor.static_).deref() {
+                        TypeInner::DefT(_, d) if let DefTInner::ObjT(o) = d.deref() => cx
+                            .find_props(o.props_tmap.dupe())
+                            .get(&name)
+                            .map(|p| p.dupe()),
+                        _ => None,
                     }
-                }
-                properties::PropertiesMap::from_btree_map(map)
+                })
             }
-            DefTInner::FunT(..) => return Err("method of a function"),
-            DefTInner::PolyT(_) => return Err("method of a generic value"),
-            _ => return Err("receiver is not an object"),
+            DefTInner::FunT(..) => return Err(NoMethod::OfFunction),
+            DefTInner::PolyT(_) => return Err(NoMethod::OfGenericValue),
+            _ => return Err(NoMethod::NotAnObject),
         };
-        let Some(prop) = props.get(&Name::new(FlowSmolStr::new(name))) else {
+        let Some(prop) = prop else {
             return Ok(None);
         };
-        let Some(t) = property::read_t(prop) else {
-            return Err("method is not readable");
+        let Some(t) = property::read_t(&prop) else {
+            return Err(NoMethod::NotReadable);
         };
         Ok(Some(self.resolve(cx, &t)))
     }
@@ -3130,6 +3122,20 @@ impl<'e> Walker<'e> {
         properties::PropertiesMap::from_btree_map(map)
     }
 
+    /// The field or method `name` of an instance, its own or an inherited one.
+    fn inst_prop<'cx>(
+        &self,
+        cx: &mut Context<'cx>,
+        inst: &InstanceT,
+        name: &Name,
+    ) -> Option<Property> {
+        self.ancestors(cx, inst).iter().find_map(|i| {
+            [i.inst.own_props.dupe(), i.inst.proto_props.dupe()]
+                .into_iter()
+                .find_map(|id| cx.find_props(id).get(name).map(|p| p.dupe()))
+        })
+    }
+
     /// The indexer of an instance, its own or an inherited one.
     fn inst_dict<'cx>(&self, cx: &mut Context<'cx>, inst: &InstanceT) -> Option<DictType> {
         self.ancestors(cx, inst)
@@ -3148,7 +3154,7 @@ impl<'e> Walker<'e> {
             (Some(l), Some(u)) => self.walk(cx, &l, &u),
             (Some(l), None) => self.walk(cx, &l, u),
             (None, Some(u)) => self.walk(cx, l, &u),
-            (None, None) => self.no_rule(cx, "type application", l, u),
+            (None, None) => self.give_up(cx, "type application", l, u),
         }
     }
 
@@ -3283,7 +3289,7 @@ impl<'e> Walker<'e> {
                     type_util::reason_of_t(u).dupe(),
                     DefT::new(DefTInner::InstanceT(Rc::new(li.dupe()))),
                 ));
-                return self.no_rule(cx, "interface without members", &l, u);
+                return self.give_up(cx, "interface without members", &l, u);
             }
             return self.walk_props(cx, &lp, ld.as_ref(), &up, ud.as_ref(), false, false);
         }
@@ -4222,7 +4228,7 @@ impl<'e> Walker<'e> {
         reason: &Reason,
         type_: &Type,
         d: &Destructor,
-        id: &flow_typing_type::type_::eval::Id,
+        id: &eval::Id,
     ) -> Result<Option<Type>, FlowJsException> {
         let errors = cx.errors();
         let result = run_keeping_clean_flows(cx, self.env, self.preserve, |cx| {
@@ -4351,7 +4357,7 @@ impl<'e> Walker<'e> {
             {
                 match self.evaluate(cx, &object, defer_use_t)? {
                     Some(result) => self.walk(cx, l, &result),
-                    None => self.no_rule(cx, "destructor", l, u),
+                    None => self.give_up(cx, "destructor", l, u),
                 }
             }
             // `l <: [...prefix, ...T]`: the elements of `l` go to the prefix, and `T` gets the rest,
@@ -4374,8 +4380,7 @@ impl<'e> Walker<'e> {
                     reverse_rest(cx, env, reason, t_rest, l)
                 })?
                 .flatten() else {
-                    self.give_up(cx, "destructor", l, u);
-                    return Ok(());
+                    return self.give_up(cx, "destructor", l, u);
                 };
                 let reversed = self.resolve(cx, &reversed);
                 self.add_upper_at(cx, &name, &reversed, Priority::Reversal);
@@ -4405,8 +4410,7 @@ impl<'e> Walker<'e> {
                     reverse_spread(cx, env, reason, todo_rev, &acc, l, target.literal())
                 })?
                 .flatten() else {
-                    self.give_up(cx, "destructor", l, u);
-                    return Ok(());
+                    return self.give_up(cx, "destructor", l, u);
                 };
                 let reversed = self.resolve(cx, &reversed);
                 self.add_reversal(cx, &bounded, &reversed)
@@ -4436,7 +4440,7 @@ impl<'e> Walker<'e> {
                 let l = self.evaluated(cx, l)?;
                 match self.reverse_destructor(cx, reason, d, &l)? {
                     Some(reversed) => self.add_upper_at(cx, &name, &reversed, Priority::Reversal),
-                    None => self.give_up(cx, "destructor", &l, u),
+                    None => self.give_up(cx, "destructor", &l, u)?,
                 }
                 Ok(())
             }
@@ -4458,10 +4462,7 @@ impl<'e> Walker<'e> {
                 }
                 match self.evaluate(cx, type_, defer_use_t)? {
                     Some(result) if self.is_structure(cx, &result) => self.walk(cx, l, &result),
-                    _ => {
-                        self.give_up(cx, "destructor", l, u);
-                        Ok(())
-                    }
+                    _ => self.give_up(cx, "destructor", l, u),
                 }
             }
             Destructor::ReactCheckComponentConfig { props } if props.is_empty() => {
@@ -4472,21 +4473,9 @@ impl<'e> Walker<'e> {
             // Otherwise it is stuck on a marker, and says nothing about it.
             _ => match self.evaluate(cx, type_, defer_use_t)? {
                 Some(result) => self.walk(cx, l, &result),
-                None => self.no_rule(cx, "destructor", l, u),
+                None => self.give_up(cx, "destructor", l, u),
             },
         }
-    }
-
-    /// A pair without a rule: no evidence.
-    fn no_rule<'cx>(
-        &mut self,
-        cx: &mut Context<'cx>,
-        what: &str,
-        l: &Type,
-        u: &Type,
-    ) -> Result<(), FlowJsException> {
-        self.give_up(cx, what, l, u);
-        Ok(())
     }
 
     /// Renders types, as subtyping relates them (`renders_kit`). `renders A` sends `A` to the
@@ -4660,14 +4649,12 @@ impl<'e> Walker<'e> {
                         return Ok(());
                     }
                     None => {
-                        self.give_up(cx, "spread of unknown length", l, u);
-                        return Ok(());
+                        return self.give_up(cx, "spread of unknown length", l, u);
                     }
                 },
             };
             let Some(part) = part else {
-                self.give_up(cx, "destructor", l, u);
-                return Ok(());
+                return self.give_up(cx, "destructor", l, u);
             };
             if lower {
                 self.walk(cx, &t, &part)?;
@@ -4983,10 +4970,7 @@ impl<'e> Walker<'e> {
                     let u = self.evaluated(cx, u)?;
                     return match self.reverse_destructor(cx, reason, &d, &u)? {
                         Some(reversed) => self.add_reversal(cx, &target, &reversed),
-                        None => {
-                            self.give_up(cx, "destructor", l, &u);
-                            Ok(())
-                        }
+                        None => self.give_up(cx, "destructor", l, &u),
                     };
                 }
                 if self.spread_waits(cx, type_, d) {
@@ -5012,10 +4996,7 @@ impl<'e> Walker<'e> {
                 }
                 match self.evaluate(cx, type_, defer_use_t)? {
                     Some(result) if self.is_structure(cx, &result) => self.walk(cx, &result, u),
-                    _ => {
-                        self.give_up(cx, "destructor", l, u);
-                        Ok(())
-                    }
+                    _ => self.give_up(cx, "destructor", l, u),
                 }
             }
             // `[...prefix, ...T] <: u`: the prefix goes to the elements of `u`, and `T` to the rest.
@@ -5054,7 +5035,7 @@ impl<'e> Walker<'e> {
             // nothing about it.
             _ => match self.evaluate(cx, type_, defer_use_t)? {
                 Some(result) => self.walk(cx, &result, u),
-                None => self.no_rule(cx, "destructor", l, u),
+                None => self.give_up(cx, "destructor", l, u),
             },
         }
     }
@@ -5496,11 +5477,11 @@ fn key_markers_seen<'cx>(
     cx: &mut Context<'cx>,
     t: &Type,
     out: &mut BTreeSet<SubstName>,
-    seen: &mut BTreeSet<flow_typing_type::type_::poly::Id>,
+    seen: &mut BTreeSet<poly::Id>,
 ) {
     struct Visitor<'o> {
         out: &'o mut BTreeSet<SubstName>,
-        seen: &'o mut BTreeSet<flow_typing_type::type_::poly::Id>,
+        seen: &'o mut BTreeSet<poly::Id>,
     }
     fn marker(t: &Type) -> Option<SubstName> {
         match t.deref() {
@@ -6118,7 +6099,7 @@ fn solve_targs_in_snapshot<'cx>(
                         Some(f) => Some(f),
                         None => give_up!('op, "constructor is not a function"),
                     },
-                    Err(reason) => give_up!('op, reason),
+                    Err(no) => give_up!('op, no.why()),
                 };
                 let no_params: Vec<FunParam> = Vec::new();
                 let signature = match &ctor {
@@ -6212,7 +6193,7 @@ fn solve_targs_in_snapshot<'cx>(
                     let method = match walker.method_type_of(cx, &receiver, &name) {
                         Ok(Some(method)) => method,
                         Ok(None) => give_up!('op, "method not found"),
-                        Err(reason) => give_up!('op, reason),
+                        Err(no) => give_up!('op, no.why()),
                     };
                     match walker.signature_for_call(cx, &method, &call.meth_args_tlist)? {
                         Some(method) => {
