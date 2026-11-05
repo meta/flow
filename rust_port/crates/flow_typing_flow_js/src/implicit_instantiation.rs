@@ -931,15 +931,15 @@ fn identity_reverse_upper_bound<'cx>(
     Ok(solution)
 }
 
-fn reverse_obj_spread<'cx>(
+/// The types that the reversal of a spread takes away from its result, in order: its accumulated
+/// elements, then its remaining operands.
+fn spread_reversal_rests<'cx>(
     cx: &mut Context<'cx>,
-    env: &FlowJsEnv,
     r: &Reason,
     todo_rev: &flow_data_structure_wrapper::list::FlowOcamlList<object::spread::Operand>,
     acc_elements: &flow_data_structure_wrapper::list::FlowOcamlList<object::spread::AccElement>,
-    tout: &Type,
     literal: ObjLiteral,
-) -> Result<Type, FlowJsException> {
+) -> Vec<Type> {
     let inline_slice_to_t = |cx: &mut Context<'cx>, s: &object::spread::OperandSlice| -> Type {
         let obj_kind = obj_type::obj_kind_from_optional_dict(s.dict.clone(), ObjKind::Exact);
         obj_type::mk_with_proto(
@@ -970,53 +970,88 @@ fn reverse_obj_spread<'cx>(
         )
     };
 
-    let operand_to_t = |cx: &mut Context<'cx>, o: &object::spread::Operand| -> Type {
-        match o {
-            object::spread::Operand::Slice(s) => inline_slice_to_t(cx, s),
-            object::spread::Operand::Type(t) => t.dupe(),
-        }
-    };
-
-    let acc_element_to_ts = |cx: &mut Context<'cx>, e: &object::spread::AccElement| -> Vec<Type> {
+    let mut rests = Vec::new();
+    for e in acc_elements.iter() {
         match e {
-            object::spread::AccElement::InlineSlice(s) => vec![inline_slice_to_t(cx, s)],
+            object::spread::AccElement::InlineSlice(s) => rests.push(inline_slice_to_t(cx, s)),
             object::spread::AccElement::ResolvedSlice(resolved) => {
-                resolved.0.iter().map(|s| slice_to_t(cx, s)).collect()
+                rests.extend(resolved.0.iter().map(|s| slice_to_t(cx, s)))
             }
         }
-    };
+    }
+    for o in todo_rev.iter() {
+        rests.push(match o {
+            object::spread::Operand::Slice(s) => inline_slice_to_t(cx, s),
+            object::spread::Operand::Type(t) => t.dupe(),
+        });
+    }
+    rests
+}
 
-    let rest_type = |cx: &mut Context<'cx>, l: Type, rest: Type| -> Result<Type, FlowJsException> {
-        flow_typing_tvar::mk_where(cx, r.dupe(), |cx, tout| {
-            let u_inner = UseTInner::ObjKitT(
-                unknown_use(),
-                r.dupe(),
-                Box::new(object::ResolveTool::Resolve(object::Resolve::Next)),
-                Box::new(object::Tool::Rest(Box::new((
-                    object::rest::MergeMode::SpreadReversal,
-                    object::rest::State::One(rest),
-                )))),
-                tout.dupe(),
-            );
-            FlowJs::flow_with_env(cx, env, &l, &UseT::new(u_inner))?;
-            Ok::<(), FlowJsException>(())
-        })
-    };
+/// Flows `l` without the props of `rest` into `tout`, as the reversal of a spread takes away an
+/// operand.
+fn flow_spread_reversal_rest<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    r: &Reason,
+    l: &Type,
+    rest: Type,
+    tout: &Type,
+) -> Result<(), FlowJsException> {
+    let u_inner = UseTInner::ObjKitT(
+        unknown_use(),
+        r.dupe(),
+        Box::new(object::ResolveTool::Resolve(object::Resolve::Next)),
+        Box::new(object::Tool::Rest(Box::new((
+            object::rest::MergeMode::SpreadReversal,
+            object::rest::State::One(rest),
+        )))),
+        tout.dupe(),
+    );
+    FlowJs::flow_with_env(cx, env, l, &UseT::new(u_inner))
+}
 
+fn reverse_obj_spread<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    r: &Reason,
+    todo_rev: &flow_data_structure_wrapper::list::FlowOcamlList<object::spread::Operand>,
+    acc_elements: &flow_data_structure_wrapper::list::FlowOcamlList<object::spread::AccElement>,
+    tout: &Type,
+    literal: ObjLiteral,
+) -> Result<Type, FlowJsException> {
     let mut tout_val = flow_typing_tvar::mk_where(cx, r.dupe(), |cx, t_prime| {
         FlowJs::flow_t_with_env(cx, env, tout, t_prime)?;
         Ok::<(), FlowJsException>(())
     })?;
-    for e in acc_elements.iter() {
-        for t in acc_element_to_ts(cx, e) {
-            tout_val = rest_type(cx, tout_val, t)?;
-        }
-    }
-    for o in todo_rev.iter() {
-        let operand = operand_to_t(cx, o);
-        tout_val = rest_type(cx, tout_val, operand)?;
+    for rest in spread_reversal_rests(cx, r, todo_rev, acc_elements, literal) {
+        let next = flow_typing_tvar::mk_where(cx, r.dupe(), |cx, t_prime| {
+            flow_spread_reversal_rest(cx, env, r, &tout_val, rest, t_prime)
+        })?;
+        tout_val = next;
     }
     Ok(tout_val)
+}
+
+/// The props of a component of component syntax other than its declared props `pmap`, which its
+/// config check takes away from the props of an element.
+fn component_config_rest<'cx>(
+    cx: &mut Context<'cx>,
+    reason: &Reason,
+    pmap: &properties::PropertiesMap,
+    literal: bool,
+) -> Type {
+    obj_type::mk_with_proto(
+        cx,
+        reason.dupe(),
+        ObjKind::Exact,
+        None,
+        None,
+        Some(pmap.dupe()),
+        None,
+        Type::new(TypeInner::ObjProtoT(reason.dupe())),
+        ObjLiteral::of_literal(literal),
+    )
 }
 
 fn reverse_component_check_config<'cx>(
@@ -1031,30 +1066,45 @@ fn reverse_component_check_config<'cx>(
         return Ok(tout.dupe());
     }
     flow_typing_tvar::mk_where(cx, reason.dupe(), |cx, t_prime| {
-        let rest = obj_type::mk_with_proto(
-            cx,
-            reason.dupe(),
-            ObjKind::Exact,
-            None,
-            None,
-            Some(pmap.dupe()),
-            None,
-            Type::new(TypeInner::ObjProtoT(reason.dupe())),
-            ObjLiteral::of_literal(literal),
-        );
-        let u_inner = UseTInner::ObjKitT(
-            unknown_use(),
-            reason.dupe(),
-            Box::new(object::ResolveTool::Resolve(object::Resolve::Next)),
-            Box::new(object::Tool::Rest(Box::new((
-                object::rest::MergeMode::SpreadReversal,
-                object::rest::State::One(rest),
-            )))),
-            t_prime.dupe(),
-        );
-        FlowJs::flow_with_env(cx, env, tout, &UseT::new(u_inner))?;
-        Ok(())
+        let rest = component_config_rest(cx, reason, pmap, literal);
+        flow_spread_reversal_rest(cx, env, reason, tout, rest, t_prime)
     })
+}
+
+/// Flows `tout` spread with `t_rest` into `t_prime`, as the reversal of a rest puts back the props
+/// it removed.
+fn flow_rest_reversal<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    reason: &Reason,
+    t_rest: &Type,
+    tout: &Type,
+    literal: bool,
+    t_prime: &Type,
+) -> Result<(), FlowJsException> {
+    let tool = object::ResolveTool::Resolve(object::Resolve::Next);
+    let options = object::spread::Target::Value {
+        make_seal: obj_type::mk_seal(false, false),
+        strictness_kind: cx.type_strictness_kind(),
+        literal: ObjLiteral::of_literal(literal),
+    };
+    let state = object::spread::State {
+        todo_rev: flow_data_structure_wrapper::list::FlowOcamlList::unit(
+            object::spread::Operand::Type(t_rest.dupe()),
+        ),
+        acc: flow_data_structure_wrapper::list::FlowOcamlList::new(),
+        spread_id: flow_common::reason::mk_id() as i32,
+        union_t: None,
+        curr_resolve_idx: 0,
+    };
+    let u_inner = UseTInner::ObjKitT(
+        unknown_use(),
+        reason.dupe(),
+        Box::new(tool),
+        Box::new(object::Tool::Spread(Box::new((options, state)))),
+        t_prime.dupe(),
+    );
+    FlowJs::flow_with_env(cx, env, tout, &UseT::new(u_inner))
 }
 
 fn reverse_obj_kit_rest<'cx>(
@@ -1066,34 +1116,11 @@ fn reverse_obj_kit_rest<'cx>(
     literal: bool,
 ) -> Result<Type, FlowJsException> {
     flow_typing_tvar::mk_no_wrap_where(cx, reason.dupe(), |cx, _r, t_prime_id| {
-        let tool = object::ResolveTool::Resolve(object::Resolve::Next);
-        let options = object::spread::Target::Value {
-            make_seal: obj_type::mk_seal(false, false),
-            strictness_kind: cx.type_strictness_kind(),
-            literal: ObjLiteral::of_literal(literal),
-        };
-        let state = object::spread::State {
-            todo_rev: flow_data_structure_wrapper::list::FlowOcamlList::unit(
-                object::spread::Operand::Type(t_rest.dupe()),
-            ),
-            acc: flow_data_structure_wrapper::list::FlowOcamlList::new(),
-            spread_id: flow_common::reason::mk_id() as i32,
-            union_t: None,
-            curr_resolve_idx: 0,
-        };
         let open_t_prime = Type::new(TypeInner::OpenT(Tvar::new(
             reason.dupe(),
             t_prime_id as u32,
         )));
-        let u_inner = UseTInner::ObjKitT(
-            unknown_use(),
-            reason.dupe(),
-            Box::new(tool),
-            Box::new(object::Tool::Spread(Box::new((options, state)))),
-            open_t_prime,
-        );
-        FlowJs::flow_with_env(cx, env, tout, &UseT::new(u_inner))?;
-        Ok(())
+        flow_rest_reversal(cx, env, reason, t_rest, tout, literal, &open_t_prime)
     })
 }
 
@@ -1849,12 +1876,13 @@ fn force_type_arguments(cx: &mut Context<'_>, targs: &[Targ]) {
 }
 
 // Checks the operation of `check` with the poly type instantiated with its explicit type
-// arguments, and with new tvars for the others. Returns its type arguments and the result of the
-// operation, if it has one.
+// arguments, and for the others, with `inferred` if given, and otherwise with new tvars. Returns
+// its type arguments and the result of the operation, if it has one.
 fn check_instantiation<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     check: &ImplicitInstantiationCheck,
+    inferred: Option<&[Type]>,
 ) -> Result<(Vec<SolveTarg>, Option<Type>), FlowJsException> {
     let (ref use_op, ref reason_op, ref op) = check.operation;
     let reason_tapp = type_util::reason_of_t(&check.lhs);
@@ -1878,14 +1906,18 @@ fn check_instantiation<'cx>(
         }
         let mut targs = Vec::with_capacity(tparams.len());
         for (i, tparam) in tparams.iter().enumerate() {
+            let inferred_targ = |cx: &mut Context<'cx>, reason_op: &Reason| match inferred {
+                Some(ts) => ts[i].dupe(),
+                None => mk_inference_targ(cx, env, tparam, reason_op, reason_tapp),
+            };
             let targ = match explicit_targs.map(|explicit_targs| explicit_targs.get(i)) {
                 None => SolveTarg {
                     tparam: tparam.dupe(),
-                    t: mk_inference_targ(cx, env, tparam, reason_op, reason_tapp),
+                    t: inferred_targ(cx, reason_op),
                     inferred: true,
                 },
                 Some(None) => {
-                    let t = mk_inference_targ(cx, env, tparam, reason_op, reason_tapp);
+                    let t = inferred_targ(cx, reason_op);
                     if tparam.default.is_none() {
                         flow_js_utils::add_output_with_env(
                             cx,
@@ -1907,6 +1939,12 @@ fn check_instantiation<'cx>(
                     tparam: tparam.dupe(),
                     t: t.dupe(),
                     inferred: false,
+                },
+                // With `inferred`, the solve flows its solution into the tvar of `_`.
+                Some(Some(Targ::ImplicitArg(_))) if inferred.is_some() => SolveTarg {
+                    tparam: tparam.dupe(),
+                    t: inferred_targ(cx, reason_op),
+                    inferred: true,
                 },
                 Some(Some(Targ::ImplicitArg(tvar))) => {
                     let reason = flow_common::reason::mk_reason(None, tvar.reason().loc().dupe());
@@ -2245,7 +2283,7 @@ fn implicitly_instantiate<'cx>(
     let Some(marked_tparams) = marks_of_check(cx, check) else {
         return Ok((Vec::new(), Marked::new(), None));
     };
-    let (targs, tout) = check_instantiation(cx, env, check)?;
+    let (targs, tout) = check_instantiation(cx, env, check, None)?;
     Ok((targs, marked_tparams, tout))
 }
 

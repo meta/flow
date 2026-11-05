@@ -195,6 +195,85 @@ fn run_keeping_clean_flows<'cx, T>(
     result
 }
 
+/// The result of an operation that `f` flows into the tvar it is given: the tvar, resolved to it
+/// (see `resolve_result`). `None` if the operation gives nothing.
+fn flowed<'cx>(
+    cx: &mut Context<'cx>,
+    reason: &Reason,
+    f: impl FnOnce(&mut Context<'cx>, &Type) -> Result<(), FlowJsException>,
+) -> Result<Option<Type>, FlowJsException> {
+    let tvar = flow_typing_tvar::mk_where(cx, reason.dupe(), f)?;
+    Ok(resolve_result(cx, &tvar).then_some(tvar))
+}
+
+/// Resolves `tvar`, which an operation flowed its result into, to that result, as
+/// `mk_type_destructor` resolves an evaluation, so that the walk leaves no unresolved tvar
+/// behind. A result that mentions unresolved tvars is left as it is: those can still give it more,
+/// and are not the walk's to resolve. Says whether there is a result.
+fn resolve_result<'cx>(cx: &mut Context<'cx>, tvar: &Type) -> bool {
+    let Some(node) = type_util::constraint_node_id(tvar) else {
+        return true;
+    };
+    let lowers = flow_js_utils::possible_types(cx, node.id());
+    if (lowers.iter()).any(|t| flow_js_utils::tvar_visitors::has_unresolved_tvars(cx, t)) {
+        return true;
+    }
+    tvar_resolver::resolve(cx, tvar_resolver::default_no_lowers, true, tvar);
+    !lowers.is_empty()
+}
+
+/// `reverse_obj_spread` of `l`, with the result of each step resolved.
+fn reverse_spread<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    reason: &Reason,
+    todo_rev: &flow_data_structure_wrapper::list::FlowOcamlList<object::spread::Operand>,
+    acc: &flow_data_structure_wrapper::list::FlowOcamlList<object::spread::AccElement>,
+    l: &Type,
+    literal: ObjLiteral,
+) -> Result<Option<Type>, FlowJsException> {
+    let mut t = l.dupe();
+    for rest in spread_reversal_rests(cx, reason, todo_rev, acc, literal) {
+        match flowed(cx, reason, |cx, tout| {
+            flow_spread_reversal_rest(cx, env, reason, &t, rest, tout)
+        })? {
+            Some(next) => t = next,
+            None => return Ok(None),
+        }
+    }
+    Ok(Some(t))
+}
+
+/// `reverse_obj_kit_rest` of `l`, resolved.
+fn reverse_rest<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    reason: &Reason,
+    t_rest: &Type,
+    l: &Type,
+) -> Result<Option<Type>, FlowJsException> {
+    flowed(cx, reason, |cx, tout| {
+        flow_rest_reversal(cx, env, reason, t_rest, l, false, tout)
+    })
+}
+
+/// `reverse_component_check_config` of `l`, resolved.
+fn reverse_config<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    reason: &Reason,
+    pmap: &properties::PropertiesMap,
+    l: &Type,
+) -> Result<Option<Type>, FlowJsException> {
+    if pmap.is_empty() {
+        return Ok(Some(l.dupe()));
+    }
+    let rest = component_config_rest(cx, reason, pmap, false);
+    flowed(cx, reason, |cx, tout| {
+        flow_spread_reversal_rest(cx, env, reason, l, rest, tout)
+    })
+}
+
 fn is_mixed_or_any(t: &Type) -> bool {
     match t.deref() {
         TypeInner::AnyT(..) => true,
@@ -2033,37 +2112,47 @@ impl<'e> Walker<'e> {
         Ok(Some((out, tail)))
     }
 
-    /// The type of the elements of an iterable, as a spread of it reads them.
+    /// The type of the elements of an iterable, as a spread of it reads them: the solution of `E`
+    /// in `t <: Iterable<E>`, walked with a marker for `E`.
     fn iterable_elem<'cx>(
         &self,
         cx: &mut Context<'cx>,
         t: &Type,
     ) -> Result<Option<Type>, FlowJsException> {
         let reason = type_util::reason_of_t(t).dupe();
-        let elem = flow_typing_tvar::mk(cx, reason.dupe());
+        let name = SubstName::id(mk_id() as i32, FlowSmolStr::new("E"));
+        let id = cx.make_generic_id(name.dupe(), reason.loc());
+        let elem = Type::new(TypeInner::GenericT(Box::new(GenericTData {
+            reason: reason.dupe(),
+            name: name.dupe(),
+            bound: mixed_t::make(reason.dupe()),
+            no_infer: false,
+            id,
+        })));
         let any = || {
             unsoundness::why(
                 flow_typing_type::type_::UnsoundnessKind::ResolveSpread,
                 reason.dupe(),
             )
         };
-        let targs = vec![elem.dupe(), any(), any()];
         let iterable = FlowJs::get_builtin_typeapp_with_env(
             cx,
             self.env,
             &reason.dupe().replace_desc_new(None),
             None,
             "Iterable",
-            targs,
+            vec![elem, any(), any()],
         );
-        let env = self.env;
-        let errors = cx.errors();
-        let result = run_keeping_clean_flows(cx, env, self.preserve, |cx| {
-            FlowJs::flow_t_with_env(cx, env, t, &iterable)?;
-            merge_lower_bounds(cx, env, false, &elem)
-        });
-        cx.reset_errors(errors);
-        Ok(instantiation_solver::sandboxed(result)?.flatten())
+        let mut walker = Walker::new(self.env, self.preserve, self.call_loc.dupe(), [name.dupe()]);
+        walker.walk(cx, t, &iterable)?;
+        let bounds = &walker.vars[&name];
+        let elem = match bounds.exact.first() {
+            Some(t) => Some(t.dupe()),
+            None => {
+                type_util::union_of_ts_opt(reason, types(&bounds.lower).duped().collect(), None)
+            }
+        };
+        Ok(elem.filter(|t| !flow_js_utils::tvar_visitors::has_placeholders(cx, t)))
     }
 
     /// The type read from the property `name` of `receiver`, an instance or an object.
@@ -2185,7 +2274,7 @@ impl<'e> Walker<'e> {
             .dupe()
             .replace_desc_new(None);
         let props = sandbox(cx, env, self.preserve, |cx| {
-            flow_typing_tvar::mk_where(cx, reason.dupe(), |cx, tout| {
+            flowed(cx, &reason, |cx, tout| {
                 let tool = object::Tool::ReactConfig(Box::new(ObjectToolReactConfigData {
                     state: object::react_config::State::Config {
                         component_default_props: Some(defaults.dupe()),
@@ -2206,7 +2295,8 @@ impl<'e> Walker<'e> {
                     )),
                 )
             })
-        })?;
+        })?
+        .flatten();
         Ok(props.map(|props| self.resolve(cx, &props)))
     }
 
@@ -2423,9 +2513,15 @@ impl<'e> Walker<'e> {
             true,
             lo.literal.is_literal(),
         )?;
-        let rest_props =
-            reverse_component_check_config(cx, self.env, reason, props, jsx_props, false)?;
-        self.walk(cx, &rest_props, rest)
+        let env = self.env;
+        match sandbox(cx, env, self.preserve, |cx| {
+            reverse_config(cx, env, reason, props, jsx_props)
+        })?
+        .flatten()
+        {
+            Some(rest_props) => self.walk(cx, &rest_props, rest),
+            None => Ok(()),
+        }
     }
 
     /// The props of a JSX element without `key`, which the config check removes.
@@ -4158,9 +4254,9 @@ impl<'e> Walker<'e> {
                 let t_rest = &self.with_evidence(cx, t_rest, reason);
                 let env = self.env;
                 let Some(reversed) = sandbox(cx, env, self.preserve, |cx| {
-                    reverse_obj_kit_rest(cx, env, reason, t_rest, l, false)
+                    reverse_rest(cx, env, reason, t_rest, l)
                 })?
-                else {
+                .flatten() else {
                     self.give_up(cx, "destructor", l, u);
                     return Ok(());
                 };
@@ -4189,9 +4285,9 @@ impl<'e> Walker<'e> {
                 };
                 let env = self.env;
                 let Some(reversed) = sandbox(cx, env, self.preserve, |cx| {
-                    reverse_obj_spread(cx, env, reason, todo_rev, &acc, l, target.literal())
+                    reverse_spread(cx, env, reason, todo_rev, &acc, l, target.literal())
                 })?
-                else {
+                .flatten() else {
                     self.give_up(cx, "destructor", l, u);
                     return Ok(());
                 };
@@ -4658,13 +4754,15 @@ impl<'e> Walker<'e> {
             Destructor::RestType(_, t_rest) => {
                 let t_rest = self.with_evidence(cx, t_rest, reason);
                 sandbox(cx, env, self.preserve, |cx| {
-                    reverse_obj_kit_rest(cx, env, reason, &t_rest, t, false)
+                    reverse_rest(cx, env, reason, &t_rest, t)
                 })?
+                .flatten()
             }
             Destructor::ReactCheckComponentConfig { props } => {
                 sandbox(cx, env, self.preserve, |cx| {
-                    reverse_component_check_config(cx, env, reason, props, t, false)
+                    reverse_config(cx, env, reason, props, t)
                 })?
+                .flatten()
             }
             Destructor::SpreadType(box DestructorSpreadTypeData(_, todo_rev, head_slice)) => {
                 let acc = match head_slice {
@@ -4674,8 +4772,9 @@ impl<'e> Walker<'e> {
                     None => flow_data_structure_wrapper::list::FlowOcamlList::new(),
                 };
                 sandbox(cx, env, self.preserve, |cx| {
-                    reverse_obj_spread(cx, env, reason, todo_rev, &acc, t, ObjLiteral::NonLiteral)
+                    reverse_spread(cx, env, reason, todo_rev, &acc, t, ObjLiteral::NonLiteral)
                 })?
+                .flatten()
             }
             // `$Enum<T>`: the values of the enum.
             Destructor::EnumType => match self.resolve(cx, t).deref() {
@@ -6235,12 +6334,18 @@ fn solve_targs_in_snapshot<'cx>(
     let init_errors = cx.errors();
     let before_pinning = walker.snapshot();
     let mut result = pin_keeping_errors(cx, env, &mut walker, &pinning, too_many_targs);
-    // A type parameter without evidence is not underconstrained when the operation fails anyway,
-    // as in the flow-based solve: pin again with the error fallback.
-    if !too_many_targs && matches!(result, Ok((_, true))) {
+    // A type parameter without evidence is not underconstrained when the operation fails anyway
+    // with the solution: pin again with the error fallback.
+    if !too_many_targs && let Ok(((solution, _), true)) = &result {
         let errors = cx.errors();
+        let solution: Vec<Type> = (tparams.iter())
+            .map(|tparam| solution[&tparam.name].generalized.dupe())
+            .collect();
         let failed = run_keeping_clean_flows(cx, env, preserve, |cx| {
-            check_instantiation(cx, env, check)?;
+            let (_, tout) = check_instantiation(cx, env, check, Some(&solution))?;
+            if let Some(tout) = tout {
+                resolve_result(cx, &tout);
+            }
             Ok(!errors.ptr_eq(&cx.errors()))
         });
         cx.reset_errors(errors);
