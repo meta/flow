@@ -21,23 +21,6 @@ Cannot assign `1` to `JSON.parse` because property `parse` is not writable. [can
            ^^^^^
 
 
-Error -------------------------------------------------------------------------------------------- json_stringify.js:7:1
-
-Cannot cast `JSON.stringify(...)` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
-
-   json_stringify.js:7:1
-      7| JSON.stringify(bad1) as string;
-         ^^^^^^^^^^^^^^^^^^^^
-
-References:
-   <BUILTINS>/lib.es5.js:1129:19
-   1129|     ) => string | void);
-                           ^^^^ [1]
-   json_stringify.js:7:25
-      7| JSON.stringify(bad1) as string;
-                                 ^^^^^^ [2]
-
-
 Error ----------------------------------------------------------------------------------------------------- map.js:28:21
 
 Cannot call `Map` with array literal bound to `entries` because: [incompatible-type]
@@ -775,4 +758,4 @@ References:
 
 
 
-Found 41 errors
+Found 40 errors
