@@ -227,7 +227,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------- poly_value_rounds.js:87:1
 
-Cannot call `genericOverloaded` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot call `genericOverloaded` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
 
    poly_value_rounds.js:87:1
    87| genericOverloaded(id, 1) as string; // ERROR

@@ -89,34 +89,57 @@ const MAX_STEPS: usize = 100_000;
 /// The most members a union with nested unions is flattened to.
 const MAX_FLAT_MEMBERS: usize = 128;
 
+/// How much a bound says about its marker. The solution so far, which a generic value or a
+/// conditional type met during the walk is instantiated with, reads only the bounds of the highest
+/// priority a marker has, but `Soft` ones. Pinning reads all of them, and merges the upper bounds
+/// in this order, each replacing the one taken so far if it is a subtype of it.
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum Priority {
+    /// An upper bound from the bound of a type parameter pinned before: the bound check of that
+    /// type parameter fails unless the solution is below it.
+    Bound,
+    /// What the arguments and the hint give the marker.
+    Direct,
+    /// The reversal of a destructor of the marker (a spread, a rest, the config of a component),
+    /// or what flows to `Partial` or `Required`. The flow-based solve reads it after the others.
+    Reversal,
+    /// The hint through `NonNullable`, and an invariant position of an instance of a generic
+    /// value whose type parameters had no evidence. The solution so far does not read them.
+    Soft,
+}
+
 /// The bounds recorded for one marker.
 #[derive(Default, Clone)]
 struct Bounds {
-    lower: Vec<Type>,
-    upper: Vec<Type>,
+    lower: Vec<(Type, Priority)>,
+    upper: Vec<(Type, Priority)>,
     /// Types met in invariant positions. The flow-based solve unifies there, so the first one is
     /// the solution.
     exact: Vec<Type>,
-    /// The positions in `upper` of the bounds that the flow-based solve reads late, through the use
-    /// of a destructor: the reversals of spreads, rests and configs.
-    late_upper: BTreeSet<usize>,
-    /// The positions in `upper` of the late bounds read through the reversal of a rest.
-    rest_upper: BTreeSet<usize>,
-    /// The positions in `lower` and `upper` of the bounds from an invariant position of an
-    /// instance of a generic value whose type parameters had no evidence. They take part in the
-    /// solution, but not in the solution so far that later generic values are instantiated with.
-    soft_lower: BTreeSet<usize>,
-    soft_upper: BTreeSet<usize>,
-    /// The positions in `lower` of the bounds from walking a plain type against the bound of
-    /// another type parameter. Pinning flows that type parameter to its bound before it pins this
-    /// one, which records them again.
-    from_bound: BTreeSet<usize>,
 }
 
-impl Bounds {
-    fn is_empty(&self) -> bool {
-        self.lower.is_empty() && self.upper.is_empty() && self.exact.is_empty()
+fn types(bounds: &[(Type, Priority)]) -> impl Iterator<Item = &Type> {
+    bounds.iter().map(|(t, _)| t)
+}
+
+/// Adds `t` to `bounds` with `priority`, or raises the priority of `t` if it is there.
+fn add_bound(bounds: &mut Vec<(Type, Priority)>, t: &Type, priority: Priority) {
+    match bounds.iter_mut().find(|(b, _)| b.ptr_eq(t)) {
+        Some((_, p)) => *p = (*p).min(priority),
+        None => bounds.push((t.dupe(), priority)),
     }
+}
+
+/// The bounds of the highest priority among `bounds`, but `Soft`.
+fn best(bounds: &[(Type, Priority)]) -> Vec<Type> {
+    let top = (bounds.iter())
+        .map(|(_, p)| *p)
+        .filter(|p| *p != Priority::Soft)
+        .min();
+    (bounds.iter())
+        .filter(|(_, p)| Some(*p) == top)
+        .map(|(t, _)| t.dupe())
+        .collect()
 }
 
 /// The parts of a function type that a call walks its arguments against.
@@ -406,12 +429,12 @@ struct Walker<'e> {
     defaults: BTreeMap<SubstName, Type>,
     /// Set while the return type is walked against the hint.
     in_hint: bool,
+    /// Set while the solution of a type parameter is walked against its bound.
+    in_bound: bool,
     /// The type parameters the markers stand for.
     tparams: BTreeMap<SubstName, TypeParam>,
     /// The pairs `l <: [...prefix, ...T]` met, for the literals they need precise.
     spread_tuple_pairs: Vec<(Type, Type)>,
-    /// Whether the walk is adding the reversal of a rest.
-    in_rest: bool,
 }
 
 /// The arguments of a call from its first spread of unknown length on.
@@ -493,6 +516,13 @@ struct Snapshot {
     spread_tuple_pairs: Vec<(Type, Type)>,
 }
 
+/// What the reversal of a destructor bounds.
+enum ReversalTarget {
+    Marker(SubstName),
+    /// An operand of a spread that is a spread with markers inside.
+    Spread(Type),
+}
+
 /// The address of a type, to key caches on: types are compared by identity, and the cache keeps
 /// each type it keys on alive.
 fn addr(t: &Type) -> usize {
@@ -525,8 +555,8 @@ impl<'e> Walker<'e> {
             defaults: BTreeMap::new(),
             tparams: BTreeMap::new(),
             spread_tuple_pairs: Vec::new(),
-            in_rest: false,
             in_hint: false,
+            in_bound: false,
         }
     }
 
@@ -683,6 +713,16 @@ impl<'e> Walker<'e> {
     }
 
     fn add_lower<'cx>(&mut self, cx: &mut Context<'cx>, name: &SubstName, t: &Type) {
+        self.add_lower_at(cx, name, t, Priority::Direct);
+    }
+
+    fn add_lower_at<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        name: &SubstName,
+        t: &Type,
+        priority: Priority,
+    ) {
         if flow_js_utils::tvar_visitors::has_placeholders(cx, t) {
             // As in the flow-based solve, the members of a union are bounds one by one, so the
             // members that are placeholders drop out.
@@ -694,7 +734,7 @@ impl<'e> Walker<'e> {
                     .collect();
                 if !members.is_empty() && members.len() < rep.members_iter().count() {
                     let t = type_util::union_of_ts(r.dupe(), members, None);
-                    self.add_lower(cx, name, &t);
+                    self.add_lower_at(cx, name, &t, priority);
                 }
             }
             return;
@@ -714,9 +754,7 @@ impl<'e> Walker<'e> {
             )
         });
         let bounds = self.vars.get_mut(name).expect("marker should have bounds");
-        if !bounds.lower.iter().any(|b| b.ptr_eq(t)) {
-            bounds.lower.push(t.dupe());
-        }
+        add_bound(&mut bounds.lower, t, priority);
     }
 
     fn add_exact<'cx>(&mut self, cx: &mut Context<'cx>, name: &SubstName, t: &Type) {
@@ -724,15 +762,8 @@ impl<'e> Walker<'e> {
             return;
         }
         if self.soft_exact {
-            let (lowers, uppers) = {
-                let b = &self.vars[name];
-                (b.lower.len(), b.upper.len())
-            };
-            self.add_lower(cx, name, t);
-            self.add_upper(cx, name, t);
-            let b = self.vars.get_mut(name).expect("marker should have bounds");
-            b.soft_lower.extend(lowers..b.lower.len());
-            b.soft_upper.extend(uppers..b.upper.len());
+            self.add_lower_at(cx, name, t, Priority::Soft);
+            self.add_upper_at(cx, name, t, Priority::Soft);
             return;
         }
         log(cx, || {
@@ -789,6 +820,16 @@ impl<'e> Walker<'e> {
     }
 
     fn add_upper<'cx>(&mut self, cx: &mut Context<'cx>, name: &SubstName, t: &Type) {
+        self.add_upper_at(cx, name, t, Priority::Direct);
+    }
+
+    fn add_upper_at<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        name: &SubstName,
+        t: &Type,
+        priority: Priority,
+    ) {
         if flow_js_utils::tvar_visitors::has_placeholders(cx, t) {
             return;
         }
@@ -799,32 +840,13 @@ impl<'e> Walker<'e> {
                 flow_typing_debug::dump_t(Some(2), cx, t)
             )
         });
+        let priority = if self.in_bound {
+            Priority::Bound
+        } else {
+            priority
+        };
         let bounds = self.vars.get_mut(name).expect("marker should have bounds");
-        if !bounds.upper.iter().any(|b| b.ptr_eq(t)) {
-            bounds.upper.push(t.dupe());
-        }
-    }
-
-    /// An upper bound that pinning reads but the solution so far does not.
-    fn add_soft_upper<'cx>(&mut self, cx: &mut Context<'cx>, name: &SubstName, t: &Type) {
-        let before = self.vars.get(name).map_or(0, |b| b.upper.len());
-        self.add_upper(cx, name, t);
-        let b = self.vars.get_mut(name).expect("marker should have bounds");
-        b.soft_upper.extend(before..b.upper.len());
-    }
-
-    fn add_late_upper<'cx>(&mut self, cx: &mut Context<'cx>, name: &SubstName, t: &Type) {
-        let before = self.vars.get(name).map_or(0, |b| b.upper.len());
-        self.add_upper(cx, name, t);
-        let in_rest = self.in_rest;
-        if let Some(bounds) = self.vars.get_mut(name)
-            && bounds.upper.len() > before
-        {
-            bounds.late_upper.insert(before);
-            if in_rest {
-                bounds.rest_upper.insert(before);
-            }
-        }
+        add_bound(&mut bounds.upper, t, priority);
     }
 
     /// Follows tvars and annotations to the type they stand for. An unresolved tvar stands for the
@@ -3489,19 +3511,19 @@ impl<'e> Walker<'e> {
             .iter()
             .filter_map(|(name, now)| Some((before.get(name)?, now)))
             .flat_map(|(old, now)| {
-                let lowers: Vec<Type> = old.lower.iter().chain(old.exact.first()).duped().collect();
+                let lowers: Vec<Type> =
+                    types(&old.lower).chain(old.exact.first()).duped().collect();
                 let uppers: Vec<Type> = now.exact[old.exact.len()..]
                     .iter()
-                    .chain(now.upper[old.upper.len()..].iter())
+                    .chain(types(&now.upper[old.upper.len()..]))
                     .duped()
                     .collect();
-                let new_lowers: Vec<Type> = now.lower[old.lower.len()..]
-                    .iter()
+                let new_lowers: Vec<Type> = types(&now.lower[old.lower.len()..])
                     .chain(now.exact[old.exact.len()..].iter())
                     .duped()
                     .collect();
                 let old_uppers: Vec<Type> =
-                    old.upper.iter().chain(old.exact.first()).duped().collect();
+                    types(&old.upper).chain(old.exact.first()).duped().collect();
                 let forward: Vec<(Type, Type)> = lowers
                     .iter()
                     .chain(new_lowers.iter())
@@ -3543,14 +3565,13 @@ impl<'e> Walker<'e> {
             .filter_map(|(name, now)| Some((before.get(name)?, now)))
             .flat_map(|(old, now)| {
                 let new_exact = &now.exact[old.exact.len()..];
-                let lowers: Vec<Type> = now.lower[old.lower.len()..]
-                    .iter()
+                let lowers: Vec<Type> = types(&now.lower[old.lower.len()..])
                     .chain(new_exact)
                     .duped()
                     .collect();
                 let uppers: Vec<Type> = new_exact
                     .iter()
-                    .chain(&now.upper[old.upper.len()..])
+                    .chain(types(&now.upper[old.upper.len()..]))
                     .duped()
                     .collect();
                 lowers
@@ -4071,13 +4092,12 @@ impl<'e> Walker<'e> {
             {
                 self.walk(cx, l, &result)
             }
-            // What flows to `Partial<T>` says only which properties `T` may have. The flow-based
-            // solve reads it as an upper bound of `T`, through the use of the destructor's result,
-            // so late: other evidence (a return hint) comes first.
+            // What flows to `Partial<T>` says only which properties `T` may have: an upper bound
+            // of `T`, as the flow-based solve reads it, of lower priority than direct evidence.
             Destructor::PartialType | Destructor::RequiredType
                 if let Some(name) = self.marker_of(&self.resolve(cx, type_)) =>
             {
-                self.add_late_upper(cx, &name, l);
+                self.add_upper_at(cx, &name, l, Priority::Reversal);
                 Ok(())
             }
             Destructor::ReadOnlyType
@@ -4127,9 +4147,8 @@ impl<'e> Walker<'e> {
                 self.walk_spread_tuple(cx, items, l, u, false)
             }
             // `l <: Rest<T, R>`: `T` gets `l` with the props of `R` it lacks, as the flow-based
-            // solve's reversal computes it. That is an upper bound, which pinning reads late,
-            // through the use of the destructor's result, so that other evidence (a return hint)
-            // comes first.
+            // solve's reversal computes it, as an upper bound of lower priority than direct
+            // evidence (a return hint).
             Destructor::RestType(_, t_rest)
                 if let Some(name) = self.marker_of(type_)
                     && !self.mentions(cx, l) =>
@@ -4146,17 +4165,16 @@ impl<'e> Walker<'e> {
                     return Ok(());
                 };
                 let reversed = self.resolve(cx, &reversed);
-                let in_rest = std::mem::replace(&mut self.in_rest, true);
-                self.add_late_upper(cx, &name, &reversed);
-                self.in_rest = in_rest;
+                self.add_upper_at(cx, &name, &reversed, Priority::Reversal);
                 Ok(())
             }
             // `l <: {...T, ...rest}`: what `l` has besides the props of the other operands, as
             // the flow-based solve's reversal computes it, bounds `T` from above, as the
-            // flow-based solve reads it when it merges the upper bounds of `T`.
+            // flow-based solve reads it when it merges the upper bounds of `T`, with the priority of
+            // a reversal.
             Destructor::SpreadType(box DestructorSpreadTypeData(target, ..))
                 if !self.mentions(cx, l)
-                    && let Some((name, d)) = self.reversal_target(cx, type_, d)
+                    && let Some((bounded, d)) = self.reversal_target(cx, type_, d)
                     && let Destructor::SpreadType(box DestructorSpreadTypeData(
                         _,
                         todo_rev,
@@ -4178,8 +4196,7 @@ impl<'e> Walker<'e> {
                     return Ok(());
                 };
                 let reversed = self.resolve(cx, &reversed);
-                self.add_late_upper(cx, &name, &reversed);
-                Ok(())
+                self.add_reversal(cx, &bounded, &reversed)
             }
             // `l <: {...A, ...B}` where no operand is a marker: `l` is walked against the spread
             // made in full, with the markers inside its props, as the flow-based solve flows `l`
@@ -4198,14 +4215,14 @@ impl<'e> Walker<'e> {
                 self.walk(cx, l, &result)
             }
             // `l <: config(T)`, the config of a component of component syntax: `T` gets the
-            // flow-based solve's reversal of `l` as an upper bound, read late.
+            // flow-based solve's reversal of `l` as an upper bound, with the priority of a reversal.
             Destructor::ReactCheckComponentConfig { .. } | Destructor::EnumType
                 if let Some(name) = self.marker_through_identity(cx, type_)
                     && !self.mentions(cx, l) =>
             {
                 let l = self.evaluated(cx, l)?;
                 match self.reverse_destructor(cx, reason, d, &l)? {
-                    Some(reversed) => self.add_late_upper(cx, &name, &reversed),
+                    Some(reversed) => self.add_upper_at(cx, &name, &reversed, Priority::Reversal),
                     None => self.give_up(cx, "destructor", &l, u),
                 }
                 Ok(())
@@ -4454,7 +4471,7 @@ impl<'e> Walker<'e> {
             Some(name) => {
                 let bounds = &self.vars[&name];
                 match (bounds.exact.as_slice(), bounds.lower.as_slice()) {
-                    ([t], _) | ([], [t]) => t.dupe(),
+                    ([t], _) | ([], [(t, _)]) => t.dupe(),
                     _ => return None,
                 }
             }
@@ -4492,23 +4509,25 @@ impl<'e> Walker<'e> {
     /// The marker whose bound the flow-based solve's pinning reverses from the destructor `d` of
     /// `type_`, and the destructor to reverse. For a spread, the marker may be any operand when the
     /// others have no markers: the reversal takes the props of all the others away, whatever their
-    /// order.
+    /// order. Without a marker among them, the target may be an operand that is a spread with
+    /// markers inside, which the reversal bounds in turn.
     fn reversal_target<'cx>(
         &mut self,
         cx: &mut Context<'cx>,
         type_: &Type,
         d: &Destructor,
-    ) -> Option<(SubstName, Destructor)> {
+    ) -> Option<(ReversalTarget, Destructor)> {
         let Destructor::SpreadType(box DestructorSpreadTypeData(target, todo_rev, head_slice)) = d
         else {
             return self
                 .marker_through_identity(cx, type_)
-                .map(|name| (name, d.clone()));
+                .map(|name| (ReversalTarget::Marker(name), d.clone()));
         };
         // The other operands may have markers inside, but not be one, unless it has evidence: then
         // it stands for its solution so far. The reversal takes their props away by name.
         let reason = type_util::reason_of_t(type_).dupe();
         let mut found = None;
+        let mut nested = Vec::new();
         let mut others = Vec::new();
         let operands = std::iter::once(object::spread::Operand::Type(type_.dupe()))
             .chain(todo_rev.iter().cloned())
@@ -4526,12 +4545,20 @@ impl<'e> Walker<'e> {
                         let t = self.with_evidence(cx, t, &reason);
                         others.push(object::spread::Operand::Type(t));
                     }
+                    None if self.is_spread_with_markers(cx, t) => nested.push(operand.clone()),
                     None => others.push(operand.clone()),
                 },
                 object::spread::Operand::Slice(_) => others.push(operand.clone()),
             }
         }
-        let name = found?;
+        let name = match (found, nested.as_slice()) {
+            (Some(name), _) => {
+                others.extend(nested);
+                ReversalTarget::Marker(name)
+            }
+            (None, [object::spread::Operand::Type(t)]) => ReversalTarget::Spread(t.dupe()),
+            (None, _) => return None,
+        };
         let mut list = flow_data_structure_wrapper::list::FlowOcamlList::new();
         for operand in others.into_iter().rev() {
             list.push_front(operand);
@@ -4544,6 +4571,31 @@ impl<'e> Walker<'e> {
                 head_slice.clone(),
             ))),
         ))
+    }
+
+    /// The reversal of a destructor bounds its target: a marker, with the priority of a reversal,
+    /// or a spread with markers inside, which is walked against it.
+    fn add_reversal<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        target: &ReversalTarget,
+        reversed: &Type,
+    ) -> Result<(), FlowJsException> {
+        match target {
+            ReversalTarget::Marker(name) => {
+                self.add_upper_at(cx, name, reversed, Priority::Reversal);
+                Ok(())
+            }
+            ReversalTarget::Spread(t) => self.walk(cx, t, reversed),
+        }
+    }
+
+    /// Whether `t` is a spread with markers inside.
+    fn is_spread_with_markers<'cx>(&mut self, cx: &mut Context<'cx>, t: &Type) -> bool {
+        let t = self.resolve(cx, t);
+        matches!(t.deref(), TypeInner::EvalT { defer_use_t, .. }
+            if matches!(defer_use_t.2.deref(), Destructor::SpreadType(_)))
+            && self.mentions(cx, &t)
     }
 
     fn has_evidence(&self, name: &SubstName) -> bool {
@@ -4660,9 +4712,9 @@ impl<'e> Walker<'e> {
             return self.walk(cx, &result, u);
         }
         // `NonNullable<T>` against the hint `u`: the flow-based solve's pinning reads `?u` as an upper
-        // bound of `T`. It is soft, so that the arguments decide the solution so far without it. A
-        // hint of `mixed` or `any` says nothing (it stands in for evidence the walk may not see, such
-        // as a nested generic call's result).
+        // bound of `T`. It is soft, so that the arguments decide without it. A hint of `mixed` or
+        // `any` says nothing (it stands in for evidence the walk may not see, such as a nested
+        // generic call's result).
         if self.in_hint && matches!(d.deref(), Destructor::NonMaybeType) {
             let says_nothing = match self.resolve(cx, u).deref() {
                 TypeInner::AnyT(..) => true,
@@ -4671,7 +4723,7 @@ impl<'e> Walker<'e> {
             };
             if !says_nothing && let Some(name) = self.marker_of(type_) {
                 let maybe = Type::new(TypeInner::MaybeT(reason.dupe(), u.dupe()));
-                self.add_soft_upper(cx, &name, &maybe);
+                self.add_upper_at(cx, &name, &maybe, Priority::Soft);
             }
             return Ok(());
         }
@@ -4711,20 +4763,15 @@ impl<'e> Walker<'e> {
             | Destructor::EnumType
                 if !self.mentions(cx, u) =>
             {
-                if let Some((name, d)) = self.reversal_target(cx, type_, d) {
+                if let Some((target, d)) = self.reversal_target(cx, type_, d) {
                     let u = self.evaluated(cx, u)?;
-                    match self.reverse_destructor(cx, reason, &d, &u)? {
-                        Some(reversed) => {
-                            let in_rest = std::mem::replace(
-                                &mut self.in_rest,
-                                matches!(d, Destructor::RestType(..)),
-                            );
-                            self.add_late_upper(cx, &name, &reversed);
-                            self.in_rest = in_rest;
+                    return match self.reverse_destructor(cx, reason, &d, &u)? {
+                        Some(reversed) => self.add_reversal(cx, &target, &reversed),
+                        None => {
+                            self.give_up(cx, "destructor", l, &u);
+                            Ok(())
                         }
-                        None => self.give_up(cx, "destructor", l, &u),
-                    }
-                    return Ok(());
+                    };
                 }
                 if self.spread_waits(cx, type_, d) {
                     self.deferred.push((l.dupe(), u.dupe()));
@@ -4891,10 +4938,11 @@ impl<'e> Walker<'e> {
                 let t = (bounds.exact.first().map(Dupe::dupe))
                     .or_else(|| {
                         (!bounds.lower.is_empty()).then(|| {
-                            type_util::union_of_ts(reason.dupe(), bounds.lower.clone(), None)
+                            let lower = types(&bounds.lower).duped().collect();
+                            type_util::union_of_ts(reason.dupe(), lower, None)
                         })
                     })
-                    .or_else(|| bounds.upper.first().map(Dupe::dupe));
+                    .or_else(|| types(&bounds.upper).next().map(Dupe::dupe));
                 t.map(|t| (tparam.dupe(), t))
             })
             .collect();
@@ -5092,7 +5140,8 @@ impl<'e> Walker<'e> {
     }
 
     /// What a marker stands for so far, for instantiating a generic value against it: the union
-    /// of its lower bounds, otherwise its first upper bound, otherwise a placeholder.
+    /// of its lower bounds, otherwise its first upper bound (of the highest priority, but `Soft`),
+    /// otherwise a placeholder.
     fn current_solution<'cx>(
         &self,
         cx: &mut Context<'cx>,
@@ -5100,17 +5149,14 @@ impl<'e> Walker<'e> {
         reason: &Reason,
     ) -> Type {
         let bounds = &self.vars[name];
-        let lower: Vec<Type> = (bounds.lower.iter().enumerate())
-            .filter(|(i, _)| !bounds.soft_lower.contains(i))
-            .map(|(_, t)| t.dupe())
-            .collect();
-        let upper = (bounds.upper.iter().enumerate()).find(|(i, _)| !bounds.soft_upper.contains(i));
+        let lower = best(&bounds.lower);
+        let upper = best(&bounds.upper);
         if let Some(t) = bounds.exact.first() {
             t.dupe()
         } else if !lower.is_empty() {
             let t = type_util::union_of_ts(reason.dupe(), lower, None);
             generalize_singletons(cx, &self.call_loc, false, t)
-        } else if let Some((_, u)) = upper {
+        } else if let Some(u) = upper.first() {
             u.dupe()
         } else if let Some(default) = self.defaults.get(name) {
             default.dupe()
@@ -5165,9 +5211,10 @@ impl<'e> Walker<'e> {
             let t = if let Some(t) = bounds.exact.first() {
                 t.dupe()
             } else if !bounds.lower.is_empty() {
-                let t = type_util::union_of_ts(tparam.reason.dupe(), bounds.lower.clone(), None);
+                let lower = types(&bounds.lower).duped().collect();
+                let t = type_util::union_of_ts(tparam.reason.dupe(), lower, None);
                 generalize_singletons(cx, &self.call_loc, false, t)
-            } else if let Some(u) = bounds.upper.first() {
+            } else if let Some(u) = types(&bounds.upper).next() {
                 u.dupe()
             } else {
                 fallback = true;
@@ -5655,77 +5702,7 @@ fn arr_elem(a: &ArrType) -> Type {
     }
 }
 
-/// Gives `tvar` the bounds. The `late` upper bounds are uses that pinning merges after the others
-/// (`sort_upper_bounds_for_merging`), including the ones that the flows of pinning add, as it
-/// merges the uses through which the flow-based solve's reversals read their bounds. They share
-/// one reason, so that they are merged in the order of their types, as the others are.
-fn insert_bounds<'cx>(
-    cx: &mut Context<'cx>,
-    tvar: &Type,
-    lower: &[Type],
-    upper: &[Type],
-    late: &[Type],
-) {
-    let Some(node) = type_util::constraint_node_id(tvar) else {
-        return;
-    };
-    // A flow from a resolved type variable gives the variable its type: two resolved type
-    // variables that hold the same type are one lower bound.
-    let mut held: BTreeSet<Type> = BTreeSet::new();
-    let mut distinct: Vec<Type> = Vec::new();
-    for l in lower {
-        let mut t = l.dupe();
-        for _ in 0..16 {
-            let TypeInner::OpenT(tvar) = t.deref() else {
-                break;
-            };
-            t = match cx.find_constraints(tvar.id() as i32).1 {
-                constraint::Constraints::Resolved(t) => t,
-                constraint::Constraints::FullyResolved(s) => cx.force_fully_resolved_tvar(&s),
-                constraint::Constraints::Unresolved(_) => break,
-            };
-        }
-        if held.insert(t) {
-            distinct.push(l.dupe());
-        }
-    }
-    if let (_, constraint::Constraints::Unresolved(bounds)) = cx.find_constraints(node.id()) {
-        let mut bounds = bounds.borrow_mut();
-        for l in distinct {
-            bounds
-                .lower
-                .insert(l, (DepthTrace::dummy_trace(), unknown_use()));
-        }
-        let use_of = |u: &Type| UseT::new(UseTInner::UseT(unknown_use(), u.dupe()));
-        let uses = upper.iter().map(use_of).chain(late.iter().map(|u| {
-            UseT::new(UseTInner::ReposLowerT {
-                reason: type_util::reason_of_t(tvar).dupe(),
-                use_desc: false,
-                use_t: Box::new(use_of(u)),
-            })
-        }));
-        for use_t in uses {
-            bounds.upper.insert(
-                constraint::UseTypeKey { use_t, assoc: None },
-                DepthTrace::dummy_trace(),
-            );
-        }
-    }
-}
-
 type Solution = (BTreeMap<SubstName, GeneralizedTarg>, Vec<(Type, SubstName)>);
-
-/// A component or a class, or a generic one.
-fn is_component(t: &Type) -> bool {
-    let TypeInner::DefT(_, d) = t.deref() else {
-        return false;
-    };
-    match d.deref() {
-        DefTInner::ReactAbstractComponentT(_) | DefTInner::ClassT(_) => true,
-        DefTInner::PolyT(p) => is_component(&p.t_out),
-        _ => false,
-    }
-}
 
 /// Solves `check` by walking. As the flow-based solve, it restores the caches after, but for
 /// the constraint cache entries of flows without errors.
@@ -6070,169 +6047,7 @@ fn solve_targs_in_snapshot<'cx>(
                 }
             }
         }
-        // The flow-based solve flows each type variable to its bound. For a component, a bound
-        // such as `React.ComponentType<P>` says what `P` is. So does a bound such as
-        // `(...A) => R` for a generic function, whose instance against the bound (with the
-        // solution so far, as for a generic argument) gives `A` and `R` what the flow-based solve
-        // gets from the hint round. So does any bound for type parameters in it that have no
-        // other evidence (`V extends EnumValue<R>` for `R`). (Other bounds that mention type
-        // parameters mostly say nothing the flow-based solve can use before they are solved.)
-        for (tparam, marker) in tparams.iter().zip(markers.iter()) {
-            let Some(name) = marker else { continue };
-            let bound = subst(cx, &subst_map, &tparam.bound);
-            if !walker.mentions(cx, &bound)
-                || matches!(walker.resolve(cx, &bound).deref(), TypeInner::EvalT { .. })
-            {
-                continue;
-            }
-            let only_source = (walker.markers_in(cx, &bound).iter())
-                .any(|m| m != name && walker.vars[m].is_empty());
-            let bounds = &walker.vars[name];
-            let mut evidence: Vec<Type> = bounds
-                .exact
-                .first()
-                .into_iter()
-                .chain(bounds.lower.iter())
-                .duped()
-                .collect();
-            // A solution from an upper bound flows to the bound too.
-            if evidence.is_empty()
-                && only_source
-                && let Some(upper) = bounds.upper.first()
-            {
-                evidence.push(upper.dupe());
-            }
-            for l in evidence {
-                let resolved = walker.resolve(cx, &l);
-                let generic = matches!(
-                    resolved.deref(),
-                    TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::PolyT(_))
-                );
-                if generic || is_component(&resolved) {
-                    walker.walk(cx, &l, &bound)?;
-                } else if only_source {
-                    let before: Vec<(SubstName, usize)> = (walker.vars.iter())
-                        .filter(|(m, _)| *m != name)
-                        .map(|(m, b)| (m.dupe(), b.lower.len()))
-                        .collect();
-                    walker.walk(cx, &l, &bound)?;
-                    for (m, n) in before {
-                        let b = walker.vars.get_mut(&m).expect("marker should have bounds");
-                        let len = b.lower.len();
-                        b.from_bound.extend(n..len);
-                    }
-                }
-            }
-        }
     }
-
-    // Pinning reads bounds from tvars: give each inferred type parameter one with the recorded
-    // bounds, markers replaced by the tvars. Pinning again (see below) takes new ones, as pinning
-    // flows each tvar to its bound, which would be one of its upper bounds the second time.
-    let bounded_targs = |cx: &mut Context<'cx>, walker: &Walker<'_>| {
-        let mut targs = Vec::with_capacity(tparams.len());
-        let mut tvars = FlowOrdMap::new();
-        for (i, tparam) in tparams.iter().enumerate() {
-            match &markers[i] {
-                None => targs.push(SolveTarg {
-                    tparam: tparam.dupe(),
-                    t: subst_map
-                        .get(&tparam.name)
-                        .expect("explicit type argument")
-                        .dupe(),
-                    inferred: false,
-                }),
-                Some(name) => {
-                    let tvar = mk_inference_targ(cx, env, tparam, reason_op, &reason_tapp);
-                    tvars.insert(name.dupe(), tvar.dupe());
-                    targs.push(SolveTarg {
-                        tparam: tparam.dupe(),
-                        t: tvar,
-                        inferred: true,
-                    });
-                }
-            }
-        }
-        // The flow-based solve unifies a type variable with the type it meets in an invariant
-        // position, so that later flows check against that type instead of adding bounds to it.
-        let mut unified = Vec::new();
-        for (i, targ) in targs.iter().enumerate() {
-            let Some(name) = &markers[i] else { continue };
-            let bounds = &walker.vars[name];
-            let (lower, upper, late) = match bounds.exact.first() {
-                Some(t) => {
-                    unified.push((targ.t.dupe(), subst(cx, &tvars, t)));
-                    continue;
-                }
-                None if bounds.late_upper.is_empty() => {
-                    (bounds.lower.clone(), bounds.upper.clone(), Vec::new())
-                }
-                // A flow to `any` records no bound.
-                None if matches!(
-                    walker.resolve(cx, &targ.tparam.bound).deref(),
-                    TypeInner::AnyT(..)
-                ) =>
-                {
-                    (bounds.lower.clone(), bounds.upper.clone(), Vec::new())
-                }
-                // Only upper bounds read through the reversal of a rest: the flow-based solve merges
-                // them alone.
-                None if !bounds.upper.is_empty()
-                    && (0..bounds.upper.len()).all(|i| bounds.rest_upper.contains(&i)) =>
-                {
-                    (bounds.lower.clone(), bounds.upper.clone(), Vec::new())
-                }
-                None => {
-                    // The flow-based solve flows each type variable to its bound after the bounds of
-                    // the arguments and the hint.
-                    let bound = subst(cx, &subst_map, &targ.tparam.bound);
-                    let (late, direct): (Vec<(usize, &Type)>, Vec<(usize, &Type)>) = bounds
-                        .upper
-                        .iter()
-                        .enumerate()
-                        .partition(|(i, _)| bounds.late_upper.contains(i));
-                    let direct: Vec<Type> = direct.into_iter().map(|(_, t)| t.dupe()).collect();
-                    // The flow-based solve merges the late bounds after the others, in the order the
-                    // flows add them, so that one is the solution only if it is a subtype of each of
-                    // the others and of each late one before it.
-                    let mut late_kept: Vec<Type> = Vec::new();
-                    for (_, t) in late {
-                        let mut keep = true;
-                        for d in direct.iter().chain(late_kept.iter()) {
-                            let ok = sandbox(cx, env, preserve, |cx| {
-                                FlowJs::speculative_subtyping_succeeds_with_flow_errors(
-                                    cx, env, t, d,
-                                )
-                            })?;
-                            if ok != Some(true) {
-                                keep = false;
-                                break;
-                            }
-                        }
-                        if keep {
-                            late_kept.push(t.dupe());
-                        }
-                    }
-                    // The bound goes with the late ones, after the bounds that pinning adds when the
-                    // solution of another type parameter flows to its bound, which mentions this one.
-                    let late = std::iter::once(bound).chain(late_kept).collect();
-                    (bounds.lower.clone(), direct, late)
-                }
-            };
-            let lower: Vec<Type> = (lower.iter().enumerate())
-                .filter(|(i, _)| !bounds.from_bound.contains(i))
-                .map(|(_, t)| subst(cx, &tvars, t))
-                .collect();
-            let upper: Vec<Type> = upper.iter().map(|t| subst(cx, &tvars, t)).collect();
-            let late: Vec<Type> = late.iter().map(|t| subst(cx, &tvars, t)).collect();
-            insert_bounds(cx, &targ.t, &lower, &upper, &late);
-        }
-        for (tvar, t) in unified {
-            crate::flow_js::unify_with_env(cx, env, None, &tvar, &t)?;
-        }
-        Ok::<_, FlowJsException>(targs)
-    };
-    let mut targs = bounded_targs(cx, &walker)?;
 
     // The flow-based solve flows each lower bound of a type parameter to its upper bounds. That
     // records the literals an annotation needs precise (`'hi'` against `'hi'`), which pinning
@@ -6242,10 +6057,35 @@ fn solve_targs_in_snapshot<'cx>(
     // Only a lower bound with a literal of a value has a literal to keep precise, and only an
     // upper bound without one asks for it. Each bound is checked once, not once per pair, and the
     // lower bounds, which can be large, only when an upper bound asks.
+    // The flow-based solve also flows each type parameter to its bound, so the bound is one of
+    // those upper bounds, with the solution so far for the type parameters it mentions, which that
+    // solve pins first, its literals still precise.
+    let open_map: FlowOrdMap<SubstName, Type> = (tparams.iter().zip(markers.iter()))
+        .map(|(tparam, marker)| {
+            let t = match marker {
+                Some(name) => {
+                    let bounds = &walker.vars[name];
+                    let lower = best(&bounds.lower);
+                    match bounds.exact.first() {
+                        Some(t) => t.dupe(),
+                        None if !lower.is_empty() => {
+                            type_util::union_of_ts(tparam.reason.dupe(), lower, None)
+                        }
+                        None => walker.current_solution(cx, name, &tparam.reason),
+                    }
+                }
+                None => subst_map[&tparam.name].dupe(),
+            };
+            (tparam.name.dupe(), t)
+        })
+        .collect();
     let mut pairs: Vec<(Type, Type)> = Vec::new();
     let mut literals = LiteralCache::new();
-    for name in markers.iter().flatten() {
+    for (tparam, marker) in tparams.iter().zip(markers.iter()) {
+        let Some(name) = marker else { continue };
         let bounds = walker.vars[name].clone();
+        let lower: Vec<Type> = types(&bounds.lower).duped().collect();
+        let upper: Vec<Type> = types(&bounds.upper).duped().collect();
         let as_upper = |walker: &mut Walker<'_>,
                         cx: &mut Context<'cx>,
                         literals: &mut LiteralCache,
@@ -6262,14 +6102,29 @@ fn solve_targs_in_snapshot<'cx>(
                 .map(|t| !walker.mentions(cx, t) && has_inferred_literal(cx, literals, t))
                 .collect::<Vec<bool>>()
         };
-        if !bounds.lower.is_empty() {
-            let upper_ok = as_upper(&mut walker, cx, &mut literals, &bounds.upper);
+        if !lower.is_empty() {
+            let upper_ok = as_upper(&mut walker, cx, &mut literals, &upper);
             if upper_ok.iter().any(|ok| *ok) {
-                let lower_ok = as_lower(&mut walker, cx, &mut literals, &bounds.lower);
-                for (l, _) in bounds.lower.iter().zip(&lower_ok).filter(|(_, ok)| **ok) {
-                    for (u, _) in bounds.upper.iter().zip(&upper_ok).filter(|(_, ok)| **ok) {
+                let lower_ok = as_lower(&mut walker, cx, &mut literals, &lower);
+                for (l, _) in lower.iter().zip(&lower_ok).filter(|(_, ok)| **ok) {
+                    for (u, _) in upper.iter().zip(&upper_ok).filter(|(_, ok)| **ok) {
                         pairs.push((l.dupe(), u.dupe()));
                     }
+                }
+            }
+        }
+        // The tvar flows to the bound with its first exact bound, or its lower bounds. A bound is
+        // an annotation: a literal of a value in it was not met in an invariant position.
+        if !is_mixed_or_any(&walker.resolve(cx, &tparam.bound)) {
+            let bound = subst(cx, &open_map, &tparam.bound);
+            if !walker.mentions(cx, &bound) {
+                let from = match bounds.exact.first() {
+                    Some(t) => vec![t.dupe()],
+                    None => lower.clone(),
+                };
+                let from_ok = as_lower(&mut walker, cx, &mut literals, &from);
+                for (l, _) in from.iter().zip(&from_ok).filter(|(_, ok)| **ok) {
+                    pairs.push((l.dupe(), bound.dupe()));
                 }
             }
         }
@@ -6290,7 +6145,7 @@ fn solve_targs_in_snapshot<'cx>(
     // as when the flow-based solve flows it there.
     let mut literal_lowers: BTreeMap<SubstName, Vec<Type>> = BTreeMap::new();
     for (name, bounds) in walker.vars.iter() {
-        for l in bounds.lower.iter() {
+        for l in types(&bounds.lower) {
             let l = walker.resolve(cx, l);
             if is_value_literal(&l) {
                 literal_lowers.entry(name.dupe()).or_default().push(l);
@@ -6342,7 +6197,8 @@ fn solve_targs_in_snapshot<'cx>(
             let t = match bounds.exact.first() {
                 Some(t) => t.dupe(),
                 None if !bounds.lower.is_empty() => {
-                    type_util::union_of_ts(reason_op.dupe(), bounds.lower.clone(), None)
+                    let lower = types(&bounds.lower).duped().collect();
+                    type_util::union_of_ts(reason_op.dupe(), lower, None)
                 }
                 None => return None,
             };
@@ -6368,34 +6224,17 @@ fn solve_targs_in_snapshot<'cx>(
     if allow_underconstrained {
         marked = Marked::new();
     }
-    let init_errors = cx.errors();
-    let pin = |cx: &mut Context<'cx>, targs: &[SolveTarg], has_new_errors: bool| {
-        cx.run_and_rolled_back_cache(|cx| {
-            cx.reset_errors(Default::default());
-            let result = pin_types(
-                cx,
-                env,
-                UnmarkedFallback::Bound,
-                use_op,
-                has_new_errors,
-                has_syntactic_hint,
-                targs,
-                &marked,
-                check,
-            );
-            let pinning_errors = cx.errors().filter(|error| {
-                matches!(
-                    error.msg,
-                    ErrorMessage::EImplicitInstantiationUnderconstrainedError(..)
-                        | ErrorMessage::EInternal(..)
-                )
-            });
-            let underconstrained = !pinning_errors.is_empty();
-            cx.reset_errors(init_errors.union(&pinning_errors));
-            result.map(|result| (result, underconstrained))
-        })
+    let pinning = Pinning {
+        use_op,
+        check,
+        markers: &markers,
+        subst_map: &subst_map,
+        marked: &marked,
+        has_syntactic_hint,
     };
-    let mut result = pin(cx, &targs, too_many_targs);
+    let init_errors = cx.errors();
+    let before_pinning = walker.snapshot();
+    let mut result = pin_keeping_errors(cx, env, &mut walker, &pinning, too_many_targs);
     // A type parameter without evidence is not underconstrained when the operation fails anyway,
     // as in the flow-based solve: pin again with the error fallback.
     if !too_many_targs && matches!(result, Ok((_, true))) {
@@ -6407,8 +6246,8 @@ fn solve_targs_in_snapshot<'cx>(
         cx.reset_errors(errors);
         if instantiation_solver::sandboxed(failed)?.unwrap_or(true) {
             cx.reset_errors(init_errors.dupe());
-            targs = bounded_targs(cx, &walker)?;
-            result = pin(cx, &targs, true);
+            walker.restore(before_pinning);
+            result = pin_keeping_errors(cx, env, &mut walker, &pinning, true);
         }
     }
     let (result, _) = result?;
@@ -6438,28 +6277,15 @@ fn solve_targs_in_snapshot<'cx>(
         });
     }
 
-    // The flow-based solve flows the result, in its tvars, into an expected-type hint, so that a
-    // conflict fails an enclosing speculation (an overload). For a result with a destructor, under
-    // speculation, do the same with the tvars that pinning read: the destructor evaluates as soon
-    // as they have lower bounds, and a conditional type waits for them to be resolved, as there.
-    // Otherwise the solution flows, to unify the type variables of the hint with it in invariant
-    // positions; the tvars would also check the bounds pinning gave them against each other, which
-    // the flow-based solve does lazily (a rest parameter's reversal waits for the spread). Other
-    // errors of that flow are dropped, so outside speculation a hint without unresolved type
-    // variables needs no flow.
+    // The flow-based solve flows the result into an expected-type hint, so that a conflict fails an
+    // enclosing speculation (an overload). Outside speculation, the flow unifies the type variables
+    // of the hint with the solution in invariant positions; its other errors are dropped, so a hint
+    // without unresolved type variables, or a result with a destructor, needs no flow there.
     if let (Some((hint, flow_common::hint::HintKind::ExpectedTypeHint)), Some(return_t)) =
         (return_hint, &return_t)
         && (env.speculating() || flow_js_utils::tvar_visitors::has_unresolved_tvars(cx, hint))
     {
-        let has_eval = contains_eval(cx, return_t);
-        let instantiated = if env.speculating() && has_eval {
-            let tvars: FlowOrdMap<SubstName, Type> = markers
-                .iter()
-                .zip(targs.iter())
-                .filter_map(|(marker, targ)| Some((marker.as_ref()?.dupe(), targ.t.dupe())))
-                .collect();
-            Some(subst(cx, &tvars, return_t))
-        } else if has_eval {
+        let instantiated = if !env.speculating() && contains_eval(cx, return_t) {
             None
         } else {
             let solution: FlowOrdMap<SubstName, Type> = markers
@@ -6483,4 +6309,326 @@ fn solve_targs_in_snapshot<'cx>(
         }
     }
     Ok(result)
+}
+
+/// What pinning needs of a solve.
+struct Pinning<'a> {
+    use_op: &'a UseOp,
+    check: &'a ImplicitInstantiationCheck,
+    /// The marker of each type parameter, `None` for an explicit type argument.
+    markers: &'a [Option<SubstName>],
+    /// The type parameters to their markers or explicit type arguments.
+    subst_map: &'a FlowOrdMap<SubstName, Type>,
+    marked: &'a Marked<SubstName>,
+    has_syntactic_hint: bool,
+}
+
+/// The bounds a solution comes from.
+enum Source {
+    /// The first exact bound, or the lower bounds.
+    Lower,
+    Upper,
+}
+
+/// Pins the type parameters, without the caches and errors of pinning other than the
+/// underconstrained ones, and says whether there are any of those.
+fn pin_keeping_errors<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    walker: &mut Walker<'_>,
+    pinning: &Pinning<'_>,
+    has_new_errors: bool,
+) -> Result<(Solution, bool), FlowJsException> {
+    let init_errors = cx.errors();
+    cx.run_and_rolled_back_cache(|cx| {
+        cx.reset_errors(Default::default());
+        let result = pin(cx, env, walker, pinning, has_new_errors);
+        let pinning_errors = cx.errors().filter(|error| {
+            matches!(
+                error.msg,
+                ErrorMessage::EImplicitInstantiationUnderconstrainedError(..)
+                    | ErrorMessage::EInternal(..)
+            )
+        });
+        let underconstrained = !pinning_errors.is_empty();
+        cx.reset_errors(init_errors.union(&pinning_errors));
+        result.map(|result| (result, underconstrained))
+    })
+}
+
+/// Pins each type parameter to its bounds, in the order of `type_param_pin_order`, as `pin_types`
+/// pins the tvars of the flow-based solve: its first exact bound; otherwise the union of its lower
+/// bounds or, for a type parameter that the result mentions only negatively, the most specific of
+/// its upper bounds, each with the other as the fallback, and of either the bounds of the highest
+/// priority. A type parameter with neither takes `error_fallback`, its default or its bound, or is
+/// underconstrained, as there. The evidence of a pinned type parameter is then walked against its
+/// bound, as the flow-based solve flows each tvar to its bound: that gives the type parameters in
+/// the bound, which are pinned after it, their evidence from it. A solution that mentions the
+/// marker of a type parameter pinned after it takes that one's solution.
+fn pin<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    walker: &mut Walker<'_>,
+    pinning: &Pinning<'_>,
+    has_new_errors: bool,
+) -> Result<Solution, FlowJsException> {
+    let (_, ref reason_op, ref op) = pinning.check.operation;
+    let tparams = &pinning.check.poly_t.1;
+    let reason_tapp = type_util::reason_of_t(&pinning.check.lhs).dupe();
+    let mut solutions: Vec<Option<Type>> = vec![None; tparams.len()];
+    let mut solved = FlowOrdMap::new();
+    for index in type_param_pin_order(cx, tparams) {
+        let tparam = &tparams[index];
+        let bound = subst(cx, pinning.subst_map, &tparam.bound);
+        let (t, source) = match &pinning.markers[index] {
+            None => {
+                let t = (pinning.subst_map.get(&tparam.name))
+                    .expect("explicit type argument")
+                    .dupe();
+                log_pinned(cx, tparam, &t);
+                (t, Some(Source::Lower))
+            }
+            Some(name) => {
+                let reason = instantiation_utils::implicit_type_argument::mk_targ_reason(
+                    tparam,
+                    reason_op,
+                    &reason_tapp,
+                );
+                let polarity = pinning.marked.get(&tparam.name);
+                let bounds = &walker.vars[name];
+                let (t, source) =
+                    match pin_bounds(cx, env, bounds, tparam, polarity, &reason, &solved)? {
+                        Some((t, source)) => (t, Some(source)),
+                        // The operation failed: a type parameter without evidence is not
+                        // underconstrained.
+                        None if polarity.is_some() && has_new_errors => {
+                            let t = match *cx.typing_mode() {
+                                TypingMode::CheckingMode => any_t::error(reason),
+                                TypingMode::SynthesisMode { .. }
+                                | TypingMode::HintEvaluationMode => {
+                                    placeholder_t::why(reason.dupe(), mixed_t::why(reason))
+                                }
+                            };
+                            log_pinned(cx, tparam, &t);
+                            (t, None)
+                        }
+                        None => {
+                            let t = UnmarkedFallback::Bound.without_bounds(
+                                cx,
+                                env,
+                                pinning.use_op,
+                                tparam,
+                                polarity.is_some(),
+                                &reason,
+                                reason_op,
+                            )?;
+                            (t, None)
+                        }
+                    };
+                solved.insert(name.dupe(), t.dupe());
+                (t, source)
+            }
+        };
+        // As the flow-based solve flows the lower bounds of a pinned tvar to its bound.
+        let walk_to_bound = walker.mentions(cx, &bound) && matches!(source, Some(Source::Lower));
+        if walk_to_bound {
+            walker.in_bound = true;
+            let walked = walker.walk(cx, &t, &bound);
+            walker.in_bound = false;
+            walked?;
+        }
+        solutions[index] = Some(t);
+    }
+
+    // A solution mentions the marker of a type parameter pinned after it only through evidence
+    // that mentions it. In a cycle of those, the marker is `unknown`.
+    let mut solutions: Vec<Type> = solutions
+        .into_iter()
+        .map(|t| t.expect("each type parameter is pinned"))
+        .collect();
+    for _ in 0..=tparams.len() {
+        let pending: Vec<usize> = (0..solutions.len())
+            .filter(|i| walker.mentions(cx, &solutions[*i]))
+            .collect();
+        if pending.is_empty() {
+            break;
+        }
+        let map: FlowOrdMap<SubstName, Type> = (pinning.markers.iter())
+            .zip(solutions.iter())
+            .filter_map(|(m, t)| Some((m.as_ref()?.dupe(), t.dupe())))
+            .collect();
+        for i in pending {
+            solutions[i] = subst(cx, &map, &solutions[i]);
+        }
+    }
+    let unknown: FlowOrdMap<SubstName, Type> = (pinning.markers.iter())
+        .zip(tparams.iter())
+        .filter_map(|(m, tparam)| Some((m.as_ref()?.dupe(), mixed_t::why(tparam.reason.dupe()))))
+        .collect();
+
+    let call_loc = reason_op.loc().dupe();
+    let mut result_map = BTreeMap::new();
+    let mut result_list = Vec::with_capacity(tparams.len());
+    for (tparam, inferred) in tparams.iter().zip(solutions) {
+        let inferred = if walker.mentions(cx, &inferred) {
+            subst(cx, &unknown, &inferred)
+        } else {
+            inferred
+        };
+        let generalized = match op {
+            Operation::Call(_) | Operation::Constructor(_, _) | Operation::Method { .. }
+                if tparam.is_const =>
+            {
+                // Adjust 'const' type parameters. Keeping container reasons for
+                // compatibility with existing code.
+                natural_inference::convert_literal_type_to_const(
+                    call_loc.dupe(),
+                    cx,
+                    inferred.dupe(),
+                )
+            }
+            _ if matches!(tparam.bound.deref(), TypeInner::DefT(_, d)
+                if matches!(d.deref(), DefTInner::NumGeneralT(_))) =>
+            {
+                inferred.dupe()
+            }
+            // Prevent leaking of precise singleton types
+            _ => generalize_singletons(cx, &call_loc, pinning.has_syntactic_hint, inferred.dupe()),
+        };
+        result_list.push((generalized.dupe(), tparam.name.dupe()));
+        result_map.insert(
+            tparam.name.dupe(),
+            GeneralizedTarg {
+                tparam: tparam.dupe(),
+                inferred,
+                generalized,
+            },
+        );
+    }
+    Ok((result_map, result_list))
+}
+
+/// The solution of `tparam` from its `bounds`, as `pin_type` pins a tvar, with the markers of the
+/// type parameters already pinned replaced by their solutions. `None` without usable bounds.
+fn pin_bounds<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    bounds: &Bounds,
+    tparam: &TypeParam,
+    polarity: Option<Polarity>,
+    reason: &Reason,
+    solved: &FlowOrdMap<SubstName, Type>,
+) -> Result<Option<(Type, Source)>, FlowJsException> {
+    let with_solved = |cx: &mut Context<'cx>, t: &Type| {
+        let t = if solved.is_empty() {
+            t.dupe()
+        } else {
+            subst(cx, solved, t)
+        };
+        (!flow_js_utils::tvar_visitors::has_placeholders(cx, &t)).then_some(t)
+    };
+    if let Some(t) = bounds.exact.first()
+        && let Some(t) = with_solved(cx, t)
+    {
+        log_pinned(cx, tparam, &t);
+        return Ok(Some((t, Source::Lower)));
+    }
+    // Each type once, in the order the walk met them, the upper bounds also in the order of their
+    // priorities: the flow-based solve merges the uses through which its reversals read their bounds
+    // after the others.
+    let mut seen = BTreeSet::new();
+    let lowers: Vec<Type> = types(&bounds.lower)
+        .filter_map(|t| with_solved(cx, t))
+        .filter(|t| seen.insert(t.dupe()))
+        .collect();
+    let mut by_priority: Vec<&(Type, Priority)> = bounds.upper.iter().collect();
+    by_priority.sort_by_key(|(_, p)| *p);
+    let mut seen = BTreeSet::new();
+    let uppers: Vec<Type> = (by_priority.into_iter())
+        .filter_map(|(t, _)| with_solved(cx, t))
+        .filter(|t| seen.insert(t.dupe()))
+        .collect();
+    let filter_empty = tparam.default.is_some();
+    let merge_lowers = |cx: &mut Context<'cx>| {
+        if lowers.is_empty() {
+            return None;
+        }
+        let mut collected = Vec::new();
+        collect_pinning_lowers(
+            cx,
+            env,
+            &mut BTreeSet::new(),
+            &mut collected,
+            lowers.iter().duped().collect(),
+        );
+        // Lower bounds that are tvars holding the same type are one bound.
+        let mut seen = BTreeSet::new();
+        let filtered: Vec<Type> = union_flatten_list(collected)
+            .into_iter()
+            .filter(|t| seen.insert(t.dupe()))
+            .filter(|t| {
+                !(filter_empty
+                    && matches!(t.deref(), TypeInner::DefT(_, d)
+                            if matches!(d.deref(), DefTInner::EmptyT)))
+            })
+            .filter(|t| !flow_js_utils::tvar_visitors::has_placeholders(cx, t))
+            .collect();
+        type_util::union_of_ts_opt(
+            reason.dupe(),
+            filtered,
+            Some(union_rep::UnionKind::ImplicitInstantiationKind),
+        )
+    };
+    // The upper bounds folded to a common subtype: each replaces the one taken so far if it is a
+    // subtype of it. An upper bound of `any` bounds nothing: it replaces none, so that the order of
+    // the bounds does not decide the solution.
+    let merge_uppers = |cx: &mut Context<'cx>| -> Result<Option<Type>, FlowJsException> {
+        let mut acc: Option<Type> = None;
+        for t in uppers.iter() {
+            let t = match type_util::constraint_node_id(t) {
+                Some(_) => match merge_upper_bounds(cx, env, &mut BTreeSet::new(), t)? {
+                    UseTResult::UpperT(t)
+                        if !flow_js_utils::tvar_visitors::has_placeholders(cx, &t) =>
+                    {
+                        t
+                    }
+                    _ => continue,
+                },
+                None => t.dupe(),
+            };
+            acc = Some(match acc {
+                Some(prev) if matches!(t.deref(), TypeInner::AnyT(..)) => prev,
+                Some(prev)
+                    if !(concrete_type_eq::eq_with_env(cx, env, &prev, &t)
+                        || type_util::quick_subtype(None::<&mut fn(&Type)>, &t, &prev)
+                        || speculative_subtyping_succeeds(
+                            cx,
+                            env,
+                            DepthTrace::dummy_trace(),
+                            unknown_use(),
+                            &t,
+                            &prev,
+                        )?) =>
+                {
+                    prev
+                }
+                _ => t,
+            });
+        }
+        Ok(acc)
+    };
+    let merged = match polarity {
+        Some(Polarity::Negative) => match merge_uppers(cx)? {
+            Some(t) => Some((t, Source::Upper)),
+            None => merge_lowers(cx).map(|t| (t, Source::Lower)),
+        },
+        None | Some(Polarity::Positive | Polarity::Neutral) => match merge_lowers(cx) {
+            Some(t) => Some((t, Source::Lower)),
+            None => merge_uppers(cx)?.map(|t| (t, Source::Upper)),
+        },
+    };
+    if let Some((t, _)) = &merged {
+        log_pinned(cx, tparam, t);
+    }
+    Ok(merged)
 }

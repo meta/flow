@@ -180,8 +180,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ jsx.js:30:3
 
-Cannot create `AcceptsWhatever` element because in type argument `C` > the return value: `string` [1] is incompatible
-with `number` [2]. [incompatible-use]
+Cannot create `AcceptsWhatever` element because `string` [1] is incompatible with `number` [2]. [incompatible-use]
 
    jsx.js:30:3
    30| (<AcceptsWhatever />) as number; // Error string ~> number
@@ -198,8 +197,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ jsx.js:31:3
 
-Cannot create `AcceptsWhatever` element because in type argument `C` > the return value: `string` [1] is incompatible
-with `number` [2]. [incompatible-use]
+Cannot create `AcceptsWhatever` element because `string` [1] is incompatible with `number` [2]. [incompatible-use]
 
    jsx.js:31:3
    31| (<AcceptsWhatever name="hi">Text</AcceptsWhatever>) as number; // Error string ~> number
@@ -242,31 +240,19 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ jsx.js:35:3
 
-Cannot create `ExpectsProps` element because: [incompatible-use]
- - Either in type argument `C` > the first parameter: property `name` is missing in `{...}` [1] but exists in
-   `{name: string, ...}` [2].
- - Or in type argument `C` > the return value: `string` [3] is incompatible with `number` [4].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot create `ExpectsProps` element because `string` [1] is incompatible with `number` [2]. [incompatible-use]
 
    jsx.js:35:3
    35| (<ExpectsProps name="hi">Text</ExpectsProps>) as number; // Error string ~> number
          ^^^^^^^^^^^^
 
 References:
-   jsx.js:10:21
-   10|   C extends (props: {...}, children: Children) => Elem,
-                           ^^^^^ [1]
-   jsx.js:33:38
-   33| declare function ExpectsProps(props: {name: string, ...}, children: any): string;
-                                            ^^^^^^^^^^^^^^^^^^^ [2]
    jsx.js:33:75
    33| declare function ExpectsProps(props: {name: string, ...}, children: any): string;
-                                                                                 ^^^^^^ [3]
+                                                                                 ^^^^^^ [1]
    jsx.js:35:50
    35| (<ExpectsProps name="hi">Text</ExpectsProps>) as number; // Error string ~> number
-                                                        ^^^^^^ [4]
+                                                        ^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------------ jsx.js:38:2
@@ -290,7 +276,7 @@ References:
 Error ------------------------------------------------------------------------------------------------------ jsx.js:40:2
 
 Cannot create `ExpectsChildrenTuple` element because in type argument `C` > the second parameter > index `0`:
-`string` [1] is incompatible with `123` [2]. [incompatible-use]
+`string` [1] is incompatible with `number` [2]. [incompatible-use]
 
    jsx.js:40:2
    40| <ExpectsChildrenTuple>{123}</ExpectsChildrenTuple>; // Error: number ~> string
@@ -307,7 +293,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ jsx.js:41:2
 
-Cannot create `ExpectsChildrenTuple` element because in type argument `C` > the second parameter: `["Hi ", "there"]` [1]
+Cannot create `ExpectsChildrenTuple` element because in type argument `C` > the second parameter: `[string, string]` [1]
 has 2 elements but `[string]` [2] has 1 element. [incompatible-use]
 
    jsx.js:41:2
@@ -326,7 +312,7 @@ References:
 Error ------------------------------------------------------------------------------------------------------ jsx.js:49:2
 
 Cannot create `ExpectsChildrenArray` element because in type argument `C` > the second parameter > array element:
-`string` [1] is incompatible with `123` [2]. [incompatible-use]
+`string` [1] is incompatible with `number` [2]. [incompatible-use]
 
    jsx.js:49:2
    49| <ExpectsChildrenArray>{123}</ExpectsChildrenArray>; // Error: number ~> string

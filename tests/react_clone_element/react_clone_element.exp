@@ -2,13 +2,13 @@ Error --------------------------------------------------------------------------
 
 Cannot call `React.cloneElement` because: [incompatible-type]
  - Either in type argument `E`: `void` [1] is incompatible with
-   `ExactReactElement_DEPRECATED<empty, React.ComponentProps<empty>>` [2].
+   `ExactReactElement_DEPRECATED<any, React.ComponentProps<any>>` [2].
  - Or in type argument `E`: `void` [1] is incompatible with
-   `ExactReactElement_DEPRECATED<component(...empty) | string, empty>` [3].
+   `ExactReactElement_DEPRECATED<component(...empty) | string, any>` [3].
  - Or in type argument `E`: `void` [1] is incompatible with
-   `ExactReactElement_DEPRECATED<component(...empty) | string, empty>` [4].
+   `ExactReactElement_DEPRECATED<component(...empty) | string, any>` [4].
  - Or in type argument `E`: `void` [1] is incompatible with
-   `ExactReactElement_DEPRECATED<component(...empty) | string, empty>` [5].
+   `ExactReactElement_DEPRECATED<component(...empty) | string, any>` [5].
 
    test.js:19:7
     19| React.cloneElement(); // Error: Needs a minimum of two arguments.
@@ -35,14 +35,14 @@ References:
 Error ----------------------------------------------------------------------------------------------------- test.js:20:7
 
 Cannot call `React.cloneElement` because: [incompatible-type]
- - Either in type argument `E`: `"nope"` [1] is incompatible with
-   `ExactReactElement_DEPRECATED<empty, React.ComponentProps<empty>>` [2].
- - Or in type argument `E`: `"nope"` [1] is incompatible with
-   `ExactReactElement_DEPRECATED<component(...empty) | string, empty>` [3].
- - Or in type argument `E`: `"nope"` [1] is incompatible with
-   `ExactReactElement_DEPRECATED<component(...empty) | string, empty>` [4].
- - Or in type argument `E`: `"nope"` [1] is incompatible with
-   `ExactReactElement_DEPRECATED<component(...empty) | string, empty>` [5].
+ - Either in type argument `E`: `string` [1] is incompatible with
+   `ExactReactElement_DEPRECATED<any, React.ComponentProps<any>>` [2].
+ - Or in type argument `E`: `string` [1] is incompatible with
+   `ExactReactElement_DEPRECATED<component(...empty) | string, any>` [3].
+ - Or in type argument `E`: `string` [1] is incompatible with
+   `ExactReactElement_DEPRECATED<component(...empty) | string, any>` [4].
+ - Or in type argument `E`: `string` [1] is incompatible with
+   `ExactReactElement_DEPRECATED<component(...empty) | string, any>` [5].
 
    test.js:20:7
     20| React.cloneElement('nope'); // Error: Not a valid element type.
@@ -70,13 +70,13 @@ Error --------------------------------------------------------------------------
 
 Cannot call `React.cloneElement` because: [incompatible-type]
  - Either in type argument `E`: object literal [1] is incompatible with
-   `ExactReactElement_DEPRECATED<empty, React.ComponentProps<empty>>` [2].
+   `ExactReactElement_DEPRECATED<any, React.ComponentProps<any>>` [2].
  - Or in type argument `E`: object literal [1] is incompatible with
-   `ExactReactElement_DEPRECATED<component(...empty) | string, empty>` [3].
+   `ExactReactElement_DEPRECATED<component(...empty) | string, any>` [3].
  - Or in type argument `E`: object literal [1] is incompatible with
-   `ExactReactElement_DEPRECATED<component(...empty) | string, empty>` [4].
+   `ExactReactElement_DEPRECATED<component(...empty) | string, any>` [4].
  - Or in type argument `E`: object literal [1] is incompatible with
-   `ExactReactElement_DEPRECATED<component(...empty) | string, empty>` [5].
+   `ExactReactElement_DEPRECATED<component(...empty) | string, any>` [5].
 
    test.js:21:7
     21| React.cloneElement({ type: any }); // Error: Not a valid element type.
@@ -102,33 +102,23 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:25:7
 
-Cannot call `React.cloneElement` because: [incompatible-type]
- - Either in type argument `ElementType` [1]: `A` [2] is incompatible with `B` [3].
- - Or in type argument `C`: `Class<A>` [4] is incompatible with `string` [5].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot call `React.cloneElement` because in type argument `ElementType` [1]: `A` [2] is incompatible with `B` [3].
+[incompatible-type]
 
    test.js:25:7
-     25| React.cloneElement(a) as ExactReactElement_DEPRECATED<Class<B>>; // Error: A ~> B
-               ^^^^^^^^^^^^
+   25| React.cloneElement(a) as ExactReactElement_DEPRECATED<Class<B>>; // Error: A ~> B
+             ^^^^^^^^^^^^
 
 References:
    <BUILTINS>/react.js:58:54
-     58| declare opaque type ExactReactElement_DEPRECATED<out ElementType extends React$ElementType, out P = React.ComponentProps<ElementType>>: {...};
-                                                              ^^^^^^^^^^^ [1]
+   58| declare opaque type ExactReactElement_DEPRECATED<out ElementType extends React$ElementType, out P = React.ComponentProps<ElementType>>: {...};
+                                                            ^^^^^^^^^^^ [1]
    test.js:13:53
-     13| declare const a: ExactReactElement_DEPRECATED<Class<A>>;
-                                                             ^ [2]
+   13| declare const a: ExactReactElement_DEPRECATED<Class<A>>;
+                                                           ^ [2]
    test.js:25:61
-     25| React.cloneElement(a) as ExactReactElement_DEPRECATED<Class<B>>; // Error: A ~> B
-                                                                     ^ [3]
-   test.js:13:47
-     13| declare const a: ExactReactElement_DEPRECATED<Class<A>>;
-                                                       ^^^^^^^^ [4]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [5]
+   25| React.cloneElement(a) as ExactReactElement_DEPRECATED<Class<B>>; // Error: A ~> B
+                                                                   ^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:31:7
@@ -485,13 +475,13 @@ Error --------------------------------------------------------------------------
 
 Cannot call `React.cloneElement` because: [incompatible-type]
  - Either in type argument `E`: `void` [1] is incompatible with
-   `ExactReactElement_DEPRECATED<empty, React.ComponentProps<empty>>` [2].
+   `ExactReactElement_DEPRECATED<any, React.ComponentProps<any>>` [2].
  - Or in type argument `E`: `void` [1] is incompatible with
-   `ExactReactElement_DEPRECATED<component(...empty) | string, empty>` [3].
+   `ExactReactElement_DEPRECATED<component(...empty) | string, React.ComponentProps<any>>` [3].
  - Or in type argument `E`: `void` [1] is incompatible with
-   `ExactReactElement_DEPRECATED<component(...empty) | string, empty>` [4].
+   `ExactReactElement_DEPRECATED<component(...empty) | string, React.ComponentProps<any>>` [4].
  - Or in type argument `E`: `void` [1] is incompatible with
-   `ExactReactElement_DEPRECATED<component(...empty) | string, empty>` [5].
+   `ExactReactElement_DEPRECATED<component(...empty) | string, React.ComponentProps<any>>` [5].
 
    test.js:99:9
     99|   React.cloneElement(el); // ERROR
@@ -519,13 +509,13 @@ Error --------------------------------------------------------------------------
 
 Cannot call `React.cloneElement` because: [incompatible-type]
  - Either in type argument `E`: `void` [1] is incompatible with
-   `ExactReactElement_DEPRECATED<empty, React.ComponentProps<empty>>` [2].
+   `ExactReactElement_DEPRECATED<any, React.ComponentProps<any>>` [2].
  - Or in type argument `E`: `void` [1] is incompatible with
-   `ExactReactElement_DEPRECATED<component(...empty) | string, empty>` [3].
+   `ExactReactElement_DEPRECATED<component(...empty) | string, React.ComponentProps<any>>` [3].
  - Or in type argument `E`: `void` [1] is incompatible with
-   `ExactReactElement_DEPRECATED<component(...empty) | string, empty>` [4].
+   `ExactReactElement_DEPRECATED<component(...empty) | string, React.ComponentProps<any>>` [4].
  - Or in type argument `E`: `void` [1] is incompatible with
-   `ExactReactElement_DEPRECATED<component(...empty) | string, empty>` [5].
+   `ExactReactElement_DEPRECATED<component(...empty) | string, React.ComponentProps<any>>` [5].
 
    test.js:100:9
    100|   React.cloneElement(el, {}); // ERROR
