@@ -10,6 +10,40 @@ An important distinction with this translator and others is this is not intended
 
 Below are some common use cases:
 
+### Flow type AST -> TS type AST
+
+`translateFlowTypeToTSType` synchronously converts a single
+`flow-estree.TypeAnnotationType` into a TypeScript ESTree type node. It does not
+parse or print source, mutate the input AST, resolve bindings, or add imports.
+For example, an inline Flow interface becomes a TypeScript object type:
+
+```js
+const {parse} = require('flow-parser');
+const {translateFlowTypeToTSType} = require('flow-api-translator');
+
+const program = parse('type T = interface { foo: number };');
+const tsType = translateFlowTypeToTSType(program.body[0].right);
+// tsType.type === 'TSTypeLiteral', representing { foo: number }
+```
+
+Pass the type node itself, not its surrounding `TypeAnnotation` wrapper. Nested
+types are translated recursively using the same rules as the definition-file
+translator. Inline interfaces with bases become intersections of those bases
+and the translated body. The input must use the `flow-estree` dialect, including
+its location and range metadata; the returned node's locations are placeholders,
+not positions in generated TypeScript source.
+
+This API always throws for unsupported translations instead of recovering with
+`any`, including generic indexer keys that need mapped-type lowering. It also
+throws if translation would require adding a React import; use
+`translateFlowDefToTSDef` for translations requiring file-level import handling.
+Generic names otherwise remain references without resolving their bindings.
+Optional `sourceText` enriches errors with a source code frame:
+
+```js
+translateFlowTypeToTSType(flowType, {sourceText});
+```
+
 ### Flow -> Flow Lib
 
 Creating a Flow type definition and runtime files from Flow source code is simple. Just get the source text then pass it to the respective translators:

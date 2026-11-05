@@ -29,6 +29,8 @@ import {TSDefToFlowDef} from './TSDefToFlowDef';
 export type TranslateOptions = Omit<TranslationOptions, 'recoverFromErrors'>;
 
 export type {DefaultExportDocPlacement};
+export type {TypeTranslationOptions} from './flowDefToTSDef';
+export {translateFlowTypeToTSType} from './flowDefToTSDef';
 
 export async function translateFlowToFlowDef(
   code: string,

@@ -81,6 +81,10 @@ export function buildCodeFrame(
   code: string,
   highlightCode: boolean = process.env.NODE_ENV !== 'test',
 ): string {
+  if (code.length === 0) {
+    return message;
+  }
+
   // babel uses 1-indexed columns
   const locForBabel = {
     start: {

@@ -123,20 +123,32 @@ function isValidReactImportOrGlobal(id: FlowESTree.Identifier): boolean {
   return VALID_REACT_IMPORTS.has(id.name) || id.name.startsWith('React$');
 }
 
-let shouldAddReactImport: boolean | null = null;
+export type TypeTranslationOptions = {
+  /** Original source text, used only to enrich error messages. */
+  sourceText?: string,
+};
 
-// Returns appropriate Identifier for `React` import.
-// If a global is in use, set a flag to indicate that we should add the import.
-function getReactIdentifier(hasReactImport: boolean): TSESTree.EntityName {
-  if (shouldAddReactImport !== false) {
-    shouldAddReactImport = !hasReactImport;
+/**
+ * Translate a Flow type subtree without parsing, printing, or mutating it.
+ * Unsupported types and translations requiring an added import throw.
+ */
+export function translateFlowTypeToTSType(
+  node: FlowESTree.TypeAnnotationType,
+  options: TypeTranslationOptions = {},
+): TSESTree.TypeNode {
+  const sourceText = options.sourceText ?? '';
+  const translator = getTransforms(sourceText, null, {
+    recoverFromErrors: false,
+  });
+  const result = translator.translateType(node);
+  if (translator.needsReactImport()) {
+    throw translationErrorBase(
+      node,
+      'Translating this type requires adding a React import. Use the whole-program translator instead.',
+      {code: sourceText},
+    );
   }
-
-  return {
-    type: 'Identifier',
-    loc: DUMMY_LOC,
-    name: `React`,
-  };
+  return result;
 }
 
 export function flowDefToTSDef(
@@ -155,9 +167,8 @@ export function flowDefToTSDef(
       ast.docblock == null ? null : removeAtFlowFromDocblock(ast.docblock),
   };
 
-  shouldAddReactImport = null;
-
-  const [transform, code] = getTransforms(originalCode, scopeManager, opts);
+  const translator = getTransforms(originalCode, scopeManager, opts);
+  const {transform} = translator;
 
   for (const node of ast.body) {
     if (node.type in transform) {
@@ -174,12 +185,12 @@ export function flowDefToTSDef(
       throw unexpectedTranslationErrorBase(
         node,
         `Unexpected node type ${node.type}`,
-        {code},
+        {code: translator.getCode()},
       );
     }
   }
 
-  if (shouldAddReactImport === true) {
+  if (translator.needsReactImport()) {
     tsBody.unshift({
       type: 'ImportDeclaration',
       assertions: [],
@@ -205,15 +216,28 @@ export function flowDefToTSDef(
     });
   }
 
-  return [tsProgram, code];
+  return [tsProgram, translator.getCode()];
 }
 
 const getTransforms = (
   originalCode: string,
-  scopeManager: ScopeManager,
+  scopeManager: ScopeManager | null,
   opts: TranslationOptions,
 ) => {
   let code = originalCode;
+  let shouldAddReactImport: boolean | null = null;
+
+  // If a global is in use, the program translator needs to add the import.
+  function getReactIdentifier(hasReactImport: boolean): TSESTree.EntityName {
+    if (shouldAddReactImport !== false) {
+      shouldAddReactImport = !hasReactImport;
+    }
+    return {
+      type: 'Identifier',
+      loc: DUMMY_LOC,
+      name: 'React',
+    };
+  }
   function translationError(node: ObjectWithLoc, message: string) {
     return translationErrorBase(node, message, {code});
   }
@@ -295,7 +319,10 @@ const getTransforms = (
   }
 
   const topScope = (() => {
-    const globalScope = scopeManager.globalScope;
+    const globalScope = scopeManager?.globalScope;
+    if (globalScope == null) {
+      return null;
+    }
     if (
       globalScope.childScopes.length > 0 &&
       globalScope.childScopes[0].type === 'module'
@@ -306,6 +333,9 @@ const getTransforms = (
   })();
 
   function isReactImport(scopeNode: FlowESTree.ESNode, name: string): boolean {
+    if (scopeManager == null) {
+      return false;
+    }
     let currentScope = (() => {
       let scope = null;
       let node: FlowESTree.ESNode = scopeNode;
@@ -998,7 +1028,7 @@ const getTransforms = (
   // the one case where `typeof name` can be re-exported as `name` itself and
   // keep both its value and its type meaning.
   const isDeclaredClass = (name: string): boolean => {
-    const exportedVar = topScope.set.get(name);
+    const exportedVar = topScope?.set.get(name);
     return (
       exportedVar != null &&
       exportedVar.defs.length === 1 &&
@@ -1477,7 +1507,7 @@ const getTransforms = (
             // QualifiedTypeIdentifiers are types so cannot be handled without the intermediate variable so
             // only Identifiers can be handled here.
             if (referencedId.type === 'Identifier') {
-              const exportedVar = topScope.set.get(referencedId.name);
+              const exportedVar = topScope?.set.get(referencedId.name);
               if (exportedVar != null && exportedVar.defs.length === 1) {
                 const def = exportedVar.defs[0];
                 switch (def.type) {
@@ -4811,5 +4841,10 @@ const getTransforms = (
     };
   }
 
-  return [transform, code];
+  return {
+    transform,
+    translateType: transformTypeAnnotationType,
+    getCode: () => code,
+    needsReactImport: () => shouldAddReactImport === true,
+  };
 };
