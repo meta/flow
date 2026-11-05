@@ -151,5 +151,57 @@ References:
                   ^^^^^ [2]
 
 
+Error ----------------------------------------------------------------------------------------------------- main.js:68:1
 
-Found 10 errors
+Cannot cast `callSignaturesOk` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   main.js:68:1
+   68| callSignaturesOk as string; // Error: number ~> string
+       ^^^^^^^^^^^^^^^^
+
+References:
+   flow-typed/libs.js:48:9
+   48|     ok: number;
+               ^^^^^^ [1]
+   main.js:68:21
+   68| callSignaturesOk as string; // Error: number ~> string
+                           ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- main.js:72:1
+
+Cannot cast `overloadedNamespaceOk` to `string` because `number` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   main.js:72:1
+   72| overloadedNamespaceOk as string; // Error: number ~> string
+       ^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   flow-typed/libs.js:59:21
+   59|     declare var ok: number;
+                           ^^^^^^ [1]
+   main.js:72:26
+   72| overloadedNamespaceOk as string; // Error: number ~> string
+                                ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- main.js:76:1
+
+Cannot cast `callableValueOk` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   main.js:76:1
+   76| callableValueOk as string; // Error: number ~> string
+       ^^^^^^^^^^^^^^^
+
+References:
+   callable_exports.js:4:7
+    4|   ok: number;
+             ^^^^^^ [1]
+   main.js:76:20
+   76| callableValueOk as string; // Error: number ~> string
+                          ^^^^^^ [2]
+
+
+
+Found 13 errors

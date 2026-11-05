@@ -62,3 +62,15 @@ new E() as empty; // error
 // import {T} from "DependsOnRealModule";
 // (42: T);
 // ("str": T);
+
+import {ok as callSignaturesOk} from "declare_m_e_with_call_signatures";
+callSignaturesOk as number; // ok
+callSignaturesOk as string; // Error: number ~> string
+
+import {ok as overloadedNamespaceOk} from "declare_m_e_overloaded_function_and_namespace";
+overloadedNamespaceOk as number; // ok
+overloadedNamespaceOk as string; // Error: number ~> string
+
+import {ok as callableValueOk} from "./callable_exports";
+callableValueOk as number; // ok
+callableValueOk as string; // Error: number ~> string

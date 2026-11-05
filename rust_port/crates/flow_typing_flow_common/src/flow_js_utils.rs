@@ -6134,6 +6134,7 @@ pub mod cjs_extract_named_exports_t_kit {
     use std::ops::Deref;
 
     use dupe::Dupe;
+    use dupe::IterDupedExt;
     use flow_common::reason::Reason;
     use flow_typing_context::Context;
     use flow_typing_type::type_::DefTInner;
@@ -6320,6 +6321,19 @@ pub mod cjs_extract_named_exports_t_kit {
                 } else {
                     unreachable!()
                 }
+            }
+            // An intersection, such as an object type with several call signatures or an
+            // overloaded function, has the properties of all its members. Members are visited
+            // last to first so that the first member that has a property provides its export,
+            // as in a property read on the intersection.
+            TypeInner::IntersectionT(_, rep) => {
+                let members: Vec<Type> = rep.members_iter().duped().collect();
+                members
+                    .into_iter()
+                    .rev()
+                    .try_fold(local_module, |module, member| {
+                        on_type(cx, concretize, reason.dupe(), module, member)
+                    })
             }
             // If the module is exporting any or Object, then we allow any named import.
             TypeInner::AnyT(_, _)

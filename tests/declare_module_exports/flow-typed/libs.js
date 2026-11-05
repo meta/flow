@@ -36,3 +36,27 @@ declare module "declare_overloaded_function" {
   declare function foo(x: string): string;
   declare function foo(x: number): number;
 }
+
+/**
+ * Properties of a `module.exports` with several call signatures are named
+ * exports, as they are with one.
+ */
+declare module "declare_m_e_with_call_signatures" {
+  declare module.exports: {
+    (x: number): number;
+    (x: string): string;
+    ok: number;
+  };
+}
+
+/**
+ * Namespace members of an overloaded function are named exports.
+ */
+declare module "declare_m_e_overloaded_function_and_namespace" {
+  declare function f(x: number): number;
+  declare function f(x: string): string;
+  declare namespace f {
+    declare var ok: number;
+  }
+  declare module.exports: typeof f;
+}
