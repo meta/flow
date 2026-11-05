@@ -179,7 +179,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         }
       ],
       "implements":[],
@@ -246,7 +246,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         }
       ],
       "mixins":[]
@@ -313,7 +313,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         }
       ]
     },
@@ -578,7 +578,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         }
       ],
       "implements":[],
@@ -637,7 +637,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         }
       ],
       "mixins":[]
@@ -696,7 +696,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         }
       ]
     }

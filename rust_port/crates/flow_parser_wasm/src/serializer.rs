@@ -1031,6 +1031,26 @@ impl<'a> Serializer<'a> {
     // Type serialization
     // ---------------------------------------------------------------
 
+    fn write_type_use_node_header(&mut self, kind: NodeKind, loc: &Loc) {
+        let kind = if self.is_babel() {
+            match kind {
+                NodeKind::GenericTypeAnnotation => NodeKind::BabelGenericTypeAnnotation,
+                NodeKind::InterfaceExtends => NodeKind::BabelInterfaceExtends,
+                NodeKind::ClassImplements => NodeKind::BabelClassImplements,
+                _ => kind,
+            }
+        } else {
+            kind
+        };
+        self.write_node_header(kind, loc);
+    }
+
+    fn serialize_generic_type(&mut self, loc: &Loc, generic: &ast::types::Generic<Loc, Loc>) {
+        self.write_type_use_node_header(NodeKind::GenericTypeAnnotation, loc);
+        self.serialize_generic_type_identifier(&generic.id);
+        self.serialize_type_args_opt(&generic.targs);
+    }
+
     fn serialize_type(&mut self, ty: &ast::types::Type<Loc, Loc>) {
         // Mirror upstream Hermes' mapGenericTypeAnnotation: collapse the
         // no-targs `this` identifier case to a ThisTypeAnnotation leaf node.
@@ -1095,7 +1115,7 @@ impl<'a> Serializer<'a> {
     }
 
     fn serialize_babel_keyword_generic(&mut self, loc: &Loc, name: &str) {
-        self.write_node_header(NodeKind::GenericTypeAnnotation, loc);
+        self.write_type_use_node_header(NodeKind::GenericTypeAnnotation, loc);
         self.write_identifier_node_header(loc, name);
         self.write_str(name);
         self.write_null_node();
@@ -2019,8 +2039,11 @@ impl<'a> Serializer<'a> {
                         ast::expression::CallTypeArg::Implicit(imp) => {
                             // Synthesize a GenericTypeAnnotation with
                             // id = Identifier "_" for implicit type args (`_`).
-                            // 117: GenericTypeAnnotation — id(Node) typeParameters(Node)
-                            self.write_node_header(NodeKind::GenericTypeAnnotation, &imp.loc);
+                            // 139: GenericTypeAnnotation — id(Node) typeArguments(Node)
+                            self.write_type_use_node_header(
+                                NodeKind::GenericTypeAnnotation,
+                                &imp.loc,
+                            );
                             // 76: Identifier — name typeAnnotation optional
                             self.write_identifier_node_header(&imp.loc, "_");
                             self.write_str("_");
@@ -2338,8 +2361,8 @@ impl<'a> Serializer<'a> {
             Some(impls) => {
                 self.buf.push(impls.interfaces.len() as u32);
                 for iface in impls.interfaces.iter() {
-                    // 86: ClassImplements — id(Node) typeParameters(Node)
-                    self.write_node_header(NodeKind::ClassImplements, &iface.loc);
+                    // 86: ClassImplements — id(Node) typeArguments(Node)
+                    self.write_type_use_node_header(NodeKind::ClassImplements, &iface.loc);
                     self.serialize_generic_type_identifier(&iface.id);
                     self.serialize_type_args_opt(&iface.targs);
                 }
@@ -3129,8 +3152,8 @@ impl<'a> Serializer<'a> {
     }
 
     fn serialize_interface_extends(&mut self, loc: &Loc, generic: &ast::types::Generic<Loc, Loc>) {
-        // 158: InterfaceExtends — id(Node) typeParameters(Node)
-        self.write_node_header(NodeKind::InterfaceExtends, loc);
+        // 158: InterfaceExtends — id(Node) typeArguments(Node)
+        self.write_type_use_node_header(NodeKind::InterfaceExtends, loc);
         self.serialize_generic_type_identifier(&generic.id);
         match &generic.targs {
             Some(targs) => {
@@ -3156,9 +3179,7 @@ impl<'a> Serializer<'a> {
             ast::statement::DeclareClassExtends::ExtendsCall { callee, arg } => {
                 // DeclareClassExtendsCall — callee(Node) argument(Node)
                 self.write_node_header(NodeKind::DeclareClassExtendsCall, loc);
-                self.write_node_header(NodeKind::GenericTypeAnnotation, &callee.0);
-                self.serialize_generic_type_identifier(&callee.1.id);
-                self.serialize_type_args_opt(&callee.1.targs);
+                self.serialize_generic_type(&callee.0, &callee.1);
                 self.serialize_declare_class_extends(&arg.0, &arg.1);
             }
         }
@@ -3630,7 +3651,7 @@ impl<'a> Serializer<'a> {
 
     fn serialize_babel_typeof(&mut self, loc: &Loc, typeof_: &ast::types::Typeof<Loc, Loc>) {
         self.write_node_header(NodeKind::BabelTypeofTypeAnnotation, loc);
-        self.write_node_header(NodeKind::GenericTypeAnnotation, typeof_.argument.loc());
+        self.write_type_use_node_header(NodeKind::GenericTypeAnnotation, typeof_.argument.loc());
         self.serialize_babel_typeof_identifier(&typeof_.argument);
         self.write_null_node();
     }
@@ -4229,8 +4250,8 @@ impl<'a> Serializer<'a> {
             Some(impls) => {
                 self.buf.push(impls.interfaces.len() as u32);
                 for iface in impls.interfaces.iter() {
-                    // 86: ClassImplements — id typeParameters
-                    self.write_node_header(NodeKind::ClassImplements, &iface.loc);
+                    // 86: ClassImplements — id typeArguments
+                    self.write_type_use_node_header(NodeKind::ClassImplements, &iface.loc);
                     self.serialize_generic_type_identifier(&iface.id);
                     self.serialize_type_args_opt(&iface.targs);
                 }

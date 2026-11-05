@@ -825,41 +825,41 @@ describe('TupleTypeAnnotation', () => {
 
     test('ESTree', () => {
       expect(parseForSnapshot(testCase.code)).toMatchInlineSnapshot(`
-        {
-          "body": [
-            {
-              "id": {
-                "name": "T1",
-                "optional": false,
-                "type": "Identifier",
-                "typeAnnotation": null,
-              },
-              "right": {
-                "elementTypes": [
-                  {
-                    "label": null,
-                    "type": "TupleTypeSpreadElement",
-                    "typeAnnotation": {
-                      "id": {
-                        "name": "b",
-                        "optional": false,
-                        "type": "Identifier",
-                        "typeAnnotation": null,
-                      },
-                      "type": "GenericTypeAnnotation",
-                      "typeParameters": null,
-                    },
-                  },
-                ],
-                "inexact": false,
-                "type": "TupleTypeAnnotation",
-              },
-              "type": "TypeAlias",
-              "typeParameters": null,
-            },
-          ],
-          "type": "Program",
-        }
+       {
+         "body": [
+           {
+             "id": {
+               "name": "T1",
+               "optional": false,
+               "type": "Identifier",
+               "typeAnnotation": null,
+             },
+             "right": {
+               "elementTypes": [
+                 {
+                   "label": null,
+                   "type": "TupleTypeSpreadElement",
+                   "typeAnnotation": {
+                     "id": {
+                       "name": "b",
+                       "optional": false,
+                       "type": "Identifier",
+                       "typeAnnotation": null,
+                     },
+                     "type": "GenericTypeAnnotation",
+                     "typeArguments": null,
+                   },
+                 },
+               ],
+               "inexact": false,
+               "type": "TupleTypeAnnotation",
+             },
+             "type": "TypeAlias",
+             "typeParameters": null,
+           },
+         ],
+         "type": "Program",
+       }
       `);
       expectEspreeAlignment(testCase);
     });
@@ -1725,75 +1725,75 @@ describe('TypePredicate', () => {
 
   test('ESTree', () => {
     expect(parseForSnapshot(testCase.code)).toMatchInlineSnapshot(`
-      {
-        "body": [
-          {
-            "async": false,
-            "body": {
-              "body": [
-                {
-                  "argument": {
-                    "name": "x",
-                    "optional": false,
-                    "type": "Identifier",
-                    "typeAnnotation": null,
-                  },
-                  "type": "ReturnStatement",
-                },
-              ],
-              "type": "BlockStatement",
-            },
-            "expression": false,
-            "generator": false,
-            "id": {
-              "name": "predicate",
-              "optional": false,
-              "type": "Identifier",
-              "typeAnnotation": null,
-            },
-            "params": [
-              {
-                "name": "x",
-                "optional": false,
-                "type": "Identifier",
-                "typeAnnotation": {
-                  "type": "TypeAnnotation",
-                  "typeAnnotation": {
-                    "type": "MixedTypeAnnotation",
-                  },
-                },
-              },
-            ],
-            "predicate": null,
-            "returnType": {
-              "type": "TypeAnnotation",
-              "typeAnnotation": {
-                "kind": null,
-                "parameterName": {
-                  "name": "x",
-                  "optional": false,
-                  "type": "Identifier",
-                  "typeAnnotation": null,
-                },
-                "type": "TypePredicate",
-                "typeAnnotation": {
-                  "id": {
-                    "name": "T",
-                    "optional": false,
-                    "type": "Identifier",
-                    "typeAnnotation": null,
-                  },
-                  "type": "GenericTypeAnnotation",
-                  "typeParameters": null,
-                },
-              },
-            },
-            "type": "FunctionDeclaration",
-            "typeParameters": null,
-          },
-        ],
-        "type": "Program",
-      }
+     {
+       "body": [
+         {
+           "async": false,
+           "body": {
+             "body": [
+               {
+                 "argument": {
+                   "name": "x",
+                   "optional": false,
+                   "type": "Identifier",
+                   "typeAnnotation": null,
+                 },
+                 "type": "ReturnStatement",
+               },
+             ],
+             "type": "BlockStatement",
+           },
+           "expression": false,
+           "generator": false,
+           "id": {
+             "name": "predicate",
+             "optional": false,
+             "type": "Identifier",
+             "typeAnnotation": null,
+           },
+           "params": [
+             {
+               "name": "x",
+               "optional": false,
+               "type": "Identifier",
+               "typeAnnotation": {
+                 "type": "TypeAnnotation",
+                 "typeAnnotation": {
+                   "type": "MixedTypeAnnotation",
+                 },
+               },
+             },
+           ],
+           "predicate": null,
+           "returnType": {
+             "type": "TypeAnnotation",
+             "typeAnnotation": {
+               "kind": null,
+               "parameterName": {
+                 "name": "x",
+                 "optional": false,
+                 "type": "Identifier",
+                 "typeAnnotation": null,
+               },
+               "type": "TypePredicate",
+               "typeAnnotation": {
+                 "id": {
+                   "name": "T",
+                   "optional": false,
+                   "type": "Identifier",
+                   "typeAnnotation": null,
+                 },
+                 "type": "GenericTypeAnnotation",
+                 "typeArguments": null,
+               },
+             },
+           },
+           "type": "FunctionDeclaration",
+           "typeParameters": null,
+         },
+       ],
+       "type": "Program",
+     }
     `);
     expectEspreeAlignment(testCase);
   });

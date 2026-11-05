@@ -1114,9 +1114,7 @@ const getTransforms = (
           node.id.type === 'QualifiedTypeIdentifier'
             ? transform.QualifiedTypeIdentifier(node.id)
             : transform.Identifier(node.id, false),
-        typeArguments: transform.TypeParameterInstantiation(
-          node.typeParameters,
-        ),
+        typeArguments: transform.TypeParameterInstantiation(node.typeArguments),
       };
     },
     DeclareClass(
@@ -1324,7 +1322,7 @@ const getTransforms = (
                 ? transform.QualifiedTypeIdentifier(superClass.id)
                 : transform.Identifier(superClass.id as $FlowFixMe, false);
             superTypeArguments = transform.TypeParameterInstantiation(
-              superClass.typeParameters,
+              superClass.typeArguments,
             );
             break;
         }
@@ -2465,7 +2463,7 @@ const getTransforms = (
     ): TSESTree.TypeNode {
       const importType = transformImportTypeReference(
         node.id,
-        transform.TypeParameterInstantiation(node.typeParameters) ?? null,
+        transform.TypeParameterInstantiation(node.typeArguments) ?? null,
       );
       if (importType != null) {
         return importType;
@@ -2498,8 +2496,8 @@ const getTransforms = (
       const assertHasExactlyNTypeParameters = (
         count: number,
       ): ReadonlyArray<TSESTree.TypeNode> => {
-        if (node.typeParameters != null) {
-          if (node.typeParameters.params.length !== count) {
+        if (node.typeArguments != null) {
+          if (node.typeArguments.params.length !== count) {
             throw translationError(
               node,
               `Expected exactly ${count} type parameter${
@@ -2509,7 +2507,7 @@ const getTransforms = (
           }
 
           const res = [];
-          for (const param of node.typeParameters.params) {
+          for (const param of node.typeArguments.params) {
             res.push(transformTypeAnnotationType(param));
           }
           return res;
@@ -2529,8 +2527,8 @@ const getTransforms = (
         min: number,
         max: number,
       ): ReadonlyArray<TSESTree.TypeNode> {
-        const {typeParameters} = node;
-        if (typeParameters == null) {
+        const {typeArguments} = node;
+        if (typeArguments == null) {
           if (min > 0) {
             throw translationError(
               node,
@@ -2539,7 +2537,7 @@ const getTransforms = (
           }
           return [];
         }
-        const params = typeParameters.params;
+        const params = typeArguments.params;
         if (params.length < min || params.length > max) {
           throw translationError(
             node,
@@ -2547,7 +2545,7 @@ const getTransforms = (
           );
         }
 
-        return typeParameters.params.map(transformTypeAnnotationType);
+        return typeArguments.params.map(transformTypeAnnotationType);
       }
 
       switch (fullTypeName) {
@@ -3062,14 +3060,14 @@ const getTransforms = (
           // React$Component<A,B> -> React.Component<A,B>
           case 'React.Component':
           case 'React$Component': {
-            const typeParameters = node.typeParameters;
-            if (typeParameters == null || typeParameters.params.length === 0) {
+            const typeArguments = node.typeArguments;
+            if (typeArguments == null || typeArguments.params.length === 0) {
               throw translationError(
                 node,
                 `Expected at least 1 type parameter with \`${fullTypeName}\``,
               );
             }
-            const params = typeParameters.params;
+            const params = typeArguments.params;
             if (params.length > 2) {
               throw translationError(
                 node,
@@ -3305,14 +3303,14 @@ const getTransforms = (
           // React$AbstractComponent<Config, Instance> -> React.ComponentType<Config & React.RefAttributes<Instance>>
           case 'React.AbstractComponent':
           case 'React$AbstractComponent': {
-            const typeParameters = node.typeParameters;
-            if (typeParameters == null || typeParameters.params.length === 0) {
+            const typeArguments = node.typeArguments;
+            if (typeArguments == null || typeArguments.params.length === 0) {
               throw translationError(
                 node,
                 `Expected at least 1 type parameter with \`${fullTypeName}\``,
               );
             }
-            const params = typeParameters.params;
+            const params = typeArguments.params;
             if (params.length > 3) {
               throw translationError(
                 node,
@@ -3502,9 +3500,7 @@ const getTransforms = (
         type: 'TSTypeReference',
         loc: DUMMY_LOC,
         typeName,
-        typeArguments: transform.TypeParameterInstantiation(
-          node.typeParameters,
-        ),
+        typeArguments: transform.TypeParameterInstantiation(node.typeArguments),
       };
     },
     Identifier(
@@ -3641,9 +3637,7 @@ const getTransforms = (
           node.id.type === 'QualifiedTypeIdentifier'
             ? transform.QualifiedTypeIdentifier(node.id)
             : transform.Identifier(node.id, false),
-        typeArguments: transform.TypeParameterInstantiation(
-          node.typeParameters,
-        ),
+        typeArguments: transform.TypeParameterInstantiation(node.typeArguments),
       };
     },
     InterfaceTypeAnnotation(
@@ -3665,7 +3659,7 @@ const getTransforms = (
                   ? transform.QualifiedTypeIdentifier(ex.id)
                   : transform.Identifier(ex.id, false),
               typeArguments: transform.TypeParameterInstantiation(
-                ex.typeParameters,
+                ex.typeArguments,
               ),
             })),
             transform.ObjectTypeAnnotation(node.body),

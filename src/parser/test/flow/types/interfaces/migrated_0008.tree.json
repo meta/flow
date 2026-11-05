@@ -56,7 +56,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           }
         ],
         "decorators":[]

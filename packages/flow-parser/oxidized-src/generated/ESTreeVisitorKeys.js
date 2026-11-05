@@ -117,7 +117,7 @@ module.exports = {
   ],
   ClassImplements: [
     'id',
-    'typeParameters',
+    'typeArguments',
   ],
   ComponentDeclaration: [
     'id',
@@ -351,7 +351,7 @@ module.exports = {
   ],
   GenericTypeAnnotation: [
     'id',
-    'typeParameters',
+    'typeArguments',
   ],
   HookDeclaration: [
     'id',
@@ -420,7 +420,7 @@ module.exports = {
   ],
   InterfaceExtends: [
     'id',
-    'typeParameters',
+    'typeArguments',
   ],
   InterfaceTypeAnnotation: [
     'extends',

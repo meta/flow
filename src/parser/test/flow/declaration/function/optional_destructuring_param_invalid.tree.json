@@ -73,7 +73,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             }
           },
           "optional":true
@@ -135,7 +135,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             }
           },
           "optional":true

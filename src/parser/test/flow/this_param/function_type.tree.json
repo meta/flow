@@ -180,7 +180,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":{
+            "typeArguments":{
               "type":"TypeParameterInstantiation",
               "loc":{"source":null,"start":{"line":5,"column":54},"end":{"line":5,"column":63}},
               "range":[141,150],
@@ -257,7 +257,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":{
+            "typeArguments":{
               "type":"TypeParameterInstantiation",
               "loc":{"source":null,"start":{"line":7,"column":41},"end":{"line":7,"column":50}},
               "range":[203,212],

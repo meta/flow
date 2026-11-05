@@ -193,7 +193,7 @@
                 90
               ],
               "type": "GenericTypeAnnotation",
-              "typeParameters": null
+              "typeArguments": null
             }
           }
         ],
@@ -342,7 +342,7 @@
               150
             ],
             "type": "GenericTypeAnnotation",
-            "typeParameters": null
+            "typeArguments": null
           }
         },
         "rest": null,

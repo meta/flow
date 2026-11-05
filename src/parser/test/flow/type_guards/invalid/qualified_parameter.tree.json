@@ -108,7 +108,7 @@
               "optional":false
             }
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "rest":null,
         "typeParameters":null

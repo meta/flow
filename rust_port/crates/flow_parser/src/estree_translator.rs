@@ -3261,7 +3261,7 @@ fn class_implements(
                 }
             }),
             (
-                "typeParameters",
+                "typeArguments",
                 option(&interface.targs, |t| type_args(offset_table, config, t)),
             ),
         ],
@@ -4065,7 +4065,7 @@ fn interface_extends(
         vec![
             ("id", id),
             (
-                "typeParameters",
+                "typeArguments",
                 option(&extends.targs, |t| type_args(offset_table, config, t)),
             ),
         ],
@@ -5755,7 +5755,7 @@ fn generic_type(
         vec![
             ("id", id),
             (
-                "typeParameters",
+                "typeArguments",
                 option(&generic.targs, |t| type_args(offset_table, config, t)),
             ),
         ],

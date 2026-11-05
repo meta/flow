@@ -38,44 +38,44 @@ describe('IndexedAccessType', () => {
 
     test('ESTree', () => {
       expect(parseForSnapshot(testCase.code)).toMatchInlineSnapshot(`
-        {
-          "body": [
-            {
-              "id": {
-                "name": "T",
-                "optional": false,
-                "type": "Identifier",
-                "typeAnnotation": null,
-              },
-              "right": {
-                "indexType": {
-                  "id": {
-                    "name": "k",
-                    "optional": false,
-                    "type": "Identifier",
-                    "typeAnnotation": null,
-                  },
-                  "type": "GenericTypeAnnotation",
-                  "typeParameters": null,
-                },
-                "objectType": {
-                  "id": {
-                    "name": "O",
-                    "optional": false,
-                    "type": "Identifier",
-                    "typeAnnotation": null,
-                  },
-                  "type": "GenericTypeAnnotation",
-                  "typeParameters": null,
-                },
-                "type": "IndexedAccessType",
-              },
-              "type": "TypeAlias",
-              "typeParameters": null,
-            },
-          ],
-          "type": "Program",
-        }
+       {
+         "body": [
+           {
+             "id": {
+               "name": "T",
+               "optional": false,
+               "type": "Identifier",
+               "typeAnnotation": null,
+             },
+             "right": {
+               "indexType": {
+                 "id": {
+                   "name": "k",
+                   "optional": false,
+                   "type": "Identifier",
+                   "typeAnnotation": null,
+                 },
+                 "type": "GenericTypeAnnotation",
+                 "typeArguments": null,
+               },
+               "objectType": {
+                 "id": {
+                   "name": "O",
+                   "optional": false,
+                   "type": "Identifier",
+                   "typeAnnotation": null,
+                 },
+                 "type": "GenericTypeAnnotation",
+                 "typeArguments": null,
+               },
+               "type": "IndexedAccessType",
+             },
+             "type": "TypeAlias",
+             "typeParameters": null,
+           },
+         ],
+         "type": "Program",
+       }
       `);
       expectEspreeAlignment(testCase);
     });
@@ -123,45 +123,45 @@ describe('IndexedAccessType', () => {
 
     test('ESTree', () => {
       expect(parseForSnapshot(testCase.code)).toMatchInlineSnapshot(`
-        {
-          "body": [
-            {
-              "id": {
-                "name": "T",
-                "optional": false,
-                "type": "Identifier",
-                "typeAnnotation": null,
-              },
-              "right": {
-                "indexType": {
-                  "id": {
-                    "name": "k",
-                    "optional": false,
-                    "type": "Identifier",
-                    "typeAnnotation": null,
-                  },
-                  "type": "GenericTypeAnnotation",
-                  "typeParameters": null,
-                },
-                "objectType": {
-                  "id": {
-                    "name": "O",
-                    "optional": false,
-                    "type": "Identifier",
-                    "typeAnnotation": null,
-                  },
-                  "type": "GenericTypeAnnotation",
-                  "typeParameters": null,
-                },
-                "optional": true,
-                "type": "OptionalIndexedAccessType",
-              },
-              "type": "TypeAlias",
-              "typeParameters": null,
-            },
-          ],
-          "type": "Program",
-        }
+       {
+         "body": [
+           {
+             "id": {
+               "name": "T",
+               "optional": false,
+               "type": "Identifier",
+               "typeAnnotation": null,
+             },
+             "right": {
+               "indexType": {
+                 "id": {
+                   "name": "k",
+                   "optional": false,
+                   "type": "Identifier",
+                   "typeAnnotation": null,
+                 },
+                 "type": "GenericTypeAnnotation",
+                 "typeArguments": null,
+               },
+               "objectType": {
+                 "id": {
+                   "name": "O",
+                   "optional": false,
+                   "type": "Identifier",
+                   "typeAnnotation": null,
+                 },
+                 "type": "GenericTypeAnnotation",
+                 "typeArguments": null,
+               },
+               "optional": true,
+               "type": "OptionalIndexedAccessType",
+             },
+             "type": "TypeAlias",
+             "typeParameters": null,
+           },
+         ],
+         "type": "Program",
+       }
       `);
       expectEspreeAlignment(testCase);
     });

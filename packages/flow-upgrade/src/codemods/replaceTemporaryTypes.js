@@ -29,7 +29,7 @@ export default codemod({
         if (
           id.type === 'Identifier' &&
           id.name === '$TEMPORARY$object' &&
-          node.typeParameters != null
+          node.typeArguments != null
         ) {
           context.modifyNodeInPlace(node, {
             id: t.Identifier({
@@ -40,7 +40,7 @@ export default codemod({
         if (
           id.type === 'Identifier' &&
           id.name === '$TEMPORARY$array' &&
-          node.typeParameters != null
+          node.typeArguments != null
         ) {
           context.modifyNodeInPlace(node, {
             id: t.Identifier({

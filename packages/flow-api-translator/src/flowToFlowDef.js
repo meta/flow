@@ -1391,7 +1391,7 @@ function convertSuperClassHelper(
   return [
     t.InterfaceExtends({
       id: detachedId,
-      typeParameters: resultTypeParams,
+      typeArguments: resultTypeParams,
     }),
     [...typeParamsDeps, ...superDeps],
   ];

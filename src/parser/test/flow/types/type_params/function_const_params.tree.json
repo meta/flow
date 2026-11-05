@@ -230,7 +230,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             }
           }
         ]
@@ -291,7 +291,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "const":true,
             "variance":null,
@@ -387,7 +387,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "const":true,
             "variance":null,

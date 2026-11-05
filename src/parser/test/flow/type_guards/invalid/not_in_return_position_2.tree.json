@@ -51,7 +51,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "optional":false
           },

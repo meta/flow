@@ -89,7 +89,7 @@
                         "typeAnnotation":null,
                         "optional":false
                       },
-                      "typeParameters":null
+                      "typeArguments":null
                     },
                     "sourceType":{
                       "type":"KeyofTypeAnnotation",
@@ -107,7 +107,7 @@
                           "typeAnnotation":null,
                           "optional":false
                         },
-                        "typeParameters":null
+                        "typeArguments":null
                       }
                     },
                     "nameType":null,

@@ -13,6 +13,7 @@
 import type {ESNode, Program, Comment} from 'flow-estree';
 import type {VisitorKeysType} from '../traverse/getVisitorKeys';
 import {SimpleTransform} from '../transform/SimpleTransform';
+import {SimpleTraverser} from '../traverse/SimpleTraverser';
 
 // https://github.com/prettier/prettier/blob/d962466a828f8ef51435e3e8840178d90b7ec6cd/src/language-js/parse/postprocess/index.js#L161-L182
 function transformChainExpression(
@@ -125,6 +126,27 @@ export default function mutate(
       }
 
       return node;
+    },
+    visitorKeys,
+  });
+
+  SimpleTraverser.traverse(rootNode, {
+    enter() {},
+    leave(node) {
+      switch (node.type) {
+        case 'GenericTypeAnnotation':
+        case 'InterfaceExtends':
+        case 'ClassImplements':
+          if (!Object.prototype.hasOwnProperty.call(node, 'typeArguments')) {
+            break;
+          }
+          // $FlowExpectedError[prop-missing] Prettier's private AST field.
+          // $FlowExpectedError[cannot-write]
+          node.typeParameters = node.typeArguments;
+          // $FlowExpectedError[cannot-write]
+          delete node.typeArguments;
+          break;
+      }
     },
     visitorKeys,
   });

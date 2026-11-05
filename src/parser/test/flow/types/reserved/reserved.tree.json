@@ -25,7 +25,7 @@
                 "loc":{"end":{"column":14,"line":1},"source":null,"start":{"column":7,"line":1}},
                 "range":[7,14],
                 "type":"GenericTypeAnnotation",
-                "typeParameters":null
+                "typeArguments":null
               }
             }
           },

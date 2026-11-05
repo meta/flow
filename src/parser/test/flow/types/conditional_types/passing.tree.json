@@ -583,7 +583,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "extendsType":{
           "type":"GenericTypeAnnotation",
@@ -597,7 +597,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":{
+          "typeArguments":{
             "type":"TypeParameterInstantiation",
             "loc":{"source":null,"start":{"line":14,"column":38},"end":{"line":14,"column":47}},
             "range":[579,588],
@@ -633,7 +633,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "falseType":{
           "type":"EmptyTypeAnnotation",

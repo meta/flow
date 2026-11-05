@@ -233,7 +233,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":{
+          "typeArguments":{
             "type":"TypeParameterInstantiation",
             "leadingComments":[
               {
@@ -258,7 +258,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             ]
           }
@@ -364,7 +364,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           }
         ]
       },
@@ -582,7 +582,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           }
         ],
         "decorators":[]
@@ -760,7 +760,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           }
         ]
       },
@@ -785,7 +785,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":{
+          "typeArguments":{
             "type":"TypeParameterInstantiation",
             "trailingComments":[
               {
@@ -818,7 +818,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             ]
           }
@@ -961,7 +961,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         }
       ],
       "decorators":[]
@@ -1053,7 +1053,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         }
       ],
       "decorators":[]

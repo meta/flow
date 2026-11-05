@@ -57,7 +57,7 @@ function createSimpleGenericTypeAnnotation(
       range: nodeForLoc.range,
       parent: EMPTY_PARENT,
     },
-    typeParameters: null,
+    typeArguments: null,
     loc: nodeForLoc.loc,
     range: nodeForLoc.range,
     parent: nodeForLoc.parent,

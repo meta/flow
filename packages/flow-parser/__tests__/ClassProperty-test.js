@@ -186,7 +186,7 @@ describe('PropertyDefinition', () => {
                            "typeAnnotation": null,
                          },
                          "type": "GenericTypeAnnotation",
-                         "typeParameters": null,
+                         "typeArguments": null,
                        },
                      },
                      "value": {

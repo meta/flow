@@ -28,7 +28,7 @@
           "typeAnnotation":null,
           "optional":false
         },
-        "typeParameters":{
+        "typeArguments":{
           "type":"TypeParameterInstantiation",
           "loc":{"source":null,"start":{"line":2,"column":16},"end":{"line":2,"column":32}},
           "range":[62,78],

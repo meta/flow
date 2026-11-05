@@ -52,7 +52,7 @@ describe('Super type arguments', () => {
                    "typeAnnotation": null,
                  },
                  "type": "GenericTypeAnnotation",
-                 "typeParameters": null,
+                 "typeArguments": null,
                },
              ],
              "type": "TypeParameterInstantiation",

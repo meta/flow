@@ -185,7 +185,7 @@
               "optional":false
             }
           },
-          "typeParameters":null
+          "typeArguments":null
         }
       }
     },

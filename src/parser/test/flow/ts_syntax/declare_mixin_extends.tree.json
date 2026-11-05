@@ -43,7 +43,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           },
           "argument":{
             "type":"InterfaceExtends",
@@ -57,7 +57,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           }
         }
       ],
@@ -104,7 +104,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           },
           "argument":{
             "type":"DeclareClassExtendsCall",
@@ -122,7 +122,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "argument":{
               "type":"InterfaceExtends",
@@ -136,7 +136,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             }
           }
         }
@@ -197,7 +197,7 @@
                 "optional":false
               }
             },
-            "typeParameters":null
+            "typeArguments":null
           },
           "argument":{
             "type":"InterfaceExtends",
@@ -224,7 +224,7 @@
                 "optional":false
               }
             },
-            "typeParameters":null
+            "typeArguments":null
           }
         }
       ],

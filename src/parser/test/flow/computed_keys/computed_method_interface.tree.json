@@ -119,7 +119,7 @@
                   24
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "this": null,
               "type": "FunctionTypeAnnotation",
@@ -293,7 +293,7 @@
                   50
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "this": null,
               "type": "FunctionTypeAnnotation",
@@ -422,7 +422,7 @@
                   61
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "this": null,
               "type": "FunctionTypeAnnotation",
@@ -596,7 +596,7 @@
                   89
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "this": null,
               "type": "FunctionTypeAnnotation",
@@ -804,7 +804,7 @@
                       119
                     ],
                     "type": "GenericTypeAnnotation",
-                    "typeParameters": null
+                    "typeArguments": null
                   }
                 }
               ],
@@ -851,7 +851,7 @@
                   123
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "this": null,
               "type": "FunctionTypeAnnotation",
@@ -1028,7 +1028,7 @@
                 163
               ],
               "type": "GenericTypeAnnotation",
-              "typeParameters": null
+              "typeArguments": null
             },
             "variance": null
           }
@@ -1147,7 +1147,7 @@
                   150
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "this": null,
               "type": "FunctionTypeAnnotation",

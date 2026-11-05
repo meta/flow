@@ -637,7 +637,7 @@
                       124
                     ],
                     "type": "GenericTypeAnnotation",
-                    "typeParameters": null
+                    "typeArguments": null
                   }
                 }
               ],
@@ -684,7 +684,7 @@
                   128
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "this": null,
               "type": "FunctionTypeAnnotation",

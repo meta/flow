@@ -216,7 +216,7 @@
                               46
                             ],
                             "type": "GenericTypeAnnotation",
-                            "typeParameters": null
+                            "typeArguments": null
                           }
                         ],
                         "inexact": false,

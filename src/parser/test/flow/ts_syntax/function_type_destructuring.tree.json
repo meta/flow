@@ -287,7 +287,7 @@
             66
           ],
           "type": "GenericTypeAnnotation",
-          "typeParameters": null
+          "typeArguments": null
         },
         "this": null,
         "type": "FunctionTypeAnnotation",
@@ -808,7 +808,7 @@
                   163
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               }
             }
           }
@@ -856,7 +856,7 @@
             169
           ],
           "type": "GenericTypeAnnotation",
-          "typeParameters": null
+          "typeArguments": null
         },
         "this": null,
         "type": "FunctionTypeAnnotation",
@@ -992,7 +992,7 @@
                 189
               ],
               "type": "GenericTypeAnnotation",
-              "typeParameters": null
+              "typeArguments": null
             }
           },
           {
@@ -1134,7 +1134,7 @@
                   197
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               }
             }
           },
@@ -1234,7 +1234,7 @@
                   205
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               }
             }
           }
@@ -1282,7 +1282,7 @@
             211
           ],
           "type": "GenericTypeAnnotation",
-          "typeParameters": null
+          "typeArguments": null
         },
         "this": null,
         "type": "FunctionTypeAnnotation",
@@ -1462,7 +1462,7 @@
                 243
               ],
               "type": "GenericTypeAnnotation",
-              "typeParameters": null
+              "typeArguments": null
             }
           }
         },
@@ -1504,7 +1504,7 @@
             249
           ],
           "type": "GenericTypeAnnotation",
-          "typeParameters": null
+          "typeArguments": null
         },
         "this": null,
         "type": "FunctionTypeAnnotation",
@@ -1706,7 +1706,7 @@
                 279
               ],
               "type": "GenericTypeAnnotation",
-              "typeParameters": null
+              "typeArguments": null
             }
           }
         },
@@ -1748,7 +1748,7 @@
             285
           ],
           "type": "GenericTypeAnnotation",
-          "typeParameters": null
+          "typeArguments": null
         },
         "this": null,
         "type": "FunctionTypeAnnotation",
@@ -2009,7 +2009,7 @@
                         316
                       ],
                       "type": "GenericTypeAnnotation",
-                      "typeParameters": null
+                      "typeArguments": null
                     },
                     "variance": null
                   }
@@ -2066,7 +2066,7 @@
             323
           ],
           "type": "GenericTypeAnnotation",
-          "typeParameters": null
+          "typeArguments": null
         },
         "this": null,
         "type": "FunctionTypeAnnotation",
@@ -2306,7 +2306,7 @@
                   349
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               }
             }
           }
@@ -2354,7 +2354,7 @@
             355
           ],
           "type": "GenericTypeAnnotation",
-          "typeParameters": null
+          "typeArguments": null
         },
         "this": null,
         "type": "FunctionTypeAnnotation",
@@ -2509,7 +2509,7 @@
                   386
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               }
             }
           }
@@ -2557,7 +2557,7 @@
             392
           ],
           "type": "GenericTypeAnnotation",
-          "typeParameters": null
+          "typeArguments": null
         },
         "this": null,
         "type": "FunctionTypeAnnotation",

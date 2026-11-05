@@ -179,7 +179,7 @@ function createPropsTypeAnnotation(
         typeAnnotation: null,
         ...createParamsTypeLoc(),
       },
-      typeParameters: {
+      typeArguments: {
         type: 'TypeParameterInstantiation',
         params: [propTypeObj],
         ...createParamsTypeLoc(),
@@ -582,7 +582,7 @@ function mapComponentDeclaration(
         },
         ...createRendersTypeLoc(),
       },
-      typeParameters: null,
+      typeArguments: null,
       ...createRendersTypeLoc(),
     },
     ...createRendersTypeLoc(),

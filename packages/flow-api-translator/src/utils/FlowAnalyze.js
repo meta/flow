@@ -31,7 +31,7 @@ export function analyzeFunctionReturn(func: AFunction): TypeAnnotation {
     typeAnnotation: func.async
       ? t.GenericTypeAnnotation({
           id: t.Identifier({name: 'Promise'}),
-          typeParameters: t.TypeParameterInstantiation({params: [voidType]}),
+          typeArguments: t.TypeParameterInstantiation({params: [voidType]}),
         })
       : voidType,
   });

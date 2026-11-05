@@ -42,6 +42,24 @@ test('pattern visitor accepts sparse array expressions', () => {
   expect(array.elements[1]).toBeNull(); // OK
 });
 
+test.each([
+  ['type Alias = Box<Outer<Inner>>;', ['Box', 'Outer', 'Inner']],
+  ['interface I extends Base<Outer<Inner>> {}', ['Base', 'Outer', 'Inner']],
+  ['class C implements I<Outer<Inner>> {}', ['I', 'Outer', 'Inner']],
+  [
+    'declare class C extends Base<Outer<Inner>> implements I<Outer<Inner>> {}',
+    ['Base', 'Outer', 'Inner', 'I', 'Outer', 'Inner'],
+  ],
+])('nested type arguments are type references: %s', (code, expected) => {
+  const {scopeManager} = parseForESLint(code, {flow: 'all'});
+  const references = scopeManager.scopes.flatMap(scope =>
+    scope.references.filter(reference => reference.isTypeReference),
+  );
+  expect(references.map(reference => reference.identifier.name)).toEqual(
+    expected,
+  );
+});
+
 describe('Source type option', () => {
   test('script', () => {
     const {ast, scopeManager} = parseForESLint('Foo', {sourceType: 'script'});

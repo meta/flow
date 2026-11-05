@@ -32,7 +32,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "indexType":{
           "type":"StringLiteralTypeAnnotation",
@@ -72,7 +72,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":{
+          "typeArguments":{
             "type":"TypeParameterInstantiation",
             "loc":{"source":null,"start":{"line":3,"column":14},"end":{"line":3,"column":22}},
             "range":[34,42],
@@ -129,7 +129,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "indexType":{
               "type":"StringLiteralTypeAnnotation",
@@ -151,7 +151,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           }
         },
         "indexType":{
@@ -196,7 +196,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           },
           "indexType":{
             "type":"StringLiteralTypeAnnotation",
@@ -248,7 +248,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           },
           "indexType":{
             "type":"StringLiteralTypeAnnotation",

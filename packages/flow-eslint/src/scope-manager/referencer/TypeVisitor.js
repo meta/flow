@@ -384,7 +384,7 @@ class TypeVisitor extends Visitor {
 
   GenericTypeAnnotation(node: GenericTypeAnnotation): void {
     this.visit(node.id);
-    this.visit(node.typeParameters);
+    this.visit(node.typeArguments);
   }
 
   Identifier(node: Identifier): void {

@@ -17,7 +17,7 @@ export default codemod({
   describe: 'Renames the `$Partial` type utility to `Partial`.',
   transform: context => {
     return {
-      'GenericTypeAnnotation[id.name="$Partial"][typeParameters.params.length > 0]'(
+      'GenericTypeAnnotation[id.name="$Partial"][typeArguments.params.length > 0]'(
         node,
       ) {
         context.modifyNodeInPlace(node.id, {

@@ -71,6 +71,9 @@ const fixtures = {
   'readonly and extends bounds':
     'type User={readonly name:string,readonly age:number}; function get<K extends keyof User>(user:User,key:K):User[K]{return user[key]}',
   'colon bounds': 'function f<T: number>(x:T):T { return x; }',
+  'nested type arguments': 'type Alias<T> = NS.Box<Map<string, Array<T>>>;',
+  'heritage type arguments':
+    'interface I<T> extends NS.Base<Array<T>> {} class C<T> implements I<T> {}',
   'optional chaining and casts':
     'const x = foo?.bar?.(); const y = (x: ?number);',
   'comments and JSX':
@@ -116,11 +119,17 @@ test('preserves hashbangs, including comment-only scripts', async () => {
 // The adapter invokes the selected package with Flow enabled even without @flow.
 test('uses flow-parser explicitly and rejects invalid programs', async () => {
   let options;
+  let mutations = 0;
   const {formatCode} = loadModule('formatCode.js', {
     'flow-parser': {
+      ...flowParser,
       parse(code, opts) {
         options = opts;
         return flowParser.parse(code, opts);
+      },
+      mutateESTreeASTForPrettier(ast) {
+        mutations++;
+        flowParser.mutateESTreeASTForPrettier(ast);
       },
     },
   });
@@ -133,7 +142,23 @@ test('uses flow-parser explicitly and rejects invalid programs', async () => {
     babel: false,
     throwOnParseErrors: true,
   }); // OK
+  assert.equal(mutations, 1); // OK
   await assert.rejects(formatCode('const x = ;', 0), SyntaxError); // OK
+});
+
+test('preserves type arguments and the cursor inside nested references', async () => {
+  const source =
+    'type Alias<T>=NS.Box<Map<string,Array<T>>>; interface I<T>extends Base<T>{} class C<T>implements I<T>{}';
+  const result = await formatCode(source, source.indexOf('string'));
+  assert.deepEqual(
+    semanticAST(flowParser.parse(result.formatted, {flow: 'all'})),
+    semanticAST(flowParser.parse(source, {flow: 'all'})),
+  ); // OK
+  assert.match(result.formatted, /NS\.Box<Map<string,\s*Array<T>>>/); // OK
+  assert.equal(
+    result.formatted.slice(result.cursorOffset, result.cursorOffset + 6),
+    'string',
+  ); // OK
 });
 
 // Cursor offsets use UTF-16 and preserve the editor's CRLF line endings.

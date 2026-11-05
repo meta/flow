@@ -76,7 +76,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "value":{
               "type":"GenericTypeAnnotation",
@@ -90,7 +90,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "static":false,
             "variance":null

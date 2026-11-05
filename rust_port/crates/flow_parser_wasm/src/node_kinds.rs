@@ -999,7 +999,7 @@ define_nodes! {
     },
     ClassImplements = 86 {
         id: Node,
-        typeParameters: Node,
+        typeArguments: Node,
     },
     MethodDefinition = 87 {
         key: Node,
@@ -1316,11 +1316,9 @@ define_nodes! {
         from Type::Undefined { loc, .. } {},
     GenericTypeAnnotation = 139 {
         id: Node,
-        typeParameters: Node,
-    } from Type::Generic { loc, inner } {
-            self.serialize_generic_type_identifier(&inner.id),
-            self.serialize_type_args_opt(&inner.targs),
-        },
+        typeArguments: Node,
+    } from Type::Generic { loc, inner }
+        {=> self.serialize_generic_type(loc, inner)},
     QualifiedTypeIdentifier = 140 {
         qualification: Node,
         id: Node,
@@ -1437,7 +1435,7 @@ define_nodes! {
         },
     InterfaceExtends = 158 {
         id: Node,
-        typeParameters: Node,
+        typeArguments: Node,
     },
     InterfaceTypeAnnotation = 159 {
         extends: NodeList,
@@ -2070,6 +2068,18 @@ define_nodes! {
     BabelFile = 278 as "File" {
         program: Node,
         comments: CommentList,
+    },
+    BabelGenericTypeAnnotation = 279 as "GenericTypeAnnotation" {
+        id: Node,
+        typeParameters: Node,
+    },
+    BabelInterfaceExtends = 280 as "InterfaceExtends" {
+        id: Node,
+        typeParameters: Node,
+    },
+    BabelClassImplements = 281 as "ClassImplements" {
+        id: Node,
+        typeParameters: Node,
     },
 }
 

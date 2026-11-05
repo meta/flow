@@ -51,7 +51,7 @@ exports[`ConditionalTypeAnnotation Basic ESTree 1`] = `
             "typeAnnotation": null,
           },
           "type": "GenericTypeAnnotation",
-          "typeParameters": null,
+          "typeArguments": null,
         },
         "extendsType": {
           "type": "UnionTypeAnnotation",
@@ -72,7 +72,7 @@ exports[`ConditionalTypeAnnotation Basic ESTree 1`] = `
             "typeAnnotation": null,
           },
           "type": "GenericTypeAnnotation",
-          "typeParameters": {
+          "typeArguments": {
             "params": [
               {
                 "indexType": {
@@ -88,7 +88,7 @@ exports[`ConditionalTypeAnnotation Basic ESTree 1`] = `
                     "typeAnnotation": null,
                   },
                   "type": "GenericTypeAnnotation",
-                  "typeParameters": null,
+                  "typeArguments": null,
                 },
                 "optional": true,
                 "type": "OptionalIndexedAccessType",

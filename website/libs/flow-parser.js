@@ -12,4 +12,9 @@ declare module 'flow-parser' {
     code: string,
     options: {flow: 'all', babel: false, throwOnParseErrors: true},
   ): {interpreter?: any, comments: Array<any>, ...};
+  declare export function mutateESTreeASTForPrettier(ast: {
+    interpreter?: any,
+    comments: Array<any>,
+    ...
+  }): void;
 }

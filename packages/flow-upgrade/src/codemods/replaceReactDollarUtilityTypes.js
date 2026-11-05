@@ -54,7 +54,7 @@ export default codemod({
             }),
             qualification: t.Identifier({name: 'React'}),
           }),
-          typeParameters: node.typeParameters,
+          typeArguments: node.typeArguments,
         });
         context.replaceNode(node, newNode);
       },

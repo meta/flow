@@ -73,7 +73,7 @@
             "optional":false
           }
         },
-        "typeParameters":null
+        "typeArguments":null
       }
     },
     {
@@ -142,7 +142,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "const":false,
             "variance":{
@@ -187,7 +187,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             }
           }
         ]
@@ -204,7 +204,7 @@
           "typeAnnotation":null,
           "optional":false
         },
-        "typeParameters":null
+        "typeArguments":null
       }
     },
     {
@@ -260,7 +260,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         }
       }
     },
@@ -377,7 +377,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           }
         ],
         "inexact":false
@@ -436,7 +436,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         }
       }
     },
@@ -696,7 +696,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           },
           {
             "type":"GenericTypeAnnotation",
@@ -726,7 +726,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           }
         ]
       }
@@ -785,7 +785,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           },
           {
             "type":"GenericTypeAnnotation",
@@ -815,7 +815,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           }
         ]
       }
@@ -1105,7 +1105,7 @@
           "typeAnnotation":null,
           "optional":false
         },
-        "typeParameters":{
+        "typeArguments":{
           "type":"TypeParameterInstantiation",
           "trailingComments":[
             {
@@ -1138,7 +1138,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             }
           ]
         }
@@ -1177,7 +1177,7 @@
           "typeAnnotation":null,
           "optional":false
         },
-        "typeParameters":{
+        "typeArguments":{
           "type":"TypeParameterInstantiation",
           "leadingComments":[
             {
@@ -1202,7 +1202,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             }
           ]
         }
@@ -1233,7 +1233,7 @@
           "typeAnnotation":null,
           "optional":false
         },
-        "typeParameters":{
+        "typeArguments":{
           "type":"TypeParameterInstantiation",
           "trailingComments":[
             {
@@ -1274,7 +1274,7 @@
           "typeAnnotation":null,
           "optional":false
         },
-        "typeParameters":{
+        "typeArguments":{
           "type":"TypeParameterInstantiation",
           "trailingComments":[
             {
@@ -1299,7 +1299,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             }
           ]
         }

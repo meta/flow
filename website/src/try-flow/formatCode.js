@@ -7,7 +7,7 @@
  * @format
  */
 
-import {parse} from 'flow-parser';
+import {mutateESTreeASTForPrettier, parse} from 'flow-parser';
 import {formatWithCursor} from 'prettier/standalone';
 import * as estree from 'prettier/plugins/estree';
 
@@ -27,6 +27,7 @@ const flowPlugin = {
           babel: false,
           throwOnParseErrors: true,
         });
+        mutateESTreeASTForPrettier(ast);
         if (ast.interpreter != null) {
           ast.comments.unshift(ast.interpreter);
           delete ast.interpreter;

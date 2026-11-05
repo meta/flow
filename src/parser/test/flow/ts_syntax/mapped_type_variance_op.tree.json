@@ -131,7 +131,7 @@
                   41
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "loc": {
                 "end": {
@@ -182,7 +182,7 @@
                   39
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "range": [
                 38,
@@ -233,7 +233,7 @@
                   35
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "loc": {
                 "end": {
@@ -415,7 +415,7 @@
                   87
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "loc": {
                 "end": {
@@ -466,7 +466,7 @@
                   85
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "range": [
                 84,
@@ -517,7 +517,7 @@
                   81
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "loc": {
                 "end": {
@@ -699,7 +699,7 @@
                   135
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "loc": {
                 "end": {
@@ -750,7 +750,7 @@
                   133
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "range": [
                 132,
@@ -801,7 +801,7 @@
                   127
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "loc": {
                 "end": {
@@ -983,7 +983,7 @@
                   180
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "loc": {
                 "end": {
@@ -1034,7 +1034,7 @@
                   178
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "range": [
                 177,
@@ -1085,7 +1085,7 @@
                   174
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "loc": {
                 "end": {
@@ -1267,7 +1267,7 @@
                   243
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "loc": {
                 "end": {
@@ -1318,7 +1318,7 @@
                   241
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "range": [
                 240,
@@ -1369,7 +1369,7 @@
                   237
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "loc": {
                 "end": {

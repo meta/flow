@@ -31,7 +31,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         }
       },
       "directive":null

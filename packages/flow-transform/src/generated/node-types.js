@@ -376,8 +376,8 @@ export type ClassExpressionProps = {
 
 export type ClassImplementsProps = {
   readonly id: MaybeDetachedNode<ClassImplementsType['id']>,
-  readonly typeParameters?: ?MaybeDetachedNode<
-    ClassImplementsType['typeParameters'],
+  readonly typeArguments?: ?MaybeDetachedNode<
+    ClassImplementsType['typeArguments'],
   >,
 };
 
@@ -735,8 +735,8 @@ export type FunctionTypeParamProps = {
 
 export type GenericTypeAnnotationProps = {
   readonly id: MaybeDetachedNode<GenericTypeAnnotationType['id']>,
-  readonly typeParameters?: ?MaybeDetachedNode<
-    GenericTypeAnnotationType['typeParameters'],
+  readonly typeArguments?: ?MaybeDetachedNode<
+    GenericTypeAnnotationType['typeArguments'],
   >,
 };
 
@@ -846,8 +846,8 @@ export type InterfaceDeclarationProps = {
 
 export type InterfaceExtendsProps = {
   readonly id: MaybeDetachedNode<InterfaceExtendsType['id']>,
-  readonly typeParameters?: ?MaybeDetachedNode<
-    InterfaceExtendsType['typeParameters'],
+  readonly typeArguments?: ?MaybeDetachedNode<
+    InterfaceExtendsType['typeArguments'],
   >,
 };
 
@@ -1888,7 +1888,7 @@ export function ClassImplements(props: {
   const node = detachedProps<ClassImplementsType>(props.parent as $FlowFixMe, {
     type: 'ClassImplements',
     id: asDetachedNodeForCodeGen(props.id),
-    typeParameters: asDetachedNodeForCodeGen(props.typeParameters),
+    typeArguments: asDetachedNodeForCodeGen(props.typeArguments),
   });
   setParentPointersInDirectChildren(node as $FlowFixMe);
   return node;
@@ -2621,7 +2621,7 @@ export function GenericTypeAnnotation(props: {
     {
       type: 'GenericTypeAnnotation',
       id: asDetachedNodeForCodeGen(props.id),
-      typeParameters: asDetachedNodeForCodeGen(props.typeParameters),
+      typeArguments: asDetachedNodeForCodeGen(props.typeArguments),
     },
   );
   setParentPointersInDirectChildren(node as $FlowFixMe);
@@ -2863,7 +2863,7 @@ export function InterfaceExtends(props: {
   const node = detachedProps<InterfaceExtendsType>(props.parent as $FlowFixMe, {
     type: 'InterfaceExtends',
     id: asDetachedNodeForCodeGen(props.id),
-    typeParameters: asDetachedNodeForCodeGen(props.typeParameters),
+    typeArguments: asDetachedNodeForCodeGen(props.typeArguments),
   });
   setParentPointersInDirectChildren(node as $FlowFixMe);
   return node;

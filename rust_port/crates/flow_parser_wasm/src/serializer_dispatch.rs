@@ -533,9 +533,7 @@ impl<'a> Serializer<'a> {
                 self.write_node_header(NodeKind::UndefinedTypeAnnotation, loc);
             }
             TypeInner::Generic { loc, inner } => {
-                self.write_node_header(NodeKind::GenericTypeAnnotation, loc);
-                self.serialize_generic_type_identifier(&inner.id);
-                self.serialize_type_args_opt(&inner.targs);
+                self.serialize_generic_type(loc, inner);
             }
             TypeInner::Typeof { loc, inner } => {
                 self.write_node_header(NodeKind::TypeofTypeAnnotation, loc);

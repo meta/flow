@@ -37,7 +37,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             }
           },
           "optional":false
@@ -79,7 +79,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         }
       },
       "typeParameters":{

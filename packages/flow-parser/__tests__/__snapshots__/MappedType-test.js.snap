@@ -57,7 +57,7 @@ exports[`MappedType Basic ESTree 1`] = `
                   "typeAnnotation": null,
                 },
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null,
+                "typeArguments": null,
               },
               "objectType": {
                 "id": {
@@ -67,7 +67,7 @@ exports[`MappedType Basic ESTree 1`] = `
                   "typeAnnotation": null,
                 },
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null,
+                "typeArguments": null,
               },
               "type": "IndexedAccessType",
             },
@@ -80,7 +80,7 @@ exports[`MappedType Basic ESTree 1`] = `
                   "typeAnnotation": null,
                 },
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null,
+                "typeArguments": null,
               },
               "type": "KeyofTypeAnnotation",
             },
@@ -156,7 +156,7 @@ exports[`MappedType Union ESTree 1`] = `
                   "typeAnnotation": null,
                 },
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null,
+                "typeArguments": null,
               },
               "objectType": {
                 "id": {
@@ -166,7 +166,7 @@ exports[`MappedType Union ESTree 1`] = `
                   "typeAnnotation": null,
                 },
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null,
+                "typeArguments": null,
               },
               "type": "IndexedAccessType",
             },
@@ -182,7 +182,7 @@ exports[`MappedType Union ESTree 1`] = `
                       "typeAnnotation": null,
                     },
                     "type": "GenericTypeAnnotation",
-                    "typeParameters": null,
+                    "typeArguments": null,
                   },
                   {
                     "id": {
@@ -192,7 +192,7 @@ exports[`MappedType Union ESTree 1`] = `
                       "typeAnnotation": null,
                     },
                     "type": "GenericTypeAnnotation",
-                    "typeParameters": null,
+                    "typeArguments": null,
                   },
                 ],
               },

@@ -649,7 +649,7 @@
             143
           ],
           "type": "GenericTypeAnnotation",
-          "typeParameters": null
+          "typeArguments": null
         },
         "falseType": {
           "loc": {

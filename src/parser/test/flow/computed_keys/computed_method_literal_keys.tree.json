@@ -156,7 +156,7 @@
                   21
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "this": null,
               "type": "FunctionTypeAnnotation",
@@ -330,7 +330,7 @@
                   45
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "this": null,
               "type": "FunctionTypeAnnotation",
@@ -524,7 +524,7 @@
                   69
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "this": null,
               "type": "FunctionTypeAnnotation",
@@ -699,7 +699,7 @@
                   93
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "this": null,
               "type": "FunctionTypeAnnotation",
@@ -894,7 +894,7 @@
                   118
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "this": null,
               "type": "FunctionTypeAnnotation",
@@ -1068,7 +1068,7 @@
                   144
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "this": null,
               "type": "FunctionTypeAnnotation",
@@ -1242,7 +1242,7 @@
                   170
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "this": null,
               "type": "FunctionTypeAnnotation",

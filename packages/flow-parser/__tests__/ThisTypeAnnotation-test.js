@@ -40,82 +40,82 @@ describe('ThisTypeAnnotation', () => {
 
   test('ESTree', () => {
     expect(parseForSnapshot(testCase.code)).toMatchInlineSnapshot(`
-      {
-        "body": [
-          {
-            "id": {
-              "name": "t1",
-              "optional": false,
-              "type": "Identifier",
-              "typeAnnotation": null,
-            },
-            "right": {
-              "type": "ThisTypeAnnotation",
-            },
-            "type": "TypeAlias",
-            "typeParameters": null,
-          },
-          {
-            "id": {
-              "name": "t3",
-              "optional": false,
-              "type": "Identifier",
-              "typeAnnotation": null,
-            },
-            "right": {
-              "id": {
-                "id": {
-                  "name": "this",
-                  "optional": false,
-                  "type": "Identifier",
-                  "typeAnnotation": null,
-                },
-                "qualification": {
-                  "name": "T",
-                  "optional": false,
-                  "type": "Identifier",
-                  "typeAnnotation": null,
-                },
-                "type": "QualifiedTypeIdentifier",
-              },
-              "type": "GenericTypeAnnotation",
-              "typeParameters": null,
-            },
-            "type": "TypeAlias",
-            "typeParameters": null,
-          },
-          {
-            "id": {
-              "name": "t4",
-              "optional": false,
-              "type": "Identifier",
-              "typeAnnotation": null,
-            },
-            "right": {
-              "id": {
-                "id": {
-                  "name": "T",
-                  "optional": false,
-                  "type": "Identifier",
-                  "typeAnnotation": null,
-                },
-                "qualification": {
-                  "name": "this",
-                  "optional": false,
-                  "type": "Identifier",
-                  "typeAnnotation": null,
-                },
-                "type": "QualifiedTypeIdentifier",
-              },
-              "type": "GenericTypeAnnotation",
-              "typeParameters": null,
-            },
-            "type": "TypeAlias",
-            "typeParameters": null,
-          },
-        ],
-        "type": "Program",
-      }
+     {
+       "body": [
+         {
+           "id": {
+             "name": "t1",
+             "optional": false,
+             "type": "Identifier",
+             "typeAnnotation": null,
+           },
+           "right": {
+             "type": "ThisTypeAnnotation",
+           },
+           "type": "TypeAlias",
+           "typeParameters": null,
+         },
+         {
+           "id": {
+             "name": "t3",
+             "optional": false,
+             "type": "Identifier",
+             "typeAnnotation": null,
+           },
+           "right": {
+             "id": {
+               "id": {
+                 "name": "this",
+                 "optional": false,
+                 "type": "Identifier",
+                 "typeAnnotation": null,
+               },
+               "qualification": {
+                 "name": "T",
+                 "optional": false,
+                 "type": "Identifier",
+                 "typeAnnotation": null,
+               },
+               "type": "QualifiedTypeIdentifier",
+             },
+             "type": "GenericTypeAnnotation",
+             "typeArguments": null,
+           },
+           "type": "TypeAlias",
+           "typeParameters": null,
+         },
+         {
+           "id": {
+             "name": "t4",
+             "optional": false,
+             "type": "Identifier",
+             "typeAnnotation": null,
+           },
+           "right": {
+             "id": {
+               "id": {
+                 "name": "T",
+                 "optional": false,
+                 "type": "Identifier",
+                 "typeAnnotation": null,
+               },
+               "qualification": {
+                 "name": "this",
+                 "optional": false,
+                 "type": "Identifier",
+                 "typeAnnotation": null,
+               },
+               "type": "QualifiedTypeIdentifier",
+             },
+             "type": "GenericTypeAnnotation",
+             "typeArguments": null,
+           },
+           "type": "TypeAlias",
+           "typeParameters": null,
+         },
+       ],
+       "type": "Program",
+     }
     `);
     expectEspreeAlignment(testCase);
   });
@@ -163,45 +163,45 @@ describe('ThisTypeAnnotation', () => {
 
     test('ESTree', () => {
       expect(parseForSnapshot(testCase.code)).toMatchInlineSnapshot(`
-        {
-          "body": [
-            {
-              "id": {
-                "name": "t2",
-                "optional": false,
-                "type": "Identifier",
-                "typeAnnotation": null,
-              },
-              "right": {
-                "id": {
-                  "name": "this",
-                  "optional": false,
-                  "type": "Identifier",
-                  "typeAnnotation": null,
-                },
-                "type": "GenericTypeAnnotation",
-                "typeParameters": {
-                  "params": [
-                    {
-                      "id": {
-                        "name": "T",
-                        "optional": false,
-                        "type": "Identifier",
-                        "typeAnnotation": null,
-                      },
-                      "type": "GenericTypeAnnotation",
-                      "typeParameters": null,
-                    },
-                  ],
-                  "type": "TypeParameterInstantiation",
-                },
-              },
-              "type": "TypeAlias",
-              "typeParameters": null,
-            },
-          ],
-          "type": "Program",
-        }
+       {
+         "body": [
+           {
+             "id": {
+               "name": "t2",
+               "optional": false,
+               "type": "Identifier",
+               "typeAnnotation": null,
+             },
+             "right": {
+               "id": {
+                 "name": "this",
+                 "optional": false,
+                 "type": "Identifier",
+                 "typeAnnotation": null,
+               },
+               "type": "GenericTypeAnnotation",
+               "typeArguments": {
+                 "params": [
+                   {
+                     "id": {
+                       "name": "T",
+                       "optional": false,
+                       "type": "Identifier",
+                       "typeAnnotation": null,
+                     },
+                     "type": "GenericTypeAnnotation",
+                     "typeArguments": null,
+                   },
+                 ],
+                 "type": "TypeParameterInstantiation",
+               },
+             },
+             "type": "TypeAlias",
+             "typeParameters": null,
+           },
+         ],
+         "type": "Program",
+       }
       `);
       expectEspreeAlignment(testCase);
     });

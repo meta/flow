@@ -733,6 +733,30 @@ mod tests {
     use crate::serializer::Serializer;
 
     #[test]
+    fn type_use_schemas_distinguish_estree_and_babel_fields() {
+        for (estree, babel) in [
+            (
+                NodeKind::GenericTypeAnnotation,
+                NodeKind::BabelGenericTypeAnnotation,
+            ),
+            (NodeKind::InterfaceExtends, NodeKind::BabelInterfaceExtends),
+            (NodeKind::ClassImplements, NodeKind::BabelClassImplements),
+        ] {
+            let estree = &SCHEMA[estree as usize];
+            let babel = &SCHEMA[babel as usize];
+            assert_eq!(estree.estree_type, babel.estree_type);
+            assert_eq!(
+                estree.properties,
+                &[("id", PropType::Node), ("typeArguments", PropType::Node)]
+            );
+            assert_eq!(
+                babel.properties,
+                &[("id", PropType::Node), ("typeParameters", PropType::Node)]
+            );
+        }
+    }
+
+    #[test]
     fn default_interface_exports_do_not_select_module_source_type() {
         // A type-only default export leaves module detection in script mode.
         let (program, errors) = flow_parser::parse_program_without_file(

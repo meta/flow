@@ -34,7 +34,7 @@
           "typeAnnotation":null,
           "optional":false
         },
-        "typeParameters":null
+        "typeArguments":null
       },
       "supertype":{
         "type":"GenericTypeAnnotation",
@@ -48,7 +48,7 @@
           "typeAnnotation":null,
           "optional":false
         },
-        "typeParameters":null
+        "typeArguments":null
       }
     }
   ],

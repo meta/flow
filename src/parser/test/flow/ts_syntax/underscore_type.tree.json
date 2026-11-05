@@ -48,7 +48,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "extendsType":{
           "type":"GenericTypeAnnotation",
@@ -62,7 +62,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":{
+          "typeArguments":{
             "type":"TypeParameterInstantiation",
             "loc":{"source":null,"start":{"line":1,"column":38},"end":{"line":1,"column":47}},
             "range":[38,47],
@@ -136,7 +136,7 @@
             "optional":false
           }
         },
-        "typeParameters":null
+        "typeArguments":null
       }
     },
     {
@@ -182,7 +182,7 @@
                     "optional":false
                   }
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "optional":false

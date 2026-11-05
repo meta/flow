@@ -157,7 +157,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             {
               "type":"GenericTypeAnnotation",
@@ -171,7 +171,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             }
           ],
           "inexact":false
@@ -209,7 +209,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               },
               "const":false,
               "variance":null,
@@ -225,7 +225,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             }
           ]

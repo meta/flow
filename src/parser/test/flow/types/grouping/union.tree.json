@@ -33,7 +33,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           },
           {
             "type":"GenericTypeAnnotation",
@@ -47,7 +47,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           }
         ]
       }

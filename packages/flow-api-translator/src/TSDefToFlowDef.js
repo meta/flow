@@ -238,7 +238,7 @@ const getTransforms = (originalCode: string, opts: TranslationOptions) => {
         constructFlowNode<FlowESTree.InterfaceExtends>({
           type: 'InterfaceExtends',
           id,
-          typeParameters:
+          typeArguments:
             Transform.TSTypeParameterInstantiationOpt(superTypeArguments),
         }),
       ];
@@ -256,7 +256,7 @@ const getTransforms = (originalCode: string, opts: TranslationOptions) => {
       return constructFlowNode<FlowESTree.ClassImplements>({
         type: 'ClassImplements',
         id: Transform.Identifier(node.expression),
-        typeParameters: Transform.TSTypeParameterInstantiationOpt(
+        typeArguments: Transform.TSTypeParameterInstantiationOpt(
           node.typeArguments,
         ),
       });
@@ -1052,7 +1052,7 @@ const getTransforms = (originalCode: string, opts: TranslationOptions) => {
             optional: false,
             typeAnnotation: null,
           }),
-          typeParameters:
+          typeArguments:
             constructFlowNode<FlowESTree.TypeParameterInstantiation>({
               type: 'TypeParameterInstantiation',
               params: [Transform.TSTypeAnnotation(source)],
@@ -1206,7 +1206,7 @@ const getTransforms = (originalCode: string, opts: TranslationOptions) => {
           node.expression,
           'interface extends',
         ),
-        typeParameters: Transform.TSTypeParameterInstantiationOpt(
+        typeArguments: Transform.TSTypeParameterInstantiationOpt(
           node.typeArguments,
         ),
       });
@@ -1464,7 +1464,7 @@ const getTransforms = (originalCode: string, opts: TranslationOptions) => {
           typeAnnotation: null,
           optional: false,
         }),
-        typeParameters: null,
+        typeArguments: null,
       });
     }
 
@@ -1883,7 +1883,7 @@ const getTransforms = (originalCode: string, opts: TranslationOptions) => {
                   optional: false,
                   typeAnnotation: null,
                 }),
-                typeParameters:
+                typeArguments:
                   constructFlowNode<FlowESTree.TypeParameterInstantiation>({
                     type: 'TypeParameterInstantiation',
                     params: [Transform.TSTypeAnnotation(child.elementType)],
@@ -1898,7 +1898,7 @@ const getTransforms = (originalCode: string, opts: TranslationOptions) => {
                   optional: false,
                   typeAnnotation: null,
                 }),
-                typeParameters:
+                typeArguments:
                   constructFlowNode<FlowESTree.TypeParameterInstantiation>({
                     type: 'TypeParameterInstantiation',
                     params: [Transform.TSTypeAnnotation(child)],
@@ -2020,7 +2020,7 @@ const getTransforms = (originalCode: string, opts: TranslationOptions) => {
       return constructFlowNode<FlowESTree.GenericTypeAnnotation>({
         type: 'GenericTypeAnnotation',
         id: Transform.EntityNameToTypeIdentifier(node.typeName),
-        typeParameters: Transform.TSTypeParameterInstantiationOpt(
+        typeArguments: Transform.TSTypeParameterInstantiationOpt(
           node.typeArguments,
         ),
       });

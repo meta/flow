@@ -1610,7 +1610,7 @@
                   857
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "loc": {
                 "end": {
@@ -1661,7 +1661,7 @@
                   855
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "range": [
                 854,
@@ -1712,7 +1712,7 @@
                   851
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "loc": {
                 "end": {

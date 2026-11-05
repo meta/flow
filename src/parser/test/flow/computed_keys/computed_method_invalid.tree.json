@@ -156,7 +156,7 @@
                   26
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "this": null,
               "type": "FunctionTypeAnnotation",
@@ -330,7 +330,7 @@
                   52
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "this": null,
               "type": "FunctionTypeAnnotation",
@@ -504,7 +504,7 @@
                   85
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "this": null,
               "type": "FunctionTypeAnnotation",
@@ -678,7 +678,7 @@
                   120
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "this": null,
               "type": "FunctionTypeAnnotation",

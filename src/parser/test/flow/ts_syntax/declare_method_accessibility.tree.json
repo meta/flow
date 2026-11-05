@@ -1665,7 +1665,7 @@
                         352
                       ],
                       "type": "GenericTypeAnnotation",
-                      "typeParameters": null
+                      "typeArguments": null
                     }
                   }
                 ],
@@ -1712,7 +1712,7 @@
                     356
                   ],
                   "type": "GenericTypeAnnotation",
-                  "typeParameters": null
+                  "typeArguments": null
                 },
                 "this": null,
                 "type": "FunctionTypeAnnotation",
@@ -1918,7 +1918,7 @@
                     411
                   ],
                   "type": "GenericTypeAnnotation",
-                  "typeParameters": {
+                  "typeArguments": {
                     "loc": {
                       "end": {
                         "column": 53,

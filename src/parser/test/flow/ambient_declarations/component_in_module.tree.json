@@ -160,7 +160,7 @@
                     "optional":false
                   }
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "typeParameters":null
@@ -319,7 +319,7 @@
                     "optional":false
                   }
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "typeParameters":null
@@ -372,7 +372,7 @@
                         "typeAnnotation":null,
                         "optional":false
                       },
-                      "typeParameters":{
+                      "typeArguments":{
                         "type":"TypeParameterInstantiation",
                         "loc":{"source":null,"start":{"line":6,"column":32},"end":{"line":6,"column":35}},
                         "range":[247,250],
@@ -389,7 +389,7 @@
                               "typeAnnotation":null,
                               "optional":false
                             },
-                            "typeParameters":null
+                            "typeArguments":null
                           }
                         ]
                       }
@@ -442,7 +442,7 @@
                               "typeAnnotation":null,
                               "optional":false
                             },
-                            "typeParameters":null
+                            "typeArguments":null
                           },
                           "optional":false
                         }
@@ -472,7 +472,7 @@
                             "optional":false
                           }
                         },
-                        "typeParameters":null
+                        "typeArguments":null
                       },
                       "rest":null,
                       "typeParameters":null,
@@ -514,7 +514,7 @@
                     "optional":false
                   }
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "typeParameters":{

@@ -78,7 +78,7 @@
             60
           ],
           "type": "GenericTypeAnnotation",
-          "typeParameters": null
+          "typeArguments": null
         }
       },
       "loc": {

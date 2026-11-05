@@ -770,7 +770,7 @@
           "typeAnnotation":null,
           "optional":false
         },
-        "typeParameters":null
+        "typeArguments":null
       }
     },
     {
@@ -814,7 +814,7 @@
           "typeAnnotation":null,
           "optional":false
         },
-        "typeParameters":null
+        "typeArguments":null
       }
     },
     {
@@ -871,7 +871,7 @@
             "optional":false
           }
         },
-        "typeParameters":null
+        "typeArguments":null
       }
     },
     {
@@ -907,7 +907,7 @@
           "typeAnnotation":null,
           "optional":false
         },
-        "typeParameters":{
+        "typeArguments":{
           "type":"TypeParameterInstantiation",
           "trailingComments":[
             {
@@ -932,7 +932,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             }
           ]
         }

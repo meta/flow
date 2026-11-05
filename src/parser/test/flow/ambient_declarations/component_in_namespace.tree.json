@@ -131,7 +131,7 @@
                     "optional":false
                   }
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "typeParameters":null
@@ -214,7 +214,7 @@
                     "optional":false
                   }
                 },
-                "typeParameters":{
+                "typeArguments":{
                   "type":"TypeParameterInstantiation",
                   "loc":{"source":null,"start":{"line":4,"column":64},"end":{"line":4,"column":69}},
                   "range":[173,178],
@@ -279,7 +279,7 @@
                         "typeAnnotation":null,
                         "optional":false
                       },
-                      "typeParameters":null
+                      "typeArguments":null
                     }
                   },
                   "optional":false
@@ -317,7 +317,7 @@
                     "optional":false
                   }
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "typeParameters":{

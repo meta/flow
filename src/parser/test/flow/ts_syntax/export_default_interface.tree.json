@@ -232,7 +232,7 @@
                   112
                 ],
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null
+                "typeArguments": null
               },
               "variance": null
             }
@@ -282,7 +282,7 @@
               99
             ],
             "type": "InterfaceExtends",
-            "typeParameters": null
+            "typeArguments": null
           }
         ],
         "id": {
@@ -477,7 +477,7 @@
             159
           ],
           "type": "GenericTypeAnnotation",
-          "typeParameters": {
+          "typeArguments": {
             "loc": {
               "end": {
                 "column": 43,

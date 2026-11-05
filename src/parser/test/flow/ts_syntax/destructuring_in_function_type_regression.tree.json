@@ -262,7 +262,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "trueType":{
           "type":"NullLiteralTypeAnnotation",

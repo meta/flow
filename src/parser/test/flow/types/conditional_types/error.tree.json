@@ -89,7 +89,7 @@
                     "typeAnnotation":null,
                     "optional":false
                   },
-                  "typeParameters":null
+                  "typeArguments":null
                 },
                 "falseType":{
                   "type":"StringTypeAnnotation",

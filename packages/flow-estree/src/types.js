@@ -1459,7 +1459,7 @@ export interface ExistsTypeAnnotation extends BaseNode {
 export interface GenericTypeAnnotation extends BaseNode {
   readonly type: 'GenericTypeAnnotation';
   readonly id: Identifier | QualifiedTypeIdentifier | ImportType;
-  readonly typeParameters: null | TypeParameterInstantiation;
+  readonly typeArguments: null | TypeParameterInstantiation;
 }
 export interface ImportType extends BaseNode {
   readonly type: 'ImportType';
@@ -1813,7 +1813,7 @@ export interface InterfaceDeclaration extends BaseInterfaceDeclaration {
 export interface InterfaceExtends extends BaseNode {
   readonly type: 'InterfaceExtends';
   readonly id: Identifier | QualifiedTypeIdentifier;
-  readonly typeParameters: null | TypeParameterInstantiation;
+  readonly typeArguments: null | TypeParameterInstantiation;
 
   readonly parent: InterfaceDeclaration | DeclareInterface;
 }
@@ -1821,7 +1821,7 @@ export interface InterfaceExtends extends BaseNode {
 export interface ClassImplements extends BaseNode {
   readonly type: 'ClassImplements';
   readonly id: Identifier | QualifiedTypeIdentifier;
-  readonly typeParameters: null | TypeParameterInstantiation;
+  readonly typeArguments: null | TypeParameterInstantiation;
 
   readonly parent: AClass | DeclareClass;
 }

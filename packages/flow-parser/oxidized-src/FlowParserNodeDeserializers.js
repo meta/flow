@@ -1004,7 +1004,7 @@ module.exports = [
       type: 'ClassImplements',
       loc: this.addEmptyLoc(),
       id: this.deserializeNode(),
-      typeParameters: this.deserializeNode(),
+      typeArguments: this.deserializeNode(),
     };
   },
 
@@ -1595,7 +1595,7 @@ module.exports = [
       type: 'GenericTypeAnnotation',
       loc: this.addEmptyLoc(),
       id: this.deserializeNode(),
-      typeParameters: this.deserializeNode(),
+      typeArguments: this.deserializeNode(),
     };
   },
 
@@ -1822,7 +1822,7 @@ module.exports = [
       type: 'InterfaceExtends',
       loc: this.addEmptyLoc(),
       id: this.deserializeNode(),
-      typeParameters: this.deserializeNode(),
+      typeArguments: this.deserializeNode(),
     };
   },
 
@@ -3246,6 +3246,36 @@ module.exports = [
       loc: this.addEmptyLoc(),
       program: this.deserializeNode(),
       comments: this.deserializeComments(),
+    };
+  },
+
+  // 279: BabelGenericTypeAnnotation
+  function () {
+    return {
+      type: 'GenericTypeAnnotation',
+      loc: this.addEmptyLoc(),
+      id: this.deserializeNode(),
+      typeParameters: this.deserializeNode(),
+    };
+  },
+
+  // 280: BabelInterfaceExtends
+  function () {
+    return {
+      type: 'InterfaceExtends',
+      loc: this.addEmptyLoc(),
+      id: this.deserializeNode(),
+      typeParameters: this.deserializeNode(),
+    };
+  },
+
+  // 281: BabelClassImplements
+  function () {
+    return {
+      type: 'ClassImplements',
+      loc: this.addEmptyLoc(),
+      id: this.deserializeNode(),
+      typeParameters: this.deserializeNode(),
     };
   },
 ];

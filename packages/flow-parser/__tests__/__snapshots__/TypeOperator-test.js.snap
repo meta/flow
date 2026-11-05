@@ -62,7 +62,7 @@ exports[`TypeOperator renders Basic ESTree 1`] = `
             "typeAnnotation": null,
           },
           "type": "GenericTypeAnnotation",
-          "typeParameters": null,
+          "typeArguments": null,
         },
       },
       "type": "TypeAlias",
@@ -86,7 +86,7 @@ exports[`TypeOperator renders Basic ESTree 1`] = `
             "typeAnnotation": null,
           },
           "type": "GenericTypeAnnotation",
-          "typeParameters": null,
+          "typeArguments": null,
         },
       },
       "type": "TypeAlias",
@@ -110,7 +110,7 @@ exports[`TypeOperator renders Basic ESTree 1`] = `
             "typeAnnotation": null,
           },
           "type": "GenericTypeAnnotation",
-          "typeParameters": null,
+          "typeArguments": null,
         },
       },
       "type": "TypeAlias",
@@ -175,7 +175,7 @@ exports[`TypeOperator renders Nested Union ESTree 1`] = `
                     "typeAnnotation": null,
                   },
                   "type": "GenericTypeAnnotation",
-                  "typeParameters": null,
+                  "typeArguments": null,
                 },
                 {
                   "id": {
@@ -185,7 +185,7 @@ exports[`TypeOperator renders Nested Union ESTree 1`] = `
                     "typeAnnotation": null,
                   },
                   "type": "GenericTypeAnnotation",
-                  "typeParameters": null,
+                  "typeArguments": null,
                 },
               ],
             },
@@ -268,7 +268,7 @@ exports[`TypeOperator renders Union ESTree 1`] = `
                 "typeAnnotation": null,
               },
               "type": "GenericTypeAnnotation",
-              "typeParameters": null,
+              "typeArguments": null,
             },
             {
               "id": {
@@ -278,7 +278,7 @@ exports[`TypeOperator renders Union ESTree 1`] = `
                 "typeAnnotation": null,
               },
               "type": "GenericTypeAnnotation",
-              "typeParameters": null,
+              "typeArguments": null,
             },
           ],
         },
@@ -307,7 +307,7 @@ exports[`TypeOperator renders Union ESTree 1`] = `
                 "typeAnnotation": null,
               },
               "type": "GenericTypeAnnotation",
-              "typeParameters": null,
+              "typeArguments": null,
             },
             {
               "id": {
@@ -317,7 +317,7 @@ exports[`TypeOperator renders Union ESTree 1`] = `
                 "typeAnnotation": null,
               },
               "type": "GenericTypeAnnotation",
-              "typeParameters": null,
+              "typeArguments": null,
             },
           ],
         },
@@ -346,7 +346,7 @@ exports[`TypeOperator renders Union ESTree 1`] = `
                 "typeAnnotation": null,
               },
               "type": "GenericTypeAnnotation",
-              "typeParameters": null,
+              "typeArguments": null,
             },
             {
               "id": {
@@ -356,7 +356,7 @@ exports[`TypeOperator renders Union ESTree 1`] = `
                 "typeAnnotation": null,
               },
               "type": "GenericTypeAnnotation",
-              "typeParameters": null,
+              "typeArguments": null,
             },
           ],
         },

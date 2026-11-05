@@ -45,7 +45,7 @@
           "typeAnnotation":null,
           "optional":false
         },
-        "typeParameters":null
+        "typeArguments":null
       },
       "lowerBound":{
         "type":"GenericTypeAnnotation",
@@ -59,7 +59,7 @@
           "typeAnnotation":null,
           "optional":false
         },
-        "typeParameters":null
+        "typeArguments":null
       }
     },
     {

@@ -32,7 +32,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "indexType":{
           "type":"GenericTypeAnnotation",
@@ -46,7 +46,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "optional":true
       }
@@ -84,7 +84,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           },
           "indexType":{
             "type":"GenericTypeAnnotation",
@@ -98,7 +98,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           },
           "optional":true
         },
@@ -114,7 +114,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "optional":true
       }
@@ -148,7 +148,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "indexType":{
           "type":"BooleanLiteralTypeAnnotation",
@@ -193,7 +193,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           },
           "indexType":{
             "type":"BooleanLiteralTypeAnnotation",
@@ -247,7 +247,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           },
           "indexType":{
             "type":"StringLiteralTypeAnnotation",
@@ -269,7 +269,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "optional":true
       }
@@ -307,7 +307,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":null
+            "typeArguments":null
           },
           "indexType":{
             "type":"StringLiteralTypeAnnotation",
@@ -356,7 +356,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "indexType":{
           "type":"StringLiteralTypeAnnotation",
@@ -405,7 +405,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "indexType":{
               "type":"StringLiteralTypeAnnotation",
@@ -472,7 +472,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "indexType":{
               "type":"StringLiteralTypeAnnotation",

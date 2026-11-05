@@ -18,7 +18,7 @@ import {t} from 'flow-transform';
 function eliminateAbstractComponent(
   node: GenericTypeAnnotation,
 ): MaybeDetachedNode<TypeAnnotationType> | null {
-  const {id: maybeQualifiedIdentifier, typeParameters} = node;
+  const {id: maybeQualifiedIdentifier, typeArguments} = node;
 
   // `React.AbstractComponent<Props>` -> `React.ComponentType<Props>`
   // `React.AbstractComponent<Props, mixed>` -> `React.ComponentType<Props>`
@@ -26,9 +26,9 @@ function eliminateAbstractComponent(
     maybeQualifiedIdentifier.type === 'QualifiedTypeIdentifier' &&
     maybeQualifiedIdentifier.qualification.name === 'React' &&
     maybeQualifiedIdentifier.id.name === 'AbstractComponent' &&
-    typeParameters != null
+    typeArguments != null
   ) {
-    const [config, instance, renders] = typeParameters.params;
+    const [config, instance, renders] = typeArguments.params;
 
     if (renders != null) {
       return null;
@@ -40,7 +40,7 @@ function eliminateAbstractComponent(
           qualification: t.Identifier({name: 'React'}),
           id: t.Identifier({name: 'ComponentType'}),
         }),
-        typeParameters: t.TypeParameterInstantiation({params: [config]}),
+        typeArguments: t.TypeParameterInstantiation({params: [config]}),
       });
     }
 
@@ -53,16 +53,16 @@ function eliminateAbstractComponent(
     maybeQualifiedIdentifier.qualification.name === 'React' &&
     (maybeQualifiedIdentifier.id.name === 'ComponentProps' ||
       maybeQualifiedIdentifier.id.name === 'ElementConfig') &&
-    typeParameters != null &&
-    typeParameters.params.length === 1 &&
-    typeParameters.params[0].type === 'GenericTypeAnnotation' &&
-    typeParameters.params[0].id.type === 'QualifiedTypeIdentifier' &&
-    typeParameters.params[0].id.qualification.name === 'React' &&
-    typeParameters.params[0].id.id.name === 'AbstractComponent' &&
-    typeParameters.params[0].typeParameters != null &&
-    typeParameters.params[0].typeParameters.params.length >= 1
+    typeArguments != null &&
+    typeArguments.params.length === 1 &&
+    typeArguments.params[0].type === 'GenericTypeAnnotation' &&
+    typeArguments.params[0].id.type === 'QualifiedTypeIdentifier' &&
+    typeArguments.params[0].id.qualification.name === 'React' &&
+    typeArguments.params[0].id.id.name === 'AbstractComponent' &&
+    typeArguments.params[0].typeArguments != null &&
+    typeArguments.params[0].typeArguments.params.length >= 1
   ) {
-    return typeParameters.params[0].typeParameters.params[0];
+    return typeArguments.params[0].typeArguments.params[0];
   }
 
   // React.ElementRef<React.AbstractComponent<Props, Instance, ...> -> Instance
@@ -70,16 +70,16 @@ function eliminateAbstractComponent(
     maybeQualifiedIdentifier.type === 'QualifiedTypeIdentifier' &&
     maybeQualifiedIdentifier.qualification.name === 'React' &&
     maybeQualifiedIdentifier.id.name === 'ElementRef' &&
-    typeParameters != null &&
-    typeParameters.params.length === 1 &&
-    typeParameters.params[0].type === 'GenericTypeAnnotation' &&
-    typeParameters.params[0].id.type === 'QualifiedTypeIdentifier' &&
-    typeParameters.params[0].id.qualification.name === 'React' &&
-    typeParameters.params[0].id.id.name === 'AbstractComponent' &&
-    typeParameters.params[0].typeParameters != null &&
-    typeParameters.params[0].typeParameters.params.length >= 2
+    typeArguments != null &&
+    typeArguments.params.length === 1 &&
+    typeArguments.params[0].type === 'GenericTypeAnnotation' &&
+    typeArguments.params[0].id.type === 'QualifiedTypeIdentifier' &&
+    typeArguments.params[0].id.qualification.name === 'React' &&
+    typeArguments.params[0].id.id.name === 'AbstractComponent' &&
+    typeArguments.params[0].typeArguments != null &&
+    typeArguments.params[0].typeArguments.params.length >= 2
   ) {
-    return typeParameters.params[0].typeParameters.params[1];
+    return typeArguments.params[0].typeArguments.params[1];
   }
 
   // React.ElementRef<React.AbstractComponent<Props> -> mixed
@@ -87,14 +87,14 @@ function eliminateAbstractComponent(
     maybeQualifiedIdentifier.type === 'QualifiedTypeIdentifier' &&
     maybeQualifiedIdentifier.qualification.name === 'React' &&
     maybeQualifiedIdentifier.id.name === 'ElementRef' &&
-    typeParameters != null &&
-    typeParameters.params.length === 1 &&
-    typeParameters.params[0].type === 'GenericTypeAnnotation' &&
-    typeParameters.params[0].id.type === 'QualifiedTypeIdentifier' &&
-    typeParameters.params[0].id.qualification.name === 'React' &&
-    typeParameters.params[0].id.id.name === 'AbstractComponent' &&
-    typeParameters.params[0].typeParameters != null &&
-    typeParameters.params[0].typeParameters.params.length === 1
+    typeArguments != null &&
+    typeArguments.params.length === 1 &&
+    typeArguments.params[0].type === 'GenericTypeAnnotation' &&
+    typeArguments.params[0].id.type === 'QualifiedTypeIdentifier' &&
+    typeArguments.params[0].id.qualification.name === 'React' &&
+    typeArguments.params[0].id.id.name === 'AbstractComponent' &&
+    typeArguments.params[0].typeArguments != null &&
+    typeArguments.params[0].typeArguments.params.length === 1
   ) {
     return t.MixedTypeAnnotation({});
   }

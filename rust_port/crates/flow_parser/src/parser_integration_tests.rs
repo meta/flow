@@ -1582,18 +1582,40 @@ mod hardcoded_tests {
         Normal,
     }
 
-    fn record_tree(path: &str, test_name: &str, case_name: &str, case: &TestCase) -> bool {
-        let Some(ref content) = case.content else {
+    fn snapshot_filename(source_filename: &str) -> String {
+        let (mut stem, extension) = split_extension(source_filename.to_owned());
+        if extension == "flow" && stem.ends_with(".js") {
+            stem.truncate(stem.len() - 3);
+        } else if matches!(extension.as_str(), "ts" | "tsx" | "mts" | "cts") && stem.ends_with(".d")
+        {
+            stem.truncate(stem.len() - 2);
+        }
+        format!("{stem}.tree.json")
+    }
+
+    #[test]
+    fn recording_uses_the_source_path_and_normalizes_compound_extensions() {
+        for (source, expected) in [
+            (
+                "/root/arrow_function/migrated_0006.js",
+                "/root/arrow_function/migrated_0006.tree.json",
+            ),
+            (
+                "/root/types/example.js.flow",
+                "/root/types/example.tree.json",
+            ),
+            ("/root/types/example.d.ts", "/root/types/example.tree.json"),
+            ("/root/types/example.mts", "/root/types/example.tree.json"),
+        ] {
+            assert_eq!(snapshot_filename(source), expected);
+        }
+    }
+
+    fn record_tree(case: &TestCase) -> bool {
+        let (Some(content), Some(source_filename)) = (&case.content, &case.filename) else {
             return false;
         };
-        let filename = format!(
-            "{}{}{}{}{}.tree.json",
-            path,
-            std::path::MAIN_SEPARATOR,
-            test_name,
-            std::path::MAIN_SEPARATOR,
-            case_name
-        );
+        let filename = snapshot_filename(source_filename);
         let json = parse_file(&case.options, content, case.filename.as_deref());
         let json_str = serde_json::to_string_pretty(&json).unwrap();
         fs::write(&filename, format!("{}\n", json_str))
@@ -1625,7 +1647,7 @@ mod hardcoded_tests {
                         if verbose_mode != VerboseMode::Quiet {
                             eprintln!("[-] SKIP: {} - no .tree.json", key);
                         }
-                        if record && record_tree(path, &test_name, &key, &case) {
+                        if record && record_tree(&case) {
                             eprintln!("[+] RECORD: {}", key);
                         }
                         result.skipped += 1;
@@ -1638,7 +1660,7 @@ mod hardcoded_tests {
                         for err in &errs {
                             eprintln!("    {}", err);
                         }
-                        if record && record_tree(path, &test_name, &key, &case) {
+                        if record && record_tree(&case) {
                             eprintln!("[+] RECORD: {}", key);
                         }
                         result.failed += 1;

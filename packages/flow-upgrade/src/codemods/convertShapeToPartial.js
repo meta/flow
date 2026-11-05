@@ -18,7 +18,7 @@ export default codemod({
     'Converts usage of the `$Shape` utility type to `Partial`. It is possible that this will create type errors that you will have to resolve.',
   transform: context => {
     return {
-      'GenericTypeAnnotation[id.name="$Shape"][typeParameters.params.length > 0]'(
+      'GenericTypeAnnotation[id.name="$Shape"][typeArguments.params.length > 0]'(
         node,
       ) {
         context.modifyNodeInPlace(node.id, {

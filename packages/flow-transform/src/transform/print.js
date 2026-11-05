@@ -18,6 +18,10 @@ import * as prettier from 'prettier';
 import {mutateESTreeASTCommentsForPrettier} from './comments/comments';
 import type {VisitorKeysType} from 'flow-parser';
 
+/**
+ * Prints the AST as source code, mutating it in place for Prettier.
+ * Treat the input AST as consumed after printing.
+ */
 export async function print(
   ast: MaybeDetachedNode<Program>,
   originalCode: string,

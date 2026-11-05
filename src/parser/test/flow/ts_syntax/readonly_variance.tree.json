@@ -192,7 +192,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               },
               "rest":null,
               "typeParameters":{
@@ -467,7 +467,7 @@
                     "typeAnnotation":null,
                     "optional":false
                   },
-                  "typeParameters":null
+                  "typeArguments":null
                 }
               },
               "typeParameters":{
@@ -609,7 +609,7 @@
                     "typeAnnotation":null,
                     "optional":false
                   },
-                  "typeParameters":null
+                  "typeArguments":null
                 }
               },
               "typeParameters":{
@@ -797,7 +797,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               },
               "rest":null,
               "typeParameters":null,
@@ -840,7 +840,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               },
               "rest":null,
               "typeParameters":{

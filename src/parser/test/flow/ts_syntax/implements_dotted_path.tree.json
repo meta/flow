@@ -53,7 +53,7 @@
               "optional":false
             }
           },
-          "typeParameters":null
+          "typeArguments":null
         }
       ],
       "mixins":[]
@@ -105,7 +105,7 @@
               "optional":false
             }
           },
-          "typeParameters":null
+          "typeArguments":null
         }
       ],
       "decorators":[]

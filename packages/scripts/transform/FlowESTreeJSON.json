@@ -514,7 +514,7 @@
       },
       {
         "type": "NodePtr",
-        "name": "typeParameters",
+        "name": "typeArguments",
         "optional": true
       }
     ]
@@ -1567,7 +1567,7 @@
       },
       {
         "type": "NodePtr",
-        "name": "typeParameters",
+        "name": "typeArguments",
         "optional": true
       }
     ]
@@ -1893,7 +1893,7 @@
       },
       {
         "type": "NodePtr",
-        "name": "typeParameters",
+        "name": "typeArguments",
         "optional": true
       }
     ]

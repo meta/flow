@@ -53,7 +53,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               },
               "indexType":{
                 "type":"GenericTypeAnnotation",
@@ -67,7 +67,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "sourceType":{
@@ -86,7 +86,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "nameType":{
@@ -154,7 +154,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               },
               "indexType":{
                 "type":"GenericTypeAnnotation",
@@ -168,7 +168,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "sourceType":{
@@ -187,7 +187,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "nameType":{
@@ -210,7 +210,7 @@
                     "typeAnnotation":null,
                     "optional":false
                   },
-                  "typeParameters":null
+                  "typeArguments":null
                 },
                 "indexType":{
                   "type":"GenericTypeAnnotation",
@@ -224,7 +224,7 @@
                     "typeAnnotation":null,
                     "optional":false
                   },
-                  "typeParameters":null
+                  "typeArguments":null
                 }
               },
               "extendsType":{
@@ -249,7 +249,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "variance":null,
@@ -316,7 +316,7 @@
                     "typeAnnotation":null,
                     "optional":false
                   },
-                  "typeParameters":null
+                  "typeArguments":null
                 }
               }
             },
@@ -332,7 +332,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "nameType":{
               "type":"IndexedAccessType",
@@ -350,7 +350,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               },
               "indexType":{
                 "type":"StringLiteralTypeAnnotation",
@@ -420,7 +420,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               },
               "indexType":{
                 "type":"GenericTypeAnnotation",
@@ -434,7 +434,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "sourceType":{
@@ -453,7 +453,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "nameType":{
@@ -476,7 +476,7 @@
                     "typeAnnotation":null,
                     "optional":false
                   },
-                  "typeParameters":null
+                  "typeArguments":null
                 },
                 "indexType":{
                   "type":"GenericTypeAnnotation",
@@ -490,7 +490,7 @@
                     "typeAnnotation":null,
                     "optional":false
                   },
-                  "typeParameters":null
+                  "typeArguments":null
                 }
               },
               "extendsType":{
@@ -505,7 +505,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               },
               "trueType":{
                 "type":"GenericTypeAnnotation",
@@ -519,7 +519,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               },
               "falseType":{
                 "type":"NeverTypeAnnotation",

@@ -60,12 +60,12 @@ Transforms legacy Flow utility types to TypeScript-compatible types:
         // Handle $Keys<T> -> keyof T
         if (typeName === '$Keys') {
           if (
-            node.typeParameters &&
-            node.typeParameters.params &&
-            node.typeParameters.params.length === 1
+            node.typeArguments &&
+            node.typeArguments.params &&
+            node.typeArguments.params.length === 1
           ) {
             const newNode = t.KeyofTypeAnnotation({
-              argument: node.typeParameters.params[0],
+              argument: node.typeArguments.params[0],
             });
             context.replaceNode(node, newNode, {
               keepComments: true,

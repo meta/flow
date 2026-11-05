@@ -141,7 +141,7 @@ exports[`ComponentTypeAnnotation Union ESTree 1`] = `
                   "typeAnnotation": null,
                 },
                 "type": "GenericTypeAnnotation",
-                "typeParameters": null,
+                "typeArguments": null,
               },
             },
             "rest": null,

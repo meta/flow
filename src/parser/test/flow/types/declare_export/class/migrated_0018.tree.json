@@ -85,7 +85,7 @@
               "typeAnnotation":null,
               "optional":false
             },
-            "typeParameters":{
+            "typeArguments":{
               "type":"TypeParameterInstantiation",
               "loc":{"source":null,"start":{"line":1,"column":35},"end":{"line":1,"column":38}},
               "range":[35,38],
@@ -102,7 +102,7 @@
                     "typeAnnotation":null,
                     "optional":false
                   },
-                  "typeParameters":null
+                  "typeArguments":null
                 }
               ]
             }

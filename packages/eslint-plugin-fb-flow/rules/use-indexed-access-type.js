@@ -30,7 +30,12 @@ function doesObjectNeedsParens(node) {
 
 function report(context, sourceCode, node) {
   const util = node.id.name;
-  const {typeParameters} = node;
+  const typeArguments = Object.prototype.hasOwnProperty.call(
+    node,
+    'typeArguments',
+  )
+    ? node.typeArguments
+    : node.typeParameters;
 
   // Defaults if we can't produce a fix.
   let fix = undefined;
@@ -38,12 +43,12 @@ function report(context, sourceCode, node) {
   let indexText = util === '$ElementType' ? 'K' : "'prop'";
 
   if (
-    typeParameters != null &&
-    typeParameters.type === 'TypeParameterInstantiation' &&
-    Array.isArray(typeParameters.params) &&
-    typeParameters.params.length === 2
+    typeArguments != null &&
+    typeArguments.type === 'TypeParameterInstantiation' &&
+    Array.isArray(typeArguments.params) &&
+    typeArguments.params.length === 2
   ) {
-    const [objectNode, indexNode] = typeParameters.params;
+    const [objectNode, indexNode] = typeArguments.params;
     const objectNeedsParens = doesObjectNeedsParens(objectNode);
     const objectSource = sourceCode.getText(objectNode).trim();
     objectText = objectNeedsParens ? `(${objectSource})` : objectSource;

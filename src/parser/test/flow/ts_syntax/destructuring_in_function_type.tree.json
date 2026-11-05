@@ -93,7 +93,7 @@
                       "typeAnnotation":null,
                       "optional":false
                     },
-                    "typeParameters":null
+                    "typeArguments":null
                   }
                 },
                 "optional":false
@@ -111,7 +111,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "rest":null,
             "typeParameters":null,
@@ -188,7 +188,7 @@
                       "typeAnnotation":null,
                       "optional":false
                     },
-                    "typeParameters":null
+                    "typeArguments":null
                   }
                 },
                 "optional":false
@@ -206,7 +206,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "rest":null,
             "typeParameters":null,
@@ -274,7 +274,7 @@
                       "typeAnnotation":null,
                       "optional":false
                     },
-                    "typeParameters":null
+                    "typeArguments":null
                   }
                 },
                 "optional":false
@@ -292,7 +292,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "rest":null,
             "typeParameters":null,
@@ -395,7 +395,7 @@
                       "typeAnnotation":null,
                       "optional":false
                     },
-                    "typeParameters":null
+                    "typeArguments":null
                   }
                 },
                 "optional":false
@@ -413,7 +413,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "rest":null,
             "typeParameters":null,
@@ -503,7 +503,7 @@
                       "typeAnnotation":null,
                       "optional":false
                     },
-                    "typeParameters":null
+                    "typeArguments":null
                   }
                 },
                 "optional":false
@@ -521,7 +521,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "rest":null,
             "typeParameters":null,
@@ -598,7 +598,7 @@
                       "typeAnnotation":null,
                       "optional":false
                     },
-                    "typeParameters":null
+                    "typeArguments":null
                   }
                 },
                 "optional":true
@@ -616,7 +616,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "rest":null,
             "typeParameters":null,
@@ -676,7 +676,7 @@
                       "typeAnnotation":null,
                       "optional":false
                     },
-                    "typeParameters":null
+                    "typeArguments":null
                   }
                 },
                 "optional":true
@@ -694,7 +694,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "rest":null,
             "typeParameters":null,
@@ -789,7 +789,7 @@
                         "typeAnnotation":null,
                         "optional":false
                       },
-                      "typeParameters":null
+                      "typeArguments":null
                     }
                   },
                   "optional":false
@@ -807,7 +807,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               },
               "rest":null,
               "typeParameters":null,
@@ -913,7 +913,7 @@
                         "typeAnnotation":null,
                         "optional":false
                       },
-                      "typeParameters":null
+                      "typeArguments":null
                     }
                   },
                   "optional":true
@@ -931,7 +931,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               },
               "rest":null,
               "typeParameters":null,
@@ -1028,7 +1028,7 @@
                         "typeAnnotation":null,
                         "optional":false
                       },
-                      "typeParameters":null
+                      "typeArguments":null
                     }
                   },
                   "optional":false
@@ -1046,7 +1046,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               },
               "rest":null,
               "typeParameters":null,
@@ -1097,7 +1097,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "rest":{
               "type":"ObjectPattern",
@@ -1146,7 +1146,7 @@
                     "typeAnnotation":null,
                     "optional":false
                   },
-                  "typeParameters":null
+                  "typeArguments":null
                 }
               },
               "optional":false
@@ -1190,7 +1190,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "rest":{
               "type":"ArrayPattern",
@@ -1230,7 +1230,7 @@
                     "typeAnnotation":null,
                     "optional":false
                   },
-                  "typeParameters":null
+                  "typeArguments":null
                 }
               },
               "optional":false
@@ -1334,7 +1334,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "optional":false
@@ -1352,7 +1352,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "rest":null,
         "typeParameters":null,
@@ -1449,7 +1449,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "optional":false
@@ -1467,7 +1467,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "rest":null,
         "typeParameters":null,
@@ -1530,7 +1530,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "optional":false
@@ -1548,7 +1548,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "rest":null,
         "typeParameters":null,
@@ -1604,7 +1604,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "optional":false
@@ -1622,7 +1622,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "rest":null,
         "typeParameters":null,
@@ -1694,7 +1694,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "optional":true
@@ -1712,7 +1712,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "rest":null,
         "typeParameters":null,
@@ -1767,7 +1767,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "optional":true
@@ -1785,7 +1785,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "rest":null,
         "typeParameters":null,
@@ -1870,7 +1870,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "optional":false
@@ -1888,7 +1888,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "rest":null,
         "typeParameters":null,
@@ -1986,7 +1986,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "optional":false
@@ -2004,7 +2004,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "rest":null,
         "typeParameters":null,
@@ -2076,7 +2076,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "optional":false
@@ -2128,7 +2128,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "optional":false
@@ -2146,7 +2146,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "rest":null,
         "typeParameters":null,
@@ -2218,7 +2218,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":null
+                "typeArguments":null
               }
             },
             "optional":false
@@ -2247,7 +2247,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             },
             "optional":false
           }
@@ -2264,7 +2264,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "rest":null,
         "typeParameters":null,
@@ -2301,7 +2301,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "rest":{
           "type":"ObjectPattern",
@@ -2350,7 +2350,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             }
           },
           "optional":false
@@ -2389,7 +2389,7 @@
             "typeAnnotation":null,
             "optional":false
           },
-          "typeParameters":null
+          "typeArguments":null
         },
         "rest":{
           "type":"ArrayPattern",
@@ -2429,7 +2429,7 @@
                 "typeAnnotation":null,
                 "optional":false
               },
-              "typeParameters":null
+              "typeArguments":null
             }
           },
           "optional":false

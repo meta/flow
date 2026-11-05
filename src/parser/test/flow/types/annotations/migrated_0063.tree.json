@@ -67,7 +67,7 @@
                   "typeAnnotation":null,
                   "optional":false
                 },
-                "typeParameters":{
+                "typeArguments":{
                   "type":"TypeParameterInstantiation",
                   "loc":{"source":null,"start":{"line":1,"column":65},"end":{"line":1,"column":68}},
                   "range":[65,68],
@@ -84,7 +84,7 @@
                         "typeAnnotation":null,
                         "optional":false
                       },
-                      "typeParameters":null
+                      "typeArguments":null
                     }
                   ]
                 }
@@ -113,7 +113,7 @@
                     "typeAnnotation":null,
                     "optional":false
                   },
-                  "typeParameters":{
+                  "typeArguments":{
                     "type":"TypeParameterInstantiation",
                     "loc":{"source":null,"start":{"line":1,"column":43},"end":{"line":1,"column":57}},
                     "range":[43,57],
@@ -135,7 +135,7 @@
                               "typeAnnotation":null,
                               "optional":false
                             },
-                            "typeParameters":{
+                            "typeArguments":{
                               "type":"TypeParameterInstantiation",
                               "loc":{"source":null,"start":{"line":1,"column":49},"end":{"line":1,"column":52}},
                               "range":[49,52],
@@ -152,7 +152,7 @@
                                     "typeAnnotation":null,
                                     "optional":false
                                   },
-                                  "typeParameters":null
+                                  "typeArguments":null
                                 }
                               ]
                             }
@@ -169,7 +169,7 @@
                               "typeAnnotation":null,
                               "optional":false
                             },
-                            "typeParameters":null
+                            "typeArguments":null
                           }
                         ]
                       }
