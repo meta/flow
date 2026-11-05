@@ -180,7 +180,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ jsx.js:30:3
 
-Cannot create `AcceptsWhatever` element because `string` [1] is incompatible with `number` [2]. [incompatible-use]
+Cannot create `AcceptsWhatever` element because in type argument `C` > the return value: `string` [1] is incompatible
+with `number` [2]. [incompatible-use]
 
    jsx.js:30:3
    30| (<AcceptsWhatever />) as number; // Error string ~> number
@@ -197,7 +198,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ jsx.js:31:3
 
-Cannot create `AcceptsWhatever` element because `string` [1] is incompatible with `number` [2]. [incompatible-use]
+Cannot create `AcceptsWhatever` element because in type argument `C` > the return value: `string` [1] is incompatible
+with `number` [2]. [incompatible-use]
 
    jsx.js:31:3
    31| (<AcceptsWhatever name="hi">Text</AcceptsWhatever>) as number; // Error string ~> number
@@ -215,8 +217,9 @@ References:
 Error ------------------------------------------------------------------------------------------------------ jsx.js:34:2
 
 Cannot create `ExpectsProps` element because: [incompatible-use]
- - Either in the first parameter: property `name` is missing in `{...}` [1] but exists in `{name: string, ...}` [2].
- - Or in the first parameter: `{name: string, ...}` [2] is incompatible with `null` [3].
+ - Either in type argument `C` > the first parameter: property `name` is missing in `{...}` [1] but exists in
+   `{name: string, ...}` [2].
+ - Or in type argument `C` > the first parameter: `{name: string, ...}` [2] is incompatible with `null` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -240,8 +243,9 @@ References:
 Error ------------------------------------------------------------------------------------------------------ jsx.js:35:3
 
 Cannot create `ExpectsProps` element because: [incompatible-use]
- - Either in the first parameter: property `name` is missing in `{...}` [1] but exists in `{name: string, ...}` [2].
- - Or `string` [3] is incompatible with `number` [4].
+ - Either in type argument `C` > the first parameter: property `name` is missing in `{...}` [1] but exists in
+   `{name: string, ...}` [2].
+ - Or in type argument `C` > the return value: `string` [3] is incompatible with `number` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -267,8 +271,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ jsx.js:38:2
 
-Cannot create `ExpectsChildrenTuple` element because in the second parameter: `Readonly<[]>` [1] has 0 elements but
-`[string]` [2] has 1 element. [incompatible-use]
+Cannot create `ExpectsChildrenTuple` element because in type argument `C` > the second parameter: `Readonly<[]>` [1] has
+0 elements but `[string]` [2] has 1 element. [incompatible-use]
 
    jsx.js:38:2
    38| <ExpectsChildrenTuple />; // Error - missing child
@@ -285,8 +289,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ jsx.js:40:2
 
-Cannot create `ExpectsChildrenTuple` element because in the second parameter > index `0`: `string` [1] is incompatible
-with `123` [2]. [incompatible-use]
+Cannot create `ExpectsChildrenTuple` element because in type argument `C` > the second parameter > index `0`:
+`string` [1] is incompatible with `123` [2]. [incompatible-use]
 
    jsx.js:40:2
    40| <ExpectsChildrenTuple>{123}</ExpectsChildrenTuple>; // Error: number ~> string
@@ -303,8 +307,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ jsx.js:41:2
 
-Cannot create `ExpectsChildrenTuple` element because in the second parameter: `["Hi ", "there"]` [1] has 2 elements but
-`[string]` [2] has 1 element. [incompatible-use]
+Cannot create `ExpectsChildrenTuple` element because in type argument `C` > the second parameter: `["Hi ", "there"]` [1]
+has 2 elements but `[string]` [2] has 1 element. [incompatible-use]
 
    jsx.js:41:2
    41| <ExpectsChildrenTuple>Hi {'there'}</ExpectsChildrenTuple>; // Error: too many children
@@ -321,8 +325,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ jsx.js:49:2
 
-Cannot create `ExpectsChildrenArray` element because in the second parameter > array element: `string` [1] is
-incompatible with `123` [2]. [incompatible-use]
+Cannot create `ExpectsChildrenArray` element because in type argument `C` > the second parameter > array element:
+`string` [1] is incompatible with `123` [2]. [incompatible-use]
 
    jsx.js:49:2
    49| <ExpectsChildrenArray>{123}</ExpectsChildrenArray>; // Error: number ~> string

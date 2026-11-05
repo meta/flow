@@ -2175,14 +2175,30 @@ fn pin_types<'cx>(
 
         let bound_t = type_subst::subst(
             cx,
-            Some(unknown_use()),
+            Some(use_op.dupe()),
             true,
             false,
             type_subst::Purpose::Normal,
             &subst_map,
             tparam.bound.dupe(),
         );
-        FlowJs::flow_t_with_env(cx, env, t, &bound_t)?;
+        // What flowed into `t` flows into the bound, which is what the type parameters that the
+        // bound mentions learn from `tparam`. `t` itself doesn't: an evaluation in the bound that
+        // waits on them would keep it as a pending lower bound, and pinning them would return it.
+        let bound_use = UseT::new(UseTInner::UseT(
+            UseOp::Frame(
+                std::sync::Arc::new(VirtualFrameUseOp::TypeParamBound {
+                    name: tparam.name.dupe(),
+                }),
+                std::sync::Arc::new(use_op.dupe()),
+            ),
+            bound_t.dupe(),
+        ));
+        let mut lowers = Vec::new();
+        collect_pinning_lowers(cx, env, &mut BTreeSet::new(), &mut lowers, vec![t.dupe()]);
+        for lower in &lowers {
+            FlowJs::flow_with_env(cx, env, lower, &bound_use)?;
+        }
 
         let call_loc = instantiation_reason.loc().dupe();
         let generalized = match op {

@@ -2,7 +2,7 @@ Error --------------------------------------------------------------------------
 
 Cannot call `MyIterable` because: [incompatible-type]
  - Either `MyIterable<number>` [1] is incompatible with `Array<empty>` [2].
- - Or `Array<empty>` [3] is incompatible with `MyIterable<number>` [4].
+ - Or in type argument `Iter`: `Array<empty>` [3] is incompatible with `MyIterable<number>` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.

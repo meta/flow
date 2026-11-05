@@ -210,6 +210,60 @@ References:
                                                  ^^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------------ dependent_bound.js:9:14
+
+Cannot call `scramble` with object literal bound to `props` because in property `c` > the first parameter: inexact
+`{...}` [1] is incompatible with exact `{a: string}` [2]. [incompatible-exact]
+
+   dependent_bound.js:9:14
+   9| scramble({c: ad, p: {a: 'x'}}); // error: `{...}` is incompatible with `{a: string}`
+                   ^^
+
+References:
+   dependent_bound.js:5:42
+   5| declare function scramble<TProps extends {...}, TPartial extends Readonly<Partial<TProps>>>(
+                                               ^^^^^ [1]
+   dependent_bound.js:8:23
+   8| declare const ad: (p: {a: string}) => void;
+                            ^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------ dependent_bound.js:9:14
+
+Cannot call `scramble` with object literal bound to `props` because in property `c` > the first parameter: property `a`
+is missing in `{...}` [1] but exists in `{a: string}` [2]. [incompatible-type]
+
+   dependent_bound.js:9:14
+   9| scramble({c: ad, p: {a: 'x'}}); // error: `{...}` is incompatible with `{a: string}`
+                   ^^
+
+References:
+   dependent_bound.js:5:42
+   5| declare function scramble<TProps extends {...}, TPartial extends Readonly<Partial<TProps>>>(
+                                               ^^^^^ [1]
+   dependent_bound.js:8:23
+   8| declare const ad: (p: {a: string}) => void;
+                            ^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------ dependent_bound.js:13:1
+
+Cannot call `h` because `A` [1] is underconstrained by call of `h` [2]. Either add explicit type arguments or cast the
+expression to your expected type. [underconstrained-implicit-instantiation]
+
+   dependent_bound.js:13:1
+   13| h((b: {x: number}) => {}); // error: `A` is underconstrained
+       ^
+
+References:
+   dependent_bound.js:12:20
+   12| declare function h<A, B extends Readonly<A>>(cb: (b: B) => void): A;
+                          ^ [1]
+   dependent_bound.js:13:1
+   13| h((b: {x: number}) => {}); // error: `A` is underconstrained
+       ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
 Error ----------------------------------------------------------------------------------------------- issue_9015.js:20:3
 
 Cannot call `c.query` because `R` [1] is underconstrained by call of method `query` [2]. Either add explicit type
@@ -1202,4 +1256,4 @@ References:
 
 
 
-Found 74 errors
+Found 77 errors
