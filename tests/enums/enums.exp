@@ -333,32 +333,17 @@ References:
 
 Error -------------------------------------------------------------------------------------------- abstract-enum.js:42:3
 
-Cannot call `f` because in type argument `TEnumValue`: `true` [1] is incompatible with
-`EnumValue<EnumRepresentationTypes>` [2]. [incompatible-type]
-
-   abstract-enum.js:42:3
-    42| f(true); // ERROR
-          ^^^^ [1]
-
-References:
-   <BUILTINS>/misc.js:158:34
-   158| type Enum<out TEnumValue extends EnumValue<> = EnumValue<>> = $Enum<TEnumValue>;
-                                         ^^^^^^^^^^^ [2]
-
-
-Error -------------------------------------------------------------------------------------------- abstract-enum.js:42:3
-
-Cannot call `f` because in type argument `TEnumValue`: `true` [1] is incompatible with
-`EnumValue<EnumRepresentationTypes>` [2]. [incompatible-type]
+Cannot call `f` with `true` bound to `e` because `true` [1] is incompatible with
+`Enum<EnumValue<TRepresentationType>>` [2]. [incompatible-type]
 
    abstract-enum.js:42:3
    42| f(true); // ERROR
          ^^^^ [1]
 
 References:
-   abstract-enum.js:26:22
-   26|   TEnumValue extends EnumValue<TRepresentationType>,
-                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   abstract-enum.js:27:6
+   27| >(e: Enum<TEnumValue>) {
+            ^^^^^^^^^^^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- cast.js:36:1
@@ -5136,4 +5121,4 @@ References:
 
 
 
-Found 301 errors
+Found 300 errors

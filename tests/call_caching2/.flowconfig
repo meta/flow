@@ -6,5 +6,6 @@
 lib
 
 [options]
+experimental.implicit_instantiation_walk=true
 all=true
 builtin_lib=prelude

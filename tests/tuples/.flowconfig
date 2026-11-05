@@ -1,4 +1,5 @@
 [options]
+experimental.implicit_instantiation_walk=true
 builtin_lib=core-only
 lazy_mode=fs
 all=true

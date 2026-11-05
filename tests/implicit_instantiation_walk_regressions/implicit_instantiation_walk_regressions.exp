@@ -1,0 +1,312 @@
+Error --------------------------------------------------------------------------------------- callable_interface.js:10:1
+
+Cannot cast `p` to `Promise<string>` because in type argument `T` [1]: `number` [2] is incompatible with `string` [3].
+[incompatible-type]
+
+   callable_interface.js:10:1
+    10| p as Promise<string>; // error
+        ^
+
+References:
+   <BUILTINS>/misc.js:216:23
+   216| interface Promise<out T = unknown> {
+                              ^ [1]
+   callable_interface.js:8:32
+     8| const p = request('k', lock => 1); // ok
+                                       ^ [2]
+   callable_interface.js:10:14
+    10| p as Promise<string>; // error
+                     ^^^^^^ [3]
+
+
+Error ---------------------------------------------------------------------------- class_component_default_props.js:19:2
+
+Cannot create `Boundary` element because in type argument `TProps`: property `extra` is extra in
+`{children: React.MixedElement, extra: number, resetCount: number}` [1] but missing in
+`{readonly children: React.Node, readonly fallback?: null | ((string) => React.Node), readonly resetC...` [2]. Exact
+objects do not accept extra props. [incompatible-type]
+
+   class_component_default_props.js:19:2
+   19| <Boundary extra={1}><div /></Boundary>; // error: `extra` is not a prop of `Boundary`
+        ^^^^^^^^
+
+References:
+   class_component_default_props.js:19:1
+   19| <Boundary extra={1}><div /></Boundary>; // error: `extra` is not a prop of `Boundary`
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   class_component_default_props.js:9:31
+    9| class Boundary<TProps extends Props = Props> extends React.PureComponent<TProps> {
+                                     ^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------- component_bound.js:31:11
+
+Cannot call `withTheme` because in type argument `TProps`: property `theme` is missing in
+`{readonly a: unknown, readonly b: unknown, readonly ref?: React.RefSetter<Header<unknown, unknown>>,...` [1] but exists
+in `{readonly theme?: ?string, ...}` [2]. [incompatible-type]
+
+   component_bound.js:31:11
+   31|     class Header<A, B> extends React.Component<HeaderProps<A, B>, void> { // error: no `theme` prop
+                 ^^^^^^ [1]
+
+References:
+   component_bound.js:24:29
+   24|     TProps extends Readonly<{theme?: ?string, ...}>,
+                                   ^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------- component_config_rest_spread.js:23:13
+
+Cannot create `B` element because in property `maxLines`: `"no"` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   component_config_rest_spread.js:23:13
+   23| <B maxLines="no" />; // error
+                   ^^^^ [1]
+
+References:
+   component_config_rest_spread.js:13:58
+   13| type Props = Readonly<{children?: React.Node, maxLines?: number}>;
+                                                                ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------- failed_operations_any.js:22:15
+
+Cannot call `f` with `o` bound to `g` because `{a: string}` [1] is incompatible with `() => any` [2].
+[incompatible-type]
+
+   failed_operations_any.js:22:15
+   22|   const x = f(o); // error: `o` is not a function
+                     ^
+
+References:
+   failed_operations_any.js:20:20
+   20|   declare const o: {a: string};
+                          ^^^^^^^^^^^ [1]
+   failed_operations_any.js:19:28
+   19|   declare function f<T>(g: () => T): T;
+                                  ^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------- failed_operations_any.js:42:28
+
+Cannot call `map` with function bound to `fn` because in the return value: `string` [1] is incompatible with `void` [2].
+[incompatible-type]
+
+   failed_operations_any.js:42:28
+   42|   map(x, child => child as string); // error (2): `child` is `unknown`; callback must return `void`
+                                  ^^^^^^ [1]
+
+References:
+   failed_operations_any.js:39:55
+   39|   declare function map<T>(c: CA<T>, fn: (child: T) => void): void;
+                                                             ^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------- failed_operations_any.js:42:19
+
+Cannot cast `child` to `string` because `unknown` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   failed_operations_any.js:42:19
+   42|   map(x, child => child as string); // error (2): `child` is `unknown`; callback must return `void`
+                         ^^^^^
+
+References:
+   failed_operations_any.js:39:24
+   39|   declare function map<T>(c: CA<T>, fn: (child: T) => void): void;
+                              ^ [1]
+   failed_operations_any.js:42:28
+   42|   map(x, child => child as string); // error (2): `child` is `unknown`; callback must return `void`
+                                  ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------ generic_value_defaults.js:7:1
+
+Cannot cast `a` to `empty` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   generic_value_defaults.js:7:1
+   7| a as empty; // error
+      ^
+
+References:
+   generic_value_defaults.js:3:24
+   3| declare function g<A = string, B = A>(): B;
+                             ^^^^^^ [1]
+   generic_value_defaults.js:7:6
+   7| a as empty; // error
+           ^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------- indexed_access_keys.js:12:1
+
+Cannot cast `send(...)` to `empty` because `(number) => string` [1] is incompatible with `empty` [2].
+[incompatible-type]
+
+   indexed_access_keys.js:12:1
+   12| send('ns', 'a', 1) as empty; // error
+       ^^^^^^^^^^^^^^^^^^
+
+References:
+   indexed_access_keys.js:9:4
+    9| ): Lookup<Api, NS, K>;
+          ^^^^^^^^^^^^^^^^^^ [1]
+   indexed_access_keys.js:12:23
+   12| send('ns', 'a', 1) as empty; // error
+                             ^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------- interface_construct_signature.js:18:1
+
+Cannot cast `box` to `string` because `Box` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   interface_construct_signature.js:18:1
+   18| box as string; // error
+       ^^^
+
+References:
+   interface_construct_signature.js:9:39
+    9|   new (items: ReadonlyArray<number>): Box;
+                                             ^^^ [1]
+   interface_construct_signature.js:18:8
+   18| box as string; // error
+              ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- jsx_props.js:45:34
+
+Cannot create `MenuItem` element because in property `onClick` > the first parameter: `{id: string, ...}` [1] is
+incompatible with `null` [2]. [incompatible-type]
+
+   jsx_props.js:45:34
+   45|   <MenuItem data={{id}} onClick={onClick} />; // error: `T` includes the `null` of `defaultProps`
+                                        ^^^^^^^
+
+References:
+   jsx_props.js:42:33
+   42|   declare const onClick: (data: {id: string, ...}) => void;
+                                       ^^^^^^^^^^^^^^^^^ [1]
+   jsx_props.js:39:33
+   39|     static defaultProps: {data: null} = {data: null};
+                                       ^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------- nested_iterable.js:8:1
+
+Cannot cast `flat` to `Array<string>` because in array element: `number` [1] is not exactly the same as `string` [2].
+[incompatible-type]
+
+The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
+- Either make `Array<number>` [3] and `Array<string>` [4] exactly the same
+- Or make `Array<string>` [4] a `ReadonlyArray`.
+See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
+
+   nested_iterable.js:8:1
+   8| flat as Array<string>; // error
+      ^^^^
+
+References:
+   nested_iterable.js:2:49
+   2| declare const rows: ReadonlyArray<ReadonlyArray<number>>;
+                                                      ^^^^^^ [1]
+   nested_iterable.js:8:15
+   8| flat as Array<string>; // error
+                    ^^^^^^ [2]
+   nested_iterable.js:1:61
+   1| declare function flatten<T>(nested: Iterable<Iterable<T>>): Array<T>;
+                                                                  ^^^^^^^^ [3]
+   nested_iterable.js:8:9
+   8| flat as Array<string>; // error
+              ^^^^^^^^^^^^^ [4]
+
+
+Error ------------------------------------------------------------------------------ overloads_against_signature.js:10:1
+
+Cannot cast `n` to `number` because `ReadonlyArray<number>` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   overloads_against_signature.js:10:1
+   10| n as number; // error
+       ^
+
+References:
+   overloads_against_signature.js:2:55
+    2| declare function parse(input: ReadonlyArray<string>): ReadonlyArray<number>;
+                                                             ^^^^^^^^^^^^^^^^^^^^^ [1]
+   overloads_against_signature.js:10:6
+   10| n as number; // error
+            ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------- overloads_result_hint.js:24:11
+
+Cannot call `o.get` because: [incompatible-type]
+ - Either `null` [1] is incompatible with `{...}` [2].
+ - Or `null` [3] is incompatible with `{...}` [2].
+
+   overloads_result_hint.js:24:11
+   24|   click(o.get('a')); // error: `get` may return `null`
+                 ^^^
+
+References:
+   overloads_result_hint.js:18:46
+   18|     get<K extends keyof Map>(k: K): Map[K] | null;
+                                                    ^^^^ [1]
+   overloads_result_hint.js:22:29
+   22|   declare function click(e: {...}): void;
+                                   ^^^^^ [2]
+   overloads_result_hint.js:19:37
+   19|     get<E = {x: 2}>(k: string): E | null;
+                                           ^^^^ [3]
+
+
+Error ------------------------------------------------------------------------------------- recursive_alias_union.js:6:1
+
+Cannot call `f` because `T` [1] is underconstrained by call of `f` [2]. Either add explicit type arguments or cast the
+expression to your expected type. [underconstrained-implicit-instantiation]
+
+   recursive_alias_union.js:6:1
+   6| f(1); // error: underconstrained, as in the flow-based solve
+      ^
+
+References:
+   recursive_alias_union.js:4:20
+   4| declare function f<T>(x: F<number> | T): T;
+                         ^ [1]
+   recursive_alias_union.js:6:1
+   6| f(1); // error: underconstrained, as in the flow-based solve
+      ^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------ structural_variance_unions.js:42:10
+
+Cannot use `this` [1] in an input position because `this` [1] is expected to occur only in output positions.
+[incompatible-variance]
+
+   structural_variance_unions.js:42:10
+   42|     m(x: this): void {} // error: `this` in an input position
+                ^^^^
+
+References:
+   structural_variance_unions.js:41:9
+   41|   class C extends Base implements I {
+               ^ [1]
+
+
+Error -------------------------------------------------------------------------------------- union_same_class_fit.js:9:1
+
+Cannot cast `f(...)` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   union_same_class_fit.js:9:1
+   9| f(n) as empty; // error
+      ^^^^
+
+References:
+   union_same_class_fit.js:6:22
+   6| declare const n: Box<number>;
+                           ^^^^^^ [1]
+   union_same_class_fit.js:9:9
+   9| f(n) as empty; // error
+              ^^^^^ [2]
+
+
+
+Found 17 errors

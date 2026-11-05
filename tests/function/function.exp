@@ -428,6 +428,24 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- apply.js:29:1
 
+Cannot call `test.call.apply` because in array element: `"foo"` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   apply.js:29:1
+   29| test.call.apply(test, [0, 123, 'foo']) as void;
+       ^^^^^^^^^
+
+References:
+   apply.js:29:32
+   29| test.call.apply(test, [0, 123, 'foo']) as void;
+                                      ^^^^^ [1]
+   apply.js:29:27
+   29| test.call.apply(test, [0, 123, 'foo']) as void;
+                                 ^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- apply.js:29:1
+
 Cannot call `test.call.apply` because in the `this` parameter > the first argument: `string` [1] is incompatible with
 `number` [2]. [incompatible-type]
 
@@ -439,27 +457,9 @@ References:
    apply.js:1:41
     1| function test(this: number | string, a: string, b: number): number {
                                                ^^^^^^ [1]
-   apply.js:29:27
+   apply.js:29:24
    29| test.call.apply(test, [0, 123, 'foo']) as void;
-                                 ^^^ [2]
-
-
-Error ---------------------------------------------------------------------------------------------------- apply.js:29:1
-
-Cannot call `test.call.apply` because in the `this` parameter > the second argument: `number` [1] is incompatible with
-`string` [2]. [incompatible-type]
-
-   apply.js:29:1
-   29| test.call.apply(test, [0, 123, 'foo']) as void;
-       ^^^^^^^^^
-
-References:
-   apply.js:1:52
-    1| function test(this: number | string, a: string, b: number): number {
-                                                          ^^^^^^ [1]
-   apply.js:29:32
-   29| test.call.apply(test, [0, 123, 'foo']) as void;
-                                      ^^^^^ [2]
+                              ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- apply.js:29:1
@@ -482,8 +482,8 @@ References:
 Error --------------------------------------------------------------------------------------------------- apply.js:34:11
 
 Cannot call `test.bind.apply` because: [incompatible-type]
- - Either in the return value: `[number]` [1] has 1 element but `[a: string, b: number]` [2] has 2 elements.
- - Or in the first parameter: `string` [3] is incompatible with `number` [4].
+ - Either in the `this` parameter > the first parameter: `number` [1] is incompatible with `string` [2].
+ - Or `[number]` [3] has 1 element but `[a: string, b: number]` [4] has 2 elements.
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -493,18 +493,18 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
                   ^^^^^
 
 References:
-   apply.js:34:36
+   apply.js:34:24
     34| test.bind.apply(test, [0, 123]) as (b: number) => number;
-                                           ^^^^^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:357:82
-   357| type OmitThisParameter<T> = unknown extends ThisParameterType<T> ? T : T extends (this: infer This, ...args: infer A) => infer R ? (...args: A) => R : T;
-                                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+                               ^ [1]
    apply.js:1:41
      1| function test(this: number | string, a: string, b: number): number {
-                                                ^^^^^^ [3]
-   apply.js:34:27
+                                                ^^^^^^ [2]
+   apply.js:34:36
     34| test.bind.apply(test, [0, 123]) as (b: number) => number;
-                                  ^^^ [4]
+                                           ^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es5.js:357:82
+   357| type OmitThisParameter<T> = unknown extends ThisParameterType<T> ? T : T extends (this: infer This, ...args: infer A) => infer R ? (...args: A) => R : T;
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ---------------------------------------------------------------------------------------------------- apply.js:44:5
@@ -598,7 +598,7 @@ References:
 Error ---------------------------------------------------------------------------------------------------- bind.js:42:17
 
 Cannot call `receiver.method.bind` because: [incompatible-type]
- - Either in the first parameter: `string` [1] is incompatible with `1` [2].
+ - Either in the first parameter: `string` [1] is incompatible with `number` [2].
  - Or no more than 1 argument is expected by function type [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are

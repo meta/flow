@@ -54,7 +54,10 @@ Error --------------------------------------------------------------------------
 
 Cannot call `o.m.bind` because: [incompatible-type]
  - Either property `x` is missing in `O` [1] but exists in `{x: number, ...}` [2].
- - Or property `x` is missing in `O` [1] but exists in `{x: number, ...}` [3].
+ - Or in the `this` parameter: property `x` is missing in `O` [1] but exists in `{x: number, ...}` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    lint_settings.js:18:5
     18| o.m.bind(other); // error: lint disabled, `this` incompatibility still reported
@@ -76,7 +79,10 @@ Error --------------------------------------------------------------------------
 
 Cannot call `o.m.bind` because: [incompatible-type]
  - Either property `x` is missing in `O` [1] but exists in `{x: number, ...}` [2].
- - Or property `x` is missing in `O` [1] but exists in `{x: number, ...}` [3].
+ - Or in the `this` parameter: property `x` is missing in `O` [1] but exists in `{x: number, ...}` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    lint_settings.js:20:5
     20| o.m.bind(other); // error
@@ -230,7 +236,10 @@ Error --------------------------------------------------------------------------
 
 Cannot call `o.m.bind` because: [incompatible-type]
  - Either property `x` is missing in `O` [1] but exists in `{x: number, ...}` [2].
- - Or property `x` is missing in `O` [1] but exists in `{x: number, ...}` [3].
+ - Or in the `this` parameter: property `x` is missing in `O` [1] but exists in `{x: number, ...}` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    rejected.js:10:5
     10| o.m.bind(other); // error: receiver mismatch
@@ -319,25 +328,27 @@ References:
 Error ------------------------------------------------------------------------------------------------- rejected.js:13:5
 
 Cannot call `o.m.bind` because: [incompatible-type]
- - Either `(this: (this: {x: number, ...}, y: number) => void, thisArg: ThisParameterType<(this: {x: number, .....` [1]
+ - Either in the `this` parameter: `{x: number, ...}` [1] is incompatible with `void` [2].
+ - Or `(this: (this: {x: number, ...}, y: number) => void, thisArg: ThisParameterType<(this: {x: number, .....` [3]
    requires another argument from call of method `bind` [2].
- - Or `(this: (this: void, ...args: [...Readonly<[]>, ...empty]) => void, thisArg: void, ...argArray: Reado...` [3]
-   requires another argument from call of method `bind` [2].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    rejected.js:13:5
     13| o.m.bind(); // error: no first argument
             ^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:335:12
-   335|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   rejected.js:2:13
+     2|   m: (this: {x: number, ...}, y: number) => void,
+                    ^^^^^^^^^^^^^^^^ [1]
    rejected.js:13:1
     13| o.m.bind(); // error: no first argument
         ^^^^^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:336:12
-   336|         & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...argArray: A) => (...args: B) => R);
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es5.js:335:12
+   335|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------------- rejected.js:13:5
@@ -495,7 +506,10 @@ Error --------------------------------------------------------------------------
 
 Cannot call `f.bind` because: [incompatible-type]
  - Either property `x` is missing in `O` [1] but exists in `{x: number, ...}` [2].
- - Or property `x` is missing in `O` [1] but exists in `{x: number, ...}` [3].
+ - Or in the `this` parameter: property `x` is missing in `O` [1] but exists in `{x: number, ...}` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    rejected.js:25:3
     25| f.bind(o); // error: `f` is not a member access

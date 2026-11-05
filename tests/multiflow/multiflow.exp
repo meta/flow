@@ -54,7 +54,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- apply.js:18:7
 
-Cannot call `apply` with `withRest1` bound to `fn` because `[string]` [1] has 1 element but `["hi", 123]` [2] has 2
+Cannot call `apply` with `withRest1` bound to `fn` because `["hi"]` [1] has 1 element but `["hi", 123]` [2] has 2
 elements. [invalid-tuple-arity]
 
    apply.js:18:7
@@ -72,7 +72,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- apply.js:19:7
 
-Cannot call `apply` with `withRest1` bound to `fn` because `[string, number, boolean]` [1] has 3 elements but
+Cannot call `apply` with `withRest1` bound to `fn` because `["hi", 123, boolean]` [1] has 3 elements but
 `["hi", 123]` [2] has 2 elements. [invalid-tuple-arity]
 
    apply.js:19:7
@@ -144,7 +144,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- apply.js:37:11
 
-Cannot call `applyType` with `withRest2` bound to `fn` because `[string]` [1] has 1 element but `["hi", 123]` [2] has 2
+Cannot call `applyType` with `withRest2` bound to `fn` because `["hi"]` [1] has 1 element but `["hi", 123]` [2] has 2
 elements. [invalid-tuple-arity]
 
    apply.js:37:11
@@ -162,7 +162,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- apply.js:38:11
 
-Cannot call `applyType` with `withRest2` bound to `fn` because `[string, number, boolean]` [1] has 3 elements but
+Cannot call `applyType` with `withRest2` bound to `fn` because `["hi", 123, boolean]` [1] has 3 elements but
 `["hi", 123]` [2] has 2 elements. [invalid-tuple-arity]
 
    apply.js:38:11
@@ -180,8 +180,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ jsx.js:30:3
 
-Cannot create `AcceptsWhatever` element because in the return value: `string` [1] is incompatible with `number` [2].
-[incompatible-use]
+Cannot create `AcceptsWhatever` element because `string` [1] is incompatible with `number` [2]. [incompatible-use]
 
    jsx.js:30:3
    30| (<AcceptsWhatever />) as number; // Error string ~> number
@@ -198,12 +197,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ jsx.js:31:3
 
-Cannot create `AcceptsWhatever` element because: [incompatible-use]
- - Either in the return value: `string` [1] is incompatible with `number` [2].
- - Or `{name: "hi"}` [3] is incompatible with `null` [4].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot create `AcceptsWhatever` element because `string` [1] is incompatible with `number` [2]. [incompatible-use]
 
    jsx.js:31:3
    31| (<AcceptsWhatever name="hi">Text</AcceptsWhatever>) as number; // Error string ~> number
@@ -216,19 +210,13 @@ References:
    jsx.js:31:56
    31| (<AcceptsWhatever name="hi">Text</AcceptsWhatever>) as number; // Error string ~> number
                                                               ^^^^^^ [2]
-   jsx.js:31:2
-   31| (<AcceptsWhatever name="hi">Text</AcceptsWhatever>) as number; // Error string ~> number
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
-   jsx.js:13:10
-   13|   props: null,
-                ^^^^ [4]
 
 
 Error ------------------------------------------------------------------------------------------------------ jsx.js:34:2
 
 Cannot create `ExpectsProps` element because: [incompatible-use]
  - Either in the first parameter: property `name` is missing in `{...}` [1] but exists in `{name: string, ...}` [2].
- - Or `null` [3] is incompatible with `{name: string, ...}` [2].
+ - Or in the first parameter: `{name: string, ...}` [2] is incompatible with `null` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -252,8 +240,8 @@ References:
 Error ------------------------------------------------------------------------------------------------------ jsx.js:35:3
 
 Cannot create `ExpectsProps` element because: [incompatible-use]
- - Either in the return value: `string` [1] is incompatible with `number` [2].
- - Or `{name: "hi"}` [3] is incompatible with `null` [4].
+ - Either in the first parameter: property `name` is missing in `{...}` [1] but exists in `{name: string, ...}` [2].
+ - Or `string` [3] is incompatible with `number` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -263,24 +251,24 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
          ^^^^^^^^^^^^
 
 References:
+   jsx.js:10:21
+   10|   C extends (props: {...}, children: Children) => Elem,
+                           ^^^^^ [1]
+   jsx.js:33:38
+   33| declare function ExpectsProps(props: {name: string, ...}, children: any): string;
+                                            ^^^^^^^^^^^^^^^^^^^ [2]
    jsx.js:33:75
    33| declare function ExpectsProps(props: {name: string, ...}, children: any): string;
-                                                                                 ^^^^^^ [1]
+                                                                                 ^^^^^^ [3]
    jsx.js:35:50
    35| (<ExpectsProps name="hi">Text</ExpectsProps>) as number; // Error string ~> number
-                                                        ^^^^^^ [2]
-   jsx.js:35:2
-   35| (<ExpectsProps name="hi">Text</ExpectsProps>) as number; // Error string ~> number
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
-   jsx.js:13:10
-   13|   props: null,
-                ^^^^ [4]
+                                                        ^^^^^^ [4]
 
 
 Error ------------------------------------------------------------------------------------------------------ jsx.js:38:2
 
-Cannot create `ExpectsChildrenTuple` element because `Readonly<[]>` [1] has 0 elements but `[string]` [2] has 1 element.
-[incompatible-use]
+Cannot create `ExpectsChildrenTuple` element because in the second parameter: `Readonly<[]>` [1] has 0 elements but
+`[string]` [2] has 1 element. [incompatible-use]
 
    jsx.js:38:2
    38| <ExpectsChildrenTuple />; // Error - missing child
@@ -297,26 +285,26 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ jsx.js:40:2
 
-Cannot create `ExpectsChildrenTuple` element because in index `0`: `123` [1] is incompatible with `string` [2].
-[incompatible-use]
+Cannot create `ExpectsChildrenTuple` element because in the second parameter > index `0`: `string` [1] is incompatible
+with `123` [2]. [incompatible-use]
 
    jsx.js:40:2
    40| <ExpectsChildrenTuple>{123}</ExpectsChildrenTuple>; // Error: number ~> string
         ^^^^^^^^^^^^^^^^^^^^
 
 References:
-   jsx.js:40:24
-   40| <ExpectsChildrenTuple>{123}</ExpectsChildrenTuple>; // Error: number ~> string
-                              ^^^ [1]
    jsx.js:37:62
    37| declare function ExpectsChildrenTuple(props: any, children: [string]): string;
-                                                                    ^^^^^^ [2]
+                                                                    ^^^^^^ [1]
+   jsx.js:40:24
+   40| <ExpectsChildrenTuple>{123}</ExpectsChildrenTuple>; // Error: number ~> string
+                              ^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------------ jsx.js:41:2
 
-Cannot create `ExpectsChildrenTuple` element because `["Hi ", "there"]` [1] has 2 elements but `[string]` [2] has 1
-element. [incompatible-use]
+Cannot create `ExpectsChildrenTuple` element because in the second parameter: `["Hi ", "there"]` [1] has 2 elements but
+`[string]` [2] has 1 element. [incompatible-use]
 
    jsx.js:41:2
    41| <ExpectsChildrenTuple>Hi {'there'}</ExpectsChildrenTuple>; // Error: too many children
@@ -333,20 +321,20 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ jsx.js:49:2
 
-Cannot create `ExpectsChildrenArray` element because in array element: `123` [1] is incompatible with `string` [2].
-[incompatible-use]
+Cannot create `ExpectsChildrenArray` element because in the second parameter > array element: `string` [1] is
+incompatible with `123` [2]. [incompatible-use]
 
    jsx.js:49:2
    49| <ExpectsChildrenArray>{123}</ExpectsChildrenArray>; // Error: number ~> string
         ^^^^^^^^^^^^^^^^^^^^
 
 References:
-   jsx.js:49:24
-   49| <ExpectsChildrenArray>{123}</ExpectsChildrenArray>; // Error: number ~> string
-                              ^^^ [1]
    jsx.js:45:19
    45|   children: Array<string>,
-                         ^^^^^^ [2]
+                         ^^^^^^ [1]
+   jsx.js:49:24
+   49| <ExpectsChildrenArray>{123}</ExpectsChildrenArray>; // Error: number ~> string
+                              ^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------------------- spread.js:5:55

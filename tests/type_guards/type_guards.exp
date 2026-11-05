@@ -2381,8 +2381,8 @@ References:
 Error ---------------------------------------------------------------------------------------------- refinement.js:47:35
 
 Cannot call `arr.filter` because: [incompatible-type]
- - Either in array element: `number` [1] is incompatible with `string` [2].
- - Or in array element: `unknown` [3] is incompatible with `string` [2].
+ - Either in the type predicate: `string` [1] is incompatible with `number` [2].
+ - Or in array element: `unknown` [3] is incompatible with `string` [1].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -2392,12 +2392,12 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
                                          ^^^^^^
 
 References:
-   refinement.js:47:61
-   47|   const arr2: Array<string> = arr.filter((x: unknown): x is number => { return typeof x === "number"; }); // error
-                                                                   ^^^^^^ [1]
    refinement.js:47:21
    47|   const arr2: Array<string> = arr.filter((x: unknown): x is number => { return typeof x === "number"; }); // error
-                           ^^^^^^ [2]
+                           ^^^^^^ [1]
+   refinement.js:47:61
+   47|   const arr2: Array<string> = arr.filter((x: unknown): x is number => { return typeof x === "number"; }); // error
+                                                                   ^^^^^^ [2]
    refinement.js:44:37
    44|   declare const arr: ReadOnlyArray_<unknown>;
                                            ^^^^^^^ [3]

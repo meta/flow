@@ -250,9 +250,9 @@ References:
    lazy.js:19:12
    19| const _b = <LazyFunctionComponent />; // Error missing foo
                   ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   lazy.js:6:31
-    6| function FunctionComponent(x: Props): React.Node { return null }
-                                     ^^^^^ [2]
+   lazy.js:5:14
+    5| type Props = { foo: number };
+                    ^^^^^^^^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- lazy.js:20:13
@@ -268,9 +268,9 @@ References:
    lazy.js:20:12
    20| const _c = <LazyFunctionComponent foo={3} bar={3} />; // Error extra bar
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   lazy.js:6:31
-    6| function FunctionComponent(x: Props): React.Node { return null }
-                                     ^^^^^ [2]
+   lazy.js:5:14
+    5| type Props = { foo: number };
+                    ^^^^^^^^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- lazy.js:21:39
@@ -367,9 +367,9 @@ References:
    memo.js:12:12
    12| const _b = <MemoComponent />; // Error missing foo
                   ^^^^^^^^^^^^^^^^^ [1]
-   memo.js:7:23
-    7| function Component(x: Props): React.Node { return null }
-                             ^^^^^ [2]
+   memo.js:5:14
+    5| type Props = { foo: number };
+                    ^^^^^^^^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- memo.js:13:13
@@ -385,9 +385,9 @@ References:
    memo.js:13:12
    13| const _c = <MemoComponent foo={3} bar={3} />; // Error extra bar
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   memo.js:7:23
-    7| function Component(x: Props): React.Node { return null }
-                             ^^^^^ [2]
+   memo.js:5:14
+    5| type Props = { foo: number };
+                    ^^^^^^^^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- memo.js:14:31
@@ -418,9 +418,9 @@ References:
    memo.js:19:12
    19| const _f = <MemoComponentWithEqual />; // Error missing foo
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   memo.js:7:23
-    7| function Component(x: Props): React.Node { return null }
-                             ^^^^^ [2]
+   memo.js:5:14
+    5| type Props = { foo: number };
+                    ^^^^^^^^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- memo.js:20:13
@@ -436,9 +436,9 @@ References:
    memo.js:20:12
    20| const _g = <MemoComponentWithEqual foo={3} bar={3} />; // Error extra bar
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   memo.js:7:23
-    7| function Component(x: Props): React.Node { return null }
-                             ^^^^^ [2]
+   memo.js:5:14
+    5| type Props = { foo: number };
+                    ^^^^^^^^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- memo.js:21:40

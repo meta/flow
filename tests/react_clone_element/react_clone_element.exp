@@ -1,56 +1,31 @@
 Error ----------------------------------------------------------------------------------------------------- test.js:19:7
 
 Cannot call `React.cloneElement` because: [incompatible-type]
- - Either `(element: void, props?: ?Partial<$JSXIntrinsics[empty]["props"]>, ...children: ReadonlyArray<React.N...` [1]
-   requires another argument from call of method `cloneElement` [2].
- - Or `(element: void, props?: ?Partial<Readonly<{...$Exact<any>, key: React.Key}>>) => void` [3] requires another
-   argument from call of method `cloneElement` [2].
- - Or `(element: void, props: ?Partial<Readonly<{...$Exact<any>, key: React.Key}>>, children: any["children...` [4]
-   requires another argument from call of method `cloneElement` [2].
- - Or `(element: void, props: ?Partial<Readonly<{...$Exact<any>, key: React.Key}>>, firstChild: any["childr...` [5]
-   requires another argument from call of method `cloneElement` [2].
+ - Either `void` [1] is incompatible with `ExactReactElement_DEPRECATED<empty, React.ComponentProps<empty>>` [2].
+ - Or `void` [1] is incompatible with `ExactReactElement_DEPRECATED<component(...empty) | string, empty>` [3].
+ - Or `void` [1] is incompatible with `ExactReactElement_DEPRECATED<component(...empty) | string, empty>` [4].
+ - Or `void` [1] is incompatible with `ExactReactElement_DEPRECATED<component(...empty) | string, empty>` [5].
 
    test.js:19:7
     19| React.cloneElement(); // Error: Needs a minimum of two arguments.
               ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:351:6
-             v---------------------------------------------------------------------------
-   351|   & (<C extends keyof $JSXIntrinsics, E extends ExactReactElement_DEPRECATED<C>>(
-   352|     element: E,
-   353|     props?: ?Partial<$JSXIntrinsics[C]['props']>,
-   354|     ...children: ReadonlyArray<React$Node>
-   355|   ) => E)
-          -----^ [1]
    test.js:19:1
     19| React.cloneElement(); // Error: Needs a minimum of two arguments.
-        ^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/react.js:356:6
-             v------------------------------------------------------------------------------------
+        ^^^^^^^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/react.js:351:49
+   351|   & (<C extends keyof $JSXIntrinsics, E extends ExactReactElement_DEPRECATED<C>>(
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/react.js:356:24
    356|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
-   357|     element: E,
-   358|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
-   359|   ) => E)
-          -----^ [3]
-   <BUILTINS>/react.js:360:6
-             v------------------------------------------------------------------------------------
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/react.js:360:24
    360|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
-   361|     element: E,
-   362|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
-   363|     children: NoInfer<Props>['children']
-   364|   ) => E)
-          -----^ [4]
-   <BUILTINS>/react.js:365:6
-             v------------------------------------------------------------------------------------
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   <BUILTINS>/react.js:365:24
    365|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
-   366|     element: E,
-   367|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
-   368|     firstChild: NoInfer<Props>['children'][0],
-   369|     secondChild: NoInfer<Props>['children'][1],
-   370|     ...restChildren: NoInfer<Props>['children'] extends [readonly first: unknown, readonly second: unknown, ...infer Rest] ? Rest : NoInfer<Props>['children']
-   371|   ) => E);
-          -----^ [5]
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [5]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:20:7
@@ -116,63 +91,75 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:25:7
 
-Cannot call `React.cloneElement` because in type argument `ElementType` [1]: `A` [2] is incompatible with `B` [3].
-[incompatible-type]
-
-   test.js:25:7
-   25| React.cloneElement(a) as ExactReactElement_DEPRECATED<Class<B>>; // Error: A ~> B
-             ^^^^^^^^^^^^
-
-References:
-   <BUILTINS>/react.js:58:54
-   58| declare opaque type ExactReactElement_DEPRECATED<out ElementType extends React$ElementType, out P = React.ComponentProps<ElementType>>: {...};
-                                                            ^^^^^^^^^^^ [1]
-   test.js:13:53
-   13| declare const a: ExactReactElement_DEPRECATED<Class<A>>;
-                                                           ^ [2]
-   test.js:25:61
-   25| React.cloneElement(a) as ExactReactElement_DEPRECATED<Class<B>>; // Error: A ~> B
-                                                                   ^ [3]
-
-
-Error ----------------------------------------------------------------------------------------------------- test.js:31:7
-
 Cannot call `React.cloneElement` because: [incompatible-type]
- - Either in type argument `ElementType` [1]: `Class<A>` [2] is incompatible with `string` [3].
- - Or property `bar` is extra in object literal [4] but missing in
-   `{readonly foo?: number, readonly key?: React.Key, readonly ref?: React.RefSetter<A>}` [5]. Exact objects do not
-   accept extra props.
+ - Either in type argument `ElementType` [1]: `A` [2] is incompatible with `B` [3].
+ - Or `Class<A>` [4] is incompatible with `string` [5].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
-   test.js:31:7
-     31| React.cloneElement(a, {foo: 1, bar: 2}); // Error: `bar` is extra
+   test.js:25:7
+     25| React.cloneElement(a) as ExactReactElement_DEPRECATED<Class<B>>; // Error: A ~> B
                ^^^^^^^^^^^^
 
 References:
    <BUILTINS>/react.js:58:54
      58| declare opaque type ExactReactElement_DEPRECATED<out ElementType extends React$ElementType, out P = React.ComponentProps<ElementType>>: {...};
                                                               ^^^^^^^^^^^ [1]
+   test.js:13:53
+     13| declare const a: ExactReactElement_DEPRECATED<Class<A>>;
+                                                             ^ [2]
+   test.js:25:61
+     25| React.cloneElement(a) as ExactReactElement_DEPRECATED<Class<B>>; // Error: A ~> B
+                                                                     ^ [3]
    test.js:13:47
      13| declare const a: ExactReactElement_DEPRECATED<Class<A>>;
-                                                       ^^^^^^^^ [2]
+                                                       ^^^^^^^^ [4]
    <BUILTINS>/react.js:1838:9
    1838|   [key: string]: {
-                 ^^^^^^ [3]
+                 ^^^^^^ [5]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:31:7
+
+Cannot call `React.cloneElement` because: [incompatible-type]
+ - Either property `bar` is extra in object literal [1] but missing in
+   `{readonly foo?: number, readonly key?: React.Key, readonly ref?: React.RefSetter<A>}` [2]. Exact objects do not
+   accept extra props.
+ - Or property `bar` is extra in object literal [1] but missing in
+   `{readonly foo?: number, readonly key?: React.Key, readonly ref?: React.RefSetter<A>}` [3]. Exact objects do not
+   accept extra props.
+ - Or property `bar` is extra in object literal [1] but missing in
+   `{readonly foo?: number, readonly key?: React.Key, readonly ref?: React.RefSetter<A>}` [4]. Exact objects do not
+   accept extra props.
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   test.js:31:7
+    31| React.cloneElement(a, {foo: 1, bar: 2}); // Error: `bar` is extra
+              ^^^^^^^^^^^^
+
+References:
    test.js:31:23
-     31| React.cloneElement(a, {foo: 1, bar: 2}); // Error: `bar` is extra
-                               ^^^^^^^^^^^^^^^^ [4]
+    31| React.cloneElement(a, {foo: 1, bar: 2}); // Error: `bar` is extra
+                              ^^^^^^^^^^^^^^^^ [1]
    <BUILTINS>/react.js:358:31
-    358|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
-                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [5]
+   358|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/react.js:362:30
+   362|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/react.js:367:30
+   367|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:32:7
 
 Cannot call `React.cloneElement` because: [incompatible-type]
- - Either in type argument `ElementType` [1]: `Class<A>` [2] is incompatible with `string` [3].
- - Or in property `foo`: `"1"` [4] is incompatible with `number` [5].
+ - Either in property `foo`: `"1"` [1] is incompatible with `number` [2].
+ - Or `Class<A>` [3] is incompatible with `string` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -182,28 +169,25 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
                ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:58:54
-     58| declare opaque type ExactReactElement_DEPRECATED<out ElementType extends React$ElementType, out P = React.ComponentProps<ElementType>>: {...};
-                                                              ^^^^^^^^^^^ [1]
-   test.js:13:47
-     13| declare const a: ExactReactElement_DEPRECATED<Class<A>>;
-                                                       ^^^^^^^^ [2]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [3]
    test.js:32:29
      32| React.cloneElement(a, {foo: '1'}); // Error: `foo` is a number.
-                                     ^^^ [4]
+                                     ^^^ [1]
    test.js:5:39
       5| class A extends React.Component<{foo: number, ...}, void> {}
-                                               ^^^^^^ [5]
+                                               ^^^^^^ [2]
+   test.js:13:47
+     13| declare const a: ExactReactElement_DEPRECATED<Class<A>>;
+                                                       ^^^^^^^^ [3]
+   <BUILTINS>/react.js:1838:9
+   1838|   [key: string]: {
+                 ^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:38:7
 
 Cannot call `React.cloneElement` because: [incompatible-type]
- - Either in type argument `ElementType` [1]: `Class<B>` [2] is incompatible with `string` [3].
- - Or in property `foo`: `"1"` [4] is incompatible with `number` [5].
+ - Either in property `foo`: `"1"` [1] is incompatible with `number` [2].
+ - Or `Class<B>` [3] is incompatible with `string` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -213,28 +197,25 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
                ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:58:54
-     58| declare opaque type ExactReactElement_DEPRECATED<out ElementType extends React$ElementType, out P = React.ComponentProps<ElementType>>: {...};
-                                                              ^^^^^^^^^^^ [1]
-   test.js:14:47
-     14| declare const b: ExactReactElement_DEPRECATED<Class<B>>;
-                                                       ^^^^^^^^ [2]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [3]
    test.js:38:29
      38| React.cloneElement(b, {foo: '1'}); // Error: `foo` is a number.
-                                     ^^^ [4]
+                                     ^^^ [1]
    test.js:6:39
       6| class B extends React.Component<{foo: number, bar: number, ...}, void> {}
-                                               ^^^^^^ [5]
+                                               ^^^^^^ [2]
+   test.js:14:47
+     14| declare const b: ExactReactElement_DEPRECATED<Class<B>>;
+                                                       ^^^^^^^^ [3]
+   <BUILTINS>/react.js:1838:9
+   1838|   [key: string]: {
+                 ^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:44:7
 
 Cannot call `React.cloneElement` because: [incompatible-type]
- - Either in type argument `ElementType` [1]: `Class<C>` [2] is incompatible with `string` [3].
- - Or in property `children`: `"42"` [4] is incompatible with `number` [5].
+ - Either in property `children`: `"42"` [1] is incompatible with `number` [2].
+ - Or `Class<C>` [3] is incompatible with `string` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -244,124 +225,130 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
                ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:58:54
-     58| declare opaque type ExactReactElement_DEPRECATED<out ElementType extends React$ElementType, out P = React.ComponentProps<ElementType>>: {...};
-                                                              ^^^^^^^^^^^ [1]
-   test.js:15:47
-     15| declare const c: ExactReactElement_DEPRECATED<Class<C>>;
-                                                       ^^^^^^^^ [2]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [3]
    test.js:44:34
      44| React.cloneElement(c, {children: '42'}); // Error: `children` is a number.
-                                          ^^^^ [4]
+                                          ^^^^ [1]
    test.js:7:44
       7| class C extends React.Component<{children: number, ...}, void> {}
-                                                    ^^^^^^ [5]
+                                                    ^^^^^^ [2]
+   test.js:15:47
+     15| declare const c: ExactReactElement_DEPRECATED<Class<C>>;
+                                                       ^^^^^^^^ [3]
+   <BUILTINS>/react.js:1838:9
+   1838|   [key: string]: {
+                 ^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:48:7
 
 Cannot call `React.cloneElement` because: [incompatible-type]
- - Either in type argument `ElementType` [1]: `Class<C>` [2] is incompatible with `string` [3].
- - Or no more than 2 arguments are expected by function type [4].
+ - Either no more than 2 arguments are expected by function type [1].
+ - Or no more than 3 arguments are expected by function type [2].
+ - Or property `0` is missing in `Number` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    test.js:48:7
-     48| React.cloneElement(c, {}, 1, 2, 3); // Error: `children` is not an array.
-               ^^^^^^^^^^^^
+    48| React.cloneElement(c, {}, 1, 2, 3); // Error: `children` is not an array.
+              ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:58:54
-     58| declare opaque type ExactReactElement_DEPRECATED<out ElementType extends React$ElementType, out P = React.ComponentProps<ElementType>>: {...};
-                                                              ^^^^^^^^^^^ [1]
-   test.js:15:47
-     15| declare const c: ExactReactElement_DEPRECATED<Class<C>>;
-                                                       ^^^^^^^^ [2]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [3]
    <BUILTINS>/react.js:356:6
-              v------------------------------------------------------------------------------------
-    356|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
-    357|     element: E,
-    358|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
-    359|   ) => E)
-           -----^ [4]
+             v------------------------------------------------------------------------------------
+   356|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+   357|     element: E,
+   358|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+   359|   ) => E)
+          -----^ [1]
+   <BUILTINS>/react.js:360:6
+             v------------------------------------------------------------------------------------
+   360|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+   361|     element: E,
+   362|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+   363|     children: NoInfer<Props>['children']
+   364|   ) => E)
+          -----^ [2]
+   test.js:7:44
+     7| class C extends React.Component<{children: number, ...}, void> {}
+                                                   ^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:49:7
 
 Cannot call `React.cloneElement` because: [incompatible-type]
- - Either in type argument `ElementType` [1]: `Class<C>` [2] is incompatible with `string` [3].
- - Or no more than 2 arguments are expected by function type [4].
+ - Either no more than 2 arguments are expected by function type [1].
+ - Or no more than 3 arguments are expected by function type [2].
+ - Or property `0` is missing in `Number` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    test.js:49:7
-     49| React.cloneElement(c, undefined, 1, 2, 3); // Error: `children` is not an array.
-               ^^^^^^^^^^^^
+    49| React.cloneElement(c, undefined, 1, 2, 3); // Error: `children` is not an array.
+              ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:58:54
-     58| declare opaque type ExactReactElement_DEPRECATED<out ElementType extends React$ElementType, out P = React.ComponentProps<ElementType>>: {...};
-                                                              ^^^^^^^^^^^ [1]
-   test.js:15:47
-     15| declare const c: ExactReactElement_DEPRECATED<Class<C>>;
-                                                       ^^^^^^^^ [2]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [3]
    <BUILTINS>/react.js:356:6
-              v------------------------------------------------------------------------------------
-    356|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
-    357|     element: E,
-    358|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
-    359|   ) => E)
-           -----^ [4]
+             v------------------------------------------------------------------------------------
+   356|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+   357|     element: E,
+   358|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+   359|   ) => E)
+          -----^ [1]
+   <BUILTINS>/react.js:360:6
+             v------------------------------------------------------------------------------------
+   360|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+   361|     element: E,
+   362|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+   363|     children: NoInfer<Props>['children']
+   364|   ) => E)
+          -----^ [2]
+   test.js:7:44
+     7| class C extends React.Component<{children: number, ...}, void> {}
+                                                   ^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:50:7
 
 Cannot call `React.cloneElement` because: [incompatible-type]
- - Either in type argument `ElementType` [1]: `Class<C>` [2] is incompatible with `string` [3].
- - Or no more than 2 arguments are expected by function type [4].
+ - Either no more than 2 arguments are expected by function type [1].
+ - Or no more than 3 arguments are expected by function type [2].
+ - Or property `0` is missing in `Number` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    test.js:50:7
-     50| React.cloneElement(c, null, 1, 2, 3); // Error: `children` is not an array.
-               ^^^^^^^^^^^^
+    50| React.cloneElement(c, null, 1, 2, 3); // Error: `children` is not an array.
+              ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:58:54
-     58| declare opaque type ExactReactElement_DEPRECATED<out ElementType extends React$ElementType, out P = React.ComponentProps<ElementType>>: {...};
-                                                              ^^^^^^^^^^^ [1]
-   test.js:15:47
-     15| declare const c: ExactReactElement_DEPRECATED<Class<C>>;
-                                                       ^^^^^^^^ [2]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [3]
    <BUILTINS>/react.js:356:6
-              v------------------------------------------------------------------------------------
-    356|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
-    357|     element: E,
-    358|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
-    359|   ) => E)
-           -----^ [4]
+             v------------------------------------------------------------------------------------
+   356|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+   357|     element: E,
+   358|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+   359|   ) => E)
+          -----^ [1]
+   <BUILTINS>/react.js:360:6
+             v------------------------------------------------------------------------------------
+   360|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+   361|     element: E,
+   362|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+   363|     children: NoInfer<Props>['children']
+   364|   ) => E)
+          -----^ [2]
+   test.js:7:44
+     7| class C extends React.Component<{children: number, ...}, void> {}
+                                                   ^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:54:7
 
 Cannot call `React.cloneElement` because: [incompatible-type]
- - Either in type argument `ElementType` [1]: `Class<D>` [2] is incompatible with `string` [3].
- - Or in property `children`: `42` [4] is incompatible with `Array<number>` [5].
+ - Either in property `children`: `42` [1] is incompatible with `Array<number>` [2].
+ - Or `Class<D>` [3] is incompatible with `string` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -371,146 +358,137 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
                ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:58:54
-     58| declare opaque type ExactReactElement_DEPRECATED<out ElementType extends React$ElementType, out P = React.ComponentProps<ElementType>>: {...};
-                                                              ^^^^^^^^^^^ [1]
-   test.js:16:47
-     16| declare const d: ExactReactElement_DEPRECATED<Class<D>>;
-                                                       ^^^^^^^^ [2]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [3]
    test.js:54:34
      54| React.cloneElement(d, {children: 42}); // Error: `children` is an array.
-                                          ^^ [4]
+                                          ^^ [1]
    test.js:8:44
       8| class D extends React.Component<{children: Array<number>, ...}, void> {}
-                                                    ^^^^^^^^^^^^^ [5]
+                                                    ^^^^^^^^^^^^^ [2]
+   test.js:16:47
+     16| declare const d: ExactReactElement_DEPRECATED<Class<D>>;
+                                                       ^^^^^^^^ [3]
+   <BUILTINS>/react.js:1838:9
+   1838|   [key: string]: {
+                 ^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:56:7
 
 Cannot call `React.cloneElement` because: [incompatible-type]
- - Either in type argument `ElementType` [1]: `Class<D>` [2] is incompatible with `string` [3].
- - Or `42` [4] is incompatible with `Array<number>` [5].
+ - Either `42` [1] is incompatible with `Array<number>` [2].
+ - Or no more than 2 arguments are expected by function type [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    test.js:56:7
-     56| React.cloneElement(d, {}, 42); // Error: `children` is an array.
-               ^^^^^^^^^^^^
+    56| React.cloneElement(d, {}, 42); // Error: `children` is an array.
+              ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:58:54
-     58| declare opaque type ExactReactElement_DEPRECATED<out ElementType extends React$ElementType, out P = React.ComponentProps<ElementType>>: {...};
-                                                              ^^^^^^^^^^^ [1]
-   test.js:16:47
-     16| declare const d: ExactReactElement_DEPRECATED<Class<D>>;
-                                                       ^^^^^^^^ [2]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [3]
    test.js:56:27
-     56| React.cloneElement(d, {}, 42); // Error: `children` is an array.
-                                   ^^ [4]
+    56| React.cloneElement(d, {}, 42); // Error: `children` is an array.
+                                  ^^ [1]
    test.js:8:44
-      8| class D extends React.Component<{children: Array<number>, ...}, void> {}
-                                                    ^^^^^^^^^^^^^ [5]
+     8| class D extends React.Component<{children: Array<number>, ...}, void> {}
+                                                   ^^^^^^^^^^^^^ [2]
+   <BUILTINS>/react.js:356:6
+             v------------------------------------------------------------------------------------
+   356|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+   357|     element: E,
+   358|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+   359|   ) => E)
+          -----^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:57:7
 
 Cannot call `React.cloneElement` because: [incompatible-type]
- - Either in type argument `ElementType` [1]: `Class<D>` [2] is incompatible with `string` [3].
- - Or `42` [4] is incompatible with `Array<number>` [5].
+ - Either `42` [1] is incompatible with `Array<number>` [2].
+ - Or no more than 2 arguments are expected by function type [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    test.js:57:7
-     57| React.cloneElement(d, undefined, 42); // Error: `children` is an array.
-               ^^^^^^^^^^^^
+    57| React.cloneElement(d, undefined, 42); // Error: `children` is an array.
+              ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:58:54
-     58| declare opaque type ExactReactElement_DEPRECATED<out ElementType extends React$ElementType, out P = React.ComponentProps<ElementType>>: {...};
-                                                              ^^^^^^^^^^^ [1]
-   test.js:16:47
-     16| declare const d: ExactReactElement_DEPRECATED<Class<D>>;
-                                                       ^^^^^^^^ [2]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [3]
    test.js:57:34
-     57| React.cloneElement(d, undefined, 42); // Error: `children` is an array.
-                                          ^^ [4]
+    57| React.cloneElement(d, undefined, 42); // Error: `children` is an array.
+                                         ^^ [1]
    test.js:8:44
-      8| class D extends React.Component<{children: Array<number>, ...}, void> {}
-                                                    ^^^^^^^^^^^^^ [5]
+     8| class D extends React.Component<{children: Array<number>, ...}, void> {}
+                                                   ^^^^^^^^^^^^^ [2]
+   <BUILTINS>/react.js:356:6
+             v------------------------------------------------------------------------------------
+   356|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+   357|     element: E,
+   358|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+   359|   ) => E)
+          -----^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:58:7
 
 Cannot call `React.cloneElement` because: [incompatible-type]
- - Either in type argument `ElementType` [1]: `Class<D>` [2] is incompatible with `string` [3].
- - Or `42` [4] is incompatible with `Array<number>` [5].
+ - Either `42` [1] is incompatible with `Array<number>` [2].
+ - Or no more than 2 arguments are expected by function type [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    test.js:58:7
-     58| React.cloneElement(d, null, 42); // Error: `children` is an array.
-               ^^^^^^^^^^^^
+    58| React.cloneElement(d, null, 42); // Error: `children` is an array.
+              ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:58:54
-     58| declare opaque type ExactReactElement_DEPRECATED<out ElementType extends React$ElementType, out P = React.ComponentProps<ElementType>>: {...};
-                                                              ^^^^^^^^^^^ [1]
-   test.js:16:47
-     16| declare const d: ExactReactElement_DEPRECATED<Class<D>>;
-                                                       ^^^^^^^^ [2]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [3]
    test.js:58:29
-     58| React.cloneElement(d, null, 42); // Error: `children` is an array.
-                                     ^^ [4]
+    58| React.cloneElement(d, null, 42); // Error: `children` is an array.
+                                    ^^ [1]
    test.js:8:44
-      8| class D extends React.Component<{children: Array<number>, ...}, void> {}
-                                                    ^^^^^^^^^^^^^ [5]
+     8| class D extends React.Component<{children: Array<number>, ...}, void> {}
+                                                   ^^^^^^^^^^^^^ [2]
+   <BUILTINS>/react.js:356:6
+             v------------------------------------------------------------------------------------
+   356|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+   357|     element: E,
+   358|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+   359|   ) => E)
+          -----^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:76:7
 
 Cannot call `React.cloneElement` because: [incompatible-type]
- - Either in type argument `ElementType` [1]: `(x: {foo: number}) => void` [2] is incompatible with `string` [3].
- - Or property `bar` is extra in object literal [4] but missing in
-   `{readonly foo?: number, readonly key?: React.Key}` [5]. Exact objects do not accept extra props.
+ - Either property `bar` is extra in object literal [1] but missing in
+   `{readonly foo?: number, readonly key?: React.Key}` [2]. Exact objects do not accept extra props.
+ - Or property `bar` is extra in object literal [1] but missing in
+   `{readonly foo?: number, readonly key?: React.Key}` [3]. Exact objects do not accept extra props.
+ - Or property `bar` is extra in object literal [1] but missing in
+   `{readonly foo?: number, readonly key?: React.Key}` [4]. Exact objects do not accept extra props.
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    test.js:76:7
-     76| React.cloneElement(exact, {foo: 1, bar: 2}); // ERROR
-               ^^^^^^^^^^^^
+    76| React.cloneElement(exact, {foo: 1, bar: 2}); // ERROR
+              ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:58:54
-     58| declare opaque type ExactReactElement_DEPRECATED<out ElementType extends React$ElementType, out P = React.ComponentProps<ElementType>>: {...};
-                                                              ^^^^^^^^^^^ [1]
-   test.js:74:51
-     74| declare const exact: ExactReactElement_DEPRECATED<typeof Exact>;
-                                                           ^^^^^^^^^^^^ [2]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [3]
    test.js:76:27
-     76| React.cloneElement(exact, {foo: 1, bar: 2}); // ERROR
-                                   ^^^^^^^^^^^^^^^^ [4]
+    76| React.cloneElement(exact, {foo: 1, bar: 2}); // ERROR
+                                  ^^^^^^^^^^^^^^^^ [1]
    <BUILTINS>/react.js:358:31
-    358|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
-                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [5]
+   358|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/react.js:362:30
+   362|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/react.js:367:30
+   367|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:99:9

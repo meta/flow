@@ -930,27 +930,20 @@ References:
 
 Error ------------------------------------------------------------------------------------ nested_instantiation.js:96:25
 
-Cannot call `preserveController` with `both` bound to `x` because: [incompatible-type]
- - Either in property `b`: `number` [1] is incompatible with `string` [2].
- - Or in property `value`: `string` [3] is incompatible with `number` [4].
+Cannot call `preserveController` with `both` bound to `x` because in property `value`: `string` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    nested_instantiation.js:96:25
    96|   preserveController(3, both); // error: string ~> number
                                ^^^^
 
 References:
-   nested_instantiation.js:95:37
-   95|   const both = {a: "not number", b: 42, value: "wrong"};
-                                           ^^ [1]
-   nested_instantiation.js:95:20
-   95|   const both = {a: "not number", b: 42, value: "wrong"};
-                          ^^^^^^^^^^^^ [2]
    nested_instantiation.js:95:48
    95|   const both = {a: "not number", b: 42, value: "wrong"};
-                                                      ^^^^^^^ [3]
+                                                      ^^^^^^^ [1]
    nested_instantiation.js:96:22
    96|   preserveController(3, both); // error: string ~> number
-                            ^ [4]
+                            ^ [2]
 
 
 Error ------------------------------------------------------------------------------------ nested_instantiation.js:112:3
@@ -986,7 +979,7 @@ References:
 
 Error ------------------------------------------------------------------------------------ nested_instantiation.js:142:3
 
-Cannot cast `r` to `string` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `r` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
 
    nested_instantiation.js:142:3
    142|   r as string; // error: number ~> string
@@ -1003,7 +996,7 @@ References:
 
 Error ------------------------------------------------------------------------------------ nested_instantiation.js:149:3
 
-Cannot cast `r` to `string` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `r` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
 
    nested_instantiation.js:149:3
    149|   r as string; // error: number ~> string
@@ -1020,19 +1013,24 @@ References:
 
 Error ------------------------------------------------------------------------------------ nested_instantiation.js:160:3
 
-Cannot cast `exec(...)` to `number` because `"utf8"` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot call `exec` because: [incompatible-type]
+ - Either no arguments are expected by function type [1].
+ - Or `"utf8"` [2] is incompatible with `number` [3].
 
    nested_instantiation.js:160:3
    160|   exec({encoding: 'utf8'}) as number; // error: 'utf8' ~> number
-          ^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^
 
 References:
+   nested_instantiation.js:155:24
+   155|   declare function exec(): number;
+                               ^^^^^^^^^^ [1]
    nested_instantiation.js:158:6
    158|   ): Encoding<O>;
-             ^^^^^^^^^^^ [1]
+             ^^^^^^^^^^^ [2]
    nested_instantiation.js:160:31
    160|   exec({encoding: 'utf8'}) as number; // error: 'utf8' ~> number
-                                      ^^^^^^ [2]
+                                      ^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------- non_distributive.js:23:3

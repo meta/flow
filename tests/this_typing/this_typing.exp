@@ -454,8 +454,12 @@ References:
 
 Error --------------------------------------------------------------------------------------- class_poly_method.js:23:10
 
-Cannot call `n.method.bind` because in type argument `N` [1]: `string` [2] is incompatible with `number` [3].
-[incompatible-type]
+Cannot call `n.method.bind` because: [incompatible-type]
+ - Either in type argument `N` [1]: `string` [2] is incompatible with `number` [3].
+ - Or in the `this` parameter > type argument `N` [1]: `number` [3] is incompatible with `string` [2].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    class_poly_method.js:23:10
    23| n.method.bind(s); // errors: type argument and receiver mismatch
@@ -491,8 +495,12 @@ References:
 
 Error --------------------------------------------------------------------------------------- class_poly_method.js:24:10
 
-Cannot call `s.method.bind` because in type argument `N` [1]: `number` [2] is incompatible with `string` [3].
-[incompatible-type]
+Cannot call `s.method.bind` because: [incompatible-type]
+ - Either in type argument `N` [1]: `number` [2] is incompatible with `string` [3].
+ - Or in the `this` parameter > type argument `N` [1]: `string` [3] is incompatible with `number` [2].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    class_poly_method.js:24:10
    24| s.method.bind(n); // errors: type argument and receiver mismatch
@@ -983,7 +991,12 @@ References:
 
 Error ----------------------------------------------------------------------------------------- declare_function.js:12:7
 
-Cannot call `myFun.bind` because in property `prop`: `true` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot call `myFun.bind` because: [incompatible-type]
+ - Either in property `prop`: `true` [1] is incompatible with `number` [2].
+ - Or in the `this` parameter > property `prop`: `number` [2] is incompatible with `boolean` [1].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    declare_function.js:12:7
    12| myFun.bind({prop: true}); // Error - boolean ~> number
@@ -1084,8 +1097,12 @@ References:
 
 Error ---------------------------------------------------------------------------------------- declare_function.js:15:11
 
-Cannot call `myPolyFun.bind` because in property `prop`: `true` [1] is incompatible with `number` [2].
-[incompatible-type]
+Cannot call `myPolyFun.bind` because: [incompatible-type]
+ - Either in property `prop`: `true` [1] is incompatible with `number` [2].
+ - Or in the `this` parameter > property `prop`: `number` [2] is incompatible with `boolean` [1].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    declare_function.js:15:11
    15| myPolyFun.bind({prop: true}); // Error - boolean ~> number
@@ -1187,25 +1204,27 @@ References:
 Error ----------------------------------------------------------------------------------------- declare_function.js:19:7
 
 Cannot call `myFun.bind` because: [incompatible-type]
- - Either `(this: (this: {readonly prop: number, ...}) => string, thisArg: ThisParameterType<(this: {readonly p...` [1]
+ - Either in the `this` parameter: `{readonly prop: number, ...}` [1] is incompatible with `void` [2].
+ - Or `(this: (this: {readonly prop: number, ...}) => string, thisArg: ThisParameterType<(this: {readonly p...` [3]
    requires another argument from call of method `bind` [2].
- - Or `(this: (this: void, ...args: [...Readonly<[]>, ...empty]) => string, thisArg: void, ...argArray: Rea...` [3]
-   requires another argument from call of method `bind` [2].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    declare_function.js:19:7
     19| myFun.bind(); // Error - void ~> number
               ^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:335:12
-   335|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   declare_function.js:1:30
+     1| declare function myFun(this: {readonly prop: number, ...}): string;
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    declare_function.js:19:1
     19| myFun.bind(); // Error - void ~> number
         ^^^^^^^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:336:12
-   336|         & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...argArray: A) => (...args: B) => R);
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es5.js:335:12
+   335|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------- declare_function.js:19:7
@@ -1295,25 +1314,27 @@ References:
 Error ---------------------------------------------------------------------------------------- declare_function.js:22:11
 
 Cannot call `myPolyFun.bind` because: [incompatible-type]
- - Either `(this: <T>(this: {readonly prop: number, ...}, x: T) => T, thisArg: ThisParameterType<<T>(this: {rea...` [1]
+ - Either in the `this` parameter: `{readonly prop: number, ...}` [1] is incompatible with `void` [2].
+ - Or `(this: <T>(this: {readonly prop: number, ...}, x: T) => T, thisArg: ThisParameterType<<T>(this: {rea...` [3]
    requires another argument from call of method `bind` [2].
- - Or `(this: (this: void, ...args: [...Readonly<[]>, ...empty]) => any, thisArg: void, ...argArray: Readon...` [3]
-   requires another argument from call of method `bind` [2].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    declare_function.js:22:11
     22| myPolyFun.bind(); // Error - void ~> number
                   ^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:335:12
-   335|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   declare_function.js:2:37
+     2| declare function myPolyFun<T>(this: {readonly prop: number, ...}, x: T): T;
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    declare_function.js:22:1
     22| myPolyFun.bind(); // Error - void ~> number
         ^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:336:12
-   336|         & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...argArray: A) => (...args: B) => R);
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es5.js:335:12
+   335|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------- declare_function.js:22:11
@@ -1420,7 +1441,10 @@ Error --------------------------------------------------------------------------
 
 Cannot call `x.bind` because: [incompatible-type]
  - Either `""` [1] is incompatible with `number` [2].
- - Or `""` [1] is incompatible with `number` [3].
+ - Or in the `this` parameter: `number` [3] is incompatible with `string` [1].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    function_type.js:5:4
      5| (x.bind("")()); // error: number incompatible with string
@@ -1474,7 +1498,10 @@ Error --------------------------------------------------------------------------
 
 Cannot call `y.bind` because: [incompatible-type]
  - Either `""` [1] is incompatible with `number` [2].
- - Or `""` [1] is incompatible with `number` [3].
+ - Or in the `this` parameter: `number` [3] is incompatible with `string` [1].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    function_type.js:12:3
     12| y.bind(""); // error: number incompatible with string
@@ -2459,7 +2486,10 @@ Error --------------------------------------------------------------------------
 
 Cannot call `bar.bind` because: [incompatible-type]
  - Either property `f` is missing in `{y: string, ...}` [1] but exists in `{f: number, ...}` [2].
- - Or property `f` is missing in `{y: string, ...}` [1] but exists in `{f: number, ...}` [3].
+ - Or in the `this` parameter: property `f` is missing in `{y: string, ...}` [1] but exists in `{f: number, ...}` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    test.js:17:5
     17| bar.bind(y)(); // error : number incompatible with string
@@ -2589,8 +2619,11 @@ Error --------------------------------------------------------------------------
 Cannot call `o3.foo.bind` because: [incompatible-type]
  - Either property `foo` is extra in object literal [1] but missing in `{y: number}` [2]. Exact objects do not accept
    extra props.
- - Or property `foo` is extra in object literal [1] but missing in `{y: number}` [3]. Exact objects do not accept extra
-   props.
+ - Or in the `this` parameter: property `foo` is extra in object literal [1] but missing in `{y: number}` [3]. Exact
+   objects do not accept extra props.
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    test.js:45:8
     45| o3.foo.bind(o2)(); // error, foo is missing in type of o2 this

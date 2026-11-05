@@ -50,8 +50,8 @@ References:
 Error ------------------------------------------------------------------------------ conditional_type_placeholder.js:9:1
 
 Cannot call `render` because: [incompatible-type]
- - Either in the return value: `string` [1] is incompatible with `number` [2].
- - Or `(props: Unbox<Box<{readonly s: empty}>>) => empty` [3] is incompatible with `number` [4].
+ - Either `(props: Unbox<Box<{readonly s: unknown}>>) => unknown` [1] is incompatible with `number` [2].
+ - Or `string` [3] is incompatible with `number` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -61,25 +61,25 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
       ^^^^^^
 
 References:
-   conditional_type_placeholder.js:4:29
-   4|   (<R>((props: {readonly s: string}) => R) => R);
-                                  ^^^^^^ [1]
-   conditional_type_placeholder.js:9:24
-   9| render(renderUnbox) as number; // error: string ~> number
-                             ^^^^^^ [2]
    conditional_type_placeholder.js:7:29
    7| declare function renderUnbox<S>(props: Unbox<Box<{readonly s: S}>>): S;
-                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    conditional_type_placeholder.js:3:37
    3| declare const render: ((overrides?: number) => void) &
-                                          ^^^^^^ [4]
+                                          ^^^^^^ [2]
+   conditional_type_placeholder.js:4:29
+   4|   (<R>((props: {readonly s: string}) => R) => R);
+                                  ^^^^^^ [3]
+   conditional_type_placeholder.js:9:24
+   9| render(renderUnbox) as number; // error: string ~> number
+                             ^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------- conditional_type_placeholder.js:15:1
 
 Cannot call `render` because: [incompatible-type]
- - Either in the return value: `string` [1] is incompatible with `number` [2].
- - Or `(props: ParamOf<Box<(x: {readonly s: empty}) => void>>) => empty` [3] is incompatible with `number` [4].
+ - Either `(props: ParamOf<Box<(x: {readonly s: unknown}) => void>>) => unknown` [1] is incompatible with `number` [2].
+ - Or `string` [3] is incompatible with `number` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -89,18 +89,18 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
        ^^^^^^
 
 References:
-   conditional_type_placeholder.js:4:29
-    4|   (<R>((props: {readonly s: string}) => R) => R);
-                                   ^^^^^^ [1]
-   conditional_type_placeholder.js:15:24
-   15| render(renderParam) as number; // error: string ~> number
-                              ^^^^^^ [2]
    conditional_type_placeholder.js:13:29
    13| declare function renderParam<S>(props: ParamOf<Box<(x: {readonly s: S}) => void>>): S;
-                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    conditional_type_placeholder.js:3:37
     3| declare const render: ((overrides?: number) => void) &
-                                           ^^^^^^ [4]
+                                           ^^^^^^ [2]
+   conditional_type_placeholder.js:4:29
+    4|   (<R>((props: {readonly s: string}) => R) => R);
+                                   ^^^^^^ [3]
+   conditional_type_placeholder.js:15:24
+   15| render(renderParam) as number; // error: string ~> number
+                              ^^^^^^ [4]
 
 
 Error ---------------------------------------------------------------------------- conditional_type_without_infer.js:6:1
@@ -363,7 +363,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- no_infer.js:49:1
 
-Cannot cast `r11` to `number` because `""` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `r11` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
 
    no_infer.js:49:1
    49| r11 as number; // error: string ~> number
@@ -380,7 +380,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- no_infer.js:56:1
 
-Cannot cast `r12` to `number` because `""` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `r12` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
 
    no_infer.js:56:1
    56| r12 as number; // error: string ~> number
@@ -468,7 +468,7 @@ References:
 
 Error --------------------------------------------------------------------- pinning_repos_use_through_repos_lower.js:8:1
 
-Cannot cast `r` to `empty` because `"a"` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `r` to `empty` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    pinning_repos_use_through_repos_lower.js:8:1
    8| r as empty; // error: string ~> empty
@@ -1067,13 +1067,13 @@ Error --------------------------------------------------------------------------
 Cannot get `r1.bad` because property `bad` is missing in `Array<string>` [1]. [prop-missing]
 
    upper_non_t.js:99:6
-     99|   r1.bad; // error
-              ^^^
+   99|   r1.bad; // error
+            ^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1263:15
-   1263| declare class Array<T> extends ReadonlyArray<T> {
-                       ^^^^^ [1]
+   upper_non_t.js:95:32
+   95|   const r1 = ArrRest(...([] as Array<string>)); // ok
+                                      ^^^^^^^^^^^^^ [1]
 
 
 Error --------------------------------------------------------------------------------------------- upper_non_t.js:103:3
@@ -1176,9 +1176,9 @@ Cannot cast `v1` to `empty` because `[x: number, y: string]` [1] is incompatible
           ^^
 
 References:
-   upper_non_t.js:112:9
-   112|     fn: (...TArguments) => unknown,
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   upper_non_t.js:120:37
+   120|   function h(x: number, y: string): void {}
+                                            ^^^^ [1]
    upper_non_t.js:132:9
    132|   v1 as empty; // error: tuple ~> empty
                 ^^^^^ [2]
@@ -1193,9 +1193,9 @@ Cannot cast `f4` to `empty` because `[c: boolean, d: Date]` [1] is incompatible 
           ^^
 
 References:
-   upper_non_t.js:134:40
-   134|   declare function funArgRest<Rest>(f: (first: empty, second: empty, ...args: Rest) => unknown): Rest;
-                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   upper_non_t.js:135:80
+   135|   declare function funArgRestInput(a: string, b: number, c: boolean, d: Date): void;
+                                                                                       ^^^^ [1]
    upper_non_t.js:138:9
    138|   f4 as empty; // error: tuple ~> empty
                 ^^^^^ [2]

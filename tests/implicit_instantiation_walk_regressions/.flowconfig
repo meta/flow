@@ -1,0 +1,4 @@
+[options]
+all=true
+builtin_lib=core-only
+experimental.implicit_instantiation_walk=true

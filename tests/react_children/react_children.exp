@@ -37,21 +37,6 @@ Cannot call `Children.map` with function bound to `fn` because in the first para
                               ^^^^^^ [1]
 
 References:
-   api.js:6:10
-    6| const a: ChildrenArray<?number> = [
-                ^^^^^^^^^^^^^^^^^^^^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------------------- api.js:15:24
-
-Cannot call `Children.map` with function bound to `fn` because in the first parameter: `string` [1] is incompatible with
-`number` [2]. [incompatible-type]
-
-   api.js:15:24
-   15| na(Children.map(a, (x: string) => x as string)); // Error
-                              ^^^^^^ [1]
-
-References:
    api.js:6:25
     6| const a: ChildrenArray<?number> = [
                                ^^^^^^ [2]
@@ -96,36 +81,6 @@ with `null` [2]. [incompatible-type]
                                ^^^^^^ [1]
 
 References:
-   api.js:6:10
-    6| const a: ChildrenArray<?number> = [
-                ^^^^^^^^^^^^^^^^^^^^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------------------- api.js:18:25
-
-Cannot call `Children.forEach` with function bound to `fn` because in the first parameter: `number` [1] is incompatible
-with `void` [2]. [incompatible-type]
-
-   api.js:18:25
-   18| Children.forEach(a, (x: number) => {}); // Error
-                               ^^^^^^ [1]
-
-References:
-   api.js:6:10
-    6| const a: ChildrenArray<?number> = [
-                ^^^^^^^^^^^^^^^^^^^^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------------------- api.js:18:25
-
-Cannot call `Children.forEach` with function bound to `fn` because in the first parameter: `number` [1] is incompatible
-with `null` [2]. [incompatible-type]
-
-   api.js:18:25
-   18| Children.forEach(a, (x: number) => {}); // Error
-                               ^^^^^^ [1]
-
-References:
    api.js:6:24
     6| const a: ChildrenArray<?number> = [
                               ^^^^^^^ [2]
@@ -144,51 +99,6 @@ References:
    api.js:6:24
     6| const a: ChildrenArray<?number> = [
                               ^^^^^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------------------- api.js:20:25
-
-Cannot call `Children.forEach` with function bound to `fn` because in the first parameter: `string` [1] is incompatible
-with `null` [2]. [incompatible-type]
-
-   api.js:20:25
-   20| Children.forEach(a, (x: string) => {}); // Error
-                               ^^^^^^ [1]
-
-References:
-   api.js:6:10
-    6| const a: ChildrenArray<?number> = [
-                ^^^^^^^^^^^^^^^^^^^^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------------------- api.js:20:25
-
-Cannot call `Children.forEach` with function bound to `fn` because in the first parameter: `string` [1] is incompatible
-with `number` [2]. [incompatible-type]
-
-   api.js:20:25
-   20| Children.forEach(a, (x: string) => {}); // Error
-                               ^^^^^^ [1]
-
-References:
-   api.js:6:10
-    6| const a: ChildrenArray<?number> = [
-                ^^^^^^^^^^^^^^^^^^^^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------------------- api.js:20:25
-
-Cannot call `Children.forEach` with function bound to `fn` because in the first parameter: `string` [1] is incompatible
-with `void` [2]. [incompatible-type]
-
-   api.js:20:25
-   20| Children.forEach(a, (x: string) => {}); // Error
-                               ^^^^^^ [1]
-
-References:
-   api.js:6:10
-    6| const a: ChildrenArray<?number> = [
-                ^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- api.js:20:25
@@ -252,24 +162,6 @@ References:
    api.js:33:15
      33| function s(x: string) {}
                        ^^^^^^ [2]
-
-
-Error ------------------------------------------------------------------------------------------------------ api.js:26:3
-
-Cannot call `s` with `Children.only(...)` bound to `x` because `number` [1] is incompatible with `string` [2].
-[incompatible-type]
-
-   api.js:26:3
-   26| s(Children.only(a)); // Error
-         ^^^^^^^^^^^^^^^^
-
-References:
-   api.js:6:10
-    6| const a: ChildrenArray<?number> = [
-                ^^^^^^^^^^^^^^^^^^^^^^ [1]
-   api.js:33:15
-   33| function s(x: string) {}
-                     ^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------------ api.js:26:3
@@ -1706,4 +1598,4 @@ References:
 
 
 
-Found 98 errors
+Found 91 errors

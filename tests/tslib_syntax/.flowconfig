@@ -4,6 +4,7 @@ object_construct_sig_lib.d.ts
 ts_interop_arrays.d.ts
 
 [options]
+experimental.implicit_instantiation_walk=true
 all=true
 builtin_lib=core-only
 experimental.tslib_syntax=true

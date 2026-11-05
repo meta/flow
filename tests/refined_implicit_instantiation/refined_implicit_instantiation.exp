@@ -1,92 +1,45 @@
 Error ---------------------------------------------------------------------------------------------------- test.js:24:10
 
 Cannot call `List` because: [incompatible-type]
- - Either 
-    - `Array<{severity: "YELLOW" | "GREEN" | "RED"}>` [1] is incompatible with `Iterable` [2]
-       - in property `@@iterator`: `ArrayIterator<{severity: "YELLOW" | "GREEN" | "RED"}>` [3] is incompatible with
-         `Iterator<{severity: "YELLOW" | "GREEN" | "RED"}, void, void>` [4]
-          - in the return value > type argument `T` [5] > property `severity`: `"GREEN"` [6] is incompatible with
-            `"RED" | "YELLOW"` [7]
- - Or property `[toStringTag]` is missing in `Array<{severity: "YELLOW" | "GREEN" | "RED"}>` [1] but exists in
-   `IteratorObject<empty, void, void>` [8].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+ - Either in type argument `T` [1] > property `severity`: `"GREEN"` [2] is incompatible with `"RED" | "YELLOW"` [3].
+ - Or in type argument `T` [1] > property `severity`: `"GREEN"` [2] is incompatible with `"RED" | "YELLOW"` [3].
 
    test.js:24:10
-    24|   return List(
-                 ^^^^
+   24|   return List(
+                ^^^^
 
 References:
-   test.js:32:27
-    32|       .filter(Boolean) ?? [],
-                                  ^^ [1]
-   test.js:5:22
-     5|   static <T>(input: ?$Iterable<T, void, void>): List<T>;
-                             ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/lib.es2015.iterable.js:79:26
-    79|     [Symbol.iterator](): ArrayIterator<T>;
-                                 ^^^^^^^^^^^^^^^^ [3]
-   <BUILTINS>/lib.es2015.iterable.js:50:26
-    50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
-                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/misc.js:309:24
-   309| interface Iterator<out T, out TReturn = void, in TNext = void> {}
-                               ^ [5]
+   test.js:4:24
+    4| declare class List<out T> {
+                              ^ [1]
    test.js:23:48
-    23| function invalidAlerts(values: ?ReadonlyArray<?string>): List<Alert> {
-                                                       ^^^^^^ [6]
+   23| function invalidAlerts(values: ?ReadonlyArray<?string>): List<Alert> {
+                                                      ^^^^^^ [2]
    test.js:1:25
-     1| type Alert = {severity: 'RED' | 'YELLOW'};
-                                ^^^^^^^^^^^^^^^^ [7]
-   test.js:6:22
-     6|   static <T>(input: ?IteratorObject<T>): List<T>;
-                             ^^^^^^^^^^^^^^^^^ [8]
+    1| type Alert = {severity: 'RED' | 'YELLOW'};
+                               ^^^^^^^^^^^^^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:47:10
 
 Cannot call `List` because: [incompatible-type]
- - Either 
-    - `Array<{value: 1 | 3}>` [1] is incompatible with `Iterable` [2]
-       - in property `@@iterator`: `ArrayIterator<{value: 1 | 3}>` [3] is incompatible with
-         `Iterator<{value: 1 | 3}, void, void>` [4]
-          - in the return value > type argument `T` [5] > property `value`: `3` [6] is incompatible with `empty` [7]
- - Or property `[toStringTag]` is missing in `Array<{value: 1 | 3}>` [1] but exists in
-   `IteratorObject<empty, void, void>` [8].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+ - Either in type argument `T` [1] > property `value`: `3` [2] is incompatible with `empty` [3].
+ - Or in type argument `T` [1] > property `value`: `3` [2] is incompatible with `empty` [3].
 
    test.js:47:10
-    47|   return List(
-                 ^^^^
+   47|   return List(
+                ^^^^
 
 References:
-   test.js:52:27
-    52|       .filter(Boolean) ?? [],
-                                  ^^ [1]
-   test.js:5:22
-     5|   static <T>(input: ?$Iterable<T, void, void>): List<T>;
-                             ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/lib.es2015.iterable.js:79:26
-    79|     [Symbol.iterator](): ArrayIterator<T>;
-                                 ^^^^^^^^^^^^^^^^ [3]
-   <BUILTINS>/lib.es2015.iterable.js:50:26
-    50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
-                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/misc.js:309:24
-   309| interface Iterator<out T, out TReturn = void, in TNext = void> {}
-                               ^ [5]
+   test.js:4:24
+    4| declare class List<out T> {
+                              ^ [1]
    test.js:46:48
-    46| function invalidCounts(values: ?ReadonlyArray<?number>): List<Count> {
-                                                       ^^^^^^ [6]
+   46| function invalidCounts(values: ?ReadonlyArray<?number>): List<Count> {
+                                                      ^^^^^^ [2]
    test.js:2:22
-     2| type Count = {value: 1 | 2};
-                             ^^^^^ [7]
-   test.js:6:22
-     6|   static <T>(input: ?IteratorObject<T>): List<T>;
-                             ^^^^^^^^^^^^^^^^^ [8]
+    2| type Count = {value: 1 | 2};
+                            ^^^^^ [3]
 
 
 

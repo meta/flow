@@ -483,38 +483,30 @@ References:
    test.js:39:23
    39|     declare const f: <Key, Value>(o: {[Key]: Value}) => Key;
                              ^^^ [1]
-   test.js:32:13
-                   v
-   32|   const o = {
-   33|     '1': true,
-   34|     '2': false,
-   35|   };
-         ^ [2]
+   test.js:39:40
+   39|     declare const f: <Key, Value>(o: {[Key]: Value}) => Key;
+                                              ^^^ [2]
    test.js:42:10
    42|     x as number; // ERROR
                 ^^^^^^ [3]
 
 
-Error ---------------------------------------------------------------------------------------------------- test.js:47:17
+Error ---------------------------------------------------------------------------------------------------- test.js:47:15
 
 Cannot call `f` because in type argument `Key` > at least one member of `"1" | "2"` [1]: `"1"` [2] is incompatible with
 `number` [3]. [incompatible-type]
 
-   test.js:47:17
+   test.js:47:15
    47|     const x = f(o); // ERROR
-                       ^
+                     ^
 
 References:
    test.js:46:23
    46|     declare const f: <Key extends number, Value>(o: {[Key]: Value}) => Key;
                              ^^^ [1]
-   test.js:32:13
-                   v
-   32|   const o = {
-   33|     '1': true,
-   34|     '2': false,
-   35|   };
-         ^ [2]
+   test.js:46:55
+   46|     declare const f: <Key extends number, Value>(o: {[Key]: Value}) => Key;
+                                                             ^^^ [2]
    test.js:46:35
    46|     declare const f: <Key extends number, Value>(o: {[Key]: Value}) => Key;
                                          ^^^^^^ [3]

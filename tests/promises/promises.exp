@@ -264,25 +264,29 @@ References:
                    ^^^^^^^^^^^^^^ [3]
 
 
-Error ------------------------------------------------------------------------------------------------------ any.js:23:3
+Error ----------------------------------------------------------------------------------------------------- any.js:23:11
 
-Cannot cast `Promise.any(...)` to `Promise<number>` because in type argument `T` [1]: `string` [2] is incompatible with
-`number` [3]. [incompatible-type]
+Cannot call `Promise.any` because: [incompatible-type]
+ - Either in type argument `T` [1]: `string` [2] is incompatible with `number` [3].
+ - Or in type argument `T` [1]: `string` [4] is incompatible with `number` [3].
 
-   any.js:23:3
+   any.js:23:11
     23|   Promise.any([a, b]) as Promise<number>; // Error: string is incompatible with number
-          ^^^^^^^^^^^^^^^^^^^
+                  ^^^
 
 References:
    <BUILTINS>/misc.js:216:23
    216| interface Promise<out T = unknown> {
                               ^ [1]
-   <BUILTINS>/lib.es2021.promise.js:48:59
-    48|     any<T>(values: Iterable<T | PromiseLike<T>>): Promise<Awaited<T>>;
-                                                                  ^^^^^^^^^^ [2]
+   any.js:21:47
+    21| function test4(a: Promise<number>, b: Promise<string>) {
+                                                      ^^^^^^ [2]
    any.js:23:34
     23|   Promise.any([a, b]) as Promise<number>; // Error: string is incompatible with number
                                          ^^^^^^ [3]
+   <BUILTINS>/lib.es2021.promise.js:48:59
+    48|     any<T>(values: Iterable<T | PromiseLike<T>>): Promise<Awaited<T>>;
+                                                                  ^^^^^^^^^^ [4]
 
 
 Error ------------------------------------------------------------------------------------------------------ any.js:29:7
@@ -307,25 +311,32 @@ References:
                                                  ^^^^^^ [3]
 
 
-Error ----------------------------------------------------------------------------------------------------- any.js:34:10
+Error ----------------------------------------------------------------------------------------------------- any.js:34:18
 
-Cannot return `Promise.any(...)` because in type argument `T` [1]: `unknown` [2] is incompatible with `empty` [3].
-[incompatible-type]
+Cannot call `Promise.any` because: [incompatible-type]
+ - Either in type argument `T` [1]: `unknown` [2] is incompatible with `empty` [3].
+ - Or `unknown` [4] is incompatible with `empty` [3].
 
-   any.js:34:10
-    34|   return Promise.any(a); // Error
-                 ^^^^^^^^^^^^^^
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   any.js:34:18
+     34|   return Promise.any(a); // Error
+                          ^^^
 
 References:
    <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
-                              ^ [1]
+    216| interface Promise<out T = unknown> {
+                               ^ [1]
    <BUILTINS>/lib.es2021.promise.js:48:59
-    48|     any<T>(values: Iterable<T | PromiseLike<T>>): Promise<Awaited<T>>;
-                                                                  ^^^^^^^^^^ [2]
+     48|     any<T>(values: Iterable<T | PromiseLike<T>>): Promise<Awaited<T>>;
+                                                                   ^^^^^^^^^^ [2]
    any.js:33:41
-    33| function test6<X>(a: Array<X>): Promise<X> {
-                                                ^ [3]
+     33| function test6<X>(a: Array<X>): Promise<X> {
+                                                 ^ [3]
+   <BUILTINS>/lib.es5.js:1529:43
+   1529| type Awaited<T> = T extends Promise<infer U> ? U : T;
+                                                   ^ [4]
 
 
 Error -------------------------------------------------------------------------------------------------- finally.js:12:1
@@ -1138,11 +1149,11 @@ References:
 Error ------------------------------------------------------------------------------------ typescript_allSettled.js:13:1
 
 Cannot cast `iterableResult` to `Promise<Array<PromiseSettledResult<string>>>` because in type argument `T` [1] > array
-element: `PromiseSettledResult<$AllSettledAwaited<Promise<number>>>` [2] is not exactly the same as
+element: `PromiseSettledResult<$AllSettledAwaited<number>>` [2] is not exactly the same as
 `PromiseSettledResult<string>` [3]. [incompatible-type]
 
 The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
-- Either make `Array<PromiseSettledResult<$AllSettledAwaited<Promise<number>>>>` [4] and
+- Either make `Array<PromiseSettledResult<$AllSettledAwaited<number>>>` [4] and
 `Array<PromiseSettledResult<string>>` [5] exactly the same
 - Or make `Array<PromiseSettledResult<string>>` [5] a `ReadonlyArray`.
 See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.

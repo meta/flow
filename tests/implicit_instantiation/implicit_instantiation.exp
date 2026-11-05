@@ -88,16 +88,17 @@ References:
 
 Error ---------------------------------------------------------------------------------------- poly_value_rounds.js:21:1
 
-Cannot cast `piped.value` to `string` because `unknown` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `piped.value` to `string` because `{value: string}` [1] is incompatible with `string` [2].
+[incompatible-type]
 
    poly_value_rounds.js:21:1
    21| piped.value as string; // ERROR
        ^^^^^^^^^^^
 
 References:
-   poly_value_rounds.js:18:23
+   poly_value_rounds.js:18:33
    18| declare function wrap<T>(x: T): Box<T>;
-                             ^ [1]
+                                       ^^^^^^ [1]
    poly_value_rounds.js:21:16
    21| piped.value as string; // ERROR
                       ^^^^^^ [2]
@@ -226,13 +227,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------- poly_value_rounds.js:87:1
 
-Cannot call `genericOverloaded` because: [incompatible-type]
- - Either `1` [1] is incompatible with `string` [2].
- - Or `(fn: (any | 1) => any | 1, x: any | 1, y: boolean) => any | 1` [3] requires another argument from call of
-   `genericOverloaded` [4].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot call `genericOverloaded` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
 
    poly_value_rounds.js:87:1
    87| genericOverloaded(id, 1) as string; // ERROR
@@ -245,12 +240,6 @@ References:
    poly_value_rounds.js:87:29
    87| genericOverloaded(id, 1) as string; // ERROR
                                    ^^^^^^ [2]
-   poly_value_rounds.js:83:3
-   83|   <S>(fn: (S) => S, x: S, y: boolean): S,
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
-   poly_value_rounds.js:87:1
-   87| genericOverloaded(id, 1) as string; // ERROR
-       ^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ---------------------------------------------------------------------------------------- poly_value_rounds.js:93:7
@@ -345,20 +334,23 @@ References:
 
 Error --------------------------------------------------------------------------------------- poly_value_rounds.js:108:1
 
-Cannot cast `applied` to `Box<string>` because `unknown` [1] is incompatible with `{value: string}` [2].
-[incompatible-type]
+Cannot cast `applied` to `Box<string>` because in type argument `T` [1]: `unknown` [2] is incompatible with
+`string` [3]. [incompatible-type]
 
    poly_value_rounds.js:108:1
    108| applied as Box<string>; // ERROR
         ^^^^^^^
 
 References:
-   poly_value_rounds.js:105:29
-   105| declare function applyTo<T, U>(f: (T) => U, x: T): U;
-                                    ^ [1]
-   poly_value_rounds.js:108:12
+   poly_value_rounds.js:4:10
+     4| type Box<T> = {value: T};
+                 ^ [1]
+   poly_value_rounds.js:18:23
+    18| declare function wrap<T>(x: T): Box<T>;
+                              ^ [2]
+   poly_value_rounds.js:108:16
    108| applied as Box<string>; // ERROR
-                   ^^^^^^^^^^^ [2]
+                       ^^^^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------- poly_value_rounds.js:114:1
@@ -438,9 +430,9 @@ Cannot cast `err1` to `"FOO"` because `"BAR"` [1] is incompatible with `"FOO"` [
        ^^^^
 
 References:
-   repos_use.js:9:23
-    9| declare const dict: {[MyEnum]: unknown};
-                             ^^^^^^ [1]
+   repos_use.js:3:23
+    3| type MyEnum = 'FOO' | 'BAR';
+                             ^^^^^ [1]
    repos_use.js:20:9
    20| err1 as 'FOO'; // ERR
                ^^^^^ [2]
@@ -448,16 +440,17 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- repos_use.js:21:22
 
-Cannot assign `getKeys1(...)` to `err1_` because `MyEnum` [1] is incompatible with `"FOO"` [2]. [incompatible-type]
+Cannot assign `getKeys1(...)` to `err1_` because `"FOO" | "BAR"` [1] is incompatible with `"FOO"` [2].
+[incompatible-type]
 
    repos_use.js:21:22
    21| const err1_: 'FOO' = getKeys1(dict); // ERR
                             ^^^^^^^^^^^^^^
 
 References:
-   repos_use.js:9:23
-    9| declare const dict: {[MyEnum]: unknown};
-                             ^^^^^^ [1]
+   repos_use.js:6:27
+    6| declare function getKeys1<TKey>(x: {readonly [{foo: TKey}['foo']]: unknown}): TKey;
+                                 ^^^^ [1]
    repos_use.js:21:14
    21| const err1_: 'FOO' = getKeys1(dict); // ERR
                     ^^^^^ [2]
@@ -472,9 +465,9 @@ Cannot cast `err2` to `"FOO"` because `"BAR"` [1] is incompatible with `"FOO"` [
        ^^^^
 
 References:
-   repos_use.js:9:23
-    9| declare const dict: {[MyEnum]: unknown};
-                             ^^^^^^ [1]
+   repos_use.js:3:23
+    3| type MyEnum = 'FOO' | 'BAR';
+                             ^^^^^ [1]
    repos_use.js:24:9
    24| err2 as 'FOO'; // ERR
                ^^^^^ [2]

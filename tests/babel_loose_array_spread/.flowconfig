@@ -1,4 +1,5 @@
 [options]
+experimental.implicit_instantiation_walk=true
 builtin_lib=core-only
 all=true
 babel_loose_array_spread=true

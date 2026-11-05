@@ -52,8 +52,9 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- iterables.js:4:3
 
-Cannot call `f.bind` because `Iterable<number, void, void>` [1] is incompatible with `ReadonlyArray<empty>` [2].
-[incompatible-type]
+Cannot call `f.bind` because: [incompatible-type]
+ - Either `Iterable<number, void, void>` [1] is incompatible with `ReadonlyArray<empty>` [2].
+ - Or cannot spread non-tuple (`Array<number>` [3]) into tuple type.
 
    iterables.js:4:3
       4| f.bind(null, ...it); // Error
@@ -66,6 +67,9 @@ References:
    <BUILTINS>/lib.es5.js:1138:15
    1138| declare class ReadonlyArray<T> {
                        ^^^^^^^^^^^^^ [2]
+   iterables.js:4:1
+      4| f.bind(null, ...it); // Error
+         ^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------------ iterables.js:12:5
@@ -104,8 +108,12 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ iterables.js:14:3
 
-Cannot call `f.bind` because `Iterable<number, void, void>` [1] is incompatible with `ReadonlyArray<empty>` [2].
-[incompatible-type]
+Cannot call `f.bind` because: [incompatible-type]
+ - Either `Iterable<number, void, void>` [1] is incompatible with `ReadonlyArray<empty>` [2].
+ - Or cannot spread non-tuple (`Array<number>` [3]) into tuple type.
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    iterables.js:14:3
      14| f.bind(null, ...oit); // Error
@@ -118,6 +126,9 @@ References:
    <BUILTINS>/lib.es5.js:1138:15
    1138| declare class ReadonlyArray<T> {
                        ^^^^^^^^^^^^^ [2]
+   iterables.js:14:1
+     14| f.bind(null, ...oit); // Error
+         ^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------------------ maps.js:4:6

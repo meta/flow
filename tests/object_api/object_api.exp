@@ -1299,9 +1299,8 @@ References:
 Error ---------------------------------------------------------------------------------------------------- proto.js:13:1
 
 Cannot cast `C1_proto.bind` to `empty` because: [incompatible-type]
- - Either `(this: empty, thisArg: ThisParameterType<empty>) => OmitThisParameter<empty>` [1] is incompatible with
-   `empty` [2].
- - Or `(this: (this: empty, ...args: [...empty, ...empty]) => empty, thisArg: empty, ...argArray: empty) =>...` [3] is
+ - Either `(thisArg: ThisParameterType<unknown>) => OmitThisParameter<unknown>` [1] is incompatible with `empty` [2].
+ - Or `(this: (...args: [...ReadonlyArray<any>, ...ReadonlyArray<any>]) => unknown, thisArg: unknown, ...ar...` [3] is
    incompatible with `empty` [2].
 
    proto.js:13:1

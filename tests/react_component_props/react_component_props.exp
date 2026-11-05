@@ -18,7 +18,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------- generic_inference.js:22:1
 
-Cannot cast `viaModalProps(...).name` to `number` because `"a"` [1] is incompatible with `number` [2].
+Cannot cast `viaModalProps(...).name` to `number` because `string` [1] is incompatible with `number` [2].
 [incompatible-type]
 
    generic_inference.js:22:1

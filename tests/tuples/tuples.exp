@@ -1998,26 +1998,20 @@ References:
 Error ------------------------------------------------------------------------------ rest_element_array_literal.js:46:17
 
 Cannot call `c.m.bind` because: [incompatible-type]
- - Either `Array<any>` [1] has an unknown number of elements, so is incompatible with `[string, ...Array<number>]` [2].
- - Or no more than 1 argument is expected by function type [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+ - Either no more than 1 argument is expected by function type [1].
+ - Or cannot spread non-tuple (`Array<"a" | number>` [2]) into tuple type.
 
    rest_element_array_literal.js:46:17
     46|   const g = c.m.bind(c, 'a', ...arr); // ERROR
                         ^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:336:85
-   336|         & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...argArray: A) => (...args: B) => R);
-                                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   rest_element_array_literal.js:42:16
-    42|     m(...args: T): void;
-                       ^ [2]
    <BUILTINS>/lib.es5.js:335:12
    335|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   rest_element_array_literal.js:46:13
+    46|   const g = c.m.bind(c, 'a', ...arr); // ERROR
+                    ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------------------- spread.js:10:3
@@ -2219,9 +2213,9 @@ Cannot cast `x` to `[1, 2, 3]` because `[2, 3]` [1] has 2 elements but `[1, 2, 3
           ^
 
 References:
-   spread.js:92:37
-    92| declare function tail<T>(xs: [1, ...T]): T;
-                                            ^ [1]
+   spread.js:99:18
+    99|   const x = tail([1, 2, 3]);
+                         ^^^^^^^^^ [1]
    spread.js:101:8
    101|   x as [1, 2, 3]; // ERROR
                ^^^^^^^^^ [2]

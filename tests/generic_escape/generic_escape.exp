@@ -547,8 +547,8 @@ References:
 Error ---------------------------------------------------------------------------------------------------- misc.js:44:12
 
 Cannot return `g` because: [incompatible-type]
- - Either in the first parameter: `void` [1] is incompatible with `boolean` [2].
- - Or `(x: empty) => (boolean, number) => void` [3] is incompatible with `empty` [4].
+ - Either in the return value: `boolean` [1] is incompatible with `void` [2].
+ - Or `(x: unknown) => unknown` [3] is incompatible with `empty` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -558,12 +558,12 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
                   ^
 
 References:
-   misc.js:40:50
-   40|   function g<X>(x: X): X | ((boolean, number) => void) {
-                                                        ^^^^ [1]
    misc.js:40:30
    40|   function g<X>(x: X): X | ((boolean, number) => void) {
-                                    ^^^^^^^ [2]
+                                    ^^^^^^^ [1]
+   misc.js:40:50
+   40|   function g<X>(x: X): X | ((boolean, number) => void) {
+                                                        ^^^^ [2]
    misc.js:40:3
    40|   function g<X>(x: X): X | ((boolean, number) => void) {
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]

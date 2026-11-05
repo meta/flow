@@ -1,4 +1,5 @@
 [options]
+experimental.implicit_instantiation_walk=true
 component_syntax=true
 all=true
 builtin_lib=core-only

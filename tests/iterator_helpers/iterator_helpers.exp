@@ -21,9 +21,9 @@ References:
    reduce.js:9:1
    9| iterator.reduce(flexibleReducer) as string | number; // ERROR: without an initial value, the reducer must return a number
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
-   reduce.js:5:33
-   5| declare const flexibleReducer: (string | number,  number) => string;
-                                      ^^^^^^ [4]
+   reduce.js:9:37
+   9| iterator.reduce(flexibleReducer) as string | number; // ERROR: without an initial value, the reducer must return a number
+                                          ^^^^^^ [4]
 
 
 
