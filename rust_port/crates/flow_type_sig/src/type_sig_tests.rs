@@ -53,7 +53,6 @@ fn default_sig_options() -> TypeSigOptions {
         component_syntax_enabled_in_config: true,
         enable_ts_syntax: true,
         enable_ts_utility_syntax: true,
-        export_as_namespace_support: false,
         hook_compatibility: true,
         enable_records: true,
         enable_relay_integration: false,
@@ -151,7 +150,6 @@ fn print_builtins_with_global_augmentations(
     }
     let opts = TypeSigOptions {
         for_builtins: true,
-        export_as_namespace_support: true,
         ..default_sig_options()
     };
     let arena = bumpalo::Bump::new();

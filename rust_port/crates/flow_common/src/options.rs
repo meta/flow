@@ -133,7 +133,6 @@ pub struct Options {
     pub enabled_rollouts: Arc<BTreeMap<String, String>>,
     pub enums: bool,
     pub estimate_recheck_time: bool,
-    pub export_as_namespace_support: bool,
     pub saved_state_restart_on_reinit: bool,
     pub facebook_fbs: Option<FlowSmolStr>,
     pub facebook_fbt: Option<FlowSmolStr>,

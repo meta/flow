@@ -3943,11 +3943,8 @@ fn statement_<'a>(
             }
         }
         StatementInner::NamespaceExportDeclaration { .. } => {
-            let unsupported = if !cx.export_as_namespace_support() {
-                Some(UnsupportedSyntax::TSLibSyntax(
-                    TsLibSyntaxKind::NamespaceExportDeclaration,
-                ))
-            } else if !(type_env::in_toplevel_scope(cx) || type_env::in_global_scope(cx)) {
+            let unsupported = if !(type_env::in_toplevel_scope(cx) || type_env::in_global_scope(cx))
+            {
                 Some(UnsupportedSyntax::NamespaceExportDeclaration(
                     NamespaceExportDeclarationKind::NotTopLevel,
                 ))

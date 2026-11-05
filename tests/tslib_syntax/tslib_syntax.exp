@@ -748,7 +748,7 @@ References:
 
 Error --------------------------------------------------------------------------------------- export_as_namespace.js:1:1
 
-`export as namespace` is not enabled. [unsupported-syntax]
+`export as namespace` may only appear in declaration files. [unsupported-syntax]
 
    1| export as namespace Foo; // ERROR
       ^^^^^^^^^^^^^^^^^^^^^^^^

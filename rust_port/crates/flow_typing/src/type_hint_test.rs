@@ -310,7 +310,6 @@ mod tests {
                 component_syntax_enabled_in_config: true,
                 enable_ts_syntax: true,
                 enable_ts_utility_syntax: true,
-                export_as_namespace_support: false,
                 hook_compatibility: true,
                 enable_records: true,
                 for_builtins: true,

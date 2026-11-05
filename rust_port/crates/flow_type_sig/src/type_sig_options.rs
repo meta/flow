@@ -24,7 +24,6 @@ pub struct TypeSigOptions {
     pub component_syntax_enabled_in_config: bool,
     pub enable_ts_syntax: bool,
     pub enable_ts_utility_syntax: bool,
-    pub export_as_namespace_support: bool,
     pub hook_compatibility: bool,
     pub enable_records: bool,
     pub enable_relay_integration: bool,
@@ -82,7 +81,6 @@ impl TypeSigOptions {
             enable_ts_syntax: options.ts_syntax || flow_common::files::has_ts_ext(file),
             enable_ts_utility_syntax: options.ts_utility_syntax
                 || flow_common::files::has_ts_ext(file),
-            export_as_namespace_support: options.export_as_namespace_support,
             enable_records: options.enable_records,
             for_builtins: false,
             is_ts_file: flow_common::files::has_ts_ext(file),
@@ -109,7 +107,6 @@ impl TypeSigOptions {
             component_syntax_enabled_in_config: options.component_syntax,
             enable_ts_syntax: false,
             enable_ts_utility_syntax: true,
-            export_as_namespace_support: options.export_as_namespace_support,
             hook_compatibility: options.hook_compatibility,
             enable_records: options.enable_records,
             for_builtins: true,

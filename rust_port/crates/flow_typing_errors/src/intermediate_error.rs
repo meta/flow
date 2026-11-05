@@ -10280,7 +10280,6 @@ where
                             }
                             OptionalUnlabeledTupleElement => "Optional unlabeled tuple element",
                             OptionalIndexer => "Optional indexer (`?:`)",
-                            NamespaceExportDeclaration => "`export as namespace`",
                             PrivateClassField => "Private class field (`#private`)",
                             GenericTaggedTemplate => {
                                 "Type arguments for tagged template expression"

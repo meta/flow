@@ -189,7 +189,6 @@ pub struct FrozenMetadata {
     pub enable_pattern_matching: bool,
     pub enable_records: bool,
     pub enable_relay_integration: bool,
-    pub export_as_namespace_support: bool,
     pub facebook_fbs: Option<FlowSmolStr>,
     pub facebook_fbt: Option<FlowSmolStr>,
     pub facebook_module_interop: bool,
@@ -253,7 +252,6 @@ impl Default for FrozenMetadata {
             enable_pattern_matching: false,
             enable_records: false,
             enable_relay_integration: false,
-            export_as_namespace_support: false,
             facebook_fbs: None,
             facebook_fbt: None,
             facebook_module_interop: false,
@@ -919,7 +917,6 @@ pub fn mk_context_metadata(options: &Options, global_libdefs: Arc<BTreeSet<FileK
             enable_pattern_matching: options.enable_pattern_matching,
             enable_records: options.enable_records,
             enable_relay_integration: options.enable_relay_integration,
-            export_as_namespace_support: options.export_as_namespace_support,
             facebook_fbs: options.facebook_fbs.dupe(),
             facebook_fbt: options.facebook_fbt.dupe(),
             facebook_module_interop: options.facebook_module_interop,
@@ -1686,10 +1683,6 @@ impl<'a> Context<'a> {
             .frozen
             .stylex_shorthand_prop
             .as_deref()
-    }
-
-    pub fn export_as_namespace_support(&self) -> bool {
-        self.inner().metadata.frozen.export_as_namespace_support
     }
 
     pub fn export_star_excludes_default(&self) -> bool {

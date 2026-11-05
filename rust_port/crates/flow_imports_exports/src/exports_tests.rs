@@ -60,7 +60,6 @@ fn sig_opts() -> TypeSigOptions {
         component_syntax_enabled_in_config: true,
         enable_ts_syntax: true,
         enable_ts_utility_syntax: true,
-        export_as_namespace_support: false,
         hook_compatibility: true,
         enable_records: true,
         enable_relay_integration: false,

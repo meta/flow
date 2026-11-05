@@ -102,7 +102,6 @@ fn parse_libs<'arena: 'ast, 'ast>(
                 inner,
                 ..
             } = &**stmt
-                && opts.export_as_namespace_support
                 // A UMD global aliases this copy of the module, which cannot resolve imports.
                 && file_sig.requires().is_empty()
             {

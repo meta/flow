@@ -279,7 +279,7 @@ Optional indexer (`?:`) is not enabled. [unsupported-syntax]
 
 Error ------------------------------------------------------------------------------------------------ test.js.flow:90:1
 
-`export as namespace` is not enabled. [unsupported-syntax]
+`export as namespace` may only appear in declaration files. [unsupported-syntax]
 
    90| export as namespace Foo; // ERROR
        ^^^^^^^^^^^^^^^^^^^^^^^^

@@ -1254,8 +1254,7 @@ fn detect_import_export_errors<'cx>(
     }
     // The UMD global is built from the builtins copy of this module, which cannot resolve
     // imports, so it is not declared.
-    if cx.export_as_namespace_support()
-        && !cx.is_global_lib_context()
+    if !cx.is_global_lib_context()
         && has_dts_ext(cx.file().as_str())
         && !file_sig.requires().is_empty()
     {

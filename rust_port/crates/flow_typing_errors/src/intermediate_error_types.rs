@@ -361,7 +361,6 @@ pub enum TsLibSyntaxKind {
     ReadonlyMappedTypeVarianceOp,
     OptionalUnlabeledTupleElement,
     OptionalIndexer,
-    NamespaceExportDeclaration,
     PrivateClassField,
     GenericTaggedTemplate,
     TypeofThis,

@@ -121,8 +121,8 @@ pub struct ParseResults {
     pub all_unordered_libs: BTreeSet<FlowSmolStr>,
     // declaration file kinds encountered by parse attempts
     pub dts_file_kinds: BTreeMap<FileKey, DtsFileKind>,
-    // TypeScript external modules containing a direct `declare global` block or, with
-    // `experimental.export_as_namespace_support`, a `.d.ts` `export as namespace`
+    // TypeScript external modules containing a direct `declare global` block or a `.d.ts`
+    // `export as namespace`
     pub ts_global_augmentation_files: FlowOrdSet<FileKey>,
 }
 
@@ -159,9 +159,7 @@ fn has_ts_global_augmentation(
             || files::is_builtin_ts_module(&options.file_options, &file.to_absolute()))
         && is_external_module(file, ast)
         && (has_top_level_declare_global(ast)
-            || (options.export_as_namespace_support
-                && has_dts_ext(file.as_str())
-                && has_top_level_namespace_export(ast)))
+            || (has_dts_ext(file.as_str()) && has_top_level_namespace_export(ast)))
 }
 
 pub fn parse_package_json_file(

@@ -1,6 +1,5 @@
 [options]
 all=true
-experimental.export_as_namespace_support=true
 experimental.typescript_library_definition_support=true
 module.file_ext=.js
 module.file_ext=.ts
