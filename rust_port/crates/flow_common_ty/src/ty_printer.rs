@@ -2151,6 +2151,7 @@ fn layout_of_binder(
                         owner: None,
                         type_parameter_context: None,
                         overloads: 0,
+                        targs: None,
                     },
                     t,
                     state,
@@ -2182,6 +2183,7 @@ fn layout_of_binder(
         {
             layout::fuse(vec![
                 layout_of_binder_head_with_effect(binder, &func.fun_effect),
+                option(|targs| type_args(opts, 0, targs, state), &binder.targs),
                 function_signature(opts, 0, &LayoutNode::atom(":".to_string()), func, state),
                 layout_of_overload_count(binder.overloads),
             ])

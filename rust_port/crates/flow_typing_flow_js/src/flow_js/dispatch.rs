@@ -71,6 +71,7 @@ use flow_typing_type::type_::ResolvedSpreadArgData;
 use flow_typing_type::type_::SealGenericTData;
 use flow_typing_type::type_::SetElemTData;
 use flow_typing_type::type_::SpecializeTData;
+use flow_typing_type::type_::SpecializedCallee;
 use flow_typing_type::type_::StandaloneCallThisData;
 use flow_typing_type::type_::SuperTData;
 use flow_typing_type::type_::TestPropTData;
@@ -4964,9 +4965,16 @@ fn __flow_impl<'cx>(
                     ),
                 )
             };
-            let t_ = instantiate_poly_call_or_new(cx, env, trace, lparts, uparts, &check)?;
+            let (t_, targs) =
+                instantiate_poly_call_or_new_with_soln(cx, env, trace, lparts, uparts, &check)?;
             let new_calltype = FuncallType {
                 call_targs: None,
+                call_specialized_callee: calltype.call_specialized_callee.as_ref().map(|c| {
+                    SpecializedCallee {
+                        targs: Some(targs.iter().map(|(t, _)| t.dupe()).collect()),
+                        ..c.clone()
+                    }
+                }),
                 ..calltype.clone()
             };
             let new_u = UseT::new(CallT(Box::new(CallTData {

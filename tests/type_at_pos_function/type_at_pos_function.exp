@@ -42,11 +42,11 @@ function-poly-2.js:4:12 = function inner<T>(x: T, z: TOuter | T): T
 function-poly-2.js:4:12,4:16
 function-poly-2.js:5:5 = (parameter) y: TOuter
 function-poly-2.js:5:5,5:5
-function-poly-2.js:6:5 = function inner(x: T, z: TOuter | T): T
+function-poly-2.js:6:5 = function inner<T>(x: T, z: TOuter | T): T
 function-poly-2.js:6:5,6:9
 function-poly-2.js:7:12 = (parameter) x: T
 function-poly-2.js:7:12,7:12
-function-poly-2.js:9:13 = function inner(x: number, z: TOuter | number): number
+function-poly-2.js:9:13 = function inner<number>(x: number, z: TOuter | number): number
 function-poly-2.js:9:13,9:17
 function-poly-2.js:11:12 = function inner_<T>(x: T): T
 function-poly-2.js:11:12,11:17
@@ -78,3 +78,15 @@ overloads.js:15:1 (call, not overloaded) = function solo(x: number): string
 overloads.js:15:1,15:4
 overloads.js:22:3 (overloaded method call) = (method) C.m(x: number): string
 overloads.js:22:3,22:3
+function-poly-call.js:4:1 (implicit) = function id<number>(x: number): number
+function-poly-call.js:4:1,4:2
+function-poly-call.js:5:1 (explicit) = function id<string>(x: string): string
+function-poly-call.js:5:1,5:2
+function-poly-call.js:8:1 (two type parameters) = function pair<number, string>(a: number, b: string): [number, string]
+function-poly-call.js:8:1,8:4
+function-poly-call.js:14:3 (method) = (method) C.m<boolean>(x: boolean): Array<boolean>
+function-poly-call.js:14:3,14:3
+function-poly-call.js:18:1 (polymorphic overload) = function f<number>(x: number): number (+1 overload)
+function-poly-call.js:18:1,18:1
+function-poly-call.js:19:1 (monomorphic overload) = function f(x: string, y: string): string (+1 overload)
+function-poly-call.js:19:1,19:1

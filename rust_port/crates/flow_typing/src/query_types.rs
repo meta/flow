@@ -234,6 +234,7 @@ fn framed_of_identifier_reference(cx: &mut Context<'_>, file_sig: &FileSig, loc:
         owner: None,
         type_parameter_context: None,
         overloads: overloads_of_def(kind, def),
+        targs: None,
     });
     let alias = is_imported_binding_kind(def.kind).then(|| Alias {
         kind: AliasKind::Import,
@@ -430,6 +431,7 @@ fn binder_of_member_reference(
             owner: None,
             type_parameter_context: None,
             overloads: 0,
+            targs: None,
         });
     }
     let named_prop = named_prop?;
@@ -455,6 +457,7 @@ fn binder_of_member_reference(
         // been looked up an overloaded method is indistinguishable from a plain
         // one and there is nothing left to count.
         overloads: 0,
+        targs: None,
     })
 }
 pub fn dump_type_at_pos(
@@ -551,6 +554,7 @@ pub fn type_at_pos_type<'a>(
                                 owner: None,
                                 type_parameter_context: None,
                                 overloads: 0,
+                                targs: None,
                             }),
                         alias: None,
                     },
@@ -624,12 +628,13 @@ pub fn type_at_pos_type<'a>(
                     let genv = ty_normalizer_flow::mk_genv(options, typed_ast_opt, file_sig.dupe());
                     ty_normalizer_flow::from_type_with_found_computed_type(cx, &genv, t)
                 };
+                let callee_targs = cx.get_callee_targs(&ALoc::of_loc(loc.dupe()));
                 // This pass evaluates the destructors it judges worth evaluating, so
                 // it has to leave the server's caches and error set as it found them:
                 // that state outlives the request, and a hover must not change how the
                 // next one behaves. Its result is kept whatever the errors say -- there
                 // is no second form to fall back on.
-                let (ty, type_parameter_context) = cx.run_and_rolled_back_cache(|cx| {
+                let (ty, type_parameter_context, targs) = cx.run_and_rolled_back_cache(|cx| {
                     let errors = cx.errors();
                     let (ty, _) = from_type(cx, &t, EvaluateTypeDestructorsMode::EvaluateForHover);
                     let type_parameter_context = match type_parameter_context.as_ref() {
@@ -648,8 +653,23 @@ pub fn type_at_pos_type<'a>(
                             })
                         }
                     };
+                    // Type arguments are shown all or none: one that does not
+                    // normalize to a type drops them all.
+                    let targs = callee_targs.and_then(|targs| {
+                        targs
+                            .iter()
+                            .map(|t| {
+                                let (ty, _) =
+                                    from_type(cx, t, EvaluateTypeDestructorsMode::EvaluateForHover);
+                                match ty {
+                                    Ok(Elt::Type(t)) => Some(t),
+                                    Ok(Elt::Decl(_)) | Err(_) => None,
+                                }
+                            })
+                            .collect::<Option<Arc<[_]>>>()
+                    });
                     cx.reset_errors(errors);
-                    (ty, type_parameter_context)
+                    (ty, type_parameter_context, targs)
                 });
                 match ty.and_then(|ty| {
                     type_parameter_context
@@ -696,8 +716,10 @@ pub fn type_at_pos_type<'a>(
                                 // overloaded import is an intersection anyway, and
                                 // `Ty::Fun` only matches a lone signature.
                                 overloads: 0,
+                                targs: None,
                             })
                         });
+                        let binder = binder.map(|binder| Binder { targs, ..binder });
                         QueryResult::Success(
                             loc,
                             TypeAtPosResult {

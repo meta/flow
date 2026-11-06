@@ -898,6 +898,9 @@ pub struct Binder {
     /// overloaded function prints the signature the call selected, so without a
     /// count nothing says the other signatures exist.
     pub overloads: u32,
+    /// The type arguments a call instantiated the signature with: the `<number>`
+    /// in `function f<number>(x: number): number`.
+    pub targs: Option<Arc<[ALocTy]>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

@@ -486,6 +486,7 @@ pub mod type_at_pos {
                         // A declaration site prints the whole declared type, so an
                         // overload set is already visible there and needs no count.
                         overloads: 0,
+                        targs: None,
                     },
                     type_parameter_context: (kind == BinderKind::TypeParameter)
                         .then(|| self.type_parameter_context(t))

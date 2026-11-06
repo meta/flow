@@ -8542,12 +8542,29 @@ fn proven_bare_assertion_throw(
     bare_assertion_call_always_throws(assertion, arguments)
 }
 
-fn is_single_assertion_function(finalized: &VecDeque<Type>) -> bool {
+/// The identifier that names a callee: `f` in `f()`, `m` in `o.m()`. This is
+/// where `push_toplevel_type` puts the specialized callee type, and so where a
+/// hover on the callee lands.
+fn callee_name_loc(callee: &expression::Expression<ALoc, (ALoc, Type)>) -> Option<ALoc> {
+    use ast::expression::ExpressionInner;
+    let member = match callee.deref() {
+        ExpressionInner::Identifier { inner, .. } => return Some(inner.loc.0.dupe()),
+        ExpressionInner::Member { inner, .. } => inner.as_ref(),
+        ExpressionInner::OptionalMember { inner, .. } => &inner.member,
+        _ => return None,
+    };
+    match &member.property {
+        expression::member::Property::PropertyIdentifier(id) => Some(id.loc.0.dupe()),
+        _ => None,
+    }
+}
+
+fn is_single_assertion_function(finalized: &VecDeque<type_::RecordedCallee>) -> bool {
     if finalized.len() != 1 {
         return false;
     }
     match finalized.front() {
-        Some(t)
+        Some(type_::RecordedCallee { t, .. })
             if let TypeInner::DefT(_, def_t) = t.deref()
                 && let DefTInner::FunT(_, function) = def_t.deref() =>
         {
@@ -9708,6 +9725,11 @@ pub fn optional_chain<'a>(
         if is_single_assertion_function(&finalized) {
             cx.add_assertion_call_candidate(callee.loc().0.dupe());
         }
+        if let Some(targs) = flow_js_utils::callee_recorder::targs_for_tast(specialized_callee)
+            && let Some(name_loc) = callee_name_loc(&callee)
+        {
+            cx.set_callee_targs(name_loc, targs);
+        }
         if finalized.is_empty() {
             callee
         } else {
@@ -9717,7 +9739,7 @@ pub fn optional_chain<'a>(
             let t_init = callee.loc().1.dupe();
             let t = union_of_ts(
                 reason_of_t(&t_init).dupe(),
-                finalized.iter().cloned().collect(),
+                finalized.iter().map(|c| c.t.dupe()).collect(),
                 None,
             );
             flow_parser::ast_utils::push_toplevel_type(t, callee)

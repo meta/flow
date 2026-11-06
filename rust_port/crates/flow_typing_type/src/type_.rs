@@ -5375,10 +5375,22 @@ pub struct SpecState {
 /// so we only need a simple list to record signatures.
 #[derive(Debug, Clone)]
 pub struct SpecializedCallee {
-    pub finalized: Rc<RefCell<std::collections::VecDeque<Type>>>,
-    pub speculative_candidates: Rc<RefCell<std::collections::VecDeque<(Type, SpecState)>>>,
+    pub finalized: Rc<RefCell<std::collections::VecDeque<RecordedCallee>>>,
+    pub speculative_candidates:
+        Rc<RefCell<std::collections::VecDeque<(RecordedCallee, SpecState)>>>,
     pub init_speculation_state: Option<SpecState>,
     pub sig_help: Rc<RefCell<std::collections::VecDeque<Type>>>,
+    /// The type arguments of the instantiation that produced the callee reaching
+    /// this call. The `PolyT ~> CallT` rule sets them on the copy it passes on.
+    pub targs: Option<Rc<[Type]>>,
+}
+
+/// A specialized callee type, with the type arguments it was instantiated with
+/// when it comes from a polymorphic definition.
+#[derive(Debug, Clone, Dupe, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct RecordedCallee {
+    pub t: Type,
+    pub targs: Option<Rc<[Type]>>,
 }
 
 impl PartialEq for SpecializedCallee {
@@ -5409,6 +5421,7 @@ impl Ord for SpecializedCallee {
                     .cmp(&other.init_speculation_state)
             })
             .then_with(|| self.sig_help.borrow().cmp(&*other.sig_help.borrow()))
+            .then_with(|| self.targs.cmp(&other.targs))
     }
 }
 
@@ -5418,6 +5431,7 @@ impl std::hash::Hash for SpecializedCallee {
         self.speculative_candidates.borrow().hash(state);
         self.init_speculation_state.hash(state);
         self.sig_help.borrow().hash(state);
+        self.targs.hash(state);
     }
 }
 

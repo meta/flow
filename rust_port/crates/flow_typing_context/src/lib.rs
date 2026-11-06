@@ -507,6 +507,7 @@ pub struct ComponentT {
     signature_help_callee: ALocMap<Type>,
     // Hover type
     ctor_callee: ALocMap<Type>,
+    callee_targs: ALocMap<Rc<[Type]>>,
     // Union optimization checks
     union_opt: ALocMap<Type>,
     // Natural inference (records checks on primitive literal types during
@@ -1104,6 +1105,7 @@ fn make_ccx() -> ComponentT {
         exhaustive_checks: ALocMap::new(),
         signature_help_callee: ALocMap::new(),
         ctor_callee: ALocMap::new(),
+        callee_targs: ALocMap::new(),
         union_opt: ALocMap::new(),
         primitive_literal_checks: ALocSet::new(),
         fun_proto_method_lookups: ALocSet::new(),
@@ -2545,6 +2547,16 @@ impl<'a> Context<'a> {
         self.ccx().ctor_callee.get(loc).duped()
     }
 
+    /// Records the type arguments a call instantiated its callee with, keyed by
+    /// the identifier that names the callee.
+    pub fn set_callee_targs(&mut self, loc: ALoc, targs: Rc<[Type]>) {
+        self.ccx_mut().callee_targs.insert(loc, targs);
+    }
+
+    pub fn get_callee_targs(&self, loc: &ALoc) -> Option<Rc<[Type]>> {
+        self.ccx().callee_targs.get(loc).duped()
+    }
+
     pub fn record_primitive_literal_check(&mut self, loc: ALoc) {
         self.ccx_mut().primitive_literal_checks.insert(loc);
     }
@@ -3502,6 +3514,7 @@ impl<'a> Context<'a> {
                 std::collections::VecDeque::new(),
             )),
             sig_help: std::rc::Rc::new(std::cell::RefCell::new(std::collections::VecDeque::new())),
+            targs: None,
         }
     }
 }

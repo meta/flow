@@ -287,6 +287,7 @@ mod tests {
             owner: None,
             type_parameter_context: None,
             overloads: 0,
+            targs: None,
         };
 
         let (type_str, _) = string_of_type_at_pos_result::<Loc>(

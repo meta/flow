@@ -10165,11 +10165,14 @@ pub mod render_types {
 }
 
 pub mod callee_recorder {
+    use std::rc::Rc;
+
     use dupe::Dupe;
     use flow_common::reason::Reason;
     use flow_lazy::ContextFamily;
     use flow_typing_flow_js_env::FlowJsEnv;
     use flow_typing_type::type_::CallTData;
+    use flow_typing_type::type_::RecordedCallee;
     use flow_typing_type::type_::SpecializedCallee;
     use flow_typing_type::type_::Type;
     use flow_typing_type::type_::UseT;
@@ -10183,6 +10186,10 @@ pub mod callee_recorder {
     }
 
     fn add_tast(env: &FlowJsEnv, l: Type, specialized_callee: &SpecializedCallee) {
+        let l = RecordedCallee {
+            t: l,
+            targs: specialized_callee.targs.dupe(),
+        };
         match env.speculation_id() {
             Some(id) if Some(id.dupe()) != specialized_callee.init_speculation_state => {
                 // It is possible that the call we are inspecting was initiated in a speculative
@@ -10270,7 +10277,17 @@ pub mod callee_recorder {
 
     pub fn type_for_tast(reason: Reason, specialized_callee: &SpecializedCallee) -> Type {
         let finalized = specialized_callee.finalized.borrow();
-        union_of_ts(reason, finalized.iter().cloned().collect(), None)
+        union_of_ts(reason, finalized.iter().map(|c| c.t.dupe()).collect(), None)
+    }
+
+    /// The type arguments of the callee's instantiation, when the call settled on
+    /// a single callee that came from a polymorphic definition.
+    pub fn targs_for_tast(specialized_callee: &SpecializedCallee) -> Option<Rc<[Type]>> {
+        let finalized = specialized_callee.finalized.borrow();
+        match finalized.front() {
+            Some(callee) if finalized.len() == 1 => callee.targs.dupe(),
+            _ => None,
+        }
     }
 
     pub fn type_for_tast_opt(
@@ -10283,7 +10300,7 @@ pub mod callee_recorder {
         } else {
             Some(union_of_ts(
                 reason,
-                finalized.iter().cloned().collect(),
+                finalized.iter().map(|c| c.t.dupe()).collect(),
                 None,
             ))
         }

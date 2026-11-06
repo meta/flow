@@ -108,3 +108,19 @@ printf "overloads.js:15:1 (call, not overloaded) = "
 assert_ok "$FLOW" type-at-pos overloads.js 15 1 --strip-root
 printf "overloads.js:22:3 (overloaded method call) = "
 assert_ok "$FLOW" type-at-pos overloads.js 22 3 --strip-root
+
+# function-poly-call.js
+# A call to a polymorphic function prints the signature it instantiated, with
+# the type arguments of that instantiation.
+printf "function-poly-call.js:4:1 (implicit) = "
+assert_ok "$FLOW" type-at-pos function-poly-call.js 4 1 --strip-root
+printf "function-poly-call.js:5:1 (explicit) = "
+assert_ok "$FLOW" type-at-pos function-poly-call.js 5 1 --strip-root
+printf "function-poly-call.js:8:1 (two type parameters) = "
+assert_ok "$FLOW" type-at-pos function-poly-call.js 8 1 --strip-root
+printf "function-poly-call.js:14:3 (method) = "
+assert_ok "$FLOW" type-at-pos function-poly-call.js 14 3 --strip-root
+printf "function-poly-call.js:18:1 (polymorphic overload) = "
+assert_ok "$FLOW" type-at-pos function-poly-call.js 18 1 --strip-root
+printf "function-poly-call.js:19:1 (monomorphic overload) = "
+assert_ok "$FLOW" type-at-pos function-poly-call.js 19 1 --strip-root
