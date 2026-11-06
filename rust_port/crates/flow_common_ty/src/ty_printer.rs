@@ -654,15 +654,15 @@ fn function_signature<L: Dupe>(
         params,
     );
 
-    let return_type = return_t(opts, depth, &func.fun_return, size);
+    let return_type = match &func.fun_return {
+        ReturnT::ReturnType(t) => type_after_separator(opts, depth, t, size),
+        ret @ ReturnT::TypeGuard(..) => layout::fuse(vec![
+            layout::pretty_space(),
+            return_t(opts, depth, ret, size),
+        ]),
+    };
 
-    layout::fuse(vec![
-        type_params,
-        params_list,
-        sep.clone(),
-        layout::pretty_space(),
-        return_type,
-    ])
+    layout::fuse(vec![type_params, params_list, sep.clone(), return_type])
 }
 
 fn type_function_param<L: Dupe>(
@@ -673,7 +673,7 @@ fn type_function_param<L: Dupe>(
     fun_param: &FunParam,
     size: &mut PrintState<L>,
 ) -> LayoutNode {
-    let name_part = match name {
+    match name {
         Some(id) => layout::fuse(vec![
             LayoutNode::atom(id.to_string()),
             if fun_param.prm_optional {
@@ -682,12 +682,10 @@ fn type_function_param<L: Dupe>(
                 LayoutNode::empty()
             },
             LayoutNode::atom(":".to_string()),
-            layout::pretty_space(),
+            type_after_separator(opts, depth, annot.as_ref(), size),
         ]),
-        None => LayoutNode::empty(),
-    };
-
-    layout::fuse(vec![name_part, type_(opts, depth, annot.as_ref(), size)])
+        None => type_(opts, depth, annot.as_ref(), size),
+    }
 }
 
 fn return_t<L: Dupe>(
@@ -770,8 +768,7 @@ fn type_param<L: Dupe>(
         Some(t) => layout::fuse(vec![
             layout::pretty_space(),
             LayoutNode::atom("=".to_string()),
-            layout::pretty_space(),
-            type_(opts, depth, t.as_ref(), size),
+            type_after_separator(opts, depth, t.as_ref(), size),
         ]),
         _ => LayoutNode::empty(),
     };
@@ -794,8 +791,7 @@ fn type_param_bound<L: Dupe>(
     layout::fuse(vec![
         layout::pretty_space(),
         LayoutNode::atom("extends".to_string()),
-        layout::pretty_space(),
-        type_(opts, depth, t, size),
+        type_after_separator(opts, depth, t, size),
     ])
 }
 
@@ -887,8 +883,7 @@ fn type_object_property<L: Dupe>(
                     LayoutNode::empty()
                 },
                 LayoutNode::atom(":".to_string()),
-                layout::pretty_space(),
-                type_(opts, depth, t.as_ref(), size),
+                type_after_separator(opts, depth, t.as_ref(), size),
             ]),
             NamedProp::Method {
                 fun: func,
@@ -910,8 +905,7 @@ fn type_object_property<L: Dupe>(
                 layout::softline(),
                 LayoutNode::atom(")".to_string()),
                 LayoutNode::atom(":".to_string()),
-                layout::pretty_space(),
-                type_(opts, depth, t.as_ref(), size),
+                type_after_separator(opts, depth, t.as_ref(), size),
             ])]),
             NamedProp::Set(t) => layout::group(vec![layout::fuse(vec![
                 LayoutNode::atom("set".to_string()),
@@ -985,8 +979,7 @@ fn type_object_property<L: Dupe>(
                 LayoutNode::atom("]".to_string()),
                 optional_modifier,
                 LayoutNode::atom(":".to_string()),
-                layout::pretty_space(),
-                type_(opts, depth, prop.as_ref(), size),
+                type_after_separator(opts, depth, prop.as_ref(), size),
             ])
         }
     }
@@ -1014,8 +1007,7 @@ fn type_dict<L: Dupe>(
         type_(opts, depth, dict.dict_key.as_ref(), size),
         LayoutNode::atom("]".to_string()),
         LayoutNode::atom(":".to_string()),
-        layout::pretty_space(),
-        type_(opts, depth, dict.dict_value.as_ref(), size),
+        type_after_separator(opts, depth, dict.dict_value.as_ref(), size),
     ])
 }
 
@@ -1150,8 +1142,7 @@ fn type_component_sig<L: Dupe>(
                         LayoutNode::empty()
                     },
                     LayoutNode::atom(":".to_string()),
-                    layout::pretty_space(),
-                    type_(opts, depth, t.as_ref(), size),
+                    type_after_separator(opts, depth, t.as_ref(), size),
                 ]));
             }
             if *inexact {
@@ -1221,27 +1212,24 @@ fn tuple_element<L: Dupe>(
                 LayoutNode::empty()
             };
 
-            let id_nodes = |id: &str| -> Vec<LayoutNode> {
-                vec![
+            let id_nodes = |id: &str, size: &mut PrintState<L>| -> LayoutNode {
+                layout::fuse(vec![
                     LayoutNode::atom(id.to_string()),
                     opt_node.clone(),
                     LayoutNode::atom(":".to_string()),
-                    layout::pretty_space(),
-                ]
+                    type_after_separator(opts, depth, t.as_ref(), size),
+                ])
             };
 
-            let name_nodes = match (name, polarity, optional) {
-                (Some(n), _, _) => id_nodes(n.as_str()),
-                (None, Polarity::Neutral, false) => vec![],
+            let element = match (name, polarity, optional) {
+                (Some(n), _, _) => id_nodes(n.as_str(), size),
+                (None, Polarity::Neutral, false) => type_(opts, depth, t.as_ref(), size),
                 // We cannot omit the name of a non-neutral variance or optional
                 // element. If the name is missing, add a default name "_".
-                (None, _, _) => id_nodes(&format!("_{}", idx)),
+                (None, _, _) => id_nodes(&format!("_{}", idx), size),
             };
 
-            let mut nodes = vec![property_variance(*polarity)];
-            nodes.extend(name_nodes);
-            nodes.push(type_(opts, depth, t.as_ref(), size));
-            layout::fuse(nodes)
+            layout::fuse(vec![property_variance(*polarity), element])
         }
         TupleElement::TupleSpread { name, t } => {
             let name_part = match name {
@@ -1307,12 +1295,22 @@ fn type_array<L: Dupe>(
     } else {
         "Array"
     };
-    layout::fuse(vec![
-        LayoutNode::atom(arr_name.to_string()),
-        LayoutNode::atom("<".to_string()),
-        type_(opts, depth, &arr.arr_elt_t, size),
-        LayoutNode::atom(">".to_string()),
-    ])
+    match arr.arr_elt_t.as_ref() {
+        // A union that does not fit needs lines of its own for its members.
+        Ty::Union(..) => type_reference(
+            opts,
+            depth,
+            LayoutNode::atom(arr_name.to_string()),
+            Some(std::slice::from_ref(&arr.arr_elt_t)),
+            size,
+        ),
+        _ => layout::fuse(vec![
+            LayoutNode::atom(arr_name.to_string()),
+            LayoutNode::atom("<".to_string()),
+            type_(opts, depth, &arr.arr_elt_t, size),
+            LayoutNode::atom(">".to_string()),
+        ]),
+    }
 }
 
 fn type_generic<L: Dupe>(
@@ -1376,7 +1374,7 @@ fn type_args<L: Dupe>(
 fn type_union<L: Dupe>(
     opts: &PrinterOptions,
     depth: usize,
-    after_assignment: bool,
+    after_separator: bool,
     types: &[&Ty<L>],
     size: &mut PrintState<L>,
 ) -> LayoutNode {
@@ -1400,58 +1398,71 @@ fn type_union<L: Dupe>(
         (LayoutNode::empty(), types.to_vec())
     };
 
-    // `?() => void` already parses as `?(() => void)`, so a lone function
-    // under the maybe prefix needs no parentheses.
-    if prefix_is_maybe && let [t @ Ty::Fun(_)] = filtered_types.as_slice() {
-        let fun = type_(opts, depth, t, size);
-        return if after_assignment {
-            layout::fuse(vec![layout::pretty_space(), prefix, fun])
+    // A lone type under the maybe prefix has no members to list. `?() => void`
+    // already parses as `?(() => void)`, so a lone function needs no parentheses.
+    if let [t] = filtered_types.as_slice() {
+        let t = match t {
+            Ty::Fun(_) => type_(opts, depth, t, size),
+            _ => type_with_parens(opts, depth, t, size),
+        };
+        return if after_separator {
+            layout::fuse(vec![layout::pretty_space(), prefix, t])
         } else {
-            layout::fuse(vec![prefix, fun])
+            layout::fuse(vec![prefix, t])
         };
     }
 
-    if after_assignment {
-        let elements = type_list_elements(
-            opts,
-            depth,
-            "|",
-            "union member",
-            "union members",
-            &filtered_types,
-            size,
+    // A union that does not fit lists its members a line each, every one led by
+    // `|`. A member's own lines are indented past its `| `.
+    let elements = type_list_elements(
+        opts,
+        depth,
+        "|",
+        "union member",
+        "union members",
+        &filtered_types,
+        size,
+    )
+    .into_iter()
+    .map(LayoutNode::indent);
+    let leading_bar = |flat: LayoutNode| {
+        layout::if_break(
+            layout::fuse(vec![LayoutNode::atom("|".to_string()), layout::space()]),
+            flat,
         )
-        .into_iter()
-        .enumerate()
-        .map(|(i, element)| {
-            if i == 0 {
-                layout::fuse(vec![
-                    layout::if_break(
-                        layout::fuse(vec![LayoutNode::atom("|".to_string()), layout::space()]),
-                        layout::space(),
-                    ),
-                    prefix.dupe(),
-                    element,
-                ])
-            } else {
-                element
-            }
-        })
-        .collect();
+    };
+    if after_separator {
+        // After a separator the members start on a line of their own, indented
+        // under it.
+        let elements = elements
+            .enumerate()
+            .map(|(i, element)| {
+                if i == 0 {
+                    layout::fuse(vec![leading_bar(layout::space()), prefix.dupe(), element])
+                } else {
+                    element
+                }
+            })
+            .collect();
         layout::list(None, None, None, false, Some((false, true)), None, elements)
     } else {
-        let elements = intersperse_pretty_line(
-            opts,
-            depth,
-            "|",
-            "union member",
-            "union members",
-            &filtered_types,
-            size,
-        );
-        layout::group(vec![layout::fuse(
-            std::iter::once(prefix).chain(elements).collect(),
-        )])
+        // Elsewhere the members line up under the first one, wherever the
+        // enclosing layout starts it.
+        let elements = elements
+            .enumerate()
+            .map(|(i, element)| {
+                if i == 0 {
+                    layout::fuse(vec![
+                        leading_bar(LayoutNode::empty()),
+                        prefix.dupe(),
+                        element,
+                    ])
+                } else {
+                    layout::fuse(vec![layout::pretty_line(), element])
+                }
+            })
+            .collect();
+        layout::group(vec![layout::fuse(elements)])
     }
 }
 
@@ -1545,7 +1556,18 @@ fn type_with_parens<L: Dupe>(
     size: &mut PrintState<L>,
 ) -> LayoutNode {
     match t {
-        Ty::Fun(_) | Ty::Union(_, _, _, _) | Ty::Inter(_, _, _) | Ty::Conditional { .. } => {
+        // A union that does not fit puts its members on lines of their own
+        // between the parentheses.
+        Ty::Union(..) => layout::group(vec![
+            LayoutNode::atom("(".to_string()),
+            LayoutNode::indent(layout::fuse(vec![
+                layout::softline(),
+                type_(opts, depth, t, size),
+            ])),
+            layout::softline(),
+            LayoutNode::atom(")".to_string()),
+        ]),
+        Ty::Fun(_) | Ty::Inter(_, _, _) | Ty::Conditional { .. } => {
             wrap_in_parens(type_(opts, depth, t, size))
         }
         _ => type_(opts, depth, t, size),
@@ -1713,8 +1735,7 @@ fn type_alias<L: Dupe>(
         Some(t) => layout::fuse(vec![
             layout::space(),
             LayoutNode::atom(keyword.to_string()),
-            layout::space(),
-            type_(opts, depth, t, size),
+            type_after_separator(opts, depth, t, size),
         ]),
         None => LayoutNode::empty(),
     };
@@ -1732,7 +1753,7 @@ fn type_alias<L: Dupe>(
         Some(t) => layout::fuse(vec![
             layout::pretty_space(),
             LayoutNode::atom("=".to_string()),
-            type_after_assignment(opts, depth, t, size),
+            type_after_separator(opts, depth, t, size),
         ]),
         None => LayoutNode::empty(),
     };
@@ -1747,7 +1768,7 @@ fn type_alias<L: Dupe>(
     ])
 }
 
-fn type_after_assignment<L: Dupe>(
+fn type_after_separator<L: Dupe>(
     opts: &PrinterOptions,
     depth: usize,
     t: &Ty<L>,
@@ -1788,8 +1809,7 @@ fn variable_decl<L: Dupe>(
         layout::space(),
         identifier(name),
         LayoutNode::atom(":".to_string()),
-        layout::space(),
-        type_(opts, depth, t, size),
+        type_after_separator(opts, depth, t, size),
     ])
 }
 
@@ -2212,8 +2232,7 @@ fn layout_of_binder(
         _ => layout::fuse(vec![
             head,
             LayoutNode::atom(":".to_string()),
-            layout::pretty_space(),
-            type_(opts, 0, t, state),
+            type_after_separator(opts, 0, t, state),
         ]),
     }
 }

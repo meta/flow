@@ -913,7 +913,7 @@ Poly<?K | L>
 unions.js:86:3,86:4
 
 At unions.js:95:4
-LongLongLongLongLongLongLongLongName
+| LongLongLongLongLongLongLongLongName
 | AnotherLongLongLongLongLongLongLongLongName
 
 'AnotherLongLongLongLongLongLongLongLongName' defined at unions.js:91:20
@@ -922,7 +922,7 @@ LongLongLongLongLongLongLongLongName
 unions.js:95:3,95:4
 
 At unions.js:97:4
-?LongLongLongLongLongLongLongLongNameP<TValue>
+| ?LongLongLongLongLongLongLongLongNameP<TValue>
 | AnotherLongLongLongLongLongLongLongLongName
 
 'AnotherLongLongLongLongLongLongLongLongName' defined at unions.js:91:20
@@ -932,7 +932,7 @@ unions.js:97:3,97:4
 
 At unions.js:99:4
 Poly<
-  LongLongLongLongLongLongLongLongName
+  | LongLongLongLongLongLongLongLongName
   | AnotherLongLongLongLongLongLongLongLongName,
 >
 
@@ -954,7 +954,7 @@ unions.js:101:3,101:4
 
 At unions.js:103:4
 Poly<
-  ?LongLongLongLongLongLongLongLongName
+  | ?LongLongLongLongLongLongLongLongName
   | AnotherLongLongLongLongLongLongLongLongName,
 >
 
@@ -980,7 +980,7 @@ unions.js:112:6,112:14
 
 At unions.js:115:6
 type LongUnionPoly = Poly<
-  LongLongLongLongLongLongLongLongName1
+  | LongLongLongLongLongLongLongLongName1
   | LongLongLongLongLongLongLongLongName2
   | LongLongLongLongLongLongLongLongName3
   | LongLongLongLongLongLongLongLongName4,
@@ -993,6 +993,64 @@ type LongUnionPoly = Poly<
 'Poly' defined at unions.js:72:20
 
 unions.js:115:6,115:18
+
+At unions.js:122:4
+(
+  x:
+    | LongLongLongLongLongLongLongLongName1
+    | LongLongLongLongLongLongLongLongName2
+) =>
+  | LongLongLongLongLongLongLongLongName3
+  | LongLongLongLongLongLongLongLongName4
+
+'LongLongLongLongLongLongLongLongName1' defined at unions.js:107:20
+'LongLongLongLongLongLongLongLongName2' defined at unions.js:108:20
+'LongLongLongLongLongLongLongLongName3' defined at unions.js:109:20
+'LongLongLongLongLongLongLongLongName4' defined at unions.js:110:20
+
+unions.js:122:1,122:18
+
+At unions.js:127:4
+{
+  p:
+    | LongLongLongLongLongLongLongLongName1
+    | LongLongLongLongLongLongLongLongName2
+}
+
+'LongLongLongLongLongLongLongLongName1' defined at unions.js:107:20
+'LongLongLongLongLongLongLongLongName2' defined at unions.js:108:20
+
+unions.js:127:1,127:12
+
+At unions.js:130:4
+Array<
+  | LongLongLongLongLongLongLongLongName1
+  | LongLongLongLongLongLongLongLongName2
+  | LongLongLongLongLongLongLongLongName3,
+>
+
+'LongLongLongLongLongLongLongLongName1' defined at unions.js:107:20
+'LongLongLongLongLongLongLongLongName2' defined at unions.js:108:20
+'LongLongLongLongLongLongLongLongName3' defined at unions.js:109:20
+
+unions.js:130:1,130:9
+
+At unions.js:136:4
+| {
+    a: LongLongLongLongLongLongLongLongName1,
+    b: LongLongLongLongLongLongLongLongName2
+  }
+| {
+    c: LongLongLongLongLongLongLongLongName3,
+    d: LongLongLongLongLongLongLongLongName4
+  }
+
+'LongLongLongLongLongLongLongLongName1' defined at unions.js:107:20
+'LongLongLongLongLongLongLongLongName2' defined at unions.js:108:20
+'LongLongLongLongLongLongLongLongName3' defined at unions.js:109:20
+'LongLongLongLongLongLongLongLongName4' defined at unions.js:110:20
+
+unions.js:136:1,136:16
 
 tparam_defaults.js
 At tparam_defaults.js:11:9

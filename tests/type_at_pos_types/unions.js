@@ -114,3 +114,24 @@ type LongUnion = LongLongLongLongLongLongLongLongName1 | LongLongLongLongLongLon
 
 type LongUnionPoly = Poly<LongLongLongLongLongLongLongLongName1 | LongLongLongLongLongLongLongLongName2 | LongLongLongLongLongLongLongLongName3 | LongLongLongLongLongLongLongLongName4>;
 //   ^?
+
+// A union after a `:` or `=>` starts its members on lines of their own.
+declare function longParamAndReturn(
+  x: LongLongLongLongLongLongLongLongName1 | LongLongLongLongLongLongLongLongName2,
+): LongLongLongLongLongLongLongLongName3 | LongLongLongLongLongLongLongLongName4;
+longParamAndReturn;
+// ^?
+declare const longProperty: {
+  p: LongLongLongLongLongLongLongLongName1 | LongLongLongLongLongLongLongLongName2,
+};
+longProperty;
+// ^?
+declare const longArray: Array<LongLongLongLongLongLongLongLongName1 | LongLongLongLongLongLongLongLongName2 | LongLongLongLongLongLongLongLongName3>;
+longArray;
+// ^?
+// A member's own lines are indented past its `| `.
+declare const multilineMembers:
+  | {a: LongLongLongLongLongLongLongLongName1, b: LongLongLongLongLongLongLongLongName2}
+  | {c: LongLongLongLongLongLongLongLongName3, d: LongLongLongLongLongLongLongLongName4};
+multilineMembers;
+// ^?
