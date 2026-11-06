@@ -387,7 +387,7 @@
     "path":"test.js",
     "reasons":[],
     "start":37,
-    "type":"any (explicit)"
+    "type":"any"
   },
   {
     "end":65,
@@ -417,7 +417,7 @@
     "path":"test.js",
     "reasons":[],
     "start":43,
-    "type":"any (explicit)"
+    "type":"any"
   },
   {
     "end":55,
@@ -1470,8 +1470,8 @@ elem_call.js:13:7-9: string
 elem_call.js:13:12-13: ""
 elem_call.js:17:1-5: {[key: "a"]: () => {...}} | void
 elem_call.js:17:1-5: {[key: "a"]: () => {...}} | void
-elem_call.js:17:1-8: any (implicit)
-elem_call.js:17:1-10: any (implicit)
+elem_call.js:17:1-8: any
+elem_call.js:17:1-10: any
 elem_call.js:17:7: "b"
 elem_call.js:17:7: "b"
 === optional_calls.js ===

@@ -311,7 +311,7 @@ inferred.js:44:7,44:9
 
 negation.js:5:5
 Flags:
-(parameter) x: any (explicit)
+(parameter) x: any
 negation.js:5:5,5:5
 
 negation.js:12:5

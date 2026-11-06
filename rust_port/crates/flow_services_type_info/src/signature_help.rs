@@ -62,30 +62,21 @@ fn parameter_name(is_opt: bool, name: &Option<FlowSmolStr>) -> String {
 }
 
 fn string_of_ty<L: Dupe>(t: &Ty<L>) -> String {
-    let opts = PrinterOptions {
-        with_comments: false,
-        ..Default::default()
-    };
+    let opts = PrinterOptions::default();
     ty_printer::string_of_t_single_line(t, &opts)
 }
 
 fn string_of_return_t<L: Dupe>(return_t: &ReturnT<L>) -> String {
     match return_t {
         ReturnT::ReturnType(t) => {
-            let opts = PrinterOptions {
-                with_comments: false,
-                ..Default::default()
-            };
+            let opts = PrinterOptions::default();
             ty_printer::string_of_t_single_line(t, &opts)
         }
         ReturnT::TypeGuard(kind, x, t) => {
             let prefix = flow_common_ty::ty::type_guard_kind_prefix(*kind);
             match t {
                 Some(t) => {
-                    let opts = PrinterOptions {
-                        with_comments: false,
-                        ..Default::default()
-                    };
+                    let opts = PrinterOptions::default();
                     let t_str = ty_printer::string_of_t_single_line(t, &opts);
                     format!("{}{} is {}", prefix, x, t_str)
                 }

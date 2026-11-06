@@ -28,7 +28,7 @@ Cannot resolve name `IdeGlobal`. [cannot-resolve-name]
 
 Found 3 errors
 Type at global use:
-any (implicit)
+any
 use.js:1:18,1:26
 Definition of global use:
 use.js:1:18,1:26
@@ -129,7 +129,7 @@ Cannot resolve name `IdeGlobal`. [cannot-resolve-name]
 
 Found 3 errors
 Type at global use:
-any (implicit)
+any
 use.js:1:18,1:26
 Definition of global use:
 use.js:1:18,1:26
@@ -235,7 +235,7 @@ Cannot resolve name `IdeGlobal`. [cannot-resolve-name]
 
 Found 3 errors
 Type at global use:
-any (implicit)
+any
 use.js:1:18,1:26
 Definition of global use:
 use.js:1:18,1:26

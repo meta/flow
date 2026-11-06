@@ -79,7 +79,7 @@ declare.js:24:4
 Flags: --strip-root
 
  declaration of baz
-function baz(x: any (explicit)): any (explicit)
+function baz(x: any): any
 declare.js:24:3,24:5
 
 objects-requires.js:18:6

@@ -174,7 +174,6 @@ pub struct AcOptions {
 fn printer_options(prefer_single_quotes: bool) -> ty_printer::PrinterOptions {
     ty_printer::PrinterOptions {
         prefer_single_quotes,
-        with_comments: false,
         ..Default::default()
     }
 }
@@ -275,7 +274,6 @@ fn detail_of_ty_decl(decl: &Decl<ALoc>) -> (Option<String>, Option<String>) {
         decl,
         &ty_printer::PrinterOptions {
             prefer_single_quotes: false,
-            with_comments: false,
             ..Default::default()
         },
     );

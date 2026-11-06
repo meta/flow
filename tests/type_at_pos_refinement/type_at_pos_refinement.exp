@@ -5,7 +5,7 @@ predicates.js - Array: class Array<T>
 'Array' defined at (lib) prelude.js:30:14
 
 predicates.js:6:5,6:9
-predicates.js - isArray: any (implicit)
+predicates.js - isArray: any
 predicates.js:6:11,6:17
 predicates.js - y (refined obj): let y: {FOO: string}
 predicates.js:8:5,8:5

@@ -47,7 +47,6 @@ mod tests {
         PrinterOptions {
             prefer_single_quotes: false,
             size: 80,
-            with_comments: false,
         }
     }
 

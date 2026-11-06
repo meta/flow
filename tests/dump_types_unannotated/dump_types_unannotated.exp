@@ -27,7 +27,7 @@
     "path":"test.js",
     "reasons":[],
     "start":22,
-    "type":"any (implicit)"
+    "type":"any"
   },
   {
     "end":22,
@@ -42,7 +42,7 @@
     "path":"test.js",
     "reasons":[],
     "start":22,
-    "type":"any (implicit)"
+    "type":"any"
   },
   {
     "end":22,
@@ -57,7 +57,7 @@
     "path":"test.js",
     "reasons":[],
     "start":23,
-    "type":"any (implicit)"
+    "type":"any"
   },
   {
     "end":23,
@@ -72,7 +72,7 @@
     "path":"test.js",
     "reasons":[],
     "start":24,
-    "type":"any (implicit)"
+    "type":"any"
   },
   {
     "end":11,
@@ -87,7 +87,7 @@
     "path":"test.js",
     "reasons":[],
     "start":3,
-    "type":"any (implicit)"
+    "type":"any"
   },
   {
     "end":10,
@@ -102,7 +102,7 @@
     "path":"test.js",
     "reasons":[],
     "start":10,
-    "type":"any (implicit)"
+    "type":"any"
   },
   {
     "end":10,
@@ -117,6 +117,6 @@
     "path":"test.js",
     "reasons":[],
     "start":10,
-    "type":"any (implicit)"
+    "type":"any"
   }
 ]

@@ -102,7 +102,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- file.js:48:16
 
-Invalid use of $Flow$EnforceOptimized on non-union type `any (explicit)` [1]. [union-unoptimizable]
+Invalid use of $Flow$EnforceOptimized on non-union type `any` [1]. [union-unoptimizable]
 
    file.js:48:16
    48| type Error6c = $Flow$EnforceOptimized<any>; // error non-union argument

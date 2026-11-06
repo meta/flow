@@ -23,7 +23,7 @@ Flags: --pretty
   "path":"setter_class_missing_param.js",
   "reasons":[],
   "start":3,
-  "types":{"type":"any (implicit)"}
+  "types":{"type":"any"}
 }
 
 Error ------------------------------------------------------------------------------ setter_class_multiple_params.js:2:7
@@ -79,7 +79,7 @@ Flags: --pretty
   "path":"setter_interface_missing_param.js",
   "reasons":[],
   "start":3,
-  "types":{"type":"any (implicit)"}
+  "types":{"type":"any"}
 }
 
 Error -------------------------------------------------------------------------- setter_interface_multiple_params.js:2:7
@@ -135,7 +135,7 @@ Flags: --pretty
   "path":"setter_object_missing_param.js",
   "reasons":[],
   "start":3,
-  "types":{"type":"any (implicit)"}
+  "types":{"type":"any"}
 }
 
 Error ----------------------------------------------------------------------------- setter_object_multiple_params.js:2:7
@@ -191,7 +191,7 @@ Flags: --pretty
   "path":"setter_type_missing_param.js",
   "reasons":[],
   "start":3,
-  "types":{"type":"any (implicit)"}
+  "types":{"type":"any"}
 }
 
 Error ------------------------------------------------------------------------------- setter_type_multiple_params.js:2:7

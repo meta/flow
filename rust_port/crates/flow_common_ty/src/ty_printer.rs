@@ -307,7 +307,7 @@ fn type_impl<L: Dupe>(
             let (_, name) = data.as_ref();
             LayoutNode::atom(name.to_string())
         }
-        Ty::Any(kind) => any(opts, depth, kind),
+        Ty::Any(_) => LayoutNode::atom("any".to_string()),
         Ty::Top => LayoutNode::atom("unknown".to_string()),
         Ty::Bot(_) => LayoutNode::atom("empty".to_string()),
         Ty::Void => LayoutNode::atom("void".to_string()),
@@ -514,27 +514,6 @@ fn type_impl<L: Dupe>(
             layout::fuse(parts)
         }
     }
-}
-
-fn any<L: Dupe>(opts: &PrinterOptions, depth: usize, kind: &AnyKind<L>) -> LayoutNode {
-    let kind_str = match kind {
-        AnyKind::Annotated(_) => "explicit",
-        AnyKind::Recursive => "recursive",
-        AnyKind::Placeholder => "placeholder",
-        AnyKind::AnyError(_) | AnyKind::Unsound(_) | AnyKind::Untyped => "implicit",
-    };
-
-    layout::fuse(vec![
-        LayoutNode::atom("any".to_string()),
-        if depth == 1 && opts.with_comments {
-            layout::fuse(vec![
-                layout::pretty_space(),
-                wrap_in_parens(LayoutNode::atom(kind_str.to_string())),
-            ])
-        } else {
-            LayoutNode::empty()
-        },
-    ])
 }
 
 fn arrow_separator() -> LayoutNode {
@@ -1949,7 +1928,6 @@ fn decl<L: Dupe>(
 pub struct PrinterOptions {
     pub prefer_single_quotes: bool,
     pub size: usize,
-    pub with_comments: bool,
 }
 
 impl Default for PrinterOptions {
@@ -1957,7 +1935,6 @@ impl Default for PrinterOptions {
         PrinterOptions {
             prefer_single_quotes: false,
             size: 5000,
-            with_comments: true,
         }
     }
 }

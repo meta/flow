@@ -234,7 +234,7 @@ import-default.js:34:7,34:8
 
 import-rec-export.js:3:10
 Flags:
-(alias) const p: any (implicit)
+(alias) const p: any
 import {p} from "./rec-export"
 import-rec-export.js:3:10,3:10
 
@@ -763,7 +763,7 @@ import-default.js:34:7,34:8
 
 import-rec-export.js:3:10
 Flags: --do_not_use_typed_AST_for_imports
-(alias) const p: any (implicit)
+(alias) const p: any
 import {p} from "./rec-export"
 import-rec-export.js:3:10,3:10
 

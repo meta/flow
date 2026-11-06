@@ -1703,7 +1703,7 @@ References:
 Error -------------------------------------------------------------------------------------- object-pattern-rest.js:37:5
 
 This object pattern hasn't considered all possible properties of the input. There could be additional properties due to
-`any (explicit)` [1]. To fix, add `...` to the end of the pattern to match all other properties. [match-not-exhaustive]
+`any` [1]. To fix, add `...` to the end of the pattern to match all other properties. [match-not-exhaustive]
 
    object-pattern-rest.js:37:5
    37|     {type: 'a'} => {} // ERROR
