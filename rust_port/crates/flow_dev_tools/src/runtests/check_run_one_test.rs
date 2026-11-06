@@ -514,7 +514,9 @@ queries_in_file() {
   local query=$1 file=$2
   shift 2
   local arg_flags_array=("$@")
-  awk '/^\/\/.*\^/{ print NR }' "$file" | while read -r line; do
+  # A query line queries the closest line above it that is not a query line
+  # itself, so several queries on one line stack under it.
+  awk 'BEGIN { target = 0 } /^\/\/.*\^/{ print NR, target; next } { target = NR }' "$file" | while read -r line target; do
     local linep="$line""p"
     local col
     col=$(sed -n "$linep" "$file" | awk -F'^' '{ print $1}' | wc -c)
@@ -522,9 +524,8 @@ queries_in_file() {
     local line_flags_array=()
     IFS=" " read -r -a line_flags_array <<< "$(sed -n "$linep" "$file" | awk -F'^' '{ print $2 }')"
     if [ -n "$col" ]; then
-      ((line--))
       local all_flags=("${arg_flags_array[@]}" "${line_flags_array[@]}")
-      query_at_pos "$query" "$file" "$line" "$col" "${all_flags[@]}"
+      query_at_pos "$query" "$file" "$target" "$col" "${all_flags[@]}"
     fi
   done
 }

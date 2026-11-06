@@ -1,6 +1,7 @@
 // @flow
 
 const d1 = {
+//    ^
   ab: null,
   "a b": null,
   "a'b": null,
@@ -17,6 +18,7 @@ const d1 = {
 };
 
 const d2 = {
+//    ^
   ab: null,
   'a b': null,
   'a"b': null,

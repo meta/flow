@@ -1,98 +1,233 @@
-declare.js:3:18 = function foo(): void
+declare.js:3:18
+Flags:
+function foo(): void
 declare.js:3:18,3:20
-declare.js:5:18 = function bar(): string
-function bar(): number
-declare.js:5:18,5:20
-declare.js:6:18 = function bar(): string
+
+declare.js:6:18
+Flags:
+function bar(): string
 function bar(): number
 declare.js:6:18,6:20
-declare.js:8:18 = (unknown)
-declare.js:9:18 = (unknown)
-function.js:4:3 = (method) bar(): void
+
+declare.js:8:18
+Flags:
+function bar(): string
+function bar(): number
+declare.js:8:18,8:20
+
+declare.js:11:18 = (unknown)
+declare.js:12:18 = (unknown)
+function.js:4:3
+Flags:
+(method) bar(): void
 function.js:4:3,4:5
-function.js:8:3 = (property) bar: () => void
-function.js:8:3,8:5
-function.js:12:3 = (method) m<T>(x: T): T
-function.js:12:3,12:3
-function.js:16:3 = (property) m: <T>(x: T) => T
-function.js:16:3,16:3
-function.js:24:20 (this parameter, framed) = (parameter) this: {z: number}
-function.js:24:20,24:36
-function.js:24:27 (this annotation, unframed) = (property) z: number
-function.js:24:27,24:27
-default.js:4:16 = let y: number
+
+function.js:9:3
+Flags:
+(property) bar: () => void
+function.js:9:3,9:5
+
+function.js:14:3
+Flags:
+(method) m<T>(x: T): T
+function.js:14:3,14:3
+
+function.js:19:3
+Flags:
+(property) m: <T>(x: T) => T
+function.js:19:3,19:3
+
+function.js:25:18
+Flags:
+(parameter) xs: Array<string>
+function.js:25:18,25:19
+
+function.js:29:20
+Flags:
+(parameter) this: {z: number}
+function.js:29:20,29:36
+
+function.js:29:27
+Flags:
+(property) z: number
+function.js:29:27,29:27
+
+default.js:4:16
+Flags:
+let y: number
 default.js:4:16,4:16
-default.js:5:17 = let y: number
-default.js:5:17,5:17
-function-poly-0.js:3:10 = function f<T>(x: T): T
+
+default.js:6:17
+Flags:
+let y: number
+default.js:6:17,6:17
+
+function-poly-0.js:3:10
+Flags:
+function f<T>(x: T): T
 function-poly-0.js:3:10,3:10
-function-poly-0.js:3:30 = (parameter) x: T
+
+function-poly-0.js:3:33
+Flags:
+(parameter) x: T
 function-poly-0.js:3:33,3:33
-function-poly-0.js:4:7 = const x: number
-function-poly-0.js:4:7,4:7
-function-poly-1.js:3:10 = function f<T>(x: T): T
+
+function-poly-0.js:6:7
+Flags:
+const x: number
+function-poly-0.js:6:7,6:7
+
+function-poly-1.js:3:10
+Flags:
+function f<T>(x: T): T
 function-poly-1.js:3:10,3:10
-function-poly-1.js:3:3 = (parameter) x: T
+
+function-poly-1.js:3:33
+Flags:
+(parameter) x: T
 function-poly-1.js:3:33,3:33
-function-poly-1.js:4:7 = const x: number
-function-poly-1.js:4:7,4:7
-function-poly-2.js:3:10 = function outer<TOuter>(y: TOuter): void
+
+function-poly-1.js:6:7
+Flags:
+const x: number
+function-poly-1.js:6:7,6:7
+
+function-poly-2.js:3:10
+Flags:
+function outer<TOuter>(y: TOuter): void
 function-poly-2.js:3:10,3:14
-function-poly-2.js:4:12 = function inner<T>(x: T, z: TOuter | T): T
-function-poly-2.js:4:12,4:16
-function-poly-2.js:5:5 = (parameter) y: TOuter
-function-poly-2.js:5:5,5:5
-function-poly-2.js:6:5 = function inner<T>(x: T, z: TOuter | T): T
-function-poly-2.js:6:5,6:9
-function-poly-2.js:7:12 = (parameter) x: T
-function-poly-2.js:7:12,7:12
-function-poly-2.js:9:13 = function inner<number>(x: number, z: TOuter | number): number
-function-poly-2.js:9:13,9:17
-function-poly-2.js:11:12 = function inner_<T>(x: T): T
-function-poly-2.js:11:12,11:17
-function-poly-4.js:3:11 = function foo<T>(x: T): {f: T}
+
+function-poly-2.js:5:12
+Flags:
+function inner<T>(x: T, z: TOuter | T): T
+function-poly-2.js:5:12,5:16
+
+function-poly-2.js:7:5
+Flags:
+(parameter) y: TOuter
+function-poly-2.js:7:5,7:5
+
+function-poly-2.js:9:5
+Flags:
+function inner<T>(x: T, z: TOuter | T): T
+function-poly-2.js:9:5,9:9
+
+function-poly-2.js:11:12
+Flags:
+(parameter) x: T
+function-poly-2.js:11:12,11:12
+
+function-poly-2.js:14:13
+Flags:
+function inner<number>(x: number, z: TOuter | number): number
+function-poly-2.js:14:13,14:17
+
+function-poly-2.js:17:12
+Flags:
+function inner_<T>(x: T): T
+function-poly-2.js:17:12,17:17
+
+function-poly-4.js:3:11
+Flags:
+function foo<T>(x: T): {f: T}
 function-poly-4.js:3:10,3:12
-function-poly-4.js:7:7 = const bar: <T>(x: T) => {f: T}
-function-poly-4.js:7:7,7:9
-function-poly-4.js:9:7 = const obj: {m<T>(x: T): {f: T}}
-function-poly-4.js:9:7,9:9
-function-poly-5.js:3:10 = function foo<T extends number | string>(x: T): number
+
+function-poly-4.js:8:7
+Flags:
+const bar: <T>(x: T) => {f: T}
+function-poly-4.js:8:7,8:9
+
+function-poly-4.js:11:7
+Flags:
+const obj: {m<T>(x: T): {f: T}}
+function-poly-4.js:11:7,11:9
+
+function-poly-5.js:3:10
+Flags:
+function foo<T extends number | string>(x: T): number
 function-poly-5.js:3:10,3:12
-function-poly-6.js:7:6 = (unknown)
+
+function-poly-6.js:7:6
+Flags:
+(unknown)
 function-poly-6.js:7:6,7:8
-function.js:21:18 (framed) = (parameter) xs: Array<string>
-function.js:21:18,21:19
-overloads.js:3:18 (declaration site) = function f(x: number): string
+
+overloads.js:6:18
+Flags:
+function f(x: number): string
 function f(x: string): string
 function f(x: boolean): string
-overloads.js:3:18,3:18
-overloads.js:7:1 (call, number arm) = function f(x: number): string (+2 overloads)
-overloads.js:7:1,7:1
-overloads.js:8:1 (call, string arm) = function f(x: string): string (+2 overloads)
-overloads.js:8:1,8:1
-overloads.js:12:11 (reference, not a call) = function f(x: number): string
+overloads.js:6:18,6:18
+
+overloads.js:11:3
+Flags:
+function f(x: number): string (+2 overloads)
+overloads.js:11:3,11:3
+
+overloads.js:13:3
+Flags:
+function f(x: string): string (+2 overloads)
+overloads.js:13:3,13:3
+
+overloads.js:18:11
+Flags:
+function f(x: number): string
 function f(x: string): string
 function f(x: boolean): string
-overloads.js:12:11,12:11
-overloads.js:15:1 (call, not overloaded) = function solo(x: number): string
-overloads.js:15:1,15:4
-overloads.js:22:3 (overloaded method call) = (method) C.m(x: number): string
-overloads.js:22:3,22:3
-function-poly-call.js:4:1 (implicit) = function id<number>(x: number): number
-function-poly-call.js:4:1,4:2
-function-poly-call.js:5:1 (explicit) = function id<string>(x: string): string
-function-poly-call.js:5:1,5:2
-function-poly-call.js:8:1 (two type parameters) = function pair<number, string>(a: number, b: string): [number, string]
-function-poly-call.js:8:1,8:4
-function-poly-call.js:14:3 (method) = (method) C.m<boolean>(x: boolean): Array<boolean>
-function-poly-call.js:14:3,14:3
-function-poly-call.js:18:1 (polymorphic overload) = function f<number>(x: number): number (+1 overload)
-function-poly-call.js:18:1,18:1
-function-poly-call.js:19:1 (monomorphic overload) = function f(x: string, y: string): string (+1 overload)
-function-poly-call.js:19:1,19:1
-function-poly-call.js:22:1 (const) = const g: <number>(x: number) => number
-function-poly-call.js:22:1,22:1
-function-poly-call.js:25:3 (property) = (property) p: <string>(x: string) => Array<string>
-function-poly-call.js:25:3,25:3
-function-poly-call.js:28:3 (parameter) = (parameter) k: <boolean>(x: boolean) => boolean
-function-poly-call.js:28:3,28:3
+overloads.js:18:11,18:11
+
+overloads.js:22:3
+Flags:
+function solo(x: number): string
+overloads.js:22:3,22:6
+
+overloads.js:30:3
+Flags:
+(method) C.m(x: number): string
+overloads.js:30:3,30:3
+
+function-poly-call.js:6:3
+Flags:
+function id<number>(x: number): number
+function-poly-call.js:6:3,6:4
+
+function-poly-call.js:8:3
+Flags:
+function id<string>(x: string): string
+function-poly-call.js:8:3,8:4
+
+function-poly-call.js:12:3
+Flags:
+function pair<number, string>(a: number, b: string): [number, string]
+function-poly-call.js:12:3,12:6
+
+function-poly-call.js:19:3
+Flags:
+(method) C.m<boolean>(x: boolean): Array<boolean>
+function-poly-call.js:19:3,19:3
+
+function-poly-call.js:24:3
+Flags:
+function f<number>(x: number): number (+1 overload)
+function-poly-call.js:24:3,24:3
+
+function-poly-call.js:26:3
+Flags:
+function f(x: string, y: string): string (+1 overload)
+function-poly-call.js:26:3,26:3
+
+function-poly-call.js:32:3
+Flags:
+const g: <number>(x: number) => number
+function-poly-call.js:32:3,32:3
+
+function-poly-call.js:36:3
+Flags:
+(property) p: <string>(x: string) => Array<string>
+function-poly-call.js:36:3,36:3
+
+function-poly-call.js:40:3
+Flags:
+(parameter) k: <boolean>(x: boolean) => boolean
+function-poly-call.js:40:3,40:3
+

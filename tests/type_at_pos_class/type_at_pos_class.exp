@@ -1,328 +1,664 @@
-annot_t.js:9:23 = class KeyedSeq<K, out V>
+annot_t.js:9:23
+Flags:
+class KeyedSeq<K, out V>
 
 'KeyedSeq' defined at annot_t.js:6:14
 
 annot_t.js:9:22,9:26
-class-0.js:3:7 = class A
+
+class-0.js:3:7
+Flags:
+class A
 class-0.js:3:7,3:7
-class-0.js:4:3 = (method) A.m(this: this): void
-class-0.js:4:3,4:3
-class-0.js:4:10 = this
-class-0.js:4:9,4:12
-class-0.js:12:5 = var b: Class<unknown>
-class-0.js:12:5,12:5
-class-0.js:21:5 = var i: Class<C1 & C2>
 
-'C1' defined at class-0.js:17:6
-'C2' defined at class-0.js:18:6
+class-0.js:5:3
+Flags:
+(method) A.m(this: this): void
+class-0.js:5:3,5:3
 
-class-0.js:21:5,21:5
-class-0.js:24:5 = var u: Class<C1 | C2>
+class-0.js:5:10
+Flags:
+this
+class-0.js:5:9,5:12
 
-'C1' defined at class-0.js:17:6
-'C2' defined at class-0.js:18:6
+class-0.js:15:5
+Flags:
+var b: Class<unknown>
+class-0.js:15:5,15:5
 
-class-0.js:24:5,24:5
-class-1.js:4:3 = (method) A.m(this: this): void
-class-1.js:4:3,4:3
-class-1.js:8:3 = (method) B.m(this: this): number
-class-1.js:8:3,8:3
-class-2.js:4:3 = (method) A.m(this: this): A
+class-0.js:25:5
+Flags:
+var i: Class<C1 & C2>
+
+'C1' defined at class-0.js:21:6
+'C2' defined at class-0.js:22:6
+
+class-0.js:25:5,25:5
+
+class-0.js:29:5
+Flags:
+var u: Class<C1 | C2>
+
+'C1' defined at class-0.js:21:6
+'C2' defined at class-0.js:22:6
+
+class-0.js:29:5,29:5
+
+class-1.js:5:3
+Flags:
+(method) A.m(this: this): void
+class-1.js:5:3,5:3
+
+class-1.js:10:3
+Flags:
+(method) B.m(this: this): number
+class-1.js:10:3,10:3
+
+class-2.js:4:3
+Flags:
+(method) A.m(this: this): A
 
 'A' defined at class-2.js:3:6
 
 class-2.js:4:3,4:3
-class-2.js:9:9 = (method) A.m(this: A): A
+
+class-2.js:10:9
+Flags:
+(method) A.m(this: A): A
 
 'A' defined at class-2.js:3:6
-
-class-2.js:9:9,9:9
-class-2.js:10:9 = (method) B.m(this: B): A
-
-'A' defined at class-2.js:3:6
-'B' defined at class-2.js:7:6
 
 class-2.js:10:9,10:9
-class-2.js:12:7 = const a: A
+
+class-2.js:12:9
+Flags:
+(method) B.m(this: B): A
+
+'A' defined at class-2.js:3:6
+'B' defined at class-2.js:8:6
+
+class-2.js:12:9,12:9
+
+class-2.js:15:7
+Flags:
+const a: A
 
 'A' defined at class-2.js:3:6
 
-class-2.js:12:7,12:7
-class-2.js:13:7 = const b: A
+class-2.js:15:7,15:7
+
+class-2.js:17:7
+Flags:
+const b: A
 
 'A' defined at class-2.js:3:6
 
-class-2.js:13:7,13:7
-class-3.js:4:3 = (method) A.m(): this
+class-2.js:17:7,17:7
+
+class-3.js:4:3
+Flags:
+(method) A.m(): this
 class-3.js:4:3,4:3
-class-3.js:9:9 = (method) A.m(this: A): A
+
+class-3.js:10:9
+Flags:
+(method) A.m(this: A): A
 
 'A' defined at class-3.js:3:14
 
-class-3.js:9:9,9:9
-class-3.js:10:9 = (method) B.m(this: B): B
-
-'B' defined at class-3.js:7:14
-
 class-3.js:10:9,10:9
-class-4.js:9:6 = Y
+
+class-3.js:12:9
+Flags:
+(method) B.m(this: B): B
+
+'B' defined at class-3.js:8:14
+
+class-3.js:12:9,12:9
+
+class-4.js:9:6
+Flags:
+Y
 
 'Y' defined at class-4.js:3:14
 
 class-4.js:9:5,9:9
-class-4.js:9:11 (framed) = (property) Y.a: string
+
+class-4.js:9:11
+Flags:
+(property) Y.a: string
 class-4.js:9:11,9:11
-class-bound.js:4:6 = type C<T extends R<any>> = Class<T>
+
+class-bound.js:4:6
+Flags:
+type C<T extends R<any>> = Class<T>
 
 'R' defined at class-bound.js:3:6
 
 class-bound.js:4:6,4:6
-class-getters-setters.js:6:7 = (getter) A.x: string
+
+class-getters-setters.js:6:7
+Flags:
+(getter) A.x: string
 class-getters-setters.js:6:7,6:7
-class-getters-setters.js:9:7 = (setter) A.x: ?string
-class-getters-setters.js:9:7,9:7
-class-poly-0.js:5:7 = class A<X extends Base>
+
+class-getters-setters.js:10:7
+Flags:
+(setter) A.x: ?string
+class-getters-setters.js:10:7,10:7
+
+class-poly-0.js:5:7
+Flags:
+class A<X extends Base>
 
 'Base' defined at class-poly-0.js:3:6
 
 class-poly-0.js:5:7,5:7
-class-poly-0.js:5:9 = (type parameter) X in class A<X extends Base>
+
+class-poly-0.js:5:9
+Flags:
+(type parameter) X in class A<X extends Base>
 class-poly-0.js:5:9,5:9
-class-poly-0.js:10:33 = class A<X extends Base>
+
+class-poly-0.js:12:33
+Flags:
+class A<X extends Base>
 
 'A' defined at class-poly-0.js:5:6
 'Base' defined at class-poly-0.js:3:6
 
-class-poly-0.js:10:33,10:33
-class-poly-0.js:12:7 = A<X>
+class-poly-0.js:12:33,12:33
+
+class-poly-0.js:15:7
+Flags:
+A<X>
 
 'A' defined at class-poly-0.js:5:6
 
-class-poly-0.js:12:5,12:9
-class-poly-0.js:16:7 = this
-class-poly-0.js:16:5,16:8
-class-poly-0.js:16:10 = (property) x: X
-class-poly-0.js:16:10,16:10
-class-poly-0.js:17:7 = A<X>
+class-poly-0.js:15:5,15:9
+
+class-poly-0.js:20:7
+Flags:
+this
+class-poly-0.js:20:5,20:8
+
+class-poly-0.js:20:10
+Flags:
+(property) x: X
+class-poly-0.js:20:10,20:10
+
+class-poly-0.js:23:7
+Flags:
+A<X>
 
 'A' defined at class-poly-0.js:5:6
 
-class-poly-0.js:17:5,17:9
-class-poly-1.js:9:5 = var x: number
+class-poly-0.js:23:5,23:9
+
+class-poly-1.js:9:5
+Flags:
+var x: number
 class-poly-1.js:9:5,9:5
-class-poly-1.js:9:11 = (method) A.m(): number
+
+class-poly-1.js:9:11
+Flags:
+(method) A.m(): number
 class-poly-1.js:9:11,9:11
-class-statics.js:4:10 = (method) A.m(): void
+
+class-statics.js:4:10
+Flags:
+(method) A.m(): void
 class-statics.js:4:10,4:10
-class-statics.js:8:10 = (method) B.m(this: Class<this>): Class<this>
-class-statics.js:8:10,8:10
-class-statics.js:9:7 = Class<this>
-class-statics.js:9:5,9:8
-class-statics.js:11:8 = Class<A>
+
+class-statics.js:9:10
+Flags:
+(method) B.m(this: Class<this>): Class<this>
+class-statics.js:9:10,9:10
+
+class-statics.js:11:7
+Flags:
+Class<this>
+class-statics.js:11:5,11:8
+
+class-statics.js:14:8
+Flags:
+Class<A>
 
 'A' defined at class-statics.js:3:6
 
-class-statics.js:11:5,11:9
-class-statics.js:16:5 = var bCtor: Class<B>
+class-statics.js:14:5,14:9
 
-'B' defined at class-statics.js:7:6
+class-statics.js:20:5
+Flags:
+var bCtor: Class<B>
 
-class-statics.js:16:5,16:9
-class-statics.js:17:5 = var b: B
+'B' defined at class-statics.js:8:6
 
-'B' defined at class-statics.js:7:6
+class-statics.js:20:5,20:9
 
-class-statics.js:17:5,17:5
-class-statics.js:20:19 = (property) C.y: this
-class-statics.js:20:19,20:19
-class-statics-poly.js:4:10 = (method) A.m(): void
+class-statics.js:22:5
+Flags:
+var b: B
+
+'B' defined at class-statics.js:8:6
+
+class-statics.js:22:5,22:5
+
+class-statics.js:27:19
+Flags:
+(property) C.y: this
+class-statics.js:27:19,27:19
+
+class-statics-poly.js:4:10
+Flags:
+(method) A.m(): void
 class-statics-poly.js:4:10,4:10
-class-statics-poly.js:8:10 = (method) B.m(this: Class<this>): Class<B<any>>
 
-'B' defined at class-statics-poly.js:7:6
+class-statics-poly.js:9:10
+Flags:
+(method) B.m(this: Class<this>): Class<B<any>>
 
-class-statics-poly.js:8:10,8:10
-class-statics-poly.js:9:7 = Class<this>
-class-statics-poly.js:9:5,9:8
-class-statics-poly.js:11:8 = Class<A<T>>
+'B' defined at class-statics-poly.js:8:6
+
+class-statics-poly.js:9:10,9:10
+
+class-statics-poly.js:12:7
+Flags:
+Class<this>
+class-statics-poly.js:12:5,12:8
+
+class-statics-poly.js:15:8
+Flags:
+Class<A<T>>
 
 'A' defined at class-statics-poly.js:3:6
 
-class-statics-poly.js:11:5,11:9
-class-statics-poly.js:16:5 = var bCtor: Class<B<any>>
+class-statics-poly.js:15:5,15:9
 
-'B' defined at class-statics-poly.js:7:6
+class-statics-poly.js:21:5
+Flags:
+var bCtor: Class<B<any>>
 
-class-statics-poly.js:16:5,16:9
-class-statics-poly.js:17:5 = var b: B<any>
+'B' defined at class-statics-poly.js:8:6
 
-'B' defined at class-statics-poly.js:7:6
+class-statics-poly.js:21:5,21:9
 
-class-statics-poly.js:17:5,17:5
-declare_class.js:3:15 = class C
+class-statics-poly.js:23:5
+Flags:
+var b: B<any>
+
+'B' defined at class-statics-poly.js:8:6
+
+class-statics-poly.js:23:5,23:5
+
+declare_class.js:3:15
+Flags:
+class C
 declare_class.js:3:15,3:15
-declare_class.js:4:5 = var c: {C: typeof C}
+
+declare_class.js:5:5
+Flags:
+var c: {C: typeof C}
 
 'C' defined at declare_class.js:3:14
 
-declare_class.js:4:5,4:5
-declare_class.js:6:15 = class P<X>
-declare_class.js:6:15,6:15
-declare_class.js:7:5 = var p: {P: typeof P}
+declare_class.js:5:5,5:5
 
-'P' defined at declare_class.js:6:14
+declare_class.js:8:15
+Flags:
+class P<X>
+declare_class.js:8:15,8:15
 
-declare_class.js:7:5,7:5
-FluxStore.js:14:5 = Class<FluxStore<any>>
+declare_class.js:10:5
+Flags:
+var p: {P: typeof P}
+
+'P' defined at declare_class.js:8:14
+
+declare_class.js:10:5,10:5
+
+FluxStore.js:5:3
+Flags:
+(property) FluxStore.p: string
+FluxStore.js:5:3,5:3
+
+FluxStore.js:15:5
+Flags:
+Class<FluxStore<any>>
 
 'FluxStore' defined at FluxStore.js:3:6
 
-FluxStore.js:14:5,14:9
-implements.js:7:8 = interface IA<T>
+FluxStore.js:15:5,15:9
+
+implements.js:4:23
+Flags:
+interface IA<T>
 
 'IA' defined at implements.js:3:10
 
 implements.js:4:23,4:24
-multi-inheritance.js:6:7 = Class<A> | Class<B>
 
-'A' defined at multi-inheritance.js:11:6
-'B' defined at multi-inheritance.js:12:6
+multi-inheritance.js:6:7
+Flags:
+Class<A> | Class<B>
+
+'A' defined at multi-inheritance.js:12:6
+'B' defined at multi-inheritance.js:13:6
 
 multi-inheritance.js:6:7,6:11
-type-utils.js:5:15 class C<P>
+
+type-utils.js:5:15
+Flags:
+class C<P>
 
 'C' defined at type-utils.js:3:14
 
 type-utils.js:5:15,5:22
-type-utils.js:6:15 const class_of_C_number: Class<C<number>>
+
+type-utils.js:7:15
+Flags:
+const class_of_C_number: Class<C<number>>
 
 'C' defined at type-utils.js:3:14
 
-type-utils.js:6:15,6:31
-type-utils.js:10:15 const class_a: Class<A>
+type-utils.js:7:15,7:31
 
-'A' defined at type-utils.js:8:14
+type-utils.js:12:15
+Flags:
+const class_a: Class<A>
 
-type-utils.js:10:15,10:21
-type-utils.js:11:15 const class_class_a: Class<Class<A>>
+'A' defined at type-utils.js:10:14
 
-'A' defined at type-utils.js:8:14
+type-utils.js:12:15,12:21
 
-type-utils.js:11:15,11:27
-type-utils.js:12:15 const class_class_class_a: Class<Class<Class<A>>>
+type-utils.js:14:15
+Flags:
+const class_class_a: Class<Class<A>>
 
-'A' defined at type-utils.js:8:14
+'A' defined at type-utils.js:10:14
 
-type-utils.js:12:15,12:33
-default.js:4:17 let y: number
+type-utils.js:14:15,14:27
+
+type-utils.js:16:15
+Flags:
+const class_class_class_a: Class<Class<Class<A>>>
+
+'A' defined at type-utils.js:10:14
+
+type-utils.js:16:15,16:33
+
+default.js:4:17
+Flags:
+let y: number
 default.js:4:17,4:17
-default.js:5:18 let y: number
-default.js:5:18,5:18
-constructor.js:4:7 constructor Foo(x: string): void
+
+default.js:6:18
+Flags:
+let y: number
+default.js:6:18,6:18
+
+constructor.js:4:7
+Flags:
+constructor Foo(x: string): void
 constructor.js:4:3,4:13
-this.js:5:13 (parameter) baz: Readonly<this>
+
+constructor.js:12:17
+Flags:
+constructor Foo(x: string): void
+constructor.js:12:17,12:19
+
+constructor.js:12:14
+Flags:
+constructor Foo(x: string): void
+constructor.js:12:17,12:19
+
+constructor.js:23:20
+Flags:
+constructor Bar(x: number): void
+constructor.js:23:20,23:22
+
+constructor.js:29:3
+Flags:
+(x: string) => void
+constructor.js:29:3,29:13
+
+constructor.js:39:17
+Flags:
+constructor Box<number>(x: number): void
+constructor.js:39:17,39:19
+
+constructor.js:39:13
+Flags:
+constructor Box<number>(x: number): void
+constructor.js:39:17,39:19
+
+constructor.js:45:22
+Flags:
+constructor Box<string>(x: string): void
+constructor.js:45:22,45:24
+
+this.js:5:13
+Flags:
+(parameter) baz: Readonly<this>
 this.js:5:13,5:15
-function_this.js:2:1 const explicitThis: (this: {value: number}, x: string) => void
-function_this.js:2:1,2:12
-function_this.js:5:1 const mixedThis: (x: string) => void
-function_this.js:5:1,5:9
-function_this.js:8:1 const anyThis: (x: string) => void
-function_this.js:8:1,8:7
-FluxStore.js:5:3 (framed) = (property) FluxStore.p: string
-FluxStore.js:5:3,5:3
-constructor.js:9:17 (framed) = constructor Foo(x: string): void
-constructor.js:9:17,9:19
-constructor.js:9:14 (new keyword, framed) = constructor Foo(x: string): void
-constructor.js:9:17,9:19
-constructor.js:17:20 (member callee, framed) = constructor Bar(x: number): void
-constructor.js:17:20,17:22
-constructor.js:20:3 (anonymous, framed) = (x: string) => void
-constructor.js:20:3,20:13
-constructor.js:27:17 (polymorphic, framed) = constructor Box<number>(x: number): void
-constructor.js:27:17,27:19
-constructor.js:27:13 (polymorphic, new keyword, framed) = constructor Box<number>(x: number): void
-constructor.js:27:17,27:19
-constructor.js:31:22 (polymorphic member callee, explicit, framed) = constructor Box<string>(x: string): void
-constructor.js:31:22,31:24
-declare_class_members.js:8:3 (framed) = (property) D.p: number
+
+function_this.js:2:3
+Flags:
+const explicitThis: (this: {value: number}, x: string) => void
+function_this.js:2:3,2:14
+
+function_this.js:6:3
+Flags:
+const mixedThis: (x: string) => void
+function_this.js:6:3,6:11
+
+function_this.js:10:3
+Flags:
+const anyThis: (x: string) => void
+function_this.js:10:3,10:9
+
+declare_class_members.js:8:3
+Flags:
+(property) D.p: number
 declare_class_members.js:8:3,8:3
-declare_class_members.js:9:3 (framed) = (method) D.m(): void
-declare_class_members.js:9:3,9:3
-declare_class_members.js:10:7 (framed) = (getter) D.g: string
-declare_class_members.js:10:7,10:7
-declare_class_members.js:11:7 (framed) = (setter) D.s: number
-declare_class_members.js:11:7,11:7
-declare_class_members.js:12:10 (framed) = (property) D.sp: number
-declare_class_members.js:12:10,12:11
-declare_class_members.js:13:3 (framed) = (property) D.nested: {inner: number}
-declare_class_members.js:13:3,13:8
-declare_class_members.js:13:12 (framed) = (property) inner: number
-declare_class_members.js:13:12,13:16
-member_reference.js:14:3 (framed) = (property) A.p: number
-member_reference.js:14:3,14:3
-member_reference.js:15:3 (framed) = (method) A.m(): string
-member_reference.js:15:3,15:3
-member_reference.js:16:3 (framed) = (getter) A.g: boolean
-member_reference.js:16:3,16:3
-member_reference.js:17:3 (framed) = (setter) A.s: boolean
+
+declare_class_members.js:10:3
+Flags:
+(method) D.m(): void
+declare_class_members.js:10:3,10:3
+
+declare_class_members.js:12:7
+Flags:
+(getter) D.g: string
+declare_class_members.js:12:7,12:7
+
+declare_class_members.js:14:7
+Flags:
+(setter) D.s: number
+declare_class_members.js:14:7,14:7
+
+declare_class_members.js:16:10
+Flags:
+(property) D.sp: number
+declare_class_members.js:16:10,16:11
+
+declare_class_members.js:18:3
+Flags:
+(property) D.nested: {inner: number}
+declare_class_members.js:18:3,18:8
+
+declare_class_members.js:18:12
+Flags:
+(property) inner: number
+declare_class_members.js:18:12,18:16
+
+member_reference.js:17:3
+Flags:
+(property) A.p: number
 member_reference.js:17:3,17:3
-member_reference.js:18:3 (framed) = (property) A.sp: number
-member_reference.js:18:3,18:4
-member_reference.js:19:9 (framed) = (property) A.p: number | void
-member_reference.js:19:9,19:9
-member_reference.js:23:3 (framed) = (property) x: number
+
+member_reference.js:19:3
+Flags:
+(method) A.m(): string
+member_reference.js:19:3,19:3
+
+member_reference.js:21:3
+Flags:
+(getter) A.g: boolean
+member_reference.js:21:3,21:3
+
+member_reference.js:23:3
+Flags:
+(setter) A.s: boolean
 member_reference.js:23:3,23:3
-member_reference.js:24:3 (framed) = (method) f(): void
-member_reference.js:24:3,24:3
-member_reference.js:25:3 (framed) = (property) h: () => number
-member_reference.js:25:3,25:3
-member_reference_eval.js:18:9 (framed) = (property) p: void | number
-member_reference_eval.js:18:9,18:9
-member_reference_eval.js:19:9 (framed) = (method) m(): string
-member_reference_eval.js:19:9,19:9
-member_reference_eval.js:23:7 (framed) = (property) NamedPartial.p: void | number
-member_reference_eval.js:23:7,23:7
-member_reference_eval.js:24:7 (framed) = (method) NamedPartial.m(): string
-member_reference_eval.js:24:7,24:7
-member_reference_eval.js:27:10 (framed) = (method) m(): string
-member_reference_eval.js:27:10,27:10
-member_reference_eval.js:28:10 (framed) = (property) g: boolean
-member_reference_eval.js:28:10,28:10
-member_reference_eval.js:31:10 (framed) = (property) Base.p: number
-member_reference_eval.js:31:10,31:10
-member_reference_eval.js:32:10 (framed) = (method) Base.m(): string
-member_reference_eval.js:32:10,32:10
-member_reference_eval.js:33:10 (framed) = (getter) Base.g: boolean
-member_reference_eval.js:33:10,33:10
-member_reference_eval.js:34:10 (framed) = (setter) Base.s: boolean
+
+member_reference.js:25:3
+Flags:
+(property) A.sp: number
+member_reference.js:25:3,25:4
+
+member_reference.js:27:9
+Flags:
+(property) A.p: number | void
+member_reference.js:27:9,27:9
+
+member_reference.js:32:3
+Flags:
+(property) x: number
+member_reference.js:32:3,32:3
+
+member_reference.js:34:3
+Flags:
+(method) f(): void
+member_reference.js:34:3,34:3
+
+member_reference.js:36:3
+Flags:
+(property) h: () => number
+member_reference.js:36:3,36:3
+
+member_reference_eval.js:21:9
+Flags:
+(property) p: void | number
+member_reference_eval.js:21:9,21:9
+
+member_reference_eval.js:23:9
+Flags:
+(method) m(): string
+member_reference_eval.js:23:9,23:9
+
+member_reference_eval.js:28:7
+Flags:
+(property) NamedPartial.p: void | number
+member_reference_eval.js:28:7,28:7
+
+member_reference_eval.js:30:7
+Flags:
+(method) NamedPartial.m(): string
+member_reference_eval.js:30:7,30:7
+
+member_reference_eval.js:34:10
+Flags:
+(method) m(): string
 member_reference_eval.js:34:10,34:10
-member_reference_eval.js:37:8 (framed) = (property) p: number
-member_reference_eval.js:37:8,37:8
-member_reference_eval.js:38:8 (framed) = (method) m(): string
-member_reference_eval.js:38:8,38:8
-member_reference_eval.js:41:8 (framed) = (property) p: number
-member_reference_eval.js:41:8,41:8
-member_reference_eval.js:44:13 (framed) = (property) Base.p: number
-member_reference_eval.js:44:13,44:13
-member_reference_eval.js:45:13 (framed) = (method) Base.m(): string
-member_reference_eval.js:45:13,45:13
-private_members.js:4:3 (framed) = (property) A.#f: number
-private_members.js:4:3,4:4
-private_members.js:5:3 (framed) = (method) A.#m(): void
-private_members.js:5:3,5:4
-private_members.js:6:7 (framed) = (getter) A.#g: string
-private_members.js:6:3,6:8
-private_members.js:7:10 (framed) = (property) A.#sf: boolean
-private_members.js:7:10,7:12
-private_members.js:10:10 (framed) = (method) A.#m(): void
-private_members.js:10:10,10:11
-private_members.js:11:10 (framed) = (property) A.#f: number
-private_members.js:11:10,11:11
-private_members.js:12:10 (framed) = (getter) A.#g: empty
-private_members.js:12:10,12:11
-private_members.js:13:7 (framed) = (property) A.#sf: boolean
-private_members.js:13:7,13:9
-private_members.js:18:3 (framed) = (property) B.#f: string
-private_members.js:18:3,18:4
-private_members.js:20:17 (framed) = (property) B.#f: string
-private_members.js:20:17,20:18
+
+member_reference_eval.js:36:10
+Flags:
+(property) g: boolean
+member_reference_eval.js:36:10,36:10
+
+member_reference_eval.js:40:10
+Flags:
+(property) Base.p: number
+member_reference_eval.js:40:10,40:10
+
+member_reference_eval.js:42:10
+Flags:
+(method) Base.m(): string
+member_reference_eval.js:42:10,42:10
+
+member_reference_eval.js:44:10
+Flags:
+(getter) Base.g: boolean
+member_reference_eval.js:44:10,44:10
+
+member_reference_eval.js:46:10
+Flags:
+(setter) Base.s: boolean
+member_reference_eval.js:46:10,46:10
+
+member_reference_eval.js:50:8
+Flags:
+(property) p: number
+member_reference_eval.js:50:8,50:8
+
+member_reference_eval.js:52:8
+Flags:
+(method) m(): string
+member_reference_eval.js:52:8,52:8
+
+member_reference_eval.js:56:8
+Flags:
+(property) p: number
+member_reference_eval.js:56:8,56:8
+
+member_reference_eval.js:60:13
+Flags:
+(property) Base.p: number
+member_reference_eval.js:60:13,60:13
+
+member_reference_eval.js:62:13
+Flags:
+(method) Base.m(): string
+member_reference_eval.js:62:13,62:13
+
+private_members.js:8:3
+Flags:
+(property) A.#f: number
+private_members.js:8:3,8:4
+
+private_members.js:10:3
+Flags:
+(method) A.#m(): void
+private_members.js:10:3,10:4
+
+private_members.js:12:7
+Flags:
+(getter) A.#g: string
+private_members.js:12:3,12:8
+
+private_members.js:14:10
+Flags:
+(property) A.#sf: boolean
+private_members.js:14:10,14:12
+
+private_members.js:18:10
+Flags:
+(method) A.#m(): void
+private_members.js:18:10,18:11
+
+private_members.js:20:10
+Flags:
+(property) A.#f: number
+private_members.js:20:10,20:11
+
+private_members.js:22:10
+Flags:
+(getter) A.#g: empty
+private_members.js:22:10,22:11
+
+private_members.js:24:7
+Flags:
+(property) A.#sf: boolean
+private_members.js:24:7,24:9
+
+private_members.js:31:3
+Flags:
+(property) B.#f: string
+private_members.js:31:3,31:4
+
+private_members.js:34:17
+Flags:
+(property) B.#f: string
+private_members.js:34:17,34:18
+

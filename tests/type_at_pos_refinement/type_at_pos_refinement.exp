@@ -1,39 +1,84 @@
-predicates.js - undefined: void
+predicates.js:5:12
+Flags:
+void
 predicates.js:5:10,5:18
-predicates.js - Array: class Array<T>
+
+predicates.js:7:6
+Flags:
+class Array<T>
 
 'Array' defined at (lib) prelude.js:30:14
 
-predicates.js:6:5,6:9
-predicates.js - isArray: any
-predicates.js:6:11,6:17
-predicates.js - y (refined obj): let y: {FOO: string}
-predicates.js:8:5,8:5
-predicates.js - if (y.FOO) obj: let y: {FOO: string}
-predicates.js:9:5,9:5
-predicates.js - if (y.FOO) prop: (property) FOO: string
-predicates.js:9:7,9:9
-predicates.js - if (y.FOO == '') obj: let y: {FOO: string}
-predicates.js:10:5,10:5
-predicates.js - if (y.FOO == '') prop: (property) FOO: string
-predicates.js:10:7,10:9
-predicates.js - if (y.FOO === '') obj: let y: {FOO: string}
+predicates.js:7:5,7:9
+
+predicates.js:7:15
+Flags:
+any
+predicates.js:7:11,7:17
+
+predicates.js:11:5
+Flags:
+let y: {FOO: string}
 predicates.js:11:5,11:5
-predicates.js - if (y.FOO === '') prop: (property) FOO: string
-predicates.js:11:7,11:9
-predicates.js - if (y.FOO == null) prop: (property) FOO: string
-predicates.js:12:7,12:9
-predicates.js - if (y.FOO == undefined) prop: (property) FOO: string
+
+predicates.js:13:5
+Flags:
+let y: {FOO: string}
+predicates.js:13:5,13:5
+
+predicates.js:13:8
+Flags:
+(property) FOO: string
 predicates.js:13:7,13:9
-predicates.js - if (Array.isArray(y.FOO)): (property) FOO: string
-predicates.js:14:21,14:23
-refinement.js:7:25 = (property) foo: () => void
+
+predicates.js:16:5
+Flags:
+let y: {FOO: string}
+predicates.js:16:5,16:5
+
+predicates.js:16:8
+Flags:
+(property) FOO: string
+predicates.js:16:7,16:9
+
+predicates.js:19:5
+Flags:
+let y: {FOO: string}
+predicates.js:19:5,19:5
+
+predicates.js:19:8
+Flags:
+(property) FOO: string
+predicates.js:19:7,19:9
+
+predicates.js:22:8
+Flags:
+(property) FOO: string
+predicates.js:22:7,22:9
+
+predicates.js:24:8
+Flags:
+(property) FOO: string
+predicates.js:24:7,24:9
+
+predicates.js:26:22
+Flags:
+(property) FOO: string
+predicates.js:26:21,26:23
+
+refinement.js:7:25
+Flags:
+(property) foo: () => void
 
 Refined at refinement.js:7:4
 
 refinement.js:7:24,7:26
-refinement.js:8:25 = (property) foo: () => void
 
-Refined at refinement.js:8:4
+refinement.js:9:25
+Flags:
+(property) foo: () => void
 
-refinement.js:8:24,8:26
+Refined at refinement.js:9:4
+
+refinement.js:9:24,9:26
+

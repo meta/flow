@@ -9,10 +9,19 @@ declare const e: string;
 
 var {
   a,
+//^
+  // A destructured binding is framed by the declaration it resolves to, so `b: b1`
+  // reports the bound name rather than the property name.
   b: b1,
+//^
+//   ^
+//^
   c = c2,
+//^
   d: d1 = d2,
+//^
   [e]: { e1 }
+// ^
 } = {
   a: o,
   b: o,

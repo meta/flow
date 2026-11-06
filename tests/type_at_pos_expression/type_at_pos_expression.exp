@@ -1,4 +1,6 @@
-dictionary.js:3:7 = const d1: {
+dictionary.js:3:7
+Flags:
+const d1: {
   "": null,
   " ": null,
   "'": null,
@@ -11,7 +13,10 @@ dictionary.js:3:7 = const d1: {
   set y(string): void
 }
 dictionary.js:3:7,3:8
-dictionary.js:19:7 = const d2: {
+
+dictionary.js:20:7
+Flags:
+const d2: {
   "": null,
   " ": null,
   '"': null,
@@ -23,170 +28,341 @@ dictionary.js:19:7 = const d2: {
   get x(): null,
   set y(string): void
 }
-dictionary.js:19:7,19:8
-jsx.js:7:12 = "div"
+dictionary.js:20:7,20:8
+
+jsx.js:7:12
+Flags:
+"div"
 jsx.js:7:12,7:14
-jsx.js:7:16 = (property) style: string
+
+jsx.js:7:16
+Flags:
+(property) style: string
 jsx.js:7:16,7:20
-jsx.js:7:23 = const props: {data: A, name: string, ...}
+
+jsx.js:7:23
+Flags:
+const props: {data: A, name: string, ...}
 
 'A' defined at jsx.js:4:20
 
 jsx.js:7:23,7:27
-jsx.js:7:29 = (property) data: A
+
+jsx.js:7:29
+Flags:
+(property) data: A
 
 'A' defined at jsx.js:4:20
 
 jsx.js:7:29,7:32
-jsx.js:7:35 = (property) id: "literal"
+
+jsx.js:7:35
+Flags:
+(property) id: "literal"
 jsx.js:7:35,7:36
-jsx.js:7:48 = (property) hidden: true
+
+jsx.js:7:48
+Flags:
+(property) hidden: true
 jsx.js:7:48,7:53
-jsx.js:7:59 = const props: {data: A, name: string, ...}
+
+jsx.js:7:59
+Flags:
+const props: {data: A, name: string, ...}
 
 'A' defined at jsx.js:4:20
 
 jsx.js:7:59,7:63
-jsx.js:8:17 = const props: {data: A, name: string, ...}
+
+jsx.js:15:17
+Flags:
+const props: {data: A, name: string, ...}
 
 'A' defined at jsx.js:4:20
 
-jsx.js:8:17,8:21
-jsx.js:8:23 = (property) name: string
-jsx.js:8:23,8:26
-jsx.js:8:30 = "div"
-jsx.js:8:30,8:32
-jsx.js:11:17 = const str: string
-jsx.js:11:17,11:19
-jsx.js:18:12 = const o: {r: typeof C}
+jsx.js:15:17,15:21
 
-'C' defined at jsx.js:13:6
+jsx.js:15:23
+Flags:
+(property) name: string
+jsx.js:15:23,15:26
 
-jsx.js:18:12,18:12
-jsx.js:18:14 = class C
+jsx.js:15:30
+Flags:
+"div"
+jsx.js:15:30,15:32
 
-'C' defined at jsx.js:13:6
+jsx.js:21:17
+Flags:
+const str: string
+jsx.js:21:17,21:19
 
-jsx.js:18:14,18:14
-jsx.js:18:12 = const o: {r: typeof C}
+jsx.js:29:12
+Flags:
+const o: {r: typeof C}
 
-'C' defined at jsx.js:13:6
+'C' defined at jsx.js:24:6
 
-jsx.js:18:22,18:22
-jsx.js:18:24 = class C
+jsx.js:29:12,29:12
 
-'C' defined at jsx.js:13:6
+jsx.js:29:14
+Flags:
+class C
 
-jsx.js:18:24,18:24
-literals.js:6:7 = const s: "A"
+'C' defined at jsx.js:24:6
+
+jsx.js:29:14,29:14
+
+jsx.js:29:22
+Flags:
+const o: {r: typeof C}
+
+'C' defined at jsx.js:24:6
+
+jsx.js:29:22,29:22
+
+jsx.js:29:24
+Flags:
+class C
+
+'C' defined at jsx.js:24:6
+
+jsx.js:29:24,29:24
+
+literals.js:6:7
+Flags:
+const s: "A"
 literals.js:6:7,6:7
-literals.js:7:7 = const n: 1
-literals.js:7:7,7:7
-literals.js:8:7 = const f: 1.01
+
+literals.js:8:7
+Flags:
+const n: 1
 literals.js:8:7,8:7
-literals.js:9:7 = const b: true
-literals.js:9:7,9:7
-literals.js:10:7 = const u: boolean | number | string
+
+literals.js:10:7
+Flags:
+const f: 1.01
 literals.js:10:7,10:7
-literals.js:13:6 = type S = "A"
-literals.js:13:6,13:6
-literals.js:14:6 = type N = 1
-literals.js:14:6,14:6
-literals.js:15:6 = type F = 1.01
-literals.js:15:6,15:6
-literals.js:16:6 = type B = true
-literals.js:16:6,16:6
-literals.js:17:6 = type U = "A" | 1 | 1.01 | true
-literals.js:17:6,17:6
-literals.js:19:7 = const f1: (x: "A" | "B") => "A" | "B"
-literals.js:19:7,19:8
-literals.js:21:7 = const o1: {f: string}
-literals.js:21:7,21:8
-literals.js:22:7 = const o2: {f: "f"}
-literals.js:22:7,22:8
-literals.js:24:7 = const f2: (x: "A" | "B") => "A" | "B"
-literals.js:24:7,24:8
-literals.js:28:7 = const numLitArray: Array<number>
-literals.js:28:7,28:17
-literals.js:31:7 = const a_n: A<number>
 
-'A' defined at literals.js:30:6
+literals.js:12:7
+Flags:
+const b: true
+literals.js:12:7,12:7
 
-literals.js:31:7,31:9
-literals.js:32:7 = const a_1: A<1>
+literals.js:14:7
+Flags:
+const u: boolean | number | string
+literals.js:14:7,14:7
 
-'A' defined at literals.js:30:6
+literals.js:18:6
+Flags:
+type S = "A"
+literals.js:18:6,18:6
 
-literals.js:32:7,32:9
-new-array.js:3:15 = 
+literals.js:20:6
+Flags:
+type N = 1
+literals.js:20:6,20:6
+
+literals.js:22:6
+Flags:
+type F = 1.01
+literals.js:22:6,22:6
+
+literals.js:24:6
+Flags:
+type B = true
+literals.js:24:6,24:6
+
+literals.js:26:6
+Flags:
+type U = "A" | 1 | 1.01 | true
+literals.js:26:6,26:6
+
+literals.js:29:7
+Flags:
+const f1: (x: "A" | "B") => "A" | "B"
+literals.js:29:7,29:8
+
+literals.js:32:7
+Flags:
+const o1: {f: string}
+literals.js:32:7,32:8
+
+literals.js:34:7
+Flags:
+const o2: {f: "f"}
+literals.js:34:7,34:8
+
+literals.js:37:7
+Flags:
+const f2: (x: "A" | "B") => "A" | "B"
+literals.js:37:7,37:8
+
+literals.js:42:7
+Flags:
+const numLitArray: Array<number>
+literals.js:42:7,42:17
+
+literals.js:46:7
+Flags:
+const a_n: A<number>
+
+'A' defined at literals.js:45:6
+
+literals.js:46:7,46:9
+
+literals.js:48:7
+Flags:
+const a_1: A<1>
+
+'A' defined at literals.js:45:6
+
+literals.js:48:7,48:9
+
+new-array.js:3:15
+Flags:
+
  Returns a new JavaScript array with its length property set to that number.
  (Note: this implies an array of arrayLength empty slots, not slots with actual undefined
  values. See [sparse arrays](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Indexed_collections#sparse_arrays)).
 constructor Array<any>(arrayLength?: number): void
 new-array.js:3:13,3:17
-object-resolution.js:5:2 = const ro: {readonly p: number}
-object-resolution.js:5:1,5:2
-object-resolution.js:10:2 = const diff: Omit<O2, "p">
 
-'O2' defined at object-resolution.js:8:5
+object-resolution.js:5:4
+Flags:
+const ro: {readonly p: number}
+object-resolution.js:5:3,5:4
+
+object-resolution.js:11:4
+Flags:
+const diff: Omit<O2, "p">
+
+'O2' defined at object-resolution.js:9:5
 'Omit' defined at (lib) lib.es5.js:1556:5
 
-object-resolution.js:10:1,10:4
-object-resolution.js:13:5 = const spread: {p: number, q: string, ...}
-object-resolution.js:13:5,13:10
-object.js:3:17 = const obj: {a?: {b: ?{c: null | {d: number, ...}, ...}, ...}, ...}
+object-resolution.js:11:3,11:6
+
+object-resolution.js:15:5
+Flags:
+const spread: {p: number, q: string, ...}
+object-resolution.js:15:5,15:10
+
+object.js:3:17
+Flags:
+const obj: {a?: {b: ?{c: null | {d: number, ...}, ...}, ...}, ...}
 object.js:3:15,3:17
-object.js:3:21 = (property) a: void | {b: ?{c: null | {d: number, ...}, ...}, ...}
+
+object.js:3:21
+Flags:
+(property) a: void | {b: ?{c: null | {d: number, ...}, ...}, ...}
 object.js:3:21,3:21
-object.js:3:26 = (property) b: ?{c: null | {d: number, ...}, ...}
+
+object.js:3:26
+Flags:
+(property) b: ?{c: null | {d: number, ...}, ...}
 object.js:3:26,3:26
-object.js:3:31 = (property) c: null | {d: number, ...}
+
+object.js:3:31
+Flags:
+(property) c: null | {d: number, ...}
 object.js:3:31,3:31
-object.js:3:42 = (property) d: number
+
+object.js:3:42
+Flags:
+(property) d: number
 object.js:3:42,3:42
-object.js:6:5 = const obj: {a?: {b: ?{c: null | {d: number, ...}, ...}, ...}, ...}
-object.js:6:3,6:5
-object.js:6:7 = (property) a: void | {b: ?{c: null | {d: number, ...}, ...}, ...}
-object.js:6:7,6:7
-object.js:7:10 = (property) a: {b: ?{c: null | {d: number, ...}, ...}, ...}
 
-Refined at object.js:6:2
+object.js:12:5
+Flags:
+const obj: {a?: {b: ?{c: null | {d: number, ...}, ...}, ...}, ...}
+object.js:12:3,12:5
 
-object.js:7:10,7:10
-object.js:7:12 = (property) b: ?{c: null | {d: number, ...}, ...}
-object.js:7:12,7:12
-object.js:8:14 = (property) b: {c: null | {d: number, ...}, ...}
+object.js:12:7
+Flags:
+(property) a: void | {b: ?{c: null | {d: number, ...}, ...}, ...}
+object.js:12:7,12:7
 
-Refined at object.js:7:5
+object.js:15:10
+Flags:
+(property) a: {b: ?{c: null | {d: number, ...}, ...}, ...}
 
-object.js:8:14,8:14
-object.js:8:16 = (property) c: null | {d: number, ...}
-object.js:8:16,8:16
-object.js:9:18 = (property) c: {d: number, ...}
+Refined at object.js:12:2
 
-Refined at object.js:8:7
+object.js:15:10,15:10
 
-object.js:9:18,9:18
-object.js:9:34 = (property) d: number
+object.js:15:12
+Flags:
+(property) b: ?{c: null | {d: number, ...}, ...}
+object.js:15:12,15:12
 
-Refined at object.js:9:9
+object.js:18:14
+Flags:
+(property) b: {c: null | {d: number, ...}, ...}
 
-object.js:9:34,9:34
-object.js:15:3 = (method) m(n: string): string
-object.js:15:3,15:3
-object.js:16:3 = (property) n: (k: number) => number
-object.js:16:3,16:3
-object.js:19:3 = let myobj: {m(n: string): string, n: (k: number) => number}
-object.js:19:1,19:5
-object.js:19:7 = (method) m(n: string): string
-object.js:19:7,19:7
-object.js:20:7 = (method) m(n: string): string
-object.js:20:7,20:7
-object.js:21:7 = (property) n: (k: number) => number
-object.js:21:7,21:7
-object.js:22:7 = (property) n: (k: number) => number
-object.js:22:7,22:7
-object.js:35:1 = const litobj: {
+Refined at object.js:15:5
+
+object.js:18:14,18:14
+
+object.js:18:16
+Flags:
+(property) c: null | {d: number, ...}
+object.js:18:16,18:16
+
+object.js:21:18
+Flags:
+(property) c: {d: number, ...}
+
+Refined at object.js:18:7
+
+object.js:21:18,21:18
+
+object.js:21:34
+Flags:
+(property) d: number
+
+Refined at object.js:21:9
+
+object.js:21:34,21:34
+
+object.js:29:3
+Flags:
+(method) m(n: string): string
+object.js:29:3,29:3
+
+object.js:31:3
+Flags:
+(property) n: (k: number) => number
+object.js:31:3,31:3
+
+object.js:35:3
+Flags:
+let myobj: {m(n: string): string, n: (k: number) => number}
+object.js:35:1,35:5
+
+object.js:35:7
+Flags:
+(method) m(n: string): string
+object.js:35:7,35:7
+
+object.js:38:7
+Flags:
+(method) m(n: string): string
+object.js:38:7,38:7
+
+object.js:40:7
+Flags:
+(property) n: (k: number) => number
+object.js:40:7,40:7
+
+object.js:42:7
+Flags:
+(property) n: (k: number) => number
+object.js:42:7,42:7
+
+object.js:56:3
+Flags:
+const litobj: {
   b: 0b111,
   d: 11,
   f: "ff",
@@ -197,50 +373,66 @@ object.js:35:1 = const litobj: {
   x: 0x111,
   ...
 }
-object.js:35:1,35:6
-object.js:37:7
+object.js:56:3,56:8
+
+object.js:59:7
 Flags:
 const frozenObject1: {readonly A: "a", readonly B: "b"}
-object.js:37:7,37:19
+object.js:59:7,59:19
 
-object.js:40:7
+object.js:62:7
 Flags:
 const frozenObject2: {readonly A: "a", readonly B: {C: string}}
-object.js:40:7,40:19
+object.js:62:7,62:19
 
-object.js:43:5
+object.js:65:5
 Flags:
 
  Provides functionality common to all JavaScript objects.
 (method) constructor(this: typeof Object.prototype, ...empty): any
-object.js:43:5,43:15
+object.js:65:5,65:15
 
-object.js:46:5
+object.js:68:5
 Flags:
 
  Provides functionality common to all JavaScript objects.
 (method) constructor(this: typeof Object.prototype, ...empty): any
-object.js:46:5,46:15
+object.js:68:5,68:15
 
-optional_chaining.js:16:7 = const n: number | void
+optional_chaining.js:16:7
+Flags:
+const n: number | void
 optional_chaining.js:16:7,16:7
-optional_chaining.js:16:11 = const foo: ?Foo
+
+optional_chaining.js:16:11
+Flags:
+const foo: ?Foo
 
 'Foo' defined at optional_chaining.js:3:6
 
 optional_chaining.js:16:11,16:13
-optional_chaining.js:16:16 = (property) Foo.bar: Bar | void
+
+optional_chaining.js:16:16
+Flags:
+(property) Foo.bar: Bar | void
 
 'Bar' defined at optional_chaining.js:7:6
 
 optional_chaining.js:16:16,16:18
-optional_chaining.js:16:20 = (property) Bar.baz: Baz | void
+
+optional_chaining.js:16:20
+Flags:
+(property) Bar.baz: Baz | void
 
 'Baz' defined at optional_chaining.js:11:6
 
 optional_chaining.js:16:20,16:22
-optional_chaining.js:16:24 = (property) Baz.qux: number | void
+
+optional_chaining.js:16:24
+Flags:
+(property) Baz.qux: number | void
 optional_chaining.js:16:24,16:26
+
 identifier.js:5:4
 Flags:
 const fooBar: number

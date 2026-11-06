@@ -3,6 +3,7 @@ class Foo2 {
     baz: Readonly<this>,
   ): Readonly<this> {
     baz.bar(baz);
+//          ^
     return this
   }
 }

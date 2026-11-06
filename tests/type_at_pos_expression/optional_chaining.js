@@ -14,3 +14,8 @@ class Baz {
 
 declare const foo: ?Foo;
 const n = foo?.bar.baz.qux;
+//    ^
+//        ^
+//             ^
+//                 ^
+//                     ^

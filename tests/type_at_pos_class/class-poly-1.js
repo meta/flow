@@ -7,3 +7,5 @@ export class A<T> {
 
 declare const a: A<number>;
 var x = a.m();
+//  ^
+//        ^

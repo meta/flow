@@ -6,9 +6,16 @@
 
 declare class D {
   p: number;
+//^
   m(): void;
+//^
   get g(): string;
+//    ^
   set s(x: number): void;
+//    ^
   static sp: number;
+//       ^
   nested: {inner: number};
+//^
+//         ^
 }

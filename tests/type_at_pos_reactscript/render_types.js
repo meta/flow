@@ -6,6 +6,7 @@ component Foo() { return null }
 component Bar() { return null }
 
 type Z = renders Foo;
+//    ^
 //   ^
 type U = renders (Foo | Bar);
 //   ^

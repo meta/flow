@@ -1,11 +1,13 @@
-basic.js:3:7 = {
+basic.js:4:7
+Flags: --pretty
+{
   "end":9,
-  "endline":3,
-  "line":3,
+  "endline":4,
+  "line":4,
   "loc":{
-    "end":{"column":9,"line":3,"offset":19},
+    "end":{"column":9,"line":4,"offset":68},
     "source":"basic.js",
-    "start":{"column":7,"line":3,"offset":16},
+    "start":{"column":7,"line":4,"offset":65},
     "type":"SourceFile"
   },
   "path":"basic.js",
@@ -13,14 +15,17 @@ basic.js:3:7 = {
   "start":7,
   "types":{"type":"number"}
 }
-basic.js:4:7 = {
+
+basic.js:6:7
+Flags: --pretty
+{
   "end":9,
-  "endline":4,
-  "line":4,
+  "endline":6,
+  "line":6,
   "loc":{
-    "end":{"column":9,"line":4,"offset":42},
+    "end":{"column":9,"line":6,"offset":108},
     "source":"basic.js",
-    "start":{"column":7,"line":4,"offset":39},
+    "start":{"column":7,"line":6,"offset":105},
     "type":"SourceFile"
   },
   "path":"basic.js",
@@ -28,22 +33,26 @@ basic.js:4:7 = {
   "start":7,
   "types":{"type":"\"hello\""}
 }
-basic.js:6:1 = {
-  "end":3,
-  "endline":6,
-  "line":6,
+
+basic.js:9:3
+Flags: --pretty
+{
+  "end":5,
+  "endline":9,
+  "line":9,
   "loc":{
-    "end":{"column":3,"line":6,"offset":58},
+    "end":{"column":5,"line":9,"offset":143},
     "source":"basic.js",
-    "start":{"column":1,"line":6,"offset":55},
+    "start":{"column":3,"line":9,"offset":140},
     "type":"SourceFile"
   },
   "path":"basic.js",
   "reasons":[],
-  "start":1,
+  "start":3,
   "types":{"type":"number"}
 }
-basic.js:8:5 = {
+
+basic.js:12:5 = {
   "end":0,
   "endline":0,
   "line":0,
@@ -58,15 +67,17 @@ basic.js:8:5 = {
   "start":1,
   "types":null
 }
-docs.js:6:7 = {
+docs.js:7:7
+Flags: --pretty
+{
   "documentation":"\n this is documented!",
   "end":16,
-  "endline":6,
-  "line":6,
+  "endline":7,
+  "line":7,
   "loc":{
-    "end":{"column":16,"line":6,"offset":57},
+    "end":{"column":16,"line":7,"offset":80},
     "source":"docs.js",
-    "start":{"column":7,"line":6,"offset":47},
+    "start":{"column":7,"line":7,"offset":70},
     "type":"SourceFile"
   },
   "path":"docs.js",
@@ -74,30 +85,36 @@ docs.js:6:7 = {
   "start":7,
   "types":{"type":"number"}
 }
-docs.js:8:1 = {
+
+docs.js:10:3
+Flags: --pretty
+{
   "documentation":"\n this is documented!",
-  "end":10,
-  "endline":8,
-  "line":8,
+  "end":12,
+  "endline":10,
+  "line":10,
   "loc":{
-    "end":{"column":10,"line":8,"offset":82},
+    "end":{"column":12,"line":10,"offset":124},
     "source":"docs.js",
-    "start":{"column":1,"line":8,"offset":72},
+    "start":{"column":3,"line":10,"offset":114},
     "type":"SourceFile"
   },
   "path":"docs.js",
   "reasons":[],
-  "start":1,
+  "start":3,
   "types":{"type":"number"}
 }
-spread.js:4:7 = {
+
+spread.js:5:7
+Flags: --pretty --expand-json-output
+{
   "end":14,
-  "endline":4,
-  "line":4,
+  "endline":5,
+  "line":5,
   "loc":{
-    "end":{"column":14,"line":4,"offset":55},
+    "end":{"column":14,"line":5,"offset":117},
     "source":"spread.js",
-    "start":{"column":7,"line":4,"offset":47},
+    "start":{"column":7,"line":5,"offset":109},
     "type":"SourceFile"
   },
   "path":"spread.js",
@@ -105,7 +122,7 @@ spread.js:4:7 = {
   "start":7,
   "types":{
     "expanded":{
-      "def_loc":"spread.js:4:18-35",
+      "def_loc":"spread.js:5:18-35",
       "kind":"Obj",
       "obj_kind":"Exact",
       "props":[
@@ -132,7 +149,7 @@ spread.js:4:7 = {
         {
           "kind":"NamedProp",
           "prop":{
-            "def_locs":["spread.js:4:28"],
+            "def_locs":["spread.js:5:28"],
             "inherited":false,
             "name":"c",
             "prop":{"kind":"Field","optional":false,"polarity":"Neutral","type":{"kind":"Bool"}},
@@ -144,7 +161,10 @@ spread.js:4:7 = {
     "type":"{a: number, b: string, c: boolean}"
   }
 }
-main.js:5:10 = {
+
+main.js:5:10
+Flags: --pretty --expand-json-output
+{
   "end":14,
   "endline":5,
   "line":5,
@@ -196,3 +216,4 @@ main.js:5:10 = {
     "type":"type Props = {color: string, size: number}"
   }
 }
+

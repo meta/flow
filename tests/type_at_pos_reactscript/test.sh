@@ -6,5 +6,3 @@
 
 queries_in_file "type-at-pos" "component.js"
 queries_in_file "type-at-pos" "render_types.js"
-printf "render_types.js:8:7 = "
-assert_ok "$FLOW" type-at-pos render_types.js 8 7 --strip-root

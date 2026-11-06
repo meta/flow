@@ -1,9 +1,14 @@
-dro.js:2:9 = 
+dro.js:2:9
+Flags:
+
  Sorts an array in place.
  This method mutates the array and returns a reference to the same array.
 (method) sort(compareFn?: (a: number, b: number) => number): Array<number>
 dro.js:2:9,2:12
-lazy_ref.js:14:9 = const x: {
+
+lazy_ref.js:14:9
+Flags:
+const x: {
   default: component(
     ...{...empty, readonly ref?: RefSetter<{moo(x: string): void}>}
   ) renders null
@@ -12,19 +17,28 @@ lazy_ref.js:14:9 = const x: {
 'RefSetter' defined at (lib) react.js:1644:9
 
 lazy_ref.js:14:9,14:9
-lazy_ref.js:19:9 = const x: Promise<{readonly default: (x: Props) => MixedElement}>
+
+lazy_ref.js:20:9
+Flags:
+const x: Promise<{readonly default: (x: Props) => MixedElement}>
 
 'MixedElement' defined at (lib) react.js:583:22
 'Promise' defined at (lib) misc.js:216:10
 'Props' defined at exports-component.js:5:5
 
-lazy_ref.js:19:9,19:9
-react_component.js:3:9 = module "react"
+lazy_ref.js:20:9,20:9
+
+react_component.js:3:9
+Flags:
+module "react"
 
 'react' defined at react_component.js:3:14
 
 react_component.js:3:7,3:11
-react_component.js:13:33 = 
+
+react_component.js:14:33
+Flags:
+
  `Component` lets you define a React component as a JavaScript class.
 
  We recommend defining components as functions instead of classes.
@@ -35,13 +49,19 @@ class Component<Props, State = void>
 
 'Component' defined at (lib) react.js:1251:18
 
-react_component.js:13:29,13:37
-react_component.js:18:17 = (property) state: State
+react_component.js:14:29,14:37
 
-'State' defined at react_component.js:9:5
+react_component.js:20:17
+Flags:
+(property) state: State
 
-react_component.js:18:14,18:18
-react_component.js:31:7 = 
+'State' defined at react_component.js:10:5
+
+react_component.js:20:14,20:18
+
+react_component.js:34:7
+Flags:
+
  `<Fragment>`, often used via `<>...</>` syntax,
  lets you group elements without a wrapper node.
 
@@ -51,10 +71,17 @@ component Fragment<Renders extends React$Node = void>(children?: Renders) render
 'Fragment' defined at (lib) react.js:1356:4
 'React$Node' defined at (lib) react.js:15:13
 
-react_component.js:31:7,31:14
-react_component.js:32:15 = const react_ct: component(...number)
-react_component.js:32:15,32:22
-react_component.js:32:31 = (unknown)
+react_component.js:34:7,34:14
+
+react_component.js:36:15
+Flags:
+const react_ct: component(...number)
+react_component.js:36:15,36:22
+
+react_component.js:36:31
+Flags:
+(unknown)
+
 react.js:4:7
 Flags:
 
@@ -68,10 +95,16 @@ Flags:
 
 react.js:4:7,4:19
 
-react_abstract_component.js:3:15 = (parameter) x: component(...any)
+react_abstract_component.js:3:15
+Flags:
+(parameter) x: component(...any)
 react_abstract_component.js:3:15,3:15
-react_abstract_component.js:8:15 = type RendersFoo = renders Foo
 
-'Foo' defined at react_abstract_component.js:7:18
+react_abstract_component.js:9:15
+Flags:
+type RendersFoo = renders Foo
 
-react_abstract_component.js:8:6,8:15
+'Foo' defined at react_abstract_component.js:8:18
+
+react_abstract_component.js:9:6,9:15
+

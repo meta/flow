@@ -5,4 +5,6 @@ declare const a: {
  ...};
 
 if (a.foo != null) { a.foo; }
+//                      ^
 if (a.foo != null) { a.foo(); }
+//                      ^

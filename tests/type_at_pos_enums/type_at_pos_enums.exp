@@ -1,119 +1,135 @@
-test.js:3:6
-Flags:
-enum E
-test.js:3:6,3:6
-
-test.js:6:11
-Flags:
-enum E
-
-'E' defined at test.js:3:5
-
-test.js:6:11,6:11
-
-test.js:9:13
+test.js:5:9
 Flags:
 (enum member) E.A: E
 
-'E' defined at test.js:3:5
+'E' defined at test.js:5:5
 
-test.js:9:13,9:13
+test.js:5:9,5:9
 
-test.js:12:10
+test.js:5:12
+Flags:
+(enum member) E.B: E
+
+'E' defined at test.js:5:5
+
+test.js:5:12,5:12
+
+test.js:5:6
+Flags:
+enum E
+test.js:5:6,5:6
+
+test.js:10:11
 Flags:
 enum E
 
-'E' defined at test.js:3:5
+'E' defined at test.js:5:5
 
-test.js:12:10,12:10
+test.js:10:11,10:11
 
-test.js:15:6
+test.js:13:13
+Flags:
+(enum member) E.A: E
+
+'E' defined at test.js:5:5
+
+test.js:13:13,13:13
+
+test.js:16:10
+Flags:
+enum E
+
+'E' defined at test.js:5:5
+
+test.js:16:10,16:10
+
+test.js:19:6
 Flags:
 type T = Class<E>
 
-'E' defined at test.js:3:5
+'E' defined at test.js:5:5
 
-test.js:15:6,15:6
+test.js:19:6,19:6
 
-test.js:18:14
+test.js:22:14
 Flags:
 (alias) enum F
 import type {F} from "./export.js"
 
 'F' defined at export.js:3:12
 
-test.js:18:14,18:14
+test.js:22:14,22:14
 
-test.js:20:15
+test.js:24:15
 Flags:
 const f: F
 
 'F' defined at export.js:3:12
 
-test.js:20:15,20:15
+test.js:24:15,24:15
 
-test.js:22:19
+test.js:26:19
 Flags:
 (alias) enum F
 import type {F} from "./export.js"
 
 'F' defined at export.js:3:12
 
-test.js:22:19,22:19
+test.js:26:19,26:19
 
-test.js:25:13
+test.js:29:13
 Flags:
 (alias) enum G
 import type G from "./export.js"
 
 'G' defined at export.js:8:20
 
-test.js:25:13,25:13
+test.js:29:13,29:13
 
-test.js:27:15
+test.js:31:15
 Flags:
 const g: G
 
 'G' defined at export.js:8:20
 
-test.js:27:15,27:15
+test.js:31:15,31:15
 
-test.js:29:19
+test.js:33:19
 Flags:
 (alias) enum G
 import type G from "./export.js"
 
 'G' defined at export.js:8:20
 
-test.js:29:19,29:19
+test.js:33:19,33:19
 
-test.js:32:8
+test.js:36:8
 Flags:
 (alias) enum G
 import H from "./export.js"
 
 'G' defined at export.js:8:20
 
-test.js:32:8,32:8
+test.js:36:8,36:8
 
-test.js:34:15
+test.js:38:15
 Flags:
 const h: G
 
 'G' defined at export.js:8:20
 
-test.js:34:15,34:15
+test.js:38:15,38:15
 
-test.js:36:19
+test.js:40:19
 Flags:
 (alias) enum G
 import H from "./export.js"
 
 'G' defined at export.js:8:20
 
-test.js:36:19,36:19
+test.js:40:19,40:19
 
-test.js:39:14
+test.js:43:14
 Flags:
 (alias) type FType = F
 import type {FType} from "./export.js"
@@ -121,17 +137,17 @@ import type {FType} from "./export.js"
 'F' defined at export.js:3:12
 'FType' defined at export.js:13:12
 
-test.js:39:14,39:18
+test.js:43:14,43:18
 
-test.js:41:15
+test.js:45:15
 Flags:
 const i: FType
 
 'FType' defined at export.js:13:12
 
-test.js:41:15,41:15
+test.js:45:15,45:15
 
-test.js:43:19
+test.js:47:19
 Flags:
 (alias) type FType = F
 import type {FType} from "./export.js"
@@ -139,39 +155,29 @@ import type {FType} from "./export.js"
 'F' defined at export.js:3:12
 'FType' defined at export.js:13:12
 
-test.js:43:19,43:23
+test.js:47:19,47:23
 
-test.js:46:7
+test.js:50:7
 Flags:
 const j: E
 
-'E' defined at test.js:3:5
+'E' defined at test.js:5:5
 
-test.js:46:7,46:7
+test.js:50:7,50:7
 
-test.js:49:7
+test.js:53:7
 Flags:
 const k: typeof E | 1
 
-'E' defined at test.js:3:5
+'E' defined at test.js:5:5
 
-test.js:49:7,49:7
+test.js:53:7,53:7
 
-test.js:54:3
+test.js:58:3
 Flags:
 (method) E.cast(this: typeof E, input: ?string): void | E
 
-'E' defined at test.js:3:5
+'E' defined at test.js:5:5
 
-test.js:54:3,54:6
+test.js:58:3,58:6
 
-test.js:3:9 (framed) = (enum member) E.A: E
-
-'E' defined at test.js:3:5
-
-test.js:3:9,3:9
-test.js:3:12 (framed) = (enum member) E.B: E
-
-'E' defined at test.js:3:5
-
-test.js:3:12,3:12

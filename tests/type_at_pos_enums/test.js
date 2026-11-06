@@ -1,6 +1,10 @@
 // @flow
 
+// Enum member sites frame like member references, even though members carry
+// no types of their own.
 enum E {A, B}
+//      ^
+//         ^
 //   ^
 
 const x = E.A;

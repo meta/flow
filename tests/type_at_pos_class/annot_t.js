@@ -7,3 +7,4 @@ declare class KeyedSeq<K, out V> extends Seq<K, V> {
   key: K;
 }
 declare const a: Seq.Keyed<number, number>
+//                    ^

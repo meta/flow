@@ -1,71 +1,155 @@
-typed.js:2:7 = const untyped: any
+typed.js:2:7
+Flags:
+const untyped: any
 typed.js:2:7,2:13
-typed.js:4:5 = let x: any
-typed.js:4:5,4:5
-typed.js:5:5 = let y: Function
 
-'Function' defined at (lib) prelude.js:14:14
-
+typed.js:5:5
+Flags:
+let x: any
 typed.js:5:5,5:5
-typed.js:5:9 = class Function
+
+typed.js:7:5
+Flags:
+let y: Function
 
 'Function' defined at (lib) prelude.js:14:14
 
-typed.js:5:9,5:16
-typed.js:6:5 = let z: Object
+typed.js:7:5,7:5
+
+typed.js:7:9
+Flags:
+class Function
+
+'Function' defined at (lib) prelude.js:14:14
+
+typed.js:7:9,7:16
+
+typed.js:10:5
+Flags:
+let z: Object
 
 'Object' defined at (lib) prelude.js:12:14
 
-typed.js:6:5,6:5
-typed.js:6:9 = class Object
-
-'Object' defined at (lib) prelude.js:12:14
-
-typed.js:6:9,6:14
-typed.js:8:5 = let a: any
-typed.js:8:5,8:5
-typed.js:8:9 = let x: any
-typed.js:8:9,8:9
-typed.js:9:5 = let b: any
-typed.js:9:5,9:5
-typed.js:9:9 = let z: Object
-
-'Object' defined at (lib) prelude.js:12:14
-
-typed.js:9:9,9:9
-typed.js:9:12 = any
-typed.js:9:11,9:12
-typed.js:10:5 = let c: any
 typed.js:10:5,10:5
-typed.js:10:9 = let y: any
-typed.js:10:9,10:9
-typed.js:12:5 = let u: any
-typed.js:12:5,12:5
-typed.js:12:9 = const untyped: any
-typed.js:12:9,12:15
-typed.js:12:17 = any
-typed.js:12:17,12:18
-typed.js:13:5 = let v: any
-typed.js:13:5,13:5
-typed.js:13:9 = const untyped: any
-typed.js:13:9,13:15
-typed.js:15:5 = let unsound1: any
-typed.js:15:5,15:12
-typed.js:15:27 = (method) constructor: any
-typed.js:15:27,15:37
-typed.js:16:5 = let unsound2: any
-typed.js:16:5,16:12
-typed.js:18:5 = let num: number
-typed.js:18:5,18:7
-typed.js:20:5 = let str: string
-typed.js:20:5,20:7
-typed.js:21:5 = let m: string
+
+typed.js:10:9
+Flags:
+class Object
+
+'Object' defined at (lib) prelude.js:12:14
+
+typed.js:10:9,10:14
+
+typed.js:14:5
+Flags:
+let a: any
+typed.js:14:5,14:5
+
+typed.js:14:9
+Flags:
+let x: any
+typed.js:14:9,14:9
+
+typed.js:17:5
+Flags:
+let b: any
+typed.js:17:5,17:5
+
+typed.js:17:9
+Flags:
+let z: Object
+
+'Object' defined at (lib) prelude.js:12:14
+
+typed.js:17:9,17:9
+
+typed.js:17:12
+Flags:
+any
+typed.js:17:11,17:12
+
+typed.js:21:5
+Flags:
+let c: any
 typed.js:21:5,21:5
-typed.js:23:5 = let arr: Array<any>
-typed.js:23:5,23:7
-typed.js:24:5 = let arr2: Array<any>
-typed.js:24:5,24:8
-typed.js:27:5 = let bar: (any) => void
-typed.js:27:5,27:7
-typed.js:28:5 = let baz: (any) => void
-typed.js:28:5,28:7
+
+typed.js:21:9
+Flags:
+let y: any
+typed.js:21:9,21:9
+
+typed.js:25:5
+Flags:
+let u: any
+typed.js:25:5,25:5
+
+typed.js:25:9
+Flags:
+const untyped: any
+typed.js:25:9,25:15
+
+typed.js:25:17
+Flags:
+any
+typed.js:25:17,25:18
+
+typed.js:29:5
+Flags:
+let v: any
+typed.js:29:5,29:5
+
+typed.js:29:9
+Flags:
+const untyped: any
+typed.js:29:9,29:15
+
+typed.js:33:5
+Flags:
+let unsound1: any
+typed.js:33:5,33:12
+
+typed.js:33:27
+Flags:
+(method) constructor: any
+typed.js:33:27,33:37
+
+typed.js:36:5
+Flags:
+let unsound2: any
+typed.js:36:5,36:12
+
+typed.js:39:5
+Flags:
+let num: number
+typed.js:39:5,39:7
+
+typed.js:42:5
+Flags:
+let str: string
+typed.js:42:5,42:7
+
+typed.js:44:5
+Flags:
+let m: string
+typed.js:44:5,44:5
+
+typed.js:47:5
+Flags:
+let arr: Array<any>
+typed.js:47:5,47:7
+
+typed.js:49:5
+Flags:
+let arr2: Array<any>
+typed.js:49:5,49:8
+
+typed.js:53:5
+Flags:
+let bar: (any) => void
+typed.js:53:5,53:7
+
+typed.js:55:5
+Flags:
+let baz: (any) => void
+typed.js:55:5,55:7
+

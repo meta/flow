@@ -15,31 +15,49 @@ type Base = {
 };
 
 declare var partial: Partial<Base>;
+// The receiver of a member access can itself be a type destructor. Expanding its
+// members forces evaluation, so the property's kind is still recovered; the
+// qualifier comes off the unevaluated receiver.
 partial.p;
+//      ^
 partial.m();
+//      ^
 
 type NamedPartial = Partial<Base>;
 declare var named: NamedPartial;
 named.p;
+//    ^
 named.m();
+//    ^
 
 declare var readOnly: Readonly<Base>;
 readOnly.m();
+//       ^
 readOnly.g;
+//       ^
 
 declare var nonMaybe: NonNullable<?Base>;
 nonMaybe.p;
+//       ^
 nonMaybe.m();
+//       ^
 nonMaybe.g;
+//       ^
 nonMaybe.s = true;
+//       ^
 
 declare var spread: {...Base, extra: string};
 spread.p;
+//     ^
 spread.m();
+//     ^
 
 declare var mapped: {[K in keyof Base]: Base[K]};
 mapped.p;
+//     ^
 
 declare var conditional: (string extends string ? Base : empty);
 conditional.p;
+//          ^
 conditional.m();
+//          ^
