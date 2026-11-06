@@ -3749,6 +3749,8 @@ pub enum ErrorMessage<L: Dupe + PartialOrd + Ord + PartialEq + Eq> {
 
     EMissingFunctionTypeParamName(L),
 
+    EMissingDictionaryKeyLabel(L),
+
     EMissingParameterAnnotation {
         loc: L,
         hint_available: bool,
@@ -5662,6 +5664,8 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             EMissingThisAnnotation(loc) => EMissingThisAnnotation(f(loc)),
 
             EMissingFunctionTypeParamName(loc) => EMissingFunctionTypeParamName(f(loc)),
+
+            EMissingDictionaryKeyLabel(loc) => EMissingDictionaryKeyLabel(f(loc)),
 
             EMissingParameterAnnotation {
                 loc,
@@ -8976,6 +8980,8 @@ impl<L: Dupe + PartialOrd + Ord + PartialEq + Eq> ErrorMessage<L> {
 
             Self::EMissingFunctionTypeParamName(loc) => Some(loc.dupe()),
 
+            Self::EMissingDictionaryKeyLabel(loc) => Some(loc.dupe()),
+
             Self::EMissingParameterAnnotation { loc, .. } => Some(loc.dupe()),
 
             Self::ESketchyNumberLint(_, value) => Some(value.loc.dupe()),
@@ -11944,6 +11950,10 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                 Normal(Message::MessageMissingFunctionTypeParamName)
             }
 
+            ErrorMessage::EMissingDictionaryKeyLabel(_) => {
+                Normal(Message::MessageMissingDictionaryKeyLabel)
+            }
+
             ErrorMessage::EMissingParameterAnnotation { hint_available, .. } => {
                 if hint_available {
                     Normal(Message::MessageMissingParameterAnnotationDueToContextualTypingFailure)
@@ -12871,6 +12881,7 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             | Self::EUntypedImport(box (_, _))
             | Self::ENonstrictImport(_)
             | Self::EUnclearType(_)
+            | Self::EMissingDictionaryKeyLabel(_)
             | Self::EDeprecatedBool(_)
             | Self::EInternalType(_, _)
             | Self::EUnsafeGettersSetters(_)
@@ -13307,6 +13318,7 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             ErrorMessage::EMissingParameterAnnotation { .. } => Some(MissingLocalAnnot),
             ErrorMessage::EMissingThisAnnotation(_) => Some(MissingThisAnnot),
             ErrorMessage::EMissingFunctionTypeParamName(_) => Some(MissingFunctionTypeParamName),
+            ErrorMessage::EMissingDictionaryKeyLabel(_) => Some(MissingDictionaryKeyLabel),
             ErrorMessage::EMissingTypeArgs(box EMissingTypeArgsData { .. }) => Some(MissingTypeArg),
             ErrorMessage::EMixedImportAndRequire { .. } => Some(MixedImportAndRequire),
             ErrorMessage::EUnsupportedVarianceAnnotation { .. } => {

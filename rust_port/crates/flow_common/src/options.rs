@@ -186,6 +186,7 @@ pub struct Options {
     pub relay_integration_excludes: Arc<[Regex]>,
     pub relay_integration_module_prefix: Option<FlowSmolStr>,
     pub relay_integration_module_prefix_includes: Arc<[Regex]>,
+    pub require_dictionary_key_label: bool,
     pub require_function_type_param_name: bool,
     pub root: Arc<PathBuf>,
     pub root_name: Option<FlowSmolStr>,

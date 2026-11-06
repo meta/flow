@@ -197,6 +197,11 @@ fn config_options(config: Option<&Value>) -> Result<Options, String> {
         ]),
         react_runtime,
         recursion_limit: 10000,
+        require_dictionary_key_label: bool_config(
+            config,
+            "experimental.require_dictionary_key_label",
+            false,
+        ),
         require_function_type_param_name: bool_config(
             config,
             "experimental.require_function_type_param_name",

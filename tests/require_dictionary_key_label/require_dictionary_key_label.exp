@@ -1,0 +1,130 @@
+Error ---------------------------------------------------------------------------------------- contextual_typing.js:4:23
+
+Missing a label on this dictionary key. Write it as `[key: Type]`. [missing-dictionary-key-label]
+
+   4| function f(): Array<{[string]: string}> { // error
+                            ^^^^^^
+
+
+Error --------------------------------------------------------------------------------------------- declare_class.js:2:4
+
+Missing a label on this dictionary key. Write it as `[key: Type]`. [missing-dictionary-key-label]
+
+   2|   [string]: number; // error
+         ^^^^^^
+
+
+Error -------------------------------------------------------------------------------------------- declare_class.js:3:11
+
+Missing a label on this dictionary key. Write it as `[key: Type]`. [missing-dictionary-key-label]
+
+   3|   static [number]: string; // error
+                ^^^^^^
+
+
+Error -------------------------------------------------------------------------------------------- declare_class.js:16:4
+
+Missing a label on this dictionary key. Write it as `[key: Type]`. [missing-dictionary-key-label]
+
+   16|   [string]: number; // error
+          ^^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------- object_type.js:1:20
+
+Missing a label on this dictionary key. Write it as `[key: Type]`. [missing-dictionary-key-label]
+
+   1| type Unlabeled = {[string]: number}; // error
+                         ^^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------- object_type.js:3:28
+
+Missing a label on this dictionary key. Write it as `[key: Type]`. [missing-dictionary-key-label]
+
+   3| type ReadOnly = {readonly [string]: number}; // error
+                                 ^^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------- object_type.js:4:29
+
+Missing a label on this dictionary key. Write it as `[key: Type]`. [missing-dictionary-key-label]
+
+   4| type Mixed = {foo: string, [number]: boolean}; // error
+                                  ^^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------- object_type.js:5:17
+
+Missing a label on this dictionary key. Write it as `[key: Type]`. [missing-dictionary-key-label]
+
+   5| type Exact = {|[string]: number|}; // error
+                      ^^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------- object_type.js:6:33
+
+Missing a label on this dictionary key. Write it as `[key: Type]`. [missing-dictionary-key-label]
+
+   6| type Nested = {[key: string]: {[number]: string}}; // error on the inner key
+                                      ^^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------- object_type.js:8:19
+
+Missing a label on this dictionary key. Write it as `[key: Type]`. [missing-dictionary-key-label]
+
+   8| type AliasKey = {[Alias]: number}; // error
+                        ^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------- object_type.js:9:36
+
+Missing a label on this dictionary key. Write it as `[key: Type]`. [missing-dictionary-key-label]
+
+   9| type Generic<K extends string> = {[K]: number}; // error
+                                         ^
+
+
+Error --------------------------------------------------------------------------------------------- object_type.js:10:16
+
+Missing a label on this dictionary key. Write it as `[key: Type]`. [missing-dictionary-key-label]
+
+   10| type Union = {['a' | 'b']: number}; // error
+                      ^^^^^^^^^
+
+
+Error --------------------------------------------------------------------------------------------- object_type.js:19:14
+
+Missing a label on this dictionary key. Write it as `[key: Type]`. [missing-dictionary-key-label]
+
+   19| let annot: {[string]: number} = {}; // error
+                    ^^^^^^
+
+
+Error --------------------------------------------------------------------------------------------- object_type.js:20:17
+
+Missing a label on this dictionary key. Write it as `[key: Type]`. [missing-dictionary-key-label]
+
+   20| function f(x: {[string]: number}): void {} // error
+                       ^^^^^^
+
+
+Error --------------------------------------------------------------------------------------------- object_type.js:21:25
+
+Missing a label on this dictionary key. Write it as `[key: Type]`. [missing-dictionary-key-label]
+
+   21| declare function g(x: {[string]: number}): void; // error
+                               ^^^^^^
+
+
+Error --------------------------------------------------------------------------------------------- object_type.js:23:26
+
+Missing a label on this dictionary key. Write it as `[key: Type]`. [missing-dictionary-key-label]
+
+   23| export type Exported = {[string]: number}; // error
+                                ^^^^^^
+
+
+
+Found 16 errors

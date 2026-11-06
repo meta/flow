@@ -1,0 +1,7 @@
+[libs]
+lib.js
+
+[options]
+all=true
+builtin_lib=core-only
+experimental.require_dictionary_key_label=true

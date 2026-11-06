@@ -3026,6 +3026,9 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_aloc(None, loc)
             )
         }
+        ErrorMessage::EMissingDictionaryKeyLabel(loc) => {
+            format!("EMissingDictionaryKeyLabel ({})", string_of_aloc(None, loc))
+        }
         ErrorMessage::EMissingParameterAnnotation {
             loc,
             hint_available,

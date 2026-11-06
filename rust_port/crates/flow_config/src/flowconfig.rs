@@ -241,6 +241,7 @@ pub mod opts {
         pub relay_integration_excludes: Vec<String>,
         pub relay_integration_module_prefix: Option<String>,
         pub relay_integration_module_prefix_includes: Vec<String>,
+        pub require_dictionary_key_label: bool,
         pub require_function_type_param_name: bool,
         pub root_name: Option<String>,
         pub saved_state_parallel_decompress: bool,
@@ -396,6 +397,7 @@ pub mod opts {
             relay_integration_module_prefix_includes: vec![ocaml_str_to_rust_regex(
                 "<PROJECT_ROOT>/.*",
             )],
+            require_dictionary_key_label: false,
             require_function_type_param_name: false,
             root_name: None,
             saved_state_parallel_decompress: false,
@@ -2217,6 +2219,19 @@ pub mod opts {
                     config,
                 )
             }),
+            (
+                "experimental.require_dictionary_key_label",
+                |values, config| {
+                    parse_boolean(
+                        |opts, v| {
+                            opts.require_dictionary_key_label = v;
+                            Ok(())
+                        },
+                        values,
+                        config,
+                    )
+                },
+            ),
             (
                 "experimental.require_function_type_param_name",
                 |values, config| {

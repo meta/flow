@@ -618,6 +618,24 @@ pub fn error_on_unnamed_function_type_params<'a>(
         });
 }
 
+/// Under `experimental.require_dictionary_key_label`, an index signature must
+/// label its key, as in `{[key: string]: V}`. Only called on bracketed members
+/// read as index signatures: an unlabeled computed key such as `{['a']: V}` is
+/// a property, not a dictionary. Library definitions are exempt, as they are
+/// from `unclear-type`.
+fn error_on_unlabeled_dictionary_key<'a>(
+    cx: &mut Context<'a>,
+    indexer: &ast::types::object::Indexer<ALoc, ALoc>,
+) {
+    if !cx.require_dictionary_key_label() || cx.is_global_lib_context() || indexer.id.is_some() {
+        return;
+    }
+    flow_js_utils::add_output_non_speculating(
+        cx,
+        ErrorMessage::EMissingDictionaryKeyLabel(indexer.key.loc().dupe()),
+    );
+}
+
 /// Whether an annotation is the type of a position that binds exactly one
 /// value. That is the only kind of position where a bare `unique symbol` may be
 /// written: the annotation *is* the identity of one symbol, so anywhere one
@@ -5161,6 +5179,9 @@ fn convert_object<'a>(
                         KeyRead::IndexSignature,
                     ),
                 };
+                if matches!(key_read, KeyRead::IndexSignature) {
+                    error_on_unlabeled_dictionary_key(cx, indexer);
+                }
                 // A rejected key adds no member at all. Past here the key is
                 // either a name or an index signature, so the two are the only
                 // cases the rest has to answer for.
@@ -7285,6 +7306,9 @@ fn add_interface_properties<'a>(
                 // for carrying a `?`, which is TSLib-only syntax on an indexer.
                 let key_form = interface_key_form(cx, idx);
                 let is_index_signature = matches!(key_form, InterfaceKeyForm::IndexSignature);
+                if is_index_signature {
+                    error_on_unlabeled_dictionary_key(cx, idx);
+                }
                 if is_index_signature && class_sig::has_indexer(idx.static_, &s) {
                     flow_js_utils::add_output_non_speculating(
                         cx,

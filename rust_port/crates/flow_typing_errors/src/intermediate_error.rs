@@ -8667,6 +8667,11 @@ where
                 code("name: Type"),
                 text("."),
             ]),
+            MessageMissingDictionaryKeyLabel => friendly::Message(vec![
+                text("Missing a label on this dictionary key. Write it as "),
+                code("[key: Type]"),
+                text("."),
+            ]),
             MessageMissingReturnAnnotation => friendly::Message(vec![
                 text("Missing an annotation on "),
                 text("return"),
