@@ -238,7 +238,7 @@ Poly<?(K & L)>
 intersections.js:17:3,17:4
 
 At intersections.js:26:4
-LongLongLongLongLongLongLongLongName
+& LongLongLongLongLongLongLongLongName
 & AnotherLongLongLongLongLongLongLongLongName
 
 'AnotherLongLongLongLongLongLongLongLongName' defined at intersections.js:22:20
@@ -247,7 +247,7 @@ LongLongLongLongLongLongLongLongName
 intersections.js:26:3,26:4
 
 At intersections.js:28:4
-(?LongLongLongLongLongLongLongLongNameP<TValue>)
+& (?LongLongLongLongLongLongLongLongNameP<TValue>)
 & AnotherLongLongLongLongLongLongLongLongName
 
 'AnotherLongLongLongLongLongLongLongLongName' defined at intersections.js:22:20
@@ -257,7 +257,7 @@ intersections.js:28:3,28:4
 
 At intersections.js:30:4
 Poly<
-  LongLongLongLongLongLongLongLongName
+  & LongLongLongLongLongLongLongLongName
   & AnotherLongLongLongLongLongLongLongLongName,
 >
 
@@ -283,14 +283,16 @@ intersections.js:32:3,32:4
 
 At intersections.js:34:4
 Poly<
-  ?(((
-    LongLongLongLongLongLongLongLongName,
-    AnotherLongLongLongLongLongLongLongLongName
-  ) => void)
-  & ((
-    AnotherLongLongLongLongLongLongLongLongName,
-    LongLongLongLongLongLongLongLongName
-  ) => void)),
+  ?(
+    & ((
+        LongLongLongLongLongLongLongLongName,
+        AnotherLongLongLongLongLongLongLongLongName
+      ) => void)
+    & ((
+        AnotherLongLongLongLongLongLongLongLongName,
+        LongLongLongLongLongLongLongLongName
+      ) => void)
+  ),
 >
 
 'AnotherLongLongLongLongLongLongLongLongName' defined at intersections.js:22:20
@@ -301,8 +303,10 @@ intersections.js:34:3,34:5
 
 At intersections.js:36:4
 Poly<
-  ?(LongLongLongLongLongLongLongLongName
-  & AnotherLongLongLongLongLongLongLongLongName),
+  ?(
+    & LongLongLongLongLongLongLongLongName
+    & AnotherLongLongLongLongLongLongLongLongName
+  ),
 >
 
 'AnotherLongLongLongLongLongLongLongLongName' defined at intersections.js:22:20
@@ -337,24 +341,25 @@ type Obj3 = {(...args: ReadonlyArray<unknown>): void, f: <T>(x: T) => T, ...}
 callable-object.js:20:6,20:9
 
 At callable-object.js:26:8
-type Obj4 = {
-  (...args: ReadonlyArray<unknown>): O1,
-  $call: (...args: ReadonlyArray<unknown>) => O3,
-  f: <T>(x: T) => T,
-  ...
-}
-& {
-  (...args: ReadonlyArray<unknown>): O2,
-  $call: (...args: ReadonlyArray<unknown>) => O3,
-  f: <T>(x: T) => T,
-  ...
-}
-& {
-  (...args: ReadonlyArray<unknown>): O4,
-  $call: (...args: ReadonlyArray<unknown>) => O3,
-  f: <T>(x: T) => T,
-  ...
-}
+type Obj4 =
+  & {
+      (...args: ReadonlyArray<unknown>): O1,
+      $call: (...args: ReadonlyArray<unknown>) => O3,
+      f: <T>(x: T) => T,
+      ...
+    }
+  & {
+      (...args: ReadonlyArray<unknown>): O2,
+      $call: (...args: ReadonlyArray<unknown>) => O3,
+      f: <T>(x: T) => T,
+      ...
+    }
+  & {
+      (...args: ReadonlyArray<unknown>): O4,
+      $call: (...args: ReadonlyArray<unknown>) => O3,
+      f: <T>(x: T) => T,
+      ...
+    }
 
 'O1' defined at callable-object.js:3:20
 'O2' defined at callable-object.js:4:20
@@ -364,24 +369,25 @@ type Obj4 = {
 callable-object.js:26:6,26:9
 
 At callable-object.js:35:8
-type Obj5 = {
-  (...args: ReadonlyArray<unknown>): O4,
-  $call: (...args: ReadonlyArray<unknown>) => O3,
-  f: <T>(x: T) => T,
-  ...
-}
-& {
-  (...args: ReadonlyArray<unknown>): O1,
-  $call: (...args: ReadonlyArray<unknown>) => O3,
-  f: <T>(x: T) => T,
-  ...
-}
-& {
-  (...args: ReadonlyArray<unknown>): O2,
-  $call: (...args: ReadonlyArray<unknown>) => O3,
-  f: <T>(x: T) => T,
-  ...
-}
+type Obj5 =
+  & {
+      (...args: ReadonlyArray<unknown>): O4,
+      $call: (...args: ReadonlyArray<unknown>) => O3,
+      f: <T>(x: T) => T,
+      ...
+    }
+  & {
+      (...args: ReadonlyArray<unknown>): O1,
+      $call: (...args: ReadonlyArray<unknown>) => O3,
+      f: <T>(x: T) => T,
+      ...
+    }
+  & {
+      (...args: ReadonlyArray<unknown>): O2,
+      $call: (...args: ReadonlyArray<unknown>) => O3,
+      f: <T>(x: T) => T,
+      ...
+    }
 
 'O1' defined at callable-object.js:3:20
 'O2' defined at callable-object.js:4:20

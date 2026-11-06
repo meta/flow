@@ -342,7 +342,7 @@ fn type_impl<L: Dupe>(
             for t in ts.iter() {
                 all.push(t.as_ref());
             }
-            type_intersection(opts, depth, &all, size)
+            type_intersection(opts, depth, false, &all, size)
         }
 
         Ty::Utility(u) => utility(opts, depth, u, size),
@@ -1429,8 +1429,6 @@ fn type_union<L: Dupe>(
         };
     }
 
-    // A union that does not fit lists its members a line each, every one led by
-    // `|`. A member's own lines are indented past its `| `.
     let elements = type_list_elements(
         opts,
         depth,
@@ -1439,12 +1437,41 @@ fn type_union<L: Dupe>(
         "union members",
         &filtered_types,
         size,
-    )
-    .into_iter()
-    .map(LayoutNode::indent);
-    let leading_bar = |flat: LayoutNode| {
+    );
+    layout_of_members(after_separator, "|", prefix, elements)
+}
+
+fn type_intersection<L: Dupe>(
+    opts: &PrinterOptions,
+    depth: usize,
+    after_separator: bool,
+    types: &[&Ty<L>],
+    size: &mut PrintState<L>,
+) -> LayoutNode {
+    let elements = type_list_elements(
+        opts,
+        depth,
+        "&",
+        "intersection member",
+        "intersection members",
+        types,
+        size,
+    );
+    layout_of_members(after_separator, "&", LayoutNode::empty(), elements)
+}
+
+/// A union or intersection that does not fit lists its members a line each,
+/// every one led by `sep`. A member's own lines are indented past its `sep`.
+fn layout_of_members(
+    after_separator: bool,
+    sep: &str,
+    prefix: LayoutNode,
+    elements: Vec<LayoutNode>,
+) -> LayoutNode {
+    let elements = elements.into_iter().map(LayoutNode::indent);
+    let leading_sep = |flat: LayoutNode| {
         layout::if_break(
-            layout::fuse(vec![LayoutNode::atom("|".to_string()), layout::space()]),
+            layout::fuse(vec![LayoutNode::atom(sep.to_string()), layout::space()]),
             flat,
         )
     };
@@ -1455,7 +1482,7 @@ fn type_union<L: Dupe>(
             .enumerate()
             .map(|(i, element)| {
                 if i == 0 {
-                    layout::fuse(vec![leading_bar(layout::space()), prefix.dupe(), element])
+                    layout::fuse(vec![leading_sep(layout::space()), prefix.dupe(), element])
                 } else {
                     element
                 }
@@ -1470,7 +1497,7 @@ fn type_union<L: Dupe>(
             .map(|(i, element)| {
                 if i == 0 {
                     layout::fuse(vec![
-                        leading_bar(LayoutNode::empty()),
+                        leading_sep(LayoutNode::empty()),
                         prefix.dupe(),
                         element,
                     ])
@@ -1481,50 +1508,6 @@ fn type_union<L: Dupe>(
             .collect();
         layout::group(vec![layout::fuse(elements)])
     }
-}
-
-fn type_intersection<L: Dupe>(
-    opts: &PrinterOptions,
-    depth: usize,
-    types: &[&Ty<L>],
-    size: &mut PrintState<L>,
-) -> LayoutNode {
-    let elements = intersperse_pretty_line(
-        opts,
-        depth,
-        "&",
-        "intersection member",
-        "intersection members",
-        types,
-        size,
-    );
-    layout::group(vec![layout::fuse(elements)])
-}
-
-fn intersperse_pretty_line<L: Dupe>(
-    opts: &PrinterOptions,
-    depth: usize,
-    sep: &str,
-    singular: &str,
-    plural: &str,
-    types: &[&Ty<L>],
-    size: &mut PrintState<L>,
-) -> Vec<LayoutNode> {
-    let elts = type_list_elements(opts, depth, sep, singular, plural, types, size);
-    let len = elts.len();
-    elts.into_iter()
-        .enumerate()
-        .map(|(i, elt)| {
-            layout::fuse(vec![
-                elt,
-                if i == len - 1 {
-                    LayoutNode::empty()
-                } else {
-                    layout::pretty_line()
-                },
-            ])
-        })
-        .collect()
 }
 
 fn type_list_elements<L: Dupe>(
@@ -1573,9 +1556,9 @@ fn type_with_parens<L: Dupe>(
     size: &mut PrintState<L>,
 ) -> LayoutNode {
     match t {
-        // A union that does not fit puts its members on lines of their own
-        // between the parentheses.
-        Ty::Union(..) => layout::group(vec![
+        // A union or intersection that does not fit puts its members on lines
+        // of their own between the parentheses.
+        Ty::Union(..) | Ty::Inter(..) => layout::group(vec![
             LayoutNode::atom("(".to_string()),
             LayoutNode::indent(layout::fuse(vec![
                 layout::softline(),
@@ -1584,9 +1567,7 @@ fn type_with_parens<L: Dupe>(
             layout::softline(),
             LayoutNode::atom(")".to_string()),
         ]),
-        Ty::Fun(_) | Ty::Inter(_, _, _) | Ty::Conditional { .. } => {
-            wrap_in_parens(type_(opts, depth, t, size))
-        }
+        Ty::Fun(_) | Ty::Conditional { .. } => wrap_in_parens(type_(opts, depth, t, size)),
         _ => type_(opts, depth, t, size),
     }
 }
@@ -1804,6 +1785,13 @@ fn type_after_separator<L: Dupe>(
                 .chain(ts.iter().map(AsRef::as_ref))
                 .collect();
             type_union(opts, depth, true, &types, size)
+        }
+        Ty::Inter(t1, t2, ts) => {
+            let types: Vec<_> = [t1.as_ref(), t2.as_ref()]
+                .into_iter()
+                .chain(ts.iter().map(AsRef::as_ref))
+                .collect();
+            type_intersection(opts, depth, true, &types, size)
         }
         _ => layout::fuse(vec![
             layout::pretty_space(),

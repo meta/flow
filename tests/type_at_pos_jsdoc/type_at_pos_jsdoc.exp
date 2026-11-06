@@ -832,18 +832,16 @@ Flags: --strip-root
  to your component.
 
 **@see**  https://react.dev/reference/react/useReducer
-(property) useReducer: (hook <S, A>(reducer: (S, A) => S, initialState: S) => [
-  S,
-  Dispatch<A>
-])
-& (hook <S, A>(reducer: (S, A) => S, initialState: S, init: void) => [
-  S,
-  Dispatch<A>
-])
-& (hook <S, A, I>(reducer: (S, A) => S, initialArg: I, init: (I) => S) => [
-  S,
-  Dispatch<A>
-])
+(property) useReducer:
+  & (hook <S, A>(reducer: (S, A) => S, initialState: S) => [S, Dispatch<A>])
+  & (hook <S, A>(reducer: (S, A) => S, initialState: S, init: void) => [
+      S,
+      Dispatch<A>
+    ])
+  & (hook <S, A, I>(reducer: (S, A) => S, initialArg: I, init: (I) => S) => [
+      S,
+      Dispatch<A>
+    ])
 
 'Dispatch' defined at (lib) react.js:1794:9
 
