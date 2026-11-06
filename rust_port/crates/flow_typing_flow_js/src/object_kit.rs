@@ -64,6 +64,7 @@ use vec1::Vec1;
 
 use crate::flow_js::FlowJs;
 use crate::slice_utils;
+use crate::template_literal_type;
 use crate::tvar_resolver;
 
 // We use this function to transform a resolved UnionT into a `(Vec<(Name, Reason)>, Vec<Type>)`,
@@ -123,7 +124,52 @@ fn partition_keys_and_indexer<'cx>(
     FlowJs::rec_flow_t_with_env(cx, env, trace, compatibility_use_op, keys, &union)?;
     let possible_types =
         FlowJs::possible_concrete_types_for_inspection_with_env(cx, env, reason, keys)?;
+    let possible_types = expand_template_literal_keys(cx, env, possible_types)?;
     Ok(split_mapped_type_keys(possible_types))
+}
+
+/// Replaces each template literal type among concrete mapped type keys with the string literals
+/// it produces, when its placeholders concretize to literals, e.g. ``on${K}`` with `K = "a" | "b"`.
+/// Placeholders are concretized once, so a template that only expands through another template,
+/// such as a recursive alias, stays as it is.
+fn expand_template_literal_keys<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    keys: Vec<Type>,
+) -> Result<Vec<Type>, FlowJsException> {
+    let expanded = keys
+        .into_iter()
+        .map(|t| {
+            let TypeInner::TemplateLiteralT {
+                reason,
+                from_annot,
+                quasis,
+                types,
+            } = t.deref()
+            else {
+                return Ok(vec![t]);
+            };
+            let placeholders = types
+                .iter()
+                .map(|p| {
+                    FlowJs::possible_concrete_types_for_inspection_with_env(
+                        cx,
+                        env,
+                        type_util::reason_of_t(p),
+                        p,
+                    )
+                })
+                .collect::<Result<Vec<_>, _>>()?;
+            Ok(template_literal_type::string_literals_of_template_literal(
+                reason,
+                *from_annot,
+                quasis,
+                &placeholders,
+            )
+            .unwrap_or_else(|| vec![t.dupe()]))
+        })
+        .collect::<Result<Vec<_>, FlowJsException>>()?;
+    Ok(expanded.into_iter().flatten().collect())
 }
 
 /// Splits concrete mapped type keys into property names and indexer keys.
@@ -168,6 +214,7 @@ fn dispatch_substituted_name<'cx>(
      * singleton-string destinations vs. types that contribute to the output indexer. */
     let possible =
         FlowJs::possible_concrete_types_for_inspection_with_env(cx, env, reason, name_t)?;
+    let possible = expand_template_literal_keys(cx, env, possible)?;
     let mut dests: Vec<(Name, Reason)> = Vec::new();
     let mut idx_keys: Vec<Type> = Vec::new();
     for t in possible {

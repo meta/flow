@@ -2656,5 +2656,93 @@ References:
                              ^^^ [4]
 
 
+Error ----------------------------------------------------------------------------------------- substituted_keys.js:9:10
 
-Found 170 errors
+Cannot call `h.onmark` with `'a'` bound to `e` because `"a"` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   substituted_keys.js:9:10
+   9| h.onmark('a'); // ERROR: string is incompatible with number
+               ^^^ [1]
+
+References:
+   substituted_keys.js:4:22
+   4| type Events = {mark: number, measure: string};
+                           ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------- substituted_keys.js:11:3
+
+Cannot get `h.onnope` because property `onnope` is missing in
+`{onmark: (e: Events["mark"]) => void, onmeasure: (e: Events["measure"]) => void}` [1]. [prop-missing]
+
+   substituted_keys.js:11:3
+   11| h.onnope; // ERROR: property missing
+         ^^^^^^
+
+References:
+   substituted_keys.js:7:18
+    7| declare const h: Handlers;
+                        ^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- substituted_keys.js:23:2
+
+Cannot cast object literal to `Alias` because property `onb` is missing in object literal [1] but exists in
+`{ona: number, onb: number}` [2]. [incompatible-type]
+
+   substituted_keys.js:23:2
+   23| ({ona: 1}) as Alias; // ERROR: property `onb` missing
+        ^^^^^^^^ [1]
+
+References:
+   substituted_keys.js:23:15
+   23| ({ona: 1}) as Alias; // ERROR: property `onb` missing
+                     ^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------- substituted_keys.js:26:2
+
+Cannot cast object literal to `Filtered` because property `onmark` is extra in object literal [1] but missing in
+`{onmeasure: number}` [2]. Exact objects do not accept extra props. [incompatible-type]
+
+   substituted_keys.js:26:2
+   26| ({onmark: 1}) as Filtered; // ERROR: property `onmeasure` missing
+        ^^^^^^^^^^^ [1]
+
+References:
+   substituted_keys.js:26:18
+   26| ({onmark: 1}) as Filtered; // ERROR: property `onmeasure` missing
+                        ^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------- substituted_keys.js:26:2
+
+Cannot cast object literal to `Filtered` because property `onmeasure` is missing in object literal [1] but exists in
+`{onmeasure: number}` [2]. [incompatible-type]
+
+   substituted_keys.js:26:2
+   26| ({onmark: 1}) as Filtered; // ERROR: property `onmeasure` missing
+        ^^^^^^^^^^^ [1]
+
+References:
+   substituted_keys.js:26:18
+   26| ({onmark: 1}) as Filtered; // ERROR: property `onmeasure` missing
+                        ^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------- substituted_keys.js:30:5
+
+Cannot get `x.ona` because property `ona` is missing in ``{[`on${K}`]: number}`` [1]. [prop-missing]
+
+   substituted_keys.js:30:5
+   30|   x.ona; // ERROR: no property `ona` on a generic mapped type
+           ^^^
+
+References:
+   substituted_keys.js:29:39
+   29| function generic<K extends string>(x: {[P in On<K>]: number}) {
+                                             ^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+
+Found 176 errors

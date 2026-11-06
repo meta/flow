@@ -4185,6 +4185,43 @@ fn map_mapped_type_slice<'cx>(
     .expect("should not raise: annotation inference's filter_optional never fails")
 }
 
+/// The string literals a template literal mapped-type key produces, as
+/// `object_kit::expand_template_literal_keys` does in checking. Other keys are returned as is.
+fn expand_template_literal_key<'cx>(cx: &mut Context<'cx>, t: Type) -> Vec<Type> {
+    let TypeInner::TemplateLiteralT {
+        reason,
+        from_annot,
+        quasis,
+        types,
+    } = t.deref()
+    else {
+        return vec![t];
+    };
+    let placeholders: Vec<Vec<Type>> = types
+        .iter()
+        .map(|p| {
+            let collector = TypeCollector::create();
+            elab_t(
+                cx,
+                None,
+                p.dupe(),
+                Op::new(OpInner::AnnotConcretizeForInspection {
+                    reason: reason.dupe(),
+                    collector: collector.dupe(),
+                }),
+            );
+            collector.collect_to_vec()
+        })
+        .collect();
+    flow_typing_flow_js::template_literal_type::string_literals_of_template_literal(
+        reason,
+        *from_annot,
+        quasis,
+        &placeholders,
+    )
+    .unwrap_or_else(|| vec![t.dupe()])
+}
+
 /// Splits mapped type keys into property names and indexer keys, as
 /// `object_kit::partition_keys_and_indexer` does in checking. Checking
 /// validates the keys by subtyping against `string | number | symbol`; here,
@@ -4206,7 +4243,11 @@ fn partition_mapped_type_keys<'cx>(
             collector: collector.clone(),
         }),
     );
-    let keys = collector.collect_to_vec();
+    let keys: Vec<Type> = collector
+        .collect_to_vec()
+        .into_iter()
+        .flat_map(|t| expand_template_literal_key(cx, t))
+        .collect();
     let all_valid = keys.iter().all(|t| match t.deref() {
         TypeInner::DefT(_, def_t) => matches!(
             def_t.deref(),

@@ -92,6 +92,9 @@ pub fn extract_strings_aux(expand_generics: bool, t: &Type) -> Option<Vec<FlowSm
                 .iter()
                 .map(|t| extract_strings_aux(expand_generics, t))
                 .collect::<Option<Vec<_>>>()?;
+            if cross_product_size(&string_lists) > MAX_CROSS_PRODUCT_SIZE {
+                return None;
+            }
             fn product(
                 prefix: String,
                 quasis: &[FlowSmolStr],
@@ -707,6 +710,44 @@ pub fn try_resolve_concretized<'cx>(
         .iter()
         .map(|t| extract_strings_concretized(possible_concrete_types_for_inspection, cx, env, t))
         .collect::<Result<Option<Vec<_>>, _>>()
+}
+
+/// The string literal types a template literal type produces, given the concrete types of each
+/// of its placeholders (`placeholders`, in order). [None] when a placeholder isn't literal, a union
+/// placeholder is empty, or the product exceeds [MAX_CROSS_PRODUCT_SIZE]. A generic placeholder
+/// isn't expanded, since its strings aren't known.
+pub fn string_literals_of_template_literal(
+    reason: &reason::Reason,
+    from_annot: bool,
+    quasis: &[FlowSmolStr],
+    placeholders: &[Vec<Type>],
+) -> Option<Vec<Type>> {
+    let string_lists = placeholders
+        .iter()
+        .map(|ts| {
+            ts.iter()
+                .map(|t| extract_strings_aux(false, t))
+                .collect::<Option<Vec<_>>>()
+                .map(|v| v.into_iter().flatten().collect())
+        })
+        .collect::<Option<Vec<Vec<FlowSmolStr>>>>();
+    let strings = finalize_to_strings(quasis, string_lists)?;
+    Some(
+        strings
+            .into_iter()
+            .map(|s| {
+                Type::new(TypeInner::DefT(
+                    reason
+                        .dupe()
+                        .replace_desc(VirtualReasonDesc::RStringLit(s.dupe())),
+                    DefT::new(DefTInner::SingletonStrT {
+                        from_annot,
+                        value: s,
+                    }),
+                ))
+            })
+            .collect(),
+    )
 }
 
 /// Concretizing analogue of `try_resolve_to_strings`.
