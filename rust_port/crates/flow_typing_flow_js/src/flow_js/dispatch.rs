@@ -5026,7 +5026,8 @@ fn __flow_impl<'cx>(
                     args_c.dupe(),
                 )
             };
-            let t_ = instantiate_poly_call_or_new(cx, env, trace, lparts, uparts, &check)?;
+            let (t_, targs) =
+                instantiate_poly_call_or_new_with_soln(cx, env, trace, lparts, uparts, &check)?;
             let new_u = UseT::new(ConstructorT(Box::new(ConstructorTData {
                 use_op: ctor_data.use_op.dupe(),
                 reason: ctor_data.reason.dupe(),
@@ -5034,7 +5035,10 @@ fn __flow_impl<'cx>(
                 args: ctor_data.args.dupe(),
                 tout: ctor_data.tout.dupe(),
                 return_hint: ctor_data.return_hint.clone(),
-                specialized_ctor: ctor_data.specialized_ctor.clone(),
+                specialized_ctor: ctor_data.specialized_ctor.as_ref().map(|c| SpecializedCallee {
+                    targs: Some(targs.iter().map(|(t, _)| t.dupe()).collect()),
+                    ..c.clone()
+                }),
             })));
             rec_flow(cx, env, trace, (&t_, &new_u))?;
         }

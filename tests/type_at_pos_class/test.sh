@@ -195,6 +195,14 @@ assert_ok "$FLOW" type-at-pos constructor.js 17 20 --strip-root
 # keyword is left unframed.
 printf "constructor.js:20:3 (anonymous, framed) = "
 assert_ok "$FLOW" type-at-pos constructor.js 20 3 --strip-root
+# Constructing a polymorphic class prints the type arguments it was
+# instantiated with.
+printf "constructor.js:27:17 (polymorphic, framed) = "
+assert_ok "$FLOW" type-at-pos constructor.js 27 17 --strip-root
+printf "constructor.js:27:13 (polymorphic, new keyword, framed) = "
+assert_ok "$FLOW" type-at-pos constructor.js 27 13 --strip-root
+printf "constructor.js:31:22 (polymorphic member callee, explicit, framed) = "
+assert_ok "$FLOW" type-at-pos constructor.js 31 22 --strip-root
 
 # declare_class_members.js
 printf "declare_class_members.js:8:3 (framed) = "

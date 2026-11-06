@@ -238,6 +238,12 @@ constructor.js:17:20 (member callee, framed) = constructor Bar(x: number): void
 constructor.js:17:20,17:22
 constructor.js:20:3 (anonymous, framed) = (x: string) => void
 constructor.js:20:3,20:13
+constructor.js:27:17 (polymorphic, framed) = constructor Box<number>(x: number): void
+constructor.js:27:17,27:19
+constructor.js:27:13 (polymorphic, new keyword, framed) = constructor Box<number>(x: number): void
+constructor.js:27:17,27:19
+constructor.js:31:22 (polymorphic member callee, explicit, framed) = constructor Box<string>(x: string): void
+constructor.js:31:22,31:24
 declare_class_members.js:8:3 (framed) = (property) D.p: number
 declare_class_members.js:8:3,8:3
 declare_class_members.js:9:3 (framed) = (method) D.m(): void

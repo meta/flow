@@ -122,7 +122,7 @@ new-array.js:3:15 =
  Returns a new JavaScript array with its length property set to that number.
  (Note: this implies an array of arrayLength empty slots, not slots with actual undefined
  values. See [sparse arrays](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Indexed_collections#sparse_arrays)).
-constructor Array(arrayLength?: number): void
+constructor Array<any (implicit)>(arrayLength?: number): void
 new-array.js:3:13,3:17
 object-resolution.js:5:2 = const ro: {readonly p: number}
 object-resolution.js:5:1,5:2

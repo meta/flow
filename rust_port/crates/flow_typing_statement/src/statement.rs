@@ -1118,6 +1118,7 @@ fn mk_inference_target_with_annots(
 fn new_call<'a>(
     cx: &mut Context<'a>,
     loc: ALoc,
+    callee_name_loc: Option<ALoc>,
     reason: Reason,
     use_op: UseOp,
     class_: Type,
@@ -1144,6 +1145,11 @@ fn new_call<'a>(
     })?;
     let ctor_t = flow_js_utils::callee_recorder::type_for_tast_opt(reason, &specialized_ctor)
         .unwrap_or_else(|| class_.dupe());
+    if let Some(targs) = flow_js_utils::callee_recorder::targs_for_tast(&specialized_ctor)
+        && let Some(name_loc) = callee_name_loc
+    {
+        cx.set_callee_targs(name_loc, targs);
+    }
     Ok((t, ctor_t))
 }
 
@@ -7187,6 +7193,7 @@ fn expression_<'a>(
                 let (t, ctor_t) = new_call(
                     cx,
                     loc.dupe(),
+                    None,
                     reason,
                     use_op,
                     constructor_t,
@@ -7551,6 +7558,7 @@ fn expression_<'a>(
                     let (t, ctor_t) = new_call(
                         cx,
                         loc.dupe(),
+                        Some(id_loc.dupe()),
                         reason_call,
                         use_op,
                         id_t.dupe(),
@@ -7612,7 +7620,16 @@ fn expression_<'a>(
                 ),
                 local: true,
             }))));
-            let (t, ctor_t) = new_call(cx, loc.dupe(), reason, use_op, class_, targts, argts)?;
+            let (t, ctor_t) = new_call(
+                cx,
+                loc.dupe(),
+                callee_name_loc(&callee_ast),
+                reason,
+                use_op,
+                class_,
+                targts,
+                argts,
+            )?;
             cx.set_ctor_callee(loc.dupe(), ctor_t);
             // Check if using new Record({...}) and emit error suggesting record expression syntax
             if let Some(arguments) = &inner.arguments {
