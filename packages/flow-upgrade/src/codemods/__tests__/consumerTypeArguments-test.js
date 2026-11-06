@@ -68,27 +68,49 @@ const cases = [
   },
 ];
 
+// Preserve nested applications and declaration parameters with either parser AST.
+const typeArgumentField =
+  'typeArguments' in parse('type T = Box<X>;', {flow: 'all'}).body[0].right
+    ? 'typeArguments'
+    : 'typeParameters';
+const otherTypeArgumentField =
+  typeArgumentField === 'typeArguments' ? 'typeParameters' : 'typeArguments';
+
 test.each(cases)(
-  '$name consumes canonical type arguments',
+  '$name preserves type arguments',
   async ({codemod, code, output}) => {
     const result = await transform(code, codemod.transform);
-    expect(result.trim()).toBe(output);
+    expect(result.trim()).toBe(output); // OK
     const ast = parse(result, {flow: 'all'});
     expect(ast.body[0]).toMatchObject({
       type: 'TypeAlias',
       typeParameters: {type: 'TypeParameterDeclaration', params: [{name: 'X'}]},
-    });
+    }); // OK
     let genericCount = 0;
     SimpleTraverser.traverse(ast, {
       enter(node) {
         if (node.type === 'GenericTypeAnnotation') {
           genericCount++;
-          expect(node).toHaveProperty('typeArguments');
-          expect(node).not.toHaveProperty('typeParameters');
+          expect(node).toHaveProperty(typeArgumentField); // OK
+          expect(node).not.toHaveProperty(otherTypeArgumentField); // OK
         }
       },
       leave() {},
     });
-    expect(genericCount).toBeGreaterThan(0);
+    expect(genericCount).toBeGreaterThan(0); // OK
+  },
+);
+
+// Argument-sensitive renames must still ignore bare utility types.
+test.each([
+  [convertShapeToPartial, 'type T = $Shape;'],
+  [renamePartial, 'type T = $Partial;'],
+  [convertLegacyUtilityTypes, 'type T = $Keys;'],
+  [replaceTemporaryTypes, 'type T = $TEMPORARY$array;'],
+  [replaceTemporaryTypes, 'type T = $TEMPORARY$object;'],
+])(
+  'leaves an unparameterized utility unchanged: %p %s',
+  async (codemod, code) => {
+    expect(await transform(code, codemod.transform)).toBe(code); // OK
   },
 );

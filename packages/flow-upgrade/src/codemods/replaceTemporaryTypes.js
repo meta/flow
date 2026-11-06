@@ -12,6 +12,7 @@
 import type {CodemodModule} from '../Types';
 import {t} from 'flow-transform';
 import {codemod} from '../Types';
+import {getTypeArguments} from '../codemodUtils/getTypeArguments';
 
 export default codemod({
   title: 'Replace $TEMPORARY$ types',
@@ -29,7 +30,7 @@ export default codemod({
         if (
           id.type === 'Identifier' &&
           id.name === '$TEMPORARY$object' &&
-          node.typeArguments != null
+          getTypeArguments(node) != null
         ) {
           context.modifyNodeInPlace(node, {
             id: t.Identifier({
@@ -40,7 +41,7 @@ export default codemod({
         if (
           id.type === 'Identifier' &&
           id.name === '$TEMPORARY$array' &&
-          node.typeArguments != null
+          getTypeArguments(node) != null
         ) {
           context.modifyNodeInPlace(node, {
             id: t.Identifier({

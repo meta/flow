@@ -11,15 +11,17 @@
 import type {CodemodModule} from '../Types';
 
 import {codemod} from '../Types';
+import {getTypeArguments} from '../codemodUtils/getTypeArguments';
 
 export default codemod({
   title: 'Rename `$Partial` to `Partial`',
   describe: 'Renames the `$Partial` type utility to `Partial`.',
   transform: context => {
     return {
-      'GenericTypeAnnotation[id.name="$Partial"][typeArguments.params.length > 0]'(
-        node,
-      ) {
+      'GenericTypeAnnotation[id.name="$Partial"]'(node) {
+        if (!getTypeArguments(node)?.params.length) {
+          return;
+        }
         context.modifyNodeInPlace(node.id, {
           name: 'Partial',
         });

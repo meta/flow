@@ -12,6 +12,7 @@ import type {CodemodModule} from '../Types';
 
 import {codemod} from '../Types';
 import {t} from 'flow-transform';
+import {getTypeArguments} from '../codemodUtils/getTypeArguments';
 
 /**
  * This codemod transforms legacy Flow utility types to their modern TypeScript-compatible equivalents:
@@ -59,13 +60,10 @@ Transforms legacy Flow utility types to TypeScript-compatible types:
 
         // Handle $Keys<T> -> keyof T
         if (typeName === '$Keys') {
-          if (
-            node.typeArguments &&
-            node.typeArguments.params &&
-            node.typeArguments.params.length === 1
-          ) {
+          const typeArguments = getTypeArguments(node);
+          if (typeArguments?.params.length === 1) {
             const newNode = t.KeyofTypeAnnotation({
-              argument: node.typeArguments.params[0],
+              argument: typeArguments.params[0],
             });
             context.replaceNode(node, newNode, {
               keepComments: true,

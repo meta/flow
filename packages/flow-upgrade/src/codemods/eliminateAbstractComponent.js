@@ -10,15 +10,23 @@
 
 import type {CodemodModule} from '../Types';
 import type {GenericTypeAnnotation, TypeAnnotationType} from 'flow-estree';
-import type {MaybeDetachedNode} from 'flow-transform';
+import type {MaybeDetachedNode, TransformContext} from 'flow-transform';
 
 import {codemod} from '../Types';
 import {t} from 'flow-transform';
+import {getTypeArguments} from '../codemodUtils/getTypeArguments';
 
 function eliminateAbstractComponent(
+  context: TransformContext,
   node: GenericTypeAnnotation,
 ): MaybeDetachedNode<TypeAnnotationType> | null {
-  const {id: maybeQualifiedIdentifier, typeArguments} = node;
+  const {id: maybeQualifiedIdentifier} = node;
+  const typeArguments = getTypeArguments(node);
+  const innerType = typeArguments?.params[0];
+  const innerTypeArguments =
+    innerType?.type === 'GenericTypeAnnotation'
+      ? getTypeArguments(innerType)
+      : null;
 
   // `React.AbstractComponent<Props>` -> `React.ComponentType<Props>`
   // `React.AbstractComponent<Props, mixed>` -> `React.ComponentType<Props>`
@@ -35,13 +43,11 @@ function eliminateAbstractComponent(
     }
 
     if (instance == null || instance.type === 'MixedTypeAnnotation') {
-      return t.GenericTypeAnnotation({
-        id: t.QualifiedTypeIdentifier({
-          qualification: t.Identifier({name: 'React'}),
-          id: t.Identifier({name: 'ComponentType'}),
-        }),
-        typeArguments: t.TypeParameterInstantiation({params: [config]}),
+      context.modifyNodeInPlace(maybeQualifiedIdentifier.id, {
+        name: 'ComponentType',
       });
+      context.modifyNodeInPlace(typeArguments, {params: [config]});
+      return null;
     }
 
     return null;
@@ -59,10 +65,10 @@ function eliminateAbstractComponent(
     typeArguments.params[0].id.type === 'QualifiedTypeIdentifier' &&
     typeArguments.params[0].id.qualification.name === 'React' &&
     typeArguments.params[0].id.id.name === 'AbstractComponent' &&
-    typeArguments.params[0].typeArguments != null &&
-    typeArguments.params[0].typeArguments.params.length >= 1
+    innerTypeArguments != null &&
+    innerTypeArguments.params.length >= 1
   ) {
-    return typeArguments.params[0].typeArguments.params[0];
+    return innerTypeArguments.params[0];
   }
 
   // React.ElementRef<React.AbstractComponent<Props, Instance, ...> -> Instance
@@ -76,10 +82,10 @@ function eliminateAbstractComponent(
     typeArguments.params[0].id.type === 'QualifiedTypeIdentifier' &&
     typeArguments.params[0].id.qualification.name === 'React' &&
     typeArguments.params[0].id.id.name === 'AbstractComponent' &&
-    typeArguments.params[0].typeArguments != null &&
-    typeArguments.params[0].typeArguments.params.length >= 2
+    innerTypeArguments != null &&
+    innerTypeArguments.params.length >= 2
   ) {
-    return typeArguments.params[0].typeArguments.params[1];
+    return innerTypeArguments.params[1];
   }
 
   // React.ElementRef<React.AbstractComponent<Props> -> mixed
@@ -93,8 +99,8 @@ function eliminateAbstractComponent(
     typeArguments.params[0].id.type === 'QualifiedTypeIdentifier' &&
     typeArguments.params[0].id.qualification.name === 'React' &&
     typeArguments.params[0].id.id.name === 'AbstractComponent' &&
-    typeArguments.params[0].typeArguments != null &&
-    typeArguments.params[0].typeArguments.params.length === 1
+    innerTypeArguments != null &&
+    innerTypeArguments.params.length === 1
   ) {
     return t.MixedTypeAnnotation({});
   }
@@ -112,7 +118,7 @@ export default codemod({
   transform: context => {
     return {
       GenericTypeAnnotation(node) {
-        const replacement = eliminateAbstractComponent(node);
+        const replacement = eliminateAbstractComponent(context, node);
         if (replacement) {
           context.replaceNode(node, replacement, {
             keepComments: true,

@@ -11,6 +11,7 @@
 import type {CodemodModule} from '../Types';
 
 import {codemod} from '../Types';
+import {getTypeArguments} from '../codemodUtils/getTypeArguments';
 
 export default codemod({
   title: 'Convert `$Shape` to `Partial`',
@@ -18,9 +19,10 @@ export default codemod({
     'Converts usage of the `$Shape` utility type to `Partial`. It is possible that this will create type errors that you will have to resolve.',
   transform: context => {
     return {
-      'GenericTypeAnnotation[id.name="$Shape"][typeArguments.params.length > 0]'(
-        node,
-      ) {
+      'GenericTypeAnnotation[id.name="$Shape"]'(node) {
+        if (!getTypeArguments(node)?.params.length) {
+          return;
+        }
         context.modifyNodeInPlace(node.id, {
           name: 'Partial',
         });

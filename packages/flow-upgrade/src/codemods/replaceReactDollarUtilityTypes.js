@@ -47,16 +47,14 @@ export default codemod({
         if (!UTILITY_TYPES.has(utilTypeName)) {
           return;
         }
-        const newNode = t.GenericTypeAnnotation({
+        context.modifyNodeInPlace(node, {
           id: t.QualifiedTypeIdentifier({
             id: t.Identifier({
               name: utilTypeName.substring('React$'.length),
             }),
             qualification: t.Identifier({name: 'React'}),
           }),
-          typeArguments: node.typeArguments,
         });
-        context.replaceNode(node, newNode);
       },
     };
   },
