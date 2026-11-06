@@ -37,8 +37,8 @@ use flow_utils_concurrency::lockfree_overlay_map::commit_map_remove_hashed;
 use flow_utils_concurrency::lockfree_overlay_map::commit_map_with_capacity;
 use parking_lot::ArcRwLockReadGuard;
 use parking_lot::Mutex;
-use parking_lot::RawRwLock;
-use parking_lot::RwLock;
+use parking_lot::RawRwLockRecursive;
+use parking_lot::RecursiveRwLock;
 use rayon::join;
 use rayon::prelude::*;
 
@@ -58,7 +58,7 @@ use crate::transaction::GcState;
 /// everything that holds an `Arc<CommittedHeap>` keeps pointing at this same handle. Transactions
 /// take the state by `Arc`, so one that is already open goes on reading the state it opened on.
 pub struct CommittedHeap {
-    pub(crate) state: ArcSwap<RwLock<CommittedHeapState>>,
+    pub(crate) state: ArcSwap<RecursiveRwLock<CommittedHeapState>>,
 }
 
 pub(crate) struct CommittedHeapState {
@@ -118,7 +118,7 @@ impl CommittedHeap {
 
     pub(crate) fn with_data(data: CommittedHeapData) -> Self {
         Self {
-            state: ArcSwap::from_pointee(RwLock::new(CommittedHeapState::new(data))),
+            state: ArcSwap::from_pointee(RecursiveRwLock::new(CommittedHeapState::new(data))),
         }
     }
 
@@ -185,7 +185,7 @@ impl CommittedHeap {
     }
 
     pub(crate) fn read_arc_recursive(&self) -> CommittedHeapReadGuard {
-        self.state.load().read_arc_recursive()
+        self.state.load().read_arc()
     }
 
     pub(crate) fn apply_commit_deltas_to_both(
@@ -348,7 +348,7 @@ struct HeapOverlayCommitDeltas {
     haste_provider_candidates: DrainedSetOverlay<HasteModuleInfo, FileKey>,
 }
 
-pub(crate) type CommittedHeapReadGuard = ArcRwLockReadGuard<RawRwLock, CommittedHeapState>;
+pub(crate) type CommittedHeapReadGuard = ArcRwLockReadGuard<RawRwLockRecursive, CommittedHeapState>;
 
 fn apply_commit_deltas_to_data(committed: &mut CommittedHeapData, deltas: HeapOverlayCommitDeltas) {
     let HeapOverlayCommitDeltas {

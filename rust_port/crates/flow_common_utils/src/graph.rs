@@ -309,7 +309,7 @@ struct GraphCellBase<T, K: Eq + Ord + Hash + Dupe> {
 impl<T, K: Eq + Ord + Hash + Dupe> GraphCellBase<T, K> {
     fn new(cell: Arc<EnvCell<T>>, graph: fn(&T) -> &Graph<K>) -> Self {
         Self {
-            snapshot: cell.read_arc_recursive(),
+            snapshot: cell.read_arc(),
             graph,
         }
     }

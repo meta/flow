@@ -20,8 +20,8 @@ use std::sync::Arc;
 
 use dupe::Dupe;
 use parking_lot::ArcRwLockReadGuard;
-use parking_lot::RawRwLock;
-use parking_lot::RwLock;
+use parking_lot::RawRwLockRecursive;
+use parking_lot::RecursiveRwLock;
 
 /// A `BTreeMap`-like map with a shared base and an owned delta of changes.
 #[derive(Clone)]
@@ -69,8 +69,8 @@ impl<K: Ord + Clone, V: Clone> OverlayMapBase<K, V> for Arc<BTreeMap<K, V>> {
     }
 }
 
-pub type EnvCell<T> = RwLock<T>;
-pub type EnvCellReadGuard<T> = ArcRwLockReadGuard<RawRwLock, T>;
+pub type EnvCell<T> = RecursiveRwLock<T>;
+pub type EnvCellReadGuard<T> = ArcRwLockReadGuard<RawRwLockRecursive, T>;
 
 pub struct EnvCellMapBase<T, K: Ord + Clone, V: Clone> {
     snapshot: EnvCellReadGuard<T>,
@@ -81,7 +81,7 @@ impl<T, K: Ord + Clone, V: Clone> Clone for EnvCellMapBase<T, K, V> {
     fn clone(&self) -> Self {
         let cell = ArcRwLockReadGuard::rwlock(&self.snapshot).dupe();
         Self {
-            snapshot: cell.read_arc_recursive(),
+            snapshot: cell.read_arc(),
             map: self.map,
         }
     }
@@ -90,7 +90,7 @@ impl<T, K: Ord + Clone, V: Clone> Clone for EnvCellMapBase<T, K, V> {
 impl<T, K: Ord + Clone, V: Clone> EnvCellMapBase<T, K, V> {
     pub fn new(cell: Arc<EnvCell<T>>, map: fn(&T) -> &BTreeMap<K, V>) -> Self {
         Self {
-            snapshot: cell.read_arc_recursive(),
+            snapshot: cell.read_arc(),
             map,
         }
     }

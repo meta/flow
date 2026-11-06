@@ -26,7 +26,7 @@ use flow_common_modulename::Modulename;
 use flow_parser::file_key::FileKey;
 use flow_parser_utils::package_json::PackageJson;
 use flow_utils_concurrency::lockfree_overlay_map::commit_map_with_capacity;
-use parking_lot::RwLock;
+use parking_lot::RecursiveRwLock;
 use rayon::prelude::*;
 
 use crate::haste_module::HasteModule;
@@ -67,7 +67,7 @@ pub struct Transaction {
     /// request that built them and keep holding the `Arc<Transaction>`, so the guard — not
     /// the transaction — is what has to be given back. `ActiveTransaction` makes that handoff
     /// structural by releasing the guard when the unit-of-work scope ends.
-    committed: RwLock<Option<CommittedHeapReadGuard>>,
+    committed: RecursiveRwLock<Option<CommittedHeapReadGuard>>,
 }
 
 /// Owns the active lifetime of a transaction.
@@ -96,7 +96,7 @@ impl ActiveTransaction {
             heap,
             overlay: HeapOverlay::new(),
             symlink_paths: flow_common::files::SymlinkMap::default(),
-            committed: RwLock::new(Some(guard)),
+            committed: RecursiveRwLock::new(Some(guard)),
         })))
     }
 
@@ -149,7 +149,7 @@ impl HeapAccess<'_> {
 }
 
 enum CommittedStateAccess<'a> {
-    Active(parking_lot::RwLockReadGuard<'a, Option<CommittedHeapReadGuard>>),
+    Active(parking_lot::RecursiveRwLockReadGuard<'a, Option<CommittedHeapReadGuard>>),
     Detached(DetachedCommittedState),
 }
 
@@ -198,7 +198,7 @@ pub struct HashStats {
 impl CommittedHeap {
     pub fn hash_stats(&self) -> HashStats {
         let heap = self.state.load_full();
-        let state = heap.read_recursive();
+        let state = heap.read();
         let file_count = state.data.files.len() as i32;
         let haste_count = state.data.haste_modules.len() as i32;
         Self::hash_stats_from_counts(file_count, haste_count)
@@ -215,27 +215,23 @@ impl CommittedHeap {
 
     pub fn heap_size(&self) -> i32 {
         let heap = self.state.load_full();
-        let state = heap.read_recursive();
+        let state = heap.read();
         (state.data.files.len() + state.data.haste_modules.len()) as i32
     }
 
     pub fn clear_reader_cache(&self) {
-        self.state.load().read_recursive().reader_cache.clear();
+        self.state.load().read().reader_cache.clear();
     }
 
     pub fn remove_reader_cache_batch(&self, keys: &[FileKey]) {
-        self.state
-            .load()
-            .read_recursive()
-            .reader_cache
-            .remove_batch(keys);
+        self.state.load().read().reader_cache.remove_batch(keys);
     }
 
     // Saving frees nothing, so unlike a compaction it leaves every heap address a cache may be
     // holding valid. Callers that want their caches emptied around a save do it themselves.
     pub fn save_heap(&self, writer: &mut impl Write) -> io::Result<()> {
         let heap = self.state.load_full();
-        let state = heap.read_recursive();
+        let state = heap.read();
         Transaction::write_heap(writer, &state.data)
     }
 
@@ -278,7 +274,7 @@ impl CommittedHeap {
         let (sender, receiver) = mpsc::sync_channel(1);
         rayon::spawn(move || {
             let heap = heap.state.load_full();
-            let state = heap.read_recursive();
+            let state = heap.read();
             let files = state.data.files.keys().map(Dupe::dupe).collect::<Vec<_>>();
             let haste_modules = state
                 .data
@@ -470,17 +466,12 @@ impl CommittedHeap {
         before_compact: BeforeCompact<'_>,
     ) -> bool {
         let heap = self.state.load_full();
-        if heap
-            .read_recursive()
-            .active_transactions
-            .load(Ordering::Acquire)
-            != 0
-        {
+        if heap.read().active_transactions.load(Ordering::Acquire) != 0 {
             return true;
         }
         let mut work = work;
         while work > 0 {
-            let state = heap.read_recursive();
+            let state = heap.read();
             let mut gc_state = state.gc_state.lock();
             match gc_state.phase {
                 GcPhase::Idle => {
@@ -498,7 +489,7 @@ impl CommittedHeap {
             }
         }
         let (is_idle, compact_files, compact_haste_modules) = {
-            let state = heap.read_recursive();
+            let state = heap.read();
             let mut gc_state = state.gc_state.lock();
             let is_idle = gc_state.phase == GcPhase::Idle;
             let should_compact = is_idle && Self::should_compact(&state, &gc_state);
@@ -527,7 +518,7 @@ impl CommittedHeap {
     fn finish_cycle(self: &Arc<Self>) {
         let heap = self.state.load_full();
         loop {
-            let state = heap.read_recursive();
+            let state = heap.read();
             let mut gc_state = state.gc_state.lock();
             if gc_state.phase != GcPhase::Mark {
                 break;
@@ -535,7 +526,7 @@ impl CommittedHeap {
             self.mark_slice(&mut gc_state, usize::MAX);
         }
         loop {
-            let state = heap.read_recursive();
+            let state = heap.read();
             let mut gc_state = state.gc_state.lock();
             if gc_state.phase != GcPhase::Sweep {
                 break;
@@ -547,21 +538,19 @@ impl CommittedHeap {
     pub fn compact(self: &Arc<Self>, before_compact: BeforeCompact<'_>) {
         let heap = self.state.load_full();
         assert_eq!(
-            heap.read_recursive()
-                .active_transactions
-                .load(Ordering::Acquire),
+            heap.read().active_transactions.load(Ordering::Acquire),
             0,
             "cannot compact while a transaction is active"
         );
         self.finish_cycle();
         {
-            let state = heap.read_recursive();
+            let state = heap.read();
             let mut gc_state = state.gc_state.lock();
             self.start_cycle(&mut gc_state);
         }
         self.finish_cycle();
         let (files, haste_modules) = {
-            let state = heap.read_recursive();
+            let state = heap.read();
             let mut gc_state = state.gc_state.lock();
             (
                 std::mem::take(&mut gc_state.free_files),
@@ -779,7 +768,7 @@ impl Transaction {
     }
 
     fn committed_state(&self) -> CommittedStateAccess<'_> {
-        let active = self.committed.read_recursive();
+        let active = self.committed.read();
         if active.is_some() {
             return CommittedStateAccess::Active(active);
         }
@@ -829,7 +818,7 @@ impl Transaction {
 
     pub(crate) fn heap_writer(&self) -> HeapWrite<'_> {
         HeapWrite {
-            slot: self.committed.read_recursive(),
+            slot: self.committed.read(),
             overlay: &self.overlay,
         }
     }
@@ -1782,7 +1771,7 @@ impl Transaction {
 
 /// Borrows the committed heap for the duration of one write into the overlay.
 pub struct HeapWrite<'a> {
-    slot: parking_lot::RwLockReadGuard<'a, Option<CommittedHeapReadGuard>>,
+    slot: parking_lot::RecursiveRwLockReadGuard<'a, Option<CommittedHeapReadGuard>>,
     overlay: &'a HeapOverlay,
 }
 
@@ -1805,7 +1794,7 @@ impl Drop for Transaction {
         // committed — has published into whatever the heap holds now, so that is the cache to
         // empty for it.
         if !self.overlay.is_empty() {
-            match self.committed.read_recursive().as_ref() {
+            match self.committed.read().as_ref() {
                 Some(state) => state.reader_cache.clear(),
                 None => self.heap.read_arc_recursive().reader_cache.clear(),
             }
