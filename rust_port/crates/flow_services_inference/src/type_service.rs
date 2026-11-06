@@ -1574,7 +1574,7 @@ pub(crate) mod recheck {
         } = clear_errors(&new_or_changed_or_deleted, errors);
 
         let mut collated_errors = collated_errors;
-        {
+        with_timer(options, "CollateLocalErrors", || {
             collated_errors.clear_all(&new_or_changed_or_deleted);
             let unsuppressable_error_codes: BTreeSet<FlowSmolStr> =
                 options.unsuppressable_error_codes.iter().duped().collect();
@@ -1590,7 +1590,7 @@ pub(crate) mod recheck {
                 &new_local_errors,
                 &mut collated_errors,
             );
-        }
+        });
 
         let mut coverage = env.take_coverage();
         for file in &new_or_changed_or_deleted {
@@ -1727,14 +1727,16 @@ pub(crate) mod recheck {
         });
         check_recheck_canceled()?;
 
-        let to_remove = parsed.dupe().union(deleted);
-        let unparsed = FlowOrdSet::from(
-            env.unparsed()
-                .dupe()
-                .into_inner()
-                .relative_complement(to_remove.into_inner()),
-        )
-        .union(unparsed_set);
+        let unparsed = with_timer(options, "UpdateUnparsed", || {
+            let to_remove = parsed.dupe().union(deleted);
+            FlowOrdSet::from(
+                env.unparsed()
+                    .dupe()
+                    .into_inner()
+                    .relative_complement(to_remove.into_inner()),
+            )
+            .union(unparsed_set)
+        });
 
         env.set_files(parsed);
         env.set_unparsed(unparsed);
@@ -1975,7 +1977,7 @@ pub(crate) mod recheck {
             // Fix: find files that both have ETrivialRecursiveDefinition errors
             // AND are mutually dependent (same cycle). Keep only the error from
             // the lexicographically smallest file in each cycle group.
-            {
+            with_timer(options, "DeduplicateCycleErrors", || {
                 use flow_typing_errors::error_message::ErrorMessage;
                 let dep_graph = dependency_info.implementation_dependency_graph();
                 let files_with_cycle_errors: BTreeSet<FileKey> = errors
@@ -2016,7 +2018,7 @@ pub(crate) mod recheck {
                         }
                     }
                 }
-            }
+            });
             check_recheck_canceled()?;
 
             let options_for_record = options.dupe();

@@ -151,7 +151,9 @@ fn recheck(
             unreachable!("TooSlow is handled inside type_service::recheck");
         }
     };
-    orchestrator.commit_recheck(|| prepared.commit(), recheck_epoch);
+    recheck_profiling.with_timer(should_print_summary, "CommitRecheck", || {
+        orchestrator.commit_recheck(|| prepared.commit(), recheck_epoch);
+    });
     let recheck_profiling = recheck_profiling.finish();
     if should_print_summary {
         profiling_js::print_summary(&recheck_profiling);
