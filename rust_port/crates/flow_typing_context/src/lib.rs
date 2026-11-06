@@ -206,6 +206,7 @@ pub struct FrozenMetadata {
     pub no_implicit_override: bool,
     pub no_unchecked_indexed_access: bool,
     pub normalize_intersections: bool,
+    pub package_boundary: bool,
     pub projects_options: Arc<ProjectsOptions>,
     pub react_custom_jsx_typing: bool,
     pub react_managed_attributes: bool,
@@ -270,6 +271,7 @@ impl Default for FrozenMetadata {
             no_implicit_override: false,
             no_unchecked_indexed_access: false,
             normalize_intersections: false,
+            package_boundary: false,
             projects_options: Arc::new(ProjectsOptions::default()),
             react_custom_jsx_typing: false,
             react_managed_attributes: false,
@@ -933,6 +935,7 @@ pub fn mk_context_metadata(options: &Options, global_libdefs: Arc<BTreeSet<FileK
             no_implicit_override: options.no_implicit_override,
             no_unchecked_indexed_access: options.no_unchecked_indexed_access,
             normalize_intersections: options.normalize_intersections,
+            package_boundary: options.package_boundary,
             projects_options: options.projects_options.dupe(),
             react_custom_jsx_typing: options.react_custom_jsx_typing,
             react_managed_attributes: options.react_managed_attributes,
@@ -1700,6 +1703,10 @@ impl<'a> Context<'a> {
 
     pub fn normalize_intersections(&self) -> bool {
         self.inner().metadata.frozen.normalize_intersections
+    }
+
+    pub fn package_boundary(&self) -> bool {
+        self.inner().metadata.frozen.package_boundary
     }
 
     pub fn implicit_instantiation_walk(&self) -> bool {

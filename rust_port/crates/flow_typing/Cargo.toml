@@ -45,3 +45,6 @@ flow_flowlib = { path = "../flow_flowlib" }
 flow_parser_utils_output = { path = "../flow_parser_utils_output" }
 flow_server_files = { path = "../flow_server_files" }
 flow_utils_find = { path = "../flow_utils_find" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(fbcode_build)"]}

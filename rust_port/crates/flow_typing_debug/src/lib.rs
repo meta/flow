@@ -3136,6 +3136,13 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_aloc(None, import_loc)
             )
         }
+        ErrorMessage::EPackageBoundaryImport(box (loc, boundary)) => {
+            format!(
+                "EPackageBoundaryImport ({}, {})",
+                string_of_aloc(None, loc),
+                boundary
+            )
+        }
         ErrorMessage::EUnsupportedVarianceAnnotation(box (loc, s)) => {
             format!(
                 "EUnsupportedVarianceAnnotation(Box::new(({}, {})))",

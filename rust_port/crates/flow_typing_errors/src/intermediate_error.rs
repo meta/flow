@@ -11091,6 +11091,11 @@ where
                 friendly::Message(features)
             }
             MessageParseError(parse_error) => friendly::message_of_string(&parse_error.to_string()),
+            MessagePackageBoundaryImport(boundary) => friendly::Message(vec![
+                text("The import crosses the "),
+                text(boundary),
+                text(" boundary."),
+            ]),
             MessageDoesNotRender { lower, upper } => {
                 friendly::Message(vec![ref_(lower), text(" does not render "), ref_(upper)])
             }

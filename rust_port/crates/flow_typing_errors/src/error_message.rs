@@ -3785,6 +3785,9 @@ pub enum ErrorMessage<L: Dupe + PartialOrd + Ord + PartialEq + Eq> {
 
     EMixedImportAndRequire(Box<(L, L)>),
 
+    /// An import of a module across the named package boundary.
+    EPackageBoundaryImport(Box<(L, FlowSmolStr)>),
+
     EUnsupportedVarianceAnnotation(Box<(L, FlowSmolStr)>),
 
     EExportRenamedDefault(Box<EExportRenamedDefaultData<L>>),
@@ -5991,6 +5994,9 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             EThisInExportedFunction(loc) => EThisInExportedFunction(f(loc)),
             EMixedImportAndRequire(box (require_loc, import_loc)) => {
                 EMixedImportAndRequire(Box::new((f(require_loc), f(import_loc))))
+            }
+            EPackageBoundaryImport(box (loc, boundary)) => {
+                EPackageBoundaryImport(Box::new((f(loc), boundary)))
             }
             EUnsupportedVarianceAnnotation(box (loc, k)) => {
                 EUnsupportedVarianceAnnotation(Box::new((f(loc), k)))
@@ -9196,6 +9202,7 @@ impl<L: Dupe + PartialOrd + Ord + PartialEq + Eq> ErrorMessage<L> {
             | Self::ENonConstVarExport(box (loc, _))
             | Self::EThisInExportedFunction(loc)
             | Self::EMixedImportAndRequire(box (loc, _))
+            | Self::EPackageBoundaryImport(box (loc, _))
             | Self::EUnsupportedVarianceAnnotation(box (loc, _))
             | Self::EExportRenamedDefault(box EExportRenamedDefaultData { loc, .. })
             | Self::EIndeterminateModuleType(loc)
@@ -12064,6 +12071,10 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                 Normal(Message::MessageCannotUseMixedImportAndRequire(import_loc))
             }
 
+            ErrorMessage::EPackageBoundaryImport(box (_, boundary)) => {
+                Normal(Message::MessagePackageBoundaryImport(boundary))
+            }
+
             ErrorMessage::EUnsupportedVarianceAnnotation(box (_, kind)) => {
                 Normal(Message::MessageUnsupportedVarianceAnnotation(kind))
             }
@@ -13321,6 +13332,7 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             ErrorMessage::EMissingDictionaryKeyLabel(_) => Some(MissingDictionaryKeyLabel),
             ErrorMessage::EMissingTypeArgs(box EMissingTypeArgsData { .. }) => Some(MissingTypeArg),
             ErrorMessage::EMixedImportAndRequire { .. } => Some(MixedImportAndRequire),
+            ErrorMessage::EPackageBoundaryImport { .. } => Some(PackageBoundary),
             ErrorMessage::EUnsupportedVarianceAnnotation { .. } => {
                 Some(UnsupportedVarianceAnnotation)
             }

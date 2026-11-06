@@ -1252,6 +1252,10 @@ fn detect_import_export_errors<'cx>(
     for msg in module_exports_checker::check_program(file_sig, program) {
         flow_js_utils::add_output_non_speculating(cx, msg);
     }
+    #[cfg(fbcode_build)]
+    if cx.package_boundary() && !cx.is_global_lib_context() {
+        detect_package_boundary_imports(cx, file_sig);
+    }
     // The UMD global is built from the builtins copy of this module, which cannot resolve
     // imports, so it is not declared.
     if !cx.is_global_lib_context()
@@ -1271,6 +1275,37 @@ fn detect_import_export_errors<'cx>(
                     ))),
                 );
             }
+        }
+    }
+}
+
+#[cfg(fbcode_build)]
+fn detect_package_boundary_imports<'cx>(cx: &mut Context<'cx>, file_sig: &FileSig) {
+    for (specifier, locs) in file_sig.require_loc_map() {
+        let provider = match cx.find_require(&specifier) {
+            ResolvedRequire::TypedModule(f) => match f(cx) {
+                Ok(m) => m.module_reason.def_loc().source().map(|file| file.dupe()),
+                Err(_) => None,
+            },
+            ResolvedRequire::UncheckedModule(loc) => loc.source().map(|file| file.dupe()),
+            ResolvedRequire::MissingModule | ResolvedRequire::GlobalLibdefModule(_) => None,
+        };
+        let Some(provider) = provider else {
+            continue;
+        };
+        let Some(boundary) =
+            flow_facebook_package_boundary::crossed_boundary(cx.file().as_str(), provider.as_str())
+        else {
+            continue;
+        };
+        for loc in locs {
+            flow_js_utils::add_output_non_speculating(
+                cx,
+                ErrorMessage::EPackageBoundaryImport(Box::new((
+                    ALoc::of_loc(loc),
+                    FlowSmolStr::new(boundary),
+                ))),
+            );
         }
     }
 }

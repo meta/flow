@@ -2674,6 +2674,8 @@ pub enum Message<L: Dupe> {
 
     MessageOnlyDefaultExport(Box<MessageOnlyDefaultExportData>),
 
+    MessagePackageBoundaryImport(FlowSmolStr),
+
     MessageParseError(ParseError),
     MessagePlatformSpecificImplementationModuleLookupFailed(FlowSmolStr),
 
