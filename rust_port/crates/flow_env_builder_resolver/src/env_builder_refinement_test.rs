@@ -5062,7 +5062,7 @@ eval;
     ModuleScoped arguments
   };
   (3, 0) to (3, 4) => {
-    ModuleScoped eval
+    Global eval
   }]"#
     );
 }

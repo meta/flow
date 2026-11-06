@@ -1536,7 +1536,7 @@ fn error_for_assignment_kind(
     }
 }
 
-const MODULE_SCOPED_VARS: &[&str] = &["eval", "arguments"];
+const MODULE_SCOPED_VARS: &[&str] = &["arguments"];
 
 fn initialize_globals(
     is_lib: bool,

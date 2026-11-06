@@ -797,6 +797,37 @@ Cannot resolve name `Foo`. [cannot-resolve-name]
               ^^^
 
 
+Error --------------------------------------------------------------------------------------------- module_scoped.js:3:6
+
+Cannot call `eval` with `1` bound to `x` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   module_scoped.js:3:6
+    3| eval(1); // error: number ~> string
+            ^ [1]
+
+References:
+   <BUILTINS>/lib.es5.js:30:26
+   30| declare function eval(x: string): any;
+                                ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- module_scoped.js:4:1
+
+Cannot cast `eval` to `number` because `(x: string) => any` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   module_scoped.js:4:1
+    4| eval as number; // error: function ~> number
+       ^^^^
+
+References:
+   <BUILTINS>/lib.es5.js:30:22
+   30| declare function eval(x: string): any;
+                            ^^^^^^^^^^^^^^^^ [1]
+   module_scoped.js:4:9
+    4| eval as number; // error: function ~> number
+               ^^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------------------------ rebinding.js:22:8
 
 Cannot declare `A` [1] because the name is already bound. [name-already-bound]
@@ -2227,4 +2258,4 @@ Cannot resolve name `unboundFunction2`. [cannot-resolve-name]
 
 
 
-Found 168 errors
+Found 170 errors

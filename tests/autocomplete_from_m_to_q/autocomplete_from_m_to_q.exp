@@ -401,6 +401,7 @@ Flags: --pretty
     },
     {"name":"Error","type":"ErrorConstructor"},
     {"name":"escape","type":"(string: string) => string"},
+    {"name":"eval","type":"(x: string) => any"},
     {"name":"EvalError","type":"EvalErrorConstructor"},
     {"name":"exports","type":"{writeonly [key: string]: unknown}"},
     {"name":"FinalizationRegistry","type":"FinalizationRegistryConstructor"},
