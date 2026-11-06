@@ -90,3 +90,9 @@ function-poly-call.js:18:1 (polymorphic overload) = function f<number>(x: number
 function-poly-call.js:18:1,18:1
 function-poly-call.js:19:1 (monomorphic overload) = function f(x: string, y: string): string (+1 overload)
 function-poly-call.js:19:1,19:1
+function-poly-call.js:22:1 (const) = const g: <number>(x: number) => number
+function-poly-call.js:22:1,22:1
+function-poly-call.js:25:3 (property) = (property) p: <string>(x: string) => Array<string>
+function-poly-call.js:25:3,25:3
+function-poly-call.js:28:3 (parameter) = (parameter) k: <boolean>(x: boolean) => boolean
+function-poly-call.js:28:3,28:3

@@ -17,3 +17,13 @@ declare function f<T>(x: T): T;
 declare function f(x: string, y: string): string;
 f(1);
 f('a', 'b');
+
+const g = <T>(x: T): T => x;
+g(1);
+
+declare const o: {p: <T>(x: T) => Array<T>};
+o.p('a');
+
+function h(k: <T>(x: T) => T) {
+  k(true);
+}

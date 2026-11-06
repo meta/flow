@@ -124,3 +124,11 @@ printf "function-poly-call.js:18:1 (polymorphic overload) = "
 assert_ok "$FLOW" type-at-pos function-poly-call.js 18 1 --strip-root
 printf "function-poly-call.js:19:1 (monomorphic overload) = "
 assert_ok "$FLOW" type-at-pos function-poly-call.js 19 1 --strip-root
+# A callee bound by `const`, held in a property or passed as a parameter prints
+# as an arrow type, with the type arguments in place of its type parameters.
+printf "function-poly-call.js:22:1 (const) = "
+assert_ok "$FLOW" type-at-pos function-poly-call.js 22 1 --strip-root
+printf "function-poly-call.js:25:3 (property) = "
+assert_ok "$FLOW" type-at-pos function-poly-call.js 25 3 --strip-root
+printf "function-poly-call.js:28:3 (parameter) = "
+assert_ok "$FLOW" type-at-pos function-poly-call.js 28 3 --strip-root

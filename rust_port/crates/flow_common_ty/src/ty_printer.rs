@@ -324,13 +324,7 @@ fn type_impl<L: Dupe>(
         Ty::BoolLit(value) => LayoutNode::atom(if *value { "true" } else { "false" }.to_string()),
         Ty::BigIntLit(raw) => LayoutNode::atom(raw.to_string()),
 
-        Ty::Fun(func) => {
-            let sep = layout::fuse(vec![
-                layout::pretty_space(),
-                LayoutNode::atom("=>".to_string()),
-            ]);
-            type_function(opts, depth, &sep, func, size)
-        }
+        Ty::Fun(func) => type_function(opts, depth, &arrow_separator(), func, None, size),
         Ty::Obj(obj) => type_object(opts, depth, obj, size),
         Ty::Arr(arr) => type_array(opts, depth, arr, size),
         Ty::Generic(g) => type_generic(opts, depth, g, size),
@@ -543,14 +537,22 @@ fn any<L: Dupe>(opts: &PrinterOptions, depth: usize, kind: &AnyKind<L>) -> Layou
     ])
 }
 
+fn arrow_separator() -> LayoutNode {
+    layout::fuse(vec![
+        layout::pretty_space(),
+        LayoutNode::atom("=>".to_string()),
+    ])
+}
+
 fn type_function<L: Dupe>(
     opts: &PrinterOptions,
     depth: usize,
     sep: &LayoutNode,
     func: &FunT<L>,
+    targs: Option<&[Arc<Ty<L>>]>,
     size: &mut PrintState<L>,
 ) -> LayoutNode {
-    let signature = function_signature(opts, depth, sep, func, size);
+    let signature = function_signature(opts, depth, sep, func, targs, size);
     if matches!(func.fun_effect, FunEffect::Hook) {
         layout::fuse(vec![
             LayoutNode::atom("hook".to_string()),
@@ -563,12 +565,14 @@ fn type_function<L: Dupe>(
 }
 
 /// A function type without its `hook` keyword: type parameters, parameters,
-/// `sep`, and the return type.
+/// `sep`, and the return type. A signature instantiated by a call shows the
+/// call's type arguments `targs` in place of its type parameters.
 fn function_signature<L: Dupe>(
     opts: &PrinterOptions,
     depth: usize,
     sep: &LayoutNode,
     func: &FunT<L>,
+    targs: Option<&[Arc<Ty<L>>]>,
     size: &mut PrintState<L>,
 ) -> LayoutNode {
     let mut params = Vec::new();
@@ -636,9 +640,10 @@ fn function_signature<L: Dupe>(
         ]));
     }
 
-    let type_params = match &func.fun_type_params {
-        Some(tparams) => type_parameter(opts, depth, tparams, size),
-        _ => LayoutNode::empty(),
+    let type_params = match (targs, &func.fun_type_params) {
+        (Some(targs), _) => type_args(opts, depth, targs, size),
+        (None, Some(tparams)) => type_parameter(opts, depth, tparams, size),
+        (None, None) => LayoutNode::empty(),
     };
 
     let params_list = layout::list(
@@ -895,7 +900,14 @@ fn type_object_property<L: Dupe>(
                 } else {
                     LayoutNode::empty()
                 },
-                type_function(opts, depth, &LayoutNode::atom(":".to_string()), func, size),
+                type_function(
+                    opts,
+                    depth,
+                    &LayoutNode::atom(":".to_string()),
+                    func,
+                    None,
+                    size,
+                ),
             ]),
             NamedProp::Get(t) => layout::group(vec![layout::fuse(vec![
                 LayoutNode::atom("get".to_string()),
@@ -924,9 +936,14 @@ fn type_object_property<L: Dupe>(
                 type_(opts, depth, &Ty::<L>::Void, size),
             ])]),
         },
-        Prop::CallProp(func) => {
-            type_function(opts, depth, &LayoutNode::atom(":".to_string()), func, size)
-        }
+        Prop::CallProp(func) => type_function(
+            opts,
+            depth,
+            &LayoutNode::atom(":".to_string()),
+            func,
+            None,
+            size,
+        ),
         Prop::SpreadProp(t) => layout::fuse(vec![
             LayoutNode::atom("...".to_string()),
             type_(opts, depth, t.as_ref(), size),
@@ -2203,8 +2220,14 @@ fn layout_of_binder(
         {
             layout::fuse(vec![
                 layout_of_binder_head_with_effect(binder, &func.fun_effect),
-                option(|targs| type_args(opts, 0, targs, state), &binder.targs),
-                function_signature(opts, 0, &LayoutNode::atom(":".to_string()), func, state),
+                function_signature(
+                    opts,
+                    0,
+                    &LayoutNode::atom(":".to_string()),
+                    func,
+                    binder.targs.as_deref(),
+                    state,
+                ),
                 layout_of_overload_count(binder.overloads),
             ])
         }
@@ -2224,11 +2247,22 @@ fn layout_of_binder(
                     0,
                     &LayoutNode::atom(":".to_string()),
                     func,
+                    None,
                     state,
                 ));
             }
             layout::fuse(parts)
         }
+        // A callee bound by `const` or held in a property is an arrow type, with
+        // the call's type arguments in place of its type parameters:
+        // `const f: <number>(x: number) => number`. The arrow is at the depth
+        // `type_after_separator` gives an annotation.
+        Ty::Fun(func) if let Some(targs) = &binder.targs => layout::fuse(vec![
+            head,
+            LayoutNode::atom(":".to_string()),
+            layout::pretty_space(),
+            type_function(opts, 1, &arrow_separator(), func, Some(targs), state),
+        ]),
         _ => layout::fuse(vec![
             head,
             LayoutNode::atom(":".to_string()),
