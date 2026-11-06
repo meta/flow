@@ -842,12 +842,15 @@ where
                 let Ok(()) = self.object_key(key);
                 let Ok(()) = self.type_annotation(annot);
             }
-            // AbstractMethod is a type annotation, no runtime def
-            ast::class::BodyElement::AbstractMethod(_) => {}
-            // AbstractProperty is a type annotation, no runtime def
-            ast::class::BodyElement::AbstractProperty(_) => {}
-            // IndexSignature is a type annotation, no runtime def
-            ast::class::BodyElement::IndexSignature(_) => {}
+            ast::class::BodyElement::AbstractMethod(meth) => {
+                let Ok(()) = self.class_abstract_method(meth);
+            }
+            ast::class::BodyElement::AbstractProperty(prop) => {
+                let Ok(()) = self.class_abstract_property(prop);
+            }
+            ast::class::BodyElement::IndexSignature(indexer) => {
+                let Ok(()) = self.class_indexer(indexer);
+            }
         }
     }
 

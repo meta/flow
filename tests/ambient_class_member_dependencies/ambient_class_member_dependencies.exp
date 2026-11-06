@@ -1,0 +1,56 @@
+Error ----------------------------------------------------------------------------------------------------- test.ts:6:34
+
+Cannot assign `visitor.visit(...).value` to `wrongMethodValue` because `number` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   test.ts:6:34
+   6| const wrongMethodValue: string = visitor.visit(new Node()).value; // ERROR
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   defs.d.ts:5:36
+   5| export declare class Node { value: number; }
+                                         ^^^^^^ [1]
+   test.ts:6:25
+   6| const wrongMethodValue: string = visitor.visit(new Node()).value; // ERROR
+                              ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.ts:11:36
+
+Cannot assign `container.node.value` to `wrongPropertyValue` because `string` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   test.ts:11:36
+   11| const wrongPropertyValue: number = container.node.value; // ERROR
+                                          ^^^^^^^^^^^^^^^^^^^^
+
+References:
+   defs.d.ts:11:37
+   11| export declare class Entry { value: string; }
+                                           ^^^^^^ [1]
+   test.ts:11:27
+   11| const wrongPropertyValue: number = container.node.value; // ERROR
+                                 ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.ts:16:33
+
+Cannot assign `dictionary.example.value` to `wrongIndexValue` because `boolean` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   test.ts:16:33
+   16| const wrongIndexValue: number = dictionary.example.value; // ERROR
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   defs.d.ts:17:36
+   17| export declare class Item { value: boolean; }
+                                          ^^^^^^^ [1]
+   test.ts:16:24
+   16| const wrongIndexValue: number = dictionary.example.value; // ERROR
+                              ^^^^^^ [2]
+
+
+
+Found 3 errors
