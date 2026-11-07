@@ -1,0 +1,60 @@
+Error ----------------------------------------------------------------------------------------------------- test.js:2:24
+
+Cannot resolve module `./node_modules/pkg/rejected`. [cannot-resolve-module]
+
+   2| import {rejected} from './node_modules/pkg/rejected'; // ERROR: rejected declarations aren't included
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:4:35
+
+Cannot resolve module `./declarations/rejected`. [cannot-resolve-module]
+
+   4| import {rejectedDeclaration} from './declarations/rejected'; // ERROR
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Error ------------------------------------------------------------------------------------------------------ test.js:9:1
+
+Cannot cast `allowed` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:9:1
+   9| allowed as string; // ERROR
+      ^^^^^^^
+
+References:
+   node_modules/pkg/allowed.d.ts:1:31
+   1| export declare const allowed: number;
+                                    ^^^^^^ [1]
+   test.js:9:12
+   9| allowed as string; // ERROR
+                 ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:10:1
+
+Cannot cast `allowedDeclaration` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:10:1
+   10| allowedDeclaration as string; // ERROR
+       ^^^^^^^^^^^^^^^^^^
+
+References:
+   declarations/allowed.d.ts:1:42
+    1| export declare const allowedDeclaration: number;
+                                                ^^^^^^ [1]
+   test.js:10:23
+   10| allowedDeclaration as string; // ERROR
+                             ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:11:1
+
+Cannot resolve name `packageGlobal`. [cannot-resolve-name]
+
+   11| packageGlobal; // ERROR: globals from rejected declarations aren't included
+       ^^^^^^^^^^^^^
+
+
+
+Found 5 errors

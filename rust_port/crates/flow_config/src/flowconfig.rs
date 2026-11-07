@@ -259,6 +259,7 @@ pub mod opts {
         pub ts_utility_syntax: bool,
         pub tslib_syntax: Option<bool>,
         pub typescript_library_definition_support: bool,
+        pub typescript_library_definition_support_includes: Vec<FlowconfigGlobPattern>,
         pub enable_custom_error: bool,
         pub assert_operator: AssertOperator,
         pub type_expansion_recursion_limit: u32,
@@ -417,6 +418,7 @@ pub mod opts {
             ts_utility_syntax: true,
             tslib_syntax: None,
             typescript_library_definition_support: false,
+            typescript_library_definition_support_includes: Vec::new(),
             enable_custom_error: false,
             assert_operator: AssertOperator::Disabled,
             type_expansion_recursion_limit: 3,
@@ -2352,6 +2354,26 @@ pub mod opts {
                             opts.typescript_library_definition_support = v;
                             Ok(())
                         },
+                        values,
+                        config,
+                    )
+                },
+            ),
+            (
+                "experimental.typescript_library_definition_support.includes",
+                |values, config| {
+                    opt(
+                        |pattern| {
+                            FlowconfigGlobPattern::try_new(pattern.to_owned(), false)
+                                .map_err(|error| error.message())
+                        },
+                        |opts, pattern| {
+                            opts.typescript_library_definition_support_includes
+                                .push(pattern);
+                            Ok(())
+                        },
+                        None,
+                        true,
                         values,
                         config,
                     )

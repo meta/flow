@@ -147,6 +147,7 @@ pub struct FileOptions {
     pub multi_platform_extensions: Vec<FlowSmolStr>,
     pub multi_platform_extension_group_mapping: Vec<(FlowSmolStr, Vec<FlowSmolStr>)>,
     pub node_resolver_dirnames: Vec<String>,
+    pub typescript_library_definition_support_includes: Vec<RootedGlob>,
 }
 
 impl Default for FileOptions {
@@ -168,6 +169,7 @@ impl Default for FileOptions {
             multi_platform_extensions: Vec::new(),
             multi_platform_extension_group_mapping: Vec::new(),
             node_resolver_dirnames: vec!["node_modules".to_string()],
+            typescript_library_definition_support_includes: Vec::new(),
         }
     }
 }
@@ -599,6 +601,9 @@ pub fn is_valid_path(options: &FileOptions, path: &str) -> bool {
     if basename.starts_with('.') {
         return false;
     }
+    if has_dts_ext(path) && !is_included_typescript_library_definition(options, path) {
+        return false;
+    }
     let file_exts = get_all_watched_extensions(options);
     check_ext(&file_exts, basename) || basename == "package.json"
 }
@@ -654,6 +659,16 @@ pub fn is_in_flowlib(options: &FileOptions, path: &str) -> bool {
                     .is_ok_and(|canonical_root| path.starts_with(canonical_root))
         }
     }
+}
+
+/// true if a TypeScript library definition is a bundled compiler library or matches an
+/// `experimental.typescript_library_definition_support.includes` glob. Without any includes,
+/// every library definition is included.
+fn is_included_typescript_library_definition(options: &FileOptions, path: &str) -> bool {
+    let includes = &options.typescript_library_definition_support_includes;
+    includes.is_empty()
+        || is_in_flowlib(options, path)
+        || includes.iter().any(|pattern| pattern.is_match(path))
 }
 
 pub fn ordered_and_unordered_lib_paths(options: &FileOptions) -> Vec<String> {

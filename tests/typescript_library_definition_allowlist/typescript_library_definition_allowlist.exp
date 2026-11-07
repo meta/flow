@@ -1,0 +1,153 @@
+Error ----------------------------------------------------------------------------------------------------- test.js:8:26
+
+Cannot resolve module `./single/nested/rejected`. [cannot-resolve-module]
+
+   8| import {rejectedTs} from './single/nested/rejected'; // ERROR: rejected declarations aren't included
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:9:27
+
+Cannot resolve module `./single/nested/rejected.d.mts`. [cannot-resolve-module]
+
+   9| import {rejectedMts} from './single/nested/rejected.d.mts'; // ERROR
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:10:27
+
+Cannot resolve module `./single/nested/rejected.d.cts`. [cannot-resolve-module]
+
+   10| import {rejectedCts} from './single/nested/rejected.d.cts'; // ERROR
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:11:21
+
+Cannot resolve module `./other/rejected`. [cannot-resolve-module]
+
+   11| import {other} from './other/rejected'; // ERROR
+                           ^^^^^^^^^^^^^^^^^^
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:21:1
+
+Cannot cast `rootTs` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:21:1
+   21| rootTs as string; // ERROR
+       ^^^^^^
+
+References:
+   root.d.ts:8:30
+    8| export declare const rootTs: number;
+                                    ^^^^^^ [1]
+   test.js:21:11
+   21| rootTs as string; // ERROR
+                 ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:22:1
+
+Cannot cast `rootMts` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   test.js:22:1
+   22| rootMts as number; // ERROR
+       ^^^^^^^
+
+References:
+   root.d.mts:1:31
+    1| export declare const rootMts: string;
+                                     ^^^^^^ [1]
+   test.js:22:12
+   22| rootMts as number; // ERROR
+                  ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:23:1
+
+Cannot cast `rootCts` to `string` because `boolean` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:23:1
+   23| rootCts as string; // ERROR
+       ^^^^^^^
+
+References:
+   root.d.cts:1:31
+    1| export declare const rootCts: boolean;
+                                     ^^^^^^^ [1]
+   test.js:23:12
+   23| rootCts as string; // ERROR
+                  ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:24:1
+
+Cannot cast `single` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:24:1
+   24| single as string; // ERROR
+       ^^^^^^
+
+References:
+   single/top.d.ts:8:30
+    8| export declare const single: number;
+                                    ^^^^^^ [1]
+   test.js:24:11
+   24| single as string; // ERROR
+                 ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:25:1
+
+Cannot cast `recursive` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:25:1
+   25| recursive as string; // ERROR
+       ^^^^^^^^^
+
+References:
+   recursive/top.d.ts:8:33
+    8| export declare const recursive: number;
+                                       ^^^^^^ [1]
+   test.js:25:14
+   25| recursive as string; // ERROR
+                    ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:26:1
+
+Cannot cast `nestedMts` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   test.js:26:1
+   26| nestedMts as number; // ERROR
+       ^^^^^^^^^
+
+References:
+   recursive/nested/allowed.d.mts:1:33
+    1| export declare const nestedMts: string;
+                                       ^^^^^^ [1]
+   test.js:26:14
+   26| nestedMts as number; // ERROR
+                    ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:27:1
+
+Cannot cast `nestedCts` to `string` because `boolean` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:27:1
+   27| nestedCts as string; // ERROR
+       ^^^^^^^^^
+
+References:
+   recursive/nested/allowed.d.cts:1:33
+    1| export declare const nestedCts: boolean;
+                                       ^^^^^^^ [1]
+   test.js:27:14
+   27| nestedCts as string; // ERROR
+                    ^^^^^^ [2]
+
+
+
+Found 11 errors

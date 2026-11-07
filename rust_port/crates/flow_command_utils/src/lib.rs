@@ -1161,6 +1161,16 @@ pub fn file_options(
         }
     }
 
+    let typescript_library_definition_support_includes = flowconfig
+        .options
+        .typescript_library_definition_support_includes
+        .iter()
+        .map(|pattern| {
+            RootedGlob::new(root, pattern.pattern())
+                .expect("flowconfig glob should have been validated while parsing")
+        })
+        .collect();
+
     Arc::new(FileOptions {
         default_lib_dir,
         ignores,
@@ -1186,6 +1196,7 @@ pub fn file_options(
             .multi_platform_extension_group_mapping
             .to_vec(),
         node_resolver_dirnames: flowconfig.options.node_resolver_dirnames.clone(),
+        typescript_library_definition_support_includes,
     })
 }
 
@@ -2283,6 +2294,7 @@ pub fn make_options(
                 ts_utility_syntax,
                 tslib_syntax,
                 typescript_library_definition_support,
+                typescript_library_definition_support_includes: _,
                 enable_custom_error,
                 assert_operator,
                 type_expansion_recursion_limit,

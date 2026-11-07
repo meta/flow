@@ -1,0 +1,8 @@
+[declarations]
+<PROJECT_ROOT>/declarations/.*
+
+[options]
+all=true
+builtin_lib=core-only
+experimental.typescript_library_definition_support=true
+experimental.typescript_library_definition_support.includes=**/allowed.d.ts
