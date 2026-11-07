@@ -6,7 +6,7 @@ version = "0.0.0"
 edition = "2024"
 
 [dependencies]
-fancy-regex = "0.19.2"
+fancy-regex = "0.20.0"
 flow_common_vcs = { path = "../flow_common_vcs" }
 flow_parser = { path = "../flow_parser" }
 flow_parser_utils_output = { path = "../flow_parser_utils_output" }
