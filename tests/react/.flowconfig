@@ -5,3 +5,4 @@ builtin_lib=core-only
 all=true
 ban_spread_key_props=true
 component_syntax=false
+experimental.react_managed_attributes=false

@@ -1,3 +1,4 @@
 [options]
 all=true
 builtin_lib=core-only
+experimental.react_managed_attributes=false

@@ -378,7 +378,7 @@ pub mod opts {
             projects_path_mapping: Vec::new(),
             projects_strict_boundary: false,
             react_custom_jsx_typing: false,
-            react_managed_attributes: false,
+            react_managed_attributes: true,
             stylex_shorthand_prop: None,
             // Keep in sync with `component_syntax: true` above: when component
             // syntax is on (the default), the React rules are on too. Explicitly

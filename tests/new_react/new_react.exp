@@ -298,7 +298,8 @@ References:
 Error ------------------------------------------------------------------------------------------------- classes.js:39:32
 
 Cannot create `Foo` element because property `x` is missing in `{...}` [1] but exists in
-`{readonly ref?: React.RefSetter<Foo>, readonly x: number, ...}` [2]. [incompatible-type]
+`{readonly ref?: {ref?: React.RefSetter<Foo>, x: number, ...}["ref"], readonly x: {ref?: React.RefSet...` [2].
+[incompatible-type]
 
    classes.js:39:32
    39| var foo: React.MixedElement = <Foo/>;

@@ -3491,7 +3491,7 @@ module.exports = suite(
 
       ...[
         {line: 94, character: 36, label: 'onChange: (number) => void'},
-        {line: 101, character: 30, label: 'bar?: string'},
+        {line: 101, character: 30, label: 'bar?: string | void'},
       ].map(({line, character, label}) =>
         lspRequestAndWaitUntilResponse('textDocument/signatureHelp', {
           textDocument: {uri: '<PLACEHOLDER_PROJECT_URL>/jsx_attr.js'},

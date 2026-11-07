@@ -2196,7 +2196,7 @@ References:
 Error ---------------------------------------------------------------------------------------------------- test.js:892:2
 
 Cannot create `Class_DefaultProps` element because property `bar` is missing in `{foo: 1, ...}` [1] but exists in
-`{readonly bar: number, readonly foo?: number, readonly ref?: React.RefSetter<Class_DefaultProps>, .....` [2].
+`{readonly bar: {bar: number, foo: number, ref?: React.RefSetter<Class_DefaultProps>, ...}["bar"], re...` [2].
 [incompatible-type]
 
    test.js:892:2
@@ -2218,7 +2218,7 @@ References:
 Error ---------------------------------------------------------------------------------------------------- test.js:909:2
 
 Cannot create `ClassExact_DefaultProps` element because property `bar` is missing in `{foo: 1}` [1] but exists in
-`{readonly bar: number, readonly foo?: number, readonly ref?: React.RefSetter<ClassExact_DefaultProps...` [2].
+`{readonly bar: {bar: number, foo: number, ref?: React.RefSetter<ClassExact_DefaultProps>}["bar"], re...` [2].
 [incompatible-type]
 
    test.js:909:2
@@ -2240,7 +2240,7 @@ References:
 Error ---------------------------------------------------------------------------------------------------- test.js:925:2
 
 Cannot create `ClassPure_DefaultProps` element because property `bar` is missing in `{foo: 1, ...}` [1] but exists in
-`{readonly bar: number, readonly foo?: number, readonly ref?: React.RefSetter<ClassPure_DefaultProps>...` [2].
+`{readonly bar: {bar: number, foo: number, ref?: React.RefSetter<ClassPure_DefaultProps>, ...}["bar"]...` [2].
 [incompatible-type]
 
    test.js:925:2
@@ -2262,7 +2262,7 @@ References:
 Error ---------------------------------------------------------------------------------------------------- test.js:937:2
 
 Cannot create `Member_DefaultProps.prop` element because property `bar` is missing in `{foo: 1, ...}` [1] but exists in
-`{readonly bar: number, readonly foo?: number, readonly ref?: React.RefSetter<Class_DefaultProps>, .....` [2].
+`{readonly bar: {bar: number, foo: number, ref?: React.RefSetter<Class_DefaultProps>, ...}["bar"], re...` [2].
 [incompatible-type]
 
    test.js:937:2
@@ -2284,7 +2284,7 @@ References:
 Error ---------------------------------------------------------------------------------------------------- test.js:949:2
 
 Cannot create `EnhancedClass_DefaultProps` element because property `bar` is missing in `{foo: 1}` [1] but exists in
-`{readonly bar: number, readonly foo?: number, readonly ref?: React.RefSetter<Class_DefaultProps>, .....` [2].
+`{readonly bar: {bar: number, foo: number, ref?: React.RefSetter<Class_DefaultProps>, ...}["bar"], re...` [2].
 [incompatible-type]
 
    test.js:949:2

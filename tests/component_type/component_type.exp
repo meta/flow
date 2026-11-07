@@ -115,7 +115,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `ComponentNarrower` to `component(ref: React.RefSetter<any>)` because properties `bar` and `foo` are missing
 in `{readonly ref: React.RefSetter<any>, ...}` [1] but exist in
-`{readonly bar: number, readonly foo?: number, readonly ref?: React.RefSetter<ComponentNarrower>, ......` [2].
+`{readonly bar: {bar: number, foo: number, ref?: React.RefSetter<ComponentNarrower>, ...}["bar"], rea...` [2].
 [incompatible-type]
 
    classes_lower.js:17:1
@@ -135,7 +135,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `ComponentNarrower` to `component(foo?: number, ref: React.RefSetter<any>)` because property `bar` is
 missing in `{readonly foo?: number, readonly ref: React.RefSetter<any>}` [1] but exists in
-`{readonly bar: number, readonly foo?: number, readonly ref?: React.RefSetter<ComponentNarrower>, ......` [2].
+`{readonly bar: {bar: number, foo: number, ref?: React.RefSetter<ComponentNarrower>, ...}["bar"], rea...` [2].
 [incompatible-type]
 
    classes_lower.js:18:1
@@ -155,7 +155,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `ComponentNarrower` to `component(ref: React.RefSetter<Component>)` because properties `bar` and `foo` are
 missing in `{readonly ref: React.RefSetter<Component>, ...}` [1] but exist in
-`{readonly bar: number, readonly foo?: number, readonly ref?: React.RefSetter<ComponentNarrower>, ......` [2].
+`{readonly bar: {bar: number, foo: number, ref?: React.RefSetter<ComponentNarrower>, ...}["bar"], rea...` [2].
 [incompatible-type]
 
    classes_lower.js:19:1
@@ -283,7 +283,8 @@ References:
 Error ---------------------------------------------------------------------------------------------- config_HOC.js:27:13
 
 Cannot create `WrappedComponent` element because property `bar` is missing in `{foo: 3}` [1] but exists in
-`{readonly bar: number, readonly foo?: number, readonly ref?: React.RefSetter<Component>, ...}` [2]. [incompatible-type]
+`{readonly bar: {bar: number, foo: number, ref?: React.RefSetter<Component>, ...}["bar"], readonly fo...` [2].
+[incompatible-type]
 
    config_HOC.js:27:13
    27| const _c = <WrappedComponent foo={3} />; // Error missing bar

@@ -109,20 +109,6 @@ References:
 
 Error ---------------------------------------------------------------------------------------- subclassComponent.js:29:2
 
-Cannot create `D` element because `{}` [1] is incompatible with `empty` [1]. [incompatible-type]
-
-   subclassComponent.js:29:2
-   29| <D></D>; // error
-        ^
-
-References:
-   subclassComponent.js:29:1
-   29| <D></D>; // error
-       ^^^^^^^ [1]
-
-
-Error ---------------------------------------------------------------------------------------- subclassComponent.js:29:2
-
 `D` [1] is incompatible with `Component<empty, empty>` [2]. [incompatible-type]
 
    subclassComponent.js:29:2
@@ -136,20 +122,6 @@ References:
    <BUILTINS>/react.js:1251:19
    1251|     declare class Component<Props, State = void> {
                            ^^^^^^^^^ [2]
-
-
-Error ---------------------------------------------------------------------------------------- subclassComponent.js:30:2
-
-Cannot create `E` element because `{}` [1] is incompatible with `empty` [1]. [incompatible-type]
-
-   subclassComponent.js:30:2
-   30| <E></E>; // error
-        ^
-
-References:
-   subclassComponent.js:30:1
-   30| <E></E>; // error
-       ^^^^^^^ [1]
 
 
 Error ---------------------------------------------------------------------------------------- subclassComponent.js:30:2
@@ -171,20 +143,6 @@ References:
 
 Error ---------------------------------------------------------------------------------------- subclassComponent.js:31:2
 
-Cannot create `F` element because `{}` [1] is incompatible with `empty` [1]. [incompatible-type]
-
-   subclassComponent.js:31:2
-   31| <F></F>; // error
-        ^
-
-References:
-   subclassComponent.js:31:1
-   31| <F></F>; // error
-       ^^^^^^^ [1]
-
-
-Error ---------------------------------------------------------------------------------------- subclassComponent.js:31:2
-
 `F` [1] is incompatible with `Component<empty, empty>` [2]. [incompatible-type]
 
    subclassComponent.js:31:2
@@ -201,4 +159,4 @@ References:
 
 
 
-Found 12 errors
+Found 9 errors

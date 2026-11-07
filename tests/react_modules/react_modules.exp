@@ -1,7 +1,8 @@
 Error --------------------------------------------------------------------------------- es6class-types-callsite.js:18:10
 
 Cannot create `Hello` element because property `name` is missing in `{}` [1] but exists in
-`{readonly name: string, readonly ref?: React.RefSetter<Hello>}` [2]. [incompatible-type]
+`{readonly name: {name: string, ref?: React.RefSetter<Hello>}["name"], readonly ref?: {name: string, ...` [2].
+[incompatible-type]
 
    es6class-types-callsite.js:18:10
    18|         <Hello />
