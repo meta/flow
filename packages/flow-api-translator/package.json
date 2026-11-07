@@ -1,6 +1,6 @@
 {
   "name": "flow-api-translator",
-  "version": "0.338.0",
+  "version": "0.339.0",
   "description": "Toolkit for creating Flow and TypeScript compatible libraries from Flow source code.",
   "homepage": "https://flow.org",
   "license": "MIT",
@@ -14,10 +14,10 @@
     "@typescript-eslint/parser": "8.38.0",
     "@typescript-eslint/visitor-keys": "8.38.0",
     "flow-enums-runtime": "^0.0.6",
-    "flow-eslint": "0.338.0",
-    "flow-estree": "0.338.0",
-    "flow-parser": "0.338.0",
-    "flow-transform": "0.338.0",
+    "flow-eslint": "0.339.0",
+    "flow-estree": "0.339.0",
+    "flow-parser": "0.339.0",
+    "flow-transform": "0.339.0",
     "typescript": "5.3.2"
   },
   "peerDependencies": {

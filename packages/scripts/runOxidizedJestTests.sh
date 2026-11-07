@@ -71,8 +71,7 @@ yarn build
 # locked dependency trees available before the root Jest invocation.
 for standalone_package in \
   babel-plugin-transform-flow-enums \
-  eslint-plugin-fb-flow \
-  flow-upgrade
+  eslint-plugin-fb-flow
 do
   (
     cd "$WORKSPACE_DIR/$standalone_package"

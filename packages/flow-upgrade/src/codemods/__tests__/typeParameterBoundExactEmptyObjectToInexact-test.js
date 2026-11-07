@@ -15,7 +15,37 @@ testCodemod(
   'typeParameterBoundExactEmptyObjectToInexact',
   typeParameterBoundExactEmptyObjectToInexact,
   {
-    ignored: [],
+    ignored: [
+      {
+        description: 'Unbounded parameter',
+        code: 'function foo<T>() {}',
+      },
+      {
+        description: 'Already-inexact bound',
+        code: 'function foo<T: {...}>() {}',
+      },
+      {
+        description: 'Property-bearing bound',
+        code: 'function foo<T: {x: string}>() {}',
+      },
+      {
+        description: 'Empty-object default is not a bound',
+        code: 'function foo<T = {}>() {}',
+      },
+      {
+        description: 'Second pass leaves transformed bounds unchanged',
+        code: `\
+function foo<
+  A: {...},
+  B: string,
+  C: {...},
+  D: boolean,
+  E: {[string]: boolean},
+  F: {(): void},
+>() {}
+        `,
+      },
+    ],
 
     transformed: [
       {

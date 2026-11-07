@@ -15,7 +15,10 @@ const packageJson = require('./package.json');
 
 const workspaceModuleNameMappers = Object.fromEntries(
   packageJson.workspaces
-    .filter(moduleName => moduleName !== 'flow-parser')
+    .filter(
+      moduleName =>
+        moduleName !== 'flow-parser' && moduleName !== 'flow-upgrade',
+    )
     .map(moduleName => [
       `^${moduleName}$`,
       path.resolve(__dirname, moduleName, 'src', 'index.js'),

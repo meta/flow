@@ -1,3 +1,107 @@
+### 0.339.0
+
+Breaking Changes:
+* Rename `typeParameters` to `typeArguments` on ESTree `GenericTypeAnnotation`, `InterfaceExtends`, and `ClassImplements`, including WASM `flow-parser` output. Declaration parameters and Babel output retain their existing names.
+* `PropertyDescriptor` and `Object.getOwnPropertyDescriptor` are no longer generic. Remove type arguments from `PropertyDescriptor<T>` annotations and `Object.getOwnPropertyDescriptor<T>(...)` calls.
+
+Likely to cause new Flow errors:
+* Hook calls in classes now use `react-rule-hook-class`, and calls in deeper nested anonymous callbacks inside components or hooks use `react-rule-hook-conditional`, instead of `react-rule-hook`. Update suppressions to the new codes. Hook calls directly in class property initializers are also rejected when the enclosing function would otherwise permit them.
+* Assignments and throws in function or component parameter defaults and destructuring defaults are now treated as conditional, because a default only runs when the value it replaces is `undefined`.
+* Property increments and decrements (`o.x++`, `o.x--`, `++o.x`, and `--o.x`) now invalidate narrowings of the property through aliases, as assignments already do.
+* Reads in an assertion call's condition now use the types at the point where they run, rather than types after the call and its later arguments. This removes false errors and reports reads before a later argument assigns a variable.
+* `break`, `continue`, `return`, and `throw` paths through `finally` are no longer dropped. Flow now reports variables left unassigned and narrowings that do not hold on these paths.
+* Optional class fields (`x?: T`, with `experimental.tslib_syntax`) now have type `T | void`. Reads may return `undefined`, and assigning `undefined` is allowed.
+* Type parameters explicitly declared `in out` in TypeScript files are now invariant rather than covariant.
+* Functions named `use*` declared in TypeScript files are now treated as hooks. This fixes calls from Flow hook syntax, but calls outside a component or hook can now report Rules of Hooks errors.
+* `parseInt`, `parseFloat`, and `eval` now require a `string`; `isNaN` and `isFinite` require a `number`; and builtin Error constructors require a `string` message, matching TypeScript.
+* `Object.getOwnPropertyDescriptor`, `Object.defineProperty`, `Object.prototype.hasOwnProperty`, and `Object.prototype.propertyIsEnumerable` now require `PropertyKey` (`string | number | symbol`) keys. `PropertyDescriptorMap` is also keyed by `PropertyKey`.
+* `DataView.byteLength` and `byteOffset`, numeric typed array `byteLength`, `byteOffset`, and `length`, and `RegExp.source`, `global`, `ignoreCase`, and `multiline` are now read-only. `RegExp.prototype.compile` now requires a pattern.
+* `Array.prototype.splice` uses separate removal and insertion overloads, so inserting items requires a `deleteCount`.
+* `Array` and `ReadonlyArray` `reduce` and `reduceRight` now have an overload whose initial value and accumulator use the element type. Calls intending a different accumulator type may need an explicit type argument, e.g. `reduce<number>(...)`.
+* `Promise.prototype.then` and `catch` now use TypeScript-style signatures. `then` has separate fulfillment and rejection type parameters; calls whose inferred result is unsuitable may need explicit type arguments.
+* `RegExpMatchArray.index` and `input` are now optional, and its first element is declared as `0: string`. Check optional fields on `match` results, and use `RegExpExecArray` for `exec` and `matchAll` results.
+* `Error.stack` is now optional, matching TypeScript.
+* Numeric typed array `subarray` methods, including `Uint8Array.prototype.subarray`, return their corresponding typed array rather than `this`. Subclasses that return their own type should declare their own override.
+
+New Features:
+* Format code with Prettier in the Try Flow playground, and copy JSON from its AST view.
+* Object type spreads allow optional properties after an object with an indexer. Value spreads retain their existing checks.
+* Add `translateFlowTypeToTSType` to `flow-api-translator` for type-node translation.
+* Functions with any return type are accepted where a TypeScript-declared function type returning `void` is expected, matching TypeScript. Flow-declared function types retain their existing return checks.
+
+Notable bug fixes:
+* Fixed Windows commands such as `flow check` hanging when their output is piped or captured, even after the command exits ([#9519](https://github.com/meta/flow/issues/9519)).
+* Preserve imported TypeScript template literal types without requiring `experimental.tslib_syntax`.
+* Type guards refine distinct bigint literal types to `empty`, as they already do for string, number, and boolean literals.
+* Fixed an internal error when a function parameter default always throws; the function is now typed and checked.
+* JavaScript objects with extra properties can be checked against TypeScript object types whose index signature applies to only some keys, and against interfaces extending an object type with an index signature.
+* Accept literal initializers such as `declare const x = -1`.
+* Improve implicit instantiation through conditional types without `infer`, conditional types nested inside distributive conditional types, and type applications that expand to types mentioning the inferred parameters.
+* Fixed a crash when a mapped type's key has the same name as a type parameter spread in the mapped object type.
+* Imports such as `.//foo` and `..//foo` resolve like `./foo` and `../foo`.
+* Prevent stack overflows and spurious internal errors when checking recursive tuple spreads in generic type arguments.
+* JavaScript subclasses can override static methods of TypeScript classes with narrower parameters, as on the instance side.
+* Fixed a crash on a `match` in unreachable code.
+* Fixed a crash when a namespace merged with a class or function redeclares one of its members.
+* Fixed crashes when a recheck is canceled while checking a component declaration, or when cancellation or a timeout interrupts a type cast from an annotated source.
+* Fixed a crash on a method with a `this` parameter in a class expression or a class declared in a callback.
+* Fixed a crash when a file imports a name that it also declares as a function, component, or hook.
+* Fixed crashes when a library definition stops parsing while the server is running, or contains an ignored statement that reads a name, such as `f();`.
+* TypeScript enum checking no longer requires `enums=true`.
+* Fixed a crash ("Non speculating: LimitExceeded") when destructuring a value whose type lookup exceeds the recursion limit.
+* A type parameter whose bound mentions another type parameter no longer leaks unresolved into the other parameter's solution.
+* A field named `constructor`, including TypeScript's `['constructor']` fields, now types `x.constructor` without shadowing the constructor used by `new` and `super()`.
+* Named imports work from CommonJS modules whose `module.exports` has multiple call signatures or is an overloaded function merged with a namespace.
+* Mapped types with template literal keys now produce individual properties when their placeholders resolve to string literals, instead of retaining a template literal indexer. Generic placeholders and unsupported intersection or recursive-alias cases retain their existing behavior.
+* `flow-upgrade` transformations preserve type arguments with both legacy and current parser AST fields.
+
+Misc:
+* Implements errors print the implemented interface's type and type arguments instead of generic descriptions such as "exports".
+* Try Flow disables Clear and Copy code when the editor is empty, keeps the Format button stable as saved-state controls change, and places the AST format selector after its hide options.
+* Tooling documentation recommends `flow-parser` and Prettier's built-in Flow parser without an external parser plugin.
+
+Parser:
+* `Program` source locations and ranges span the entire input, including whitespace and comments.
+* `flow-parser` preserves optionality on constructor parameter properties.
+* Correct `flow-estree` types for unannotated object type properties, readonly type operators, combined `in out` variance, optional `Program.tokens`, sparse-array elements, and JSX namespaced attributes. Sparse-array parent repair and traversal preserve holes.
+* Omit absent `typeof` type arguments from ESTree output, including WASM-decoded nodes and detached builders.
+* Default interface exports have the correct type-only export kind and AST typings. Type stripping removes the complete export wrapper rather than leaving a dangling `export default`.
+* `flow-parser` type stripping preserves function parameter defaults and side-effect imports.
+* `flow-transform` preserves leading `#!` lines.
+* `flow-eslint` scope analysis handles TypeScript parameter properties, class member decorators, and `declare global`.
+* Type translation preserves readonly array and tuple operands, inline interface bodies, and qualified interface bases.
+* Type translation tracks required React imports for JSX-qualified types.
+* Strict TypeScript translation rejects unsupported generic indexer keys instead of silently losing qualification or type arguments. Recovering string-API behavior is unchanged.
+
+IDE:
+* Hover on calls to polymorphic functions, including functions bound by `const`, properties, or parameters, and on construction of polymorphic classes shows the instantiated type arguments.
+* Multiline unions and intersections in hover types are indented under their annotation, one member per line.
+* Hover, `dump-types`, and error messages print `any` without its kind, e.g. `any` instead of `any (explicit)`.
+
+Library Definitions:
+* `encodeURIComponent` also accepts numbers and booleans.
+* `Symbol.prototype.valueOf` returns `symbol` instead of `?symbol`.
+* `arguments.callee` and `Function.prototype.caller` are typed as `Function`, and function `prototype` properties are typed as `any`.
+* `TemplateStringsArray` is an interface extending `ReadonlyArray<string>`.
+* Add `ImportCallOptions`, `ImportAssertions`, and `ImportAttributes` interfaces.
+* `Date.prototype.toString` declares a `Date` receiver rather than inheriting an `Object` receiver.
+* Locale-sensitive methods of `String`, `Number`, and `Date` use overloads and `Intl` option types.
+* Calling `EvalError`, `RangeError`, `ReferenceError`, `SyntaxError`, `TypeError`, or `URIError` returns its own type rather than `Error`.
+* `JSON.parse` reviver and `JSON.stringify` replacer callbacks accept any `this` and receive a `string` key.
+* `JSON.stringify` returns `string`; its replacer is a function or a read-only array of strings and numbers.
+* Declare legacy `RegExp` statics such as `RegExp.$1` and `RegExp.lastMatch`.
+* `ArrayBuffer.isView` is a type guard that refines its argument to `ArrayBufferView`.
+* `ArrayBufferView` is a structural interface rather than a union of typed arrays and `DataView`. Libraries can extend `ArrayBufferTypes` to add buffer types to `ArrayBufferLike`.
+* Add `PromiseConstructorLike` and `ConcatArray`.
+* Add the `ThisType<T>` marker interface. Flow does not give it TypeScript's contextual `this` behavior.
+* Numeric typed array callbacks accept `thisArg?: any`, and their static `from` methods accept mapping functions from any element type.
+* Libraries can redeclare `ReactDOM$UserVisibleString` to change the type accepted by user-visible React DOM string attributes such as `aria-label`, `title`, `alt`, and `placeholder`.
+* `Boolean()` accepts no argument.
+* `Object.defineProperty` and `Object.defineProperties` return their first argument's type.
+* `Object.getPrototypeOf`, `Object.getOwnPropertyDescriptor`, `Object.getOwnPropertyNames`, `Object.getOwnPropertySymbols`, `Object.isSealed`, `Object.isFrozen`, and `Object.isExtensible` accept any argument.
+* `Object.prototype.valueOf` returns `Object` instead of `unknown`.
+* `String.prototype.matchAll` yields `RegExpExecArray` for string patterns as well as regular expressions.
+
 ### 0.338.0
 
 Breaking Changes:

@@ -115,11 +115,22 @@ describe('packaged installation', () => {
     // The tarball extracts to a 'package' directory
     const extractedDir = path.join(tempDir, 'package');
 
-    // Copy node_modules from the source package to provide dependencies
-    // This avoids needing to fetch from npm
-    const srcNodeModules = path.join(packageDir, 'node_modules');
+    const manifest = JSON.parse(
+      fs.readFileSync(path.join(extractedDir, 'package.json'), 'utf8'),
+    );
+    const dependencies = Object.keys({
+      ...manifest.dependencies,
+      ...manifest.peerDependencies,
+    });
     const dstNodeModules = path.join(extractedDir, 'node_modules');
-    execSync(`cp -R ${srcNodeModules} ${dstNodeModules}`, {stdio: 'inherit'});
+    for (const dependency of dependencies) {
+      const dependencyManifest = require.resolve(`${dependency}/package.json`, {
+        paths: [packageDir],
+      });
+      const destination = path.join(dstNodeModules, dependency);
+      fs.mkdirSync(path.dirname(destination), {recursive: true});
+      fs.symlinkSync(path.dirname(dependencyManifest), destination, 'junction');
+    }
 
     // Update tempDir to point to the extracted package
     tempDir = extractedDir;

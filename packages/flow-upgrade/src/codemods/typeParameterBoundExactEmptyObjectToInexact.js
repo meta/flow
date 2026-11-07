@@ -20,7 +20,7 @@ export default codemod({
     return {
       TypeParameter(node) {
         if (node.bound != null) {
-          const annotation = node.bound.typeAnnotation;
+          const annotation = node.bound;
           if (
             annotation.type === 'ObjectTypeAnnotation' &&
             !annotation.inexact &&

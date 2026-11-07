@@ -43,6 +43,7 @@
     "flow-estree",
     "flow-parser",
     "flow-transform",
+    "flow-upgrade",
     "babel-plugin-syntax-flow-parser"
   ],
   "dependencies": {},
