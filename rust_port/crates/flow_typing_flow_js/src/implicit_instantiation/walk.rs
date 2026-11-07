@@ -31,7 +31,6 @@
 //! Only whether the operation fails anyway, which keeps a type parameter without evidence from
 //! being underconstrained, is found by flowing its arguments (`check_instantiation`).
 
-use std::collections::HashMap;
 use std::sync::Arc;
 
 use flow_aloc::ALoc;
@@ -5838,42 +5837,34 @@ fn arr_slice(t: &Type, n: usize, len: Option<usize>) -> Option<Type> {
 }
 
 /// Whether `t` contains a literal type that comes from a value rather than an annotation.
-fn has_value_literal<'cx>(cx: &mut Context<'cx>, literals: &mut LiteralCache, t: &Type) -> bool {
-    find_value_literal(cx, literals, t, false)
+fn has_value_literal<'cx>(cx: &mut Context<'cx>, t: &Type) -> bool {
+    find_value_literal(cx, t, false)
 }
 
 /// Whether `t` contains a literal type or a template literal type that comes from a value: a
 /// literal that implicit instantiation may need to keep precise.
-fn has_inferred_literal<'cx>(cx: &mut Context<'cx>, literals: &mut LiteralCache, t: &Type) -> bool {
-    find_value_literal(cx, literals, t, true)
+fn has_inferred_literal<'cx>(cx: &mut Context<'cx>, t: &Type) -> bool {
+    find_value_literal(cx, t, true)
 }
-
-/// What `find_value_literal` found behind each resolved type variable in a solve, with or without
-/// template literals.
-type LiteralCache = HashMap<(u32, bool), bool>;
 
 /// The search for a literal of a value skips what only annotations define: the body of a type
 /// alias or class, and the parts of a type destructor other than its argument. It also skips
-/// function types, whose literals a bound does not need precise.
-fn find_value_literal<'cx>(
-    cx: &mut Context<'cx>,
-    literals: &mut LiteralCache,
-    t: &Type,
-    templates: bool,
-) -> bool {
-    struct Visitor<'a> {
-        literals: &'a mut LiteralCache,
+/// function types, whose literals a bound does not need precise. The answer for a resolved type
+/// variable, and for a type whose visit met no unresolved one, does not change: it is kept for the
+/// check of the file, whose solves meet the same types again and again.
+fn find_value_literal<'cx>(cx: &mut Context<'cx>, t: &Type, templates: bool) -> bool {
+    struct Visitor {
         found: bool,
         templates: bool,
         tvars: BTreeSet<u32>,
         seen: BTreeSet<usize>,
-        /// Type variables being visited, and the types whose visit met one or an unresolved one:
-        /// the answer for those can change, so it is not remembered.
-        visiting: BTreeSet<u32>,
+        /// Counts the unresolved type variables met so far. A type variable or type met again in
+        /// this visit counts too: its answer was not kept, so it depends on an unresolved type
+        /// variable or on a type variable still being visited. The answer for a type whose visit
+        /// adds to the count is not kept.
         incomplete: usize,
-        incomplete_types: BTreeSet<usize>,
     }
-    impl TypeVisitor<()> for Visitor<'_> {
+    impl TypeVisitor<()> for Visitor {
         // A resolved type variable, as a solution of an earlier pass in a hint.
         fn tvar<'cx>(
             &mut self,
@@ -5884,15 +5875,12 @@ fn find_value_literal<'cx>(
             id: u32,
         ) {
             let key = (id, self.templates);
-            if let Some(found) = self.literals.get(&key).copied() {
+            if let Some(found) = cx.literal_cache_mut().tvars.get(&key).copied() {
                 self.found |= found;
                 return;
             }
-            if self.visiting.contains(&id) {
-                self.incomplete += 1;
-                return;
-            }
             if !self.tvars.insert(id) {
+                self.incomplete += 1;
                 return;
             }
             let t = match cx.find_constraints(id as i32).1 {
@@ -5904,12 +5892,9 @@ fn find_value_literal<'cx>(
                 }
             };
             let before = self.incomplete;
-            self.visiting.insert(id);
             self.type_(cx, pole, (), &t);
-            self.visiting.remove(&id);
-            // A resolved type variable does not change: what it holds is remembered for the solve.
             if self.found || self.incomplete == before {
-                self.literals.insert(key, self.found);
+                cx.literal_cache_mut().tvars.insert(key, self.found);
             }
         }
 
@@ -5917,20 +5902,25 @@ fn find_value_literal<'cx>(
             if self.found {
                 return;
             }
+            let key = (addr(t), self.templates);
+            if let Some((_, found)) = cx.literal_cache_mut().types.get(&key) {
+                self.found |= *found;
+                return;
+            }
             if !self.seen.insert(addr(t)) {
-                if self.incomplete_types.contains(&addr(t)) {
-                    self.incomplete += 1;
-                }
+                self.incomplete += 1;
                 return;
             }
             let before = self.incomplete;
             self.visit(cx, pole, t);
-            if self.incomplete > before {
-                self.incomplete_types.insert(addr(t));
+            if self.found || self.incomplete == before {
+                cx.literal_cache_mut()
+                    .types
+                    .insert(key, (t.dupe(), self.found));
             }
         }
     }
-    impl Visitor<'_> {
+    impl Visitor {
         fn visit<'cx>(&mut self, cx: &mut Context<'cx>, pole: Polarity, t: &Type) {
             match t.deref() {
                 TypeInner::DefT(_, d)
@@ -5984,14 +5974,11 @@ fn find_value_literal<'cx>(
         }
     }
     let mut visitor = Visitor {
-        literals,
         found: false,
         templates,
         tvars: BTreeSet::new(),
         seen: BTreeSet::new(),
-        visiting: BTreeSet::new(),
         incomplete: 0,
-        incomplete_types: BTreeSet::new(),
     };
     visitor.type_(cx, Polarity::Positive, (), t);
     visitor.found
@@ -6425,32 +6412,25 @@ fn solve_targs_in_snapshot<'cx>(
         })
         .collect();
     let mut pairs: Vec<(Type, Type)> = Vec::new();
-    let mut literals = LiteralCache::new();
     for (tparam, marker) in tparams.iter().zip(markers.iter()) {
         let Some(name) = marker else { continue };
         let bounds = walker.vars[name].clone();
         let lower: Vec<Type> = types(&bounds.lower).duped().collect();
         let upper: Vec<Type> = types(&bounds.upper).duped().collect();
-        let as_upper = |walker: &mut Walker<'_>,
-                        cx: &mut Context<'cx>,
-                        literals: &mut LiteralCache,
-                        ts: &[Type]| {
+        let as_upper = |walker: &mut Walker<'_>, cx: &mut Context<'cx>, ts: &[Type]| {
             ts.iter()
-                .map(|t| !walker.mentions(cx, t) && !has_value_literal(cx, literals, t))
+                .map(|t| !walker.mentions(cx, t) && !has_value_literal(cx, t))
                 .collect::<Vec<bool>>()
         };
-        let as_lower = |walker: &mut Walker<'_>,
-                        cx: &mut Context<'cx>,
-                        literals: &mut LiteralCache,
-                        ts: &[Type]| {
+        let as_lower = |walker: &mut Walker<'_>, cx: &mut Context<'cx>, ts: &[Type]| {
             ts.iter()
-                .map(|t| !walker.mentions(cx, t) && has_inferred_literal(cx, literals, t))
+                .map(|t| !walker.mentions(cx, t) && has_inferred_literal(cx, t))
                 .collect::<Vec<bool>>()
         };
         if !lower.is_empty() {
-            let upper_ok = as_upper(&mut walker, cx, &mut literals, &upper);
+            let upper_ok = as_upper(&mut walker, cx, &upper);
             if upper_ok.iter().any(|ok| *ok) {
-                let lower_ok = as_lower(&mut walker, cx, &mut literals, &lower);
+                let lower_ok = as_lower(&mut walker, cx, &lower);
                 for (l, _) in lower.iter().zip(&lower_ok).filter(|(_, ok)| **ok) {
                     for (u, _) in upper.iter().zip(&upper_ok).filter(|(_, ok)| **ok) {
                         pairs.push((l.dupe(), u.dupe()));
@@ -6469,8 +6449,8 @@ fn solve_targs_in_snapshot<'cx>(
                     Some(t) => vec![t.dupe()],
                     None => lower.clone(),
                 };
-                let from_ok = as_lower(&mut walker, cx, &mut literals, &from);
-                let bound_ok = has_inferred_literal(cx, &mut literals, &bound);
+                let from_ok = as_lower(&mut walker, cx, &from);
+                let bound_ok = has_inferred_literal(cx, &bound);
                 for (l, _) in from
                     .iter()
                     .zip(&from_ok)
@@ -6482,8 +6462,8 @@ fn solve_targs_in_snapshot<'cx>(
         }
         // Types met in invariant positions are unified with each other.
         if bounds.exact.len() > 1 {
-            let exact_upper_ok = as_upper(&mut walker, cx, &mut literals, &bounds.exact);
-            let exact_lower_ok = as_lower(&mut walker, cx, &mut literals, &bounds.exact);
+            let exact_upper_ok = as_upper(&mut walker, cx, &bounds.exact);
+            let exact_lower_ok = as_lower(&mut walker, cx, &bounds.exact);
             for (i, a) in bounds.exact.iter().enumerate() {
                 for (j, b) in bounds.exact.iter().enumerate() {
                     if i != j && exact_lower_ok[i] && exact_upper_ok[j] {
@@ -6558,7 +6538,7 @@ fn solve_targs_in_snapshot<'cx>(
         })
         .collect();
     for (arg, param) in std::mem::take(&mut walker.spread_tuple_pairs) {
-        if !has_inferred_literal(cx, &mut literals, &arg) {
+        if !has_inferred_literal(cx, &arg) {
             continue;
         }
         let param = subst(cx, &inferred, &param);

@@ -588,6 +588,7 @@ struct ContextInner {
     hint_map_arglist_cache: HashMap<(ALoc, Option<ALoc>), Vec<(ALoc, type_::CallArg)>>,
     hint_map_jsx_cache: HashMap<(Reason, String, Vec<ALoc>, ALoc), LazyHintMapJsx>,
     hint_eval_cache: IntHashMap<i32, Option<Type>>,
+    literal_cache: LiteralCache,
     environment: LocEnv<Cx>,
     typing_mode: TypingMode,
     //  A subset of all transitive dependencies of the current file as determined by import/require.
@@ -602,6 +603,15 @@ struct ContextInner {
 }
 
 pub type LazyHintMapJsx = Rc<flow_lazy::Lazy<Cx, Result<Type, JobError>>>;
+
+/// Whether the implicit instantiation walk found a literal of a value, with or without template
+/// literals, behind a resolved type variable or in a type. A type is keyed by its address and held,
+/// so that the address stays its own.
+#[derive(Default)]
+pub struct LiteralCache {
+    pub tvars: HashMap<(u32, bool), bool>,
+    pub types: HashMap<(usize, bool), (Type, bool)>,
+}
 
 pub type ResolveRequire =
     Rc<dyn for<'a> Fn(&mut Context<'a>, &FlowImportSpecifier) -> ResolvedRequire>;
@@ -748,6 +758,7 @@ impl ContextArena {
             hint_map_arglist_cache: HashMap::new(),
             hint_map_jsx_cache: HashMap::new(),
             hint_eval_cache: IntHashMap::default(),
+            literal_cache: LiteralCache::default(),
             environment: LocEnv::empty(ScopeKind::Global),
             typing_mode: TypingMode::CheckingMode,
             reachable_deps: BTreeSet::new(),
@@ -3086,6 +3097,10 @@ impl<'a> Context<'a> {
 
     pub fn add_hint_eval_cache_entry(&mut self, id: i32, result: Option<Type>) {
         self.inner_mut().hint_eval_cache.insert(id, result);
+    }
+
+    pub fn literal_cache_mut(&mut self) -> &mut LiteralCache {
+        &mut self.inner_mut().literal_cache
     }
 
     // utils
