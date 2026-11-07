@@ -264,6 +264,12 @@ pub struct TokenSinkResult {
     pub token_context: LexMode,
 }
 
+#[derive(Debug)]
+pub struct ParenthesizedExpressionLocation {
+    pub loc: Loc,
+    pub expression_loc: Loc,
+}
+
 #[derive(Debug, Clone)]
 pub struct ParseOptions {
     /// enable parsing of Flow component syntax
@@ -360,6 +366,7 @@ pub(crate) struct ParserEnvFlags {
 pub struct ParserEnv<'a> {
     errors: Vec<(Loc, ParseError)>,
     comments: Vec<Comment<Loc>>,
+    parenthesized_expression_locations: Option<Vec<ParenthesizedExpressionLocation>>,
     labels: HashSet<FlowSmolStr>,
     last_lex_result: Option<(Loc, TokenKind)>,
     flags: ParserEnvFlags,
@@ -433,6 +440,7 @@ pub fn init_env<'a, E>(
     ParserEnv {
         errors,
         comments: Vec::new(),
+        parenthesized_expression_locations: None,
         labels: HashSet::new(),
         last_lex_result: None,
         flags: ParserEnvFlags {
@@ -470,6 +478,27 @@ pub fn init_env<'a, E>(
 }
 
 impl<'a> ParserEnv<'a> {
+    pub fn enable_parenthesized_expression_locations(&mut self) {
+        self.parenthesized_expression_locations = Some(Vec::new());
+    }
+
+    pub fn take_parenthesized_expression_locations(
+        &mut self,
+    ) -> Vec<ParenthesizedExpressionLocation> {
+        self.parenthesized_expression_locations
+            .take()
+            .unwrap_or_default()
+    }
+
+    pub(crate) fn record_parenthesized_expression(&mut self, loc: Loc, expression_loc: Loc) {
+        if let Some(locations) = &mut self.parenthesized_expression_locations {
+            locations.push(ParenthesizedExpressionLocation {
+                loc,
+                expression_loc,
+            });
+        }
+    }
+
     // getters
 
     pub(crate) fn in_strict_mode(&self) -> bool {
@@ -2731,6 +2760,7 @@ pub mod try_parse {
     struct SavedState {
         saved_errors_len: usize,
         saved_comments_len: usize,
+        saved_parenthesized_expression_locations_len: usize,
         saved_last_lex_result: Option<(Loc, TokenKind)>,
         saved_lex_mode_stack: Vec<LexMode>,
         saved_lex_cursor: wrapped_lex_env::WrappedLexCursor,
@@ -2753,6 +2783,10 @@ pub mod try_parse {
         SavedState {
             saved_errors_len: env.errors.len(),
             saved_comments_len: env.comments.len(),
+            saved_parenthesized_expression_locations_len: env
+                .parenthesized_expression_locations
+                .as_ref()
+                .map_or(0, Vec::len),
             saved_last_lex_result: env.last_lex_result.clone(),
             saved_lex_mode_stack: env.lex_mode_stack.clone(),
             saved_lex_cursor: env.lookahead.committed_cursor(),
@@ -2783,6 +2817,9 @@ pub mod try_parse {
         reset_token_sink(env, saved_state.token_buffer, false);
         env.errors.truncate(saved_state.saved_errors_len);
         env.comments.truncate(saved_state.saved_comments_len);
+        if let Some(locations) = &mut env.parenthesized_expression_locations {
+            locations.truncate(saved_state.saved_parenthesized_expression_locations_len);
+        }
         env.last_lex_result = saved_state.saved_last_lex_result;
         env.lex_mode_stack = saved_state.saved_lex_mode_stack;
         env.consumed_comments_pos = saved_state.saved_consumed_comments_pos;

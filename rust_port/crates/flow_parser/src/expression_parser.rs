@@ -2731,7 +2731,10 @@ fn group(env: &mut ParserEnv) -> Result<expression::Expression<Loc, Loc>, Rollba
 
     let trailing = eat::trailing_comments(env);
     let ret = match cover {
-        GroupCover::GroupExpr(expr) => expr,
+        GroupCover::GroupExpr(expr) => {
+            env.record_parenthesized_expression(loc, expr.loc().dupe());
+            expr
+        }
         GroupCover::GroupTypecast(cast) => expression::Expression::new(ExpressionInner::TypeCast {
             loc,
             inner: Arc::new(cast),

@@ -454,6 +454,13 @@ fn check_for_duplicate_exports(env: &mut ParserEnv, stmts: &[ast::statement::Sta
     }
 }
 
+pub fn parse_program_in_context(
+    env: &mut ParserEnv,
+    allow_await: bool,
+) -> Result<ast::Program<Loc, Loc>, Rollback> {
+    env.with_allow_await(allow_await, parse_program_inner)
+}
+
 fn parse_program_inner(env: &mut ParserEnv) -> Result<ast::Program<Loc, Loc>, Rollback> {
     // Set ambient context for .flow and .d.ts files, or if ambient parse option is set
     let should_use_ambient = env.parse_options().ambient
