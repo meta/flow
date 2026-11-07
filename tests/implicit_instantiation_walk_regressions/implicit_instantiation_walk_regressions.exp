@@ -1,3 +1,24 @@
+Error ---------------------------------------------------------------------------- bound_needs_literal_of_other.js:17:16
+
+Cannot call `loadEntryPoint` because in type argument `TEntryPoint` > type argument `TParams` [1] > property `surface`:
+`Surface` [2] is incompatible with `"nope"` [3]. [incompatible-type]
+
+   bound_needs_literal_of_other.js:17:16
+   17| loadEntryPoint(ep, {surface: 'nope', id: '1'}); // error
+                      ^^
+
+References:
+   bound_needs_literal_of_other.js:4:20
+    4| type EntryPoint<in TParams, out TComponent> = Readonly<{
+                          ^^^^^^^ [1]
+   bound_needs_literal_of_other.js:15:49
+   15| declare const ep: EntryPoint<Readonly<{surface: Surface, id: string}>, component(x: number)>;
+                                                       ^^^^^^^ [2]
+   bound_needs_literal_of_other.js:17:30
+   17| loadEntryPoint(ep, {surface: 'nope', id: '1'}); // error
+                                    ^^^^^^ [3]
+
+
 Error --------------------------------------------------------------------------------------- callable_interface.js:10:1
 
 Cannot cast `p` to `Promise<string>` because in type argument `T` [1]: `number` [2] is incompatible with `string` [3].
@@ -37,6 +58,41 @@ References:
    class_component_default_props.js:9:31
     9| class Boundary<TProps extends Props = Props> extends React.PureComponent<TProps> {
                                      ^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------- class_extends_constructor.js:10:1
+
+Cannot cast `unwrap(...).status` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   class_extends_constructor.js:10:1
+   10| unwrap(request).status as string; // error
+       ^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   class_extends_constructor.js:3:48
+    3| declare class Request extends Promise<{status: number}> {
+                                                      ^^^^^^ [1]
+   class_extends_constructor.js:10:27
+   10| unwrap(request).status as string; // error
+                                 ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------- class_extends_constructor.js:14:3
+
+Cannot cast `(await request).status` to `string` because `number` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   class_extends_constructor.js:14:3
+   14|   (await request).status as string; // error
+         ^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   class_extends_constructor.js:3:48
+    3| declare class Request extends Promise<{status: number}> {
+                                                      ^^^^^^ [1]
+   class_extends_constructor.js:14:29
+   14|   (await request).status as string; // error
+                                   ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------- component_bound.js:31:11
@@ -424,6 +480,24 @@ References:
       ^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------------ rest_past_params.js:9:1
+
+Cannot cast `afterSecond(...)` to `[number]` because in index `0`: `boolean` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   rest_past_params.js:9:1
+   9| afterSecond(tupleRest) as [number]; // error
+      ^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   rest_past_params.js:7:57
+   7| declare function tupleRest(a: string, ...rest: [number, boolean]): void;
+                                                              ^^^^^^^ [1]
+   rest_past_params.js:9:28
+   9| afterSecond(tupleRest) as [number]; // error
+                                 ^^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------ structural_variance_unions.js:42:10
 
 Cannot use `this` [1] in an input position because `this` [1] is expected to occur only in output positions.
@@ -485,4 +559,4 @@ References:
 
 
 
-Found 28 errors
+Found 32 errors

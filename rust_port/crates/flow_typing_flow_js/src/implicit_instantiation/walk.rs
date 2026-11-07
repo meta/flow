@@ -1607,9 +1607,14 @@ impl<'e> Walker<'e> {
                 }
                 Ok(())
             }
-            // An opaque type, such as a React element, against a renders type.
+            // An opaque type, such as a React element, against a renders type, and back.
             (TypeInner::NominalT { .. }, TypeInner::DefT(_, ud))
                 if matches!(ud.deref(), DefTInner::RendersT(_)) =>
+            {
+                self.walk_renders(cx, &l, &u)
+            }
+            (TypeInner::DefT(_, ld), TypeInner::NominalT { .. })
+                if matches!(ld.deref(), DefTInner::RendersT(_)) =>
             {
                 self.walk_renders(cx, &l, &u)
             }
@@ -2796,6 +2801,16 @@ impl<'e> Walker<'e> {
             }
         }
         match (&urest, &lrest) {
+            // `l`'s rest parameter receives `u`'s parameters past `l`'s and `u`'s rest parameter.
+            (Some(urest), Some(lrest)) if un > ln && !self.rest_is_array(cx, urest) => {
+                let tuple = reverse_resolve_spread_multiflow_subtype_full_no_resolution(
+                    cx,
+                    &reason,
+                    uf.params.get(ln..).unwrap_or(&[]),
+                    &uf.rest_param,
+                )?;
+                self.walk(cx, &tuple, lrest)?;
+            }
             // `u`'s rest parameter feeds `l`'s remaining parameters: it is a subtype of their tuple,
             // as the flow-based solve's reversal builds it.
             (Some(urest), _) if !self.rest_is_array(cx, urest) => {
@@ -3083,6 +3098,8 @@ impl<'e> Walker<'e> {
                     TypeInner::TypeAppT(_) | TypeInner::ThisTypeAppT(_) => {
                         if let Some(t) = self.expand_typeapp(cx, &sup) {
                             supers.push_front(t);
+                        } else if let Some(t) = self.constructed(cx, &sup) {
+                            supers.push_front(t);
                         }
                     }
                     _ => {}
@@ -3090,6 +3107,67 @@ impl<'e> Walker<'e> {
             }
         }
         result
+    }
+
+    /// What a class extends when its superclass is a value with a construct signature (`class B
+    /// extends Promise<T>`, with `declare var Promise: PromiseConstructor`), as subtyping gets it:
+    /// what the first construct signature that takes the type arguments returns.
+    fn constructed<'cx>(&self, cx: &mut Context<'cx>, t: &Type) -> Option<Type> {
+        let (type_, targs) = match t.deref() {
+            TypeInner::TypeAppT(a) => (a.type_.dupe(), a.targs.dupe()),
+            TypeInner::ThisTypeAppT(a) => (
+                a.type_.dupe(),
+                a.targs.clone().unwrap_or_else(|| Rc::from([])),
+            ),
+            _ => return None,
+        };
+        let c = self.resolve(cx, &type_);
+        let TypeInner::DefT(_, d) = c.deref() else {
+            return None;
+        };
+        let DefTInner::InstanceT(i) = d.deref() else {
+            return None;
+        };
+        let ctor = cx.find_call(i.inst.inst_construct_t?);
+        let ctor = self.resolve(cx, &ctor);
+        let signatures: Vec<Type> = match ctor.deref() {
+            TypeInner::IntersectionT(_, rep) => rep.members_iter().duped().collect(),
+            _ => vec![ctor],
+        };
+        signatures.iter().find_map(|signature| {
+            let signature = self.resolve(cx, signature);
+            let TypeInner::DefT(_, d) = signature.deref() else {
+                return None;
+            };
+            match d.deref() {
+                DefTInner::FunT(_, f) if targs.is_empty() => Some(f.return_t.dupe()),
+                DefTInner::PolyT(p)
+                    if targs.len() <= p.tparams.len()
+                        && p.tparams
+                            .iter()
+                            .skip(targs.len())
+                            .all(|tp| tp.default.is_some()) =>
+                {
+                    let mut map = FlowOrdMap::new();
+                    for (i, tparam) in p.tparams.iter().enumerate() {
+                        let targ = match (targs.get(i), &tparam.default) {
+                            (Some(t), _) => t.dupe(),
+                            (None, Some(default)) => subst(cx, &map, default),
+                            (None, None) => return None,
+                        };
+                        map.insert(tparam.name.dupe(), targ);
+                    }
+                    let f = subst(cx, &map, &p.t_out);
+                    match self.resolve(cx, &f).deref() {
+                        TypeInner::DefT(_, d) if let DefTInner::FunT(_, f) = d.deref() => {
+                            Some(f.return_t.dupe())
+                        }
+                        _ => None,
+                    }
+                }
+                _ => None,
+            }
+        })
     }
 
     /// The `any` that an instance extends, itself or through an ancestor, if it does.
@@ -3261,6 +3339,10 @@ impl<'e> Walker<'e> {
                 self.walk_by_polarity(cx, &l, &u, p)?;
             }
             return Ok(());
+        }
+        // A class that extends `any` meets the other instance through that `any`, as in subtyping.
+        if let Some(any) = self.any_super(cx, li) {
+            return self.walk(cx, &any, u);
         }
         if matches!(ui.inst.inst_kind, InstanceKind::InterfaceKind { .. }) {
             // The call and construct signatures, as in structural subtyping.
@@ -4560,13 +4642,27 @@ impl<'e> Walker<'e> {
                 },
                 _ => Ok(()),
             },
-            // Out of the renders world: what `renders A` renders, `A`.
+            // Out of the renders world, as subtyping leaves it: what `renders A` renders, `A`; the
+            // render type of a component or an intrinsic is a `React.MixedElement`.
             (Some(lf), None) => match lf.deref() {
                 CanonicalRendersForm::StructuralRenders {
                     renders_structural_type: a,
                     ..
                 } => self.walk(cx, a, u),
-                _ => Ok(()),
+                CanonicalRendersForm::NominalRenders { .. }
+                | CanonicalRendersForm::IntrinsicRenders(_) => {
+                    let reason = type_util::reason_of_t(l).dupe();
+                    let mixed_element = FlowJs::get_builtin_react_type_with_env(
+                        cx,
+                        self.env,
+                        None,
+                        &reason,
+                        None,
+                        ExpectedModulePurpose::ReactModuleForReactMixedElementType,
+                    )?;
+                    self.walk(cx, &mixed_element, u)
+                }
+                CanonicalRendersForm::DefaultRenders => Ok(()),
             },
             (None, None) => Ok(()),
         }
@@ -6329,7 +6425,9 @@ fn solve_targs_in_snapshot<'cx>(
             }
         }
         // The tvar flows to the bound with its first exact bound, or its lower bounds. A bound is
-        // an annotation: a literal of a value in it was not met in an invariant position.
+        // an annotation: a literal of a value in it was not met in an invariant position, but the
+        // solutions so far of the type parameters it mentions can have literals that the flow
+        // needs precise.
         if !is_mixed_or_any(&walker.resolve(cx, &tparam.bound)) {
             let bound = subst(cx, &open_map, &tparam.bound);
             if !walker.mentions(cx, &bound) {
@@ -6338,7 +6436,12 @@ fn solve_targs_in_snapshot<'cx>(
                     None => lower.clone(),
                 };
                 let from_ok = as_lower(&mut walker, cx, &mut literals, &from);
-                for (l, _) in from.iter().zip(&from_ok).filter(|(_, ok)| **ok) {
+                let bound_ok = has_inferred_literal(cx, &mut literals, &bound);
+                for (l, _) in from
+                    .iter()
+                    .zip(&from_ok)
+                    .filter(|(l, ok)| **ok || (bound_ok && !walker.mentions(cx, l)))
+                {
                     pairs.push((l.dupe(), bound.dupe()));
                 }
             }
