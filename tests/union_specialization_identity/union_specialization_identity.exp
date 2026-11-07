@@ -1,0 +1,48 @@
+Error ----------------------------------------------------------------------------------------------------- test.js:4:22
+
+Cannot assign `d` to `e` because in property `a.a.a.v` > array element > array element > array element: `string` [1] is
+incompatible with `number` [2]. [incompatible-type]
+
+   test.js:4:22
+   4| const e: E<number> = d; // error
+                           ^
+
+References:
+   test.js:3:20
+   3| declare const d: D<string>;
+                         ^^^^^^ [1]
+   test.js:4:12
+   4| const e: E<number> = d; // error
+                 ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:4:22
+
+Cannot assign `d` to `e` because in property `a.a.a.r.v`: [incompatible-type]
+ - Either in array element > array element > array element: `string` [1] is incompatible with `number` [2].
+ - Or `ReadonlyArray<ReadonlyArray<ReadonlyArray<string>>>` [3] is incompatible with `void` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   test.js:4:22
+   4| const e: E<number> = d; // error
+                           ^
+
+References:
+   test.js:3:20
+   3| declare const d: D<string>;
+                         ^^^^^^ [1]
+   test.js:4:12
+   4| const e: E<number> = d; // error
+                 ^^^^^^ [2]
+   test.js:1:28
+   1| type D<T> = {readonly a: D<ReadonlyArray<T>>, readonly r: D<T | void>, readonly v: T};
+                                 ^^^^^^^^^^^^^^^^ [3]
+   test.js:2:65
+   2| type E<T> = {readonly a: E<ReadonlyArray<T>>, readonly r: E<T | void>, readonly v: T};
+                                                                      ^^^^ [4]
+
+
+
+Found 2 errors

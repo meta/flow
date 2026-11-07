@@ -8425,7 +8425,7 @@ pub mod union_rep {
         UnknownKind,
     }
 
-    #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+    #[derive(Debug, Clone)]
     pub enum FinallyOptimizedRep {
         /// [None] in the position of tag means that the values used to create this
         /// enum union were not of the same tag.
@@ -8439,46 +8439,6 @@ pub mod union_rep {
         ),
         Empty,
         Singleton(Type),
-    }
-
-    // Manual Hash impl because BTreeMap does not implement Hash in std.
-    // OCaml's generic compare/hash traverses all fields structurally,
-    // including through ref cells. We match that behavior here.
-    impl std::hash::Hash for FinallyOptimizedRep {
-        fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-            std::mem::discriminant(self).hash(state);
-            match self {
-                FinallyOptimizedRep::EnumUnion(set, tag) => {
-                    set.hash(state);
-                    tag.hash(state);
-                }
-                FinallyOptimizedRep::PartiallyOptimizedUnionEnum(set) => {
-                    set.hash(state);
-                }
-                FinallyOptimizedRep::AlmostDisjointUnionWithPossiblyNonUniqueKeys(map) => {
-                    for (k, v) in map.iter() {
-                        k.hash(state);
-                        for (k2, v2) in v {
-                            k2.hash(state);
-                            v2.hash(state);
-                        }
-                    }
-                }
-                FinallyOptimizedRep::PartiallyOptimizedAlmostDisjointUnionWithPossiblyNonUniqueKeys(map) => {
-                    for (k, v) in map.iter() {
-                        k.hash(state);
-                        for (k2, v2) in v {
-                            k2.hash(state);
-                            v2.hash(state);
-                        }
-                    }
-                }
-                FinallyOptimizedRep::Empty => {}
-                FinallyOptimizedRep::Singleton(t) => {
-                    t.hash(state);
-                }
-            }
-        }
     }
 
     #[derive(
@@ -8527,37 +8487,7 @@ pub mod union_rep {
         }
     }
 
-    impl PartialEq for Specialization {
-        fn eq(&self, other: &Self) -> bool {
-            std::ptr::eq(self.0.as_ptr(), other.0.as_ptr()) || *self.0.borrow() == *other.0.borrow()
-        }
-    }
-
-    impl Eq for Specialization {}
-
-    impl PartialOrd for Specialization {
-        fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-            Some(self.cmp(other))
-        }
-    }
-
-    impl Ord for Specialization {
-        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-            if std::ptr::eq(self.0.as_ptr(), other.0.as_ptr()) {
-                std::cmp::Ordering::Equal
-            } else {
-                self.0.borrow().cmp(&other.0.borrow())
-            }
-        }
-    }
-
-    impl std::hash::Hash for Specialization {
-        fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-            self.0.borrow().hash(state)
-        }
-    }
-
-    #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+    #[derive(Debug)]
     pub struct UnionRepInner {
         t0: Type,
         t1: Type,
@@ -8574,6 +8504,68 @@ pub mod union_rep {
         kind: UnionKind,
     }
 
+    // The specialization caches an optimized form of the members and is filled in after the
+    // union is created, so it takes no part in the union's identity.
+    impl PartialEq for UnionRepInner {
+        fn eq(&self, other: &Self) -> bool {
+            let UnionRepInner {
+                t0,
+                t1,
+                ts,
+                source_aloc,
+                specialization: _,
+                kind,
+            } = self;
+            let UnionRepInner {
+                t0: other_t0,
+                t1: other_t1,
+                ts: other_ts,
+                source_aloc: other_source_aloc,
+                specialization: _,
+                kind: other_kind,
+            } = other;
+            t0 == other_t0
+                && t1 == other_t1
+                && ts == other_ts
+                && source_aloc == other_source_aloc
+                && kind == other_kind
+        }
+    }
+
+    impl Eq for UnionRepInner {}
+
+    impl PartialOrd for UnionRepInner {
+        fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+            Some(self.cmp(other))
+        }
+    }
+
+    impl Ord for UnionRepInner {
+        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+            let UnionRepInner {
+                t0,
+                t1,
+                ts,
+                source_aloc,
+                specialization: _,
+                kind,
+            } = self;
+            let UnionRepInner {
+                t0: other_t0,
+                t1: other_t1,
+                ts: other_ts,
+                source_aloc: other_source_aloc,
+                specialization: _,
+                kind: other_kind,
+            } = other;
+            t0.cmp(other_t0)
+                .then_with(|| t1.cmp(other_t1))
+                .then_with(|| ts.cmp(other_ts))
+                .then_with(|| source_aloc.cmp(other_source_aloc))
+                .then_with(|| kind.cmp(other_kind))
+        }
+    }
+
     // Mirror OCaml's bounded `Hashtbl.hash`: cap the recursion through
     // `ts` to keep `UnionRepInner` hashing O(1) instead of O(union
     // membership). Equality is unchanged so HashMap correctness is
@@ -8584,15 +8576,22 @@ pub mod union_rep {
 
     impl std::hash::Hash for UnionRepInner {
         fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-            self.t0.hash(state);
-            self.t1.hash(state);
-            self.ts.len().hash(state);
-            for t in self.ts.iter().take(UNION_HASH_BOUND) {
+            let UnionRepInner {
+                t0,
+                t1,
+                ts,
+                source_aloc,
+                specialization: _,
+                kind,
+            } = self;
+            t0.hash(state);
+            t1.hash(state);
+            ts.len().hash(state);
+            for t in ts.iter().take(UNION_HASH_BOUND) {
                 t.hash(state);
             }
-            self.source_aloc.hash(state);
-            self.specialization.hash(state);
-            self.kind.hash(state);
+            source_aloc.hash(state);
+            kind.hash(state);
         }
     }
 
