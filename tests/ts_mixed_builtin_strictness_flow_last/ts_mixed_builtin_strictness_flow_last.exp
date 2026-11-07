@@ -151,5 +151,31 @@ References:
                           ^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
+Error ---------------------------------------------------------------------------------------------------- test.js:39:22
 
-Found 7 errors
+Cannot extend `FlowBuiltinNode` [1] with `FlowBuiltinSubNode` [2] because in property `clone` > the first parameter:
+`FlowBuiltinSubNode` [3] is incompatible with `unknown` [4]. [incompatible-type]
+
+   test.js:39:22
+   39|   static clone(node: FlowBuiltinSubNode): FlowBuiltinSubNode { // ERROR: overrides a Flow method.
+                            ^^^^^^^^^^^^^^^^^^ [3]
+
+References:
+   test.js:38:34
+   38| class FlowBuiltinSubNode extends FlowBuiltinNode {
+                                        ^^^^^^^^^^^^^^^ [1]
+   test.js:38:1
+       v-------------------------------------------------
+   38| class FlowBuiltinSubNode extends FlowBuiltinNode {
+   39|   static clone(node: FlowBuiltinSubNode): FlowBuiltinSubNode { // ERROR: overrides a Flow method.
+   40|     return new FlowBuiltinSubNode();
+   41|   }
+   42| }
+       ^ [2]
+   a_flow.js:31:22
+   31|   static clone(data: unknown): FlowBuiltinNode;
+                            ^^^^^^^ [4]
+
+
+
+Found 8 errors

@@ -26,3 +26,7 @@ declare interface MergedIface {
   arr: Array<number>;
 }
 declare function over(x: number): void;
+
+declare class FlowBuiltinNode {
+  static clone(data: unknown): FlowBuiltinNode;
+}

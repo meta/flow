@@ -7,3 +7,7 @@ export declare class Node {
   static importJSON(json: {type: string}): Node;
   update(node: Node): void;
 }
+
+export declare class ElementNode extends Node {}
+
+export type NodeShape = {update(node: unknown): void};

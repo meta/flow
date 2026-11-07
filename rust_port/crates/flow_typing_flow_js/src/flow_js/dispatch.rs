@@ -224,7 +224,7 @@ fn strict_lookup_failed<'cx>(
             trace,
             propref,
             &property::property_type(&fallback.property),
-            Some(&fallback.property),
+            Some((&fallback.property, fallback.strictness_kind)),
             PropertySource::IndexerProperty,
             &fallback.obj,
             reason_op,
@@ -6457,7 +6457,7 @@ fn __flow_impl<'cx>(
                             trace,
                             propref,
                             &property_type,
-                            Some(&p),
+                            Some((&p, inst_t.inst.strictness_kind)),
                             target_kind,
                             l,
                             reason_op,
@@ -6649,7 +6649,7 @@ fn __flow_impl<'cx>(
                             trace,
                             &propref,
                             &property::property_type(p),
-                            Some(p),
+                            Some((p, inst.strictness_kind)),
                             PropertySource::PropertyMapProperty,
                             l,
                             &spp_data.reason,
@@ -7073,7 +7073,7 @@ fn __flow_impl<'cx>(
                             trace,
                             propref,
                             &property::property_type(&p),
-                            Some(&p),
+                            Some((&p, o.strictness_kind)),
                             target_kind.clone(),
                             l,
                             reason_op,
@@ -8698,7 +8698,7 @@ fn __flow_impl<'cx>(
                     l,
                     x,
                     p,
-                    strictness_kind.join(inst_t.inst.strictness_kind),
+                    *strictness_kind,
                 )?;
             }
             for (x, p) in proto.iter() {
@@ -8715,7 +8715,7 @@ fn __flow_impl<'cx>(
                         l,
                         x,
                         p,
-                        strictness_kind.join(inst_t.inst.strictness_kind),
+                        *strictness_kind,
                     )?;
                 }
             }
@@ -8737,7 +8737,7 @@ fn __flow_impl<'cx>(
                         st,
                         x,
                         p,
-                        strictness_kind.join(inst_t.inst.strictness_kind),
+                        *strictness_kind,
                     )?;
                 }
             }
@@ -8779,7 +8779,7 @@ fn __flow_impl<'cx>(
                     l,
                     x,
                     p,
-                    strictness_kind.join(obj.strictness_kind),
+                    *strictness_kind,
                 )?;
             }
             for (x, p) in proto.iter() {
@@ -8796,7 +8796,7 @@ fn __flow_impl<'cx>(
                         l,
                         x,
                         p,
-                        strictness_kind.join(obj.strictness_kind),
+                        *strictness_kind,
                     )?;
                 }
             }
@@ -10159,7 +10159,7 @@ fn __flow_impl<'cx>(
                     trace,
                     propref,
                     &property::property_type(&fallback.property),
-                    Some(&fallback.property),
+                    Some((&fallback.property, fallback.strictness_kind)),
                     PropertySource::IndexerProperty,
                     &fallback.obj,
                     reason_op,

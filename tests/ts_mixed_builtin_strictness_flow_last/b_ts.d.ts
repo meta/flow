@@ -52,3 +52,7 @@ declare function over(x: string): void;
 declare namespace over {
   let f: number;
 }
+
+declare class TsBuiltinNode {
+  static clone(data: unknown): TsBuiltinNode;
+}

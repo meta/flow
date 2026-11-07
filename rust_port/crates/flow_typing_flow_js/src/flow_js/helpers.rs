@@ -163,6 +163,9 @@ pub(super) fn speculative_subtyping_succeeds_non_speculating<'cx>(
 
 // get prop
 
+/// `prop` is the property the lookup found, with the language of the type that
+/// declares it.
+///
 /// `up` is the upper property `propref` was looked up for. Only
 /// [`LookupAction::LookupPropsForSubtyping`] needs it, since it carries several
 /// upper properties at once; `dispatch::lookup_targets` pairs each of them with
@@ -173,7 +176,7 @@ pub(super) fn perform_lookup_action<'cx>(
     trace: DepthTrace,
     propref: &PropRef,
     p: &PropertyType,
-    prop: Option<&Property>,
+    prop: Option<(&Property, TypeStrictnessKind)>,
     target_kind: PropertySource,
     l: &Type,
     ureason: &Reason,
@@ -224,7 +227,7 @@ pub(super) fn perform_lookup_action<'cx>(
                     env,
                     Some(trace),
                     use_op,
-                    prop.map(|lp| (lp, up)),
+                    prop.map(|(lp, _)| (lp, up)),
                     *strictness_kind,
                     true,
                     PropPolarityMismatchObject::Type(l),
@@ -237,6 +240,12 @@ pub(super) fn perform_lookup_action<'cx>(
         }
         LookupAction::SuperProp(box (use_op, lp, strictness_kind, derived)) => {
             let lp_type = property::property_type(lp);
+            let strictness_kind = match prop {
+                Some((_, declared_strictness_kind)) => {
+                    strictness_kind.join(declared_strictness_kind)
+                }
+                None => *strictness_kind,
+            };
             let derived = match derived {
                 DerivedReference::Named(name) => {
                     PropPolarityMismatchObject::Class(NamedReferenceData {
@@ -251,8 +260,8 @@ pub(super) fn perform_lookup_action<'cx>(
                 env,
                 Some(trace),
                 use_op.dupe(),
-                prop.map(|up| (lp, up)),
-                *strictness_kind,
+                prop.map(|(up, _)| (lp, up)),
+                strictness_kind,
                 true,
                 derived,
                 PropPolarityMismatchObject::Type(l),

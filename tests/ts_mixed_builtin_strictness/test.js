@@ -27,3 +27,15 @@ FlowNs as {v: number | string, ...}; // ERROR: read-only in Flow.
 declare var mergedIface: MergedIface;
 mergedIface.arr as Array<number | string>; // ERROR: a Flow array is invariant.
 over as {f: number | string, ...}; // OK
+
+// An override of a static method follows the file that declares the method.
+class TsBuiltinSubNode extends TsBuiltinNode {
+  static clone(node: TsBuiltinSubNode): TsBuiltinSubNode { // OK: overrides a TypeScript method.
+    return new TsBuiltinSubNode();
+  }
+}
+class FlowBuiltinSubNode extends FlowBuiltinNode {
+  static clone(node: FlowBuiltinSubNode): FlowBuiltinSubNode { // ERROR: overrides a Flow method.
+    return new FlowBuiltinSubNode();
+  }
+}

@@ -568,7 +568,7 @@ pub(super) fn write_obj_prop<'cx>(
             trace,
             propref,
             &property::property_type(&p),
-            Some(&p),
+            Some((&p, o.strictness_kind)),
             target_kind,
             &obj_t,
             reason_op,

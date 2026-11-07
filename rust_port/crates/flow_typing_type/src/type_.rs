@@ -5992,6 +5992,8 @@ pub struct IndexerFallbackData {
     pub property: Property,
     /// The instance the indexer was declared on.
     pub obj: Type,
+    /// The language of that instance.
+    pub strictness_kind: TypeStrictnessKind,
     /// TypeScript resolves named access through a string indexer silently, so a
     /// declared property is genuinely not required whenever either end of the access is
     /// TypeScript. Pure Flow code still reports the property as missing and only reuses

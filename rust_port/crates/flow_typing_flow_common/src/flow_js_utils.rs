@@ -7666,6 +7666,7 @@ pub mod get_prop_t_kit {
             Some(Box::new(IndexerFallbackData {
                 property,
                 obj: obj.dupe(),
+                strictness_kind: inst.strictness_kind,
                 // The access is TS-related when either side is: the interface was declared
                 // under TS semantics, or the access itself is written in a TS file.
                 suppress_missing_error: inst
