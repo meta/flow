@@ -12921,6 +12921,8 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             | Self::EConstantCondition(box EConstantConditionData { .. })
             | Self::EBuiltinNameLookupFailed(box EBuiltinNameLookupFailedData { .. }) => true,
 
+            Self::EUnsupportedSyntax(box (_, UnsupportedSyntax::ExplicitExactObjectType)) => true,
+
             Self::EBindingError(box (BindingError::EReferencedBeforeDeclaration, _, _, _)) => true,
 
             Self::EEnumError(EnumErrorKind::EnumNotAllChecked(box EnumNotAllCheckedData {
@@ -13481,6 +13483,10 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             ErrorMessage::EUnsupportedComputedKeyInClass(_) => Some(IllegalKey),
             ErrorMessage::EAmbiguousNumericKeyWithVariance { .. } => Some(IllegalKey),
             ErrorMessage::EUnsupportedSetProto { .. } => Some(CannotWrite),
+            ErrorMessage::EUnsupportedSyntax(box (
+                _,
+                crate::intermediate_error_types::UnsupportedSyntax::ExplicitExactObjectType,
+            )) => Some(UnsupportedExactObjectType),
             ErrorMessage::EUnsupportedSyntax(box (_, _)) => Some(UnsupportedSyntax),
             ErrorMessage::EImplicitInstantiationUnderconstrainedError(
                 box EImplicitInstantiationUnderconstrainedErrorData { .. },

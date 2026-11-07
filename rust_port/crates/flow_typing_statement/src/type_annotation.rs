@@ -1150,6 +1150,20 @@ fn convert_inner<'a>(
     use flow_parser::ast::types::TypeInner;
     use flow_typing_type::type_::*;
 
+    if let TypeInner::Object { loc, inner } = t.deref()
+        && inner.exact
+        && cx.ban_explicit_exact_object_types()
+        && !cx.is_global_lib_context()
+    {
+        flow_js_utils::add_output_non_speculating(
+            cx,
+            ErrorMessage::EUnsupportedSyntax(Box::new((
+                loc.dupe(),
+                intermediate_error_types::UnsupportedSyntax::ExplicitExactObjectType,
+            ))),
+        );
+    }
+
     Ok(match t.deref() {
         TypeInner::Any { loc, comments } => {
             add_unclear_type_error_if_not_lib_file(cx, loc.dupe());

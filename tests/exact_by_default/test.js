@@ -10,6 +10,6 @@ test(inexact); // Error inexact ~> exact
 
 const exact: {foo: number} = {foo: 3};
 
-const alsoExact: {| foo: number |} = exact;
+const alsoExact: {| foo: number |} = exact; // Error, explicit exact syntax is unsupported
 
 const inexact2: {foo: number, ...} = alsoExact;

@@ -177,6 +177,7 @@ pub struct FrozenMetadata {
     pub assert_operator: AssertOperator,
     pub automatic_require_default: bool,
     pub babel_loose_array_spread: bool,
+    pub ban_explicit_exact_object_types: bool,
     pub ban_spread_key_props: bool,
     pub component_syntax: bool,
     pub async_component_syntax: bool,
@@ -242,6 +243,7 @@ impl Default for FrozenMetadata {
             assert_operator: AssertOperator::Disabled,
             automatic_require_default: false,
             babel_loose_array_spread: false,
+            ban_explicit_exact_object_types: false,
             ban_spread_key_props: false,
             component_syntax: true,
             async_component_syntax: false,
@@ -963,6 +965,7 @@ pub fn mk_context_metadata(options: &Options, global_libdefs: Arc<BTreeSet<FileK
             assert_operator: options.assert_operator,
             type_expansion_recursion_limit: options.type_expansion_recursion_limit,
             use_unknown_in_catch_variables: options.use_unknown_in_catch_variables,
+            ban_explicit_exact_object_types: options.ban_explicit_exact_object_types,
             ban_spread_key_props: options.ban_spread_key_props,
         }),
     }
@@ -1416,6 +1419,10 @@ impl<'a> Context<'a> {
 
     pub fn strict_property_initialization(&self) -> bool {
         self.inner().metadata.frozen.strict_property_initialization
+    }
+
+    pub fn ban_explicit_exact_object_types(&self) -> bool {
+        self.inner().metadata.frozen.ban_explicit_exact_object_types
     }
 
     pub fn require_dictionary_key_label(&self) -> bool {

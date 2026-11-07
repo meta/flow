@@ -10164,6 +10164,11 @@ where
                         text(" instance patterns are not supported."),
                     ]),
                     MetaPropertyExpression => friendly::Message(vec![text("Not supported.")]),
+                    ExplicitExactObjectType => friendly::Message(vec![
+                        text("Explicit exact object type syntax "),
+                        code("{| ... |}"),
+                        text(" is unsupported."),
+                    ]),
                     MultipleIndexers => {
                         friendly::Message(vec![text("Multiple indexers are not supported.")])
                     }

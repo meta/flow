@@ -180,6 +180,11 @@ fn config_options(config: Option<&Value>) -> Result<Options, String> {
             AssertOperator::Disabled
         },
         babel_loose_array_spread: bool_config(config, "babel_loose_array_spread", false),
+        ban_explicit_exact_object_types: bool_config(
+            config,
+            "experimental.ban_explicit_exact_object_types",
+            false,
+        ),
         component_syntax: true,
         enable_const_params: bool_config(config, "experimental.const_params", false),
         enable_pattern_matching: true,

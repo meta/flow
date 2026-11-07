@@ -246,6 +246,7 @@ pub enum UnsupportedSyntax {
     ClassStaticBlock,
     ClassDeclareMethod,
     ClassIndexSignature,
+    ExplicitExactObjectType,
     RequireDynamicArgument,
     CatchParameterDeclaration,
     DestructuringObjectPropertyInvalidLiteral,

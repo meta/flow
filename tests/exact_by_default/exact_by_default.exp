@@ -31,5 +31,13 @@ References:
                        ^^^^^^^^^^^^^ [2]
 
 
+Error ---------------------------------------------------------------------------------------------------- test.js:13:18
 
-Found 2 errors
+Explicit exact object type syntax `{| ... |}` is unsupported. [unsupported-exact-object-type]
+
+   13| const alsoExact: {| foo: number |} = exact; // Error, explicit exact syntax is unsupported
+                        ^^^^^^^^^^^^^^^^^
+
+
+
+Found 3 errors

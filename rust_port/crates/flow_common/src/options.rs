@@ -117,6 +117,7 @@ pub struct Options {
     pub autoimports_ranked_by_usage_boost_exact_match_min_length: i32,
     pub automatic_require_default: bool,
     pub babel_loose_array_spread: bool,
+    pub ban_explicit_exact_object_types: bool,
     pub ban_spread_key_props: bool,
     pub component_syntax: bool,
     pub async_component_syntax: bool,
