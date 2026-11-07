@@ -1,0 +1,1339 @@
+{
+  "body": [
+    {
+      "body": {
+        "body": [],
+        "loc": {
+          "end": {
+            "column": 29,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 27,
+            "line": 2
+          }
+        },
+        "range": [
+          107,
+          109
+        ],
+        "type": "ClassBody"
+      },
+      "decorators": [
+        {
+          "expression": {
+            "computed": false,
+            "loc": {
+              "end": {
+                "column": 15,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 1,
+                "line": 2
+              }
+            },
+            "object": {
+              "loc": {
+                "end": {
+                  "column": 5,
+                  "line": 2
+                },
+                "source": null,
+                "start": {
+                  "column": 1,
+                  "line": 2
+                }
+              },
+              "name": "this",
+              "optional": false,
+              "range": [
+                81,
+                85
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "optional": false,
+            "property": {
+              "loc": {
+                "end": {
+                  "column": 15,
+                  "line": 2
+                },
+                "source": null,
+                "start": {
+                  "column": 6,
+                  "line": 2
+                }
+              },
+              "name": "decorator",
+              "optional": false,
+              "range": [
+                86,
+                95
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "range": [
+              81,
+              95
+            ],
+            "type": "MemberExpression"
+          },
+          "loc": {
+            "end": {
+              "column": 15,
+              "line": 2
+            },
+            "source": null,
+            "start": {
+              "column": 0,
+              "line": 2
+            }
+          },
+          "range": [
+            80,
+            95
+          ],
+          "type": "Decorator"
+        }
+      ],
+      "id": {
+        "loc": {
+          "end": {
+            "column": 26,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 22,
+            "line": 2
+          }
+        },
+        "name": "This",
+        "optional": false,
+        "range": [
+          102,
+          106
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "implements": [],
+      "loc": {
+        "end": {
+          "column": 29,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 16,
+          "line": 2
+        }
+      },
+      "range": [
+        96,
+        109
+      ],
+      "superClass": null,
+      "superTypeArguments": null,
+      "type": "ClassDeclaration",
+      "typeParameters": null
+    },
+    {
+      "directive": null,
+      "expression": {
+        "arguments": [],
+        "callee": {
+          "loc": {
+            "end": {
+              "column": 14,
+              "line": 3
+            },
+            "source": null,
+            "start": {
+              "column": 5,
+              "line": 3
+            }
+          },
+          "name": "Decorator",
+          "optional": false,
+          "range": [
+            124,
+            133
+          ],
+          "type": "Identifier",
+          "typeAnnotation": null
+        },
+        "loc": {
+          "end": {
+            "column": 16,
+            "line": 3
+          },
+          "source": null,
+          "start": {
+            "column": 5,
+            "line": 3
+          }
+        },
+        "optional": false,
+        "range": [
+          124,
+          135
+        ],
+        "type": "CallExpression",
+        "typeArguments": null
+      },
+      "loc": {
+        "end": {
+          "column": 16,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 5,
+          "line": 3
+        }
+      },
+      "range": [
+        124,
+        135
+      ],
+      "type": "ExpressionStatement"
+    },
+    {
+      "body": {
+        "body": [],
+        "loc": {
+          "end": {
+            "column": 37,
+            "line": 3
+          },
+          "source": null,
+          "start": {
+            "column": 35,
+            "line": 3
+          }
+        },
+        "range": [
+          154,
+          156
+        ],
+        "type": "ClassBody"
+      },
+      "decorators": [],
+      "id": {
+        "loc": {
+          "end": {
+            "column": 34,
+            "line": 3
+          },
+          "source": null,
+          "start": {
+            "column": 23,
+            "line": 3
+          }
+        },
+        "name": "Constructed",
+        "optional": false,
+        "range": [
+          142,
+          153
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "implements": [],
+      "loc": {
+        "end": {
+          "column": 37,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 17,
+          "line": 3
+        }
+      },
+      "range": [
+        136,
+        156
+      ],
+      "superClass": null,
+      "superTypeArguments": null,
+      "type": "ClassDeclaration",
+      "typeParameters": null
+    },
+    {
+      "body": {
+        "body": [],
+        "loc": {
+          "end": {
+            "column": 19,
+            "line": 4
+          },
+          "source": null,
+          "start": {
+            "column": 17,
+            "line": 4
+          }
+        },
+        "range": [
+          183,
+          185
+        ],
+        "type": "ClassBody"
+      },
+      "decorators": [
+        {
+          "expression": {
+            "loc": {
+              "end": {
+                "column": 3,
+                "line": 4
+              },
+              "source": null,
+              "start": {
+                "column": 1,
+                "line": 4
+              }
+            },
+            "name": "",
+            "optional": false,
+            "range": [
+              167,
+              169
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          },
+          "loc": {
+            "end": {
+              "column": 3,
+              "line": 4
+            },
+            "source": null,
+            "start": {
+              "column": 0,
+              "line": 4
+            }
+          },
+          "range": [
+            166,
+            169
+          ],
+          "type": "Decorator"
+        }
+      ],
+      "id": {
+        "loc": {
+          "end": {
+            "column": 16,
+            "line": 4
+          },
+          "source": null,
+          "start": {
+            "column": 10,
+            "line": 4
+          }
+        },
+        "name": "Number",
+        "optional": false,
+        "range": [
+          176,
+          182
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "implements": [],
+      "loc": {
+        "end": {
+          "column": 19,
+          "line": 4
+        },
+        "source": null,
+        "start": {
+          "column": 4,
+          "line": 4
+        }
+      },
+      "range": [
+        170,
+        185
+      ],
+      "superClass": null,
+      "superTypeArguments": null,
+      "type": "ClassDeclaration",
+      "typeParameters": null
+    },
+    {
+      "body": {
+        "body": [],
+        "loc": {
+          "end": {
+            "column": 28,
+            "line": 5
+          },
+          "source": null,
+          "start": {
+            "column": 26,
+            "line": 5
+          }
+        },
+        "range": [
+          221,
+          223
+        ],
+        "type": "ClassBody"
+      },
+      "decorators": [
+        {
+          "expression": {
+            "loc": {
+              "end": {
+                "column": 12,
+                "line": 5
+              },
+              "source": null,
+              "start": {
+                "column": 1,
+                "line": 5
+              }
+            },
+            "name": "",
+            "optional": false,
+            "range": [
+              196,
+              207
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          },
+          "loc": {
+            "end": {
+              "column": 12,
+              "line": 5
+            },
+            "source": null,
+            "start": {
+              "column": 0,
+              "line": 5
+            }
+          },
+          "range": [
+            195,
+            207
+          ],
+          "type": "Decorator"
+        }
+      ],
+      "id": {
+        "loc": {
+          "end": {
+            "column": 25,
+            "line": 5
+          },
+          "source": null,
+          "start": {
+            "column": 19,
+            "line": 5
+          }
+        },
+        "name": "String",
+        "optional": false,
+        "range": [
+          214,
+          220
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "implements": [],
+      "loc": {
+        "end": {
+          "column": 28,
+          "line": 5
+        },
+        "source": null,
+        "start": {
+          "column": 13,
+          "line": 5
+        }
+      },
+      "range": [
+        208,
+        223
+      ],
+      "superClass": null,
+      "superTypeArguments": null,
+      "type": "ClassDeclaration",
+      "typeParameters": null
+    },
+    {
+      "body": {
+        "body": [],
+        "loc": {
+          "end": {
+            "column": 22,
+            "line": 6
+          },
+          "source": null,
+          "start": {
+            "column": 20,
+            "line": 6
+          }
+        },
+        "range": [
+          253,
+          255
+        ],
+        "type": "ClassBody"
+      },
+      "decorators": [
+        {
+          "expression": {
+            "loc": {
+              "end": {
+                "column": 5,
+                "line": 6
+              },
+              "source": null,
+              "start": {
+                "column": 1,
+                "line": 6
+              }
+            },
+            "name": "true",
+            "optional": false,
+            "range": [
+              234,
+              238
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          },
+          "loc": {
+            "end": {
+              "column": 5,
+              "line": 6
+            },
+            "source": null,
+            "start": {
+              "column": 0,
+              "line": 6
+            }
+          },
+          "range": [
+            233,
+            238
+          ],
+          "type": "Decorator"
+        }
+      ],
+      "id": {
+        "loc": {
+          "end": {
+            "column": 19,
+            "line": 6
+          },
+          "source": null,
+          "start": {
+            "column": 12,
+            "line": 6
+          }
+        },
+        "name": "Boolean",
+        "optional": false,
+        "range": [
+          245,
+          252
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "implements": [],
+      "loc": {
+        "end": {
+          "column": 22,
+          "line": 6
+        },
+        "source": null,
+        "start": {
+          "column": 6,
+          "line": 6
+        }
+      },
+      "range": [
+        239,
+        255
+      ],
+      "superClass": null,
+      "superTypeArguments": null,
+      "type": "ClassDeclaration",
+      "typeParameters": null
+    },
+    {
+      "body": {
+        "body": [],
+        "loc": {
+          "end": {
+            "column": 19,
+            "line": 7
+          },
+          "source": null,
+          "start": {
+            "column": 17,
+            "line": 7
+          }
+        },
+        "range": [
+          282,
+          284
+        ],
+        "type": "ClassBody"
+      },
+      "decorators": [
+        {
+          "expression": {
+            "loc": {
+              "end": {
+                "column": 5,
+                "line": 7
+              },
+              "source": null,
+              "start": {
+                "column": 1,
+                "line": 7
+              }
+            },
+            "name": "null",
+            "optional": false,
+            "range": [
+              266,
+              270
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          },
+          "loc": {
+            "end": {
+              "column": 5,
+              "line": 7
+            },
+            "source": null,
+            "start": {
+              "column": 0,
+              "line": 7
+            }
+          },
+          "range": [
+            265,
+            270
+          ],
+          "type": "Decorator"
+        }
+      ],
+      "id": {
+        "loc": {
+          "end": {
+            "column": 16,
+            "line": 7
+          },
+          "source": null,
+          "start": {
+            "column": 12,
+            "line": 7
+          }
+        },
+        "name": "Null",
+        "optional": false,
+        "range": [
+          277,
+          281
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "implements": [],
+      "loc": {
+        "end": {
+          "column": 19,
+          "line": 7
+        },
+        "source": null,
+        "start": {
+          "column": 6,
+          "line": 7
+        }
+      },
+      "range": [
+        271,
+        284
+      ],
+      "superClass": null,
+      "superTypeArguments": null,
+      "type": "ClassDeclaration",
+      "typeParameters": null
+    },
+    {
+      "directive": null,
+      "expression": {
+        "loc": {
+          "end": {
+            "column": 11,
+            "line": 8
+          },
+          "source": null,
+          "start": {
+            "column": 2,
+            "line": 8
+          }
+        },
+        "name": "decorator",
+        "optional": false,
+        "range": [
+          296,
+          305
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "loc": {
+        "end": {
+          "column": 11,
+          "line": 8
+        },
+        "source": null,
+        "start": {
+          "column": 2,
+          "line": 8
+        }
+      },
+      "range": [
+        296,
+        305
+      ],
+      "type": "ExpressionStatement"
+    },
+    {
+      "directive": null,
+      "expression": {
+        "loc": {
+          "end": {
+            "column": 24,
+            "line": 8
+          },
+          "source": null,
+          "start": {
+            "column": 19,
+            "line": 8
+          }
+        },
+        "name": "Array",
+        "optional": false,
+        "range": [
+          313,
+          318
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "loc": {
+        "end": {
+          "column": 24,
+          "line": 8
+        },
+        "source": null,
+        "start": {
+          "column": 19,
+          "line": 8
+        }
+      },
+      "range": [
+        313,
+        318
+      ],
+      "type": "ExpressionStatement"
+    },
+    {
+      "body": [],
+      "loc": {
+        "end": {
+          "column": 27,
+          "line": 8
+        },
+        "source": null,
+        "start": {
+          "column": 25,
+          "line": 8
+        }
+      },
+      "range": [
+        319,
+        321
+      ],
+      "type": "BlockStatement"
+    },
+    {
+      "directive": null,
+      "expression": {
+        "loc": {
+          "end": {
+            "column": 11,
+            "line": 9
+          },
+          "source": null,
+          "start": {
+            "column": 2,
+            "line": 9
+          }
+        },
+        "name": "decorator",
+        "optional": false,
+        "range": [
+          333,
+          342
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "loc": {
+        "end": {
+          "column": 11,
+          "line": 9
+        },
+        "source": null,
+        "start": {
+          "column": 2,
+          "line": 9
+        }
+      },
+      "range": [
+        333,
+        342
+      ],
+      "type": "ExpressionStatement"
+    },
+    {
+      "directive": null,
+      "expression": {
+        "loc": {
+          "end": {
+            "column": 25,
+            "line": 9
+          },
+          "source": null,
+          "start": {
+            "column": 19,
+            "line": 9
+          }
+        },
+        "name": "Object",
+        "optional": false,
+        "range": [
+          350,
+          356
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "loc": {
+        "end": {
+          "column": 25,
+          "line": 9
+        },
+        "source": null,
+        "start": {
+          "column": 19,
+          "line": 9
+        }
+      },
+      "range": [
+        350,
+        356
+      ],
+      "type": "ExpressionStatement"
+    },
+    {
+      "body": [],
+      "loc": {
+        "end": {
+          "column": 28,
+          "line": 9
+        },
+        "source": null,
+        "start": {
+          "column": 26,
+          "line": 9
+        }
+      },
+      "range": [
+        357,
+        359
+      ],
+      "type": "BlockStatement"
+    }
+  ],
+  "comments": [
+    {
+      "loc": {
+        "end": {
+          "column": 79,
+          "line": 1
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
+      "range": [
+        0,
+        79
+      ],
+      "type": "Line",
+      "value": " Bare decorator roots must be IdentifierReferences, not keywords or literals."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 38,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 30,
+          "line": 2
+        }
+      },
+      "range": [
+        110,
+        118
+      ],
+      "type": "Line",
+      "value": " ERROR"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 46,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 38,
+          "line": 3
+        }
+      },
+      "range": [
+        157,
+        165
+      ],
+      "type": "Line",
+      "value": " ERROR"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 28,
+          "line": 4
+        },
+        "source": null,
+        "start": {
+          "column": 20,
+          "line": 4
+        }
+      },
+      "range": [
+        186,
+        194
+      ],
+      "type": "Line",
+      "value": " ERROR"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 37,
+          "line": 5
+        },
+        "source": null,
+        "start": {
+          "column": 29,
+          "line": 5
+        }
+      },
+      "range": [
+        224,
+        232
+      ],
+      "type": "Line",
+      "value": " ERROR"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 31,
+          "line": 6
+        },
+        "source": null,
+        "start": {
+          "column": 23,
+          "line": 6
+        }
+      },
+      "range": [
+        256,
+        264
+      ],
+      "type": "Line",
+      "value": " ERROR"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 28,
+          "line": 7
+        },
+        "source": null,
+        "start": {
+          "column": 20,
+          "line": 7
+        }
+      },
+      "range": [
+        285,
+        293
+      ],
+      "type": "Line",
+      "value": " ERROR"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 36,
+          "line": 8
+        },
+        "source": null,
+        "start": {
+          "column": 28,
+          "line": 8
+        }
+      },
+      "range": [
+        322,
+        330
+      ],
+      "type": "Line",
+      "value": " ERROR"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 37,
+          "line": 9
+        },
+        "source": null,
+        "start": {
+          "column": 29,
+          "line": 9
+        }
+      },
+      "range": [
+        360,
+        368
+      ],
+      "type": "Line",
+      "value": " ERROR"
+    }
+  ],
+  "errors": [
+    {
+      "loc": {
+        "end": {
+          "column": 5,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 1,
+          "line": 2
+        }
+      },
+      "message": "Unexpected reserved word"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 4,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 1,
+          "line": 3
+        }
+      },
+      "message": "Unexpected reserved word"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 4,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 3
+        }
+      },
+      "message": "Found a decorator in an unsupported position."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 22,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 17,
+          "line": 3
+        }
+      },
+      "message": "Unexpected token `class`, expected the end of an expression statement (`;`)"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 3,
+          "line": 4
+        },
+        "source": null,
+        "start": {
+          "column": 1,
+          "line": 4
+        }
+      },
+      "message": "Unexpected number, expected an identifier"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 12,
+          "line": 5
+        },
+        "source": null,
+        "start": {
+          "column": 1,
+          "line": 5
+        }
+      },
+      "message": "Unexpected string, expected an identifier"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 5,
+          "line": 6
+        },
+        "source": null,
+        "start": {
+          "column": 1,
+          "line": 6
+        }
+      },
+      "message": "Unexpected reserved word"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 5,
+          "line": 7
+        },
+        "source": null,
+        "start": {
+          "column": 1,
+          "line": 7
+        }
+      },
+      "message": "Unexpected reserved word"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 2,
+          "line": 8
+        },
+        "source": null,
+        "start": {
+          "column": 1,
+          "line": 8
+        }
+      },
+      "message": "Unexpected token `[`, expected an identifier"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 2,
+          "line": 8
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 8
+        }
+      },
+      "message": "Found a decorator in an unsupported position."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 12,
+          "line": 8
+        },
+        "source": null,
+        "start": {
+          "column": 11,
+          "line": 8
+        }
+      },
+      "message": "Unexpected token `]`, expected the end of an expression statement (`;`)"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 12,
+          "line": 8
+        },
+        "source": null,
+        "start": {
+          "column": 11,
+          "line": 8
+        }
+      },
+      "message": "Unexpected token `]`, expected the start of a statement"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 18,
+          "line": 8
+        },
+        "source": null,
+        "start": {
+          "column": 13,
+          "line": 8
+        }
+      },
+      "message": "Unexpected token `class`"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 26,
+          "line": 8
+        },
+        "source": null,
+        "start": {
+          "column": 25,
+          "line": 8
+        }
+      },
+      "message": "Unexpected token `{`, expected the end of an expression statement (`;`)"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 2,
+          "line": 9
+        },
+        "source": null,
+        "start": {
+          "column": 1,
+          "line": 9
+        }
+      },
+      "message": "Unexpected token `{`, expected an identifier"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 2,
+          "line": 9
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 9
+        }
+      },
+      "message": "Found a decorator in an unsupported position."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 12,
+          "line": 9
+        },
+        "source": null,
+        "start": {
+          "column": 11,
+          "line": 9
+        }
+      },
+      "message": "Unexpected token `}`, expected the start of a statement"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 18,
+          "line": 9
+        },
+        "source": null,
+        "start": {
+          "column": 13,
+          "line": 9
+        }
+      },
+      "message": "Unexpected token `class`"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 27,
+          "line": 9
+        },
+        "source": null,
+        "start": {
+          "column": 26,
+          "line": 9
+        }
+      },
+      "message": "Unexpected token `{`, expected the end of an expression statement (`;`)"
+    }
+  ],
+  "loc": {
+    "end": {
+      "column": 0,
+      "line": 10
+    },
+    "source": null,
+    "start": {
+      "column": 0,
+      "line": 1
+    }
+  },
+  "range": [
+    0,
+    369
+  ],
+  "type": "Program"
+}

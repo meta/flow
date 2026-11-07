@@ -1,0 +1,231 @@
+{
+  "body": [
+    {
+      "directive": null,
+      "expression": {
+        "async": false,
+        "body": {
+          "loc": {
+            "end": {
+              "column": 27,
+              "line": 2
+            },
+            "source": null,
+            "start": {
+              "column": 22,
+              "line": 2
+            }
+          },
+          "name": "Typed",
+          "optional": false,
+          "range": [
+            91,
+            96
+          ],
+          "type": "Identifier",
+          "typeAnnotation": null
+        },
+        "expression": true,
+        "generator": false,
+        "id": null,
+        "loc": {
+          "end": {
+            "column": 27,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 10,
+            "line": 2
+          }
+        },
+        "params": [],
+        "predicate": null,
+        "range": [
+          79,
+          96
+        ],
+        "returnType": null,
+        "type": "ArrowFunctionExpression",
+        "typeParameters": {
+          "loc": {
+            "end": {
+              "column": 13,
+              "line": 2
+            },
+            "source": null,
+            "start": {
+              "column": 10,
+              "line": 2
+            }
+          },
+          "params": [
+            {
+              "bound": null,
+              "const": false,
+              "default": null,
+              "loc": {
+                "end": {
+                  "column": 12,
+                  "line": 2
+                },
+                "source": null,
+                "start": {
+                  "column": 11,
+                  "line": 2
+                }
+              },
+              "name": "T",
+              "range": [
+                80,
+                81
+              ],
+              "type": "TypeParameter",
+              "variance": null
+            }
+          ],
+          "range": [
+            79,
+            82
+          ],
+          "type": "TypeParameterDeclaration"
+        }
+      },
+      "loc": {
+        "end": {
+          "column": 27,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 10,
+          "line": 2
+        }
+      },
+      "range": [
+        79,
+        96
+      ],
+      "type": "ExpressionStatement"
+    },
+    {
+      "body": [],
+      "loc": {
+        "end": {
+          "column": 30,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 28,
+          "line": 2
+        }
+      },
+      "range": [
+        97,
+        99
+      ],
+      "type": "BlockStatement"
+    }
+  ],
+  "comments": [
+    {
+      "loc": {
+        "end": {
+          "column": 68,
+          "line": 1
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
+      "range": [
+        0,
+        68
+      ],
+      "type": "Line",
+      "value": " Type arguments require the parenthesized expression escape hatch."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 39,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 31,
+          "line": 2
+        }
+      },
+      "range": [
+        100,
+        108
+      ],
+      "type": "Line",
+      "value": " ERROR"
+    }
+  ],
+  "errors": [
+    {
+      "loc": {
+        "end": {
+          "column": 10,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 2
+        }
+      },
+      "message": "Found a decorator in an unsupported position."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 21,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 16,
+          "line": 2
+        }
+      },
+      "message": "Unexpected token `class`, expected the token `=>`"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 29,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 28,
+          "line": 2
+        }
+      },
+      "message": "Unexpected token `{`, expected the end of an expression statement (`;`)"
+    }
+  ],
+  "loc": {
+    "end": {
+      "column": 0,
+      "line": 3
+    },
+    "source": null,
+    "start": {
+      "column": 0,
+      "line": 1
+    }
+  },
+  "range": [
+    0,
+    109
+  ],
+  "type": "Program"
+}

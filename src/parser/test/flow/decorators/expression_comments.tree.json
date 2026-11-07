@@ -1,0 +1,1004 @@
+{
+  "body": [
+    {
+      "body": {
+        "body": [
+          {
+            "computed": true,
+            "decorators": [
+              {
+                "expression": {
+                  "arguments": [
+                    {
+                      "leadingComments": [
+                        {
+                          "loc": {
+                            "end": {
+                              "column": 87,
+                              "line": 3
+                            },
+                            "source": null,
+                            "start": {
+                              "column": 73,
+                              "line": 3
+                            }
+                          },
+                          "range": [
+                            167,
+                            181
+                          ],
+                          "type": "Block",
+                          "value": " argument "
+                        }
+                      ],
+                      "loc": {
+                        "end": {
+                          "column": 93,
+                          "line": 3
+                        },
+                        "source": null,
+                        "start": {
+                          "column": 88,
+                          "line": 3
+                        }
+                      },
+                      "name": "value",
+                      "optional": false,
+                      "range": [
+                        182,
+                        187
+                      ],
+                      "trailingComments": [
+                        {
+                          "loc": {
+                            "end": {
+                              "column": 103,
+                              "line": 3
+                            },
+                            "source": null,
+                            "start": {
+                              "column": 94,
+                              "line": 3
+                            }
+                          },
+                          "range": [
+                            188,
+                            197
+                          ],
+                          "type": "Block",
+                          "value": " end "
+                        }
+                      ],
+                      "type": "Identifier",
+                      "typeAnnotation": null
+                    }
+                  ],
+                  "callee": {
+                    "computed": false,
+                    "loc": {
+                      "end": {
+                        "column": 59,
+                        "line": 3
+                      },
+                      "source": null,
+                      "start": {
+                        "column": 15,
+                        "line": 3
+                      }
+                    },
+                    "object": {
+                      "leadingComments": [
+                        {
+                          "loc": {
+                            "end": {
+                              "column": 14,
+                              "line": 3
+                            },
+                            "source": null,
+                            "start": {
+                              "column": 4,
+                              "line": 3
+                            }
+                          },
+                          "range": [
+                            98,
+                            108
+                          ],
+                          "type": "Block",
+                          "value": " root "
+                        }
+                      ],
+                      "loc": {
+                        "end": {
+                          "column": 25,
+                          "line": 3
+                        },
+                        "source": null,
+                        "start": {
+                          "column": 15,
+                          "line": 3
+                        }
+                      },
+                      "name": "decorators",
+                      "optional": false,
+                      "range": [
+                        109,
+                        119
+                      ],
+                      "trailingComments": [
+                        {
+                          "loc": {
+                            "end": {
+                              "column": 35,
+                              "line": 3
+                            },
+                            "source": null,
+                            "start": {
+                              "column": 26,
+                              "line": 3
+                            }
+                          },
+                          "range": [
+                            120,
+                            129
+                          ],
+                          "type": "Block",
+                          "value": " dot "
+                        }
+                      ],
+                      "type": "Identifier",
+                      "typeAnnotation": null
+                    },
+                    "optional": false,
+                    "property": {
+                      "leadingComments": [
+                        {
+                          "loc": {
+                            "end": {
+                              "column": 52,
+                              "line": 3
+                            },
+                            "source": null,
+                            "start": {
+                              "column": 38,
+                              "line": 3
+                            }
+                          },
+                          "range": [
+                            132,
+                            146
+                          ],
+                          "type": "Block",
+                          "value": " property "
+                        }
+                      ],
+                      "loc": {
+                        "end": {
+                          "column": 59,
+                          "line": 3
+                        },
+                        "source": null,
+                        "start": {
+                          "column": 53,
+                          "line": 3
+                        }
+                      },
+                      "name": "member",
+                      "optional": false,
+                      "range": [
+                        147,
+                        153
+                      ],
+                      "type": "Identifier",
+                      "typeAnnotation": null
+                    },
+                    "range": [
+                      109,
+                      153
+                    ],
+                    "type": "MemberExpression"
+                  },
+                  "leadingComments": [
+                    {
+                      "loc": {
+                        "end": {
+                          "column": 70,
+                          "line": 3
+                        },
+                        "source": null,
+                        "start": {
+                          "column": 60,
+                          "line": 3
+                        }
+                      },
+                      "range": [
+                        154,
+                        164
+                      ],
+                      "type": "Block",
+                      "value": " args "
+                    }
+                  ],
+                  "loc": {
+                    "end": {
+                      "column": 105,
+                      "line": 3
+                    },
+                    "source": null,
+                    "start": {
+                      "column": 15,
+                      "line": 3
+                    }
+                  },
+                  "optional": false,
+                  "range": [
+                    109,
+                    199
+                  ],
+                  "type": "CallExpression",
+                  "typeArguments": null
+                },
+                "loc": {
+                  "end": {
+                    "column": 105,
+                    "line": 3
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 2,
+                    "line": 3
+                  }
+                },
+                "range": [
+                  96,
+                  199
+                ],
+                "type": "Decorator"
+              }
+            ],
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 118,
+                  "line": 3
+                },
+                "source": null,
+                "start": {
+                  "column": 117,
+                  "line": 3
+                }
+              },
+              "range": [
+                211,
+                212
+              ],
+              "raw": "0",
+              "type": "Literal",
+              "value": 0
+            },
+            "kind": "method",
+            "leadingComments": [
+              {
+                "loc": {
+                  "end": {
+                    "column": 115,
+                    "line": 3
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 106,
+                    "line": 3
+                  }
+                },
+                "range": [
+                  200,
+                  209
+                ],
+                "type": "Block",
+                "value": " key "
+              }
+            ],
+            "loc": {
+              "end": {
+                "column": 124,
+                "line": 3
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 3
+              }
+            },
+            "range": [
+              96,
+              218
+            ],
+            "static": false,
+            "tsAccessibility": null,
+            "type": "MethodDefinition",
+            "value": {
+              "async": false,
+              "body": {
+                "body": [],
+                "loc": {
+                  "end": {
+                    "column": 124,
+                    "line": 3
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 122,
+                    "line": 3
+                  }
+                },
+                "range": [
+                  216,
+                  218
+                ],
+                "trailingComments": [
+                  {
+                    "loc": {
+                      "end": {
+                        "column": 130,
+                        "line": 3
+                      },
+                      "source": null,
+                      "start": {
+                        "column": 125,
+                        "line": 3
+                      }
+                    },
+                    "range": [
+                      219,
+                      224
+                    ],
+                    "type": "Line",
+                    "value": " OK"
+                  }
+                ],
+                "type": "BlockStatement"
+              },
+              "expression": false,
+              "generator": false,
+              "id": null,
+              "loc": {
+                "end": {
+                  "column": 124,
+                  "line": 3
+                },
+                "source": null,
+                "start": {
+                  "column": 119,
+                  "line": 3
+                }
+              },
+              "params": [],
+              "predicate": null,
+              "range": [
+                213,
+                218
+              ],
+              "returnType": null,
+              "type": "FunctionExpression",
+              "typeParameters": null
+            }
+          },
+          {
+            "computed": true,
+            "decorators": [
+              {
+                "expression": {
+                  "computed": true,
+                  "leadingComments": [
+                    {
+                      "loc": {
+                        "end": {
+                          "column": 17,
+                          "line": 4
+                        },
+                        "source": null,
+                        "start": {
+                          "column": 4,
+                          "line": 4
+                        }
+                      },
+                      "range": [
+                        229,
+                        242
+                      ],
+                      "type": "Block",
+                      "value": " grouped "
+                    }
+                  ],
+                  "loc": {
+                    "end": {
+                      "column": 45,
+                      "line": 4
+                    },
+                    "source": null,
+                    "start": {
+                      "column": 32,
+                      "line": 4
+                    }
+                  },
+                  "object": {
+                    "leadingComments": [
+                      {
+                        "loc": {
+                          "end": {
+                            "column": 31,
+                            "line": 4
+                          },
+                          "source": null,
+                          "start": {
+                            "column": 20,
+                            "line": 4
+                          }
+                        },
+                        "range": [
+                          245,
+                          256
+                        ],
+                        "type": "Block",
+                        "value": " inner "
+                      }
+                    ],
+                    "loc": {
+                      "end": {
+                        "column": 42,
+                        "line": 4
+                      },
+                      "source": null,
+                      "start": {
+                        "column": 32,
+                        "line": 4
+                      }
+                    },
+                    "name": "decorators",
+                    "optional": false,
+                    "range": [
+                      257,
+                      267
+                    ],
+                    "type": "Identifier",
+                    "typeAnnotation": null
+                  },
+                  "optional": false,
+                  "property": {
+                    "loc": {
+                      "end": {
+                        "column": 44,
+                        "line": 4
+                      },
+                      "source": null,
+                      "start": {
+                        "column": 43,
+                        "line": 4
+                      }
+                    },
+                    "range": [
+                      268,
+                      269
+                    ],
+                    "raw": "0",
+                    "type": "Literal",
+                    "value": 0
+                  },
+                  "range": [
+                    257,
+                    270
+                  ],
+                  "trailingComments": [
+                    {
+                      "loc": {
+                        "end": {
+                          "column": 57,
+                          "line": 4
+                        },
+                        "source": null,
+                        "start": {
+                          "column": 46,
+                          "line": 4
+                        }
+                      },
+                      "range": [
+                        271,
+                        282
+                      ],
+                      "type": "Block",
+                      "value": " close "
+                    }
+                  ],
+                  "type": "MemberExpression"
+                },
+                "loc": {
+                  "end": {
+                    "column": 59,
+                    "line": 4
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 2,
+                    "line": 4
+                  }
+                },
+                "range": [
+                  227,
+                  284
+                ],
+                "type": "Decorator"
+              }
+            ],
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 74,
+                  "line": 4
+                },
+                "source": null,
+                "start": {
+                  "column": 73,
+                  "line": 4
+                }
+              },
+              "range": [
+                298,
+                299
+              ],
+              "raw": "1",
+              "type": "Literal",
+              "value": 1
+            },
+            "leadingComments": [
+              {
+                "loc": {
+                  "end": {
+                    "column": 71,
+                    "line": 4
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 60,
+                    "line": 4
+                  }
+                },
+                "range": [
+                  285,
+                  296
+                ],
+                "type": "Block",
+                "value": " field "
+              }
+            ],
+            "loc": {
+              "end": {
+                "column": 84,
+                "line": 4
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 4
+              }
+            },
+            "optional": false,
+            "range": [
+              227,
+              309
+            ],
+            "static": false,
+            "trailingComments": [
+              {
+                "loc": {
+                  "end": {
+                    "column": 90,
+                    "line": 4
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 85,
+                    "line": 4
+                  }
+                },
+                "range": [
+                  310,
+                  315
+                ],
+                "type": "Line",
+                "value": " OK"
+              }
+            ],
+            "tsAccessibility": null,
+            "type": "PropertyDefinition",
+            "typeAnnotation": null,
+            "value": {
+              "loc": {
+                "end": {
+                  "column": 83,
+                  "line": 4
+                },
+                "source": null,
+                "start": {
+                  "column": 78,
+                  "line": 4
+                }
+              },
+              "name": "value",
+              "optional": false,
+              "range": [
+                303,
+                308
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "variance": null
+          }
+        ],
+        "loc": {
+          "end": {
+            "column": 1,
+            "line": 5
+          },
+          "source": null,
+          "start": {
+            "column": 15,
+            "line": 2
+          }
+        },
+        "range": [
+          92,
+          317
+        ],
+        "type": "ClassBody"
+      },
+      "decorators": [],
+      "id": {
+        "loc": {
+          "end": {
+            "column": 14,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 6,
+            "line": 2
+          }
+        },
+        "name": "Comments",
+        "optional": false,
+        "range": [
+          83,
+          91
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "implements": [],
+      "leadingComments": [
+        {
+          "loc": {
+            "end": {
+              "column": 76,
+              "line": 1
+            },
+            "source": null,
+            "start": {
+              "column": 0,
+              "line": 1
+            }
+          },
+          "range": [
+            0,
+            76
+          ],
+          "type": "Line",
+          "value": " Comments at member, call, and computed-key boundaries stay attached once."
+        }
+      ],
+      "loc": {
+        "end": {
+          "column": 1,
+          "line": 5
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 2
+        }
+      },
+      "range": [
+        77,
+        317
+      ],
+      "superClass": null,
+      "superTypeArguments": null,
+      "type": "ClassDeclaration",
+      "typeParameters": null
+    }
+  ],
+  "comments": [
+    {
+      "loc": {
+        "end": {
+          "column": 76,
+          "line": 1
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
+      "range": [
+        0,
+        76
+      ],
+      "type": "Line",
+      "value": " Comments at member, call, and computed-key boundaries stay attached once."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 14,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 4,
+          "line": 3
+        }
+      },
+      "range": [
+        98,
+        108
+      ],
+      "type": "Block",
+      "value": " root "
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 35,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 26,
+          "line": 3
+        }
+      },
+      "range": [
+        120,
+        129
+      ],
+      "type": "Block",
+      "value": " dot "
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 52,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 38,
+          "line": 3
+        }
+      },
+      "range": [
+        132,
+        146
+      ],
+      "type": "Block",
+      "value": " property "
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 70,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 60,
+          "line": 3
+        }
+      },
+      "range": [
+        154,
+        164
+      ],
+      "type": "Block",
+      "value": " args "
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 87,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 73,
+          "line": 3
+        }
+      },
+      "range": [
+        167,
+        181
+      ],
+      "type": "Block",
+      "value": " argument "
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 103,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 94,
+          "line": 3
+        }
+      },
+      "range": [
+        188,
+        197
+      ],
+      "type": "Block",
+      "value": " end "
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 115,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 106,
+          "line": 3
+        }
+      },
+      "range": [
+        200,
+        209
+      ],
+      "type": "Block",
+      "value": " key "
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 130,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 125,
+          "line": 3
+        }
+      },
+      "range": [
+        219,
+        224
+      ],
+      "type": "Line",
+      "value": " OK"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 17,
+          "line": 4
+        },
+        "source": null,
+        "start": {
+          "column": 4,
+          "line": 4
+        }
+      },
+      "range": [
+        229,
+        242
+      ],
+      "type": "Block",
+      "value": " grouped "
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 31,
+          "line": 4
+        },
+        "source": null,
+        "start": {
+          "column": 20,
+          "line": 4
+        }
+      },
+      "range": [
+        245,
+        256
+      ],
+      "type": "Block",
+      "value": " inner "
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 57,
+          "line": 4
+        },
+        "source": null,
+        "start": {
+          "column": 46,
+          "line": 4
+        }
+      },
+      "range": [
+        271,
+        282
+      ],
+      "type": "Block",
+      "value": " close "
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 71,
+          "line": 4
+        },
+        "source": null,
+        "start": {
+          "column": 60,
+          "line": 4
+        }
+      },
+      "range": [
+        285,
+        296
+      ],
+      "type": "Block",
+      "value": " field "
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 90,
+          "line": 4
+        },
+        "source": null,
+        "start": {
+          "column": 85,
+          "line": 4
+        }
+      },
+      "range": [
+        310,
+        315
+      ],
+      "type": "Line",
+      "value": " OK"
+    }
+  ],
+  "loc": {
+    "end": {
+      "column": 0,
+      "line": 6
+    },
+    "source": null,
+    "start": {
+      "column": 0,
+      "line": 1
+    }
+  },
+  "range": [
+    0,
+    318
+  ],
+  "type": "Program"
+}

@@ -1,0 +1,216 @@
+{
+  "body": [
+    {
+      "directive": null,
+      "expression": {
+        "expressions": [],
+        "loc": {
+          "end": {
+            "column": 17,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 10,
+            "line": 2
+          }
+        },
+        "quasis": [
+          {
+            "loc": {
+              "end": {
+                "column": 17,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 10,
+                "line": 2
+              }
+            },
+            "range": [
+              61,
+              68
+            ],
+            "tail": true,
+            "type": "TemplateElement",
+            "value": {
+              "cooked": "value",
+              "raw": "value"
+            }
+          }
+        ],
+        "range": [
+          61,
+          68
+        ],
+        "type": "TemplateLiteral"
+      },
+      "loc": {
+        "end": {
+          "column": 17,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 10,
+          "line": 2
+        }
+      },
+      "range": [
+        61,
+        68
+      ],
+      "type": "ExpressionStatement"
+    },
+    {
+      "body": {
+        "body": [],
+        "loc": {
+          "end": {
+            "column": 33,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 31,
+            "line": 2
+          }
+        },
+        "range": [
+          82,
+          84
+        ],
+        "type": "ClassBody"
+      },
+      "decorators": [],
+      "id": {
+        "loc": {
+          "end": {
+            "column": 30,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 24,
+            "line": 2
+          }
+        },
+        "name": "Tagged",
+        "optional": false,
+        "range": [
+          75,
+          81
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "implements": [],
+      "loc": {
+        "end": {
+          "column": 33,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 18,
+          "line": 2
+        }
+      },
+      "range": [
+        69,
+        84
+      ],
+      "superClass": null,
+      "superTypeArguments": null,
+      "type": "ClassDeclaration",
+      "typeParameters": null
+    }
+  ],
+  "comments": [
+    {
+      "loc": {
+        "end": {
+          "column": 50,
+          "line": 1
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
+      "range": [
+        0,
+        50
+      ],
+      "type": "Line",
+      "value": " A tagged template is not a bare decorator call."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 42,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 34,
+          "line": 2
+        }
+      },
+      "range": [
+        85,
+        93
+      ],
+      "type": "Line",
+      "value": " ERROR"
+    }
+  ],
+  "errors": [
+    {
+      "loc": {
+        "end": {
+          "column": 10,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 2
+        }
+      },
+      "message": "Found a decorator in an unsupported position."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 23,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 18,
+          "line": 2
+        }
+      },
+      "message": "Unexpected token `class`, expected the end of an expression statement (`;`)"
+    }
+  ],
+  "loc": {
+    "end": {
+      "column": 0,
+      "line": 3
+    },
+    "source": null,
+    "start": {
+      "column": 0,
+      "line": 1
+    }
+  },
+  "range": [
+    0,
+    94
+  ],
+  "type": "Program"
+}

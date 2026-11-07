@@ -1,0 +1,220 @@
+{
+  "body": [
+    {
+      "body": {
+        "body": [],
+        "loc": {
+          "end": {
+            "column": 32,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 30,
+            "line": 2
+          }
+        },
+        "range": [
+          83,
+          85
+        ],
+        "type": "ClassBody"
+      },
+      "decorators": [
+        {
+          "expression": {
+            "computed": false,
+            "loc": {
+              "end": {
+                "column": 15,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 1,
+                "line": 2
+              }
+            },
+            "object": {
+              "loc": {
+                "end": {
+                  "column": 6,
+                  "line": 2
+                },
+                "source": null,
+                "start": {
+                  "column": 1,
+                  "line": 2
+                }
+              },
+              "name": "Outer",
+              "optional": false,
+              "range": [
+                54,
+                59
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "optional": false,
+            "property": {
+              "loc": {
+                "end": {
+                  "column": 15,
+                  "line": 2
+                },
+                "source": null,
+                "start": {
+                  "column": 7,
+                  "line": 2
+                }
+              },
+              "name": "missing",
+              "optional": false,
+              "range": [
+                60,
+                68
+              ],
+              "type": "PrivateIdentifier",
+              "typeAnnotation": null
+            },
+            "range": [
+              54,
+              68
+            ],
+            "type": "MemberExpression"
+          },
+          "loc": {
+            "end": {
+              "column": 15,
+              "line": 2
+            },
+            "source": null,
+            "start": {
+              "column": 0,
+              "line": 2
+            }
+          },
+          "range": [
+            53,
+            68
+          ],
+          "type": "Decorator"
+        }
+      ],
+      "id": {
+        "loc": {
+          "end": {
+            "column": 29,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 22,
+            "line": 2
+          }
+        },
+        "name": "Unknown",
+        "optional": false,
+        "range": [
+          75,
+          82
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "implements": [],
+      "loc": {
+        "end": {
+          "column": 32,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 16,
+          "line": 2
+        }
+      },
+      "range": [
+        69,
+        85
+      ],
+      "superClass": null,
+      "superTypeArguments": null,
+      "type": "ClassDeclaration",
+      "typeParameters": null
+    }
+  ],
+  "comments": [
+    {
+      "loc": {
+        "end": {
+          "column": 52,
+          "line": 1
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
+      "range": [
+        0,
+        52
+      ],
+      "type": "Line",
+      "value": " Decorators still enforce private-name resolution."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 41,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 33,
+          "line": 2
+        }
+      },
+      "range": [
+        86,
+        94
+      ],
+      "type": "Line",
+      "value": " ERROR"
+    }
+  ],
+  "errors": [
+    {
+      "loc": {
+        "end": {
+          "column": 15,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 7,
+          "line": 2
+        }
+      },
+      "message": "Private fields can only be referenced from within a class."
+    }
+  ],
+  "loc": {
+    "end": {
+      "column": 0,
+      "line": 3
+    },
+    "source": null,
+    "start": {
+      "column": 0,
+      "line": 1
+    }
+  },
+  "range": [
+    0,
+    95
+  ],
+  "type": "Program"
+}

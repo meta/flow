@@ -1023,6 +1023,51 @@ pub(super) fn left_hand_side(
     as_expression(env, cover)
 }
 
+pub(super) fn decorator(env: &mut ParserEnv) -> Result<expression::Expression<Loc, Loc>, Rollback> {
+    env.with_no_call(false, |env| {
+        env.with_no_in(false, |env| {
+            if peek::token(env) == &TokenKind::TLparen {
+                return group(env);
+            }
+
+            let id = main_parser::parse_identifier(env, None)?;
+            let start_loc = id.loc.dupe();
+            let mut expression = expression::Expression::new(ExpressionInner::Identifier {
+                loc: start_loc.dupe(),
+                inner: id,
+            });
+
+            while eat::maybe(env, TokenKind::TPeriod)? {
+                let (property_loc, property) = static_member_property(env)?;
+                expression = expression::Expression::new(ExpressionInner::Member {
+                    loc: Loc::between(&start_loc, &property_loc),
+                    inner: Arc::new(expression::Member {
+                        object: expression,
+                        property,
+                        comments: None,
+                    }),
+                });
+            }
+
+            if peek::token(env) == &TokenKind::TLparen {
+                comment_attachment::expression_remove_trailing(env, &mut expression);
+                let arguments = arguments(env)?;
+                expression = expression::Expression::new(ExpressionInner::Call {
+                    loc: Loc::between(&start_loc, &arguments.loc),
+                    inner: Arc::new(expression::Call {
+                        callee: expression,
+                        targs: None,
+                        arguments,
+                        comments: None,
+                    }),
+                });
+            }
+
+            Ok(expression)
+        })
+    })
+}
+
 fn super_expr(env: &mut ParserEnv) -> Result<expression::Expression<Loc, Loc>, Rollback> {
     let allowed_mode = env.allow_super();
     let (allowed, call_allowed) = match allowed_mode {
@@ -1656,6 +1701,28 @@ pub(super) fn arguments(env: &mut ParserEnv) -> Result<expression::ArgList<Loc, 
     })
 }
 
+fn static_member_property(
+    env: &mut ParserEnv,
+) -> Result<(Loc, expression::member::Property<Loc, Loc>), Rollback> {
+    match peek::token(env) {
+        TokenKind::TPound => {
+            let id = private_identifier(env)?;
+            env.add_used_private(id.name.as_str().to_owned(), id.loc.dupe())?;
+            Ok((
+                id.loc.dupe(),
+                expression::member::Property::PropertyPrivateName(id),
+            ))
+        }
+        _ => {
+            let id = identifier_name(env)?;
+            Ok((
+                id.loc.dupe(),
+                expression::member::Property::PropertyIdentifier(id),
+            ))
+        }
+    }
+}
+
 fn member_cover(
     env: &mut ParserEnv,
     allow_optional_chain: bool,
@@ -1713,23 +1780,7 @@ fn member_cover(
         start_loc: Loc,
         left: PatternCover,
     ) -> Result<PatternCover, Rollback> {
-        let (id_loc, property) = match peek::token(env) {
-            TokenKind::TPound => {
-                let id = private_identifier(env)?;
-                env.add_used_private(id.name.as_str().to_owned(), id.loc.dupe())?;
-                (
-                    id.loc.dupe(),
-                    expression::member::Property::PropertyPrivateName(id),
-                )
-            }
-            _ => {
-                let id = identifier_name(env)?;
-                (
-                    id.loc.dupe(),
-                    expression::member::Property::PropertyIdentifier(id),
-                )
-            }
-        };
+        let (id_loc, property) = static_member_property(env)?;
         let loc = Loc::between(&start_loc, &id_loc);
 
         // super.PrivateName is a syntax error
@@ -2341,6 +2392,9 @@ fn primary_cover(env: &mut ParserEnv) -> Result<PatternCover, Rollback> {
         TokenKind::TClass => Ok(PatternCover::CoverExpr(object_parser::class_expression(
             env,
         )?)),
+        TokenKind::TAt if env.parse_options().esproposal_decorators => Ok(PatternCover::CoverExpr(
+            object_parser::class_expression(env)?,
+        )),
         TokenKind::TIdentifier { raw, .. }
             if raw == "abstract" && peek::abstract_token_is_followed_by_class(env) =>
         {

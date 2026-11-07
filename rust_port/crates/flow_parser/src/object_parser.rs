@@ -52,7 +52,7 @@ pub(super) fn parse_decorator_list(
         let (loc, mut d) = with_loc(None, env, |env| {
             let leading = peek::comments(env);
             eat::token(env)?;
-            let mut expression = expression_parser::left_hand_side(env)?;
+            let mut expression = expression_parser::decorator(env)?;
             comment_attachment::expression_remove_trailing(env, &mut expression);
             Ok(class::Decorator {
                 loc: LOC_NONE,

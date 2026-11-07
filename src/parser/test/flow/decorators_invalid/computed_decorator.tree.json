@@ -1,0 +1,213 @@
+{
+  "body": [
+    {
+      "directive": null,
+      "expression": {
+        "elements": [
+          {
+            "loc": {
+              "end": {
+                "column": 13,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 12,
+                "line": 2
+              }
+            },
+            "range": [
+              82,
+              83
+            ],
+            "raw": "0",
+            "type": "Literal",
+            "value": 0
+          }
+        ],
+        "loc": {
+          "end": {
+            "column": 14,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 11,
+            "line": 2
+          }
+        },
+        "range": [
+          81,
+          84
+        ],
+        "trailingComma": false,
+        "type": "ArrayExpression"
+      },
+      "loc": {
+        "end": {
+          "column": 14,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 11,
+          "line": 2
+        }
+      },
+      "range": [
+        81,
+        84
+      ],
+      "type": "ExpressionStatement"
+    },
+    {
+      "body": {
+        "body": [],
+        "loc": {
+          "end": {
+            "column": 32,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 30,
+            "line": 2
+          }
+        },
+        "range": [
+          100,
+          102
+        ],
+        "type": "ClassBody"
+      },
+      "decorators": [],
+      "id": {
+        "loc": {
+          "end": {
+            "column": 29,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 21,
+            "line": 2
+          }
+        },
+        "name": "Computed",
+        "optional": false,
+        "range": [
+          91,
+          99
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "implements": [],
+      "loc": {
+        "end": {
+          "column": 32,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 15,
+          "line": 2
+        }
+      },
+      "range": [
+        85,
+        102
+      ],
+      "superClass": null,
+      "superTypeArguments": null,
+      "type": "ClassDeclaration",
+      "typeParameters": null
+    }
+  ],
+  "comments": [
+    {
+      "loc": {
+        "end": {
+          "column": 69,
+          "line": 1
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
+      "range": [
+        0,
+        69
+      ],
+      "type": "Line",
+      "value": " Computed access is not part of an unparenthesized class decorator."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 41,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 33,
+          "line": 2
+        }
+      },
+      "range": [
+        103,
+        111
+      ],
+      "type": "Line",
+      "value": " ERROR"
+    }
+  ],
+  "errors": [
+    {
+      "loc": {
+        "end": {
+          "column": 11,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 2
+        }
+      },
+      "message": "Found a decorator in an unsupported position."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 20,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 15,
+          "line": 2
+        }
+      },
+      "message": "Unexpected token `class`, expected the end of an expression statement (`;`)"
+    }
+  ],
+  "loc": {
+    "end": {
+      "column": 0,
+      "line": 3
+    },
+    "source": null,
+    "start": {
+      "column": 0,
+      "line": 1
+    }
+  },
+  "range": [
+    0,
+    112
+  ],
+  "type": "Program"
+}

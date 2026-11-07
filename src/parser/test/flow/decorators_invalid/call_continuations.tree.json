@@ -1,0 +1,353 @@
+{
+  "body": [
+    {
+      "directive": null,
+      "expression": {
+        "loc": {
+          "end": {
+            "column": 19,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 13,
+            "line": 2
+          }
+        },
+        "name": "member",
+        "optional": false,
+        "range": [
+          84,
+          90
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "loc": {
+        "end": {
+          "column": 19,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 13,
+          "line": 2
+        }
+      },
+      "range": [
+        84,
+        90
+      ],
+      "type": "ExpressionStatement"
+    },
+    {
+      "body": {
+        "body": [],
+        "loc": {
+          "end": {
+            "column": 35,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 33,
+            "line": 2
+          }
+        },
+        "range": [
+          104,
+          106
+        ],
+        "type": "ClassBody"
+      },
+      "decorators": [],
+      "id": {
+        "loc": {
+          "end": {
+            "column": 32,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 26,
+            "line": 2
+          }
+        },
+        "name": "Member",
+        "optional": false,
+        "range": [
+          97,
+          103
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "implements": [],
+      "loc": {
+        "end": {
+          "column": 35,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 20,
+          "line": 2
+        }
+      },
+      "range": [
+        91,
+        106
+      ],
+      "superClass": null,
+      "superTypeArguments": null,
+      "type": "ClassDeclaration",
+      "typeParameters": null
+    },
+    {
+      "directive": null,
+      "expression": {
+        "async": false,
+        "body": {
+          "loc": {
+            "end": {
+              "column": 25,
+              "line": 3
+            },
+            "source": null,
+            "start": {
+              "column": 21,
+              "line": 3
+            }
+          },
+          "name": "Call",
+          "optional": false,
+          "range": [
+            137,
+            141
+          ],
+          "type": "Identifier",
+          "typeAnnotation": null
+        },
+        "expression": true,
+        "generator": false,
+        "id": null,
+        "loc": {
+          "end": {
+            "column": 25,
+            "line": 3
+          },
+          "source": null,
+          "start": {
+            "column": 12,
+            "line": 3
+          }
+        },
+        "params": [],
+        "predicate": null,
+        "range": [
+          128,
+          141
+        ],
+        "returnType": null,
+        "type": "ArrowFunctionExpression",
+        "typeParameters": null
+      },
+      "loc": {
+        "end": {
+          "column": 25,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 12,
+          "line": 3
+        }
+      },
+      "range": [
+        128,
+        141
+      ],
+      "type": "ExpressionStatement"
+    },
+    {
+      "body": [],
+      "loc": {
+        "end": {
+          "column": 28,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 26,
+          "line": 3
+        }
+      },
+      "range": [
+        142,
+        144
+      ],
+      "type": "BlockStatement"
+    }
+  ],
+  "comments": [
+    {
+      "loc": {
+        "end": {
+          "column": 70,
+          "line": 1
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
+      "range": [
+        0,
+        70
+      ],
+      "type": "Line",
+      "value": " A bare decorator call cannot be followed by another member or call."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 44,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 36,
+          "line": 2
+        }
+      },
+      "range": [
+        107,
+        115
+      ],
+      "type": "Line",
+      "value": " ERROR"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 37,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 29,
+          "line": 3
+        }
+      },
+      "range": [
+        145,
+        153
+      ],
+      "type": "Line",
+      "value": " ERROR"
+    }
+  ],
+  "errors": [
+    {
+      "loc": {
+        "end": {
+          "column": 12,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 2
+        }
+      },
+      "message": "Found a decorator in an unsupported position."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 13,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 12,
+          "line": 2
+        }
+      },
+      "message": "Unexpected token `.`, expected the start of a statement"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 25,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 20,
+          "line": 2
+        }
+      },
+      "message": "Unexpected token `class`, expected the end of an expression statement (`;`)"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 12,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 3
+        }
+      },
+      "message": "Found a decorator in an unsupported position."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 20,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 15,
+          "line": 3
+        }
+      },
+      "message": "Unexpected token `class`, expected the token `=>`"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 27,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 26,
+          "line": 3
+        }
+      },
+      "message": "Unexpected token `{`, expected the end of an expression statement (`;`)"
+    }
+  ],
+  "loc": {
+    "end": {
+      "column": 0,
+      "line": 4
+    },
+    "source": null,
+    "start": {
+      "column": 0,
+      "line": 1
+    }
+  },
+  "range": [
+    0,
+    154
+  ],
+  "type": "Program"
+}
