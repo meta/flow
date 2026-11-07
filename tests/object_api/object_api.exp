@@ -628,8 +628,8 @@ Cannot assign `x.toString` to `xToString` because `(this: Date) => string` [1] i
                                  ^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:730:5
-   730|     toString(): string;
+   <BUILTINS>/lib.es5.js:736:5
+   736|     toString(): string;
             ^^^^^^^^^^^^^^^^^^ [1]
    object_prototype.js:38:17
     38| var xToString : number = x.toString; // error
@@ -646,8 +646,8 @@ Cannot assign `x.toString` to `xToString2` because in the `this` parameter: `Dat
                                         ^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:728:11
-   728| interface Date {
+   <BUILTINS>/lib.es5.js:734:11
+   734| interface Date {
                   ^^^^ [1]
 
 
@@ -661,8 +661,8 @@ Cannot assign `x.toString` to `xToString2` because in the return value: `string`
                                         ^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:730:17
-   730|     toString(): string;
+   <BUILTINS>/lib.es5.js:736:17
+   736|     toString(): string;
                         ^^^^^^ [1]
    object_prototype.js:39:24
     39| var xToString2 : () => number = x.toString; // error
@@ -711,8 +711,8 @@ Cannot call `123.toString` with `'foo'` bound to `radix` because `"foo"` [1] is 
                        ^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:520:22
-   520|     toString(radix?: number): string;
+   <BUILTINS>/lib.es5.js:526:22
+   526|     toString(radix?: number): string;
                              ^^^^^^ [2]
 
 
@@ -726,8 +726,8 @@ Cannot call `123.toString` with `null` bound to `radix` because `null` [1] is in
                        ^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:520:22
-   520|     toString(radix?: number): string;
+   <BUILTINS>/lib.es5.js:526:22
+   526|     toString(radix?: number): string;
                              ^^^^^^ [2]
 
 
@@ -923,8 +923,8 @@ Cannot assign `x.valueOf` to `xValueOf` because `(this: Date) => number` [1] is 
                                 ^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:742:5
-   742|     valueOf(): number;
+   <BUILTINS>/lib.es5.js:748:5
+   748|     valueOf(): number;
             ^^^^^^^^^^^^^^^^^ [1]
    object_prototype.js:122:16
    122| var xValueOf : number = x.valueOf; // error
@@ -984,11 +984,11 @@ References:
    object_prototype.js:150:23
     150| var xToLocaleString : number = x.toLocaleString; // error
                                ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:4491:5
-   4491|     toLocaleString(locales?: string | string[], options?: Intl.DateTimeFormatOptions): string;
+   <BUILTINS>/lib.es5.js:4497:5
+   4497|     toLocaleString(locales?: string | string[], options?: Intl.DateTimeFormatOptions): string;
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:736:5
-    736|     toLocaleString(): string;
+   <BUILTINS>/lib.es5.js:742:5
+    742|     toLocaleString(): string;
              ^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
@@ -1004,8 +1004,8 @@ Cannot assign `x.toLocaleString` to `xToLocaleString2` because: [incompatible-ty
                                               ^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:728:11
-   728| interface Date {
+   <BUILTINS>/lib.es5.js:734:11
+   734| interface Date {
                   ^^^^ [1]
 
 
@@ -1308,14 +1308,14 @@ Cannot cast `C1_proto.bind` to `empty` because: [incompatible-type]
         ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:341:12
-   341|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
+   <BUILTINS>/lib.es5.js:347:12
+   347|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    proto.js:13:18
     13| C1_proto.bind as empty; // error: function ~> empty
                          ^^^^^ [2]
-   <BUILTINS>/lib.es5.js:342:12
-   342|         & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...argArray: A) => (...args: B) => R);
+   <BUILTINS>/lib.es5.js:348:12
+   348|         & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...argArray: A) => (...args: B) => R);
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 

@@ -68,8 +68,8 @@ Cannot cast `rendersHeaderList` to `renders Header` because `ReadonlyArray<rende
          ^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1144:15
-   1144| declare class ReadonlyArray<T> {
+   <BUILTINS>/lib.es5.js:1150:15
+   1150| declare class ReadonlyArray<T> {
                        ^^^^^^^^^^^^^ [1]
    -:17:22
      17| rendersHeaderList as renders Header; // ERROR
@@ -102,8 +102,8 @@ Cannot cast `rendersHeaderList` to `renders? Header` because `ReadonlyArray<rend
          ^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1144:15
-   1144| declare class ReadonlyArray<T> {
+   <BUILTINS>/lib.es5.js:1150:15
+   1150| declare class ReadonlyArray<T> {
                        ^^^^^^^^^^^^^ [1]
    -:18:22
      18| rendersHeaderList as renders? Header; // ERROR

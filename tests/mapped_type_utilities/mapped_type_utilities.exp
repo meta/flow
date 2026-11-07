@@ -314,8 +314,8 @@ https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-
          ^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1562:40
-   1562| type Omit<T extends interface {}, K> = $Omit<T, K>;
+   <BUILTINS>/lib.es5.js:1568:40
+   1568| type Omit<T extends interface {}, K> = $Omit<T, K>;
                                                 ^^^^^^^^^^^ [1]
    omit_inference.js:1:40
       1| function projectWithoutA<T extends {a: number, b: string}>(): Omit<T, 'a'> {
@@ -396,8 +396,8 @@ Cannot cast `pickedO1.bar` to `string` because `void` [1] is incompatible with `
          ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1539:15
-   1539|     [P in K]: T[P];
+   <BUILTINS>/lib.es5.js:1545:15
+   1545|     [P in K]: T[P];
                        ^^^^ [1]
    pick.js:9:17
       9| pickedO1.bar as string; // ERROR bar is optional

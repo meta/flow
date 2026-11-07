@@ -136,19 +136,30 @@ References:
                      ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
-Error ----------------------------------------------------------------------------------------------------- obj.js:27:42
+Error ------------------------------------------------------------------------------------------------------ obj.js:27:8
 
-Cannot call method `freeze` with object literal bound to `o` because property `c` is missing in
-`{readonly a: number, readonly b: number}` [1] but exists in `{readonly c: number, ...}` [2]. [incompatible-type]
+Cannot call method `freeze` because: [incompatible-type]
+ - Either property `c` is missing in `{readonly a: number, readonly b: number}` [1] but exists in
+   `{readonly c: number, ...}` [2].
+ - Or in type argument `T`: `{readonly c: number, ...}` [2] is incompatible with `Function` [3].
 
-   obj.js:27:42
-   27| Object.freeze<{readonly c: number, ...}>({a: 42, b: 42}); // c does not exist
-                                                ^^^^^^^^^^^^^^ [1]
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   obj.js:27:8
+    27| Object.freeze<{readonly c: number, ...}>({a: 42, b: 42}); // c does not exist
+               ^^^^^^
 
 References:
+   obj.js:27:42
+    27| Object.freeze<{readonly c: number, ...}>({a: 42, b: 42}); // c does not exist
+                                                 ^^^^^^^^^^^^^^ [1]
    obj.js:27:15
-   27| Object.freeze<{readonly c: number, ...}>({a: 42, b: 42}); // c does not exist
-                     ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+    27| Object.freeze<{readonly c: number, ...}>({a: 42, b: 42}); // c does not exist
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:215:29
+   215|     static freeze<T extends Function>(f: T): T;
+                                    ^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------------------ obj.js:28:1

@@ -236,6 +236,28 @@ References:
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------------- object_freeze.js:13:36
+
+Cannot call method `freeze` because: [incompatible-type]
+ - Either in type argument `T`: `number` [1] is incompatible with `Function` [2].
+ - Or `number` [1] is not an object, array, or tuple.
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   object_freeze.js:13:36
+    13| export const frozenNumber = Object.freeze(123); // TODO type_sig support
+                                           ^^^^^^
+
+References:
+   object_freeze.js:13:43
+    13| export const frozenNumber = Object.freeze(123); // TODO type_sig support
+                                                  ^^^ [1]
+   <BUILTINS>/lib.es5.js:215:29
+   215|     static freeze<T extends Function>(f: T): T;
+                                    ^^^^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------------------- object_freeze.js:13:29
 
 Cannot build a typed interface for this module. You should annotate the exports of this module with types. Cannot
@@ -495,4 +517,4 @@ References:
 
 
 
-Found 35 errors
+Found 36 errors
