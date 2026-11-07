@@ -177,17 +177,7 @@ fn recurse_into_intersection<'cx>(
         }
         let t = remaining[0].dupe();
         let rest = &remaining[1..];
-        let t = match t.deref() {
-            TypeInner::OpenT(tvar) => {
-                let (_, constraints) = cx.find_constraints(tvar.id() as i32);
-                match constraints {
-                    Constraints::FullyResolved(s) => cx.force_fully_resolved_tvar(&s),
-                    Constraints::Resolved(t) => t,
-                    _ => t,
-                }
-            }
-            _ => t,
-        };
+        let t = resolved(cx, &t);
         let FilterResult { type_, changed } = filter_fn(cx, t);
         match type_.deref() {
             TypeInner::DefT(_, d) if matches!(&**d, DefTInner::EmptyT) => {
