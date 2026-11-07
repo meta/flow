@@ -1,0 +1,244 @@
+Error ---------------------------------------------------------------------------------------------------- test.js:40:13
+
+Cannot call `takeNumbers` with `strings` bound to `values` because in the indexer property: `string` [1] is incompatible
+with `number` [2]. [incompatible-type]
+
+   test.js:40:13
+   40| takeNumbers(strings); // ERROR: string vs number
+                   ^^^^^^^
+
+References:
+   test.js:38:35
+   38| declare const strings: {[string]: string};
+                                         ^^^^^^ [1]
+   node_modules/repro/index.d.ts:9:58
+    9| export declare function takeNumbers(values: Dict<string, number>): void;
+                                                                ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:41:13
+
+Cannot call `takeNumbers` with `node` bound to `values` because in property `type`: `string` [1] is incompatible with
+`number` [2]. [incompatible-type]
+
+   test.js:41:13
+   41| takeNumbers(node); // ERROR: `type` is a string
+                   ^^^^
+
+References:
+   test.js:16:28
+   16| declare const node: {type: string, version: number};
+                                  ^^^^^^ [1]
+   node_modules/repro/index.d.ts:9:58
+    9| export declare function takeNumbers(values: Dict<string, number>): void;
+                                                                ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:42:8
+
+Cannot call `takeAB` with `a` bound to `values` because property `b` is missing in `{a: number}` [1] but exists in
+`{a: number, b: number}` [2]. [incompatible-type]
+
+   test.js:42:8
+   42| takeAB(a); // ERROR: `b` is missing
+              ^
+
+References:
+   test.js:39:18
+   39| declare const a: {a: number};
+                        ^^^^^^^^^^^ [1]
+   node_modules/repro/index.d.ts:10:40
+   10| export declare function takeAB(values: Dict<'a' | 'b', number>): void;
+                                              ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:46:1
+
+Cannot cast `flowNodes` to `{[string]: PartialNode | Node}` because in the indexer property: `Node` [1] is not exactly
+the same as `PartialNode | Node` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because the indexer is invariantly typed. To fix the error,
+- Either make `{[string]: Node}` [3] and `{[string]: PartialNode | Node}` [4] exactly the same
+- Or make the indexer in `{[string]: PartialNode | Node}` [4] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   test.js:46:1
+   46| flowNodes as {[string]: PartialNode | Node}; // ERROR: invariant
+       ^^^^^^^^^
+
+References:
+   test.js:15:37
+   15| declare const flowNodes: {[string]: Node};
+                                           ^^^^ [1]
+   test.js:46:25
+   46| flowNodes as {[string]: PartialNode | Node}; // ERROR: invariant
+                               ^^^^^^^^^^^^^^^^^^ [2]
+   test.js:15:26
+   15| declare const flowNodes: {[string]: Node};
+                                ^^^^^^^^^^^^^^^^ [3]
+   test.js:46:14
+   46| flowNodes as {[string]: PartialNode | Node}; // ERROR: invariant
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:47:1
+
+Cannot cast `flowNodes` to `FlowDict<string, PartialNode | Node>` because in the indexer property: `Node` [1] is not
+exactly the same as `PartialNode | Node` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because the indexer is invariantly typed. To fix the error,
+- Either make `{[string]: Node}` [3] and `{[string]: PartialNode | Node}` [4] exactly the same
+- Or make the indexer in `{[string]: PartialNode | Node}` [5] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   test.js:47:1
+   47| flowNodes as FlowDict<string, PartialNode | Node>; // ERROR: invariant
+       ^^^^^^^^^
+
+References:
+   test.js:15:37
+   15| declare const flowNodes: {[string]: Node};
+                                           ^^^^ [1]
+   test.js:45:54
+   45| type FlowDict<K extends PropertyKey, T> = {[P in K]: T};
+                                                            ^ [2]
+   test.js:15:26
+   15| declare const flowNodes: {[string]: Node};
+                                ^^^^^^^^^^^^^^^^ [3]
+   test.js:45:43
+   45| type FlowDict<K extends PropertyKey, T> = {[P in K]: T};
+                                                 ^^^^^^^^^^^^^ [4]
+   test.js:47:14
+   47| flowNodes as FlowDict<string, PartialNode | Node>; // ERROR: invariant
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [5]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:48:1
+
+Cannot cast `abc` to `FlowDict<"a" | "b", number>` because property `c` is extra in
+`{a: number, b: number, c: number}` [1] but missing in `{a: number, b: number}` [2]. Exact objects do not accept extra
+props. [incompatible-type]
+
+   test.js:48:1
+   48| abc as FlowDict<'a' | 'b', number>; // ERROR: `c` is extra
+       ^^^
+
+References:
+   test.js:18:20
+   18| declare const abc: {a: number, b: number, c: number};
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   test.js:48:8
+   48| abc as FlowDict<'a' | 'b', number>; // ERROR: `c` is extra
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:60:1
+
+Cannot cast `flowMapped` to `{a: PartialNode | Node, b: Node}` because in property `a`: `NodePair["a"]` [1] is not
+exactly the same as `PartialNode | Node` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `a` is invariantly typed. To fix the error,
+- Either make `{a: NodePair["a"], b: NodePair["b"]}` [3] and `{a: PartialNode | Node, b: Node}` [4] exactly the same
+- Or make property `a` in `{a: PartialNode | Node, b: Node}` [4] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   test.js:60:1
+   60| flowMapped as {a: PartialNode | Node, b: Node}; // ERROR: invariant
+       ^^^^^^^^^^
+
+References:
+   test.js:54:39
+   54| type FlowMapped<O> = {[K in keyof O]: O[K]};
+                                             ^^^^ [1]
+   test.js:60:19
+   60| flowMapped as {a: PartialNode | Node, b: Node}; // ERROR: invariant
+                         ^^^^^^^^^^^^^^^^^^ [2]
+   test.js:54:22
+   54| type FlowMapped<O> = {[K in keyof O]: O[K]};
+                            ^^^^^^^^^^^^^^^^^^^^^^ [3]
+   test.js:60:15
+   60| flowMapped as {a: PartialNode | Node, b: Node}; // ERROR: invariant
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:61:1
+
+Cannot cast `flowMappedArray` to `Array<PartialNode | Node>` because in array element: `NodeArray[number]` [1] is not
+exactly the same as `PartialNode | Node` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
+- Either make `Array<NodeArray[number]>` [3] and `Array<PartialNode | Node>` [4] exactly the same
+- Or make `Array<PartialNode | Node>` [4] a `ReadonlyArray`.
+See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
+
+   test.js:61:1
+   61| flowMappedArray as Array<PartialNode | Node>; // ERROR: invariant
+       ^^^^^^^^^^^^^^^
+
+References:
+   test.js:54:39
+   54| type FlowMapped<O> = {[K in keyof O]: O[K]};
+                                             ^^^^ [1]
+   test.js:61:26
+   61| flowMappedArray as Array<PartialNode | Node>; // ERROR: invariant
+                                ^^^^^^^^^^^^^^^^^^ [2]
+   test.js:54:22
+   54| type FlowMapped<O> = {[K in keyof O]: O[K]};
+                            ^^^^^^^^^^^^^^^^^^^^^^ [3]
+   test.js:61:20
+   61| flowMappedArray as Array<PartialNode | Node>; // ERROR: invariant
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:62:1
+
+Cannot cast `flowMappedInterface` to `interface {a: PartialNode | Node; b: Node}` because in property `a` > property
+`version`: `void` [1] is incompatible with `number` [2]. [incompatible-type]
+
+This property is invariantly typed. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   test.js:62:1
+   62| flowMappedInterface as interface {a: PartialNode | Node, b: Node}; // ERROR: invariant
+       ^^^^^^^^^^^^^^^^^^^
+
+References:
+   node_modules/repro/index.d.ts:2:52
+    2| export type PartialNode = {type: string; version?: number};
+                                                          ^^^^^^ [1]
+   node_modules/repro/index.d.ts:1:44
+    1| export type Node = {type: string; version: number; slots?: Dict<string, Node>};
+                                                  ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:68:1
+
+Cannot cast `flowOmitted` to `{a: PartialNode | Node, b: Node}` because in property `a`: `Node` [1] is not exactly the
+same as `PartialNode | Node` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `a` is invariantly typed. To fix the error,
+- Either make `{a: Node, b: Node}` [3] and `{a: PartialNode | Node, b: Node}` [4] exactly the same
+- Or make property `a` in `{a: PartialNode | Node, b: Node}` [4] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   test.js:68:1
+     68| flowOmitted as {a: PartialNode | Node, b: Node}; // ERROR: invariant
+         ^^^^^^^^^^^
+
+References:
+   test.js:66:37
+     66| declare const flowOmitted: Omit<{a: Node, b: Node, c: Node}, 'c'>;
+                                             ^^^^ [1]
+   test.js:68:20
+     68| flowOmitted as {a: PartialNode | Node, b: Node}; // ERROR: invariant
+                            ^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:1568:40
+   1568| type Omit<T extends interface {}, K> = $Omit<T, K>;
+                                                ^^^^^^^^^^^ [3]
+   test.js:68:16
+     68| flowOmitted as {a: PartialNode | Node, b: Node}; // ERROR: invariant
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+
+Found 10 errors

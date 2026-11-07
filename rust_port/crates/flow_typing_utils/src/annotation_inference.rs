@@ -55,6 +55,7 @@ use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeAppTData;
 use flow_typing_type::type_::TypeInner;
 use flow_typing_type::type_::TypeMap;
+use flow_typing_type::type_::TypeStrictnessKind;
 use flow_typing_type::type_::TypeTKind;
 use flow_typing_type::type_::UseOp;
 use flow_typing_type::type_::aconstraint::AConstraintInner;
@@ -1018,6 +1019,7 @@ pub fn elab_t<'cx>(
                     mapped_type_flags,
                     homomorphic,
                     distributive_tparam_name,
+                    strictness_kind,
                 }) => {
                     let (property_type, _, homomorphic) =
                         flow_js_utils::substitute_mapped_type_distributive_tparams(
@@ -1038,6 +1040,7 @@ pub fn elab_t<'cx>(
                                 inner_t.dupe(),
                                 &property_type,
                                 mapped_type_flags,
+                                *strictness_kind,
                                 &op,
                             );
                             return elab_t(cx, None, mapped, op);
@@ -1056,6 +1059,7 @@ pub fn elab_t<'cx>(
                                 name_type: None,
                                 mapped_type_flags: *mapped_type_flags,
                                 selected_keys_opt,
+                                strictness_kind: *strictness_kind,
                             },
                         )),
                         inner_t.dupe(),
@@ -4107,6 +4111,7 @@ fn object_kit_concrete<'cx>(
                 name_type: None,
                 mapped_type_flags,
                 selected_keys_opt,
+                strictness_kind,
             }) => {
                 let selected_keys = match selected_keys_opt {
                     None => None,
@@ -4124,6 +4129,7 @@ fn object_kit_concrete<'cx>(
                             reason,
                             prop_type,
                             mapped_type_flags,
+                            *strictness_kind,
                             selected_keys.as_ref(),
                             slice,
                         )
@@ -4160,6 +4166,7 @@ fn map_mapped_type_slice<'cx>(
     reason: &Reason,
     property_type: &Type,
     mapped_type_flags: &type_::MappedTypeFlags,
+    strictness_kind: TypeStrictnessKind,
     selected_keys: Option<&(Vec<(Name, Reason)>, Vec<Type>)>,
     slice: &type_::object::Slice,
 ) -> Type {
@@ -4175,6 +4182,7 @@ fn map_mapped_type_slice<'cx>(
         None,
         property_type,
         mapped_type_flags,
+        strictness_kind,
         cx,
         &FlowJsEnv::entry(),
         reason,
@@ -4278,6 +4286,7 @@ fn mapped_type_of_keys<'cx>(
     keys: Type,
     property_type: &Type,
     mapped_type_flags: &type_::MappedTypeFlags,
+    strictness_kind: TypeStrictnessKind,
     op: &Op<Cx>,
 ) -> Type {
     let Some((keys_with_reasons, indexers)) = partition_mapped_type_keys(cx, &reason, keys.dupe())
@@ -4290,8 +4299,9 @@ fn mapped_type_of_keys<'cx>(
         &reason,
         property_type,
         mapped_type_flags,
+        strictness_kind,
         None,
-        &slice_of_keys(&reason, &keys_with_reasons, &indexers),
+        &slice_of_keys(&reason, strictness_kind, &keys_with_reasons, &indexers),
     )
 }
 

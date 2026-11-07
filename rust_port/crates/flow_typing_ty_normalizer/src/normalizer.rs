@@ -3821,6 +3821,7 @@ mod type_converter {
                 mapped_type_flags,
                 homomorphic,
                 distributive_tparam_name,
+                strictness_kind: _,
             }) => {
                 let (property_type, name_type, homomorphic) =
                     flow_typing_flow_common::flow_js_utils::substitute_mapped_type_distributive_tparams(

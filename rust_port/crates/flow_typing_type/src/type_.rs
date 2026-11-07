@@ -6765,6 +6765,8 @@ pub struct DestructorMappedTypeData {
     /// source key is substituted to produce the destination key (TS `as` clause).
     pub name_type: Option<Type>,
     pub mapped_type_flags: MappedTypeFlags,
+    /// The strictness of the file that declares the mapped type. The objects it maps to have it.
+    pub strictness_kind: TypeStrictnessKind,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -9639,6 +9641,7 @@ pub mod object {
         pub name_type: Option<Type>,
         pub mapped_type_flags: MappedTypeFlags,
         pub selected_keys_opt: Option<Type>,
+        pub strictness_kind: TypeStrictnessKind,
     }
 
     #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]

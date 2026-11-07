@@ -145,6 +145,7 @@ pub fn mk_object_type<'cx>(
                     inline: true,
                     reject_primitives: false,
                 },
+                strictness_kind,
                 ..(*inst).clone()
             });
             let reason = reason.dupe().replace_desc(VirtualReasonDesc::RObjectType);
@@ -3324,6 +3325,7 @@ pub fn map_object<'cx>(
     name_remap: Option<&NameRemap>,
     poly_prop: &Type,
     mapped_type_flags: &MappedTypeFlags,
+    strictness_kind: TypeStrictnessKind,
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     reason: &Reason,
@@ -3335,7 +3337,7 @@ pub fn map_object<'cx>(
     let mapped_type_optionality = &mapped_type_flags.optional;
     let object::Slice {
         reason: _,
-        strictness_kind,
+        strictness_kind: _,
         props,
         flags,
         frozen,
@@ -3684,7 +3686,7 @@ pub fn map_object<'cx>(
         id,
         proto,
         generics.clone(),
-        *strictness_kind,
+        strictness_kind,
         ObjLiteral::NonLiteral,
     ))
 }

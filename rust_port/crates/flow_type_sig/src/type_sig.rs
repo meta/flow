@@ -2299,7 +2299,7 @@ pub enum Annot<Loc, T> {
     OptionalIndexedAccessNonMaybeType(Box<AnnotOptionalIndexedAccessNonMaybeType<Loc, T>>),
     OptionalIndexedAccessResultType(Box<AnnotOptionalIndexedAccessResultType<Loc, T>>),
     NonMaybeType(Box<(Loc, T)>),
-    Omit(Box<(Loc, T, T)>),
+    Omit(Box<(Loc, T, T, TypeStrictnessKind)>),
     ReadOnly(Box<(Loc, T)>),
     Partial(Box<(Loc, T)>),
     Required(Box<(Loc, T)>),
@@ -2443,11 +2443,7 @@ impl<Loc: std::hash::Hash, T: std::hash::Hash> std::hash::Hash for Annot<Loc, T>
                 inner.0.hash(state);
                 inner.1.hash(state);
             }
-            Annot::Omit(inner) => {
-                inner.0.hash(state);
-                inner.1.hash(state);
-                inner.2.hash(state);
-            }
+            Annot::Omit(inner) => inner.hash(state),
             Annot::ReadOnly(inner)
             | Annot::Partial(inner)
             | Annot::Required(inner)
@@ -2987,6 +2983,7 @@ impl<Loc, T> Annot<Loc, T> {
                 f_loc(cx, &inner.0),
                 f_t(cx, &inner.1),
                 f_t(cx, &inner.2),
+                inner.3,
             ))),
             Annot::ReadOnly(inner) => {
                 Annot::ReadOnly(Box::new((f_loc(cx, &inner.0), f_t(cx, &inner.1))))

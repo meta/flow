@@ -1051,6 +1051,7 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
                 name_type,
                 mapped_type_flags,
                 homomorphic,
+                strictness_kind,
             }) => {
                 let (distributive_tparam_name_new, new_map) =
                     self.subst_distributive_tparam_name(cx, distributive_tparam_name, map.dupe());
@@ -1110,6 +1111,7 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
                         name_type: name_type_prime,
                         mapped_type_flags: *mapped_type_flags,
                         homomorphic: homomorphic_prime,
+                        strictness_kind: *strictness_kind,
                     })))
                 }
             }

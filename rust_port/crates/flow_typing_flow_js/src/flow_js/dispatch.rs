@@ -8065,6 +8065,7 @@ fn __flow_impl<'cx>(
                     name_type: None,
                     mapped_type_flags,
                     selected_keys_opt: None,
+                    strictness_kind,
                 }),
                 tout,
             ),
@@ -8123,6 +8124,7 @@ fn __flow_impl<'cx>(
                                         name_type: None,
                                         mapped_type_flags: mapped_type_flags.clone(),
                                         selected_keys_opt: None,
+                                        strictness_kind: *strictness_kind,
                                     },
                                 ))),
                                 tout_inner.dupe(),
@@ -8157,6 +8159,7 @@ fn __flow_impl<'cx>(
                     name_type: None,
                     mapped_type_flags,
                     selected_keys_opt: None,
+                    strictness_kind,
                 }),
                 deref!(OpenT(tout_tvar)),
             ),
@@ -8263,7 +8266,6 @@ fn __flow_impl<'cx>(
                     elem_t,
                     tuple_view,
                     react_dro,
-                    strictness_kind,
                     ..
                 }) => {
                     let mapped_elem_t = f(cx, elem_t, None, false)?;
@@ -8323,7 +8325,6 @@ fn __flow_impl<'cx>(
                     inexact,
                     rest,
                     react_dro,
-                    strictness_kind,
                     ..
                 }) => {
                     let mapped_elem_t = f(cx, elem_t, None, false)?;
@@ -8372,7 +8373,7 @@ fn __flow_impl<'cx>(
                         elem_t: array_elem(cx, mapped_elem_t)?,
                         react_dro: dro.clone(),
                         tuple_view: None,
-                        strictness_kind: TypeStrictnessKind::Flow,
+                        strictness_kind: *strictness_kind,
                         literal: ArrLiteral::NonLiteral,
                         fresh: false,
                     }))

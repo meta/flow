@@ -1,0 +1,5 @@
+[options]
+all=true
+builtin_lib=core-only
+experimental.typescript_library_definition_support=true
+node_modules_errors=true

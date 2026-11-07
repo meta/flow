@@ -1,3 +1,11 @@
+Error --------------------------------------------------------------------------------- class_implements_object.ts:20:29
+
+Cannot implement `{age: Animal["age"], name: Animal["name"]}` [1] because it is not an interface. [cannot-implement]
+
+   20| class PetSummary implements Pick<Animal, "name" | "age"> {
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
 Error ---------------------------------------------------------------------------------- class_implements_object.ts:43:7
 
 Cannot implement `Omit<Animal, "sound">` [1] with `Bad` because property `age` is missing in `Bad` [2] but exists in
@@ -799,4 +807,4 @@ References:
 
 
 
-Found 45 errors
+Found 46 errors

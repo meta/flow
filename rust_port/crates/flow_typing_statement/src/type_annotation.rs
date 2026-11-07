@@ -2521,6 +2521,7 @@ fn convert_inner<'a>(
                                         variance: type_::MappedTypeVariance::KeepVariance,
                                     },
                                     distributive_tparam_name: None,
+                                    strictness_kind: cx.type_strictness_kind(),
                                 }));
                             let eval_id = EvalId::generate_id();
                             let mapped_use_op =
@@ -3567,6 +3568,7 @@ fn convert_inner<'a>(
                             variance: mapped_type_variance,
                         },
                         distributive_tparam_name,
+                        strictness_kind: cx.type_strictness_kind(),
                     }));
                 let eval_id = EvalId::generate_id();
                 let use_op =

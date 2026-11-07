@@ -1553,6 +1553,7 @@ pub fn destructor_default<'cx, A, M: TypeMapper<'cx, A> + ?Sized>(
             mapped_type_flags,
             homomorphic,
             distributive_tparam_name,
+            strictness_kind,
         }) => {
             let property_type_prime = mapper.type_(cx, map_cx, property_type.dupe());
             let name_type_prime = match name_type {
@@ -1597,6 +1598,7 @@ pub fn destructor_default<'cx, A, M: TypeMapper<'cx, A> + ?Sized>(
                     mapped_type_flags: mapped_type_flags.clone(),
                     homomorphic: homomorphic_prime,
                     distributive_tparam_name: distributive_tparam_name.clone(),
+                    strictness_kind: *strictness_kind,
                 })))
             }
         }

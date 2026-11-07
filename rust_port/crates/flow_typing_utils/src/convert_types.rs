@@ -1259,6 +1259,7 @@ fn json_of_destructor<'cx>(
             property_type,
             name_type,
             mapped_type_flags,
+            strictness_kind: _,
         }) => {
             let homomorphic_json = match homomorphic {
                 MappedTypeHomomorphicFlag::Homomorphic => json_with_type("Homomorphic", vec![]),

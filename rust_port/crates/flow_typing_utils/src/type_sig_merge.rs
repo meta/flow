@@ -2336,7 +2336,7 @@ fn merge_annot<'cx>(
                 id,
             })
         }
-        Annot::Omit(box (loc, t1, t2)) => {
+        Annot::Omit(box (loc, t1, t2, strictness_kind)) => {
             let reason = reason::mk_reason(RType("Omit".into()), loc.dupe());
             let use_op = type_::UseOp::Op(Arc::new(type_::RootUseOp::TypeApplication {
                 type_: type_::TypeApplicationTarget::Reason(reason.dupe()),
@@ -2359,6 +2359,7 @@ fn merge_annot<'cx>(
                                 variance: type_::MappedTypeVariance::KeepVariance,
                             },
                             distributive_tparam_name: None,
+                            strictness_kind: *strictness_kind,
                         },
                     ))),
                 )),
@@ -3077,6 +3078,7 @@ fn merge_annot<'cx>(
                             mapped_type_flags,
                             homomorphic,
                             distributive_tparam_name,
+                            strictness_kind: *strictness_kind,
                         },
                     ))),
                 )),

@@ -428,6 +428,7 @@ fn compute_name_remap<'cx>(
 /// key and one indexer per non-literal key type.
 pub fn slice_of_keys(
     reason: &Reason,
+    strictness_kind: TypeStrictnessKind,
     keys_with_reasons: &[(Name, Reason)],
     indexers: &[Type],
 ) -> object::Slice {
@@ -481,7 +482,7 @@ pub fn slice_of_keys(
     let obj_reason = reason.dupe().replace_desc(VirtualReasonDesc::RObjectType);
     object::Slice {
         reason: obj_reason,
-        strictness_kind: TypeStrictnessKind::Flow,
+        strictness_kind,
         props,
         flags,
         frozen: false,
@@ -503,10 +504,11 @@ pub fn mapped_type_of_keys<'cx>(
     property_type: &Type,
     name_type: Option<&Type>,
     mapped_type_flags: &MappedTypeFlags,
+    strictness_kind: TypeStrictnessKind,
 ) -> Result<Type, FlowJsException> {
     let (keys_with_reasons, indexers) =
         partition_keys_and_indexer(cx, env, trace, use_op.dupe(), reason, keys)?;
-    let slice = slice_of_keys(reason, &keys_with_reasons, &indexers);
+    let slice = slice_of_keys(reason, strictness_kind, &keys_with_reasons, &indexers);
     let filter_optional = |cx: &mut Context<'cx>, t: Type| -> Result<Type, FlowJsException> {
         let filter_id = crate::flow_js::filter_optional_with_env(cx, env, reason, &t)?;
         Ok(Type::new(TypeInner::OpenT(Tvar::new(
@@ -525,6 +527,7 @@ pub fn mapped_type_of_keys<'cx>(
         name_remap.as_ref(),
         property_type,
         mapped_type_flags,
+        strictness_kind,
         cx,
         env,
         reason,
@@ -1272,6 +1275,7 @@ pub(super) fn run_with_env<'cx>(
                       name_type: &Option<Type>,
                       mapped_type_flags: &MappedTypeFlags,
                       selected_keys_opt: &Option<Type>,
+                      strictness_kind: TypeStrictnessKind,
                       cx: &mut Context<'cx>,
                       use_op: UseOp,
                       reason: &Reason,
@@ -1309,6 +1313,7 @@ pub(super) fn run_with_env<'cx>(
                     name_remap.as_ref(),
                     prop_type,
                     mapped_type_flags,
+                    strictness_kind,
                     cx,
                     env,
                     reason,
@@ -1381,11 +1386,13 @@ pub(super) fn run_with_env<'cx>(
                 name_type,
                 mapped_type_flags,
                 selected_keys_opt,
+                strictness_kind,
             }) => object_map(
                 prop_type,
                 name_type,
                 mapped_type_flags,
                 selected_keys_opt,
+                *strictness_kind,
                 cx,
                 use_op,
                 reason,

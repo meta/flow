@@ -487,6 +487,7 @@ pub(super) fn eval_destructor<'cx>(
         property_type,
         name_type,
         distributive_tparam_name: _,
+        strictness_kind,
     }) = d
     {
         // Non-homomorphic mapped types have their own special resolution code, so they do not fit well
@@ -501,6 +502,7 @@ pub(super) fn eval_destructor<'cx>(
             property_type,
             name_type.as_ref(),
             mapped_type_flags,
+            *strictness_kind,
         );
         let mapped_t = mapped_t?;
         // Intentional unknown_use for the tout Flow
@@ -1377,6 +1379,7 @@ pub(super) fn eval_destructor<'cx>(
                     mapped_type_flags,
                     homomorphic,
                     distributive_tparam_name,
+                    strictness_kind,
                 }) => {
                     let (property_type, name_type, homomorphic) =
                         flow_js_utils::substitute_mapped_type_distributive_tparams(
@@ -1402,6 +1405,7 @@ pub(super) fn eval_destructor<'cx>(
                             name_type,
                             mapped_type_flags: *mapped_type_flags,
                             selected_keys_opt,
+                            strictness_kind: *strictness_kind,
                         }))),
                         Type::new(TypeInner::OpenT(tout.dupe())),
                     ));

@@ -9417,7 +9417,12 @@ fn maybe_special_unqualified_generic<'arena, 'ast>(
             Some(type_args) if type_args.arguments.len() == 2 => {
                 let t1 = annot(opts, scope, scopes, tbls, xs, &type_args.arguments[0]);
                 let t2 = annot(opts, scope, scopes, tbls, xs, &type_args.arguments[1]);
-                Parsed::Annot(Box::new(ParsedAnnot::Omit(Box::new((loc, t1, t2)))))
+                Parsed::Annot(Box::new(ParsedAnnot::Omit(Box::new((
+                    loc,
+                    t1,
+                    t2,
+                    tbls.strictness_kind,
+                )))))
             }
             _ => Parsed::Err(loc, Errno::CheckError),
         },
