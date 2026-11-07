@@ -46,17 +46,9 @@ Missing an annotation on this parameter. [missing-local-annot]
                       ^
 
 
-Error ----------------------------------------------------------------------------------------------------- call.js:9:14
-
-Missing an annotation on this parameter. [missing-local-annot]
-
-   9|   const a = (x) => 3; // Required annot
-                   ^
-
-
 Error ----------------------------------------------------------------------------------------------------- call.js:12:8
 
-Property `@@iterator` is missing in `{...}` [1] but exists in
+Cannot call `f` because property `@@iterator` is missing in `{...}` [1] but exists in
 `{"@@iterator"(this: Iterable<any, any, any>): Iterator<any, any, any>, ...}` [2]. [incompatible-type]
 
    call.js:12:8
@@ -67,6 +59,14 @@ References:
    <BUILTINS>/misc.js:304:11
    304| interface Iterable<out T, out TReturn = void, in TNext = void> {}
                   ^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- call.js:9:14
+
+Missing an annotation on this parameter. [missing-local-annot]
+
+   9|   const a = (x) => 3; // Required annot
+                   ^
 
 
 Error ----------------------------------------------------------------------------------------------------- call.js:12:9

@@ -1,4 +1,4 @@
-const arr = [1,2,3];  // badly-positioned error
+const arr = [1,2,3];
 
 // fun.call()
 (function (this: any, ...args: any) { return this.bar; }).call(...arr); // error

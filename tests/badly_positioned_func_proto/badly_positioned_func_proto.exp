@@ -1,28 +1,17 @@
-Error ----------------------------------------------------------------------------------------------------- test.js:1:14
+Error ------------------------------------------------------------------------------------------------------ test.js:7:2
 
-`number` [1], a primitive, cannot be used as a subtype of `Iterable<empty, any, any>` [2]. You can wrap it in
-`new Number(...))` to turn it into an object and attempt to use it as a subtype of an interface. [incompatible-type]
+Cannot call `function () { ... }.apply` because `number` [1], a primitive, cannot be used as a subtype of
+`Iterable<empty, any, any>` [2]. You can wrap it in `new Number(...))` to turn it into an object and attempt to use it
+as a subtype of an interface. [incompatible-type]
 
-   test.js:1:14
-     1| const arr = [1,2,3];  // badly-positioned error
-                     ^ [1]
+   test.js:7:2
+     7| (function (this: any) { return this.bar; }).apply(...arr); // error
+         ^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:304:11
-   304| interface Iterable<out T, out TReturn = void, in TNext = void> {}
-                  ^^^^^^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------------------- test.js:1:16
-
-`number` [1], a primitive, cannot be used as a subtype of `Iterable<empty, any, any>` [2]. You can wrap it in
-`new Number(...))` to turn it into an object and attempt to use it as a subtype of an interface. [incompatible-type]
-
    test.js:1:16
-     1| const arr = [1,2,3];  // badly-positioned error
+     1| const arr = [1,2,3];
                        ^ [1]
-
-References:
    <BUILTINS>/misc.js:304:11
    304| interface Iterable<out T, out TReturn = void, in TNext = void> {}
                   ^^^^^^^^ [2]
@@ -54,11 +43,30 @@ it as a subtype of an interface. [incompatible-type]
 
 References:
    test.js:1:16
-     1| const arr = [1,2,3];  // badly-positioned error
+     1| const arr = [1,2,3];
                        ^ [1]
    <BUILTINS>/lib.es5.js:331:36
    331|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, argArray?: A) => R);
                                            ^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------------ test.js:8:2
+
+Cannot call `function () { ... }.apply` because `number` [1], a primitive, cannot be used as a subtype of
+`Iterable<empty, any, any>` [2]. You can wrap it in `new Number(...))` to turn it into an object and attempt to use it
+as a subtype of an interface. [incompatible-type]
+
+   test.js:8:2
+     8| (function (this: any) { return this.bar; }).apply({} as any, ...arr); // error
+         ^^^^^^^^^^^^^^^^^^^^
+
+References:
+   test.js:1:14
+     1| const arr = [1,2,3];
+                     ^ [1]
+   <BUILTINS>/misc.js:304:11
+   304| interface Iterable<out T, out TReturn = void, in TNext = void> {}
+                  ^^^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:8:45
@@ -87,11 +95,30 @@ it as a subtype of an interface. [incompatible-type]
 
 References:
    test.js:1:14
-     1| const arr = [1,2,3];  // badly-positioned error
+     1| const arr = [1,2,3];
                      ^ [1]
    <BUILTINS>/lib.es5.js:331:36
    331|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, argArray?: A) => R);
                                            ^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------------ test.js:9:2
+
+Cannot call `function () { ... }.apply` because `number` [1], a primitive, cannot be used as a subtype of
+`Iterable<empty, any, any>` [2]. You can wrap it in `new Number(...))` to turn it into an object and attempt to use it
+as a subtype of an interface. [incompatible-type]
+
+   test.js:9:2
+     9| (function (this: any) { return this.bar; }).apply(...arr, ...arr); // error
+         ^^^^^^^^^^^^^^^^^^^^
+
+References:
+   test.js:1:16
+     1| const arr = [1,2,3];
+                       ^ [1]
+   <BUILTINS>/misc.js:304:11
+   304| interface Iterable<out T, out TReturn = void, in TNext = void> {}
+                  ^^^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:9:45
@@ -120,7 +147,7 @@ it as a subtype of an interface. [incompatible-type]
 
 References:
    test.js:1:16
-     1| const arr = [1,2,3];  // badly-positioned error
+     1| const arr = [1,2,3];
                        ^ [1]
    <BUILTINS>/lib.es5.js:331:36
    331|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, argArray?: A) => R);
@@ -128,4 +155,4 @@ References:
 
 
 
-Found 8 errors
+Found 9 errors

@@ -35,7 +35,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- iterables.js:3:6
 
-`Iterable<number, void, void>` [1] is incompatible with `ReadonlyArray<empty>` [2]. [incompatible-type]
+Cannot call `f` because `Iterable<number, void, void>` [1] is incompatible with `ReadonlyArray<empty>` [2].
+[incompatible-type]
 
    iterables.js:3:6
       3| f(...it); // Error
@@ -91,7 +92,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ iterables.js:13:6
 
-`Iterable<number, void, void>` [1] is incompatible with `ReadonlyArray<empty>` [2]. [incompatible-type]
+Cannot call `f` because `Iterable<number, void, void>` [1] is incompatible with `ReadonlyArray<empty>` [2].
+[incompatible-type]
 
    iterables.js:13:6
      13| f(...oit); // Error
@@ -167,7 +169,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ maps.js:9:6
 
-`Map<string, string>` [1] is incompatible with `ReadonlyArray<empty>` [2]. [incompatible-type]
+Cannot call `f` because `Map<string, string>` [1] is incompatible with `ReadonlyArray<empty>` [2]. [incompatible-type]
 
    maps.js:9:6
       9|   ...map1, // Error
@@ -184,7 +186,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- maps.js:10:6
 
-`Map<string, string>` [1] is incompatible with `ReadonlyArray<empty>` [2]. [incompatible-type]
+Cannot call `f` because `Map<string, string>` [1] is incompatible with `ReadonlyArray<empty>` [2]. [incompatible-type]
 
    maps.js:10:6
      10|   ...map2, // Error

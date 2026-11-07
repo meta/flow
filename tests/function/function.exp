@@ -1,5 +1,24 @@
 Error ------------------------------------------------------------------------------------------ apply-array-like.js:5:1
 
+Cannot call `test.apply` because `string` [1], a primitive, cannot be used as a subtype of
+`Iterable<empty, any, any>` [2]. You can wrap it in `new String(...))` to turn it into an object and attempt to use it
+as a subtype of an interface. [incompatible-type]
+
+   apply-array-like.js:5:1
+     5| test.apply("", "foo"); // ERROR
+        ^^^^
+
+References:
+   apply-array-like.js:5:16
+     5| test.apply("", "foo"); // ERROR
+                       ^^^^^ [1]
+   <BUILTINS>/misc.js:304:11
+   304| interface Iterable<out T, out TReturn = void, in TNext = void> {}
+                  ^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------ apply-array-like.js:5:1
+
 Cannot call `test.apply` because in the `this` parameter: `string` [1], a primitive, cannot be used as a subtype of
 `interface {length: number}` [2]. You can wrap it in `new String(...))` to turn it into an object and attempt to use it
 as a subtype of an interface. [incompatible-type]
@@ -47,21 +66,6 @@ References:
    apply-array-like.js:5:1
    5| test.apply("", "foo"); // ERROR
       ^^^^ [1]
-
-
-Error ----------------------------------------------------------------------------------------- apply-array-like.js:5:16
-
-`string` [1], a primitive, cannot be used as a subtype of `Iterable<empty, any, any>` [2]. You can wrap it in
-`new String(...))` to turn it into an object and attempt to use it as a subtype of an interface. [incompatible-type]
-
-   apply-array-like.js:5:16
-     5| test.apply("", "foo"); // ERROR
-                       ^^^^^ [1]
-
-References:
-   <BUILTINS>/misc.js:304:11
-   304| interface Iterable<out T, out TReturn = void, in TNext = void> {}
-                  ^^^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------- apply-array-like.js:12:6
@@ -379,6 +383,25 @@ References:
        ^^^^ [1]
 
 
+Error ---------------------------------------------------------------------------------------------------- apply.js:22:1
+
+Cannot call `test.apply` because `string` [1], a primitive, cannot be used as a subtype of
+`Iterable<empty, any, any>` [2]. You can wrap it in `new String(...))` to turn it into an object and attempt to use it
+as a subtype of an interface. [incompatible-type]
+
+   apply.js:22:1
+    22| test.apply("", "not array"); // error: string ~> object
+        ^^^^
+
+References:
+   apply.js:22:16
+    22| test.apply("", "not array"); // error: string ~> object
+                       ^^^^^^^^^^^ [1]
+   <BUILTINS>/misc.js:304:11
+   304| interface Iterable<out T, out TReturn = void, in TNext = void> {}
+                  ^^^^^^^^ [2]
+
+
 Error --------------------------------------------------------------------------------------------------- apply.js:22:16
 
 Cannot call `test.apply` because in type argument `A`: `string` [1], a primitive, cannot be used as a subtype of
@@ -409,21 +432,6 @@ References:
    apply.js:22:1
    22| test.apply("", "not array"); // error: string ~> object
        ^^^^ [1]
-
-
-Error --------------------------------------------------------------------------------------------------- apply.js:22:16
-
-`string` [1], a primitive, cannot be used as a subtype of `Iterable<empty, any, any>` [2]. You can wrap it in
-`new String(...))` to turn it into an object and attempt to use it as a subtype of an interface. [incompatible-type]
-
-   apply.js:22:16
-    22| test.apply("", "not array"); // error: string ~> object
-                       ^^^^^^^^^^^ [1]
-
-References:
-   <BUILTINS>/misc.js:304:11
-   304| interface Iterable<out T, out TReturn = void, in TNext = void> {}
-                  ^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- apply.js:29:1
