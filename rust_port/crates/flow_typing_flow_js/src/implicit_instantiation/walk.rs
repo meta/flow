@@ -1521,6 +1521,16 @@ impl<'e> Walker<'e> {
                 self.propagate_any(cx, &u, &l, false);
                 Ok(())
             }
+            // As in subtyping, an application above a rigid type parameter is expanded before the
+            // parameter is replaced by its bound, so that the parameter can match a marker in the
+            // expansion. A bound that applies the same alias or class is compared argument by
+            // argument instead.
+            (TypeInner::GenericT(box GenericTData { bound, .. }), TypeInner::TypeAppT(b))
+                if !self.bound_applies(cx, bound, &b.type_, 0)
+                    && let Some(e) = self.expand_typeapp(cx, &u) =>
+            {
+                self.walk(cx, &l, &e)
+            }
             (TypeInner::GenericT(box GenericTData { bound, .. }), _) => self.walk(cx, bound, &u),
             (TypeInner::TypeAppT(a), TypeInner::TypeAppT(b)) => {
                 if let Some(polarities) = self.same_typeapp(cx, &a.type_, &b.type_) {
@@ -3977,6 +3987,30 @@ impl<'e> Walker<'e> {
             result.push(targ);
         }
         result
+    }
+
+    /// Whether a bound applies `c`, through other type parameters and aliases of an application.
+    fn bound_applies<'cx>(
+        &self,
+        cx: &mut Context<'cx>,
+        bound: &Type,
+        c: &Type,
+        depth: u32,
+    ) -> bool {
+        if depth > MAX_DEPTH {
+            return false;
+        }
+        let bound = self.resolve(cx, bound);
+        match bound.deref() {
+            TypeInner::GenericT(box GenericTData { bound, .. }) => {
+                self.bound_applies(cx, bound, c, depth + 1)
+            }
+            TypeInner::TypeAppT(a) if self.same_typeapp(cx, &a.type_, c).is_some() => true,
+            TypeInner::TypeAppT(_) => self
+                .expand_typeapp(cx, &bound)
+                .is_some_and(|t| self.bound_applies(cx, &t, c, depth + 1)),
+            _ => false,
+        }
     }
 
     /// The polarities of the type parameters if `a` and `b` are the same polymorphic type.

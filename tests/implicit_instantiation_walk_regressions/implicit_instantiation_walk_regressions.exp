@@ -232,6 +232,91 @@ References:
                                                        ^^^^^^ [2]
 
 
+Error -------------------------------------------------------------------------------- generic_alias_application.js:13:3
+
+Cannot cast `valFromOption(...)` to `empty` because `unknown` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   generic_alias_application.js:13:3
+   13|   valFromOption(x) as empty; // error
+         ^^^^^^^^^^^^^^^^
+
+References:
+   generic_alias_application.js:8:18
+    8| function f<A>(x: A, g: (v: A) => void) {
+                        ^ [1]
+   generic_alias_application.js:13:23
+   13|   valFromOption(x) as empty; // error
+                             ^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------- generic_alias_application.js:28:3
+
+Cannot cast `leafOf(...)` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   generic_alias_application.js:28:3
+   28|   leafOf(o) as empty; // ERROR: T
+         ^^^^^^^^^
+
+References:
+   generic_alias_application.js:26:69
+   26| function throughParameter<T extends string | number, B extends Tree<T>, O extends B>(o: O) {
+                                                                           ^ [1]
+   generic_alias_application.js:28:16
+   28|   leafOf(o) as empty; // ERROR: T
+                      ^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------- generic_alias_application.js:28:3
+
+Cannot cast `leafOf(...)` to `empty` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   generic_alias_application.js:28:3
+   28|   leafOf(o) as empty; // ERROR: T
+         ^^^^^^^^^
+
+References:
+   generic_alias_application.js:26:69
+   26| function throughParameter<T extends string | number, B extends Tree<T>, O extends B>(o: O) {
+                                                                           ^ [1]
+   generic_alias_application.js:28:16
+   28|   leafOf(o) as empty; // ERROR: T
+                      ^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------- generic_alias_application.js:35:3
+
+Cannot cast `leafOf(...)` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   generic_alias_application.js:35:3
+   35|   leafOf(o) as empty; // ERROR: T
+         ^^^^^^^^^
+
+References:
+   generic_alias_application.js:17:43
+   17| type Tree<T> = T | null | {[string]: Tree<T>, ...};
+                                                 ^ [1]
+   generic_alias_application.js:35:16
+   35|   leafOf(o) as empty; // ERROR: T
+                      ^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------- generic_alias_application.js:35:3
+
+Cannot cast `leafOf(...)` to `empty` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   generic_alias_application.js:35:3
+   35|   leafOf(o) as empty; // ERROR: T
+         ^^^^^^^^^
+
+References:
+   generic_alias_application.js:17:43
+   17| type Tree<T> = T | null | {[string]: Tree<T>, ...};
+                                                 ^ [1]
+   generic_alias_application.js:35:16
+   35|   leafOf(o) as empty; // ERROR: T
+                      ^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------------ generic_value_defaults.js:7:1
 
 Cannot cast `a` to `empty` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
@@ -581,4 +666,4 @@ References:
 
 
 
-Found 33 errors
+Found 38 errors
