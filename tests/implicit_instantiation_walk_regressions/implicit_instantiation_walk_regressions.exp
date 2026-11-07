@@ -210,6 +210,28 @@ References:
                                   ^^^^^^ [2]
 
 
+Error --------------------------------------------------------------------------------- filter_optional_property.js:8:12
+
+Cannot call `[...].filter` because: [incompatible-type]
+ - Either in the type predicate: `void` [1] is incompatible with `string` [2].
+ - Or in array element: `void` [1] is incompatible with `string` [2].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   filter_optional_property.js:8:12
+   8| [o.a, o.b].filter(v => v === undefined) as Array<string>; // error
+                 ^^^^^^
+
+References:
+   filter_optional_property.js:4:34
+   4| declare const o: {a: string, b?: string};
+                                       ^^^^^^ [1]
+   filter_optional_property.js:8:50
+   8| [o.a, o.b].filter(v => v === undefined) as Array<string>; // error
+                                                       ^^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------------ generic_value_defaults.js:7:1
 
 Cannot cast `a` to `empty` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
@@ -559,4 +581,4 @@ References:
 
 
 
-Found 32 errors
+Found 33 errors

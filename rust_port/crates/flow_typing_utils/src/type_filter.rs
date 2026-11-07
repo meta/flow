@@ -7,6 +7,7 @@
 
 // Port of type_filter.rs
 
+use std::collections::BTreeSet;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -82,6 +83,36 @@ pub fn unchanged_result(type_: Type) -> FilterResult {
     }
 }
 
+/// Filters see the members of an optimized union as they are, not concretized: a member can be a
+/// type variable, resolved to another one, and so can the inner type of a maybe or optional type.
+fn resolved(cx: &mut Context<'_>, t: &Type) -> Type {
+    let mut t = t.dupe();
+    let mut seen = BTreeSet::new();
+    while let TypeInner::OpenT(tvar) = t.deref() {
+        if !seen.insert(tvar.id()) {
+            break;
+        }
+        t = match cx.find_constraints(tvar.id() as i32).1 {
+            Constraints::FullyResolved(s) => cx.force_fully_resolved_tvar(&s),
+            Constraints::Resolved(resolved) => resolved,
+            Constraints::Unresolved(_) => break,
+        };
+    }
+    t
+}
+
+/// The result of filtering the inner type of a maybe or optional type, which removes its `null`
+/// or `undefined`: the inner type itself if filtering leaves it as it is.
+fn filter_inner<'cx>(
+    cx: &mut Context<'cx>,
+    filter_fn: &dyn Fn(&mut Context<'cx>, Type) -> FilterResult,
+    inner: &Type,
+) -> FilterResult {
+    let resolved_inner = resolved(cx, inner);
+    let FilterResult { type_, changed } = filter_fn(cx, resolved_inner);
+    changed_result(if changed { type_ } else { inner.dupe() })
+}
+
 fn recurse_into_union<'cx>(
     cx: &mut Context<'cx>,
     filter_fn: &dyn Fn(&mut Context<'cx>, Type) -> FilterResult,
@@ -91,17 +122,7 @@ fn recurse_into_union<'cx>(
     let (mut new_ts, changed) =
         ts.into_iter()
             .fold((Vec::new(), false), |(mut new_ts, changed_acc), t| {
-                let t = match t.deref() {
-                    TypeInner::OpenT(tvar) => {
-                        let (_, constraints) = cx.find_constraints(tvar.id() as i32);
-                        match constraints {
-                            Constraints::FullyResolved(s) => cx.force_fully_resolved_tvar(&s),
-                            Constraints::Resolved(t) => t,
-                            _ => t,
-                        }
-                    }
-                    _ => t,
-                };
+                let t = resolved(cx, &t);
                 let FilterResult { type_, changed } = filter_fn(cx, t);
                 match type_.deref() {
                     TypeInner::DefT(_, d) if matches!(&**d, DefTInner::EmptyT) => {
@@ -343,8 +364,8 @@ pub fn truthy<'cx>(cx: &mut Context<'cx>, t: Type) -> FilterResult {
         TypeInner::UnionT(r, rep) => {
             recurse_into_union(cx, &truthy, r.dupe(), rep.members_iter().duped().collect())
         }
-        TypeInner::MaybeT(_, inner) => changed_result(inner.dupe()),
-        TypeInner::OptionalT { type_, .. } => truthy(cx, type_.dupe()),
+        TypeInner::MaybeT(_, inner) => filter_inner(cx, &truthy, inner),
+        TypeInner::OptionalT { type_, .. } => filter_inner(cx, &truthy, type_),
         TypeInner::DefT(r, d) => match d.deref() {
             DefTInner::BoolGeneralT => changed_result(Type::new(TypeInner::DefT(
                 r.dupe(),
@@ -574,8 +595,8 @@ pub fn not_maybe<'cx>(cx: &mut Context<'cx>, t: Type) -> FilterResult {
             r.dupe(),
             rep.members_iter().duped().collect(),
         ),
-        TypeInner::MaybeT(_, inner) => changed_result(inner.dupe()),
-        TypeInner::OptionalT { type_, .. } => not_maybe(cx, type_.dupe()),
+        TypeInner::MaybeT(_, inner) => filter_inner(cx, &not_maybe, inner),
+        TypeInner::OptionalT { type_, .. } => filter_inner(cx, &not_maybe, type_),
         TypeInner::DefT(r, d) => match d.deref() {
             DefTInner::NullT | DefTInner::VoidT => changed_result(empty_t::why(r.dupe())),
             DefTInner::MixedT(MixedFlavor::MixedTruthy) => unchanged_result(t),
