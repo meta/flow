@@ -2732,7 +2732,9 @@ pub fn annotated_or_inferred_of_option(
     }
 }
 
-pub fn subtype_this_of_function(funtype: &crate::type_::FunType) -> Type {
+/// The receiver type unification compares a function by: its `this` type, or `mixed` for a method
+/// without an explicit `this`.
+pub fn this_for_unification(funtype: &crate::type_::FunType) -> Type {
     use crate::type_::ThisStatus;
     use crate::type_::mixed_t;
 

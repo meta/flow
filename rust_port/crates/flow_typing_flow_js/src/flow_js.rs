@@ -199,7 +199,7 @@ use flow_typing_type::type_util::loc_of_t;
 use flow_typing_type::type_util::mk_named_prop;
 use flow_typing_type::type_util::reason_of_propref;
 use flow_typing_type::type_util::reason_of_t;
-use flow_typing_type::type_util::subtype_this_of_function;
+use flow_typing_type::type_util::this_for_unification;
 use flow_typing_type::type_util::tuple_ts_of_elements;
 use flow_typing_type::type_util::use_op_of_use_t;
 use flow_utils_concurrency::job_error::JobError;

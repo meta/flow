@@ -944,8 +944,8 @@ impl<'e> Walker<'e> {
             && uf.type_guard.is_none()
             && lf.params.len() == uf.params.len()
         {
-            let lthis = type_util::subtype_this_of_function(lf);
-            let uthis = type_util::subtype_this_of_function(uf);
+            let lthis = type_util::this_for_unification(lf);
+            let uthis = type_util::this_for_unification(uf);
             self.walk_invariant(cx, &lthis, &uthis)?;
             for (FunParam(_, lt), FunParam(_, ut)) in lf.params.iter().zip(uf.params.iter()) {
                 self.walk_invariant(cx, lt, ut)?;

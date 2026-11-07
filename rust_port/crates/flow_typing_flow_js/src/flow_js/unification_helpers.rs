@@ -552,8 +552,8 @@ fn __unify_inner<'cx>(
                         && funtype2.type_guard.is_none()
                         && funtype1.params.len() == funtype2.params.len() =>
                 {
-                    let this1 = subtype_this_of_function(funtype1);
-                    let this2 = subtype_this_of_function(funtype2);
+                    let this1 = this_for_unification(funtype1);
+                    let this2 = this_for_unification(funtype2);
                     rec_unify(
                         cx,
                         env,
