@@ -121,11 +121,22 @@ pub fn mk(obj_kind: ObjKind, cx: &mut Context, reason: Reason, literal: ObjLiter
 }
 
 /// The intrinsic `ExactObjectType`, bounded above by `{...}`.
-pub fn mk_exact_object_type(cx: &mut Context, reason: Reason) -> Type {
-    let upper_t = mk(
-        ObjKind::Inexact,
+pub fn mk_exact_object_type(
+    cx: &mut Context,
+    reason: Reason,
+    strictness_kind: TypeStrictnessKind,
+) -> Type {
+    let upper_reason = reason.dupe().replace_desc(VirtualReasonDesc::RObjectType);
+    let upper_t = mk_with_proto_and_strictness(
         cx,
-        reason.dupe().replace_desc(VirtualReasonDesc::RObjectType),
+        upper_reason.dupe(),
+        ObjKind::Inexact,
+        None,
+        None,
+        None,
+        None,
+        obj_proto::make(upper_reason),
+        strictness_kind,
         ObjLiteral::NonLiteral,
     );
     mk_exact_object_type_with_upper(reason, upper_t)

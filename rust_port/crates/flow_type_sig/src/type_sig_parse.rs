@@ -218,22 +218,27 @@ pub(super) enum Parsed<'arena, 'ast> {
         LocNode<'arena>,
         Box<Parsed<'arena, 'ast>>,
         Box<Op<Parsed<'arena, 'ast>>>,
+        TypeStrictnessKind,
     ),
     Require {
         loc: LocNode<'arena>,
         mref: ModuleRefNode<'arena>,
+        strictness_kind: TypeStrictnessKind,
     },
     ImportDynamic {
         loc: LocNode<'arena>,
         mref: ModuleRefNode<'arena>,
+        strictness_kind: TypeStrictnessKind,
     },
     ModuleRef {
         loc: LocNode<'arena>,
         mref: ModuleRefNode<'arena>,
+        strictness_kind: TypeStrictnessKind,
     },
     ImportTypeAnnot {
         loc: LocNode<'arena>,
         mref: ModuleRefNode<'arena>,
+        strictness_kind: TypeStrictnessKind,
     },
 }
 
@@ -245,6 +250,7 @@ pub(super) enum TyName<'arena, 'ast> {
         id_loc: LocNode<'arena>,
         name: FlowSmolStr,
         qualification: Box<TyName<'arena, 'ast>>,
+        strictness_kind: TypeStrictnessKind,
     },
 }
 
@@ -326,6 +332,7 @@ pub(super) struct Exports<'arena, 'ast> {
     pub(super) ts_pending: BTreeMap<FlowSmolStr, TsPendingExport<'arena, 'ast>>,
     pub(super) strict: bool,
     pub(super) platform_availability_set: Option<PlatformSet>,
+    pub(super) strictness_kind: TypeStrictnessKind,
 }
 
 // When resolving names in the next phase, it will become possible to visit a
@@ -432,12 +439,14 @@ pub(super) enum LocalBinding<'arena, 'ast> {
                 ),
             >,
         >,
+        strictness_kind: TypeStrictnessKind,
     },
     NamespaceBinding {
         id_loc: LocNode<'arena>,
         name: FlowSmolStr,
         values: BTreeMap<FlowSmolStr, (LocNode<'arena>, Parsed<'arena, 'ast>)>,
         types: BTreeMap<FlowSmolStr, (LocNode<'arena>, Parsed<'arena, 'ast>)>,
+        strictness_kind: TypeStrictnessKind,
     },
 }
 
@@ -513,33 +522,39 @@ pub(super) enum RemoteBinding<'arena> {
         name: FlowSmolStr,
         mref: ModuleRefNode<'arena>,
         remote: FlowSmolStr,
+        strictness_kind: TypeStrictnessKind,
     },
     ImportTypeBinding {
         id_loc: LocNode<'arena>,
         name: FlowSmolStr,
         mref: ModuleRefNode<'arena>,
         remote: FlowSmolStr,
+        strictness_kind: TypeStrictnessKind,
     },
     ImportTypeofBinding {
         id_loc: LocNode<'arena>,
         name: FlowSmolStr,
         mref: ModuleRefNode<'arena>,
         remote: FlowSmolStr,
+        strictness_kind: TypeStrictnessKind,
     },
     ImportNsBinding {
         id_loc: LocNode<'arena>,
         name: FlowSmolStr,
         mref: ModuleRefNode<'arena>,
+        strictness_kind: TypeStrictnessKind,
     },
     ImportTypeofNsBinding {
         id_loc: LocNode<'arena>,
         name: FlowSmolStr,
         mref: ModuleRefNode<'arena>,
+        strictness_kind: TypeStrictnessKind,
     },
     ImportTypeNsBinding {
         id_loc: LocNode<'arena>,
         name: FlowSmolStr,
         mref: ModuleRefNode<'arena>,
+        strictness_kind: TypeStrictnessKind,
     },
 }
 
@@ -549,21 +564,25 @@ pub(super) enum Pattern<'arena, 'ast> {
         def: PatternNode<'arena, 'ast>,
         id_loc: LocNode<'arena>,
         name: FlowSmolStr,
+        strictness_kind: TypeStrictnessKind,
     },
     ComputedP {
         def: PatternNode<'arena, 'ast>,
         elem: PatternDefNode<'arena, 'ast>,
+        strictness_kind: TypeStrictnessKind,
     },
     UnsupportedLiteralP(LocNode<'arena>),
     ObjRestP {
         def: PatternNode<'arena, 'ast>,
         loc: LocNode<'arena>,
         xs: Vec<FlowSmolStr>,
+        strictness_kind: TypeStrictnessKind,
     },
     IndexP {
         def: PatternNode<'arena, 'ast>,
         loc: LocNode<'arena>,
         i: usize,
+        strictness_kind: TypeStrictnessKind,
     },
     ArrRestP {
         def: PatternNode<'arena, 'ast>,
@@ -880,6 +899,7 @@ impl<'arena, 'ast> Exports<'arena, 'ast> {
     pub(crate) fn create(
         strict: bool,
         platform_availability_set: Option<PlatformSet>,
+        strictness_kind: TypeStrictnessKind,
     ) -> Rc<RefCell<Self>> {
         Rc::new(RefCell::new(Self {
             kind: ModuleKind::UnknownModule,
@@ -888,6 +908,7 @@ impl<'arena, 'ast> Exports<'arena, 'ast> {
             ts_pending: BTreeMap::new(),
             strict,
             platform_availability_set,
+            strictness_kind,
         }))
     }
 
@@ -1174,24 +1195,26 @@ pub(crate) mod scope {
         scopes: &mut Scopes<'arena, 'ast>,
         strict: bool,
         platform_availability_set: Option<PlatformSet>,
+        strictness_kind: TypeStrictnessKind,
     ) -> ScopeId {
         scopes.push(Scope::Module {
             parent: None,
             values: BTreeMap::new(),
             types: BTreeMap::new(),
-            exports: Exports::create(strict, platform_availability_set),
+            exports: Exports::create(strict, platform_availability_set, strictness_kind),
         })
     }
 
     pub(crate) fn create_augmentation_module<'arena, 'ast>(
         scopes: &mut Scopes<'arena, 'ast>,
         global_target: ScopeId,
+        strictness_kind: TypeStrictnessKind,
     ) -> ScopeId {
         scopes.push(Scope::Module {
             parent: Some(global_target),
             values: BTreeMap::new(),
             types: BTreeMap::new(),
-            exports: Exports::create(true, None),
+            exports: Exports::create(true, None, strictness_kind),
         })
     }
 
@@ -1243,7 +1266,7 @@ pub(crate) mod scope {
         loc: LocNode<'arena>,
         name: FlowSmolStr,
     ) -> ScopeId {
-        let exports = Exports::create(true, None);
+        let exports = Exports::create(true, None, tbls.strictness_kind);
         match scopes.get_mut(parent) {
             Scope::Global { modules, .. } => {
                 if let Some((override_binding_loc, _)) = modules.get(&name) {
@@ -1388,6 +1411,7 @@ pub(crate) mod scope {
         name: FlowSmolStr,
         mref: ModuleRefNode<'arena>,
         remote: FlowSmolStr,
+        strictness_kind: TypeStrictnessKind,
     ) -> RemoteBinding<'arena> {
         match kind {
             ast::statement::ImportKind::ImportValue => RemoteBinding::ImportBinding {
@@ -1395,18 +1419,21 @@ pub(crate) mod scope {
                 name,
                 mref,
                 remote,
+                strictness_kind,
             },
             ast::statement::ImportKind::ImportType => RemoteBinding::ImportTypeBinding {
                 id_loc,
                 name,
                 mref,
                 remote,
+                strictness_kind,
             },
             ast::statement::ImportKind::ImportTypeof => RemoteBinding::ImportTypeofBinding {
                 id_loc,
                 name,
                 mref,
                 remote,
+                strictness_kind,
             },
         }
     }
@@ -1416,17 +1443,27 @@ pub(crate) mod scope {
         id_loc: LocNode<'arena>,
         name: FlowSmolStr,
         mref: ModuleRefNode<'arena>,
+        strictness_kind: TypeStrictnessKind,
     ) -> RemoteBinding<'arena> {
         match kind {
-            ast::statement::ImportKind::ImportValue => {
-                RemoteBinding::ImportNsBinding { id_loc, name, mref }
-            }
-            ast::statement::ImportKind::ImportTypeof => {
-                RemoteBinding::ImportTypeofNsBinding { id_loc, name, mref }
-            }
-            ast::statement::ImportKind::ImportType => {
-                RemoteBinding::ImportTypeNsBinding { id_loc, name, mref }
-            }
+            ast::statement::ImportKind::ImportValue => RemoteBinding::ImportNsBinding {
+                id_loc,
+                name,
+                mref,
+                strictness_kind,
+            },
+            ast::statement::ImportKind::ImportTypeof => RemoteBinding::ImportTypeofNsBinding {
+                id_loc,
+                name,
+                mref,
+                strictness_kind,
+            },
+            ast::statement::ImportKind::ImportType => RemoteBinding::ImportTypeNsBinding {
+                id_loc,
+                name,
+                mref,
+                strictness_kind,
+            },
         }
     }
 
@@ -2295,10 +2332,11 @@ pub(crate) mod scope {
                         .map(|t| rename_tparams_in_parsed(rename_map, t))
                         .collect(),
                 },
-                Parsed::Eval(loc, t, op) => Parsed::Eval(
+                Parsed::Eval(loc, t, op, strictness_kind) => Parsed::Eval(
                     loc.dupe(),
                     Box::new(rename_tparams_in_parsed(rename_map, t)),
                     Box::new(op.map(&mut (), |_, t| rename_tparams_in_parsed(rename_map, t))),
+                    *strictness_kind,
                 ),
                 Parsed::TyRef(_)
                 | Parsed::AsyncVoidReturn(_)
@@ -2352,10 +2390,11 @@ pub(crate) mod scope {
                         .map(|t| override_bound_names_by_loc(loc_names, t))
                         .collect(),
                 },
-                Parsed::Eval(loc, t, op) => Parsed::Eval(
+                Parsed::Eval(loc, t, op, strictness_kind) => Parsed::Eval(
                     loc.dupe(),
                     Box::new(override_bound_names_by_loc(loc_names, t)),
                     Box::new(op.map(&mut (), |_, t| override_bound_names_by_loc(loc_names, t))),
+                    *strictness_kind,
                 ),
                 Parsed::TyRef(_)
                 | Parsed::AsyncVoidReturn(_)
@@ -3894,6 +3933,7 @@ pub(crate) mod scope {
             false,
             IncomingBindingKind::Enum,
         );
+        let strictness_kind = tbls.strictness_kind;
         bind_local(
             false,
             id,
@@ -3905,6 +3945,7 @@ pub(crate) mod scope {
                 id_loc,
                 name: name.clone(),
                 def,
+                strictness_kind,
             },
             k,
         );
@@ -4211,6 +4252,7 @@ pub(crate) mod scope {
                 true
             }
         };
+        let strictness_kind = tbls.strictness_kind;
         bind_remote(
             type_only,
             id,
@@ -4218,7 +4260,7 @@ pub(crate) mod scope {
             tbls,
             local.clone(),
             id_loc.dupe(),
-            import_binding(kind, id_loc, local, mref, remote),
+            import_binding(kind, id_loc, local, mref, remote, strictness_kind),
         );
     }
 
@@ -4239,6 +4281,7 @@ pub(crate) mod scope {
                 true
             }
         };
+        let strictness_kind = tbls.strictness_kind;
         bind_remote(
             type_only,
             id,
@@ -4246,7 +4289,7 @@ pub(crate) mod scope {
             tbls,
             name.clone(),
             id_loc.dupe(),
-            import_ns_binding(kind, id_loc, name, mref),
+            import_ns_binding(kind, id_loc, name, mref, strictness_kind),
         );
     }
 
@@ -4547,6 +4590,7 @@ pub(crate) mod scope {
                     name: exported_name.clone(),
                     mref,
                     remote,
+                    strictness_kind: tbls.strictness_kind,
                 });
                 modify_exports(scopes, id, |exports| {
                     exports.add_type(exported_name, ExportType::ExportTypeFrom(node))
@@ -4573,6 +4617,7 @@ pub(crate) mod scope {
                     name: exported_name.clone(),
                     mref,
                     remote,
+                    strictness_kind: tbls.strictness_kind,
                 });
                 modify_exports(scopes, id, |exports| {
                     exports.add(exported_name, Export::ExportFrom(node))
@@ -4600,6 +4645,7 @@ pub(crate) mod scope {
                     id_loc,
                     name: name.clone(),
                     mref,
+                    strictness_kind: tbls.strictness_kind,
                 });
                 modify_exports(scopes, id, |exports| {
                     exports.add(name, Export::ExportFrom(node))
@@ -5426,6 +5472,7 @@ pub(crate) mod scope {
                             LocalBinding::NamespaceBinding {
                                 values: existing_values,
                                 types: existing_types,
+                                strictness_kind: existing_strictness_kind,
                                 ..
                             },
                             LocalBinding::NamespaceBinding {
@@ -5433,6 +5480,7 @@ pub(crate) mod scope {
                                 name,
                                 values,
                                 types,
+                                strictness_kind,
                             },
                         ) => Some((
                             existing_values.clone(),
@@ -5441,6 +5489,7 @@ pub(crate) mod scope {
                             name.dupe(),
                             values.clone(),
                             types.clone(),
+                            existing_strictness_kind.join(*strictness_kind),
                         )),
                         _ => None,
                     }
@@ -5452,6 +5501,7 @@ pub(crate) mod scope {
                     namespace_name,
                     values,
                     types,
+                    strictness_kind,
                 )) = namespace_merge
                 {
                     merge_namespace_entries(
@@ -5468,6 +5518,7 @@ pub(crate) mod scope {
                         name: namespace_name,
                         values: merged_values,
                         types: merged_types,
+                        strictness_kind,
                     };
                     Some(entry.clone())
                 } else if merge_interface_into_declare_class_binding(
@@ -5591,6 +5642,12 @@ pub(crate) mod scope {
         ns_types: BTreeMap<FlowSmolStr, (LocNode<'arena>, Parsed<'arena, 'ast>)>,
     ) -> bool {
         let mut binding = node.0.data_mut();
+        if let LocalBinding::NamespaceBinding {
+            strictness_kind, ..
+        } = binding.deref_mut()
+        {
+            *strictness_kind = strictness_kind.join(tbls.strictness_kind);
+        }
         match binding.deref_mut() {
             LocalBinding::NamespaceBinding {
                 values: existing_values,
@@ -5749,6 +5806,7 @@ pub(crate) mod scope {
                     name: name.clone(),
                     values: ns_values.clone(),
                     types: ns_types.clone(),
+                    strictness_kind: tbls.strictness_kind,
                 };
                 let node = tbls.push_local_def(def);
                 if is_type_only {
@@ -5886,6 +5944,7 @@ pub(crate) mod scope {
                     _ => false,
                 };
                 if !merged_existing {
+                    let strictness_kind = tbls.strictness_kind;
                     bind_local(
                         is_type_only,
                         parent,
@@ -5898,6 +5957,7 @@ pub(crate) mod scope {
                             name,
                             values: ns_values,
                             types: ns_types,
+                            strictness_kind,
                         },
                         k,
                     );
@@ -5915,6 +5975,7 @@ pub(crate) mod scope {
         tbls: &mut Tables<'arena, 'ast>,
         id: ScopeId,
         global_this_loc: Loc,
+        strictness_kind: TypeStrictnessKind,
     ) {
         let Scope::Global { values, types, .. } = scopes.get_mut(id) else {
             panic!("finalize_globalThis must be called after parsing all lib files on global scope")
@@ -5939,6 +6000,7 @@ pub(crate) mod scope {
                 name,
                 values: ns_values,
                 types: ns_types,
+                strictness_kind,
             },
             |_, _, _| {},
         );
@@ -6960,6 +7022,7 @@ fn expression_for_computed_key<'arena, 'ast>(
                     loc,
                     Box::new(base),
                     Box::new(Op::GetProp(Box::new(id_name(id).clone()))),
+                    tbls.strictness_kind,
                 ),
                 _ => Parsed::Err(
                     loc.dupe(),
@@ -6998,6 +7061,7 @@ fn value_object_type_key<'arena, 'ast>(
                 loc,
                 Box::new(base),
                 Box::new(Op::GetProp(Box::new(qualified.id.name.dupe()))),
+                tbls.strictness_kind,
             )
         }
         // `object_type_key_form` reports the `Name` form only for a plain or a
@@ -7201,7 +7265,11 @@ fn annot_with_loc<'arena, 'ast>(
         }
         TypeInner::Array { inner, .. } => {
             let arg = annot(opts, scope, scopes, tbls, xs, &inner.argument);
-            Parsed::Annot(Box::new(ParsedAnnot::Array(Box::new((loc, arg)))))
+            Parsed::Annot(Box::new(ParsedAnnot::Array(Box::new((
+                loc,
+                arg,
+                tbls.strictness_kind,
+            )))))
         }
         TypeInner::Conditional { inner, .. } => {
             conditional_type(opts, scope, scopes, tbls, xs, loc, inner.as_ref())
@@ -7430,6 +7498,7 @@ fn typeof_<'arena, 'ast>(
                 id_loc,
                 Box::new(t),
                 Box::new(Op::GetProp(Box::new(x.clone()))),
+                tbls.strictness_kind,
             );
             qname.push(x);
         }
@@ -7483,6 +7552,7 @@ fn typeof_<'arena, 'ast>(
                 let t = Parsed::ImportTypeAnnot {
                     loc: import_loc,
                     mref,
+                    strictness_kind: tbls.strictness_kind,
                 };
                 return finish(
                     opts,
@@ -9153,13 +9223,20 @@ fn handle_import_type<'arena, 'ast>(
     let value = &import_type.source.1.value;
     let mref = Userland::from_smol_str(value.dupe());
     let mref = tbls.push_module_ref(mref);
+    let strictness_kind = tbls.strictness_kind;
     let base = Parsed::ImportTypeAnnot {
         loc: import_loc,
         mref,
+        strictness_kind,
     };
     chain.into_iter().fold(base, |t, (id_loc, name)| {
         let id_loc = tbls.push_loc(id_loc);
-        Parsed::Eval(id_loc, Box::new(t), Box::new(Op::GetProp(Box::new(name))))
+        Parsed::Eval(
+            id_loc,
+            Box::new(t),
+            Box::new(Op::GetProp(Box::new(name))),
+            strictness_kind,
+        )
     })
 }
 
@@ -9183,6 +9260,7 @@ fn generic_id<'arena, 'ast>(
                 id_loc,
                 name,
                 qualification: Box::new(result),
+                strictness_kind: tbls.strictness_kind,
             };
         }
         result
@@ -9358,7 +9436,11 @@ fn maybe_special_unqualified_generic<'arena, 'ast>(
         "Array" => match targs {
             Some(type_args) if type_args.arguments.len() == 1 => {
                 let t = annot(opts, scope, scopes, tbls, xs, &type_args.arguments[0]);
-                Parsed::Annot(Box::new(ParsedAnnot::Array(Box::new((loc, t)))))
+                Parsed::Annot(Box::new(ParsedAnnot::Array(Box::new((
+                    loc,
+                    t,
+                    tbls.strictness_kind,
+                )))))
             }
             _ => Parsed::Err(loc, Errno::CheckError),
         },
@@ -9381,7 +9463,10 @@ fn maybe_special_unqualified_generic<'arena, 'ast>(
             _ => Parsed::Err(loc, Errno::CheckError),
         },
         "ExactObjectType" => match targs {
-            None => Parsed::Annot(Box::new(ParsedAnnot::ExactObjectType(Box::new(loc)))),
+            None => Parsed::Annot(Box::new(ParsedAnnot::ExactObjectType(Box::new((
+                loc,
+                tbls.strictness_kind,
+            ))))),
             Some(_) => Parsed::Err(loc, Errno::CheckError),
         },
         "$ReadOnlyArray" => match targs {
@@ -9489,6 +9574,7 @@ fn maybe_special_unqualified_generic<'arena, 'ast>(
                         Parsed::Annot(Box::new(ParsedAnnot::ExportsT(Box::new((
                             loc,
                             Userland::from_smol_str(literal.value.dupe()),
+                            tbls.strictness_kind,
                         )))))
                     }
                     _ => {
@@ -10078,6 +10164,7 @@ fn module_ref_literal<'arena, 'ast>(
     Parsed::ModuleRef {
         loc,
         mref: mref_node,
+        strictness_kind: tbls.strictness_kind,
     }
 }
 
@@ -10145,7 +10232,11 @@ fn graphql_literal<'arena, 'ast>(
     match graphql::extract_module_name(quasi, module_prefix) {
         Ok(module_name) => {
             let mref = tbls.push_module_ref(Userland::from_smol_str(FlowSmolStr::new(module_name)));
-            Parsed::Require { loc, mref }
+            Parsed::Require {
+                loc,
+                mref,
+                strictness_kind: tbls.strictness_kind,
+            }
         }
         Err(_) => Parsed::Annot(Box::new(ParsedAnnot::Any(Box::new(loc)))),
     }
@@ -10269,6 +10360,7 @@ fn binary<'arena, 'ast>(
     lhs_t: Parsed<'arena, 'ast>,
     rhs_t: Parsed<'arena, 'ast>,
     op: &ast::expression::BinaryOperator,
+    strictness_kind: TypeStrictnessKind,
 ) -> Parsed<'arena, 'ast> {
     use ast::expression::BinaryOperator;
     match op {
@@ -10299,6 +10391,7 @@ fn binary<'arena, 'ast>(
             loc,
             Box::new(lhs_t),
             Box::new(Op::Arith(Box::new((*op, rhs_t)))),
+            strictness_kind,
         ),
     }
 }
@@ -10530,10 +10623,12 @@ fn expression<'arena: 'ast, 'ast>(
                     loc,
                     box Parsed::Value(v),
                     box Op::Unary(ast::expression::UnaryOperator::Minus),
+                    strictness_kind,
                 ) => Parsed::Eval(
                     loc,
                     Box::new(Parsed::Value(Box::new(ParsedValue::AsConst(v)))),
                     Box::new(Op::Unary(ast::expression::UnaryOperator::Minus)),
+                    strictness_kind,
                 ),
                 e => e,
             }
@@ -10556,7 +10651,12 @@ fn expression<'arena: 'ast, 'ast>(
             }
             _ => {
                 let t = expression(opts, scope, scopes, tbls, frozen, &inner.argument);
-                Parsed::Eval(loc, Box::new(t), Box::new(Op::Unary(inner.operator)))
+                Parsed::Eval(
+                    loc,
+                    Box::new(t),
+                    Box::new(Op::Unary(inner.operator)),
+                    tbls.strictness_kind,
+                )
             }
         },
         E::Binary { inner, .. } => {
@@ -10576,11 +10676,11 @@ fn expression<'arena: 'ast, 'ast>(
                 FrozenKind::NotFrozen,
                 &inner.right,
             );
-            binary(loc, lhs_t, rhs_t, &inner.operator)
+            binary(loc, lhs_t, rhs_t, &inner.operator, tbls.strictness_kind)
         }
         E::Update { inner, .. } => {
             let t = expression(opts, scope, scopes, tbls, frozen, &inner.argument);
-            Parsed::Eval(loc, Box::new(t), Box::new(Op::Update))
+            Parsed::Eval(loc, Box::new(t), Box::new(Op::Update), tbls.strictness_kind)
         }
         E::Sequence { inner, .. } => {
             let expr = inner.expressions.last().expect("unexpected empty sequence");
@@ -10625,7 +10725,11 @@ fn expression<'arena: 'ast, 'ast>(
                         Some(mref) => {
                             let mref = Userland::from_smol_str(mref.clone());
                             let mref = tbls.push_module_ref(mref);
-                            Parsed::Require { loc, mref }
+                            Parsed::Require {
+                                loc,
+                                mref,
+                                strictness_kind: tbls.strictness_kind,
+                            }
                         }
                         None => {
                             // error cases: explicit targs / non-literal require
@@ -10741,7 +10845,11 @@ fn expression<'arena: 'ast, 'ast>(
             Some(mref) => {
                 let mref = Userland::from_smol_str(mref.clone());
                 let mref = tbls.push_module_ref(mref);
-                Parsed::ImportDynamic { loc, mref }
+                Parsed::ImportDynamic {
+                    loc,
+                    mref,
+                    strictness_kind: tbls.strictness_kind,
+                }
             }
         },
         E::Conditional { .. } => Parsed::Err(
@@ -10948,6 +11056,7 @@ fn object_pattern<'arena: 'ast, 'ast, F>(
                             id_loc,
                             name: name.clone(),
                             def: def.dupe(),
+                            strictness_kind: tbls.strictness_kind,
                         });
                         xs.push(name.clone());
                         def
@@ -10958,6 +11067,7 @@ fn object_pattern<'arena: 'ast, 'ast, F>(
                             id_loc,
                             name: name.clone(),
                             def: def.dupe(),
+                            strictness_kind: tbls.strictness_kind,
                         });
                         xs.push(name.clone());
                         def
@@ -10975,6 +11085,7 @@ fn object_pattern<'arena: 'ast, 'ast, F>(
                         tbls.push_pattern(Pattern::ComputedP {
                             elem,
                             def: def.dupe(),
+                            strictness_kind: tbls.strictness_kind,
                         })
                     }
                     O::Key::NumberLiteral((loc, _)) | O::Key::BigIntLiteral((loc, _)) => {
@@ -10990,6 +11101,7 @@ fn object_pattern<'arena: 'ast, 'ast, F>(
                     loc,
                     xs: std::mem::take(xs),
                     def: def.dupe(),
+                    strictness_kind: tbls.strictness_kind,
                 });
                 pattern(opts, scope, scopes, tbls, f, def, &rest.argument);
             }
@@ -11030,6 +11142,7 @@ fn array_pattern<'arena: 'ast, 'ast, F>(
                     loc,
                     i,
                     def: def.dupe(),
+                    strictness_kind: tbls.strictness_kind,
                 });
                 pattern(opts, scope, scopes, tbls, f, def, &el.argument);
             }
@@ -11089,7 +11202,7 @@ fn member<'arena: 'ast, 'ast>(
     ) -> Parsed<'arena, 'ast> {
         for (loc, property) in chain.into_iter().rev() {
             let op = prop_op(opts, scope, scopes, tbls, property);
-            t = Parsed::Eval(loc, Box::new(t), Box::new(op));
+            t = Parsed::Eval(loc, Box::new(t), Box::new(op), tbls.strictness_kind);
         }
         t
     }
@@ -12756,6 +12869,7 @@ fn member_expr_of_generic_id<'arena, 'ast>(
                         loc.dupe(),
                         Box::new(t),
                         Box::new(Op::GetProp(Box::new(name.clone()))),
+                        tbls.strictness_kind,
                     );
                 }
                 return t;
@@ -12765,15 +12879,18 @@ fn member_expr_of_generic_id<'arena, 'ast>(
                 let value = &import_type.source.1.value;
                 let mref = Userland::from_smol_str(value.dupe());
                 let mref = tbls.push_module_ref(mref);
+                let strictness_kind = tbls.strictness_kind;
                 let base = Parsed::ImportTypeAnnot {
                     loc: import_loc,
                     mref,
+                    strictness_kind,
                 };
                 let t = chain.into_iter().rev().fold(base, |t, (loc, name)| {
                     Parsed::Eval(
                         loc.dupe(),
                         Box::new(t),
                         Box::new(Op::GetProp(Box::new(name))),
+                        strictness_kind,
                     )
                 });
                 return t;

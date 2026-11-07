@@ -1,0 +1,7 @@
+[libs]
+b_ts.d.ts
+a_flow.js
+
+[options]
+all=true
+builtin_lib=core-only

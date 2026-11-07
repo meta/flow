@@ -487,6 +487,7 @@ pub fn mk_check_file(
                             type_stars,
                             strict,
                             platform_availability_set,
+                            strictness_kind,
                         } = &info.map(&|i| (*aloc_for_exports)(i));
 
                         assert_eq!(
@@ -510,6 +511,7 @@ pub fn mk_check_file(
                             type_stars: type_stars.clone(),
                             strict: *strict,
                             platform_availability_set: platform_availability_set.clone(),
+                            strictness_kind: *strictness_kind,
                         }
                     };
                     let es_module = |type_exports_arr: &[Pack::TypeExport<Index<Loc>>],
@@ -525,6 +527,7 @@ pub fn mk_check_file(
                             ts_pending_keys,
                             strict,
                             platform_availability_set,
+                            strictness_kind,
                         } = &info.map(&|i| (*aloc_for_exports)(i));
 
                         assert_eq!(
@@ -565,6 +568,7 @@ pub fn mk_check_file(
                             .map(|(name, pending)| {
                                 let pending = pending.clone();
                                 let aloc = aloc_for_exports.dupe();
+                                let strictness_kind = *strictness_kind;
                                 let classified: type_sig_merge::LazyTsPendingClassified =
                                     Rc::new(flow_lazy::Lazy::new(move |cx: &mut Context<'_>| {
                                         let pending = pending.map(&|i| (*aloc)(i));
@@ -572,6 +576,7 @@ pub fn mk_check_file(
                                             cx,
                                             &cx.sig_file(file_id),
                                             &pending,
+                                            strictness_kind,
                                         )
                                     }));
                                 (name.dupe(), classified)

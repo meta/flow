@@ -74,7 +74,8 @@ fn parse_libs<'arena: 'ast, 'ast>(
     }
     for (ast, strictness_kind, file_sig) in global_augmentation_asts {
         tbls.set_strictness_kind(*strictness_kind);
-        let module_scope = parse::scope::create_augmentation_module(&mut scopes, global_scope);
+        let module_scope =
+            parse::scope::create_augmentation_module(&mut scopes, global_scope, *strictness_kind);
         let parent = if file_sig.requires().is_empty() {
             module_scope
         } else {
@@ -111,7 +112,23 @@ fn parse_libs<'arena: 'ast, 'ast>(
             }
         }
     }
-    parse::scope::bind_global_this(&mut scopes, &mut tbls, global_scope, LOC_NONE);
+    // `globalThis` holds the globals of every library file.
+    let global_this_strictness_kind = ordered_asts
+        .iter()
+        .map(|(_, strictness_kind)| *strictness_kind)
+        .chain(
+            global_augmentation_asts
+                .iter()
+                .map(|(_, strictness_kind, _)| *strictness_kind),
+        )
+        .fold(TypeStrictnessKind::Flow, TypeStrictnessKind::join);
+    parse::scope::bind_global_this(
+        &mut scopes,
+        &mut tbls,
+        global_scope,
+        LOC_NONE,
+        global_this_strictness_kind,
+    );
     let builtins = parse::scope::builtins_exn(&scopes, global_scope);
     (scopes, tbls, builtins)
 }
@@ -243,7 +260,12 @@ fn parse_module<'arena: 'ast, 'ast>(
     let mut scopes = parse::scope::Scopes::new();
     let strictness_kind =
         TypeStrictnessKind::from_is_typescript(opts.is_ts_file || opts.is_dts_file);
-    let scope = parse::scope::create_module(&mut scopes, strict, platform_availability_set);
+    let scope = parse::scope::create_module(
+        &mut scopes,
+        strict,
+        platform_availability_set,
+        strictness_kind,
+    );
     let mut tbls = parse::Tables::new(arenas, strictness_kind);
     let file_loc = tbls.push_loc(Loc { source, ..LOC_NONE });
     for stmt in ast.statements.iter() {
@@ -267,7 +289,12 @@ fn parse_libdef_file_as_empty_module<'arena: 'ast, 'ast>(
     Rc<RefCell<parse::Exports<'arena, 'ast>>>,
 ) {
     let mut scopes = parse::scope::Scopes::new();
-    let scope = parse::scope::create_module(&mut scopes, strict, platform_availability_set);
+    let scope = parse::scope::create_module(
+        &mut scopes,
+        strict,
+        platform_availability_set,
+        strictness_kind,
+    );
     let mut tbls = parse::Tables::new(arenas, strictness_kind);
     let file_loc = tbls.push_loc(Loc { source, ..LOC_NONE });
     let exports = parse::scope::exports_exn(&mut scopes, scope);
@@ -455,6 +482,9 @@ pub fn parse_and_pack_targets<'arena: 'ast, 'ast>(
                             type_stars: vec![],
                             strict,
                             platform_availability_set,
+                            strictness_kind: TypeStrictnessKind::from_is_typescript(
+                                opts.is_ts_file || opts.is_dts_file,
+                            ),
                         },
                     },
                     module_refs: Table::empty(),
@@ -551,6 +581,7 @@ pub fn parse_and_pack_targets<'arena: 'ast, 'ast>(
             type_stars: vec![],
             strict: exports.strict,
             platform_availability_set: exports.platform_availability_set,
+            strictness_kind: exports.strictness_kind,
         },
     };
     let module = Module {

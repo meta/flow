@@ -182,15 +182,15 @@ fn mark_parsed<'arena, 'ast>(
         parse::Parsed::Pattern(p) => {
             marker.mark_pattern(opts, scopes, tbls, p);
         }
-        parse::Parsed::Eval(loc, t, op) => {
+        parse::Parsed::Eval(loc, t, op, _) => {
             mark_loc(marker, loc);
             mark_parsed(opts, scopes, tbls, marker, t);
             mark_op(opts, scopes, tbls, marker, op);
         }
-        parse::Parsed::Require { loc, mref }
-        | parse::Parsed::ImportDynamic { loc, mref }
-        | parse::Parsed::ModuleRef { loc, mref }
-        | parse::Parsed::ImportTypeAnnot { loc, mref } => {
+        parse::Parsed::Require { loc, mref, .. }
+        | parse::Parsed::ImportDynamic { loc, mref, .. }
+        | parse::Parsed::ModuleRef { loc, mref, .. }
+        | parse::Parsed::ImportTypeAnnot { loc, mref, .. } => {
             mark_loc(marker, loc);
             mark_mref(mref);
         }
@@ -211,6 +211,7 @@ fn mark_tyname<'arena, 'ast>(
             id_loc,
             name: _,
             qualification,
+            strictness_kind: _,
         } => {
             mark_loc(marker, loc);
             mark_loc(marker, id_loc);
@@ -411,6 +412,7 @@ fn mark_local_binding<'arena, 'ast>(
             id_loc,
             name: _,
             def,
+            strictness_kind: _,
         } => {
             mark_loc(marker, id_loc);
             if let Some((_rep, members, _member_values, _has_unknown_members)) =
@@ -426,6 +428,7 @@ fn mark_local_binding<'arena, 'ast>(
             name: _,
             values,
             types,
+            strictness_kind: _,
         } => {
             mark_loc(marker, id_loc);
             for (loc, parsed) in values.values() {
@@ -447,33 +450,39 @@ fn mark_remote_binding<'arena>(marker: &mut Marker<'_>, binding: &parse::RemoteB
             name: _,
             mref,
             remote: _,
+            strictness_kind: _,
         }
         | parse::RemoteBinding::ImportTypeBinding {
             id_loc,
             name: _,
             mref,
             remote: _,
+            strictness_kind: _,
         }
         | parse::RemoteBinding::ImportTypeofBinding {
             id_loc,
             name: _,
             mref,
             remote: _,
+            strictness_kind: _,
         }
         | parse::RemoteBinding::ImportNsBinding {
             id_loc,
             name: _,
             mref,
+            strictness_kind: _,
         }
         | parse::RemoteBinding::ImportTypeofNsBinding {
             id_loc,
             name: _,
             mref,
+            strictness_kind: _,
         }
         | parse::RemoteBinding::ImportTypeNsBinding {
             id_loc,
             name: _,
             mref,
+            strictness_kind: _,
         } => {
             marker.mark_skip_visit_loc(|marker| mark_loc(marker, id_loc));
             mark_mref(mref);
@@ -497,14 +506,29 @@ fn mark_pattern<'arena, 'ast>(
             def,
             id_loc: loc,
             name: _,
+            strictness_kind: _,
         }
-        | parse::Pattern::ObjRestP { def, loc, xs: _ }
-        | parse::Pattern::IndexP { def, loc, i: _ }
+        | parse::Pattern::ObjRestP {
+            def,
+            loc,
+            xs: _,
+            strictness_kind: _,
+        }
+        | parse::Pattern::IndexP {
+            def,
+            loc,
+            i: _,
+            strictness_kind: _,
+        }
         | parse::Pattern::ArrRestP { def, loc, i: _ } => {
             mark_loc(marker, loc);
             marker.mark_pattern(opts, scopes, tbls, def);
         }
-        parse::Pattern::ComputedP { def, elem } => {
+        parse::Pattern::ComputedP {
+            def,
+            elem,
+            strictness_kind: _,
+        } => {
             marker.mark_pattern(opts, scopes, tbls, def);
             marker.mark_pattern_def(opts, scopes, tbls, elem);
         }

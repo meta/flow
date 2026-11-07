@@ -57,5 +57,99 @@ References:
                                  ^^^^^^ [3]
 
 
+Error ----------------------------------------------------------------------------------------------------- test.js:20:1
 
-Found 3 errors
+Cannot cast `tsIfaceClass` to `{name: string | number, ...}` because `{name: string, ...}` [1] is incompatible with
+`Object` [2]. [incompatible-type]
+
+   test.js:20:1
+   20| tsIfaceClass as {name: string | number, ...}; // ERROR: a null prototype, but `name` is OK.
+       ^^^^^^^^^^^^
+
+References:
+   b_ts.d.ts:44:11
+   44| interface TsIface {
+                 ^^^^^^^ [1]
+   test.js:20:17
+   20| tsIfaceClass as {name: string | number, ...}; // ERROR: a null prototype, but `name` is OK.
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:21:1
+
+Cannot cast `FlowStatics` to `{s: number | string, ...}` because in property `s`: `number` [1] is not exactly the same
+as `number | string` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `s` is invariantly typed. To fix the error,
+- Either make `{name: string, s: number, ...}` [3] and `{s: number | string, ...}` [4] exactly the same
+- Or make property `s` in `{s: number | string, ...}` [4] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   test.js:21:1
+   21| FlowStatics as {s: number | string, ...}; // ERROR: Flow fields are invariant.
+       ^^^^^^^^^^^
+
+References:
+   a_flow.js:20:13
+   20|   static s: number;
+                   ^^^^^^ [1]
+   test.js:21:20
+   21| FlowStatics as {s: number | string, ...}; // ERROR: Flow fields are invariant.
+                          ^^^^^^^^^^^^^^^ [2]
+   a_flow.js:19:15
+   19| declare class FlowStatics {
+                     ^^^^^^^^^^^ [3]
+   test.js:21:16
+   21| FlowStatics as {s: number | string, ...}; // ERROR: Flow fields are invariant.
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:22:1
+
+Cannot cast `FlowNs` to `{v: number | string, ...}` because property `v` is read-only in `{readonly v: number}` [1] but
+writable in `{v: number | string, ...}` [2]. [incompatible-variance]
+
+   test.js:22:1
+   22| FlowNs as {v: number | string, ...}; // ERROR: read-only in Flow.
+       ^^^^^^
+
+References:
+   a_flow.js:22:19
+   22| declare namespace FlowNs {
+                         ^^^^^^ [1]
+   test.js:22:11
+   22| FlowNs as {v: number | string, ...}; // ERROR: read-only in Flow.
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:28:1
+
+Cannot cast `mergedIface.arr` to `Array<number | string>` because in array element: `number` [1] is not exactly the same
+as `number | string` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
+- Either make `Array<number>` [3] and `Array<number | string>` [4] exactly the same
+- Or make `Array<number | string>` [4] a `ReadonlyArray`.
+See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
+
+   test.js:28:1
+   28| mergedIface.arr as Array<number | string>; // ERROR: a Flow array is invariant.
+       ^^^^^^^^^^^^^^^
+
+References:
+   a_flow.js:26:14
+   26|   arr: Array<number>;
+                    ^^^^^^ [1]
+   test.js:28:26
+   28| mergedIface.arr as Array<number | string>; // ERROR: a Flow array is invariant.
+                                ^^^^^^^^^^^^^^^ [2]
+   a_flow.js:26:8
+   26|   arr: Array<number>;
+              ^^^^^^^^^^^^^ [3]
+   test.js:28:20
+   28| mergedIface.arr as Array<number | string>; // ERROR: a Flow array is invariant.
+                          ^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+
+Found 7 errors

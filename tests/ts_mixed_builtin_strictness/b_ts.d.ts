@@ -30,3 +30,25 @@ interface TsListener {
   on(type: string, value: string): void;
 }
 declare var tsListener: TsListener;
+
+declare function tsFn(x: number): void;
+declare namespace tsFn {
+  let f: number;
+}
+declare class TsStatics {
+  static s: number;
+}
+declare namespace TsNs {
+  let v: number;
+}
+interface TsIface {
+  x: number;
+}
+declare var tsIfaceClass: Class<TsIface>;
+interface MergedIface {
+  y: string;
+}
+declare function over(x: string): void;
+declare namespace over {
+  let f: number;
+}

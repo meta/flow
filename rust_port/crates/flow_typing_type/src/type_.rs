@@ -10857,6 +10857,8 @@ pub mod aconstraint {
         pub use_op: UseOp,
         pub reason: Reason,
         pub prop_ref: (Reason, Name),
+        /// The language of the file the access is written in.
+        pub strictness_kind: TypeStrictnessKind,
     }
 
     #[derive(Clone)]
@@ -10865,6 +10867,8 @@ pub mod aconstraint {
         pub use_op: UseOp,
         pub from_annot: bool,
         pub prop_ref: PropRef,
+        /// The language of the file the access is written in.
+        pub strictness_kind: TypeStrictnessKind,
     }
 
     #[derive(Clone)]
@@ -10877,6 +10881,8 @@ pub mod aconstraint {
         /// prototype chain by recursion rather than through the constraint graph, but the
         /// candidate still has to reach the end of the chain, so it rides along here too.
         pub indexer_fallback: Option<Box<super::IndexerFallbackData>>,
+        /// The language of the file the access is written in.
+        pub strictness_kind: TypeStrictnessKind,
     }
 
     #[derive(Clone)]
@@ -10942,12 +10948,16 @@ pub mod aconstraint {
             reason: Reason,
             use_op: UseOp,
             key: Type,
+            /// The language of the file the access is written in.
+            strictness_kind: TypeStrictnessKind,
         },
         AnnotElemT {
             reason: Reason,
             use_op: UseOp,
             from_annot: bool,
             source: Type,
+            /// The language of the file the access is written in.
+            strictness_kind: TypeStrictnessKind,
         },
         AnnotGetStaticsT(Reason),
         AnnotLookupT(Box<AnnotLookupTData>),
@@ -10974,6 +10984,8 @@ pub mod aconstraint {
         AnnotObjRestT {
             reason: Reason,
             keys: Rc<[FlowSmolStr]>,
+            /// The language of the file the rest pattern is written in.
+            strictness_kind: TypeStrictnessKind,
         },
         AnnotGetValuesT(Reason),
         AnnotFilterOptionalT(Reason),

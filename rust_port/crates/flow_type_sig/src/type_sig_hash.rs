@@ -275,19 +275,20 @@ pub fn visit_packed<Loc>(
             loc: _,
             packed: t,
             op,
+            strictness_kind: _,
         }) => {
             visit_eval(edge, dep_edge, file, t, op);
         }
-        P::Packed::Require(box P::PackedLocIndex { loc: _, index }) => {
+        P::Packed::Require(box P::PackedLocIndex { loc: _, index, .. }) => {
             edge_require(edge, dep_edge, file, *index)
         }
-        P::Packed::ImportDynamic(box P::PackedLocIndex { loc: _, index }) => {
+        P::Packed::ImportDynamic(box P::PackedLocIndex { loc: _, index, .. }) => {
             edge_import_ns(edge, dep_edge, file, *index)
         }
-        P::Packed::ModuleRef(box P::PackedLocIndex { loc: _, index }) => {
+        P::Packed::ModuleRef(box P::PackedLocIndex { loc: _, index, .. }) => {
             edge_require(edge, dep_edge, file, *index)
         }
-        P::Packed::ImportTypeAnnot(box P::PackedLocIndex { loc: _, index }) => {
+        P::Packed::ImportTypeAnnot(box P::PackedLocIndex { loc: _, index, .. }) => {
             edge_import_ns(edge, dep_edge, file, *index)
         }
     }
@@ -369,7 +370,7 @@ pub fn visit_remote_ref<Loc>(
 pub fn visit_pattern<Loc>(edge: &dyn Fn(Rc<Node>), file: &File, pattern: &P::Pattern<Loc>) {
     match pattern {
         P::Pattern::PDef(index) => edge_pattern_def(edge, file, *index),
-        P::Pattern::ComputedP { elem, def } => {
+        P::Pattern::ComputedP { elem, def, .. } => {
             edge_pattern_def(edge, file, *elem);
             edge_pattern(edge, file, *def);
         }

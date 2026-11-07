@@ -425,6 +425,7 @@ fn cg_lookup_<'cx>(
     propref: &type_::PropRef,
     objt: &Type,
     indexer_fallback: Option<Box<type_::IndexerFallbackData>>,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     elab_t(
         cx,
@@ -436,6 +437,7 @@ fn cg_lookup_<'cx>(
             prop_ref: propref.clone(),
             type_: objt.dupe(),
             indexer_fallback,
+            strictness_kind,
         }))),
     )
 }
@@ -562,6 +564,7 @@ impl flow_js_utils::GetPropHelper for AnnotGetPropHelper {
             indexer_fallback,
             propref,
             use_op,
+            access_strictness_kind,
             ..
         } = args;
         Ok(cg_lookup_(
@@ -572,6 +575,7 @@ impl flow_js_utils::GetPropHelper for AnnotGetPropHelper {
             &propref,
             &obj_t,
             indexer_fallback,
+            access_strictness_kind,
         ))
     }
 
@@ -581,6 +585,7 @@ impl flow_js_utils::GetPropHelper for AnnotGetPropHelper {
         _trace: DepthTrace,
         t: Type,
         args: (UseOp, Reason, Option<i32>, (Reason, Name)),
+        access_strictness_kind: TypeStrictnessKind,
     ) -> Result<Type, FlowJsException> {
         debug_assert!(!env.speculating(), "annotation inference never speculates");
         let (use_op, access_reason, _, (prop_reason, name)) = args;
@@ -593,6 +598,7 @@ impl flow_js_utils::GetPropHelper for AnnotGetPropHelper {
                 use_op,
                 from_annot: false,
                 prop_ref: type_util::mk_named_prop(prop_reason, false, name),
+                strictness_kind: access_strictness_kind,
             }))),
         ))
     }
@@ -970,10 +976,13 @@ pub fn elab_t<'cx>(
                     );
                     elab_t(cx, None, t, op)
                 }
+                // A type destructor does not record the language of the annotation that
+                // wrote it, so the access takes the language of this context.
                 Destructor::PropertyType { name } => {
                     let reason_op = reason.dupe().replace_desc(
                         flow_common::reason::VirtualReasonDesc::RProperty(Some(name.dupe())),
                     );
+                    let strictness_kind = cx.type_strictness_kind();
                     let t = elab_t(
                         cx,
                         None,
@@ -987,11 +996,13 @@ pub fn elab_t<'cx>(
                                 name: name.dupe(),
                                 from_indexed_access: true,
                             },
+                            strictness_kind,
                         }))),
                     );
                     elab_t(cx, None, t, op)
                 }
                 Destructor::ElementType { index_type } => {
+                    let strictness_kind = cx.type_strictness_kind();
                     let t = elab_t(
                         cx,
                         None,
@@ -1000,6 +1011,7 @@ pub fn elab_t<'cx>(
                             reason,
                             use_op,
                             key: index_type.dupe(),
+                            strictness_kind,
                         }),
                     );
                     elab_t(cx, None, t, op)
@@ -2233,6 +2245,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 prop_ref: propref,
                 type_: objt,
                 indexer_fallback,
+                strictness_kind,
             } = data.as_ref();
             use flow_typing_flow_common::flow_js_utils::get_prop_t_kit;
             use flow_typing_type::type_::property;
@@ -2261,6 +2274,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                                     reason_op,
                                     IndexerFallbackMode::PropertyAndIndexedAccess,
                                     &t,
+                                    *strictness_kind,
                                 )
                                 // Annotation inference is never speculative
                                 .unwrap();
@@ -2288,6 +2302,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                                     propref,
                                     objt,
                                     indexer_fallback.clone().or(candidate),
+                                    *strictness_kind,
                                 ),
                             }
                         }
@@ -2339,6 +2354,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                             propref,
                             objt,
                             indexer_fallback.clone(),
+                            *strictness_kind,
                         ),
                     }
                 }
@@ -2508,6 +2524,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             OpInner::AnnotObjRestT {
                 reason: reason_op,
                 keys: xs,
+                strictness_kind,
             },
         ) => {
             match t.deref() {
@@ -2522,6 +2539,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                         reason_obj,
                         xs,
                         true,
+                        *strictness_kind,
                     )
                     // Annotation inference is never speculative
                     .unwrap()
@@ -2531,24 +2549,33 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                     // hard to implement in annotation inference.
                     error_unsupported(cx, &t, &op)
                 }
-                TypeInner::ObjProtoT(_) => flow_typing_flow_common::obj_type::mk_with_proto(
-                    cx,
-                    reason_op.dupe(),
-                    type_::ObjKind::Exact,
-                    None,
-                    None,
-                    None,
-                    None,
-                    t,
-                    type_::ObjLiteral::Literal,
-                ),
+                TypeInner::ObjProtoT(_) => {
+                    flow_typing_flow_common::obj_type::mk_with_proto_and_strictness(
+                        cx,
+                        reason_op.dupe(),
+                        type_::ObjKind::Exact,
+                        None,
+                        None,
+                        None,
+                        None,
+                        t,
+                        *strictness_kind,
+                        type_::ObjLiteral::Literal,
+                    )
+                }
                 TypeInner::DefT(_, def_t)
                     if matches!(def_t.deref(), DefTInner::NullT | DefTInner::VoidT) =>
                 {
-                    flow_typing_flow_common::obj_type::mk(
-                        type_::ObjKind::Exact,
+                    flow_typing_flow_common::obj_type::mk_with_proto_and_strictness(
                         cx,
                         reason_op.dupe(),
+                        type_::ObjKind::Exact,
+                        None,
+                        None,
+                        None,
+                        None,
+                        type_::obj_proto::make(reason_op.dupe()),
+                        *strictness_kind,
                         type_::ObjLiteral::Literal,
                     )
                 }
@@ -2580,6 +2607,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 reason,
                 use_op,
                 prop_ref,
+                strictness_kind,
             } = data.as_ref();
             let (prop_ref_reason, prop_name) = prop_ref;
             match cx
@@ -2601,6 +2629,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                             false,
                             prop_name.dupe(),
                         ),
+                        strictness_kind: *strictness_kind,
                     }))),
                 ),
             }
@@ -2611,6 +2640,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 reason,
                 use_op,
                 prop_ref,
+                strictness_kind,
             } = data.as_ref();
             let (prop_ref_reason, prop_name) = prop_ref;
             elab_t(
@@ -2626,6 +2656,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                         false,
                         prop_name.dupe(),
                     ),
+                    strictness_kind: *strictness_kind,
                 }))),
             )
         }
@@ -2649,6 +2680,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 use_op,
                 from_annot,
                 prop_ref: propref,
+                strictness_kind,
             } = data.as_ref();
             use flow_typing_flow_common::flow_js_utils::get_prop_t_kit;
 
@@ -2672,6 +2704,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                                 &inst_t.inst,
                                 propref,
                                 reason_op,
+                                *strictness_kind,
                             )
                             // Annotation inference is never speculative
                             .unwrap()
@@ -2701,6 +2734,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                             reason_obj.dupe(),
                             reason_op.dupe(),
                             None,
+                            *strictness_kind,
                         )
                         // Annotation inference is never speculative
                         .unwrap()
@@ -2744,6 +2778,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                         enum_value_t.dupe(),
                         enum_concrete_info,
                         &access,
+                        *strictness_kind,
                     )
                     // Annotation inference is never speculative
                     .unwrap()
@@ -2837,6 +2872,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 reason,
                 use_op,
                 key,
+                strictness_kind,
             },
         ) => {
             let key_type = key.dupe();
@@ -2849,6 +2885,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                     use_op: use_op.dupe(),
                     from_annot: false,
                     source: t.dupe(),
+                    strictness_kind: *strictness_kind,
                 }),
             )
         }
@@ -2858,6 +2895,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 reason,
                 use_op,
                 key,
+                strictness_kind,
             },
         ) if matches!(
             def_t.deref(),
@@ -2874,6 +2912,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                     use_op: use_op.dupe(),
                     from_annot: false,
                     source: t.dupe(),
+                    strictness_kind: *strictness_kind,
                 }),
             )
         }
@@ -2884,6 +2923,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 use_op,
                 from_annot,
                 source,
+                strictness_kind,
             },
         ) => {
             let source_type = source.dupe();
@@ -2904,6 +2944,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                             from_annot: *from_annot,
                             use_op: use_op.dupe(),
                             prop_ref,
+                            strictness_kind: *strictness_kind,
                         }))),
                     )
                 }
@@ -3085,6 +3126,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 reason: reason_op,
                 use_op: _,
                 key: elem,
+                strictness_kind: _,
             },
         ) if let DefTInner::EnumObjectT { enum_info, .. } = def_t.deref() => {
             let elem_type = elem.dupe();
@@ -3447,6 +3489,7 @@ pub fn get_prop<'cx>(
     op_reason: Option<Reason>,
     name: Name,
     t: Type,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     let op_reason = op_reason.unwrap_or_else(|| reason.dupe());
     elab_t(
@@ -3458,6 +3501,7 @@ pub fn get_prop<'cx>(
             use_op,
             from_annot: false,
             prop_ref: type_util::mk_named_prop(reason, false, name),
+            strictness_kind,
         }))),
     )
 }
@@ -3468,6 +3512,7 @@ pub(crate) fn get_elem<'cx>(
     reason: Reason,
     key: Type,
     t: Type,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     elab_t(
         cx,
@@ -3477,6 +3522,7 @@ pub(crate) fn get_elem<'cx>(
             reason,
             use_op,
             key,
+            strictness_kind,
         }),
     )
 }
@@ -3488,6 +3534,7 @@ pub fn qualify_type<'cx>(
     op_reason: Reason,
     prop_name: Name,
     t: Type,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     let op_reason2 = op_reason.dupe();
     let reason2 = reason.dupe();
@@ -3504,6 +3551,7 @@ pub fn qualify_type<'cx>(
                     reason: op_reason2.dupe(),
                     use_op: use_op2.dupe(),
                     prop_ref: (reason2.dupe(), prop_name2.dupe()),
+                    strictness_kind,
                 },
             ))),
         );
@@ -3539,6 +3587,7 @@ pub(crate) fn cjs_require<'cx>(
     reason: Reason,
     namespace_symbol: flow_common::flow_symbol::Symbol,
     is_strict: bool,
+    strictness_kind: TypeStrictnessKind,
     standard_cjs_esm_interop: bool,
     resolved_require: flow_typing_context::ResolvedRequire,
 ) -> Type {
@@ -3555,6 +3604,7 @@ pub(crate) fn cjs_require<'cx>(
                     reason2.dupe(),
                     namespace_symbol2.clone(),
                     is_strict,
+                    strictness_kind,
                     standard_cjs_esm_interop,
                     &module_type,
                 )
@@ -3674,6 +3724,7 @@ pub fn import_named<'cx>(
     export_name: &str,
     module_name: flow_common::flow_import_specifier::Userland,
     is_strict: bool,
+    strictness_kind: TypeStrictnessKind,
     resolved_require: flow_typing_context::ResolvedRequire,
 ) -> Type {
     let reason2 = reason.dupe();
@@ -3688,6 +3739,7 @@ pub fn import_named<'cx>(
             &export_name2,
             module_name2.clone(),
             is_strict,
+            strictness_kind,
             m,
         )
         .unwrap_or_else(|_| (None, type_::any_t::error(reason2.dupe())));
@@ -3749,6 +3801,7 @@ pub(crate) fn import_named_for_extends<'cx>(
     export_name: &FlowSmolStr,
     module_name: flow_common::flow_import_specifier::Userland,
     is_strict: bool,
+    strictness_kind: TypeStrictnessKind,
     resolved_require: flow_typing_context::ResolvedRequire,
 ) -> Type {
     let reason2 = reason.dupe();
@@ -3762,6 +3815,7 @@ pub(crate) fn import_named_for_extends<'cx>(
             &export_name2,
             module_name2.clone(),
             is_strict,
+            strictness_kind,
             m,
         )
         .unwrap_or_else(|_| (None, type_::any_t::error(reason2.dupe())));
@@ -3784,6 +3838,7 @@ pub fn import_ns<'cx>(
     reason: Reason,
     namespace_symbol: flow_common::flow_symbol::Symbol,
     is_strict: bool,
+    strictness_kind: TypeStrictnessKind,
     resolved_require: flow_typing_context::ResolvedRequire,
 ) -> Type {
     let reason2 = reason.dupe();
@@ -3798,6 +3853,7 @@ pub fn import_ns<'cx>(
                     false,
                     reason2.dupe(),
                     is_strict,
+                    strictness_kind,
                     &m,
                 )
                 .unwrap_or_else(|_| {
@@ -3956,7 +4012,13 @@ pub fn mixin<'cx>(cx: &mut Context<'cx>, reason: Reason, t: Type) -> Type {
     elab_t(cx, None, t, Op::new(OpInner::AnnotMixinT(reason)))
 }
 
-pub fn obj_rest<'cx>(cx: &mut Context<'cx>, reason: Reason, xs: Vec<FlowSmolStr>, t: Type) -> Type {
+pub fn obj_rest<'cx>(
+    cx: &mut Context<'cx>,
+    reason: Reason,
+    xs: Vec<FlowSmolStr>,
+    t: Type,
+    strictness_kind: TypeStrictnessKind,
+) -> Type {
     elab_t(
         cx,
         None,
@@ -3964,6 +4026,7 @@ pub fn obj_rest<'cx>(cx: &mut Context<'cx>, reason: Reason, xs: Vec<FlowSmolStr>
         Op::new(OpInner::AnnotObjRestT {
             reason,
             keys: xs.into(),
+            strictness_kind,
         }),
     )
 }

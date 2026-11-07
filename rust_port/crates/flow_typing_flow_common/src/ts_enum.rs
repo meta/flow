@@ -36,6 +36,7 @@ use flow_typing_type::type_::NamedSymbol;
 use flow_typing_type::type_::NumberLiteral;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeInner;
+use flow_typing_type::type_::TypeStrictnessKind;
 use flow_typing_type::type_::TypeTKind;
 use flow_typing_type::type_util;
 
@@ -98,6 +99,7 @@ pub fn mk_ts_enum_namespace_type<'cx>(
     reason: Reason,
     namespace_symbol: Symbol,
     members: &[(FlowSmolStr, ALoc, TsEnumMemberValue)],
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     let mk_named_symbol =
         |loc: ALoc, type_: Type| -> NamedSymbol { NamedSymbol::new(Some(loc), None, type_, None) };
@@ -131,7 +133,14 @@ pub fn mk_ts_enum_namespace_type<'cx>(
             _ => {}
         }
     }
-    flow_js_utils::namespace_type(cx, reason, namespace_symbol, &values_map, &types_map)
+    flow_js_utils::namespace_type(
+        cx,
+        reason,
+        namespace_symbol,
+        &values_map,
+        &types_map,
+        strictness_kind,
+    )
 }
 
 // Build the type of a TypeScript enum (in a .ts/.d.ts file). The result is a
@@ -246,5 +255,6 @@ pub fn mk_ts_enum_namespace<'cx>(
         .map(|(name, member_loc, _init_loc, value, _error)| (name, member_loc, value))
         .collect();
     let namespace_symbol = flow_symbol::Symbol::mk_enum_symbol(enum_name, name_loc);
-    mk_ts_enum_namespace_type(cx, enum_reason, namespace_symbol, &members)
+    let strictness_kind = cx.type_strictness_kind();
+    mk_ts_enum_namespace_type(cx, enum_reason, namespace_symbol, &members, strictness_kind)
 }

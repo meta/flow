@@ -1,0 +1,155 @@
+Error ------------------------------------------------------------------------------------------------------ test.js:3:1
+
+Cannot cast `tsDogFlowBox` to `FlowBuiltinBox<TsAnimal>` because in type argument `T` [1]: `TsAnimal` [2] is
+incompatible with `TsDog` [3]. For example, property `bark` is missing in `TsAnimal` [2] but exists in `TsDog` [3].
+[incompatible-type]
+
+   test.js:3:1
+    3| tsDogFlowBox as FlowBuiltinBox<TsAnimal>; // ERROR: Flow generic with TypeScript arguments.
+       ^^^^^^^^^^^^
+
+References:
+   a_flow.js:6:30
+    6| declare class FlowBuiltinBox<T> {
+                                    ^ [1]
+   test.js:3:32
+    3| tsDogFlowBox as FlowBuiltinBox<TsAnimal>; // ERROR: Flow generic with TypeScript arguments.
+                                      ^^^^^^^^ [2]
+   b_ts.d.ts:18:42
+   18| declare var tsDogFlowBox: FlowBuiltinBox<TsDog>;
+                                                ^^^^^ [3]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:10:1
+
+Cannot cast `'mousedown'` to `keyof FlowDerivedMap` because property `mousedown` is missing in `FlowDerivedMap` [1].
+[prop-missing]
+
+   test.js:10:1
+   10| 'mousedown' as typeof flowKeys; // ERROR: inherited members are not Flow keys.
+       ^^^^^^^^^^^
+
+References:
+   test.js:10:16
+   10| 'mousedown' as typeof flowKeys; // ERROR: inherited members are not Flow keys.
+                      ^^^^^^^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:14:12
+
+Cannot call `tsListener.on` because: [incompatible-type]
+ - Either `1` [1] is incompatible with `string` [2].
+ - Or `1` [1] is incompatible with `string` [3].
+
+   test.js:14:12
+   14| tsListener.on('custom', 1); // ERROR: the keyed overload types `custom` as `string`.
+                  ^^
+
+References:
+   test.js:14:25
+   14| tsListener.on('custom', 1); // ERROR: the keyed overload types `custom` as `string`.
+                               ^ [1]
+   b_ts.d.ts:24:11
+   24|   custom: string;
+                 ^^^^^^ [2]
+   b_ts.d.ts:30:27
+   30|   on(type: string, value: string): void;
+                                 ^^^^^^ [3]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:21:1
+
+Cannot cast `tsIfaceClass` to `{name: string | number, ...}` because `{name: string, ...}` [1] is incompatible with
+`Object` [2]. [incompatible-type]
+
+   test.js:21:1
+   21| tsIfaceClass as {name: string | number, ...}; // ERROR: a null prototype, but `name` is OK.
+       ^^^^^^^^^^^^
+
+References:
+   b_ts.d.ts:44:11
+   44| interface TsIface {
+                 ^^^^^^^ [1]
+   test.js:21:17
+   21| tsIfaceClass as {name: string | number, ...}; // ERROR: a null prototype, but `name` is OK.
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:22:1
+
+Cannot cast `FlowStatics` to `{s: number | string, ...}` because in property `s`: `number` [1] is not exactly the same
+as `number | string` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `s` is invariantly typed. To fix the error,
+- Either make `{name: string, s: number, ...}` [3] and `{s: number | string, ...}` [4] exactly the same
+- Or make property `s` in `{s: number | string, ...}` [4] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   test.js:22:1
+   22| FlowStatics as {s: number | string, ...}; // ERROR: Flow fields are invariant.
+       ^^^^^^^^^^^
+
+References:
+   a_flow.js:20:13
+   20|   static s: number;
+                   ^^^^^^ [1]
+   test.js:22:20
+   22| FlowStatics as {s: number | string, ...}; // ERROR: Flow fields are invariant.
+                          ^^^^^^^^^^^^^^^ [2]
+   a_flow.js:19:15
+   19| declare class FlowStatics {
+                     ^^^^^^^^^^^ [3]
+   test.js:22:16
+   22| FlowStatics as {s: number | string, ...}; // ERROR: Flow fields are invariant.
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:23:1
+
+Cannot cast `FlowNs` to `{v: number | string, ...}` because property `v` is read-only in `{readonly v: number}` [1] but
+writable in `{v: number | string, ...}` [2]. [incompatible-variance]
+
+   test.js:23:1
+   23| FlowNs as {v: number | string, ...}; // ERROR: read-only in Flow.
+       ^^^^^^
+
+References:
+   a_flow.js:22:19
+   22| declare namespace FlowNs {
+                         ^^^^^^ [1]
+   test.js:23:11
+   23| FlowNs as {v: number | string, ...}; // ERROR: read-only in Flow.
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:29:1
+
+Cannot cast `mergedIface.arr` to `Array<number | string>` because in array element: `number` [1] is not exactly the same
+as `number | string` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
+- Either make `Array<number>` [3] and `Array<number | string>` [4] exactly the same
+- Or make `Array<number | string>` [4] a `ReadonlyArray`.
+See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
+
+   test.js:29:1
+   29| mergedIface.arr as Array<number | string>; // ERROR: a Flow array is invariant.
+       ^^^^^^^^^^^^^^^
+
+References:
+   a_flow.js:26:14
+   26|   arr: Array<number>;
+                    ^^^^^^ [1]
+   test.js:29:26
+   29| mergedIface.arr as Array<number | string>; // ERROR: a Flow array is invariant.
+                                ^^^^^^^^^^^^^^^ [2]
+   a_flow.js:26:8
+   26|   arr: Array<number>;
+              ^^^^^^^^^^^^^ [3]
+   test.js:29:20
+   29| mergedIface.arr as Array<number | string>; // ERROR: a Flow array is invariant.
+                          ^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+
+Found 7 errors

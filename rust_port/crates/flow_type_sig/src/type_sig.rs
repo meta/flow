@@ -1404,6 +1404,7 @@ pub struct DefEnumBinding<Loc> {
     // None for Flow Enums, which are modeled nominally.
     pub member_values: Option<BTreeMap<FlowSmolStr, TsEnumMemberValue>>,
     pub has_unknown_members: bool,
+    pub strictness_kind: TypeStrictnessKind,
 }
 
 #[derive(Debug, Clone, PartialEq, Hash, serde::Serialize, serde::Deserialize)]
@@ -1418,6 +1419,7 @@ pub struct DefNamespaceBinding<Loc, T> {
     pub name: FlowSmolStr,
     pub values: BTreeMap<FlowSmolStr, (Loc, T)>,
     pub types: BTreeMap<FlowSmolStr, (Loc, T)>,
+    pub strictness_kind: TypeStrictnessKind,
 }
 
 #[derive(Debug, Clone, PartialEq, Hash, serde::Serialize, serde::Deserialize)]
@@ -1759,6 +1761,7 @@ impl<Loc: Clone, T> Def<Loc, T> {
                     .collect(),
                 member_values: inner.member_values.clone(),
                 has_unknown_members: inner.has_unknown_members,
+                strictness_kind: inner.strictness_kind,
             })),
             Def::DisabledEnumBinding(inner) => {
                 Def::DisabledEnumBinding(Box::new(DefDisabledEnumBinding {
@@ -1779,6 +1782,7 @@ impl<Loc: Clone, T> Def<Loc, T> {
                     .iter()
                     .map(|(k, (loc, t))| (k.dupe(), (f_loc(cx, loc), f_t(cx, t))))
                     .collect(),
+                strictness_kind: inner.strictness_kind,
             })),
         }
     }
@@ -2272,13 +2276,13 @@ pub enum Annot<Loc, T> {
     // TS-only `object` builtin: a structurally-empty interface that rejects
     // primitives. See type_annotation.rs / subtyping_kit.rs.
     ObjectBuiltin(Box<(Loc, TypeStrictnessKind)>),
-    ExactObjectType(Box<Loc>),
+    ExactObjectType(Box<(Loc, TypeStrictnessKind)>),
     Optional(Box<T>),
     Maybe(Box<(Loc, T)>),
     Union(Box<AnnotUnion<Loc, T>>),
     Intersection(Box<AnnotIntersection<Loc, T>>),
     Tuple(Box<AnnotTuple<Loc, T>>),
-    Array(Box<(Loc, T)>),
+    Array(Box<(Loc, T, TypeStrictnessKind)>),
     ReadOnlyArray(Box<(Loc, T)>),
     SingletonString(Box<(Loc, FlowSmolStr)>),
     SingletonNumber(Box<(Loc, f64, FlowSmolStr)>),
@@ -2308,7 +2312,7 @@ pub enum Annot<Loc, T> {
     ComponentMissingRenders(Box<Loc>),
     Values(Box<(Loc, T)>),
     Exact(Box<(Loc, T)>),
-    ExportsT(Box<(Loc, flow_import_specifier::Userland)>),
+    ExportsT(Box<(Loc, flow_import_specifier::Userland, TypeStrictnessKind)>),
     Conditional(Box<AnnotConditional<Loc, T>>),
     ObjKeyMirror(Box<AnnotObjKeyMirror<Loc, T>>),
     ClassT(Box<(Loc, T)>),
@@ -2336,8 +2340,8 @@ impl<Loc: std::hash::Hash, T: std::hash::Hash> std::hash::Hash for Annot<Loc, T>
             | Annot::BigInt(l)
             | Annot::String(l)
             | Annot::Boolean(l)
-            | Annot::Exists(l)
-            | Annot::ExactObjectType(l) => l.hash(state),
+            | Annot::Exists(l) => l.hash(state),
+            Annot::ExactObjectType(inner) => inner.0.hash(state),
             Annot::ObjectBuiltin(inner) => inner.hash(state),
             Annot::Optional(t) => t.hash(state),
             Annot::Maybe(inner) => {
@@ -2361,7 +2365,11 @@ impl<Loc: std::hash::Hash, T: std::hash::Hash> std::hash::Hash for Annot<Loc, T>
                 inner.elems.hash(state);
                 inner.inexact.hash(state);
             }
-            Annot::Array(inner) | Annot::ReadOnlyArray(inner) => {
+            Annot::Array(inner) => {
+                inner.0.hash(state);
+                inner.1.hash(state);
+            }
+            Annot::ReadOnlyArray(inner) => {
                 inner.0.hash(state);
                 inner.1.hash(state);
             }
@@ -2541,7 +2549,7 @@ impl<Loc, T> Annot<Loc, T> {
             | Annot::String(box loc)
             | Annot::Boolean(box loc)
             | Annot::Exists(box loc)
-            | Annot::ExactObjectType(box loc) => f_loc(cx, loc),
+            | Annot::ExactObjectType(box (loc, _)) => f_loc(cx, loc),
             Annot::ObjectBuiltin(box (loc, _)) => f_loc(cx, loc),
             Annot::Optional(box t) => f_t(cx, t),
             Annot::Maybe(inner) => {
@@ -2870,7 +2878,9 @@ impl<Loc, T> Annot<Loc, T> {
             Annot::ObjectBuiltin(box (loc, strictness_kind)) => {
                 Annot::ObjectBuiltin(Box::new((f_loc(cx, loc), *strictness_kind)))
             }
-            Annot::ExactObjectType(loc) => Annot::ExactObjectType(Box::new(f_loc(cx, loc))),
+            Annot::ExactObjectType(box (loc, strictness_kind)) => {
+                Annot::ExactObjectType(Box::new((f_loc(cx, loc), *strictness_kind)))
+            }
             Annot::Optional(t) => Annot::Optional(Box::new(f_t(cx, t))),
             Annot::Maybe(inner) => Annot::Maybe(Box::new((f_loc(cx, &inner.0), f_t(cx, &inner.1)))),
             Annot::Union(inner) => Annot::Union(Box::new(AnnotUnion {
@@ -2895,7 +2905,9 @@ impl<Loc, T> Annot<Loc, T> {
                 inexact: inner.inexact,
                 strictness_kind: inner.strictness_kind,
             })),
-            Annot::Array(inner) => Annot::Array(Box::new((f_loc(cx, &inner.0), f_t(cx, &inner.1)))),
+            Annot::Array(inner) => {
+                Annot::Array(Box::new((f_loc(cx, &inner.0), f_t(cx, &inner.1), inner.2)))
+            }
             Annot::ReadOnlyArray(inner) => {
                 Annot::ReadOnlyArray(Box::new((f_loc(cx, &inner.0), f_t(cx, &inner.1))))
             }
@@ -3008,7 +3020,7 @@ impl<Loc, T> Annot<Loc, T> {
             }
             Annot::Exact(inner) => Annot::Exact(Box::new((f_loc(cx, &inner.0), f_t(cx, &inner.1)))),
             Annot::ExportsT(inner) => {
-                Annot::ExportsT(Box::new((f_loc(cx, &inner.0), inner.1.clone())))
+                Annot::ExportsT(Box::new((f_loc(cx, &inner.0), inner.1.clone(), inner.2)))
             }
             Annot::Conditional(inner) => Annot::Conditional(Box::new(AnnotConditional {
                 loc: f_loc(cx, &inner.loc),

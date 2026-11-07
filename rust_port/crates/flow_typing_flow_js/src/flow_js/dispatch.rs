@@ -6409,6 +6409,7 @@ fn __flow_impl<'cx>(
             let mut indexer_fallback = indexer_fallback.clone();
             let mut missing = vec![];
             for (propref, up) in lookup_targets(propref, action) {
+                let access_strictness_kind = cx.type_strictness_kind();
                 let (property, candidate) =
                     flow_js_utils::get_prop_t_kit::get_instance_prop_for_lookup::<FlowJs>(
                         cx,
@@ -6421,6 +6422,7 @@ fn __flow_impl<'cx>(
                         reason_op,
                         indexer_fallback_mode,
                         l,
+                        access_strictness_kind,
                     )?;
                 // A candidate found closer to the access wins: it is the one an
                 // inherited declared property would have to beat.
@@ -6695,6 +6697,7 @@ fn __flow_impl<'cx>(
                 &data.propref,
                 lookup_action.clone(),
             );
+            let access_strictness_kind = cx.type_strictness_kind();
             flow_js_utils::get_prop_t_kit::read_instance_prop::<FlowJs>(
                 cx,
                 env,
@@ -6710,6 +6713,7 @@ fn __flow_impl<'cx>(
                 inst,
                 &data.propref,
                 &data.reason,
+                access_strictness_kind,
             )?(cx, (*data.tout).dupe())?;
         }
         (DefT(reason_c, deref!(InstanceT(inst_t))), GetPrivatePropT(box gpp_data)) => {
@@ -6764,6 +6768,7 @@ fn __flow_impl<'cx>(
                         propref,
                         lookup_action.clone(),
                     );
+                    let access_strictness_kind = cx.type_strictness_kind();
                     flow_js_utils::get_prop_t_kit::read_instance_prop::<FlowJs>(
                         cx,
                         env,
@@ -6779,6 +6784,7 @@ fn __flow_impl<'cx>(
                         inst,
                         propref,
                         reason_call,
+                        access_strictness_kind,
                     )?(cx, tout_tvar.dupe())?;
                     Ok::<(), FlowJsException>(())
                 },
@@ -6875,6 +6881,7 @@ fn __flow_impl<'cx>(
                     0 => {
                         let xs_smol: Vec<flow_data_structure_wrapper::smol_str::FlowSmolStr> =
                             xs.iter().map(|s| s.as_str().into()).collect();
+                        let strictness_kind = cx.type_strictness_kind();
                         let rest_obj = flow_js_utils::objt_to_obj_rest(
                             cx,
                             env,
@@ -6885,6 +6892,7 @@ fn __flow_impl<'cx>(
                             reason_obj,
                             &xs_smol,
                             *literal,
+                            strictness_kind,
                         )?;
                         rec_flow_t(cx, env, trace, unknown_use(), (&rest_obj, t))?;
                     }
@@ -6922,6 +6930,7 @@ fn __flow_impl<'cx>(
             })?;
             let xs_smol: Vec<flow_data_structure_wrapper::smol_str::FlowSmolStr> =
                 xs.iter().map(|s| s.as_str().into()).collect();
+            let strictness_kind = cx.type_strictness_kind();
             let o = flow_js_utils::objt_to_obj_rest(
                 cx,
                 env,
@@ -6932,6 +6941,7 @@ fn __flow_impl<'cx>(
                 reason,
                 &xs_smol,
                 *literal,
+                strictness_kind,
             );
             // Combine super and own props.
             let use_op = UseOp::Op(std::sync::Arc::new(VirtualRootUseOp::ObjectSpread {
@@ -7232,6 +7242,7 @@ fn __flow_impl<'cx>(
                     },
                 )
             });
+            let access_strictness_kind = cx.type_strictness_kind();
             flow_js_utils::get_prop_t_kit::read_obj_prop::<FlowJs>(
                 cx,
                 env,
@@ -7244,6 +7255,7 @@ fn __flow_impl<'cx>(
                 reason_obj.dupe(),
                 data.reason.dupe(),
                 lookup_info,
+                access_strictness_kind,
             )?(cx, (*data.tout).dupe())?;
         }
         (
@@ -7316,6 +7328,7 @@ fn __flow_impl<'cx>(
                 cx,
                 reason_lookup.dupe(),
                 |cx, reason_tout, tout| {
+                    let access_strictness_kind = cx.type_strictness_kind();
                     flow_js_utils::get_prop_t_kit::read_obj_prop::<FlowJs>(
                         cx,
                         env,
@@ -7328,6 +7341,7 @@ fn __flow_impl<'cx>(
                         reason_obj.dupe(),
                         reason_lookup.dupe(),
                         None,
+                        access_strictness_kind,
                     )?(cx, Tvar::new(reason_tout.dupe(), tout as u32))?;
                     Ok::<(), FlowJsException>(())
                 },
@@ -9172,6 +9186,7 @@ fn __flow_impl<'cx>(
                 },
             ),
         ) if let EnumInfoInner::ConcreteEnum(enum_info) = EnumInfo::deref(enum_info) => {
+            let access_strictness_kind = cx.type_strictness_kind();
             flow_js_utils::get_prop_t_kit::on_enum_object_t::<FlowJs>(
                 cx,
                 env,
@@ -9185,6 +9200,7 @@ fn __flow_impl<'cx>(
                     None,
                     (prop_reason.dupe(), member_name.dupe()),
                 ),
+                access_strictness_kind,
             )?(cx, (*data.tout).dupe())?;
         }
         (

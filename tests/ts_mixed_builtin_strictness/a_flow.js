@@ -15,3 +15,14 @@ declare interface FlowDerivedMap extends FlowBaseMap {
 }
 // $FlowFixMe[deprecated-utility]
 declare var flowKeys: $Keys<FlowDerivedMap>;
+
+declare class FlowStatics {
+  static s: number;
+}
+declare namespace FlowNs {
+  declare var v: number;
+}
+declare interface MergedIface {
+  arr: Array<number>;
+}
+declare function over(x: number): void;

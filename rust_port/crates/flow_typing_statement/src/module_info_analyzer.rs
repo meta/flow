@@ -1268,12 +1268,14 @@ fn mk_namespace_t<'a>(
         .iter()
         .map(|(k, v)| (k.dupe(), v.clone()))
         .collect();
+    let strictness_kind = cx.type_strictness_kind();
     flow_js_utils::namespace_type(
         cx,
         reason,
         namespace_symbol,
         &named_btree,
         &type_named_btree,
+        strictness_kind,
     )
 }
 

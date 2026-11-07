@@ -96,6 +96,7 @@ pub enum Exports {
         type_stars: Vec<(ALoc, Index<FlowImportSpecifier>)>,
         strict: bool,
         platform_availability_set: Option<flow_common::platform_set::PlatformSet>,
+        strictness_kind: TypeStrictnessKind,
     },
     ESExports {
         type_exports: BTreeMap<FlowSmolStr, LazyExport>,
@@ -469,7 +470,13 @@ fn eval_update<'cx>(cx: &mut Context<'cx>, loc: ALoc, t: Type) -> Type {
     annotation_inference::unary_arith(cx, reason, t, type_::UnaryArithKind::Update)
 }
 
-fn eval<'cx>(cx: &mut Context<'cx>, loc: ALoc, t: Type, op: Op<Type>) -> Type {
+fn eval<'cx>(
+    cx: &mut Context<'cx>,
+    loc: ALoc,
+    t: Type,
+    op: Op<Type>,
+    strictness_kind: TypeStrictnessKind,
+) -> Type {
     use flow_common::reason::VirtualReasonDesc::*;
     match op {
         Op::Arith(box (bin_op, rhs_t)) => eval_arith(cx, loc, t, rhs_t, bin_op),
@@ -480,13 +487,13 @@ fn eval<'cx>(cx: &mut Context<'cx>, loc: ALoc, t: Type, op: Op<Type>) -> Type {
             let reason = reason::mk_reason(RProperty(Some(name.dupe())), loc);
             // TODO: use_op
             let use_op = type_::unknown_use();
-            annotation_inference::get_prop(cx, use_op, reason, None, name, t)
+            annotation_inference::get_prop(cx, use_op, reason, None, name, t, strictness_kind)
         }
         Op::GetElem(box index) => {
             let reason = reason::mk_reason(RProperty(None), loc);
             // TODO: use_op
             let use_op = type_::unknown_use();
-            annotation_inference::get_elem(cx, use_op, reason, index, t)
+            annotation_inference::get_elem(cx, use_op, reason, index, t, strictness_kind)
         }
     }
 }
@@ -546,6 +553,7 @@ fn add_record_constructor<'cx>(
     own_props: &BTreeMap<Name, type_::Property>,
     defaulted_props: &flow_data_structure_wrapper::ord_set::FlowOrdSet<FlowSmolStr>,
     class_props: &mut BTreeMap<Name, type_::Property>,
+    strictness_kind: TypeStrictnessKind,
 ) {
     use flow_common::reason::VirtualReasonDesc::*;
 
@@ -583,7 +591,7 @@ fn add_record_constructor<'cx>(
             (prop_name.dupe(), new_prop)
         })
         .collect();
-    let param = obj_type::mk_with_proto(
+    let param = obj_type::mk_with_proto_and_strictness(
         cx,
         record_reason.dupe(),
         type_::ObjKind::Exact,
@@ -592,6 +600,7 @@ fn add_record_constructor<'cx>(
         Some(props),
         None,
         Type::new(type_::TypeInner::NullProtoT(record_reason)),
+        strictness_kind,
         type_::ObjLiteral::NonLiteral,
     );
     let funtype = type_::mk_boundfunctiontype(
@@ -636,6 +645,7 @@ fn require<'cx>(
     loc: ALoc,
     index: Index<FlowImportSpecifier>,
     standard_cjs_esm_interop: bool,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     let (mref, lazy_resolved) = {
         let deps = &file.dependencies;
@@ -650,6 +660,7 @@ fn require<'cx>(
         reason,
         symbol,
         false,
+        strictness_kind,
         standard_cjs_esm_interop,
         resolved_require,
     )
@@ -663,6 +674,7 @@ fn import<'cx>(
     kind: type_::ImportKind,
     remote: &FlowSmolStr,
     local: &FlowSmolStr,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     let (mref, lazy_resolved) = {
         let deps = &file.dependencies;
@@ -688,6 +700,7 @@ fn import<'cx>(
             remote,
             mref.dupe(),
             false,
+            strictness_kind,
             resolved_require,
         )
     }
@@ -701,6 +714,7 @@ fn import_for_extends<'cx>(
     kind: type_::ImportKind,
     remote: &FlowSmolStr,
     local: &FlowSmolStr,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     let (mref, lazy_resolved) = {
         let deps = &file.dependencies;
@@ -726,6 +740,7 @@ fn import_for_extends<'cx>(
             remote,
             mref.dupe(),
             false,
+            strictness_kind,
             resolved_require,
         )
     }
@@ -738,6 +753,7 @@ fn import_ns<'cx>(
     name: &FlowSmolStr,
     id_loc: ALoc,
     index: Index<FlowImportSpecifier>,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     let lazy_resolved = file.dependencies.get(index).1.dupe();
     let resolved_require = lazy_resolved.get_forced(cx).dupe();
@@ -745,7 +761,14 @@ fn import_ns<'cx>(
         Userland::from_smol_str(name.dupe()).into_inner(),
         id_loc.dupe(),
     );
-    annotation_inference::import_ns(cx, reason, namespace_symbol, false, resolved_require)
+    annotation_inference::import_ns(
+        cx,
+        reason,
+        namespace_symbol,
+        false,
+        strictness_kind,
+        resolved_require,
+    )
 }
 
 fn import_typeof_ns<'cx>(
@@ -755,6 +778,7 @@ fn import_typeof_ns<'cx>(
     name: &FlowSmolStr,
     id_loc: ALoc,
     index: Index<FlowImportSpecifier>,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     let lazy_resolved = file.dependencies.get(index).1.dupe();
     let resolved_require = lazy_resolved.get_forced(cx).dupe();
@@ -764,6 +788,7 @@ fn import_typeof_ns<'cx>(
         reason.dupe(),
         namespace_symbol,
         false,
+        strictness_kind,
         resolved_require,
     );
     annotation_inference::import_typeof(cx, reason, "*", ns_t)
@@ -782,6 +807,7 @@ fn merge_ts_enum_namespace<'cx>(
     enum_name: &FlowSmolStr,
     members: &BTreeMap<FlowSmolStr, ALoc>,
     member_values: &BTreeMap<FlowSmolStr, TsEnumMemberValue>,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     let resolved_members: Vec<(FlowSmolStr, ALoc, TsEnumMemberValue)> = member_values
         .iter()
@@ -799,6 +825,7 @@ fn merge_ts_enum_namespace<'cx>(
         reason,
         namespace_symbol,
         &resolved_members,
+        strictness_kind,
     )
 }
 
@@ -811,6 +838,7 @@ fn merge_enum<'cx>(
     members: &BTreeMap<FlowSmolStr, ALoc>,
     member_values: Option<&BTreeMap<FlowSmolStr, TsEnumMemberValue>>,
     has_unknown_members: bool,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     use flow_common::reason::VirtualReasonDesc::*;
 
@@ -819,9 +847,15 @@ fn merge_enum<'cx>(
         // + union type. This path does not depend on the Flow-Enum representation
         // (`rep`), which may be `None` for member shapes Flow Enums reject (e.g.
         // defaulted numeric members).
-        Some(member_values) => {
-            merge_ts_enum_namespace(cx, reason, id_loc, enum_name, members, member_values)
-        }
+        Some(member_values) => merge_ts_enum_namespace(
+            cx,
+            reason,
+            id_loc,
+            enum_name,
+            members,
+            member_values,
+            strictness_kind,
+        ),
         None => match rep {
             None => type_::any_t::error(reason),
             Some(rep) => {
@@ -894,7 +928,12 @@ pub fn merge_pattern<'cx>(
             let __rc = file.pattern_defs.get(*i).dupe();
             __rc.get_forced(cx).dupe()
         }
-        Pack::Pattern::PropP { id_loc, name, def } => {
+        Pack::Pattern::PropP {
+            id_loc,
+            name,
+            def,
+            strictness_kind,
+        } => {
             let t = {
                 let __rc = file.patterns.get(*def).dupe();
                 __rc.get_forced(cx).dupe()
@@ -903,9 +942,13 @@ pub fn merge_pattern<'cx>(
             let reason = reason::mk_reason(RProperty(Some(name.dupe())), id_loc.dupe());
             // TODO: use_op
             let use_op = type_::unknown_use();
-            annotation_inference::get_prop(cx, use_op, reason, None, name, t)
+            annotation_inference::get_prop(cx, use_op, reason, None, name, t, *strictness_kind)
         }
-        Pack::Pattern::ComputedP { elem, def } => {
+        Pack::Pattern::ComputedP {
+            elem,
+            def,
+            strictness_kind,
+        } => {
             let elem = {
                 let __rc = file.pattern_defs.get(*elem).dupe();
                 __rc.get_forced(cx).dupe()
@@ -918,20 +961,36 @@ pub fn merge_pattern<'cx>(
             let reason = reason::mk_reason(RProperty(None), loc.dupe());
             // TODO: use_op
             let use_op = type_::unknown_use();
-            annotation_inference::get_elem(cx, use_op, reason, elem, t)
+            annotation_inference::get_elem(cx, use_op, reason, elem, t, *strictness_kind)
         }
         Pack::Pattern::UnsupportedLiteralP(loc) => {
             type_::any_t::at(type_::AnySource::AnyError(None), loc.dupe())
         }
-        Pack::Pattern::ObjRestP { loc, xs, def } => {
+        Pack::Pattern::ObjRestP {
+            loc,
+            xs,
+            def,
+            strictness_kind,
+        } => {
             let t = {
                 let __rc = file.patterns.get(*def).dupe();
                 __rc.get_forced(cx).dupe()
             };
             let reason = reason::mk_reason(RObjectPatternRestProp, loc.dupe());
-            annotation_inference::obj_rest(cx, reason, xs.iter().duped().collect(), t)
+            annotation_inference::obj_rest(
+                cx,
+                reason,
+                xs.iter().duped().collect(),
+                t,
+                *strictness_kind,
+            )
         }
-        Pack::Pattern::IndexP { loc, i, def } => {
+        Pack::Pattern::IndexP {
+            loc,
+            i,
+            def,
+            strictness_kind,
+        } => {
             let t = {
                 let __rc = file.patterns.get(*def).dupe();
                 __rc.get_forced(cx).dupe()
@@ -949,7 +1008,7 @@ pub fn merge_pattern<'cx>(
             };
             // TODO: use_op
             let use_op = type_::unknown_use();
-            annotation_inference::get_elem(cx, use_op, reason, i, t.dupe())
+            annotation_inference::get_elem(cx, use_op, reason, i, t.dupe(), *strictness_kind)
         }
         Pack::Pattern::ArrRestP { loc, i, def } => {
             let t = {
@@ -976,6 +1035,7 @@ pub fn merge_remote_ref<'cx>(
             name,
             index,
             remote,
+            strictness_kind,
         } => import(
             cx,
             file,
@@ -984,12 +1044,14 @@ pub fn merge_remote_ref<'cx>(
             type_::ImportKind::ImportValue,
             remote,
             name,
+            *strictness_kind,
         ),
         Pack::RemoteRef::ImportType {
             id_loc: _,
             name,
             index,
             remote,
+            strictness_kind,
         } => import(
             cx,
             file,
@@ -998,12 +1060,14 @@ pub fn merge_remote_ref<'cx>(
             type_::ImportKind::ImportType,
             remote,
             name,
+            *strictness_kind,
         ),
         Pack::RemoteRef::ImportTypeof {
             id_loc: _,
             name,
             index,
             remote,
+            strictness_kind,
         } => import(
             cx,
             file,
@@ -1012,22 +1076,50 @@ pub fn merge_remote_ref<'cx>(
             type_::ImportKind::ImportTypeof,
             remote,
             name,
+            *strictness_kind,
         ),
         Pack::RemoteRef::ImportNs {
             id_loc,
             name,
             index,
-        } => import_ns(cx, file, reason, name, id_loc.dupe(), *index),
+            strictness_kind,
+        } => import_ns(
+            cx,
+            file,
+            reason,
+            name,
+            id_loc.dupe(),
+            *index,
+            *strictness_kind,
+        ),
         Pack::RemoteRef::ImportTypeofNs {
             id_loc,
             name,
             index,
-        } => import_typeof_ns(cx, file, reason, name, id_loc.dupe(), *index),
+            strictness_kind,
+        } => import_typeof_ns(
+            cx,
+            file,
+            reason,
+            name,
+            id_loc.dupe(),
+            *index,
+            *strictness_kind,
+        ),
         Pack::RemoteRef::ImportTypeNs {
             id_loc,
             name,
             index,
-        } => import_ns(cx, file, reason, name, id_loc.dupe(), *index),
+            strictness_kind,
+        } => import_ns(
+            cx,
+            file,
+            reason,
+            name,
+            id_loc.dupe(),
+            *index,
+            *strictness_kind,
+        ),
     }
 }
 
@@ -1043,6 +1135,7 @@ pub fn merge_remote_ref_for_extends<'cx>(
             name,
             index,
             remote,
+            strictness_kind,
         } => import_for_extends(
             cx,
             file,
@@ -1051,12 +1144,14 @@ pub fn merge_remote_ref_for_extends<'cx>(
             type_::ImportKind::ImportValue,
             remote,
             name,
+            *strictness_kind,
         ),
         Pack::RemoteRef::ImportType {
             id_loc: _,
             name,
             index,
             remote,
+            strictness_kind,
         } => import_for_extends(
             cx,
             file,
@@ -1065,12 +1160,14 @@ pub fn merge_remote_ref_for_extends<'cx>(
             type_::ImportKind::ImportType,
             remote,
             name,
+            *strictness_kind,
         ),
         Pack::RemoteRef::ImportTypeof {
             id_loc: _,
             name,
             index,
             remote,
+            strictness_kind,
         } => import_for_extends(
             cx,
             file,
@@ -1079,22 +1176,50 @@ pub fn merge_remote_ref_for_extends<'cx>(
             type_::ImportKind::ImportTypeof,
             remote,
             name,
+            *strictness_kind,
         ),
         Pack::RemoteRef::ImportNs {
             id_loc,
             name,
             index,
-        } => import_ns(cx, file, reason, name, id_loc.dupe(), *index),
+            strictness_kind,
+        } => import_ns(
+            cx,
+            file,
+            reason,
+            name,
+            id_loc.dupe(),
+            *index,
+            *strictness_kind,
+        ),
         Pack::RemoteRef::ImportTypeofNs {
             id_loc,
             name,
             index,
-        } => import_typeof_ns(cx, file, reason, name, id_loc.dupe(), *index),
+            strictness_kind,
+        } => import_typeof_ns(
+            cx,
+            file,
+            reason,
+            name,
+            id_loc.dupe(),
+            *index,
+            *strictness_kind,
+        ),
         Pack::RemoteRef::ImportTypeNs {
             id_loc,
             name,
             index,
-        } => import_ns(cx, file, reason, name, id_loc.dupe(), *index),
+            strictness_kind,
+        } => import_ns(
+            cx,
+            file,
+            reason,
+            name,
+            id_loc.dupe(),
+            *index,
+            *strictness_kind,
+        ),
     }
 }
 
@@ -1162,7 +1287,7 @@ fn merge_tyref<'cx, R>(
                     packed_ref,
                     false,
                 );
-                for (q_loc, q_id_loc, q_name) in qualifications.iter().rev() {
+                for (q_loc, q_id_loc, q_name, strictness_kind) in qualifications.iter().rev() {
                     let q_loc: &ALoc = q_loc;
                     let q_id_loc: &ALoc = q_id_loc;
                     let q_name: &FlowSmolStr = q_name;
@@ -1180,7 +1305,13 @@ fn merge_tyref<'cx, R>(
                         type_::VirtualRootUseOp::GetProperty(op_reason.dupe()),
                     ));
                     t = annotation_inference::qualify_type(
-                        cx, use_op, id_reason, op_reason, name, t,
+                        cx,
+                        use_op,
+                        id_reason,
+                        op_reason,
+                        name,
+                        t,
+                        *strictness_kind,
                     );
                     loc = q_loc.dupe();
                 }
@@ -1192,8 +1323,9 @@ fn merge_tyref<'cx, R>(
                 id_loc,
                 name,
                 qualification,
+                strictness_kind,
             }) => {
-                qualifications.push((loc.dupe(), id_loc.dupe(), name.dupe()));
+                qualifications.push((loc.dupe(), id_loc.dupe(), name.dupe(), *strictness_kind));
                 current = qualification;
             }
         }
@@ -1403,6 +1535,7 @@ pub fn merge_exports<'cx>(
             type_stars,
             strict,
             platform_availability_set,
+            strictness_kind,
         } => {
             let (def_loc_opt, exports_t) = match exports {
                 Some(lazy_val) => {
@@ -1411,7 +1544,7 @@ pub fn merge_exports<'cx>(
                 }
                 None => (
                     None,
-                    obj_type::mk_with_proto(
+                    obj_type::mk_with_proto_and_strictness(
                         cx,
                         reason.dupe(),
                         type_::ObjKind::Exact,
@@ -1420,6 +1553,7 @@ pub fn merge_exports<'cx>(
                         None,
                         None,
                         Type::new(type_::TypeInner::ObjProtoT(reason.dupe())),
+                        strictness_kind,
                         type_::ObjLiteral::NonLiteral,
                     ),
                 ),
@@ -1607,7 +1741,12 @@ fn merge_impl<'cx>(
         Pack::Packed::Err(box loc) => {
             type_::any_t::at(type_::AnySource::AnyError(None), loc.dupe())
         }
-        Pack::Packed::Eval(box Pack::PackedEval { loc, packed: t, op }) => {
+        Pack::Packed::Eval(box Pack::PackedEval {
+            loc,
+            packed: t,
+            op,
+            strictness_kind,
+        }) => {
             let (eval_as_const, eval_const_decl) = match op {
                 Op::Unary(flow_parser::ast::expression::UnaryOperator::Minus)
                 | Op::Unary(flow_parser::ast::expression::UnaryOperator::Not) => {
@@ -1617,29 +1756,59 @@ fn merge_impl<'cx>(
             };
             let merged_t = merge_impl(env, cx, file, t, eval_as_const, eval_const_decl);
             let merged_op = merge_op(env, cx, file, op);
-            eval(cx, loc.dupe(), merged_t, merged_op)
+            eval(cx, loc.dupe(), merged_t, merged_op, *strictness_kind)
         }
-        Pack::Packed::Require(box Pack::PackedLocIndex { loc, index }) => {
-            require(cx, file, loc.dupe(), *index, false)
-        }
-        Pack::Packed::ImportDynamic(box Pack::PackedLocIndex { loc, index }) => {
+        Pack::Packed::Require(box Pack::PackedLocIndex {
+            loc,
+            index,
+            strictness_kind,
+        }) => require(cx, file, loc.dupe(), *index, false, *strictness_kind),
+        Pack::Packed::ImportDynamic(box Pack::PackedLocIndex {
+            loc,
+            index,
+            strictness_kind,
+        }) => {
             let mref = file.dependencies.get(*index).0.dupe();
             let ns_reason = reason::mk_reason(RModule(mref.dupe()), loc.dupe());
             let name = mref.dupe().into_inner();
-            let ns_t = import_ns(cx, file, ns_reason, &name, loc.dupe(), index.clone());
+            let ns_t = import_ns(
+                cx,
+                file,
+                ns_reason,
+                &name,
+                loc.dupe(),
+                index.clone(),
+                *strictness_kind,
+            );
             let reason = reason::mk_annot_reason(None, loc.dupe());
             flow_js_utils::lookup_builtin_typeapp(cx, reason, "Promise", vec![ns_t])
         }
-        Pack::Packed::ModuleRef(box Pack::PackedLocIndex { loc, index }) => {
-            let t = require(cx, file, loc.dupe(), *index, true);
+        Pack::Packed::ModuleRef(box Pack::PackedLocIndex {
+            loc,
+            index,
+            strictness_kind,
+        }) => {
+            let t = require(cx, file, loc.dupe(), *index, true, *strictness_kind);
             let reason = reason::mk_reason(None, loc.dupe());
             flow_js_utils::lookup_builtin_typeapp(cx, reason, "$Flow$ModuleRef", vec![t])
         }
-        Pack::Packed::ImportTypeAnnot(box Pack::PackedLocIndex { loc, index }) => {
+        Pack::Packed::ImportTypeAnnot(box Pack::PackedLocIndex {
+            loc,
+            index,
+            strictness_kind,
+        }) => {
             let mref = file.dependencies.get(*index).0.dupe();
             let ns_reason = reason::mk_reason(RModule(mref.dupe()), loc.dupe());
             let name = mref.dupe().into_inner();
-            import_ns(cx, file, ns_reason, &name, loc.dupe(), *index)
+            import_ns(
+                cx,
+                file,
+                ns_reason,
+                &name,
+                loc.dupe(),
+                *index,
+                *strictness_kind,
+            )
         }
     }
 }
@@ -1885,12 +2054,12 @@ fn merge_annot<'cx>(
         Annot::String(box loc) => type_::str_module_t::at(loc.dupe()),
         Annot::Boolean(box loc) => type_::bool_module_t::at(loc.dupe()),
         Annot::Exists(box loc) => type_::any_t::at(type_::AnySource::AnnotatedAny, loc.dupe()),
-        Annot::ExactObjectType(box loc) => {
+        Annot::ExactObjectType(box (loc, strictness_kind)) => {
             let reason = reason::mk_annot_reason(
                 RType(FlowSmolStr::new_inline("ExactObjectType")),
                 loc.dupe(),
             );
-            obj_type::mk_exact_object_type(cx, reason)
+            obj_type::mk_exact_object_type(cx, reason, *strictness_kind)
         }
         Annot::Optional(t) => {
             let t = merge_impl(env, cx, file, t, false, false);
@@ -2010,7 +2179,7 @@ fn merge_annot<'cx>(
             )
             .unwrap()
         }
-        Annot::Array(box (loc, t)) => {
+        Annot::Array(box (loc, t, strictness_kind)) => {
             let reason = reason::mk_annot_reason(RArrayType, loc.dupe());
             let elem_t = merge_impl(env, cx, file, t, false, false);
             Type::new(type_::TypeInner::DefT(
@@ -2020,9 +2189,7 @@ fn merge_annot<'cx>(
                         elem_t,
                         tuple_view: None,
                         react_dro: None,
-                        strictness_kind: TypeStrictnessKind::from_is_typescript(
-                            loc.source().is_some_and(flow_common::files::has_ts_ext),
-                        ),
+                        strictness_kind: *strictness_kind,
                         literal: type_::ArrLiteral::NonLiteral,
                         fresh: false,
                     }),
@@ -2492,7 +2659,7 @@ fn merge_annot<'cx>(
                 id,
             })
         }
-        Annot::ExportsT(box (loc, mref)) => {
+        Annot::ExportsT(box (loc, mref, strictness_kind)) => {
             let reason = reason::mk_annot_reason(
                 reason::VirtualReasonDesc::RModule(mref.dupe()),
                 loc.dupe(),
@@ -2520,7 +2687,7 @@ fn merge_annot<'cx>(
                     ))
                 }
             };
-            annotation_inference::cjs_require(cx, reason, symbol, false, false, f)
+            annotation_inference::cjs_require(cx, reason, symbol, false, *strictness_kind, false, f)
         }
         Annot::Conditional(inner) => {
             let AnnotConditional {
@@ -2669,8 +2836,15 @@ fn merge_annot<'cx>(
         }
         Annot::FunAnnot(box (loc, def)) | Annot::MethodAnnot(box (loc, _, def)) => {
             let reason = reason::mk_annot_reason(RFunctionType, loc.dupe());
-            let statics =
-                merge_fun_statics(env, cx, file, reason.dupe(), std::iter::empty(), false);
+            let statics = merge_fun_statics(
+                env,
+                cx,
+                file,
+                reason.dupe(),
+                std::iter::empty(),
+                false,
+                def.strictness_kind,
+            );
             merge_fun(
                 env,
                 cx,
@@ -3123,6 +3297,7 @@ fn merge_value<'cx>(
                     .iter()
                     .map(|(key, (loc, t))| (key, loc, t, Polarity::Neutral)),
                 true,
+                def.strictness_kind,
             );
             merge_fun(
                 env,
@@ -3688,8 +3863,15 @@ fn merge_obj_value_prop<'cx>(
                      def,
                  }: &ObjValueMethodData<ALoc, Pack::Packed<ALoc>>| {
                     let reason = reason::func_reason(*async_, *generator, fn_loc.dupe());
-                    let statics =
-                        merge_fun_statics(env, cx, file, reason.dupe(), std::iter::empty(), true);
+                    let statics = merge_fun_statics(
+                        env,
+                        cx,
+                        file,
+                        reason.dupe(),
+                        std::iter::empty(),
+                        true,
+                        def.strictness_kind,
+                    );
                     merge_fun(
                         env,
                         cx,
@@ -3785,8 +3967,15 @@ fn merge_obj_annot_prop<'cx>(
             def,
         }) => {
             let reason = reason::mk_annot_reason(RFunctionType, fn_loc.dupe());
-            let statics =
-                merge_fun_statics(env, cx, file, reason.dupe(), std::iter::empty(), false);
+            let statics = merge_fun_statics(
+                env,
+                cx,
+                file,
+                reason.dupe(),
+                std::iter::empty(),
+                false,
+                def.strictness_kind,
+            );
             let type_ = merge_fun(
                 env,
                 cx,
@@ -4069,6 +4258,7 @@ fn merge_interface_extends<'cx>(
                     id_loc,
                     name,
                     qualification,
+                    strictness_kind,
                 }) => {
                     let qual_t = aux(cx, file, qualification);
                     let name_r = Name::new(name.dupe());
@@ -4078,7 +4268,13 @@ fn merge_interface_extends<'cx>(
                         type_::VirtualRootUseOp::GetProperty(op_reason.dupe()),
                     ));
                     annotation_inference::qualify_type(
-                        cx, use_op, id_reason, op_reason, name_r, qual_t,
+                        cx,
+                        use_op,
+                        id_reason,
+                        op_reason,
+                        name_r,
+                        qual_t,
+                        *strictness_kind,
                     )
                 }
                 Pack::TyRef::Unqualified(_) => {
@@ -4210,7 +4406,7 @@ fn merge_interface<'cx>(
         constructs,
         dict,
         abstract_,
-        strictness_kind: _,
+        strictness_kind,
     } = def;
     let static_ = {
         let static_reason = reason.dupe().replace_desc(None);
@@ -4219,7 +4415,7 @@ fn merge_interface<'cx>(
         add_name_field(reason.dupe(), &mut props_map);
         let props = type_::properties::PropertiesMap::from_btree_map(props_map);
         let proto = Type::new(type_::TypeInner::NullProtoT(static_reason.dupe()));
-        obj_type::mk_with_proto(
+        obj_type::mk_with_proto_and_strictness(
             cx,
             static_reason,
             type_::ObjKind::Inexact,
@@ -4228,6 +4424,7 @@ fn merge_interface<'cx>(
             Some(props),
             None,
             proto,
+            *strictness_kind,
             type_::ObjLiteral::NonLiteral,
         )
     };
@@ -4402,7 +4599,7 @@ fn merge_interface<'cx>(
             // Other interfaces stay non-abstract.
             inst_abstract: *abstract_,
             inst_abstract_props: flow_data_structure_wrapper::ord_set::FlowOrdSet::new(),
-            strictness_kind: def.strictness_kind,
+            strictness_kind: *strictness_kind,
         });
         (inst, make_super)
     };
@@ -4531,9 +4728,16 @@ fn merge_class_mixin<'cx>(
                 loc,
                 packed: t,
                 op: Op::GetProp(box name),
+                strictness_kind,
             }) => {
                 let (t, mut names_rev) = loop_mixin(cx, file, t);
-                let t = eval(cx, loc.dupe(), t, Op::GetProp(Box::new(name.dupe())));
+                let t = eval(
+                    cx,
+                    loc.dupe(),
+                    t,
+                    Op::GetProp(Box::new(name.dupe())),
+                    *strictness_kind,
+                );
                 names_rev.push(name.dupe());
                 (t, names_rev)
             }
@@ -4605,7 +4809,7 @@ fn merge_this_class_t<'cx>(
         tparams: _,
         abstract_,
         abstract_props,
-        strictness_kind: _,
+        strictness_kind,
     } = def;
     let class_name_owned = class_name;
     move |cx: &mut Context<'cx>,
@@ -4657,7 +4861,7 @@ fn merge_this_class_t<'cx>(
             }
             add_name_field(reason.dupe(), &mut props_map);
             let props = type_::properties::PropertiesMap::from_btree_map(props_map);
-            obj_type::mk_with_proto(
+            obj_type::mk_with_proto_and_strictness(
                 cx,
                 static_reason,
                 type_::ObjKind::Inexact,
@@ -4666,6 +4870,7 @@ fn merge_this_class_t<'cx>(
                 Some(props),
                 None,
                 static_proto,
+                strictness_kind,
                 type_::ObjLiteral::NonLiteral,
             )
         };
@@ -4715,6 +4920,7 @@ fn merge_this_class_t<'cx>(
                 &own_props_map,
                 defaulted_props,
                 &mut proto_props_map,
+                strictness_kind,
             ),
             _ => {}
         };
@@ -4746,7 +4952,7 @@ fn merge_this_class_t<'cx>(
                 .generate_property_map(type_::properties::PropertiesMap::new()),
             inst_abstract: abstract_,
             inst_abstract_props: abstract_props.iter().map(|n| Name::new(n.dupe())).collect(),
-            strictness_kind: def.strictness_kind,
+            strictness_kind,
         });
         type_util::class_type(
             Type::new(type_::TypeInner::ThisInstanceT(Box::new(
@@ -4873,6 +5079,7 @@ fn merge_fun_statics<'cx, 'sig>(
         ),
     >,
     literal: bool,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     let props: type_::properties::PropertiesMap = statics
         .into_iter()
@@ -4889,7 +5096,7 @@ fn merge_fun_statics<'cx, 'sig>(
         })
         .collect();
     let reason = reason.replace_desc(None);
-    obj_type::mk_with_proto(
+    obj_type::mk_with_proto_and_strictness(
         cx,
         reason.dupe(),
         type_::ObjKind::Inexact,
@@ -4898,6 +5105,7 @@ fn merge_fun_statics<'cx, 'sig>(
         Some(props),
         None,
         Type::new(type_::TypeInner::FunProtoT(reason)),
+        strictness_kind,
         type_::ObjLiteral::of_literal(literal),
     )
 }
@@ -5098,7 +5306,7 @@ fn merge_component<'cx>(
             .collect();
         let config_reason = reason::mk_reason(None, def.params_loc.dupe());
         let rest_t = match &def.rest_param {
-            None => obj_type::mk_with_proto(
+            None => obj_type::mk_with_proto_and_strictness(
                 cx,
                 config_reason.dupe(),
                 type_::ObjKind::Exact,
@@ -5107,6 +5315,7 @@ fn merge_component<'cx>(
                 None,
                 None,
                 Type::new(type_::TypeInner::ObjProtoT(config_reason.dupe())),
+                def.strictness_kind,
                 type_::ObjLiteral::NonLiteral,
             ),
             Some(ComponentRestParam { t }) => merge_impl(env, cx, file, t, false, false),
@@ -5322,7 +5531,7 @@ fn merge_declare_class<'cx>(
         static_dict: _,
         abstract_,
         abstract_props,
-        strictness_kind: _,
+        strictness_kind,
     } = def;
     let this_reason = reason.dupe().replace_desc(RThisType);
     let class_name_owned = class_name.dupe();
@@ -5402,7 +5611,7 @@ fn merge_declare_class<'cx>(
                     }
                 }
             };
-            obj_type::mk_with_proto(
+            obj_type::mk_with_proto_and_strictness(
                 cx,
                 static_reason,
                 type_::ObjKind::Inexact,
@@ -5411,6 +5620,7 @@ fn merge_declare_class<'cx>(
                 Some(props),
                 None,
                 static_proto,
+                *strictness_kind,
                 type_::ObjLiteral::NonLiteral,
             )
         };
@@ -5535,7 +5745,7 @@ fn merge_declare_class<'cx>(
                 .generate_property_map(type_::properties::PropertiesMap::new()),
             inst_abstract: *abstract_,
             inst_abstract_props: abstract_props.iter().map(|n| Name::new(n.dupe())).collect(),
-            strictness_kind: def.strictness_kind,
+            strictness_kind: *strictness_kind,
         });
         type_util::class_type(
             Type::new(type_::TypeInner::ThisInstanceT(Box::new(
@@ -5595,6 +5805,11 @@ fn merge_declare_fun<'cx>(
     namespace_types: &BTreeMap<FlowSmolStr, (ALoc, Pack::Packed<ALoc>)>,
 ) -> Type {
     use flow_common::reason::VirtualReasonDesc::*;
+    // Overloads can be declared in several library files.
+    let strictness_kind = defs
+        .iter()
+        .map(|(_, _, def)| def.strictness_kind)
+        .fold(TypeStrictnessKind::Flow, TypeStrictnessKind::join);
     let env = mk_merge_env(FlowOrdMap::new());
     let statics_t = merge_fun_statics(
         &env,
@@ -5605,6 +5820,7 @@ fn merge_declare_fun<'cx>(
             .iter()
             .map(|(key, (loc, t, polarity))| (key, loc, t, *polarity)),
         false,
+        strictness_kind,
     );
     let ts: Vec<Type> = defs
         .iter()
@@ -5775,6 +5991,7 @@ pub fn merge_def<'cx>(
                     .iter()
                     .map(|(key, (loc, t, polarity))| (key, loc, t, *polarity)),
                 true,
+                inner.def.strictness_kind,
             );
             let function_t = merge_fun(
                 &env,
@@ -5862,6 +6079,7 @@ pub fn merge_def<'cx>(
                 member_values,
                 has_unknown_members,
                 name,
+                strictness_kind,
             } = inner.as_ref();
             merge_enum(
                 cx,
@@ -5872,6 +6090,7 @@ pub fn merge_def<'cx>(
                 members,
                 member_values.as_ref(),
                 *has_unknown_members,
+                *strictness_kind,
             )
         }
         Def::NamespaceBinding(inner) => {
@@ -5881,7 +6100,14 @@ pub fn merge_def<'cx>(
             let namespace_symbol = Symbol::mk_namespace_symbol(name.dupe(), id_loc.dupe());
             let values = merge_namespace_symbols(&env, cx, file, values);
             let types = merge_namespace_symbols(&env, cx, file, types);
-            flow_js_utils::namespace_type(cx, reason, namespace_symbol, &values, &types)
+            flow_js_utils::namespace_type(
+                cx,
+                reason,
+                namespace_symbol,
+                &values,
+                &types,
+                inner.strictness_kind,
+            )
         }
     }
 }
@@ -5987,6 +6213,7 @@ pub fn classify_ts_pending_export<'cx>(
     cx: &mut Context<'cx>,
     file: &SigFile,
     pending: &Pack::TsPendingExport<ALoc>,
+    strictness_kind: TypeStrictnessKind,
 ) -> TsPendingClassified {
     let mut classify_from_dep = |mref_index: &Index<FlowImportSpecifier>,
                                  remote_name: &FlowSmolStr|
@@ -6044,6 +6271,7 @@ pub fn classify_ts_pending_export<'cx>(
                 name: FlowSmolStr::new(""),
                 index: *mref,
                 remote: remote_name.dupe(),
+                strictness_kind,
             };
             let reason = reason::mk_reason(
                 reason::VirtualReasonDesc::RIdentifier(remote_name.dupe()),
@@ -6347,6 +6575,7 @@ pub fn merge_builtins(
                         type_stars,
                         strict,
                         platform_availability_set,
+                        strictness_kind,
                     } = info;
                     let type_exports = type_exports.iter().map(&type_export).collect::<Vec<_>>();
                     let exports = exports.map(cjs_exports_fn);
@@ -6358,6 +6587,7 @@ pub fn merge_builtins(
                         type_stars,
                         strict,
                         platform_availability_set,
+                        strictness_kind,
                     }
                 };
                 let es_module = |type_exports: &[Pack::TypeExport<Index<Loc>>],
@@ -6374,6 +6604,7 @@ pub fn merge_builtins(
                         stars,
                         strict,
                         platform_availability_set,
+                        strictness_kind,
                     } = info;
                     let type_exports = type_exports.iter().map(&type_export).collect::<Vec<_>>();
                     let type_exports: BTreeMap<FlowSmolStr, LazyExport> =
@@ -6391,7 +6622,7 @@ pub fn merge_builtins(
                                 Rc::new(flow_lazy::Lazy::new(move |cx: &mut Context<'_>| {
                                     let pending = pending.map(&*aloc_fn);
                                     let file = cx.sig_file(file_id);
-                                    classify_ts_pending_export(cx, &file, &pending)
+                                    classify_ts_pending_export(cx, &file, &pending, strictness_kind)
                                 }));
                             (name, classified)
                         })
@@ -6453,7 +6684,17 @@ pub fn merge_builtins(
                         ..
                     }
                 );
-                (name.dupe(), id_loc, export_assignment, lazy_module)
+                let strictness_kind = match &module_def.module_kind {
+                    Pack::ModuleKind::CJSModule { info, .. } => info.strictness_kind,
+                    Pack::ModuleKind::ESModule { info, .. } => info.strictness_kind,
+                };
+                (
+                    name.dupe(),
+                    id_loc,
+                    export_assignment,
+                    strictness_kind,
+                    lazy_module,
+                )
             })
             .collect();
 
@@ -6537,7 +6778,7 @@ pub fn merge_builtins(
     let builtin_umd_values: BTreeMap<FlowSmolStr, flow_typing_builtins::LazyVal<Cx>> =
         builtin_umd_modules
             .into_iter()
-            .map(|(name, id_loc, export_assignment, lazy_module)| {
+            .map(|(name, id_loc, export_assignment, strictness_kind, lazy_module)| {
                 let lazy_val: flow_typing_builtins::LazyVal<Cx> = Rc::new(flow_lazy::Lazy::new({
                     let name = name.dupe();
                     move |cx: &mut Context<'_>| {
@@ -6571,6 +6812,7 @@ pub fn merge_builtins(
                                 reason,
                                 Symbol::mk_module_symbol(module_name.into_inner(), id_loc.dupe()),
                                 false,
+                                strictness_kind,
                                 resolved_require,
                             )
                         };

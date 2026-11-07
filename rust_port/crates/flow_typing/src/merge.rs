@@ -1488,12 +1488,14 @@ fn check_multiplatform_conformance<'cx>(
                                     }
                                 }
                                 // For conformance test, we only care about the value part
+                                let strictness_kind = cx.type_strictness_kind();
                                 let (values_t, _) =
                                     flow_js_utils::import_module_ns_t_kit::on_module_t(
                                         cx,
                                         is_common_interface_module,
                                         reason.dupe(),
                                         false,
+                                        strictness_kind,
                                         m,
                                     )
                                     .unwrap();

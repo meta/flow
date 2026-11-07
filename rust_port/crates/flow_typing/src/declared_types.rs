@@ -470,6 +470,7 @@ fn property_type<'cx>(
     property_path: &[FlowSmolStr],
     root_type: Type,
 ) -> Type {
+    let strictness_kind = cx.type_strictness_kind();
     property_path.iter().fold(root_type, |type_, property| {
         let name = Name::new(property.dupe());
         let reason = reason::mk_reason(RProperty(Some(name.dupe())), callee_loc.dupe());
@@ -480,6 +481,7 @@ fn property_type<'cx>(
             None,
             name,
             type_,
+            strictness_kind,
         )
     })
 }

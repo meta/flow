@@ -95,6 +95,7 @@ impl flow_js_utils::GetPropHelper for FlowJs {
             propref,
             use_op,
             ids,
+            access_strictness_kind: _,
         } = args;
         Ok(Box::new(move |cx, tout| {
             rec_flow(
@@ -134,6 +135,7 @@ impl flow_js_utils::GetPropHelper for FlowJs {
             Option<i32>,
             (Reason, flow_common::reason::Name),
         ),
+        _access_strictness_kind: TypeStrictnessKind,
     ) -> Result<Self::R, FlowJsException> {
         let env = env.dupe();
         let (use_op, access_reason, id, (prop_reason, name)) = args;

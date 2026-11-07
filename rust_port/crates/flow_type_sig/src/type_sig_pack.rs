@@ -12,6 +12,7 @@ use flow_common::flow_import_specifier;
 use flow_common::flow_import_specifier::FlowImportSpecifier;
 use flow_common::platform_set;
 use flow_common::polarity::Polarity;
+use flow_common::type_strictness::TypeStrictnessKind;
 use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 use flow_parser::loc::Loc;
 
@@ -28,33 +29,39 @@ pub enum RemoteRef<Loc> {
         name: FlowSmolStr,
         index: Index<FlowImportSpecifier>,
         remote: FlowSmolStr,
+        strictness_kind: TypeStrictnessKind,
     },
     ImportType {
         id_loc: Loc,
         name: FlowSmolStr,
         index: Index<FlowImportSpecifier>,
         remote: FlowSmolStr,
+        strictness_kind: TypeStrictnessKind,
     },
     ImportTypeof {
         id_loc: Loc,
         name: FlowSmolStr,
         index: Index<FlowImportSpecifier>,
         remote: FlowSmolStr,
+        strictness_kind: TypeStrictnessKind,
     },
     ImportTypeofNs {
         id_loc: Loc,
         name: FlowSmolStr,
         index: Index<FlowImportSpecifier>,
+        strictness_kind: TypeStrictnessKind,
     },
     ImportTypeNs {
         id_loc: Loc,
         name: FlowSmolStr,
         index: Index<FlowImportSpecifier>,
+        strictness_kind: TypeStrictnessKind,
     },
     ImportNs {
         id_loc: Loc,
         name: FlowSmolStr,
         index: Index<FlowImportSpecifier>,
+        strictness_kind: TypeStrictnessKind,
     },
 }
 
@@ -88,60 +95,72 @@ impl<Loc> RemoteRef<Loc> {
                 name,
                 index,
                 remote,
+                strictness_kind,
             } => RemoteRef::Import {
                 id_loc: f(id_loc),
                 name: name.dupe(),
                 index: *index,
                 remote: remote.dupe(),
+                strictness_kind: *strictness_kind,
             },
             RemoteRef::ImportType {
                 id_loc,
                 name,
                 index,
                 remote,
+                strictness_kind,
             } => RemoteRef::ImportType {
                 id_loc: f(id_loc),
                 name: name.dupe(),
                 index: *index,
                 remote: remote.dupe(),
+                strictness_kind: *strictness_kind,
             },
             RemoteRef::ImportTypeof {
                 id_loc,
                 name,
                 index,
                 remote,
+                strictness_kind,
             } => RemoteRef::ImportTypeof {
                 id_loc: f(id_loc),
                 name: name.dupe(),
                 index: *index,
                 remote: remote.dupe(),
+                strictness_kind: *strictness_kind,
             },
             RemoteRef::ImportTypeofNs {
                 id_loc,
                 name,
                 index,
+                strictness_kind,
             } => RemoteRef::ImportTypeofNs {
                 id_loc: f(id_loc),
                 name: name.dupe(),
                 index: *index,
+                strictness_kind: *strictness_kind,
             },
             RemoteRef::ImportTypeNs {
                 id_loc,
                 name,
                 index,
+                strictness_kind,
             } => RemoteRef::ImportTypeNs {
                 id_loc: f(id_loc),
                 name: name.dupe(),
                 index: *index,
+                strictness_kind: *strictness_kind,
             },
             RemoteRef::ImportNs {
                 id_loc,
                 name,
                 index,
+                strictness_kind,
             } => RemoteRef::ImportNs {
                 id_loc: f(id_loc),
                 name: name.dupe(),
                 index: *index,
+                strictness_kind: *strictness_kind,
             },
         }
     }
@@ -211,6 +230,7 @@ pub struct TyRefQualified<Loc> {
     pub id_loc: Loc,
     pub name: FlowSmolStr,
     pub qualification: Box<TyRef<Loc>>,
+    pub strictness_kind: TypeStrictnessKind,
 }
 
 impl<Loc> TyRef<Loc> {
@@ -222,6 +242,7 @@ impl<Loc> TyRef<Loc> {
                 id_loc: f(&inner.id_loc),
                 name: inner.name.dupe(),
                 qualification: Box::new(inner.qualification.map(f)),
+                strictness_kind: inner.strictness_kind,
             })),
         }
     }
@@ -256,12 +277,14 @@ pub struct PackedEval<Loc> {
     pub loc: Loc,
     pub packed: Box<Packed<Loc>>,
     pub op: Op<Box<Packed<Loc>>>,
+    pub strictness_kind: TypeStrictnessKind,
 }
 
 #[derive(Debug, Clone, Hash, serde::Serialize, serde::Deserialize)]
 pub struct PackedLocIndex<Loc> {
     pub loc: Loc,
     pub index: Index<FlowImportSpecifier>,
+    pub strictness_kind: TypeStrictnessKind,
 }
 
 pub type PackedValue<Loc> = Value<Loc, Packed<Loc>>;
@@ -298,22 +321,27 @@ impl<Loc> Packed<Loc> {
                 loc: f(&inner.loc),
                 packed: Box::new(inner.packed.map(f)),
                 op: inner.op.map(&mut (), |_: &mut (), t| Box::new(t.map(f))),
+                strictness_kind: inner.strictness_kind,
             })),
             Packed::Require(inner) => Packed::Require(Box::new(PackedLocIndex {
                 loc: f(&inner.loc),
                 index: inner.index,
+                strictness_kind: inner.strictness_kind,
             })),
             Packed::ImportDynamic(inner) => Packed::ImportDynamic(Box::new(PackedLocIndex {
                 loc: f(&inner.loc),
                 index: inner.index,
+                strictness_kind: inner.strictness_kind,
             })),
             Packed::ModuleRef(inner) => Packed::ModuleRef(Box::new(PackedLocIndex {
                 loc: f(&inner.loc),
                 index: inner.index,
+                strictness_kind: inner.strictness_kind,
             })),
             Packed::ImportTypeAnnot(inner) => Packed::ImportTypeAnnot(Box::new(PackedLocIndex {
                 loc: f(&inner.loc),
                 index: inner.index,
+                strictness_kind: inner.strictness_kind,
             })),
         }
     }
@@ -375,6 +403,7 @@ impl<Loc> CJSModuleInfo<Loc> {
                 .collect(),
             strict: self.strict,
             platform_availability_set: self.platform_availability_set.clone(),
+            strictness_kind: self.strictness_kind,
         }
     }
 }
@@ -393,6 +422,7 @@ impl<Loc> ESModuleInfo<Loc> {
             ts_pending_keys: self.ts_pending_keys.clone(),
             strict: self.strict,
             platform_availability_set: self.platform_availability_set.clone(),
+            strictness_kind: self.strictness_kind,
         }
     }
 }
@@ -470,6 +500,7 @@ pub struct CJSModuleInfo<Loc> {
     pub type_stars: Vec<(Loc, Index<FlowImportSpecifier>)>,
     pub strict: bool,
     pub platform_availability_set: Option<platform_set::PlatformSet>,
+    pub strictness_kind: TypeStrictnessKind,
 }
 
 #[derive(Debug, Clone, Hash, serde::Serialize, serde::Deserialize)]
@@ -481,6 +512,7 @@ pub struct ESModuleInfo<Loc> {
     pub ts_pending_keys: Vec<FlowSmolStr>,
     pub strict: bool,
     pub platform_availability_set: Option<platform_set::PlatformSet>,
+    pub strictness_kind: TypeStrictnessKind,
 }
 
 #[derive(Debug, Clone, Hash, serde::Serialize, serde::Deserialize)]
@@ -532,21 +564,25 @@ pub enum Pattern<Loc> {
         id_loc: Loc,
         name: FlowSmolStr,
         def: Index<Pattern<Loc>>,
+        strictness_kind: TypeStrictnessKind,
     },
     ComputedP {
         elem: Index<Packed<Loc>>,
         def: Index<Pattern<Loc>>,
+        strictness_kind: TypeStrictnessKind,
     },
     UnsupportedLiteralP(Loc),
     ObjRestP {
         loc: Loc,
         xs: Vec<FlowSmolStr>,
         def: Index<Pattern<Loc>>,
+        strictness_kind: TypeStrictnessKind,
     },
     IndexP {
         loc: Loc,
         i: usize,
         def: Index<Pattern<Loc>>,
+        strictness_kind: TypeStrictnessKind,
     },
     ArrRestP {
         loc: Loc,
@@ -562,15 +598,25 @@ impl<Loc> Pattern<Loc> {
                 index: index.index,
                 _phantom: std::marker::PhantomData,
             }),
-            Pattern::PropP { id_loc, name, def } => Pattern::PropP {
+            Pattern::PropP {
+                id_loc,
+                name,
+                def,
+                strictness_kind,
+            } => Pattern::PropP {
                 id_loc: f(id_loc),
                 name: name.dupe(),
                 def: Index {
                     index: def.index,
                     _phantom: std::marker::PhantomData,
                 },
+                strictness_kind: *strictness_kind,
             },
-            Pattern::ComputedP { elem, def } => Pattern::ComputedP {
+            Pattern::ComputedP {
+                elem,
+                def,
+                strictness_kind,
+            } => Pattern::ComputedP {
                 elem: Index {
                     index: elem.index,
                     _phantom: std::marker::PhantomData,
@@ -579,23 +625,36 @@ impl<Loc> Pattern<Loc> {
                     index: def.index,
                     _phantom: std::marker::PhantomData,
                 },
+                strictness_kind: *strictness_kind,
             },
             Pattern::UnsupportedLiteralP(loc) => Pattern::UnsupportedLiteralP(f(loc)),
-            Pattern::ObjRestP { loc, xs, def } => Pattern::ObjRestP {
+            Pattern::ObjRestP {
+                loc,
+                xs,
+                def,
+                strictness_kind,
+            } => Pattern::ObjRestP {
                 loc: f(loc),
                 xs: xs.clone(),
                 def: Index {
                     index: def.index,
                     _phantom: std::marker::PhantomData,
                 },
+                strictness_kind: *strictness_kind,
             },
-            Pattern::IndexP { loc, i, def } => Pattern::IndexP {
+            Pattern::IndexP {
+                loc,
+                i,
+                def,
+                strictness_kind,
+            } => Pattern::IndexP {
                 loc: f(loc),
                 i: *i,
                 def: Index {
                     index: def.index,
                     _phantom: std::marker::PhantomData,
                 },
+                strictness_kind: *strictness_kind,
             },
             Pattern::ArrRestP { loc, i, def } => Pattern::ArrRestP {
                 loc: f(loc),
@@ -670,37 +729,58 @@ pub(crate) fn pack_parsed<'arena, 'ast>(
             Packed::Ref(pack_ref(type_ref, ref_))
         }
         parse::Parsed::Pattern(p) => Packed::Pattern(p.0.index_exn()),
-        parse::Parsed::Eval(loc, t, op) => Packed::Eval(Box::new(PackedEval {
+        parse::Parsed::Eval(loc, t, op, strictness_kind) => Packed::Eval(Box::new(PackedEval {
             loc: pack_loc(loc),
             packed: Box::new(pack_parsed(cx, t)),
             op: pack_op(cx, op),
+            strictness_kind: *strictness_kind,
         })),
-        parse::Parsed::Require { loc, mref } => {
+        parse::Parsed::Require {
+            loc,
+            mref,
+            strictness_kind,
+        } => {
             let loc = pack_loc(loc);
             Packed::Require(Box::new(PackedLocIndex {
                 loc,
                 index: mref.0.index_exn(),
+                strictness_kind: *strictness_kind,
             }))
         }
-        parse::Parsed::ImportDynamic { loc, mref } => {
+        parse::Parsed::ImportDynamic {
+            loc,
+            mref,
+            strictness_kind,
+        } => {
             let loc = pack_loc(loc);
             Packed::ImportDynamic(Box::new(PackedLocIndex {
                 loc,
                 index: mref.0.index_exn(),
+                strictness_kind: *strictness_kind,
             }))
         }
-        parse::Parsed::ModuleRef { loc, mref } => {
+        parse::Parsed::ModuleRef {
+            loc,
+            mref,
+            strictness_kind,
+        } => {
             let loc = pack_loc(loc);
             Packed::ModuleRef(Box::new(PackedLocIndex {
                 loc,
                 index: mref.0.index_exn(),
+                strictness_kind: *strictness_kind,
             }))
         }
-        parse::Parsed::ImportTypeAnnot { loc, mref } => {
+        parse::Parsed::ImportTypeAnnot {
+            loc,
+            mref,
+            strictness_kind,
+        } => {
             let loc = pack_loc(loc);
             Packed::ImportTypeAnnot(Box::new(PackedLocIndex {
                 loc,
                 index: mref.0.index_exn(),
+                strictness_kind: *strictness_kind,
             }))
         }
     }
@@ -726,6 +806,7 @@ fn pack_tyname<'arena, 'ast>(name: &parse::TyName<'arena, 'ast>) -> TyRef<Index<
             id_loc,
             name,
             qualification,
+            strictness_kind,
         } => {
             let loc = pack_loc(loc);
             let id_loc = pack_loc(id_loc);
@@ -734,6 +815,7 @@ fn pack_tyname<'arena, 'ast>(name: &parse::TyName<'arena, 'ast>) -> TyRef<Index<
                 id_loc,
                 name: name.dupe(),
                 qualification: Box::new(pack_tyname(qualification)),
+                strictness_kind: *strictness_kind,
             }))
         }
     }
@@ -1094,7 +1176,12 @@ pub(crate) fn pack_local_binding<'arena, 'ast>(
                 tail: packed_defs,
             }))
         }
-        parse::LocalBinding::EnumBinding { id_loc, name, def } => {
+        parse::LocalBinding::EnumBinding {
+            id_loc,
+            name,
+            def,
+            strictness_kind,
+        } => {
             let id_loc = pack_loc(id_loc);
             match def {
                 None => Def::DisabledEnumBinding(Box::new(DefDisabledEnumBinding {
@@ -1115,6 +1202,7 @@ pub(crate) fn pack_local_binding<'arena, 'ast>(
                         members,
                         member_values: member_values.clone(),
                         has_unknown_members: *has_unknown_members,
+                        strictness_kind: *strictness_kind,
                     }))
                 }
             }
@@ -1124,6 +1212,7 @@ pub(crate) fn pack_local_binding<'arena, 'ast>(
             name,
             values,
             types,
+            strictness_kind,
         } => {
             let id_loc = pack_loc(id_loc);
             let values = values
@@ -1139,6 +1228,7 @@ pub(crate) fn pack_local_binding<'arena, 'ast>(
                 name: name.dupe(),
                 values,
                 types,
+                strictness_kind: *strictness_kind,
             }))
         }
     }
@@ -1153,6 +1243,7 @@ pub(crate) fn pack_remote_binding<'arena>(
             name,
             mref,
             remote,
+            strictness_kind,
         } => {
             let id_loc = pack_loc(id_loc);
             let index = mref.0.index_exn();
@@ -1161,6 +1252,7 @@ pub(crate) fn pack_remote_binding<'arena>(
                 name: name.dupe(),
                 index,
                 remote: remote.dupe(),
+                strictness_kind: *strictness_kind,
             }
         }
         parse::RemoteBinding::ImportTypeBinding {
@@ -1168,6 +1260,7 @@ pub(crate) fn pack_remote_binding<'arena>(
             name,
             mref,
             remote,
+            strictness_kind,
         } => {
             let id_loc = pack_loc(id_loc);
             let index = mref.0.index_exn();
@@ -1176,6 +1269,7 @@ pub(crate) fn pack_remote_binding<'arena>(
                 name: name.dupe(),
                 index,
                 remote: remote.dupe(),
+                strictness_kind: *strictness_kind,
             }
         }
         parse::RemoteBinding::ImportTypeofBinding {
@@ -1183,6 +1277,7 @@ pub(crate) fn pack_remote_binding<'arena>(
             name,
             mref,
             remote,
+            strictness_kind,
         } => {
             let id_loc = pack_loc(id_loc);
             let index = mref.0.index_exn();
@@ -1191,33 +1286,52 @@ pub(crate) fn pack_remote_binding<'arena>(
                 name: name.dupe(),
                 index,
                 remote: remote.dupe(),
+                strictness_kind: *strictness_kind,
             }
         }
-        parse::RemoteBinding::ImportNsBinding { id_loc, name, mref } => {
+        parse::RemoteBinding::ImportNsBinding {
+            id_loc,
+            name,
+            mref,
+            strictness_kind,
+        } => {
             let id_loc = pack_loc(id_loc);
             let index = mref.0.index_exn();
             RemoteRef::ImportNs {
                 id_loc,
                 name: name.dupe(),
                 index,
+                strictness_kind: *strictness_kind,
             }
         }
-        parse::RemoteBinding::ImportTypeofNsBinding { id_loc, name, mref } => {
+        parse::RemoteBinding::ImportTypeofNsBinding {
+            id_loc,
+            name,
+            mref,
+            strictness_kind,
+        } => {
             let id_loc = pack_loc(id_loc);
             let index = mref.0.index_exn();
             RemoteRef::ImportTypeofNs {
                 id_loc,
                 name: name.dupe(),
                 index,
+                strictness_kind: *strictness_kind,
             }
         }
-        parse::RemoteBinding::ImportTypeNsBinding { id_loc, name, mref } => {
+        parse::RemoteBinding::ImportTypeNsBinding {
+            id_loc,
+            name,
+            mref,
+            strictness_kind,
+        } => {
             let id_loc = pack_loc(id_loc);
             let index = mref.0.index_exn();
             RemoteRef::ImportTypeNs {
                 id_loc,
                 name: name.dupe(),
                 index,
+                strictness_kind: *strictness_kind,
             }
         }
     }
@@ -1229,34 +1343,64 @@ pub(crate) fn pack_pattern(pattern: &parse::Pattern<'_, '_>) -> Pattern<Index<Lo
             let def = def.as_already_forced().0.index_exn();
             Pattern::PDef(def)
         }
-        parse::Pattern::PropP { def, id_loc, name } => {
+        parse::Pattern::PropP {
+            def,
+            id_loc,
+            name,
+            strictness_kind,
+        } => {
             let id_loc = pack_loc(id_loc);
             let def = def.0.index_exn();
             Pattern::PropP {
                 id_loc,
                 name: name.dupe(),
                 def,
+                strictness_kind: *strictness_kind,
             }
         }
-        parse::Pattern::ComputedP { def, elem } => {
+        parse::Pattern::ComputedP {
+            def,
+            elem,
+            strictness_kind,
+        } => {
             let elem = elem.0.index_exn();
             let def = def.0.index_exn();
-            Pattern::ComputedP { elem, def }
+            Pattern::ComputedP {
+                elem,
+                def,
+                strictness_kind: *strictness_kind,
+            }
         }
         parse::Pattern::UnsupportedLiteralP(loc) => Pattern::UnsupportedLiteralP(pack_loc(loc)),
-        parse::Pattern::ObjRestP { def, loc, xs } => {
+        parse::Pattern::ObjRestP {
+            def,
+            loc,
+            xs,
+            strictness_kind,
+        } => {
             let loc = pack_loc(loc);
             let def = def.0.index_exn();
             Pattern::ObjRestP {
                 loc,
                 xs: xs.clone(),
                 def,
+                strictness_kind: *strictness_kind,
             }
         }
-        parse::Pattern::IndexP { def, loc, i } => {
+        parse::Pattern::IndexP {
+            def,
+            loc,
+            i,
+            strictness_kind,
+        } => {
             let loc = pack_loc(loc);
             let def = def.0.index_exn();
-            Pattern::IndexP { loc, i: *i, def }
+            Pattern::IndexP {
+                loc,
+                i: *i,
+                def,
+                strictness_kind: *strictness_kind,
+            }
         }
         parse::Pattern::ArrRestP { def, loc, i } => {
             let loc = pack_loc(loc);
@@ -1293,6 +1437,7 @@ pub(crate) fn pack_exports<'arena, 'ast>(
         ts_pending: _,
         strict,
         platform_availability_set,
+        strictness_kind: module_strictness_kind,
     } = exports;
 
     let (type_export_keys, type_exports) = pack_btreemap(types, pack_type_export);
@@ -1311,6 +1456,7 @@ pub(crate) fn pack_exports<'arena, 'ast>(
                 type_stars,
                 strict: *strict,
                 platform_availability_set: *platform_availability_set,
+                strictness_kind: *module_strictness_kind,
             };
             ModuleKind::CJSModule {
                 type_exports,
@@ -1325,6 +1471,7 @@ pub(crate) fn pack_exports<'arena, 'ast>(
                 type_stars,
                 strict: *strict,
                 platform_availability_set: *platform_availability_set,
+                strictness_kind: *module_strictness_kind,
             };
             ModuleKind::CJSModule {
                 type_exports,
@@ -1362,6 +1509,7 @@ pub(crate) fn pack_exports<'arena, 'ast>(
                 type_stars,
                 strict: *strict,
                 platform_availability_set: *platform_availability_set,
+                strictness_kind: *module_strictness_kind,
             };
             ModuleKind::CJSModule {
                 type_exports,
@@ -1405,6 +1553,7 @@ pub(crate) fn pack_exports<'arena, 'ast>(
                 type_stars,
                 strict: *strict,
                 platform_availability_set: *platform_availability_set,
+                strictness_kind: *module_strictness_kind,
             };
             ModuleKind::CJSModule {
                 type_exports,
@@ -1431,6 +1580,7 @@ pub(crate) fn pack_exports<'arena, 'ast>(
                 ts_pending_keys,
                 strict: *strict,
                 platform_availability_set: *platform_availability_set,
+                strictness_kind: *module_strictness_kind,
             };
             ModuleKind::ESModule {
                 type_exports,

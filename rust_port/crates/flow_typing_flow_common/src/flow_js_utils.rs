@@ -3544,6 +3544,7 @@ pub fn namespace_type<'cx>(
     namespace_symbol: flow_common::flow_symbol::Symbol,
     values: &std::collections::BTreeMap<Name, flow_typing_type::type_::NamedSymbol>,
     types: &std::collections::BTreeMap<Name, flow_typing_type::type_::NamedSymbol>,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     use flow_common::polarity::Polarity;
     use flow_typing_type::type_::FieldData;
@@ -3567,7 +3568,7 @@ pub fn namespace_type<'cx>(
         .collect();
 
     let proto = Type::new(TypeInner::ObjProtoT(reason.dupe()));
-    let values_type = crate::obj_type::mk_with_proto(
+    let values_type = crate::obj_type::mk_with_proto_and_strictness(
         cx,
         reason.dupe(),
         ObjKind::Exact,
@@ -3576,6 +3577,7 @@ pub fn namespace_type<'cx>(
         Some(props),
         None,
         proto,
+        strictness_kind,
         ObjLiteral::NonLiteral,
     );
     namespace_type_with_values_type(cx, namespace_symbol, values_type, types)
@@ -4914,6 +4916,7 @@ pub mod cjs_require_t_kit {
     use flow_typing_type::type_::PropertyInner;
     use flow_typing_type::type_::Type;
     use flow_typing_type::type_::TypeInner;
+    use flow_typing_type::type_::TypeStrictnessKind;
     use flow_typing_type::type_::properties::PropertiesMap;
     use flow_typing_type::type_util;
     use flow_utils_concurrency::job_error::JobError;
@@ -4929,6 +4932,7 @@ pub mod cjs_require_t_kit {
         reason: Reason,
         module_symbol: Symbol,
         is_strict: bool,
+        strictness_kind: TypeStrictnessKind,
         standard_cjs_esm_interop: bool,
         module_: &ModuleType,
     ) -> Result<(Type, ALoc), FlowJsException>
@@ -4978,7 +4982,7 @@ pub mod cjs_require_t_kit {
                         .iter()
                         .map(|(k, v)| (k.dupe(), Property::new(named_symbol_to_field(v))))
                         .collect();
-                    let values_type = crate::obj_type::mk_with_proto(
+                    let values_type = crate::obj_type::mk_with_proto_and_strictness(
                         cx,
                         reason.dupe(),
                         ObjKind::Exact,
@@ -4987,6 +4991,7 @@ pub mod cjs_require_t_kit {
                         Some(value_props),
                         None,
                         proto,
+                        strictness_kind,
                         ObjLiteral::NonLiteral,
                     );
                     let types_tmap = cx.generate_property_map(type_props);
@@ -5076,6 +5081,7 @@ pub mod import_module_ns_t_kit {
     use flow_typing_type::type_::PropertyInner;
     use flow_typing_type::type_::Type;
     use flow_typing_type::type_::TypeInner;
+    use flow_typing_type::type_::TypeStrictnessKind;
     use flow_typing_type::type_::properties;
     use flow_typing_type::type_::str_module_t;
     use flow_typing_type::type_util;
@@ -5089,6 +5095,7 @@ pub mod import_module_ns_t_kit {
         is_common_interface_module: bool,
         reason_op: Reason,
         is_strict: bool,
+        strictness_kind: TypeStrictnessKind,
         module_: &ModuleType,
     ) -> Result<(Type, properties::Id), FlowJsException> {
         let env = &FlowJsEnv::entry();
@@ -5172,7 +5179,7 @@ pub mod import_module_ns_t_kit {
             ObjKind::Exact
         };
         let proto = Type::new(TypeInner::ObjProtoT(reason.dupe()));
-        let values_type = obj_type::mk_with_proto(
+        let values_type = obj_type::mk_with_proto_and_strictness(
             cx,
             reason.dupe(),
             obj_kind,
@@ -5181,6 +5188,7 @@ pub mod import_module_ns_t_kit {
             Some(value_props),
             None,
             proto,
+            strictness_kind,
             ObjLiteral::NonLiteral,
         );
         let types_tmap = cx.generate_property_map(type_props);
@@ -5448,6 +5456,7 @@ pub mod import_named_t_kit {
     use flow_typing_type::type_::NamedSymbol;
     use flow_typing_type::type_::Type;
     use flow_typing_type::type_::TypeInner;
+    use flow_typing_type::type_::TypeStrictnessKind;
     use flow_typing_type::type_::aconstraint::AnnotConcretizeForImportsExportsFn;
     use flow_typing_type::type_::exports;
     use flow_typing_type::type_util;
@@ -5471,6 +5480,7 @@ pub mod import_named_t_kit {
         export_name: &FlowSmolStr,
         module_name: Userland,
         is_strict: bool,
+        strictness_kind: TypeStrictnessKind,
         module_: &ModuleType,
     ) -> Result<(Option<ALoc>, Type), FlowJsException> {
         on_module_t_with_env(
@@ -5482,6 +5492,7 @@ pub mod import_named_t_kit {
             export_name,
             module_name,
             is_strict,
+            strictness_kind,
             module_,
         )
     }
@@ -5500,6 +5511,7 @@ pub mod import_named_t_kit {
         export_name: &FlowSmolStr,
         module_name: Userland,
         is_strict: bool,
+        strictness_kind: TypeStrictnessKind,
         module_: &ModuleType,
     ) -> Result<(Option<ALoc>, Type), FlowJsException> {
         let ModuleTypeInner {
@@ -5620,7 +5632,7 @@ pub mod import_named_t_kit {
                 Ok((None, t))
             }
             (ImportKind::ImportValue, None) if type_exports_tmap.contains_key(&export_name_key) => {
-                if flow_common::files::has_ts_ext(cx.file()) {
+                if strictness_kind.is_typescript_loose() {
                     let ns = type_exports_tmap
                         .get(&export_name_key)
                         .expect("checked above");
@@ -5704,6 +5716,7 @@ pub mod import_named_t_kit {
         export_name: &FlowSmolStr,
         _module_name: Userland,
         is_strict: bool,
+        strictness_kind: TypeStrictnessKind,
         module_: &ModuleType,
     ) -> Result<(Option<ALoc>, Type), FlowJsException> {
         let ModuleTypeInner {
@@ -5756,7 +5769,7 @@ pub mod import_named_t_kit {
             }
             None => match import_kind {
                 ImportKind::ImportValue if type_exports_tmap.contains_key(&export_name_key) => {
-                    if flow_common::files::has_ts_ext(cx.file()) {
+                    if strictness_kind.is_typescript_loose() {
                         let ns = type_exports_tmap
                             .get(&export_name_key)
                             .expect("checked above");
@@ -6541,6 +6554,7 @@ pub mod import_export_utils {
         local_name: &FlowSmolStr,
     ) -> Result<(Option<ALoc>, Type), FlowJsException> {
         let is_strict = cx.is_strict();
+        let strictness_kind = cx.type_strictness_kind();
         let mut name_def_loc_ref: Option<ALoc> = None;
         let with_concretized_type = |cx: &mut Context<'cx>,
                                      r: Reason,
@@ -6578,6 +6592,7 @@ pub mod import_export_utils {
                         remote_name,
                         module_name,
                         is_strict,
+                        strictness_kind,
                         m,
                     )?;
                     name_def_loc_ref = name_loc_opt;
@@ -6599,8 +6614,15 @@ pub mod import_export_utils {
         let is_strict = cx.is_strict();
         Ok(match source_module {
             Ok(m) => {
-                let (values_type, types_tmap) =
-                    import_module_ns_t_kit::on_module_t(cx, false, reason, is_strict, m)?;
+                let strictness_kind = cx.type_strictness_kind();
+                let (values_type, types_tmap) = import_module_ns_t_kit::on_module_t(
+                    cx,
+                    false,
+                    reason,
+                    is_strict,
+                    strictness_kind,
+                    m,
+                )?;
                 Type::new(TypeInner::NamespaceT(Rc::new(NamespaceType {
                     namespace_symbol,
                     values_type,
@@ -6730,6 +6752,7 @@ pub mod import_export_utils {
         let is_strict = cx.is_strict();
         match source_module {
             Ok(m) => {
+                let strictness_kind = cx.type_strictness_kind();
                 let (_name_loc_opt, t) = import_named_t_kit::on_module_t_for_extends(
                     cx,
                     import_reason,
@@ -6737,6 +6760,7 @@ pub mod import_export_utils {
                     remote_name,
                     module_name,
                     is_strict,
+                    strictness_kind,
                     m,
                 )?;
                 Ok(t)
@@ -6786,12 +6810,14 @@ pub mod import_export_utils {
         let is_strict = cx.is_strict();
         Ok(match source_module {
             Ok(m) => {
+                let strictness_kind = cx.type_strictness_kind();
                 let (t, def_loc) = super::cjs_require_t_kit::on_module_t(
                     cx,
                     reposition,
                     reason,
                     namespace_symbol,
                     is_strict,
+                    strictness_kind,
                     standard_cjs_esm_interop,
                     m,
                 )?;
@@ -7147,6 +7173,8 @@ pub struct CgLookupArgs {
     pub propref: flow_typing_type::type_::PropRef,
     pub use_op: UseOp,
     pub ids: flow_typing_type::type_::properties::Set,
+    /// The language of the file the access is written in.
+    pub access_strictness_kind: TypeStrictnessKind,
 }
 
 pub trait GetPropHelper {
@@ -7212,6 +7240,7 @@ pub trait GetPropHelper {
             Option<i32>,
             (Reason, flow_common::reason::Name),
         ),
+        access_strictness_kind: TypeStrictnessKind,
     ) -> Result<Self::R, FlowJsException>;
 
     // When looking up a prop on an object with an indexer we can do a subtyping check to see if
@@ -7269,6 +7298,7 @@ pub mod get_prop_t_kit {
     use flow_typing_type::type_::ReactDro;
     use flow_typing_type::type_::Type;
     use flow_typing_type::type_::TypeInner;
+    use flow_typing_type::type_::TypeStrictnessKind;
     use flow_typing_type::type_::UseOp;
     use flow_typing_type::type_::any_t;
     use flow_typing_type::type_::name_of_propref;
@@ -7538,6 +7568,7 @@ pub mod get_prop_t_kit {
         reason_op: &Reason,
         indexer_fallback_mode: IndexerFallbackMode,
         obj: &Type,
+        access_strictness_kind: TypeStrictnessKind,
     ) -> Result<
         (
             Option<(Property, PropertySource)>,
@@ -7639,7 +7670,7 @@ pub mod get_prop_t_kit {
                 // under TS semantics, or the access itself is written in a TS file.
                 suppress_missing_error: inst
                     .strictness_kind
-                    .join(cx.type_strictness_kind())
+                    .join(access_strictness_kind)
                     .is_typescript_loose(),
             })),
         ))
@@ -7660,6 +7691,7 @@ pub mod get_prop_t_kit {
         inst: &InstType,
         propref: &PropRef,
         reason_op: &Reason,
+        access_strictness_kind: TypeStrictnessKind,
     ) -> Result<F::R, FlowJsException> {
         let (property, indexer_fallback) = get_instance_prop_for_lookup::<F>(
             cx,
@@ -7672,6 +7704,7 @@ pub mod get_prop_t_kit {
             reason_op,
             IndexerFallbackMode::PropertyAndIndexedAccess,
             instance_t,
+            access_strictness_kind,
         )?;
         if let Some(id) = id
             && (property.is_some() || indexer_fallback.is_some())
@@ -7714,6 +7747,7 @@ pub mod get_prop_t_kit {
                 propref: propref.clone(),
                 use_op: use_op.dupe(),
                 ids,
+                access_strictness_kind,
             },
         )
     }
@@ -7726,6 +7760,7 @@ pub mod get_prop_t_kit {
         enum_value_t: Type,
         enum_info: &type_::EnumConcreteInfo,
         access: &(UseOp, Reason, Option<i32>, (Reason, Name)),
+        access_strictness_kind: TypeStrictnessKind,
     ) -> Result<F::R, FlowJsException> {
         let (_, access_reason, _, (prop_reason, member_name)) = access;
         let type_::EnumConcreteInfoInner {
@@ -7796,7 +7831,7 @@ pub mod get_prop_t_kit {
                     enum_value_t.dupe(),
                     representation_t.dupe(),
                 );
-                F::cg_get_prop(cx, env, *trace, t, access.clone())
+                F::cg_get_prop(cx, env, *trace, t, access.clone(), access_strictness_kind)
             }
         }
     }
@@ -7939,6 +7974,7 @@ pub mod get_prop_t_kit {
         reason_obj: Reason,
         reason_op: Reason,
         lookup_info: Option<(i32, LookupDefaultResult)>,
+        access_strictness_kind: TypeStrictnessKind,
     ) -> Result<F::R, FlowJsException> {
         let l = Type::new(TypeInner::DefT(
             reason_obj.dupe(),
@@ -8006,6 +8042,7 @@ pub mod get_prop_t_kit {
                         propref: propref.clone(),
                         use_op,
                         ids: [o.props_tmap.dupe()].into_iter().collect(),
+                        access_strictness_kind,
                     };
                     F::cg_lookup(cx, env, *trace, l, true, o.proto_t.dupe(), data)
                 }
@@ -8814,6 +8851,7 @@ pub fn objt_to_obj_rest<'cx>(
     reason_obj: &Reason,
     xs: &[flow_data_structure_wrapper::smol_str::FlowSmolStr],
     literal: bool,
+    strictness_kind: TypeStrictnessKind,
 ) -> Result<Type, FlowJsException> {
     use flow_common::polarity::Polarity;
     use flow_common::reason::Name;
@@ -8878,7 +8916,7 @@ pub fn objt_to_obj_rest<'cx>(
     };
 
     let proto = Type::new(TypeInner::ObjProtoT(reason_op.dupe()));
-    Ok(crate::obj_type::mk_with_proto(
+    Ok(crate::obj_type::mk_with_proto_and_strictness(
         cx,
         reason_op.dupe(),
         obj_kind,
@@ -8887,6 +8925,7 @@ pub fn objt_to_obj_rest<'cx>(
         Some(props),
         None,
         proto,
+        strictness_kind,
         ObjLiteral::of_literal(literal),
     ))
 }

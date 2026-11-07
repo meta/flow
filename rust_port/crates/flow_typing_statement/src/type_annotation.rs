@@ -2257,7 +2257,8 @@ fn convert_inner<'a>(
                                 reason::VirtualReasonDesc::RType(name.dupe()),
                                 loc.dupe(),
                             );
-                            let t = obj_type::mk_exact_object_type(cx, reason);
+                            let strictness_kind = cx.type_strictness_kind();
+                            let t = obj_type::mk_exact_object_type(cx, reason, strictness_kind);
                             Ok(reconstruct_ast(t, None, None))
                         })?
                     }

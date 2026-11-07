@@ -2664,11 +2664,13 @@ pub struct CacheSnapshot {
 pub enum ElabOpenMemoTag {
     GetProp {
         prop_ref: PropRef,
+        strictness_kind: TypeStrictnessKind,
     },
     Lookup {
         prop_ref: PropRef,
         type_: Type,
         indexer_fallback: Option<Box<IndexerFallbackData>>,
+        strictness_kind: TypeStrictnessKind,
     },
     ThisSpecialize {
         this: Type,
@@ -2694,13 +2696,16 @@ pub enum ElabOpenMemoTag {
     },
     GetTypeFromNamespace {
         name: Name,
+        strictness_kind: TypeStrictnessKind,
     },
     GetElem {
         key: Type,
+        strictness_kind: TypeStrictnessKind,
     },
     Elem {
         from_annot: bool,
         source: Type,
+        strictness_kind: TypeStrictnessKind,
     },
     ObjKit {
         resolve_tool: ResolveTool,
@@ -2723,6 +2728,7 @@ pub enum ElabOpenMemoTag {
     },
     ObjRest {
         keys: Rc<[FlowSmolStr]>,
+        strictness_kind: TypeStrictnessKind,
     },
     // Payload-free ops: the variant alone identifies the demand.
     ConcretizeForCJS,
@@ -2756,11 +2762,13 @@ pub fn elab_open_memo_key(op: &Op<Cx>, id: i32) -> Option<ElabOpenMemoKey> {
     let tag = match &**op {
         OpInner::AnnotGetPropT(data) => ElabOpenMemoTag::GetProp {
             prop_ref: data.prop_ref.clone(),
+            strictness_kind: data.strictness_kind,
         },
         OpInner::AnnotLookupT(data) => ElabOpenMemoTag::Lookup {
             prop_ref: data.prop_ref.clone(),
             type_: data.type_.dupe(),
             indexer_fallback: data.indexer_fallback.clone(),
+            strictness_kind: data.strictness_kind,
         },
         OpInner::AnnotThisSpecializeT { type_: this, .. } => {
             ElabOpenMemoTag::ThisSpecialize { this: this.dupe() }
@@ -2778,13 +2786,25 @@ pub fn elab_open_memo_key(op: &Op<Cx>, id: i32) -> Option<ElabOpenMemoKey> {
         OpInner::AnnotUseTTypeT { kind, .. } => ElabOpenMemoTag::UseTType { kind: *kind },
         OpInner::AnnotGetTypeFromNamespaceT(data) => ElabOpenMemoTag::GetTypeFromNamespace {
             name: data.prop_ref.1.clone(),
+            strictness_kind: data.strictness_kind,
         },
-        OpInner::AnnotGetElemT { key, .. } => ElabOpenMemoTag::GetElem { key: key.dupe() },
+        OpInner::AnnotGetElemT {
+            key,
+            strictness_kind,
+            ..
+        } => ElabOpenMemoTag::GetElem {
+            key: key.dupe(),
+            strictness_kind: *strictness_kind,
+        },
         OpInner::AnnotElemT {
-            from_annot, source, ..
+            from_annot,
+            source,
+            strictness_kind,
+            ..
         } => ElabOpenMemoTag::Elem {
             from_annot: *from_annot,
             source: source.dupe(),
+            strictness_kind: *strictness_kind,
         },
         OpInner::AnnotObjKitT(data) => ElabOpenMemoTag::ObjKit {
             resolve_tool: data.resolve_tool.clone(),
@@ -2803,7 +2823,14 @@ pub fn elab_open_memo_key(op: &Op<Cx>, id: i32) -> Option<ElabOpenMemoKey> {
         OpInner::AnnotToStringT { orig_t, .. } => ElabOpenMemoTag::ToString {
             orig_t: orig_t.clone(),
         },
-        OpInner::AnnotObjRestT { keys, .. } => ElabOpenMemoTag::ObjRest { keys: keys.clone() },
+        OpInner::AnnotObjRestT {
+            keys,
+            strictness_kind,
+            ..
+        } => ElabOpenMemoTag::ObjRest {
+            keys: keys.clone(),
+            strictness_kind: *strictness_kind,
+        },
         // `ConcretizeForImportsExports` applies an opaque closure: unkeyable.
         // The other concretize ops write to collectors: memoizing would skip
         // collection on re-demands. All keep old behavior.
