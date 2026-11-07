@@ -424,6 +424,12 @@ fn flow_dict_key_to_keys<'cx>(
     )
 }
 
+/// An indexer key in the key set, positioned at the key set like the named keys
+/// are. Its own definition stays as its provenance.
+fn dict_key_at_key_set(keys_reason: &Reason, key: &Type) -> Type {
+    type_util::mod_reason_of_t(&|r: Reason| r.reposition(keys_reason.loc().dupe()), key)
+}
+
 /// Whether two evals are both `M[K]` for the same non-generic instance type `M` and the same
 /// generic `K`. Overriding generic methods restate the same indexed access at a new annotation
 /// site (e.g. `ev: HTMLElementEventMap[K]` in every `HTML*Element.addEventListener`), so their
@@ -10581,9 +10587,10 @@ fn __flow_impl<'cx>(
             collector.add(l.dupe());
         }
 
-        // A template literal indexer key is already a string, so it joins the key set unchanged.
-        (TemplateLiteralT { .. }, GetKeysDictKeyT { t_out, .. }) => {
-            rec_flow(cx, env, trace, (l, t_out.as_ref()))?;
+        // A template literal indexer key is already a string, so it joins the key set unstringified.
+        (TemplateLiteralT { .. }, GetKeysDictKeyT { reason, t_out, .. }) => {
+            let key = dict_key_at_key_set(reason, l);
+            rec_flow(cx, env, trace, (&key, t_out.as_ref()))?;
         }
         (TemplateLiteralT { reason, quasis, .. }, _) => {
             let reason = reason.dupe().replace_desc(VirtualReasonDesc::RString);
@@ -10634,14 +10641,23 @@ fn __flow_impl<'cx>(
         (
             DefT(_, deref!(UniqueSymbolT(_) | SymbolT)),
             GetKeysDictKeyT {
+                reason,
                 t_out,
                 include_symbols,
-                ..
             },
         ) => {
             if *include_symbols {
-                rec_flow(cx, env, trace, (l, t_out.as_ref()))?;
+                let key = dict_key_at_key_set(reason, l);
+                rec_flow(cx, env, trace, (&key, t_out.as_ref()))?;
             }
+        }
+        // A string indexer key is already a property key, so it joins the key set unstringified.
+        (
+            DefT(_, deref!(StrGeneralT(_) | SingletonStrT { .. })),
+            GetKeysDictKeyT { reason, t_out, .. },
+        ) => {
+            let key = dict_key_at_key_set(reason, l);
+            rec_flow(cx, env, trace, (&key, t_out.as_ref()))?;
         }
         // Every other key stringifies.
         (_, GetKeysDictKeyT { reason, t_out, .. }) => {

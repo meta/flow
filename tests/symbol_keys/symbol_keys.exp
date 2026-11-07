@@ -725,16 +725,19 @@ References:
                               ^^^^^^ [2]
 
 
-Error -------------------------------------------------------------------------------------- keyof_deferred_key.js:69:10
+Error --------------------------------------------------------------------------------------- keyof_deferred_key.js:69:1
 
 Cannot cast `keysOf<...>(...)` to `string` because unique symbol [1] is incompatible with `string` [2].
 [incompatible-type]
 
+   keyof_deferred_key.js:69:1
+   69| keysOf<{[typeof s]: number}>(symDict) as string; // ERROR: the key is a `unique symbol`, not a string
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
    keyof_deferred_key.js:69:10
    69| keysOf<{[typeof s]: number}>(symDict) as string; // ERROR: the key is a `unique symbol`, not a string
                 ^^^^^^^^ [1]
-
-References:
    keyof_deferred_key.js:69:42
    69| keysOf<{[typeof s]: number}>(symDict) as string; // ERROR: the key is a `unique symbol`, not a string
                                                 ^^^^^^ [2]

@@ -1,3 +1,37 @@
+Error ------------------------------------------------------------------------------------------- dict_key_import.js:6:3
+
+Cannot access object literal [1] with computed property using `string` [2]. [invalid-computed-prop]
+
+   dict_key_import.js:6:3
+   6| o[k1]; // error at k1, not at the indexer key in dict_key_export.js
+        ^^
+
+References:
+   dict_key_import.js:3:11
+   3| const o = {a: 1};
+                ^^^^^^ [1]
+   dict_key_export.js:1:27
+   1| export const dict: {[key: string]: number} = {};
+                                ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------- dict_key_import.js:7:3
+
+Cannot access object literal [1] with computed property using `string` [2]. [invalid-computed-prop]
+
+   dict_key_import.js:7:3
+   7| o[k2]; // error at k2
+        ^^
+
+References:
+   dict_key_import.js:3:11
+   3| const o = {a: 1};
+                ^^^^^^ [1]
+   dict_key_export.js:1:27
+   1| export const dict: {[key: string]: number} = {};
+                                ^^^^^^ [2]
+
+
 Error ---------------------------------------------------------------------------------------------------- errors.js:9:1
 
 Cannot cast `k` to `"c"` because in at least one member of `K` [1]: `"a"` [2] is incompatible with `"c"` [3].
@@ -273,4 +307,4 @@ References:
 
 
 
-Found 19 errors
+Found 21 errors

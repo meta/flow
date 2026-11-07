@@ -367,24 +367,21 @@ Cannot cast `Object.keys(...)` to `Array<"bye">` because in array element: `"hi"
 `"bye"` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
-- Either make `Array<"hi">` [3] and `Array<"bye">` [4] exactly the same
-- Or make `Array<"bye">` [4] a `ReadonlyArray`.
+- Either make `Array<"hi">` [1] and `Array<"bye">` [3] exactly the same
+- Or make `Array<"bye">` [3] a `ReadonlyArray`.
 See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
 
    object_keys.js:37:5
    37|     Object.keys(dict) as Array<'bye'>; // error
-           ^^^^^^^^^^^^^^^^^ [3]
+           ^^^^^^^^^^^^^^^^^ [1]
 
 References:
-   object_keys.js:35:25
-   35|   function(dict: {[key: 'hi']: unknown}) {
-                               ^^^^ [1]
    object_keys.js:37:32
    37|     Object.keys(dict) as Array<'bye'>; // error
                                       ^^^^^ [2]
    object_keys.js:37:26
    37|     Object.keys(dict) as Array<'bye'>; // error
-                                ^^^^^^^^^^^^ [4]
+                                ^^^^^^^^^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------- object_keys.js:43:5
