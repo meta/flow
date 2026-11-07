@@ -2052,7 +2052,7 @@ fn resolve_binding<'cx>(
             let filtered_pattern_type = cx
                 .node_cache()
                 .get_match_pattern_value_union(parent_loc)
-                .map(|vu| vu.select(cx, selector))
+                .map(|vu| exhaustive::select_value_union(cx, &vu, selector))
                 .transpose()?
                 .flatten()
                 .map(|value_left| {

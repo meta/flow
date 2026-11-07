@@ -1269,6 +1269,11 @@ pub mod value_union {
             &self,
             cx: &mut CX::Context<'_>,
             selector: &Selector<ALoc, ALoc>,
+            get_prop: &impl Fn(
+                &mut CX::Context<'_>,
+                &Type,
+                &FlowSmolStr,
+            ) -> Result<Option<value_object::Property<CX>>, JobError>,
         ) -> Result<Option<Self>, JobError> {
             let Self {
                 tuples,
@@ -1277,42 +1282,60 @@ pub mod value_union {
                 ..
             } = self;
 
-            fn conservative_find<'a, CX: ContextFamily + Clone>(
+            fn conservative_find<CX: ContextFamily + Clone>(
+                cx: &mut CX::Context<'_>,
                 key: &FlowSmolStr,
-                values: &'a FlowVector<value_object::ValueObject<CX>>,
-            ) -> Option<Vec<value_object::LazyValueUnion<CX>>> {
+                values: &FlowVector<value_object::ValueObject<CX>>,
+                get_prop: &impl Fn(
+                    &mut CX::Context<'_>,
+                    &Type,
+                    &FlowSmolStr,
+                )
+                    -> Result<Option<value_object::Property<CX>>, JobError>,
+            ) -> Result<Option<Vec<value_object::LazyValueUnion<CX>>>, JobError> {
                 let mut acc: Vec<value_object::LazyValueUnion<CX>> = Vec::new();
                 for value_object::ValueObject(_, inner) in values.iter() {
-                    let value_object::ValueObjectInner { props, rest, .. } = inner.as_ref();
+                    let value_object::ValueObjectInner { props, rest, t, .. } = inner.as_ref();
                     match props.get(key) {
-                        None => {
-                            if rest.is_some() {
-                                return None;
-                            }
+                        None if rest.is_some() => {
+                            let Some(prop) = get_prop(cx, t, key)? else {
+                                return Ok(None);
+                            };
+                            acc.push(prop.value);
                         }
-                        Some(None) => {
-                            // We definitely know the field doesn't exist.
-                        }
+                        None | Some(None) => {}
                         Some(Some(v)) => {
                             acc.push(v.value.dupe());
                         }
                     }
                 }
-                Some(acc)
+                Ok(Some(acc))
             }
 
-            let conservative_find_all =
-                |key: &FlowSmolStr| -> Option<Vec<value_object::LazyValueUnion<CX>>> {
-                    let tuple_candidates = conservative_find(key, tuples)?;
-                    let array_candidates = conservative_find(key, arrays)?;
-                    let object_candidates = conservative_find(key, objects)?;
-                    Some([tuple_candidates, array_candidates, object_candidates].concat())
+            let conservative_find_all = |cx: &mut CX::Context<'_>,
+                                         key: &FlowSmolStr|
+             -> Result<
+                Option<Vec<value_object::LazyValueUnion<CX>>>,
+                JobError,
+            > {
+                let Some(tuple_candidates) = conservative_find(cx, key, tuples, get_prop)? else {
+                    return Ok(None);
                 };
+                let Some(array_candidates) = conservative_find(cx, key, arrays, get_prop)? else {
+                    return Ok(None);
+                };
+                let Some(object_candidates) = conservative_find(cx, key, objects, get_prop)? else {
+                    return Ok(None);
+                };
+                Ok(Some(
+                    [tuple_candidates, array_candidates, object_candidates].concat(),
+                ))
+            };
 
             let vus_opt: Option<Vec<ValueUnion<CX>>> = match selector {
                 Selector::Elem { index, .. } => {
                     let key: FlowSmolStr = index.to_string().into();
-                    conservative_find_all(&key)
+                    conservative_find_all(cx, &key)?
                         .map(|lazy_cells| {
                             lazy_cells
                                 .into_iter()
@@ -1321,7 +1344,7 @@ pub mod value_union {
                         })
                         .transpose()?
                 }
-                Selector::Prop { prop, .. } => conservative_find_all(prop)
+                Selector::Prop { prop, .. } => conservative_find_all(cx, prop)?
                     .map(|lazy_cells| {
                         lazy_cells
                             .into_iter()

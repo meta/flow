@@ -1,0 +1,89 @@
+Error ----------------------------------------------------------------------------------------------------- test.js:11:7
+
+Cannot get `value._private` because property `_private` is missing in `Derived` [1]. [prop-missing]
+
+   test.js:11:7
+   11| value._private; // ERROR: inherited munged property
+             ^^^^^^^^
+
+References:
+   test.js:7:22
+    7| declare const value: Derived;
+                            ^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:15:5
+
+Property `_private` is missing in `Derived` [1]. [prop-missing]
+
+   test.js:15:5
+   15|   [{_private: const privateValue, ...}] => privateValue, // ERROR: inherited munged property
+           ^^^^^^^^
+
+References:
+   test.js:7:22
+    7| declare const value: Derived;
+                            ^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:20:5
+
+Property `_private` is missing in `null` [1]. [incompatible-use]
+
+   test.js:20:5
+   20|   [{_private: const privateValue, ...}] => privateValue, // ERROR: inherited munged property
+           ^^^^^^^^
+
+References:
+   test.js:8:27
+    8| declare const maybeValue: ?Derived;
+                                 ^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:20:5
+
+Property `_private` is missing in `void` [1]. [incompatible-use]
+
+   test.js:20:5
+   20|   [{_private: const privateValue, ...}] => privateValue, // ERROR: inherited munged property
+           ^^^^^^^^
+
+References:
+   test.js:8:27
+    8| declare const maybeValue: ?Derived;
+                                 ^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:20:5
+
+Property `_private` is missing in `Derived` [1]. [prop-missing]
+
+   test.js:20:5
+   20|   [{_private: const privateValue, ...}] => privateValue, // ERROR: inherited munged property
+           ^^^^^^^^
+
+References:
+   test.js:8:28
+    8| declare const maybeValue: ?Derived;
+                                  ^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:28:5
+
+Cannot cast `publicValue` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:28:5
+   28|     publicValue as string; // ERROR: a public inherited property remains readable
+           ^^^^^^^^^^^
+
+References:
+   test.js:4:16
+    4|   publicValue: number;
+                      ^^^^^^ [1]
+   test.js:28:20
+   28|     publicValue as string; // ERROR: a public inherited property remains readable
+                          ^^^^^^ [2]
+
+
+
+Found 6 errors

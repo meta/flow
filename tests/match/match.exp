@@ -971,6 +971,633 @@ References:
                            ^ [1]
 
 
+Error ------------------------------------------------------------------------------- nested-instance-properties.js:61:5
+
+Cannot cast `extra` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   nested-instance-properties.js:61:5
+   61|     extra as string; // ERROR: the property type is not empty
+           ^^^^^
+
+References:
+   nested-instance-properties.js:10:10
+   10|   extra: number;
+                ^^^^^^ [1]
+   nested-instance-properties.js:61:14
+   61|     extra as string; // ERROR: the property type is not empty
+                    ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:111:5
+
+Cannot cast `name` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   nested-instance-properties.js:111:5
+   111|     name as number; // ERROR: retain the declared property type
+            ^^^^
+
+References:
+   nested-instance-properties.js:105:19
+   105|   readonly name?: string;
+                          ^^^^^^ [1]
+   nested-instance-properties.js:111:13
+   111|     name as number; // ERROR: retain the declared property type
+                    ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:111:5
+
+Cannot cast `name` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   nested-instance-properties.js:111:5
+   111|     name as number; // ERROR: retain the declared property type
+            ^^^^
+
+References:
+   nested-instance-properties.js:105:19
+   105|   readonly name?: string;
+                          ^^^^^^ [1]
+   nested-instance-properties.js:111:13
+   111|     name as number; // ERROR: retain the declared property type
+                    ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:119:3
+
+This match pattern [1] is unused. The values it matches are either already covered by previous patterns, or are not part
+of the input type. To fix, either remove this pattern or restructure previous patterns. [match-unused-pattern]
+
+   119|   [{const name, ...}] => {}, // ERROR: unused, do not resurrect an absent property
+          ^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:154:5
+
+Cannot cast `kind` to `"a"` because `"b"` [1] is incompatible with `"a"` [2]. [incompatible-type]
+
+   nested-instance-properties.js:154:5
+   154|     kind as 'a'; // ERROR: a cached narrowed property must win over the original type
+            ^^^^
+
+References:
+   nested-instance-properties.js:146:15
+   146|   kind: 'a' | 'b';
+                      ^^^ [1]
+   nested-instance-properties.js:154:13
+   154|     kind as 'a'; // ERROR: a cached narrowed property must win over the original type
+                    ^^^ [2]
+
+
+Error ----------------------------------------------------------------------------- nested-instance-properties.js:168:12
+
+Cannot get `maybeNamed.name` because property `name` is missing in `null` [1]. [incompatible-use]
+
+   nested-instance-properties.js:168:12
+   168| maybeNamed.name; // ERROR: nullable property access
+                   ^^^^
+
+References:
+   nested-instance-properties.js:16:27
+    16| declare const maybeNamed: ?Named;
+                                  ^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------- nested-instance-properties.js:168:12
+
+Cannot get `maybeNamed.name` because property `name` is missing in `void` [1]. [incompatible-use]
+
+   nested-instance-properties.js:168:12
+   168| maybeNamed.name; // ERROR: nullable property access
+                   ^^^^
+
+References:
+   nested-instance-properties.js:16:27
+    16| declare const maybeNamed: ?Named;
+                                  ^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:176:5
+
+Property `name` is missing in `null` [1]. [incompatible-use]
+
+   nested-instance-properties.js:176:5
+   176|   [{const name, ...}] => name, // ERROR: the property is not readable
+            ^^^^^^^^^^
+
+References:
+   nested-instance-properties.js:174:31
+   174| declare const writeonlyValue: ?WriteOnlyNamed;
+                                      ^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:176:5
+
+Property `name` is missing in `void` [1]. [incompatible-use]
+
+   nested-instance-properties.js:176:5
+   176|   [{const name, ...}] => name, // ERROR: the property is not readable
+            ^^^^^^^^^^
+
+References:
+   nested-instance-properties.js:174:31
+   174| declare const writeonlyValue: ?WriteOnlyNamed;
+                                      ^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:176:5
+
+Property `name` is not readable. [cannot-read]
+
+   176|   [{const name, ...}] => name, // ERROR: the property is not readable
+            ^^^^^^^^^^
+
+
+Error ----------------------------------------------------------------------------- nested-instance-properties.js:186:20
+
+Cannot get `indexedNonNullable.name` because property `name` is not readable. [cannot-read]
+
+   186| indexedNonNullable.name; // ERROR: ordinary access to the inherited field is not readable
+                           ^^^^
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:188:5
+
+Property `name` is missing in `null` [1]. [incompatible-use]
+
+   nested-instance-properties.js:188:5
+   188|   [{const name, ...}] => name, // ERROR: an indexer does not make the inherited field readable
+            ^^^^^^^^^^
+
+References:
+   nested-instance-properties.js:184:38
+   184| declare const indexedWriteonlyValue: ?IndexedWriteOnlyNamed;
+                                             ^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:188:5
+
+Property `name` is missing in `void` [1]. [incompatible-use]
+
+   nested-instance-properties.js:188:5
+   188|   [{const name, ...}] => name, // ERROR: an indexer does not make the inherited field readable
+            ^^^^^^^^^^
+
+References:
+   nested-instance-properties.js:184:38
+   184| declare const indexedWriteonlyValue: ?IndexedWriteOnlyNamed;
+                                             ^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:188:5
+
+Property `name` is not readable. [cannot-read]
+
+   188|   [{const name, ...}] => name, // ERROR: an indexer does not make the inherited field readable
+            ^^^^^^^^^^
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:201:5
+
+Property `name` is missing in `null` [1]. [incompatible-use]
+
+   nested-instance-properties.js:201:5
+   201|   [{const name, ...}] => name, // ERROR: named declarations take precedence over indexers
+            ^^^^^^^^^^
+
+References:
+   nested-instance-properties.js:198:39
+   198| declare const writeonlyBeforeIndexer: ?WriteOnlyBeforeIndexer;
+                                              ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:201:5
+
+Property `name` is missing in `void` [1]. [incompatible-use]
+
+   nested-instance-properties.js:201:5
+   201|   [{const name, ...}] => name, // ERROR: named declarations take precedence over indexers
+            ^^^^^^^^^^
+
+References:
+   nested-instance-properties.js:198:39
+   198| declare const writeonlyBeforeIndexer: ?WriteOnlyBeforeIndexer;
+                                              ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:201:5
+
+Property `name` is not readable. [cannot-read]
+
+   201|   [{const name, ...}] => name, // ERROR: named declarations take precedence over indexers
+            ^^^^^^^^^^
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:205:5
+
+Property `name` is missing in `null` [1]. [incompatible-use]
+
+   nested-instance-properties.js:205:5
+   205|   [{const name, ...}] => name, // ERROR: parent order must not make the field readable
+            ^^^^^^^^^^
+
+References:
+   nested-instance-properties.js:199:39
+   199| declare const indexerBeforeWriteonly: ?IndexerBeforeWriteOnly;
+                                              ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:205:5
+
+Property `name` is missing in `void` [1]. [incompatible-use]
+
+   nested-instance-properties.js:205:5
+   205|   [{const name, ...}] => name, // ERROR: parent order must not make the field readable
+            ^^^^^^^^^^
+
+References:
+   nested-instance-properties.js:199:39
+   199| declare const indexerBeforeWriteonly: ?IndexerBeforeWriteOnly;
+                                              ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:205:5
+
+Property `name` is not readable. [cannot-read]
+
+   205|   [{const name, ...}] => name, // ERROR: parent order must not make the field readable
+            ^^^^^^^^^^
+
+
+Error ----------------------------------------------------------------------------- nested-instance-properties.js:216:36
+
+Cannot call `method` as a standalone function because its `this` parameter requires `MethodClass` [1] as the receiver.
+Call it as a method, or bind it to its receiver before calling it. [incompatible-type]
+
+   nested-instance-properties.js:216:36
+   216|   [{method: const method, ...}] => method(), // ERROR: requires a receiver
+                                           ^^^^^^
+
+References:
+   nested-instance-properties.js:210:7
+   210| class MethodClass {
+              ^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------- nested-instance-properties.js:226:36
+
+Cannot call `method` as a standalone function because its `this` parameter requires `MethodInterface` [1] as the
+receiver. Call it as a method, or bind it to its receiver before calling it. [incompatible-type]
+
+   nested-instance-properties.js:226:36
+   226|   [{method: const method, ...}] => method(), // ERROR: requires a receiver
+                                           ^^^^^^
+
+References:
+   nested-instance-properties.js:221:11
+   221| interface MethodInterface {
+                  ^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:233:3
+
+This match pattern [1] is unused. The values it matches are either already covered by previous patterns, or are not part
+of the input type. To fix, either remove this pattern or restructure previous patterns. [match-unused-pattern]
+
+   233|   [{const name, ...}] => name, // ERROR: unused
+          ^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:239:3
+
+This match pattern [1] is unused. The values it matches are either already covered by previous patterns, or are not part
+of the input type. To fix, either remove this pattern or restructure previous patterns. [match-unused-pattern]
+
+   239|   [{unknown: const unknown, ...}] => unknown, // ERROR: unknown property
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:239:5
+
+Property `unknown` is missing in `null` [1]. [incompatible-use]
+
+   nested-instance-properties.js:239:5
+   239|   [{unknown: const unknown, ...}] => unknown, // ERROR: unknown property
+            ^^^^^^^
+
+References:
+   nested-instance-properties.js:16:27
+    16| declare const maybeNamed: ?Named;
+                                  ^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:239:5
+
+Property `unknown` is missing in `void` [1]. [incompatible-use]
+
+   nested-instance-properties.js:239:5
+   239|   [{unknown: const unknown, ...}] => unknown, // ERROR: unknown property
+            ^^^^^^^
+
+References:
+   nested-instance-properties.js:16:27
+    16| declare const maybeNamed: ?Named;
+                                  ^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:239:5
+
+Property `unknown` is missing in `Named` [1]. [prop-missing]
+
+   nested-instance-properties.js:239:5
+   239|   [{unknown: const unknown, ...}] => unknown, // ERROR: unknown property
+            ^^^^^^^
+
+References:
+   nested-instance-properties.js:16:28
+    16| declare const maybeNamed: ?Named;
+                                   ^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:249:1
+
+Cannot call `ordinaryConstructor` because a call signature declaring the expected parameter / return type is missing in
+`{name: string, ...}` [1]. [prop-missing]
+
+   nested-instance-properties.js:249:1
+   249| ordinaryConstructor(); // ERROR: an extracted class constructor requires new
+        ^^^^^^^^^^^^^^^^^^^
+
+References:
+   nested-instance-properties.js:247:33
+   247| declare const explicitInstance: ExplicitConstructor;
+                                        ^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------- nested-instance-properties.js:251:39
+
+Cannot call `ctor` because a call signature declaring the expected parameter / return type is missing in
+`{name: string, ...}` [1]. [prop-missing]
+
+   nested-instance-properties.js:251:39
+   251|   [{constructor: const ctor, ...}] => ctor(), // ERROR: a class constructor requires new
+                                              ^^^^
+
+References:
+   nested-instance-properties.js:247:33
+   247| declare const explicitInstance: ExplicitConstructor;
+                                        ^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:257:5
+
+Property `constructor` is missing in `null` [1]. [incompatible-use]
+
+   nested-instance-properties.js:257:5
+   257|   [{constructor: const ctor, ...}] => ctor(), // ERROR: preserve the special constructor read
+            ^^^^^^^^^^^
+
+References:
+   nested-instance-properties.js:255:38
+   255| declare const maybeExplicitInstance: ?ExplicitConstructor;
+                                             ^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:257:5
+
+Property `constructor` is missing in `void` [1]. [incompatible-use]
+
+   nested-instance-properties.js:257:5
+   257|   [{constructor: const ctor, ...}] => ctor(), // ERROR: preserve the special constructor read
+            ^^^^^^^^^^^
+
+References:
+   nested-instance-properties.js:255:38
+   255| declare const maybeExplicitInstance: ?ExplicitConstructor;
+                                             ^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------- nested-instance-properties.js:257:39
+
+Cannot call `ctor` because a call signature declaring the expected parameter / return type is missing in
+`{name: string, ...}` [1]. [prop-missing]
+
+   nested-instance-properties.js:257:39
+   257|   [{constructor: const ctor, ...}] => ctor(), // ERROR: preserve the special constructor read
+                                              ^^^^
+
+References:
+   nested-instance-properties.js:255:39
+   255| declare const maybeExplicitInstance: ?ExplicitConstructor;
+                                              ^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:266:3
+
+Cannot call `value.items.push` because property `push` is not readable. [react-rule-unsafe-mutation]
+
+React component properties [1] and their nested props and elements cannot be written to.
+(https://react.dev/reference/rules/components-and-hooks-must-be-pure#props).
+
+   nested-instance-properties.js:266:3
+   266|   value.items.push(1); // ERROR: ordinary access preserves React deep-readonly
+          ^^^^^^^^^^^^^^^^
+
+References:
+   nested-instance-properties.js:265:33
+   265| component DeepReadonlyInterface(value: DeepReadonlyValue) {
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------- nested-instance-properties.js:268:29
+
+Cannot call `items.push` because property `push` is not readable. [react-rule-unsafe-mutation]
+
+React component properties [1] and their nested props and elements cannot be written to.
+(https://react.dev/reference/rules/components-and-hooks-must-be-pure#props).
+
+   nested-instance-properties.js:268:29
+   268|     [{const items, ...}] => items.push(1), // ERROR: React deep-readonly must be preserved
+                                    ^^^^^^^^^^
+
+References:
+   nested-instance-properties.js:265:33
+   265| component DeepReadonlyInterface(value: DeepReadonlyValue) {
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:278:3
+
+Cannot call `value.items.push` because property `push` is not readable. [react-rule-unsafe-mutation]
+
+React component properties [1] and their nested props and elements cannot be written to.
+(https://react.dev/reference/rules/components-and-hooks-must-be-pure#props).
+
+   nested-instance-properties.js:278:3
+   278|   value.items.push(1); // ERROR: ordinary access preserves React deep-readonly
+          ^^^^^^^^^^^^^^^^
+
+References:
+   nested-instance-properties.js:277:29
+   277| component DeepReadonlyClass(value: DeepReadonlyClassValue) {
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------- nested-instance-properties.js:280:29
+
+Cannot call `items.push` because property `push` is not readable. [react-rule-unsafe-mutation]
+
+React component properties [1] and their nested props and elements cannot be written to.
+(https://react.dev/reference/rules/components-and-hooks-must-be-pure#props).
+
+   nested-instance-properties.js:280:29
+   280|     [{const items, ...}] => items.push(1), // ERROR: React deep-readonly must be preserved
+                                    ^^^^^^^^^^
+
+References:
+   nested-instance-properties.js:277:29
+   277| component DeepReadonlyClass(value: DeepReadonlyClassValue) {
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------- nested-instance-properties.js:287:29
+
+Cannot cast `value` to `Named` because `null` [1] is incompatible with `Named` [2]. [incompatible-type]
+
+   nested-instance-properties.js:287:29
+   287|   [{...} as const value] => value as Named, // ERROR: still nullable
+                                    ^^^^^
+
+References:
+   nested-instance-properties.js:16:27
+    16| declare const maybeNamed: ?Named;
+                                  ^^^^^^ [1]
+   nested-instance-properties.js:287:38
+   287|   [{...} as const value] => value as Named, // ERROR: still nullable
+                                             ^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------- nested-instance-properties.js:287:29
+
+Cannot cast `value` to `Named` because `void` [1] is incompatible with `Named` [2]. [incompatible-type]
+
+   nested-instance-properties.js:287:29
+   287|   [{...} as const value] => value as Named, // ERROR: still nullable
+                                    ^^^^^
+
+References:
+   nested-instance-properties.js:16:27
+    16| declare const maybeNamed: ?Named;
+                                  ^^^^^^ [1]
+   nested-instance-properties.js:287:38
+   287|   [{...} as const value] => value as Named, // ERROR: still nullable
+                                             ^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------- nested-instance-properties.js:300:21
+
+Cannot get `aliasedIndexerFirst.name` because property `name` is not readable. [cannot-read]
+
+   300| aliasedIndexerFirst.name; // ERROR: ordinary access is not readable
+                            ^^^^
+
+
+Error ----------------------------------------------------------------------------- nested-instance-properties.js:301:23
+
+Cannot get `aliasedWriteOnlyFirst.name` because property `name` is not readable. [cannot-read]
+
+   301| aliasedWriteOnlyFirst.name; // ERROR: ordinary access is not readable
+                              ^^^^
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:303:5
+
+Property `name` is missing in `null` [1]. [incompatible-use]
+
+   nested-instance-properties.js:303:5
+   303|   [{const name, ...}] => name, // ERROR: an aliased indexer cannot hide the named field
+            ^^^^^^^^^^
+
+References:
+   nested-instance-properties.js:298:41
+   298| declare const maybeAliasedIndexerFirst: ?AliasedIndexerFirst;
+                                                ^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:303:5
+
+Property `name` is missing in `void` [1]. [incompatible-use]
+
+   nested-instance-properties.js:303:5
+   303|   [{const name, ...}] => name, // ERROR: an aliased indexer cannot hide the named field
+            ^^^^^^^^^^
+
+References:
+   nested-instance-properties.js:298:41
+   298| declare const maybeAliasedIndexerFirst: ?AliasedIndexerFirst;
+                                                ^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:303:5
+
+Property `name` is not readable. [cannot-read]
+
+   303|   [{const name, ...}] => name, // ERROR: an aliased indexer cannot hide the named field
+            ^^^^^^^^^^
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:307:5
+
+Property `name` is missing in `null` [1]. [incompatible-use]
+
+   nested-instance-properties.js:307:5
+   307|   [{const name, ...}] => name, // ERROR: alias member order does not affect readability
+            ^^^^^^^^^^
+
+References:
+   nested-instance-properties.js:299:43
+   299| declare const maybeAliasedWriteOnlyFirst: ?AliasedWriteOnlyFirst;
+                                                  ^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:307:5
+
+Property `name` is missing in `void` [1]. [incompatible-use]
+
+   nested-instance-properties.js:307:5
+   307|   [{const name, ...}] => name, // ERROR: alias member order does not affect readability
+            ^^^^^^^^^^
+
+References:
+   nested-instance-properties.js:299:43
+   299| declare const maybeAliasedWriteOnlyFirst: ?AliasedWriteOnlyFirst;
+                                                  ^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:307:5
+
+Property `name` is not readable. [cannot-read]
+
+   307|   [{const name, ...}] => name, // ERROR: alias member order does not affect readability
+            ^^^^^^^^^^
+
+
+Error ------------------------------------------------------------------------------ nested-instance-properties.js:324:5
+
+Cannot cast `value` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   nested-instance-properties.js:324:5
+   324|     value as string; // ERROR: preserve the generic named property type
+            ^^^^^
+
+References:
+   nested-instance-properties.js:319:56
+   319| interface AliasedNumberValue extends IndexedValueAlias<number> {}
+                                                               ^^^^^^ [1]
+   nested-instance-properties.js:324:14
+   324|     value as string; // ERROR: preserve the generic named property type
+                     ^^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------------------- pattern-errors.js:6:10
 
 Cannot use `let` for match pattern binding. Only `const` is allowed. [match-invalid-pattern]
@@ -2083,4 +2710,4 @@ References:
 
 
 
-Found 159 errors
+Found 206 errors

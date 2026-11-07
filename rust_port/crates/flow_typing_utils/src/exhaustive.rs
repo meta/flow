@@ -16,11 +16,13 @@ use dupe::IterDupedExt;
 use flow_aloc::ALoc;
 use flow_aloc::ALocId;
 use flow_aloc::ALocSet;
+use flow_common::reason::Name;
 use flow_common::reason::Reason;
 use flow_data_structure_wrapper::ord_map::FlowOrdMap;
 use flow_data_structure_wrapper::ord_set::FlowOrdSet;
 use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 use flow_data_structure_wrapper::vector::FlowVector;
+use flow_env_builder::selector::Selector;
 use flow_parser::ast;
 use flow_parser::loc::Loc;
 use flow_typing_context::Context;
@@ -44,6 +46,7 @@ use flow_typing_flow_common::flow_js_utils;
 use flow_typing_flow_common::flow_js_utils::FlowJsException;
 use flow_typing_flow_js::flow_js;
 use flow_typing_flow_js::flow_js::FlowJs;
+use flow_typing_flow_js_env::FlowJsEnv;
 use flow_typing_loc_env::match_pattern_ir;
 use flow_typing_loc_env::match_pattern_ir::LeafSet;
 use flow_typing_loc_env::match_pattern_ir::ObjKind;
@@ -59,6 +62,7 @@ use flow_typing_type::type_::InstanceKind;
 use flow_typing_type::type_::ROArrayATData;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeInner;
+use flow_typing_type::type_::property;
 use flow_typing_type::type_util;
 use flow_typing_type::type_util::reason_of_t;
 use flow_typing_visitors::type_mapper;
@@ -1291,47 +1295,74 @@ mod value_union_builder {
         cx: &mut Context<'cx>,
         key: &(ALoc, FlowSmolStr),
         obj: &Type,
+        require_readable: bool,
     ) -> Result<Option<value_object::Property<Cx>>, JobError> {
+        Ok(match lookup_prop(cx, key, obj, require_readable)? {
+            PropertyLookup::Found(prop) | PropertyLookup::Indexed(prop) => Some(prop),
+            PropertyLookup::Missing
+            | PropertyLookup::Unreadable
+            | PropertyLookup::UnreadableIndexer => None,
+        })
+    }
+
+    enum PropertyLookup {
+        Missing,
+        Unreadable,
+        Found(value_object::Property<Cx>),
+        Indexed(value_object::Property<Cx>),
+        UnreadableIndexer,
+    }
+
+    fn lookup_prop<'cx>(
+        cx: &mut Context<'cx>,
+        key: &(ALoc, FlowSmolStr),
+        obj: &Type,
+        require_readable: bool,
+    ) -> Result<PropertyLookup, JobError> {
         fn get_prop_from_dict<'cx>(
             cx: &mut Context<'cx>,
             key_loc: &ALoc,
             key_name: &FlowSmolStr,
             dict: Option<&flow_typing_type::type_::DictType>,
-        ) -> Result<Option<value_object::Property<Cx>>, JobError> {
-            match dict {
-                Some(dict) => {
-                    let reason_key = flow_common::reason::mk_reason(
-                        flow_common::reason::VirtualReasonDesc::RProperty(Some(
-                            flow_common::reason::Name::new(key_name.dupe()),
-                        )),
-                        key_loc.dupe(),
-                    );
-                    let key_t = flow_typing_flow_common::flow_js_utils::type_of_key_name(
-                        flow_common::reason::Name::new(key_name.dupe()),
-                        &reason_key,
-                    );
-                    if flow_common::polarity::Polarity::compat(
-                        dict.dict_polarity,
-                        flow_common::polarity::Polarity::Positive,
-                    ) && flow_js::FlowJs::speculative_subtyping_succeeds(cx, &key_t, &dict.key)?
-                    {
-                        let loc = reason_of_t(&dict.key).loc();
-                        let dict_value = dict.value.dupe();
-                        let lazy_value: value_object::LazyValueUnion<Cx> =
-                            std::rc::Rc::new(flow_lazy::Lazy::new(move |cx: &mut Context<'_>| {
-                                of_type(cx, &dict_value)
-                            }));
-                        Ok(Some(value_object::Property {
-                            loc: loc.dupe(),
-                            value: lazy_value,
-                            optional: true,
-                        }))
-                    } else {
-                        Ok(None)
-                    }
-                }
-                None => Ok(None),
+            require_readable: bool,
+        ) -> Result<PropertyLookup, JobError> {
+            let Some(dict) = dict else {
+                return Ok(PropertyLookup::Missing);
+            };
+            let readable = flow_common::polarity::Polarity::compat(
+                dict.dict_polarity,
+                flow_common::polarity::Polarity::Positive,
+            );
+            if !readable && !require_readable {
+                return Ok(PropertyLookup::Missing);
             }
+            let reason_key = flow_common::reason::mk_reason(
+                flow_common::reason::VirtualReasonDesc::RProperty(Some(
+                    flow_common::reason::Name::new(key_name.dupe()),
+                )),
+                key_loc.dupe(),
+            );
+            let key_t = flow_typing_flow_common::flow_js_utils::type_of_key_name(
+                flow_common::reason::Name::new(key_name.dupe()),
+                &reason_key,
+            );
+            if !flow_js::FlowJs::speculative_subtyping_succeeds(cx, &key_t, &dict.key)? {
+                return Ok(PropertyLookup::Missing);
+            }
+            if !readable {
+                return Ok(PropertyLookup::UnreadableIndexer);
+            }
+            let loc = reason_of_t(&dict.key).loc();
+            let dict_value = dict.value.dupe();
+            let lazy_value: value_object::LazyValueUnion<Cx> =
+                std::rc::Rc::new(flow_lazy::Lazy::new(move |cx: &mut Context<'_>| {
+                    of_type(cx, &dict_value)
+                }));
+            Ok(PropertyLookup::Indexed(value_object::Property {
+                loc: loc.dupe(),
+                value: lazy_value,
+                optional: true,
+            }))
         }
 
         fn find_key<'cx>(
@@ -1340,33 +1371,73 @@ mod value_union_builder {
             props_list: &[flow_typing_type::type_::properties::Id],
             dict: Option<&flow_typing_type::type_::DictType>,
             key: &(ALoc, FlowSmolStr),
-        ) -> Result<Option<value_object::Property<Cx>>, JobError> {
+            require_readable: bool,
+        ) -> Result<PropertyLookup, JobError> {
             let (_, key_name) = key;
-            let current_prop = props_list.iter().find_map(|id| {
-                let name = flow_common::reason::Name::new(key_name.dupe());
-                cx.get_prop(id.dupe(), &name)
-                    .and_then(|p| value_object_property_builder::of_type_prop(key_name, &p))
-            });
-            if current_prop.is_some() {
-                return Ok(current_prop);
+            let name = flow_common::reason::Name::new(key_name.dupe());
+            for id in props_list {
+                if let Some(p) = cx.get_prop(id.dupe(), &name) {
+                    if require_readable && property::read_t(&p).is_none() {
+                        return Ok(PropertyLookup::Unreadable);
+                    }
+                    if let Some(prop) = value_object_property_builder::of_type_prop(key_name, &p) {
+                        return Ok(PropertyLookup::Found(prop));
+                    }
+                }
             }
-            let super_prop = get_prop(cx, key, super_t)?;
-            if super_prop.is_some() {
-                return Ok(super_prop);
+            let super_prop = lookup_prop(cx, key, super_t, require_readable)?;
+            match super_prop {
+                PropertyLookup::Missing => {}
+                PropertyLookup::Indexed(_) | PropertyLookup::UnreadableIndexer
+                    if require_readable =>
+                {
+                    let (key_loc, key_name) = key;
+                    let current =
+                        get_prop_from_dict(cx, key_loc, key_name, dict, require_readable)?;
+                    return Ok(match current {
+                        PropertyLookup::Missing => super_prop,
+                        _ => current,
+                    });
+                }
+                _ => return Ok(super_prop),
             }
             let (key_loc, key_name) = key;
-            get_prop_from_dict(cx, key_loc, key_name, dict)
+            get_prop_from_dict(cx, key_loc, key_name, dict, require_readable)
         }
 
         let (_, key_name) = key;
-        let concrete = singleton_concrete_type(cx, obj)?;
+        let inspected = if require_readable {
+            flow_js_utils::flow_js_result_to_job_error(
+                FlowJs::singleton_concrete_type_for_inspection_with_env(
+                    cx,
+                    &FlowJsEnv::entry(),
+                    reason_of_t(obj),
+                    obj,
+                ),
+            )?
+        } else {
+            obj.dupe()
+        };
+        let concrete =
+            if require_readable && matches!(inspected.deref(), TypeInner::IntersectionT(_, _)) {
+                inspected
+            } else {
+                singleton_concrete_type(cx, obj)?
+            };
         match concrete.deref() {
             TypeInner::DefT(reason, d) => match d.deref() {
                 DefTInner::ObjT(obj_rc) => {
                     let obj_t = obj_rc.deref();
                     let dict =
                         flow_typing_flow_common::obj_type::get_dict_opt(&obj_t.flags.obj_kind);
-                    find_key(cx, &obj_t.proto_t, &[obj_t.props_tmap.dupe()], dict, key)
+                    find_key(
+                        cx,
+                        &obj_t.proto_t,
+                        &[obj_t.props_tmap.dupe()],
+                        dict,
+                        key,
+                        require_readable,
+                    )
                 }
                 DefTInner::InstanceT(inst_rc) => {
                     let inst = inst_rc.deref();
@@ -1377,17 +1448,18 @@ mod value_union_builder {
                         &[inst_data.own_props.dupe(), inst_data.proto_props.dupe()],
                         inst_data.inst_dict.as_ref(),
                         key,
+                        require_readable,
                     )
                 }
                 DefTInner::ArrT(arr_rc) => {
                     let elem_t = flow_typing_type::type_::elemt_of_arrtype(arr_rc);
                     let arr_t =
                         FlowJs::get_builtin_typeapp(cx, reason, None, "Array", vec![elem_t]);
-                    get_prop(cx, key, &arr_t)
+                    lookup_prop(cx, key, &arr_t, require_readable)
                 }
-                _ => Ok(None),
+                _ => Ok(PropertyLookup::Missing),
             },
-            TypeInner::NullProtoT(_) => Ok(None),
+            TypeInner::NullProtoT(_) => Ok(PropertyLookup::Missing),
             TypeInner::ObjProtoT(reason) => {
                 let name = flow_common::reason::Name::new(key_name.dupe());
                 if flow_typing_flow_common::flow_js_utils::is_object_prototype_method(&name) {
@@ -1404,23 +1476,32 @@ mod value_union_builder {
                         Err(FlowJsException::DebugThrow { loc }) => {
                             return Err(JobError::DebugThrow { loc });
                         }
-                        Err(_) => return Ok(None),
+                        Err(_) => return Ok(PropertyLookup::Missing),
                     };
-                    get_prop(cx, key, &builtin_t)
+                    lookup_prop(cx, key, &builtin_t, require_readable)
                 } else {
-                    Ok(None)
+                    Ok(PropertyLookup::Missing)
                 }
             }
             TypeInner::IntersectionT(_, rep) => {
+                let mut indexer = PropertyLookup::Missing;
                 for member_t in rep.members_iter() {
-                    let p = get_prop(cx, key, member_t)?;
-                    if p.is_some() {
-                        return Ok(p);
+                    let p = lookup_prop(cx, key, member_t, require_readable)?;
+                    match p {
+                        PropertyLookup::Missing => {}
+                        PropertyLookup::Indexed(_) | PropertyLookup::UnreadableIndexer
+                            if require_readable =>
+                        {
+                            if matches!(indexer, PropertyLookup::Missing) {
+                                indexer = p;
+                            }
+                        }
+                        _ => return Ok(p),
                     }
                 }
-                Ok(None)
+                Ok(indexer)
             }
-            _ => Ok(None),
+            _ => Ok(PropertyLookup::Missing),
         }
     }
 
@@ -1951,7 +2032,8 @@ fn filter_object_by_pattern<'cx>(
             None => {
                 let pattern_prop = pattern_props.get(key).unwrap();
                 let key_loc = &pattern_prop.loc;
-                let prop = value_union_builder::get_prop(cx, &(key_loc.dupe(), key.dupe()), t)?;
+                let prop =
+                    value_union_builder::get_prop(cx, &(key_loc.dupe(), key.dupe()), t, false)?;
                 if prop.is_none() {
                     value_props_early_break = true;
                     break;
@@ -2598,6 +2680,26 @@ pub fn analyze<'cx>(
     }
     check_for_unused_patterns(cx, &pattern_union, &used_pattern_locs);
     Ok(())
+}
+
+/// Select a cached match value, resolving uncached instance properties lazily.
+pub fn select_value_union<'cx>(
+    cx: &mut Context<'cx>,
+    value_union: &value_union::ValueUnion<Cx>,
+    selector: &Selector<ALoc, ALoc>,
+) -> Result<Option<value_union::ValueUnion<Cx>>, JobError> {
+    value_union.select(cx, selector, &|cx, t, key| match selector {
+        Selector::Prop { prop_loc, .. }
+            if let TypeInner::DefT(_, def) = t.deref()
+                && let DefTInner::InstanceT(inst) = def.deref()
+                && inst.inst.inst_react_dro.is_none()
+                && key.as_str() != "constructor"
+                && !flow_js_utils::is_munged_prop_name(cx, &Name::new(key.dupe())) =>
+        {
+            value_union_builder::get_prop(cx, &(prop_loc.dupe(), key.dupe()), t, true)
+        }
+        _ => Ok(None),
+    })
 }
 
 /// Filter a type by a finalized PatternUnion
