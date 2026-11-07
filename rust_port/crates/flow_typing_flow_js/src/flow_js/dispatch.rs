@@ -7110,12 +7110,11 @@ fn __flow_impl<'cx>(
         ) => {
             match action {
                 box LookupAction::SuperProp(box (_, lp, _, _))
-                    if property::write_t(lp).is_none() =>
+                    if property::read_t(lp).is_none() || property::write_t(lp).is_none() =>
                 {
-                    // Without this exception, we will call rec_flow_p where
-                    // `write_t(lp)` is `None` and `write_t(up)` is `Some`, which is a polarity
-                    // mismatch error. Instead of this, we could "read" `mixed` from
-                    // covariant props, which would always flow into `any`.
+                    // `any` accepts anything. Without this exception, we will call rec_flow_p
+                    // where only one of `read_t(lp)` and `write_t(lp)` is `Some`, while both
+                    // are `Some` for `up`, which is a polarity mismatch error.
                 }
                 _ => {
                     let p = PropertyType::OrdinaryField {
