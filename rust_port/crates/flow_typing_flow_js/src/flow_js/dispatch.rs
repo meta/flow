@@ -2749,37 +2749,38 @@ fn __flow_impl<'cx>(
         }
         // helpers
         (
-            DefT(
-                reason_o,
-                deref!(ObjT(deref!(ObjType {
-                    props_tmap: mapr,
-                    flags,
-                    ..
-                }))),
-            ),
+            DefT(reason_o, deref!(ObjT(obj))),
             HasOwnPropT(box HasOwnPropTData {
                 use_op,
                 reason: reason_op,
                 type_: key,
             }),
         ) => {
+            let (prop_ids, dict_keys) = flow_js_utils::key_sources_of_obj_t(
+                |reason, t| helpers::possible_concrete_types_for_inspection(cx, env, reason, t),
+                obj,
+            )?;
+            let has_prop = |cx: &mut Context<'cx>, name: &Name| {
+                prop_ids
+                    .iter()
+                    .any(|prop_id| cx.has_prop(prop_id.dupe(), name))
+            };
             let dropped = drop_generic(key.dupe());
-            match (dropped.deref(), &flags.obj_kind) {
+            match dropped.deref() {
                 // If we have a literal string and that property exists
-                (DefT(_, deref!(SingletonStrT { value: x, .. })), _)
-                    if cx.has_prop(mapr.dupe(), &Name::new(x.dupe())) => {}
+                DefT(_, deref!(SingletonStrT { value: x, .. }))
+                    if has_prop(cx, &Name::new(x.dupe())) => {}
                 // If we have a symbol key and that property exists
-                (DefT(_, deref!(UniqueSymbolT(data))), _)
-                    if cx.has_prop(mapr.dupe(), &Name::symbol(data.symbol.dupe())) => {}
+                DefT(_, deref!(UniqueSymbolT(data)))
+                    if has_prop(cx, &Name::symbol(data.symbol.dupe())) => {}
                 // If we have a dictionary, try that next
-                (
-                    _,
-                    ObjKind::Indexed(DictType {
-                        key: expected_key, ..
-                    }),
-                ) => {
+                _ if !dict_keys.is_empty() => {
+                    let expected_key = match dict_keys.len() {
+                        1 => dict_keys[0].dupe(),
+                        _ => type_util::union_of_ts(reason_op.dupe(), dict_keys, None),
+                    };
                     let mod_key = type_util::mod_reason_of_t(&|_| reason_op.dupe(), key);
-                    rec_flow_t(cx, env, trace, use_op.dupe(), (&mod_key, expected_key))?;
+                    rec_flow_t(cx, env, trace, use_op.dupe(), (&mod_key, &expected_key))?;
                 }
                 _ => {
                     let names_a_prop = match dropped.deref() {
@@ -2799,7 +2800,7 @@ fn __flow_impl<'cx>(
                         let (prop, suggestion) = match dropped.deref() {
                             DefT(_, deref!(SingletonStrT { value: prop, .. })) => (
                                 Some(Name::new(prop.dupe())),
-                                prop_typo_suggestion(cx, &[mapr.dupe()], prop.as_str()),
+                                prop_typo_suggestion(cx, &prop_ids, prop.as_str()),
                             ),
                             // Name the missing symbol key, mirroring the `InstanceT`
                             // branch. Without this the error degrades to the computed
@@ -2931,33 +2932,33 @@ fn __flow_impl<'cx>(
             }),
         ) => {}
         (
-            DefT(
-                _,
-                deref!(ObjT(deref!(ObjType {
-                    flags,
-                    props_tmap,
-                    ..
-                }))),
-            ),
+            DefT(_, deref!(ObjT(obj))),
             GetKeysT {
                 reason: reason_op,
                 t_out: keys,
                 include_symbols,
             },
         ) => {
-            let dict_t = obj_type::get_dict_opt(&flags.obj_kind);
+            let (prop_ids, dict_keys) = flow_js_utils::key_sources_of_obj_t(
+                |reason, t| helpers::possible_concrete_types_for_inspection(cx, env, reason, t),
+                obj,
+            )?;
             // Type-level `keyof` includes symbols, while runtime key
             // enumeration (`Object.keys`) omits them, matching JavaScript.
-            let keylist = flow_js_utils::keylist_of_props(
-                env,
-                &cx.find_props(props_tmap.dupe()),
-                reason_op,
-                *include_symbols,
-            );
+            let keylist =
+                flow_js_utils::keylist_of_prop_ids(cx, env, &prop_ids, reason_op, *include_symbols);
             let union_t = type_util::union_of_ts(reason_op.dupe(), keylist, None);
             rec_flow(cx, env, trace, (&union_t, keys))?;
-            if let Some(DictType { key: dict_key, .. }) = dict_t {
-                flow_dict_key_to_keys(cx, env, trace, dict_key, reason_op, keys, *include_symbols)?;
+            for dict_key in dict_keys {
+                flow_dict_key_to_keys(
+                    cx,
+                    env,
+                    trace,
+                    &dict_key,
+                    reason_op,
+                    keys,
+                    *include_symbols,
+                )?;
             }
         }
         (

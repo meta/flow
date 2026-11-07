@@ -2429,9 +2429,10 @@ fn resolve_with_env<'cx, A>(
             );
         }
         TypeInner::DefT(r, def_t) => match def_t.deref() {
-            // We extract the props from an ObjT.
+            // We extract the props from an ObjT. The statics of a TypeScript class also have the
+            // statics they inherit from the superclass in their proto, which we recurse to collect.
             DefTInner::ObjT(obj) => {
-                let x = Vec1::new(object_slice(
+                let slice = object_slice(
                     cx,
                     None,
                     r,
@@ -2443,7 +2444,23 @@ fn resolve_with_env<'cx, A>(
                     t_generic_id,
                     obj.strictness_kind,
                     obj.literal,
-                ));
+                );
+                if flow_js_utils::ts_superclass_of_statics(obj).is_some() {
+                    return recurse(
+                        cx,
+                        env,
+                        use_op,
+                        reason,
+                        object::ResolveTool::Super(
+                            slice,
+                            Vec::new(),
+                            Rc::new(resolve_tool.clone()),
+                        ),
+                        tool,
+                        obj.proto_t.dupe(),
+                    );
+                }
+                let x = Vec1::new(slice);
                 return resolved(
                     next,
                     recurse,
@@ -3028,6 +3045,12 @@ pub fn super_<'cx, A>(
         &object::Tool,
         Type,
     ) -> Result<A, FlowJsException>,
+    statics: &dyn Fn(
+        &mut Context<'cx>,
+        &FlowJsEnv,
+        &Reason,
+        &Type,
+    ) -> Result<Type, FlowJsException>,
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     use_op: UseOp,
@@ -3110,8 +3133,21 @@ pub fn super_<'cx, A>(
                         obj.strictness_kind,
                         obj.literal,
                     ),
-                    None,
+                    flow_js_utils::ts_superclass_of_statics(obj).map(|_| obj.proto_t.dupe()),
                 ),
+                // The statics a TypeScript class inherits from its superclass.
+                DefTInner::ClassT(i) => {
+                    let statics_t = statics(cx, env, r, i)?;
+                    return recurse(
+                        cx,
+                        env,
+                        use_op,
+                        reason,
+                        object::ResolveTool::Super(acc, pending, Rc::new(resolve_tool)),
+                        tool,
+                        statics_t,
+                    );
+                }
                 _ => return finish(cx, use_op, acc, pending),
             };
             let (props, flags, frozen, generics, reachable_targs) =
@@ -3788,6 +3824,7 @@ pub fn run_with_env<'cx, A>(
             return_,
             next,
             recurse,
+            statics,
             cx,
             env,
             use_op,

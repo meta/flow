@@ -1,0 +1,46 @@
+Error ----------------------------------------------------------------------------------------------------- test.js:7:33
+
+Cannot assign `'nope'` to `missing` because property `nope` is missing in `{name: string, ...}` [1]. [prop-missing]
+
+   test.js:7:33
+   7| const missing: keyof typeof C = 'nope'; // error
+                                      ^^^^^^
+
+References:
+   test.js:7:22
+   7| const missing: keyof typeof C = 'nope'; // error
+                           ^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:12:9
+
+Cannot get `statics.nope` because property `nope` is missing in
+`{readonly clone: typeof C["clone"], count: typeof C["count"], readonly extra: typeof C["extra"], rea...` [1].
+[prop-missing]
+
+   test.js:12:9
+   12| statics.nope; // error
+               ^^^^
+
+References:
+   test.js:9:24
+    9| declare const statics: Statics<typeof C>;
+                              ^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:21:43
+
+Cannot assign `'x'` to `flowInherited` because property `x` is missing in `{name: string, ...}` [1]. [prop-missing]
+
+   test.js:21:43
+   21| const flowInherited: keyof typeof FlowB = 'x'; // error: a Flow class's keys are its own statics
+                                                 ^^^
+
+References:
+   test.js:21:28
+   21| const flowInherited: keyof typeof FlowB = 'x'; // error: a Flow class's keys are its own statics
+                                  ^^^^^^^^^^^^ [1]
+
+
+
+Found 3 errors

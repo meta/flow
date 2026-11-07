@@ -82,6 +82,7 @@ use flow_typing_type::type_::MethodTData;
 use flow_typing_type::type_::MixedFlavor;
 use flow_typing_type::type_::NamedSymbol;
 use flow_typing_type::type_::ObjLiteral;
+use flow_typing_type::type_::ObjType;
 use flow_typing_type::type_::PolyTData;
 use flow_typing_type::type_::ROArrayATData;
 use flow_typing_type::type_::ResolveUnionTData;
@@ -8692,6 +8693,101 @@ pub fn key_sources_of_instance_t<E>(
         ts_interface_key_sources(&mut concretize, instance)
     } else {
         Ok(instance_own_key_sources(&instance.inst))
+    }
+}
+
+fn obj_own_key_sources(obj: &ObjType) -> KeySources {
+    let dict_keys = crate::obj_type::get_dict_opt(&obj.flags.obj_kind)
+        .map(|dict| vec![dict.key.dupe()])
+        .unwrap_or_default();
+    (vec![obj.props_tmap.dupe()], dict_keys)
+}
+
+/// The superclass instance type of `statics` when they are the statics of a TypeScript class
+/// with a superclass. Such statics have the superclass's `ClassT` as their proto.
+pub fn ts_superclass_of_statics(statics: &ObjType) -> Option<&Type> {
+    if !statics.strictness_kind.is_typescript_loose() {
+        return None;
+    }
+    match statics.proto_t.deref() {
+        TypeInner::DefT(_, def_t) => match def_t.deref() {
+            DefTInner::ClassT(instance) => Some(instance),
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
+fn ts_class_statics_key_sources<E>(
+    concretize: &mut dyn FnMut(&Reason, &Type) -> Result<Vec<Type>, E>,
+    statics: &ObjType,
+) -> Result<KeySources, E> {
+    fn collect_statics<E>(
+        concretize: &mut dyn FnMut(&Reason, &Type) -> Result<Vec<Type>, E>,
+        seen: &mut BTreeSet<ALocId>,
+        statics: &ObjType,
+    ) -> Result<KeySources, E> {
+        let own_sources = obj_own_key_sources(statics);
+        let Some(super_instance) = ts_superclass_of_statics(statics) else {
+            return Ok(own_sources);
+        };
+        let super_sources = collect_superclass(concretize, seen, super_instance)?;
+        Ok(append_key_sources(own_sources, super_sources))
+    }
+
+    fn collect_superclass<E>(
+        concretize: &mut dyn FnMut(&Reason, &Type) -> Result<Vec<Type>, E>,
+        seen: &mut BTreeSet<ALocId>,
+        t: &Type,
+    ) -> Result<KeySources, E> {
+        use flow_typing_type::type_util::reason_of_t;
+
+        concretize(reason_of_t(t), t)?
+            .into_iter()
+            .try_fold(empty_key_sources(), |acc, t| {
+                let instance = match t.deref() {
+                    TypeInner::DefT(_, def_t) => match def_t.deref() {
+                        DefTInner::InstanceT(instance) => instance,
+                        _ => return Ok(acc),
+                    },
+                    TypeInner::ThisInstanceT(box ThisInstanceTData { instance, .. }) => instance,
+                    _ => return Ok(acc),
+                };
+                if !seen.insert(instance.inst.class_id.dupe()) {
+                    return Ok(acc);
+                }
+                concretize(reason_of_t(&instance.static_), &instance.static_)?
+                    .into_iter()
+                    .try_fold(acc, |acc, t| match t.deref() {
+                        TypeInner::DefT(_, def_t) => match def_t.deref() {
+                            DefTInner::ObjT(statics) => Ok(append_key_sources(
+                                acc,
+                                collect_statics(concretize, seen, statics)?,
+                            )),
+                            _ => Ok(acc),
+                        },
+                        _ => Ok(acc),
+                    })
+            })
+    }
+
+    let mut seen = BTreeSet::new();
+    collect_statics(concretize, &mut seen, statics)
+}
+
+/// Returns property maps and dictionary key types that contribute to `keyof`/`$Keys`
+/// for an object type.
+///
+/// The statics of a TS class have its superclass as their proto, and TS `keyof` sees the
+/// statics they inherit from it, as it sees the members an interface inherits.
+pub fn key_sources_of_obj_t<E>(
+    mut concretize: impl FnMut(&Reason, &Type) -> Result<Vec<Type>, E>,
+    obj: &ObjType,
+) -> Result<KeySources, E> {
+    if ts_superclass_of_statics(obj).is_some() {
+        ts_class_statics_key_sources(&mut concretize, obj)
+    } else {
+        Ok(obj_own_key_sources(obj))
     }
 }
 
