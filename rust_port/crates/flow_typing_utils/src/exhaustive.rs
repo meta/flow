@@ -55,6 +55,7 @@ use flow_typing_loc_env::match_pattern_ir::value_union;
 use flow_typing_type::type_::DefTInner;
 use flow_typing_type::type_::ImplicitInstantiationTvarData;
 use flow_typing_type::type_::ImplicitInstantiationTvarKind;
+use flow_typing_type::type_::InstanceKind;
 use flow_typing_type::type_::ROArrayATData;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeInner;
@@ -1804,11 +1805,18 @@ fn filter_object_by_pattern<'cx>(
     enum MatchKind {
         Match,
         NoMatch,
-        SubclassPattern,
+        PartialClassPattern,
     }
     let match_kind = match (value_class_info, pattern_class_info) {
         // Structural pattern: can match
         (_, None) => MatchKind::Match,
+        (_, Some(_))
+            if let TypeInner::DefT(_, def) = t.deref()
+                && let DefTInner::InstanceT(inst) = def.deref()
+                && matches!(inst.inst.inst_kind, InstanceKind::InterfaceKind { .. }) =>
+        {
+            MatchKind::PartialClassPattern
+        }
         // Structural value, nominal pattern: cannot match
         (None, Some(_)) => MatchKind::NoMatch,
         // Nominal value, nominal pattern
@@ -1821,7 +1829,7 @@ fn filter_object_by_pattern<'cx>(
                 MatchKind::Match
             } else if pattern_super_ids.contains(value_class_id) {
                 // Pattern's class is a strict subclass of the value's class.
-                MatchKind::SubclassPattern
+                MatchKind::PartialClassPattern
             } else {
                 MatchKind::NoMatch
             }
@@ -1837,15 +1845,13 @@ fn filter_object_by_pattern<'cx>(
                 subclass_covered.dupe(),
             ));
         }
-        MatchKind::SubclassPattern => {
-            // Flow does not track all the subclasses of a class, so a subclass pattern
-            // cannot reduce the value for exhaustiveness checking - we leave the value
-            // unconsumed, just like `NoMatch`. But the runtime value could be an
-            // instance of the subclass, so the pattern is reachable: we mark it (and
-            // its sub-patterns) as used so it is not reported as unused.
+        MatchKind::PartialClassPattern => {
+            // Neither subclasses nor classes matching a structural interface can
+            // consume the input type. Validate the class pattern while leaving
+            // other subclasses or implementations available to later patterns.
             return match pattern_class_info {
                 None => {
-                    // Unreachable: `SubclassPattern` implies a nominal pattern.
+                    // Unreachable: `PartialClassPattern` implies a nominal pattern.
                     Ok((
                         FilterObjectResult::NoMatch {
                             used_pattern_locs: ALocSet::new(),

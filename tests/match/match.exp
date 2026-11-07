@@ -135,6 +135,131 @@ References:
                               ^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
+Error ------------------------------------------------------------------------------- instance-pattern-interface.js:26:5
+
+Cannot cast `detail` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   instance-pattern-interface.js:26:5
+   26|     detail as string; // ERROR: class-specific binding is not empty
+           ^^^^^^
+
+References:
+   instance-pattern-interface.js:7:11
+    7|   detail: number;
+                 ^^^^^^ [1]
+   instance-pattern-interface.js:26:15
+   26|     detail as string; // ERROR: class-specific binding is not empty
+                     ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------- instance-pattern-interface.js:53:1
+
+`match` hasn't checked all possible cases of the input type. To fix, add the missing pattern: `NamedThing {...}` to
+match `NamedThing` [1]. [match-not-exhaustive]
+
+   instance-pattern-interface.js:53:1
+   53| match (maybeNamedThing) { // ERROR: the interface is still uncovered
+       ^^^^^
+
+References:
+   instance-pattern-interface.js:17:33
+   17| declare const maybeNamedThing: ?NamedThing;
+                                       ^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------- instance-pattern-interface.js:62:3
+
+This match pattern [1] is unused. The values it matches are either already covered by previous patterns, or are not part
+of the input type. To fix, either remove this pattern or restructure previous patterns. [match-unused-pattern]
+
+   62|   ActualThing {...} => {}, // ERROR: unused
+         ^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------- instance-pattern-interface.js:68:3
+
+This match pattern [1] is unused. The values it matches are either already covered by previous patterns, or are not part
+of the input type. To fix, either remove this pattern or restructure previous patterns. [match-unused-pattern]
+
+   68|   ActualThing {...} => {}, // ERROR: unused
+         ^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------- instance-pattern-interface.js:69:3
+
+This match pattern [1] is unused. The values it matches are either already covered by previous patterns, or are not part
+of the input type. To fix, either remove this pattern or restructure previous patterns. [match-unused-pattern]
+
+   69|   InheritedThing {...} => {}, // ERROR: unused
+         ^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------- instance-pattern-interface.js:91:3
+
+This instance pattern hasn't considered all possible properties of the input. There could be additional properties due
+to `ActualThing` [1]. To fix, add `...` to the end of the pattern to match all other properties. [match-not-exhaustive]
+
+   instance-pattern-interface.js:91:3
+   91|   ActualThing {const detail} => {}, // ERROR: requires rest
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   instance-pattern-interface.js:5:7
+    5| class ActualThing implements NamedThing {
+             ^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ instance-pattern-interface.js:97:24
+
+This match pattern [1] is unused. The values it matches are either already covered by previous patterns, or are not part
+of the input type. To fix, either remove this pattern or restructure previous patterns. [match-unused-pattern]
+
+   97|   ActualThing {detail: null, ...} => {}, // ERROR: impossible property pattern
+                              ^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ instance-pattern-interface.js:97:30
+
+This rest of object pattern [1] is unused. The values it matches are either already covered by previous patterns, or are
+not part of the input type. To fix, either remove this pattern or restructure previous patterns. [match-unused-pattern]
+
+   97|   ActualThing {detail: null, ...} => {}, // ERROR: impossible property pattern
+                                    ^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ instance-pattern-interface.js:138:3
+
+This match pattern [1] is unused. The values it matches are either already covered by previous patterns, or are not part
+of the input type. To fix, either remove this pattern or restructure previous patterns. [match-unused-pattern]
+
+   138|   StructuralThing {...} => {}, // ERROR: unused
+          ^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ instance-pattern-interface.js:146:1
+
+`match` hasn't checked all possible cases of the input type. To fix, add the missing pattern: `NamedThing {...}` to
+match `NamedThing` [1]. [match-not-exhaustive]
+
+   instance-pattern-interface.js:146:1
+   146| match (namedThing) { // ERROR: the interface is still uncovered
+        ^^^^^
+
+References:
+   instance-pattern-interface.js:18:27
+    18| declare const namedThing: NamedThing;
+                                  ^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ instance-pattern-interface.js:154:3
+
+This match pattern [1] is unused. The values it matches are either already covered by previous patterns, or are not part
+of the input type. To fix, either remove this pattern or restructure previous patterns. [match-unused-pattern]
+
+   154|   {...} => {}, // ERROR: unused
+          ^^^^^ [1]
+
+
 Error ----------------------------------------------------------------------------------------- instance-pattern.js:26:5
 
 This instance pattern hasn't considered all possible properties of the input. There could be additional properties due
@@ -1958,4 +2083,4 @@ References:
 
 
 
-Found 148 errors
+Found 159 errors

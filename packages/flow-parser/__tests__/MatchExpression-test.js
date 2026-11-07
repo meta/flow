@@ -839,6 +839,24 @@ describe('MatchExpression', () => {
       expect(runMatchExp(output, null)).toBe(1);
     });
 
+    test('instance pattern with structural fallback', async () => {
+      const output = await transform(`
+        const e = match (x) {
+          C {const foo, ...} => 'instance:' + foo,
+          {const foo, ...} => 'object:' + foo,
+          _ => 'none',
+        };
+      `);
+
+      expect(runMatchExp(output, new C({foo: 1, bar: 'bar', baz: 'baz'}))).toBe(
+        'instance:1',
+      );
+      expect(runMatchExp(output, {foo: 1})).toBe('object:1');
+      expect(runMatchExp(output, Object.create({foo: 1}))).toBe('object:1');
+      expect(runMatchExp(output, null)).toBe('none');
+      expect(runMatchExp(output, undefined)).toBe('none');
+    });
+
     test('instance pattern rest', async () => {
       const code = `
         const e = match (x) {
