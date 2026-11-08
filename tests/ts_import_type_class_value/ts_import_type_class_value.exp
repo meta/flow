@@ -1,0 +1,34 @@
+Error ------------------------------------------------------------------------------------------------- index.d.ts:10:32
+
+Cannot use type `LexicalNode` [1] as a value. Types are erased and don't exist at runtime. If the exported binding can
+also be used as a value, try importing it using `import LexicalNode` instead of `import type LexicalNode` and
+`import {LexicalNode}` instead of `import type {LexicalNode}`. [type-as-value]
+
+   index.d.ts:10:32
+   10| export type NodeClass = typeof LexicalNode;
+                                      ^^^^^^^^^^^
+
+References:
+   index.d.ts:9:15
+    9| import type { LexicalNode } from './node';
+                     ^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------- index.d.ts:11:44
+
+Cannot use type `LexicalNode` [1] as a value. Types are erased and don't exist at runtime. If the exported binding can
+also be used as a value, try importing it using `import LexicalNode` instead of `import type LexicalNode` and
+`import {LexicalNode}` instead of `import type {LexicalNode}`. [type-as-value]
+
+   index.d.ts:11:44
+   11| export declare class ParagraphNode extends LexicalNode {}
+                                                  ^^^^^^^^^^^
+
+References:
+   index.d.ts:9:15
+    9| import type { LexicalNode } from './node';
+                     ^^^^^^^^^^^ [1]
+
+
+
+Found 2 errors
