@@ -10,6 +10,8 @@
 //! In JavaScript, `Number.MAX_SAFE_INTEGER` (2^53-1) represents the maximum safe integer value,
 //! and `Number.MIN_SAFE_INTEGER` (-2^53+1) represents the minimum safe integer value.
 
+use ryu::Buffer;
+
 /// In JavaScript, `Number.MAX_SAFE_INTEGER` (2^53-1)
 /// represents the maximum safe integer value.
 pub const MAX_SAFE_INTEGER: f64 = 9007199254740991.0;
@@ -32,8 +34,9 @@ pub fn is_float_safe_integer(value: f64) -> bool {
     value.is_finite() && value.fract() == 0.0 && in_safe_integer_range(value)
 }
 
-/// Formats a float according to ECMAScript's Number::toString() rules
-/// (ECMA-262, Section 7.1.12.1).
+/// Formats a float according to ECMAScript's decimal Number::toString rules,
+/// including Note 2's closest-decimal, ties-to-even recommendation.
+/// See https://tc39.es/ecma262/#sec-numeric-types-number-tostring.
 pub fn ecma_string_of_float(v: f64) -> String {
     // 1. If NaN, return "NaN"
     if v.is_nan() {
@@ -52,9 +55,8 @@ pub fn ecma_string_of_float(v: f64) -> String {
         return "Infinity".to_owned();
     }
 
-    // Get the shortest decimal representation. Rust's Display for f64 uses the
-    // Ryū algorithm internally, producing the shortest round-trippable string.
-    // We parse this to extract significant digits (s) and exponent info.
+    // Ryū supplies the closest shortest decimal, with ties rounded to even.
+    // Extract its significant digits and exponent for ECMAScript formatting.
     let (digits, n) = shortest_decimal_digits(v);
     let k = digits.len() as i32;
 
@@ -222,9 +224,8 @@ pub fn shortest_string_of_float(v: f64) -> String {
 /// - 0.001   -> ("1", -2) because 1 * 10^(-2-1) = 0.001
 /// - 1e20    -> ("1", 21) because 1 * 10^(21-1) = 1e20
 fn shortest_decimal_digits(v: f64) -> (String, i32) {
-    // Use Rust's Display which already uses Ryū for shortest representation.
-    // The output can be in forms like: "123.456", "0.001", "1e20", "1.23e-15"
-    let s = format!("{}", v);
+    let mut buffer = Buffer::new();
+    let s = buffer.format_finite(v);
 
     if let Some(e_pos) = s.find('e') {
         // Scientific notation: e.g. "1.23e-15" or "1e20"
@@ -265,9 +266,9 @@ fn shortest_decimal_digits(v: f64) -> (String, i32) {
             (significant.to_owned(), n)
         } else {
             // "123.456" -> digits = "123456", n = 3 (number of integer digits)
-            let digits = format!("{}{}", int_part, frac_part.trim_end_matches('0'));
+            let digits = format!("{}{}", int_part, frac_part);
             let n = int_part.len() as i32;
-            (digits, n)
+            (digits.trim_end_matches('0').to_owned(), n)
         }
     } else {
         // Plain integer: e.g. "100" - but Rust normally doesn't produce this for f64
@@ -429,5 +430,65 @@ mod tests {
         assert_eq!(shortest_string_of_float(-42.0), "-42");
         assert_eq!(shortest_string_of_float(-0.0000001), "-1e-7");
         assert_eq!(shortest_string_of_float(-1000.0), "-1e3");
+    }
+
+    #[test]
+    fn test_ecma_string_of_float_decimal_ties() {
+        // Exact quarter steps at this magnitude lie between two shortest decimals.
+        for (bits, expected) in [
+            (0x430c_6bf5_2634_0002, "1000000000000000.2"),
+            (0x430c_6bf5_2634_0006, "1000000000000000.8"),
+            (0xc30c_6bf5_2634_0002, "-1000000000000000.2"),
+            (0xc30c_6bf5_2634_0006, "-1000000000000000.8"),
+        ] {
+            assert_eq!(ecma_string_of_float(f64::from_bits(bits)), expected);
+        }
+    }
+
+    #[test]
+    fn test_ecma_string_of_float_notation_boundaries() {
+        // JavaScript switches notation at 1e-6 and 1e21, including their neighbors.
+        for (bits, expected) in [
+            (0x3eb0_c6f7_a0b5_ed8c, "9.999999999999997e-7"),
+            (0x3eb0_c6f7_a0b5_ed8d, "0.000001"),
+            (0x3eb0_c6f7_a0b5_ed8e, "0.0000010000000000000002"),
+            (0x444b_1ae4_d6e2_ef4f, "999999999999999900000"),
+            (0x444b_1ae4_d6e2_ef50, "1e+21"),
+            (0x444b_1ae4_d6e2_ef51, "1.0000000000000001e+21"),
+        ] {
+            let value = f64::from_bits(bits);
+            assert_eq!(ecma_string_of_float(value), expected);
+            assert_eq!(ecma_string_of_float(-value), format!("-{expected}"));
+        }
+    }
+
+    #[test]
+    fn test_ecma_string_of_float_finite_extremes() {
+        // The largest subnormal and smallest normal retain distinct spellings.
+        for (bits, expected) in [
+            (0x0000_0000_0000_0001, "5e-324"),
+            (0x000f_ffff_ffff_ffff, "2.225073858507201e-308"),
+            (0x0010_0000_0000_0000, "2.2250738585072014e-308"),
+            (0x7fef_ffff_ffff_ffff, "1.7976931348623157e+308"),
+        ] {
+            let value = f64::from_bits(bits);
+            assert_eq!(ecma_string_of_float(value), expected);
+            assert_eq!(ecma_string_of_float(-value), format!("-{expected}"));
+        }
+    }
+
+    #[test]
+    fn test_shortest_decimal_digits_remove_trailing_zeros() {
+        // Ryū's trailing .0 must not become significant digits in compact output.
+        for (value, expected) in [
+            (1000.0, ("1", 4)),
+            (1_000_000.0, ("1", 7)),
+            (2_592_000_000.0, ("2592", 10)),
+            (120.3, ("1203", 3)),
+            (0.0012, ("12", -2)),
+        ] {
+            let (digits, n) = shortest_decimal_digits(value);
+            assert_eq!((digits.as_str(), n), expected);
+        }
     }
 }

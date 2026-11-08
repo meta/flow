@@ -677,6 +677,7 @@ dependencies = [
  "nix",
  "regex",
  "rustix",
+ "ryu",
  "serde",
  "serde_json",
  "vec1",

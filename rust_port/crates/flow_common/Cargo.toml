@@ -19,6 +19,7 @@ globset = { version = "0.4.21", features = ["serde1"] }
 jwalk = "0.8.1"
 regex = "1.13.1"
 rustix = { version = "1.1.6", features = ["event", "fs", "mm", "mount", "net", "pipe", "process", "thread", "time", "use-libc"] }
+ryu = "1.0.23"
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 serde_json = { version = "1.0.154", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
 vec1 = { version = "1.12.1", features = ["serde"] }
