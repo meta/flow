@@ -13,3 +13,7 @@ libs
 
 [options]
 all=true
+experimental.require_function_type_param_name=true
+experimental.require_dictionary_key_label=true
+unsuppressable_error_codes=missing-function-type-param-name
+unsuppressable_error_codes=missing-dictionary-key-label
