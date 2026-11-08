@@ -28,10 +28,10 @@ export default class FlowJsServices {
   schema: ?FlowJsConfigSchema;
   supportsParse: boolean;
   // Invariant: config is always legal under the current _flow.
-  config: {[string]: unknown};
+  config: {[key: string]: unknown};
 
   static init(
-    withBaseUrl: string => string,
+    withBaseUrl: (v: string) => string,
     version: string,
   ): Promise<FlowJsServices> {
     return initFlowLocally(withBaseUrl, version).then(
@@ -49,7 +49,7 @@ export default class FlowJsServices {
   }
 
   // Returns a new service object so that FlowJsServices can be used in states.
-  withUpdatedConfig(config: ?{[string]: unknown}): FlowJsServices {
+  withUpdatedConfig(config: ?{[key: string]: unknown}): FlowJsServices {
     const schema = this.schema;
     // When the current version of Flow doesn't have schema, then config is meaningless.
     if (schema == null || config == null) {

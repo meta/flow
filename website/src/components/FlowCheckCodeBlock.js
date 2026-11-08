@@ -60,7 +60,7 @@ type FlowReferenceLocation = {
 
 type FlowError = {
   messages: Array<FlowErrorMessage>,
-  referenceLocations: {[string]: FlowReferenceLocation},
+  referenceLocations: {[key: string]: FlowReferenceLocation},
   fullDescription: string,
   errorCode: string | null,
 };
@@ -73,7 +73,7 @@ type HighlightRange = {
 function formatErrorMessage(
   text: string,
   errorCode: string | null,
-  referenceLocations: {[string]: FlowReferenceLocation},
+  referenceLocations: {[key: string]: FlowReferenceLocation},
 ): React.MixedElement {
   // Extract and strip URLs from the message
   const cleanText = text

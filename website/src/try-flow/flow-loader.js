@@ -13,7 +13,7 @@ import './require_2_3_3';
 
 declare function requirejs(
   pathList: ReadonlyArray<string>,
-  resolve: (any) => void,
+  resolve: (v: any) => void,
 ): void;
 
 const versionCache /*: Map<string, Promise<FlowJs>> */ = new Map();
@@ -321,7 +321,7 @@ function waitForReady(flow: FlowJs): Promise<FlowJs> {
 }
 
 export function load(
-  withBaseUrl: string => string,
+  withBaseUrl: (v: string) => string,
   version: string,
 ): Promise<FlowJs> {
   const cached = versionCache.get(version);

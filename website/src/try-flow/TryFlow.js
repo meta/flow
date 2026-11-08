@@ -44,7 +44,7 @@ const age: number = get(user, 'name'); // Fix - update to: get(user, 'age')
 
 type InitialStateFromHash = {
   code: string,
-  config: ?{[string]: unknown},
+  config: ?{[key: string]: unknown},
   version: ?string,
 };
 

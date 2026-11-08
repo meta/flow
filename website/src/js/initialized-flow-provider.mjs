@@ -96,8 +96,8 @@ async function rateLimitedCheckContents(
 
 function getReferenceLocations(
   extra /*: ?Array<CheckContentsInfoTree> */,
-) /*: {[string]: ReferenceLocation} */ {
-  const referenceLocations /*: {[string]: ReferenceLocation} */ = {};
+) /*: {[key: string]: ReferenceLocation} */ {
+  const referenceLocations /*: {[key: string]: ReferenceLocation} */ = {};
 
   const visitInfoTree = (infoTree /*: CheckContentsInfoTree */) => {
     for (const {descr, loc} of infoTree.message) {
@@ -123,7 +123,7 @@ function getReferenceLocations(
 
 export default async function getFlowMeta(
   code /*: string */,
-  options /*: {[string]: boolean} */ = {},
+  options /*: {[key: string]: boolean} */ = {},
 ) /*: Promise<string> */ {
   if (process.env.NO_INLINE_FLOW_ERRORS) {
     return JSON.stringify({errors: [], options});

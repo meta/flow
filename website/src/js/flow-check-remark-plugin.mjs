@@ -11,15 +11,15 @@ import getFlowMeta from './initialized-flow-provider.mjs';
 
 /*:: type UnwrapPromise<T> = T extends Promise<infer V> ? V : T */
 
-const parseOptions = (rest /*: string */) /*: {[string]: boolean} */ => {
-  const options /*: {[string]: boolean} */ = {};
+const parseOptions = (rest /*: string */) /*: {[key: string]: boolean} */ => {
+  const options /*: {[key: string]: boolean} */ = {};
   for (const tok of rest.split(/\s+/).filter(Boolean)) {
     if (tok === 'first-error') options.firstErrorOnly = true;
   }
   return options;
 };
 
-const matchNode = (node /*: any */) /*: {[string]: boolean} | null */ => {
+const matchNode = (node /*: any */) /*: {[key: string]: boolean} | null */ => {
   if (node.type !== 'code') return null;
   const meta = node.meta || '';
   if (meta === 'flow-check') return {};
@@ -29,7 +29,7 @@ const matchNode = (node /*: any */) /*: {[string]: boolean} | null */ => {
 
 const transformNode = async (
   node /*: any */,
-  options /*: {[string]: boolean} */,
+  options /*: {[key: string]: boolean} */,
 ) => [
   {
     type: 'code',
