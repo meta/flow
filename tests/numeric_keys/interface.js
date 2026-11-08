@@ -14,10 +14,10 @@ interface A {
   a[0] as empty; // ERROR
 }
 
-// Invalid numeric keys in interface
+// Finite numeric keys in interface
 interface B {
-  1.1: true; // ERROR
-  9007199254740992: false; // ERROR
+  1.1: true; // OK
+  9007199254740992: false; // OK
 }
 
 // Variance with numeric key in interface (legacy sigils: ambiguity with unary +/-)

@@ -10,8 +10,7 @@ use std::ops::Deref;
 use std::rc::Rc;
 
 use dupe::Dupe;
-use flow_common::js_number::ecma_string_of_float;
-use flow_common::js_number::is_float_safe_integer;
+use flow_common::js_number::numeric_property_name;
 use flow_common::reason::Name;
 use flow_common::reason::VirtualReasonDesc;
 use flow_data_structure_wrapper::smol_str::FlowSmolStr;
@@ -117,10 +116,8 @@ impl Lookup {
                         },
                     );
                 }
-                // Check for number literal property (safe integer)
                 if let ExpressionInner::NumberLiteral { inner, .. } = prop_expr.deref() {
-                    if is_float_safe_integer(inner.value) {
-                        let name = FlowSmolStr::from(ecma_string_of_float(inner.value));
+                    if let Some(name) = numeric_property_name(inner.value) {
                         return Self::of_expression(&member.object, allow_optional).map(
                             |mut lookup| {
                                 lookup.projections.push_back(Proj::Prop(name));

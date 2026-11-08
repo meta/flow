@@ -13,8 +13,8 @@ declare class A {
   a[0] as empty; // ERROR
 }
 
-// Invalid numeric keys in declare class
+// Finite numeric keys in declare class
 declare class B {
-  1.1: true; // ERROR
-  9007199254740992: false; // ERROR
+  1.1: true; // OK
+  9007199254740992: false; // OK
 }

@@ -17,6 +17,7 @@ use flow_analysis::infer_type_hoister::ImpliedBound;
 use flow_common::alpha_rename;
 use flow_common::flow_import_specifier::Userland;
 use flow_common::flow_symbol::Symbol;
+use flow_common::js_number::numeric_property_name;
 use flow_common::polarity::Polarity;
 use flow_common::reason;
 use flow_common::reason::Name;
@@ -4792,23 +4793,15 @@ fn convert_object<'a>(
                             }
                         }
                         _ => {
-                            if flow_common::js_number::is_float_safe_integer(lit.value) {
-                                let name_str =
-                                    flow_common::js_number::ecma_string_of_float(lit.value);
-                                prop_of_name(
-                                    cx,
-                                    env,
-                                    acc,
-                                    key_loc.dupe(),
-                                    FlowSmolStr::new(&name_str),
-                                )?
+                            if let Some(name) = numeric_property_name(lit.value) {
+                                prop_of_name(cx, env, acc, key_loc.dupe(), name)?
                             } else {
                                 flow_js_utils::add_output_non_speculating(
                                     cx,
                                     ErrorMessage::EUnsupportedKeyInObject {
                                         loc: key_loc.dupe(),
                                         obj_kind: intermediate_error_types::ObjKind::Type,
-                                        key_error_kind: InvalidObjKey::kind_of_num_value(lit.value),
+                                        key_error_kind: InvalidObjKey::NumberNonFinite,
                                     },
                                 );
                                 {
@@ -7159,11 +7152,8 @@ fn interface_shadowing_member_last_locs(
         match key {
             Key::Identifier(id) => Some((Name::new(id.name.dupe()), &id.loc)),
             Key::StringLiteral((loc, lit)) => Some((Name::new(lit.value.dupe()), loc)),
-            Key::NumberLiteral((loc, lit))
-                if flow_common::js_number::is_float_safe_integer(lit.value) =>
-            {
-                let name = flow_common::js_number::ecma_string_of_float(lit.value);
-                Some((Name::new(FlowSmolStr::new(name)), loc))
+            Key::NumberLiteral((loc, lit)) if let Some(name) = numeric_property_name(lit.value) => {
+                Some((Name::new(name), loc))
             }
             _ => None,
         }
@@ -8053,13 +8043,10 @@ fn add_interface_properties<'a>(
                                  num_value: f64,
                                  num_lit: ast::NumberLiteral<ALoc>|
                                  -> Option<(FlowSmolStr, ALoc, RebuildKey)> {
-                                    if flow_common::js_number::is_float_safe_integer(num_value) {
-                                        let name = flow_common::js_number::ecma_string_of_float(
-                                            num_value,
-                                        );
+                                    if let Some(name) = numeric_property_name(num_value) {
                                         let key_loc_clone = key_loc.dupe();
                                         Some((
-                                            FlowSmolStr::new(&name),
+                                            name,
                                             key_loc,
                                             Box::new(move |t| {
                                                 Key::NumberLiteral((
@@ -8075,7 +8062,7 @@ fn add_interface_properties<'a>(
                                                 loc: key_loc,
                                                 obj_kind: obj_kind.clone(),
                                                 key_error_kind:
-                                                    InvalidObjKey::kind_of_num_value(num_value),
+                                                    InvalidObjKey::NumberNonFinite,
                                             },
                                         );
                                         None

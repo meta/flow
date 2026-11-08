@@ -1,0 +1,8 @@
+[libs]
+libs/fractional.d.ts
+
+[options]
+all=true
+module.file_ext=.js
+module.file_ext=.ts
+experimental.typescript_library_definition_support=true

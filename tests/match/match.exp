@@ -384,11 +384,16 @@ of the input type. To fix, either remove this pattern or restructure previous pa
 
 Error --------------------------------------------------------------------------------------- instance-pattern.js:173:12
 
-Unsupported instance pattern property literal in match pattern. String literals and int-like number literals are
-supported. [match-invalid-pattern]
+Property `1.3` is missing in `Point` [1]. [prop-missing]
 
+   instance-pattern.js:173:12
    173|     Point {1.3: _, ...} => {} // ERROR
                    ^^^
+
+References:
+   instance-pattern.js:170:20
+   170|   declare const x: Point;
+                           ^^^^^ [1]
 
 
 Error --------------------------------------------------------------------------------------- instance-pattern.js:183:12
@@ -1686,24 +1691,6 @@ Cannot use `var` for match pattern binding. Only `const` is allowed. [match-inva
             ^^^^^
 
 
-Error ------------------------------------------------------------------------------------------- pattern-errors.js:25:5
-
-This match pattern [1] is unused. The values it matches are either already covered by previous patterns, or are not part
-of the input type. To fix, either remove this pattern or restructure previous patterns. [match-unused-pattern]
-
-   25|     {1.1: _} => 0, // ERROR
-           ^^^^^^^^ [1]
-
-
-Error ------------------------------------------------------------------------------------------- pattern-errors.js:25:6
-
-Unsupported object pattern property literal in match pattern. String literals and int-like number literals are
-supported. [match-invalid-pattern]
-
-   25|     {1.1: _} => 0, // ERROR
-            ^^^
-
-
 Error ------------------------------------------------------------------------------------------- pattern-errors.js:35:5
 
 Unary pattern on `0` is not supported. [match-invalid-pattern]
@@ -2006,8 +1993,8 @@ you want to create a new variable with the value of property `foo`, or use `{foo
 
 Error ------------------------------------------------------------------------------------------ pattern-errors.js:181:6
 
-Unsupported object pattern property literal in match pattern. String literals and int-like number literals are
-supported. [match-invalid-pattern]
+Unsupported object pattern property literal in match pattern. String literals and finite number literals are supported.
+[match-invalid-pattern]
 
    181|     {1n: 1, ...} => 0, // ERROR
              ^^
@@ -2710,4 +2697,4 @@ References:
 
 
 
-Found 206 errors
+Found 204 errors

@@ -10,6 +10,7 @@
 //! In JavaScript, `Number.MAX_SAFE_INTEGER` (2^53-1) represents the maximum safe integer value,
 //! and `Number.MIN_SAFE_INTEGER` (-2^53+1) represents the minimum safe integer value.
 
+use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 use ryu::Buffer;
 
 /// In JavaScript, `Number.MAX_SAFE_INTEGER` (2^53-1)
@@ -32,6 +33,24 @@ pub fn in_safe_integer_range(value: f64) -> bool {
 /// Returns `true` if the value is an integer and within the safe integer range.
 pub fn is_float_safe_integer(value: f64) -> bool {
     value.is_finite() && value.fract() == 0.0 && in_safe_integer_range(value)
+}
+
+/// The JavaScript property name of a finite numeric literal.
+pub fn numeric_property_name(value: f64) -> Option<FlowSmolStr> {
+    if value.is_finite() {
+        Some(FlowSmolStr::new(ecma_string_of_float(value)))
+    } else {
+        None
+    }
+}
+
+/// The numeric value of a property name that round-trips through JavaScript
+/// number stringification. Noncanonical strings name distinct properties.
+pub fn canonical_numeric_property_value(name: &str) -> Option<f64> {
+    match name.parse::<f64>() {
+        Ok(value) if value.is_finite() && ecma_string_of_float(value) == name => Some(value),
+        Ok(_) | Err(_) => None,
+    }
 }
 
 /// Formats a float according to ECMAScript's decimal Number::toString rules,
@@ -323,6 +342,57 @@ mod tests {
         assert!(!is_float_safe_integer(f64::NAN));
         assert!(!is_float_safe_integer(f64::INFINITY));
         assert!(!is_float_safe_integer(f64::NEG_INFINITY));
+    }
+
+    #[test]
+    fn test_numeric_property_names() {
+        for (value, name) in [
+            (0.5, "0.5"),
+            (1.5, "1.5"),
+            (0.1, "0.1"),
+            (1_000_000_000_000_000.3, "1000000000000000.2"),
+            (-0.5, "-0.5"),
+            (-0.0, "0"),
+            (1e-6, "0.000001"),
+            (1e-7, "1e-7"),
+            (1e21, "1e+21"),
+            (9007199254740992.0, "9007199254740992"),
+            (f64::MAX, "1.7976931348623157e+308"),
+            (f64::from_bits(1), "5e-324"),
+        ] {
+            assert_eq!(numeric_property_name(value).as_deref(), Some(name));
+            assert_eq!(canonical_numeric_property_value(name), Some(value));
+        }
+        for value in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
+            assert_eq!(numeric_property_name(value), None);
+        }
+    }
+
+    #[test]
+    fn test_noncanonical_numeric_property_names() {
+        for name in [
+            "0.50",
+            "01.5",
+            ".5",
+            "+0.5",
+            " 0.5",
+            "0.5 ",
+            "5e-1",
+            "1e3",
+            "1E-7",
+            "1e21",
+            "-0",
+            "9007199254740993",
+            "1000000000000000.3",
+            "NaN",
+            "Infinity",
+            "-Infinity",
+            "1e309",
+            "",
+            "known",
+        ] {
+            assert_eq!(canonical_numeric_property_value(name), None, "{name}");
+        }
     }
 
     #[test]

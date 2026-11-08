@@ -1,0 +1,3490 @@
+Error ---------------------------------------------------------------------------------------------- annotations.js:14:3
+
+Cannot cast `o['0.5']` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   annotations.js:14:3
+   14|   o['0.5'] as number; // ERROR
+         ^^^^^^^^
+
+References:
+   annotations.js:2:25
+    2| type Fractional = {0.5: string, 1.5: number, '-0.5': boolean}; // OK
+                               ^^^^^^ [1]
+   annotations.js:14:15
+   14|   o['0.5'] as number; // ERROR
+                     ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- annotations.js:15:4
+
+Cannot cast object literal to `Fractional` because property `-0.5` is missing in object literal [1] but exists in
+`Fractional` [2]. [incompatible-type]
+
+   annotations.js:15:4
+   15|   ({0.5: 'half', 1.5: 15}) as Fractional; // ERROR: missing signed field
+          ^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+References:
+   annotations.js:15:31
+   15|   ({0.5: 'half', 1.5: 15}) as Fractional; // ERROR: missing signed field
+                                     ^^^^^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- annotations.js:16:10
+
+Cannot cast object literal to `FractionalInterface` because in property `0.5`: `5` [1] is incompatible with
+`string` [2]. [incompatible-type]
+
+   annotations.js:16:10
+   16|   ({0.5: 5, 1.5: 15, '-0.5': true}) as FractionalInterface; // ERROR
+                ^ [1]
+
+References:
+   annotations.js:4:8
+    4|   0.5: string; // OK
+              ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- annotations.js:27:5
+
+Cannot assign `'new'` to `o['0.5']` because property `0.5` is not writable. [cannot-write]
+
+   27|   o['0.5'] = 'new'; // ERROR
+           ^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------- annotations.js:29:5
+
+Cannot get `o['-0.5']` because an index signature declaring the expected key / value type is not readable. [cannot-read]
+
+   29|   o['-0.5'] as number; // ERROR
+           ^^^^^^
+
+
+Error --------------------------------------------------------------------------------------------- annotations.js:30:13
+
+Cannot assign `'new'` to `o[-0.5]` because `"new"` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   annotations.js:30:13
+   30|   o[-0.5] = 'new'; // ERROR
+                   ^^^^^ [1]
+
+References:
+   annotations.js:22:21
+   22|   writeonly '-0.5': number, // OK
+                           ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- annotations.js:48:3
+
+Cannot cast `o[0.5]` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   annotations.js:48:3
+   48|   o[0.5] as number; // ERROR
+         ^^^^^^
+
+References:
+   annotations.js:35:8
+   35|   0.5: string; // OK
+              ^^^^^^ [1]
+   annotations.js:48:13
+   48|   o[0.5] as number; // ERROR
+                   ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- annotations.js:49:10
+
+Cannot call `o[2.5]` with `1` bound to `value` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   annotations.js:49:10
+   49|   o[2.5](1); // ERROR
+                ^ [1]
+
+References:
+   annotations.js:38:14
+   38|   2.5(value: string): number; // OK
+                    ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- annotations.js:50:5
+
+Cannot get `o[3.5]` because property `3.5` is missing in `FractionalClass` [1]. [prop-missing]
+
+   annotations.js:50:5
+   50|   o[3.5]; // ERROR: static field is not on an instance
+           ^^^
+
+References:
+   annotations.js:42:20
+   42|   declare const o: FractionalClass;
+                          ^^^^^^^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------- annotations.js:60:3
+
+Cannot cast `quoted` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   annotations.js:60:3
+   60|   quoted as number; // ERROR
+         ^^^^^^
+
+References:
+   annotations.js:2:25
+    2| type Fractional = {0.5: string, 1.5: number, '-0.5': boolean}; // OK
+                               ^^^^^^ [1]
+   annotations.js:60:13
+   60|   quoted as number; // ERROR
+                   ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- annotations.js:61:29
+
+Cannot access `2.5` on `Fractional` because property `2.5` (did you mean `0.5`?) is missing in `Fractional` [1].
+[prop-missing]
+
+   annotations.js:61:29
+   61|   type Missing = Fractional[2.5]; // ERROR
+                                   ^^^
+
+References:
+   annotations.js:61:18
+   61|   type Missing = Fractional[2.5]; // ERROR
+                        ^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------- annotations.js:62:34
+
+Cannot access `"0.50"` on `Fractional` because property `0.50` (did you mean `0.5`?) is missing in `Fractional` [1].
+[prop-missing]
+
+   annotations.js:62:34
+   62|   type NonCanonical = Fractional['0.50']; // ERROR
+                                        ^^^^^^
+
+References:
+   annotations.js:62:23
+   62|   type NonCanonical = Fractional['0.50']; // ERROR
+                             ^^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------- annotations.js:72:3
+
+Cannot cast `0.5` to `keyof Fractional` because `0.5` [1] is incompatible with `keyof Fractional` [2].
+[incompatible-type]
+
+   annotations.js:72:3
+   72|   0.5 as keyof Fractional; // ERROR
+         ^^^ [1]
+
+References:
+   annotations.js:72:10
+   72|   0.5 as keyof Fractional; // ERROR
+                ^^^^^^^^^^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- annotations.js:73:3
+
+Cannot cast `-0.5` to `LegacyKeys<Fractional>` because `-0.5` [1] is incompatible with `keyof Fractional` [2].
+[incompatible-type]
+
+   annotations.js:73:3
+   73|   -0.5 as LegacyKeys<Fractional>; // ERROR
+         ^^^^ [1]
+
+References:
+   annotations.js:73:11
+   73|   -0.5 as LegacyKeys<Fractional>; // ERROR
+                 ^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- annotations.js:74:3
+
+Cannot cast `'0.50'` to `keyof Fractional` because property `0.50` (did you mean `0.5`?) is missing in `Fractional` [1].
+[prop-missing]
+
+   annotations.js:74:3
+   74|   '0.50' as keyof Fractional; // ERROR
+         ^^^^^^
+
+References:
+   annotations.js:74:19
+   74|   '0.50' as keyof Fractional; // ERROR
+                         ^^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------- annotations.js:77:3
+
+Cannot cast `Object.keys(...)` to `ReadonlyArray<number>` because in array element > at least one member of
+`"-0.5" | "0.5" | "1.5"` [1]: `"-0.5"` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   annotations.js:77:3
+   77|   Object.keys(o) as ReadonlyArray<number>; // ERROR
+         ^^^^^^^^^^^^^^ [1]
+
+References:
+   annotations.js:77:35
+   77|   Object.keys(o) as ReadonlyArray<number>; // ERROR
+                                         ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- annotations.js:78:3
+
+Cannot cast `'0.5'` to `number` because `"0.5"` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   annotations.js:78:3
+   78|   '0.5' as number; // ERROR
+         ^^^^^ [1]
+
+References:
+   annotations.js:78:12
+   78|   '0.5' as number; // ERROR
+                  ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- annotations.js:79:3
+
+Cannot cast `'-0.5'` to `number` because `"-0.5"` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   annotations.js:79:3
+   79|   '-0.5' as number; // ERROR
+         ^^^^^^ [1]
+
+References:
+   annotations.js:79:13
+   79|   '-0.5' as number; // ERROR
+                   ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- annotations.js:90:3
+
+Cannot cast `identity[1.5]` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   annotations.js:90:3
+   90|   identity[1.5] as string; // ERROR
+         ^^^^^^^^^^^^^
+
+References:
+   annotations.js:83:51
+   83| type Identity<O extends {...}> = {[K in keyof O]: O[K]}; // OK
+                                                         ^^^^ [1]
+   annotations.js:90:20
+   90|   identity[1.5] as string; // ERROR
+                          ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- annotations.js:93:12
+
+Cannot assign `'new'` to `readonly[0.5]` because property `0.5` is not writable. [cannot-write]
+
+   93|   readonly[0.5] = 'new'; // ERROR
+                  ^^^
+
+
+Error ---------------------------------------------------------------------------------------------- annotations.js:96:3
+
+Cannot cast `optional[0.5]` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   annotations.js:96:3
+   96|   optional[0.5] as string; // ERROR
+         ^^^^^^^^^^^^^
+
+References:
+   annotations.js:84:52
+   84| type Optional<O extends {...}> = {[K in keyof O]?: O[K]}; // OK
+                                                          ^^^^ [1]
+   annotations.js:96:20
+   96|   optional[0.5] as string; // ERROR
+                          ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- annotations.js:98:10
+
+Cannot cast object literal to `Optional<Fractional>` because in property `0.5`: `5` [1] is incompatible with
+`string` [2]. [incompatible-type]
+
+   annotations.js:98:10
+   98|   ({0.5: 5}) as Optional<Fractional>; // ERROR
+                ^ [1]
+
+References:
+   annotations.js:84:52
+   84| type Optional<O extends {...}> = {[K in keyof O]?: O[K]}; // OK
+                                                          ^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- annotations.js:99:4
+
+Cannot cast object literal to `Identity<Fractional>` because property `0.5` is missing in object literal [1] but exists
+in `{"-0.5": Fractional["-0.5"], "0.5": Fractional["0.5"], "1.5": Fractional["1.5"]}` [2]. [incompatible-type]
+
+   annotations.js:99:4
+   99|   ({1.5: 15, '-0.5': true}) as Identity<Fractional>; // ERROR
+          ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+References:
+   annotations.js:99:32
+   99|   ({1.5: 15, '-0.5': true}) as Identity<Fractional>; // ERROR
+                                      ^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------ array_boundaries.js:5:5
+
+Cannot get `a['1.5']` because property `1.5` is missing in `Array<string>` [1]. [prop-missing]
+
+   array_boundaries.js:5:5
+   5|   a['1.5']; // ERROR
+          ^^^^^
+
+References:
+   array_boundaries.js:3:20
+   3|   declare const a: Array<string>;
+                         ^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------ array_boundaries.js:6:5
+
+Cannot get `a['1e-7']` because property `1e-7` is missing in `Array<string>` [1]. [prop-missing]
+
+   array_boundaries.js:6:5
+   6|   a['1e-7']; // ERROR
+          ^^^^^^
+
+References:
+   array_boundaries.js:3:20
+   3|   declare const a: Array<string>;
+                         ^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------ array_boundaries.js:7:5
+
+Cannot get `a['1e+21']` because property `1e+21` is missing in `Array<string>` [1]. [prop-missing]
+
+   array_boundaries.js:7:5
+   7|   a['1e+21']; // ERROR
+          ^^^^^^^
+
+References:
+   array_boundaries.js:3:20
+   3|   declare const a: Array<string>;
+                         ^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------ array_boundaries.js:8:5
+
+Cannot get `a['9007199254740992']` because property `9007199254740992` is missing in `Array<string>` [1]. [prop-missing]
+
+   array_boundaries.js:8:5
+   8|   a['9007199254740992']; // ERROR
+          ^^^^^^^^^^^^^^^^^^
+
+References:
+   array_boundaries.js:3:20
+   3|   declare const a: Array<string>;
+                         ^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------ array_boundaries.js:9:5
+
+Cannot assign `'fraction'` to `a['1.5']` because property `1.5` is missing in `Array<string>` [1]. [prop-missing]
+
+   array_boundaries.js:9:5
+   9|   a['1.5'] = 'fraction'; // ERROR
+          ^^^^^
+
+References:
+   array_boundaries.js:3:20
+   3|   declare const a: Array<string>;
+                         ^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- array_boundaries.js:10:5
+
+Cannot assign `'large'` to `a['9007199254740992']` because property `9007199254740992` is missing in
+`Array<string>` [1]. [prop-missing]
+
+   array_boundaries.js:10:5
+   10|   a['9007199254740992'] = 'large'; // ERROR
+           ^^^^^^^^^^^^^^^^^^
+
+References:
+   array_boundaries.js:3:20
+    3|   declare const a: Array<string>;
+                          ^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- array_boundaries.js:11:5
+
+Cannot get `a.length` because property `length` is missing in `Array<string>` [1]. [prop-missing]
+
+   array_boundaries.js:11:5
+   11|   a.length as number; // OK
+           ^^^^^^
+
+References:
+   array_boundaries.js:3:20
+    3|   declare const a: Array<string>;
+                          ^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- array_boundaries.js:12:5
+
+Cannot call `a.map` because property `map` is missing in `Array<string>` [1]. [prop-missing]
+
+   array_boundaries.js:12:5
+   12|   a.map(value => value.length) as Array<number>; // OK
+           ^^^
+
+References:
+   array_boundaries.js:3:20
+    3|   declare const a: Array<string>;
+                          ^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- array_boundaries.js:12:9
+
+An annotation on this parameter is required because Flow cannot infer its type from local context. [missing-local-annot]
+
+   12|   a.map(value => value.length) as Array<number>; // OK
+               ^^^^^
+
+
+Error ----------------------------------------------------------------------------------------- array_boundaries.js:13:5
+
+Cannot call `a[Symbol.iterator]` because `string` [1] is not a function. [not-a-function]
+
+   array_boundaries.js:13:5
+   13|   a[Symbol.iterator](); // OK
+           ^^^^^^^^^^^^^^^
+
+References:
+   array_boundaries.js:3:26
+    3|   declare const a: Array<string>;
+                                ^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- array_boundaries.js:13:5
+
+Cannot resolve name `Symbol`. [cannot-resolve-name]
+
+   13|   a[Symbol.iterator](); // OK
+           ^^^^^^
+
+
+Error ---------------------------------------------------------------------------------------- array_boundaries.js:16:13
+
+Cannot call `functions['1.5']` because property `1.5` is missing in `Array<() => number>` [1]. [prop-missing]
+
+   array_boundaries.js:16:13
+   16|   functions['1.5'](); // ERROR
+                   ^^^^^
+
+References:
+   array_boundaries.js:14:28
+   14|   declare const functions: Array<() => number>;
+                                  ^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- array_boundaries.js:23:5
+
+Cannot get `a['0.5']` because property `0.5` is missing in `ReadonlyArray<string>` [1]. [prop-missing]
+
+   array_boundaries.js:23:5
+   23|   a['0.5']; // ERROR
+           ^^^^^
+
+References:
+   array_boundaries.js:21:20
+   21|   declare const a: ReadonlyArray<string>;
+                          ^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- array_boundaries.js:24:5
+
+Cannot get `a['9007199254740992']` because property `9007199254740992` is missing in `ReadonlyArray<string>` [1].
+[prop-missing]
+
+   array_boundaries.js:24:5
+   24|   a['9007199254740992']; // ERROR
+           ^^^^^^^^^^^^^^^^^^
+
+References:
+   array_boundaries.js:21:20
+   21|   declare const a: ReadonlyArray<string>;
+                          ^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------- array_boundaries.js:26:13
+
+Cannot call `functions['0.5']` because property `0.5` is missing in `ReadonlyArray<() => number>` [1]. [prop-missing]
+
+   array_boundaries.js:26:13
+   26|   functions['0.5'](); // ERROR
+                   ^^^^^
+
+References:
+   array_boundaries.js:25:28
+   25|   declare const functions: ReadonlyArray<() => number>;
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- array_boundaries.js:29:9
+
+Cannot get `tuple['0.5']` because property `0.5` is missing in `ReadonlyArray<string | number>` [1]. [prop-missing]
+
+   array_boundaries.js:29:9
+   29|   tuple['0.5']; // ERROR
+               ^^^^^
+
+References:
+   array_boundaries.js:27:24
+   27|   declare const tuple: [string, number];
+                              ^^^^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- array_boundaries.js:30:9
+
+Cannot get `tuple[0.5]` because the index into a tuple must be an integer, but `0.5` [1] is not an integer.
+[invalid-tuple-index]
+
+   30|   tuple[0.5]; // ERROR
+               ^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- array_boundaries.js:31:9
+
+Cannot get `tuple['9007199254740992']` because property `9007199254740992` is missing in
+`ReadonlyArray<string | number>` [1]. [prop-missing]
+
+   array_boundaries.js:31:9
+   31|   tuple['9007199254740992']; // ERROR
+               ^^^^^^^^^^^^^^^^^^
+
+References:
+   array_boundaries.js:27:24
+   27|   declare const tuple: [string, number];
+                              ^^^^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- array_boundaries.js:36:5
+
+Cannot get `a[key]` because property `1` is missing in `Array<string>` [1]. [prop-missing]
+
+   array_boundaries.js:36:5
+   36|   a[key] as string; // OK
+           ^^^
+
+References:
+   array_boundaries.js:35:38
+   35| function safeAlias<K extends '1'>(a: Array<string>, key: K): void {
+                                            ^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- array_boundaries.js:37:5
+
+Cannot get `a[key]` because property `1` is missing in `Array<string>` [1]. [prop-missing]
+
+   array_boundaries.js:37:5
+   37|   a[key] as number; // ERROR
+           ^^^
+
+References:
+   array_boundaries.js:35:38
+   35| function safeAlias<K extends '1'>(a: Array<string>, key: K): void {
+                                            ^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- array_boundaries.js:44:3
+
+Cannot cast `a[key]` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   array_boundaries.js:44:3
+   44|   a[key] as number; // ERROR
+         ^^^^^^
+
+References:
+   array_boundaries.js:41:26
+   41|   declare const a: Array<string>;
+                                ^^^^^^ [1]
+   array_boundaries.js:44:13
+   44|   a[key] as number; // ERROR
+                   ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------- array_boundaries.js:56:3
+
+Cannot cast `left['0.5']` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   array_boundaries.js:56:3
+   56|   left['0.5'] as string; // ERROR
+         ^^^^^^^^^^^
+
+References:
+   array_boundaries.js:48:22
+   48| type Named = {'0.5': number, '9007199254740992': boolean}; // OK
+                            ^^^^^^ [1]
+   array_boundaries.js:56:18
+   56|   left['0.5'] as string; // ERROR
+                        ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------- array_boundaries.js:57:3
+
+Cannot cast `right['0.5']` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   array_boundaries.js:57:3
+   57|   right['0.5'] as string; // ERROR
+         ^^^^^^^^^^^^
+
+References:
+   array_boundaries.js:48:22
+   48| type Named = {'0.5': number, '9007199254740992': boolean}; // OK
+                            ^^^^^^ [1]
+   array_boundaries.js:57:19
+   57|   right['0.5'] as string; // ERROR
+                         ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------- array_boundaries.js:66:3
+
+Cannot cast `custom['0.5']` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   array_boundaries.js:66:3
+   66|   custom['0.5'] as string; // ERROR
+         ^^^^^^^^^^^^^
+
+References:
+   array_boundaries.js:61:53
+   61| declare class Custom extends Array<string> { '0.5': number } // OK
+                                                           ^^^^^^ [1]
+   array_boundaries.js:66:20
+   66|   custom['0.5'] as string; // ERROR
+                          ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------- array_boundaries.js:67:10
+
+Cannot get `custom['0.6']` because property `0.6` is missing in `Custom` [1]. [prop-missing]
+
+   array_boundaries.js:67:10
+   67|   custom['0.6']; // ERROR
+                ^^^^^
+
+References:
+   array_boundaries.js:64:25
+   64|   declare const custom: Custom;
+                               ^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- array_boundaries.js:72:3
+
+Cannot cast `dictionary['0.5']` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   array_boundaries.js:72:3
+   72|   dictionary['0.5'] as number; // ERROR
+         ^^^^^^^^^^^^^^^^^
+
+References:
+   array_boundaries.js:62:43
+   62| declare class Dictionary { [key: number]: string } // OK
+                                                 ^^^^^^ [1]
+   array_boundaries.js:72:24
+   72|   dictionary['0.5'] as number; // ERROR
+                              ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------------- consumer.js:7:1
+
+Cannot cast `exported[0.5]` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   consumer.js:7:1
+   7| exported[0.5] as number; // ERROR
+      ^^^^^^^^^^^^^
+
+References:
+   signatures.js:3:31
+   3| export const exported = {0.5: 'half', 1.5: 15, '-1.5': true}; // OK
+                                    ^^^^^^ [1]
+   consumer.js:7:18
+   7| exported[0.5] as number; // ERROR
+                       ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------------- consumer.js:8:1
+
+Cannot cast `exported[-1.5]` to `string` because `boolean` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   consumer.js:8:1
+   8| exported[-1.5] as string; // ERROR
+      ^^^^^^^^^^^^^^
+
+References:
+   signatures.js:3:56
+   3| export const exported = {0.5: 'half', 1.5: 15, '-1.5': true}; // OK
+                                                             ^^^^ [1]
+   consumer.js:8:19
+   8| exported[-1.5] as string; // ERROR
+                        ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- consumer.js:9:10
+
+Cannot get `exported[2.5]` because property `2.5` (did you mean `0.5`?) is missing in object literal [1]. [prop-missing]
+
+   consumer.js:9:10
+   9| exported[2.5]; // ERROR
+               ^^^
+
+References:
+   signatures.js:3:25
+   3| export const exported = {0.5: 'half', 1.5: 15, '-1.5': true}; // OK
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------ consumer.js:14:17
+
+Cannot call `roundtrip` with object literal bound to `value` because in property `0.5`: `5` [1] is incompatible with
+`string` [2]. [incompatible-type]
+
+   consumer.js:14:17
+   14| roundtrip({0.5: 5, 1.5: 15}); // ERROR
+                       ^ [1]
+
+References:
+   signatures.js:2:40
+    2| export type ExportedFractional = {0.5: string, '1.5': number}; // OK
+                                              ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ consumer.js:15:11
+
+Cannot call `roundtrip` with object literal bound to `value` because property `0.5` is missing in object literal [1] but
+exists in `ExportedFractional` [2]. [incompatible-type]
+
+   consumer.js:15:11
+   15| roundtrip({1.5: 15}); // ERROR
+                 ^^^^^^^^^ [1]
+
+References:
+   signatures.js:4:34
+    4| export function roundtrip(value: ExportedFractional): ExportedFractional {
+                                        ^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- consumer.js:18:1
+
+Cannot cast `5` to `NumericValue` because `5` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   consumer.js:18:1
+   18| 5 as NumericValue; // ERROR
+       ^ [1]
+
+References:
+   consumer.js:18:6
+   18| 5 as NumericValue; // ERROR
+            ^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- consumer.js:25:1
+
+Cannot cast `ts[0.5]` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   consumer.js:25:1
+   25| ts[0.5] as number; // ERROR
+       ^^^^^^^
+
+References:
+   libs/fractional.d.ts:10:17
+   10|   readonly 0.5: string; // OK
+                       ^^^^^^ [1]
+   consumer.js:25:12
+   25| ts[0.5] as number; // ERROR
+                  ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- consumer.js:26:1
+
+Cannot cast `ts['-0.5']` to `string` because `boolean` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   consumer.js:26:1
+   26| ts['-0.5'] as string; // ERROR
+       ^^^^^^^^^^
+
+References:
+   libs/fractional.d.ts:12:11
+   12|   '-0.5': boolean; // OK
+                 ^^^^^^^ [1]
+   consumer.js:26:15
+   26| ts['-0.5'] as string; // ERROR
+                     ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- consumer.js:28:9
+
+Cannot call `ts[2.5]` with `1` bound to `value` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   consumer.js:28:9
+   28| ts[2.5](1); // ERROR
+               ^ [1]
+
+References:
+   libs/fractional.d.ts:13:14
+   13|   2.5(value: string): number; // OK
+                    ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:16:3
+
+Cannot cast `o` to `{[key: number]: string}` because in property `-0.5`: `boolean` [1] is not exactly the same as
+`string` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `-0.5` is invariantly typed. To fix the error,
+- Either annotate object literal [3] with `{[key: number]: string}` [4]
+- Or make property `-0.5` in `{[key: number]: string}` [4] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   dictionaries.js:16:3
+   16|   o as {[key: number]: string}; // ERROR
+         ^
+
+References:
+   dictionaries.js:6:13
+    6|     '-0.5': true,
+                   ^^^^ [1]
+   dictionaries.js:16:24
+   16|   o as {[key: number]: string}; // ERROR
+                              ^^^^^^ [2]
+   dictionaries.js:3:13
+                   v
+    3|   const o = {
+    4|     '0.5': true,
+    5|     '1.5': false,
+    6|     '-0.5': true,
+    7|     '-1.5': false,
+    8|     '0': true,
+    9|     '1e-7': false,
+   10|     '1e+21': true,
+   11|     '9007199254740992': false,
+   12|     '1.7976931348623157e+308': true,
+   13|   }; // OK
+         ^ [3]
+   dictionaries.js:16:8
+   16|   o as {[key: number]: string}; // ERROR
+              ^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:16:3
+
+Cannot cast `o` to `{[key: number]: string}` because in property `-1.5`: `boolean` [1] is not exactly the same as
+`string` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `-1.5` is invariantly typed. To fix the error,
+- Either annotate object literal [3] with `{[key: number]: string}` [4]
+- Or make property `-1.5` in `{[key: number]: string}` [4] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   dictionaries.js:16:3
+   16|   o as {[key: number]: string}; // ERROR
+         ^
+
+References:
+   dictionaries.js:7:13
+    7|     '-1.5': false,
+                   ^^^^^ [1]
+   dictionaries.js:16:24
+   16|   o as {[key: number]: string}; // ERROR
+                              ^^^^^^ [2]
+   dictionaries.js:3:13
+                   v
+    3|   const o = {
+    4|     '0.5': true,
+    5|     '1.5': false,
+    6|     '-0.5': true,
+    7|     '-1.5': false,
+    8|     '0': true,
+    9|     '1e-7': false,
+   10|     '1e+21': true,
+   11|     '9007199254740992': false,
+   12|     '1.7976931348623157e+308': true,
+   13|   }; // OK
+         ^ [3]
+   dictionaries.js:16:8
+   16|   o as {[key: number]: string}; // ERROR
+              ^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:16:3
+
+Cannot cast `o` to `{[key: number]: string}` because in property `0`: `boolean` [1] is not exactly the same as
+`string` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `0` is invariantly typed. To fix the error,
+- Either annotate object literal [3] with `{[key: number]: string}` [4]
+- Or make property `0` in `{[key: number]: string}` [4] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   dictionaries.js:16:3
+   16|   o as {[key: number]: string}; // ERROR
+         ^
+
+References:
+   dictionaries.js:8:10
+    8|     '0': true,
+                ^^^^ [1]
+   dictionaries.js:16:24
+   16|   o as {[key: number]: string}; // ERROR
+                              ^^^^^^ [2]
+   dictionaries.js:3:13
+                   v
+    3|   const o = {
+    4|     '0.5': true,
+    5|     '1.5': false,
+    6|     '-0.5': true,
+    7|     '-1.5': false,
+    8|     '0': true,
+    9|     '1e-7': false,
+   10|     '1e+21': true,
+   11|     '9007199254740992': false,
+   12|     '1.7976931348623157e+308': true,
+   13|   }; // OK
+         ^ [3]
+   dictionaries.js:16:8
+   16|   o as {[key: number]: string}; // ERROR
+              ^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:16:3
+
+Cannot cast `o` to `{[key: number]: string}` because in property `0.5`: `boolean` [1] is not exactly the same as
+`string` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `0.5` is invariantly typed. To fix the error,
+- Either annotate object literal [3] with `{[key: number]: string}` [4]
+- Or make property `0.5` in `{[key: number]: string}` [4] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   dictionaries.js:16:3
+   16|   o as {[key: number]: string}; // ERROR
+         ^
+
+References:
+   dictionaries.js:4:12
+    4|     '0.5': true,
+                  ^^^^ [1]
+   dictionaries.js:16:24
+   16|   o as {[key: number]: string}; // ERROR
+                              ^^^^^^ [2]
+   dictionaries.js:3:13
+                   v
+    3|   const o = {
+    4|     '0.5': true,
+    5|     '1.5': false,
+    6|     '-0.5': true,
+    7|     '-1.5': false,
+    8|     '0': true,
+    9|     '1e-7': false,
+   10|     '1e+21': true,
+   11|     '9007199254740992': false,
+   12|     '1.7976931348623157e+308': true,
+   13|   }; // OK
+         ^ [3]
+   dictionaries.js:16:8
+   16|   o as {[key: number]: string}; // ERROR
+              ^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:16:3
+
+Cannot cast `o` to `{[key: number]: string}` because in property `1.5`: `boolean` [1] is not exactly the same as
+`string` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `1.5` is invariantly typed. To fix the error,
+- Either annotate object literal [3] with `{[key: number]: string}` [4]
+- Or make property `1.5` in `{[key: number]: string}` [4] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   dictionaries.js:16:3
+   16|   o as {[key: number]: string}; // ERROR
+         ^
+
+References:
+   dictionaries.js:5:12
+    5|     '1.5': false,
+                  ^^^^^ [1]
+   dictionaries.js:16:24
+   16|   o as {[key: number]: string}; // ERROR
+                              ^^^^^^ [2]
+   dictionaries.js:3:13
+                   v
+    3|   const o = {
+    4|     '0.5': true,
+    5|     '1.5': false,
+    6|     '-0.5': true,
+    7|     '-1.5': false,
+    8|     '0': true,
+    9|     '1e-7': false,
+   10|     '1e+21': true,
+   11|     '9007199254740992': false,
+   12|     '1.7976931348623157e+308': true,
+   13|   }; // OK
+         ^ [3]
+   dictionaries.js:16:8
+   16|   o as {[key: number]: string}; // ERROR
+              ^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:16:3
+
+Cannot cast `o` to `{[key: number]: string}` because in property `1.7976931348623157e+308`: `boolean` [1] is not exactly
+the same as `string` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `1.7976931348623157e+308` is invariantly typed. To fix
+the error,
+- Either annotate object literal [3] with `{[key: number]: string}` [4]
+- Or make property `1.7976931348623157e+308` in `{[key: number]: string}` [4] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   dictionaries.js:16:3
+   16|   o as {[key: number]: string}; // ERROR
+         ^
+
+References:
+   dictionaries.js:12:32
+   12|     '1.7976931348623157e+308': true,
+                                      ^^^^ [1]
+   dictionaries.js:16:24
+   16|   o as {[key: number]: string}; // ERROR
+                              ^^^^^^ [2]
+   dictionaries.js:3:13
+                   v
+    3|   const o = {
+    4|     '0.5': true,
+    5|     '1.5': false,
+    6|     '-0.5': true,
+    7|     '-1.5': false,
+    8|     '0': true,
+    9|     '1e-7': false,
+   10|     '1e+21': true,
+   11|     '9007199254740992': false,
+   12|     '1.7976931348623157e+308': true,
+   13|   }; // OK
+         ^ [3]
+   dictionaries.js:16:8
+   16|   o as {[key: number]: string}; // ERROR
+              ^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:16:3
+
+Cannot cast `o` to `{[key: number]: string}` because in property `1e+21`: `boolean` [1] is not exactly the same as
+`string` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `1e+21` is invariantly typed. To fix the error,
+- Either annotate object literal [3] with `{[key: number]: string}` [4]
+- Or make property `1e+21` in `{[key: number]: string}` [4] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   dictionaries.js:16:3
+   16|   o as {[key: number]: string}; // ERROR
+         ^
+
+References:
+   dictionaries.js:10:14
+   10|     '1e+21': true,
+                    ^^^^ [1]
+   dictionaries.js:16:24
+   16|   o as {[key: number]: string}; // ERROR
+                              ^^^^^^ [2]
+   dictionaries.js:3:13
+                   v
+    3|   const o = {
+    4|     '0.5': true,
+    5|     '1.5': false,
+    6|     '-0.5': true,
+    7|     '-1.5': false,
+    8|     '0': true,
+    9|     '1e-7': false,
+   10|     '1e+21': true,
+   11|     '9007199254740992': false,
+   12|     '1.7976931348623157e+308': true,
+   13|   }; // OK
+         ^ [3]
+   dictionaries.js:16:8
+   16|   o as {[key: number]: string}; // ERROR
+              ^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:16:3
+
+Cannot cast `o` to `{[key: number]: string}` because in property `1e-7`: `boolean` [1] is not exactly the same as
+`string` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `1e-7` is invariantly typed. To fix the error,
+- Either annotate object literal [3] with `{[key: number]: string}` [4]
+- Or make property `1e-7` in `{[key: number]: string}` [4] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   dictionaries.js:16:3
+   16|   o as {[key: number]: string}; // ERROR
+         ^
+
+References:
+   dictionaries.js:9:13
+    9|     '1e-7': false,
+                   ^^^^^ [1]
+   dictionaries.js:16:24
+   16|   o as {[key: number]: string}; // ERROR
+                              ^^^^^^ [2]
+   dictionaries.js:3:13
+                   v
+    3|   const o = {
+    4|     '0.5': true,
+    5|     '1.5': false,
+    6|     '-0.5': true,
+    7|     '-1.5': false,
+    8|     '0': true,
+    9|     '1e-7': false,
+   10|     '1e+21': true,
+   11|     '9007199254740992': false,
+   12|     '1.7976931348623157e+308': true,
+   13|   }; // OK
+         ^ [3]
+   dictionaries.js:16:8
+   16|   o as {[key: number]: string}; // ERROR
+              ^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:16:3
+
+Cannot cast `o` to `{[key: number]: string}` because in property `9007199254740992`: `boolean` [1] is not exactly the
+same as `string` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `9007199254740992` is invariantly typed. To fix the
+error,
+- Either annotate object literal [3] with `{[key: number]: string}` [4]
+- Or make property `9007199254740992` in `{[key: number]: string}` [4] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   dictionaries.js:16:3
+   16|   o as {[key: number]: string}; // ERROR
+         ^
+
+References:
+   dictionaries.js:11:25
+   11|     '9007199254740992': false,
+                               ^^^^^ [1]
+   dictionaries.js:16:24
+   16|   o as {[key: number]: string}; // ERROR
+                              ^^^^^^ [2]
+   dictionaries.js:3:13
+                   v
+    3|   const o = {
+    4|     '0.5': true,
+    5|     '1.5': false,
+    6|     '-0.5': true,
+    7|     '-1.5': false,
+    8|     '0': true,
+    9|     '1e-7': false,
+   10|     '1e+21': true,
+   11|     '9007199254740992': false,
+   12|     '1.7976931348623157e+308': true,
+   13|   }; // OK
+         ^ [3]
+   dictionaries.js:16:8
+   16|   o as {[key: number]: string}; // ERROR
+              ^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:17:3
+
+Cannot cast `o` to `{readonly [key: 0.5 | 1.5]: boolean}` because property `-0.5` is missing in
+`{readonly [key: 0.5 | 1.5]: boolean}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: 0.5 | 1.5]: boolean}` [1] must be compatible with its indexer `0.5 | 1.5` [3]. [incompatible-type]
+
+   dictionaries.js:17:3
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+         ^
+
+References:
+   dictionaries.js:17:8
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:3:13
+                   v
+    3|   const o = {
+    4|     '0.5': true,
+    5|     '1.5': false,
+    6|     '-0.5': true,
+    7|     '-1.5': false,
+    8|     '0': true,
+    9|     '1e-7': false,
+   10|     '1e+21': true,
+   11|     '9007199254740992': false,
+   12|     '1.7976931348623157e+308': true,
+   13|   }; // OK
+         ^ [2]
+   dictionaries.js:17:24
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+                              ^^^^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:17:3
+
+Cannot cast `o` to `{readonly [key: 0.5 | 1.5]: boolean}` because property `-1.5` is missing in
+`{readonly [key: 0.5 | 1.5]: boolean}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: 0.5 | 1.5]: boolean}` [1] must be compatible with its indexer `0.5 | 1.5` [3]. [incompatible-type]
+
+   dictionaries.js:17:3
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+         ^
+
+References:
+   dictionaries.js:17:8
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:3:13
+                   v
+    3|   const o = {
+    4|     '0.5': true,
+    5|     '1.5': false,
+    6|     '-0.5': true,
+    7|     '-1.5': false,
+    8|     '0': true,
+    9|     '1e-7': false,
+   10|     '1e+21': true,
+   11|     '9007199254740992': false,
+   12|     '1.7976931348623157e+308': true,
+   13|   }; // OK
+         ^ [2]
+   dictionaries.js:17:24
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+                              ^^^^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:17:3
+
+Cannot cast `o` to `{readonly [key: 0.5 | 1.5]: boolean}` because property `0` is missing in
+`{readonly [key: 0.5 | 1.5]: boolean}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: 0.5 | 1.5]: boolean}` [1] must be compatible with its indexer `0.5 | 1.5` [3]. [incompatible-type]
+
+   dictionaries.js:17:3
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+         ^
+
+References:
+   dictionaries.js:17:8
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:3:13
+                   v
+    3|   const o = {
+    4|     '0.5': true,
+    5|     '1.5': false,
+    6|     '-0.5': true,
+    7|     '-1.5': false,
+    8|     '0': true,
+    9|     '1e-7': false,
+   10|     '1e+21': true,
+   11|     '9007199254740992': false,
+   12|     '1.7976931348623157e+308': true,
+   13|   }; // OK
+         ^ [2]
+   dictionaries.js:17:24
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+                              ^^^^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:17:3
+
+Cannot cast `o` to `{readonly [key: 0.5 | 1.5]: boolean}` because property `1.7976931348623157e+308` is missing in
+`{readonly [key: 0.5 | 1.5]: boolean}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: 0.5 | 1.5]: boolean}` [1] must be compatible with its indexer `0.5 | 1.5` [3]. [incompatible-type]
+
+   dictionaries.js:17:3
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+         ^
+
+References:
+   dictionaries.js:17:8
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:3:13
+                   v
+    3|   const o = {
+    4|     '0.5': true,
+    5|     '1.5': false,
+    6|     '-0.5': true,
+    7|     '-1.5': false,
+    8|     '0': true,
+    9|     '1e-7': false,
+   10|     '1e+21': true,
+   11|     '9007199254740992': false,
+   12|     '1.7976931348623157e+308': true,
+   13|   }; // OK
+         ^ [2]
+   dictionaries.js:17:24
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+                              ^^^^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:17:3
+
+Cannot cast `o` to `{readonly [key: 0.5 | 1.5]: boolean}` because property `1e+21` is missing in
+`{readonly [key: 0.5 | 1.5]: boolean}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: 0.5 | 1.5]: boolean}` [1] must be compatible with its indexer `0.5 | 1.5` [3]. [incompatible-type]
+
+   dictionaries.js:17:3
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+         ^
+
+References:
+   dictionaries.js:17:8
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:3:13
+                   v
+    3|   const o = {
+    4|     '0.5': true,
+    5|     '1.5': false,
+    6|     '-0.5': true,
+    7|     '-1.5': false,
+    8|     '0': true,
+    9|     '1e-7': false,
+   10|     '1e+21': true,
+   11|     '9007199254740992': false,
+   12|     '1.7976931348623157e+308': true,
+   13|   }; // OK
+         ^ [2]
+   dictionaries.js:17:24
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+                              ^^^^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:17:3
+
+Cannot cast `o` to `{readonly [key: 0.5 | 1.5]: boolean}` because property `1e-7` is missing in
+`{readonly [key: 0.5 | 1.5]: boolean}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: 0.5 | 1.5]: boolean}` [1] must be compatible with its indexer `0.5 | 1.5` [3]. [incompatible-type]
+
+   dictionaries.js:17:3
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+         ^
+
+References:
+   dictionaries.js:17:8
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:3:13
+                   v
+    3|   const o = {
+    4|     '0.5': true,
+    5|     '1.5': false,
+    6|     '-0.5': true,
+    7|     '-1.5': false,
+    8|     '0': true,
+    9|     '1e-7': false,
+   10|     '1e+21': true,
+   11|     '9007199254740992': false,
+   12|     '1.7976931348623157e+308': true,
+   13|   }; // OK
+         ^ [2]
+   dictionaries.js:17:24
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+                              ^^^^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:17:3
+
+Cannot cast `o` to `{readonly [key: 0.5 | 1.5]: boolean}` because property `9007199254740992` is missing in
+`{readonly [key: 0.5 | 1.5]: boolean}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: 0.5 | 1.5]: boolean}` [1] must be compatible with its indexer `0.5 | 1.5` [3]. [incompatible-type]
+
+   dictionaries.js:17:3
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+         ^
+
+References:
+   dictionaries.js:17:8
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:3:13
+                   v
+    3|   const o = {
+    4|     '0.5': true,
+    5|     '1.5': false,
+    6|     '-0.5': true,
+    7|     '-1.5': false,
+    8|     '0': true,
+    9|     '1e-7': false,
+   10|     '1e+21': true,
+   11|     '9007199254740992': false,
+   12|     '1.7976931348623157e+308': true,
+   13|   }; // OK
+         ^ [2]
+   dictionaries.js:17:24
+   17|   o as {readonly [key: 0.5 | 1.5]: boolean}; // ERROR: other keys are present
+                              ^^^^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:36:3
+
+Cannot cast `dict['0.5']` to `string` because `unknown` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   dictionaries.js:36:3
+   36|   dict['0.5'] as string; // ERROR
+         ^^^^^^^^^^^
+
+References:
+   dictionaries.js:21:42
+   21| type UnknownDictionary = {[key: number]: unknown}; // OK
+                                                ^^^^^^^ [1]
+   dictionaries.js:36:18
+   36|   dict['0.5'] as string; // ERROR
+                        ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:37:8
+
+Cannot assign `'new'` to `dict['0.50']` because property `0.50` is missing in `UnknownDictionary` [1]. [prop-missing]
+
+   dictionaries.js:37:8
+   37|   dict['0.50'] = 'new'; // ERROR
+              ^^^^^^
+
+References:
+   dictionaries.js:28:15
+   28|   const dict: UnknownDictionary = values; // OK
+                     ^^^^^^^^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:38:8
+
+Cannot assign `false` to `dict['-0']` because property `-0` is missing in `UnknownDictionary` [1]. [prop-missing]
+
+   dictionaries.js:38:8
+   38|   dict['-0'] = false; // ERROR
+              ^^^^
+
+References:
+   dictionaries.js:28:15
+   28|   const dict: UnknownDictionary = values; // OK
+                     ^^^^^^^^^^^^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------- dictionaries.js:39:43
+
+Cannot assign object literal to `nonCanonical` because property `5e-1` is missing in `UnknownDictionary` [1] but exists
+in object literal [2]. Any property that does not exist in `UnknownDictionary` [1] must be compatible with its indexer
+`number` [3]. [incompatible-type]
+
+   dictionaries.js:39:43
+   39|   const nonCanonical: UnknownDictionary = {'5e-1': true as unknown}; // ERROR
+                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+References:
+   dictionaries.js:39:23
+   39|   const nonCanonical: UnknownDictionary = {'5e-1': true as unknown}; // ERROR
+                             ^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:21:33
+   21| type UnknownDictionary = {[key: number]: unknown}; // OK
+                                       ^^^^^^ [3]
+
+
+Error -------------------------------------------------------------------------------------------- dictionaries.js:40:43
+
+Cannot assign object literal to `negativeZero` because property `-0` is missing in `UnknownDictionary` [1] but exists in
+object literal [2]. Any property that does not exist in `UnknownDictionary` [1] must be compatible with its indexer
+`number` [3]. [incompatible-type]
+
+   dictionaries.js:40:43
+   40|   const negativeZero: UnknownDictionary = {'-0': false as unknown}; // ERROR
+                                                 ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+References:
+   dictionaries.js:40:23
+   40|   const negativeZero: UnknownDictionary = {'-0': false as unknown}; // ERROR
+                             ^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:21:33
+   21| type UnknownDictionary = {[key: number]: unknown}; // OK
+                                       ^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:45:4
+
+Cannot cast object literal to `{readonly [key: number]: unknown}` because property `0.50` is missing in
+`{readonly [key: number]: unknown}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: number]: unknown}` [1] must be compatible with its indexer `number` [3]. [incompatible-type]
+
+   dictionaries.js:45:4
+   45|   ({'0.50': true}) as {readonly [key: number]: unknown}; // ERROR
+          ^^^^^^^^^^^^^^ [2]
+
+References:
+   dictionaries.js:45:23
+   45|   ({'0.50': true}) as {readonly [key: number]: unknown}; // ERROR
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:45:39
+   45|   ({'0.50': true}) as {readonly [key: number]: unknown}; // ERROR
+                                             ^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:46:4
+
+Cannot cast object literal to `{readonly [key: number]: unknown}` because property `01.5` is missing in
+`{readonly [key: number]: unknown}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: number]: unknown}` [1] must be compatible with its indexer `number` [3]. [incompatible-type]
+
+   dictionaries.js:46:4
+   46|   ({'01.5': true}) as {readonly [key: number]: unknown}; // ERROR
+          ^^^^^^^^^^^^^^ [2]
+
+References:
+   dictionaries.js:46:23
+   46|   ({'01.5': true}) as {readonly [key: number]: unknown}; // ERROR
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:46:39
+   46|   ({'01.5': true}) as {readonly [key: number]: unknown}; // ERROR
+                                             ^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:47:4
+
+Cannot cast object literal to `{readonly [key: number]: unknown}` because property `+0.5` is missing in
+`{readonly [key: number]: unknown}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: number]: unknown}` [1] must be compatible with its indexer `number` [3]. [incompatible-type]
+
+   dictionaries.js:47:4
+   47|   ({'+0.5': true}) as {readonly [key: number]: unknown}; // ERROR
+          ^^^^^^^^^^^^^^ [2]
+
+References:
+   dictionaries.js:47:23
+   47|   ({'+0.5': true}) as {readonly [key: number]: unknown}; // ERROR
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:47:39
+   47|   ({'+0.5': true}) as {readonly [key: number]: unknown}; // ERROR
+                                             ^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:48:4
+
+Cannot cast object literal to `{readonly [key: number]: unknown}` because property ` 0.5 ` is missing in
+`{readonly [key: number]: unknown}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: number]: unknown}` [1] must be compatible with its indexer `number` [3]. [incompatible-type]
+
+   dictionaries.js:48:4
+   48|   ({' 0.5 ': true}) as {readonly [key: number]: unknown}; // ERROR
+          ^^^^^^^^^^^^^^^ [2]
+
+References:
+   dictionaries.js:48:24
+   48|   ({' 0.5 ': true}) as {readonly [key: number]: unknown}; // ERROR
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:48:40
+   48|   ({' 0.5 ': true}) as {readonly [key: number]: unknown}; // ERROR
+                                              ^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:49:4
+
+Cannot cast object literal to `{readonly [key: number]: unknown}` because property `.5` is missing in
+`{readonly [key: number]: unknown}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: number]: unknown}` [1] must be compatible with its indexer `number` [3]. [incompatible-type]
+
+   dictionaries.js:49:4
+   49|   ({'.5': true}) as {readonly [key: number]: unknown}; // ERROR
+          ^^^^^^^^^^^^ [2]
+
+References:
+   dictionaries.js:49:21
+   49|   ({'.5': true}) as {readonly [key: number]: unknown}; // ERROR
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:49:37
+   49|   ({'.5': true}) as {readonly [key: number]: unknown}; // ERROR
+                                           ^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:50:4
+
+Cannot cast object literal to `{readonly [key: number]: unknown}` because property `5e-1` is missing in
+`{readonly [key: number]: unknown}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: number]: unknown}` [1] must be compatible with its indexer `number` [3]. [incompatible-type]
+
+   dictionaries.js:50:4
+   50|   ({'5e-1': true}) as {readonly [key: number]: unknown}; // ERROR
+          ^^^^^^^^^^^^^^ [2]
+
+References:
+   dictionaries.js:50:23
+   50|   ({'5e-1': true}) as {readonly [key: number]: unknown}; // ERROR
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:50:39
+   50|   ({'5e-1': true}) as {readonly [key: number]: unknown}; // ERROR
+                                             ^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:51:4
+
+Cannot cast object literal to `{readonly [key: number]: unknown}` because property `-0` is missing in
+`{readonly [key: number]: unknown}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: number]: unknown}` [1] must be compatible with its indexer `number` [3]. [incompatible-type]
+
+   dictionaries.js:51:4
+   51|   ({'-0': true}) as {readonly [key: number]: unknown}; // ERROR
+          ^^^^^^^^^^^^ [2]
+
+References:
+   dictionaries.js:51:21
+   51|   ({'-0': true}) as {readonly [key: number]: unknown}; // ERROR
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:51:37
+   51|   ({'-0': true}) as {readonly [key: number]: unknown}; // ERROR
+                                           ^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:52:4
+
+Cannot cast object literal to `{readonly [key: number]: unknown}` because property `NaN` is missing in
+`{readonly [key: number]: unknown}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: number]: unknown}` [1] must be compatible with its indexer `number` [3]. [incompatible-type]
+
+   dictionaries.js:52:4
+   52|   ({'NaN': true}) as {readonly [key: number]: unknown}; // ERROR
+          ^^^^^^^^^^^^^ [2]
+
+References:
+   dictionaries.js:52:22
+   52|   ({'NaN': true}) as {readonly [key: number]: unknown}; // ERROR
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:52:38
+   52|   ({'NaN': true}) as {readonly [key: number]: unknown}; // ERROR
+                                            ^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:53:4
+
+Cannot cast object literal to `{readonly [key: number]: unknown}` because property `Infinity` is missing in
+`{readonly [key: number]: unknown}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: number]: unknown}` [1] must be compatible with its indexer `number` [3]. [incompatible-type]
+
+   dictionaries.js:53:4
+   53|   ({'Infinity': true}) as {readonly [key: number]: unknown}; // ERROR
+          ^^^^^^^^^^^^^^^^^^ [2]
+
+References:
+   dictionaries.js:53:27
+   53|   ({'Infinity': true}) as {readonly [key: number]: unknown}; // ERROR
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:53:43
+   53|   ({'Infinity': true}) as {readonly [key: number]: unknown}; // ERROR
+                                                 ^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:54:4
+
+Cannot cast object literal to `{readonly [key: number]: unknown}` because property `unrelated` is missing in
+`{readonly [key: number]: unknown}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: number]: unknown}` [1] must be compatible with its indexer `number` [3]. [incompatible-type]
+
+   dictionaries.js:54:4
+   54|   ({'0.5': true, unrelated: false}) as {readonly [key: number]: unknown}; // ERROR
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+References:
+   dictionaries.js:54:40
+   54|   ({'0.5': true, unrelated: false}) as {readonly [key: number]: unknown}; // ERROR
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:54:56
+   54|   ({'0.5': true, unrelated: false}) as {readonly [key: number]: unknown}; // ERROR
+                                                              ^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:69:3
+
+Cannot cast `dict['0.5']` to `string` because `boolean` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   dictionaries.js:69:3
+   69|   dict['0.5'] as string; // ERROR
+         ^^^^^^^^^^^
+
+References:
+   dictionaries.js:60:39
+   60|   declare const dict: {[key: number]: boolean};
+                                             ^^^^^^^ [1]
+   dictionaries.js:69:18
+   69|   dict['0.5'] as string; // ERROR
+                        ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:70:8
+
+Cannot get `dict['0.50']` because property `0.50` is missing in `{[key: number]: boolean}` [1]. [prop-missing]
+
+   dictionaries.js:70:8
+   70|   dict['0.50']; // ERROR
+              ^^^^^^
+
+References:
+   dictionaries.js:60:23
+   60|   declare const dict: {[key: number]: boolean};
+                             ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:71:8
+
+Cannot get `dict['01.5']` because property `01.5` is missing in `{[key: number]: boolean}` [1]. [prop-missing]
+
+   dictionaries.js:71:8
+   71|   dict['01.5']; // ERROR
+              ^^^^^^
+
+References:
+   dictionaries.js:60:23
+   60|   declare const dict: {[key: number]: boolean};
+                             ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:72:8
+
+Cannot get `dict['+0.5']` because property `+0.5` is missing in `{[key: number]: boolean}` [1]. [prop-missing]
+
+   dictionaries.js:72:8
+   72|   dict['+0.5']; // ERROR
+              ^^^^^^
+
+References:
+   dictionaries.js:60:23
+   60|   declare const dict: {[key: number]: boolean};
+                             ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:73:8
+
+Cannot get `dict[' 0.5 ']` because property ` 0.5 ` is missing in `{[key: number]: boolean}` [1]. [prop-missing]
+
+   dictionaries.js:73:8
+   73|   dict[' 0.5 ']; // ERROR
+              ^^^^^^^
+
+References:
+   dictionaries.js:60:23
+   60|   declare const dict: {[key: number]: boolean};
+                             ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:74:8
+
+Cannot get `dict['.5']` because property `.5` is missing in `{[key: number]: boolean}` [1]. [prop-missing]
+
+   dictionaries.js:74:8
+   74|   dict['.5']; // ERROR
+              ^^^^
+
+References:
+   dictionaries.js:60:23
+   60|   declare const dict: {[key: number]: boolean};
+                             ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:75:8
+
+Cannot get `dict['5e-1']` because property `5e-1` is missing in `{[key: number]: boolean}` [1]. [prop-missing]
+
+   dictionaries.js:75:8
+   75|   dict['5e-1']; // ERROR
+              ^^^^^^
+
+References:
+   dictionaries.js:60:23
+   60|   declare const dict: {[key: number]: boolean};
+                             ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:76:8
+
+Cannot get `dict['-0']` because property `-0` is missing in `{[key: number]: boolean}` [1]. [prop-missing]
+
+   dictionaries.js:76:8
+   76|   dict['-0']; // ERROR
+              ^^^^
+
+References:
+   dictionaries.js:60:23
+   60|   declare const dict: {[key: number]: boolean};
+                             ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:89:3
+
+Cannot cast `alias[0.5]` to `boolean` because `"declared"` [1] is incompatible with `boolean` [2]. [incompatible-type]
+
+   dictionaries.js:89:3
+   89|   alias[0.5] as boolean; // ERROR
+         ^^^^^^^^^^
+
+References:
+   dictionaries.js:80:29
+   80| type WithDeclared = {'0.5': 'declared', [key: number]: boolean}; // OK
+                                   ^^^^^^^^^^ [1]
+   dictionaries.js:89:17
+   89|   alias[0.5] as boolean; // ERROR
+                       ^^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- dictionaries.js:90:18
+
+Cannot assign `false` to `alias['0.5']` because `false` [1] is incompatible with `"declared"` [2]. [incompatible-type]
+
+   dictionaries.js:90:18
+   90|   alias['0.5'] = false; // ERROR
+                        ^^^^^ [1]
+
+References:
+   dictionaries.js:80:29
+   80| type WithDeclared = {'0.5': 'declared', [key: number]: boolean}; // OK
+                                   ^^^^^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- dictionaries.js:91:16
+
+Cannot assign `'declared'` to `alias[1.5]` because `"declared"` [1] is incompatible with `boolean` [2].
+[incompatible-type]
+
+   dictionaries.js:91:16
+   91|   alias[1.5] = 'declared'; // ERROR
+                      ^^^^^^^^^^ [1]
+
+References:
+   dictionaries.js:80:56
+   80| type WithDeclared = {'0.5': 'declared', [key: number]: boolean}; // OK
+                                                              ^^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- dictionaries.js:94:3
+
+Cannot cast `alias` to `{readonly [key: number]: boolean}` because in property `0.5`: `"declared"` [1] is incompatible
+with `boolean` [2]. [incompatible-type]
+
+   dictionaries.js:94:3
+   94|   alias as {readonly [key: number]: boolean}; // ERROR: cannot skip the declared field
+         ^^^^^
+
+References:
+   dictionaries.js:80:29
+   80| type WithDeclared = {'0.5': 'declared', [key: number]: boolean}; // OK
+                                   ^^^^^^^^^^ [1]
+   dictionaries.js:94:37
+   94|   alias as {readonly [key: number]: boolean}; // ERROR: cannot skip the declared field
+                                           ^^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- dictionaries.js:103:3
+
+Cannot cast `key` to `number` because in at least one member of `"0.5" | "1.5"` [1]: `"0.5"` [2] is incompatible with
+`number` [3]. [incompatible-type]
+
+   dictionaries.js:103:3
+   103|   key as number; // ERROR
+          ^^^
+
+References:
+   dictionaries.js:100:28
+   100|   declare const inferKey: <K, V>(o: {[K]: V}) => K;
+                                   ^ [1]
+   dictionaries.js:99:13
+    99|   const o = {0.5: true, 1.5: false}; // OK
+                    ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   dictionaries.js:103:10
+   103|   key as number; // ERROR
+                 ^^^^^^ [3]
+
+
+Error ------------------------------------------------------------------------------------------- dictionaries.js:105:14
+
+Cannot call `numericKey` because in type argument `K` > at least one member of `"0.5" | "1.5"` [1]: `"0.5"` [2] is
+incompatible with `number` [3]. [incompatible-type]
+
+   dictionaries.js:105:14
+   105|   numericKey(o); // ERROR
+                     ^
+
+References:
+   dictionaries.js:104:30
+   104|   declare const numericKey: <K extends number, V>(o: {[K]: V}) => K;
+                                     ^ [1]
+   dictionaries.js:99:13
+    99|   const o = {0.5: true, 1.5: false}; // OK
+                    ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   dictionaries.js:104:40
+   104|   declare const numericKey: <K extends number, V>(o: {[K]: V}) => K;
+                                               ^^^^^^ [3]
+
+
+Error -------------------------------------------------------------------------------------------- dictionaries.js:109:3
+
+Cannot cast `value` to `string` because `boolean` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   dictionaries.js:109:3
+   109|   value as string; // ERROR
+          ^^^^^
+
+References:
+   dictionaries.js:99:19
+    99|   const o = {0.5: true, 1.5: false}; // OK
+                          ^^^^ [1]
+   dictionaries.js:109:12
+   109|   value as string; // ERROR
+                   ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- dictionaries.js:113:3
+
+Cannot cast `inferred` to `number` because in at least one member of `"0.5" | "1.5"` [1]: `"0.5"` [1] is incompatible
+with `number` [2]. [incompatible-type]
+
+   dictionaries.js:113:3
+   113|   inferred as number; // ERROR
+          ^^^^^^^^
+
+References:
+   dictionaries.js:111:27
+   111|   declare const inferred: InferredKeys<{0.5: boolean, '1.5': string}>;
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   dictionaries.js:113:15
+   113|   inferred as number; // ERROR
+                      ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ nonfinite.js:2:18
+
+Unsupported key in object literal. Only finite number literals are allowed. [illegal-key]
+
+   2| const literal = {1e309: true}; // ERROR
+                       ^^^^^
+
+
+Error ------------------------------------------------------------------------------------------------ nonfinite.js:3:20
+
+Cannot use `1e309` [1] to assign a computed property. Only finite number literals are allowed. [invalid-computed-prop]
+
+   3| const computed = {[1e309]: true}; // ERROR
+                         ^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------ nonfinite.js:4:20
+
+Cannot use `-1e309` [1] to assign a computed property. Only finite number literals are allowed. [invalid-computed-prop]
+
+   4| const negative = {[-1e309]: true}; // ERROR
+                         ^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------ nonfinite.js:6:19
+
+Unsupported key in object type. Only finite number literals are allowed. [illegal-key]
+
+   6| type Nonfinite = {1e309: boolean}; // ERROR
+                        ^^^^^
+
+
+Error ------------------------------------------------------------------------------------------------ nonfinite.js:7:32
+
+Unsupported key in interface. Only finite number literals are allowed. [illegal-key]
+
+   7| interface NonfiniteInterface { 1e309: boolean } // ERROR
+                                     ^^^^^
+
+
+Error ------------------------------------------------------------------------------------------------ nonfinite.js:8:32
+
+Unsupported key in declare class. Only finite number literals are allowed. [illegal-key]
+
+   8| declare class NonfiniteClass { 1e309: boolean } // ERROR
+                                     ^^^^^
+
+
+Error ------------------------------------------------------------------------------------------------ nonfinite.js:13:5
+
+Cannot access `{Infinity: boolean}` [1] with computed property using `1e309` [2]. Only finite number literals are
+allowed. [invalid-computed-prop]
+
+   nonfinite.js:13:5
+   13|   o[1e309]; // ERROR
+           ^^^^^ [2]
+
+References:
+   nonfinite.js:12:20
+   12|   declare const o: {'Infinity': boolean};
+                          ^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------ nonfinite.js:14:5
+
+Cannot use `1e309` [1] to assign a computed property. Computed properties may only be numeric or string literal values.
+See https://flow.org/en/docs/types/literals/ for more information on literal types. [invalid-computed-prop]
+
+   14|   o[1e309] = true; // ERROR
+           ^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------ nonfinite.js:22:3
+
+Cannot cast `o` to `{readonly [key: number]: unknown}` because property `-Infinity` is missing in
+`{readonly [key: number]: unknown}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: number]: unknown}` [1] must be compatible with its indexer `number` [3]. [incompatible-type]
+
+   nonfinite.js:22:3
+   22|   o as {readonly [key: number]: unknown}; // ERROR
+         ^
+
+References:
+   nonfinite.js:22:8
+   22|   o as {readonly [key: number]: unknown}; // ERROR
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   nonfinite.js:20:13
+   20|   const o = {'NaN': true, 'Infinity': false, '-Infinity': true}; // OK
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   nonfinite.js:22:24
+   22|   o as {readonly [key: number]: unknown}; // ERROR
+                              ^^^^^^ [3]
+
+
+Error ------------------------------------------------------------------------------------------------ nonfinite.js:22:3
+
+Cannot cast `o` to `{readonly [key: number]: unknown}` because property `Infinity` is missing in
+`{readonly [key: number]: unknown}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: number]: unknown}` [1] must be compatible with its indexer `number` [3]. [incompatible-type]
+
+   nonfinite.js:22:3
+   22|   o as {readonly [key: number]: unknown}; // ERROR
+         ^
+
+References:
+   nonfinite.js:22:8
+   22|   o as {readonly [key: number]: unknown}; // ERROR
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   nonfinite.js:20:13
+   20|   const o = {'NaN': true, 'Infinity': false, '-Infinity': true}; // OK
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   nonfinite.js:22:24
+   22|   o as {readonly [key: number]: unknown}; // ERROR
+                              ^^^^^^ [3]
+
+
+Error ------------------------------------------------------------------------------------------------ nonfinite.js:22:3
+
+Cannot cast `o` to `{readonly [key: number]: unknown}` because property `NaN` is missing in
+`{readonly [key: number]: unknown}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: number]: unknown}` [1] must be compatible with its indexer `number` [3]. [incompatible-type]
+
+   nonfinite.js:22:3
+   22|   o as {readonly [key: number]: unknown}; // ERROR
+         ^
+
+References:
+   nonfinite.js:22:8
+   22|   o as {readonly [key: number]: unknown}; // ERROR
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   nonfinite.js:20:13
+   20|   const o = {'NaN': true, 'Infinity': false, '-Infinity': true}; // OK
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   nonfinite.js:22:24
+   22|   o as {readonly [key: number]: unknown}; // ERROR
+                              ^^^^^^ [3]
+
+
+Error ----------------------------------------------------------------------------------------------- nonfinite.js:28:10
+
+Unsupported literal object property in destructuring. String literals and finite number literals are supported.
+[unsupported-syntax]
+
+   28|   const {1e309: value} = o; // ERROR
+                ^^^^^
+
+
+Error ------------------------------------------------------------------------------------------------ nonfinite.js:30:6
+
+Unsupported object pattern property literal in match pattern. String literals and finite number literals are supported.
+[match-invalid-pattern]
+
+   30|     {1e309: _} => true, // ERROR
+            ^^^^^
+
+
+Error ------------------------------------------------------------------------------------------------ nonfinite.js:39:6
+
+Unsupported object pattern property literal in match pattern. String literals and finite number literals are supported.
+[match-invalid-pattern]
+
+   39|     {1e309: _, 'Infinity': const value} => value, // ERROR: invalid numeric key only
+            ^^^^^
+
+
+Error ------------------------------------------------------------------------------------------------ nonfinite.js:43:3
+
+Cannot cast `result` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   nonfinite.js:43:3
+   43|   result as number; // ERROR
+         ^^^^^^
+
+References:
+   nonfinite.js:37:37
+   37|   declare const input: {'Infinity': string} | {known: number};
+                                           ^^^^^^ [1]
+   nonfinite.js:43:13
+   43|   result as number; // ERROR
+                   ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ nonfinite.js:43:3
+
+Cannot cast `result` to `number` because `"fallback"` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   nonfinite.js:43:3
+   43|   result as number; // ERROR
+         ^^^^^^
+
+References:
+   nonfinite.js:40:10
+   40|     _ => 'fallback',
+                ^^^^^^^^^^ [1]
+   nonfinite.js:43:13
+   43|   result as number; // ERROR
+                   ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ nonfinite.js:50:6
+
+Unsupported object pattern property literal in match pattern. String literals and finite number literals are supported.
+[match-invalid-pattern]
+
+   50|     {1e309: _, 1e309: _} => 1, // ERROR: each nonfinite key is invalid
+            ^^^^^
+
+
+Error ----------------------------------------------------------------------------------------------- nonfinite.js:50:16
+
+Unsupported object pattern property literal in match pattern. String literals and finite number literals are supported.
+[match-invalid-pattern]
+
+   50|     {1e309: _, 1e309: _} => 1, // ERROR: each nonfinite key is invalid
+                      ^^^^^
+
+
+Error ------------------------------------------------------------------------------------------------ nonfinite.js:57:6
+
+Unsupported object pattern property literal in match pattern. String literals and finite number literals are supported.
+[match-invalid-pattern]
+
+   57|     {1n: _, '1n': _} => 2, // ERROR: bigint key is invalid, not a named duplicate
+            ^^
+
+
+Error ----------------------------------------------------------------------------------------------- nonfinite.js:66:14
+
+Duplicate property `1.5` in object pattern. [match-invalid-pattern]
+
+   66|     {1.5: _, '1.5': _, ...} => 1, // ERROR: duplicate canonical key
+                    ^^^^^
+
+
+Error ----------------------------------------------------------------------------------------------- nonfinite.js:70:21
+
+Duplicate property `Infinity` in object pattern. [match-invalid-pattern]
+
+   70|     {'Infinity': _, 'Infinity': _, ...} => 1, // ERROR: duplicate quoted key
+                           ^^^^^^^^^^
+
+
+Error -------------------------------------------------------------------------------------------------- objects.js:11:3
+
+Cannot cast `direct[0.5]` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   objects.js:11:3
+   11|   direct[0.5] as number; // ERROR
+         ^^^^^^^^^^^
+
+References:
+   objects.js:3:24
+    3|   const direct = {0.5: 'half', 1.5: 15}; // OK
+                              ^^^^^^ [1]
+   objects.js:11:18
+   11|   direct[0.5] as number; // ERROR
+                        ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------------- objects.js:12:3
+
+Cannot cast `computed['1.5']` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   objects.js:12:3
+   12|   computed['1.5'] as string; // ERROR
+         ^^^^^^^^^^^^^^^
+
+References:
+   objects.js:5:43
+    5|   const computed = {[0.5]: 'half', [1.5]: 15}; // OK
+                                                 ^^ [1]
+   objects.js:12:22
+   12|   computed['1.5'] as string; // ERROR
+                            ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- objects.js:13:10
+
+Cannot get `quoted[2.5]` because property `2.5` (did you mean `0.5`?) is missing in object literal [1]. [prop-missing]
+
+   objects.js:13:10
+   13|   quoted[2.5]; // ERROR
+                ^^^
+
+References:
+   objects.js:4:18
+    4|   const quoted = {'0.5': 'half', '1.5': 15}; // OK
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------------- objects.js:14:4
+
+Cannot cast object literal to `{"0.5": string}` because property `0.5` is missing in object literal [1] but exists in
+`{"0.5": string}` [2]. [incompatible-type]
+
+   objects.js:14:4
+   14|   ({}) as {0.5: string}; // ERROR
+          ^^ [1]
+
+References:
+   objects.js:14:11
+   14|   ({}) as {0.5: string}; // ERROR
+                 ^^^^^^^^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------------- objects.js:23:3
+
+Cannot cast `signed[-0.5]` to `string` because `boolean` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   objects.js:23:3
+   23|   signed[-0.5] as string; // ERROR
+         ^^^^^^^^^^^^
+
+References:
+   objects.js:19:27
+   19|   const signed = {[-0.5]: true, [-1.5]: 'negative', [0.5]: 5}; // OK
+                                 ^^^^ [1]
+   objects.js:23:19
+   23|   signed[-0.5] as string; // ERROR
+                         ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- objects.js:24:10
+
+Cannot get `signed[1.5]` because property `1.5` (did you mean `-1.5`?) is missing in object literal [1]. [prop-missing]
+
+   objects.js:24:10
+   24|   signed[1.5]; // ERROR
+                ^^^
+
+References:
+   objects.js:19:18
+   19|   const signed = {[-0.5]: true, [-1.5]: 'negative', [0.5]: 5}; // OK
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------------- objects.js:30:3
+
+Cannot cast `zero[-0]` to `boolean` because `string` [1] is incompatible with `boolean` [2]. [incompatible-type]
+
+   objects.js:30:3
+   30|   zero[-0] as boolean; // ERROR
+         ^^^^^^^^
+
+References:
+   objects.js:25:23
+   25|   const zero = {[-0]: 'zero', '-0': false}; // OK
+                             ^^^^^^ [1]
+   objects.js:30:15
+   30|   zero[-0] as boolean; // ERROR
+                     ^^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------------- objects.js:31:3
+
+Cannot cast `zero['-0']` to `string` because `boolean` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   objects.js:31:3
+   31|   zero['-0'] as string; // ERROR
+         ^^^^^^^^^^
+
+References:
+   objects.js:25:37
+   25|   const zero = {[-0]: 'zero', '-0': false}; // OK
+                                           ^^^^^ [1]
+   objects.js:31:17
+   31|   zero['-0'] as string; // ERROR
+                       ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------------- objects.js:57:3
+
+Cannot cast `o['0.5']` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   objects.js:57:3
+   57|   o['0.5'] as number; // ERROR
+         ^^^^^^^^
+
+References:
+   objects.js:37:9
+   37|     .5: 'half', // OK
+               ^^^^^^ [1]
+   objects.js:57:15
+   57|   o['0.5'] as number; // ERROR
+                     ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------------- objects.js:58:3
+
+Cannot cast `o['1e+21']` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   objects.js:58:3
+   58|   o['1e+21'] as number; // ERROR
+         ^^^^^^^^^^
+
+References:
+   objects.js:42:13
+   42|     [1e21]: 'exponent', // OK
+                   ^^^^^^^^^^ [1]
+   objects.js:58:17
+   58|   o['1e+21'] as number; // ERROR
+                       ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------------- objects.js:59:5
+
+Cannot get `o['5e-1']` because property `5e-1` is missing in object literal [1]. [prop-missing]
+
+   objects.js:59:5
+   59|   o['5e-1']; // ERROR
+           ^^^^^^
+
+References:
+   objects.js:36:13
+                   v
+   36|   const o = {
+   37|     .5: 'half', // OK
+   38|     [15e-1]: 'one and a half', // OK
+   39|     1e-7: 'tiny', // OK
+   40|     [1e-6]: 'decimal', // OK
+   41|     1e20: 'large decimal', // OK
+   42|     [1e21]: 'exponent', // OK
+   43|     9007199254740993: 'rounded', // OK
+   44|     [-1e100]: 'negative exponent', // OK
+   45|     1.7976931348623157e308: 'largest finite', // OK
+   46|   };
+         ^ [1]
+
+
+Error -------------------------------------------------------------------------------------------------- objects.js:60:5
+
+Cannot get `o['1e-6']` because property `1e-6` (did you mean `1e-7`?) is missing in object literal [1]. [prop-missing]
+
+   objects.js:60:5
+   60|   o['1e-6']; // ERROR
+           ^^^^^^
+
+References:
+   objects.js:36:13
+                   v
+   36|   const o = {
+   37|     .5: 'half', // OK
+   38|     [15e-1]: 'one and a half', // OK
+   39|     1e-7: 'tiny', // OK
+   40|     [1e-6]: 'decimal', // OK
+   41|     1e20: 'large decimal', // OK
+   42|     [1e21]: 'exponent', // OK
+   43|     9007199254740993: 'rounded', // OK
+   44|     [-1e100]: 'negative exponent', // OK
+   45|     1.7976931348623157e308: 'largest finite', // OK
+   46|   };
+         ^ [1]
+
+
+Error -------------------------------------------------------------------------------------------------- objects.js:61:5
+
+Cannot get `o['1e21']` because property `1e21` (did you mean `1e+21`?) is missing in object literal [1]. [prop-missing]
+
+   objects.js:61:5
+   61|   o['1e21']; // ERROR
+           ^^^^^^
+
+References:
+   objects.js:36:13
+                   v
+   36|   const o = {
+   37|     .5: 'half', // OK
+   38|     [15e-1]: 'one and a half', // OK
+   39|     1e-7: 'tiny', // OK
+   40|     [1e-6]: 'decimal', // OK
+   41|     1e20: 'large decimal', // OK
+   42|     [1e21]: 'exponent', // OK
+   43|     9007199254740993: 'rounded', // OK
+   44|     [-1e100]: 'negative exponent', // OK
+   45|     1.7976931348623157e308: 'largest finite', // OK
+   46|   };
+         ^ [1]
+
+
+Error -------------------------------------------------------------------------------------------------- objects.js:62:5
+
+Cannot get `o['9007199254740993']` because property `9007199254740993` (did you mean `9007199254740992`?) is missing in
+object literal [1]. [prop-missing]
+
+   objects.js:62:5
+   62|   o['9007199254740993']; // ERROR
+           ^^^^^^^^^^^^^^^^^^
+
+References:
+   objects.js:36:13
+                   v
+   36|   const o = {
+   37|     .5: 'half', // OK
+   38|     [15e-1]: 'one and a half', // OK
+   39|     1e-7: 'tiny', // OK
+   40|     [1e-6]: 'decimal', // OK
+   41|     1e20: 'large decimal', // OK
+   42|     [1e21]: 'exponent', // OK
+   43|     9007199254740993: 'rounded', // OK
+   44|     [-1e100]: 'negative exponent', // OK
+   45|     1.7976931348623157e308: 'largest finite', // OK
+   46|   };
+         ^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------- objects.js:77:16
+
+Cannot call `members[0.5]` with `1` bound to `value` because `1` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   objects.js:77:16
+   77|   members[0.5](1); // ERROR
+                      ^ [1]
+
+References:
+   objects.js:68:16
+   68|     0.5(value: string): string { return value; }, // OK
+                      ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- objects.js:78:18
+
+Cannot call `members['1.5']` with `'value'` bound to `value` because `"value"` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   objects.js:78:18
+   78|   members['1.5']('value'); // ERROR
+                        ^^^^^^^ [1]
+
+References:
+   objects.js:69:18
+   69|     [1.5](value: number): number { return value; }, // OK
+                        ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- objects.js:79:19
+
+Cannot assign `'value'` to `members[-0.5]` because `"value"` [1] is incompatible with `boolean` [2]. [incompatible-type]
+
+   objects.js:79:19
+   79|   members[-0.5] = 'value'; // ERROR
+                         ^^^^^^^ [1]
+
+References:
+   objects.js:71:23
+   71|     set '-0.5'(value: boolean): void {}, // OK
+                             ^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- objects.js:84:22
+
+Cannot use `1e309` [1] to assign a computed property. Only finite number literals are allowed. [invalid-computed-prop]
+
+   84|   const computed = {[1e309]: true}; // ERROR
+                            ^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------- objects.js:85:19
+
+Unsupported key in object literal. Only finite number literals are allowed. [illegal-key]
+
+   85|   const direct = {1e309: true}; // ERROR
+                         ^^^^^
+
+
+Error ------------------------------------------------------------------------------------------------- objects.js:86:21
+
+Unsupported key in object type. Only finite number literals are allowed. [illegal-key]
+
+   86|   type NonFinite = {1e309: boolean}; // ERROR
+                           ^^^^^
+
+
+Error -------------------------------------------------------------------------------------------------- objects.js:93:3
+
+Cannot cast `arr[0.5]` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   objects.js:93:3
+   93|   arr[0.5] as number; // ERROR
+         ^^^^^^^^
+
+References:
+   objects.js:91:28
+   91|   declare const arr: Array<string>;
+                                  ^^^^^^ [1]
+   objects.js:93:15
+   93|   arr[0.5] as number; // ERROR
+                     ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------------- objects.js:94:7
+
+Cannot get `arr['0.5']` because property `0.5` is missing in `Array<string>` [1]. [prop-missing]
+
+   objects.js:94:7
+   94|   arr['0.5']; // ERROR: named missing property, not a numeric array position
+             ^^^^^
+
+References:
+   objects.js:91:22
+   91|   declare const arr: Array<string>;
+                            ^^^^^^^^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------------- objects.js:98:9
+
+Cannot get `tuple[0.5]` because the index into a tuple must be an integer, but `0.5` [1] is not an integer.
+[invalid-tuple-index]
+
+   98|   tuple[0.5]; // ERROR
+               ^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------------- objects.js:99:9
+
+Cannot get `tuple['0.5']` because property `0.5` is missing in `ReadonlyArray<string | number>` [1]. [prop-missing]
+
+   objects.js:99:9
+   99|   tuple['0.5']; // ERROR
+               ^^^^^
+
+References:
+   objects.js:95:24
+   95|   declare const tuple: [string, number];
+                              ^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------ objects.js:100:46
+
+Cannot access `0.5` on `[string, number]` because the index into a tuple must be an integer, but `0.5` [1] is not an
+integer. [invalid-tuple-index]
+
+   100|   type FractionalPosition = [string, number][0.5]; // ERROR
+                                                     ^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------- refinements.js:6:3
+
+Cannot cast `half` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   refinements.js:6:3
+   6|   half as number; // ERROR
+        ^^^^
+
+References:
+   refinements.js:3:19
+   3|   const o = {0.5: 'half', 1.5: 15, '-0.5': true}; // OK
+                        ^^^^^^ [1]
+   refinements.js:6:11
+   6|   half as number; // ERROR
+                ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- refinements.js:9:8
+
+Cannot get `rest['0.5']` because property `0.5` (did you mean `-0.5`?) is missing in
+`{"-0.5": boolean, "1.5": number}` [1]. [prop-missing]
+
+   refinements.js:9:8
+   9|   rest['0.5']; // ERROR: removed by the numeric pattern
+             ^^^^^
+
+References:
+   refinements.js:4:24
+   4|   const {0.5: half, ...rest} = o; // OK
+                             ^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------- refinements.js:10:3
+
+Cannot cast `rest[1.5]` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   refinements.js:10:3
+   10|   rest[1.5] as string; // ERROR
+         ^^^^^^^^^
+
+References:
+   refinements.js:3:32
+    3|   const o = {0.5: 'half', 1.5: 15, '-0.5': true}; // OK
+                                      ^^ [1]
+   refinements.js:10:16
+   10|   rest[1.5] as string; // ERROR
+                      ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- refinements.js:14:10
+
+Property `2.5` (did you mean `0.5`?) is missing in object literal [1]. [prop-missing]
+
+   refinements.js:14:10
+   14|   const {'2.5': missing} = o; // ERROR
+                ^^^^^
+
+References:
+   refinements.js:3:13
+    3|   const o = {0.5: 'half', 1.5: 15, '-0.5': true}; // OK
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------- refinements.js:21:5
+
+Cannot cast `o[0.5]` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   refinements.js:21:5
+   21|     o[0.5] as number; // ERROR
+           ^^^^^^
+
+References:
+   refinements.js:18:28
+   18| function refine(o: {'0.5': string | number}): void {
+                                  ^^^^^^ [1]
+   refinements.js:21:15
+   21|     o[0.5] as number; // ERROR
+                     ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- refinements.js:24:5
+
+Cannot cast `o[0.5]` to `string` because `42` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   refinements.js:24:5
+   24|     o[0.5] as string; // ERROR: quoted write invalidates numeric refinement
+           ^^^^^^
+
+References:
+   refinements.js:22:16
+   22|     o['0.5'] = 42; // OK
+                      ^^ [1]
+   refinements.js:24:15
+   24|     o[0.5] as string; // ERROR: quoted write invalidates numeric refinement
+                     ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- refinements.js:29:5
+
+Cannot cast `o['0.5']` to `string` because `42` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   refinements.js:29:5
+   29|     o['0.5'] as string; // ERROR: numeric write invalidates quoted refinement
+           ^^^^^^^^
+
+References:
+   refinements.js:28:14
+   28|     o[0.5] = 42; // OK
+                    ^^ [1]
+   refinements.js:29:17
+   29|     o['0.5'] as string; // ERROR: numeric write invalidates quoted refinement
+                       ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- refinements.js:39:5
+
+Cannot cast `o[0.5]` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   refinements.js:39:5
+   39|     o[0.5] as string; // ERROR
+           ^^^^^^
+
+References:
+   refinements.js:35:47
+   35| function callInvalidation(o: {'0.5': string | number}): void {
+                                                     ^^^^^^ [1]
+   refinements.js:39:15
+   39|     o[0.5] as string; // ERROR
+                     ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- refinements.js:47:5
+
+Cannot cast `o['-0']` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   refinements.js:47:5
+   47|     o['-0'] as string; // ERROR
+           ^^^^^^^
+
+References:
+   refinements.js:44:62
+   44| function refineZero(o: {'0': string | number, '-0': string | number}): void {
+                                                                    ^^^^^^ [1]
+   refinements.js:47:16
+   47|     o['-0'] as string; // ERROR
+                      ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- refinements.js:51:5
+
+Cannot cast `o[0]` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   refinements.js:51:5
+   51|     o[0] as string; // ERROR
+           ^^^^
+
+References:
+   refinements.js:44:39
+   44| function refineZero(o: {'0': string | number, '-0': string | number}): void {
+                                             ^^^^^^ [1]
+   refinements.js:51:13
+   51|     o[0] as string; // ERROR
+                   ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- refinements.js:62:5
+
+Cannot cast `o.value` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   refinements.js:62:5
+   62|     o.value as number; // ERROR
+           ^^^^^^^
+
+References:
+   refinements.js:57:28
+   57|   | {'0.5': 'text', value: string}
+                                  ^^^^^^ [1]
+   refinements.js:62:16
+   62|     o.value as number; // ERROR
+                      ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- refinements.js:65:5
+
+Cannot cast `o.value` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   refinements.js:65:5
+   65|     o.value as string; // ERROR
+           ^^^^^^^
+
+References:
+   refinements.js:58:30
+   58|   | {'0.5': 'number', value: number}; // OK
+                                    ^^^^^^ [1]
+   refinements.js:65:16
+   65|     o.value as string; // ERROR
+                      ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- refinements.js:69:5
+
+Cannot cast `o.value` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   refinements.js:69:5
+   69|     o.value as string; // ERROR
+           ^^^^^^^
+
+References:
+   refinements.js:58:30
+   58|   | {'0.5': 'number', value: number}; // OK
+                                    ^^^^^^ [1]
+   refinements.js:69:16
+   69|     o.value as string; // ERROR
+                      ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- refinements.js:77:5
+
+Cannot cast `o[0.5]` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   refinements.js:77:5
+   77|     o[0.5] as number; // ERROR
+           ^^^^^^
+
+References:
+   refinements.js:74:31
+   74| function hasFraction(o: {0.5: string} | {1.5: number}): void {
+                                     ^^^^^^ [1]
+   refinements.js:77:15
+   77|     o[0.5] as number; // ERROR
+                     ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- refinements.js:81:5
+
+Cannot cast `o['0.5']` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   refinements.js:81:5
+   81|     o['0.5'] as number; // ERROR
+           ^^^^^^^^
+
+References:
+   refinements.js:74:31
+   74| function hasFraction(o: {0.5: string} | {1.5: number}): void {
+                                     ^^^^^^ [1]
+   refinements.js:81:17
+   81|     o['0.5'] as number; // ERROR
+                       ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- refinements.js:90:7
+
+Cannot cast `value` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   refinements.js:90:7
+   90|       value as number; // ERROR
+             ^^^^^
+
+References:
+   refinements.js:87:29
+   87|   const callbacks: {'0.5': (string) => string, '1.5': (number) => number} = {
+                                   ^^^^^^ [1]
+   refinements.js:90:16
+   90|       value as number; // ERROR
+                      ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- refinements.js:95:7
+
+Cannot cast `value` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   refinements.js:95:7
+   95|       value as string; // ERROR
+             ^^^^^
+
+References:
+   refinements.js:87:56
+   87|   const callbacks: {'0.5': (string) => string, '1.5': (number) => number} = {
+                                                              ^^^^^^ [1]
+   refinements.js:95:16
+   95|       value as string; // ERROR
+                      ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- refinements.js:102:7
+
+Cannot cast `value` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   refinements.js:102:7
+   102|       value as number; // ERROR
+              ^^^^^
+
+References:
+   refinements.js:99:26
+    99|   const quoted: {'0.5': (string) => string} = {
+                                 ^^^^^^ [1]
+   refinements.js:102:16
+   102|       value as number; // ERROR
+                       ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- refinements.js:107:15
+
+Cannot call `quoted[0.5]` with `5` bound to the first parameter because `5` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   refinements.js:107:15
+   107|   quoted[0.5](5); // ERROR
+                      ^ [1]
+
+References:
+   refinements.js:99:26
+    99|   const quoted: {'0.5': (string) => string} = {
+                                 ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------------- rounding.js:6:5
+
+Cannot get `o['1000000000...']` because property `1000000000000000.3` (did you mean `1000000000000000.2`?) is missing in
+object literal [1]. [prop-missing]
+
+   rounding.js:6:5
+   6|   o['1000000000000000.3']; // ERROR: a distinct string name despite equal numeric parsing
+          ^^^^^^^^^^^^^^^^^^^^
+
+References:
+   rounding.js:3:13
+   3|   const o = {1000000000000000.25: true}; // OK
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------------- rounding.js:9:4
+
+Cannot cast object literal to `{readonly [key: number]: unknown}` because property `1000000000000000.3` is missing in
+`{readonly [key: number]: unknown}` [1] but exists in object literal [2]. Any property that does not exist in
+`{readonly [key: number]: unknown}` [1] must be compatible with its indexer `number` [3]. [incompatible-type]
+
+   rounding.js:9:4
+   9|   ({'1000000000000000.3': true}) as {readonly [key: number]: unknown}; // ERROR
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+References:
+   rounding.js:9:37
+   9|   ({'1000000000000000.3': true}) as {readonly [key: number]: unknown}; // ERROR
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   rounding.js:9:53
+   9|   ({'1000000000000000.3': true}) as {readonly [key: number]: unknown}; // ERROR
+                                                          ^^^^^^ [3]
+
+
+Error ------------------------------------------------------------------------------------------------- rounding.js:16:5
+
+Cannot get `o['-100000000...']` because property `-1000000000000000.3` (did you mean `-1000000000000000.2`?) is missing
+in object literal [1]. [prop-missing]
+
+   rounding.js:16:5
+   16|   o['-1000000000000000.3']; // ERROR
+           ^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   rounding.js:14:13
+   14|   const o = {[-1000000000000000.25]: 'negative'}; // OK
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------- spacing_use.ts:13:21
+
+Cannot assign `spacing.known` to `bad` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   spacing_use.ts:13:21
+   13| const bad: number = spacing.known; // ERROR
+                           ^^^^^^^^^^^^^
+
+References:
+   spacing.d.ts:11:10
+   11|   known: string;
+                ^^^^^^ [1]
+   spacing_use.ts:13:12
+   13| const bad: number = spacing.known; // ERROR
+                  ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- spacing_use.ts:14:9
+
+Cannot assign `'new'` to `spacing[0.5]` because property `0.5` is not writable. [cannot-write]
+
+   14| spacing[0.5] = 'new'; // ERROR
+               ^^^
+
+
+Error ----------------------------------------------------------------------------------------------- typescript.ts:16:1
+
+Cannot cast `direct[0.5]` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   typescript.ts:16:1
+   16| direct[0.5] as number; // ERROR
+       ^^^^^^^^^^^
+
+References:
+   typescript.ts:9:22
+    9| const direct = {0.5: 'half', '1.5': 15, [-0.5]: true}; // OK
+                            ^^^^^^ [1]
+   typescript.ts:16:16
+   16| direct[0.5] as number; // ERROR
+                      ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- typescript.ts:17:1
+
+Cannot cast `computed['-0.5']` to `string` because `boolean` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   typescript.ts:17:1
+   17| computed['-0.5'] as string; // ERROR
+       ^^^^^^^^^^^^^^^^
+
+References:
+   typescript.ts:10:54
+   10| const computed = {[5e-1]: 'half', [1.5]: 15, '-0.5': true}; // OK
+                                                            ^^^^ [1]
+   typescript.ts:17:21
+   17| computed['-0.5'] as string; // ERROR
+                           ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- typescript.ts:18:10
+
+Cannot get `computed[2.5]` because property `2.5` (did you mean `0.5`?) is missing in object literal [1]. [prop-missing]
+
+   typescript.ts:18:10
+   18| computed[2.5]; // ERROR
+                ^^^
+
+References:
+   typescript.ts:10:18
+   10| const computed = {[5e-1]: 'half', [1.5]: 15, '-0.5': true}; // OK
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------- typescript.ts:19:2
+
+Cannot cast object literal to `TSFractionalObject` because properties `-0.5`, `0.5`, and `1.5` are missing in object
+literal [1] but exist in `TSFractionalObject` [2]. [incompatible-type]
+
+   typescript.ts:19:2
+   19| ({}) as TSFractionalObject; // ERROR
+        ^^ [1]
+
+References:
+   typescript.ts:19:9
+   19| ({}) as TSFractionalObject; // ERROR
+               ^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- typescript.ts:31:7
+
+Cannot assign `'new'` to `local['0.5']` because property `0.5` is not writable. [cannot-write]
+
+   31| local['0.5'] = 'new'; // ERROR
+             ^^^^^
+
+
+Error ----------------------------------------------------------------------------------------------- typescript.ts:32:7
+
+Cannot assign `false` to `local[-0.5]` because property `-0.5` is not writable. [cannot-write]
+
+   32| local[-0.5] = false; // ERROR
+             ^^^^
+
+
+Error ---------------------------------------------------------------------------------------------- typescript.ts:33:16
+
+Cannot assign `'new'` to `local['1.5']` because `"new"` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   typescript.ts:33:16
+   33| local['1.5'] = 'new'; // ERROR
+                      ^^^^^ [1]
+
+References:
+   typescript.ts:24:10
+   24|   [1.5]: number; // OK
+                ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- typescript.ts:40:9
+
+Cannot assign `'new'` to `library['0.5']` because property `0.5` is not writable. [cannot-write]
+
+   40| library['0.5'] = 'new'; // ERROR
+               ^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------- typescript.ts:42:14
+
+Cannot call `library[2.5]` with `1` bound to `value` because `1` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   typescript.ts:42:14
+   42| library[2.5](1); // ERROR
+                    ^ [1]
+
+References:
+   libs/fractional.d.ts:13:14
+   13|   2.5(value: string): number; // OK
+                    ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- typescript.ts:44:21
+
+Cannot call `fractionalRoundtrip` with object literal bound to `value` because property `-0.5` is missing in object
+literal [1] but exists in `TSFractionalObject` [2]. [incompatible-type]
+
+   typescript.ts:44:21
+   44| fractionalRoundtrip({0.5: 'half', 1.5: 15}); // ERROR
+                           ^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+References:
+   libs/fractional.d.ts:21:45
+   21| declare function fractionalRoundtrip(value: TSFractionalObject): TSFractionalObject;
+                                                   ^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- typescript.ts:45:27
+
+Cannot call `fractionalRoundtrip` with object literal bound to `value` because in property `0.5`: `5` [1] is
+incompatible with `string` [2]. [incompatible-type]
+
+   typescript.ts:45:27
+   45| fractionalRoundtrip({0.5: 5, 1.5: 15, '-0.5': true}); // ERROR
+                                 ^ [1]
+
+References:
+   libs/fractional.d.ts:16:8
+   16|   0.5: string; // OK
+              ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- typescript.ts:47:1
+
+Cannot cast `tsLibraryObject['0.5']` to `number` because `string` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   typescript.ts:47:1
+   47| tsLibraryObject['0.5'] as number; // ERROR
+       ^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   libs/fractional.d.ts:16:8
+   16|   0.5: string; // OK
+              ^^^^^^ [1]
+   typescript.ts:47:27
+   47| tsLibraryObject['0.5'] as number; // ERROR
+                                 ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- typescript.ts:55:10
+
+Cannot assign `'new'` to `instance[0.5]` because property `0.5` is not writable. [cannot-write]
+
+   55| instance[0.5] = 'new'; // ERROR
+                ^^^
+
+
+Error ---------------------------------------------------------------------------------------------- typescript.ts:56:18
+
+Cannot call `instance['-0.5']` with `1` bound to `value` because `1` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   typescript.ts:56:18
+   56| instance['-0.5'](1); // ERROR
+                        ^ [1]
+
+References:
+   libs/fractional.d.ts:27:17
+   27|   '-0.5'(value: string): number; // OK
+                       ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- typescript.ts:57:10
+
+Cannot get `instance[-1.5]` because property `-1.5` is missing in `TSFractionalClass` [1]. [prop-missing]
+
+   typescript.ts:57:10
+   57| instance[-1.5]; // ERROR
+                ^^^^
+
+References:
+   typescript.ts:50:25
+   50| declare const instance: TSFractionalClass;
+                               ^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------- typescript.ts:67:1
+
+Cannot cast `members[0.5]` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   typescript.ts:67:1
+   67| members[0.5] as number; // ERROR
+       ^^^^^^^^^^^^
+
+References:
+   typescript.ts:61:10
+   61|   [0.5]: string = 'half'; // OK
+                ^^^^^^ [1]
+   typescript.ts:67:17
+   67| members[0.5] as number; // ERROR
+                       ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- typescript.ts:68:16
+
+Cannot call `members['1.5']` with `'value'` bound to `value` because `"value"` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   typescript.ts:68:16
+   68| members['1.5']('value'); // ERROR
+                      ^^^^^^^ [1]
+
+References:
+   typescript.ts:62:16
+   62|   [1.5](value: number): number { return value; } // OK
+                      ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- typescript.ts:75:1
+
+Cannot cast `5` to `Numeric` because `5` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   typescript.ts:75:1
+   75| 5 as Numeric; // ERROR
+       ^ [1]
+
+References:
+   typescript.ts:75:6
+   75| 5 as Numeric; // ERROR
+            ^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- typescript.ts:78:1
+
+Cannot cast `0.5` to `keyof Local` because `0.5` [1] is incompatible with `keyof Local` [2]. [incompatible-type]
+
+   typescript.ts:78:1
+   78| 0.5 as keyof Local; // ERROR
+       ^^^ [1]
+
+References:
+   typescript.ts:78:8
+   78| 0.5 as keyof Local; // ERROR
+              ^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- typescript.ts:80:1
+
+Cannot cast `Object.keys(...)` to `ReadonlyArray<number>` because in array element > at least one member of
+`"-0.5" | "0.5" | "1.5"` [1]: `"-0.5"` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   typescript.ts:80:1
+   80| Object.keys(direct) as ReadonlyArray<number>; // ERROR
+       ^^^^^^^^^^^^^^^^^^^ [1]
+
+References:
+   typescript.ts:80:38
+   80| Object.keys(direct) as ReadonlyArray<number>; // ERROR
+                                            ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- typescript.ts:81:1
+
+Cannot cast `'0.5'` to `number` because `"0.5"` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   typescript.ts:81:1
+   81| '0.5' as number; // ERROR
+       ^^^^^ [1]
+
+References:
+   typescript.ts:81:10
+   81| '0.5' as number; // ERROR
+                ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- typescript.ts:87:1
+
+Cannot cast `identity[1.5]` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   typescript.ts:87:1
+   87| identity[1.5] as string; // ERROR
+       ^^^^^^^^^^^^^
+
+References:
+   libs/fractional.d.ts:17:10
+   17|   [1.5]: number; // OK
+                ^^^^^^ [1]
+   typescript.ts:87:18
+   87| identity[1.5] as string; // ERROR
+                        ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- typescript.ts:90:10
+
+Cannot assign `'new'` to `readonly[0.5]` because property `0.5` is not writable. [cannot-write]
+
+   90| readonly[0.5] = 'new'; // ERROR
+                ^^^
+
+
+Error ---------------------------------------------------------------------------------------------- typescript.ts:93:17
+
+Cannot assign `false` to `builtinReadonly['-0.5']` because property `-0.5` is not writable. [cannot-write]
+
+   93| builtinReadonly['-0.5'] = false; // ERROR
+                       ^^^^^^
+
+
+Error ----------------------------------------------------------------------------------------------- typescript.ts:96:1
+
+Cannot cast `optional['0.5']` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   typescript.ts:96:1
+   96| optional['0.5'] as string; // ERROR
+       ^^^^^^^^^^^^^^^
+
+References:
+   libs/fractional.d.ts:41:40
+   41| type TSOptional<O> = {[K in keyof O]?: O[K]}; // OK
+                                              ^^^^ [1]
+   typescript.ts:96:20
+   96| optional['0.5'] as string; // ERROR
+                          ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- typescript.ts:98:8
+
+Cannot cast object literal to `TSOptional<TSFractionalObject>` because in property `0.5`: `5` [1] is incompatible with
+`string` [2]. [incompatible-type]
+
+   typescript.ts:98:8
+   98| ({0.5: 5}) as TSOptional<TSFractionalObject>; // ERROR
+              ^ [1]
+
+References:
+   libs/fractional.d.ts:16:8
+   16|   0.5: string; // OK
+              ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- typescript.ts:99:2
+
+Cannot cast object literal to `TSIdentity<TSFractionalObject>` because property `0.5` is missing in object literal [1]
+but exists in
+`{"-0.5": TSFractionalObject["-0.5"], "0.5": TSFractionalObject["0.5"], "1.5": TSFractionalObject["1....` [2].
+[incompatible-type]
+
+   typescript.ts:99:2
+   99| ({1.5: 15, '-0.5': true}) as TSIdentity<TSFractionalObject>; // ERROR
+        ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+References:
+   typescript.ts:99:30
+   99| ({1.5: 15, '-0.5': true}) as TSIdentity<TSFractionalObject>; // ERROR
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- typescript.ts:107:1
+
+Cannot cast `finite['1e+21']` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   typescript.ts:107:1
+   107| finite['1e+21'] as string; // ERROR
+        ^^^^^^^^^^^^^^^
+
+References:
+   libs/fractional.d.ts:35:9
+    35|   1e21: number; // OK
+                ^^^^^^ [1]
+   typescript.ts:107:20
+   107| finite['1e+21'] as string; // ERROR
+                           ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- typescript.ts:108:8
+
+Cannot get `finite['5e-1']` because property `5e-1` is missing in `TSFinite` [1]. [prop-missing]
+
+   typescript.ts:108:8
+   108| finite['5e-1']; // ERROR
+               ^^^^^^
+
+References:
+   typescript.ts:102:23
+   102| declare const finite: TSFinite;
+                              ^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------- typescript.ts:109:8
+
+Cannot get `finite['1e21']` because property `1e21` is missing in `TSFinite` [1]. [prop-missing]
+
+   typescript.ts:109:8
+   109| finite['1e21']; // ERROR
+               ^^^^^^
+
+References:
+   typescript.ts:102:23
+   102| declare const finite: TSFinite;
+                              ^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------- typescript.ts:110:8
+
+Cannot get `finite['9007199254740993']` because property `9007199254740993` is missing in `TSFinite` [1]. [prop-missing]
+
+   typescript.ts:110:8
+   110| finite['9007199254740993']; // ERROR
+               ^^^^^^^^^^^^^^^^^^
+
+References:
+   typescript.ts:102:23
+   102| declare const finite: TSFinite;
+                              ^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------- typescript.ts:116:1
+
+Cannot cast `zero['-0']` to `string` because `boolean` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   typescript.ts:116:1
+   116| zero['-0'] as string; // ERROR
+        ^^^^^^^^^^
+
+References:
+   typescript.ts:113:35
+   113| const zero = {[-0]: 'zero', '-0': false}; // OK
+                                          ^^^^^ [1]
+   typescript.ts:116:15
+   116| zero['-0'] as string; // ERROR
+                      ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- typescript.ts:119:19
+
+Cannot get `numericDictionary['-0']` because property `-0` is missing in `{[key: number]: unknown}` [1]. [prop-missing]
+
+   typescript.ts:119:19
+   119| numericDictionary['-0']; // ERROR
+                          ^^^^
+
+References:
+   typescript.ts:118:34
+   118| declare const numericDictionary: {[key: number]: unknown};
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------- typescript.ts:120:19
+
+Cannot get `numericDictionary['5e-1']` because property `5e-1` is missing in `{[key: number]: unknown}` [1].
+[prop-missing]
+
+   typescript.ts:120:19
+   120| numericDictionary['5e-1']; // ERROR
+                          ^^^^^^
+
+References:
+   typescript.ts:118:34
+   118| declare const numericDictionary: {[key: number]: unknown};
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------- typescript.ts:128:11
+
+Cannot call `roundtrip` with object literal bound to `value` because property `1.5` is missing in object literal [1] but
+exists in `ExportedFractional` [2]. [incompatible-type]
+
+   typescript.ts:128:11
+   128| roundtrip({0.5: 'half'}); // ERROR
+                  ^^^^^^^^^^^^^ [1]
+
+References:
+   signatures.js:4:34
+     4| export function roundtrip(value: ExportedFractional): ExportedFractional {
+                                         ^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- typescript.ts:130:1
+
+Cannot cast `5` to `QuotedValue` because `5` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   typescript.ts:130:1
+   130| 5 as QuotedValue; // ERROR
+        ^ [1]
+
+References:
+   typescript.ts:130:6
+   130| 5 as QuotedValue; // ERROR
+             ^^^^^^^^^^^ [2]
+
+
+
+Found 211 errors

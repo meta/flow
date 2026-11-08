@@ -17,12 +17,12 @@
   };
 }
 
-// Invalid numeric property
+// Fractional numeric object-pattern keys are supported.
 {
-  declare const x: {1: true};
+  declare const x: {1: true} | {1.1: true};
 
   const e1 = match (x) {
-    {1.1: _} => 0, // ERROR
+    {1.1: _} => 0, // OK
     _ => 0,
   };
 }

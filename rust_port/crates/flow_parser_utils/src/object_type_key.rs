@@ -23,8 +23,7 @@
 use std::ops::Deref;
 
 use dupe::Dupe;
-use flow_common::js_number::ecma_string_of_float;
-use flow_common::js_number::is_float_safe_integer;
+use flow_common::js_number::numeric_property_name;
 use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 use flow_parser::ast::Identifier;
 use flow_parser::ast::types;
@@ -56,10 +55,10 @@ pub fn object_type_key_form<'a, M: Dupe, T: Dupe>(
         types::TypeInner::StringLiteral { literal, .. } => {
             ObjectTypeKeyForm::Literal(literal.value.dupe())
         }
-        // A non-integer number has no agreed property spelling, so it stays an
-        // index signature rather than naming a property nothing can write.
-        types::TypeInner::NumberLiteral { literal, .. } if is_float_safe_integer(literal.value) => {
-            ObjectTypeKeyForm::Literal(FlowSmolStr::new(ecma_string_of_float(literal.value)))
+        types::TypeInner::NumberLiteral { literal, .. }
+            if let Some(name) = numeric_property_name(literal.value) =>
+        {
+            ObjectTypeKeyForm::Literal(name)
         }
         // Type arguments make this the application of a generic type, never a
         // value reference.

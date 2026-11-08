@@ -97,12 +97,12 @@
   o as {[string]: boolean}; // OK
 }
 
-// Only int-like keys allowed
+// Fractional keys
 {
   const o = {
     '1.0234': true,
   };
-  o as {[number]: boolean}; // ERROR
+  o as {[number]: boolean}; // OK
   o as {[string]: boolean}; // OK
 }
 
@@ -111,7 +111,7 @@
   const o = {
     '9007199254740992': true,
   };
-  o as {[number]: boolean}; // ERROR
+  o as {[number]: boolean}; // OK
   o as {[string]: boolean}; // OK
 }
 
@@ -182,16 +182,16 @@
   x[9007199254740992]; // ERROR
 }
 
-// Invalid creation
+// Finite fractional and large numeric creation
 {
   const x = {
-    [1.1]: true, // ERROR
-    [9007199254740992]: false, // ERROR
-    [-9007199254740992]: false, // ERROR
+    [1.1]: true, // OK
+    [9007199254740992]: false, // OK
+    [-9007199254740992]: false, // OK
   };
   const y = {
-    1.1: true, // ERROR
-    9007199254740992: false, // ERROR
+    1.1: true, // OK
+    9007199254740992: false, // OK
   };
 }
 

@@ -29,6 +29,7 @@ use dupe::Dupe;
 use flow_analysis::infer_type_hoister::ImpliedBound;
 use flow_common::alpha_rename;
 use flow_common::flow_import_specifier::Userland;
+use flow_common::js_number::numeric_property_name;
 use flow_common::platform_set::PlatformSet;
 use flow_common::polarity::Polarity;
 use flow_common::type_strictness::TypeStrictnessKind;
@@ -7097,12 +7098,9 @@ fn resolve_prop_key<'ast>(
             ResolvedPropKey::Named(name.dupe(), id_loc.dupe())
         }
         Key::NumberLiteral((id_loc, ast::NumberLiteral { value, .. }))
-            if flow_common::js_number::is_float_safe_integer(*value) =>
+            if let Some(name) = numeric_property_name(*value) =>
         {
-            ResolvedPropKey::Named(
-                FlowSmolStr::new(flow_common::js_number::ecma_string_of_float(*value)),
-                id_loc.dupe(),
-            )
+            ResolvedPropKey::Named(name, id_loc.dupe())
         }
         Key::BigIntLiteral((id_loc, lit)) => ResolvedPropKey::Named(
             FlowSmolStr::new(ast_utils::string_of_bigint(lit)),
@@ -7117,12 +7115,9 @@ fn resolve_prop_key<'ast>(
                     ResolvedPropKey::Named(inner.value.dupe(), loc.dupe())
                 }
                 ExpressionInner::NumberLiteral { loc, inner, .. }
-                    if flow_common::js_number::is_float_safe_integer(inner.value) =>
+                    if let Some(name) = numeric_property_name(inner.value) =>
                 {
-                    ResolvedPropKey::Named(
-                        FlowSmolStr::new(flow_common::js_number::ecma_string_of_float(inner.value)),
-                        loc.dupe(),
-                    )
+                    ResolvedPropKey::Named(name, loc.dupe())
                 }
                 ExpressionInner::BigIntLiteral { loc, inner, .. } => ResolvedPropKey::Named(
                     FlowSmolStr::new(ast_utils::string_of_bigint(inner)),
@@ -7139,14 +7134,9 @@ fn resolve_prop_key<'ast>(
                 {
                     match inner.argument.deref() {
                         ExpressionInner::NumberLiteral { inner: num, .. }
-                            if flow_common::js_number::is_float_safe_integer(-num.value) =>
+                            if let Some(name) = numeric_property_name(-num.value) =>
                         {
-                            ResolvedPropKey::Named(
-                                FlowSmolStr::new(flow_common::js_number::ecma_string_of_float(
-                                    -num.value,
-                                )),
-                                loc.dupe(),
-                            )
+                            ResolvedPropKey::Named(name, loc.dupe())
                         }
                         _ => ResolvedPropKey::ComputedError { loc: ck.loc.dupe() },
                     }
@@ -12039,11 +12029,8 @@ fn class_def<'arena: 'ast, 'ast>(
                                 );
                             }
                             ExpressionInner::NumberLiteral { loc, inner, .. }
-                                if flow_common::js_number::is_float_safe_integer(inner.value) =>
+                                if let Some(name) = numeric_property_name(inner.value) =>
                             {
-                                let name = FlowSmolStr::new(
-                                    flow_common::js_number::ecma_string_of_float(inner.value),
-                                );
                                 let fn_loc_node = tbls.push_loc(fn_loc.dupe());
                                 let id_loc = tbls.push_loc(loc.dupe());
                                 let def = function_def(
@@ -12199,7 +12186,7 @@ fn class_def<'arena: 'ast, 'ast>(
                     }
                     // Match the typing pipeline (statement.rs): a computed key is a
                     // field only when it resolves to a single literal string or
-                    // safe-integer number, either directly or through a value
+                    // finite number, either directly or through a value
                     // reference. bigint keys, symbol keys, and everything else are
                     // unsupported and reported at the declaration site, so they are
                     // dropped here rather than emitting a duplicate signature error.
@@ -12230,11 +12217,8 @@ fn class_def<'arena: 'ast, 'ast>(
                             );
                         }
                         ExpressionInner::NumberLiteral { loc, inner, .. }
-                            if flow_common::js_number::is_float_safe_integer(inner.value) =>
+                            if let Some(name) = numeric_property_name(inner.value) =>
                         {
-                            let name = FlowSmolStr::new(
-                                flow_common::js_number::ecma_string_of_float(inner.value),
-                            );
                             let id_loc_node = tbls.push_loc(loc.dupe());
                             let parsed_t = class_field_value_type(
                                 opts,
@@ -12285,7 +12269,7 @@ fn class_def<'arena: 'ast, 'ast>(
                         // and an error key for anything it cannot represent. The error key
                         // makes an exported class fail signature verification rather than
                         // silently dropping a member the checker accepted. bigint and
-                        // non-safe-integer number literals resolve to a non-name at merge and
+                        // non-finite number literals resolve to a non-name at merge and
                         // are dropped, matching the unsupported-syntax error the typing
                         // pipeline already reports for them.
                         _ => {
@@ -12550,14 +12534,11 @@ fn object_literal<'arena: 'ast, 'ast>(
                         ast::NumberLiteral {
                             value: num_value, ..
                         },
-                    )) if flow_common::js_number::is_float_safe_integer(*num_value) => {
-                        let name = FlowSmolStr::new(flow_common::js_number::ecma_string_of_float(
-                            *num_value,
-                        ));
+                    )) if let Some(name) = numeric_property_name(*num_value) => {
                         (id_loc.dupe(), name)
                     }
                     Key::NumberLiteral(_) | Key::BigIntLiteral(_) => {
-                        // unsupported literal key: BigIntLiteral or non-safe-integer NumberLiteral
+                        // unsupported literal key: BigIntLiteral or non-finite NumberLiteral
                         return;
                     }
                     Key::Computed(_) => {
@@ -12596,14 +12577,11 @@ fn object_literal<'arena: 'ast, 'ast>(
                         ast::NumberLiteral {
                             value: num_value, ..
                         },
-                    )) if flow_common::js_number::is_float_safe_integer(*num_value) => {
-                        let name = FlowSmolStr::new(flow_common::js_number::ecma_string_of_float(
-                            *num_value,
-                        ));
+                    )) if let Some(name) = numeric_property_name(*num_value) => {
                         (id_loc.dupe(), name)
                     }
                     Key::NumberLiteral(_) | Key::BigIntLiteral(_) => {
-                        // unsupported literal key: BigIntLiteral or non-safe-integer NumberLiteral
+                        // unsupported literal key: BigIntLiteral or non-finite NumberLiteral
                         return;
                     }
                     Key::Computed(_) => {
@@ -12648,10 +12626,7 @@ fn object_literal<'arena: 'ast, 'ast>(
                         ast::NumberLiteral {
                             value: num_value, ..
                         },
-                    )) if flow_common::js_number::is_float_safe_integer(*num_value) => {
-                        let name = FlowSmolStr::new(flow_common::js_number::ecma_string_of_float(
-                            *num_value,
-                        ));
+                    )) if let Some(name) = numeric_property_name(*num_value) => {
                         (id_loc.dupe(), name)
                     }
                     Key::NumberLiteral(_) | Key::BigIntLiteral(_) | Key::Computed(_) => {
@@ -12694,10 +12669,7 @@ fn object_literal<'arena: 'ast, 'ast>(
                         ast::NumberLiteral {
                             value: num_value, ..
                         },
-                    )) if flow_common::js_number::is_float_safe_integer(*num_value) => {
-                        let name = FlowSmolStr::new(flow_common::js_number::ecma_string_of_float(
-                            *num_value,
-                        ));
+                    )) if let Some(name) = numeric_property_name(*num_value) => {
                         (id_loc.dupe(), name)
                     }
                     Key::NumberLiteral(_) | Key::BigIntLiteral(_) | Key::Computed(_) => {

@@ -15,9 +15,7 @@ use std::ops::Deref;
 
 use dupe::Dupe;
 use flow_aloc::ALoc;
-use flow_common::js_number::ecma_string_of_float;
-use flow_common::js_number::is_float_safe_integer;
-use flow_data_structure_wrapper::smol_str::FlowSmolStr;
+use flow_common::js_number::numeric_property_name;
 use flow_parser::ast::expression::Expression;
 use flow_parser::ast::expression::ExpressionInner;
 use flow_parser::ast::expression::member;
@@ -87,8 +85,7 @@ pub mod keys {
                         }
                     }
                     ExpressionInner::NumberLiteral { inner, .. } => {
-                        if is_float_safe_integer(inner.value) {
-                            let name = FlowSmolStr::from(ecma_string_of_float(inner.value));
+                        if let Some(name) = numeric_property_name(inner.value) {
                             match key(allow_optional, object) {
                                 Some(Key(base, mut chain)) => {
                                     chain.push(Proj::Prop(name));

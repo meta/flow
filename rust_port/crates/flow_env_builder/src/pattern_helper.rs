@@ -9,8 +9,7 @@ use std::collections::BTreeMap;
 use std::rc::Rc;
 
 use dupe::Dupe;
-use flow_common::js_number::ecma_string_of_float;
-use flow_common::js_number::is_float_safe_integer;
+use flow_common::js_number::numeric_property_name;
 use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 use flow_parser::ast::expression::Expression;
 use flow_parser::ast::function;
@@ -139,8 +138,7 @@ pub fn object_property<L: Dupe>(
             (bind, used_props, true)
         }
         pattern::object::Key::NumberLiteral((loc, lit)) => {
-            if is_float_safe_integer(lit.value) {
-                let name = FlowSmolStr::from(ecma_string_of_float(lit.value));
+            if let Some(name) = numeric_property_name(lit.value) {
                 let bind =
                     object_named_property(parent_loc, bind, loc.dupe(), name.dupe(), has_default);
                 used_props.push(name);

@@ -13,8 +13,7 @@ use std::ops::Deref;
 use dupe::Dupe;
 use flow_aloc::ALoc;
 use flow_common::hint::SentinelRefinement;
-use flow_common::js_number::ecma_string_of_float;
-use flow_common::js_number::is_float_safe_integer;
+use flow_common::js_number::numeric_property_name;
 use flow_common::reason::mk_expression_reason;
 use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 use flow_parser::ast::expression::Expression;
@@ -203,9 +202,8 @@ pub fn object_properties_possible_sentinel_refinements(
                             }
                         }
                         object::Key::NumberLiteral((_, lit))
-                            if is_float_safe_integer(lit.value) =>
+                            if let Some(name) = numeric_property_name(lit.value) =>
                         {
-                            let name = FlowSmolStr::new(ecma_string_of_float(lit.value));
                             if let Some(check) = literal_check_of_expr(value) {
                                 acc.insert(name, check);
                             }

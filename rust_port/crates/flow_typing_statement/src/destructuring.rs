@@ -13,6 +13,7 @@ use std::sync::Arc;
 
 use dupe::Dupe;
 use flow_aloc::ALoc;
+use flow_common::js_number::numeric_property_name;
 use flow_common::reason::Name;
 use flow_common::reason::Reason;
 use flow_common::reason::VirtualReasonDesc;
@@ -314,20 +315,18 @@ fn object_property<'a>(
             ))
         }
         pattern::object::Key::NumberLiteral((loc, lit))
-            if flow_common::js_number::is_float_safe_integer(lit.value) =>
+            if let Some(name) = numeric_property_name(lit.value) =>
         {
-            let name = flow_common::js_number::ecma_string_of_float(lit.value);
-            let name_smol = FlowSmolStr::new(&name);
             let new_acc = object_named_property(
                 has_default,
                 parent_loc,
                 cx,
                 acc,
                 loc.dupe(),
-                &name_smol,
+                &name,
                 lit.comments.dupe(),
             )?;
-            xs.push(name_smol);
+            xs.push(name);
             Ok((
                 new_acc,
                 pattern::object::Key::NumberLiteral((loc.dupe(), lit.clone())),

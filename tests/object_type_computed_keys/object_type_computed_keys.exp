@@ -1199,16 +1199,16 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- within.js:27:6
 
-Cannot get `frac[2.5]` because `2.5` [1] is incompatible with `1.5` [2]. [incompatible-type]
+Cannot get `frac[2.5]` because property `2.5` (did you mean `1.5`?) is missing in `Frac` [1]. [prop-missing]
 
    within.js:27:6
-   27| frac[2.5]; // ERROR: 2.5 is not in the 1.5 indexer key set
-            ^^^ [1]
+   27| frac[2.5]; // ERROR: property 2.5 is missing
+            ^^^
 
 References:
-   within.js:24:15
-   24| type Frac = {[1.5]: boolean};
-                     ^^^ [2]
+   within.js:25:21
+   25| declare const frac: Frac;
+                           ^^^^ [1]
 
 
 Error --------------------------------------------------------------------------------------------------- within.js:33:1

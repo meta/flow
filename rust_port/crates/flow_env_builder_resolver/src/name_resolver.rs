@@ -38,6 +38,7 @@ use flow_analysis::hoister::LexicalHoister;
 use flow_analysis::hoister::field_init_bindings;
 use flow_analysis::scope_builder;
 use flow_analysis::scope_builder::WithBindings;
+use flow_common::js_number::numeric_property_name;
 use flow_common::options::JsxMode;
 use flow_common::refinement_invalidation::RefinementInvalidation;
 use flow_data_structure_wrapper::ord_map::FlowOrdMap;
@@ -3484,9 +3485,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                                     )?;
                                 }
                                 Key::NumberLiteral((loc, lit)) => {
-                                    if flow_common::js_number::is_float_safe_integer(lit.value) {
-                                        let name =
-                                            flow_common::js_number::ecma_string_of_float(lit.value);
+                                    if let Some(name) = numeric_property_name(lit.value) {
                                         handle_prop_with_name(
                                             self,
                                             default,
@@ -3494,7 +3493,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                                             acc.clone(),
                                             kind,
                                             loc.dupe(),
-                                            name.into(),
+                                            name,
                                         )?;
                                     } else {
                                         self.pattern_object_property(kind, prop_inner)?;
@@ -7783,14 +7782,8 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                     } => get_refis(self, ploc.dupe(), &member.object, inner.value.dupe()),
                     ExpressionInner::NumberLiteral {
                         loc: ploc, inner, ..
-                    } if flow_common::js_number::is_float_safe_integer(inner.value) => {
-                        let prop_name = flow_common::js_number::ecma_string_of_float(inner.value);
-                        get_refis(
-                            self,
-                            ploc.dupe(),
-                            &member.object,
-                            FlowSmolStr::new(prop_name),
-                        )
+                    } if let Some(prop_name) = numeric_property_name(inner.value) => {
+                        get_refis(self, ploc.dupe(), &member.object, prop_name)
                     }
                     _ => refis,
                 },
@@ -7866,14 +7859,8 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                     } => get_refis(self, ploc.dupe(), &member.object, inner.value.dupe()),
                     ExpressionInner::NumberLiteral {
                         loc: ploc, inner, ..
-                    } if flow_common::js_number::is_float_safe_integer(inner.value) => {
-                        let prop_name = flow_common::js_number::ecma_string_of_float(inner.value);
-                        get_refis(
-                            self,
-                            ploc.dupe(),
-                            &member.object,
-                            FlowSmolStr::new(prop_name),
-                        )
+                    } if let Some(prop_name) = numeric_property_name(inner.value) => {
+                        get_refis(self, ploc.dupe(), &member.object, prop_name)
                     }
                     _ => BTreeMap::new(),
                 },
@@ -8003,12 +7990,8 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
             Some(obj_refinement_key) => {
                 let propname: Option<FlowSmolStr> = match prop_expr.deref() {
                     ExpressionInner::StringLiteral { inner, .. } => Some(inner.value.dupe()),
-                    ExpressionInner::NumberLiteral { inner, .. }
-                        if flow_common::js_number::is_float_safe_integer(inner.value) =>
-                    {
-                        Some(FlowSmolStr::new(
-                            flow_common::js_number::ecma_string_of_float(inner.value),
-                        ))
+                    ExpressionInner::NumberLiteral { inner, .. } => {
+                        numeric_property_name(inner.value)
                     }
                     _ => None,
                 };
@@ -8534,15 +8517,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
             MemberProperty::PropertyIdentifier(id) => Some(id.name.dupe()),
             MemberProperty::PropertyExpression(prop_expr) => match prop_expr.deref() {
                 ExpressionInner::StringLiteral { inner, .. } => Some(inner.value.dupe()),
-                ExpressionInner::NumberLiteral { inner, .. } => {
-                    if flow_common::js_number::is_float_safe_integer(inner.value) {
-                        Some(FlowSmolStr::new(
-                            flow_common::js_number::ecma_string_of_float(inner.value),
-                        ))
-                    } else {
-                        None
-                    }
-                }
+                ExpressionInner::NumberLiteral { inner, .. } => numeric_property_name(inner.value),
                 _ => None,
             },
             MemberProperty::PropertyPrivateName(_) => None,

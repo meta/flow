@@ -205,8 +205,7 @@ mod destructure {
                 (new_acc, true)
             }
             Key::NumberLiteral((loc, num)) => {
-                if js_number::is_float_safe_integer(num.value) {
-                    let name = FlowSmolStr::from(js_number::ecma_string_of_float(num.value));
+                if let Some(name) = js_number::numeric_property_name(num.value) {
                     let new_acc = object_named_property(
                         parent_loc,
                         acc,
@@ -506,8 +505,7 @@ mod match_pattern {
                 )
             }
             Key::NumberLiteral((loc, num)) => {
-                if js_number::is_float_safe_integer(num.value) {
-                    let prop = FlowSmolStr::from(js_number::ecma_string_of_float(num.value));
+                if let Some(prop) = js_number::numeric_property_name(num.value) {
                     let selector = Selector::Prop {
                         prop: prop.dupe(),
                         prop_loc: loc.dupe(),
@@ -1250,8 +1248,8 @@ pub fn expression_is_definitely_synthesizable(
                                     synthesizable(autocomplete_hooks, value)
                                 }
                                 Key::NumberLiteral((loc, num)) => {
-                                    if js_number::is_float_safe_integer(num.value) {
-                                        let name = js_number::ecma_string_of_float(num.value);
+                                    if let Some(name) = js_number::numeric_property_name(num.value)
+                                    {
                                         if (autocomplete_hooks.obj_prop_decl_hook)(&name, loc) {
                                             return false;
                                         }
@@ -3313,10 +3311,9 @@ impl<'a> DefFinder<'a> {
                                     (
                                         ast::pattern::object::Key::NumberLiteral((nl_loc, nl)),
                                         Some(h),
-                                    ) if js_number::is_float_safe_integer(nl.value) => {
-                                        let name = FlowSmolStr::from(
-                                            js_number::ecma_string_of_float(nl.value),
-                                        );
+                                    ) if let Some(name) =
+                                        js_number::numeric_property_name(nl.value) =>
+                                    {
                                         acc.push(ObjectPropPatternHint::ObjectPropPatternHint(
                                             name,
                                             nl_loc.dupe(),
@@ -4415,8 +4412,7 @@ impl<'a> DefFinder<'a> {
                         (self.autocomplete_hooks.obj_prop_decl_hook)(&sl.value, loc)
                     }
                     Key::NumberLiteral((loc, nl)) => {
-                        if js_number::is_float_safe_integer(nl.value) {
-                            let name = js_number::ecma_string_of_float(nl.value);
+                        if let Some(name) = js_number::numeric_property_name(nl.value) {
                             if (self.autocomplete_hooks.obj_prop_decl_hook)(&name, loc) {
                                 true
                             } else {
@@ -4453,9 +4449,10 @@ impl<'a> DefFinder<'a> {
                     let decomp = HintDecomposition::new(DecompObjProp(sl.value.dupe()));
                     Ok(Hint::decompose(decomp, object_hints.clone()))
                 }
-                Key::NumberLiteral((_, nl)) if js_number::is_float_safe_integer(nl.value) => {
-                    let name = js_number::ecma_string_of_float(nl.value);
-                    let decomp = HintDecomposition::new(DecompObjProp(name.into()));
+                Key::NumberLiteral((_, nl))
+                    if let Some(name) = js_number::numeric_property_name(nl.value) =>
+                {
+                    let decomp = HintDecomposition::new(DecompObjProp(name));
                     Ok(Hint::decompose(decomp, object_hints.clone()))
                 }
                 Key::NumberLiteral(_) | Key::BigIntLiteral(_) => Ok(vec![]),

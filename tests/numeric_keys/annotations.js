@@ -25,8 +25,8 @@ type C = {
   o[2] as boolean; // OK
 }
 
-// Invalid numbers
+// Finite numbers in annotations
 type D = {
-  1.1: true, // ERROR
-  9007199254740992: false, // ERROR
+  1.1: true, // OK
+  9007199254740992: false, // OK
 };

@@ -906,9 +906,7 @@ pub enum InvalidObjKey {
     Other,
     /// The nullish part of a maybe type, kept together after concretization.
     NullOrVoid,
-    NumberNonInt,
-    NumberTooLarge,
-    NumberTooSmall,
+    NumberNonFinite,
     /// A computed key whose type is not a single literal, so it names no one
     /// property.
     ComputedNotLiteral,
@@ -918,28 +916,11 @@ pub enum InvalidObjKey {
 }
 
 impl InvalidObjKey {
-    pub fn kind_of_num_value(value: f64) -> Self {
-        use flow_common::js_number::MAX_SAFE_INTEGER;
-        use flow_common::js_number::MIN_SAFE_INTEGER;
-
-        if value.fract() != 0.0 {
-            Self::NumberNonInt
-        } else if value > MAX_SAFE_INTEGER {
-            Self::NumberTooLarge
-        } else if value < MIN_SAFE_INTEGER {
-            Self::NumberTooSmall
-        } else {
-            Self::Other
-        }
-    }
-
     pub fn str_of_kind(self) -> &'static str {
         match self {
             Self::Other => "other",
             Self::NullOrVoid => "null or void",
-            Self::NumberNonInt => "number non-int",
-            Self::NumberTooLarge => "number too large",
-            Self::NumberTooSmall => "number too small",
+            Self::NumberNonFinite => "number non-finite",
             Self::ComputedNotLiteral => "computed not literal",
             Self::ComputedTypeName => "computed type name",
         }

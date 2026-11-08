@@ -6040,19 +6040,9 @@ where
                     | InvalidObjKey::NullOrVoid
                     | InvalidObjKey::ComputedNotLiteral
                     | InvalidObjKey::ComputedTypeName => vec![],
-                    InvalidObjKey::NumberNonInt => {
-                        vec![text(" Only integer-like number literals are allowed.")]
+                    InvalidObjKey::NumberNonFinite => {
+                        vec![text(" Only finite number literals are allowed.")]
                     }
-                    InvalidObjKey::NumberTooLarge => vec![
-                        text(" Number literals must not be larger than "),
-                        code("Number.MAX_SAFE_INTEGER"),
-                        text("."),
-                    ],
-                    InvalidObjKey::NumberTooSmall => vec![
-                        text(" Number literals must not be smaller than "),
-                        code("Number.MIN_SAFE_INTEGER"),
-                        text("."),
-                    ],
                 };
                 let mut features = vec![
                     text("Cannot access "),
@@ -9848,19 +9838,9 @@ where
                     InvalidObjKey::Other | InvalidObjKey::NullOrVoid => vec![text(
                         " Only identifier, string literal, and number literal keys are allowed.",
                     )],
-                    InvalidObjKey::NumberNonInt => {
-                        vec![text(" Only integer-like number literals are allowed.")]
+                    InvalidObjKey::NumberNonFinite => {
+                        vec![text(" Only finite number literals are allowed.")]
                     }
-                    InvalidObjKey::NumberTooLarge => vec![
-                        text(" Number literals must not be larger than "),
-                        code("Number.MAX_SAFE_INTEGER"),
-                        text("."),
-                    ],
-                    InvalidObjKey::NumberTooSmall => vec![
-                        text(" Number literals must not be smaller than "),
-                        code("Number.MIN_SAFE_INTEGER"),
-                        text("."),
-                    ],
                     InvalidObjKey::ComputedNotLiteral => vec![
                         text(" A computed key must have a single string or number literal type."),
                         text(" To declare an index signature instead, label the key, as in "),
@@ -10060,7 +10040,7 @@ where
                         "Unsupported expression pattern in destructuring.",
                     )]),
                     DestructuringObjectPropertyInvalidLiteral => friendly::Message(vec![text(
-                        "Unsupported literal object property in destructuring. String literals and int-like number literals are supported.",
+                        "Unsupported literal object property in destructuring. String literals and finite number literals are supported.",
                     )]),
                     ExistsType => friendly::Message(vec![
                         text("The existential type "),
@@ -10612,7 +10592,7 @@ where
                 text("Unsupported "),
                 text(pattern_kind.to_string()),
                 text(" property literal in match pattern. "),
-                text("String literals and int-like number literals are supported."),
+                text("String literals and finite number literals are supported."),
             ]),
             MessageMatchInvalidUnaryZero => friendly::Message(vec![
                 text("Unary pattern on "),
@@ -11010,19 +10990,9 @@ where
                             " See https://flow.org/en/docs/types/literals/ for more information on literal types.",
                         ),
                     ],
-                    InvalidObjKey::NumberNonInt => {
-                        vec![text(" Only integer-like number literals are allowed.")]
+                    InvalidObjKey::NumberNonFinite => {
+                        vec![text(" Only finite number literals are allowed.")]
                     }
-                    InvalidObjKey::NumberTooLarge => vec![
-                        text(" Number literals must not be larger than "),
-                        code("Number.MAX_SAFE_INTEGER"),
-                        text("."),
-                    ],
-                    InvalidObjKey::NumberTooSmall => vec![
-                        text(" Number literals must not be smaller than "),
-                        code("Number.MIN_SAFE_INTEGER"),
-                        text("."),
-                    ],
                 };
                 let mut features = vec![
                     text("Cannot use "),

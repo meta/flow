@@ -7,6 +7,7 @@
 
 use flow_typing_errors::error_message::EPrivateLookupFailedData;
 use flow_typing_errors::error_message::EPropNotFoundInLookupData;
+use flow_typing_errors::intermediate_error_types::InvalidObjKey;
 use flow_typing_flow_common::flow_js_utils::CgLookupArgs;
 use flow_typing_flow_js_env::FlowJsEnv;
 use flow_typing_type::type_::GenericTData;
@@ -493,15 +494,9 @@ pub(super) fn write_computed_obj_prop<'cx>(
                 loop_(cx, env, trace, use_op, upper, reason, obj_t, tin)
             }
             TypeInner::DefT(reason, def_t)
-                if let DefTInner::SingletonNumT {
-                    value: NumberLiteral(value, _),
-                    ..
-                } = def_t.deref() =>
+                if matches!(def_t.deref(), DefTInner::SingletonNumT { .. }) =>
             {
-                let kind =
-                    flow_typing_errors::intermediate_error_types::InvalidObjKey::kind_of_num_value(
-                        *value,
-                    );
+                let kind = InvalidObjKey::NumberNonFinite;
                 flow_js_utils::add_output_with_env(
                     cx,
                     env,

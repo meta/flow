@@ -214,15 +214,6 @@ string literal, number literal, or `unique symbol`. [illegal-key]
          ^^^^^^^^^
 
 
-Error ----------------------------------------------------------------------------------------------- unsupported.js:7:4
-
-Unsupported computed key. Computed keys are only supported on class fields and methods, and must resolve to a single
-string literal, number literal, or `unique symbol`. [illegal-key]
-
-   7|   [1.5]: number = 3; // ERROR: number key is not a safe integer
-         ^^^
-
-
 Error ----------------------------------------------------------------------------------------------- unsupported.js:8:4
 
 Unsupported computed key. Computed keys are only supported on class fields and methods, and must resolve to a single
@@ -274,4 +265,4 @@ References:
 
 
 
-Found 23 errors
+Found 22 errors

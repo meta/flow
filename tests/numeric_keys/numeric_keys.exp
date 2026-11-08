@@ -50,22 +50,6 @@ making positive the number literal. Consider using a string literal key name to 
           ^
 
 
-Error ---------------------------------------------------------------------------------------------- annotations.js:30:3
-
-Unsupported key in object type. Only integer-like number literals are allowed. [illegal-key]
-
-   30|   1.1: true, // ERROR
-         ^^^
-
-
-Error ---------------------------------------------------------------------------------------------- annotations.js:31:3
-
-Unsupported key in object type. Number literals must not be larger than `Number.MAX_SAFE_INTEGER`. [illegal-key]
-
-   31|   9007199254740992: false, // ERROR
-         ^^^^^^^^^^^^^^^^
-
-
 Error -------------------------------------------------------------------------------------------- declare_class.js:13:3
 
 Cannot cast `a[0]` to `empty` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
@@ -81,22 +65,6 @@ References:
    declare_class.js:13:11
    13|   a[0] as empty; // ERROR
                  ^^^^^ [2]
-
-
-Error -------------------------------------------------------------------------------------------- declare_class.js:18:3
-
-Unsupported key in declare class. Only integer-like number literals are allowed. [illegal-key]
-
-   18|   1.1: true; // ERROR
-         ^^^
-
-
-Error -------------------------------------------------------------------------------------------- declare_class.js:19:3
-
-Unsupported key in declare class. Number literals must not be larger than `Number.MAX_SAFE_INTEGER`. [illegal-key]
-
-   19|   9007199254740992: false; // ERROR
-         ^^^^^^^^^^^^^^^^
 
 
 Error ---------------------------------------------------------------------------------------- import_numeric_key.js:7:1
@@ -148,22 +116,6 @@ References:
    interface.js:14:11
    14|   a[0] as empty; // ERROR
                  ^^^^^ [2]
-
-
-Error ------------------------------------------------------------------------------------------------ interface.js:19:3
-
-Unsupported key in interface. Only integer-like number literals are allowed. [illegal-key]
-
-   19|   1.1: true; // ERROR
-         ^^^
-
-
-Error ------------------------------------------------------------------------------------------------ interface.js:20:3
-
-Unsupported key in interface. Number literals must not be larger than `Number.MAX_SAFE_INTEGER`. [illegal-key]
-
-   20|   9007199254740992: false; // ERROR
-         ^^^^^^^^^^^^^^^^
 
 
 Error ------------------------------------------------------------------------------------------------ interface.js:25:4
@@ -566,56 +518,6 @@ References:
                          ^^^^^^ [2]
 
 
-Error ---------------------------------------------------------------------------------------------------- test.js:105:3
-
-Cannot cast `o` to `{[number]: boolean}` because property `1.0234` is missing in `{[number]: boolean}` [1] but exists in
-object literal [2]. Any property that does not exist in `{[number]: boolean}` [1] must be compatible with its indexer
-`number` [3]. [incompatible-type]
-
-   test.js:105:3
-   105|   o as {[number]: boolean}; // ERROR
-          ^
-
-References:
-   test.js:105:8
-   105|   o as {[number]: boolean}; // ERROR
-               ^^^^^^^^^^^^^^^^^^^ [1]
-   test.js:102:13
-                    v
-   102|   const o = {
-   103|     '1.0234': true,
-   104|   };
-          ^ [2]
-   test.js:105:10
-   105|   o as {[number]: boolean}; // ERROR
-                 ^^^^^^ [3]
-
-
-Error ---------------------------------------------------------------------------------------------------- test.js:114:3
-
-Cannot cast `o` to `{[number]: boolean}` because property `9007199254740992` is missing in `{[number]: boolean}` [1] but
-exists in object literal [2]. Any property that does not exist in `{[number]: boolean}` [1] must be compatible with its
-indexer `number` [3]. [incompatible-type]
-
-   test.js:114:3
-   114|   o as {[number]: boolean}; // ERROR
-          ^
-
-References:
-   test.js:114:8
-   114|   o as {[number]: boolean}; // ERROR
-               ^^^^^^^^^^^^^^^^^^^ [1]
-   test.js:111:13
-                    v
-   111|   const o = {
-   112|     '9007199254740992': true,
-   113|   };
-          ^ [2]
-   test.js:114:10
-   114|   o as {[number]: boolean}; // ERROR
-                 ^^^^^^ [3]
-
-
 Error ---------------------------------------------------------------------------------------------------- test.js:128:3
 
 Cannot cast `o[1]` to `empty` because `boolean` [1] is incompatible with `empty` [2]. [incompatible-type]
@@ -751,12 +653,11 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:181:5
 
-Cannot access object literal [1] with computed property using `1.1` [2]. Only integer-like number literals are allowed.
-[invalid-computed-prop]
+Cannot get `x[1.1]` because property `1.1` is missing in object literal [1]. [prop-missing]
 
    test.js:181:5
    181|   x[1.1]; // ERROR
-            ^^^ [2]
+            ^^^
 
 References:
    test.js:180:13
@@ -766,60 +667,16 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:182:5
 
-Cannot access object literal [1] with computed property using `9007199254740992` [2]. Number literals must not be larger
-than `Number.MAX_SAFE_INTEGER`. [invalid-computed-prop]
+Cannot get `x[9007199254740992]` because property `9007199254740992` is missing in object literal [1]. [prop-missing]
 
    test.js:182:5
    182|   x[9007199254740992]; // ERROR
-            ^^^^^^^^^^^^^^^^ [2]
+            ^^^^^^^^^^^^^^^^
 
 References:
    test.js:180:13
    180|   const x = {};
                     ^^ [1]
-
-
-Error ---------------------------------------------------------------------------------------------------- test.js:188:6
-
-Cannot use `1.1` [1] to assign a computed property. Only integer-like number literals are allowed.
-[invalid-computed-prop]
-
-   188|     [1.1]: true, // ERROR
-             ^^^ [1]
-
-
-Error ---------------------------------------------------------------------------------------------------- test.js:189:6
-
-Cannot use `9007199254740992` [1] to assign a computed property. Number literals must not be larger than
-`Number.MAX_SAFE_INTEGER`. [invalid-computed-prop]
-
-   189|     [9007199254740992]: false, // ERROR
-             ^^^^^^^^^^^^^^^^ [1]
-
-
-Error ---------------------------------------------------------------------------------------------------- test.js:190:6
-
-Cannot use `-9007199254740992` [1] to assign a computed property. Number literals must not be smaller than
-`Number.MIN_SAFE_INTEGER`. [invalid-computed-prop]
-
-   190|     [-9007199254740992]: false, // ERROR
-             ^^^^^^^^^^^^^^^^^ [1]
-
-
-Error ---------------------------------------------------------------------------------------------------- test.js:193:5
-
-Unsupported key in object literal. Only integer-like number literals are allowed. [illegal-key]
-
-   193|     1.1: true, // ERROR
-            ^^^
-
-
-Error ---------------------------------------------------------------------------------------------------- test.js:194:5
-
-Unsupported key in object literal. Number literals must not be larger than `Number.MAX_SAFE_INTEGER`. [illegal-key]
-
-   194|     9007199254740992: false, // ERROR
-            ^^^^^^^^^^^^^^^^
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:206:3
@@ -857,4 +714,4 @@ References:
 
 
 
-Found 53 errors
+Found 40 errors

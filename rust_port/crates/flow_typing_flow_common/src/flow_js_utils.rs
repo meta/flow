@@ -7145,7 +7145,7 @@ pub fn type_of_key_name_with_env(env: &FlowJsEnv, name: Name, reason: &Reason) -
     // ```
     // So, if we are in implicit instantiation, we always treat this as a string.
     if !env.in_implicit_instantiation()
-        && let Some(value) = intlike_str_safe_int(str)
+        && let Some(value) = flow_common::js_number::canonical_numeric_property_value(str)
     {
         let key_reason = reason
             .dupe()
@@ -7272,6 +7272,7 @@ pub mod get_prop_t_kit {
     use flow_typing_errors::error_message::EnumInvalidMemberAccessData;
     use flow_typing_errors::error_message::EnumMemberAccess;
     use flow_typing_errors::error_message::EnumReferenceData;
+    use flow_typing_errors::intermediate_error_types::InvalidObjKey;
     use flow_typing_flow_js_env::FlowJsEnv;
     use flow_typing_type::type_;
     use flow_typing_type::type_::DefT;
@@ -7288,7 +7289,6 @@ pub mod get_prop_t_kit {
     use flow_typing_type::type_::LookupDefaultResult;
     use flow_typing_type::type_::LookupKind;
     use flow_typing_type::type_::NonstrictReturningData;
-    use flow_typing_type::type_::NumberLiteral;
     use flow_typing_type::type_::ObjType;
     use flow_typing_type::type_::PropRef;
     use flow_typing_type::type_::Property;
@@ -7421,6 +7421,27 @@ pub mod get_prop_t_kit {
         }
     }
 
+    /// Builtin array indexers describe positions, not named non-index properties.
+    fn instance_dict_for_prop<'a, 'cx>(
+        cx: &mut Context<'cx>,
+        inst: &'a InstType,
+        propref: &PropRef,
+    ) -> Option<&'a DictType> {
+        let dict = inst.inst_dict.as_ref()?;
+        if let PropRef::Named {
+            name: Name::Str(name),
+            ..
+        } = propref
+            && super::intlike_str_safe_int(name).is_none()
+            && (super::is_builtin_class_id("Array", inst.class_id.dupe(), cx)
+                || super::is_builtin_class_id("ReadonlyArray", inst.class_id.dupe(), cx))
+        {
+            None
+        } else {
+            Some(dict)
+        }
+    }
+
     pub fn get_instance_prop<'cx, F: GetPropHelper>(
         cx: &mut Context<'cx>,
         env: &FlowJsEnv,
@@ -7431,7 +7452,6 @@ pub mod get_prop_t_kit {
         propref: &PropRef,
         reason_op: &Reason,
     ) -> Result<Option<(Property, PropertySource)>, FlowJsException> {
-        let dict = &inst.inst_dict;
         let named_prop = match propref {
             PropRef::Named { name, .. } => {
                 let own_props = cx.find_props(inst.own_props.dupe());
@@ -7453,6 +7473,11 @@ pub mod get_prop_t_kit {
                 cx.get_prop(inst.proto_props.dupe(), &Name::new("constructor"))
             }
             PropRef::Computed(_) => None,
+        };
+        let dict = if named_prop.is_none() {
+            instance_dict_for_prop(cx, inst, propref)
+        } else {
+            None
         };
         match (&named_prop, propref, dict) {
             (Some(prop), _, _) => Ok(Some((prop.dupe(), PropertySource::PropertyMapProperty))),
@@ -7603,7 +7628,7 @@ pub mod get_prop_t_kit {
                 value,
                 dict_polarity,
                 ..
-            }) = &inst.inst_dict
+            }) = instance_dict_for_prop(cx, inst, propref)
         {
             let matches_indexer = match propref {
                 PropRef::Named { name, .. } => {
@@ -8093,18 +8118,8 @@ pub mod get_prop_t_kit {
                     }
                     TypeInner::GenericT(box GenericTData { bound, .. }) if matches!(bound.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::SingletonNumT { .. })) =>
                     {
-                        let value = match bound.deref() {
-                            TypeInner::DefT(_, d) => match d.deref() {
-                                DefTInner::SingletonNumT {
-                                    value: NumberLiteral(value, _),
-                                    ..
-                                } => *value,
-                                _ => unreachable!(),
-                            },
-                            _ => unreachable!(),
-                        };
                         let reason_prop = reason_of_t(elem_t).dupe();
-                        let kind = flow_typing_errors::intermediate_error_types::InvalidObjKey::kind_of_num_value(value);
+                        let kind = InvalidObjKey::NumberNonFinite;
                         add_output_with_env(
                                     cx,
                                     env,
@@ -8119,15 +8134,8 @@ pub mod get_prop_t_kit {
                     TypeInner::DefT(_, d)
                         if matches!(d.deref(), DefTInner::SingletonNumT { .. }) =>
                     {
-                        let value = match d.deref() {
-                            DefTInner::SingletonNumT {
-                                value: NumberLiteral(value, _),
-                                ..
-                            } => *value,
-                            _ => unreachable!(),
-                        };
                         let reason_prop = reason_of_t(elem_t).dupe();
-                        let kind = flow_typing_errors::intermediate_error_types::InvalidObjKey::kind_of_num_value(value);
+                        let kind = InvalidObjKey::NumberNonFinite;
                         add_output_with_env(
                                     cx,
                                     env,
@@ -8480,8 +8488,7 @@ pub fn propref_for_elem_t_with_env<'cx>(
     env: &FlowJsEnv,
     l: &Type,
 ) -> flow_typing_type::type_::PropRef {
-    use flow_common::js_number::ecma_string_of_float;
-    use flow_common::js_number::is_float_safe_integer;
+    use flow_common::js_number::numeric_property_name;
     use flow_typing_type::type_::DefTInner;
     use flow_typing_type::type_::PropRef;
     use flow_typing_type::type_util::mk_named_prop;
@@ -8502,15 +8509,12 @@ pub fn propref_for_elem_t_with_env<'cx>(
                         return mk_named_prop(reason, true, name);
                     }
                     if let DefTInner::SingletonNumT { value, .. } = def.deref() {
-                        if is_float_safe_integer(value.0) {
+                        if let Some(name) = numeric_property_name(value.0) {
                             update_lit_type_from_annot(cx, env, l);
-                            let reason =
-                                reason
-                                    .dupe()
-                                    .replace_desc(VirtualReasonDesc::RProperty(Some(Name::new(
-                                        value.1.dupe(),
-                                    ))));
-                            let name = Name::new(ecma_string_of_float(value.0));
+                            let name = Name::new(name);
+                            let reason = reason
+                                .dupe()
+                                .replace_desc(VirtualReasonDesc::RProperty(Some(name.dupe())));
                             return mk_named_prop(reason, true, name);
                         }
                     }
@@ -8536,15 +8540,12 @@ pub fn propref_for_elem_t_with_env<'cx>(
                     return mk_named_prop(reason, true, name);
                 }
                 if let DefTInner::SingletonNumT { value, .. } = def.deref() {
-                    if is_float_safe_integer(value.0) {
+                    if let Some(name) = numeric_property_name(value.0) {
                         update_lit_type_from_annot(cx, env, l);
-                        let reason =
-                            reason
-                                .dupe()
-                                .replace_desc(VirtualReasonDesc::RProperty(Some(Name::new(
-                                    value.1.dupe(),
-                                ))));
-                        let name = Name::new(ecma_string_of_float(value.0));
+                        let name = Name::new(name);
+                        let reason = reason
+                            .dupe()
+                            .replace_desc(VirtualReasonDesc::RProperty(Some(name.dupe())));
                         return mk_named_prop(reason, true, name);
                     }
                 }
@@ -8575,14 +8576,12 @@ pub fn propref_for_elem_t_with_env<'cx>(
                 return mk_named_prop(reason, true, name);
             }
             if let DefTInner::SingletonNumT { value, .. } = def.deref() {
-                if is_float_safe_integer(value.0) {
+                if let Some(name) = numeric_property_name(value.0) {
                     update_lit_type_from_annot(cx, env, l);
+                    let name = Name::new(name);
                     let reason = reason
                         .dupe()
-                        .replace_desc(VirtualReasonDesc::RProperty(Some(Name::new(
-                            value.1.dupe(),
-                        ))));
-                    let name = Name::new(ecma_string_of_float(value.0));
+                        .replace_desc(VirtualReasonDesc::RProperty(Some(name.dupe())));
                     return mk_named_prop(reason, true, name);
                 }
             }

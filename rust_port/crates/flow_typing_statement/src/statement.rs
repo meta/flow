@@ -23,6 +23,7 @@ use dupe::OptionDupedExt;
 use flow_aloc::ALoc;
 use flow_common::enclosing_context::EnclosingContext;
 use flow_common::flow_import_specifier;
+use flow_common::js_number::numeric_property_name;
 use flow_common::polarity::Polarity;
 use flow_common::reason::Name;
 use flow_common::reason::Reason;
@@ -100,6 +101,7 @@ use flow_typing_errors::intermediate_error_types::ContextDependentUnsupportedSta
 use flow_typing_errors::intermediate_error_types::DeclareComponentInvalidParamKind;
 use flow_typing_errors::intermediate_error_types::ExpressionReferenceData;
 use flow_typing_errors::intermediate_error_types::ExpressionReferenceKind;
+use flow_typing_errors::intermediate_error_types::InvalidObjKey;
 use flow_typing_errors::intermediate_error_types::MatchInvalidCaseSyntax;
 use flow_typing_errors::intermediate_error_types::NamedReferenceData;
 use flow_typing_errors::intermediate_error_types::NamespaceExportDeclarationKind;
@@ -802,16 +804,13 @@ fn name_of_identifier_or_literal_key(
         Key::Identifier(id) => Ok(id.name.dupe()),
         Key::StringLiteral((_loc, lit)) => Ok(lit.value.dupe()),
         Key::NumberLiteral((loc, lit)) => {
-            if flow_common::js_number::is_float_safe_integer(lit.value) {
-                let name = flow_common::js_number::ecma_string_of_float(lit.value);
-                Ok(FlowSmolStr::new(name))
+            if let Some(name) = numeric_property_name(lit.value) {
+                Ok(name)
             } else {
                 Err(Box::new(ErrorMessage::EUnsupportedKeyInObject {
                     loc: loc.dupe(),
                     obj_kind: intermediate_error_types::ObjKind::Literal,
-                    key_error_kind: intermediate_error_types::InvalidObjKey::kind_of_num_value(
-                        lit.value,
-                    ),
+                    key_error_kind: InvalidObjKey::NumberNonFinite,
                 }))
             }
         }
@@ -5832,12 +5831,9 @@ fn create_computed_prop<'a>(
                             }
                         }
                         TypeInner::DefT(_, def)
-                            if let DefTInner::SingletonNumT { value: num_lit, .. } =
-                                def.deref() =>
+                            if matches!(def.deref(), DefTInner::SingletonNumT { .. }) =>
                         {
-                            let kind = intermediate_error_types::InvalidObjKey::kind_of_num_value(
-                                num_lit.0,
-                            );
+                            let kind = InvalidObjKey::NumberNonFinite;
                             flow_js::add_output_non_speculating(
                                 cx,
                                 ErrorMessage::EObjectComputedPropertyAssign(Box::new((

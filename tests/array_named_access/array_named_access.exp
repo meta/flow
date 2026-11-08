@@ -139,76 +139,76 @@ References:
                         ^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------------- test.js:53:1
+Error ----------------------------------------------------------------------------------------------------- test.js:53:5
 
-Cannot get `arr['9007199254740993']` because `"9007199254740993"` [1] is incompatible with `number` [2].
-[incompatible-type]
+Cannot get `arr['9007199254740993']` because property `9007199254740993` is missing in `Array<number>` [1].
+[prop-missing]
 
-   test.js:53:1
-     53| arr['9007199254740993']; // ERROR: outside the safe-integer range, so a named key
-         ^^^^^^^^^^^^^^^^^^^^^^^ [1]
-
-References:
-   <BUILTINS>/lib.es5.js:1265:18
-   1265|     readonly [n: number]: T;
-                          ^^^^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------------------- test.js:54:1
-
-Cannot get `arr['1.5']` because `"1.5"` [1] is incompatible with `number` [2]. [incompatible-type]
-
-   test.js:54:1
-     54| arr['1.5']; // ERROR: not an integer, so a named key
-         ^^^^^^^^^^ [1]
+   test.js:53:5
+   53| arr['9007199254740993']; // ERROR: outside the safe-integer range, so a named key
+           ^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1265:18
-   1265|     readonly [n: number]: T;
-                          ^^^^^^ [2]
+   test.js:7:20
+    7| declare const arr: Array<number>;
+                          ^^^^^^^^^^^^^ [1]
 
 
-Error ----------------------------------------------------------------------------------------------------- test.js:55:1
+Error ----------------------------------------------------------------------------------------------------- test.js:54:5
 
-Cannot get `arr['01']` because `"01"` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot get `arr['1.5']` because property `1.5` is missing in `Array<number>` [1]. [prop-missing]
 
-   test.js:55:1
-     55| arr['01']; // ERROR: not a canonical integer, so a named key
-         ^^^^^^^^^ [1]
-
-References:
-   <BUILTINS>/lib.es5.js:1265:18
-   1265|     readonly [n: number]: T;
-                          ^^^^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------------------- test.js:56:1
-
-Cannot get `arr['nope']` because `"nope"` [1] is incompatible with `number` [2]. [incompatible-type]
-
-   test.js:56:1
-     56| arr['nope']; // ERROR: no such named member
-         ^^^^^^^^^^^ [1]
+   test.js:54:5
+   54| arr['1.5']; // ERROR: not an integer, so a named key
+           ^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1265:18
-   1265|     readonly [n: number]: T;
-                          ^^^^^^ [2]
+   test.js:7:20
+    7| declare const arr: Array<number>;
+                          ^^^^^^^^^^^^^ [1]
 
 
-Error ----------------------------------------------------------------------------------------------------- test.js:57:1
+Error ----------------------------------------------------------------------------------------------------- test.js:55:5
 
-Cannot get `tup['9007199254740993']` because `"9007199254740993"` [1] is incompatible with `number` [2].
-[incompatible-type]
+Cannot get `arr['01']` because property `01` is missing in `Array<number>` [1]. [prop-missing]
 
-   test.js:57:1
-     57| tup['9007199254740993']; // ERROR: outside the safe-integer range, so a named key
-         ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   test.js:55:5
+   55| arr['01']; // ERROR: not a canonical integer, so a named key
+           ^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1265:18
-   1265|     readonly [n: number]: T;
-                          ^^^^^^ [2]
+   test.js:7:20
+    7| declare const arr: Array<number>;
+                          ^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:56:5
+
+Cannot get `arr['nope']` because property `nope` is missing in `Array<number>` [1]. [prop-missing]
+
+   test.js:56:5
+   56| arr['nope']; // ERROR: no such named member
+           ^^^^^^
+
+References:
+   test.js:7:20
+    7| declare const arr: Array<number>;
+                          ^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:57:5
+
+Cannot get `tup['9007199254740993']` because property `9007199254740993` is missing in
+`ReadonlyArray<number | string>` [1]. [prop-missing]
+
+   test.js:57:5
+   57| tup['9007199254740993']; // ERROR: outside the safe-integer range, so a named key
+           ^^^^^^^^^^^^^^^^^^
+
+References:
+   test.js:39:20
+   39| declare const tup: [number, string];
+                          ^^^^^^^^^^^^^^^^ [1]
 
 
 

@@ -126,7 +126,7 @@ fn object_property_key<'a>(
 ) -> (
     expression::Expression<ALoc, ALoc>,
     match_pattern::object_pattern::Key<ALoc, (ALoc, Type)>,
-    FlowSmolStr,
+    Option<FlowSmolStr>,
 ) {
     match key {
         match_pattern::object_pattern::Key::Identifier(id) => {
@@ -144,7 +144,7 @@ fn object_property_key<'a>(
             (
                 new_acc,
                 match_pattern::object_pattern::Key::Identifier(typed_id),
-                id.name.dupe(),
+                Some(id.name.dupe()),
             )
         }
         match_pattern::object_pattern::Key::StringLiteral((loc, lit)) => {
@@ -152,17 +152,16 @@ fn object_property_key<'a>(
             (
                 new_acc,
                 match_pattern::object_pattern::Key::StringLiteral((loc.dupe(), lit.clone())),
-                lit.value.dupe(),
+                Some(lit.value.dupe()),
             )
         }
         match_pattern::object_pattern::Key::NumberLiteral((loc, lit)) => {
-            let prop = FlowSmolStr::new(js_number::ecma_string_of_float(lit.value));
-            if js_number::is_float_safe_integer(lit.value) {
+            if let Some(prop) = js_number::numeric_property_name(lit.value) {
                 let new_acc = object_named_property(acc, loc.dupe(), &prop);
                 (
                     new_acc,
                     match_pattern::object_pattern::Key::NumberLiteral((loc.dupe(), lit.clone())),
-                    prop,
+                    Some(prop),
                 )
             } else {
                 flow_js::add_output_non_speculating(
@@ -175,12 +174,11 @@ fn object_property_key<'a>(
                 (
                     acc.dupe(),
                     match_pattern::object_pattern::Key::NumberLiteral((loc.dupe(), lit.clone())),
-                    prop,
+                    None,
                 )
             }
         }
-        match_pattern::object_pattern::Key::BigIntLiteral((loc, lit)) => {
-            let raw = lit.raw.dupe();
+        match_pattern::object_pattern::Key::BigIntLiteral((loc, _)) => {
             flow_js::add_output_non_speculating(
                 cx,
                 ErrorMessage::EMatchError(MatchErrorKind::MatchInvalidObjectPropertyLiteral {
@@ -194,7 +192,7 @@ fn object_property_key<'a>(
                     polymorphic_ast_mapper::match_object_pattern_property_key(&mut mapper, key);
                 v
             };
-            (acc.dupe(), typed_key, raw)
+            (acc.dupe(), typed_key, None)
         }
     }
 }
@@ -832,7 +830,9 @@ fn object_properties<'a>(
                 let shorthand = property.shorthand;
                 let prop_comments = &property.comments;
                 let (new_acc, typed_key, name) = object_property_key(cx, acc, pattern_kind, key);
-                if seen.contains(&name) {
+                if let Some(name) = &name
+                    && seen.contains(name)
+                {
                     let key_loc = match &typed_key {
                         match_pattern::object_pattern::Key::StringLiteral((loc, _))
                         | match_pattern::object_pattern::Key::NumberLiteral((loc, _))
@@ -858,7 +858,7 @@ fn object_properties<'a>(
                         ErrorMessage::EMatchError(MatchErrorKind::MatchDuplicateObjectProperty(
                             Box::new(MatchDuplicateObjectPropertyData {
                                 loc: key_loc,
-                                name: FlowSmolStr::new(&name),
+                                name: FlowSmolStr::new(name),
                                 pattern_kind,
                             }),
                         )),
@@ -882,7 +882,9 @@ fn object_properties<'a>(
                         comments: prop_comments.clone(),
                     },
                 });
-                seen.insert(name);
+                if let Some(name) = name {
+                    seen.insert(name);
+                }
             }
             match_pattern::object_pattern::Property::InvalidShorthand {
                 loc,

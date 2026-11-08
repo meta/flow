@@ -19,12 +19,12 @@ num[42] as boolean; // OK
 num['42'] as boolean; // OK
 num[99]; // ERROR: property `99` is missing (named key, not a number indexer)
 
-// A number literal with no integer spelling has no property name, so it stays
-// an index signature keyed by that literal.
+// A fractional number literal is a specific named property,
+// using its canonical JavaScript string spelling.
 type Frac = {[1.5]: boolean};
 declare const frac: Frac;
-frac[1.5] as boolean; // OK via the indexer
-frac[2.5]; // ERROR: 2.5 is not in the 1.5 indexer key set
+frac[1.5] as boolean; // OK, the named property
+frac[2.5]; // ERROR: property 2.5 is missing
 
 // A general string key is an index signature.
 type Dict = {[string]: number};
