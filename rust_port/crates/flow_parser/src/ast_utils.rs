@@ -494,25 +494,57 @@ pub fn get_call_to_object_dot_freeze_arg<'a, M: Dupe, T: Dupe>(
     }
 }
 
-pub fn is_call_to_object_static_method<M: Dupe, T: Dupe>(
+/// Whether a call `Object.m(...)` is one that the checker types itself, instead of through the
+/// library signature of `Object.m` (see `static_method_call_object`).
+pub fn is_specially_typed_object_call<M: Dupe, T: Dupe>(
     callee: &expression::Expression<M, T>,
+    has_targs: bool,
+    arguments: &[expression::ExpressionOrSpread<M, T>],
 ) -> bool {
-    match callee.deref() {
-        ExpressionInner::Member { inner, .. } => {
-            if let ExpressionInner::Identifier {
-                inner: object_inner,
-                ..
-            } = inner.object.deref()
-            {
-                if matches!(
-                    inner.property,
-                    expression::member::Property::PropertyIdentifier(_)
-                ) {
-                    return object_inner.name == "Object";
-                }
-            }
-            false
+    use expression::ExpressionOrSpread::Expression;
+    let ExpressionInner::Member { inner, .. } = callee.deref() else {
+        return false;
+    };
+    let (
+        ExpressionInner::Identifier {
+            inner: object_inner,
+            ..
+        },
+        expression::member::Property::PropertyIdentifier(id),
+    ) = (inner.object.deref(), &inner.property)
+    else {
+        return false;
+    };
+    if object_inner.name != "Object" {
+        return false;
+    }
+    let is_object_literal =
+        |e: &expression::Expression<M, T>| matches!(e.deref(), ExpressionInner::Object { .. });
+    match (id.name.as_str(), arguments) {
+        (
+            "assign"
+            | "create"
+            | "getOwnPropertyNames"
+            | "getPrototypeOf"
+            | "keys"
+            | "defineProperty"
+            | "defineProperties"
+            | "freeze",
+            _,
+        ) if has_targs => true,
+        (_, _) if has_targs => false,
+        ("assign", _) => true,
+        (
+            "getPrototypeOf" | "create" | "getOwnPropertyNames" | "keys" | "values" | "entries",
+            [Expression(_)],
+        ) => true,
+        ("create" | "defineProperties", [Expression(_), Expression(props)]) => {
+            is_object_literal(props)
         }
+        ("defineProperty", [Expression(_), Expression(key), Expression(_)]) => {
+            matches!(key.deref(), ExpressionInner::StringLiteral { .. })
+        }
+        ("freeze", [Expression(o)]) => is_object_literal(o),
         _ => false,
     }
 }

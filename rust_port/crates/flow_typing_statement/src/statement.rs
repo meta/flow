@@ -1298,6 +1298,7 @@ fn method_call<'a>(
     name: &FlowSmolStr,
     targts: Option<Vec<Targ>>,
     argts: Vec<CallArg>,
+    return_hint: type_::LazyHintT<Cx>,
 ) -> Result<(Type, Type), JobError> {
     let expr_loc = expr.loc().dupe();
     match refinement::get(true, cx, expr, reason.loc().dupe())? {
@@ -1324,7 +1325,7 @@ fn method_call<'a>(
                         use_op: use_op.dupe(),
                         reason: reason.dupe(),
                         call_action: Box::new(type_::CallAction::Funcalltype(Box::new(app))),
-                        return_hint: type_::hint_unavailable(),
+                        return_hint: return_hint.clone(),
                     })));
                     flow_js::flow_non_speculating(cx, (&f, &use_t))
                 },
@@ -1360,7 +1361,7 @@ fn method_call<'a>(
                         method_action: Box::new(type_::MethodAction::CallM(Box::new(
                             type_::CallMData {
                                 methodcalltype,
-                                return_hint: type_::hint_unavailable(),
+                                return_hint: return_hint.clone(),
                                 specialized_callee: Some(specialized_callee.clone()),
                             },
                         ))),
@@ -13940,7 +13941,17 @@ fn non_react_jsx_desugar<'a>(
             let object = &member.object;
             let ot = jsx_pragma_expression(cx, object.loc().dupe(), object)?;
             method_call(
-                cx, reason, use_op, false, prop_loc, jsx_expr, ot, &name, targs_opt, argts,
+                cx,
+                reason,
+                use_op,
+                false,
+                prop_loc,
+                jsx_expr,
+                ot,
+                &name,
+                targs_opt,
+                argts,
+                type_::hint_unavailable(),
             )?
             .1
         }
@@ -15090,6 +15101,7 @@ fn static_method_call_object<'a>(
                 m,
                 method_targts,
                 vec![CallArg::arg(arg_t)],
+                type_::hint_unavailable(),
             )?;
             let result_targs = typed_targs.map(|(_, targs_ast)| targs_ast);
             (
@@ -15164,6 +15176,7 @@ fn static_method_call_object<'a>(
                 m,
                 targts,
                 argts,
+                type_env::get_hint(cx, loc.dupe()),
             )?;
             (result_t, targ_asts, arg_asts)
         }

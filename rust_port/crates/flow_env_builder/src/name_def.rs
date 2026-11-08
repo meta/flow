@@ -3458,8 +3458,8 @@ impl<'a> DefFinder<'a> {
         use flow_common::reason::mk_expression_reason;
         use flow_parser::ast_utils::is_call_to_is_array;
         use flow_parser::ast_utils::is_call_to_object_dot_freeze;
-        use flow_parser::ast_utils::is_call_to_object_static_method;
         use flow_parser::ast_utils::is_call_to_require;
+        use flow_parser::ast_utils::is_specially_typed_object_call;
 
         let callee = &expr.callee;
         let targs = &expr.targs;
@@ -3520,7 +3520,7 @@ impl<'a> DefFinder<'a> {
             {
                 self.visit_expression(EnclosingContext::NoContext, hints, expr)?;
             }
-            _ if is_call_to_object_static_method(callee) => {
+            _ if is_specially_typed_object_call(callee, targs.is_some(), arguments) => {
                 for arg in arguments.iter() {
                     match arg {
                         ast::expression::ExpressionOrSpread::Expression(expr) => {
