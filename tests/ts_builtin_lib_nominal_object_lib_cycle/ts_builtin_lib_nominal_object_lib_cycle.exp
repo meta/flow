@@ -1,0 +1,33 @@
+Error ----------------------------------------------------------------------------------------------------- test.js:4:11
+
+Cannot cast `new A()` to `B` because `A` [1] is incompatible with `B` [2]. [incompatible-type]
+
+   test.js:4:11
+   4| const a = new A() as B; // ERROR
+                ^^^^^^^ [1]
+
+References:
+   test.js:4:22
+   4| const a = new A() as B; // ERROR
+                           ^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:5:11
+
+Cannot cast `A` to `B` because class `A` [1] is incompatible with `B` [2]. [incompatible-type]
+
+   test.js:5:11
+   5| const c = A as B; // ERROR
+                ^
+
+References:
+   test.js:1:7
+   1| class A {}
+            ^ [1]
+   test.js:5:16
+   5| const c = A as B; // ERROR
+                     ^ [2]
+
+
+
+Found 2 errors

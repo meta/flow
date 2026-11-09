@@ -1,0 +1,6 @@
+[options]
+all=true
+builtin_lib=experimental.tslib
+
+[libs]
+lib.js

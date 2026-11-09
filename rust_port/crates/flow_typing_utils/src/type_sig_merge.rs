@@ -4440,6 +4440,13 @@ fn merge_interface<'cx>(
             .map(|t| merge_interface_extends(true, env, cx, file, t))
             .collect();
         let function_like = !calls.is_empty() || !constructs.is_empty();
+        // ObjProtoT stands for the builtin `Object`, so `Object` itself has a null prototype,
+        // as a `declare class Object` in a libdef does.
+        let null_proto = class_name.as_deref() == Some("Object")
+            && reason
+                .loc()
+                .source()
+                .is_some_and(|source| cx.is_global_libdef(source));
         let reason_for_super = reason.dupe();
         let make_super: Box<dyn FnOnce(Option<Type>) -> Type + 'cx> =
             Box::new(move |this_opt: Option<Type>| {
@@ -4463,6 +4470,7 @@ fn merge_interface<'cx>(
                     );
                 }
                 match ts.len() {
+                    0 if null_proto => Type::new(type_::TypeInner::NullProtoT(super_reason)),
                     0 => Type::new(type_::TypeInner::ObjProtoT(super_reason)),
                     1 => ts.into_iter().next().unwrap(),
                     _ => {
