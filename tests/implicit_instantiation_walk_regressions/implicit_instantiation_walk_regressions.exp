@@ -630,6 +630,52 @@ References:
                                            ^^^^ [3]
 
 
+Error ----------------------------------------------------------------------------------- partial_bound_reversal.js:11:3
+
+Cannot call `mergeWithDefaults` because in type argument `TDefaults`: property `b` is missing in object literal [1] but
+exists in `{a?: number, b?: string}` [2]. [incompatible-type]
+
+This optional property of `{a?: number, b?: string}` [2] is invariantly typed. To fix,
+- Either annotate object literal [1] with `{a?: number, b?: string}` [2]
+- Or make `{a?: number, b?: string}` [2] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   partial_bound_reversal.js:11:3
+   11|   {a: 1}, // error: `{a: 1}` is not below `Partial<{a: number, b: string}>`
+         ^^^^^^ [1]
+
+References:
+   partial_bound_reversal.js:12:12
+   12|   ({a, b}: {a: number, b: string}) => b,
+                  ^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------- partial_bound_reversal.js:11:7
+
+Cannot call `mergeWithDefaults` because in type argument `TDefaults` > property `a`: `number` [1] is not exactly the
+same as `void | number` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `a` is invariantly typed. To fix the error,
+- Either annotate object literal [3] with `{a?: number, b?: string}` [4]
+- Or make property `a` in `{a?: number, b?: string}` [4] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   partial_bound_reversal.js:11:7
+   11|   {a: 1}, // error: `{a: 1}` is not below `Partial<{a: number, b: string}>`
+             ^ [1]
+
+References:
+   partial_bound_reversal.js:12:16
+   12|   ({a, b}: {a: number, b: string}) => b,
+                      ^^^^^^ [2]
+   partial_bound_reversal.js:11:3
+   11|   {a: 1}, // error: `{a: 1}` is not below `Partial<{a: number, b: string}>`
+         ^^^^^^ [3]
+   partial_bound_reversal.js:12:12
+   12|   ({a, b}: {a: number, b: string}) => b,
+                  ^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
 Error ------------------------------------------------------------------------------------- recursive_alias_union.js:6:1
 
 Cannot call `f` because `T` [1] is underconstrained by call of `f` [2]. Either add explicit type arguments or cast the
@@ -776,4 +822,4 @@ References:
 
 
 
-Found 43 errors
+Found 45 errors

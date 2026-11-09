@@ -103,6 +103,11 @@ enum Priority {
     Bound,
     /// What the arguments and the hint give the marker.
     Direct,
+    /// A reversal met while walking the solution of a type parameter pinned before against its
+    /// bound (what flows to `Partial<T>`). As a reversal, it says only which properties the marker
+    /// may have, so it ranks after direct evidence, but it comes from a solution, so before the
+    /// reversals met in the arguments and the hint, which have the solution so far.
+    BoundReversal,
     /// The reversal of a destructor of the marker (a spread, a rest, the config of a component),
     /// or what flows to `Partial` or `Required`. The flow-based solve reads it after the others.
     Reversal,
@@ -976,10 +981,10 @@ impl<'e> Walker<'e> {
                 flow_typing_debug::dump_t(Some(2), cx, t)
             )
         });
-        let priority = if self.in_bound {
-            Priority::Bound
-        } else {
-            priority
+        let priority = match priority {
+            Priority::Direct if self.in_bound => Priority::Bound,
+            Priority::Reversal if self.in_bound => Priority::BoundReversal,
+            priority => priority,
         };
         let bounds = self.vars.get_mut(name).expect("marker should have bounds");
         add_bound(&mut bounds.upper, t, priority);
@@ -4604,6 +4609,10 @@ impl<'e> Walker<'e> {
                 if let Some(name) = self.marker_of(type_)
                     && !self.mentions(cx, l) =>
             {
+                if self.rest_waits(cx, d) {
+                    self.deferred.push((l.dupe(), u.dupe()));
+                    return Ok(());
+                }
                 // The props to remove may depend on other markers (`Omit<T, keyof U>`): those
                 // with evidence take their solution so far, as in the flow-based solve.
                 let t_rest = &self.with_evidence(cx, t_rest, reason);
@@ -5072,6 +5081,17 @@ impl<'e> Walker<'e> {
                 > 1
     }
 
+    /// Whether a rest removes props that depend on a marker without evidence yet
+    /// (`Omit<T, keyof U>`): its reversal waits for the other arguments, which may give that marker
+    /// evidence, as the flow-based solve reverses it once the tvar of `U` has its lower bounds.
+    fn rest_waits<'cx>(&self, cx: &mut Context<'cx>, d: &Destructor) -> bool {
+        let Destructor::RestType(_, t_rest) = d else {
+            return false;
+        };
+        !self.second_pass
+            && (self.markers_in(cx, t_rest).iter()).any(|name| !self.has_evidence(name))
+    }
+
     /// `t` evaluated if it is a destructor without markers.
     fn evaluated<'cx>(&mut self, cx: &mut Context<'cx>, t: &Type) -> Result<Type, FlowJsException> {
         let t = self.resolve(cx, t);
@@ -5215,6 +5235,10 @@ impl<'e> Walker<'e> {
             | Destructor::EnumType
                 if !self.mentions(cx, u) =>
             {
+                if self.rest_waits(cx, d) {
+                    self.deferred.push((l.dupe(), u.dupe()));
+                    return Ok(());
+                }
                 if let Some((target, d)) = self.reversal_target(cx, type_, d) {
                     let u = self.evaluated(cx, u)?;
                     return match self.reverse_destructor(cx, reason, &d, &u)? {
