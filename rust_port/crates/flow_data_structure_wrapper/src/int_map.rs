@@ -22,9 +22,13 @@ use std::hash::Hasher;
 pub struct IdentityHasher(u64);
 
 impl Hasher for IdentityHasher {
+    /// The table picks a bucket from the low bits of the hash, which stay the integer itself, and
+    /// filters the keys it compares by the top 7 bits, which are the same for every small integer.
+    /// Mix the integer into those 7 bits so that the filter rejects the other keys of a probe.
     #[inline]
     fn finish(&self) -> u64 {
-        self.0
+        const TOP_7_BITS: u64 = 0x7F << 57;
+        self.0 ^ (self.0.wrapping_mul(0x9E37_79B9_7F4A_7C15) & TOP_7_BITS)
     }
 
     #[inline]
