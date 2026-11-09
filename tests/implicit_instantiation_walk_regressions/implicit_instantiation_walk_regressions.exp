@@ -486,6 +486,21 @@ References:
                                 ^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------ literal_bound_pinned_after.js:15:52
+
+Cannot call `useModal` because in type argument `TRuntime` > property `mode`: `"other"` [1] is incompatible with
+`"draft" | "published" | null` [2]. [incompatible-type]
+
+   literal_bound_pinned_after.js:15:52
+   15| useModal(Modal, {mode: isPublished ? 'published' : 'other'}); // error: 'other'
+                                                          ^^^^^^^ [1]
+
+References:
+   literal_bound_pinned_after.js:6:31
+    6| declare component Modal(mode: 'draft' | 'published' | null);
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------------------- nested_iterable.js:8:1
 
 Cannot cast `flat` to `Array<string>` because in array element: `number` [1] is not exactly the same as `string` [2].
@@ -732,4 +747,4 @@ References:
 
 
 
-Found 41 errors
+Found 42 errors

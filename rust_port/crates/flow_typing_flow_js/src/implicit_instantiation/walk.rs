@@ -6891,6 +6891,32 @@ fn pin<'cx>(
         .filter_map(|(m, tparam)| Some((m.as_ref()?.dupe(), mixed_t::why(tparam.reason.dupe()))))
         .collect();
 
+    // The flow-based solve flows each tvar to its bound once the tvars that the bound mentions are
+    // pinned. That records the literals the bound needs precise, also those it needs through a
+    // type parameter pinned after this one, which the solution so far that the solve checks bounds
+    // with before pinning does not know. Do the same with the solutions, dropping the errors. As
+    // there, a bound with a literal of a value asks for no precision.
+    let solved: FlowOrdMap<SubstName, Type> = (pinning.markers.iter())
+        .zip(solutions.iter())
+        .filter_map(|(m, t)| Some((m.as_ref()?.dupe(), t.dupe())))
+        .collect();
+    for (tparam, t) in tparams.iter().zip(solutions.iter()) {
+        let bound = subst(cx, pinning.subst_map, &tparam.bound);
+        if !walker.mentions(cx, &bound) || walker.mentions(cx, t) || !has_inferred_literal(cx, t) {
+            continue;
+        }
+        let bound = subst(cx, &solved, &bound);
+        if walker.mentions(cx, &bound) || has_value_literal(cx, &bound) {
+            continue;
+        }
+        let errors = cx.errors();
+        let flowed = run_keeping_clean_flows(cx, env, walker.preserve, |cx| {
+            FlowJs::flow_t_with_env(cx, env, t, &bound)
+        });
+        cx.reset_errors(errors);
+        instantiation_solver::sandboxed(flowed)?;
+    }
+
     let call_loc = reason_op.loc().dupe();
     let mut result_map = BTreeMap::new();
     let mut result_list = Vec::with_capacity(tparams.len());
