@@ -1540,7 +1540,13 @@ impl<'e> Walker<'e> {
             }
             (TypeInner::GenericT(box GenericTData { bound, .. }), _) => self.walk(cx, bound, &u),
             (TypeInner::TypeAppT(a), TypeInner::TypeAppT(b)) => {
-                if let Some(polarities) = self.same_typeapp(cx, &a.type_, &b.type_) {
+                // Applications of the same alias or class are compared argument by argument
+                // when they write as many arguments, as subtyping does (`ConcretizeTypeAppsT`);
+                // otherwise by their expansions, where a default stands in for an argument left
+                // out.
+                if a.targs.len() == b.targs.len()
+                    && let Some(polarities) = self.same_typeapp(cx, &a.type_, &b.type_)
+                {
                     let ltargs = self.full_targs(cx, &a.type_, &a.targs);
                     let utargs = self.full_targs(cx, &b.type_, &b.targs);
                     let pairs: Vec<(Type, Type, Polarity)> = ltargs
