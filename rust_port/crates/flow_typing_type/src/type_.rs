@@ -10308,8 +10308,25 @@ pub mod constraint {
         }
 
         pub struct State<CX: ContextFamily, A, B> {
-            inner: Rc<UnsafeCell<ForcingStateInner<CX, A>>>,
+            inner: Rc<StateCell<CX, A, B>>,
+        }
+
+        // The error reason is fixed when the state is made, so it is shared along with the
+        // status: cloning a state only increments one reference count.
+        struct StateCell<CX: ContextFamily, A, B> {
+            status: UnsafeCell<ForcingStateInner<CX, A>>,
             error_reason: Option<B>,
+        }
+
+        impl<CX: ContextFamily, A, B> State<CX, A, B> {
+            fn new(status: ForcingStateInner<CX, A>, error_reason: Option<B>) -> Self {
+                State {
+                    inner: Rc::new(StateCell {
+                        status: UnsafeCell::new(status),
+                        error_reason,
+                    }),
+                }
+            }
         }
 
         impl<CX: ContextFamily, A: Clone + std::fmt::Debug, B: Clone + std::fmt::Debug>
@@ -10317,7 +10334,7 @@ pub mod constraint {
         {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 // SAFETY: single-threaded, just reading for debug
-                let status_str = match unsafe { &*self.inner.get() } {
+                let status_str = match unsafe { &*self.inner.status.get() } {
                     ForcingStateInner::Lazy(_) => "Lazy",
                     ForcingStateInner::LazyResult(_) => "LazyResult",
                     ForcingStateInner::Forcing => "Forcing",
@@ -10327,7 +10344,7 @@ pub mod constraint {
                 };
                 f.debug_struct("State")
                     .field("status", &status_str)
-                    .field("error_reason", &self.error_reason)
+                    .field("error_reason", &self.inner.error_reason)
                     .finish()
             }
         }
@@ -10340,10 +10357,7 @@ pub mod constraint {
             where
                 F: for<'a> FnOnce(&mut CX::Context<'a>) -> A + 'static,
             {
-                State {
-                    inner: Rc::new(UnsafeCell::new(ForcingStateInner::Lazy(Box::new(f)))),
-                    error_reason: Some(error_reason),
-                }
+                State::new(ForcingStateInner::Lazy(Box::new(f)), Some(error_reason))
             }
 
             pub fn try_of_lazy_t<F>(error_reason: B, f: F) -> Self
@@ -10354,17 +10368,14 @@ pub mod constraint {
                         -> Result<A, flow_utils_concurrency::job_error::JobError>
                     + 'static,
             {
-                State {
-                    inner: Rc::new(UnsafeCell::new(ForcingStateInner::LazyResult(Box::new(f)))),
-                    error_reason: Some(error_reason),
-                }
+                State::new(
+                    ForcingStateInner::LazyResult(Box::new(f)),
+                    Some(error_reason),
+                )
             }
 
             pub fn of_non_lazy_t(t: A) -> Self {
-                State {
-                    inner: Rc::new(UnsafeCell::new(ForcingStateInner::Forced(t))),
-                    error_reason: None,
-                }
+                State::new(ForcingStateInner::Forced(t), None)
             }
 
             pub fn force<'c, F>(&self, cx: &mut CX::Context<'c>, on_error: F) -> A
@@ -10372,7 +10383,7 @@ pub mod constraint {
                 F: FnOnce(&mut CX::Context<'c>, &B) -> A,
             {
                 // SAFETY: single-threaded, no concurrent access to the same State
-                let inner = unsafe { &mut *self.inner.get() };
+                let inner = unsafe { &mut *self.inner.status.get() };
 
                 match inner {
                     ForcingStateInner::Lazy(_) => {
@@ -10410,7 +10421,7 @@ pub mod constraint {
                             Err(e) => {
                                 let fallback = on_error(
                                     cx,
-                                    self.error_reason.as_ref().expect("No error reason"),
+                                    self.inner.error_reason.as_ref().expect("No error reason"),
                                 );
                                 *inner = ForcingStateInner::ForcedWithJobError(fallback.dupe(), e);
                                 fallback
@@ -10418,7 +10429,10 @@ pub mod constraint {
                         }
                     }
                     ForcingStateInner::Forcing => {
-                        let t = on_error(cx, self.error_reason.as_ref().expect("No error reason"));
+                        let t = on_error(
+                            cx,
+                            self.inner.error_reason.as_ref().expect("No error reason"),
+                        );
                         *inner = ForcingStateInner::ForcedWithCyclicError(t.dupe());
                         t
                     }
@@ -10437,7 +10451,7 @@ pub mod constraint {
                 F: FnOnce(&mut CX::Context<'c>, &B) -> A,
             {
                 // SAFETY: single-threaded, no concurrent access to the same State
-                let inner = unsafe { &mut *self.inner.get() };
+                let inner = unsafe { &mut *self.inner.status.get() };
 
                 match inner {
                     ForcingStateInner::Lazy(_) => {
@@ -10477,7 +10491,7 @@ pub mod constraint {
                             Err(e) => {
                                 let fallback = on_error(
                                     cx,
-                                    self.error_reason.as_ref().expect("No error reason"),
+                                    self.inner.error_reason.as_ref().expect("No error reason"),
                                 );
                                 *inner = ForcingStateInner::ForcedWithJobError(fallback, e.dupe());
                                 Err(e)
@@ -10485,7 +10499,10 @@ pub mod constraint {
                         }
                     }
                     ForcingStateInner::Forcing => {
-                        let t = on_error(cx, self.error_reason.as_ref().expect("No error reason"));
+                        let t = on_error(
+                            cx,
+                            self.inner.error_reason.as_ref().expect("No error reason"),
+                        );
                         *inner = ForcingStateInner::ForcedWithCyclicError(t.dupe());
                         Ok(t)
                     }
@@ -10497,13 +10514,13 @@ pub mod constraint {
 
             pub fn already_forced_with_cyclic_error(&self) -> bool {
                 matches!(
-                    unsafe { &*self.inner.get() },
+                    unsafe { &*self.inner.status.get() },
                     ForcingStateInner::ForcedWithCyclicError(_)
                 )
             }
 
             pub fn error_reason(&self) -> Option<&B> {
-                self.error_reason.as_ref()
+                self.inner.error_reason.as_ref()
             }
 
             pub fn ptr_eq(&self, other: &Self) -> bool {
@@ -10512,7 +10529,7 @@ pub mod constraint {
 
             /// The value if it has been forced, without forcing it.
             pub fn forced(&self) -> Option<A> {
-                match unsafe { &*self.inner.get() } {
+                match unsafe { &*self.inner.status.get() } {
                     ForcingStateInner::Lazy(_)
                     | ForcingStateInner::LazyResult(_)
                     | ForcingStateInner::Forcing => None,
@@ -10531,12 +10548,12 @@ pub mod constraint {
                 F: for<'a> FnOnce(&mut CX::Context<'a>, &Self) -> A + 'static,
             {
                 let src_state = self.clone();
-                State {
-                    inner: Rc::new(UnsafeCell::new(ForcingStateInner::Lazy(Box::new(
-                        move |dst_cx: &mut CX::Context<'_>| force_copy(dst_cx, &src_state),
-                    )))),
-                    error_reason: self.error_reason.clone(),
-                }
+                State::new(
+                    ForcingStateInner::Lazy(Box::new(move |dst_cx: &mut CX::Context<'_>| {
+                        force_copy(dst_cx, &src_state)
+                    })),
+                    self.inner.error_reason.clone(),
+                )
             }
         }
 
@@ -10545,19 +10562,16 @@ pub mod constraint {
                 reason: Reason,
                 lazy_module: Rc<flow_lazy::Lazy<CX, ModuleType>>,
             ) -> Self {
-                State {
-                    inner: Rc::new(UnsafeCell::new(ForcingStateInner::Lazy(Box::new(
-                        move |cx: &mut CX::Context<'_>| Ok(lazy_module.get_forced(cx).dupe()),
-                    )))),
-                    error_reason: Some(reason),
-                }
+                State::new(
+                    ForcingStateInner::Lazy(Box::new(move |cx: &mut CX::Context<'_>| {
+                        Ok(lazy_module.get_forced(cx).dupe())
+                    })),
+                    Some(reason),
+                )
             }
 
             pub fn of_error_module(t: Type) -> Self {
-                State {
-                    inner: Rc::new(UnsafeCell::new(ForcingStateInner::Forced(Err(t)))),
-                    error_reason: None,
-                }
+                State::new(ForcingStateInner::Forced(Err(t)), None)
             }
         }
 
@@ -10565,7 +10579,6 @@ pub mod constraint {
             fn clone(&self) -> Self {
                 State {
                     inner: self.inner.clone(),
-                    error_reason: self.error_reason.clone(),
                 }
             }
         }
