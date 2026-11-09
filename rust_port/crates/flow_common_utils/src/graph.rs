@@ -9,6 +9,7 @@
 
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
+use std::collections::HashMap;
 use std::hash::Hash;
 use std::sync::Arc;
 
@@ -71,27 +72,40 @@ impl<K: Eq + Ord + Hash + Dupe> Graph<K> {
     }
 
     pub fn of_map(map: BTreeMap<K, BTreeSet<K>>) -> Self {
-        let mut nodes: BTreeMap<K, Node<K>> = BTreeMap::new();
-
-        // Single pass: consume map and build both forward and backward edges
-        for (key, forward_edges) in map {
-            // Ensure the source node exists
-            nodes.entry(key.dupe()).or_insert_with(empty_node);
-
-            // Add backward edges for each forward edge
-            for edge in &forward_edges {
-                nodes
+        // Gather the backward edges by hash: finding the node of every edge in an ordered map
+        // compares the edge with each key on its path, which dominates on large graphs. The keys of
+        // `map` come in order, so each list of backward edges comes out sorted.
+        let mut backward_edges: HashMap<K, Vec<K>> = HashMap::new();
+        for (key, forward_edges) in &map {
+            for edge in forward_edges {
+                backward_edges
                     .entry(edge.dupe())
-                    .or_insert_with(empty_node)
-                    .backward
-                    .insert(key.dupe());
+                    .or_default()
+                    .push(key.dupe());
             }
-
-            // Set the forward edges
-            nodes.get_mut(&key).unwrap().forward = forward_edges;
         }
 
-        Self { nodes }
+        let mut nodes: Vec<(K, Node<K>)> = Vec::with_capacity(map.len());
+        for (key, forward) in map {
+            let backward = backward_edges
+                .remove(&key)
+                .map_or_else(BTreeSet::new, BTreeSet::from_iter);
+            nodes.push((key, Node { forward, backward }));
+        }
+        // Nodes that are only the target of edges
+        nodes.extend(backward_edges.into_iter().map(|(key, backward)| {
+            (
+                key,
+                Node {
+                    forward: BTreeSet::new(),
+                    backward: BTreeSet::from_iter(backward),
+                },
+            )
+        }));
+
+        Self {
+            nodes: BTreeMap::from_iter(nodes),
+        }
     }
 
     pub fn update_from_map(
