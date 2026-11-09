@@ -6,7 +6,7 @@ version = "0.0.0"
 edition = "2024"
 
 [dependencies]
-arc-swap = { version = "1.9.3", features = ["weak"] }
+arc-swap = { version = "1.9.4", features = ["weak"] }
 bincode = { version = "2", features = ["serde"] }
 dupe = "0.9.1"
 flow_aloc = { path = "../flow_aloc" }
