@@ -5135,13 +5135,16 @@ impl<'e> Walker<'e> {
         // bound of `T`. It is soft, so that the arguments decide without it. A hint of `mixed` or
         // `any` says nothing (it stands in for evidence the walk may not see, such as a nested
         // generic call's result).
-        if self.in_hint && matches!(d.deref(), Destructor::NonMaybeType) {
+        if self.in_hint
+            && matches!(d.deref(), Destructor::NonMaybeType)
+            && let Some(name) = self.marker_of(type_)
+        {
             let says_nothing = match self.resolve(cx, u).deref() {
                 TypeInner::AnyT(..) => true,
                 TypeInner::DefT(_, d) => matches!(d.deref(), DefTInner::MixedT(_)),
                 _ => false,
             };
-            if !says_nothing && let Some(name) = self.marker_of(type_) {
+            if !says_nothing {
                 let maybe = Type::new(TypeInner::MaybeT(reason.dupe(), u.dupe()));
                 self.add_upper_at(cx, &name, &maybe, Priority::Soft);
             }
