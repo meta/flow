@@ -705,14 +705,17 @@ where
             let collated_errors = (&errors, &warnings, suppressed_errors, lazy_msg);
             format_errors(collated_errors)
         });
-        Ok((print_errors, errors, warnings, first_internal_error))
+        Ok((print_errors, errors, warnings, first_internal_error, env))
     });
-    let (print_errors, errors, warnings, first_internal_error) = match init_result {
+    let (print_errors, errors, warnings, first_internal_error, env) = match init_result {
         Ok(result) => result,
         Err(error) => exit_on_recheck_error(error),
     };
 
     print_errors(&profiling);
+    // Freeing the environment and the heap of a large root takes seconds, and `flow full-check`
+    // exits as soon as this returns, so free them on another thread.
+    std::thread::spawn(move || drop((env, committed_heap)));
 
     monitor_rpc::send_telemetry(
         flow_server_env::lsp_prot::TelemetryFromServer::InitSummary {
