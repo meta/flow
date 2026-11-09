@@ -1546,6 +1546,23 @@ impl<'e> Walker<'e> {
                     }
                     Ok(())
                 } else {
+                    // An alias whose body applies the alias of the other side, such as
+                    // `type MySpec<A> = Spec<?A, Props<A>>` against `Spec<R, P>`, stands for that
+                    // application, which meets the other argument by argument. Their expansions
+                    // come to the same, but the walk can't always take them apart: a spread of a
+                    // union makes a union.
+                    if let Some(e) = self.expand_typeapp(cx, &u)
+                        && let e = self.resolve(cx, &e)
+                        && matches!(e.deref(), TypeInner::TypeAppT(eb) if self.same_typeapp(cx, &a.type_, &eb.type_).is_some())
+                    {
+                        return self.walk(cx, &l, &e);
+                    }
+                    if let Some(e) = self.expand_typeapp(cx, &l)
+                        && let e = self.resolve(cx, &e)
+                        && matches!(e.deref(), TypeInner::TypeAppT(ea) if self.same_typeapp(cx, &ea.type_, &b.type_).is_some())
+                    {
+                        return self.walk(cx, &e, &u);
+                    }
                     // Applications of aliases that are compared by their expansions are nested
                     // like classes: a recursive alias would otherwise unfold without end.
                     let la = self.resolve(cx, &a.type_);
