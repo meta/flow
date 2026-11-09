@@ -1963,14 +1963,30 @@ impl<'e> Walker<'e> {
                     }
                     _ => instance,
                 };
-                match self.evaluate(cx, l, &d)? {
+                // Under `experimental.react_managed_attributes`, the config of a class with markers
+                // is `React.ReactManagedAttributes` of a spread of its props, which the walk can't
+                // take apart.
+                let config = if cx.react_managed_attributes() && self.mentions(cx, l) {
+                    None
+                } else {
+                    self.evaluate(cx, l, &d)?
+                };
+                match config {
                     Some(config) => self.walk(cx, &uc.config, &config)?,
                     // With markers in the class, its config is stuck on them: the props it
                     // declares, through the `React.Component` it extends.
                     None => {
+                        // The props stand for the config, which the flow-based solve checks only
+                        // once they are known, through the default props or
+                        // `React.ReactManagedAttributes`: their evidence counts where it agrees
+                        // with the evidence so far, as where that check succeeds.
                         if let Some(props) = self.class_component_props(cx, &instance)? {
                             let config = self.evaluated(cx, &uc.config)?;
+                            let snapshot = self.snapshot();
                             self.walk(cx, &config, &props)?;
+                            if !self.agrees_with(cx, &snapshot.vars)? {
+                                self.restore(snapshot);
+                            }
                         }
                     }
                 }
@@ -2315,13 +2331,18 @@ impl<'e> Walker<'e> {
     }
 
     /// The default props of a class component against its props: as the config of the class
-    /// leaves them out, the flow-based solve checks each against the prop of the same name.
+    /// leaves them out, the flow-based solve checks each against the prop of the same name. Under
+    /// `experimental.react_managed_attributes`, the config keeps them, optional, with the types of
+    /// the props, so the default props say nothing about the props.
     fn walk_default_props<'cx>(
         &mut self,
         cx: &mut Context<'cx>,
         component: &Type,
         props: &Type,
     ) -> Result<(), FlowJsException> {
+        if cx.react_managed_attributes() {
+            return Ok(());
+        }
         let defaults = match self.method_type_of(cx, component, "defaultProps") {
             Ok(Some(defaults)) => defaults,
             Ok(None) | Err(_) => return Ok(()),

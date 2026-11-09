@@ -1,0 +1,31 @@
+Error --------------------------------------------------------------------------- class_component_default_props.js:19:41
+
+Cannot create `MenuItem` element because in property `onClick` > the first parameter > property `threadId`: `number` [1]
+is not exactly the same as `string` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `threadId` is invariantly typed. To fix the error,
+- Either annotate object literal [3] with `{threadId: string, ...}` [4]
+- Or make property `threadId` in `{threadId: string, ...}` [4] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   class_component_default_props.js:19:41
+   19| <MenuItem data={{threadId: 1}} onClick={goToThread} />; // error
+                                               ^^^^^^^^^^
+
+References:
+   class_component_default_props.js:19:28
+   19| <MenuItem data={{threadId: 1}} onClick={goToThread} />; // error
+                                  ^ [1]
+   class_component_default_props.js:14:46
+   14| declare function goToThread(data: {threadId: string, ...}): void;
+                                                    ^^^^^^ [2]
+   class_component_default_props.js:19:17
+   19| <MenuItem data={{threadId: 1}} onClick={goToThread} />; // error
+                       ^^^^^^^^^^^^^ [3]
+   class_component_default_props.js:14:35
+   14| declare function goToThread(data: {threadId: string, ...}): void;
+                                         ^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+
+Found 1 error
