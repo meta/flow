@@ -35,7 +35,7 @@ lsp-types = "0.97"
 murmur3 = "0.5.2"
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 serde_json = { version = "1.0.154", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
-uuid = { version = "1.28.0", features = ["rng-getrandom", "serde", "v4", "v5", "v6", "v7", "v8"] }
+uuid = { version = "1.29.1", features = ["rng-getrandom", "serde", "v4", "v5", "v6", "v7", "v8"] }
 vec1 = { version = "1.12.1", features = ["serde"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
