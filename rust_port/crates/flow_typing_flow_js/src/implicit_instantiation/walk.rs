@@ -1453,7 +1453,8 @@ impl<'e> Walker<'e> {
                 self.walk(cx, &l, &e)
             }
             // An intersection of objects meets an object type through the first member that has
-            // its required properties and whose evidence agrees, as in speculation; otherwise
+            // its required properties, fits it with the markers open, and whose evidence agrees,
+            // as in speculation; otherwise
             // property by property, each from the first member that has it, as a property lookup
             // on an intersection does.
             (TypeInner::IntersectionT(_, rep), TypeInner::DefT(_, d))
@@ -1474,7 +1475,9 @@ impl<'e> Walker<'e> {
                     let Some((mp, _)) = self.object_shape(cx, m) else {
                         continue;
                     };
-                    if !required.iter().all(|name| mp.get(name).is_some()) {
+                    if !required.iter().all(|name| mp.get(name).is_some())
+                        || !self.fits_open(cx, m, &u)?
+                    {
                         continue;
                     }
                     let snapshot = self.snapshot();
