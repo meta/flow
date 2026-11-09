@@ -6767,20 +6767,28 @@ fn solve_targs_in_snapshot<'cx>(
         (return_hint, &return_t)
         && (env.speculating() || flow_js_utils::tvar_visitors::has_unresolved_tvars(cx, hint))
     {
-        let instantiated = if !env.speculating() && contains_eval(cx, return_t) {
-            None
-        } else {
-            let solution: FlowOrdMap<SubstName, Type> = markers
-                .iter()
-                .zip(tparams.iter())
-                .filter_map(|(marker, tparam)| {
-                    let name = marker.as_ref()?;
-                    let targ = result.0.get(&tparam.name)?;
-                    Some((name.dupe(), targ.generalized.dupe()))
-                })
-                .collect();
-            Some(subst(cx, &solution, return_t))
-        };
+        // A conditional type that the type parameters leave undecided is stuck in the flow-based
+        // solve, whose result still has them as type variables, so it flows nothing there.
+        let undecided_conditional = matches!(
+            walker.resolve(cx, return_t).deref(),
+            TypeInner::EvalT { defer_use_t, .. }
+                if matches!(defer_use_t.2.deref(), Destructor::ConditionalType(_))
+        ) && walker.eval_conditional(cx, return_t, false)?.is_none();
+        let instantiated =
+            if (!env.speculating() && contains_eval(cx, return_t)) || undecided_conditional {
+                None
+            } else {
+                let solution: FlowOrdMap<SubstName, Type> = markers
+                    .iter()
+                    .zip(tparams.iter())
+                    .filter_map(|(marker, tparam)| {
+                        let name = marker.as_ref()?;
+                        let targ = result.0.get(&tparam.name)?;
+                        Some((name.dupe(), targ.generalized.dupe()))
+                    })
+                    .collect();
+                Some(subst(cx, &solution, return_t))
+            };
         if let Some(instantiated) = instantiated {
             let errors = cx.errors();
             let flowed = run_keeping_clean_flows(cx, env, preserve, |cx| {
