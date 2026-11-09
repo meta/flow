@@ -1050,6 +1050,11 @@ impl<'e> Walker<'e> {
             self.add_upper(cx, &name, u);
             return Ok(());
         }
+        // `empty` is a subtype of anything, which subtyping finds at once (`empty_success`) for
+        // anything but a type variable: it gives evidence only to a bare marker.
+        if matches!(l.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::EmptyT)) {
+            return Ok(());
+        }
         if is_placeholder(l) || is_placeholder(u) {
             return Ok(());
         }
