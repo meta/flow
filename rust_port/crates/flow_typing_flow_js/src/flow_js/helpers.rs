@@ -2945,6 +2945,22 @@ pub(super) fn possible_concrete_types_for_inspection<'cx>(
     )
 }
 
+pub(super) fn possible_concrete_types_for_walk<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    reason: &Reason,
+    t: &Type,
+    markers: Arc<BTreeSet<SubstName>>,
+) -> Result<Vec<Type>, FlowJsException> {
+    possible_concrete_types(
+        ConcretizationKind::ConcretizeForWalk(markers),
+        cx,
+        env,
+        reason,
+        t,
+    )
+}
+
 pub(super) fn possible_concrete_types_for_class_extends<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,

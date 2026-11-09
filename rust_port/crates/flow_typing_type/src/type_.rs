@@ -6850,6 +6850,9 @@ pub enum ConcretizationKind {
     ConcretizeForOptionalChain,
     ConcretizeForImportsExports,
     ConcretizeForInspection,
+    /// As `ConcretizeForInspection`, for the implicit-instantiation walk: a destructor that would
+    /// act on one of these markers stays unevaluated.
+    ConcretizeForWalk(Arc<BTreeSet<SubstName>>),
     ConcretizeForClassExtends(Type),
     ConcretizeForEnumExhaustiveCheck,
     ConcretizeForPredicate(PredicateConcretetizerVariant),
@@ -12452,6 +12455,7 @@ pub fn string_of_use_ctor<CX: ContextFamily>(use_t: &UseT<CX>) -> String {
             ConcretizationKind::ConcretizeForInspection => {
                 "ConcretizeT ConcretizeForInspection".to_string()
             }
+            ConcretizationKind::ConcretizeForWalk(_) => "ConcretizeT ConcretizeForWalk".to_string(),
             ConcretizationKind::ConcretizeForClassExtends(_) => {
                 "ConcretizeT ConcretizeForClassExtends".to_string()
             }

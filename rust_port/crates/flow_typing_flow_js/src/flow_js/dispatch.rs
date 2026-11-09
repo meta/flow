@@ -453,6 +453,32 @@ fn same_generic_indexed_access<'cx>(
     g1.id == g2.id && flow_js_utils::is_same_non_generic_instance_annot(cx, t1, t2)
 }
 
+/// Whether evaluating the destructor `d` on `t` would act on one of the walk's `markers`: `t`, or
+/// an operand of a spread, is one, or is a union, an intersection or a destructor that does.
+fn acts_on_marker(t: &Type, d: &Destructor, markers: &BTreeSet<SubstName>) -> bool {
+    reaches_marker(t, markers)
+        || matches!(
+            d,
+            Destructor::SpreadType(box DestructorSpreadTypeData(_, todo_rev, _))
+                if todo_rev.iter().any(|operand| matches!(
+                    operand,
+                    object::spread::Operand::Type(t) if reaches_marker(t, markers)
+                ))
+        )
+}
+
+fn reaches_marker(t: &Type, markers: &BTreeSet<SubstName>) -> bool {
+    match t.deref() {
+        GenericT(box GenericTData { name, .. }) => markers.contains(name),
+        UnionT(_, rep) => rep.members_iter().any(|t| reaches_marker(t, markers)),
+        IntersectionT(_, rep) => rep.members_iter().any(|t| reaches_marker(t, markers)),
+        EvalT {
+            type_, defer_use_t, ..
+        } => acts_on_marker(type_, &defer_use_t.2, markers),
+        _ => false,
+    }
+}
+
 /// Substitutes `this` into the instance of a this-abstracted class or interface `c`.
 fn this_specialize_instance<'cx>(
     cx: &mut Context<'cx>,
@@ -641,6 +667,22 @@ fn __flow_impl<'cx>(
             if cx.is_verbose() {
                 eprintln!("EvalT ~> EvalT same generic indexed access fast path");
             }
+        }
+        // The walk keeps a destructor that would act on one of its markers: evaluating it would
+        // read the bound of the marker, or make a type from it, where the walk takes it apart.
+        (
+            EvalT {
+                type_: t,
+                defer_use_t,
+                ..
+            },
+            ConcretizeT(box ConcretizeTData {
+                kind: ConcretizationKind::ConcretizeForWalk(markers),
+                collector,
+                ..
+            }),
+        ) if acts_on_marker(t, &defer_use_t.2, markers) => {
+            collector.add(l.dupe());
         }
         (
             EvalT {
@@ -2443,6 +2485,7 @@ fn __flow_impl<'cx>(
             ConcretizeT(box ConcretizeTData {
                 kind:
                     ConcretizationKind::ConcretizeForInspection
+                    | ConcretizationKind::ConcretizeForWalk(_)
                     | ConcretizationKind::ConcretizeForClassExtends(_),
                 collector,
                 ..
@@ -2746,6 +2789,7 @@ fn __flow_impl<'cx>(
             ConcretizeT(box ConcretizeTData {
                 kind:
                     ConcretizationKind::ConcretizeForInspection
+                    | ConcretizationKind::ConcretizeForWalk(_)
                     | ConcretizationKind::ConcretizeForClassExtends(_),
                 collector,
                 ..

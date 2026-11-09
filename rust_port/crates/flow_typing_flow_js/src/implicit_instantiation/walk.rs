@@ -2745,9 +2745,9 @@ impl<'e> Walker<'e> {
         matches!(body.deref(), TypeInner::UnionT(..)).then_some(body)
     }
 
-    /// `t`, or the expansion of the application `t`, if it is an object, instance or array type.
-    /// A spread of types or a read-only object, or an alias whose body is one, stands for the
-    /// object they make, as the flow-based solve evaluates it before it indexes it.
+    /// `t`, or the one type it concretizes to, if it is an object, instance or array type: an
+    /// application of an alias of one, or a destructor that makes one, such as a spread of types or
+    /// a read-only object, as the flow-based solve evaluates it before it indexes it.
     fn structure_of<'cx>(
         &mut self,
         cx: &mut Context<'cx>,
@@ -2756,48 +2756,27 @@ impl<'e> Walker<'e> {
         if self.is_structure(cx, t) {
             return Ok(Some(t.dupe()));
         }
-        let resolved = self.resolve(cx, t);
-        let Some(expanded) = self.expand_typeapp(cx, &resolved) else {
-            return self.made_structure(cx, &resolved);
-        };
-        let expanded = self.resolve(cx, &expanded);
-        if self.is_structure(cx, &expanded) {
-            return Ok(Some(expanded));
-        }
-        // An alias of an application of another alias.
-        if matches!(expanded.deref(), TypeInner::TypeAppT(_)) && self.depth <= MAX_DEPTH {
-            self.depth += 1;
-            let structure = self.structure_of(cx, &expanded);
-            self.depth -= 1;
-            return structure;
-        }
-        self.made_structure(cx, &expanded)
+        Ok(match self.concretize(cx, t)?.as_slice() {
+            [only] if self.is_structure(cx, only) => Some(only.dupe()),
+            _ => None,
+        })
     }
 
-    /// The object that `t` makes, if it is a spread of types or a read-only object.
-    fn made_structure<'cx>(
+    /// The concrete types `t` stands for, as the flow-based solve concretizes it for inspection,
+    /// without errors or flows that outlive it. A destructor that would act on a marker stays.
+    fn concretize<'cx>(
         &mut self,
         cx: &mut Context<'cx>,
         t: &Type,
-    ) -> Result<Option<Type>, FlowJsException> {
-        let TypeInner::EvalT {
-            type_, defer_use_t, ..
-        } = t.deref()
-        else {
-            return Ok(None);
-        };
-        let made = match defer_use_t.2.deref() {
-            Destructor::SpreadType(_) if self.is_spread_of_types(t) => {
-                self.evaluate(cx, type_, defer_use_t)?
-            }
-            Destructor::ReadOnlyType
-                if self.is_structure(cx, type_) || self.is_spread_of_types(type_) =>
-            {
-                self.evaluate(cx, type_, defer_use_t)?
-            }
-            _ => None,
-        };
-        Ok(made.filter(|made| self.is_structure(cx, made)))
+    ) -> Result<Vec<Type>, FlowJsException> {
+        let markers = Arc::new(self.vars.keys().duped().collect::<BTreeSet<_>>());
+        let reason = type_util::reason_of_t(t).dupe();
+        let errors = cx.errors();
+        let result = run_keeping_clean_flows(cx, self.env, self.preserve, |cx| {
+            FlowJs::possible_concrete_types_for_walk_with_env(cx, self.env, &reason, t, markers)
+        });
+        cx.reset_errors(errors);
+        Ok(instantiation_solver::sandboxed(result)?.unwrap_or_default())
     }
 
     /// The builtin class an array type stands for in structural and nominal checks.

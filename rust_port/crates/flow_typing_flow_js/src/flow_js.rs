@@ -18,8 +18,10 @@
 //! subtyping. This process continues till a fixpoint is reached---which itself
 //! is guaranteed to exist, and is usually reached in very few steps.
 
+use std::collections::BTreeSet;
 use std::ops::Deref;
 use std::rc::Rc;
+use std::sync::Arc;
 
 use dupe::Dupe;
 use dupe::IterDupedExt;
@@ -506,6 +508,16 @@ impl FlowJs {
         t: &Type,
     ) -> Result<Vec<Type>, FlowJsException> {
         helpers::possible_concrete_types_for_inspection(cx, env, reason, t)
+    }
+
+    pub fn possible_concrete_types_for_walk_with_env<'cx>(
+        cx: &mut Context<'cx>,
+        env: &FlowJsEnv,
+        reason: &Reason,
+        t: &Type,
+        markers: Arc<BTreeSet<SubstName>>,
+    ) -> Result<Vec<Type>, FlowJsException> {
+        helpers::possible_concrete_types_for_walk(cx, env, reason, t, markers)
     }
 
     pub fn possible_concrete_types_for_enum_exhaustive_check_with_env<'cx>(
