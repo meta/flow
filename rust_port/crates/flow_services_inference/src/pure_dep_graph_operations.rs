@@ -7,6 +7,8 @@
 
 //! Contains pure functions which perform calculations on the dependency graph
 
+use std::collections::HashSet;
+
 use dupe::Dupe;
 use flow_common_utils::graph::GraphLike;
 use flow_data_structure_wrapper::ord_set::FlowOrdSet;
@@ -52,11 +54,16 @@ pub fn calc_direct_dependencies(
     files: &FlowOrdSet<FileKey>,
 ) -> FlowOrdSet<FileKey> {
     let mut result = files.dupe();
+    // Most dependencies are already in the result. Telling them apart by hash is much cheaper than
+    // an insert into the ordered set, which compares the file with each key on its path.
+    let mut seen: HashSet<&FileKey> = files.iter().collect();
 
     for file in files {
         if let Some(deps) = dependency_graph.find_opt(file) {
             for dep in deps {
-                result.insert(dep.dupe());
+                if seen.insert(dep) {
+                    result.insert(dep.dupe());
+                }
             }
         }
     }
