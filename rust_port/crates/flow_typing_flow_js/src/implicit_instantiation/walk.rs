@@ -3655,8 +3655,17 @@ impl<'e> Walker<'e> {
                         .duped()
                         .collect();
                     if candidates.len() < 2 {
+                        // As the speculative match of the flow-based solve, the one member that
+                        // may match gives no evidence if `l`, with the solution so far in place of
+                        // the markers, does not fit it.
+                        let snapshot = self.snapshot();
                         for m in &others {
                             self.walk(cx, l, m)?;
+                        }
+                        if let [only] = candidates.as_slice()
+                            && !self.fits_solution_so_far(cx, l, only)?
+                        {
+                            self.restore(snapshot);
                         }
                         return Ok(());
                     }
@@ -3788,6 +3797,32 @@ impl<'e> Walker<'e> {
         cx.reset_errors(errors);
         env.truncate_deferred_errors(deferred);
         Ok(instantiation_solver::sandboxed(ok)? == Some(true))
+    }
+
+    /// Whether `l` is a subtype of `u` with the solution so far in place of the markers in either,
+    /// as the speculative match of the flow-based solve would find it with its type variables.
+    fn fits_solution_so_far<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        l: &Type,
+        u: &Type,
+    ) -> Result<bool, FlowJsException> {
+        let mut names = self.markers_in(cx, l);
+        names.extend(self.markers_in(cx, u));
+        let reason = type_util::reason_of_t(u).dupe();
+        let map: FlowOrdMap<SubstName, Type> = names
+            .into_iter()
+            .map(|name| {
+                let t = self.current_solution(cx, &name, &reason);
+                (name, t)
+            })
+            .collect();
+        let (l, u) = (subst(cx, &map, l), subst(cx, &map, u));
+        let env = self.env;
+        let ok = sandbox(cx, env, self.preserve, |cx| {
+            FlowJs::speculative_subtyping_succeeds_with_flow_errors(cx, env, &l, &u)
+        })?;
+        Ok(ok == Some(true))
     }
 
     /// Whether every member of an intersection is a function: a list of overloads.

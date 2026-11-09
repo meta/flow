@@ -665,6 +665,55 @@ References:
                                                ^^^^^^ [2]
 
 
+Error -------------------------------------------------------------------- union_member_disagrees_with_arguments.js:25:1
+
+Cannot cast `task` to `Task<number>` because in type argument `T` [1]: `boolean` [2] is incompatible with `number` [3].
+[incompatible-type]
+
+   union_member_disagrees_with_arguments.js:25:1
+   25| task as Task<number>; // error
+       ^^^^
+
+References:
+   union_member_disagrees_with_arguments.js:13:24
+   13| declare interface Task<T> {
+                              ^ [1]
+   union_member_disagrees_with_arguments.js:21:30
+   21| declare const booleans: Task<boolean>;
+                                    ^^^^^^^ [2]
+   union_member_disagrees_with_arguments.js:25:14
+   25| task as Task<number>; // error
+                    ^^^^^^ [3]
+
+
+Error -------------------------------------------------------------------- union_member_disagrees_with_arguments.js:25:1
+
+Cannot cast `task` to `Task<number>` because in type argument `T` [1]: [incompatible-type]
+ - Either `number` [2] is incompatible with `boolean` [3].
+ - Or `number` [2] is incompatible with `empty` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   union_member_disagrees_with_arguments.js:25:1
+   25| task as Task<number>; // error
+       ^^^^
+
+References:
+   union_member_disagrees_with_arguments.js:13:24
+   13| declare interface Task<T> {
+                              ^ [1]
+   union_member_disagrees_with_arguments.js:25:14
+   25| task as Task<number>; // error
+                    ^^^^^^ [2]
+   union_member_disagrees_with_arguments.js:21:30
+   21| declare const booleans: Task<boolean>;
+                                    ^^^^^^^ [3]
+   union_member_disagrees_with_arguments.js:14:16
+   14|   then<R1 = T, R2 = empty>(
+                      ^^ [4]
+
+
 Error -------------------------------------------------------------------------------------- union_same_class_fit.js:9:1
 
 Cannot cast `f(...)` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
@@ -683,4 +732,4 @@ References:
 
 
 
-Found 39 errors
+Found 41 errors
