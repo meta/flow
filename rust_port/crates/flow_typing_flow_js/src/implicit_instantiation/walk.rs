@@ -2361,6 +2361,38 @@ impl<'e> Walker<'e> {
         Ok(self.prop_of(cx, instance, "props"))
     }
 
+    /// Under `experimental.react_managed_attributes`, the config of a class component is its props
+    /// with `ref?: React.RefSetter<I>` for its instance `I`, so the `ref` of an element meets the
+    /// instance.
+    fn walk_jsx_ref<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        jsx_props: &Type,
+        instance: &Type,
+    ) -> Result<(), FlowJsException> {
+        if !cx.react_managed_attributes() {
+            return Ok(());
+        }
+        let Some(ref_t) = self.prop_of(cx, jsx_props, "ref") else {
+            return Ok(());
+        };
+        let reason = type_util::reason_of_t(instance).dupe();
+        let ref_setter = sandbox(cx, self.env, self.preserve, |cx| {
+            FlowJs::get_builtin_react_typeapp_with_env(
+                cx,
+                self.env,
+                &reason,
+                None,
+                ExpectedModulePurpose::ReactModuleForReactRefSetterType,
+                vec![instance.dupe()],
+            )
+        })?;
+        match ref_setter {
+            Some(ref_setter) => self.walk(cx, &ref_t, &ref_setter),
+            None => Ok(()),
+        }
+    }
+
     /// The default props of a class component against its props: as the config of the class
     /// leaves them out, the flow-based solve checks each against the prop of the same name. Under
     /// `experimental.react_managed_attributes`, the config keeps them, optional, with the types of
@@ -6455,6 +6487,7 @@ fn solve_targs_in_snapshot<'cx>(
                             match walker.class_component_props(cx, &instance)? {
                                 Some(props) => {
                                     walker.walk_default_props(cx, &component, &props)?;
+                                    walker.walk_jsx_ref(cx, &jsx_props, &instance)?;
                                     // Props that are a type parameter get the props of the
                                     // element with the default props, as the config check
                                     // flows them there.
