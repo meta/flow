@@ -2262,6 +2262,22 @@ impl<'e> Walker<'e> {
         property::read_t(&prop)
     }
 
+    /// The type of the property that the indexed access `d` of the object type `object` reads, as
+    /// declared. Where it is a destructor with markers inside, such as `Readonly<{...T}>` in
+    /// `{a: Readonly<{...T}>}['a']`, the walk takes it apart, but evaluating the access does not
+    /// give it: it evaluates the destructor too, which makes a type from the markers.
+    fn declared_property<'cx>(
+        &self,
+        cx: &mut Context<'cx>,
+        object: &Type,
+        d: &Destructor,
+    ) -> Option<Type> {
+        let Destructor::PropertyType { name } = d else {
+            return None;
+        };
+        self.prop_of(cx, object, name.as_str_opt()?)
+    }
+
     /// The props of a class component, as the flow-based solve reads them when it checks the class
     /// against `React.Component<Props, Instance>`: the type argument of the `React.Component` it
     /// extends, rather than a `props` field it may redeclare.
@@ -2709,8 +2725,8 @@ impl<'e> Walker<'e> {
     }
 
     /// `t`, or the expansion of the application `t`, if it is an object, instance or array type.
-    /// An alias whose body is a spread of types or a read-only object stands for the object they
-    /// make, as the flow-based solve evaluates the body before it indexes it.
+    /// A spread of types or a read-only object, or an alias whose body is one, stands for the
+    /// object they make, as the flow-based solve evaluates it before it indexes it.
     fn structure_of<'cx>(
         &mut self,
         cx: &mut Context<'cx>,
@@ -2721,7 +2737,7 @@ impl<'e> Walker<'e> {
         }
         let resolved = self.resolve(cx, t);
         let Some(expanded) = self.expand_typeapp(cx, &resolved) else {
-            return Ok(None);
+            return self.made_structure(cx, &resolved);
         };
         let expanded = self.resolve(cx, &expanded);
         if self.is_structure(cx, &expanded) {
@@ -2734,14 +2750,23 @@ impl<'e> Walker<'e> {
             self.depth -= 1;
             return structure;
         }
+        self.made_structure(cx, &expanded)
+    }
+
+    /// The object that `t` makes, if it is a spread of types or a read-only object.
+    fn made_structure<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        t: &Type,
+    ) -> Result<Option<Type>, FlowJsException> {
         let TypeInner::EvalT {
             type_, defer_use_t, ..
-        } = expanded.deref()
+        } = t.deref()
         else {
             return Ok(None);
         };
         let made = match defer_use_t.2.deref() {
-            Destructor::SpreadType(_) if self.is_spread_of_types(&expanded) => {
+            Destructor::SpreadType(_) if self.is_spread_of_types(t) => {
                 self.evaluate(cx, type_, defer_use_t)?
             }
             Destructor::ReadOnlyType
@@ -4472,7 +4497,10 @@ impl<'e> Walker<'e> {
             {
                 match self.evaluate(cx, &object, defer_use_t)? {
                     Some(result) => self.walk(cx, l, &result),
-                    None => self.give_up(cx, "destructor", l, u),
+                    None => match self.declared_property(cx, &object, d) {
+                        Some(t) => self.walk(cx, l, &t),
+                        None => self.give_up(cx, "destructor", l, u),
+                    },
                 }
             }
             // `l <: [...prefix, ...T]`: the elements of `l` go to the prefix, and `T` gets the rest,
@@ -5139,7 +5167,10 @@ impl<'e> Walker<'e> {
             | Destructor::OptionalIndexedAccessNonMaybeType { .. }
             | Destructor::OptionalIndexedAccessResultType { .. }
                 if let Some(object) = self.structure_of(cx, type_)?
-                    && let Some(result) = self.evaluate(cx, &object, defer_use_t)? =>
+                    && let Some(result) = match self.evaluate(cx, &object, defer_use_t)? {
+                        Some(result) => Some(result),
+                        None => self.declared_property(cx, &object, d),
+                    } =>
             {
                 self.walk(cx, &result, u)
             }

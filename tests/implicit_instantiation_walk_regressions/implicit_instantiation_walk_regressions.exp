@@ -334,6 +334,23 @@ References:
            ^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------- indexed_access_declared_property.js:16:1
+
+Cannot cast `r` to `empty` because `{readonly a?: ?string}` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   indexed_access_declared_property.js:16:1
+   16| r as empty; // error
+       ^
+
+References:
+   indexed_access_declared_property.js:12:13
+   12| type Data = {readonly a?: ?string, readonly extra?: ?number};
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   indexed_access_declared_property.js:16:6
+   16| r as empty; // error
+            ^^^^^ [2]
+
+
 Error -------------------------------------------------------------------------------------- indexed_access_keys.js:12:1
 
 Cannot cast `send(...)` to `empty` because `(number) => string` [1] is incompatible with `empty` [2].
@@ -666,4 +683,4 @@ References:
 
 
 
-Found 38 errors
+Found 39 errors
