@@ -5230,11 +5230,13 @@ impl<'e> Walker<'e> {
                 self.walk_spread_tuple(cx, items, l, u, true)
             }
             // An indexed access of an object type with markers inside, such as an element of an
-            // alias of an array type, is indexed first: `Array<T>[number]` is `T`.
+            // alias of an array type, is indexed first: `Array<T>[number]` is `T`. So are the values
+            // of one: `Values<{a: T}>` is `T`.
             Destructor::PropertyType { .. }
             | Destructor::ElementType { .. }
             | Destructor::OptionalIndexedAccessNonMaybeType { .. }
             | Destructor::OptionalIndexedAccessResultType { .. }
+            | Destructor::ValuesType
                 if let Some(object) = self.structure_of(cx, type_)?
                     && let Some(result) = match self.evaluate(cx, &object, defer_use_t)? {
                         Some(result) => Some(result),
