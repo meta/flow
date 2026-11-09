@@ -253,8 +253,8 @@ References:
    object_freeze.js:13:43
     13| export const frozenNumber = Object.freeze(123); // TODO type_sig support
                                                   ^^^ [1]
-   <BUILTINS>/lib.es5.js:215:29
-   215|     static freeze<T extends Function>(f: T): T;
+   <BUILTINS>/lib.es5.js:216:29
+   216|     static freeze<T extends Function>(f: T): T;
                                     ^^^^^^^^ [2]
 
 

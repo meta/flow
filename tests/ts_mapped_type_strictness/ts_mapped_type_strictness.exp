@@ -232,8 +232,8 @@ References:
    test.js:68:20
      68| flowOmitted as {a: PartialNode | Node, b: Node}; // ERROR: invariant
                             ^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:1568:40
-   1568| type Omit<T extends interface {}, K> = $Omit<T, K>;
+   <BUILTINS>/lib.es5.js:1569:40
+   1569| type Omit<T extends interface {}, K> = $Omit<T, K>;
                                                 ^^^^^^^^^^^ [3]
    test.js:68:16
      68| flowOmitted as {a: PartialNode | Node, b: Node}; // ERROR: invariant

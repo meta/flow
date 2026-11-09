@@ -20,8 +20,8 @@ References:
    test.js:6:18
      6|   static keys(o: {a: number}): Array<string> { return []; } // ERROR: narrower parameter.
                          ^^^^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:251:20
-   251|     static keys(o: object): string[];
+   <BUILTINS>/lib.es5.js:252:20
+   252|     static keys(o: object): string[];
                            ^^^^^^ [4]
 
 

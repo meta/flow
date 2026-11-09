@@ -239,7 +239,7 @@ Flags:
 const diff: Omit<O2, "p">
 
 'O2' defined at object-resolution.js:9:5
-'Omit' defined at (lib) lib.es5.js:1568:5
+'Omit' defined at (lib) lib.es5.js:1569:5
 
 object-resolution.js:11:3,11:6
 
