@@ -62,13 +62,16 @@ fn split_dependency_maps(
     BTreeMap<FileKey, BTreeSet<FileKey>>,
     BTreeMap<FileKey, BTreeSet<FileKey>>,
 ) {
-    let mut sig_map = BTreeMap::new();
-    let mut implementation_map = BTreeMap::new();
-    for (file, (sig_deps, impl_deps)) in map {
-        sig_map.insert(file.dupe(), sig_deps);
-        implementation_map.insert(file, impl_deps);
-    }
-    (sig_map, implementation_map)
+    // Collecting the sorted entries builds each map in one pass, instead of searching it for the
+    // place of every file.
+    let (sig_entries, implementation_entries): (Vec<_>, Vec<_>) = map
+        .into_iter()
+        .map(|(file, (sig_deps, impl_deps))| ((file.dupe(), sig_deps), (file, impl_deps)))
+        .unzip();
+    (
+        BTreeMap::from_iter(sig_entries),
+        BTreeMap::from_iter(implementation_entries),
+    )
 }
 
 impl DependencyInfo {
