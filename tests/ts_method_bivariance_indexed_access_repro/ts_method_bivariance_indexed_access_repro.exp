@@ -1,0 +1,56 @@
+Error ----------------------------------------------------------------------------------------------------- test.js:5:19
+
+Cannot assign function to `m` because in the first parameter: `Ev` [1] is incompatible with `InputEv` [2]. For example,
+property `value` is missing in `Ev` [1] but exists in `InputEv` [2]. [incompatible-type]
+
+   test.js:5:19
+   5| const m: I['m'] = (x: InputEv) => {};
+                        ^^^^^^^^^^^^^^^^^^
+
+References:
+   node_modules/repro/index.d.ts:9:8
+   9|   m(x: Ev): void;
+             ^^ [1]
+   test.js:5:23
+   5| const m: I['m'] = (x: InputEv) => {};
+                            ^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:13:30
+
+Cannot assign `EmojiNode` to `statics` because in property `clone` > the first parameter: `EmojiNode` [1] is
+incompatible with `unknown` [2]. [incompatible-type]
+
+   test.js:13:30
+   13| const statics: NodeStatics = EmojiNode;
+                                    ^^^^^^^^^
+
+References:
+   test.js:8:22
+    8|   static clone(node: EmojiNode): EmojiNode {
+                            ^^^^^^^^^ [1]
+   node_modules/repro/index.d.ts:14:22
+   14|   static clone(data: unknown): Node;
+                            ^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:15:16
+
+Cannot call `registerNodes` with array literal bound to `nodes` because in array element > property `clone` > the first
+parameter: `EmojiNode` [1] is incompatible with `unknown` [2]. [incompatible-type]
+
+   test.js:15:16
+   15| registerNodes([EmojiNode]);
+                      ^^^^^^^^^
+
+References:
+   test.js:8:22
+    8|   static clone(node: EmojiNode): EmojiNode {
+                            ^^^^^^^^^ [1]
+   node_modules/repro/index.d.ts:14:22
+   14|   static clone(data: unknown): Node;
+                            ^^^^^^^ [2]
+
+
+
+Found 3 errors
