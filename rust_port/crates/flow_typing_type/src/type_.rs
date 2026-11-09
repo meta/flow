@@ -5312,10 +5312,13 @@ impl TypeGuard {
 
 /// FunTs distinguish methods from function values so method-to-method subtyping
 /// can be lenient while calls still check the concrete `this` parameter.
+/// A method read off its object checks `this` like a function, but is still a
+/// method signature for TypeScript's method bivariance.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ThisStatus {
     ThisMethod,
     ThisMethodWithExplicitThis,
+    ThisUnboundMethod,
     ThisFunction,
 }
 
@@ -7926,7 +7929,7 @@ pub mod properties {
                     } else {
                         new_ft.this_t.0.dupe()
                     },
-                    ThisStatus::ThisFunction,
+                    ThisStatus::ThisUnboundMethod,
                 );
                 Type::new(TypeInner::DefT(
                     r.dupe(),

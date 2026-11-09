@@ -73,6 +73,7 @@ use flow_typing_type::type_::Cont;
 use flow_typing_type::type_::DefT;
 use flow_typing_type::type_::DefTInner::*;
 use flow_typing_type::type_::DepthTrace;
+use flow_typing_type::type_::Destructor;
 use flow_typing_type::type_::DictType;
 use flow_typing_type::type_::EnumInfoInner;
 use flow_typing_type::type_::FieldData;
@@ -98,6 +99,7 @@ use flow_typing_type::type_::MixedFlavor;
 use flow_typing_type::type_::NominalType;
 use flow_typing_type::type_::NominalTypeInner;
 use flow_typing_type::type_::NonstrictReturningData;
+use flow_typing_type::type_::NumberLiteral;
 use flow_typing_type::type_::ObjKind;
 use flow_typing_type::type_::ObjType;
 use flow_typing_type::type_::OpaqueTypeCustomErrorCompatibilityData;
@@ -113,6 +115,7 @@ use flow_typing_type::type_::ReactEffectType;
 use flow_typing_type::type_::ReactKitTData;
 use flow_typing_type::type_::ReposUseTData;
 use flow_typing_type::type_::ThisInstanceTData;
+use flow_typing_type::type_::ThisStatus;
 use flow_typing_type::type_::ThisTypeAppTData;
 use flow_typing_type::type_::TupleATData;
 use flow_typing_type::type_::TupleElement;
@@ -134,6 +137,7 @@ use flow_typing_type::type_::any_t;
 use flow_typing_type::type_::constraint;
 use flow_typing_type::type_::dummy_prototype;
 use flow_typing_type::type_::empty_t;
+use flow_typing_type::type_::eval;
 use flow_typing_type::type_::hint_unavailable;
 use flow_typing_type::type_::mixed_t;
 use flow_typing_type::type_::mk_functiontype;
@@ -873,7 +877,7 @@ fn funt_to_funt_check<'cx>(
     Ok(())
 }
 
-// TS-mode bivariant param flow for method-syntax properties: try the
+// TS-mode bivariant param flow for method signatures: try the
 // contravariant direction (target -> source, the standard subtyping
 // direction) first via speculation; on failure, fall back to the covariant
 // direction (source -> target). Mirrors TS's bivariance for methods, which
@@ -984,7 +988,7 @@ fn funt_to_funt_check_params_contravariant<'cx>(
     FlowJs::multiflow_subtype_with_env(cx, env, trace, use_op.dupe(), ureason, &args, ft1)
 }
 
-// TS-mode bivariant param-flow check used for method-syntax properties: a
+// TS-mode bivariant param-flow check used for method signatures: a
 // pairwise walk over ft1.params/ft2.params using `bivariant_param_flow`,
 // plus arity enforcement. Trailing ft1 params not provided by ft2 are
 // filled with VoidT so optional params (whose type unions in void) accept
@@ -992,17 +996,9 @@ fn funt_to_funt_check_params_contravariant<'cx>(
 // `multiflow_full` uses. When ft2 has more fixed params than ft1, the
 // extras flow into `ft1.rest_param` (if present) so callers of the upper
 // signature cannot smuggle the wrong type into the lower's rest -- this
-// mirrors what `multiflow_subtype` does in the standard path.
-//
-// Caveat: `rest_param`'s type is the whole array (e.g. `Array<string>`),
-// not the element type, so flowing a single param's type bivariantly
-// against it is a single-vs-array mismatch and will always fail. That
-// means the rest-vs-extra-fixed cases (both the symmetric one above and
-// the pre-existing one below) are correctly *sound* (incompatible types
-// produce an error) but may *over-reject* compatible cases like
-// `(x, ...ys: number[]) <: (x, y: number)`. multiflow_subtype handles
-// these by building a tuple literal and flowing it; replicating that
-// here was deferred since method-syntax with rest is uncommon.
+// mirrors what `multiflow_subtype` does in the standard path. As in
+// TypeScript's `getTypeAtPosition`, a fixed param is compared with the rest
+// param's type at its position.
 fn funt_to_funt_check_params_bivariant<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
@@ -1015,6 +1011,38 @@ fn funt_to_funt_check_params_bivariant<'cx>(
     ft2: &flow_typing_type::type_::FunType,
     use_op: &UseOp,
 ) -> Result<(), FlowJsException> {
+    fn rest_type_at_position<'cx>(
+        cx: &mut Context<'cx>,
+        env: &FlowJsEnv,
+        trace: DepthTrace,
+        use_op: &UseOp,
+        rest_t: &Type,
+        index: usize,
+    ) -> Result<Type, FlowJsException> {
+        let rest_reason = type_util::reason_of_t(rest_t);
+        let index_t = Type::new(DefT(
+            rest_reason
+                .dupe()
+                .replace_desc(VirtualReasonDesc::RNumberLit(index.to_string().into())),
+            DefT::new(SingletonNumT {
+                from_annot: true,
+                value: NumberLiteral(index as f64, index.to_string().into()),
+            }),
+        ));
+        FlowJs::mk_type_destructor_with_env(
+            cx,
+            env,
+            trace,
+            use_op.dupe(),
+            rest_reason,
+            rest_t,
+            &Destructor::ElementType {
+                index_type: index_t,
+            },
+            eval::Id::generate_id(),
+        )
+    }
+
     let lower_t = flow_js_utils::type_or_type_desc_for_error(lower);
     let upper_t = flow_js_utils::type_or_type_desc_for_error(upper);
     let mut n: i32 = 1;
@@ -1034,7 +1062,15 @@ fn funt_to_funt_check_params_bivariant<'cx>(
                             }),
                             Arc::new(use_op.dupe()),
                         );
-                        bivariant_param_flow(cx, env, trace, inner_use_op, t1_rest, t2)?;
+                        let t1 = rest_type_at_position(
+                            cx,
+                            env,
+                            trace,
+                            &inner_use_op,
+                            t1_rest,
+                            (n - 1) as usize - ft1.params.len(),
+                        )?;
+                        bivariant_param_flow(cx, env, trace, inner_use_op, &t1, t2)?;
                         n += 1;
                         params2 = rest2;
                     }
@@ -1059,7 +1095,15 @@ fn funt_to_funt_check_params_bivariant<'cx>(
                             }))),
                             Arc::new(use_op.dupe()),
                         );
-                        bivariant_param_flow(cx, env, trace, inner_use_op, t1, rest_t)?;
+                        let t2 = rest_type_at_position(
+                            cx,
+                            env,
+                            trace,
+                            &inner_use_op,
+                            rest_t,
+                            (n - 1) as usize - ft2.params.len(),
+                        )?;
+                        bivariant_param_flow(cx, env, trace, inner_use_op, t1, &t2)?;
                         n += 1;
                         params1 = rest1;
                     }
@@ -5341,8 +5385,21 @@ pub fn rec_sub_t<'cx>(
                         cx, env, trace, l, u, lreason, ft1, ureason, ft2, use_op,
                     )
                 },
-                &|cx, use_op| {
-                    funt_to_funt_check_params_contravariant(cx, env, trace, ureason, ft1, ft2, use_op)
+                // As in TypeScript, the params of a method signature are checked
+                // bivariantly, however its function type is reached.
+                &|cx, use_op| match ft2.this_t.1 {
+                    ThisStatus::ThisMethod
+                    | ThisStatus::ThisMethodWithExplicitThis
+                    | ThisStatus::ThisUnboundMethod
+                        if ft1.strictness_kind.join(ft2.strictness_kind).is_typescript_loose() =>
+                    {
+                        funt_to_funt_check_params_bivariant(
+                            cx, env, trace, l, u, lreason, ureason, ft1, ft2, use_op,
+                        )
+                    }
+                    _ => funt_to_funt_check_params_contravariant(
+                        cx, env, trace, ureason, ft1, ft2, use_op,
+                    ),
                 },
             )
         }

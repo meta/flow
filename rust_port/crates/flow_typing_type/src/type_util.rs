@@ -2740,7 +2740,9 @@ pub fn this_for_unification(funtype: &crate::type_::FunType) -> Type {
 
     let (this, subtyping) = &funtype.this_t;
     match subtyping {
-        ThisStatus::ThisFunction | ThisStatus::ThisMethodWithExplicitThis => this.dupe(),
+        ThisStatus::ThisFunction
+        | ThisStatus::ThisUnboundMethod
+        | ThisStatus::ThisMethodWithExplicitThis => this.dupe(),
         ThisStatus::ThisMethod => mixed_t::make(reason_of_t(this).dupe()),
     }
 }
@@ -3038,9 +3040,8 @@ pub fn mk_possibly_generic_render_type(
 // class-instance type as its return. This helper walks the funtype leaves of
 // [t] (plain [FunT], a [PolyT] whose [t_out] is a [FunT], or [IntersectionT] of either)
 // and rewrites each leaf's [this_t] to an unconstrained any, optionally also
-// overriding [return_t]. Construct signatures do not have a meaningful
-// receiver, but keeping [ThisMethod] preserves the lenient method-to-method
-// subtyping behavior.
+// overriding [return_t]. Each leaf keeps its [ThisStatus]: as in TypeScript, a
+// class `constructor` is a method signature and a construct signature is not.
 //
 // Used by the construct-signature plumbing in [type_annotation.rs] and [flow_js/].
 pub fn normalize_construct_sig(override_return_t: Option<Type>, t: Type) -> Type {
@@ -3055,14 +3056,14 @@ pub fn normalize_construct_sig(override_return_t: Option<Type>, t: Type) -> Type
         ft: &crate::type_::FunType,
         override_return_t: &Option<Type>,
     ) -> crate::type_::FunType {
-        let (this_t, _): &(Type, ThisStatus) = &ft.this_t;
+        let (this_t, this_status): &(Type, ThisStatus) = &ft.this_t;
         let any_this_t = any_t::make(AnySource::AnyError(None), reason_of_t(this_t).dupe());
         let return_t = override_return_t
             .as_ref()
             .map(|t| t.dupe())
             .unwrap_or_else(|| ft.return_t.dupe());
         crate::type_::FunType {
-            this_t: (any_this_t, ThisStatus::ThisMethod),
+            this_t: (any_this_t, this_status.clone()),
             return_t,
             ..ft.clone()
         }

@@ -140,8 +140,8 @@ References:
 
 Error -------------------------------------------------------------------------------------- method_bivariance.ts:146:35
 
-Cannot assign `restSource` to `restMismatch` because in property `cb`: `number` [1] is incompatible with
-`Array<string>` [2]. [incompatible-type]
+Cannot assign `restSource` to `restMismatch` because in property `cb`: `number` [1] is incompatible with `string` [2].
+[incompatible-type]
 
    method_bivariance.ts:146:35
    146| const restMismatch: FixedTarget = restSource; // ERROR: number/string[] incompatible
@@ -153,7 +153,7 @@ References:
                            ^^^^^^ [1]
    method_bivariance.ts:145:49
    145| declare const restSource: {cb(x: Animal, ...ys: string[]): void};
-                                                        ^^^^^^^^ [2]
+                                                        ^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------- method_bivariance.ts:155:38
