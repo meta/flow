@@ -1426,15 +1426,6 @@ impl<'e> Walker<'e> {
                 }
                 Ok(())
             }
-            // Overloads against one signature: the last overload, the most general one.
-            (TypeInner::IntersectionT(_, lrep), _)
-                if self.all_funs(cx, lrep) && matches!(self.head(cx, &u), Head::Fun) =>
-            {
-                match lrep.members_iter().last().map(Dupe::dupe) {
-                    Some(last) => self.walk(cx, &last, &u),
-                    None => Ok(()),
-                }
-            }
             // An intersection of several bare markers says nothing about each.
             (_, TypeInner::IntersectionT(_, rep)) => {
                 let members: Vec<Type> = rep.members_iter().duped().collect();

@@ -406,9 +406,9 @@ Cannot cast `box` to `string` because `Box` [1] is incompatible with `string` [2
        ^^^
 
 References:
-   interface_construct_signature.js:9:39
-    9|   new (items: ReadonlyArray<number>): Box;
-                                             ^^^ [1]
+   interface_construct_signature.js:8:25
+    8|   new (length: number): Box;
+                               ^^^ [1]
    interface_construct_signature.js:18:8
    18| box as string; // error
               ^^^^^^ [2]
@@ -562,21 +562,50 @@ References:
                                ^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------ overloads_against_signature.js:8:17
+
+Cannot call `apply` with `parse` bound to `f` because: [incompatible-type]
+ - Either in the first parameter: `string` [1] is incompatible with array literal [2].
+ - Or in the return value: `ReadonlyArray<number>` [3] is incompatible with `number` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   overloads_against_signature.js:8:17
+   8| const n = apply(parse, ['1']); // error: the first overload takes a string
+                      ^^^^^
+
+References:
+   overloads_against_signature.js:1:31
+   1| declare function parse(input: string): number;
+                                    ^^^^^^ [1]
+   overloads_against_signature.js:8:24
+   8| const n = apply(parse, ['1']); // error: the first overload takes a string
+                             ^^^^^ [2]
+   overloads_against_signature.js:2:55
+   2| declare function parse(input: ReadonlyArray<string>): ReadonlyArray<number>;
+                                                            ^^^^^^^^^^^^^^^^^^^^^ [3]
+   overloads_against_signature.js:1:40
+   1| declare function parse(input: string): number;
+                                             ^^^^^^ [4]
+
+
 Error ------------------------------------------------------------------------------ overloads_against_signature.js:10:1
 
-Cannot cast `n` to `number` because `ReadonlyArray<number>` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `n` to `ReadonlyArray<number>` because `number` [1] is incompatible with `ReadonlyArray<number>` [2].
+[incompatible-type]
 
    overloads_against_signature.js:10:1
-   10| n as number; // error
+   10| n as ReadonlyArray<number>; // error
        ^
 
 References:
-   overloads_against_signature.js:2:55
-    2| declare function parse(input: ReadonlyArray<string>): ReadonlyArray<number>;
-                                                             ^^^^^^^^^^^^^^^^^^^^^ [1]
+   overloads_against_signature.js:1:40
+    1| declare function parse(input: string): number;
+                                              ^^^^^^ [1]
    overloads_against_signature.js:10:6
-   10| n as number; // error
-            ^^^^^^ [2]
+   10| n as ReadonlyArray<number>; // error
+            ^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------- overloads_result_hint.js:24:11
@@ -747,4 +776,4 @@ References:
 
 
 
-Found 42 errors
+Found 43 errors
