@@ -6582,13 +6582,22 @@ fn solve_targs_in_snapshot<'cx>(
     }
     for (l, u) in pairs {
         // Arguments against the parameters they are spread into are checked one by one, so
-        // that a wrong number of them still checks the others.
+        // that a wrong number of them still checks the others. A type that stands for several
+        // concrete types, such as a union or a maybe type, meets the bound one concrete type at a
+        // time, as they reach a type variable in the flow-based solve: subtyping takes a fast path
+        // for a union of literals against another one, which records none of them as needed
+        // precise. (A union is a subtype of a type when each of its members is.)
         let pairs = match (
             tuple_elements(&walker.resolve(cx, &l)),
             tuple_elements(&walker.resolve(cx, &u)),
         ) {
             (Some(ls), Some(us)) => ls.into_iter().zip(us).collect(),
-            _ => vec![(l, u)],
+            _ => match walker.concretize(cx, &l)? {
+                members if members.len() > 1 => {
+                    members.into_iter().map(|m| (m, u.dupe())).collect()
+                }
+                _ => vec![(l, u)],
+            },
         };
         for (l, u) in pairs {
             let errors = cx.errors();
