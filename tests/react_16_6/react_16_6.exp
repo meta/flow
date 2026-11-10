@@ -182,8 +182,8 @@ References:
    1189|         }>,
    1190|       >,
                ^ [2]
-   <BUILTINS>/misc.js:216:23
-    216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+    208| interface Promise<out T = unknown> {
                                ^ [3]
    lazy.js:6:1
       6| function FunctionComponent(x: Props): React.Node { return null }
@@ -222,8 +222,8 @@ References:
    1189|         }>,
    1190|       >,
                ^ [2]
-   <BUILTINS>/misc.js:216:23
-    216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+    208| interface Promise<out T = unknown> {
                                ^ [3]
    lazy.js:7:7
       7| class ClassComponent extends React.Component<Props> {}

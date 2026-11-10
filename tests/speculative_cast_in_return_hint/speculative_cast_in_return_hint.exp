@@ -9,8 +9,8 @@ incompatible with `ExpectedResponse` [3]. For example, property `constructor` is
                   ^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    lib.d.ts:20:39
     20| declare function fetchLike(): Promise<Response>;

@@ -7,8 +7,8 @@ Cannot return `1` because in type argument `T` [1]: `1` [2] is incompatible with
                  ^ [2]
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    async.js:9:30
      9| async function f1(): Promise<boolean> {
@@ -25,8 +25,8 @@ Cannot return `await p` because in type argument `T` [1]: `number` [2] is incomp
                  ^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    async.js:28:30
     28| async function f4(p: Promise<number>): Promise<boolean> {
@@ -99,8 +99,8 @@ incompatible with `void` [3]. [incompatible-type]
             ^^^^^^^^^^^^^^^ [3]
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    async2.js:55:13
     55|   : Promise<number> { // error, number != void
@@ -142,8 +142,8 @@ Cannot return undefined because in type argument `T` [1]: `void` [2] is incompat
           ^^^^^^^ [2]
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    async_return_void.js:1:32
      1| async function foo1(): Promise<string> {
@@ -160,8 +160,8 @@ Cannot return `undefined` because in type argument `T` [1]: `void` [2] is incomp
                  ^^^^^^^^^ [2]
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    async_return_void.js:5:32
      5| async function foo2(): Promise<string> {
@@ -178,8 +178,8 @@ Cannot return `bar()` because in type argument `T` [1]: `void` [2] is incompatib
                  ^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    async_return_void.js:10:17
     10|   function bar() { }
@@ -241,8 +241,8 @@ You can wrap it in `new Number(...))` to turn it into an object and attempt to u
                    ^ [1]
 
 References:
-   <BUILTINS>/misc.js:304:11
-   304| interface Iterable<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:296:11
+   296| interface Iterable<out T, out TReturn = void, in TNext = void> {}
                   ^^^^^^^^ [2]
 
 

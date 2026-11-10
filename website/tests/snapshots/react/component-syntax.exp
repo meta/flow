@@ -43,19 +43,22 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    -:5:10
-    5|   return new Object(); // ERROR: Value does not match `React.Node` type
-                ^^^^^^^^^^^^ [1]
+     5|   return new Object(); // ERROR: Value does not match `React.Node` type
+                 ^^^^^^^^^^^^
 
 References:
+   <BUILTINS>/lib.es5.js:150:24
+   150|     new (value?: any): Object;
+                               ^^^^^^ [1]
    <BUILTINS>/react.js:21:5
-   21|   | ExactReactElement_DEPRECATED<any>
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+    21|   | ExactReactElement_DEPRECATED<any>
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/react.js:22:5
-   22|   | React$Portal
-           ^^^^^^^^^^^^ [3]
+    22|   | React$Portal
+            ^^^^^^^^^^^^ [3]
    <BUILTINS>/react.js:23:5
-   23|   | Iterable<?React$Node>;
-           ^^^^^^^^^^^^^^^^^^^^^ [4]
+    23|   | Iterable<?React$Node>;
+            ^^^^^^^^^^^^^^^^^^^^^ [4]
 
 Error ---------------------------------------------------------------------- -:8:1
 

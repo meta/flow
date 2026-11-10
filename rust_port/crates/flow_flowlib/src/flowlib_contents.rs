@@ -51,8 +51,11 @@ tslib_patched_file!(LIB_ES2015_CORE_D_TS, "lib.es2015.core");
 tslib_patched_file!(LIB_ES2015_ITERABLE_D_TS, "lib.es2015.iterable");
 tslib_patched_file!(LIB_ES2015_PROMISE_D_TS, "lib.es2015.promise");
 tslib_patched_file!(LIB_ES2016_ARRAY_INCLUDE_D_TS, "lib.es2016.array.include");
+tslib_patched_file!(LIB_ES2017_OBJECT_D_TS, "lib.es2017.object");
 tslib_patched_file!(LIB_ES2019_ARRAY_D_TS, "lib.es2019.array");
+tslib_patched_file!(LIB_ES2019_OBJECT_D_TS, "lib.es2019.object");
 tslib_patched_file!(LIB_ES2020_PROMISE_D_TS, "lib.es2020.promise");
+tslib_patched_file!(LIB_ES2024_OBJECT_D_TS, "lib.es2024.object");
 tslib_patched_file!(LIB_ESNEXT_COLLECTION_D_TS, "lib.esnext.collection");
 tslib_patched_file!(LIB_ESNEXT_ITERATOR_D_TS, "lib.esnext.iterator");
 tslib_patched_file!(pub(super) REACT_DOM_D_TS, "react-dom");
@@ -111,10 +114,7 @@ pub(super) static COMMON_CONTENTS: LazyLock<Vec<(&str, &str)>> = LazyLock::new(|
         ),
         ("lib.es2017.date.js", tslib_contents::LIB_ES2017_DATE_D_TS),
         ("lib.es2017.intl.js", tslib_contents::LIB_ES2017_INTL_D_TS),
-        (
-            "lib.es2017.object.js",
-            tslib_contents::LIB_ES2017_OBJECT_D_TS,
-        ),
+        ("lib.es2017.object.js", LIB_ES2017_OBJECT_D_TS.as_str()),
         (
             "lib.es2017.sharedmemory.js",
             tslib_contents::LIB_ES2017_SHAREDMEMORY_D_TS,
@@ -146,10 +146,7 @@ pub(super) static COMMON_CONTENTS: LazyLock<Vec<(&str, &str)>> = LazyLock::new(|
         ),
         ("lib.es2019.array.js", LIB_ES2019_ARRAY_D_TS.as_str()),
         ("lib.es2019.intl.js", tslib_contents::LIB_ES2019_INTL_D_TS),
-        (
-            "lib.es2019.object.js",
-            tslib_contents::LIB_ES2019_OBJECT_D_TS,
-        ),
+        ("lib.es2019.object.js", LIB_ES2019_OBJECT_D_TS.as_str()),
         (
             "lib.es2019.string.js",
             tslib_contents::LIB_ES2019_STRING_D_TS,
@@ -223,10 +220,7 @@ pub(super) static COMMON_CONTENTS: LazyLock<Vec<(&str, &str)>> = LazyLock::new(|
             "lib.es2024.collection.js",
             tslib_contents::LIB_ES2024_COLLECTION_D_TS,
         ),
-        (
-            "lib.es2024.object.js",
-            tslib_contents::LIB_ES2024_OBJECT_D_TS,
-        ),
+        ("lib.es2024.object.js", LIB_ES2024_OBJECT_D_TS.as_str()),
         (
             "lib.es2024.promise.js",
             tslib_contents::LIB_ES2024_PROMISE_D_TS,

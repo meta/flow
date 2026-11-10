@@ -7,8 +7,8 @@ Cannot get `Default.T` because property `T` is missing in `Number` [1]. [prop-mi
                      ^
 
 References:
-   <BUILTINS>/lib.es5.js:522:11
-   522| interface Number {
+   <BUILTINS>/lib.es5.js:462:11
+   462| interface Number {
                   ^^^^^^ [1]
 
 

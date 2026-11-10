@@ -25,9 +25,9 @@ Cannot return `x` because in property `toString` > the `this` parameter: `Object
                  ^
 
 References:
-   <BUILTINS>/lib.es5.js:123:15
-   123| declare class Object {
-                      ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:120:11
+   120| interface Object {
+                  ^^^^^^ [1]
 
 
 Error ----------------------------------------------------------------------------------------------- dictionary.js:41:9
@@ -84,8 +84,8 @@ Cannot cast `o.toString()` to `boolean` because `string` [1] is incompatible wit
           ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:125:17
-   125|     toString(): string;
+   <BUILTINS>/lib.es5.js:122:17
+   122|     toString(): string;
                         ^^^^^^ [1]
    dictionary.js:79:19
     79|   o.toString() as boolean; // error: string ~> boolean
@@ -102,9 +102,9 @@ Cannot return `o` because in property `toString` > the `this` parameter: `Object
                  ^
 
 References:
-   <BUILTINS>/lib.es5.js:123:15
-   123| declare class Object {
-                      ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:120:11
+   120| interface Object {
+                  ^^^^^^ [1]
    dictionary.js:77:11
     77|   toString(): string,
                   ^^ [2]

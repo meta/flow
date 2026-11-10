@@ -89,8 +89,8 @@ is missing in `ArrayBuffer` [1] but exists in `SharedArrayBuffer` [2]. [incompat
          ^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1626:42
-   1626|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1566:42
+   1566|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [1]
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
@@ -107,8 +107,8 @@ Cannot cast `arrayBacked.buffer` to `SharedArrayBuffer` because in property `sli
          ^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1626:42
-   1626|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1566:42
+   1566|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [1]
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
@@ -236,8 +236,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:1626:42
-   1626|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1566:42
+   1566|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [2]
 
 
@@ -254,8 +254,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:1626:42
-   1626|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1566:42
+   1566|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [2]
 
 
@@ -272,8 +272,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:1626:42
-   1626|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1566:42
+   1566|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [2]
 
 
@@ -290,8 +290,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:1626:42
-   1626|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1566:42
+   1566|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [2]
 
 
@@ -308,8 +308,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:1626:42
-   1626|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1566:42
+   1566|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [2]
 
 
@@ -325,8 +325,8 @@ Cannot cast `arrayOnlyView` to `ArrayBufferView<SharedArrayBuffer>` because: [in
          ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:385:31
-    385| interface ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {}
+   <BUILTINS>/misc.js:377:31
+    377| interface ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {}
                                        ^^^^^^^^^^^^ [1]
    test.js:109:46
     109| declare const arrayOnlyView: ArrayBufferView<ArrayBuffer>;
@@ -334,8 +334,8 @@ References:
    test.js:111:34
     111| arrayOnlyView as ArrayBufferView<SharedArrayBuffer>; // ERROR
                                           ^^^^^^^^^^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:1626:42
-   1626|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1566:42
+   1566|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [4]
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
@@ -354,8 +354,8 @@ Cannot cast `arrayOnlyView` to `ArrayBufferView<SharedArrayBuffer>` because: [in
          ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:385:31
-    385| interface ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {}
+   <BUILTINS>/misc.js:377:31
+    377| interface ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {}
                                        ^^^^^^^^^^^^ [1]
    test.js:109:46
     109| declare const arrayOnlyView: ArrayBufferView<ArrayBuffer>;
@@ -363,8 +363,8 @@ References:
    test.js:111:34
     111| arrayOnlyView as ArrayBufferView<SharedArrayBuffer>; // ERROR
                                           ^^^^^^^^^^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:1626:42
-   1626|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1566:42
+   1566|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [4]
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
@@ -381,8 +381,8 @@ property `grow` is missing in `ArrayBuffer` [2] but exists in `SharedArrayBuffer
         ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:385:31
-   385| interface ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {}
+   <BUILTINS>/misc.js:377:31
+   377| interface ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {}
                                       ^^^^^^^^^^^^ [1]
    test.js:109:46
    109| declare const arrayOnlyView: ArrayBufferView<ArrayBuffer>;
@@ -402,8 +402,8 @@ property `growable` is missing in `ArrayBuffer` [2] but exists in `SharedArrayBu
         ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:385:31
-   385| interface ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {}
+   <BUILTINS>/misc.js:377:31
+   377| interface ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {}
                                       ^^^^^^^^^^^^ [1]
    test.js:109:46
    109| declare const arrayOnlyView: ArrayBufferView<ArrayBuffer>;
@@ -423,8 +423,8 @@ property `[toStringTag]`: `"ArrayBuffer"` [2] is incompatible with `"SharedArray
         ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:385:31
-   385| interface ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {}
+   <BUILTINS>/misc.js:377:31
+   377| interface ArrayBufferView<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {}
                                       ^^^^^^^^^^^^ [1]
    <BUILTINS>/lib.es2015.symbol.wellknown.js:273:36
    273|     readonly [Symbol.toStringTag]: "ArrayBuffer";
@@ -446,8 +446,8 @@ Cannot cast `sharedFloat16` to `Float16Array<ArrayBuffer>` because: [incompatibl
          ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:229:28
-    229| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
+   <BUILTINS>/misc.js:221:28
+    221| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
                                     ^^^^^^^^^^^^ [1]
    test.js:1:34
       1| declare const sharedArrayBuffer: SharedArrayBuffer;
@@ -458,8 +458,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/lib.es5.js:1626:42
-   1626|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1566:42
+   1566|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [5]
 
 
@@ -475,8 +475,8 @@ Cannot cast `sharedFloat16` to `Float16Array<ArrayBuffer>` because: [incompatibl
          ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:229:28
-    229| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
+   <BUILTINS>/misc.js:221:28
+    221| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
                                     ^^^^^^^^^^^^ [1]
    test.js:1:34
       1| declare const sharedArrayBuffer: SharedArrayBuffer;
@@ -487,8 +487,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/lib.es5.js:1626:42
-   1626|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1566:42
+   1566|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [5]
 
 
@@ -504,8 +504,8 @@ Cannot cast `sharedFloat16` to `Float16Array<ArrayBuffer>` because: [incompatibl
          ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:229:28
-    229| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
+   <BUILTINS>/misc.js:221:28
+    221| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
                                     ^^^^^^^^^^^^ [1]
    test.js:1:34
       1| declare const sharedArrayBuffer: SharedArrayBuffer;
@@ -516,8 +516,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/lib.es5.js:1626:42
-   1626|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1566:42
+   1566|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [5]
 
 
@@ -533,8 +533,8 @@ Cannot cast `sharedFloat16` to `Float16Array<ArrayBuffer>` because: [incompatibl
          ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:229:28
-    229| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
+   <BUILTINS>/misc.js:221:28
+    221| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
                                     ^^^^^^^^^^^^ [1]
    test.js:1:34
       1| declare const sharedArrayBuffer: SharedArrayBuffer;
@@ -545,8 +545,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/lib.es5.js:1626:42
-   1626|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1566:42
+   1566|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [5]
 
 
@@ -562,8 +562,8 @@ Cannot cast `sharedFloat16` to `Float16Array<ArrayBuffer>` because: [incompatibl
          ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:229:28
-    229| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
+   <BUILTINS>/misc.js:221:28
+    221| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
                                     ^^^^^^^^^^^^ [1]
    test.js:1:34
       1| declare const sharedArrayBuffer: SharedArrayBuffer;
@@ -574,8 +574,8 @@ References:
    <BUILTINS>/lib.es2017.sharedmemory.js:32:42
      32|     slice(begin?: number, end?: number): SharedArrayBuffer;
                                                   ^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/lib.es5.js:1626:42
-   1626|     slice(begin?: number, end?: number): ArrayBuffer;
+   <BUILTINS>/lib.es5.js:1566:42
+   1566|     slice(begin?: number, end?: number): ArrayBuffer;
                                                   ^^^^^^^^^^^ [5]
 
 
@@ -589,8 +589,8 @@ Cannot cast `sharedFloat16` to `Float16Array<ArrayBuffer>` because in type argum
         ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:229:28
-   229| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
+   <BUILTINS>/misc.js:221:28
+   221| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
                                    ^^^^^^^^^^^^ [1]
    test.js:1:34
      1| declare const sharedArrayBuffer: SharedArrayBuffer;
@@ -610,8 +610,8 @@ Cannot cast `sharedFloat16` to `Float16Array<ArrayBuffer>` because in type argum
         ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:229:28
-   229| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
+   <BUILTINS>/misc.js:221:28
+   221| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
                                    ^^^^^^^^^^^^ [1]
    test.js:1:34
      1| declare const sharedArrayBuffer: SharedArrayBuffer;
@@ -631,8 +631,8 @@ Cannot cast `sharedFloat16` to `Float16Array<ArrayBuffer>` because in type argum
         ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:229:28
-   229| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
+   <BUILTINS>/misc.js:221:28
+   221| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
                                    ^^^^^^^^^^^^ [1]
    test.js:1:34
      1| declare const sharedArrayBuffer: SharedArrayBuffer;
@@ -652,8 +652,8 @@ Cannot cast `sharedFloat16` to `Float16Array<ArrayBuffer>` because in type argum
         ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:229:28
-   229| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
+   <BUILTINS>/misc.js:221:28
+   221| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
                                    ^^^^^^^^^^^^ [1]
    test.js:1:34
      1| declare const sharedArrayBuffer: SharedArrayBuffer;
@@ -673,8 +673,8 @@ Cannot cast `sharedFloat16` to `Float16Array<ArrayBuffer>` because in type argum
         ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:229:28
-   229| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
+   <BUILTINS>/misc.js:221:28
+   221| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
                                    ^^^^^^^^^^^^ [1]
    test.js:1:34
      1| declare const sharedArrayBuffer: SharedArrayBuffer;
@@ -694,8 +694,8 @@ Cannot cast `sharedFloat16` to `Float16Array<ArrayBuffer>` because in type argum
         ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:229:28
-   229| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
+   <BUILTINS>/misc.js:221:28
+   221| interface Float16Array<out TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
                                    ^^^^^^^^^^^^ [1]
    <BUILTINS>/lib.es2017.sharedmemory.js:33:36
     33|     readonly [Symbol.toStringTag]: "SharedArrayBuffer";

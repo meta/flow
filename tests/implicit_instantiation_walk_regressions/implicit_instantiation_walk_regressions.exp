@@ -29,8 +29,8 @@ Cannot cast `p` to `Promise<string>` because in type argument `T` [1]: `number` 
         ^
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    callable_interface.js:8:32
      8| const p = request('k', lock => 1); // ok

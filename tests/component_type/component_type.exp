@@ -498,8 +498,8 @@ References:
    <BUILTINS>/react.js:106:21
    106|   type RefSetter<in T> =
                             ^ [1]
-   <BUILTINS>/misc.js:292:15
-   292| interface Set<T> extends ReadonlySet<T> {}
+   <BUILTINS>/misc.js:284:15
+   284| interface Set<T> extends ReadonlySet<T> {}
                       ^ [2]
    everything_implicit_instantiation.js:11:41
     11| C as component(ref: React.RefSetter<Set<number>>, foo: string, bar: number); // error
@@ -902,8 +902,8 @@ References:
    <BUILTINS>/react.js:106:21
    106|   type RefSetter<in T> =
                             ^ [1]
-   <BUILTINS>/misc.js:292:15
-   292| interface Set<T> extends ReadonlySet<T> {}
+   <BUILTINS>/misc.js:284:15
+   284| interface Set<T> extends ReadonlySet<T> {}
                       ^ [2]
    props_implicit_instantiation.js:12:41
     12| C as component(ref: React.RefSetter<Set<number>>, foo: string, bar: number); // error: number ~> string

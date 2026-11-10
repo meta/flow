@@ -7,8 +7,8 @@ Cannot assign `patt.test(...)` to `match` because `boolean` [1] is incompatible 
                            ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:967:27
-   967|     test(string: string): boolean;
+   <BUILTINS>/lib.es5.js:907:27
+   907|     test(string: string): boolean;
                                   ^^^^^^^ [1]
    regexp.js:2:11
      2| var match:number = patt.test("Hello world!");
@@ -25,8 +25,8 @@ parameter: `RegExp` [1] is incompatible with `unknown`. [incompatible-type]
         ^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:956:11
-   956| interface RegExp {
+   <BUILTINS>/lib.es5.js:896:11
+   896| interface RegExp {
                   ^^^^^^ [1]
 
 
@@ -40,8 +40,8 @@ Cannot cast `regExp[Symbol.match]` to `(str: string) => Iterator<RegExp$matchRes
         ^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:956:11
-   956| interface RegExp {
+   <BUILTINS>/lib.es5.js:896:11
+   896| interface RegExp {
                   ^^^^^^ [1]
 
 
@@ -186,11 +186,11 @@ References:
    <BUILTINS>/lib.es2020.string.js:30:22
     30|     matchAll(regexp: RegExp): RegExpStringIterator<RegExpExecArray>;
                              ^^^^^^ [2]
-   <BUILTINS>/misc.js:221:20
-   221|   matchAll(regexp: string | RegExp): RegExpStringIterator<RegExpExecArray>;
+   <BUILTINS>/misc.js:213:20
+   213|   matchAll(regexp: string | RegExp): RegExpStringIterator<RegExpExecArray>;
                            ^^^^^^ [3]
-   <BUILTINS>/misc.js:221:29
-   221|   matchAll(regexp: string | RegExp): RegExpStringIterator<RegExpExecArray>;
+   <BUILTINS>/misc.js:213:29
+   213|   matchAll(regexp: string | RegExp): RegExpStringIterator<RegExpExecArray>;
                                     ^^^^^^ [4]
 
 
@@ -215,8 +215,8 @@ References:
    <BUILTINS>/lib.es2020.intl.js:99:59
     99|     type LocalesArgument = UnicodeBCP47LocaleIdentifier | Locale | readonly (UnicodeBCP47LocaleIdentifier | Locale)[] | undefined;
                                                                   ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:473:33
-   473|     toLocaleLowerCase(locales?: string | string[]): string;
+   <BUILTINS>/lib.es5.js:413:33
+   413|     toLocaleLowerCase(locales?: string | string[]): string;
                                         ^^^^^^ [3]
 
 

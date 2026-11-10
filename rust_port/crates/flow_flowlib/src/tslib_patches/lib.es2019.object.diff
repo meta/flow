@@ -1,0 +1,15 @@
+--- tslib/lib.es2019.object.d.ts
++++ rust_port/crates/flow_flowlib/src/tslib_patches/lib.es2019.object.d.ts
+@@ -24,6 +24,12 @@
+      * Returns an object created by key-value entries for properties and methods
+      * @param entries An iterable object that contains key-value entries for properties and methods.
+      */
++    fromEntries<K, V>(entries: Iterable<[K, V] | {'0': K, '1': V, ...}>): {[K]: V, ...};
++
++    /**
++     * Returns an object created by key-value entries for properties and methods
++     * @param entries An iterable object that contains key-value entries for properties and methods.
++     */
+     fromEntries<T = any>(entries: Iterable<readonly [PropertyKey, T]>): { [k: string]: T; };
+ 
+     /**

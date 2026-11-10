@@ -60,7 +60,9 @@ References:
 Error ----------------------------------------------------------------------------------------------------- test.js:21:1
 
 Cannot cast `tsIfaceClass` to `{name: string | number, ...}` because `{name: string, ...}` [1] is incompatible with
-`Object` [2]. [incompatible-type]
+`Object` [2]. For example, property `hasOwnProperty` is missing in `{name: string, ...}` [1] but exists in
+`{hasOwnProperty(this: Object, v: PropertyKey): boolean, isPrototypeOf(this: Object, v: Object): bool...` [2].
+[incompatible-type]
 
    test.js:21:1
    21| tsIfaceClass as {name: string | number, ...}; // ERROR: a null prototype, but `name` is OK.

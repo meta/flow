@@ -45,8 +45,8 @@ References:
    forof.js:23:26
     23| function testString(str: string): void {
                                  ^^^^^^ [1]
-   <BUILTINS>/misc.js:304:11
-   304| interface Iterable<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:296:11
+   296| interface Iterable<out T, out TReturn = void, in TNext = void> {}
                   ^^^^^^^^ [2]
 
 

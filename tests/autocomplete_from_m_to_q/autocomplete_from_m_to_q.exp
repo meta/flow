@@ -428,7 +428,7 @@ Flags: --pretty
     },
     {"name":"NaN","type":"number"},
     {"name":"Number","type":"NumberConstructor"},
-    {"name":"Object","type":"typeof Object"},
+    {"name":"Object","type":"ObjectConstructor"},
     {"name":"parseFloat","type":"(string: string) => number"},
     {"name":"parseInt","type":"(string: string, radix?: number) => number"},
     {"name":"Promise","type":"PromiseConstructor"},

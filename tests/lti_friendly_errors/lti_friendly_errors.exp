@@ -8,8 +8,8 @@ Cannot cast `p` to `Promise<string>` because in type argument `T` [1]: `unknown`
         ^
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    <BUILTINS>/lib.es2015.promise.js:32:14
     32|     new <T = unknown>(executor: (resolve: (value: Promise<T> | T) => void, reject: (reason: any) => void) => unknown): Promise<T>;

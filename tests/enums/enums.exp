@@ -2218,8 +2218,8 @@ Cannot expect `Generator<void, number, void>` as the return type of generator fu
                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 References:
-   <BUILTINS>/misc.js:276:42
-   276| interface Generator<out T = unknown, out TReturn = any, in TNext = any> {}
+   <BUILTINS>/misc.js:268:42
+   268| interface Generator<out T = unknown, out TReturn = any, in TNext = any> {}
                                                  ^^^^^^^ [1]
    exhaustive-check-implicit-return.js:201:36
    201| function* u(x: E): Generator<void, number, void> { // Error: switch isn't exhaustive
@@ -2251,8 +2251,8 @@ incompatible with `void` [3]. [incompatible-type]
                                 ^^^^^^^^^^^^^^^ [3]
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    exhaustive-check-implicit-return.js:208:33
    208| async function v(x: E): Promise<number> { // Error: switch isn't exhaustive

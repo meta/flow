@@ -1,0 +1,9 @@
+--- tslib/lib.es2024.object.d.ts
++++ rust_port/crates/flow_flowlib/src/tslib_patches/lib.es2024.object.d.ts
+@@ -26,5 +26,5 @@
+     groupBy<K extends PropertyKey, T>(
+         items: Iterable<T>,
+         keySelector: (item: T, index: number) => K,
+-    ): Partial<Record<K, T[]>>;
++    ): {[K]: Array<T> | void};
+ }

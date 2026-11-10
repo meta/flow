@@ -157,9 +157,9 @@ References:
    obj.js:27:15
     27| Object.freeze<{readonly c: number, ...}>({a: 42, b: 42}); // c does not exist
                       ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:216:29
-   216|     static freeze<T extends Function>(f: T): T;
-                                    ^^^^^^^^ [3]
+   <BUILTINS>/lib.es5.js:219:22
+   219|     freeze<T extends Function>(f: T): T;
+                             ^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------------------ obj.js:28:1

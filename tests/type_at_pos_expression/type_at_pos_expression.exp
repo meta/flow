@@ -239,7 +239,7 @@ Flags:
 const diff: Omit<O2, "p">
 
 'O2' defined at object-resolution.js:9:5
-'Omit' defined at (lib) lib.es5.js:1569:5
+'Omit' defined at (lib) lib.es5.js:1509:5
 
 object-resolution.js:11:3,11:6
 
@@ -387,16 +387,12 @@ object.js:62:7,62:19
 
 object.js:65:5
 Flags:
-
- Provides functionality common to all JavaScript objects.
-(method) constructor(this: typeof Object.prototype, ...empty): any
+(this: typeof Object.prototype, ...empty) => any
 object.js:65:5,65:15
 
 object.js:68:5
 Flags:
-
- Provides functionality common to all JavaScript objects.
-(method) constructor(this: typeof Object.prototype, ...empty): any
+(this: typeof Object.prototype, ...empty) => any
 object.js:68:5,68:15
 
 optional_chaining.js:16:7

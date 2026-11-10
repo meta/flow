@@ -452,8 +452,8 @@ the expression to your expected type. [underconstrained-implicit-instantiation]
                      ^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1276:21
-   1276| declare class Array<T> extends ReadonlyArray<T> {
+   <BUILTINS>/lib.es5.js:1216:21
+   1216| declare class Array<T> extends ReadonlyArray<T> {
                              ^ [1]
    misc.js:3:9
       3| var e = new Array(10);

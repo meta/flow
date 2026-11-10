@@ -50,8 +50,8 @@ Cannot cast `quasis.raw` to `empty` because `ReadonlyArray<string>` [1] is incom
             ^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:392:17
-   392|   readonly raw: ReadonlyArray<string>;
+   <BUILTINS>/misc.js:384:17
+   384|   readonly raw: ReadonlyArray<string>;
                         ^^^^^^^^^^^^^^^^^^^^^ [1]
    tagged_template.js:34:19
     34|     quasis.raw as empty; // ERROR
@@ -67,8 +67,8 @@ Cannot cast `x` to `empty` because `string` [1] is incompatible with `empty` [2]
           ^
 
 References:
-   <BUILTINS>/lib.es2015.core.js:561:115
-   561|     raw: (template: interface {readonly raw: ReadonlyArray<string>}, ...substitutions: ReadonlyArray<unknown>) => string;
+   <BUILTINS>/lib.es2015.core.js:534:115
+   534|     raw: (template: interface {readonly raw: ReadonlyArray<string>}, ...substitutions: ReadonlyArray<unknown>) => string;
                                                                                                                           ^^^^^^ [1]
    tagged_template.js:43:8
     43|   x as empty; // ERROR
@@ -86,8 +86,8 @@ object and attempt to use it as a subtype of an interface. [incompatible-type]
                      ^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es2015.core.js:561:21
-   561|     raw: (template: interface {readonly raw: ReadonlyArray<string>}, ...substitutions: ReadonlyArray<unknown>) => string;
+   <BUILTINS>/lib.es2015.core.js:534:21
+   534|     raw: (template: interface {readonly raw: ReadonlyArray<string>}, ...substitutions: ReadonlyArray<unknown>) => string;
                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
@@ -100,8 +100,8 @@ Cannot cast `x` to `empty` because `string` [1] is incompatible with `empty` [2]
           ^
 
 References:
-   <BUILTINS>/lib.es2015.core.js:561:115
-   561|     raw: (template: interface {readonly raw: ReadonlyArray<string>}, ...substitutions: ReadonlyArray<unknown>) => string;
+   <BUILTINS>/lib.es2015.core.js:534:115
+   534|     raw: (template: interface {readonly raw: ReadonlyArray<string>}, ...substitutions: ReadonlyArray<unknown>) => string;
                                                                                                                           ^^^^^^ [1]
    tagged_template.js:54:8
     54|   x as empty; // ERROR

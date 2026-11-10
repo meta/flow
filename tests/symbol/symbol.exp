@@ -15,8 +15,8 @@ References:
    <BUILTINS>/lib.es2015.iterable.js:50:26
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/misc.js:302:24
-   302| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:294:24
+   294| interface Iterator<out T, out TReturn = void, in TNext = void> {}
                                ^ [3]
    class_iterator.js:35:40
     35|   *[Symbol.iterator](): IteratorObject<string> {
@@ -54,8 +54,8 @@ Cannot cast `roSet[Symbol.toStringTag]` to `"Map"` because `string` [1] is incom
         ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:256:34
-   256|   readonly [Symbol.toStringTag]: string;
+   <BUILTINS>/misc.js:248:34
+   248|   readonly [Symbol.toStringTag]: string;
                                          ^^^^^^ [1]
    collection_to_string_tag.js:12:30
     12| roSet[Symbol.toStringTag] as 'Map'; // ERROR
@@ -394,8 +394,8 @@ Cannot cast `roMap` to `TaggedMap` because in property `[toStringTag]`: `string`
         ^^^^^
 
 References:
-   <BUILTINS>/misc.js:252:34
-   252|   readonly [Symbol.toStringTag]: string;
+   <BUILTINS>/misc.js:244:34
+   244|   readonly [Symbol.toStringTag]: string;
                                          ^^^^^^ [1]
    collection_to_string_tag.js:17:54
     17| interface TaggedMap { readonly [Symbol.toStringTag]: 'Map' }
@@ -657,8 +657,8 @@ References:
    <BUILTINS>/lib.es2015.iterable.js:50:26
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/misc.js:302:24
-   302| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:294:24
+   294| interface Iterator<out T, out TReturn = void, in TNext = void> {}
                                ^ [3]
    type_well_known_symbol.js:16:44
     16| type Bad = { [Symbol.iterator](): Iterator<string> };

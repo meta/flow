@@ -253,9 +253,9 @@ References:
    object_freeze.js:13:43
     13| export const frozenNumber = Object.freeze(123); // TODO type_sig support
                                                   ^^^ [1]
-   <BUILTINS>/lib.es5.js:216:29
-   216|     static freeze<T extends Function>(f: T): T;
-                                    ^^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:219:22
+   219|     freeze<T extends Function>(f: T): T;
+                             ^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------- object_freeze.js:13:29

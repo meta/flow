@@ -60,8 +60,8 @@ Cannot cast `promise` to `Promise<string>` because in type argument `T` [1]: `HT
         ^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    test.js:6:24
      6| const promise: Promise<HTMLDivElement> = Promise.resolve(element);

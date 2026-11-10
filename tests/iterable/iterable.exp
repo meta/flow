@@ -15,8 +15,8 @@ References:
    <BUILTINS>/lib.es2015.iterable.js:50:26
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/misc.js:302:24
-   302| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:294:24
+   294| interface Iterator<out T, out TReturn = void, in TNext = void> {}
                                ^ [3]
    array.js:7:2
      7| ['hi'] as Iterable<number>; // Error string ~> number
@@ -43,8 +43,8 @@ References:
    <BUILTINS>/lib.es2015.iterable.js:50:26
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/misc.js:302:24
-   302| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:294:24
+   294| interface Iterator<out T, out TReturn = void, in TNext = void> {}
                                ^ [3]
    array.js:8:8
      8| ['hi', 1] as Iterable<string>; // Error number ~> string
@@ -79,8 +79,8 @@ References:
    <BUILTINS>/lib.es2015.iterable.js:50:26
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/misc.js:302:24
-   302| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:294:24
+   294| interface Iterator<out T, out TReturn = void, in TNext = void> {}
                                ^ [5]
    caching_bug.js:21:43
     21| function miss_the_cache(x: Array<string | number>): Iterable<string> { return x; }
@@ -193,8 +193,8 @@ References:
    <BUILTINS>/lib.es2015.iterable.js:50:26
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/misc.js:302:24
-   302| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:294:24
+   294| interface Iterator<out T, out TReturn = void, in TNext = void> {}
                                ^ [5]
    <BUILTINS>/lib.es2015.iterable.js:144:38
    144|     [Symbol.iterator](): MapIterator<[K, V]>;
@@ -228,8 +228,8 @@ References:
    <BUILTINS>/lib.es2015.iterable.js:50:26
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/misc.js:302:24
-   302| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:294:24
+   294| interface Iterator<out T, out TReturn = void, in TNext = void> {}
                                ^ [5]
    set.js:13:28
     13| function setTest4(set: Set<string>): Iterable<number> {
@@ -256,8 +256,8 @@ References:
    <BUILTINS>/lib.es2015.iterable.js:50:26
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/misc.js:302:24
-   302| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:294:24
+   294| interface Iterator<out T, out TReturn = void, in TNext = void> {}
                                ^ [3]
    <BUILTINS>/lib.es2015.iterable.js:253:41
    253|     [Symbol.iterator](): StringIterator<string>;

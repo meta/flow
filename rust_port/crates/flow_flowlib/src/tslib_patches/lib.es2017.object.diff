@@ -1,0 +1,9 @@
+--- tslib/lib.es2017.object.d.ts
++++ rust_port/crates/flow_flowlib/src/tslib_patches/lib.es2017.object.d.ts
+@@ -46,5 +46,5 @@
+      * Returns an object containing all own property descriptors of an object
+      * @param o Object that contains the properties and methods. This can be an object that you created or an existing Document Object Model (DOM) object.
+      */
+-    getOwnPropertyDescriptors<T>(o: T): { [P in keyof T]: TypedPropertyDescriptor<T[P]>; } & { [x: string]: PropertyDescriptor; };
++    getOwnPropertyDescriptors(o: {...}): PropertyDescriptorMap;
+ }

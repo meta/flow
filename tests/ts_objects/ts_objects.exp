@@ -959,8 +959,8 @@ References:
     78|   hasOwnProperty(key: number): boolean; // ERROR: `Object` declares it in Flow
     79| }
         ^ [2]
-   <BUILTINS>/lib.es5.js:137:23
-   137|     hasOwnProperty(v: PropertyKey): boolean;
+   <BUILTINS>/lib.es5.js:134:23
+   134|     hasOwnProperty(v: PropertyKey): boolean;
                               ^^^^^^^^^^^ [4]
 
 
@@ -983,8 +983,8 @@ References:
     78|   hasOwnProperty(key: number): boolean; // ERROR: `Object` declares it in Flow
     79| }
         ^ [2]
-   <BUILTINS>/lib.es5.js:137:23
-   137|     hasOwnProperty(v: PropertyKey): boolean;
+   <BUILTINS>/lib.es5.js:134:23
+   134|     hasOwnProperty(v: PropertyKey): boolean;
                               ^^^^^^^^^^^ [4]
 
 

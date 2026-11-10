@@ -275,8 +275,8 @@ Cannot call `Promise.any` because: [incompatible-type]
                   ^^^
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    <BUILTINS>/lib.es2021.promise.js:41:64
     41|     any<T extends readonly unknown[] | []>(values: T): Promise<Awaited<T[number]>>;
@@ -322,8 +322,8 @@ Cannot call `Promise.any` because: [incompatible-type]
                          ^^^
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    <BUILTINS>/lib.es2021.promise.js:41:64
     41|     any<T extends readonly unknown[] | []>(values: T): Promise<Awaited<T[number]>>;
@@ -346,8 +346,8 @@ Cannot cast `p.finally(...)` to `Promise<string>` because in type argument `T` [
         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    finally.js:1:26
      1| declare const p: Promise<number>;
@@ -377,8 +377,8 @@ References:
    <BUILTINS>/lib.es2018.promise.js:30:26
     30|     finally(onfinally?: (() => void) | undefined | null): Promise<T>;
                                  ^^^^^^^^^^ [2]
-   <BUILTINS>/misc.js:217:24
-   217|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
+   <BUILTINS>/misc.js:209:24
+   209|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
                                ^^^^^^^^^^^^^ [3]
 
 
@@ -473,8 +473,8 @@ References:
     18|   finally(onFinally: () => unknown): NarrowFinally<R>; // Error: `null` and `undefined` are not functions
     19| }
         ^ [2]
-   <BUILTINS>/misc.js:217:23
-   217|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
+   <BUILTINS>/misc.js:209:23
+   209|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
@@ -497,8 +497,8 @@ References:
     18|   finally(onFinally: () => unknown): NarrowFinally<R>; // Error: `null` and `undefined` are not functions
     19| }
         ^ [2]
-   <BUILTINS>/misc.js:217:41
-   217|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
+   <BUILTINS>/misc.js:209:41
+   209|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
                                                 ^^^^^^^^^ [4]
 
 
@@ -521,8 +521,8 @@ References:
     18|   finally(onFinally: () => unknown): NarrowFinally<R>; // Error: `null` and `undefined` are not functions
     19| }
         ^ [2]
-   <BUILTINS>/misc.js:217:53
-   217|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
+   <BUILTINS>/misc.js:209:53
+   209|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
                                                             ^^^^ [4]
 
 
@@ -939,8 +939,8 @@ Cannot cast `Promise.resolve()` to `Promise<number>` because in type argument `T
         ^^^^^^^^^^^^^^^^^ [2]
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    resolve_void.js:1:30
      1| Promise.resolve() as Promise<number>; // error
@@ -957,8 +957,8 @@ with `number` [3]. [incompatible-type]
                         ^^^^^^^^^ [2]
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    resolve_void.js:3:39
      3| Promise.resolve(undefined) as Promise<number>; // error
@@ -982,8 +982,8 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
         ^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    <BUILTINS>/lib.es2020.promise.js:20:34
     20| interface PromiseFulfilledResult<T> {
@@ -1017,8 +1017,8 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
         ^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    <BUILTINS>/lib.es2020.promise.js:20:34
     20| interface PromiseFulfilledResult<T> {
@@ -1054,8 +1054,8 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
         ^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    <BUILTINS>/lib.es2020.promise.js:20:34
     20| interface PromiseFulfilledResult<T> {
@@ -1089,8 +1089,8 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
         ^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    <BUILTINS>/lib.es2020.promise.js:20:34
     20| interface PromiseFulfilledResult<T> {
@@ -1126,8 +1126,8 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
         ^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    <BUILTINS>/lib.es2020.promise.js:43:99
     43|     allSettled<T extends readonly unknown[] | []>(values: T): Promise<{ -readonly [P in keyof T]: PromiseSettledResult<$AllSettledAwaited<T[P]>>; }>;
@@ -1160,8 +1160,8 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
         ^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    <BUILTINS>/lib.es2020.promise.js:51:66
     51|     allSettled<T>(values: Iterable<T | PromiseLike<T>>): Promise<PromiseSettledResult<$AllSettledAwaited<T>>[]>;
@@ -1300,8 +1300,8 @@ Cannot cast `promise` to `Promise<string>` because in type argument `T` [1]: `nu
         ^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:216:23
-   216| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:208:23
+   208| interface Promise<out T = unknown> {
                               ^ [1]
    withResolvers.js:1:58
      1| const {promise, resolve, reject} = Promise.withResolvers<number>();

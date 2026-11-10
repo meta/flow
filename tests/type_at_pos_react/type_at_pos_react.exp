@@ -23,7 +23,7 @@ Flags:
 const x: Promise<{readonly default: (x: Props) => MixedElement}>
 
 'MixedElement' defined at (lib) react.js:583:22
-'Promise' defined at (lib) misc.js:216:10
+'Promise' defined at (lib) misc.js:208:10
 'Props' defined at exports-component.js:5:5
 
 lazy_ref.js:20:9,20:9

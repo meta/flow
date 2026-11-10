@@ -20,9 +20,36 @@ References:
    test.js:6:18
      6|   static keys(o: {a: number}): Array<string> { return []; } // ERROR: narrower parameter.
                          ^^^^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:252:20
-   252|     static keys(o: object): string[];
-                           ^^^^^^ [4]
+   <BUILTINS>/lib.es5.js:255:13
+   255|     keys(o: object): string[];
+                    ^^^^^^ [4]
+
+
+Error ------------------------------------------------------------------------------------------------------ test.js:6:3
+
+Cannot extend `Object` [1] with `MyObject` [2] because in property `keys` > the first parameter: property `a` is missing
+in `{}` [3] but exists in `{a: number}` [4]. [incompatible-type]
+
+   test.js:6:3
+     6|   static keys(o: {a: number}): Array<string> { return []; } // ERROR: narrower parameter.
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   test.js:5:24
+     5| class MyObject extends Object {
+                               ^^^^^^ [1]
+   test.js:5:1
+        v------------------------------
+     5| class MyObject extends Object {
+     6|   static keys(o: {a: number}): Array<string> { return []; } // ERROR: narrower parameter.
+     7| }
+        ^ [2]
+   <BUILTINS>/lib.es2015.core.js:299:13
+   299|     keys(o: {}): string[];
+                    ^^ [3]
+   test.js:6:18
+     6|   static keys(o: {a: number}): Array<string> { return []; } // ERROR: narrower parameter.
+                         ^^^^^^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:10:1
@@ -111,4 +138,4 @@ References:
 
 
 
-Found 4 errors
+Found 5 errors
