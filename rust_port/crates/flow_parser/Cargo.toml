@@ -12,6 +12,7 @@ test = false
 [dependencies]
 dupe = "0.9.1"
 flow_data_structure_wrapper = { path = "../flow_data_structure_wrapper" }
+hashbrown = "0.17.1"
 logos = "0.16.1"
 regex = "1.13.1"
 serde = { version = "1.0.229", features = ["derive", "rc"] }

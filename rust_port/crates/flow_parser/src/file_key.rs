@@ -15,16 +15,15 @@
 // stripped in to_string/to_absolute and replaced with the flowlib root.
 
 use std::cell::RefCell;
-use std::collections::HashSet;
 use std::hash::DefaultHasher;
 use std::hash::Hash;
 use std::hash::Hasher;
 use std::path::PathBuf;
-use std::sync::LazyLock;
 use std::sync::Mutex;
 use std::sync::RwLock;
 
 use dupe::Dupe;
+use hashbrown::HashTable;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub enum FileKeyInner {
@@ -263,11 +262,10 @@ pub struct FileKey {
 
 const INTERNER_SHARDS: usize = 64;
 
-static INTERNER: LazyLock<Vec<Mutex<HashSet<&'static FileKeyInner>>>> = LazyLock::new(|| {
-    (0..INTERNER_SHARDS)
-        .map(|_| Mutex::new(HashSet::new()))
-        .collect()
-});
+/// Each interned key is stored with its hash, so neither a lookup nor a resize of a shard hashes
+/// a path again.
+static INTERNER: [Mutex<HashTable<(u64, &'static FileKeyInner)>>; INTERNER_SHARDS] =
+    [const { Mutex::new(HashTable::new()) }; INTERNER_SHARDS];
 
 const LOCAL_CACHE_SIZE: usize = 4096;
 
@@ -292,14 +290,14 @@ fn intern(inner: FileKeyInner) -> &'static FileKeyInner {
     }
     let shard = ((hash >> 32) as usize) % INTERNER_SHARDS;
     let interned = {
-        let mut interned_set = INTERNER[shard]
+        let mut interned_table = INTERNER[shard]
             .lock()
             .expect("file key interner lock should not be poisoned");
-        match interned_set.get(&inner) {
-            Some(interned) => *interned,
+        match interned_table.find(hash, |&(_, interned)| *interned == inner) {
+            Some(&(_, interned)) => interned,
             None => {
                 let interned: &'static FileKeyInner = Box::leak(Box::new(inner));
-                interned_set.insert(interned);
+                interned_table.insert_unique(hash, (hash, interned), |&(hash, _)| hash);
                 interned
             }
         }

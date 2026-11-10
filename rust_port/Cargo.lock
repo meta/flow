@@ -1192,6 +1192,7 @@ dependencies = [
  "buck-resources",
  "dupe",
  "flow_data_structure_wrapper",
+ "hashbrown 0.17.1",
  "logos",
  "regex",
  "serde",
