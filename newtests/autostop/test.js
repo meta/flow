@@ -32,6 +32,10 @@ module.exports = suite(({addFile, flowCmd, lspStart, lspInitializeParams}) => [
       .verifyAllLSPMessagesInStep(
         [{method: 'telemetry/connectionStatus', params: {isConnected: true}}],
         [
+          {
+            method: 'window/logMessage',
+            params: {message: 'Starting Flow server', type: 3},
+          },
           'window/showStatus',
           'textDocument/publishDiagnostics',
           '$/cancelRequest',
