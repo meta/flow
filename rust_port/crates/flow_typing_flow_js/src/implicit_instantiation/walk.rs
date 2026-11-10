@@ -48,6 +48,8 @@ use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::InstanceKind;
 use flow_typing_type::type_::InstanceT;
 use flow_typing_type::type_::MixedFlavor;
+use flow_typing_type::type_::NominalType;
+use flow_typing_type::type_::NominalTypeInner;
 use flow_typing_type::type_::ObjKind;
 use flow_typing_type::type_::ObjType;
 use flow_typing_type::type_::OptionalIndexedAccessIndex;
@@ -382,21 +384,37 @@ fn is_nullish(t: &Type, maybe: bool) -> bool {
         if matches!(d.deref(), DefTInner::VoidT) || (maybe && matches!(d.deref(), DefTInner::NullT)))
 }
 
-/// Whether some members of a union are absorbed by a maybe (or optional) type, if all of its
-/// members are types that are known to be `null` or `void` or not.
-fn nullish_members(rep: &union_rep::UnionRep, maybe: bool) -> Option<bool> {
-    let mut nullish = false;
-    for m in rep.members_iter() {
-        match m.deref() {
-            TypeInner::DefT(_, d)
-                if !matches!(d.deref(), DefTInner::MixedT(_) | DefTInner::EmptyT) =>
-            {
-                nullish |= is_nullish(m, maybe);
-            }
-            _ => return None,
+/// Whether some members of a union are absorbed by a maybe (or optional) type, when subtyping
+/// knows it from the optimized representation of the union (`quick_mem_enum`); otherwise it
+/// compares the members one by one.
+fn nullish_members<'cx>(
+    cx: &mut Context<'cx>,
+    reason: &Reason,
+    rep: &union_rep::UnionRep,
+    maybe: bool,
+) -> Option<bool> {
+    use union_rep::QuickMemResult;
+    let mut mem = |t: Type| {
+        union_rep::quick_mem_enum(
+            cx,
+            |_, t1, t2| type_util::quick_subtype(None::<&mut fn(&Type)>, t1, t2),
+            &t,
+            rep,
+        )
+    };
+    let void = mem(void::why(reason.dupe()));
+    let null = if maybe {
+        mem(null::make(reason.dupe()))
+    } else {
+        QuickMemResult::No
+    };
+    match (void, null) {
+        (QuickMemResult::No, QuickMemResult::No) => Some(false),
+        (QuickMemResult::Yes | QuickMemResult::No, QuickMemResult::Yes | QuickMemResult::No) => {
+            Some(true)
         }
+        _ => None,
     }
-    Some(nullish)
 }
 
 /// Whether `t` is a literal of a value, which `update_lit_type_from_annot` keeps precise.
@@ -575,6 +593,17 @@ struct Tail {
     elems: Vec<Type>,
     /// The spread array, when it is all there is.
     array: Option<Type>,
+}
+
+/// Whether a type is written with a nullish member, as subtyping tells for the supertype of an
+/// opaque type against a maybe or optional type.
+fn has_syntactic_nullish_member(t: &Type) -> bool {
+    match t.deref() {
+        TypeInner::MaybeT(..) | TypeInner::OptionalT { .. } => true,
+        TypeInner::UnionT(_, rep) => rep.members_iter().any(has_syntactic_nullish_member),
+        TypeInner::DefT(_, d) => matches!(d.deref(), DefTInner::NullT | DefTInner::VoidT),
+        _ => false,
+    }
 }
 
 /// The type of the arguments a rest parameter receives when a spread of unknown length is among
@@ -1224,8 +1253,12 @@ impl<'e> Walker<'e> {
             (
                 TypeInner::UnionT(reason, rep),
                 TypeInner::MaybeT(_, inner) | TypeInner::OptionalT { type_: inner, .. },
-            ) if let Some(nullish) =
-                nullish_members(rep, matches!(u.deref(), TypeInner::MaybeT(..))) =>
+            ) if let Some(nullish) = nullish_members(
+                cx,
+                type_util::reason_of_t(&u),
+                rep,
+                matches!(u.deref(), TypeInner::MaybeT(..)),
+            ) =>
             {
                 let inner = inner.dupe();
                 if nullish {
@@ -1334,6 +1367,45 @@ impl<'e> Walker<'e> {
                 && !matches!(expanded.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::InstanceT(_))) =>
             {
                 self.walk(cx, &expanded, &u)
+            }
+            // As subtyping: an opaque type with a supertype without a nullish member flows to a
+            // maybe or optional type through its inner type, and one with a union supertype to a
+            // union as the union of the opaque type over each member of its supertype.
+            (
+                TypeInner::NominalT {
+                    nominal_type: a, ..
+                },
+                TypeInner::MaybeT(_, inner) | TypeInner::OptionalT { type_: inner, .. },
+            ) if let Some(sup) = &a.upper_t
+                && !has_syntactic_nullish_member(sup) =>
+            {
+                let inner = inner.dupe();
+                self.walk(cx, &l, &inner)
+            }
+            (
+                TypeInner::NominalT {
+                    reason,
+                    nominal_type: a,
+                },
+                TypeInner::UnionT(..),
+            ) if let Some(sup) = &a.upper_t
+                && let members = self.flatten_aliases(cx, vec![sup.dupe()])
+                && members.len() > 1 =>
+            {
+                for m in members {
+                    let opaque = Type::new(TypeInner::NominalT {
+                        reason: reason.dupe(),
+                        nominal_type: Rc::new(NominalType::new(NominalTypeInner {
+                            nominal_id: a.nominal_id.clone(),
+                            underlying_t: a.underlying_t.clone(),
+                            lower_t: a.lower_t.clone(),
+                            upper_t: Some(m),
+                            nominal_type_args: a.nominal_type_args.dupe(),
+                        })),
+                    });
+                    self.walk(cx, &opaque, &u)?;
+                }
+                Ok(())
             }
             // An opaque type with a supertype flows to a union-like type through it.
             (
