@@ -33,6 +33,7 @@ use flow_services_export::export_index::ExportIndex;
 use flow_services_export::export_index::Kind;
 use flow_services_export::export_index::Source;
 use flow_typing_errors::flow_error::ErrorSet;
+use rayon::prelude::*;
 
 const SAVED_STATE_FILE_TABLE_MAGIC: u64 = 0x464C4F5753465431; // "FLOWSFT1"
 const SAVED_STATE_RAW_BLOCK_MAGIC: u64 = 0x464C4F5752415731; // "FLOWRAW1"
@@ -473,7 +474,7 @@ fn deserialize_file_table(bytes: &[u8]) -> Result<SavedStateEnvFileTable, Invali
     }
     let mut offset = 8;
     let len = read_usize(bytes, &mut offset)?;
-    let mut files = Vec::with_capacity(len);
+    let mut paths = Vec::with_capacity(len);
     let mut previous = Vec::new();
     for _ in 0..len {
         let tag = bytes.get(offset).copied().ok_or_else(|| {
@@ -495,15 +496,18 @@ fn deserialize_file_table(bytes: &[u8]) -> Result<SavedStateEnvFileTable, Invali
         }
         previous.truncate(prefix_len);
         previous.extend_from_slice(tail);
-        let file = file_key_from_tag(
+        paths.push((
             tag,
             std::str::from_utf8(&previous)
                 .map_err(|err| InvalidReason::Failed_to_marshal(err.to_string()))?
                 .to_owned(),
-        )?;
-        files.push(file);
+        ));
         offset = tail_end;
     }
+    let files = paths
+        .into_par_iter()
+        .map(|(tag, path)| file_key_from_tag(tag, path))
+        .collect::<Result<Vec<_>, _>>()?;
     Ok(SavedStateEnvFileTable { files })
 }
 

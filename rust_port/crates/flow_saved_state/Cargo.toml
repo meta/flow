@@ -22,4 +22,5 @@ flow_server_files = { path = "../flow_server_files" }
 flow_services_export = { path = "../flow_services_export" }
 flow_typing_errors = { path = "../flow_typing_errors" }
 lz4_flex = "0.13.1"
+rayon = "1.11.0"
 serde = { version = "1.0.229", features = ["derive", "rc"] }

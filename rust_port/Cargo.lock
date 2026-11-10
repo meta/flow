@@ -1321,6 +1321,7 @@ dependencies = [
  "flow_services_export",
  "flow_typing_errors",
  "lz4_flex",
+ "rayon",
  "serde",
 ]
 
