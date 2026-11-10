@@ -257,6 +257,13 @@ where
     refinement_of_id: &'a dyn Fn(i32) -> Refinement<ALoc>,
     seen: ALocSet,
     acc: EnvMap<ALoc, Vec1<ALoc>>,
+    // The dependencies earlier visitors of the same def found.
+    init: EnvMap<ALoc, Vec1<ALoc>>,
+    // The locations this visitor added dependencies for, the last one, and the ones it added
+    // dependencies for again after adding some for another location.
+    whys: ALocSet,
+    last_why: Option<ALoc>,
+    repeated_whys: ALocSet,
     _phantom: std::marker::PhantomData<Fl>,
 }
 
@@ -286,7 +293,11 @@ where
             declare_namespace_read_paths,
             refinement_of_id,
             seen: ALocSet::new(),
-            acc: init,
+            acc: init.dupe(),
+            init,
+            whys: ALocSet::new(),
+            last_why: None,
+            repeated_whys: ALocSet::new(),
             _phantom: std::marker::PhantomData,
         }
     }
@@ -296,16 +307,31 @@ where
     }
 
     pub fn add(&mut self, why: ALoc, t: EnvKey<ALoc>) {
-        if env_api::has_assigning_write(t.dupe(), self.env_entries) {
-            self.acc
-                .entry(t)
-                .and_modify(|locs| {
-                    if !locs.contains(&why) {
-                        locs.push(why.dupe());
-                    }
-                })
-                .or_insert_with(|| Vec1::new(why));
+        if !env_api::has_assigning_write(t.dupe(), self.env_entries) {
+            return;
         }
+        if self.last_why.as_ref() != Some(&why) {
+            if !self.whys.insert(why.dupe()) {
+                self.repeated_whys.insert(why.dupe());
+            }
+            self.last_why = Some(why.dupe());
+        }
+        let Some(locs) = self.acc.get_mut(&t) else {
+            self.acc.insert(t, Vec1::new(why));
+            return;
+        };
+        // Unless this visitor added dependencies for `why` before some for another location, or the
+        // key comes from an earlier visitor, `why` can only be the last location of the key.
+        // Searching all of them instead would make a def with many reads that depend on the same
+        // keys quadratic: each read in a namespace depends on all the declarations it merges.
+        if *locs.last() == why {
+            return;
+        }
+        if (self.repeated_whys.contains(&why) || self.init.contains_key(&t)) && locs.contains(&why)
+        {
+            return;
+        }
+        locs.push(why);
     }
 
     fn add_declare_namespace_prefix_dependencies(&mut self, read_loc: &ALoc) {
@@ -1447,9 +1473,8 @@ fn depends<'a, 'cx, Cx: Context, Fl: Flow<Cx = Cx>>(
             providers,
             declare_namespace_read_paths,
             refinement_of_id,
-            EnvMap::empty(),
+            state,
         );
-        visitor.acc = state;
         mk_visit(&mut visitor);
         visitor.into_acc()
     }

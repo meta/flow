@@ -222,29 +222,9 @@ pub struct EnvMapEntry<'a, L: Dupe + Eq + Ord + Hash, V: Clone> {
 }
 
 impl<L: Dupe + Eq + Ord + Hash, V: Clone> EnvMapEntry<'_, L, V> {
-    pub fn and_modify<F>(self, f: F) -> Self
-    where
-        F: FnOnce(&mut V),
-    {
-        if let Some(mut value) = self.map.inner.remove(&self.key) {
-            f(&mut value);
-            self.map.inner.insert(self.key.dupe(), value);
-        }
-        self
-    }
-
     pub fn or_insert(self, default: V) {
         if self.map.inner.get(&self.key).is_none() {
             self.map.inner.insert(self.key, default);
-        }
-    }
-
-    pub fn or_insert_with<F>(self, default: F)
-    where
-        F: FnOnce() -> V,
-    {
-        if self.map.inner.get(&self.key).is_none() {
-            self.map.inner.insert(self.key, default());
         }
     }
 }
