@@ -1733,7 +1733,10 @@ mod type_converter {
                 type_: c,
                 targs: ts,
                 ..
-            }) => type_app::<I>(env, state, false, c, ts.as_deref()),
+            }) => match expand_members::constructed_instance(env.cx, c, ts.as_deref()) {
+                Some(inherited_t) => type__::<I>(env, state, None, &inherited_t),
+                None => type_app::<I>(env, state, false, c, ts.as_deref()),
+            },
             TypeInner::KeysT(reason, inner_t) => {
                 keys_t::<I>(type__::<I>, env, state, false, reason, inner_t)
             }
@@ -5360,7 +5363,7 @@ mod expand_members {
     // A class extending a value with a construct signature (`extends Map<K, V>`)
     // inherits what the signature returns, the way [ThisSpecializeT] works it
     // out, rather than the members of the value itself.
-    fn constructed_instance<'cx>(
+    pub(super) fn constructed_instance<'cx>(
         cx: &mut Context<'cx>,
         c: &Type,
         targs: Option<&[Type]>,

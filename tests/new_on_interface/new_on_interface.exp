@@ -195,6 +195,38 @@ References:
                                             ^^^^^^ [2]
 
 
+Error ---------------------------------------------------------------------------------------- extends_ctor_desc.js:12:3
+
+Cannot extend `Base` [1] with `Derived` [2] because in property `create` > the first parameter: property `a` is missing
+in `{}` [3] but exists in `{a: number}` [4]. [incompatible-type]
+
+   extends_ctor_desc.js:12:3
+         v---------------------------------------------
+   12|   static create(o: {a: number}): Base { // ERROR
+   13|     return new BaseC();
+   14|   }
+         ^
+
+References:
+   extends_ctor_desc.js:11:23
+   11| class Derived extends BaseC {
+                             ^^^^^ [1]
+   extends_ctor_desc.js:11:1
+       v----------------------------
+   11| class Derived extends BaseC {
+   12|   static create(o: {a: number}): Base { // ERROR
+   13|     return new BaseC();
+   14|   }
+   15| }
+       ^ [2]
+   extends_ctor_desc.js:7:13
+    7|   create(o: {}): Base;
+                   ^^ [3]
+   extends_ctor_desc.js:12:20
+   12|   static create(o: {a: number}): Base { // ERROR
+                          ^^^^^^^^^^^ [4]
+
+
 Error --------------------------------------------------------------------------------------- extends_ctor_usage.js:7:13
 
 Cannot get `FromStatics.nope` because property `nope` is missing in `{name: string, ...}` [1]. [prop-missing]
@@ -322,4 +354,4 @@ References:
 
 
 
-Found 21 errors
+Found 22 errors
