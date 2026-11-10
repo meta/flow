@@ -15303,7 +15303,11 @@ fn declared_type_includes_void(cx: &mut Context<'_>, field_t: &Type) -> Result<b
     let concrete_types =
         flow_js_utils::flow_js_result_to_job_error(cx.run_and_rolled_back_cache(|cx| {
             cx.with_suppressed_errors(|cx| {
-                FlowJs::possible_concrete_types_for_inspection(cx, reason_of_t(field_t), field_t)
+                FlowJs::possible_concrete_types_for_property_initialization_check(
+                    cx,
+                    reason_of_t(field_t),
+                    field_t,
+                )
             })
         }))?;
     Ok(concrete_types.iter().any(|t| match t.deref() {

@@ -2525,7 +2525,8 @@ fn __flow_impl<'cx>(
                 kind:
                     ConcretizationKind::ConcretizeForInspection
                     | ConcretizationKind::ConcretizeForWalk(_)
-                    | ConcretizationKind::ConcretizeForClassExtends(_),
+                    | ConcretizationKind::ConcretizeForClassExtends(_)
+                    | ConcretizationKind::ConcretizeForPropertyInitializationCheck,
                 collector,
                 ..
             }),
@@ -2774,6 +2775,16 @@ fn __flow_impl<'cx>(
         {
             rec_flow(cx, env, trace, (t, u))?;
         }
+        // An opaque type accepts the values of its lower bound, as in subtyping
+        (
+            NominalT { nominal_type, .. },
+            ConcretizeT(box ConcretizeTData {
+                kind: ConcretizationKind::ConcretizeForPropertyInitializationCheck,
+                ..
+            }),
+        ) if let Some(lower_t) = &nominal_type.lower_t => {
+            rec_flow(cx, env, trace, (lower_t, u))?;
+        }
 
         // *****************************************************
         // * keys (NOTE: currently we only support string keys *
@@ -2829,7 +2840,8 @@ fn __flow_impl<'cx>(
                 kind:
                     ConcretizationKind::ConcretizeForInspection
                     | ConcretizationKind::ConcretizeForWalk(_)
-                    | ConcretizationKind::ConcretizeForClassExtends(_),
+                    | ConcretizationKind::ConcretizeForClassExtends(_)
+                    | ConcretizationKind::ConcretizeForPropertyInitializationCheck,
                 collector,
                 ..
             }),

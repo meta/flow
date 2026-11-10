@@ -6857,6 +6857,9 @@ pub enum ConcretizationKind {
     /// act on one of these markers stays unevaluated.
     ConcretizeForWalk(Arc<BTreeSet<SubstName>>),
     ConcretizeForClassExtends(Type),
+    /// Like `ConcretizeForInspection`, but an opaque type whose underlying type is not visible
+    /// gives the types of its lower bound, the values that can flow into it.
+    ConcretizeForPropertyInitializationCheck,
     ConcretizeForEnumExhaustiveCheck,
     ConcretizeForPredicate(PredicateConcretetizerVariant),
     ConcretizeForOperatorsChecking,
@@ -12461,6 +12464,9 @@ pub fn string_of_use_ctor<CX: ContextFamily>(use_t: &UseT<CX>) -> String {
             ConcretizationKind::ConcretizeForWalk(_) => "ConcretizeT ConcretizeForWalk".to_string(),
             ConcretizationKind::ConcretizeForClassExtends(_) => {
                 "ConcretizeT ConcretizeForClassExtends".to_string()
+            }
+            ConcretizationKind::ConcretizeForPropertyInitializationCheck => {
+                "ConcretizeT ConcretizeForPropertyInitializationCheck".to_string()
             }
             ConcretizationKind::ConcretizeForEnumExhaustiveCheck => {
                 "ConcretizeT ConcretizeForEnumExhaustiveCheck".to_string()

@@ -2977,6 +2977,21 @@ pub(super) fn possible_concrete_types_for_class_extends<'cx>(
     )
 }
 
+pub(super) fn possible_concrete_types_for_property_initialization_check<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    reason: &Reason,
+    t: &Type,
+) -> Result<Vec<Type>, FlowJsException> {
+    possible_concrete_types(
+        ConcretizationKind::ConcretizeForPropertyInitializationCheck,
+        cx,
+        env,
+        reason,
+        t,
+    )
+}
+
 pub(super) fn possible_concrete_types_for_enum_exhaustive_check<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,

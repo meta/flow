@@ -520,6 +520,15 @@ impl FlowJs {
         helpers::possible_concrete_types_for_walk(cx, env, reason, t, markers)
     }
 
+    fn possible_concrete_types_for_property_initialization_check_with_env<'cx>(
+        cx: &mut Context<'cx>,
+        env: &FlowJsEnv,
+        reason: &Reason,
+        t: &Type,
+    ) -> Result<Vec<Type>, FlowJsException> {
+        helpers::possible_concrete_types_for_property_initialization_check(cx, env, reason, t)
+    }
+
     pub fn possible_concrete_types_for_enum_exhaustive_check_with_env<'cx>(
         cx: &mut Context<'cx>,
         env: &FlowJsEnv,
@@ -1024,6 +1033,19 @@ impl FlowJs {
         t: &Type,
     ) -> Result<Vec<Type>, FlowJsException> {
         Self::possible_concrete_types_for_inspection_with_env(cx, &FlowJsEnv::entry(), reason, t)
+    }
+
+    pub fn possible_concrete_types_for_property_initialization_check<'cx>(
+        cx: &mut Context<'cx>,
+        reason: &Reason,
+        t: &Type,
+    ) -> Result<Vec<Type>, FlowJsException> {
+        Self::possible_concrete_types_for_property_initialization_check_with_env(
+            cx,
+            &FlowJsEnv::entry(),
+            reason,
+            t,
+        )
     }
 
     pub fn possible_concrete_types_for_enum_exhaustive_check<'cx>(

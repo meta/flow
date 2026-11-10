@@ -158,6 +158,30 @@ Property `x` has no initializer and is not definitely assigned in the constructo
          ^
 
 
+Error ---------------------------------------------------------------------------------------------- field_types.js:27:3
+
+Property `text` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   27|   text: Text; // error
+         ^^^^
+
+
+Error ---------------------------------------------------------------------------------------------- field_types.js:28:3
+
+Property `label` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   28|   label: Label; // error: every `Label` is a `?string`, but `undefined` is not a `Label`
+         ^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------- field_types.js:29:3
+
+Property `nested` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   29|   nested: Nested<string>; // error: no `void` among `string`, `Array<string>`, `Array<Array<string>>`, ...
+         ^^^^^^
+
+
 Error ------------------------------------------------------------------------------------ inherited_declarations.js:7:3
 
 Property `x` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
@@ -480,4 +504,4 @@ Property `value` has no initializer and is not definitely assigned in the constr
 
 
 
-Found 60 errors
+Found 63 errors
