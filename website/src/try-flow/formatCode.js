@@ -74,6 +74,9 @@ export function formatCode(
     parser: 'try-flow',
     plugins: [flowPlugin, estree],
     cursorOffset,
+    singleQuote: true,
+    bracketSpacing: false,
+    bracketSameLine: true,
     endOfLine: 'auto',
   });
 }

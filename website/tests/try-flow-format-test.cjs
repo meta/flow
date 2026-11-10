@@ -100,6 +100,25 @@ for (const [name, source] of Object.entries(fixtures)) {
   });
 }
 
+test('uses WWW style settings and default arrow parentheses', async () => {
+  for (const [source, expected] of [
+    [
+      'import {first,second} from "example"; const object={value:"text"}; const identity=value=>value;',
+      "import {first, second} from 'example';\nconst object = {value: 'text'};\nconst identity = (value) => value;\n",
+    ],
+    [
+      'const element=<Component firstProp="a long value for the first property" secondProp="a long value for the second property">child</Component>;',
+      'const element = (\n  <Component\n    firstProp="a long value for the first property"\n    secondProp="a long value for the second property">\n    child\n  </Component>\n);\n',
+    ],
+    [
+      'callFunction("a long value for the first function argument", "a long value for the second function argument");',
+      "callFunction(\n  'a long value for the first function argument',\n  'a long value for the second function argument',\n);\n",
+    ],
+  ]) {
+    assert.equal((await formatCode(source, 0)).formatted, expected); // OK
+  }
+});
+
 // Executable scripts must keep their leading interpreter directive.
 test('preserves hashbangs, including comment-only scripts', async () => {
   for (const source of [

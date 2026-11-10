@@ -14,6 +14,9 @@ declare module 'prettier/standalone' {
       parser: string,
       plugins: ReadonlyArray<unknown>,
       cursorOffset: number,
+      singleQuote: boolean,
+      bracketSpacing: boolean,
+      bracketSameLine: boolean,
       endOfLine: 'auto',
     },
   ): Promise<{formatted: string, cursorOffset: number}>;
