@@ -23,8 +23,8 @@ Cannot assign `super.getTime` to `getTime` because in the `this` parameter: `Dat
                                           ^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:677:11
-   677| interface Date {
+   <BUILTINS>/lib.es5.js:752:11
+   752| interface Date {
                   ^^^^ [1]
 
 

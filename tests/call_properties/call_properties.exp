@@ -247,6 +247,21 @@ References:
               ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
+Error -------------------------------------------------------------------------------------------------------- E.js:5:31
+
+Cannot assign function to `b` because property `apply` is read-only in `CallableFunction` [1] but writable in
+`{apply: any, ...}` [1]. [incompatible-variance]
+
+   E.js:5:31
+   5| var b : { apply: any, ... } = function () {};
+                                    ^^^^^^^^^^^^^^
+
+References:
+   E.js:5:9
+   5| var b : { apply: any, ... } = function () {};
+              ^^^^^^^^^^^^^^^^^^^ [1]
+
+
 Error -------------------------------------------------------------------------------------------------------- F.js:6:46
 
 Cannot assign function to `b` because in the return value: `"hi"` [1] is incompatible with `number` [2].
@@ -436,4 +451,4 @@ References:
 
 
 
-Found 27 errors
+Found 28 errors

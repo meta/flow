@@ -107,16 +107,16 @@ Flags: --pretty
     {"name":"bar","type":"string"},
     {
       "name":"apply",
-      "type":"<T, R, A extends ArrayLike<unknown> = Readonly<[]>>(this: (this: T, ...args: A) => R, thisArg: T, argArray?: A) => R"
+      "type":"<T, R, A extends ArrayLike<unknown> = Readonly<[]>>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R"
     },
     {"name":"arguments","type":"any"},
     {
       "name":"bind",
-      "type":"(<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>) & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...argArray: A) => (...args: B) => R)"
+      "type":"<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...args: A) => (...args: B) => R"
     },
     {
       "name":"call",
-      "type":"<T, R, A extends ArrayLike<unknown> = Readonly<[]>>(this: (this: T, ...args: A) => R, thisArg: T, ...argArray: A) => R"
+      "type":"<T, R, A extends ArrayLike<unknown> = Readonly<[]>>(this: (this: T, ...args: A) => R, thisArg: T, ...args: A) => R"
     },
     {"name":"caller","type":"Function"},
     {"name":"length","type":"number"},
@@ -408,7 +408,7 @@ Flags: --pretty
     {"name":"Float16Array","type":"Float16ArrayConstructor"},
     {"name":"Float32Array","type":"Float32ArrayConstructor"},
     {"name":"Float64Array","type":"Float64ArrayConstructor"},
-    {"name":"Function","type":"typeof Function"},
+    {"name":"Function","type":"FunctionConstructor"},
     {"name":"global","type":"any"},
     {"name":"globalThis","type":"typeof globalThis"},
     {"name":"Infinity","type":"number"},

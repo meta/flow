@@ -192,8 +192,8 @@ References:
    <BUILTINS>/lib.es5.js:128:16
    128|     valueOf(): Object;
                        ^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:490:16
-   490|     valueOf(): number;
+   <BUILTINS>/lib.es5.js:565:16
+   565|     valueOf(): number;
                        ^^^^^^ [2]
 
 

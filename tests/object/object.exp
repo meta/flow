@@ -141,7 +141,9 @@ Error --------------------------------------------------------------------------
 Cannot call method `freeze` because: [incompatible-type]
  - Either property `c` is missing in `{readonly a: number, readonly b: number}` [1] but exists in
    `{readonly c: number, ...}` [2].
- - Or in type argument `T`: `{readonly c: number, ...}` [2] is incompatible with `Function` [3].
+ - Or in type argument `T`: properties `apply`, `arguments`, `bind`, `call`, `caller`, `length`, `name`, `prototype`,
+   `[metadata]`, and `[hasInstance]` are missing in `{readonly c: number, ...}` [2] but exist in
+   `{apply(this: Function, thisArg: any, argArray?: any): any, arguments: any, bind(this: Function, this...` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.

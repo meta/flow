@@ -13,23 +13,9 @@ declare const funProtoCall: typeof Function.prototype.call;
 
 export function foo(): {
   funProto: typeof Object.prototype,
-  funProtoApply: <T, R, A extends ArrayLike<unknown> = Readonly<[]>>(
-    this: (this: T, ...args: A) => R,
-    thisArg: T,
-    argArray?: A
-  ) => R,
-  funProtoBind: 
-    & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
-    & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(
-      this: (this: T, ...args: [...A, ...B]) => R,
-      thisArg: T,
-      ...argArray: A
-    ) => (...args: B) => R),
-  funProtoCall: <T, R, A extends ArrayLike<unknown> = Readonly<[]>>(
-    this: (this: T, ...args: A) => R,
-    thisArg: T,
-    ...argArray: A
-  ) => R,
+  funProtoApply: (this: Function, thisArg: any, argArray?: any) => any,
+  funProtoBind: (this: Function, thisArg: any, ...argArray: Array<any>) => any,
+  funProtoCall: (this: Function, thisArg: any, ...argArray: Array<any>) => any,
   objProto: typeof Object.prototype,
 } {
     return {
@@ -46,7 +32,7 @@ export function foo(): {
 Stats:
   Files changed:                            1
   Number of annotations added:              1
-  Total size of annotations:               58
+  Total size of annotations:               23
   Number of sig. ver. errors:               1
   Number of annotations required:           1
   Number of annotations skipped:            0
@@ -62,7 +48,7 @@ Errors:
 
 Warnings:
   Skipping arrow function:                  0
-  Large type added:                         1
+  Large type added:                         0
   Location unhandled:                       0
   Empty NoUpper:                            0
   Empty SomeKnownUpper:                     0
@@ -70,31 +56,31 @@ Warnings:
 
 === Autofix exports ===
 
+>>> ./test.js
+// @flow
+
+declare const objProto: typeof Object.__proto__;
+declare const funProto: typeof Function.__proto__;
+declare const funProtoApply: typeof Function.prototype.apply;
+declare const funProtoBind: typeof Function.prototype.bind;
+declare const funProtoCall: typeof Function.prototype.call;
+
+
+export function foo(): {
+  funProto: typeof Object.prototype,
+  funProtoApply: (this: Function, thisArg: any, argArray?: any) => any,
+  funProtoBind: (this: Function, thisArg: any, ...argArray: Array<any>) => any,
+  funProtoCall: (this: Function, thisArg: any, ...argArray: Array<any>) => any,
+  objProto: typeof Object.prototype,
+} {
+    return {
+        objProto,
+        funProto,
+        funProtoApply,
+        funProtoBind,
+        funProtoCall,
+    }
+}
+
 
 === Diff between codemod-ed & autofix-ed ===
->>> ./test.js
-10,30c10
-< export function foo(): {
-<   funProto: typeof Object.prototype,
-<   funProtoApply: <T, R, A extends ArrayLike<unknown> = Readonly<[]>>(
-<     this: (this: T, ...args: A) => R,
-<     thisArg: T,
-<     argArray?: A
-<   ) => R,
-<   funProtoBind: 
-<     & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
-<     & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(
-<       this: (this: T, ...args: [...A, ...B]) => R,
-<       thisArg: T,
-<       ...argArray: A
-<     ) => (...args: B) => R),
-<   funProtoCall: <T, R, A extends ArrayLike<unknown> = Readonly<[]>>(
-<     this: (this: T, ...args: A) => R,
-<     thisArg: T,
-<     ...argArray: A
-<   ) => R,
-<   objProto: typeof Object.prototype,
-< } {
----
-> export function foo() {
-

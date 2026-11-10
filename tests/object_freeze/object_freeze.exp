@@ -239,7 +239,8 @@ References:
 Error ------------------------------------------------------------------------------------------- object_freeze.js:13:36
 
 Cannot call method `freeze` because: [incompatible-type]
- - Either in type argument `T`: `number` [1] is incompatible with `Function` [2].
+ - Either in type argument `T`: `number` [1], a primitive, cannot be used as a subtype of `Function` [2]. You can wrap
+   it in `new Number(...))` to turn it into an object and attempt to use it as a subtype of an interface.
  - Or `number` [1] is not an object, array, or tuple.
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are

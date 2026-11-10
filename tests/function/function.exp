@@ -47,9 +47,9 @@ subtype of an interface. [incompatible-type]
                        ^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:272:36
-   272|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, argArray?: A) => R);
-                                           ^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:328:27
+   328|     apply<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A): R;
+                                  ^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------ apply-array-like.js:5:6
@@ -166,9 +166,9 @@ References:
    <BUILTINS>/misc.js:268:11
    268| interface Generator<out T = unknown, out TReturn = any, in TNext = any> {}
                   ^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:272:36
-   272|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, argArray?: A) => R);
-                                           ^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:328:27
+   328|     apply<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A): R;
+                                  ^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------- apply-array-like.js:21:16
@@ -184,9 +184,9 @@ References:
    apply-array-like.js:16:17
     16| function * gen() {
                         ^ [1]
-   <BUILTINS>/lib.es5.js:272:36
-   272|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, argArray?: A) => R);
-                                           ^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:328:27
+   328|     apply<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A): R;
+                                  ^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------- apply-array-like.js:21:6
@@ -228,9 +228,9 @@ Cannot call `test.apply` because no more than 2 arguments are expected by functi
                                 ^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:272:19
-   272|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, argArray?: A) => R);
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:328:5
+   328|     apply<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A): R;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error ----------------------------------------------------------------------------------------------------- apply.js:6:6
@@ -294,9 +294,9 @@ References:
    apply.js:1:1
      1| function test(this: number | string, a: string, b: number): number {
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:272:67
-   272|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, argArray?: A) => R);
-                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:328:58
+   328|     apply<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A): R;
+                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- apply.js:15:6
@@ -413,9 +413,9 @@ subtype of an interface. [incompatible-type]
                        ^^^^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:272:36
-   272|     proto apply: (<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, argArray?: A) => R);
-                                           ^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:328:27
+   328|     apply<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, args?: A): R;
+                                  ^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- apply.js:22:6
@@ -432,87 +432,6 @@ References:
    apply.js:22:1
    22| test.apply("", "not array"); // error: string ~> object
        ^^^^ [1]
-
-
-Error ---------------------------------------------------------------------------------------------------- apply.js:29:1
-
-Cannot call `test.call.apply` because in array element: `"foo"` [1] is incompatible with `number` [2].
-[incompatible-type]
-
-   apply.js:29:1
-   29| test.call.apply(test, [0, 123, 'foo']) as void;
-       ^^^^^^^^^
-
-References:
-   apply.js:29:32
-   29| test.call.apply(test, [0, 123, 'foo']) as void;
-                                      ^^^^^ [1]
-   apply.js:29:27
-   29| test.call.apply(test, [0, 123, 'foo']) as void;
-                                 ^^^ [2]
-
-
-Error ---------------------------------------------------------------------------------------------------- apply.js:29:1
-
-Cannot call `test.call.apply` because in the `this` parameter > the first argument: `string` [1] is incompatible with
-`number` [2]. [incompatible-type]
-
-   apply.js:29:1
-   29| test.call.apply(test, [0, 123, 'foo']) as void;
-       ^^^^^^^^^
-
-References:
-   apply.js:1:41
-    1| function test(this: number | string, a: string, b: number): number {
-                                               ^^^^^^ [1]
-   apply.js:29:24
-   29| test.call.apply(test, [0, 123, 'foo']) as void;
-                              ^ [2]
-
-
-Error ---------------------------------------------------------------------------------------------------- apply.js:29:1
-
-Cannot cast `test.call.apply(...)` to `void` because `number` [1] is incompatible with `void` [2]. [incompatible-type]
-
-   apply.js:29:1
-   29| test.call.apply(test, [0, 123, 'foo']) as void;
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-References:
-   apply.js:1:61
-    1| function test(this: number | string, a: string, b: number): number {
-                                                                   ^^^^^^ [1]
-   apply.js:29:43
-   29| test.call.apply(test, [0, 123, 'foo']) as void;
-                                                 ^^^^ [2]
-
-
-Error --------------------------------------------------------------------------------------------------- apply.js:34:11
-
-Cannot call `test.bind.apply` because: [incompatible-type]
- - Either in the `this` parameter > the first parameter: `number` [1] is incompatible with `string` [2].
- - Or `[number]` [3] has 1 element but `[a: string, b: number]` [4] has 2 elements.
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
-
-   apply.js:34:11
-    34| test.bind.apply(test, [0, 123]) as (b: number) => number;
-                  ^^^^^
-
-References:
-   apply.js:34:24
-    34| test.bind.apply(test, [0, 123]) as (b: number) => number;
-                               ^ [1]
-   apply.js:1:41
-     1| function test(this: number | string, a: string, b: number): number {
-                                                ^^^^^^ [2]
-   apply.js:34:36
-    34| test.bind.apply(test, [0, 123]) as (b: number) => number;
-                                           ^^^^^^^^^^^^^^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:310:82
-   310| type OmitThisParameter<T> = unknown extends ThisParameterType<T> ? T : T extends (this: infer This, ...args: infer A) => infer R ? (...args: A) => R : T;
-                                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ---------------------------------------------------------------------------------------------------- apply.js:44:5
@@ -623,9 +542,9 @@ References:
    bind.js:42:32
     42| receiver.method.bind(receiver, 1); // ERROR
                                        ^ [2]
-   <BUILTINS>/lib.es5.js:288:12
-   288|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es5.js:342:5
+   342|     bind<T>(this: T, thisArg: ThisParameterType<T>): OmitThisParameter<T>;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- bind.js:49:12
@@ -701,9 +620,9 @@ References:
    call.js:1:1
      1| function test(this: number | string, a: string, b: number): number {
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:279:65
-   279|     proto call: <T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, ...argArray: A) => R;
-                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:335:57
+   335|     call<T, R, A extends ArrayLike<unknown> = []>(this: (this: T, ...args: A) => R, thisArg: T, ...args: A): R;
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- call.js:12:6
@@ -842,42 +761,6 @@ References:
                                                     ^^^^ [1]
 
 
-Error ----------------------------------------------------------------------------------------------------- call.js:28:1
-
-Cannot call `test.apply.call` because in the `this` parameter > the first argument: `string` [1] is incompatible with
-`number` [2]. [incompatible-type]
-
-   call.js:28:1
-   28| test.apply.call(test, 0, [0, 'foo']) as number;
-       ^^^^^^^^^^
-
-References:
-   call.js:1:41
-    1| function test(this: number | string, a: string, b: number): number {
-                                               ^^^^^^ [1]
-   call.js:28:27
-   28| test.apply.call(test, 0, [0, 'foo']) as number;
-                                 ^ [2]
-
-
-Error ----------------------------------------------------------------------------------------------------- call.js:28:1
-
-Cannot call `test.apply.call` because in the `this` parameter > the second argument: `number` [1] is incompatible with
-`string` [2]. [incompatible-type]
-
-   call.js:28:1
-   28| test.apply.call(test, 0, [0, 'foo']) as number;
-       ^^^^^^^^^^
-
-References:
-   call.js:1:52
-    1| function test(this: number | string, a: string, b: number): number {
-                                                          ^^^^^^ [1]
-   call.js:28:30
-   28| test.apply.call(test, 0, [0, 'foo']) as number;
-                                    ^^^^^ [2]
-
-
 Error ----------------------------------------------------------------------------------------------------- call.js:38:5
 
 Cannot call `x.call` because in the second argument: `number` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -1009,8 +892,8 @@ Cannot cast `x.length` to `empty` because `number` [1] is incompatible with `emp
         ^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:295:22
-   295|     readonly length: number;
+   <BUILTINS>/lib.es5.js:293:22
+   293|     readonly length: number;
                              ^^^^^^ [1]
    function.js:4:13
      4| x.length as empty; // ERROR
@@ -1026,8 +909,8 @@ Cannot cast `y.length` to `empty` because `number` [1] is incompatible with `emp
         ^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:295:22
-   295|     readonly length: number;
+   <BUILTINS>/lib.es5.js:293:22
+   293|     readonly length: number;
                              ^^^^^^ [1]
    function.js:5:13
      5| y.length as empty; // ERROR
@@ -1315,4 +1198,4 @@ References:
 
 
 
-Found 81 errors
+Found 75 errors

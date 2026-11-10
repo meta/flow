@@ -34,7 +34,143 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:19:1
 
-Cannot cast `new C()` to `Function` because `C` [1] is incompatible with `Function` [2]. [incompatible-type]
+Cannot cast `new C()` to `Function` because property `[hasInstance]` is missing in `C` [1] but exists in `Function` [2].
+[incompatible-type]
+
+   test.js:19:1
+   19| new C() as Function; // ERROR
+       ^^^^^^^ [1]
+
+References:
+   test.js:19:12
+   19| new C() as Function; // ERROR
+                  ^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:19:1
+
+Cannot cast `new C()` to `Function` because property `[metadata]` is missing in `C` [1] but exists in `Function` [2].
+[incompatible-type]
+
+   test.js:19:1
+   19| new C() as Function; // ERROR
+       ^^^^^^^ [1]
+
+References:
+   test.js:19:12
+   19| new C() as Function; // ERROR
+                  ^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:19:1
+
+Cannot cast `new C()` to `Function` because property `apply` is missing in `C` [1] but exists in `Function` [2].
+[incompatible-type]
+
+   test.js:19:1
+   19| new C() as Function; // ERROR
+       ^^^^^^^ [1]
+
+References:
+   test.js:19:12
+   19| new C() as Function; // ERROR
+                  ^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:19:1
+
+Cannot cast `new C()` to `Function` because property `arguments` is missing in `C` [1] but exists in `Function` [2].
+[incompatible-type]
+
+   test.js:19:1
+   19| new C() as Function; // ERROR
+       ^^^^^^^ [1]
+
+References:
+   test.js:19:12
+   19| new C() as Function; // ERROR
+                  ^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:19:1
+
+Cannot cast `new C()` to `Function` because property `bind` is missing in `C` [1] but exists in `Function` [2].
+[incompatible-type]
+
+   test.js:19:1
+   19| new C() as Function; // ERROR
+       ^^^^^^^ [1]
+
+References:
+   test.js:19:12
+   19| new C() as Function; // ERROR
+                  ^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:19:1
+
+Cannot cast `new C()` to `Function` because property `call` is missing in `C` [1] but exists in `Function` [2].
+[incompatible-type]
+
+   test.js:19:1
+   19| new C() as Function; // ERROR
+       ^^^^^^^ [1]
+
+References:
+   test.js:19:12
+   19| new C() as Function; // ERROR
+                  ^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:19:1
+
+Cannot cast `new C()` to `Function` because property `caller` is missing in `C` [1] but exists in `Function` [2].
+[incompatible-type]
+
+   test.js:19:1
+   19| new C() as Function; // ERROR
+       ^^^^^^^ [1]
+
+References:
+   test.js:19:12
+   19| new C() as Function; // ERROR
+                  ^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:19:1
+
+Cannot cast `new C()` to `Function` because property `length` is missing in `C` [1] but exists in `Function` [2].
+[incompatible-type]
+
+   test.js:19:1
+   19| new C() as Function; // ERROR
+       ^^^^^^^ [1]
+
+References:
+   test.js:19:12
+   19| new C() as Function; // ERROR
+                  ^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:19:1
+
+Cannot cast `new C()` to `Function` because property `name` is missing in `C` [1] but exists in `Function` [2].
+[incompatible-type]
+
+   test.js:19:1
+   19| new C() as Function; // ERROR
+       ^^^^^^^ [1]
+
+References:
+   test.js:19:12
+   19| new C() as Function; // ERROR
+                  ^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:19:1
+
+Cannot cast `new C()` to `Function` because property `prototype` is missing in `C` [1] but exists in `Function` [2].
+[incompatible-type]
 
    test.js:19:1
    19| new C() as Function; // ERROR
@@ -48,7 +184,9 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:20:2
 
-Cannot cast object literal to `Function` because object literal [1] is incompatible with `Function` [2].
+Cannot cast object literal to `Function` because properties `apply`, `arguments`, `bind`, `call`, `caller`, `length`,
+`name`, `prototype`, `[metadata]`, and `[hasInstance]` are missing in object literal [1] but exist in
+`{apply(this: Function, thisArg: any, argArray?: any): any, arguments: any, bind(this: Function, this...` [2].
 [incompatible-type]
 
    test.js:20:2
@@ -63,7 +201,9 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:21:1
 
-Cannot cast `42` to `Function` because `42` [1] is incompatible with `Function` [2]. [incompatible-type]
+Cannot cast `42` to `Function` because `42` [1], a primitive, cannot be used as a subtype of `Function` [2]. You can
+wrap it in `new Number(...))` to turn it into an object and attempt to use it as a subtype of an interface.
+[incompatible-type]
 
    test.js:21:1
    21| 42 as Function; // ERROR
@@ -76,4 +216,4 @@ References:
 
 
 
-Found 5 errors
+Found 14 errors

@@ -1222,9 +1222,9 @@ References:
    declare_function.js:19:1
     19| myFun.bind(); // Error - void ~> number
         ^^^^^^^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:288:12
-   288|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es5.js:342:5
+   342|     bind<T>(this: T, thisArg: ThisParameterType<T>): OmitThisParameter<T>;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------- declare_function.js:19:7
@@ -1332,9 +1332,9 @@ References:
    declare_function.js:22:1
     22| myPolyFun.bind(); // Error - void ~> number
         ^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:288:12
-   288|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es5.js:342:5
+   342|     bind<T>(this: T, thisArg: ThisParameterType<T>): OmitThisParameter<T>;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------- declare_function.js:22:11
@@ -1454,9 +1454,9 @@ References:
    function_type.js:5:9
      5| (x.bind("")()); // error: number incompatible with string
                 ^^ [1]
-   <BUILTINS>/lib.es5.js:288:34
-   288|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
-                                         ^^^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:342:31
+   342|     bind<T>(this: T, thisArg: ThisParameterType<T>): OmitThisParameter<T>;
+                                      ^^^^^^^^^^^^^^^^^^^^ [2]
    function_type.js:2:27
      2| declare const x : (this : number) => void;
                                   ^^^^^^ [3]
@@ -1511,9 +1511,9 @@ References:
    function_type.js:12:8
     12| y.bind(""); // error: number incompatible with string
                ^^ [1]
-   <BUILTINS>/lib.es5.js:288:34
-   288|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
-                                         ^^^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:342:31
+   342|     bind<T>(this: T, thisArg: ThisParameterType<T>): OmitThisParameter<T>;
+                                      ^^^^^^^^^^^^^^^^^^^^ [2]
    function_type.js:10:21
     10| declare const y : F<number>;
                             ^^^^^^ [3]
@@ -2499,9 +2499,9 @@ References:
    test.js:3:19
      3| declare const y : { y : string, ...};
                           ^^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:288:34
-   288|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
-                                         ^^^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:342:31
+   342|     bind<T>(this: T, thisArg: ThisParameterType<T>): OmitThisParameter<T>;
+                                      ^^^^^^^^^^^^^^^^^^^^ [2]
    test.js:12:22
     12| function bar (this : {f : number, ...}) : number {
                              ^^^^^^^^^^^^^^^^^ [3]
@@ -2637,9 +2637,9 @@ References:
     32|     y : 3
     33| }
         ^ [1]
-   <BUILTINS>/lib.es5.js:288:34
-   288|         & (<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>)
-                                         ^^^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:342:31
+   342|     bind<T>(this: T, thisArg: ThisParameterType<T>): OmitThisParameter<T>;
+                                      ^^^^^^^^^^^^^^^^^^^^ [2]
    test.js:39:16
     39|     foo(this : {y : number}) {},
                        ^^^^^^^^^^^^ [3]

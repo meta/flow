@@ -6428,11 +6428,11 @@ b.te
                     title: '',
                   },
                   detail:
-                    '<T, R, A extends ArrayLike<unknown> = Readonly<[]>>(this: (this: T, ...args: A) => R, thisArg: T, argArray?: A) => R',
+                    '<T, R, A extends ArrayLike<unknown> = Readonly<[]>>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R',
                   documentation: {
                     kind: 'markdown',
                     value:
-                      'Calls the function, substituting the specified object for the this value of the function, and the specified array for the arguments of the function.',
+                      'Calls the function with the specified object as the this value and the elements of specified array as the arguments.',
                   },
                   insertTextFormat: 1,
                   kind: 3,
@@ -6506,14 +6506,14 @@ b.te
                     title: '',
                   },
                   detail:
-                    '(<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>) & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...argArray: A) => (...args: B) => R)',
+                    '<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...args: A) => (...args: B) => R',
                   documentation: {
                     kind: 'markdown',
                     value:
                       'For a given function, creates a bound function that has the same body as the original function.\n The this object of the bound function is associated with the specified object, and has the specified initial parameters.',
                   },
                   insertTextFormat: 1,
-                  kind: 6,
+                  kind: 3,
                   label: 'bind',
                   sortText: '00000000000000000006',
                   textEdit: {
@@ -6548,11 +6548,11 @@ b.te
                     title: '',
                   },
                   detail:
-                    '<T, R, A extends ArrayLike<unknown> = Readonly<[]>>(this: (this: T, ...args: A) => R, thisArg: T, ...argArray: A) => R',
+                    '<T, R, A extends ArrayLike<unknown> = Readonly<[]>>(this: (this: T, ...args: A) => R, thisArg: T, ...args: A) => R',
                   documentation: {
                     kind: 'markdown',
                     value:
-                      'Calls a method of an object, substituting another object for the current object.',
+                      'Calls the function with the specified object as the this value and the specified rest arguments as the arguments.',
                   },
                   insertTextFormat: 1,
                   kind: 3,
@@ -6948,11 +6948,11 @@ b.te
                     title: '',
                   },
                   detail:
-                    '<T, R, A extends ArrayLike<unknown> = Readonly<[]>>(this: (this: T, ...args: A) => R, thisArg: T, argArray?: A) => R',
+                    '<T, R, A extends ArrayLike<unknown> = Readonly<[]>>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R',
                   documentation: {
                     kind: 'markdown',
                     value:
-                      'Calls the function, substituting the specified object for the this value of the function, and the specified array for the arguments of the function.',
+                      'Calls the function with the specified object as the this value and the elements of specified array as the arguments.',
                   },
                   insertTextFormat: 1,
                   kind: 3,
@@ -7026,14 +7026,14 @@ b.te
                     title: '',
                   },
                   detail:
-                    '(<T>(this: T, thisArg: ThisParameterType<T>) => OmitThisParameter<T>) & (<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...argArray: A) => (...args: B) => R)',
+                    '<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...args: A) => (...args: B) => R',
                   documentation: {
                     kind: 'markdown',
                     value:
                       'For a given function, creates a bound function that has the same body as the original function.\n The this object of the bound function is associated with the specified object, and has the specified initial parameters.',
                   },
                   insertTextFormat: 1,
-                  kind: 6,
+                  kind: 3,
                   label: 'bind',
                   sortText: '00000000000000000006',
                   textEdit: {
@@ -7068,11 +7068,11 @@ b.te
                     title: '',
                   },
                   detail:
-                    '<T, R, A extends ArrayLike<unknown> = Readonly<[]>>(this: (this: T, ...args: A) => R, thisArg: T, ...argArray: A) => R',
+                    '<T, R, A extends ArrayLike<unknown> = Readonly<[]>>(this: (this: T, ...args: A) => R, thisArg: T, ...args: A) => R',
                   documentation: {
                     kind: 'markdown',
                     value:
-                      'Calls a method of an object, substituting another object for the current object.',
+                      'Calls the function with the specified object as the this value and the specified rest arguments as the arguments.',
                   },
                   insertTextFormat: 1,
                   kind: 3,
