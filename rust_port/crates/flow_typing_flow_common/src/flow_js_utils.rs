@@ -1162,11 +1162,24 @@ pub fn is_object_prototype_method(name: &Name) -> bool {
     )
 }
 
+/// Whether the builtin `Function` may declare `name`. Its symbol-keyed members, such as
+/// `Symbol.hasInstance`, are whatever the library merges into it, so any symbol may be one.
 pub fn is_function_prototype(name: &Name) -> bool {
-    matches!(
-        name.as_str_opt(),
-        Some("apply" | "bind" | "call" | "arguments" | "caller" | "length" | "name")
-    ) || is_object_prototype_method(name)
+    matches!(name, Name::Symbol(_))
+        || matches!(
+            name.as_str_opt(),
+            Some(
+                "apply"
+                    | "bind"
+                    | "call"
+                    | "arguments"
+                    | "caller"
+                    | "length"
+                    | "name"
+                    | "prototype"
+            )
+        )
+        || is_object_prototype_method(name)
 }
 
 // neither object prototype methods nor callable signatures should be

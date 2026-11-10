@@ -29,16 +29,42 @@ References:
            ^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
-Error ----------------------------------------------------------------------------------------------------- lazy.js:9:18
+Error ----------------------------------------------------------------------------------------------------- lazy.js:9:12
 
-Cannot call `React.lazy` with function bound to `component` because in the return value: `(x: Props) => React.Node` [1]
-is incompatible with `Promise<Readonly<{default: component(...any) renders any, ...}>>` [2]. [incompatible-type]
+Cannot call `React.lazy` with function bound to `component` because in the return value: properties `catch`, `finally`,
+and `then` are missing in `{...}` [1] but exist in
+`{catch<TResult = empty>(this: Promise<Readonly<{default: component(...any) renders any, ...}>>, onre...` [2].
+[incompatible-type]
 
-Functions without statics are not compatible with objects.
-
-   lazy.js:9:18
+   lazy.js:9:12
       9| React.lazy(() => FunctionComponent); // Error incompatible with Promise
-                          ^^^^^^^^^^^^^^^^^
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   lazy.js:6:1
+      6| function FunctionComponent(x: Props): React.Node { return null }
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/react.js:1185:24
+                                v-------
+   1185|       component: () => Promise<
+   1186|         Readonly<{
+   1187|           default: component(...Config) renders Renders,
+   1188|           ...
+   1189|         }>,
+   1190|       >,
+               ^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- lazy.js:9:12
+
+Cannot call `React.lazy` with function bound to `component` because in the return value: property `[toStringTag]` is
+missing in `{...}` [1] but exists in
+`{catch<TResult = empty>(this: Promise<Readonly<{default: component(...any) renders any, ...}>>, onre...` [2].
+[incompatible-type]
+
+   lazy.js:9:12
+      9| React.lazy(() => FunctionComponent); // Error incompatible with Promise
+                    ^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    lazy.js:6:1
@@ -471,4 +497,4 @@ References:
 
 
 
-Found 22 errors
+Found 23 errors
