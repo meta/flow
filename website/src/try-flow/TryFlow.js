@@ -892,7 +892,9 @@ export default component TryFlow(
         aria-valuemin={20}
         aria-valuemax={80}
         aria-valuenow={Math.round(splitRatio * 100)}
+        // $FlowFixMe[incompatible-type] jsx_intrinsic_elements rollout
         onMouseDown={onSplitterDown}
+        // $FlowFixMe[incompatible-type] jsx_intrinsic_elements rollout
         onKeyDown={onSplitterKey}
       />
       <TryFlowResults
