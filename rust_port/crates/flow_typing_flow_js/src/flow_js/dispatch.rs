@@ -6733,7 +6733,9 @@ fn __flow_impl<'cx>(
         (DefT(_, deref!(InstanceT(inst_t))), GetPropT(box data)) => {
             let super_ = &inst_t.super_;
             let inst = &inst_t.inst;
-            let method_accessible = data.from_annot;
+            // An interface with a construct signature types a constructor. Its methods are
+            // statics, which may be read off it unbound, as off a class.
+            let method_accessible = data.from_annot || inst.inst_construct_t.is_some();
             let lookup_action = LookupAction::ReadProp(Box::new(ReadPropData {
                 use_op: data.use_op.dupe(),
                 obj_t: l.dupe(),
@@ -9665,7 +9667,7 @@ fn __flow_impl<'cx>(
                 test_info,
             )));
             let method_accessible = match l.deref() {
-                DefT(_, deref!(InstanceT(_))) => false,
+                DefT(_, deref!(InstanceT(inst_t))) => inst_t.inst.inst_construct_t.is_some(),
                 _ => true,
             };
             rec_flow(

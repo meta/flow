@@ -2696,7 +2696,8 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                                 use_op,
                                 &t,
                                 None,
-                                false,
+                                // The statics of a constructor interface may be read unbound.
+                                inst_t.inst.inst_construct_t.is_some(),
                                 inst_t.super_.dupe(),
                                 type_::LookupKind::Strict(t.dupe()),
                                 &type_::hint_unavailable(),

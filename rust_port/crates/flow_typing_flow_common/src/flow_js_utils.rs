@@ -529,7 +529,7 @@ fn void_returning(construct: &Type) -> Type {
 // the derived class only inherits `Base.of` / `new Base()` if the instance it
 // extends carries them. `node.js.flow`'s `declare class Buffer extends
 // Uint8Array` needs both: `Buffer.from` resolves through `static_`, and
-// `new Buffer()` through [inst_construct_t].
+// `new Buffer()` through the `constructor` prototype method.
 //
 // A value without a construct signature contributes its `prototype` instead
 // ([collect_prototype_t]): `node.js.flow`'s `declare class $SymbolReplModeMagic
@@ -592,8 +592,8 @@ pub fn construct_base_instance<'cx>(
         proto_props: match &construct {
             // `new Derived()` resolves `constructor` as a prototype method —
             // the slot a class writes its own constructor into — so the
-            // signature has to be reachable there. [inst_construct_t] alone is
-            // not enough: it is only consulted for structural subtyping.
+            // signature has to be reachable there. The instance itself is not a
+            // constructor, so it gets no [inst_construct_t].
             Some(construct) => {
                 let mut props = cx.find_props(instance.inst.proto_props.dupe());
                 props.insert(
@@ -607,7 +607,6 @@ pub fn construct_base_instance<'cx>(
             }
             None => instance.inst.proto_props.dupe(),
         },
-        inst_construct_t: construct.map(|c| cx.make_call_prop(c)),
         ..(*instance.inst).clone()
     });
     Ok(Some(Type::new(TypeInner::DefT(

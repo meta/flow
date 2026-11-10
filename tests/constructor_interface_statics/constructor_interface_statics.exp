@@ -1,0 +1,32 @@
+Error ---------------------------------------------------------------------------------------------------- test.js:29:23
+
+Cannot assign `ns.f` to `f` because in the `this` parameter: `Namespace` [1] is incompatible with `unknown`.
+[incompatible-type]
+
+   test.js:29:23
+   29| const f: () => void = ns.f; // ERROR
+                             ^^^^
+
+References:
+   test.js:25:11
+   25| interface Namespace {
+                 ^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:34:35
+
+Cannot assign `super.getTime` to `getTime` because in the `this` parameter: `Date` [1] is incompatible with `unknown`.
+[incompatible-type]
+
+   test.js:34:35
+    34|     const getTime: () => number = super.getTime; // ERROR
+                                          ^^^^^^^^^^^^^
+
+References:
+   <BUILTINS>/lib.es5.js:735:11
+   735| interface Date {
+                  ^^^^ [1]
+
+
+
+Found 2 errors
