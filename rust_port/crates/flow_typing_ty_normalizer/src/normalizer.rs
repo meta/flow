@@ -5676,7 +5676,7 @@ mod expand_members {
                 force_instance,
                 allowed_prop_names,
                 r,
-                "Function",
+                "CallableFunction",
             ),
             TypeInner::MaybeT(_, inner_t) => maybe_t(
                 |env, state, id, t| {

@@ -10044,7 +10044,16 @@ fn __flow_impl<'cx>(
                 cx.record_fun_proto_method_lookup(reason_prop.loc().dupe());
             }
             // TODO: Ditto above comment for Function.prototype
-            let fun = helpers::get_builtin_type(cx, env, Some(trace), reason_op, None, "Function")?;
+            // As in TypeScript, a function's apparent type is `CallableFunction`, which extends
+            // `Function` with the precise signatures of `call`, `apply` and `bind`.
+            let fun = helpers::get_builtin_type(
+                cx,
+                env,
+                Some(trace),
+                reason_op,
+                None,
+                "CallableFunction",
+            )?;
             rec_flow(cx, env, trace, (&fun, u))?;
         }
         (
@@ -10280,10 +10289,10 @@ fn __flow_impl<'cx>(
         (FunProtoT(_), SuperT(..)) => {}
         // ExtendsUseT searches for a nominal superclass. The search terminates with
         // either failure at the root or a structural subtype check.
-        // `Function.prototype` and `Object.prototype` stand for the builtin `Function` and
-        // `Object`, which can themselves be the superclass searched for. They are matched by
-        // identity only, then the search moves on to `Object.prototype` and the root, never into
-        // the supers a library declares for them.
+        // `Function.prototype` stands for the builtin `CallableFunction` and the `Function` it
+        // extends, and `Object.prototype` for the builtin `Object`. Each can itself be the
+        // superclass searched for. They are matched by identity only, then the search moves on to
+        // `Object.prototype` and the root, never into the supers a library declares for them.
         (ObjProtoT(reason), ExtendsUseT(box ExtendsUseTData { false_t: ext_u, .. })) => {
             let obj_proto =
                 helpers::get_builtin_type(cx, env, Some(trace), reason, Some(true), "Object")?;
@@ -10293,11 +10302,27 @@ fn __flow_impl<'cx>(
             }
         }
         (FunProtoT(reason), ExtendsUseT(box ExtendsUseTData { false_t: ext_u, .. })) => {
-            let fun_proto =
-                helpers::get_builtin_type(cx, env, Some(trace), reason, Some(true), "Function")?;
+            let fun_proto = helpers::get_builtin_type(
+                cx,
+                env,
+                Some(trace),
+                reason,
+                Some(true),
+                "CallableFunction",
+            )?;
             if !flow_js_utils::is_same_non_generic_instance_annot(cx, &fun_proto, ext_u) {
-                let obj_proto = Type::new(ObjProtoT(reason.dupe()));
-                rec_flow(cx, env, trace, (&obj_proto, u))?;
+                let function = helpers::get_builtin_type(
+                    cx,
+                    env,
+                    Some(trace),
+                    reason,
+                    Some(true),
+                    "Function",
+                )?;
+                if !flow_js_utils::is_same_non_generic_instance_annot(cx, &function, ext_u) {
+                    let obj_proto = Type::new(ObjProtoT(reason.dupe()));
+                    rec_flow(cx, env, trace, (&obj_proto, u))?;
+                }
             }
         }
         (
@@ -10614,8 +10639,14 @@ fn __flow_impl<'cx>(
         // * Function library call *
         // *************************
         (FunProtoT(reason), _) => {
-            let fun_proto =
-                helpers::get_builtin_type(cx, env, Some(trace), reason, Some(true), "Function")?;
+            let fun_proto = helpers::get_builtin_type(
+                cx,
+                env,
+                Some(trace),
+                reason,
+                Some(true),
+                "CallableFunction",
+            )?;
             return Ok(Some(TailCall::RecFlow(
                 fun_proto,
                 u.dupe(),

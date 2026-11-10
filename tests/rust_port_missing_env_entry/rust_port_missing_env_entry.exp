@@ -7,8 +7,8 @@ Cannot call `[].concat` because property `concat` is missing in `Array<empty>` [
                                  ^^^^^^
 
 References:
-   <BUILTINS>/prelude.js:30:15
-   30| declare class Array<T> extends ReadonlyArray<T> {
+   <BUILTINS>/prelude.js:32:15
+   32| declare class Array<T> extends ReadonlyArray<T> {
                      ^^^^^ [1]
 
 

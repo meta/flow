@@ -182,7 +182,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- annot.js:28:1
 
-Cannot cast `o_callable.__proto__` to `empty` because `Function` [1] is incompatible with `empty` [2].
+Cannot cast `o_callable.__proto__` to `empty` because `CallableFunction` [1] is incompatible with `empty` [2].
 [incompatible-type]
 
    annot.js:28:1

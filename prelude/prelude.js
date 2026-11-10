@@ -13,6 +13,8 @@ declare class Object {}
 
 declare class Function {}
 
+interface CallableFunction extends Function {}
+
 declare class Boolean {}
 
 declare class Number {}

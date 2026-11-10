@@ -2159,12 +2159,12 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: Function) => string",
+  "detail":"(this: this) => string",
   "documentation":{"kind":"markdown","value":"Returns a string representation of a function."},
   "insertTextFormat":1,
   "kind":3,
   "label":"toString",
-  "labelDetails":{"detail":": (this: Function) => string"},
+  "labelDetails":{"detail":": (this: this) => string"},
   "sortText":"00000000000000000001",
   "textEdit":{
     "newText":"toString",

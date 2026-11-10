@@ -7036,12 +7036,12 @@ pub fn rec_sub_t<'cx>(
         }
         (FunProtoT(reason), _) => {
             let fun_proto =
-                FlowJs::get_builtin_type_with_env(cx, env, Some(trace), reason, Some(true), "Function")?;
+                FlowJs::get_builtin_type_with_env(cx, env, Some(trace), reason, Some(true), "CallableFunction")?;
             FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &fun_proto, u)
         }
         (_, FunProtoT(reason)) => {
             let fun_proto =
-                FlowJs::get_builtin_type_with_env(cx, env, Some(trace), reason, Some(true), "Function")?;
+                FlowJs::get_builtin_type_with_env(cx, env, Some(trace), reason, Some(true), "CallableFunction")?;
             FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, l, &fun_proto)
         }
         (DefT(lreason, deref!(MixedT(MixedFlavor::MixedFunction))), DefT(ureason, deref!(FunT(_, _)))) => {

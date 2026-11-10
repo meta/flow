@@ -67,8 +67,8 @@ Cannot get `React.unstable_AsyncMode` because property `unstable_AsyncMode` is m
                                          ^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/prelude.js:104:16
-   104| declare module 'react' {
+   <BUILTINS>/prelude.js:106:16
+   106| declare module 'react' {
                        ^^^^^^^ [1]
 
 

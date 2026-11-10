@@ -7,7 +7,7 @@ predicates.js:7:6
 Flags:
 class Array<T>
 
-'Array' defined at (lib) prelude.js:30:14
+'Array' defined at (lib) prelude.js:32:14
 
 predicates.js:7:5,7:9
 

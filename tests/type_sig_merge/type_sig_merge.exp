@@ -24,8 +24,8 @@ Cannot cast `f()` to `empty` because `Promise<void>` [1] is incompatible with `e
        ^^^
 
 References:
-   <BUILTINS>/prelude.js:46:11
-   46| interface Promise<out R> {}
+   <BUILTINS>/prelude.js:48:11
+   48| interface Promise<out R> {}
                  ^^^^^^^ [1]
    async_void_return-import.js:3:8
     3| f() as empty; // error: Promise ~> empty

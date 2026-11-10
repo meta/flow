@@ -74,7 +74,7 @@ non-shorthand destructuring = {"end":15,"endline":3,"line":3,"path":"objects.js"
 destructuring without type alias = {"end":14,"endline":7,"line":7,"path":"objects.js","start":12}
 bogus array destructuring of an object = {"end":12,"endline":15,"line":15,"path":"objects.js","start":10}
 property access assigned to a variable = {"end":11,"endline":16,"line":16,"path":"objects.js","start":9}
-global (builtin) variable = {"end":19,"endline":30,"line":30,"path":"[LIB] prelude.js","start":15}
+global (builtin) variable = {"end":19,"endline":32,"line":32,"path":"[LIB] prelude.js","start":15}
 object destructuring key = {"end":17,"endline":4,"line":4,"path":"destructuring.js","start":15}
 object destructuring binding = {"end":15,"endline":5,"line":5,"path":"destructuring.js","start":13}
 annot.js:5:4

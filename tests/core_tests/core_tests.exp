@@ -8,8 +8,8 @@ Cannot use `new` on `JSON` [1]. Only classes and interfaces with a construct sig
              ^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1088:19
-   1088| declare var JSON: JSON;
+   <BUILTINS>/lib.es5.js:1090:19
+   1090| declare var JSON: JSON;
                            ^^^^ [1]
 
 
@@ -626,8 +626,8 @@ Cannot call `WeakRef` because in type argument `T`: [incompatible-type]
                                ^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:1546:13
-   1546|     object: object;
+   <BUILTINS>/lib.es5.js:1548:13
+   1548|     object: object;
                      ^^^^^^ [2]
    <BUILTINS>/lib.es2023.collection.js:21:13
      21|     symbol: symbol;
@@ -646,8 +646,8 @@ Cannot call `WeakRef` because in type argument `T`: [incompatible-type]
                                ^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:1546:13
-   1546|     object: object;
+   <BUILTINS>/lib.es5.js:1548:13
+   1548|     object: object;
                      ^^^^^^ [2]
    <BUILTINS>/lib.es2023.collection.js:21:13
      21|     symbol: symbol;
@@ -666,8 +666,8 @@ Cannot call `WeakRef` because in type argument `T`: [incompatible-type]
                                ^^^^^^^^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:1546:13
-   1546|     object: object;
+   <BUILTINS>/lib.es5.js:1548:13
+   1548|     object: object;
                      ^^^^^^ [2]
    <BUILTINS>/lib.es2023.collection.js:21:13
      21|     symbol: symbol;
@@ -686,8 +686,8 @@ Cannot call `WeakSet` because in type argument `T`: [incompatible-type]
                                 ^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:1546:13
-   1546|     object: object;
+   <BUILTINS>/lib.es5.js:1548:13
+   1548|     object: object;
                      ^^^^^^ [2]
    <BUILTINS>/lib.es2023.collection.js:21:13
      21|     symbol: symbol;
@@ -706,8 +706,8 @@ Cannot call `WeakSet` because in type argument `T`: [incompatible-type]
                                    ^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:1546:13
-   1546|     object: object;
+   <BUILTINS>/lib.es5.js:1548:13
+   1548|     object: object;
                      ^^^^^^ [2]
    <BUILTINS>/lib.es2023.collection.js:21:13
      21|     symbol: symbol;
@@ -726,8 +726,8 @@ Cannot call `WeakSet` because in type argument `T`: [incompatible-type]
                                       ^ [1]
 
 References:
-   <BUILTINS>/lib.es5.js:1546:13
-   1546|     object: object;
+   <BUILTINS>/lib.es5.js:1548:13
+   1548|     object: object;
                      ^^^^^^ [2]
    <BUILTINS>/lib.es2023.collection.js:21:13
      21|     symbol: symbol;
@@ -749,8 +749,8 @@ References:
    weakset.js:24:31
      24| function* numbers(): Iterable<number> {
                                        ^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:1546:13
-   1546|     object: object;
+   <BUILTINS>/lib.es5.js:1548:13
+   1548|     object: object;
                      ^^^^^^ [2]
    <BUILTINS>/lib.es2023.collection.js:21:13
      21|     symbol: symbol;

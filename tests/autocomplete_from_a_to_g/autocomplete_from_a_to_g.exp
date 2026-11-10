@@ -495,7 +495,7 @@ Flags: --pretty
     {"name":"length","type":"number"},
     {"name":"name","type":"string"},
     {"name":"prototype","type":"any"},
-    {"name":"toString","type":"(this: Function) => string"}
+    {"name":"toString","type":"(this: this) => string"}
   ]
 }
 
@@ -545,7 +545,7 @@ Flags: --pretty
     {"name":"length","type":"number"},
     {"name":"name","type":"string"},
     {"name":"prototype","type":"any"},
-    {"name":"toString","type":"(this: Function) => string"}
+    {"name":"toString","type":"(this: this) => string"}
   ]
 }
 

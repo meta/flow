@@ -3159,7 +3159,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             elab_t(cx, Some(seen), obj_proto, op)
         }
         (TypeInner::FunProtoT(reason), _) => {
-            let fun_proto = get_builtin_type(cx, reason.dupe(), Some(true), "Function");
+            let fun_proto = get_builtin_type(cx, reason.dupe(), Some(true), "CallableFunction");
             elab_t(cx, Some(seen), fun_proto, op)
         }
         // ***********
@@ -3279,7 +3279,7 @@ fn elab_t_wildcard_op<'cx>(
         return elab_t(cx, Some(seen), obj_proto, op);
     }
     if let TypeInner::FunProtoT(reason) = t.deref() {
-        let fun_proto = get_builtin_type(cx, reason.dupe(), Some(true), "Function");
+        let fun_proto = get_builtin_type(cx, reason.dupe(), Some(true), "CallableFunction");
         return elab_t(cx, Some(seen), fun_proto, op);
     }
     // **********************

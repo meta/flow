@@ -3055,7 +3055,7 @@ fn instanceof_test<'cx>(
                 Some(trace),
                 reason,
                 Some(true),
-                "Function",
+                "CallableFunction",
             )?;
             let right_clone = right.clone();
             concretize_and_run_predicate(

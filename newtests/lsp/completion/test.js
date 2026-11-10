@@ -6738,7 +6738,7 @@ b.te
                     command: 'log:org.flow:<PLACEHOLDER_PROJECT_URL>',
                     title: '',
                   },
-                  detail: '(this: Function) => string',
+                  detail: '(this: this) => string',
                   documentation: {
                     kind: 'markdown',
                     value: 'Returns a string representation of a function.',
@@ -7258,7 +7258,7 @@ b.te
                     command: 'log:org.flow:<PLACEHOLDER_PROJECT_URL>',
                     title: '',
                   },
-                  detail: '(this: Function) => string',
+                  detail: '(this: this) => string',
                   documentation: {
                     kind: 'markdown',
                     value: 'Returns a string representation of a function.',
