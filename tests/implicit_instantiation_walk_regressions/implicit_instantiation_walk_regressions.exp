@@ -755,6 +755,31 @@ References:
                                                ^^^^^^ [2]
 
 
+Error -------------------------------------------------------------------------------------- union_array_members.js:16:7
+
+Cannot call `tuple` with `strings` bound to `x` because: [incompatible-type]
+ - Either property `size` is missing in `Strings` [1] but exists in `Set<empty>` [2].
+ - Or `Strings` [1] is incompatible with `[empty]` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   union_array_members.js:16:7
+   16| tuple(strings) as empty; // error: `Strings` is not a `Set`, and `X` is not `string`
+             ^^^^^^^
+
+References:
+   union_array_members.js:5:24
+    5| declare const strings: Strings;
+                              ^^^^^^^ [1]
+   union_array_members.js:15:36
+   15| declare function tuple<X>(x: [X] | Set<X>): X;
+                                          ^^^^^^ [2]
+   union_array_members.js:15:30
+   15| declare function tuple<X>(x: [X] | Set<X>): X;
+                                    ^^^ [3]
+
+
 Error -------------------------------------------------------------------- union_member_disagrees_with_arguments.js:25:1
 
 Cannot cast `task` to `Task<number>` because in type argument `T` [1]: `boolean` [2] is incompatible with `number` [3].
@@ -822,4 +847,4 @@ References:
 
 
 
-Found 45 errors
+Found 46 errors

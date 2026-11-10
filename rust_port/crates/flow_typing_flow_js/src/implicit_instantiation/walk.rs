@@ -1273,8 +1273,9 @@ impl<'e> Walker<'e> {
                 Ok(())
             }
             // An application meets the applications of the same alias or class among the members
-            // of a union, which it closely matches, and not the others: of several, the first whose
-            // evidence agrees with the evidence so far.
+            // of a union, which it closely matches, and not the others: the first that it fits
+            // with the markers open and whose evidence agrees with the evidence so far, and none if
+            // no member does, as in the speculative match of the flow-based solve.
             // The flow-based solve expands an alias first, so its body meets the members.
             (TypeInner::TypeAppT(a), TypeInner::UnionT(_, rep))
                 if !self.is_alias(cx, &a.type_)
@@ -1290,23 +1291,16 @@ impl<'e> Walker<'e> {
                         return self.walk_to_union(cx, &l, rep.members_iter().duped().collect());
                     }
                 }
-                if members.len() > 1 {
-                    for m in &members {
-                        // As in the speculative match of the flow-based solve, a member that `l`
-                        // does not fit even with the markers open is skipped.
-                        if !self.fits_open(cx, &l, m)? {
-                            continue;
-                        }
-                        let snapshot = self.snapshot();
-                        self.walk(cx, &l, m)?;
-                        if self.agrees_with(cx, &snapshot.vars)? {
-                            return Ok(());
-                        }
-                        self.restore(snapshot);
-                    }
-                }
                 for m in &members {
+                    if !self.fits_open(cx, &l, m)? {
+                        continue;
+                    }
+                    let snapshot = self.snapshot();
                     self.walk(cx, &l, m)?;
+                    if self.agrees_with(cx, &snapshot.vars)? {
+                        return Ok(());
+                    }
+                    self.restore(snapshot);
                 }
                 Ok(())
             }
@@ -1824,11 +1818,15 @@ impl<'e> Walker<'e> {
                 let instance = self.array_instance(cx, l, la);
                 self.walk(cx, &instance, u)
             }
-            // An instance flows to an array type if its class extends the builtin one.
-            (DefTInner::InstanceT(_), DefTInner::ArrT(ua)) => {
-                let instance = self.array_instance(cx, u, ua);
-                self.walk(cx, l, &instance)
-            }
+            // An instance flows to an array type if its class extends the builtin one, and never
+            // to a tuple type, as in subtyping.
+            (DefTInner::InstanceT(_), DefTInner::ArrT(ua)) => match ua.deref() {
+                ArrType::TupleAT(_) => Ok(()),
+                _ => {
+                    let instance = self.array_instance(cx, u, ua);
+                    self.walk(cx, l, &instance)
+                }
+            },
             (
                 DefTInner::StrGeneralT(_) | DefTInner::SingletonStrT { .. },
                 DefTInner::InstanceT(ui),
@@ -2838,6 +2836,32 @@ impl<'e> Walker<'e> {
         Ok(instantiation_solver::sandboxed(result)?.unwrap_or_default())
     }
 
+    /// Whether `t` is an object or an instance with a call signature, or a class with a static one,
+    /// which the walk takes to a function type through that signature.
+    fn has_call_signature<'cx>(&self, cx: &mut Context<'cx>, t: &Type) -> bool {
+        let t = self.resolve(cx, t);
+        let TypeInner::DefT(_, d) = t.deref() else {
+            return false;
+        };
+        match d.deref() {
+            DefTInner::ObjT(o) => o.call_t.is_some(),
+            DefTInner::InstanceT(i) => {
+                (self.ancestors(cx, i).iter()).any(|a| a.inst.inst_call_t.is_some())
+            }
+            DefTInner::ClassT(instance) => {
+                let instance = self.normalize(cx, instance);
+                match instance.deref() {
+                    TypeInner::DefT(_, d) if let DefTInner::InstanceT(i) = d.deref() => {
+                        matches!(self.resolve(cx, &i.static_).deref(), TypeInner::DefT(_, sd)
+                            if matches!(sd.deref(), DefTInner::ObjT(so) if so.call_t.is_some()))
+                    }
+                    _ => false,
+                }
+            }
+            _ => false,
+        }
+    }
+
     /// The builtin class an array type stands for in structural and nominal checks.
     fn array_instance<'cx>(&self, cx: &mut Context<'cx>, t: &Type, a: &ArrType) -> Type {
         let (name, elem) = match a {
@@ -3606,12 +3630,38 @@ impl<'e> Walker<'e> {
                 .collect(),
             _ => Vec::new(),
         };
+        // A callable object, instance or class also matches a function type, through its call
+        // signature, as in subtyping.
+        let callable = matches!(lhead, Head::Obj | Head::Inst(_) | Head::Class)
+            && self.has_call_signature(cx, l);
         let mut matching = Vec::new();
         for m in &others {
             let m = self.resolve(cx, m);
             let mhead = self.head(cx, &m);
+            // An array type stands for its builtin class against an instance, as subtyping
+            // relates an instance to the array type the member concretizes to: an `Array` to an
+            // array, a `ReadonlyArray` to a read-only array, and nothing to a tuple.
+            let array_class = match (&lhead, &mhead) {
+                (Head::Inst(_), Head::Arr) => match self.structure_of(cx, &m)?.as_deref() {
+                    Some(TypeInner::DefT(_, d)) if let DefTInner::ArrT(a) = d.deref() => {
+                        match a.deref() {
+                            ArrType::ArrayAT(_) => Some("Array"),
+                            ArrType::ROArrayAT(_) => Some("ReadonlyArray"),
+                            ArrType::TupleAT(_) => None,
+                        }
+                    }
+                    _ => None,
+                },
+                _ => None,
+            };
             if lhead != Head::Other
-                && (mhead == lhead || matches!(&mhead, Head::Inst(c) if ancestors.contains(c)))
+                && (mhead == lhead
+                    || matches!(&mhead, Head::Inst(c) if ancestors.contains(c))
+                    || array_class.is_some_and(|name| {
+                        (ancestors.iter())
+                            .any(|c| flow_js_utils::is_builtin_class_id(name, c.dupe(), cx))
+                    })
+                    || (callable && mhead == Head::Fun))
             {
                 matching.push(m);
             }
@@ -3640,9 +3690,9 @@ impl<'e> Walker<'e> {
             return Ok(());
         }
         // Like the speculative match of the flow-based solve, the first of several members that
-        // has the properties of `l` and whose evidence agrees with the evidence so far, and none
-        // if no member does. A member without markers matches when `l` is a subtype of it, and
-        // is skipped otherwise.
+        // has the properties of `l` and whose evidence agrees with the evidence so far. A member
+        // without markers matches when `l` is a subtype of it, and is skipped otherwise. If no
+        // member matches, the speculative match goes on to the bare marker, if there is one.
         if matching.len() > 1 {
             for m in &matching {
                 if !self.has_props_of(cx, l, m) || !self.fits_open(cx, l, m)? {
@@ -3661,7 +3711,10 @@ impl<'e> Walker<'e> {
                 }
                 self.restore(snapshot);
             }
-            return Ok(());
+            if naked.is_empty() {
+                return Ok(());
+            }
+            matching.clear();
         }
         for m in &matching {
             self.walk(cx, l, m)?;
@@ -3680,23 +3733,21 @@ impl<'e> Walker<'e> {
                 {
                     self.walk(cx, l, only)?;
                 }
-                // A type that gives evidence through another member, an object or interface type,
-                // is not inferred to the bare marker. A member that `l`
-                // does not fit even with the markers open gives none, as its speculative match in
-                // the flow-based solve fails.
+                // A type that fits another member, an object or interface type, is not inferred
+                // to the bare marker. A member that `l` does not fit even with the markers open
+                // gives none, as its speculative match in the flow-based solve fails.
                 [only] => {
-                    let snapshot = self.snapshot();
-                    let before = self.evidence_count();
+                    let mut fits = false;
                     for m in &others {
                         if self.mentions(cx, m)
                             && matches!(self.head(cx, m), Head::Inst(_) | Head::Obj)
                             && self.fits_open(cx, l, m)?
                         {
+                            fits = true;
                             self.walk(cx, l, m)?;
                         }
                     }
-                    if self.evidence_count() == before {
-                        self.restore(snapshot);
+                    if !fits {
                         self.walk(cx, l, only)?;
                     }
                 }
@@ -3738,7 +3789,13 @@ impl<'e> Walker<'e> {
                         self.restore(snapshot);
                     }
                 }
-                _ => {}
+                // Of several bare markers, the first, which the speculative match of the
+                // flow-based solve tries first, unless `l` is already one of the other members.
+                [first, ..] => {
+                    if !self.within_members(cx, l, &others)? {
+                        self.walk(cx, l, first)?;
+                    }
+                }
             }
         }
         Ok(())
