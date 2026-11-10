@@ -2759,6 +2759,12 @@ fn flow_obj_to_obj<'cx>(
         }
     }
 
+    // `Function.prototype` is the prototype of a callable object type. The call signature
+    // checked above is all it asks of the lower bound: as in TypeScript, the members of
+    // `Function` are apparent members of the upper bound, not requirements on the lower one.
+    if matches!(uproto.deref(), FunProtoT(_)) {
+        return Ok(());
+    }
     let l_t = Type::new(DefT(lreason.dupe(), DefT::new(ObjT(l_obj.dupe()))));
     FlowJs::rec_flow_with_env(
         cx,
@@ -5692,6 +5698,11 @@ pub fn rec_sub_t<'cx>(
                 errs,
                 strictness_kind,
             )?;
+            // As for an object lower bound, the call signature is all that
+            // `Function.prototype` asks of the instance.
+            if matches!(uproto.deref(), FunProtoT(_)) {
+                return Ok(());
+            }
             FlowJs::rec_flow_with_env(
                 cx, env,
                 trace,

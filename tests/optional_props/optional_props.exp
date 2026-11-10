@@ -85,24 +85,6 @@ References:
 
 Error -------------------------------------------------------------------------------------------- opaque_bound.js:24:35
 
-Cannot assign `single_callable` to `sc` because `{a: number}` [1] is incompatible with `Function` [2].
-[incompatible-type]
-
-   opaque_bound.js:24:35
-   24| const sc: {(): void, a: number} = single_callable; // ERROR
-                                         ^^^^^^^^^^^^^^^
-
-References:
-   opaque_bound.js:23:32
-   23| declare const single_callable: SingleCallable;
-                                      ^^^^^^^^^^^^^^ [1]
-   opaque_bound.js:24:11
-   24| const sc: {(): void, a: number} = single_callable; // ERROR
-                 ^^^^^^^^^^^^^^^^^^^^^ [2]
-
-
-Error -------------------------------------------------------------------------------------------- opaque_bound.js:24:35
-
 Cannot assign `single_callable` to `sc` because a call signature declaring the expected parameter / return type is
 missing in `{a: number}` [1] but exists in `{(): void, a: number}` [2]. [incompatible-type]
 
@@ -280,4 +262,4 @@ References:
 
 
 
-Found 16 errors
+Found 15 errors

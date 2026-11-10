@@ -293,20 +293,6 @@ References:
 
 Error --------------------------------------------------------------------------------------------- internal_slot.js:5:2
 
-Cannot cast object literal to `O` because object literal [1] is incompatible with `Function` [2]. [incompatible-type]
-
-   internal_slot.js:5:2
-   5| ({}) as O; // err: no callable property
-       ^^ [1]
-
-References:
-   internal_slot.js:5:9
-   5| ({}) as O; // err: no callable property
-              ^ [2]
-
-
-Error --------------------------------------------------------------------------------------------- internal_slot.js:5:2
-
 Cannot cast object literal to `O` because a call signature declaring the expected parameter / return type is missing in
 object literal [1] but exists in `O` [2]. [incompatible-type]
 
@@ -450,4 +436,4 @@ References:
 
 
 
-Found 28 errors
+Found 27 errors
