@@ -6205,6 +6205,13 @@ where
                 text(" because React hooks cannot be called in conditional contexts. "),
                 text("(https://react.dev/reference/rules/rules-of-hooks)"),
             ]),
+            MessageCannotCallReactHookMaybeConditionally(callee_loc) => friendly::Message(vec![
+                text("Cannot call "),
+                friendly::hardcoded_string_desc_ref("hook", loc_of_aloc(callee_loc)),
+                text(" because React hooks can only be called within components or hooks. "),
+                text("Flow cannot prove that this hook is called unconditionally. "),
+                text("(https://react.dev/reference/rules/rules-of-hooks)"),
+            ]),
             MessageCannotCallReactHookInDefinitelyNonComponentOrHook(callee_loc) => {
                 friendly::Message(vec![
                     text("Cannot call "),

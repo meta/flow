@@ -1715,11 +1715,10 @@ impl<'b, 'cx, 't>
             _ => callee_ty.dupe(),
         };
 
+        let is_bare_use = ast_utils::hook_call(expr) && bare_use(expr);
         match hook_callee(self.cx, callee_ty) {
             HookResult::HookCallee(_) | HookResult::MaybeHookCallee { .. }
-                if !(ast_utils::hook_call(expr)
-                    && bare_use(expr)
-                    && self.under_function_or_class_body) =>
+                if !(is_bare_use && self.under_function_or_class_body) =>
             {
                 match self.hook_call_context.get_forced(self.cx) {
                     Ok(HookCallContext::HookCallDefinitelyNotAllowed) => {
@@ -1735,7 +1734,11 @@ impl<'b, 'cx, 't>
                             self.cx,
                             call_loc.dupe(),
                             callee_loc.dupe(),
-                            error_message::HookRule::HookInUnknownContext,
+                            if is_bare_use {
+                                error_message::HookRule::BareUseInUnknownContext
+                            } else {
+                                error_message::HookRule::HookInUnknownContext
+                            },
                         );
                     }
                     Ok(

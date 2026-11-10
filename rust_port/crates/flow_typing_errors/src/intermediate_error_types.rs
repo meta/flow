@@ -2146,6 +2146,7 @@ pub enum Message<L: Dupe> {
     MessageCannotCallReactComponent(MessageTypeReferenceData<L>),
 
     MessageCannotCallReactHookConditionally(L),
+    MessageCannotCallReactHookMaybeConditionally(L),
     MessageCannotCallReactHookInClass(L),
     MessageCannotCallReactHookInDefinitelyNonComponentOrHook(L),
     MessageCannotCallReactHookInNonComponentSyntaxComponentOrHookSyntaxHook(L),

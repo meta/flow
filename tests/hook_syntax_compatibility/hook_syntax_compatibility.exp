@@ -890,8 +890,8 @@ References:
 
 Error ---------------------------------------------------------------------------------------- rules_of_hooks.js:1030:14
 
-Cannot call hook [1] because React hooks can only be called within components or hooks.
-(https://react.dev/reference/rules/rules-of-hooks) [react-rule-hook]
+Cannot call hook [1] because React hooks can only be called within components or hooks. Flow cannot prove that this hook
+is called unconditionally. (https://react.dev/reference/rules/rules-of-hooks) [react-rule-hook-conditional]
 
    rules_of_hooks.js:1030:14
    1030| const text = use(promise); // error

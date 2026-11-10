@@ -87,3 +87,11 @@ component ClassInComponent() {
   }
   return null;
 }
+
+declare hook use(x: unknown): unknown;
+
+function callsUseInCallback() {
+  items.forEach(() => {
+    use(items); // error: react-rule-hook-conditional
+  });
+}

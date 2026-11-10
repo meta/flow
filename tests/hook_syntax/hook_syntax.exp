@@ -1314,6 +1314,21 @@ References:
              ^^^^^^^^ [1]
 
 
+Error ------------------------------------------------------------------------ hooks_in_nested_callback_or_class.js:95:5
+
+Cannot call hook [1] because React hooks can only be called within components or hooks. Flow cannot prove that this hook
+is called unconditionally. (https://react.dev/reference/rules/rules-of-hooks) [react-rule-hook-conditional]
+
+   hooks_in_nested_callback_or_class.js:95:5
+   95|     use(items); // error: react-rule-hook-conditional
+           ^^^^^^^^^^
+
+References:
+   hooks_in_nested_callback_or_class.js:95:5
+   95|     use(items); // error: react-rule-hook-conditional
+           ^^^ [1]
+
+
 Error ------------------------------------------------------------------------- hooks_in_nested_component_or_hook.js:4:3
 
 Hooks may not be nested directly within other components or hooks. [nested-hook]
@@ -2552,8 +2567,8 @@ References:
 
 Error ---------------------------------------------------------------------------------------- rules_of_hooks.js:1027:14
 
-Cannot call hook [1] because React hooks can only be called within components or hooks.
-(https://react.dev/reference/rules/rules-of-hooks) [react-rule-hook]
+Cannot call hook [1] because React hooks can only be called within components or hooks. Flow cannot prove that this hook
+is called unconditionally. (https://react.dev/reference/rules/rules-of-hooks) [react-rule-hook-conditional]
 
    rules_of_hooks.js:1027:14
    1027| const text = use(promise); // error
@@ -2842,4 +2857,4 @@ References:
 
 
 
-Found 184 errors
+Found 185 errors
