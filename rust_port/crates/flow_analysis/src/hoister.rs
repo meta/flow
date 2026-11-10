@@ -8,8 +8,7 @@
 use std::ops::Deref;
 
 use dupe::Dupe;
-use flow_common::js_number::ecma_string_of_float;
-use flow_common::js_number::is_float_safe_integer;
+use flow_common::js_number::numeric_property_name;
 use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 use flow_parser::ast;
 use flow_parser::ast::statement::StatementInner;
@@ -804,8 +803,8 @@ pub fn field_init_bindings<Loc: Dupe>(
 }
 
 /// The name of the property that a class property key declares, when the key states it: an
-/// identifier, or a string or integer literal in brackets (`["x"]`, `[0]`). Returns the name as
-/// property reads spell it (`this.x`, `this[0]`), and the key's location.
+/// identifier, or a string or number literal in brackets (`["x"]`, `[0]`, `[1.5]`). Returns the
+/// name as property reads spell it (`this.x`, `this[0]`), and the key's location.
 pub fn property_key_name<Loc: Dupe>(
     key: &ast::expression::object::Key<Loc, Loc>,
 ) -> Option<(FlowSmolStr, &Loc)> {
@@ -817,11 +816,7 @@ pub fn property_key_name<Loc: Dupe>(
         Key::Computed(computed) => {
             let name = match computed.expression.deref() {
                 ExpressionInner::StringLiteral { inner, .. } => inner.value.dupe(),
-                ExpressionInner::NumberLiteral { inner, .. }
-                    if is_float_safe_integer(inner.value) =>
-                {
-                    FlowSmolStr::from(ecma_string_of_float(inner.value))
-                }
+                ExpressionInner::NumberLiteral { inner, .. } => numeric_property_name(inner.value)?,
                 _ => return None,
             };
             Some((name, &computed.loc))

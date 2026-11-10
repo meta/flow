@@ -310,6 +310,31 @@ Property `later` is used before its initialization. [uninitialized-property]
                      ^^^^^^^^^^
 
 
+Error --------------------------------------------------------------------------------------------- member_forms.js:52:3
+
+Property `1.5` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   52|   [1.5]: number; // error
+         ^^^^^
+
+
+Error --------------------------------------------------------------------------------------------- member_forms.js:53:3
+
+Property `9007199254740992` has no initializer and is not definitely assigned in the constructor.
+[uninitialized-property]
+
+   53|   [9007199254740993]: number; // error
+         ^^^^^^^^^^^^^^^^^^
+
+
+Error --------------------------------------------------------------------------------------------- member_forms.js:65:5
+
+Property `0.5` is used before being assigned. [uninitialized-property]
+
+   65|     this[0.5].toFixed(); // error
+           ^^^^^^^^^
+
+
 Error ----------------------------------------------------------------------------------------------------- reads.js:4:5
 
 Property `value` is used before being assigned. [uninitialized-property]
@@ -455,4 +480,4 @@ Property `value` has no initializer and is not definitely assigned in the constr
 
 
 
-Found 57 errors
+Found 60 errors

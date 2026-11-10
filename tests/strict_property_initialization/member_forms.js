@@ -47,3 +47,22 @@ class LiteralNameInitializerOrder {
   a: number = this.later; // error
   ['later']: number = 1;
 }
+
+class NonIntegerNumberNames {
+  [1.5]: number; // error
+  [9007199254740993]: number; // error
+  [2.5]: number;
+  [1e21]: number;
+  constructor() {
+    this[2.5] = 1;
+    this[1e21] = 1;
+  }
+}
+
+class NonIntegerNumberNameReadEarly {
+  [0.5]: number;
+  constructor() {
+    this[0.5].toFixed(); // error
+    this[0.5] = 1;
+  }
+}
