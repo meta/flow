@@ -1220,18 +1220,16 @@ impl NameResolverState {
 }
 
 /// The name of the field that `element` declares and whether it is private, unless `element` is
-/// not a field or its key is computed or a literal.
+/// not a field or its key does not state its name.
 fn field_name(
     element: &flow_parser::ast::class::BodyElement<ALoc, ALoc>,
 ) -> Option<(FlowSmolStr, bool)> {
     use flow_parser::ast::class::BodyElement;
-    use flow_parser::ast::expression::object::Key;
 
     match element {
-        BodyElement::Property(prop) => match &prop.key {
-            Key::Identifier(id) => Some((id.name.dupe(), false)),
-            _ => None,
-        },
+        BodyElement::Property(prop) => {
+            flow_analysis::hoister::property_key_name(&prop.key).map(|(name, _)| (name, false))
+        }
         BodyElement::PrivateField(field) => Some((field.key.name.dupe(), true)),
         _ => None,
     }

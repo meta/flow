@@ -8,6 +8,9 @@
 use std::ops::Deref;
 
 use dupe::Dupe;
+use flow_common::js_number::ecma_string_of_float;
+use flow_common::js_number::is_float_safe_integer;
+use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 use flow_parser::ast;
 use flow_parser::ast::statement::StatementInner;
 use flow_parser::ast_visitor;
@@ -780,31 +783,51 @@ pub fn field_init_bindings<Loc: Dupe>(
 ) -> Bindings<Loc> {
     use ast::class::BodyElement;
     use ast::class::property::Value;
-    use ast::expression::object::Key;
 
     instance_body
         .iter()
         .filter_map(|element| match element {
             BodyElement::Property(prop) if matches!(prop.value, Value::Uninitialized) => {
-                match &prop.key {
-                    Key::Identifier(id) => Some((&id.name, false, &id.loc)),
-                    _ => None,
-                }
+                property_key_name(&prop.key).map(|(name, loc)| (name, false, loc))
             }
             BodyElement::PrivateField(field) if matches!(field.value, Value::Uninitialized) => {
-                Some((&field.key.name, true, &field.key.loc))
+                Some((field.key.name.dupe(), true, &field.key.loc))
             }
             _ => None,
         })
         .map(|(name, private_, loc)| Entry {
             loc: loc.dupe(),
-            key: VarKey::Synthetic(SyntheticVar::FieldInit {
-                name: name.dupe(),
-                private_,
-            }),
+            key: VarKey::Synthetic(SyntheticVar::FieldInit { name, private_ }),
             kind: Kind::Internal,
         })
         .collect()
+}
+
+/// The name of the property that a class property key declares, when the key states it: an
+/// identifier, or a string or integer literal in brackets (`["x"]`, `[0]`). Returns the name as
+/// property reads spell it (`this.x`, `this[0]`), and the key's location.
+pub fn property_key_name<Loc: Dupe>(
+    key: &ast::expression::object::Key<Loc, Loc>,
+) -> Option<(FlowSmolStr, &Loc)> {
+    use ast::expression::ExpressionInner;
+    use ast::expression::object::Key;
+
+    match key {
+        Key::Identifier(id) => Some((id.name.dupe(), &id.loc)),
+        Key::Computed(computed) => {
+            let name = match computed.expression.deref() {
+                ExpressionInner::StringLiteral { inner, .. } => inner.value.dupe(),
+                ExpressionInner::NumberLiteral { inner, .. }
+                    if is_float_safe_integer(inner.value) =>
+                {
+                    FlowSmolStr::from(ecma_string_of_float(inner.value))
+                }
+                _ => return None,
+            };
+            Some((name, &computed.loc))
+        }
+        _ => None,
+    }
 }
 
 #[cfg(test)]

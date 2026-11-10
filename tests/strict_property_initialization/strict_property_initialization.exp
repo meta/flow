@@ -278,6 +278,38 @@ Property `Render` is used before being assigned. [uninitialized-property]
             ^^^^^^^^^^^
 
 
+Error --------------------------------------------------------------------------------------------- member_forms.js:28:3
+
+Property `text` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   28|   ['text']: string; // error
+         ^^^^^^^^
+
+
+Error --------------------------------------------------------------------------------------------- member_forms.js:29:3
+
+Property `0` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   29|   [0]: number; // error
+         ^^^
+
+
+Error --------------------------------------------------------------------------------------------- member_forms.js:41:5
+
+Property `value` is used before being assigned. [uninitialized-property]
+
+   41|     this['value']; // error
+           ^^^^^^^^^^^^^
+
+
+Error -------------------------------------------------------------------------------------------- member_forms.js:47:15
+
+Property `later` is used before its initialization. [uninitialized-property]
+
+   47|   a: number = this.later; // error
+                     ^^^^^^^^^^
+
+
 Error ----------------------------------------------------------------------------------------------------- reads.js:4:5
 
 Property `value` is used before being assigned. [uninitialized-property]
@@ -399,4 +431,4 @@ Property `value` is used before being assigned. [uninitialized-property]
 
 
 
-Found 50 errors
+Found 54 errors

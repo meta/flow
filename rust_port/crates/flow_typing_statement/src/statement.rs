@@ -15222,7 +15222,7 @@ fn check_property_initialization<'a>(
     class_sig: &func_class_sig_types::class::Class<func_class_sig_types::StmtConfigTypes>,
 ) -> Result<(), CheckExprError> {
     use ast::class::BodyElement;
-    use ast::expression::object::Key;
+    use flow_analysis::hoister::property_key_name;
     use func_class_sig_types::class::Field;
 
     fn may_be_unassigned(read: &Read<ALoc>) -> bool {
@@ -15242,13 +15242,12 @@ fn check_property_initialization<'a>(
     }
     for element in c.body.body.iter() {
         let (decl_loc, name, field) = match element {
-            BodyElement::Property(prop) => match &prop.key {
-                Key::Identifier(id) => (
-                    &id.loc,
-                    id.name.dupe(),
-                    class_sig.instance.fields.get(&Name::new(id.name.dupe())),
-                ),
-                _ => continue,
+            BodyElement::Property(prop) => match property_key_name(&prop.key) {
+                Some((name, loc)) => {
+                    let field = class_sig.instance.fields.get(&Name::new(name.dupe()));
+                    (loc, name, field)
+                }
+                None => continue,
             },
             BodyElement::PrivateField(field) => (
                 &field.key.loc,
