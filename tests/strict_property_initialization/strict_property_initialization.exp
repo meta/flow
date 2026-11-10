@@ -430,5 +430,29 @@ Property `value` is used before being assigned. [uninitialized-property]
                       ^^^^^^^^^^
 
 
+Error ------------------------------------------------------------------------------------------ type_destructors.js:2:3
 
-Found 54 errors
+Property `value` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   2|   value: O['label']; // error
+        ^^^^^
+
+
+Error ----------------------------------------------------------------------------------------- type_destructors.js:16:3
+
+Property `value` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   16|   value: Values<O>; // error
+         ^^^^^
+
+
+Error ----------------------------------------------------------------------------------------- type_destructors.js:20:3
+
+Property `value` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   20|   value: O[keyof O]; // error
+         ^^^^^
+
+
+
+Found 57 errors

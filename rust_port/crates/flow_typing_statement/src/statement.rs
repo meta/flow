@@ -15232,6 +15232,14 @@ fn check_property_initialization<'a>(
     }
 
     let env_values = cx.environment().var_info.env_values.dupe();
+    // A type that depends on the class's type parameters must include `void` for every type the
+    // parameters can be, so it is checked with each parameter replaced by `empty`, which every
+    // bound accepts, rather than through the parameter's bound.
+    let smallest_type_args: FlowOrdMap<SubstName, Type> = class_sig
+        .tparams_map
+        .iter()
+        .map(|(name, t)| (name.dupe(), empty_t::why(reason_of_t(t).dupe())))
+        .collect();
     let mut early_reads: BTreeMap<&ALoc, Vec<&ALoc>> = BTreeMap::new();
     for (loc, read) in env_values.iter_kind(ReadKind::FieldInitUse) {
         if let Some(decl_loc) = &read.def_loc
@@ -15263,10 +15271,11 @@ fn check_property_initialization<'a>(
         if !unassigned_at_end && reads.is_empty() {
             continue;
         }
-        if let Some((_, _, Field::Annot(field_t))) = field
-            && declared_type_includes_void(cx, field_t)?
-        {
-            continue;
+        if let Some((_, _, Field::Annot(field_t))) = field {
+            let field_t = flow_js::subst(cx, None, None, None, &smallest_type_args, field_t.dupe());
+            if declared_type_includes_void(cx, &field_t)? {
+                continue;
+            }
         }
         let problems = unassigned_at_end
             .then_some((decl_loc, UninitializedPropertyKind::NotDefinitelyAssigned))
@@ -15287,8 +15296,7 @@ fn check_property_initialization<'a>(
 }
 
 /// Whether a field's declared type includes `void`: one of the types it can be is `void`,
-/// `mixed` or `any`. Unlike TypeScript, which leaves a type operation on a type parameter
-/// (`O['label']`) unevaluated, this works it out from the parameter's bound.
+/// `mixed` or `any`.
 fn declared_type_includes_void(cx: &mut Context<'_>, field_t: &Type) -> Result<bool, JobError> {
     // Resolving the type can instantiate aliases and evaluate type operations that the
     // program itself never uses: keep their errors and cached results out of the program's.
