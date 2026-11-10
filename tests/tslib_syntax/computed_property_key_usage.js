@@ -87,3 +87,16 @@ accObj.protoMethod as boolean; // OK
 import type {WithUnionKey} from './computed_property_key';
 declare const unionObj: WithUnionKey;
 unionObj.a; // ERROR
+
+// Computed methods declared without bodies in a class
+import {WithComputedMethodSignatures, CLASS_METHOD_SYM} from './computed_property_key';
+declare const methodSigs: WithComputedMethodSignatures;
+for (const n of methodSigs) {
+  n as number; // OK
+}
+methodSigs.classMethod() as string; // OK
+methodSigs[CLASS_METHOD_SYM]() as boolean; // OK
+methodSigs.classMethod() as number; // ERROR
+methodSigs.optionalMethod as void | (() => number); // OK
+methodSigs[Symbol.asyncIterator] as void | (() => AsyncIterator<string>); // OK
+methodSigs[Symbol.dispose] as () => void; // OK

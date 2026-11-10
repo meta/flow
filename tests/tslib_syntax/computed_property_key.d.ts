@@ -84,3 +84,16 @@ export declare class WithAccessibility {
 // Union key type should not resolve to a computed property
 export declare const UNION_KEY: "a" | "b";
 export type WithUnionKey = {[UNION_KEY]: number}; // ERROR
+
+// Computed methods declared without bodies in a class
+export declare const CLASS_METHOD_KEY: "classMethod";
+export declare const CLASS_METHOD_SYM: unique symbol;
+export declare const OPTIONAL_METHOD_KEY: "optionalMethod";
+export class WithComputedMethodSignatures {
+  [Symbol.iterator](): Iterator<number>;
+  [CLASS_METHOD_KEY](): string;
+  [CLASS_METHOD_SYM](): boolean;
+  [OPTIONAL_METHOD_KEY]?(): number;
+  [Symbol.asyncIterator]?(): AsyncIterator<string>;
+  get [Symbol.dispose](): () => void;
+}

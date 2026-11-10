@@ -11839,6 +11839,22 @@ fn class_def<'arena: 'ast, 'ast>(
             )
         };
 
+    // The name of a method signature keyed by an identifier or, as in the checker, a
+    // well-known symbol.
+    let declare_method_name = |key: &ObjKey<Loc, Loc>| -> Option<(FlowSmolStr, Loc)> {
+        match key {
+            ObjKey::Identifier(id)
+                if !(opts.munge
+                    && flow_parser_utils::signature_utils::is_munged_property_string(&id.name)) =>
+            {
+                Some((id.name.dupe(), id.loc.dupe()))
+            }
+            ObjKey::Computed(ck) => ast_utils::well_known_symbol_name(&ck.expression)
+                .map(|name| (FlowSmolStr::from(name), ck.expression.loc().dupe())),
+            _ => None,
+        }
+    };
+
     let ast::class::Class {
         body,
         tparams: tps,
@@ -12309,7 +12325,7 @@ fn class_def<'arena: 'ast, 'ast>(
             }
             class::BodyElement::DeclareMethod(class::DeclareMethod {
                 kind,
-                key: ObjKey::Identifier(id),
+                key,
                 annot:
                     ast::types::Annotation {
                         loc: annot_loc,
@@ -12318,16 +12334,10 @@ fn class_def<'arena: 'ast, 'ast>(
                 static_: is_static,
                 optional,
                 ..
-            }) => {
+            }) if let Some((name, name_loc)) = declare_method_name(key) => {
                 if let TypeInner::Function { inner: f, .. } = annotation.deref() {
-                    if opts.munge
-                        && flow_parser_utils::signature_utils::is_munged_property_string(&id.name)
-                    {
-                        continue;
-                    }
-                    let name = id.name.dupe();
                     if *optional {
-                        let id_loc_node = tbls.push_loc(id.loc.dupe());
+                        let id_loc_node = tbls.push_loc(name_loc);
                         let fn_loc_node = tbls.push_loc(annot_loc.dupe());
                         let def =
                             function_type(true, opts, scope, scopes, tbls, &mut xs, f.as_ref());
@@ -12343,7 +12353,7 @@ fn class_def<'arena: 'ast, 'ast>(
                     } else {
                         match kind {
                             class::MethodKind::Get => {
-                                let id_loc_node = tbls.push_loc(id.loc.dupe());
+                                let id_loc_node = tbls.push_loc(name_loc);
                                 let getter = getter_type(
                                     opts,
                                     scope,
@@ -12356,7 +12366,7 @@ fn class_def<'arena: 'ast, 'ast>(
                                 acc.add_accessor(*is_static, name, getter);
                             }
                             class::MethodKind::Set => {
-                                let id_loc_node = tbls.push_loc(id.loc.dupe());
+                                let id_loc_node = tbls.push_loc(name_loc);
                                 let setter = setter_type(
                                     opts,
                                     scope,
@@ -12369,7 +12379,7 @@ fn class_def<'arena: 'ast, 'ast>(
                                 acc.add_accessor(*is_static, name, setter);
                             }
                             class::MethodKind::Method | class::MethodKind::Constructor => {
-                                let id_loc_node = tbls.push_loc(id.loc.dupe());
+                                let id_loc_node = tbls.push_loc(name_loc);
                                 let fn_loc_node = tbls.push_loc(annot_loc.dupe());
                                 let def = function_type(
                                     true,
@@ -12392,6 +12402,49 @@ fn class_def<'arena: 'ast, 'ast>(
                                 );
                             }
                         }
+                    }
+                }
+            }
+            // Any other computed key of a method signature is recorded as an expression resolved
+            // during merge, as for a method with a body.
+            class::BodyElement::DeclareMethod(class::DeclareMethod {
+                kind: class::MethodKind::Method,
+                key: ObjKey::Computed(ck),
+                annot:
+                    ast::types::Annotation {
+                        loc: annot_loc,
+                        annotation,
+                    },
+                static_: is_static,
+                optional,
+                ts_accessibility,
+                ..
+            }) if !is_ts_private(ts_accessibility) => {
+                if let TypeInner::Function { inner: f, .. } = annotation.deref() {
+                    let ref_loc = tbls.push_loc(ck.expression.loc().dupe());
+                    let key_ref = expression_for_computed_key(scope, tbls, &ck.expression);
+                    let fn_loc_node = tbls.push_loc(annot_loc.dupe());
+                    let def = function_type(true, opts, scope, scopes, tbls, &mut xs, f.as_ref());
+                    if *optional {
+                        let t = Parsed::Annot(Box::new(ParsedAnnot::Optional(Box::new(
+                            Parsed::Annot(Box::new(ParsedAnnot::MethodAnnot(Box::new((
+                                fn_loc_node,
+                                *is_static,
+                                def,
+                            ))))),
+                        ))));
+                        acc.add_computed_field(*is_static, key_ref, ref_loc, Polarity::Neutral, t);
+                    } else {
+                        acc.add_computed_method(
+                            *is_static,
+                            key_ref,
+                            ref_loc,
+                            fn_loc_node,
+                            false,
+                            false,
+                            false,
+                            def,
+                        );
                     }
                 }
             }

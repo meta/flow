@@ -354,6 +354,24 @@ References:
                                ^^^^^^^^^^^^ [1]
 
 
+Error ------------------------------------------------------------------------------ computed_property_key_usage.js:99:1
+
+Cannot cast `methodSigs.classMethod()` to `number` because `string` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   computed_property_key_usage.js:99:1
+   99| methodSigs.classMethod() as number; // ERROR
+       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   computed_property_key.d.ts:94:25
+   94|   [CLASS_METHOD_KEY](): string;
+                               ^^^^^^ [1]
+   computed_property_key_usage.js:99:29
+   99| methodSigs.classMethod() as number; // ERROR
+                                   ^^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------ declare_class_method_no_return.d.ts:33:12
 
 Return type annotation is required for `declare class` methods. [unsupported-syntax]
@@ -2013,4 +2031,4 @@ References:
 
 
 
-Found 130 errors
+Found 131 errors

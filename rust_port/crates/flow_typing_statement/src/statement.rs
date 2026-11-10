@@ -15313,6 +15313,37 @@ fn declared_type_includes_void(cx: &mut Context<'_>, field_t: &Type) -> Result<b
 /// The field of an optional class property (`x?: T`), which may hold `undefined`: `T | void`, as
 /// for an optional method. For a field with an initializer, the initializer's function returns
 /// the field's type.
+/// The key of a class method declared without a body, kept to build its typed AST node.
+#[derive(Clone)]
+enum DeclareMethodKey {
+    Identifier(ast::Identifier<ALoc, ALoc>),
+    Computed(
+        ast::ComputedKey<ALoc, ALoc>,
+        expression::Expression<ALoc, (ALoc, Type)>,
+    ),
+}
+
+impl DeclareMethodKey {
+    fn typed(self, id_loc: ALoc, t: Type) -> expression::object::Key<ALoc, (ALoc, Type)> {
+        match self {
+            DeclareMethodKey::Identifier(id) => {
+                expression::object::Key::Identifier(ast::Identifier::new(ast::IdentifierInner {
+                    loc: (id_loc, t),
+                    name: id.name.dupe(),
+                    comments: id.comments.dupe(),
+                }))
+            }
+            DeclareMethodKey::Computed(computed_key, typed) => {
+                expression::object::Key::Computed(ast::ComputedKey {
+                    loc: computed_key.loc,
+                    expression: typed,
+                    comments: computed_key.comments,
+                })
+            }
+        }
+    }
+}
+
 fn optional_field(
     field: func_class_sig_types::class::Field<func_class_sig_types::StmtConfigTypes>,
 ) -> func_class_sig_types::class::Field<func_class_sig_types::StmtConfigTypes> {
@@ -17908,10 +17939,85 @@ pub fn mk_class_sig<'a>(
                             let optional = dm.optional;
                             let ts_accessibility = dm.ts_accessibility.clone();
                             let comments = dm.comments.dupe();
-                            // Try to destructure as Identifier key + Function annot
-                            let id_loc_and_id = match &dm.key {
-                                ast::expression::object::Key::Identifier(id) => {
-                                    Some((id.loc.dupe(), id.clone()))
+                            // A computed key names the method the way it names a method with
+                            // a body: a well-known symbol, or a plain method's key that resolves
+                            // to a single literal or `unique symbol`.
+                            let resolved_key: Option<(ALoc, Name, DeclareMethodKey)> = match &dm.key
+                            {
+                                ast::expression::object::Key::Identifier(id) => Some((
+                                    id.loc.dupe(),
+                                    Name::new(id.name.dupe()),
+                                    DeclareMethodKey::Identifier(id.clone()),
+                                )),
+                                ast::expression::object::Key::Computed(computed_key) => {
+                                    let id_loc = computed_key.expression.loc().dupe();
+                                    let k_typed = expression(
+                                        Some(EnclosingContext::IndexContext),
+                                        None,
+                                        None,
+                                        cx,
+                                        &computed_key.expression,
+                                    )?;
+                                    let resolved = if let Some(name) =
+                                        flow_parser::ast_utils::well_known_symbol_name(
+                                            &computed_key.expression,
+                                        ) {
+                                        Some(Name::new(FlowSmolStr::from(name)))
+                                    } else if kind == ast::class::MethodKind::Method {
+                                        let (_, kt) = k_typed.loc();
+                                        let key_reason = reason_of_t(kt).dupe();
+                                        let concretized_keys =
+                                            flow_js_utils::flow_js_result_to_job_error(
+                                                FlowJs::possible_concrete_types_for_computed_object_keys(
+                                                    cx, &key_reason, kt,
+                                                ),
+                                            )?;
+                                        match concretized_keys.as_slice() {
+                                            [single] => {
+                                                match flow_js_utils::propref_for_elem_t(cx, single)
+                                                {
+                                                    PropRef::Named { name, .. } => {
+                                                        Some(name.dupe())
+                                                    }
+                                                    PropRef::Computed(_)
+                                                    | PropRef::Constructor(_) => None,
+                                                }
+                                            }
+                                            _ => None,
+                                        }
+                                    } else {
+                                        None
+                                    };
+                                    match resolved {
+                                        Some(name) => Some((
+                                            id_loc,
+                                            name,
+                                            DeclareMethodKey::Computed(
+                                                computed_key.clone(),
+                                                k_typed,
+                                            ),
+                                        )),
+                                        None => {
+                                            flow_js::add_output_non_speculating(
+                                                cx,
+                                                ErrorMessage::EUnsupportedComputedKeyInClass(
+                                                    id_loc,
+                                                ),
+                                            );
+                                            let elem_c = elem.clone();
+                                            rev_elements.push(Box::new(
+                                                move |_cx: &mut Context<'_>| {
+                                                    let Ok(v) =
+                                                        polymorphic_ast_mapper::class_element(
+                                                            &mut typed_ast_utils::ErrorMapper,
+                                                            &elem_c,
+                                                        );
+                                                    Ok(v)
+                                                },
+                                            ));
+                                            continue;
+                                        }
+                                    }
                                 }
                                 _ => None,
                             };
@@ -17923,9 +18029,8 @@ pub fn mk_class_sig<'a>(
                                 } => Some((func_annot_loc.dupe(), func_annot.clone())),
                                 _ => None,
                             };
-                            match (id_loc_and_id, func_annot_match) {
-                                (Some((id_loc, id)), Some((func_annot_loc, func_annot))) => {
-                                    let name = id.name.dupe();
+                            match (resolved_key, func_annot_match) {
+                                (Some((id_loc, name, key)), Some((func_annot_loc, func_annot))) => {
                                     if override_ && !cx.tslib_syntax() {
                                         flow_js::add_output_non_speculating(
                                             cx,
@@ -17973,7 +18078,7 @@ pub fn mk_class_sig<'a>(
                                             static_,
                                             false,
                                             override_,
-                                            Name::new(name.dupe()),
+                                            name.dupe(),
                                             id_loc.dupe(),
                                             flow_common::polarity::Polarity::Neutral,
                                             class_types::Field::Annot(optional_t.dupe()),
@@ -17983,14 +18088,14 @@ pub fn mk_class_sig<'a>(
                                             cx,
                                             &mut public_seen_names,
                                             id_loc.dupe(),
-                                            &Name::new(name.dupe()),
+                                            &name,
                                             static_,
                                             false,
                                             ClassMemberKind::ClassMemberField,
                                         );
                                         let elem_loc_c = elem_loc.dupe();
                                         let id_loc_c = id_loc.dupe();
-                                        let id_c = id.clone();
+                                        let key_c = key.clone();
                                         let annot_loc_c = annot_loc.dupe();
                                         let func_annot_loc_c = func_annot_loc.dupe();
                                         let optional_t_c = optional_t.dupe();
@@ -18008,21 +18113,8 @@ pub fn mk_class_sig<'a>(
                                                     ast::class::DeclareMethod {
                                                         loc: (elem_loc_c, optional_t_c.dupe()),
                                                         kind,
-                                                        key:
-                                                            ast::expression::object::Key::Identifier(
-                                                                ast::Identifier::new(
-                                                                    ast::IdentifierInner {
-                                                                        loc: (
-                                                                            id_loc_c,
-                                                                            optional_t_c.dupe(),
-                                                                        ),
-                                                                        name: id_c.name.dupe(),
-                                                                        comments: id_c
-                                                                            .comments
-                                                                            .dupe(),
-                                                                    },
-                                                                ),
-                                                            ),
+                                                        key: key_c
+                                                            .typed(id_loc_c, optional_t_c.dupe()),
                                                         annot: ast::types::Annotation {
                                                             loc: annot_loc_c,
                                                             annotation: ast::types::Type::new(
@@ -18058,7 +18150,7 @@ pub fn mk_class_sig<'a>(
                                         let id_loc_for_get = id_loc.dupe();
                                         let elem_loc_c = elem_loc.dupe();
                                         let id_loc_c = id_loc.dupe();
-                                        let id_c = id.clone();
+                                        let key_c = key.clone();
                                         let annot_loc_c = annot_loc.dupe();
                                         let func_annot_loc_c = func_annot_loc.dupe();
                                         let typed_func_c = typed_func.clone();
@@ -18080,21 +18172,7 @@ pub fn mk_class_sig<'a>(
                                                     ast::class::DeclareMethod {
                                                         loc: (elem_loc_c, func_t.dupe()),
                                                         kind,
-                                                        key:
-                                                            ast::expression::object::Key::Identifier(
-                                                                ast::Identifier::new(
-                                                                    ast::IdentifierInner {
-                                                                        loc: (
-                                                                            id_loc_c,
-                                                                            func_t.dupe(),
-                                                                        ),
-                                                                        name: id_c.name.dupe(),
-                                                                        comments: id_c
-                                                                            .comments
-                                                                            .dupe(),
-                                                                    },
-                                                                ),
-                                                            ),
+                                                        key: key_c.typed(id_loc_c, func_t.dupe()),
                                                         annot: ast::types::Annotation {
                                                             loc: annot_loc_c,
                                                             annotation: ast::types::Type::new(
@@ -18145,7 +18223,7 @@ pub fn mk_class_sig<'a>(
                                                     static_,
                                                     false,
                                                     override_,
-                                                    Name::new(name.dupe()),
+                                                    name.dupe(),
                                                     id_loc.dupe(),
                                                     None,
                                                     false,
@@ -18160,7 +18238,7 @@ pub fn mk_class_sig<'a>(
                                                     static_,
                                                     false,
                                                     override_,
-                                                    Name::new(name.dupe()),
+                                                    name.dupe(),
                                                     id_loc.dupe(),
                                                     None,
                                                     func_sig,
@@ -18174,7 +18252,7 @@ pub fn mk_class_sig<'a>(
                                                     static_,
                                                     false,
                                                     override_,
-                                                    Name::new(name.dupe()),
+                                                    name.dupe(),
                                                     id_loc.dupe(),
                                                     None,
                                                     func_sig,
@@ -18207,7 +18285,7 @@ pub fn mk_class_sig<'a>(
                                                     } else {
                                                         &public_seen_names.instance_names
                                                     };
-                                                    names_map.get(&Name::new(name.dupe())).copied()
+                                                    names_map.get(&name).copied()
                                                         == Some(ClassMemberKind::ClassMemberMethod)
                                                 } => {}
                                             Some(k) => {
@@ -18215,7 +18293,7 @@ pub fn mk_class_sig<'a>(
                                                     cx,
                                                     &mut public_seen_names,
                                                     id_loc.dupe(),
-                                                    &Name::new(name.dupe()),
+                                                    &name,
                                                     static_,
                                                     false,
                                                     k,
