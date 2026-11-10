@@ -254,6 +254,14 @@ Property `y` is used before its initialization. [uninitialized-property]
                        ^^^^^^
 
 
+Error -------------------------------------------------------------------------------------------- initializers.js:92:16
+
+Property `b` is used before its initialization. [uninitialized-property]
+
+   92|   a?: number = this.b; // error
+                      ^^^^^^
+
+
 Error --------------------------------------------------------------------------------------------- member_forms.js:14:5
 
 Property `value` is used before being assigned. [uninitialized-property]
@@ -391,4 +399,4 @@ Property `value` is used before being assigned. [uninitialized-property]
 
 
 
-Found 49 errors
+Found 50 errors

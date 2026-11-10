@@ -82,3 +82,13 @@ class InnerClass {
   };
   y: number = 2;
 }
+
+class OptionalLaterField {
+  a: ?number = this.b; // `b` is optional, so `undefined` is expected
+  b?: number = 2;
+}
+
+class OptionalFieldReadsLaterField {
+  a?: number = this.b; // error
+  b: number = 2;
+}

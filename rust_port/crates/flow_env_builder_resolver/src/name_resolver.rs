@@ -1237,6 +1237,17 @@ fn field_name(
     }
 }
 
+/// Whether `element` declares an optional field (`x?: T`), which may hold `undefined`.
+fn is_optional_field(element: &flow_parser::ast::class::BodyElement<ALoc, ALoc>) -> bool {
+    use flow_parser::ast::class::BodyElement;
+
+    match element {
+        BodyElement::Property(prop) => prop.optional,
+        BodyElement::PrivateField(field) => field.optional,
+        _ => false,
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum PatternWriteKind {
     VarBinding,
@@ -6204,14 +6215,18 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
 
     /// Visits the elements of a class body in order. Field initializers run in that order, so
     /// before each field, notes the fields whose initializers will not have run when its own does.
+    /// Optional fields are left out, since reading `undefined` from one is expected, as in
+    /// TypeScript.
     fn class_elements(
         &mut self,
         elements: &[&flow_parser::ast::class::BodyElement<ALoc, ALoc>],
     ) -> Result<(), AbruptCompletion> {
-        let fields: Vec<(FlowSmolStr, bool)> = if self.strict_property_initialization {
+        let fields: Vec<((FlowSmolStr, bool), bool)> = if self.strict_property_initialization {
             elements
                 .iter()
-                .filter_map(|element| field_name(element))
+                .filter_map(|element| {
+                    field_name(element).map(|name| (name, is_optional_field(element)))
+                })
                 .collect()
         } else {
             Vec::new()
@@ -6222,7 +6237,8 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                 self.env_state.field_initializer = FieldInitializer::Pending(Rc::new(
                     uninitialized
                         .iter()
-                        .map(|(name, private_)| (name.dupe(), *private_))
+                        .filter(|(_, optional)| !optional)
+                        .map(|((name, private_), _)| (name.dupe(), *private_))
                         .collect(),
                 ));
                 uninitialized = &uninitialized[1..];
