@@ -29,6 +29,7 @@ import createTokensProvider from './tokens-theme-provider';
 import flowLanguageConfiguration from './flow-configuration.json';
 
 const TRY_FLOW_LAST_CONTENT_STORAGE_KEY = 'tryFlowLastContent';
+const TRY_FLOW_PENDING_RECOVERY_STORAGE_KEY = 'tryFlowPendingRecovery';
 const DEFAULT_FLOW_PROGRAM = `type User = {
   readonly name: string,
   readonly age: number,
@@ -78,12 +79,12 @@ function getHashedValue(hash: ?string): ?InitialStateFromHash {
 }
 
 function setHashedValue(
-  flowService: ?FlowJsServices,
+  config: ?{[key: string]: unknown},
   version: string,
   code: string,
 ) {
   const compressed = LZString.compressToEncodedURIComponent(
-    JSON.stringify({config: flowService?.config, code, version}),
+    JSON.stringify({config, code, version}),
   );
   window.location.hash = `1${compressed}`;
   localStorage.setItem(TRY_FLOW_LAST_CONTENT_STORAGE_KEY, location.hash);
@@ -102,6 +103,15 @@ function getRecoverableStateFromStorage(): ?InitialStateFromHash {
   return state;
 }
 
+function takeRecoveryAfterReload(): ?InitialStateFromHash {
+  const recovery = getHashedValue(
+    sessionStorage.getItem(TRY_FLOW_PENDING_RECOVERY_STORAGE_KEY),
+  );
+  sessionStorage.removeItem(TRY_FLOW_PENDING_RECOVERY_STORAGE_KEY);
+  return recovery;
+}
+
+const recoveryAfterReload = takeRecoveryAfterReload();
 const initialStateFromURI = getHashedValue(location.hash);
 const initialState: InitialStateFromHash = initialStateFromURI || {
   // Only default to an example if we haven't used Try Flow before
@@ -276,11 +286,10 @@ export default component TryFlow(
 ) {
   const {withBaseUrl} = useBaseUrlUtils();
   const [initialStateFromStorage, setInitialStateFromStorage] = useState(
-    initialStateFromURI == null ? getRecoverableStateFromStorage() : null,
+    recoveryAfterReload ??
+      (initialStateFromURI == null ? getRecoverableStateFromStorage() : null),
   );
-  const [flowVersion, setFlowVersion] = useState(
-    initialState.version || defaultFlowVersion,
-  );
+  const flowVersion = initialState.version || defaultFlowVersion;
   const editorRef = useRef<any>(null);
   const tryEditorRef = useRef<HTMLDivElement | null>(null);
   const [splitRatio, setSplitRatio] = useState(0.5);
@@ -360,11 +369,38 @@ export default component TryFlow(
     forceRecheck();
   }, [flowService]);
 
+  function changeFlowVersion(version: string) {
+    if (version === flowVersion) return;
+    setHashedValue(
+      flowService?.config ?? initialState.config,
+      version,
+      editorRef.current?.getValue() ?? initialState.code,
+    );
+    if (initialStateFromStorage != null) {
+      sessionStorage.setItem(
+        TRY_FLOW_PENDING_RECOVERY_STORAGE_KEY,
+        `#1${LZString.compressToEncodedURIComponent(
+          JSON.stringify(initialStateFromStorage),
+        )}`,
+      );
+    }
+    window.location.reload();
+  }
+
   function resetFromStorage() {
     const model = monaco.editor.getModels()[0];
     if (initialStateFromStorage != null && model != null) {
+      const version = initialStateFromStorage.version || defaultFlowVersion;
+      if (version !== flowVersion) {
+        setHashedValue(
+          initialStateFromStorage.config,
+          version,
+          initialStateFromStorage.code,
+        );
+        window.location.reload();
+        return;
+      }
       setInitialStateFromStorage(null);
-      setFlowVersion(initialStateFromStorage.version || defaultFlowVersion);
       model.setValue(initialStateFromStorage.code);
       setFlowService(
         existing =>
@@ -608,7 +644,7 @@ export default component TryFlow(
     }
 
     // update the URL
-    setHashedValue(flowService, flowVersion, value);
+    setHashedValue(flowService?.config, flowVersion, value);
 
     // Whenever the recover prompt is showing, the editor starts empty (both on
     // load from storage and right after Clear). Once the user types real content
@@ -862,7 +898,7 @@ export default component TryFlow(
       <TryFlowResults
         flowVersion={flowVersion}
         flowVersions={flowVersions}
-        changeFlowVersion={setFlowVersion}
+        changeFlowVersion={changeFlowVersion}
         loading={loading}
         errors={errors}
         internalError={internalError}
