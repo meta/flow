@@ -2291,6 +2291,9 @@ impl<'e> Walker<'e> {
                                     ArrType::TupleAT(_) => (None, None),
                                 }
                             }
+                            // A spread of a type parameter, such as a generic rest parameter, is
+                            // also that type parameter as the array.
+                            TypeInner::GenericT(_) => (self.iterable_elem(cx, &t)?, Some(t.dupe())),
                             _ => (self.iterable_elem(cx, &t)?, None),
                         };
                         let Some(elem) = elem else {
@@ -3026,6 +3029,21 @@ impl<'e> Walker<'e> {
             {
                 let reason = type_util::reason_of_t(urest).dupe();
                 self.walk(cx, &mk_array(&reason, vec![elem]), lrest)?;
+            }
+            // `u`'s rest parameter is a tuple: `l`'s rest parameter receives `u`'s parameters past
+            // `l`'s and the elements of that tuple, as the call builds them (`multiflow_args`): an
+            // array with a tuple view, which fits an `Array` as well as a tuple.
+            (Some(urest), Some(lrest))
+                if !self.rest_is_array(cx, lrest)
+                    && let Some(elems) = tuple_elements(&self.resolve(cx, urest)) =>
+            {
+                let reason = type_util::reason_of_t(lrest).dupe();
+                let params = uf.params.get(ln..).unwrap_or(&[]);
+                // `l`'s parameters past `u`'s took the first elements.
+                let args = (params.iter().map(|FunParam(_, t)| t.dupe()))
+                    .chain(elems.into_iter().skip(ln.saturating_sub(un)))
+                    .collect();
+                self.walk(cx, &mk_tuple(&reason, args, false), lrest)?;
             }
             (_, Some(lrest)) if !self.rest_is_array(cx, lrest) => {
                 let tuple = reverse_resolve_spread_multiflow_subtype_full_no_resolution(
