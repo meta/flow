@@ -2480,6 +2480,176 @@ References:
                             ^^^^^ [2]
 
 
+Error -------------------------------------------------------------------------------------------- render_types.js:16:34
+
+Cannot create `Inner` element because property `inner` is extra in `{a: number, b: string, inner?: void}` [1] but
+missing in `{readonly a: number, readonly b: string}` [2]. Exact objects do not accept extra props. [incompatible-type]
+
+   render_types.js:16:34
+   16|     {const a, ...const rest} => <Inner a={a} {...rest} />, // ERROR
+                                        ^^^^^
+
+References:
+   render_types.js:16:33
+   16|     {const a, ...const rest} => <Inner a={a} {...rest} />, // ERROR
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   render_types.js:3:1
+    3| component Inner(a: number, b: string) {
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- render_types.js:92:3
+
+`match` hasn't checked all possible cases of the input type. To fix, add the missing patterns:
+- `false` to match `false` [1]
+- `true` to match `true` [1]
+- `null` to match `null` [1]
+- `undefined` to match `void` [1]
+- `{...}` to match `{...}` [1]
+and 2 others. [match-not-exhaustive]
+
+   render_types.js:92:3
+   92|   match (input) { // ERROR
+         ^^^^^
+
+References:
+   render_types.js:91:40
+   91| function genericLiteralPatterns(input: GenericRender<1 | 2>): void {
+                                              ^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------- render_types.js:115:41
+
+Cannot return `match` because `React.Node` [1] does not render `Other` [2]. [incompatible-type]
+
+   render_types.js:115:41
+   115|   return match (input) { const inner => inner }; // ERROR
+                                                ^^^^^ [1]
+
+References:
+   render_types.js:114:46
+   114| function rejectsOther(input: renders Inner): renders Other {
+                                                     ^^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------- render_types.js:119:41
+
+Cannot return `match` because a value that renders nothing [1] does not render `Inner` [2]. [incompatible-type]
+
+   render_types.js:119:41
+   119|   return match (input) { const inner => inner }; // ERROR
+                                                ^^^^^
+
+References:
+   render_types.js:118:33
+   118| function rejectsNullable(input: renders? Inner): renders Inner {
+                                        ^^^^^^^^^^^^^^ [1]
+   render_types.js:118:50
+   118| function rejectsNullable(input: renders? Inner): renders Inner {
+                                                         ^^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------- render_types.js:123:41
+
+Cannot return `match` because `[renders Inner, renders Inner]` [1] does not render `Inner` [2]. [incompatible-type]
+
+   render_types.js:123:41
+   123|   return match (input) { const inner => inner }; // ERROR
+                                                ^^^^^
+
+References:
+   render_types.js:122:30
+   122| function rejectsArray(input: [renders Inner, renders Inner]): renders Inner {
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   render_types.js:122:63
+   122| function rejectsArray(input: [renders Inner, renders Inner]): renders Inner {
+                                                                      ^^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------- render_types.js:127:41
+
+Cannot return `match` because `"svg"` [1] does not render `Inner` [2]. [incompatible-type]
+
+   render_types.js:127:41
+   127|   return match (input) { const inner => inner }; // ERROR
+                                                ^^^^^
+
+References:
+   render_types.js:126:36
+   126| function rejectsSvg(input: renders 'svg'): renders Inner {
+                                           ^^^^^ [1]
+   render_types.js:126:44
+   126| function rejectsSvg(input: renders 'svg'): renders Inner {
+                                                   ^^^^^^^^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- render_types.js:131:3
+
+`match` hasn't checked all possible cases of the input type. To fix, add the missing pattern: `_` to match
+`renders? Inner` [1]. [match-not-exhaustive]
+
+   render_types.js:131:3
+   131|   match (input) { // ERROR
+          ^^^^^
+
+References:
+   render_types.js:130:31
+   130| function notExhaustive(input: renders? Inner): void {
+                                      ^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------- render_types.js:152:41
+
+Cannot return `match` because `"svg"` [1] does not render `"svg"` [2]. [incompatible-type]
+
+   render_types.js:152:41
+   152|   return match (input) { const inner => inner }; // ERROR
+                                                ^^^^^
+
+References:
+   render_types.js:151:31
+   151| function rejectsRawSvg(input: 'svg'): renders 'svg' {
+                                      ^^^^^ [1]
+   render_types.js:151:47
+   151| function rejectsRawSvg(input: 'svg'): renders 'svg' {
+                                                      ^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------- render_types.js:156:41
+
+Cannot return `match` because `[renders Inner, renders Inner]` [1] does not render `Inner` [2]. [incompatible-type]
+
+   render_types.js:156:41
+   156|   return match (input) { const inner => inner }; // ERROR
+                                                ^^^^^
+
+References:
+   render_types.js:155:37
+   155| function rejectsArrayAsMaybe(input: [renders Inner, renders Inner]): renders? Inner {
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   render_types.js:155:70
+   155| function rejectsArrayAsMaybe(input: [renders Inner, renders Inner]): renders? Inner {
+                                                                             ^^^^^^^^^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- render_types.js:162:5
+
+This match pattern [1] is unused. The values it matches are either already covered by previous patterns, or are not part
+of the input type. To fix, either remove this pattern or restructure previous patterns. [match-unused-pattern]
+
+   162|     null | false => {} // ERROR
+            ^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------- render_types.js:162:12
+
+This match pattern [1] is unused. The values it matches are either already covered by previous patterns, or are not part
+of the input type. To fix, either remove this pattern or restructure previous patterns. [match-unused-pattern]
+
+   162|     null | false => {} // ERROR
+                   ^^^^^ [1]
+
+
 Error -------------------------------------------------------------------------------------------- rules-of-hooks.js:8:7
 
 Cannot call hook [1] because React hooks cannot be called in conditional contexts.
@@ -2697,4 +2867,4 @@ References:
 
 
 
-Found 204 errors
+Found 215 errors

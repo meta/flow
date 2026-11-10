@@ -949,6 +949,45 @@ fn __flow_impl<'cx>(
         ) => {
             collector.add(l.dupe());
         }
+        (
+            DefT(reason, deref!(RendersT(form))),
+            ConcretizeT(box ConcretizeTData {
+                kind: ConcretizationKind::ConcretizeForMatchArg { .. },
+                collector,
+                ..
+            }),
+        ) if match form.deref() {
+            CanonicalRendersForm::IntrinsicRenders(_)
+            | CanonicalRendersForm::NominalRenders { .. } => true,
+            CanonicalRendersForm::StructuralRenders {
+                renders_variant: RendersVariant::RendersNormal,
+                renders_structural_type,
+            } => {
+                let types = possible_concrete_types_for_inspection(
+                    cx,
+                    env,
+                    reason,
+                    renders_structural_type,
+                )?;
+                !types.is_empty()
+                    && types.iter().all(|t| {
+                        matches!(
+                            t.deref(),
+                            DefT(
+                                _,
+                                deref!(RendersT(deref!(
+                                    CanonicalRendersForm::IntrinsicRenders(_)
+                                        | CanonicalRendersForm::NominalRenders { .. }
+                                )))
+                            )
+                        )
+                    })
+            }
+            _ => false,
+        } =>
+        {
+            collector.add(l.dupe());
+        }
         (UnionT(_, urep), ConcretizeT(..)) => {
             flow_all_in_union(cx, env, trace, urep, u)?;
         }
