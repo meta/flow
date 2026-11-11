@@ -14,5 +14,122 @@ Property `second` is used before its initialization. [uninitialized-property]
                          ^^^^^^^^^^^
 
 
+Error ------------------------------------------------------------------------------------------------- variables.js:8:1
 
-Found 2 errors
+Cannot cast `plain` to `number` because uninitialized variable [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   variables.js:8:1
+   8| plain as number; // error: uninitialized
+      ^^^^^
+
+References:
+   variables.js:7:5
+   7| let plain: number;
+          ^^^^^ [1]
+   variables.js:8:10
+   8| plain as number; // error: uninitialized
+               ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ variables.js:29:1
+
+Cannot cast `plainAfterCall` to `number` because possibly uninitialized variable [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   variables.js:29:1
+   29| plainAfterCall as number; // error: possibly uninitialized
+       ^^^^^^^^^^^^^^
+
+References:
+   variables.js:24:5
+   24| let plainAfterCall: number;
+           ^^^^^^^^^^^^^^ [1]
+   variables.js:29:19
+   29| plainAfterCall as number; // error: possibly uninitialized
+                         ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- variables.js:41:12
+
+Cannot assign `'str'` to `assigned` because `"str"` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   variables.js:41:12
+   41| assigned = 'str'; // error: string is incompatible with number
+                  ^^^^^ [1]
+
+References:
+   variables.js:40:16
+   40| let assigned!: number;
+                      ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ variables.js:44:1
+
+Cannot cast `maybe` to `number` because `null` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   variables.js:44:1
+   44| maybe as number; // error: null or undefined is incompatible with number
+       ^^^^^
+
+References:
+   variables.js:43:13
+   43| let maybe!: ?number;
+                   ^^^^^^^ [1]
+   variables.js:44:10
+   44| maybe as number; // error: null or undefined is incompatible with number
+                ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ variables.js:44:1
+
+Cannot cast `maybe` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   variables.js:44:1
+   44| maybe as number; // error: null or undefined is incompatible with number
+       ^^^^^
+
+References:
+   variables.js:43:13
+   43| let maybe!: ?number;
+                   ^^^^^^^ [1]
+   variables.js:44:10
+   44| maybe as number; // error: null or undefined is incompatible with number
+                ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ variables.js:52:1
+
+Cannot use variable `beforeDeclaration` [1] because the declaration either comes later or was skipped.
+[reference-before-declaration]
+
+   variables.js:52:1
+   52| beforeDeclaration as number; // error: used before its declaration
+       ^^^^^^^^^^^^^^^^^
+
+References:
+   variables.js:53:5
+   53| let beforeDeclaration!: number;
+           ^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------ variables.js:55:1
+
+Cannot cast `readVar` to `number` because uninitialized variable [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   variables.js:55:1
+   55| readVar as number; // error: uninitialized, the declaration below has not run
+       ^^^^^^^
+
+References:
+   variables.js:56:5
+   56| var readVar!: number;
+           ^^^^^^^ [1]
+   variables.js:55:12
+   55| readVar as number; // error: uninitialized, the declaration below has not run
+                  ^^^^^^ [2]
+
+
+
+Found 9 errors

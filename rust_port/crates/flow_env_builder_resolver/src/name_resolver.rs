@@ -9863,6 +9863,16 @@ impl<'ast, 'a, Cx: Context, Fl: Flow<Cx = Cx>>
                 self.expression(init_expr)?;
                 self.binding_pattern_track_object_destructuring(Some(kind), init_expr.clone(), id)?;
             }
+            // `let x!: T` asserts that `x` is assigned before it is read, so the declaration
+            // writes `x` with its annotation, as `declare let x: T` does, instead of leaving it
+            // uninitialized.
+            (None, Pattern::Identifier { inner, .. })
+                if decl.definite && matches!(inner.annot, AnnotationOrHint::Available(_)) =>
+            {
+                self.record_pattern_loc_writes(id);
+                self.pattern_identifier(Some(kind), &inner.name)?;
+                self.with_current_pattern_bindings(id, |this| this.type_annotation_hint(annot))?;
+            }
             (None, _) => {
                 // No rhs means no write occurs, but the variable moves from undeclared to uninitialized.
                 self.record_pattern_loc_writes(id);
