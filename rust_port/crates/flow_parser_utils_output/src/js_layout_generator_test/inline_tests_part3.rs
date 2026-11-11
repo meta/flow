@@ -267,6 +267,15 @@ fn class_override() {
 }
 
 #[test]
+fn definite_assignment() {
+    assert_statement_string(false, None, "let a!:number;");
+    assert_statement_string(true, None, "let a!: number;");
+    assert_statement_string(false, None, "var a!:number,b!:string;");
+    assert_statement_string(false, None, "class a{b!:number;#c!:string;}");
+    assert_statement_string(true, None, "class a {\n  b!: number;\n  #c!: string;\n}");
+}
+
+#[test]
 fn declare_class_override() {
     // override methods
     assert_statement_string(false, None, "declare class a extends b{override a():void}");

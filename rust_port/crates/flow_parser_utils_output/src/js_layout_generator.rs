@@ -2775,6 +2775,20 @@ fn variable_declarator(
     opts: &Opts,
     decl: &ast::statement::variable::Declarator<Loc, Loc>,
 ) -> LayoutNode {
+    let id = match &decl.id {
+        ast::pattern::Pattern::Identifier { loc, inner } if decl.definite => {
+            source_location_with_comments(
+                loc,
+                None::<&ast::Syntax<Loc, ()>>,
+                fuse(vec![
+                    identifier(&inner.name),
+                    atom("!"),
+                    hint(|a| type_annotation(opts, false, a), &inner.annot),
+                ]),
+            )
+        }
+        id => pattern(opts, Some(ctxt), id),
+    };
     source_location_with_comments(
         &decl.loc,
         None::<&ast::Syntax<Loc, ()>>,
@@ -2786,14 +2800,14 @@ fn variable_declarator(
                     &comment_attachment::expression_comment_bounds(expr),
                 );
                 fuse(vec![
-                    pattern(opts, Some(ctxt), &decl.id),
+                    id,
                     pretty_space(),
                     atom("="),
                     init_separator,
                     expression_with_parens(opts, PRECEDENCE_OF_ASSIGNMENT, ctxt, expr),
                 ])
             }
-            None => pattern(opts, Some(ctxt), &decl.id),
+            None => id,
         },
     )
 }
@@ -4928,6 +4942,7 @@ fn class_property_helper(
     decorators: &[ast::class::Decorator<Loc, Loc>],
     comments: Option<&ast::Syntax<Loc, ()>>,
     optional: bool,
+    definite: bool,
 ) -> LayoutNode {
     let (declare, value_expr) = match value {
         ast::class::property::Value::Declared => (true, None),
@@ -4960,6 +4975,11 @@ fn class_property_helper(
             key,
             if optional {
                 atom("?")
+            } else {
+                LayoutNode::empty()
+            },
+            if definite {
+                atom("!")
             } else {
                 LayoutNode::empty()
             },
@@ -5008,6 +5028,7 @@ fn function_param(
             &property.decorators,
             property.comments.as_ref(),
             property.optional,
+            property.definite,
         ),
     }
 }
@@ -7510,6 +7531,7 @@ pub(crate) fn class_property(opts: &Opts, prop: &ast::class::Property<Loc, Loc>)
         &prop.decorators,
         prop.comments.as_ref(),
         prop.optional,
+        prop.definite,
     ))
 }
 
@@ -7539,6 +7561,7 @@ pub(crate) fn class_private_field(
         &field.decorators,
         field.comments.as_ref(),
         field.optional,
+        field.definite,
     ))
 }
 
