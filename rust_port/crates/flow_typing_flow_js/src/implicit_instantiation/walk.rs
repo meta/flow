@@ -2087,10 +2087,9 @@ impl<'e> Walker<'e> {
                     }
                     _ => instance,
                 };
-                // Under `experimental.react_managed_attributes`, the config of a class with markers
-                // is `React.ReactManagedAttributes` of a spread of its props, which the walk can't
-                // take apart.
-                let config = if cx.react_managed_attributes() && self.mentions(cx, l) {
+                // The config of a class with markers is `React.ReactManagedAttributes` of a spread
+                // of its props, which the walk can't take apart.
+                let config = if self.mentions(cx, l) {
                     None
                 } else {
                     self.evaluate(cx, l, &d)?
@@ -2101,9 +2100,9 @@ impl<'e> Walker<'e> {
                     // declares, through the `React.Component` it extends.
                     None => {
                         // The props stand for the config, which the flow-based solve checks only
-                        // once they are known, through the default props or
-                        // `React.ReactManagedAttributes`: their evidence counts where it agrees
-                        // with the evidence so far, as where that check succeeds.
+                        // once they are known, through `React.ReactManagedAttributes`: their
+                        // evidence counts where it agrees with the evidence so far, as where that
+                        // check succeeds.
                         if let Some(props) = self.class_component_props(cx, &instance)? {
                             let config = self.evaluated(cx, &uc.config)?;
                             let snapshot = self.snapshot();
@@ -2457,18 +2456,14 @@ impl<'e> Walker<'e> {
         Ok(self.prop_of(cx, instance, "props"))
     }
 
-    /// Under `experimental.react_managed_attributes`, the config of a class component is its props
-    /// with `ref?: React.RefSetter<I>` for its instance `I`, so the `ref` of an element meets the
-    /// instance.
+    /// The config of a class component is its props with `ref?: React.RefSetter<I>` for its
+    /// instance `I`, so the `ref` of an element meets the instance.
     fn walk_jsx_ref<'cx>(
         &mut self,
         cx: &mut Context<'cx>,
         jsx_props: &Type,
         instance: &Type,
     ) -> Result<(), FlowJsException> {
-        if !cx.react_managed_attributes() {
-            return Ok(());
-        }
         let Some(ref_t) = self.prop_of(cx, jsx_props, "ref") else {
             return Ok(());
         };
@@ -2487,60 +2482,6 @@ impl<'e> Walker<'e> {
             Some(ref_setter) => self.walk(cx, &ref_t, &ref_setter),
             None => Ok(()),
         }
-    }
-
-    /// The default props of a class component against its props: as the config of the class
-    /// leaves them out, the flow-based solve checks each against the prop of the same name. Under
-    /// `experimental.react_managed_attributes`, the config keeps them, optional, with the types of
-    /// the props, so the default props say nothing about the props.
-    fn walk_default_props<'cx>(
-        &mut self,
-        cx: &mut Context<'cx>,
-        component: &Type,
-        props: &Type,
-    ) -> Result<(), FlowJsException> {
-        if cx.react_managed_attributes() {
-            return Ok(());
-        }
-        let defaults = match self.method_type_of(cx, component, "defaultProps") {
-            Ok(Some(defaults)) => defaults,
-            Ok(None) | Err(_) => return Ok(()),
-        };
-        let props = self.structure_of(cx, props)?;
-        let (TypeInner::DefT(_, dd), Some(props)) = (defaults.deref(), props) else {
-            return Ok(());
-        };
-        let (DefTInner::ObjT(defaults), TypeInner::DefT(_, pd)) = (dd.deref(), props.deref())
-        else {
-            return Ok(());
-        };
-        let DefTInner::ObjT(props) = pd.deref() else {
-            return Ok(());
-        };
-        let defaults = cx.find_props(defaults.props_tmap.dupe());
-        let props = cx.find_props(props.props_tmap.dupe());
-        for (name, default) in defaults.iter() {
-            let Some(prop) = props.get(name) else {
-                continue;
-            };
-            let (default, prop) = (property::type_(default), property::type_(prop));
-            // A default that mentions the type parameters is left out: the flow-based solve
-            // instantiates it with its own type variables, which gives them circular bounds
-            // (`T :> Tree<T>`) and a solution in terms of itself.
-            if self.mentions(cx, default) {
-                continue;
-            }
-            // An optional default says something only about an optional prop.
-            match (default.deref(), prop.deref()) {
-                (
-                    TypeInner::OptionalT { type_: default, .. },
-                    TypeInner::OptionalT { type_: prop, .. },
-                ) => self.walk(cx, default, prop)?,
-                (TypeInner::OptionalT { .. }, _) => {}
-                _ => self.walk(cx, default, prop)?,
-            }
-        }
-        Ok(())
     }
 
     /// The props that the config check of a class component makes of the props of a JSX element:
@@ -6710,7 +6651,6 @@ fn solve_targs_in_snapshot<'cx>(
                             let instance = walker.normalize(cx, inner);
                             match walker.class_component_props(cx, &instance)? {
                                 Some(props) => {
-                                    walker.walk_default_props(cx, &component, &props)?;
                                     walker.walk_jsx_ref(cx, &jsx_props, &instance)?;
                                     // Props that are a type parameter get the props of the
                                     // element with the default props, as the config check

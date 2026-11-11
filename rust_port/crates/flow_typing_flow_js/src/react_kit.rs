@@ -532,9 +532,8 @@ fn props_to_tout<'cx>(
 }
 
 // Creates the type that we expect for a React config. For class components,
-// the default props are merged in with `React.ReactManagedAttributes` under
-// `experimental.react_managed_attributes`, and otherwise diffed out with
-// ObjKitT(Rest). The config does not include types for `key` or `ref`.
+// the default props are merged in with `React.ReactManagedAttributes`. The
+// config does not include types for `key` or `ref`.
 //
 // There is some duplication between the logic used here to get a config type
 // and ObjKitT(ReactConfig). In create_element, we want to produce a props
@@ -594,8 +593,7 @@ pub fn get_config<'cx>(
         return Ok(());
     }
     let reason_component = type_util::reason_of_t(component);
-    if cx.react_managed_attributes()
-        && let TypeInner::DefT(reason_class, def_t) = dropped.deref()
+    if let TypeInner::DefT(reason_class, def_t) = dropped.deref()
         && let DefTInner::ClassT(instance) = def_t.deref()
     {
         let reason_props = reason_component.dupe().replace_desc(None);
@@ -719,40 +717,14 @@ pub fn get_config<'cx>(
             )
         })?
     };
-    let defaults = get_defaults(cx, env, trace, component, reason_op)?;
-    match defaults {
-        None => {
-            FlowJs::rec_flow_with_env(
-                cx,
-                env,
-                trace,
-                &props,
-                &UseT::new(UseTInner::UseT(use_op, tout.dupe())),
-            )?;
-            Ok(())
-        }
-        Some(defaults) => {
-            let tool = object::ResolveTool::Resolve(object::Resolve::Next);
-            let state = object::rest::State::One(defaults);
-            FlowJs::rec_flow_with_env(
-                cx,
-                env,
-                trace,
-                &props,
-                &UseT::new(UseTInner::ObjKitT(
-                    use_op,
-                    reason_op.dupe(),
-                    Box::new(tool),
-                    Box::new(object::Tool::Rest(Box::new((
-                        object::rest::MergeMode::ReactConfigMerge(pole),
-                        state,
-                    )))),
-                    tout.dupe(),
-                )),
-            )?;
-            Ok(())
-        }
-    }
+    FlowJs::rec_flow_with_env(
+        cx,
+        env,
+        trace,
+        &props,
+        &UseT::new(UseTInner::UseT(use_op, tout.dupe())),
+    )?;
+    Ok(())
 }
 
 pub fn run<'cx>(

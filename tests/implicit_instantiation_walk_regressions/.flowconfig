@@ -2,5 +2,4 @@
 all=true
 builtin_lib=core-only
 experimental.implicit_instantiation_walk=true
-experimental.react_managed_attributes=false
 experimental.typescript_library_definition_support=true

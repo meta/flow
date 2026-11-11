@@ -30,38 +30,53 @@ References:
 
 Error ------------------------------------------------------------------------------------------ component_props.js:52:6
 
-Cannot cast object literal to `React.ComponentProps<typeof A>` because in property `p`: `"foo"` [1] is incompatible with
-`number` [2]. [incompatible-type]
+Cannot cast object literal to `React.ComponentProps<typeof A>` because in property `p`: [incompatible-type]
+ - Either `"foo"` [1] is incompatible with `number` [2].
+ - Or `"foo"` [1] is incompatible with `void` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    component_props.js:52:6
-   52| ({p: 'foo'}) as React.ComponentProps<typeof A>; // Error: string ~> number
-            ^^^^^ [1]
+    52| ({p: 'foo'}) as React.ComponentProps<typeof A>; // Error: string ~> number
+             ^^^^^ [1]
 
 References:
    component_props.js:10:38
-   10| class A extends React.Component<{p: ?number, ...}> {
-                                            ^^^^^^ [2]
+    10| class A extends React.Component<{p: ?number, ...}> {
+                                             ^^^^^^ [2]
+   <BUILTINS>/react.js:141:53
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
+                                                            ^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------ component_props.js:56:6
 
-Cannot cast object literal to `React.ComponentProps<typeof B>` because in property `p`: `"foo"` [1] is incompatible with
-`number` [2]. [incompatible-type]
+Cannot cast object literal to `React.ComponentProps<typeof B>` because in property `p`: [incompatible-type]
+ - Either `"foo"` [1] is incompatible with `number` [2].
+ - Or `"foo"` [1] is incompatible with `void` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    component_props.js:56:6
-   56| ({p: 'foo'}) as React.ComponentProps<typeof B>; // Error: string ~> number
-            ^^^^^ [1]
+    56| ({p: 'foo'}) as React.ComponentProps<typeof B>; // Error: string ~> number
+             ^^^^^ [1]
 
 References:
    component_props.js:14:38
-   14| class B extends React.Component<{p: ?number, ...}> {
-                                            ^^^^^^ [2]
+    14| class B extends React.Component<{p: ?number, ...}> {
+                                             ^^^^^^ [2]
+   <BUILTINS>/react.js:141:53
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
+                                                            ^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------ component_props.js:58:9
 
 Cannot cast `{...}` to `React.ComponentProps<typeof C>` because properties `p` and `ref` are missing in `{...}` [1] but
-exist in `{p: ?number, readonly ref?: React.RefSetter<C>, ...}` [2]. [incompatible-type]
+exist in `{readonly p?: {p: {p: ?number, ref?: React.RefSetter<C>, ...}["p"]}["p"] | void, readonly ref?: {p: ...` [2].
+[incompatible-type]
 
    component_props.js:58:9
    58| ({}) as {...} as React.ComponentProps<typeof C>; // Error: missing property `p`
@@ -75,23 +90,31 @@ References:
 
 Error ------------------------------------------------------------------------------------------ component_props.js:60:6
 
-Cannot cast object literal to `React.ComponentProps<typeof C>` because in property `p`: `"foo"` [1] is incompatible with
-`number` [2]. [incompatible-type]
+Cannot cast object literal to `React.ComponentProps<typeof C>` because in property `p`: [incompatible-type]
+ - Either `"foo"` [1] is incompatible with `number` [2].
+ - Or `"foo"` [1] is incompatible with `void` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    component_props.js:60:6
-   60| ({p: 'foo'}) as React.ComponentProps<typeof C>; // Error: string ~> number
-            ^^^^^ [1]
+    60| ({p: 'foo'}) as React.ComponentProps<typeof C>; // Error: string ~> number
+             ^^^^^ [1]
 
 References:
    component_props.js:18:38
-   18| class C extends React.Component<{p: ?number, ...}> {
-                                            ^^^^^^ [2]
+    18| class C extends React.Component<{p: ?number, ...}> {
+                                             ^^^^^^ [2]
+   <BUILTINS>/react.js:141:53
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
+                                                            ^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------ component_props.js:62:9
 
 Cannot cast `{...}` to `React.ComponentProps<typeof D>` because properties `p` and `ref` are missing in `{...}` [1] but
-exist in `{p: ?number, readonly ref?: React.RefSetter<D>, ...}` [2]. [incompatible-type]
+exist in `{readonly p?: {p: {p: ?number, ref?: React.RefSetter<D>, ...}["p"]}["p"] | void, readonly ref?: {p: ...` [2].
+[incompatible-type]
 
    component_props.js:62:9
    62| ({}) as {...} as React.ComponentProps<typeof D>; // Error: missing property `p`
@@ -105,23 +128,31 @@ References:
 
 Error ------------------------------------------------------------------------------------------ component_props.js:64:6
 
-Cannot cast object literal to `React.ComponentProps<typeof D>` because in property `p`: `"foo"` [1] is incompatible with
-`number` [2]. [incompatible-type]
+Cannot cast object literal to `React.ComponentProps<typeof D>` because in property `p`: [incompatible-type]
+ - Either `"foo"` [1] is incompatible with `number` [2].
+ - Or `"foo"` [1] is incompatible with `void` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    component_props.js:64:6
-   64| ({p: 'foo'}) as React.ComponentProps<typeof D>; // Error: string ~> number
-            ^^^^^ [1]
+    64| ({p: 'foo'}) as React.ComponentProps<typeof D>; // Error: string ~> number
+             ^^^^^ [1]
 
 References:
    component_props.js:22:38
-   22| class D extends React.Component<{p: ?number, ...}> {
-                                            ^^^^^^ [2]
+    22| class D extends React.Component<{p: ?number, ...}> {
+                                             ^^^^^^ [2]
+   <BUILTINS>/react.js:141:53
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
+                                                            ^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------ component_props.js:71:2
 
 Cannot cast object literal to `React.ComponentProps<typeof F>` because property `p` is extra in object literal [1] but
-missing in `{readonly ref?: React.RefSetter<F>}` [2]. Exact objects do not accept extra props. [incompatible-type]
+missing in `{readonly ref?: {ref?: React.RefSetter<F>}["ref"]}` [2]. Exact objects do not accept extra props.
+[incompatible-type]
 
    component_props.js:71:2
    71| ({p: 42}) as React.ComponentProps<typeof F>; // Error: extra property `p`
@@ -136,7 +167,8 @@ References:
 Error ------------------------------------------------------------------------------------------ component_props.js:72:2
 
 Cannot cast object literal to `React.ComponentProps<typeof F>` because property `p` is extra in object literal [1] but
-missing in `{readonly ref?: React.RefSetter<F>}` [2]. Exact objects do not accept extra props. [incompatible-type]
+missing in `{readonly ref?: {ref?: React.RefSetter<F>}["ref"]}` [2]. Exact objects do not accept extra props.
+[incompatible-type]
 
    component_props.js:72:2
    72| ({p: 'foo'}) as React.ComponentProps<typeof F>; // Error: extra property `p`
@@ -150,272 +182,90 @@ References:
 
 Error ------------------------------------------------------------------------------------------ component_props.js:76:6
 
-Cannot cast object literal to `React.ComponentProps<typeof G>` because in property `p`: `"foo"` [1] is incompatible with
-`number` [2]. [incompatible-type]
+Cannot cast object literal to `React.ComponentProps<typeof G>` because in property `p`: [incompatible-type]
+ - Either `"foo"` [1] is incompatible with `number` [2].
+ - Or `"foo"` [1] is incompatible with `void` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    component_props.js:76:6
-   76| ({p: 'foo'}) as React.ComponentProps<typeof G>; // Error: string ~> number
-            ^^^^^ [1]
+    76| ({p: 'foo'}) as React.ComponentProps<typeof G>; // Error: string ~> number
+             ^^^^^ [1]
 
 References:
    component_props.js:34:38
-   34| class G extends React.Component<{p: ?number, ...}> {
-                                            ^^^^^^ [2]
+    34| class G extends React.Component<{p: ?number, ...}> {
+                                             ^^^^^^ [2]
+   <BUILTINS>/react.js:141:53
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
+                                                            ^^^^ [3]
 
 
-Error ------------------------------------------------------------------------------------------ component_props.js:78:2
+Error ------------------------------------------------------------------------------------------ component_props.js:80:6
 
-Cannot cast object literal to `React.ComponentProps<typeof H>` because object literal [1] is incompatible with
-`empty` [2]. [incompatible-type]
-
-   component_props.js:78:2
-   78| ({}) as React.ComponentProps<typeof H>; // ERROR: incompatible default props
-        ^^ [1]
-
-References:
-   component_props.js:78:9
-   78| ({}) as React.ComponentProps<typeof H>; // ERROR: incompatible default props
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------- component_props.js:78:30
-
-Cannot instantiate `React.ComponentProps` because in type argument `T`: [incompatible-type]
- - Either class `H` [1] is incompatible with `string` [2].
- - Or `string` [3] is incompatible with `number` [4].
+Cannot cast object literal to `React.ComponentProps<typeof H>` because in property `p`: [incompatible-type]
+ - Either `"foo"` [1] is incompatible with `number` [2].
+ - Or `"foo"` [1] is incompatible with `void` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
-   component_props.js:78:30
-   78| ({}) as React.ComponentProps<typeof H>; // ERROR: incompatible default props
-                                    ^^^^^^^^ [1]
+   component_props.js:80:6
+    80| ({p: 'foo'}) as React.ComponentProps<typeof H>; // ERROR: incompatible default props
+             ^^^^^ [1]
 
 References:
-   <BUILTINS>/react.js:43:5
-   43|   | string
-           ^^^^^^ [2]
-   component_props.js:39:28
-   39|   static defaultProps: {p: string, ...} = {p: 'foo'};
-                                  ^^^^^^ [3]
    component_props.js:38:39
-   38| class H extends React.Component<{p?: ?number, ...}> {
-                                             ^^^^^^ [4]
-
-
-Error ------------------------------------------------------------------------------------------ component_props.js:79:2
-
-Cannot cast object literal to `React.ComponentProps<typeof H>` because object literal [1] is incompatible with
-`empty` [2]. [incompatible-type]
-
-   component_props.js:79:2
-   79| ({p: 42}) as React.ComponentProps<typeof H>; // ERROR: incompatible default props
-        ^^^^^^^ [1]
-
-References:
-   component_props.js:79:14
-   79| ({p: 42}) as React.ComponentProps<typeof H>; // ERROR: incompatible default props
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------- component_props.js:79:35
-
-Cannot instantiate `React.ComponentProps` because in type argument `T`: [incompatible-type]
- - Either class `H` [1] is incompatible with `string` [2].
- - Or `string` [3] is incompatible with `number` [4].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
-
-   component_props.js:79:35
-   79| ({p: 42}) as React.ComponentProps<typeof H>; // ERROR: incompatible default props
-                                         ^^^^^^^^ [1]
-
-References:
-   <BUILTINS>/react.js:43:5
-   43|   | string
-           ^^^^^^ [2]
-   component_props.js:39:28
-   39|   static defaultProps: {p: string, ...} = {p: 'foo'};
-                                  ^^^^^^ [3]
-   component_props.js:38:39
-   38| class H extends React.Component<{p?: ?number, ...}> {
-                                             ^^^^^^ [4]
-
-
-Error ------------------------------------------------------------------------------------------ component_props.js:80:2
-
-Cannot cast object literal to `React.ComponentProps<typeof H>` because object literal [1] is incompatible with
-`empty` [2]. [incompatible-type]
-
-   component_props.js:80:2
-   80| ({p: 'foo'}) as React.ComponentProps<typeof H>; // ERROR: incompatible default props
-        ^^^^^^^^^^ [1]
-
-References:
-   component_props.js:80:17
-   80| ({p: 'foo'}) as React.ComponentProps<typeof H>; // ERROR: incompatible default props
-                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------- component_props.js:80:38
-
-Cannot instantiate `React.ComponentProps` because in type argument `T`: [incompatible-type]
- - Either class `H` [1] is incompatible with `string` [2].
- - Or `string` [3] is incompatible with `number` [4].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
-
-   component_props.js:80:38
-   80| ({p: 'foo'}) as React.ComponentProps<typeof H>; // ERROR: incompatible default props
-                                            ^^^^^^^^ [1]
-
-References:
-   <BUILTINS>/react.js:43:5
-   43|   | string
-           ^^^^^^ [2]
-   component_props.js:39:28
-   39|   static defaultProps: {p: string, ...} = {p: 'foo'};
-                                  ^^^^^^ [3]
-   component_props.js:38:39
-   38| class H extends React.Component<{p?: ?number, ...}> {
-                                             ^^^^^^ [4]
+    38| class H extends React.Component<{p?: ?number, ...}> {
+                                              ^^^^^^ [2]
+   <BUILTINS>/react.js:141:53
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
+                                                            ^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------ component_props.js:84:6
 
-Cannot cast object literal to `React.ComponentProps<typeof I>` because in property `p`: `"foo"` [1] is incompatible with
-`number` [2]. [incompatible-type]
+Cannot cast object literal to `React.ComponentProps<typeof I>` because in property `p`: [incompatible-type]
+ - Either `"foo"` [1] is incompatible with `number` [2].
+ - Or `"foo"` [1] is incompatible with `void` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    component_props.js:84:6
-   84| ({p: 'foo'}) as React.ComponentProps<typeof I>; // Error: string ~> number
-            ^^^^^ [1]
+    84| ({p: 'foo'}) as React.ComponentProps<typeof I>; // Error: string ~> number
+             ^^^^^ [1]
 
 References:
    component_props.js:42:39
-   42| class I extends React.Component<{p?: ?number, ...}> {
-                                             ^^^^^^ [2]
+    42| class I extends React.Component<{p?: ?number, ...}> {
+                                              ^^^^^^ [2]
+   <BUILTINS>/react.js:141:53
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
+                                                            ^^^^ [3]
 
 
-Error ------------------------------------------------------------------------------------------ component_props.js:86:2
+Error ------------------------------------------------------------------------------------------ component_props.js:88:6
 
-Cannot cast object literal to `React.ComponentProps<typeof J>` because object literal [1] is incompatible with
-`empty` [2]. [incompatible-type]
-
-   component_props.js:86:2
-   86| ({}) as React.ComponentProps<typeof J>; // ERROR: incompatible default props
-        ^^ [1]
-
-References:
-   component_props.js:86:9
-   86| ({}) as React.ComponentProps<typeof J>; // ERROR: incompatible default props
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------- component_props.js:86:30
-
-Cannot instantiate `React.ComponentProps` because in type argument `T`: [incompatible-type]
- - Either class `J` [1] is incompatible with `string` [2].
- - Or `string` [3] is incompatible with `number` [4].
+Cannot cast object literal to `React.ComponentProps<typeof J>` because in property `p`: [incompatible-type]
+ - Either `"foo"` [1] is incompatible with `number` [2].
+ - Or `"foo"` [1] is incompatible with `void` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
-   component_props.js:86:30
-   86| ({}) as React.ComponentProps<typeof J>; // ERROR: incompatible default props
-                                    ^^^^^^^^ [1]
+   component_props.js:88:6
+    88| ({p: 'foo'}) as React.ComponentProps<typeof J>; // ERROR: incompatible default props
+             ^^^^^ [1]
 
 References:
-   <BUILTINS>/react.js:43:5
-   43|   | string
-           ^^^^^^ [2]
-   component_props.js:47:29
-   47|   static defaultProps: {p?: string, ...} = {} as {p?: string, ...};
-                                   ^^^^^^ [3]
    component_props.js:46:39
-   46| class J extends React.Component<{p?: ?number, ...}> {
-                                             ^^^^^^ [4]
-
-
-Error ------------------------------------------------------------------------------------------ component_props.js:87:2
-
-Cannot cast object literal to `React.ComponentProps<typeof J>` because object literal [1] is incompatible with
-`empty` [2]. [incompatible-type]
-
-   component_props.js:87:2
-   87| ({p: 42}) as React.ComponentProps<typeof J>; // ERROR: incompatible default props
-        ^^^^^^^ [1]
-
-References:
-   component_props.js:87:14
-   87| ({p: 42}) as React.ComponentProps<typeof J>; // ERROR: incompatible default props
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------- component_props.js:87:35
-
-Cannot instantiate `React.ComponentProps` because in type argument `T`: [incompatible-type]
- - Either class `J` [1] is incompatible with `string` [2].
- - Or `string` [3] is incompatible with `number` [4].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
-
-   component_props.js:87:35
-   87| ({p: 42}) as React.ComponentProps<typeof J>; // ERROR: incompatible default props
-                                         ^^^^^^^^ [1]
-
-References:
-   <BUILTINS>/react.js:43:5
-   43|   | string
-           ^^^^^^ [2]
-   component_props.js:47:29
-   47|   static defaultProps: {p?: string, ...} = {} as {p?: string, ...};
-                                   ^^^^^^ [3]
-   component_props.js:46:39
-   46| class J extends React.Component<{p?: ?number, ...}> {
-                                             ^^^^^^ [4]
-
-
-Error ------------------------------------------------------------------------------------------ component_props.js:88:2
-
-Cannot cast object literal to `React.ComponentProps<typeof J>` because object literal [1] is incompatible with
-`empty` [2]. [incompatible-type]
-
-   component_props.js:88:2
-   88| ({p: 'foo'}) as React.ComponentProps<typeof J>; // ERROR: incompatible default props
-        ^^^^^^^^^^ [1]
-
-References:
-   component_props.js:88:17
-   88| ({p: 'foo'}) as React.ComponentProps<typeof J>; // ERROR: incompatible default props
-                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------- component_props.js:88:38
-
-Cannot instantiate `React.ComponentProps` because in type argument `T`: [incompatible-type]
- - Either class `J` [1] is incompatible with `string` [2].
- - Or `string` [3] is incompatible with `number` [4].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
-
-   component_props.js:88:38
-   88| ({p: 'foo'}) as React.ComponentProps<typeof J>; // ERROR: incompatible default props
-                                            ^^^^^^^^ [1]
-
-References:
-   <BUILTINS>/react.js:43:5
-   43|   | string
-           ^^^^^^ [2]
-   component_props.js:47:29
-   47|   static defaultProps: {p?: string, ...} = {} as {p?: string, ...};
-                                   ^^^^^^ [3]
-   component_props.js:46:39
-   46| class J extends React.Component<{p?: ?number, ...}> {
-                                             ^^^^^^ [4]
+    46| class J extends React.Component<{p?: ?number, ...}> {
+                                              ^^^^^^ [2]
+   <BUILTINS>/react.js:141:53
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
+                                                            ^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------ component_props.js:98:1
@@ -585,90 +435,26 @@ References:
              ^^^ [2]
 
 
-Error ------------------------------------------------------------------------------- default_props_not_in_props.js:9:36
+Error ---------------------------------------------------------------------------------- default_props_undefined.js:8:10
 
-Cannot instantiate `React.ComponentProps` because in type argument `T`: [incompatible-type]
- - Either class `K` [1] is incompatible with `string` [2].
- - Or property `p` is missing in `{ref?: React.RefSetter<K>}` [1] but exists in `{p: number}` [3].
+Cannot create `Foo` element because in property `bar`: [incompatible-type]
+ - Either `"42"` [1] is incompatible with `number` [2].
+ - Or `"42"` [1] is incompatible with `void` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
-   default_props_not_in_props.js:9:36
-    9| const config: React.ComponentProps<typeof K> = {}; // ERROR: the default prop is not declared in K's props
-                                          ^^^^^^^^ [1]
-
-References:
-   <BUILTINS>/react.js:43:5
-   43|   | string
-           ^^^^^^ [2]
-   default_props_not_in_props.js:6:24
-    6|   static defaultProps: {p: number} = {p: 1};
-                              ^^^^^^^^^^^ [3]
-
-
-Error ------------------------------------------------------------------------------- default_props_not_in_props.js:9:48
-
-Cannot assign object literal to `config` because object literal [1] is incompatible with `empty` [2].
-[incompatible-type]
-
-   default_props_not_in_props.js:9:48
-   9| const config: React.ComponentProps<typeof K> = {}; // ERROR: the default prop is not declared in K's props
-                                                     ^^ [1]
-
-References:
-   default_props_not_in_props.js:9:15
-   9| const config: React.ComponentProps<typeof K> = {}; // ERROR: the default prop is not declared in K's props
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-
-
-Error ------------------------------------------------------------------------------- default_props_not_in_props.js:10:2
-
-Cannot create `K` element because property `p` is extra in `{p: number}` [1] but missing in
-`{readonly ref?: React.RefSetter<K>}` [2]. Exact objects do not accept extra props. [incompatible-type]
-
-   default_props_not_in_props.js:10:2
-   10| <K />; // ERROR: also reported at the element
-        ^
-
-References:
-   default_props_not_in_props.js:10:1
-   10| <K />; // ERROR: also reported at the element
-       ^^^^^ [1]
-   default_props_not_in_props.js:5:7
-    5| class K extends React.Component<{}> {
-             ^ [2]
-
-
-Error ------------------------------------------------------------------------------- default_props_not_in_props.js:10:2
-
-Property `p` is missing in `{ref?: React.RefSetter<K>}` [1] but exists in `{p: number}` [2]. [incompatible-type]
-
-   default_props_not_in_props.js:10:2
-   10| <K />; // ERROR: also reported at the element
-        ^
-
-References:
-   default_props_not_in_props.js:5:7
-    5| class K extends React.Component<{}> {
-             ^ [1]
-   default_props_not_in_props.js:6:24
-    6|   static defaultProps: {p: number} = {p: 1};
-                              ^^^^^^^^^^^ [2]
-
-
-Error ---------------------------------------------------------------------------------- default_props_undefined.js:8:10
-
-Cannot create `Foo` element because in property `bar`: `"42"` [1] is incompatible with `number` [2]. [incompatible-type]
-
    default_props_undefined.js:8:10
-   8| <Foo bar="42"/>; // Error
-               ^^^^ [1]
+     8| <Foo bar="42"/>; // Error
+                 ^^^^ [1]
 
 References:
    default_props_undefined.js:3:41
-   3| class Foo extends React.Component<{bar: number, ...}, void> {
-                                              ^^^^^^ [2]
+     3| class Foo extends React.Component<{bar: number, ...}, void> {
+                                                ^^^^^^ [2]
+   <BUILTINS>/react.js:141:53
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
+                                                            ^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------- default_props_write_only.js:7:2
@@ -1022,7 +808,7 @@ References:
 Error ----------------------------------------------------------------------------------------------------- hoc5.js:21:2
 
 Cannot create `MyComponent1` element because property `bar` is missing in `{foo: string, ...}` [1] but exists in
-`{readonly bar: number, readonly foo?: string, readonly ref?: React.RefSetter<MyComponent1>, ...}` [2].
+`{readonly bar: {bar: number, foo: string, ref?: React.RefSetter<MyComponent1>, ...}["bar"], readonly...` [2].
 [incompatible-type]
 
    hoc5.js:21:2
@@ -1055,23 +841,30 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- hoc5.js:25:29
 
-Cannot create `MyComponent1` element because in property `foo`: `100` [1] is incompatible with `string` [2].
-[incompatible-type]
+Cannot create `MyComponent1` element because in property `foo`: [incompatible-type]
+ - Either `100` [1] is incompatible with `string` [2].
+ - Or `100` [1] is incompatible with `void` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    hoc5.js:25:29
-   25| <MyComponent1 bar={42} foo={100} />; // Error
-                                   ^^^ [1]
+    25| <MyComponent1 bar={42} foo={100} />; // Error
+                                    ^^^ [1]
 
 References:
    hoc5.js:14:50
-   14| class MyComponent1 extends React.Component<{foo: string, bar: number, ...}> {
-                                                        ^^^^^^ [2]
+    14| class MyComponent1 extends React.Component<{foo: string, bar: number, ...}> {
+                                                         ^^^^^^ [2]
+   <BUILTINS>/react.js:141:53
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
+                                                            ^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- hoc5.js:30:2
 
 Cannot create `MyEnhancedComponent1` element because property `bar` is missing in `{}` [1] but exists in
-`{readonly bar: number, readonly foo?: string, readonly ref?: React.RefSetter<MyComponent1>, ...}` [2].
+`{readonly bar: {bar: number, foo: string, ref?: React.RefSetter<MyComponent1>, ...}["bar"], readonly...` [2].
 [incompatible-type]
 
    hoc5.js:30:2
@@ -1104,17 +897,24 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- hoc5.js:34:37
 
-Cannot create `MyEnhancedComponent1` element because in property `foo`: `100` [1] is incompatible with `string` [2].
-[incompatible-type]
+Cannot create `MyEnhancedComponent1` element because in property `foo`: [incompatible-type]
+ - Either `100` [1] is incompatible with `string` [2].
+ - Or `100` [1] is incompatible with `void` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    hoc5.js:34:37
-   34| <MyEnhancedComponent1 bar={42} foo={100} />; // Error
-                                           ^^^ [1]
+    34| <MyEnhancedComponent1 bar={42} foo={100} />; // Error
+                                            ^^^ [1]
 
 References:
    hoc5.js:14:50
-   14| class MyComponent1 extends React.Component<{foo: string, bar: number, ...}> {
-                                                        ^^^^^^ [2]
+    14| class MyComponent1 extends React.Component<{foo: string, bar: number, ...}> {
+                                                         ^^^^^^ [2]
+   <BUILTINS>/react.js:141:53
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
+                                                            ^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------- hoc_omit_regressions.js:78:2
@@ -2764,4 +2564,4 @@ References:
 
 
 
-Found 152 errors
+Found 138 errors

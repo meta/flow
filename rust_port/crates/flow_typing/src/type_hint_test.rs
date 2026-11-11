@@ -1090,7 +1090,7 @@ mod tests {
     #[test]
     fn jsx_props_of_class_component() {
         mk_eval_hint_test_with_type_setup(
-            "{readonly bar: string, readonly foo: number, readonly ref?: RefSetter<MyComponent>}",
+            "ReactManagedAttributes<Class<MyComponent>, {bar: string, foo: number, ref?: RefSetter<MyComponent>}>",
             "import * as React from 'react'; class MyComponent extends React.Component<{bar: string, foo: number}> {}; MyComponent",
             vec![DecompJsxProps],
         );

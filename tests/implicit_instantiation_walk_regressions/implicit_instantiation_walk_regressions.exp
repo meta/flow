@@ -431,24 +431,6 @@ References:
               ^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- jsx_props.js:45:34
-
-Cannot create `MenuItem` element because in property `onClick` > the first parameter: `{id: string, ...}` [1] is
-incompatible with `null` [2]. [incompatible-type]
-
-   jsx_props.js:45:34
-   45|   <MenuItem data={{id}} onClick={onClick} />; // error: `T` includes the `null` of `defaultProps`
-                                        ^^^^^^^
-
-References:
-   jsx_props.js:42:33
-   42|   declare const onClick: (data: {id: string, ...}) => void;
-                                       ^^^^^^^^^^^^^^^^^ [1]
-   jsx_props.js:39:33
-   39|     static defaultProps: {data: null} = {data: null};
-                                       ^^^^ [2]
-
-
 Error ---------------------------------------------------------------------------- literal_bound_mentions_other.js:18:15
 
 Cannot call `listenTo` because in type argument `N`: [incompatible-type]
@@ -847,4 +829,4 @@ References:
 
 
 
-Found 46 errors
+Found 45 errors

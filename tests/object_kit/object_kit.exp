@@ -196,6 +196,30 @@ References:
                    ^^^^^^^^^^^^^^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------------ dict_polarity.js:137:13
+
+Cannot assign `0` to `invariant.arbitrary` because property `arbitrary` is not writable. [cannot-write]
+
+   137|   invariant.arbitrary = 0; // OK
+                    ^^^^^^^^^
+
+
+Error ------------------------------------------------------------------------------------------ dict_polarity.js:141:12
+
+Cannot assign `0` to `readonly.arbitrary` because property `arbitrary` is not writable. [cannot-write]
+
+   141|   readonly.arbitrary = 0; // OK
+                   ^^^^^^^^^
+
+
+Error ------------------------------------------------------------------------------------------ dict_polarity.js:145:13
+
+Cannot assign `0` to `writeonly.arbitrary` because property `arbitrary` is not writable. [cannot-write]
+
+   145|   writeonly.arbitrary = 0; // OK
+                    ^^^^^^^^^
+
+
 Error ------------------------------------------------------------------------------------------ dict_polarity.js:160:22
 
 Cannot create `DictComponent` element because in property `key`: [incompatible-type]
@@ -219,4 +243,4 @@ References:
 
 
 
-Found 12 errors
+Found 15 errors

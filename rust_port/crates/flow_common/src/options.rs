@@ -179,7 +179,6 @@ pub struct Options {
     pub quiet: bool,
     pub records_includes: Arc<[String]>,
     pub react_custom_jsx_typing: bool,
-    pub react_managed_attributes: bool,
     pub react_rules: Arc<[ReactRule]>,
     pub react_runtime: ReactRuntime,
     pub recursion_limit: i32,
