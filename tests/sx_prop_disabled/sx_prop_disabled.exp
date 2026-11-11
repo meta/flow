@@ -6,12 +6,15 @@ objects do not accept extra props. [incompatible-type]
 
    test.js:10:2
    10| <div sx={[styles.foo]} />; // ERROR — sx is not a known prop on div
-        ^^^ [2]
+        ^^^
 
 References:
    test.js:10:1
    10| <div sx={[styles.foo]} />; // ERROR — sx is not a known prop on div
        ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   flow-typed/jsx.js:3:8
+    3|   div: { className?: string, style?: {[string]: string | number}, ref?: React.RefSetter<any> },
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 

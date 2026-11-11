@@ -37,7 +37,7 @@ test.js:34:3
 Flags:
 function Foo(props: {x: number}): React.Node
 
-'React.Node' defined at (lib) react.js:596:22
+'React.Node' defined at (lib) react.js:600:22
 
 test.js:34:3,34:5
 
@@ -45,7 +45,7 @@ test.js:37:15
 Flags:
 function Foo(props: {x: number}): React.Node
 
-'React.Node' defined at (lib) react.js:596:22
+'React.Node' defined at (lib) react.js:600:22
 
 test.js:37:15,37:17
 
@@ -66,7 +66,7 @@ test.js:56:3
 Flags:
 var NS: {Sub: (props: {x: number}) => React.Node}
 
-'React.Node' defined at (lib) react.js:596:22
+'React.Node' defined at (lib) react.js:600:22
 
 test.js:56:3,56:4
 
@@ -74,7 +74,7 @@ test.js:59:6
 Flags:
 (property) Sub: (props: {x: number}) => React.Node
 
-'React.Node' defined at (lib) react.js:596:22
+'React.Node' defined at (lib) react.js:600:22
 
 test.js:59:6,59:8
 
@@ -276,7 +276,7 @@ test.js:172:15
 Flags:
 (property) label: void | React.Node
 
-'React.Node' defined at (lib) react.js:596:22
+'React.Node' defined at (lib) react.js:600:22
 
 test.js:172:15,172:19
 
@@ -425,7 +425,7 @@ Flags:
 function Foo(props: Props<string | number>): React.Node
 
 'Props' defined at jsx_instantiation.js:102:9
-'React.Node' defined at (lib) react.js:596:22
+'React.Node' defined at (lib) react.js:600:22
 
 jsx_instantiation.js:105:6,105:8
 
@@ -434,7 +434,7 @@ Flags:
 const Indirection: (props: Props<string | number>) => React.Node
 
 'Props' defined at jsx_instantiation.js:102:9
-'React.Node' defined at (lib) react.js:596:22
+'React.Node' defined at (lib) react.js:600:22
 
 jsx_instantiation.js:109:6,109:16
 

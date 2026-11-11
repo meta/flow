@@ -705,7 +705,7 @@ Flags: --strip-root
   ...
 }
 
-'ChildrenArray' defined at (lib) react.js:1650:9
+'ChildrenArray' defined at (lib) react.js:1654:9
 
 react_api.js:3:7,3:14
 
@@ -718,7 +718,7 @@ Flags: --strip-root
 **@see**  https://react.dev/reference/react/cloneElement
 (property) cloneElement: React$CloneElement
 
-'React$CloneElement' defined at (lib) react.js:350:5
+'React$CloneElement' defined at (lib) react.js:354:5
 
 react_api.js:5:7,5:18
 
@@ -733,7 +733,7 @@ Flags: --strip-root
 **@see**  https://react.dev/reference/react/Component
 class Component<Props, State = void>
 
-'Component' defined at (lib) react.js:1251:18
+'Component' defined at (lib) react.js:1255:18
 
 react_api.js:7:7,7:15
 
@@ -753,7 +753,7 @@ Flags: --strip-root
   calculateChangedBits: ?(a: T, b: T) => number
 ) => Context<T>
 
-'Context' defined at (lib) react.js:1646:9
+'Context' defined at (lib) react.js:1650:9
 
 react_api.js:11:7,11:19
 
@@ -766,7 +766,7 @@ Flags: --strip-root
 **@see**  https://react.dev/reference/react/createElement
 (property) createElement: React$CreateElement
 
-'React$CreateElement' defined at (lib) react.js:348:20
+'React$CreateElement' defined at (lib) react.js:352:20
 
 react_api.js:13:7,13:19
 
@@ -803,7 +803,7 @@ Flags: --strip-root
 ) renders Renders
 
 'React$Node' defined at (lib) react.js:15:13
-'RefSetter' defined at (lib) react.js:1644:9
+'RefSetter' defined at (lib) react.js:1648:9
 
 react_api.js:17:7,17:16
 
@@ -820,7 +820,7 @@ Flags: --strip-root
   ReactSetStateFunction<S>
 ]
 
-'ReactSetStateFunction' defined at (lib) react.js:1651:9
+'ReactSetStateFunction' defined at (lib) react.js:1655:9
 
 react_api.js:19:7,19:14
 
@@ -843,7 +843,7 @@ Flags: --strip-root
       Dispatch<A>
     ])
 
-'Dispatch' defined at (lib) react.js:1794:9
+'Dispatch' defined at (lib) react.js:1798:9
 
 react_api.js:21:7,21:16
 

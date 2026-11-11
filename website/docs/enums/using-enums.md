@@ -734,7 +734,7 @@ component Selector<
   // Typing the `useState` selector with the enum value generic
   const [value, setValue] = useState<?TEnumValue>(null);
 
-  const handleChange = useCallback((e: SyntheticInputEvent<>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     // Using the `.cast` method
     const value = items.cast(e.target.value);
     if (value == null) { throw new Error("Invalid value"); }

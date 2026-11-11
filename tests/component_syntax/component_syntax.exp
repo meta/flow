@@ -2325,9 +2325,9 @@ Cannot cast `intrinsicProp.children` to `empty` because `Iterable<?React.Node, v
        ^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   flow-typed/jsx.js:16:24
-   16|     props: {children?: React.Node, ...},
-                              ^^^^^^^^^^ [1]
+   flow-typed/jsx.js:9:20
+    9|   div: {children?: React.Node, ref?: React.RefSetter<CommonInstance>, ...},
+                          ^^^^^^^^^^ [1]
    propsof.js:14:27
    14| intrinsicProp.children as empty; // children is ?React.Node
                                  ^^^^^ [2]
@@ -2343,9 +2343,9 @@ Cannot cast `intrinsicProp.children` to `empty` because `React.Portal` [1] is in
        ^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   flow-typed/jsx.js:16:24
-   16|     props: {children?: React.Node, ...},
-                              ^^^^^^^^^^ [1]
+   flow-typed/jsx.js:9:20
+    9|   div: {children?: React.Node, ref?: React.RefSetter<CommonInstance>, ...},
+                          ^^^^^^^^^^ [1]
    propsof.js:14:27
    14| intrinsicProp.children as empty; // children is ?React.Node
                                  ^^^^^ [2]
@@ -2361,9 +2361,9 @@ Cannot cast `intrinsicProp.children` to `empty` because `boolean` [1] is incompa
        ^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   flow-typed/jsx.js:16:24
-   16|     props: {children?: React.Node, ...},
-                              ^^^^^^^^^^ [1]
+   flow-typed/jsx.js:9:20
+    9|   div: {children?: React.Node, ref?: React.RefSetter<CommonInstance>, ...},
+                          ^^^^^^^^^^ [1]
    propsof.js:14:27
    14| intrinsicProp.children as empty; // children is ?React.Node
                                  ^^^^^ [2]
@@ -2378,9 +2378,9 @@ Cannot cast `intrinsicProp.children` to `empty` because `null` [1] is incompatib
        ^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   flow-typed/jsx.js:16:24
-   16|     props: {children?: React.Node, ...},
-                              ^^^^^^^^^^ [1]
+   flow-typed/jsx.js:9:20
+    9|   div: {children?: React.Node, ref?: React.RefSetter<CommonInstance>, ...},
+                          ^^^^^^^^^^ [1]
    propsof.js:14:27
    14| intrinsicProp.children as empty; // children is ?React.Node
                                  ^^^^^ [2]
@@ -2396,9 +2396,9 @@ Cannot cast `intrinsicProp.children` to `empty` because `number` [1] is incompat
        ^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   flow-typed/jsx.js:16:24
-   16|     props: {children?: React.Node, ...},
-                              ^^^^^^^^^^ [1]
+   flow-typed/jsx.js:9:20
+    9|   div: {children?: React.Node, ref?: React.RefSetter<CommonInstance>, ...},
+                          ^^^^^^^^^^ [1]
    propsof.js:14:27
    14| intrinsicProp.children as empty; // children is ?React.Node
                                  ^^^^^ [2]
@@ -2414,9 +2414,9 @@ Cannot cast `intrinsicProp.children` to `empty` because `string` [1] is incompat
        ^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   flow-typed/jsx.js:16:24
-   16|     props: {children?: React.Node, ...},
-                              ^^^^^^^^^^ [1]
+   flow-typed/jsx.js:9:20
+    9|   div: {children?: React.Node, ref?: React.RefSetter<CommonInstance>, ...},
+                          ^^^^^^^^^^ [1]
    propsof.js:14:27
    14| intrinsicProp.children as empty; // children is ?React.Node
                                  ^^^^^ [2]
@@ -2431,9 +2431,9 @@ Cannot cast `intrinsicProp.children` to `empty` because `void` [1] is incompatib
        ^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   flow-typed/jsx.js:16:24
-   16|     props: {children?: React.Node, ...},
-                              ^^^^^^^^^^ [1]
+   flow-typed/jsx.js:9:20
+    9|   div: {children?: React.Node, ref?: React.RefSetter<CommonInstance>, ...},
+                          ^^^^^^^^^^ [1]
    propsof.js:14:27
    14| intrinsicProp.children as empty; // children is ?React.Node
                                  ^^^^^ [2]
@@ -2449,9 +2449,9 @@ Cannot cast `intrinsicProp.children` to `empty` because `{...}` [1] is incompati
        ^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   flow-typed/jsx.js:16:24
-   16|     props: {children?: React.Node, ...},
-                              ^^^^^^^^^^ [1]
+   flow-typed/jsx.js:9:20
+    9|   div: {children?: React.Node, ref?: React.RefSetter<CommonInstance>, ...},
+                          ^^^^^^^^^^ [1]
    propsof.js:14:27
    14| intrinsicProp.children as empty; // children is ?React.Node
                                  ^^^^^ [2]
@@ -2485,9 +2485,9 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
                              ^^^
 
 References:
-   flow-typed/jsx.js:29:15
-    29|     instance: MetaInstance,
-                      ^^^^^^^^^^^^ [1]
+   flow-typed/jsx.js:14:27
+    14|     ref?: React.RefSetter<MetaInstance>,
+                                  ^^^^^^^^^^^^ [1]
    propsof.js:3:60
      3| component A(foo: string, bar: number, ref: React.RefSetter<AInstance>) {
                                                                    ^^^^^^^^^ [2]
@@ -2510,9 +2510,9 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
                              ^^^
 
 References:
-   flow-typed/jsx.js:29:15
-    29|     instance: MetaInstance,
-                      ^^^^^^^^^^^^ [1]
+   flow-typed/jsx.js:14:27
+    14|     ref?: React.RefSetter<MetaInstance>,
+                                  ^^^^^^^^^^^^ [1]
    propsof.js:3:60
      3| component A(foo: string, bar: number, ref: React.RefSetter<AInstance>) {
                                                                    ^^^^^^^^^ [2]
@@ -2836,8 +2836,8 @@ Cannot cast `Baz` to `component(ref: React.RefSetter<string>)` because in proper
         ^^^
 
 References:
-   <BUILTINS>/react.js:595:36
-   595|   declare export type RefSetter<in T> = React.RefSetter<T>;
+   <BUILTINS>/react.js:599:36
+   599|   declare export type RefSetter<in T> = React.RefSetter<T>;
                                            ^ [1]
    refs.js:17:39
     17| Baz as component(ref: React.RefSetter<string>); // err

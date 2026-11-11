@@ -1,6 +1,4 @@
-type $JSXIntrinsics = {
-  div: {
-    props: { style: string, ... },
-    instance: interface {},
- ...  }
-, ...}
+type React$JSXIntrinsicElements = {
+  div: {style: string, ref?: React.RefSetter<interface {}>, ...},
+  ...
+}

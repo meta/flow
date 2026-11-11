@@ -13,21 +13,18 @@ declare class HTMLDivElement extends HTMLElement {}
 declare class HTMLSpanElement extends HTMLElement {}
 
 type ReactDOM$HTMLElementJSXIntrinsicTyped<Props, Instance = HTMLElement> = {
-  instance: Instance,
-  props: Props,
+  ...Props,
+  ref?: React.RefSetter<Instance>,
 };
 
 type ReactDOM$HTMLElementJSXIntrinsic = {
-  instance: HTMLElement,
-  props: {
-    readonly [key: string]: any,
-    readonly children?: React.Node,
-    ...
-  },
+  readonly [key: string]: any,
+  readonly children?: React.Node,
+  ref?: React.RefSetter<HTMLElement>,
   ...
 };
 
-declare type $JSXIntrinsics = {
+declare type React$JSXIntrinsicElements = {
   div: ReactDOM$HTMLElementJSXIntrinsicTyped<ReactDOM$divProps, HTMLDivElement>,
   span: ReactDOM$HTMLElementJSXIntrinsicTyped<ReactDOM$spanProps, HTMLSpanElement>,
 }

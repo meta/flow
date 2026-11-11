@@ -5,8 +5,8 @@ description: "How to type React event handlers and synthetic events in Flow."
 ---
 
 The [React docs for handling events](https://react.dev/learn/responding-to-events) show how an event handler can be attached to
-a React element. To type these event handlers you may use the `SyntheticEvent<T>`
-types like this:
+a React element. To type these event handlers you may use React's event types,
+such as `React.MouseEvent<T>`, like this:
 
 ```js flow-check
 import {useState} from 'react';
@@ -15,7 +15,7 @@ import * as React from 'react';
 component MyComponent() {
   const [state, setState] = useState({count: 0});
 
-  const handleClick = (event: SyntheticEvent<HTMLButtonElement>) => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     // To access your button instance use `event.currentTarget`.
     event.currentTarget as HTMLButtonElement;
 
@@ -33,13 +33,13 @@ component MyComponent() {
 }
 ```
 
-There are also more specific synthetic event types like
-`SyntheticKeyboardEvent<T>`, `SyntheticMouseEvent<T>`, or
-`SyntheticTouchEvent<T>`. The `SyntheticEvent<T>` types typically take a single type
+There are also other event types like `React.KeyboardEvent<T>`,
+`React.ChangeEvent<T>`, or `React.TouchEvent<T>`, all based on
+`React.SyntheticEvent<T>`. These event types typically take a single type
 argument: the type of the HTML element the event handler was placed on.
 
 If you don't want to add the type of your element instance you can also use
-`SyntheticEvent` with *no* type arguments like so: `SyntheticEvent<>`.
+`React.SyntheticEvent` with *no* type arguments.
 
 > **Note:** To get the element instance, like `HTMLButtonElement` in the example
 > above, it is a common mistake to use `event.target` instead of
@@ -49,26 +49,27 @@ If you don't want to add the type of your element instance you can also use
 [event propagation]: https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Examples#example_5_event_propagation
 
 > **Note:** React uses its own event system so it is important to use the
-> `SyntheticEvent` types instead of the DOM types such as `Event`,
+> React event types instead of the DOM types such as `Event`,
 > `KeyboardEvent`, and `MouseEvent`.
 
-The `SyntheticEvent<T>` types that React provides and the DOM events they are
-related to are:
+The event types that React provides and the DOM events they are related to are:
 
-- `SyntheticEvent<T>` for [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event)
-- `SyntheticAnimationEvent<T>` for [AnimationEvent](https://developer.mozilla.org/en-US/docs/Web/API/AnimationEvent)
-- `SyntheticCompositionEvent<T>` for [CompositionEvent](https://developer.mozilla.org/en-US/docs/Web/API/CompositionEvent)
-- `SyntheticInputEvent<T>` for [InputEvent](https://developer.mozilla.org/en-US/docs/Web/API/InputEvent)
-- `SyntheticUIEvent<T>` for [UIEvent](https://developer.mozilla.org/en-US/docs/Web/API/UIEvent)
-- `SyntheticFocusEvent<T>` for [FocusEvent](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent)
-- `SyntheticKeyboardEvent<T>` for [KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent)
-- `SyntheticMouseEvent<T>` for [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent)
-- `SyntheticPointerEvent<T>` for [PointerEvent](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent)
-- `SyntheticDragEvent<T>` for [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent)
-- `SyntheticWheelEvent<T>` for [WheelEvent](https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent)
-- `SyntheticTouchEvent<T>` for [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent)
-- `SyntheticClipboardEvent<T>` for [ClipboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/ClipboardEvent)
-- `SyntheticTransitionEvent<T>` for [TransitionEvent](https://developer.mozilla.org/en-US/docs/Web/API/TransitionEvent)
+- `React.SyntheticEvent<T>` for [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event)
+- `React.AnimationEvent<T>` for [AnimationEvent](https://developer.mozilla.org/en-US/docs/Web/API/AnimationEvent)
+- `React.CompositionEvent<T>` for [CompositionEvent](https://developer.mozilla.org/en-US/docs/Web/API/CompositionEvent)
+- `React.InputEvent<T>` for [InputEvent](https://developer.mozilla.org/en-US/docs/Web/API/InputEvent)
+- `React.UIEvent<T>` for [UIEvent](https://developer.mozilla.org/en-US/docs/Web/API/UIEvent)
+- `React.FocusEvent<T>` for [FocusEvent](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent)
+- `React.KeyboardEvent<T>` for [KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent)
+- `React.MouseEvent<T>` for [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent)
+- `React.PointerEvent<T>` for [PointerEvent](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent)
+- `React.DragEvent<T>` for [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent)
+- `React.WheelEvent<T>` for [WheelEvent](https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent)
+- `React.TouchEvent<T>` for [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent)
+- `React.ClipboardEvent<T>` for [ClipboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/ClipboardEvent)
+- `React.TransitionEvent<T>` for [TransitionEvent](https://developer.mozilla.org/en-US/docs/Web/API/TransitionEvent)
+
+`onChange` handlers receive a `React.ChangeEvent<T>`.
 
 ## See Also {#toc-see-also}
 

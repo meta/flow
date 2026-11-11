@@ -1,8 +1,5 @@
 declare opaque type CommonInstance;
 
-type $JSXIntrinsics = {
-  [string]: {
-    props: any,
-    instance: CommonInstance,
-  },
+type React$JSXIntrinsicElements = {
+  [string]: {[string]: any, ref?: React.RefSetter<CommonInstance>},
 }

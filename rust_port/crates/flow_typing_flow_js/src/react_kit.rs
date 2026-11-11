@@ -36,11 +36,9 @@ use flow_typing_type::type_::DepthTrace;
 use flow_typing_type::type_::Destructor;
 use flow_typing_type::type_::DestructorSpreadTypeData;
 use flow_typing_type::type_::FieldData;
-use flow_typing_type::type_::GetPropTData;
 use flow_typing_type::type_::HasOwnPropTData;
 use flow_typing_type::type_::ImplicitInstantiationTvarData;
 use flow_typing_type::type_::ImplicitInstantiationTvarKind;
-use flow_typing_type::type_::Literal;
 use flow_typing_type::type_::LookupAction;
 use flow_typing_type::type_::LookupDefaultResult;
 use flow_typing_type::type_::LookupKind;
@@ -52,7 +50,6 @@ use flow_typing_type::type_::MethodTData;
 use flow_typing_type::type_::NonstrictReturningData;
 use flow_typing_type::type_::ObjKind;
 use flow_typing_type::type_::ObjLiteral;
-use flow_typing_type::type_::PropRef;
 use flow_typing_type::type_::Property;
 use flow_typing_type::type_::PropertyInner;
 use flow_typing_type::type_::ReactAbstractComponentTData;
@@ -90,7 +87,6 @@ use crate::flow_js::FlowJs;
 use crate::implicit_instantiation::generalize_singletons;
 use crate::natural_inference::has_ast_syntactic_hint;
 use crate::renders_kit;
-use crate::tvar_resolver;
 
 pub fn err_incompatible<'cx>(
     cx: &mut Context<'cx>,
@@ -126,144 +122,6 @@ pub fn component_class<'cx>(
             )?,
         )),
     )))
-}
-
-enum Artifact {
-    Props,
-    Instance,
-}
-
-enum IntrinsicLiteral {
-    Literal(FlowSmolStr),
-    General(Literal),
-}
-
-fn get_intrinsic<'cx>(
-    cx: &mut Context<'cx>,
-    env: &FlowJsEnv,
-    trace: DepthTrace,
-    component_reason: &Reason,
-    reason_op: &Reason,
-    artifact: &Artifact,
-    literal: &IntrinsicLiteral,
-    prop_polarity: Polarity,
-    tout: &Type,
-) -> Result<(), FlowJsException> {
-    let reason = component_reason;
-    // Get the internal $JSXIntrinsics map.
-    let intrinsics = {
-        let reason = mk_reason(
-            VirtualReasonDesc::RType("$JSXIntrinsics".into()),
-            component_reason.loc().dupe(),
-        );
-        FlowJs::get_builtin_type_with_env(cx, env, None, &reason, None, "$JSXIntrinsics")?
-    };
-    // Create a use_op for the upcoming operations.
-    let use_op = VirtualUseOp::Op(Arc::new(VirtualRootUseOp::ReactGetIntrinsic {
-        literal: match literal {
-            IntrinsicLiteral::Literal(name) => reason
-                .dupe()
-                .replace_desc(VirtualReasonDesc::RIdentifier(name.dupe())),
-            IntrinsicLiteral::General(_) => reason.dupe(),
-        },
-    }));
-    // GetPropT with a non-literal when there is not a dictionary will propagate
-    // any. Run the HasOwnPropT check to give the user an error if they use a
-    // non-literal without a dictionary.
-    match literal {
-        IntrinsicLiteral::Literal(_) => {}
-        IntrinsicLiteral::General(gen_lit) => {
-            FlowJs::rec_flow_with_env(
-                cx,
-                env,
-                trace,
-                &intrinsics,
-                &UseT::new(UseTInner::HasOwnPropT(Box::new(HasOwnPropTData {
-                    use_op: use_op.dupe(),
-                    reason: reason.dupe(),
-                    type_: Type::new(TypeInner::DefT(
-                        reason.dupe(),
-                        DefT::new(DefTInner::StrGeneralT(gen_lit.clone())),
-                    )),
-                }))),
-            )?;
-        }
-    }
-
-    // Get the intrinsic from the map.
-    let intrinsic = tvar_resolver::mk_tvar_and_fully_resolve_no_wrap_where(
-        cx,
-        reason.dupe(),
-        |cx, tout_reason, tout_id| {
-            let propref = match literal {
-                IntrinsicLiteral::Literal(name) => {
-                    let reason = reason
-                        .dupe()
-                        .replace_desc(VirtualReasonDesc::RReactElement {
-                            name_opt: Some(Name::new(name.dupe())),
-                            from_component_syntax: false,
-                        });
-                    mk_named_prop(reason, false, Name::new(name.dupe()))
-                }
-                IntrinsicLiteral::General(_) => PropRef::Computed(Type::new(TypeInner::DefT(
-                    reason.dupe(),
-                    DefT::new(DefTInner::StrGeneralT(Literal::AnyLiteral)),
-                ))),
-            };
-            FlowJs::rec_flow_with_env(
-                cx,
-                env,
-                trace,
-                &intrinsics,
-                &UseT::new(UseTInner::GetPropT(Box::new(GetPropTData {
-                    use_op: use_op.dupe(),
-                    reason: reason.dupe(),
-                    id: None,
-                    from_annot: false,
-                    skip_optional: false,
-                    propref: Box::new(propref),
-                    tout: Box::new(Tvar::new(tout_reason.dupe(), tout_id as u32)),
-                    hint: hint_unavailable(),
-                }))),
-            )?;
-            Ok::<(), FlowJsException>(())
-        },
-    )?;
-
-    // Get the artifact from the intrinsic.
-    let propref = {
-        let name_str = match artifact {
-            Artifact::Props => "props",
-            Artifact::Instance => "instance",
-        };
-        let name = Name::new(name_str);
-        let reason = reason_op
-            .dupe()
-            .replace_desc(VirtualReasonDesc::RProperty(Some(name.dupe())));
-        mk_named_prop(reason, false, name)
-    };
-    // if intrinsic is null, we will treat it like prototype termination,
-    // but we should error like a GetPropT would instead.
-    FlowJs::rec_flow_with_env(
-        cx,
-        env,
-        trace,
-        &intrinsic,
-        &UseT::new(UseTInner::LookupT(Box::new(LookupTData {
-            reason: reason_op.dupe(),
-            lookup_kind: Box::new(LookupKind::Strict(intrinsic.dupe())),
-            indexer_fallback: None,
-            try_ts_on_failure: vec![].into(),
-            propref: Box::new(propref),
-            lookup_action: Box::new(LookupAction::LookupPropForTvarPopulation {
-                tout: tout.dupe(),
-                polarity: prop_polarity,
-            }),
-            method_accessible: true,
-            ids: Some(properties::Set::new()),
-            ignore_dicts: false,
-        }))),
-    )
 }
 
 fn get_intrinsic_props<'cx>(
@@ -511,35 +369,6 @@ fn props_to_tout<'cx>(
     tout: Type,
 ) -> Result<(), FlowJsException> {
     let dropped = drop_generic(component.dupe());
-    let general_intrinsic = |cx: &mut Context<'cx>, gen_lit: Literal| {
-        let props = flow_typing_tvar::mk(cx, reason_op.dupe());
-        let i =
-            tvar_resolver::mk_tvar_and_fully_resolve_where(cx, reason_op.dupe(), |cx, tout_t| {
-                get_intrinsic(
-                    cx,
-                    env,
-                    trace,
-                    type_util::reason_of_t(component),
-                    reason_op,
-                    &Artifact::Instance,
-                    &IntrinsicLiteral::General(gen_lit.clone()),
-                    Polarity::Positive,
-                    tout_t,
-                )
-            })?;
-        get_intrinsic(
-            cx,
-            env,
-            trace,
-            type_util::reason_of_t(component),
-            reason_op,
-            &Artifact::Props,
-            &IntrinsicLiteral::General(gen_lit),
-            Polarity::Positive,
-            &tout,
-        )?;
-        add_optional_ref_prop_to_props(cx, env, trace, &props, reason_op, &i, tout.dupe())
-    };
     match dropped.deref() {
         TypeInner::DefT(r, def_t) => match def_t.deref() {
             // Class components or legacy components.
@@ -616,46 +445,10 @@ fn props_to_tout<'cx>(
                 Ok(())
             }
             // Special case for intrinsic components.
-            DefTInner::SingletonStrT { .. } | DefTInner::StrGeneralT(_)
-                if cx.jsx_intrinsic_elements() =>
-            {
+            DefTInner::SingletonStrT { .. } | DefTInner::StrGeneralT(_) => {
                 let props = get_intrinsic_props(cx, env, trace, component)?;
                 FlowJs::rec_flow_t_with_env(cx, env, trace, unknown_use(), &props, &tout)
             }
-            DefTInner::SingletonStrT { value: name, .. } => {
-                let props = flow_typing_tvar::mk(cx, reason_op.dupe());
-                get_intrinsic(
-                    cx,
-                    env,
-                    trace,
-                    type_util::reason_of_t(component),
-                    reason_op,
-                    &Artifact::Props,
-                    &IntrinsicLiteral::Literal(name.dupe()),
-                    Polarity::Positive,
-                    &props,
-                )?;
-                let i = tvar_resolver::mk_tvar_and_fully_resolve_where(
-                    cx,
-                    reason_op.dupe(),
-                    |cx, tout_t| {
-                        get_intrinsic(
-                            cx,
-                            env,
-                            trace,
-                            type_util::reason_of_t(component),
-                            reason_op,
-                            &Artifact::Instance,
-                            &IntrinsicLiteral::Literal(name.dupe()),
-                            Polarity::Positive,
-                            tout_t,
-                        )
-                    },
-                )?;
-                add_optional_ref_prop_to_props(cx, env, trace, &props, reason_op, &i, tout)?;
-                Ok(())
-            }
-            DefTInner::StrGeneralT(gen_lit) => general_intrinsic(cx, gen_lit.clone()),
             DefTInner::ReactAbstractComponentT(box ReactAbstractComponentTData {
                 config, ..
             }) => {
@@ -695,18 +488,10 @@ fn props_to_tout<'cx>(
                 Ok(())
             }
         },
-        TypeInner::TemplateLiteralT { .. } if cx.jsx_intrinsic_elements() => {
+        TypeInner::TemplateLiteralT { .. } => {
             let props = get_intrinsic_props(cx, env, trace, component)?;
             FlowJs::rec_flow_t_with_env(cx, env, trace, unknown_use(), &props, &tout)
         }
-        TypeInner::TemplateLiteralT { quasis, .. } => general_intrinsic(
-            cx,
-            if quasis.iter().any(|q| !q.is_empty()) {
-                Literal::Truthy
-            } else {
-                Literal::AnyLiteral
-            },
-        ),
         // Any and any specializations
         TypeInner::AnyT(reason, _)
         | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
@@ -1009,150 +794,20 @@ pub(super) fn run_with_env<'cx>(
         let component = l;
         let dropped = drop_generic(component.dupe());
         let intrinsic_to_props = |cx: &mut Context<'cx>, component: &Type| {
-            // In the annotation expressions below, T is the intrinsic tag type, e.g. 'div'.
-            // Anchor errors for the synthesized annotation to T's source location.
-            let reason_component = type_util::reason_of_t(component);
-            let reason_props = reason_component.dupe().replace_desc(None);
-            // Apply an annotation operation, such as A['props'] or $ReadOnly<A>.
-            let eval = |cx: &mut Context<'cx>, type_: Type, destructor: Destructor| {
-                FlowJs::mk_type_destructor_with_env(
-                    cx,
-                    env,
-                    trace,
-                    unknown_use(),
-                    &reason_props,
-                    &type_,
-                    &destructor,
-                    eval::Id::generate_id(),
-                )
-            };
-            if cx.jsx_intrinsic_elements() {
-                // type Config = Readonly<React$JSXIntrinsicElements[T]>;
-                let props = get_intrinsic_props(cx, env, trace, component)?;
-                let props = eval(cx, props, Destructor::ReadOnlyType)?;
-                FlowJs::rec_flow_t_with_env(cx, env, trace, unknown_use(), tin, &props)?;
-                return Ok(props);
-            }
-            // type Intrinsic = Intrinsics[T];
-            let intrinsic = {
-                // type Intrinsics = $JSXIntrinsics;
-                let intrinsics = {
-                    let reason_intrinsics = mk_reason(
-                        VirtualReasonDesc::RType("$JSXIntrinsics".into()),
-                        reason_component.loc().dupe(),
-                    );
-                    FlowJs::get_builtin_type_with_env(
-                        cx,
-                        env,
-                        None,
-                        &reason_intrinsics,
-                        None,
-                        "$JSXIntrinsics",
-                    )?
-                };
-                // Phrase lookup errors in terms of the tag T.
-                let intrinsic_use_op =
-                    VirtualUseOp::Op(Arc::new(VirtualRootUseOp::ReactGetIntrinsic {
-                        literal: if let TypeInner::DefT(_, def_t) = component.deref()
-                            && let DefTInner::SingletonStrT { value: name, .. } = def_t.deref()
-                        {
-                            reason_component
-                                .dupe()
-                                .replace_desc(VirtualReasonDesc::RIdentifier(name.dupe()))
-                        } else {
-                            reason_component.dupe()
-                        },
-                    }));
-                // For a non-literal string T, require a matching indexer in Intrinsics.
-                if let TypeInner::DefT(_, def_t) = component.deref()
-                    && let DefTInner::StrGeneralT(_) = def_t.deref()
-                {
-                    FlowJs::rec_flow_with_env(
-                        cx,
-                        env,
-                        trace,
-                        &intrinsics,
-                        &UseT::new(UseTInner::HasOwnPropT(Box::new(HasOwnPropTData {
-                            use_op: intrinsic_use_op.dupe(),
-                            reason: reason_component.dupe(),
-                            type_: component.dupe(),
-                        }))),
-                    )?;
-                }
-                FlowJs::mk_type_destructor_with_env(
-                    cx,
-                    env,
-                    trace,
-                    intrinsic_use_op,
-                    reason_component,
-                    &intrinsics,
-                    &Destructor::ElementType {
-                        index_type: component.dupe(),
-                    },
-                    eval::Id::generate_id(),
-                )?
-            };
-            // type Props = Intrinsic['props'];
-            let props = eval(
+            // type Config = Readonly<React$JSXIntrinsicElements[T]>, where T is the intrinsic tag
+            // type, e.g. 'div'. Anchor errors for the synthesized annotation to T's source location.
+            let reason_props = type_util::reason_of_t(component).dupe().replace_desc(None);
+            let props = get_intrinsic_props(cx, env, trace, component)?;
+            let props = FlowJs::mk_type_destructor_with_env(
                 cx,
-                intrinsic.dupe(),
-                Destructor::PropertyType {
-                    name: Name::new("props"),
-                },
+                env,
+                trace,
+                unknown_use(),
+                &reason_props,
+                &props,
+                &Destructor::ReadOnlyType,
+                eval::Id::generate_id(),
             )?;
-            // Same fields as {...Props, ref?: Ref}, with exactness inherited from Props.
-            let props = {
-                // The inline object annotation {ref?: Ref}.
-                let ref_slice = {
-                    // type Instance = Intrinsic['instance'];
-                    let instance = eval(
-                        cx,
-                        intrinsic,
-                        Destructor::PropertyType {
-                            name: Name::new("instance"),
-                        },
-                    )?;
-                    // type Ref = React.RefSetter<Instance>;
-                    let ref_setter = FlowJs::get_builtin_react_typeapp_with_env(
-                        cx,
-                        env,
-                        reason_op,
-                        None,
-                        ExpectedModulePurpose::ReactModuleForReactRefSetterType,
-                        vec![instance],
-                    )?;
-                    // The property annotation ref?: Ref.
-                    let ref_prop = Property::new(PropertyInner::Field(Box::new(FieldData {
-                        preferred_def_locs: None,
-                        key_loc: None,
-                        type_: type_util::optional(ref_setter, None, false),
-                        polarity: Polarity::Neutral,
-                    })));
-                    object::spread::OperandSlice::new(object::spread::OperandSliceInner {
-                        reason: reason_props.dupe(),
-                        prop_map: [(Name::new("ref"), ref_prop)].into_iter().collect(),
-                        generics: flow_typing_generics::spread_empty(),
-                        dict: None,
-                        reachable_targs: Rc::from([]),
-                    })
-                };
-                let strictness_kind = cx.type_strictness_kind();
-                eval(
-                    cx,
-                    props,
-                    Destructor::SpreadType(Box::new(DestructorSpreadTypeData(
-                        object::spread::Target::Value {
-                            make_seal: object::spread::SealType::Sealed,
-                            strictness_kind,
-                            literal: ObjLiteral::NonLiteral,
-                        },
-                        Default::default(),
-                        Some(ref_slice),
-                    ))),
-                )?
-            };
-            // type Config = Readonly<{...Props, ref?: Ref}>;
-            let props = eval(cx, props, Destructor::ReadOnlyType)?;
             FlowJs::rec_flow_t_with_env(cx, env, trace, unknown_use(), tin, &props)?;
             Ok(props)
         };

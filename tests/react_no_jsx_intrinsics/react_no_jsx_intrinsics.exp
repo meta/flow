@@ -16,7 +16,7 @@ Cannot resolve name `React$Key`. [cannot-resolve-name]
 
 Error ------------------------------------------------------------------------------------------------------ test.js:3:2
 
-Cannot resolve name `$JSXIntrinsics`. [cannot-resolve-name]
+Cannot resolve name `React$JSXIntrinsicElements`. [cannot-resolve-name]
 
    3| <div />;
        ^^^

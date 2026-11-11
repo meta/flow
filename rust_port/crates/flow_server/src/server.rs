@@ -101,9 +101,8 @@ fn extract_flowlibs_or_exit(options: &Options) {
                 }
                 LibDir::Tslib(path) => flow_flowlib::LibDir::Tslib(path.clone()),
             };
-            let extract_result = std::panic::catch_unwind(|| {
-                flow_flowlib::extract(&flowlib_libdir, options.jsx_intrinsic_elements)
-            });
+            let extract_result =
+                std::panic::catch_unwind(|| flow_flowlib::extract(&flowlib_libdir));
             match extract_result {
                 Ok(()) => {}
                 Err(_) => {

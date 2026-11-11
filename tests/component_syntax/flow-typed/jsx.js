@@ -3,29 +3,15 @@ declare opaque type AInstance: CommonInstance;
 declare opaque type MetaInstance: CommonInstance;
 declare opaque type InputInstance: CommonInstance;
 
-type $JSXIntrinsics = {
-  [string]: {
-    props: any,
-    instance: CommonInstance,
-  },
-  a: {
-    props: {children?: React.Node, ...},
-    instance: AInstance,
-  },
-  div: {
-    props: {children?: React.Node, ...},
-    instance: CommonInstance,
-  },
-  span: {
-    props: {children?: React.Node, ...},
-    instance: CommonInstance,
-  },
-  input: {
-    props: {children?: React.Node, ...},
-    instance: InputInstance,
-  },
+type React$JSXIntrinsicElements = {
+  [string]: {[string]: any, ref?: React.RefSetter<CommonInstance>},
+  a: {children?: React.Node, ref?: React.RefSetter<AInstance>, ...},
+  div: {children?: React.Node, ref?: React.RefSetter<CommonInstance>, ...},
+  span: {children?: React.Node, ref?: React.RefSetter<CommonInstance>, ...},
+  input: {children?: React.Node, ref?: React.RefSetter<InputInstance>, ...},
   meta: {
-    props: {children?: React.Node, [StringPrefix<'data-'>]: string | number},
-    instance: MetaInstance,
+    children?: React.Node,
+    ref?: React.RefSetter<MetaInstance>,
+    [StringPrefix<'data-'>]: string | number,
   },
 }

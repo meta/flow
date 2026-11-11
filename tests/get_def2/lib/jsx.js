@@ -1,6 +1,4 @@
-type $JSXIntrinsic<T> = {instance: any, props: T};
-
-type $JSXIntrinsics = {
-  div: $JSXIntrinsic<{id: string}>,
-  span: $JSXIntrinsic<{id: string, class: string}>,
+type React$JSXIntrinsicElements = {
+  div: {id: string, ref?: React.RefSetter<any>},
+  span: {id: string, class: string, ref?: React.RefSetter<any>},
 };

@@ -273,7 +273,7 @@ Flags: --pretty
     },
     {
       "name":"ComponentProps",
-      "type":"type ComponentProps<T extends React$ElementType> = T extends component(...infer Props extends {...}) ? Props : T extends keyof $JSXIntrinsics ? {...$JSXIntrinsics[T][\"props\"], ref?: RefSetter<$JSXIntrinsics[T][\"instance\"]>} : empty"
+      "type":"type ComponentProps<T extends React$ElementType> = T extends component(...infer Props extends {...}) ? Props : T extends keyof React$JSXIntrinsicElements ? React$JSXIntrinsicElements[T] : empty"
     },
     {
       "name":"ComponentPropsWithRef",
@@ -350,7 +350,7 @@ Flags: --pretty
     },
     {
       "name":"ElementRef",
-      "type":"type ElementRef<C extends string | component(...empty)> = C extends empty ? any : C extends infer S extends string ? $JSXIntrinsics[S][\"instance\"] : C extends component(...infer Props extends {...}) ? \"ref\" extends keyof Props ? Props extends {readonly ref?: RefSetter<infer I>, ...} ? I : unknown : void : empty"
+      "type":"type ElementRef<C extends string | component(...empty)> = C extends empty ? any : C extends infer S extends string ? \"ref\" extends keyof React$JSXIntrinsicElements[S] ? React$JSXIntrinsicElements[S] extends {readonly ref?: RefSetter<infer I>, ...} ? NonNullable<I> : unknown : void : C extends component(...infer Props extends {...}) ? \"ref\" extends keyof Props ? Props extends {readonly ref?: RefSetter<infer I>, ...} ? I : unknown : void : empty"
     },
     {"name":"ElementType","type":"type ElementType = React$ElementType"},
     {
@@ -631,7 +631,7 @@ Flags: --pretty
     {"name":"RefObject","type":"type RefObject<T> = React$RefObject<T>"},
     {
       "name":"RefOf",
-      "type":"type RefOf<E extends string | MixedElement | React$RendersExactly<React$ElementType>> = E extends ExactReactElement_DEPRECATED<infer C> ? ElementRef<C> : E extends React$RendersExactly<infer C> ? ElementRef<C> : E extends string ? $JSXIntrinsics[E][\"instance\"] : empty"
+      "type":"type RefOf<E extends string | MixedElement | React$RendersExactly<React$ElementType>> = E extends ExactReactElement_DEPRECATED<infer C> ? ElementRef<C> : E extends React$RendersExactly<infer C> ? ElementRef<C> : E extends string ? ElementRef<E> : empty"
     },
     {
       "name":"RefSetter",

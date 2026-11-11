@@ -5,13 +5,16 @@ Cannot create `div` element because property `sx` is extra in `{sx: Array<1 | 2 
 objects do not accept extra props. [incompatible-type]
 
    no_import.js:5:2
-   5| <div sx={[1, 2, 3]} />; // ERROR — sx is not a known prop on div
-       ^^^ [2]
+    5| <div sx={[1, 2, 3]} />; // ERROR — sx is not a known prop on div
+        ^^^
 
 References:
    no_import.js:5:1
-   5| <div sx={[1, 2, 3]} />; // ERROR — sx is not a known prop on div
-      ^^^^^^^^^^^^^^^^^^^^^^ [1]
+    5| <div sx={[1, 2, 3]} />; // ERROR — sx is not a known prop on div
+       ^^^^^^^^^^^^^^^^^^^^^^ [1]
+   flow-typed/jsx.js:28:8
+   28|   div: ReactDOM$HTMLElementJSXIntrinsicTyped<ReactDOM$divProps, HTMLDivElement>,
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:16:10
@@ -103,13 +106,16 @@ Cannot create `div` element because property `sx` is extra in `{sx: Array<1 | 2 
 objects do not accept extra props. [incompatible-type]
 
    wrong_import.js:6:2
-   6| <div sx={[1, 2, 3]} />; // ERROR — sx is not a known prop on div
-       ^^^ [2]
+    6| <div sx={[1, 2, 3]} />; // ERROR — sx is not a known prop on div
+        ^^^
 
 References:
    wrong_import.js:6:1
-   6| <div sx={[1, 2, 3]} />; // ERROR — sx is not a known prop on div
-      ^^^^^^^^^^^^^^^^^^^^^^ [1]
+    6| <div sx={[1, 2, 3]} />; // ERROR — sx is not a known prop on div
+       ^^^^^^^^^^^^^^^^^^^^^^ [1]
+   flow-typed/jsx.js:28:8
+   28|   div: ReactDOM$HTMLElementJSXIntrinsicTyped<ReactDOM$divProps, HTMLDivElement>,
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 

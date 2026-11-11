@@ -3,25 +3,10 @@ declare opaque type DivInstance: CommonInstance;
 declare opaque type SpanInstance: CommonInstance;
 declare opaque type ImgInstance: CommonInstance;
 
-type $JSXIntrinsics = {
-  [string]: {
-    props: any,
-    instance: CommonInstance,
- ...  },
-  canvas: {
-    props: {...},
-    instance: CommonInstance,
- ...  },
-  div: {
-    props: {...},
-    instance: DivInstance,
- ...  },
-  span: {
-    props: {...},
-    instance: SpanInstance,
- ...  },
-  img: {
-    props: {...},
-    instance: ImgInstance,
- ...  },
+type React$JSXIntrinsicElements = {
+  [string]: {[string]: any, ref?: React.RefSetter<CommonInstance>},
+  canvas: {ref?: React.RefSetter<CommonInstance>, ...},
+  div: {ref?: React.RefSetter<DivInstance>, ...},
+  span: {ref?: React.RefSetter<SpanInstance>, ...},
+  img: {ref?: React.RefSetter<ImgInstance>, ...},
 }

@@ -8,8 +8,8 @@ Cannot cast `React.Component` to `number` because class `Component` [1] is incom
          ^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:1251:19
-   1251|     declare class Component<Props, State = void> {
+   <BUILTINS>/react.js:1255:19
+   1255|     declare class Component<Props, State = void> {
                            ^^^^^^^^^ [1]
    commonjs.js:4:20
       4| React.Component as number; // Error
@@ -67,8 +67,8 @@ Cannot cast `React.Component` to `number` because class `Component` [1] is incom
          ^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:1251:19
-   1251|     declare class Component<Props, State = void> {
+   <BUILTINS>/react.js:1255:19
+   1255|     declare class Component<Props, State = void> {
                            ^^^^^^^^^ [1]
    es-default.js:4:20
       4| React.Component as number; // Error
@@ -111,8 +111,8 @@ Cannot get `React.Missing` because property `Missing` is missing in `...` [1]. [
                        ^^^^^^^
 
 References:
-   <BUILTINS>/react.js:1828:26
-   1828|   declare export default typeof React;
+   <BUILTINS>/react.js:1832:26
+   1832|   declare export default typeof React;
                                   ^^^^^^^^^^^^ [1]
 
 
@@ -126,8 +126,8 @@ Cannot cast `React.Component` to `number` because class `Component` [1] is incom
          ^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:1251:19
-   1251|     declare class Component<Props, State = void> {
+   <BUILTINS>/react.js:1255:19
+   1255|     declare class Component<Props, State = void> {
                            ^^^^^^^^^ [1]
    es-namespace.js:4:20
       4| React.Component as number; // Error
@@ -170,8 +170,8 @@ Cannot get `React.Missing` because property `Missing` is missing in `...` [1]. [
                       ^^^^^^^
 
 References:
-   <BUILTINS>/react.js:373:16
-   373| declare module "react" {
+   <BUILTINS>/react.js:377:16
+   377| declare module "react" {
                        ^^^^^^^ [1]
 
 

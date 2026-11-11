@@ -117,10 +117,7 @@ fn recheck(
     send_start_recheck(&env);
 
     if incompatible_lib_change.is_some() {
-        flow_flowlib::extract_if_missing_or_exit(
-            options.file_options.default_lib_dir.as_ref(),
-            options.jsx_intrinsic_elements,
-        );
+        flow_flowlib::extract_if_missing_or_exit(options.file_options.default_lib_dir.as_ref());
     }
 
     let recheck_profiling = profiling_js::Running::new("Recheck");

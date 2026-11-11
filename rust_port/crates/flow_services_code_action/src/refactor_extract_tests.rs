@@ -119,7 +119,7 @@ fn dummy_context<'cx>(arena: &'cx mut ContextArena) -> Context<'cx> {
     for name in &[
         "AsyncIterable",
         "Iterable",
-        "$JSXIntrinsics",
+        "React$JSXIntrinsicElements",
         "React$CreateElement",
         "ExactReactElement_DEPRECATED",
         "React$Key",

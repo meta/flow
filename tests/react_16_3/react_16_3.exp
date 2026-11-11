@@ -55,8 +55,8 @@ References:
    forwardRef.js:18:32
      18| const badRef = React.createRef<DivInstance>();
                                         ^^^^^^^^^^^ [2]
-   <BUILTINS>/react.js:1227:28
-   1227|     ): React$RefObject<T | null>;
+   <BUILTINS>/react.js:1231:28
+   1231|     ): React$RefObject<T | null>;
                                     ^^^^ [3]
 
 

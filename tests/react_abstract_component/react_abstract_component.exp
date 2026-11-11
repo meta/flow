@@ -49,8 +49,8 @@ References:
    error_positioning/error_positioning.js:31:1
     31| <RefetchContainer />; // Error, HOC rejected the component
         ^^^^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/react.js:579:68
-   579|   declare export type ComponentType<in P extends {...}> = component(...P);
+   <BUILTINS>/react.js:583:68
+   583|   declare export type ComponentType<in P extends {...}> = component(...P);
                                                                            ^^^^^^ [2]
 
 

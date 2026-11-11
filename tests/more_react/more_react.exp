@@ -119,8 +119,8 @@ References:
    subclassComponent.js:21:15
      21| declare class D extends React$Component2<Props2, void> {}
                        ^ [1]
-   <BUILTINS>/react.js:1251:19
-   1251|     declare class Component<Props, State = void> {
+   <BUILTINS>/react.js:1255:19
+   1255|     declare class Component<Props, State = void> {
                            ^^^^^^^^^ [2]
 
 
@@ -136,8 +136,8 @@ References:
    subclassComponent.js:23:15
      23| declare class E extends D {}
                        ^ [1]
-   <BUILTINS>/react.js:1251:19
-   1251|     declare class Component<Props, State = void> {
+   <BUILTINS>/react.js:1255:19
+   1255|     declare class Component<Props, State = void> {
                            ^^^^^^^^^ [2]
 
 
@@ -153,8 +153,8 @@ References:
    subclassComponent.js:25:15
      25| declare class F {
                        ^ [1]
-   <BUILTINS>/react.js:1251:19
-   1251|     declare class Component<Props, State = void> {
+   <BUILTINS>/react.js:1255:19
+   1255|     declare class Component<Props, State = void> {
                            ^^^^^^^^^ [2]
 
 

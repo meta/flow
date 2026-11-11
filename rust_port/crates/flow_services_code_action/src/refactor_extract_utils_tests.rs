@@ -566,7 +566,7 @@ mod collect_function_method_inserting_points_tests {
         for name in &[
             "AsyncIterable",
             "Iterable",
-            "$JSXIntrinsics",
+            "React$JSXIntrinsicElements",
             "React$CreateElement",
             "ExactReactElement_DEPRECATED",
             "React$Key",
@@ -809,7 +809,7 @@ mod find_closest_enclosing_class_tests {
         for name in &[
             "AsyncIterable",
             "Iterable",
-            "$JSXIntrinsics",
+            "React$JSXIntrinsicElements",
             "React$CreateElement",
             "ExactReactElement_DEPRECATED",
             "React$Key",
@@ -1443,7 +1443,7 @@ mod type_synthesizer_tests {
         for name in &[
             "AsyncIterable",
             "Iterable",
-            "$JSXIntrinsics",
+            "React$JSXIntrinsicElements",
             "React$CreateElement",
             "ExactReactElement_DEPRECATED",
             "React$Key",

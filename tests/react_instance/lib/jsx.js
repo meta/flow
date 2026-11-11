@@ -1,12 +1,10 @@
-type $JSXIntrinsics = {
+type React$JSXIntrinsicElements = {
   foo: {
-    props: any,
-    instance: {yep1: true, ...},
+    ref?: React.RefSetter<{yep1: true, ...}>,
     ...
   },
   bar: {
-    props: any,
-    instance: {yep2: true, ...},
+    ref?: React.RefSetter<{yep2: true, ...}>,
     ...
   },
   ...

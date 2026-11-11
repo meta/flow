@@ -18,17 +18,17 @@ References:
    test.js:19:1
     19| React.cloneElement(); // Error: Needs a minimum of two arguments.
         ^^^^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/react.js:351:49
-   351|   & (<C extends keyof $JSXIntrinsics, E extends ExactReactElement_DEPRECATED<C>>(
-                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/react.js:356:24
-   356|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
-                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/react.js:355:61
+   355|   & (<C extends keyof React$JSXIntrinsicElements, E extends ExactReactElement_DEPRECATED<C>>(
+                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/react.js:360:24
    360|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/react.js:364:24
+   364|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/react.js:365:24
-   365|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+   <BUILTINS>/react.js:369:24
+   369|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [5]
 
 
@@ -52,17 +52,17 @@ References:
    test.js:20:20
     20| React.cloneElement('nope'); // Error: Not a valid element type.
                            ^^^^^^ [1]
-   <BUILTINS>/react.js:351:49
-   351|   & (<C extends keyof $JSXIntrinsics, E extends ExactReactElement_DEPRECATED<C>>(
-                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/react.js:356:24
-   356|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
-                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/react.js:355:61
+   355|   & (<C extends keyof React$JSXIntrinsicElements, E extends ExactReactElement_DEPRECATED<C>>(
+                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/react.js:360:24
    360|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/react.js:364:24
+   364|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/react.js:365:24
-   365|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+   <BUILTINS>/react.js:369:24
+   369|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [5]
 
 
@@ -86,17 +86,17 @@ References:
    test.js:21:20
     21| React.cloneElement({ type: any }); // Error: Not a valid element type.
                            ^^^^^^^^^^^^^ [1]
-   <BUILTINS>/react.js:351:49
-   351|   & (<C extends keyof $JSXIntrinsics, E extends ExactReactElement_DEPRECATED<C>>(
-                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/react.js:356:24
-   356|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
-                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/react.js:355:61
+   355|   & (<C extends keyof React$JSXIntrinsicElements, E extends ExactReactElement_DEPRECATED<C>>(
+                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/react.js:360:24
    360|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/react.js:364:24
+   364|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/react.js:365:24
-   365|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+   <BUILTINS>/react.js:369:24
+   369|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [5]
 
 
@@ -145,14 +145,14 @@ References:
    test.js:31:23
     31| React.cloneElement(a, {foo: 1, bar: 2}); // Error: `bar` is extra
                               ^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/react.js:358:31
-   358|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+   <BUILTINS>/react.js:362:31
+   362|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/react.js:362:30
-   362|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+   <BUILTINS>/react.js:366:30
+   366|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
-   <BUILTINS>/react.js:367:30
-   367|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+   <BUILTINS>/react.js:371:30
+   371|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
@@ -166,22 +166,22 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    test.js:32:7
-     32| React.cloneElement(a, {foo: '1'}); // Error: `foo` is a number.
-               ^^^^^^^^^^^^
+    32| React.cloneElement(a, {foo: '1'}); // Error: `foo` is a number.
+              ^^^^^^^^^^^^
 
 References:
    test.js:32:29
-     32| React.cloneElement(a, {foo: '1'}); // Error: `foo` is a number.
-                                     ^^^ [1]
+    32| React.cloneElement(a, {foo: '1'}); // Error: `foo` is a number.
+                                    ^^^ [1]
    test.js:5:39
-      5| class A extends React.Component<{foo: number, ...}, void> {}
-                                               ^^^^^^ [2]
+     5| class A extends React.Component<{foo: number, ...}, void> {}
+                                              ^^^^^^ [2]
    test.js:13:47
-     13| declare const a: ExactReactElement_DEPRECATED<Class<A>>;
-                                                       ^^^^^^^^ [3]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [4]
+    13| declare const a: ExactReactElement_DEPRECATED<Class<A>>;
+                                                      ^^^^^^^^ [3]
+   <BUILTINS>/dom_extra_to_be_removed.js:213:18
+   213|       [elemName: string]: any;
+                         ^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:38:7
@@ -194,22 +194,22 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    test.js:38:7
-     38| React.cloneElement(b, {foo: '1'}); // Error: `foo` is a number.
-               ^^^^^^^^^^^^
+    38| React.cloneElement(b, {foo: '1'}); // Error: `foo` is a number.
+              ^^^^^^^^^^^^
 
 References:
    test.js:38:29
-     38| React.cloneElement(b, {foo: '1'}); // Error: `foo` is a number.
-                                     ^^^ [1]
+    38| React.cloneElement(b, {foo: '1'}); // Error: `foo` is a number.
+                                    ^^^ [1]
    test.js:6:39
-      6| class B extends React.Component<{foo: number, bar: number, ...}, void> {}
-                                               ^^^^^^ [2]
+     6| class B extends React.Component<{foo: number, bar: number, ...}, void> {}
+                                              ^^^^^^ [2]
    test.js:14:47
-     14| declare const b: ExactReactElement_DEPRECATED<Class<B>>;
-                                                       ^^^^^^^^ [3]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [4]
+    14| declare const b: ExactReactElement_DEPRECATED<Class<B>>;
+                                                      ^^^^^^^^ [3]
+   <BUILTINS>/dom_extra_to_be_removed.js:213:18
+   213|       [elemName: string]: any;
+                         ^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:44:7
@@ -222,22 +222,22 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    test.js:44:7
-     44| React.cloneElement(c, {children: '42'}); // Error: `children` is a number.
-               ^^^^^^^^^^^^
+    44| React.cloneElement(c, {children: '42'}); // Error: `children` is a number.
+              ^^^^^^^^^^^^
 
 References:
    test.js:44:34
-     44| React.cloneElement(c, {children: '42'}); // Error: `children` is a number.
-                                          ^^^^ [1]
+    44| React.cloneElement(c, {children: '42'}); // Error: `children` is a number.
+                                         ^^^^ [1]
    test.js:7:44
-      7| class C extends React.Component<{children: number, ...}, void> {}
-                                                    ^^^^^^ [2]
+     7| class C extends React.Component<{children: number, ...}, void> {}
+                                                   ^^^^^^ [2]
    test.js:15:47
-     15| declare const c: ExactReactElement_DEPRECATED<Class<C>>;
-                                                       ^^^^^^^^ [3]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [4]
+    15| declare const c: ExactReactElement_DEPRECATED<Class<C>>;
+                                                      ^^^^^^^^ [3]
+   <BUILTINS>/dom_extra_to_be_removed.js:213:18
+   213|       [elemName: string]: any;
+                         ^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:48:7
@@ -250,23 +250,23 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    test.js:48:7
-     48| React.cloneElement(c, {}, 1, 2, 3); // Error: `children` is not an array.
-               ^^^^^^^^^^^^
+    48| React.cloneElement(c, {}, 1, 2, 3); // Error: `children` is not an array.
+              ^^^^^^^^^^^^
 
 References:
    test.js:15:47
-     15| declare const c: ExactReactElement_DEPRECATED<Class<C>>;
-                                                       ^^^^^^^^ [1]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [2]
-   <BUILTINS>/react.js:356:6
-              v------------------------------------------------------------------------------------
-    356|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
-    357|     element: E,
-    358|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
-    359|   ) => E)
-           -----^ [3]
+    15| declare const c: ExactReactElement_DEPRECATED<Class<C>>;
+                                                      ^^^^^^^^ [1]
+   <BUILTINS>/dom_extra_to_be_removed.js:213:18
+   213|       [elemName: string]: any;
+                         ^^^^^^ [2]
+   <BUILTINS>/react.js:360:6
+             v------------------------------------------------------------------------------------
+   360|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+   361|     element: E,
+   362|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+   363|   ) => E)
+          -----^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:49:7
@@ -279,23 +279,23 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    test.js:49:7
-     49| React.cloneElement(c, undefined, 1, 2, 3); // Error: `children` is not an array.
-               ^^^^^^^^^^^^
+    49| React.cloneElement(c, undefined, 1, 2, 3); // Error: `children` is not an array.
+              ^^^^^^^^^^^^
 
 References:
    test.js:15:47
-     15| declare const c: ExactReactElement_DEPRECATED<Class<C>>;
-                                                       ^^^^^^^^ [1]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [2]
-   <BUILTINS>/react.js:356:6
-              v------------------------------------------------------------------------------------
-    356|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
-    357|     element: E,
-    358|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
-    359|   ) => E)
-           -----^ [3]
+    15| declare const c: ExactReactElement_DEPRECATED<Class<C>>;
+                                                      ^^^^^^^^ [1]
+   <BUILTINS>/dom_extra_to_be_removed.js:213:18
+   213|       [elemName: string]: any;
+                         ^^^^^^ [2]
+   <BUILTINS>/react.js:360:6
+             v------------------------------------------------------------------------------------
+   360|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+   361|     element: E,
+   362|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+   363|   ) => E)
+          -----^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:50:7
@@ -308,23 +308,23 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    test.js:50:7
-     50| React.cloneElement(c, null, 1, 2, 3); // Error: `children` is not an array.
-               ^^^^^^^^^^^^
+    50| React.cloneElement(c, null, 1, 2, 3); // Error: `children` is not an array.
+              ^^^^^^^^^^^^
 
 References:
    test.js:15:47
-     15| declare const c: ExactReactElement_DEPRECATED<Class<C>>;
-                                                       ^^^^^^^^ [1]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [2]
-   <BUILTINS>/react.js:356:6
-              v------------------------------------------------------------------------------------
-    356|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
-    357|     element: E,
-    358|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
-    359|   ) => E)
-           -----^ [3]
+    15| declare const c: ExactReactElement_DEPRECATED<Class<C>>;
+                                                      ^^^^^^^^ [1]
+   <BUILTINS>/dom_extra_to_be_removed.js:213:18
+   213|       [elemName: string]: any;
+                         ^^^^^^ [2]
+   <BUILTINS>/react.js:360:6
+             v------------------------------------------------------------------------------------
+   360|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+   361|     element: E,
+   362|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+   363|   ) => E)
+          -----^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:54:7
@@ -337,22 +337,22 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    test.js:54:7
-     54| React.cloneElement(d, {children: 42}); // Error: `children` is an array.
-               ^^^^^^^^^^^^
+    54| React.cloneElement(d, {children: 42}); // Error: `children` is an array.
+              ^^^^^^^^^^^^
 
 References:
    test.js:54:34
-     54| React.cloneElement(d, {children: 42}); // Error: `children` is an array.
-                                          ^^ [1]
+    54| React.cloneElement(d, {children: 42}); // Error: `children` is an array.
+                                         ^^ [1]
    test.js:8:44
-      8| class D extends React.Component<{children: Array<number>, ...}, void> {}
-                                                    ^^^^^^^^^^^^^ [2]
+     8| class D extends React.Component<{children: Array<number>, ...}, void> {}
+                                                   ^^^^^^^^^^^^^ [2]
    test.js:16:47
-     16| declare const d: ExactReactElement_DEPRECATED<Class<D>>;
-                                                       ^^^^^^^^ [3]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [4]
+    16| declare const d: ExactReactElement_DEPRECATED<Class<D>>;
+                                                      ^^^^^^^^ [3]
+   <BUILTINS>/dom_extra_to_be_removed.js:213:18
+   213|       [elemName: string]: any;
+                         ^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:56:7
@@ -365,22 +365,22 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    test.js:56:7
-     56| React.cloneElement(d, {}, 42); // Error: `children` is an array.
-               ^^^^^^^^^^^^
+    56| React.cloneElement(d, {}, 42); // Error: `children` is an array.
+              ^^^^^^^^^^^^
 
 References:
    test.js:56:27
-     56| React.cloneElement(d, {}, 42); // Error: `children` is an array.
-                                   ^^ [1]
+    56| React.cloneElement(d, {}, 42); // Error: `children` is an array.
+                                  ^^ [1]
    test.js:8:44
-      8| class D extends React.Component<{children: Array<number>, ...}, void> {}
-                                                    ^^^^^^^^^^^^^ [2]
+     8| class D extends React.Component<{children: Array<number>, ...}, void> {}
+                                                   ^^^^^^^^^^^^^ [2]
    test.js:16:47
-     16| declare const d: ExactReactElement_DEPRECATED<Class<D>>;
-                                                       ^^^^^^^^ [3]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [4]
+    16| declare const d: ExactReactElement_DEPRECATED<Class<D>>;
+                                                      ^^^^^^^^ [3]
+   <BUILTINS>/dom_extra_to_be_removed.js:213:18
+   213|       [elemName: string]: any;
+                         ^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:57:7
@@ -393,22 +393,22 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    test.js:57:7
-     57| React.cloneElement(d, undefined, 42); // Error: `children` is an array.
-               ^^^^^^^^^^^^
+    57| React.cloneElement(d, undefined, 42); // Error: `children` is an array.
+              ^^^^^^^^^^^^
 
 References:
    test.js:57:34
-     57| React.cloneElement(d, undefined, 42); // Error: `children` is an array.
-                                          ^^ [1]
+    57| React.cloneElement(d, undefined, 42); // Error: `children` is an array.
+                                         ^^ [1]
    test.js:8:44
-      8| class D extends React.Component<{children: Array<number>, ...}, void> {}
-                                                    ^^^^^^^^^^^^^ [2]
+     8| class D extends React.Component<{children: Array<number>, ...}, void> {}
+                                                   ^^^^^^^^^^^^^ [2]
    test.js:16:47
-     16| declare const d: ExactReactElement_DEPRECATED<Class<D>>;
-                                                       ^^^^^^^^ [3]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [4]
+    16| declare const d: ExactReactElement_DEPRECATED<Class<D>>;
+                                                      ^^^^^^^^ [3]
+   <BUILTINS>/dom_extra_to_be_removed.js:213:18
+   213|       [elemName: string]: any;
+                         ^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:58:7
@@ -421,22 +421,22 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    test.js:58:7
-     58| React.cloneElement(d, null, 42); // Error: `children` is an array.
-               ^^^^^^^^^^^^
+    58| React.cloneElement(d, null, 42); // Error: `children` is an array.
+              ^^^^^^^^^^^^
 
 References:
    test.js:58:29
-     58| React.cloneElement(d, null, 42); // Error: `children` is an array.
-                                     ^^ [1]
+    58| React.cloneElement(d, null, 42); // Error: `children` is an array.
+                                    ^^ [1]
    test.js:8:44
-      8| class D extends React.Component<{children: Array<number>, ...}, void> {}
-                                                    ^^^^^^^^^^^^^ [2]
+     8| class D extends React.Component<{children: Array<number>, ...}, void> {}
+                                                   ^^^^^^^^^^^^^ [2]
    test.js:16:47
-     16| declare const d: ExactReactElement_DEPRECATED<Class<D>>;
-                                                       ^^^^^^^^ [3]
-   <BUILTINS>/react.js:1838:9
-   1838|   [key: string]: {
-                 ^^^^^^ [4]
+    16| declare const d: ExactReactElement_DEPRECATED<Class<D>>;
+                                                      ^^^^^^^^ [3]
+   <BUILTINS>/dom_extra_to_be_removed.js:213:18
+   213|       [elemName: string]: any;
+                         ^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:76:7
@@ -460,14 +460,14 @@ References:
    test.js:76:27
     76| React.cloneElement(exact, {foo: 1, bar: 2}); // ERROR
                                   ^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/react.js:358:31
-   358|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+   <BUILTINS>/react.js:362:31
+   362|     props?: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/react.js:362:30
-   362|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+   <BUILTINS>/react.js:366:30
+   366|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
-   <BUILTINS>/react.js:367:30
-   367|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
+   <BUILTINS>/react.js:371:30
+   371|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
@@ -491,17 +491,17 @@ References:
    test.js:98:21
     98|   declare const el: React.Node;
                             ^^^^^^^^^^ [1]
-   <BUILTINS>/react.js:351:49
-   351|   & (<C extends keyof $JSXIntrinsics, E extends ExactReactElement_DEPRECATED<C>>(
-                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/react.js:356:24
-   356|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
-                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/react.js:355:61
+   355|   & (<C extends keyof React$JSXIntrinsicElements, E extends ExactReactElement_DEPRECATED<C>>(
+                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/react.js:360:24
    360|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/react.js:364:24
+   364|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/react.js:365:24
-   365|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+   <BUILTINS>/react.js:369:24
+   369|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [5]
 
 
@@ -525,17 +525,17 @@ References:
    test.js:98:21
     98|   declare const el: React.Node;
                             ^^^^^^^^^^ [1]
-   <BUILTINS>/react.js:351:49
-   351|   & (<C extends keyof $JSXIntrinsics, E extends ExactReactElement_DEPRECATED<C>>(
-                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/react.js:356:24
-   356|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
-                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/react.js:355:61
+   355|   & (<C extends keyof React$JSXIntrinsicElements, E extends ExactReactElement_DEPRECATED<C>>(
+                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/react.js:360:24
    360|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/react.js:364:24
+   364|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/react.js:365:24
-   365|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
+   <BUILTINS>/react.js:369:24
+   369|   & (<Props, E extends ExactReactElement_DEPRECATED<component(...empty) | string, Props>>(
                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [5]
 
 

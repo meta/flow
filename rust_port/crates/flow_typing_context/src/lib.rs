@@ -200,7 +200,6 @@ pub struct FrozenMetadata {
     pub hook_compatibility_excludes: Arc<[Regex]>,
     pub hook_compatibility_includes: Arc<[Regex]>,
     pub ignore_non_literal_requires: bool,
-    pub jsx_intrinsic_elements: bool,
     pub records_includes: Arc<[Regex]>,
     pub max_workers: i32,
     pub missing_module_generators: Arc<[(Regex, String)]>,
@@ -265,7 +264,6 @@ impl Default for FrozenMetadata {
             hook_compatibility_excludes: Arc::from([]),
             hook_compatibility_includes: Arc::from([]),
             ignore_non_literal_requires: false,
-            jsx_intrinsic_elements: false,
             records_includes: Arc::from([]),
             max_workers: 0,
             missing_module_generators: Arc::from([]),
@@ -940,7 +938,6 @@ pub fn mk_context_metadata(options: &Options, global_libdefs: Arc<BTreeSet<FileK
             global_libdefs,
             haste_disallow_dynamic_import: options.haste_disallow_dynamic_import,
             ignore_non_literal_requires: options.ignore_non_literal_requires,
-            jsx_intrinsic_elements: options.jsx_intrinsic_elements,
             max_workers: options.max_workers,
             missing_module_generators: options.missing_module_generators.dupe(),
             no_implicit_override: options.no_implicit_override,
@@ -1661,10 +1658,6 @@ impl<'a> Context<'a> {
 
     pub fn react_managed_attributes(&self) -> bool {
         self.inner().metadata.frozen.react_managed_attributes
-    }
-
-    pub fn jsx_intrinsic_elements(&self) -> bool {
-        self.inner().metadata.frozen.jsx_intrinsic_elements
     }
 
     pub fn react_runtime(&self) -> ReactRuntime {

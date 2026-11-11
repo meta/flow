@@ -13,14 +13,14 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:1374:16
-   1374|       ): Array<NonNullable<U>>,
+   <BUILTINS>/react.js:1378:16
+   1378|       ): Array<NonNullable<U>>,
                         ^^^^^^^^^^^^^^ [1]
    api.js:34:22
      34| function na(x: Array<number>) {}
                               ^^^^^^ [2]
-   <BUILTINS>/react.js:1374:10
-   1374|       ): Array<NonNullable<U>>,
+   <BUILTINS>/react.js:1378:10
+   1378|       ): Array<NonNullable<U>>,
                   ^^^^^^^^^^^^^^^^^^^^^ [3]
    api.js:34:16
      34| function na(x: Array<number>) {}
@@ -57,14 +57,14 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:1374:16
-   1374|       ): Array<NonNullable<U>>,
+   <BUILTINS>/react.js:1378:16
+   1378|       ): Array<NonNullable<U>>,
                         ^^^^^^^^^^^^^^ [1]
    api.js:35:22
      35| function sa(x: Array<string>) {}
                               ^^^^^^ [2]
-   <BUILTINS>/react.js:1374:10
-   1374|       ): Array<NonNullable<U>>,
+   <BUILTINS>/react.js:1378:10
+   1378|       ): Array<NonNullable<U>>,
                   ^^^^^^^^^^^^^^^^^^^^^ [3]
    api.js:35:16
      35| function sa(x: Array<string>) {}
@@ -156,8 +156,8 @@ Cannot call `s` with `Children.count(...)` bound to `x` because `number` [1] is 
            ^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:1380:44
-   1380|       count(children: ChildrenArray<any>): number,
+   <BUILTINS>/react.js:1384:44
+   1384|       count(children: ChildrenArray<any>): number,
                                                     ^^^^^^ [1]
    api.js:33:15
      33| function s(x: string) {}
@@ -197,14 +197,14 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
             ^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:1382:53
-   1382|       toArray<T>(children: ChildrenArray<T>): Array<NonNullable<T>>,
+   <BUILTINS>/react.js:1386:53
+   1386|       toArray<T>(children: ChildrenArray<T>): Array<NonNullable<T>>,
                                                              ^^^^^^^^^^^^^^ [1]
    api.js:35:22
      35| function sa(x: Array<string>) {}
                               ^^^^^^ [2]
-   <BUILTINS>/react.js:1382:47
-   1382|       toArray<T>(children: ChildrenArray<T>): Array<NonNullable<T>>,
+   <BUILTINS>/react.js:1386:47
+   1386|       toArray<T>(children: ChildrenArray<T>): Array<NonNullable<T>>,
                                                        ^^^^^^^^^^^^^^^^^^^^^ [3]
    api.js:35:16
      35| function sa(x: Array<string>) {}
