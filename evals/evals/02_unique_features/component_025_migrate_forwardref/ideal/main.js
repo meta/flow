@@ -20,7 +20,7 @@ export default component SearchField(
       ref={ref}
       value={value}
       placeholder={placeholder}
-      onChange={(e: SyntheticInputEvent<HTMLInputElement>) =>
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
         onChange(e.currentTarget.value)
       }
     />

@@ -20,7 +20,7 @@ export component TextInput(
     <input
       ref={ref}
       value={value}
-      onChange={(e: SyntheticInputEvent<HTMLInputElement>) => onChange(e.currentTarget.value)}
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.currentTarget.value)}
       placeholder={placeholder}
     />
   );
@@ -36,7 +36,7 @@ export component TextArea(
     <textarea
       ref={ref}
       value={value}
-      onChange={(e: SyntheticEvent<HTMLTextAreaElement>) => onChange(e.currentTarget.value)}
+      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange(e.currentTarget.value)}
       rows={rows}
     />
   );

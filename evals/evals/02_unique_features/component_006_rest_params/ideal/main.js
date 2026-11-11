@@ -17,7 +17,7 @@ export component BaseInput(
   return (
     <input
       value={value}
-      onChange={(e: SyntheticInputEvent<HTMLInputElement>) => onChange(e.currentTarget.value)}
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.currentTarget.value)}
       placeholder={placeholder}
     />
   );

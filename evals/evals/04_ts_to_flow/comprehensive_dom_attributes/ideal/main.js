@@ -17,17 +17,17 @@ component SearchField(
   onChange: (value: string) => void,
   onSubmit: (value: string) => void,
 ) {
-  const handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.currentTarget.value);
   };
 
-  const handleKeyDown = (e: SyntheticKeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       onSubmit(e.currentTarget.value);
     }
   };
 
-  const handleClick = (e: SyntheticMouseEvent<HTMLButtonElement>) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     onSubmit(value);
   };
