@@ -12088,6 +12088,20 @@ impl<'a, Cx: Context> DeadCodeMarker<'a, Cx> {
             .or_insert(EnvEntry::NonAssigningWrite);
     }
 
+    /// The variables that a `for-in` or `for-of` loop declares have no initializer, but the loop
+    /// assigns them.
+    fn loop_left_declaration(
+        &mut self,
+        (_, decl): &(
+            ALoc,
+            flow_parser::ast::statement::VariableDeclaration<ALoc, ALoc>,
+        ),
+    ) -> Result<(), !> {
+        decl.declarations
+            .iter()
+            .try_for_each(|declarator| AstVisitor::pattern(self, Some(decl.kind), &declarator.id))
+    }
+
     fn function_expression_without_name(
         &mut self,
         is_arrow: bool,
@@ -12483,6 +12497,40 @@ impl<'ast, 'a, Cx: Context> AstVisitor<'ast, ALoc, ALoc, &'ast ALoc, !> for Dead
             // mark normal declaration without initialization as non-assigning writes.
             None => Ok(()),
         }
+    }
+
+    fn pattern(
+        &mut self,
+        kind: Option<flow_parser::ast::VariableKind>,
+        pattern: &flow_parser::ast::pattern::Pattern<ALoc, ALoc>,
+    ) -> Result<(), !> {
+        if flow_parser::ast_utils::pattern_has_binding(pattern) {
+            self.mark_dead_write(env_api::EnvKey::new(
+                env_api::DefLocType::PatternLoc,
+                pattern.loc().dupe(),
+            ));
+        }
+        ast_visitor::pattern_default(self, kind, pattern)
+    }
+
+    fn for_in_left_declaration(
+        &mut self,
+        left: &(
+            ALoc,
+            flow_parser::ast::statement::VariableDeclaration<ALoc, ALoc>,
+        ),
+    ) -> Result<(), !> {
+        self.loop_left_declaration(left)
+    }
+
+    fn for_of_left_declaration(
+        &mut self,
+        left: &(
+            ALoc,
+            flow_parser::ast::statement::VariableDeclaration<ALoc, ALoc>,
+        ),
+    ) -> Result<(), !> {
+        self.loop_left_declaration(left)
     }
 
     fn yield_(

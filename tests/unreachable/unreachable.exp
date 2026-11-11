@@ -6,6 +6,38 @@ Unreachable code. [unreachable-code]
         ^^^^^^^^^^^^^^
 
 
+Error ----------------------------------------------------------------------------------------------------- loops.js:3:3
+
+Unreachable code. [unreachable-code]
+
+   3|   for (const value of [0, 1]) {}
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Error ----------------------------------------------------------------------------------------------------- loops.js:8:3
+
+Unreachable code. [unreachable-code]
+
+   8|   for (const key in object) {}
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------------- loops.js:13:3
+
+Unreachable code. [unreachable-code]
+
+   13|   for (const [first, second] of pairs) {}
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Error --------------------------------------------------------------------------------------------------- loops.js:18:27
+
+Unreachable code. [unreachable-code]
+
+   18|   const [first, second] = pairs[0];
+                                 ^^^^^^^^
+
+
 Error ------------------------------------------------------------------------------------------------ typecheck.js:4:10
 
 Cannot return `bar()` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -113,4 +145,4 @@ Unreachable code. [unreachable-code]
 
 
 
-Found 10 errors
+Found 14 errors
