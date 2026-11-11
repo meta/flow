@@ -2990,34 +2990,53 @@ fn __flow_impl<'cx>(
             }
         }
         (
-            DefT(reason_o, deref!(InstanceT(_))),
+            DefT(reason_o, deref!(InstanceT(instance_t))),
             HasOwnPropT(box HasOwnPropTData {
                 use_op,
                 reason: reason_op,
                 type_: key,
             }),
         ) => {
-            // Same as for objects above: a key that cannot spell a property
-            // name is not a missing property, it is not a key at all.
-            let dropped = drop_generic(key.dupe());
-            let names_a_prop = match dropped.deref() {
-                DefT(_, deref!(SingletonStrT { .. } | StrGeneralT(_) | NumericStrKeyT(_))) => true,
-                TemplateLiteralT { .. } => true,
-                _ => false,
-            };
-            let err = if names_a_prop {
-                ErrorMessage::EPropNotFoundInLookup(Box::new(EPropNotFoundInLookupData {
-                    prop_name: None,
-                    prop_loc: reason_op.loc().dupe(),
-                    object: flow_js_utils::type_reference_with_reason_for_error(l, reason_o.dupe()),
-                    use_op: use_op.dupe(),
-                    suggestion: None,
-                }))
+            let (_, dict_keys) = flow_js_utils::key_sources_of_instance_t(
+                |reason, t| helpers::possible_concrete_types_for_inspection(cx, env, reason, t),
+                instance_t,
+            )?;
+            // Same as for objects above: if we have a dictionary, try that.
+            if !dict_keys.is_empty() {
+                let expected_key = match dict_keys.len() {
+                    1 => dict_keys[0].dupe(),
+                    _ => type_util::union_of_ts(reason_op.dupe(), dict_keys, None),
+                };
+                let mod_key = type_util::mod_reason_of_t(&|_| reason_op.dupe(), key);
+                rec_flow_t(cx, env, trace, use_op.dupe(), (&mod_key, &expected_key))?;
             } else {
-                let keys = Type::new(KeysT(reason_o.dupe().replace_desc_new(None), l.dupe()));
-                flow_js_utils::incompatible_types_error(key, &keys, use_op.dupe(), None)
-            };
-            flow_js_utils::add_output_with_env(cx, env, err)?;
+                // A key that cannot spell a property name is not a missing property, it is not a
+                // key at all.
+                let dropped = drop_generic(key.dupe());
+                let names_a_prop = match dropped.deref() {
+                    DefT(_, deref!(SingletonStrT { .. } | StrGeneralT(_) | NumericStrKeyT(_))) => {
+                        true
+                    }
+                    TemplateLiteralT { .. } => true,
+                    _ => false,
+                };
+                let err = if names_a_prop {
+                    ErrorMessage::EPropNotFoundInLookup(Box::new(EPropNotFoundInLookupData {
+                        prop_name: None,
+                        prop_loc: reason_op.loc().dupe(),
+                        object: flow_js_utils::type_reference_with_reason_for_error(
+                            l,
+                            reason_o.dupe(),
+                        ),
+                        use_op: use_op.dupe(),
+                        suggestion: None,
+                    }))
+                } else {
+                    let keys = Type::new(KeysT(reason_o.dupe().replace_desc_new(None), l.dupe()));
+                    flow_js_utils::incompatible_types_error(key, &keys, use_op.dupe(), None)
+                };
+                flow_js_utils::add_output_with_env(cx, env, err)?;
+            }
         }
         // AnyT has every prop
         (

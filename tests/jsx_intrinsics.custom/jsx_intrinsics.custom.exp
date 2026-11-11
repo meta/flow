@@ -49,21 +49,6 @@ References:
                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
-Error -------------------------------------------------------------------------------------------------- strings.js:11:2
-
-Cannot create string element because an index signature declaring the expected key / value type is missing in
-`IntrinsicElements` [1]. [prop-missing]
-
-   strings.js:11:2
-     11| <Str />; // ERROR
-          ^^^
-
-References:
-   <BUILTINS>/react.js:1840:43
-   1840| declare type React$JSXIntrinsicElements = React.JSX.IntrinsicElements;
-                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-
-
 Error -------------------------------------------------------------------------------------------------- strings.js:13:2
 
 Cannot create `testdiv` element because property `id` is missing in `{}` [1] but exists in
@@ -82,21 +67,6 @@ References:
                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
-Error -------------------------------------------------------------------------------------------------- strings.js:15:2
-
-Cannot create string element because an index signature declaring the expected key / value type is missing in
-`IntrinsicElements` [1]. [prop-missing]
-
-   strings.js:15:2
-     15| <Str />; // ERROR
-          ^^^
-
-References:
-   <BUILTINS>/react.js:1840:43
-   1840| declare type React$JSXIntrinsicElements = React.JSX.IntrinsicElements;
-                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-
-
 Error ------------------------------------------------------------------------------------------------- strings.js:17:10
 
 Cannot create `Div` element because in property `id`: `42` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -112,4 +82,4 @@ References:
 
 
 
-Found 7 errors
+Found 5 errors
