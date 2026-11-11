@@ -55,6 +55,7 @@ try {
   succeeds(['-p', 'require("./return.cjs")'], '7\n');
   succeeds(['-p', 'const n: number = 40; n + 2'], '42\n');
   succeeds(['--no-warnings', '-p', 'process.argv.length'], '4\n');
+  succeeds(['--no-warnings', cjs, '--no-warnings', 'a'], '42 true --no-warnings,a\n');
   write('plain.cjs', 'module.exports = (42: number);');
   succeeds(['-a', '-p', 'require("./plain.cjs")'], '42\n');
   fails(['-p', 'require("./plain.cjs")'], 'SyntaxError');

@@ -32,6 +32,7 @@ var checkSource;
 var all;
 var source;
 var options = [];
+var optionIndices = [];
 var i = 2;
 while (i < process.argv.length) {
   var arg = process.argv[i++];
@@ -59,6 +60,7 @@ while (i < process.argv.length) {
     all = true;
   } else if (arg[0] === '-' || arg === 'debug') {
     options.push(arg);
+    optionIndices.push(i - 1);
   } else {
     source = arg;
     break;
@@ -72,9 +74,9 @@ if (needsLoader) {
   options.unshift('--experimental-loader', require('url').pathToFileURL(require.resolve('./loader.mjs')).href);
 }
 if (options.length > 0) {
-  var nodePath = process.argv.shift();
-  var nodeArgs = options.concat(process.argv.filter(function (arg) {
-    return options.indexOf(arg) === -1;
+  var nodePath = process.argv[0];
+  var nodeArgs = options.concat(process.argv.filter(function (arg, index) {
+    return index > 0 && optionIndices.indexOf(index) === -1;
   }));
 
   const child_process = require('child_process');
