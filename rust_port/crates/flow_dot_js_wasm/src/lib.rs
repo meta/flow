@@ -221,7 +221,6 @@ fn config_options(config: Option<&Value>) -> Result<Options, String> {
         strip_root: true,
         ts_syntax: bool_config(config, "experimental.ts_syntax", true),
         tslib_syntax: true,
-        ts_utility_syntax: true,
         type_expansion_recursion_limit: 3,
         use_unknown_in_catch_variables: bool_config(
             config,
@@ -242,7 +241,6 @@ fn builtin_sig_options() -> TypeSigOptions {
         enable_component_syntax: true,
         component_syntax_enabled_in_config: true,
         enable_ts_syntax: true,
-        enable_ts_utility_syntax: true,
         hook_compatibility: true,
         enable_records: true,
         enable_relay_integration: false,

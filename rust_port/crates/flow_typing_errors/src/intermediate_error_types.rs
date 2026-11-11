@@ -2527,9 +2527,7 @@ pub enum Message<L: Dupe> {
 
     MessageIncorrectType(IncorrectType),
 
-    MessageInvalidCatchParameterAnnotation {
-        ts_utility_syntax: bool,
-    },
+    MessageInvalidCatchParameterAnnotation,
 
     MessageInvalidComponentRestParam,
 

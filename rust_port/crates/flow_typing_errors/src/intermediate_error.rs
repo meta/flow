@@ -8214,7 +8214,7 @@ where
                     }
                 }
             }
-            MessageInvalidCatchParameterAnnotation { .. } => {
+            MessageInvalidCatchParameterAnnotation => {
                 friendly::Message(vec![
                     text("Invalid catch parameter type annotation. "),
                     text("Annotation must be "),

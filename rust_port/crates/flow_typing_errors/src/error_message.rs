@@ -3983,7 +3983,6 @@ pub enum ErrorMessage<L: Dupe + PartialOrd + Ord + PartialEq + Eq> {
 
     EInvalidCatchParameterAnnotation {
         loc: L,
-        ts_utility_syntax: bool,
     },
 
     ETSSyntax(Box<ETSSyntaxData<L>>),
@@ -6556,13 +6555,9 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                 EBigIntNumCoerce(Box::new(map_error_type_ref(operand)))
             }
 
-            EInvalidCatchParameterAnnotation {
-                loc,
-                ts_utility_syntax,
-            } => EInvalidCatchParameterAnnotation {
-                loc: f(loc),
-                ts_utility_syntax,
-            },
+            EInvalidCatchParameterAnnotation { loc } => {
+                EInvalidCatchParameterAnnotation { loc: f(loc) }
+            }
 
             ETSSyntax(box ETSSyntaxData { kind, loc }) => {
                 ETSSyntax(Box::new(ETSSyntaxData { kind, loc: f(loc) }))
@@ -11002,9 +10997,9 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                 )))
             }
 
-            ErrorMessage::EInvalidCatchParameterAnnotation {
-                ts_utility_syntax, ..
-            } => Normal(Message::MessageInvalidCatchParameterAnnotation { ts_utility_syntax }),
+            ErrorMessage::EInvalidCatchParameterAnnotation { .. } => {
+                Normal(Message::MessageInvalidCatchParameterAnnotation)
+            }
 
             ErrorMessage::EInvalidMappedType { kind, .. } => {
                 let msg = match kind {

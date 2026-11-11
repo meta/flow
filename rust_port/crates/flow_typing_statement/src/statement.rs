@@ -2374,7 +2374,6 @@ fn statement_<'a>(
                                         cx,
                                         ErrorMessage::EInvalidCatchParameterAnnotation {
                                             loc: annot_loc.dupe(),
-                                            ts_utility_syntax: cx.ts_utility_syntax(),
                                         },
                                     );
                                     let t = any_t::why(

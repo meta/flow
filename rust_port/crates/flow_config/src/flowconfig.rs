@@ -256,7 +256,6 @@ pub mod opts {
         pub export_star_excludes_default: Option<bool>,
         pub implicit_instantiation_walk: bool,
         pub ts_syntax: Option<bool>,
-        pub ts_utility_syntax: bool,
         pub tslib_syntax: Option<bool>,
         pub typescript_library_definition_support: bool,
         pub typescript_library_definition_support_includes: Vec<FlowconfigGlobPattern>,
@@ -415,7 +414,6 @@ pub mod opts {
             export_star_excludes_default: None,
             implicit_instantiation_walk: false,
             ts_syntax: None,
-            ts_utility_syntax: true,
             tslib_syntax: None,
             typescript_library_definition_support: false,
             typescript_library_definition_support_includes: Vec::new(),
@@ -2316,16 +2314,6 @@ pub mod opts {
                 parse_boolean(
                     |opts, v| {
                         opts.ts_syntax = Some(v);
-                        Ok(())
-                    },
-                    values,
-                    config,
-                )
-            }),
-            ("experimental.ts_utility_syntax", |values, config| {
-                parse_boolean(
-                    |opts, v| {
-                        opts.ts_utility_syntax = v;
                         Ok(())
                     },
                     values,

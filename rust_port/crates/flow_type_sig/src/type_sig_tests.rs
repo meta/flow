@@ -52,7 +52,6 @@ fn default_sig_options() -> TypeSigOptions {
         enable_component_syntax: true,
         component_syntax_enabled_in_config: true,
         enable_ts_syntax: true,
-        enable_ts_utility_syntax: true,
         hook_compatibility: true,
         enable_records: true,
         enable_relay_integration: false,

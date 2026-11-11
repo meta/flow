@@ -9537,19 +9537,13 @@ fn maybe_special_unqualified_generic<'arena, 'ast>(
             }
             _ => Parsed::Err(loc, Errno::CheckError),
         },
-        "Values" => {
-            if opts.enable_ts_syntax || opts.enable_ts_utility_syntax {
-                match targs {
-                    Some(type_args) if type_args.arguments.len() == 1 => {
-                        let t = annot(opts, scope, scopes, tbls, xs, &type_args.arguments[0]);
-                        Parsed::Annot(Box::new(ParsedAnnot::Values(Box::new((loc, t)))))
-                    }
-                    _ => Parsed::Err(loc, Errno::CheckError),
-                }
-            } else {
-                Parsed::Annot(Box::new(ParsedAnnot::Any(Box::new(loc))))
+        "Values" => match targs {
+            Some(type_args) if type_args.arguments.len() == 1 => {
+                let t = annot(opts, scope, scopes, tbls, xs, &type_args.arguments[0]);
+                Parsed::Annot(Box::new(ParsedAnnot::Values(Box::new((loc, t)))))
             }
-        }
+            _ => Parsed::Err(loc, Errno::CheckError),
+        },
         "$Exact" => match targs {
             Some(type_args) if type_args.arguments.len() == 1 => {
                 let t = annot(opts, scope, scopes, tbls, xs, &type_args.arguments[0]);
@@ -9611,51 +9605,27 @@ fn maybe_special_unqualified_generic<'arena, 'ast>(
             }
             _ => Parsed::Err(loc, Errno::CheckError),
         },
-        "Readonly" => {
-            if opts.enable_ts_syntax || opts.enable_ts_utility_syntax {
-                match targs {
-                    Some(type_args) if type_args.arguments.len() == 1 => {
-                        let t = annot(opts, scope, scopes, tbls, xs, &type_args.arguments[0]);
-                        Parsed::Annot(Box::new(ParsedAnnot::ReadOnly(Box::new((loc, t)))))
-                    }
-                    _ => Parsed::Err(loc, Errno::CheckError),
-                }
-            } else {
-                Parsed::Annot(Box::new(ParsedAnnot::Any(Box::new(loc))))
+        "Readonly" => match targs {
+            Some(type_args) if type_args.arguments.len() == 1 => {
+                let t = annot(opts, scope, scopes, tbls, xs, &type_args.arguments[0]);
+                Parsed::Annot(Box::new(ParsedAnnot::ReadOnly(Box::new((loc, t)))))
             }
-        }
-        "ReadonlyArray" => {
-            if opts.enable_ts_syntax || opts.enable_ts_utility_syntax {
-                match targs {
-                    Some(type_args) if type_args.arguments.len() == 1 => {
-                        let t = annot(opts, scope, scopes, tbls, xs, &type_args.arguments[0]);
-                        Parsed::Annot(Box::new(ParsedAnnot::ReadOnlyArray(Box::new((loc, t)))))
-                    }
-                    _ => Parsed::Err(loc, Errno::CheckError),
-                }
-            } else {
-                Parsed::Annot(Box::new(ParsedAnnot::Any(Box::new(loc))))
+            _ => Parsed::Err(loc, Errno::CheckError),
+        },
+        "ReadonlyArray" => match targs {
+            Some(type_args) if type_args.arguments.len() == 1 => {
+                let t = annot(opts, scope, scopes, tbls, xs, &type_args.arguments[0]);
+                Parsed::Annot(Box::new(ParsedAnnot::ReadOnlyArray(Box::new((loc, t)))))
             }
-        }
-        "NonNullable" => {
-            if opts.enable_ts_syntax || opts.enable_ts_utility_syntax {
-                match targs {
-                    Some(type_args) if type_args.arguments.len() == 1 => {
-                        let t = annot(opts, scope, scopes, tbls, xs, &type_args.arguments[0]);
-                        Parsed::Annot(Box::new(ParsedAnnot::NonMaybeType(Box::new((loc, t)))))
-                    }
-                    _ => Parsed::Err(loc, Errno::CheckError),
-                }
-            } else {
-                Parsed::Annot(Box::new(ParsedAnnot::Any(Box::new(loc))))
+            _ => Parsed::Err(loc, Errno::CheckError),
+        },
+        "NonNullable" => match targs {
+            Some(type_args) if type_args.arguments.len() == 1 => {
+                let t = annot(opts, scope, scopes, tbls, xs, &type_args.arguments[0]);
+                Parsed::Annot(Box::new(ParsedAnnot::NonMaybeType(Box::new((loc, t)))))
             }
-        }
-        "ReadonlyMap" if !(opts.enable_ts_syntax || opts.enable_ts_utility_syntax) => {
-            Parsed::Annot(Box::new(ParsedAnnot::Any(Box::new(loc))))
-        }
-        "ReadonlySet" if !(opts.enable_ts_syntax || opts.enable_ts_utility_syntax) => {
-            Parsed::Annot(Box::new(ParsedAnnot::Any(Box::new(loc))))
-        }
+            _ => Parsed::Err(loc, Errno::CheckError),
+        },
         _ => {
             let name = TyName::Unqualified(Box::new(Ref {
                 ref_loc,

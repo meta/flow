@@ -55,7 +55,6 @@ fn metadata() -> Metadata {
     let frozen = FrozenMetadata {
         hook_compatibility: true,
         ts_syntax: true,
-        ts_utility_syntax: true,
         tslib_syntax: true,
         ..Default::default()
     };
@@ -126,7 +125,6 @@ fn check_before_and_after_stmts(relative_path: &str, file_name: &str) {
         &Options {
             hook_compatibility: true,
             ts_syntax: true,
-            ts_utility_syntax: true,
             tslib_syntax: true,
             ..Default::default()
         },

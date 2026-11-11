@@ -4292,14 +4292,10 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             };
             format!("EBigIntNumCoerce ({})", operand_desc)
         }
-        ErrorMessage::EInvalidCatchParameterAnnotation {
-            loc,
-            ts_utility_syntax,
-        } => {
+        ErrorMessage::EInvalidCatchParameterAnnotation { loc } => {
             format!(
-                "EInvalidCatchParameterAnnotation {{{}; {}}}",
-                string_of_aloc(None, loc),
-                ts_utility_syntax
+                "EInvalidCatchParameterAnnotation ({})",
+                string_of_aloc(None, loc)
             )
         }
         ErrorMessage::ETSSyntax(box ETSSyntaxData { loc, .. }) => {

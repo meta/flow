@@ -227,7 +227,6 @@ pub struct FrozenMetadata {
     pub export_star_excludes_default: bool,
     pub implicit_instantiation_walk: bool,
     pub ts_syntax: bool,
-    pub ts_utility_syntax: bool,
     pub tslib_syntax: bool,
     pub typescript_library_definition_support: bool,
     pub type_expansion_recursion_limit: i32,
@@ -293,7 +292,6 @@ impl Default for FrozenMetadata {
             export_star_excludes_default: false,
             implicit_instantiation_walk: false,
             ts_syntax: false,
-            ts_utility_syntax: false,
             tslib_syntax: false,
             typescript_library_definition_support: false,
             type_expansion_recursion_limit: 3,
@@ -970,7 +968,6 @@ pub fn mk_context_metadata(options: &Options, global_libdefs: Arc<BTreeSet<FileK
             export_star_excludes_default: options.export_star_excludes_default,
             implicit_instantiation_walk: options.implicit_instantiation_walk,
             ts_syntax: options.ts_syntax,
-            ts_utility_syntax: options.ts_utility_syntax,
             tslib_syntax: options.tslib_syntax,
             typescript_library_definition_support: options.typescript_library_definition_support,
             assert_operator: options.assert_operator,
@@ -1052,7 +1049,6 @@ pub fn docblock_overrides(
         let frozen = Rc::make_mut(&mut metadata.frozen);
         frozen.ts_syntax = true;
         frozen.tslib_syntax = true;
-        frozen.ts_utility_syntax = true;
         // TS `enum`s are a distinct feature from Flow Enums and are always available
         // in .ts files, regardless of the `enums` option (which gates Flow Enums).
         frozen.enable_enums = true;
@@ -1733,10 +1729,6 @@ impl<'a> Context<'a> {
 
     pub fn ts_syntax(&self) -> bool {
         self.inner().metadata.frozen.ts_syntax || self.is_global_lib_context()
-    }
-
-    pub fn ts_utility_syntax(&self) -> bool {
-        self.inner().metadata.frozen.ts_utility_syntax
     }
 
     pub fn tslib_syntax(&self) -> bool {

@@ -212,7 +212,6 @@ pub struct Options {
     pub ts_syntax: bool,
     pub tslib_syntax: bool,
     pub typescript_library_definition_support: bool,
-    pub ts_utility_syntax: bool,
     pub type_expansion_recursion_limit: i32,
     pub unsuppressable_error_codes: Arc<HashSet<FlowSmolStr>>,
     pub use_unknown_in_catch_variables: bool,

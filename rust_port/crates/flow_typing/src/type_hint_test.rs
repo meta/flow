@@ -147,7 +147,6 @@ mod tests {
         frozen.recursion_limit = 10000;
         frozen.type_expansion_recursion_limit = 3;
         frozen.ts_syntax = true;
-        frozen.ts_utility_syntax = true;
         m.frozen = Rc::new(frozen);
         m
     }
@@ -163,7 +162,6 @@ mod tests {
                 enums: true,
                 hook_compatibility: true,
                 ts_syntax: true,
-                ts_utility_syntax: true,
                 ..Default::default()
             },
             false,
@@ -309,7 +307,6 @@ mod tests {
                 enable_component_syntax: true,
                 component_syntax_enabled_in_config: true,
                 enable_ts_syntax: true,
-                enable_ts_utility_syntax: true,
                 hook_compatibility: true,
                 enable_records: true,
                 for_builtins: true,
