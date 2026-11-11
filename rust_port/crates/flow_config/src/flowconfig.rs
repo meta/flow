@@ -2104,10 +2104,6 @@ pub mod opts {
                     config,
                 )
             }),
-            (
-                "experimental.export_as_namespace_support",
-                |values, config| enum_parser(&[("true", ())], |_opts, ()| Ok(()), values, config),
-            ),
             ("experimental.facebook_module_interop", |values, config| {
                 facebook_module_interop_parser(values, config)
             }),
