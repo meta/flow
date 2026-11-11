@@ -186,6 +186,11 @@ fn config_options(config: Option<&Value>) -> Result<Options, String> {
             false,
         ),
         component_syntax: true,
+        definite_assignment_assertions: bool_config(
+            config,
+            "experimental.definite_assignment_assertions",
+            true,
+        ),
         enable_const_params: bool_config(config, "experimental.const_params", false),
         enable_pattern_matching: true,
         enable_records: true,

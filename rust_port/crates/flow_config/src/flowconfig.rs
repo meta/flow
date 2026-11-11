@@ -155,6 +155,7 @@ pub mod opts {
         pub component_syntax: bool,
         pub async_component_syntax: bool,
         pub async_component_syntax_includes: Vec<String>,
+        pub definite_assignment_assertions: bool,
         pub dev_only_refinement_info_as_errors: bool,
         pub emoji: Option<bool>,
         pub enable_const_params: Option<bool>,
@@ -297,6 +298,7 @@ pub mod opts {
             component_syntax: true,
             async_component_syntax: false,
             async_component_syntax_includes: Vec::new(),
+            definite_assignment_assertions: false,
             dev_only_refinement_info_as_errors: false,
             emoji: None,
             enable_const_params: None,
@@ -2088,6 +2090,19 @@ pub mod opts {
                     config,
                 )
             }),
+            (
+                "experimental.definite_assignment_assertions",
+                |values, config| {
+                    parse_boolean(
+                        |opts, v| {
+                            opts.definite_assignment_assertions = v;
+                            Ok(())
+                        },
+                        values,
+                        config,
+                    )
+                },
+            ),
             ("experimental.enable_custom_error", |values, config| {
                 parse_boolean(
                     |opts, v| {

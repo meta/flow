@@ -123,6 +123,7 @@ pub struct Options {
     pub async_component_syntax: bool,
     pub async_component_syntax_includes: Arc<[Regex]>,
     pub debug: bool,
+    pub definite_assignment_assertions: bool,
     pub dev_only_refinement_info_as_errors: bool,
     pub distributed: bool,
     pub enable_const_params: bool,

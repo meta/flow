@@ -182,6 +182,7 @@ pub struct FrozenMetadata {
     pub component_syntax: bool,
     pub async_component_syntax: bool,
     pub async_component_syntax_includes: Arc<[Regex]>,
+    pub definite_assignment_assertions: bool,
     pub dev_only_refinement_info_as_errors: bool,
     pub enable_const_params: bool,
     pub enable_custom_error: bool,
@@ -245,6 +246,7 @@ impl Default for FrozenMetadata {
             component_syntax: true,
             async_component_syntax: false,
             async_component_syntax_includes: Arc::from([]),
+            definite_assignment_assertions: false,
             dev_only_refinement_info_as_errors: false,
             enable_const_params: false,
             enable_custom_error: false,
@@ -912,6 +914,7 @@ pub fn mk_context_metadata(options: &Options, global_libdefs: Arc<BTreeSet<FileK
             component_syntax: options.component_syntax,
             async_component_syntax: options.async_component_syntax,
             async_component_syntax_includes: options.async_component_syntax_includes.dupe(),
+            definite_assignment_assertions: options.definite_assignment_assertions,
             hook_compatibility_excludes: options.hook_compatibility_excludes.dupe(),
             hook_compatibility_includes: options.hook_compatibility_includes.dupe(),
             hook_compatibility: options.hook_compatibility,
@@ -1719,6 +1722,12 @@ impl<'a> Context<'a> {
 
     pub fn tslib_syntax(&self) -> bool {
         self.inner().metadata.frozen.tslib_syntax || self.is_global_lib_context()
+    }
+
+    /// Whether TypeScript's definite assignment assertions (`let x!: T`, `value!: T`) are
+    /// enabled. TypeScript files always allow them.
+    pub fn definite_assignment_assertions(&self) -> bool {
+        self.is_ts_file() || self.inner().metadata.frozen.definite_assignment_assertions
     }
 
     pub fn typescript_library_definition_support(&self) -> bool {
