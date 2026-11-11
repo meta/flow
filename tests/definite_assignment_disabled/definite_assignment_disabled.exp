@@ -22,5 +22,13 @@ Definite assignment assertion (`!`) is not enabled. [unsupported-syntax]
         ^^^^^^^^^^^^^^^^^^^^^^
 
 
+Error ------------------------------------------------------------------------------------------------- variables.js:3:5
 
-Found 3 errors
+Definite assignment assertion (`!`) is not enabled. [unsupported-syntax]
+
+   3| let count!: number; // error: not enabled
+          ^^^^^^^^^^^^^^
+
+
+
+Found 4 errors

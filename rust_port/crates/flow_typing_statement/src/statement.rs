@@ -2298,6 +2298,15 @@ fn statement_<'a>(
                         ))),
                     );
                 }
+                if decl.definite && !cx.definite_assignment_assertions() {
+                    flow_js::add_output_non_speculating(
+                        cx,
+                        ErrorMessage::EUnsupportedSyntax(Box::new((
+                            decl.loc.dupe(),
+                            UnsupportedSyntax::DefiniteAssignmentAssertion,
+                        ))),
+                    );
+                }
                 check_unique_symbol_const_binding(cx, kind, &decl.id);
                 let (id, init) = variable(cx, kind, None, &decl.id, decl.init.as_ref())?;
                 Ok(statement::variable::Declarator {

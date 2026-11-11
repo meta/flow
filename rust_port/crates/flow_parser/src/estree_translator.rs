@@ -4710,21 +4710,25 @@ fn variable_declarator(
     config: &Config,
     declarator: &ast::statement::variable::Declarator<Loc, Loc>,
 ) -> Value {
+    let mut props = vec![
+        ("id", pattern(offset_table, config, &declarator.id)),
+        (
+            "init",
+            option(&declarator.init, |e| {
+                expression(offset_table, config, false, e)
+            }),
+        ),
+    ];
+    if declarator.definite {
+        props.push(("definite", bool_value(true)));
+    }
     node(
         offset_table,
         config,
         "VariableDeclarator",
         &declarator.loc,
         None,
-        vec![
-            ("id", pattern(offset_table, config, &declarator.id)),
-            (
-                "init",
-                option(&declarator.init, |e| {
-                    expression(offset_table, config, false, e)
-                }),
-            ),
-        ],
+        props,
     )
 }
 

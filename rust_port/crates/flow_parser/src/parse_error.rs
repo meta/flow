@@ -41,6 +41,7 @@ pub enum MatchNonLastRestKind {
 )]
 pub enum DefiniteAssignmentTarget {
     ClassField,
+    Variable,
 }
 
 #[derive(
@@ -388,6 +389,9 @@ impl fmt::Display for ParseError {
                 let rules = match target {
                     DefiniteAssignmentTarget::ClassField => {
                         "It cannot be used on a `declare`, `static` or `abstract` field, in a declaration file, or in a `declare module` or `declare namespace` body."
+                    }
+                    DefiniteAssignmentTarget::Variable => {
+                        "It can only be used on a `let` or `var` declaration, and not in the head of a `for` loop, a `declare` statement, a declaration file, or a `declare module` or `declare namespace` body."
                     }
                 };
                 write!(

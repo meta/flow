@@ -1,0 +1,134 @@
+{
+  "body": [
+    {
+      "declarations": [
+        {
+          "definite": true,
+          "id": {
+            "loc": {
+              "end": {
+                "column": 16,
+                "line": 1
+              },
+              "source": null,
+              "start": {
+                "column": 6,
+                "line": 1
+              }
+            },
+            "name": "a",
+            "optional": false,
+            "range": [
+              6,
+              16
+            ],
+            "type": "Identifier",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 16,
+                  "line": 1
+                },
+                "source": null,
+                "start": {
+                  "column": 8,
+                  "line": 1
+                }
+              },
+              "range": [
+                8,
+                16
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 16,
+                    "line": 1
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 10,
+                    "line": 1
+                  }
+                },
+                "range": [
+                  10,
+                  16
+                ],
+                "type": "NumberTypeAnnotation"
+              }
+            }
+          },
+          "init": null,
+          "loc": {
+            "end": {
+              "column": 16,
+              "line": 1
+            },
+            "source": null,
+            "start": {
+              "column": 6,
+              "line": 1
+            }
+          },
+          "range": [
+            6,
+            16
+          ],
+          "type": "VariableDeclarator"
+        }
+      ],
+      "kind": "const",
+      "loc": {
+        "end": {
+          "column": 17,
+          "line": 1
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
+      "range": [
+        0,
+        17
+      ],
+      "type": "VariableDeclaration"
+    }
+  ],
+  "comments": [],
+  "errors": [
+    {
+      "loc": {
+        "end": {
+          "column": 16,
+          "line": 1
+        },
+        "source": null,
+        "start": {
+          "column": 6,
+          "line": 1
+        }
+      },
+      "message": "Const must be initialized"
+    }
+  ],
+  "loc": {
+    "end": {
+      "column": 0,
+      "line": 2
+    },
+    "source": null,
+    "start": {
+      "column": 0,
+      "line": 1
+    }
+  },
+  "range": [
+    0,
+    18
+  ],
+  "type": "Program"
+}

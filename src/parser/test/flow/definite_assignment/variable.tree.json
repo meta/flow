@@ -1,0 +1,506 @@
+{
+  "body": [
+    {
+      "declarations": [
+        {
+          "definite": true,
+          "id": {
+            "loc": {
+              "end": {
+                "column": 14,
+                "line": 1
+              },
+              "source": null,
+              "start": {
+                "column": 4,
+                "line": 1
+              }
+            },
+            "name": "a",
+            "optional": false,
+            "range": [
+              4,
+              14
+            ],
+            "type": "Identifier",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 14,
+                  "line": 1
+                },
+                "source": null,
+                "start": {
+                  "column": 6,
+                  "line": 1
+                }
+              },
+              "range": [
+                6,
+                14
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 14,
+                    "line": 1
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 8,
+                    "line": 1
+                  }
+                },
+                "range": [
+                  8,
+                  14
+                ],
+                "type": "NumberTypeAnnotation"
+              }
+            }
+          },
+          "init": null,
+          "loc": {
+            "end": {
+              "column": 14,
+              "line": 1
+            },
+            "source": null,
+            "start": {
+              "column": 4,
+              "line": 1
+            }
+          },
+          "range": [
+            4,
+            14
+          ],
+          "type": "VariableDeclarator"
+        }
+      ],
+      "kind": "let",
+      "loc": {
+        "end": {
+          "column": 15,
+          "line": 1
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
+      "range": [
+        0,
+        15
+      ],
+      "type": "VariableDeclaration"
+    },
+    {
+      "declarations": [
+        {
+          "definite": true,
+          "id": {
+            "loc": {
+              "end": {
+                "column": 14,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 4,
+                "line": 2
+              }
+            },
+            "name": "b",
+            "optional": false,
+            "range": [
+              20,
+              30
+            ],
+            "type": "Identifier",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 14,
+                  "line": 2
+                },
+                "source": null,
+                "start": {
+                  "column": 6,
+                  "line": 2
+                }
+              },
+              "range": [
+                22,
+                30
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 14,
+                    "line": 2
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 8,
+                    "line": 2
+                  }
+                },
+                "range": [
+                  24,
+                  30
+                ],
+                "type": "StringTypeAnnotation"
+              }
+            }
+          },
+          "init": null,
+          "loc": {
+            "end": {
+              "column": 14,
+              "line": 2
+            },
+            "source": null,
+            "start": {
+              "column": 4,
+              "line": 2
+            }
+          },
+          "range": [
+            20,
+            30
+          ],
+          "type": "VariableDeclarator"
+        }
+      ],
+      "kind": "var",
+      "loc": {
+        "end": {
+          "column": 15,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 2
+        }
+      },
+      "range": [
+        16,
+        31
+      ],
+      "type": "VariableDeclaration"
+    },
+    {
+      "declarations": [
+        {
+          "definite": true,
+          "id": {
+            "loc": {
+              "end": {
+                "column": 14,
+                "line": 3
+              },
+              "source": null,
+              "start": {
+                "column": 4,
+                "line": 3
+              }
+            },
+            "name": "c",
+            "optional": false,
+            "range": [
+              36,
+              46
+            ],
+            "type": "Identifier",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 14,
+                  "line": 3
+                },
+                "source": null,
+                "start": {
+                  "column": 6,
+                  "line": 3
+                }
+              },
+              "range": [
+                38,
+                46
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 14,
+                    "line": 3
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 8,
+                    "line": 3
+                  }
+                },
+                "range": [
+                  40,
+                  46
+                ],
+                "type": "NumberTypeAnnotation"
+              }
+            }
+          },
+          "init": null,
+          "loc": {
+            "end": {
+              "column": 14,
+              "line": 3
+            },
+            "source": null,
+            "start": {
+              "column": 4,
+              "line": 3
+            }
+          },
+          "range": [
+            36,
+            46
+          ],
+          "type": "VariableDeclarator"
+        },
+        {
+          "definite": true,
+          "id": {
+            "loc": {
+              "end": {
+                "column": 26,
+                "line": 3
+              },
+              "source": null,
+              "start": {
+                "column": 16,
+                "line": 3
+              }
+            },
+            "name": "d",
+            "optional": false,
+            "range": [
+              48,
+              58
+            ],
+            "type": "Identifier",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 26,
+                  "line": 3
+                },
+                "source": null,
+                "start": {
+                  "column": 18,
+                  "line": 3
+                }
+              },
+              "range": [
+                50,
+                58
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 26,
+                    "line": 3
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 20,
+                    "line": 3
+                  }
+                },
+                "range": [
+                  52,
+                  58
+                ],
+                "type": "StringTypeAnnotation"
+              }
+            }
+          },
+          "init": null,
+          "loc": {
+            "end": {
+              "column": 26,
+              "line": 3
+            },
+            "source": null,
+            "start": {
+              "column": 16,
+              "line": 3
+            }
+          },
+          "range": [
+            48,
+            58
+          ],
+          "type": "VariableDeclarator"
+        }
+      ],
+      "kind": "let",
+      "loc": {
+        "end": {
+          "column": 27,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 3
+        }
+      },
+      "range": [
+        32,
+        59
+      ],
+      "type": "VariableDeclaration"
+    },
+    {
+      "declaration": {
+        "declarations": [
+          {
+            "definite": true,
+            "id": {
+              "loc": {
+                "end": {
+                  "column": 21,
+                  "line": 4
+                },
+                "source": null,
+                "start": {
+                  "column": 11,
+                  "line": 4
+                }
+              },
+              "name": "e",
+              "optional": false,
+              "range": [
+                71,
+                81
+              ],
+              "type": "Identifier",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 21,
+                    "line": 4
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 13,
+                    "line": 4
+                  }
+                },
+                "range": [
+                  73,
+                  81
+                ],
+                "type": "TypeAnnotation",
+                "typeAnnotation": {
+                  "loc": {
+                    "end": {
+                      "column": 21,
+                      "line": 4
+                    },
+                    "source": null,
+                    "start": {
+                      "column": 15,
+                      "line": 4
+                    }
+                  },
+                  "range": [
+                    75,
+                    81
+                  ],
+                  "type": "NumberTypeAnnotation"
+                }
+              }
+            },
+            "init": null,
+            "loc": {
+              "end": {
+                "column": 21,
+                "line": 4
+              },
+              "source": null,
+              "start": {
+                "column": 11,
+                "line": 4
+              }
+            },
+            "range": [
+              71,
+              81
+            ],
+            "type": "VariableDeclarator"
+          }
+        ],
+        "kind": "let",
+        "loc": {
+          "end": {
+            "column": 22,
+            "line": 4
+          },
+          "source": null,
+          "start": {
+            "column": 7,
+            "line": 4
+          }
+        },
+        "range": [
+          67,
+          82
+        ],
+        "type": "VariableDeclaration"
+      },
+      "exportKind": "value",
+      "loc": {
+        "end": {
+          "column": 22,
+          "line": 4
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 4
+        }
+      },
+      "range": [
+        60,
+        82
+      ],
+      "source": null,
+      "specifiers": [],
+      "type": "ExportNamedDeclaration"
+    }
+  ],
+  "comments": [],
+  "loc": {
+    "end": {
+      "column": 0,
+      "line": 5
+    },
+    "source": null,
+    "start": {
+      "column": 0,
+      "line": 1
+    }
+  },
+  "range": [
+    0,
+    83
+  ],
+  "type": "Program"
+}

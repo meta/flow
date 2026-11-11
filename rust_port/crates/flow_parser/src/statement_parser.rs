@@ -454,7 +454,7 @@ fn for_loop(env: &mut ParserEnv) -> Result<statement::Statement<Loc, Loc>, Rollb
             TokenKind::TSemicolon => Ok((None, vec![])),
             TokenKind::TLet if !peek::let_token_is_followed_by_in(env) => {
                 let (loc, (declarations, leading, errs)) =
-                    with_loc(None, env, declaration_parser::parse_let)?;
+                    with_loc(None, env, |env| declaration_parser::parse_let(env, false))?;
                 Ok((
                     Some(ForLhs::ForDeclaration((
                         loc,
@@ -473,7 +473,7 @@ fn for_loop(env: &mut ParserEnv) -> Result<statement::Statement<Loc, Loc>, Rollb
             }
             TokenKind::TConst => {
                 let (loc, (declarations, leading, errs)) =
-                    with_loc(None, env, declaration_parser::parse_const)?;
+                    with_loc(None, env, |env| declaration_parser::parse_const(env, false))?;
                 Ok((
                     Some(ForLhs::ForDeclaration((
                         loc,
@@ -488,7 +488,7 @@ fn for_loop(env: &mut ParserEnv) -> Result<statement::Statement<Loc, Loc>, Rollb
             }
             TokenKind::TVar => {
                 let (loc, (declarations, leading, errs)) =
-                    with_loc(None, env, declaration_parser::parse_var)?;
+                    with_loc(None, env, |env| declaration_parser::parse_var(env, false))?;
                 Ok((
                     Some(ForLhs::ForDeclaration((
                         loc,
@@ -1077,7 +1077,7 @@ fn try_statement(env: &mut ParserEnv) -> Result<statement::Statement<Loc, Loc>, 
 fn var_statement(env: &mut ParserEnv) -> Result<statement::Statement<Loc, Loc>, Rollback> {
     let (loc, s) = with_loc(None, env, |env| {
         let kind = VariableKind::Var;
-        let (mut declarations, leading, errs) = declaration_parser::parse_var(env)?;
+        let (mut declarations, leading, errs) = declaration_parser::parse_var(env, true)?;
         let trailing = variable_declaration_end(env, kind, &mut declarations)?;
         for err in errs {
             env.error_at(err.0, err.1)?;
@@ -1104,7 +1104,7 @@ fn const_statement_after_const(
     let (loc, s) = with_loc(Some(start_loc), env, |env| {
         let kind = VariableKind::Const;
         let (mut declarations, leading, errs) =
-            declaration_parser::parse_const_after_const(env, leading)?;
+            declaration_parser::parse_const_after_const(env, leading, true)?;
         let trailing = variable_declaration_end(env, kind, &mut declarations)?;
         for err in errs {
             env.error_at(err.0, err.1)?;
@@ -1126,7 +1126,7 @@ fn const_statement_after_const(
 fn let_statement(env: &mut ParserEnv) -> Result<statement::Statement<Loc, Loc>, Rollback> {
     let (loc, s) = with_loc(None, env, |env| {
         let kind = VariableKind::Let;
-        let (mut declarations, leading, errs) = declaration_parser::parse_let(env)?;
+        let (mut declarations, leading, errs) = declaration_parser::parse_let(env, true)?;
         let trailing = variable_declaration_end(env, kind, &mut declarations)?;
         for err in errs {
             env.error_at(err.0, err.1)?;
@@ -2101,7 +2101,7 @@ fn declare_var(
         VariableKind::Let => expect::token(env, TokenKind::TLet)?,
         VariableKind::Const => expect::token(env, TokenKind::TConst)?,
     };
-    let (mut declarations, errs) = declaration_parser::variable_declaration_list(env)?;
+    let (mut declarations, errs) = declaration_parser::variable_declaration_list(env, false)?;
     for err in errs {
         env.error_at(err.0, err.1)?;
     }

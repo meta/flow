@@ -1,0 +1,607 @@
+{
+  "body": [
+    {
+      "declarations": [
+        {
+          "definite": true,
+          "id": {
+            "loc": {
+              "end": {
+                "column": 22,
+                "line": 1
+              },
+              "source": null,
+              "start": {
+                "column": 12,
+                "line": 1
+              }
+            },
+            "name": "a",
+            "optional": false,
+            "range": [
+              12,
+              22
+            ],
+            "type": "Identifier",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 22,
+                  "line": 1
+                },
+                "source": null,
+                "start": {
+                  "column": 14,
+                  "line": 1
+                }
+              },
+              "range": [
+                14,
+                22
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 22,
+                    "line": 1
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 16,
+                    "line": 1
+                  }
+                },
+                "range": [
+                  16,
+                  22
+                ],
+                "type": "NumberTypeAnnotation"
+              }
+            }
+          },
+          "init": null,
+          "loc": {
+            "end": {
+              "column": 22,
+              "line": 1
+            },
+            "source": null,
+            "start": {
+              "column": 12,
+              "line": 1
+            }
+          },
+          "range": [
+            12,
+            22
+          ],
+          "type": "VariableDeclarator"
+        }
+      ],
+      "kind": "let",
+      "loc": {
+        "end": {
+          "column": 23,
+          "line": 1
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
+      "range": [
+        0,
+        23
+      ],
+      "type": "DeclareVariable"
+    },
+    {
+      "body": {
+        "body": [],
+        "loc": {
+          "end": {
+            "column": 31,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 29,
+            "line": 2
+          }
+        },
+        "range": [
+          53,
+          55
+        ],
+        "type": "BlockStatement"
+      },
+      "init": {
+        "declarations": [
+          {
+            "definite": true,
+            "id": {
+              "loc": {
+                "end": {
+                  "column": 19,
+                  "line": 2
+                },
+                "source": null,
+                "start": {
+                  "column": 9,
+                  "line": 2
+                }
+              },
+              "name": "b",
+              "optional": false,
+              "range": [
+                33,
+                43
+              ],
+              "type": "Identifier",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 19,
+                    "line": 2
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 11,
+                    "line": 2
+                  }
+                },
+                "range": [
+                  35,
+                  43
+                ],
+                "type": "TypeAnnotation",
+                "typeAnnotation": {
+                  "loc": {
+                    "end": {
+                      "column": 19,
+                      "line": 2
+                    },
+                    "source": null,
+                    "start": {
+                      "column": 13,
+                      "line": 2
+                    }
+                  },
+                  "range": [
+                    37,
+                    43
+                  ],
+                  "type": "NumberTypeAnnotation"
+                }
+              }
+            },
+            "init": {
+              "loc": {
+                "end": {
+                  "column": 23,
+                  "line": 2
+                },
+                "source": null,
+                "start": {
+                  "column": 22,
+                  "line": 2
+                }
+              },
+              "range": [
+                46,
+                47
+              ],
+              "raw": "0",
+              "type": "Literal",
+              "value": 0
+            },
+            "loc": {
+              "end": {
+                "column": 23,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 9,
+                "line": 2
+              }
+            },
+            "range": [
+              33,
+              47
+            ],
+            "type": "VariableDeclarator"
+          }
+        ],
+        "kind": "let",
+        "loc": {
+          "end": {
+            "column": 23,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 5,
+            "line": 2
+          }
+        },
+        "range": [
+          29,
+          47
+        ],
+        "type": "VariableDeclaration"
+      },
+      "loc": {
+        "end": {
+          "column": 31,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 2
+        }
+      },
+      "range": [
+        24,
+        55
+      ],
+      "test": null,
+      "type": "ForStatement",
+      "update": null
+    },
+    {
+      "await": false,
+      "body": {
+        "body": [],
+        "loc": {
+          "end": {
+            "column": 20,
+            "line": 3
+          },
+          "source": null,
+          "start": {
+            "column": 18,
+            "line": 3
+          }
+        },
+        "range": [
+          74,
+          76
+        ],
+        "type": "BlockStatement"
+      },
+      "left": {
+        "declarations": [
+          {
+            "definite": true,
+            "id": {
+              "loc": {
+                "end": {
+                  "column": 10,
+                  "line": 3
+                },
+                "source": null,
+                "start": {
+                  "column": 9,
+                  "line": 3
+                }
+              },
+              "name": "c",
+              "optional": false,
+              "range": [
+                65,
+                66
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "init": null,
+            "loc": {
+              "end": {
+                "column": 11,
+                "line": 3
+              },
+              "source": null,
+              "start": {
+                "column": 9,
+                "line": 3
+              }
+            },
+            "range": [
+              65,
+              67
+            ],
+            "type": "VariableDeclarator"
+          }
+        ],
+        "kind": "let",
+        "loc": {
+          "end": {
+            "column": 11,
+            "line": 3
+          },
+          "source": null,
+          "start": {
+            "column": 5,
+            "line": 3
+          }
+        },
+        "range": [
+          61,
+          67
+        ],
+        "type": "VariableDeclaration"
+      },
+      "loc": {
+        "end": {
+          "column": 20,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 3
+        }
+      },
+      "range": [
+        56,
+        76
+      ],
+      "right": {
+        "loc": {
+          "end": {
+            "column": 16,
+            "line": 3
+          },
+          "source": null,
+          "start": {
+            "column": 15,
+            "line": 3
+          }
+        },
+        "name": "d",
+        "optional": false,
+        "range": [
+          71,
+          72
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "type": "ForOfStatement"
+    },
+    {
+      "body": {
+        "body": [],
+        "loc": {
+          "end": {
+            "column": 28,
+            "line": 4
+          },
+          "source": null,
+          "start": {
+            "column": 26,
+            "line": 4
+          }
+        },
+        "range": [
+          103,
+          105
+        ],
+        "type": "BlockStatement"
+      },
+      "left": {
+        "declarations": [
+          {
+            "definite": true,
+            "id": {
+              "loc": {
+                "end": {
+                  "column": 19,
+                  "line": 4
+                },
+                "source": null,
+                "start": {
+                  "column": 9,
+                  "line": 4
+                }
+              },
+              "name": "e",
+              "optional": false,
+              "range": [
+                86,
+                96
+              ],
+              "type": "Identifier",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 19,
+                    "line": 4
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 11,
+                    "line": 4
+                  }
+                },
+                "range": [
+                  88,
+                  96
+                ],
+                "type": "TypeAnnotation",
+                "typeAnnotation": {
+                  "loc": {
+                    "end": {
+                      "column": 19,
+                      "line": 4
+                    },
+                    "source": null,
+                    "start": {
+                      "column": 13,
+                      "line": 4
+                    }
+                  },
+                  "range": [
+                    90,
+                    96
+                  ],
+                  "type": "StringTypeAnnotation"
+                }
+              }
+            },
+            "init": null,
+            "loc": {
+              "end": {
+                "column": 19,
+                "line": 4
+              },
+              "source": null,
+              "start": {
+                "column": 9,
+                "line": 4
+              }
+            },
+            "range": [
+              86,
+              96
+            ],
+            "type": "VariableDeclarator"
+          }
+        ],
+        "kind": "var",
+        "loc": {
+          "end": {
+            "column": 19,
+            "line": 4
+          },
+          "source": null,
+          "start": {
+            "column": 5,
+            "line": 4
+          }
+        },
+        "range": [
+          82,
+          96
+        ],
+        "type": "VariableDeclaration"
+      },
+      "loc": {
+        "end": {
+          "column": 28,
+          "line": 4
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 4
+        }
+      },
+      "range": [
+        77,
+        105
+      ],
+      "right": {
+        "loc": {
+          "end": {
+            "column": 24,
+            "line": 4
+          },
+          "source": null,
+          "start": {
+            "column": 23,
+            "line": 4
+          }
+        },
+        "name": "f",
+        "optional": false,
+        "range": [
+          100,
+          101
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "type": "ForInStatement"
+    }
+  ],
+  "comments": [],
+  "errors": [
+    {
+      "loc": {
+        "end": {
+          "column": 14,
+          "line": 1
+        },
+        "source": null,
+        "start": {
+          "column": 13,
+          "line": 1
+        }
+      },
+      "message": "A definite assignment assertion `!` is not permitted in this context. It can only be used on a `let` or `var` declaration, and not in the head of a `for` loop, a `declare` statement, a declaration file, or a `declare module` or `declare namespace` body."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 11,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 10,
+          "line": 2
+        }
+      },
+      "message": "A definite assignment assertion `!` is not permitted in this context. It can only be used on a `let` or `var` declaration, and not in the head of a `for` loop, a `declare` statement, a declaration file, or a `declare module` or `declare namespace` body."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 11,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 10,
+          "line": 3
+        }
+      },
+      "message": "A definite assignment assertion `!` is not permitted in this context. It can only be used on a `let` or `var` declaration, and not in the head of a `for` loop, a `declare` statement, a declaration file, or a `declare module` or `declare namespace` body."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 11,
+          "line": 4
+        },
+        "source": null,
+        "start": {
+          "column": 10,
+          "line": 4
+        }
+      },
+      "message": "A definite assignment assertion `!` is not permitted in this context. It can only be used on a `let` or `var` declaration, and not in the head of a `for` loop, a `declare` statement, a declaration file, or a `declare module` or `declare namespace` body."
+    }
+  ],
+  "loc": {
+    "end": {
+      "column": 0,
+      "line": 5
+    },
+    "source": null,
+    "start": {
+      "column": 0,
+      "line": 1
+    }
+  },
+  "range": [
+    0,
+    106
+  ],
+  "type": "Program"
+}

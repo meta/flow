@@ -20,6 +20,7 @@ use crate::expression_parser;
 use crate::loc::LOC_NONE;
 use crate::loc::Loc;
 use crate::main_parser;
+use crate::parse_error::DefiniteAssignmentTarget;
 use crate::parse_error::ParseError;
 use crate::parser_common::assert_identifier_name_is_identifier;
 use crate::parser_common::identifier_name;
@@ -1009,8 +1010,11 @@ enum ImplicitDeclareResult {
     FunctionDeclaration(function::Function<Loc, Loc>),
 }
 
+/// `allow_definite` is whether TypeScript's definite assignment assertion (`let x!: T`) is
+/// permitted, which it is not in `declare` statements or the head of a `for` loop.
 pub(super) fn variable_declaration_list(
     env: &mut ParserEnv,
+    allow_definite: bool,
 ) -> Result<
     (
         Vec<statement::variable::Declarator<Loc, Loc>>,
@@ -1020,6 +1024,7 @@ pub(super) fn variable_declaration_list(
 > {
     fn variable_declaration(
         env: &mut ParserEnv,
+        allow_definite: bool,
     ) -> Result<
         (
             statement::variable::Declarator<Loc, Loc>,
@@ -1027,8 +1032,9 @@ pub(super) fn variable_declaration_list(
         ),
         Rollback,
     > {
-        let (loc, (id, init, err)) = with_loc(None, env, |env| {
+        let (loc, (id, init, definite, err)) = with_loc(None, env, |env| {
             let id = pattern_parser::pattern(env, false, ParseError::StrictVarName)?;
+            let (id, definite) = definite_assignment_assertion(env, id)?;
             let (init, err) = if eat::maybe(env, TokenKind::TAssign)? {
                 (Some(expression_parser::assignment(env)?), None)
             } else {
@@ -1042,14 +1048,24 @@ pub(super) fn variable_declaration_list(
                     ),
                 }
             };
-            Ok((id, init, err))
+            if let Some(definite_loc) = &definite
+                && let Some(error) = main_parser::definite_assignment_error(
+                    DefiniteAssignmentTarget::Variable,
+                    allow_definite && !env.in_ambient_context(),
+                    init.is_some(),
+                    ast_utils::pattern_has_type_annotation(&id),
+                )
+            {
+                env.error_at(definite_loc.dupe(), error)?;
+            }
+            Ok((id, init, definite.is_some(), err))
         })?;
         Ok((
             statement::variable::Declarator {
                 loc,
                 id,
                 init,
-                definite: false,
+                definite,
             },
             err,
         ))
@@ -1058,7 +1074,7 @@ pub(super) fn variable_declaration_list(
     let mut decls = Vec::new();
     let mut errs = Vec::new();
     loop {
-        let (decl, err) = variable_declaration(env)?;
+        let (decl, err) = variable_declaration(env, allow_definite)?;
         decls.push(decl);
         if let Some(x) = err {
             errs.push(x);
@@ -1069,9 +1085,42 @@ pub(super) fn variable_declaration_list(
     }
 }
 
+/// TypeScript's definite assignment assertion comes between a declared name and its annotation
+/// (`let x!: T`), so the pattern parser stops at the `!` and leaves the annotation unparsed. This
+/// parses the `!` and the annotation after it, which belongs to the identifier.
+fn definite_assignment_assertion(
+    env: &mut ParserEnv,
+    id: pattern::Pattern<Loc, Loc>,
+) -> Result<(pattern::Pattern<Loc, Loc>, Option<Loc>), Rollback> {
+    let pattern::Pattern::Identifier { loc, inner } = &id else {
+        return Ok((id, None));
+    };
+    if let types::AnnotationOrHint::Available(_) = inner.annot {
+        return Ok((id, None));
+    }
+    let Some(definite_loc) = main_parser::parse_definite_assignment_assertion(env)? else {
+        return Ok((id, None));
+    };
+    let annot = type_parser::parse_annotation_opt(env)?;
+    let loc = match &annot {
+        types::AnnotationOrHint::Available(annot) => Loc::between(loc, &annot.loc),
+        types::AnnotationOrHint::Missing(_) => loc.dupe(),
+    };
+    let inner = Arc::new(pattern::Identifier {
+        name: inner.name.dupe(),
+        annot,
+        optional: inner.optional,
+    });
+    Ok((
+        pattern::Pattern::Identifier { loc, inner },
+        Some(definite_loc),
+    ))
+}
+
 fn declarations(
     token: TokenKind,
     env: &mut ParserEnv,
+    allow_definite: bool,
 ) -> Result<
     (
         Vec<statement::variable::Declarator<Loc, Loc>>,
@@ -1082,12 +1131,13 @@ fn declarations(
 > {
     let leading = peek::comments(env);
     expect::token(env, token.clone())?;
-    let (declarations, errs) = variable_declaration_list(env)?;
+    let (declarations, errs) = variable_declaration_list(env, allow_definite)?;
     Ok((declarations, leading, errs))
 }
 
 pub(super) fn parse_var(
     env: &mut ParserEnv,
+    allow_definite: bool,
 ) -> Result<
     (
         Vec<statement::variable::Declarator<Loc, Loc>>,
@@ -1096,11 +1146,12 @@ pub(super) fn parse_var(
     ),
     Rollback,
 > {
-    declarations(TokenKind::TVar, env)
+    declarations(TokenKind::TVar, env, allow_definite)
 }
 
 pub(super) fn parse_const(
     env: &mut ParserEnv,
+    allow_definite: bool,
 ) -> Result<
     (
         Vec<statement::variable::Declarator<Loc, Loc>>,
@@ -1111,12 +1162,13 @@ pub(super) fn parse_const(
 > {
     let leading_comments = peek::comments(env);
     expect::token(env, TokenKind::TConst)?;
-    parse_const_after_const(env, leading_comments)
+    parse_const_after_const(env, leading_comments, allow_definite)
 }
 
 pub(super) fn parse_const_after_const(
     env: &mut ParserEnv,
     leading_comments: Vec<Comment<Loc>>,
+    allow_definite: bool,
 ) -> Result<
     (
         Vec<statement::variable::Declarator<Loc, Loc>>,
@@ -1126,7 +1178,7 @@ pub(super) fn parse_const_after_const(
     Rollback,
 > {
     env.with_no_let(true, |env| {
-        let (declarations, mut errs) = variable_declaration_list(env)?;
+        let (declarations, mut errs) = variable_declaration_list(env, allow_definite)?;
         // Make sure all consts defined are initialized, unless we're in an ambient context with type annotation
         for decl in &declarations {
             if decl.init.is_none() {
@@ -1146,6 +1198,7 @@ pub(super) fn parse_const_after_const(
 
 pub(super) fn parse_let(
     env: &mut ParserEnv,
+    allow_definite: bool,
 ) -> Result<
     (
         Vec<statement::variable::Declarator<Loc, Loc>>,
@@ -1154,7 +1207,9 @@ pub(super) fn parse_let(
     ),
     Rollback,
 > {
-    env.with_no_let(true, |env| declarations(TokenKind::TLet, env))
+    env.with_no_let(true, |env| {
+        declarations(TokenKind::TLet, env, allow_definite)
+    })
 }
 
 pub(super) fn parse_enum_declaration(

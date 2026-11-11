@@ -138,8 +138,8 @@ pub(super) fn parse_identifier_with_type(
     })
 }
 
-/// Parses TypeScript's definite assignment assertion, the `!` after a class field's name in
-/// `value!: T`, and returns its location. A `!` on the next line is not one.
+/// Parses TypeScript's definite assignment assertion, the `!` after a declared name in `let x!: T`
+/// or in a class field `value!: T`, and returns its location. A `!` on the next line is not one.
 pub(super) fn parse_definite_assignment_assertion(
     env: &mut ParserEnv,
 ) -> Result<Option<Loc>, Rollback> {
