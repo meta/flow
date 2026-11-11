@@ -4571,7 +4571,7 @@
       "patterns": [
         {
           "comment": "Assume this is a flow typed var",
-          "begin": "(?<=^|,|\\()\\s*+(?=(\\#?)((?:[$_\\p{L}\\p{Nl}]|\\\\u\\h{4}|\\\\u{\\h+})(?:[$_\\p{L}\\p{Mn}\\p{Mc}\\p{Nd}\\p{Nl}\\p{Pc}\\x{200C}\\x{200D}]|\\\\u\\h{4}|\\\\u{\\h+})*+)\\s*\\??\\s*:((?=::)|(?!:)))",
+          "begin": "(?<=^|,|\\()\\s*+(?=(\\#?)((?:[$_\\p{L}\\p{Nl}]|\\\\u\\h{4}|\\\\u{\\h+})(?:[$_\\p{L}\\p{Mn}\\p{Mc}\\p{Nd}\\p{Nl}\\p{Pc}\\x{200C}\\x{200D}]|\\\\u\\h{4}|\\\\u{\\h+})*+)\\s*[?!]?\\s*:((?=::)|(?!:)))",
           "end": "\\s*(?=,|\\))",
           "patterns": [
             {
@@ -5471,8 +5471,8 @@
           "include": "#flowtype-function-name"
         },
         {
-          "comment": "name of variable spread var with optional ? and optional flowtype :",
-          "match": "((?<!\\.)\\.\\.\\.)?\\s*+(\\#?)((?:[$_\\p{L}\\p{Nl}]|\\\\u\\h{4}|\\\\u{\\h+})(?:[$_\\p{L}\\p{Mn}\\p{Mc}\\p{Nd}\\p{Nl}\\p{Pc}\\x{200C}\\x{200D}]|\\\\u\\h{4}|\\\\u{\\h+})*+)\\s*+(\\??)\\s*+(?!::)(?=:|=>)",
+          "comment": "name of variable spread var with optional ? or definite assignment ! and optional flowtype :",
+          "match": "((?<!\\.)\\.\\.\\.)?\\s*+(\\#?)((?:[$_\\p{L}\\p{Nl}]|\\\\u\\h{4}|\\\\u{\\h+})(?:[$_\\p{L}\\p{Mn}\\p{Mc}\\p{Nd}\\p{Nl}\\p{Pc}\\x{200C}\\x{200D}]|\\\\u\\h{4}|\\\\u{\\h+})*+)\\s*+(\\??)(!?)\\s*+(?!::)(?=:|=>)",
           "captures": {
             "1": {
               "name": "keyword.operator.spread.js"
@@ -5485,6 +5485,9 @@
             },
             "4": {
               "name": "keyword.operator.optional.flowtype"
+            },
+            "5": {
+              "name": "keyword.operator.definiteassignment.flowtype"
             }
           }
         },
@@ -5642,7 +5645,7 @@
           "include": "#flowtype-function-name"
         },
         {
-          "match": "\\s*+(\\#?)((?:[$_\\p{L}\\p{Nl}]|\\\\u\\h{4}|\\\\u{\\h+})(?:[$_\\p{L}\\p{Mn}\\p{Mc}\\p{Nd}\\p{Nl}\\p{Pc}\\x{200C}\\x{200D}]|\\\\u\\h{4}|\\\\u{\\h+})*+)\\s*+(\\??)(?=\\s*:(?!:))",
+          "match": "\\s*+(\\#?)((?:[$_\\p{L}\\p{Nl}]|\\\\u\\h{4}|\\\\u{\\h+})(?:[$_\\p{L}\\p{Mn}\\p{Mc}\\p{Nd}\\p{Nl}\\p{Pc}\\x{200C}\\x{200D}]|\\\\u\\h{4}|\\\\u{\\h+})*+)\\s*+(\\??)(!?)(?=\\s*:(?!:))",
           "captures": {
             "1": {
               "name": "keyword.operator.private.js"
@@ -5652,6 +5655,9 @@
             },
             "3": {
               "name": "keyword.operator.optional.flowtype"
+            },
+            "4": {
+              "name": "keyword.operator.definiteassignment.flowtype"
             }
           }
         }
