@@ -555,7 +555,12 @@ impl<'a, 'cx> AnnotateOptionalPropertiesMapper<'a, 'cx> {
                         }
                         _ => id.clone(),
                     };
-                    ast::statement::variable::Declarator { loc, id, init }
+                    ast::statement::variable::Declarator {
+                        loc,
+                        id,
+                        init,
+                        definite: decl.definite,
+                    }
                 }
             }
             _ => flow_parser::ast_visitor::map_variable_declarator_default(self, kind, &decl),

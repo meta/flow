@@ -69,6 +69,7 @@ pub fn fold_bindings_of_variable_declarations<
         loc: _,
         id: pattern,
         init: _,
+        definite: _,
     } in declarations
     {
         let has_annotation = match pattern {

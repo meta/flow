@@ -372,6 +372,7 @@ pub(super) fn parse_function_params(
             static_: false,
             override_: false,
             optional,
+            definite: false,
             variance,
             ts_accessibility,
             decorators: [].into(),
@@ -1043,7 +1044,15 @@ pub(super) fn variable_declaration_list(
             };
             Ok((id, init, err))
         })?;
-        Ok((statement::variable::Declarator { loc, id, init }, err))
+        Ok((
+            statement::variable::Declarator {
+                loc,
+                id,
+                init,
+                definite: false,
+            },
+            err,
+        ))
     }
 
     let mut decls = Vec::new();

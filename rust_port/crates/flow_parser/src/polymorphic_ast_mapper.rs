@@ -3147,6 +3147,7 @@ pub fn class_property<M: Dupe, T: Dupe, N: Dupe, U: Dupe, E>(
         static_,
         override_,
         optional,
+        definite,
         variance: var,
         ts_accessibility,
         decorators,
@@ -3177,6 +3178,7 @@ pub fn class_property<M: Dupe, T: Dupe, N: Dupe, U: Dupe, E>(
         static_: *static_,
         override_: *override_,
         optional: *optional,
+        definite: *definite,
         variance: variance_,
         ts_accessibility: ts_accessibility_,
         decorators: decorators_.into(),
@@ -3206,6 +3208,7 @@ fn class_private_field<M: Dupe, T: Dupe, N: Dupe, U: Dupe, E>(
         static_,
         override_,
         optional,
+        definite,
         variance: var,
         ts_accessibility,
         decorators,
@@ -3236,6 +3239,7 @@ fn class_private_field<M: Dupe, T: Dupe, N: Dupe, U: Dupe, E>(
         static_: *static_,
         override_: *override_,
         optional: *optional,
+        definite: *definite,
         variance: variance_,
         ts_accessibility: ts_accessibility_,
         decorators: decorators_.into(),
@@ -3762,7 +3766,12 @@ pub fn declare_variable_declarator<M: Dupe, T: Dupe, N: Dupe, U: Dupe, E>(
     kind: ast::VariableKind,
     decl: &ast::statement::variable::Declarator<M, T>,
 ) -> Result<ast::statement::variable::Declarator<N, U>, E> {
-    let ast::statement::variable::Declarator { loc, id, init } = decl;
+    let ast::statement::variable::Declarator {
+        loc,
+        id,
+        init,
+        definite,
+    } = decl;
     let loc_ = mapper.on_loc_annot(loc)?;
     let id_ = variable_declarator_pattern(mapper, kind, id)?;
     let init_ = init.as_ref().map(|i| expression(mapper, i)).transpose()?;
@@ -3770,6 +3779,7 @@ pub fn declare_variable_declarator<M: Dupe, T: Dupe, N: Dupe, U: Dupe, E>(
         loc: loc_,
         id: id_,
         init: init_,
+        definite: *definite,
     })
 }
 
@@ -5679,7 +5689,12 @@ fn variable_declarator<M: Dupe, T: Dupe, N: Dupe, U: Dupe, E>(
     kind: ast::VariableKind,
     decl: &ast::statement::variable::Declarator<M, T>,
 ) -> Result<ast::statement::variable::Declarator<N, U>, E> {
-    let ast::statement::variable::Declarator { loc, id, init } = decl;
+    let ast::statement::variable::Declarator {
+        loc,
+        id,
+        init,
+        definite,
+    } = decl;
     let loc_ = mapper.on_loc_annot(loc)?;
     let id_ = variable_declarator_pattern(mapper, kind, id)?;
     let init_ = init.as_ref().map(|i| expression(mapper, i)).transpose()?;
@@ -5687,6 +5702,7 @@ fn variable_declarator<M: Dupe, T: Dupe, N: Dupe, U: Dupe, E>(
         loc: loc_,
         id: id_,
         init: init_,
+        definite: *definite,
     })
 }
 fn variable_declarator_pattern<M: Dupe, T: Dupe, N: Dupe, U: Dupe, E>(

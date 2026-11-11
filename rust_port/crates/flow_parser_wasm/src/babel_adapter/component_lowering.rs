@@ -516,6 +516,7 @@ impl ComponentLowerer {
                     loc: loc.dupe(),
                     id: builders::identifier_pattern(&component.id),
                     init: Some(call),
+                    definite: false,
                 }],
             )
         });
@@ -560,6 +561,7 @@ impl ComponentLowerer {
                 loc: loc.dupe(),
                 id: pattern,
                 init: None,
+                definite: false,
             }]),
             kind: ast::VariableKind::Const,
             comments: None,

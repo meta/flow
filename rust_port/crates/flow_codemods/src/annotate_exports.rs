@@ -478,6 +478,7 @@ impl<'ast, 'a, 'cx> AstVisitor<'ast, Loc> for AnnotateExportsMapper<'a, 'cx> {
                             }),
                         },
                         init: decl.init.clone(),
+                        definite: decl.definite,
                     }
                 }
             }

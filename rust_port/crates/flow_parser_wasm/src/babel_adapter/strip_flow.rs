@@ -380,6 +380,7 @@ impl StripFlow {
                 loc: loc.dupe(),
                 id: pattern,
                 init: None,
+                definite: false,
             }]),
             kind: ast::VariableKind::Const,
             comments: None,

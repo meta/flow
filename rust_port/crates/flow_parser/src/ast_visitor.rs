@@ -7809,6 +7809,7 @@ pub fn class_property_default<'ast, Loc: Dupe, Type: Dupe, C, E>(
         static_: _,
         override_: _,
         optional: _,
+        definite: _,
         variance,
         ts_accessibility: _,
         decorators,
@@ -7837,6 +7838,7 @@ pub fn map_class_property_default<'ast, Loc: Dupe, Type: Dupe, C, E>(
         static_,
         override_,
         optional,
+        definite,
         variance,
         ts_accessibility,
         decorators,
@@ -7860,6 +7862,7 @@ pub fn map_class_property_default<'ast, Loc: Dupe, Type: Dupe, C, E>(
         static_: *static_,
         override_: *override_,
         optional: *optional,
+        definite: *definite,
         variance: variance.clone(),
         ts_accessibility: ts_accessibility.clone(),
         decorators: decorators_,
@@ -7905,6 +7908,7 @@ pub fn class_private_field_default<'ast, Loc: Dupe, Type: Dupe, C, E>(
         static_: _,
         override_: _,
         optional: _,
+        definite: _,
         variance,
         ts_accessibility: _,
         decorators,
@@ -7933,6 +7937,7 @@ pub fn map_class_private_field_default<'ast, Loc: Dupe, Type: Dupe, C, E>(
         static_,
         override_,
         optional,
+        definite,
         variance,
         ts_accessibility,
         decorators,
@@ -7956,6 +7961,7 @@ pub fn map_class_private_field_default<'ast, Loc: Dupe, Type: Dupe, C, E>(
         static_: *static_,
         override_: *override_,
         optional: *optional,
+        definite: *definite,
         variance: variance.clone(),
         ts_accessibility: ts_accessibility.clone(),
         decorators: decorators_,
@@ -9323,7 +9329,12 @@ pub fn declare_variable_declarator_default<'ast, Loc: Dupe, Type: Dupe, C, E>(
     kind: ast::VariableKind,
     decl: &'ast ast::statement::variable::Declarator<Loc, Type>,
 ) -> Result<(), E> {
-    let ast::statement::variable::Declarator { loc: _, id, init } = decl;
+    let ast::statement::variable::Declarator {
+        loc: _,
+        id,
+        init,
+        definite: _,
+    } = decl;
     match id {
         ast::pattern::Pattern::Identifier { inner, .. } => {
             visitor.pattern_identifier(Some(kind), &inner.name)?;
@@ -9344,7 +9355,12 @@ pub fn map_declare_variable_declarator_default<'ast, Loc: Dupe, Type: Dupe, C, E
     kind: ast::VariableKind,
     decl: &'ast ast::statement::variable::Declarator<Loc, Loc>,
 ) -> ast::statement::variable::Declarator<Loc, Loc> {
-    let ast::statement::variable::Declarator { loc, id, init } = decl;
+    let ast::statement::variable::Declarator {
+        loc,
+        id,
+        init,
+        definite,
+    } = decl;
     let id_ = match id {
         ast::pattern::Pattern::Identifier { loc: ploc, inner } => {
             let ident_ = visitor.map_pattern_identifier(Some(kind), inner);
@@ -9360,6 +9376,7 @@ pub fn map_declare_variable_declarator_default<'ast, Loc: Dupe, Type: Dupe, C, E
         loc: loc.dupe(),
         id: id_,
         init: init_,
+        definite: *definite,
     }
 }
 
@@ -18572,7 +18589,12 @@ pub fn variable_declarator_default<'ast, Loc: Dupe, Type: Dupe, C, E>(
     kind: ast::VariableKind,
     declarator: &'ast ast::statement::variable::Declarator<Loc, Type>,
 ) -> Result<(), E> {
-    let ast::statement::variable::Declarator { loc: _, id, init } = declarator;
+    let ast::statement::variable::Declarator {
+        loc: _,
+        id,
+        init,
+        definite: _,
+    } = declarator;
     visitor.variable_declarator_pattern(kind, id)?;
     if let Some(init_expr) = init {
         visitor.expression(init_expr)?;
@@ -18585,13 +18607,19 @@ pub fn map_variable_declarator_default<'ast, Loc: Dupe, Type: Dupe, C, E>(
     kind: ast::VariableKind,
     declarator: &'ast ast::statement::variable::Declarator<Loc, Loc>,
 ) -> ast::statement::variable::Declarator<Loc, Loc> {
-    let ast::statement::variable::Declarator { loc, id, init } = declarator;
+    let ast::statement::variable::Declarator {
+        loc,
+        id,
+        init,
+        definite,
+    } = declarator;
     let id_ = visitor.map_variable_declarator_pattern(kind, id);
     let init_ = init.as_ref().map(|i| visitor.map_expression(i));
     ast::statement::variable::Declarator {
         loc: loc.dupe(),
         id: id_,
         init: init_,
+        definite: *definite,
     }
 }
 

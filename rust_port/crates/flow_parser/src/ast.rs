@@ -2177,6 +2177,7 @@ pub mod statement {
             pub loc: M,
             pub id: Pattern<M, T>,
             pub init: Option<super::super::expression::Expression<M, T>>,
+            pub definite: bool,
         }
     }
 
@@ -6453,6 +6454,7 @@ pub mod class {
         pub static_: bool,
         pub override_: bool,
         pub optional: bool,
+        pub definite: bool,
         pub variance: Option<Variance<M>>,
         pub ts_accessibility: Option<ts_accessibility::TSAccessibility<M>>,
         pub decorators: Arc<[Decorator<M, T>]>,
@@ -6478,6 +6480,7 @@ pub mod class {
         pub static_: bool,
         pub override_: bool,
         pub optional: bool,
+        pub definite: bool,
         pub variance: Option<Variance<M>>,
         pub ts_accessibility: Option<ts_accessibility::TSAccessibility<M>>,
         pub decorators: Arc<[Decorator<M, T>]>,

@@ -253,6 +253,7 @@ mod esprima_tests {
                     inner: id_inner,
                 },
             init: Some(init_expr),
+            definite: _,
         }) = declarations.first()
         else {
             return None;

@@ -11642,6 +11642,7 @@ impl<'ast, 'a, Cx: Context, Fl: Flow<Cx = Cx>>
                                     loc: _,
                                     id: _,
                                     init: Some(init),
+                                    definite: _,
                                 } => {
                                     Fl::add_output(
                                         self.cx,

@@ -640,11 +640,13 @@ impl<'ast> AstVisitor<'ast, Loc, Loc, &'ast Loc, !> for TrailingCommentsRemover 
                 loc: decl.loc.dupe(),
                 id: self.map_pattern(None, &decl.id),
                 init: None,
+                definite: decl.definite,
             },
             Some(init) => ast::statement::variable::Declarator {
                 loc: decl.loc.dupe(),
                 id: decl.id.clone(),
                 init: Some(self.map_expression(init)),
+                definite: decl.definite,
             },
         }
     }

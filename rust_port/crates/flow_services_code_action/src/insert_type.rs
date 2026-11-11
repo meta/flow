@@ -372,6 +372,7 @@ impl<F: FnMut(Loc) -> Result<(Loc, ast::types::Type<Loc, Loc>), Expected>> Mappe
                             inner: id,
                         },
                     init: Some(init_expr),
+                    definite: _,
                 },
             ) if self.is_target(init_expr.loc()) => {
                 let type_loc = init_expr.loc().dupe();

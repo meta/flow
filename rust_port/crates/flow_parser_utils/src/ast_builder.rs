@@ -897,6 +897,7 @@ pub mod classes {
             static_,
             override_: false,
             optional: false,
+            definite: false,
             variance,
             ts_accessibility: None,
             decorators: decorators.into(),
@@ -1259,7 +1260,12 @@ pub mod statements {
         init: Option<expression::Expression<Loc, Loc>>,
     ) -> statement::variable::Declarator<Loc, Loc> {
         let loc = loc.unwrap_or_else(Loc::none);
-        statement::variable::Declarator { loc, id, init }
+        statement::variable::Declarator {
+            loc,
+            id,
+            init,
+            definite: false,
+        }
     }
 
     pub fn variable_declarator(

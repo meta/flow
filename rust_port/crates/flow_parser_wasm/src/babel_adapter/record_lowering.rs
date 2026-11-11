@@ -328,6 +328,7 @@ impl RecordLowerer {
                 static_: true,
                 override_: false,
                 optional: false,
+                definite: false,
                 variance: None,
                 ts_accessibility: None,
                 decorators: Arc::from([]),

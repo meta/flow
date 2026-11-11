@@ -2304,6 +2304,7 @@ fn statement_<'a>(
                     loc: decl.loc.dupe(),
                     id,
                     init,
+                    definite: decl.definite,
                 })
             })?;
         Ok(statement::VariableDeclaration {
@@ -3084,6 +3085,7 @@ fn statement_<'a>(
                                     loc: vdecl_loc,
                                     id: id_ast,
                                     init: None,
+                                    definite: decl.declarations[0].definite,
                                 }]
                                 .into(),
                                 comments: decl.comments.dupe(),
@@ -3225,6 +3227,7 @@ fn statement_<'a>(
                                     loc: vdecl_loc,
                                     id: id_ast,
                                     init: None,
+                                    definite: decl.declarations[0].definite,
                                 }]
                                 .into(),
                                 comments: decl.comments.dupe(),
@@ -4856,6 +4859,7 @@ fn declare_variable<'a>(
                             loc: decl_loc,
                             id: typed_id,
                             init: None,
+                            definite: d.definite,
                         })
                     }
                     (ast::types::AnnotationOrHint::Missing(missing_loc), Some(init_expr))
@@ -4883,6 +4887,7 @@ fn declare_variable<'a>(
                             loc: decl_loc,
                             id: typed_id,
                             init: Some(init_ast),
+                            definite: d.definite,
                         })
                     }
                     (ast::types::AnnotationOrHint::Missing(_), Some(init_expr)) => {
@@ -17417,6 +17422,7 @@ pub fn mk_class_sig<'a>(
                                 let static_ = prop.static_;
                                 let override_ = prop.override_;
                                 let optional = prop.optional;
+                                let definite = prop.definite;
                                 let variance = &prop.variance;
                                 let ts_accessibility = &prop.ts_accessibility;
                                 let decorators = &prop.decorators;
@@ -17525,6 +17531,7 @@ pub fn mk_class_sig<'a>(
                                             static_: static_c,
                                             override_: override_c,
                                             optional,
+                                            definite,
                                             variance: variance_c,
                                             ts_accessibility: ts_accessibility_c,
                                             decorators: decorators_ast.into(),
@@ -17580,6 +17587,7 @@ pub fn mk_class_sig<'a>(
                                 let static_ = prop.static_;
                                 let override_ = prop.override_;
                                 let optional = prop.optional;
+                                let definite = prop.definite;
                                 let variance = &prop.variance;
                                 let ts_accessibility = &prop.ts_accessibility;
                                 let decorators = &prop.decorators;
@@ -17741,6 +17749,7 @@ pub fn mk_class_sig<'a>(
                                             static_: static_c,
                                             override_: override_c,
                                             optional,
+                                            definite,
                                             variance: variance_c,
                                             ts_accessibility: ts_accessibility_c,
                                             decorators: decorators_ast.into(),
@@ -17781,6 +17790,7 @@ pub fn mk_class_sig<'a>(
                             let static_ = pf.static_;
                             let override_ = pf.override_;
                             let optional = pf.optional;
+                            let definite = pf.definite;
                             let variance = &pf.variance;
                             let ts_accessibility = &pf.ts_accessibility;
                             let decorators = &pf.decorators;
@@ -17874,6 +17884,7 @@ pub fn mk_class_sig<'a>(
                                     static_: static_c,
                                     override_: override_c,
                                     optional,
+                                    definite,
                                     variance: variance_c,
                                     ts_accessibility: ts_accessibility_c,
                                     decorators: decorators_ast.into(),
