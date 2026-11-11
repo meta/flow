@@ -15294,30 +15294,15 @@ fn check_property_initialization<'a>(
     Ok(())
 }
 
-/// Whether a field's declared type includes `void`: one of the types it can be is `void`,
-/// `mixed` or `any`.
+/// Whether a field's declared type includes `void`, so that the field may hold `undefined`:
+/// `void` is a subtype of it.
 fn declared_type_includes_void(cx: &mut Context<'_>, field_t: &Type) -> Result<bool, JobError> {
-    // Resolving the type can instantiate aliases and evaluate type operations that the
+    let void_t = type_::void::why(reason_of_t(field_t).dupe());
+    // Checking the type can instantiate aliases and evaluate type operations that the
     // program itself never uses: keep their errors and cached results out of the program's.
-    let concrete_types =
-        flow_js_utils::flow_js_result_to_job_error(cx.run_and_rolled_back_cache(|cx| {
-            cx.with_suppressed_errors(|cx| {
-                FlowJs::possible_concrete_types_for_property_initialization_check(
-                    cx,
-                    reason_of_t(field_t),
-                    field_t,
-                )
-            })
-        }))?;
-    Ok(concrete_types.iter().any(|t| match t.deref() {
-        TypeInner::AnyT(..) => true,
-        TypeInner::DefT(_, def_t) => matches!(
-            def_t.deref(),
-            DefTInner::VoidT
-                | DefTInner::MixedT(MixedFlavor::MixedEverything | MixedFlavor::MixedNonNull)
-        ),
-        _ => false,
-    }))
+    cx.run_and_rolled_back_cache(|cx| {
+        cx.with_suppressed_errors(|cx| FlowJs::speculative_subtyping_succeeds(cx, &void_t, field_t))
+    })
 }
 
 /// The field of an optional class property (`x?: T`), which may hold `undefined`: `T | void`, as

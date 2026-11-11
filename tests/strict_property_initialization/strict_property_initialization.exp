@@ -174,12 +174,20 @@ Property `label` has no initializer and is not definitely assigned in the constr
          ^^^^^
 
 
-Error ---------------------------------------------------------------------------------------------- field_types.js:29:3
+Error ---------------------------------------------------------------------------------------------- field_types.js:36:3
 
-Property `nested` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+Property `oneSide` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
 
-   29|   nested: Nested<string>; // error: no `void` among `string`, `Array<string>`, `Array<Array<string>>`, ...
-         ^^^^^^
+   36|   oneSide: ?string & string; // error
+         ^^^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------- field_types.js:53:3
+
+Property `value` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   53|   value: {a: T}['missing']; // error
+         ^^^^^
 
 
 Error ------------------------------------------------------------------------------------ inherited_declarations.js:7:3
@@ -504,4 +512,4 @@ Property `value` has no initializer and is not definitely assigned in the constr
 
 
 
-Found 63 errors
+Found 64 errors
