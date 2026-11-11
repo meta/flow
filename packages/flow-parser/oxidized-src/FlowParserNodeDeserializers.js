@@ -239,12 +239,14 @@ module.exports = [
 
   // 21: VariableDeclarator
   function () {
-    return {
+    const node = {
       type: 'VariableDeclarator',
       loc: this.addEmptyLoc(),
-      init: this.deserializeNode(),
-      id: this.deserializeNode(),
     };
+    node.init = this.deserializeNode();
+    node.id = this.deserializeNode();
+    if (this.deserializeBoolean()) node['definite'] = true;
+    return node;
   },
 
   // 22: ClassDeclaration
@@ -1026,21 +1028,23 @@ module.exports = [
 
   // 88: PropertyDefinition
   function () {
-    return {
+    const node = {
       type: 'PropertyDefinition',
       loc: this.addEmptyLoc(),
-      key: this.deserializeNode(),
-      value: this.deserializeNode(),
-      typeAnnotation: this.deserializeNode(),
-      computed: this.deserializeBoolean(),
-      static: this.deserializeBoolean(),
-      variance: this.deserializeNode(),
-      tsAccessibility: this.deserializeString(),
-      declare: this.deserializeBoolean(),
-      optional: this.deserializeBoolean(),
-      override: this.deserializeBoolean(),
-      decorators: this.deserializeNodeList(),
     };
+    node.key = this.deserializeNode();
+    node.value = this.deserializeNode();
+    node.typeAnnotation = this.deserializeNode();
+    node.computed = this.deserializeBoolean();
+    node.static = this.deserializeBoolean();
+    node.variance = this.deserializeNode();
+    node.tsAccessibility = this.deserializeString();
+    node.declare = this.deserializeBoolean();
+    node.optional = this.deserializeBoolean();
+    if (this.deserializeBoolean()) node['definite'] = true;
+    node.override = this.deserializeBoolean();
+    node.decorators = this.deserializeNodeList();
+    return node;
   },
 
   // 89: StaticBlock

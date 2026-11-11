@@ -1244,6 +1244,7 @@ export type PropertyDefinitionProps = {
   >,
   readonly declare: PropertyDefinitionType['declare'],
   readonly optional: PropertyDefinitionType['optional'],
+  readonly definite?: ?PropertyDefinitionType['definite'],
   readonly variance?: ?MaybeDetachedNode<PropertyDefinitionType['variance']>,
   readonly typeAnnotation?: ?MaybeDetachedNode<
     PropertyDefinitionType['typeAnnotation'],
@@ -1539,6 +1540,7 @@ export type VariableDeclarationProps = {
 export type VariableDeclaratorProps = {
   readonly init?: ?MaybeDetachedNode<VariableDeclaratorType['init']>,
   readonly id: MaybeDetachedNode<VariableDeclaratorType['id']>,
+  readonly definite?: ?VariableDeclaratorType['definite'],
 };
 
 export type VarianceProps = {
@@ -3783,6 +3785,7 @@ export function PropertyDefinition(props: {
       decorators: props.decorators.map(n => asDetachedNodeForCodeGen(n)),
       declare: props.declare,
       optional: props.optional,
+      definite: props.definite,
       variance: asDetachedNodeForCodeGen(props.variance),
       typeAnnotation: asDetachedNodeForCodeGen(props.typeAnnotation),
       override: props.override,
@@ -4451,6 +4454,7 @@ export function VariableDeclarator(props: {
       type: 'VariableDeclarator',
       init: asDetachedNodeForCodeGen(props.init),
       id: asDetachedNodeForCodeGen(props.id),
+      definite: props.definite,
     },
   );
   setParentPointersInDirectChildren(node as $FlowFixMe);

@@ -88,6 +88,7 @@ describe('ReplaceNode', () => {
           {
             "declarations": [
               {
+                "definite": undefined,
                 "id": {
                   "name": "x",
                   "optional": false,

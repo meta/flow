@@ -169,6 +169,36 @@ describe('generated node builders', () => {
     expect(property.typeAnnotation?.parent).toBe(property);
   });
 
+  // Variable declarators and class fields carry definite assignment assertions.
+  test('builds definite assignment assertions', () => {
+    expect(
+      t.VariableDeclarator({
+        id: t.Identifier({
+          name: 'count',
+          typeAnnotation: t.TypeAnnotation({
+            typeAnnotation: t.NumberTypeAnnotation(),
+          }),
+        }),
+        definite: true,
+      }),
+    ).toMatchObject({type: 'VariableDeclarator', init: null, definite: true});
+    expect(
+      t.PropertyDefinition({
+        key: t.Identifier({name: 'value'}),
+        computed: false,
+        static: false,
+        decorators: [],
+        declare: false,
+        optional: false,
+        definite: true,
+        override: false,
+        typeAnnotation: t.TypeAnnotation({
+          typeAnnotation: t.NumberTypeAnnotation(),
+        }),
+      }),
+    ).toMatchObject({type: 'PropertyDefinition', value: null, definite: true});
+  });
+
   test('preserves export kinds', () => {
     const id = t.Identifier({name: 'Foo'});
 

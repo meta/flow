@@ -634,13 +634,14 @@ impl<'a> Serializer<'a> {
         &mut self,
         decl: &ast::statement::variable::Declarator<Loc, Loc>,
     ) {
-        // 21: VariableDeclarator — init(Node nullable), id(Node)
+        // 21: VariableDeclarator — init(Node nullable), id(Node), definite
         self.write_node_header(NodeKind::VariableDeclarator, &decl.loc);
         match &decl.init {
             Some(expr) => self.serialize_expression(expr),
             None => self.write_null_node(),
         }
         self.serialize_pattern(&decl.id);
+        self.write_bool(decl.definite);
     }
 
     fn serialize_variable_declarator_list(
@@ -2468,7 +2469,7 @@ impl<'a> Serializer<'a> {
                     return;
                 }
                 // 88: PropertyDefinition — key value typeAnnotation computed static variance
-                //     tsAccessibility declare optional override decorators
+                //     tsAccessibility declare optional definite override decorators
                 self.write_node_header(NodeKind::PropertyDefinition, &p.loc);
                 self.serialize_object_key(&p.key);
                 match &p.value {
@@ -2491,6 +2492,7 @@ impl<'a> Serializer<'a> {
                 );
                 self.write_bool(matches!(p.value, ast::class::property::Value::Declared));
                 self.write_bool(p.optional);
+                self.write_bool(p.definite);
                 self.write_bool(p.override_);
                 self.buf.push(p.decorators.len() as u32);
                 for dec in p.decorators.iter() {
@@ -2500,7 +2502,7 @@ impl<'a> Serializer<'a> {
             }
             ast::class::BodyElement::PrivateField(pf) => {
                 // 88: PropertyDefinition — key value typeAnnotation computed static variance
-                //     tsAccessibility declare optional override decorators
+                //     tsAccessibility declare optional definite override decorators
                 let mut private_field_loc = pf.loc.clone();
                 private_field_loc.start = pf.key.loc.start;
                 if self.is_babel() {
@@ -2543,6 +2545,7 @@ impl<'a> Serializer<'a> {
                 );
                 self.write_bool(matches!(pf.value, ast::class::property::Value::Declared));
                 self.write_bool(pf.optional);
+                self.write_bool(pf.definite);
                 self.write_bool(pf.override_);
                 self.buf.push(pf.decorators.len() as u32);
                 for dec in pf.decorators.iter() {

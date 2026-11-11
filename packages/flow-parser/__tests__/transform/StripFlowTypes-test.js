@@ -199,4 +199,15 @@ describe('StripFlowTypes', () => {
 
     expect(statement.expression.typeArguments).toBeNull();
   });
+
+  test.each([
+    ['let count!: number;', 'let count;'],
+    ['let first!: number, second!: string;', 'let first, second;'],
+    ['class Box { value!: number; }', 'class Box {\n  value;\n}'],
+    ['class Box { #secret!: string; }', 'class Box {\n  #secret;\n}'],
+  ])('strips definite assignment assertions from %s', async (code, result) => {
+    const stripped = stripFlowTypes(parse(code), {});
+
+    expect((await print(stripped, code)).trim()).toBe(result); // OK
+  });
 });

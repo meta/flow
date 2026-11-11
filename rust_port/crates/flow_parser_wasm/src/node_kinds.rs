@@ -535,6 +535,7 @@ define_nodes! {
     VariableDeclarator = 21 {
         init: Node,
         id: Node,
+        definite: TrueBoolean,
     },
     ClassDeclaration = 22 {
         id: Node,
@@ -1021,6 +1022,7 @@ define_nodes! {
         tsAccessibility: String,
         declare: Boolean,
         optional: Boolean,
+        definite: TrueBoolean,
         override: Boolean,
         decorators: NodeList,
     },

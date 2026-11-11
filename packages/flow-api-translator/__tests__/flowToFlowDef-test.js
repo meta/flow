@@ -746,6 +746,17 @@ describe('flowToFlowDef', () => {
         ),
       );
     });
+    it('definite assignment assertion', async () => {
+      await expectTranslate(
+        `export class A {
+           foo!: string;
+           #bar!: number;
+         }`,
+        `declare export class A {
+           foo: string;
+         }`,
+      );
+    });
   });
   describe('InterfaceDeclaration', () => {
     it('property', async () => {
@@ -887,6 +898,12 @@ describe('flowToFlowDef', () => {
       await expectTranslate(
         `export const foo: number = 1;`,
         `declare export const foo: number;`,
+      );
+    });
+    it('definite assignment assertion', async () => {
+      await expectTranslate(
+        `export let foo!: number;`,
+        `declare export let foo: number;`,
       );
     });
     it('basic typecast', async () => {

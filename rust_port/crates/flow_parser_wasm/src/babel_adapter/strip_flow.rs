@@ -477,6 +477,18 @@ impl<'ast> AstVisitor<'ast, Loc> for StripFlow {
         }
     }
 
+    // Babel's generator prints `!` for a declarator with `definite`, and stripping Flow types does
+    // not clear it, so `let x!: T` would become `let x!`.
+    fn map_variable_declarator(
+        &mut self,
+        kind: ast::VariableKind,
+        declarator: &'ast statement::variable::Declarator<Loc, Loc>,
+    ) -> statement::variable::Declarator<Loc, Loc> {
+        let mut declarator = ast_visitor::map_variable_declarator_default(self, kind, declarator);
+        declarator.definite = false;
+        declarator
+    }
+
     fn map_tuple_type(
         &mut self,
         loc: &'ast Loc,

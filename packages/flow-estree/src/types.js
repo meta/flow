@@ -470,6 +470,7 @@ export interface VariableDeclarator extends BaseNode {
   readonly type: 'VariableDeclarator';
   readonly id: BindingName;
   readonly init?: Expression | null;
+  readonly definite?: true;
 
   readonly parent: VariableDeclaration;
 }
@@ -1017,6 +1018,7 @@ interface PropertyDefinitionBase extends BaseNode {
   readonly variance: null | Variance;
   readonly declare: boolean;
   readonly optional: boolean;
+  readonly definite?: true;
   readonly override: boolean;
   readonly tsAccessibility: TSAccessibility | null;
 

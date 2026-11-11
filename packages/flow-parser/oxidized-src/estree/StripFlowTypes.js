@@ -57,6 +57,13 @@ export function transformProgram(
           return node;
         }
 
+        case 'VariableDeclarator': {
+          if (node.definite === true) {
+            return nodeWith(node, {definite: undefined});
+          }
+          return node;
+        }
+
         case 'DeclareClass':
         case 'DeclareFunction':
         case 'DeclareInterface':
@@ -112,6 +119,7 @@ export function transformProgram(
             variance: null,
             declare: false,
             optional: false,
+            definite: undefined,
           });
         }
 

@@ -3050,6 +3050,11 @@
         "optional": false
       },
       {
+        "type": "NodeBoolean",
+        "name": "definite",
+        "optional": true
+      },
+      {
         "type": "NodePtr",
         "name": "variance",
         "optional": true
@@ -3837,6 +3842,11 @@
         "type": "NodePtr",
         "name": "id",
         "optional": false
+      },
+      {
+        "type": "NodeBoolean",
+        "name": "definite",
+        "optional": true
       }
     ]
   },
