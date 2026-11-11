@@ -60,8 +60,20 @@ Run with `yarn run flow-codemod convertImplicitInexactObjectTypes`.
 
 ### Remove explicitly exact object type syntax
 Converts explicitly exact object type syntax `{| |}` to be just `{ }`. Object types are exact by default.
+Also removes comments that only set the `ambiguous-object-type` lint (e.g. `// flowlint ambiguous-object-type:error`).
 
 Run with `yarn run flow-codemod removeExplicitlyExactObjectTypeSyntax`.
+
+### Name function type params
+Names every unnamed param in function types, including `declare function` signatures (e.g. `(string) => void` becomes `(v: string) => void`), as required by `experimental.require_function_type_param_name`.
+
+Run with `yarn run flow-codemod nameFunctionTypeParams`.
+
+### Label dictionary keys
+Labels every unlabeled index signature key (e.g. `{[string]: T}` becomes `{[key: string]: T}`), as required by `experimental.require_dictionary_key_label`.
+String and number literal keys like `{['a']: T}`, and keys naming a value like `{[K]: T}` where `K` is a `const`, are computed property keys rather than index signatures, so they are left alone.
+
+Run with `yarn run flow-codemod nameIndexerKeys`.
 
 ### Remove annotations in destructuring
 Removes annotations nested inside of destructuring (e.g. `const [o: number] = foo;`). These are not valid Flow syntax.

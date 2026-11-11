@@ -41,6 +41,22 @@ testCodemod(
         description: 'default',
         code: `type Default = {a: number};`,
       },
+      {
+        description: 'comment that is not a lint directive',
+        code: `// flowlint ambiguous-object-type:\u00a0error
+const value = 'keep';`,
+      },
+      {
+        description: 'directive that sets other lints too',
+        code: `// flowlint ambiguous-object-type:error, sketchy-null:error
+const value = 'keep';`,
+      },
+      {
+        description: 'file without statements',
+        code: `// keep
+// flowlint ambiguous-object-type:error
+// keep tail`,
+      },
     ],
 
     // TRANSFORMED
@@ -113,6 +129,35 @@ testCodemod(
   c: {x: {}},
   d: {x: {y: {}}},
 };`,
+      },
+      {
+        description: 'lint directive',
+        code: `// flowlint ambiguous-object-type:error
+// keep this comment
+const value: {|foo: string|} = {foo: 'value'};`,
+        output: `// keep this comment
+const value: {foo: string} = {foo: 'value'};`,
+      },
+      {
+        description: 'decorated block lint directive',
+        code: `/*
+ * flowlint ambiguous-object-type : error
+ */
+type Value = {|value: string|};`,
+        output: `type Value = {value: string};`,
+      },
+      {
+        description: 'line lint directive',
+        code: `const value: {|foo: string|} = {foo: 'value'}; // flowlint-line ambiguous-object-type:off`,
+        output: `const value: {foo: string} = {foo: 'value'};`,
+      },
+      {
+        description: 'lint directive after a shebang',
+        code: `#!/usr/bin/env node
+// flowlint ambiguous-object-type:error
+const value: {|foo: string|} = {foo: 'value'};`,
+        output: `#!/usr/bin/env node
+const value: {foo: string} = {foo: 'value'};`,
       },
     ],
   },
