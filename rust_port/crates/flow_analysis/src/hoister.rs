@@ -776,7 +776,8 @@ impl<Loc> std::ops::DerefMut for Hoister<Loc> {
 
 /// The variables that record whether a constructor has assigned each of a class's own instance
 /// fields that have no initializer, at the fields' declarations. A `declare` field holds no value
-/// of its own, so it has none.
+/// of its own, so it has none, and neither does a field with a definite assignment assertion
+/// (`value!: T`), which asserts that the field is assigned before it is read.
 pub fn field_init_bindings<Loc: Dupe>(
     instance_body: &[&ast::class::BodyElement<Loc, Loc>],
 ) -> Bindings<Loc> {
@@ -786,10 +787,14 @@ pub fn field_init_bindings<Loc: Dupe>(
     instance_body
         .iter()
         .filter_map(|element| match element {
-            BodyElement::Property(prop) if matches!(prop.value, Value::Uninitialized) => {
+            BodyElement::Property(prop)
+                if matches!(prop.value, Value::Uninitialized) && !prop.definite =>
+            {
                 property_key_name(&prop.key).map(|(name, loc)| (name, false, loc))
             }
-            BodyElement::PrivateField(field) if matches!(field.value, Value::Uninitialized) => {
+            BodyElement::PrivateField(field)
+                if matches!(field.value, Value::Uninitialized) && !field.definite =>
+            {
                 Some((field.key.name.dupe(), true, &field.key.loc))
             }
             _ => None,

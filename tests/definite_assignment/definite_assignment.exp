@@ -1,1 +1,18 @@
-Found 0 errors
+Error --------------------------------------------------------------------------------------------------- fields.js:27:3
+
+Property `value` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   27|   value: number; // error: no initializer and not definitely assigned
+         ^^^^^
+
+
+Error -------------------------------------------------------------------------------------------------- fields.js:31:19
+
+Property `second` is used before its initialization. [uninitialized-property]
+
+   31|   first: number = this.second; // error: read before the initializer of `second` runs
+                         ^^^^^^^^^^^
+
+
+
+Found 2 errors
