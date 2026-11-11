@@ -223,6 +223,23 @@ module.exports = f();`,
   expect(executeScript(emitted.code)).toBe(7);
 });
 
+test('type erasure removes definite assignment assertions', () => {
+  const emitted = flowToRunnableJSWithSourceMap(
+    `let count!: number;
+class Box {
+  value!: number;
+  #secret!: string;
+  secret() { return this.#secret === undefined; }
+}
+count = 1;
+const box = new Box();
+module.exports = [count, Object.keys(box), box.secret()];`,
+    {sourceFilename: 'definite.js'},
+  );
+  expect(emitted.code).not.toContain('!');
+  expect(executeScript(emitted.code)).toEqual([1, ['value'], true]);
+});
+
 test('direct string emission retains isolated UTF-16 surrogates', () => {
   const source = String.raw`module.exports = ["\ud800", "\udfff", "\ud800\udfff", "\u{d800}", "\141"];`;
   const emitted = flowToRunnableJSWithSourceMap(source, {

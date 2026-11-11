@@ -443,6 +443,18 @@ class OptionalFields extends ConcreteDerived {
   declare optionalDeclare?: number;
 }
 
+let definiteVariable!: number;
+let definiteFirst /*.*/ ! /*.*/ : number, definiteSecond!: string;
+
+class DefiniteFields extends ConcreteDerived {
+  definite!: string;
+  ['definite!'] /*.*/ ! /*.*/ : number;
+  [true ? 'first' : 'second']!: number;
+  #privateDefinite!: string;
+  readonly definiteReadonly!: number;
+  override definiteOverride!: number;
+}
+
 export {type StringType as InlineType};
 export {type SomeType as OnlyInlineType, type SomeOtherType as OtherInlineType} from 'type-only-module';
 export {type SomeType as FirstInlineType, Something as InlineFirst} from 'some-module';

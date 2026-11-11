@@ -188,12 +188,11 @@ var removeFlowVisitor = {
       return false;
     }
     if (node.optional) {
-      // Find the optional token.
-      var idx = findTokenIndexAtStartOfNode(ast.tokens, node);
-      do {
-        idx++;
-      } while (getLabel(ast.tokens[idx]) !== '?');
-      removeNode(context, ast.tokens[idx]);
+      removeNextTokenWithLabel(
+        context,
+        findTokenIndexAtStartOfNode(ast.tokens, node),
+        '?',
+      );
     }
   },
 
@@ -228,12 +227,28 @@ var removeFlowVisitor = {
       removeNode(context, node.variance);
     }
     if (node.optional) {
-      var tokens = context.ast.tokens;
-      var idx = findTokenIndexAtEndOfNode(tokens, node.key);
-      do {
-        idx++;
-      } while (getLabel(tokens[idx]) !== '?');
-      removeNode(context, tokens[idx]);
+      removeNextTokenWithLabel(
+        context,
+        findTokenIndexAtEndOfNode(context.ast.tokens, node.key),
+        '?',
+      );
+    }
+    if (node.definite) {
+      removeNextTokenWithLabel(
+        context,
+        findTokenIndexAtEndOfNode(context.ast.tokens, node.key),
+        '!',
+      );
+    }
+  },
+
+  VariableDeclarator: function (context, node, ast) {
+    if (node.definite) {
+      removeNextTokenWithLabel(
+        context,
+        findTokenIndexAtStartOfNode(ast.tokens, node.id),
+        '!',
+      );
     }
   },
 
@@ -559,6 +574,16 @@ function removeTrailingCommaNode(context, node) {
     removeNode(context, ast.tokens[idx]);
   }
   return false;
+}
+
+// Removes the first token with the given label after the token at `idx`:
+// the `?` of an optional name or the `!` of a definite assignment assertion.
+function removeNextTokenWithLabel(context, idx, label) {
+  var tokens = context.ast.tokens;
+  do {
+    idx++;
+  } while (getLabel(tokens[idx]) !== label);
+  removeNode(context, tokens[idx]);
 }
 
 function getPragmaNode(context, start, size) {

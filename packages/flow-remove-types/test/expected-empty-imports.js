@@ -443,6 +443,18 @@ class OptionalFields extends ConcreteDerived {
                                    
 }
 
+let definiteVariable         ;
+let definiteFirst /*.*/   /*.*/         , definiteSecond         ;
+
+class DefiniteFields extends ConcreteDerived {
+  definite         ;
+  ['definite!'] /*.*/   /*.*/         ;
+  [true ? 'first' : 'second']         ;
+  #privateDefinite         ;
+           definiteReadonly         ;
+           definiteOverride         ;
+}
+
                                        
                                                                                                         
 export {                                  Something as InlineFirst} from 'some-module';
