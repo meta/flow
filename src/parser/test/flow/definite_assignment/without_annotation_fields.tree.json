@@ -1,0 +1,148 @@
+{
+  "body": [
+    {
+      "body": {
+        "body": [
+          {
+            "computed": false,
+            "definite": true,
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 3,
+                  "line": 2
+                },
+                "source": null,
+                "start": {
+                  "column": 2,
+                  "line": 2
+                }
+              },
+              "name": "b",
+              "optional": false,
+              "range": [
+                12,
+                13
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "loc": {
+              "end": {
+                "column": 5,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 2
+              }
+            },
+            "optional": false,
+            "range": [
+              12,
+              15
+            ],
+            "static": false,
+            "tsAccessibility": null,
+            "type": "PropertyDefinition",
+            "typeAnnotation": null,
+            "value": null,
+            "variance": null
+          }
+        ],
+        "loc": {
+          "end": {
+            "column": 1,
+            "line": 3
+          },
+          "source": null,
+          "start": {
+            "column": 8,
+            "line": 1
+          }
+        },
+        "range": [
+          8,
+          17
+        ],
+        "type": "ClassBody"
+      },
+      "decorators": [],
+      "id": {
+        "loc": {
+          "end": {
+            "column": 7,
+            "line": 1
+          },
+          "source": null,
+          "start": {
+            "column": 6,
+            "line": 1
+          }
+        },
+        "name": "C",
+        "optional": false,
+        "range": [
+          6,
+          7
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "implements": [],
+      "loc": {
+        "end": {
+          "column": 1,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
+      "range": [
+        0,
+        17
+      ],
+      "superClass": null,
+      "superTypeArguments": null,
+      "type": "ClassDeclaration",
+      "typeParameters": null
+    }
+  ],
+  "comments": [],
+  "errors": [
+    {
+      "loc": {
+        "end": {
+          "column": 4,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 3,
+          "line": 2
+        }
+      },
+      "message": "Declarations with definite assignment assertions must also have type annotations."
+    }
+  ],
+  "loc": {
+    "end": {
+      "column": 0,
+      "line": 4
+    },
+    "source": null,
+    "start": {
+      "column": 0,
+      "line": 1
+    }
+  },
+  "range": [
+    0,
+    18
+  ],
+  "type": "Program"
+}

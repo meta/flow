@@ -26,6 +26,23 @@ pub enum MatchNonLastRestKind {
     Array,
 }
 
+/// What a definite assignment assertion is on, which decides where it is permitted.
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    serde::Serialize,
+    serde::Deserialize
+)]
+pub enum DefiniteAssignmentTarget {
+    ClassField,
+}
+
 #[derive(
     Debug,
     Clone,
@@ -79,6 +96,9 @@ pub enum ParseError {
     DeclareClassElement,
     DeclareClassFieldInitializer,
     DeclareOpaqueTypeInitializer,
+    DefiniteAssignmentNotPermitted(DefiniteAssignmentTarget),
+    DefiniteAssignmentWithInitializer,
+    DefiniteAssignmentWithoutAnnotation,
     DuplicateConstructor,
     DuplicateExport(String),
     DuplicatePrivateFields(String),
@@ -362,6 +382,30 @@ impl fmt::Display for ParseError {
                 write!(
                     f,
                     "Unexpected token `=`. Initializers are not allowed in a `declare opaque type`."
+                )
+            }
+            Self::DefiniteAssignmentNotPermitted(target) => {
+                let rules = match target {
+                    DefiniteAssignmentTarget::ClassField => {
+                        "It cannot be used on a `declare`, `static` or `abstract` field, in a declaration file, or in a `declare module` or `declare namespace` body."
+                    }
+                };
+                write!(
+                    f,
+                    "A definite assignment assertion `!` is not permitted in this context. {}",
+                    rules
+                )
+            }
+            Self::DefiniteAssignmentWithInitializer => {
+                write!(
+                    f,
+                    "Declarations with initializers cannot also have definite assignment assertions."
+                )
+            }
+            Self::DefiniteAssignmentWithoutAnnotation => {
+                write!(
+                    f,
+                    "Declarations with definite assignment assertions must also have type annotations."
                 )
             }
             Self::DuplicateConstructor => {

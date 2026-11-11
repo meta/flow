@@ -1,0 +1,552 @@
+{
+  "body": [
+    {
+      "body": {
+        "body": [
+          {
+            "computed": false,
+            "definite": true,
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 10,
+                  "line": 2
+                },
+                "source": null,
+                "start": {
+                  "column": 9,
+                  "line": 2
+                }
+              },
+              "name": "g",
+              "optional": false,
+              "range": [
+                19,
+                20
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "loc": {
+              "end": {
+                "column": 20,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 2
+              }
+            },
+            "optional": false,
+            "range": [
+              12,
+              30
+            ],
+            "static": true,
+            "tsAccessibility": null,
+            "type": "PropertyDefinition",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 19,
+                  "line": 2
+                },
+                "source": null,
+                "start": {
+                  "column": 11,
+                  "line": 2
+                }
+              },
+              "range": [
+                21,
+                29
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 19,
+                    "line": 2
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 13,
+                    "line": 2
+                  }
+                },
+                "range": [
+                  23,
+                  29
+                ],
+                "type": "NumberTypeAnnotation"
+              }
+            },
+            "value": null,
+            "variance": null
+          },
+          {
+            "computed": false,
+            "declare": true,
+            "definite": true,
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 11,
+                  "line": 3
+                },
+                "source": null,
+                "start": {
+                  "column": 10,
+                  "line": 3
+                }
+              },
+              "name": "h",
+              "optional": false,
+              "range": [
+                41,
+                42
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "loc": {
+              "end": {
+                "column": 21,
+                "line": 3
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 3
+              }
+            },
+            "optional": false,
+            "range": [
+              33,
+              52
+            ],
+            "static": false,
+            "tsAccessibility": null,
+            "type": "PropertyDefinition",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 20,
+                  "line": 3
+                },
+                "source": null,
+                "start": {
+                  "column": 12,
+                  "line": 3
+                }
+              },
+              "range": [
+                43,
+                51
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 20,
+                    "line": 3
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 14,
+                    "line": 3
+                  }
+                },
+                "range": [
+                  45,
+                  51
+                ],
+                "type": "NumberTypeAnnotation"
+              }
+            },
+            "value": null,
+            "variance": null
+          },
+          {
+            "computed": false,
+            "definite": true,
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 10,
+                  "line": 4
+                },
+                "source": null,
+                "start": {
+                  "column": 9,
+                  "line": 4
+                }
+              },
+              "name": "d",
+              "optional": false,
+              "range": [
+                62,
+                63
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "loc": {
+              "end": {
+                "column": 24,
+                "line": 4
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 4
+              }
+            },
+            "optional": false,
+            "range": [
+              55,
+              77
+            ],
+            "static": true,
+            "tsAccessibility": null,
+            "type": "PropertyDefinition",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 19,
+                  "line": 4
+                },
+                "source": null,
+                "start": {
+                  "column": 11,
+                  "line": 4
+                }
+              },
+              "range": [
+                64,
+                72
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 19,
+                    "line": 4
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 13,
+                    "line": 4
+                  }
+                },
+                "range": [
+                  66,
+                  72
+                ],
+                "type": "NumberTypeAnnotation"
+              }
+            },
+            "value": {
+              "loc": {
+                "end": {
+                  "column": 23,
+                  "line": 4
+                },
+                "source": null,
+                "start": {
+                  "column": 22,
+                  "line": 4
+                }
+              },
+              "range": [
+                75,
+                76
+              ],
+              "raw": "1",
+              "type": "Literal",
+              "value": 1
+            },
+            "variance": null
+          }
+        ],
+        "loc": {
+          "end": {
+            "column": 1,
+            "line": 5
+          },
+          "source": null,
+          "start": {
+            "column": 8,
+            "line": 1
+          }
+        },
+        "range": [
+          8,
+          79
+        ],
+        "type": "ClassBody"
+      },
+      "decorators": [],
+      "id": {
+        "loc": {
+          "end": {
+            "column": 7,
+            "line": 1
+          },
+          "source": null,
+          "start": {
+            "column": 6,
+            "line": 1
+          }
+        },
+        "name": "C",
+        "optional": false,
+        "range": [
+          6,
+          7
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "implements": [],
+      "loc": {
+        "end": {
+          "column": 1,
+          "line": 5
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
+      "range": [
+        0,
+        79
+      ],
+      "superClass": null,
+      "superTypeArguments": null,
+      "type": "ClassDeclaration",
+      "typeParameters": null
+    },
+    {
+      "abstract": true,
+      "body": {
+        "body": [
+          {
+            "computed": false,
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 12,
+                  "line": 7
+                },
+                "source": null,
+                "start": {
+                  "column": 11,
+                  "line": 7
+                }
+              },
+              "name": "i",
+              "optional": false,
+              "range": [
+                110,
+                111
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "loc": {
+              "end": {
+                "column": 22,
+                "line": 7
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 7
+              }
+            },
+            "range": [
+              101,
+              121
+            ],
+            "type": "AbstractPropertyDefinition",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 21,
+                  "line": 7
+                },
+                "source": null,
+                "start": {
+                  "column": 13,
+                  "line": 7
+                }
+              },
+              "range": [
+                112,
+                120
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 21,
+                    "line": 7
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 15,
+                    "line": 7
+                  }
+                },
+                "range": [
+                  114,
+                  120
+                ],
+                "type": "NumberTypeAnnotation"
+              }
+            },
+            "value": null,
+            "variance": null
+          }
+        ],
+        "loc": {
+          "end": {
+            "column": 1,
+            "line": 8
+          },
+          "source": null,
+          "start": {
+            "column": 17,
+            "line": 6
+          }
+        },
+        "range": [
+          97,
+          123
+        ],
+        "type": "ClassBody"
+      },
+      "decorators": [],
+      "id": {
+        "loc": {
+          "end": {
+            "column": 16,
+            "line": 6
+          },
+          "source": null,
+          "start": {
+            "column": 15,
+            "line": 6
+          }
+        },
+        "name": "D",
+        "optional": false,
+        "range": [
+          95,
+          96
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "implements": [],
+      "loc": {
+        "end": {
+          "column": 1,
+          "line": 8
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 6
+        }
+      },
+      "range": [
+        80,
+        123
+      ],
+      "superClass": null,
+      "superTypeArguments": null,
+      "type": "ClassDeclaration",
+      "typeParameters": null
+    }
+  ],
+  "comments": [],
+  "errors": [
+    {
+      "loc": {
+        "end": {
+          "column": 11,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 10,
+          "line": 2
+        }
+      },
+      "message": "A definite assignment assertion `!` is not permitted in this context. It cannot be used on a `declare`, `static` or `abstract` field, in a declaration file, or in a `declare module` or `declare namespace` body."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 12,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 11,
+          "line": 3
+        }
+      },
+      "message": "A definite assignment assertion `!` is not permitted in this context. It cannot be used on a `declare`, `static` or `abstract` field, in a declaration file, or in a `declare module` or `declare namespace` body."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 11,
+          "line": 4
+        },
+        "source": null,
+        "start": {
+          "column": 10,
+          "line": 4
+        }
+      },
+      "message": "A definite assignment assertion `!` is not permitted in this context. It cannot be used on a `declare`, `static` or `abstract` field, in a declaration file, or in a `declare module` or `declare namespace` body."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 13,
+          "line": 7
+        },
+        "source": null,
+        "start": {
+          "column": 12,
+          "line": 7
+        }
+      },
+      "message": "A definite assignment assertion `!` is not permitted in this context. It cannot be used on a `declare`, `static` or `abstract` field, in a declaration file, or in a `declare module` or `declare namespace` body."
+    }
+  ],
+  "loc": {
+    "end": {
+      "column": 0,
+      "line": 9
+    },
+    "source": null,
+    "start": {
+      "column": 0,
+      "line": 1
+    }
+  },
+  "range": [
+    0,
+    124
+  ],
+  "type": "Program"
+}

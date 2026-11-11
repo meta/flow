@@ -1,0 +1,4 @@
+[options]
+all=true
+builtin_lib=core-only
+experimental.definite_assignment_assertions=true

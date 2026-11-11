@@ -1,0 +1,26 @@
+Error ---------------------------------------------------------------------------------------------------- fields.js:4:3
+
+Definite assignment assertion (`!`) is not enabled. [unsupported-syntax]
+
+   4|   value!: number; // error: not enabled
+        ^^^^^^^^^^^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------------- fields.js:5:3
+
+Definite assignment assertion (`!`) is not enabled. [unsupported-syntax]
+
+   5|   #secret!: string; // error: not enabled
+        ^^^^^^^^^^^^^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------------- fields.js:6:3
+
+Definite assignment assertion (`!`) is not enabled. [unsupported-syntax]
+
+   6|   ['computed']!: number; // error: not enabled
+        ^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+Found 3 errors

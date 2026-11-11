@@ -3594,6 +3594,10 @@ fn class_private_field(
         props.push(("override", bool_value(true)));
     }
 
+    if field.definite {
+        props.push(("definite", bool_value(true)));
+    }
+
     if !field.decorators.is_empty() {
         props.push((
             "decorators",
@@ -3721,6 +3725,10 @@ fn class_property_helper(
 
     if property.override_ {
         props.push(("override", bool_value(true)));
+    }
+
+    if property.definite {
+        props.push(("definite", bool_value(true)));
     }
 
     if !property.decorators.is_empty() {

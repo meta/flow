@@ -273,6 +273,7 @@ pub enum UnsupportedSyntax {
     DeclareGlobal,
     NonnullAssertion,
     Records,
+    DefiniteAssignmentAssertion,
     DeclareClassMethodMissingReturnType,
     DeclareVariableNonLiteralInit,
     DeclareVariableDestructuring,

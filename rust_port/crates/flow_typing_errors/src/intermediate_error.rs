@@ -10172,6 +10172,11 @@ where
                         "Support for predicate functions is removed. `%checks` declaration is now ignored.",
                     )]),
                     Records => friendly::Message(vec![text("Records are not enabled.")]),
+                    DefiniteAssignmentAssertion => friendly::Message(vec![
+                        text("Definite assignment assertion ("),
+                        code("!"),
+                        text(") is not enabled."),
+                    ]),
                     DeclareClassMethodMissingReturnType => friendly::Message(vec![
                         text("Return type annotation is required for "),
                         code("declare class"),

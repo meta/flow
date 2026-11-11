@@ -1,0 +1,228 @@
+{
+  "body": [
+    {
+      "body": {
+        "body": [
+          {
+            "computed": false,
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 3,
+                  "line": 2
+                },
+                "source": null,
+                "start": {
+                  "column": 2,
+                  "line": 2
+                }
+              },
+              "name": "c",
+              "optional": false,
+              "range": [
+                12,
+                13
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "loc": {
+              "end": {
+                "column": 3,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 2
+              }
+            },
+            "optional": false,
+            "range": [
+              12,
+              13
+            ],
+            "static": false,
+            "tsAccessibility": null,
+            "type": "PropertyDefinition",
+            "typeAnnotation": null,
+            "value": null,
+            "variance": null
+          },
+          {
+            "computed": false,
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 3,
+                  "line": 3
+                },
+                "source": null,
+                "start": {
+                  "column": 2,
+                  "line": 3
+                }
+              },
+              "name": "",
+              "optional": false,
+              "range": [
+                16,
+                17
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "loc": {
+              "end": {
+                "column": 12,
+                "line": 3
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 3
+              }
+            },
+            "optional": false,
+            "range": [
+              16,
+              26
+            ],
+            "static": false,
+            "tsAccessibility": null,
+            "type": "PropertyDefinition",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 11,
+                  "line": 3
+                },
+                "source": null,
+                "start": {
+                  "column": 3,
+                  "line": 3
+                }
+              },
+              "range": [
+                17,
+                25
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 11,
+                    "line": 3
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 5,
+                    "line": 3
+                  }
+                },
+                "range": [
+                  19,
+                  25
+                ],
+                "type": "NumberTypeAnnotation"
+              }
+            },
+            "value": null,
+            "variance": null
+          }
+        ],
+        "loc": {
+          "end": {
+            "column": 1,
+            "line": 4
+          },
+          "source": null,
+          "start": {
+            "column": 8,
+            "line": 1
+          }
+        },
+        "range": [
+          8,
+          28
+        ],
+        "type": "ClassBody"
+      },
+      "decorators": [],
+      "id": {
+        "loc": {
+          "end": {
+            "column": 7,
+            "line": 1
+          },
+          "source": null,
+          "start": {
+            "column": 6,
+            "line": 1
+          }
+        },
+        "name": "C",
+        "optional": false,
+        "range": [
+          6,
+          7
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "implements": [],
+      "loc": {
+        "end": {
+          "column": 1,
+          "line": 4
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
+      "range": [
+        0,
+        28
+      ],
+      "superClass": null,
+      "superTypeArguments": null,
+      "type": "ClassDeclaration",
+      "typeParameters": null
+    }
+  ],
+  "comments": [],
+  "errors": [
+    {
+      "loc": {
+        "end": {
+          "column": 3,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 2,
+          "line": 3
+        }
+      },
+      "message": "Unexpected token `!`, expected an identifier"
+    }
+  ],
+  "loc": {
+    "end": {
+      "column": 0,
+      "line": 5
+    },
+    "source": null,
+    "start": {
+      "column": 0,
+      "line": 1
+    }
+  },
+  "range": [
+    0,
+    29
+  ],
+  "type": "Program"
+}

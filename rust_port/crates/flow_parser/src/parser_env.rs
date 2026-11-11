@@ -1526,6 +1526,10 @@ pub(crate) mod peek {
         rest.starts_with('=') && !rest.starts_with("=>") && !rest.starts_with("==")
     }
 
+    fn rest_starts_not_token(rest: &str) -> bool {
+        rest.starts_with('!') && !rest.starts_with("!=")
+    }
+
     fn rest_starts_pling_token(rest: &str) -> Result<bool, ()> {
         if !rest.starts_with('?') {
             Ok(false)
@@ -2270,6 +2274,7 @@ pub(crate) mod peek {
                 if rest_starts_less_than_token(env.lex_mode(), rest)
                     || rest.starts_with(':')
                     || rest_starts_assign_token(rest)
+                    || rest_starts_not_token(rest)
                     || rest.starts_with(';')
                     || rest.starts_with('(')
                     || rest.starts_with('}')
@@ -2284,6 +2289,7 @@ pub(crate) mod peek {
                                 TokenKind::TLessThan
                                     | TokenKind::TColon
                                     | TokenKind::TAssign
+                                    | TokenKind::TNot
                                     | TokenKind::TSemicolon
                                     | TokenKind::TLparen
                                     | TokenKind::TPling
@@ -2300,6 +2306,7 @@ pub(crate) mod peek {
                     TokenKind::TLessThan
                         | TokenKind::TColon
                         | TokenKind::TAssign
+                        | TokenKind::TNot
                         | TokenKind::TSemicolon
                         | TokenKind::TLparen
                         | TokenKind::TPling
@@ -2316,6 +2323,7 @@ pub(crate) mod peek {
                 if rest_starts_assign_token(rest)
                     || rest.starts_with(':')
                     || rest_starts_less_than_token(env.lex_mode(), rest)
+                    || rest_starts_not_token(rest)
                     || rest.starts_with('(')
                     || rest.starts_with('}')
                     || rest.starts_with(';')
@@ -2332,6 +2340,7 @@ pub(crate) mod peek {
                                     | TokenKind::TEof
                                     | TokenKind::TLessThan
                                     | TokenKind::TLparen
+                                    | TokenKind::TNot
                                     | TokenKind::TPling
                                     | TokenKind::TRcurly
                                     | TokenKind::TSemicolon
@@ -2349,6 +2358,7 @@ pub(crate) mod peek {
                         | TokenKind::TEof
                         | TokenKind::TLessThan
                         | TokenKind::TLparen
+                        | TokenKind::TNot
                         | TokenKind::TPling
                         | TokenKind::TRcurly
                         | TokenKind::TSemicolon

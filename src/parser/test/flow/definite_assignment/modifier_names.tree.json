@@ -1,0 +1,905 @@
+{
+  "body": [
+    {
+      "body": {
+        "body": [
+          {
+            "computed": false,
+            "definite": true,
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 5,
+                  "line": 2
+                },
+                "source": null,
+                "start": {
+                  "column": 2,
+                  "line": 2
+                }
+              },
+              "name": "get",
+              "optional": false,
+              "range": [
+                12,
+                15
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "loc": {
+              "end": {
+                "column": 15,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 2
+              }
+            },
+            "optional": false,
+            "range": [
+              12,
+              25
+            ],
+            "static": false,
+            "tsAccessibility": null,
+            "type": "PropertyDefinition",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 14,
+                  "line": 2
+                },
+                "source": null,
+                "start": {
+                  "column": 6,
+                  "line": 2
+                }
+              },
+              "range": [
+                16,
+                24
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 14,
+                    "line": 2
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 8,
+                    "line": 2
+                  }
+                },
+                "range": [
+                  18,
+                  24
+                ],
+                "type": "NumberTypeAnnotation"
+              }
+            },
+            "value": null,
+            "variance": null
+          },
+          {
+            "computed": false,
+            "definite": true,
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 5,
+                  "line": 3
+                },
+                "source": null,
+                "start": {
+                  "column": 2,
+                  "line": 3
+                }
+              },
+              "name": "set",
+              "optional": false,
+              "range": [
+                28,
+                31
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "loc": {
+              "end": {
+                "column": 15,
+                "line": 3
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 3
+              }
+            },
+            "optional": false,
+            "range": [
+              28,
+              41
+            ],
+            "static": false,
+            "tsAccessibility": null,
+            "type": "PropertyDefinition",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 14,
+                  "line": 3
+                },
+                "source": null,
+                "start": {
+                  "column": 6,
+                  "line": 3
+                }
+              },
+              "range": [
+                32,
+                40
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 14,
+                    "line": 3
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 8,
+                    "line": 3
+                  }
+                },
+                "range": [
+                  34,
+                  40
+                ],
+                "type": "NumberTypeAnnotation"
+              }
+            },
+            "value": null,
+            "variance": null
+          },
+          {
+            "computed": false,
+            "definite": true,
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 8,
+                  "line": 4
+                },
+                "source": null,
+                "start": {
+                  "column": 2,
+                  "line": 4
+                }
+              },
+              "name": "static",
+              "optional": false,
+              "range": [
+                44,
+                50
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "loc": {
+              "end": {
+                "column": 18,
+                "line": 4
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 4
+              }
+            },
+            "optional": false,
+            "range": [
+              44,
+              60
+            ],
+            "static": false,
+            "tsAccessibility": null,
+            "type": "PropertyDefinition",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 17,
+                  "line": 4
+                },
+                "source": null,
+                "start": {
+                  "column": 9,
+                  "line": 4
+                }
+              },
+              "range": [
+                51,
+                59
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 17,
+                    "line": 4
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 11,
+                    "line": 4
+                  }
+                },
+                "range": [
+                  53,
+                  59
+                ],
+                "type": "NumberTypeAnnotation"
+              }
+            },
+            "value": null,
+            "variance": null
+          },
+          {
+            "computed": false,
+            "definite": true,
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 9,
+                  "line": 5
+                },
+                "source": null,
+                "start": {
+                  "column": 2,
+                  "line": 5
+                }
+              },
+              "name": "declare",
+              "optional": false,
+              "range": [
+                63,
+                70
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "loc": {
+              "end": {
+                "column": 19,
+                "line": 5
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 5
+              }
+            },
+            "optional": false,
+            "range": [
+              63,
+              80
+            ],
+            "static": false,
+            "tsAccessibility": null,
+            "type": "PropertyDefinition",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 18,
+                  "line": 5
+                },
+                "source": null,
+                "start": {
+                  "column": 10,
+                  "line": 5
+                }
+              },
+              "range": [
+                71,
+                79
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 18,
+                    "line": 5
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 12,
+                    "line": 5
+                  }
+                },
+                "range": [
+                  73,
+                  79
+                ],
+                "type": "NumberTypeAnnotation"
+              }
+            },
+            "value": null,
+            "variance": null
+          },
+          {
+            "computed": false,
+            "definite": true,
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 7,
+                  "line": 6
+                },
+                "source": null,
+                "start": {
+                  "column": 2,
+                  "line": 6
+                }
+              },
+              "name": "async",
+              "optional": false,
+              "range": [
+                83,
+                88
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "loc": {
+              "end": {
+                "column": 17,
+                "line": 6
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 6
+              }
+            },
+            "optional": false,
+            "range": [
+              83,
+              98
+            ],
+            "static": false,
+            "tsAccessibility": null,
+            "type": "PropertyDefinition",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 16,
+                  "line": 6
+                },
+                "source": null,
+                "start": {
+                  "column": 8,
+                  "line": 6
+                }
+              },
+              "range": [
+                89,
+                97
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 16,
+                    "line": 6
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 10,
+                    "line": 6
+                  }
+                },
+                "range": [
+                  91,
+                  97
+                ],
+                "type": "NumberTypeAnnotation"
+              }
+            },
+            "value": null,
+            "variance": null
+          },
+          {
+            "computed": false,
+            "definite": true,
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 10,
+                  "line": 7
+                },
+                "source": null,
+                "start": {
+                  "column": 2,
+                  "line": 7
+                }
+              },
+              "name": "abstract",
+              "optional": false,
+              "range": [
+                101,
+                109
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "loc": {
+              "end": {
+                "column": 20,
+                "line": 7
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 7
+              }
+            },
+            "optional": false,
+            "range": [
+              101,
+              119
+            ],
+            "static": false,
+            "tsAccessibility": null,
+            "type": "PropertyDefinition",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 19,
+                  "line": 7
+                },
+                "source": null,
+                "start": {
+                  "column": 11,
+                  "line": 7
+                }
+              },
+              "range": [
+                110,
+                118
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 19,
+                    "line": 7
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 13,
+                    "line": 7
+                  }
+                },
+                "range": [
+                  112,
+                  118
+                ],
+                "type": "NumberTypeAnnotation"
+              }
+            },
+            "value": null,
+            "variance": null
+          },
+          {
+            "computed": false,
+            "definite": true,
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 10,
+                  "line": 8
+                },
+                "source": null,
+                "start": {
+                  "column": 2,
+                  "line": 8
+                }
+              },
+              "name": "override",
+              "optional": false,
+              "range": [
+                122,
+                130
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "loc": {
+              "end": {
+                "column": 20,
+                "line": 8
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 8
+              }
+            },
+            "optional": false,
+            "range": [
+              122,
+              140
+            ],
+            "static": false,
+            "tsAccessibility": null,
+            "type": "PropertyDefinition",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 19,
+                  "line": 8
+                },
+                "source": null,
+                "start": {
+                  "column": 11,
+                  "line": 8
+                }
+              },
+              "range": [
+                131,
+                139
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 19,
+                    "line": 8
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 13,
+                    "line": 8
+                  }
+                },
+                "range": [
+                  133,
+                  139
+                ],
+                "type": "NumberTypeAnnotation"
+              }
+            },
+            "value": null,
+            "variance": null
+          },
+          {
+            "computed": false,
+            "definite": true,
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 10,
+                  "line": 9
+                },
+                "source": null,
+                "start": {
+                  "column": 2,
+                  "line": 9
+                }
+              },
+              "name": "readonly",
+              "optional": false,
+              "range": [
+                143,
+                151
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "loc": {
+              "end": {
+                "column": 20,
+                "line": 9
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 9
+              }
+            },
+            "optional": false,
+            "range": [
+              143,
+              161
+            ],
+            "static": false,
+            "tsAccessibility": null,
+            "type": "PropertyDefinition",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 19,
+                  "line": 9
+                },
+                "source": null,
+                "start": {
+                  "column": 11,
+                  "line": 9
+                }
+              },
+              "range": [
+                152,
+                160
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 19,
+                    "line": 9
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 13,
+                    "line": 9
+                  }
+                },
+                "range": [
+                  154,
+                  160
+                ],
+                "type": "NumberTypeAnnotation"
+              }
+            },
+            "value": null,
+            "variance": null
+          },
+          {
+            "computed": false,
+            "definite": true,
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 8,
+                  "line": 10
+                },
+                "source": null,
+                "start": {
+                  "column": 2,
+                  "line": 10
+                }
+              },
+              "name": "public",
+              "optional": false,
+              "range": [
+                164,
+                170
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "loc": {
+              "end": {
+                "column": 18,
+                "line": 10
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 10
+              }
+            },
+            "optional": false,
+            "range": [
+              164,
+              180
+            ],
+            "static": false,
+            "tsAccessibility": null,
+            "type": "PropertyDefinition",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 17,
+                  "line": 10
+                },
+                "source": null,
+                "start": {
+                  "column": 9,
+                  "line": 10
+                }
+              },
+              "range": [
+                171,
+                179
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 17,
+                    "line": 10
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 11,
+                    "line": 10
+                  }
+                },
+                "range": [
+                  173,
+                  179
+                ],
+                "type": "NumberTypeAnnotation"
+              }
+            },
+            "value": null,
+            "variance": null
+          },
+          {
+            "computed": false,
+            "definite": true,
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 10,
+                  "line": 11
+                },
+                "source": null,
+                "start": {
+                  "column": 2,
+                  "line": 11
+                }
+              },
+              "name": "accessor",
+              "optional": false,
+              "range": [
+                183,
+                191
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "loc": {
+              "end": {
+                "column": 20,
+                "line": 11
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 11
+              }
+            },
+            "optional": false,
+            "range": [
+              183,
+              201
+            ],
+            "static": false,
+            "tsAccessibility": null,
+            "type": "PropertyDefinition",
+            "typeAnnotation": {
+              "loc": {
+                "end": {
+                  "column": 19,
+                  "line": 11
+                },
+                "source": null,
+                "start": {
+                  "column": 11,
+                  "line": 11
+                }
+              },
+              "range": [
+                192,
+                200
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 19,
+                    "line": 11
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 13,
+                    "line": 11
+                  }
+                },
+                "range": [
+                  194,
+                  200
+                ],
+                "type": "NumberTypeAnnotation"
+              }
+            },
+            "value": null,
+            "variance": null
+          }
+        ],
+        "loc": {
+          "end": {
+            "column": 1,
+            "line": 12
+          },
+          "source": null,
+          "start": {
+            "column": 8,
+            "line": 1
+          }
+        },
+        "range": [
+          8,
+          203
+        ],
+        "type": "ClassBody"
+      },
+      "decorators": [],
+      "id": {
+        "loc": {
+          "end": {
+            "column": 7,
+            "line": 1
+          },
+          "source": null,
+          "start": {
+            "column": 6,
+            "line": 1
+          }
+        },
+        "name": "C",
+        "optional": false,
+        "range": [
+          6,
+          7
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "implements": [],
+      "loc": {
+        "end": {
+          "column": 1,
+          "line": 12
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
+      "range": [
+        0,
+        203
+      ],
+      "superClass": null,
+      "superTypeArguments": null,
+      "type": "ClassDeclaration",
+      "typeParameters": null
+    }
+  ],
+  "comments": [],
+  "loc": {
+    "end": {
+      "column": 0,
+      "line": 13
+    },
+    "source": null,
+    "start": {
+      "column": 0,
+      "line": 1
+    }
+  },
+  "range": [
+    0,
+    204
+  ],
+  "type": "Program"
+}

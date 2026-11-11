@@ -21,6 +21,7 @@ use crate::expression_parser;
 use crate::loc::LOC_NONE;
 use crate::loc::Loc;
 use crate::main_parser;
+use crate::parse_error::DefiniteAssignmentTarget;
 use crate::parse_error::ParseError;
 use crate::parser_common::identifier_name;
 use crate::parser_common::is_simple_parameter_list;
@@ -1510,6 +1511,7 @@ fn class_element(env: &mut ParserEnv) -> Result<class::BodyElement<Loc, Loc>, Ro
         abstract_: bool,
         override_: bool,
         optional: bool,
+        definite: Option<Loc>,
         leading: Vec<Comment<Loc>>,
     ) -> Result<class::BodyElement<Loc, Loc>, Rollback> {
         let (loc, (key, annot, value, comments)) = with_loc(Some(start_loc), env, |env| {
@@ -1535,6 +1537,18 @@ fn class_element(env: &mut ParserEnv) -> Result<class::BodyElement<Loc, Loc>, Ro
             Ok((key, annot, value, comments))
         })?;
 
+        if let Some(definite_loc) = &definite
+            && let Some(error) = main_parser::definite_assignment_error(
+                DefiniteAssignmentTarget::ClassField,
+                declare.is_none() && !static_ && !abstract_ && !env.in_ambient_context(),
+                matches!(value, class::property::Value::Initialized(_)),
+                matches!(annot, types::AnnotationOrHint::Available(_)),
+            )
+        {
+            env.error_at(definite_loc.dupe(), error)?;
+        }
+        let definite = definite.is_some();
+
         if abstract_ {
             if let class::property::Value::Initialized(_) = &value {
                 env.error_at(loc.dupe(), ParseError::AbstractPropertyWithInitializer)?;
@@ -1551,7 +1565,7 @@ fn class_element(env: &mut ParserEnv) -> Result<class::BodyElement<Loc, Loc>, Ro
                         static_,
                         override_,
                         optional,
-                        definite: false,
+                        definite,
                         variance,
                         ts_accessibility,
                         decorators: decorators.into(),
@@ -1581,7 +1595,7 @@ fn class_element(env: &mut ParserEnv) -> Result<class::BodyElement<Loc, Loc>, Ro
                         static_,
                         override_,
                         optional,
-                        definite: false,
+                        definite,
                         variance,
                         ts_accessibility,
                         decorators: decorators.into(),
@@ -1596,7 +1610,7 @@ fn class_element(env: &mut ParserEnv) -> Result<class::BodyElement<Loc, Loc>, Ro
                     static_,
                     override_,
                     optional,
-                    definite: false,
+                    definite,
                     variance,
                     ts_accessibility,
                     decorators: decorators.into(),
@@ -1651,6 +1665,27 @@ fn class_element(env: &mut ParserEnv) -> Result<class::BodyElement<Loc, Loc>, Ro
                 abstract_,
                 override_,
                 false,
+                None,
+                leading,
+            );
+        }
+        if !async_
+            && !generator
+            && let Some(definite_loc) = main_parser::parse_definite_assignment_assertion(env)?
+        {
+            return property(
+                env,
+                start_loc,
+                decorators,
+                key,
+                static_,
+                declare,
+                variance,
+                ts_accessibility,
+                abstract_,
+                override_,
+                false,
+                Some(definite_loc),
                 leading,
             );
         }
@@ -1746,6 +1781,7 @@ fn class_element(env: &mut ParserEnv) -> Result<class::BodyElement<Loc, Loc>, Ro
                 abstract_,
                 override_,
                 true,
+                None,
                 leading,
             );
         }
@@ -1763,6 +1799,7 @@ fn class_element(env: &mut ParserEnv) -> Result<class::BodyElement<Loc, Loc>, Ro
                 abstract_,
                 override_,
                 false,
+                None,
                 leading,
             );
         }
@@ -2003,6 +2040,7 @@ fn class_element(env: &mut ParserEnv) -> Result<class::BodyElement<Loc, Loc>, Ro
             | TokenKind::TSemicolon
             | TokenKind::TLparen
             | TokenKind::TPling
+            | TokenKind::TNot
             | TokenKind::TRcurly => true,
             _ => false,
         }

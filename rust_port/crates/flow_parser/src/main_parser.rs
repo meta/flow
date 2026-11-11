@@ -22,6 +22,7 @@ use crate::file_key::FileKey;
 use crate::loc::Loc;
 use crate::object_parser;
 use crate::offset_utils;
+use crate::parse_error::DefiniteAssignmentTarget;
 use crate::parse_error::ParseError;
 use crate::parser_common::assert_identifier_name_is_identifier;
 use crate::parser_common::identifier_name;
@@ -135,6 +136,43 @@ pub(super) fn parse_identifier_with_type(
             optional,
         })
     })
+}
+
+/// Parses TypeScript's definite assignment assertion, the `!` after a class field's name in
+/// `value!: T`, and returns its location. A `!` on the next line is not one.
+pub(super) fn parse_definite_assignment_assertion(
+    env: &mut ParserEnv,
+) -> Result<Option<Loc>, Rollback> {
+    if peek::token(env) != &TokenKind::TNot || peek::is_line_terminator(env) {
+        return Ok(None);
+    }
+    if !env.should_parse_types() {
+        env.error(ParseError::UnexpectedTypeModifier)?;
+        return Ok(None);
+    }
+    let loc = peek::loc(env).dupe();
+    eat::token(env)?;
+    Ok(Some(loc))
+}
+
+/// The error for a definite assignment assertion that TypeScript rejects, if any. A context that
+/// does not permit one comes first: removing the initializer or adding an annotation would not
+/// make the `!` valid there.
+pub(super) fn definite_assignment_error(
+    target: DefiniteAssignmentTarget,
+    permitted: bool,
+    has_initializer: bool,
+    has_annotation: bool,
+) -> Option<ParseError> {
+    if !permitted {
+        Some(ParseError::DefiniteAssignmentNotPermitted(target))
+    } else if has_initializer {
+        Some(ParseError::DefiniteAssignmentWithInitializer)
+    } else if !has_annotation {
+        Some(ParseError::DefiniteAssignmentWithoutAnnotation)
+    } else {
+        None
+    }
 }
 
 pub(super) fn parse_block_body(

@@ -16515,6 +16515,19 @@ pub fn mk_class_sig<'a>(
                     }
                 };
 
+                let check_definite_assignment_assertion =
+                    |cx: &mut Context<'a>, loc: &ALoc, definite: bool| {
+                        if definite && !cx.definite_assignment_assertions() {
+                            flow_js::add_output_non_speculating(
+                                cx,
+                                ErrorMessage::EUnsupportedSyntax(Box::new((
+                                    loc.dupe(),
+                                    UnsupportedSyntax::DefiniteAssignmentAssertion,
+                                ))),
+                            );
+                        }
+                    };
+
                 // Match [type_sig_parse.rs]'s skip behavior for `private abstract`
                 // members: a private abstract obligation can never be satisfied by
                 // a subclass (subclasses cannot access private), so adding the
@@ -17460,6 +17473,7 @@ pub fn mk_class_sig<'a>(
                                         ))),
                                     );
                                 }
+                                check_definite_assignment_assertion(cx, loc, definite);
                                 let field_reason = mk_reason(
                                     VirtualReasonDesc::RProperty(Some(Name::new(name.dupe()))),
                                     loc.dupe(),
@@ -17625,6 +17639,7 @@ pub fn mk_class_sig<'a>(
                                         ))),
                                     );
                                 }
+                                check_definite_assignment_assertion(cx, loc, definite);
 
                                 // A computed key that resolves to a single literal string or
                                 // number is treated as a named field, mirroring how computed
@@ -17828,6 +17843,7 @@ pub fn mk_class_sig<'a>(
                                     ))),
                                 );
                             }
+                            check_definite_assignment_assertion(cx, loc, definite);
                             let field_reason = mk_reason(
                                 VirtualReasonDesc::RPrivateProperty(name.dupe()),
                                 loc.dupe(),
