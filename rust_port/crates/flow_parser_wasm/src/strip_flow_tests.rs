@@ -163,6 +163,25 @@ const e = obj?.method(1);
 }
 
 #[test]
+fn runnable_erasure_removes_definite_assignment_assertions() {
+    let source = r#"let a!: number;
+class Box {
+  value!: number;
+  #secret!: string;
+}
+"#;
+    assert_eq!(
+        print(&super::lower_program(&parse(source))),
+        r#"let a;
+class Box {
+  value;
+  #secret;
+}
+"#
+    );
+}
+
+#[test]
 fn runnable_erasure_removes_ambient_declarations_and_keeps_module_values() {
     let source = r#"declare enum E {}
 declare namespace N {}

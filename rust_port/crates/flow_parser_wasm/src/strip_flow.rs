@@ -340,12 +340,14 @@ impl<'ast> AstVisitor<'ast, Loc> for StripFlow {
             class::BodyElement::Property(property) => {
                 property.variance = None;
                 property.optional = false;
+                property.definite = false;
                 property.override_ = false;
                 property.ts_accessibility = None;
             }
             class::BodyElement::PrivateField(property) => {
                 property.variance = None;
                 property.optional = false;
+                property.definite = false;
                 property.override_ = false;
                 property.ts_accessibility = None;
             }
@@ -356,6 +358,16 @@ impl<'ast> AstVisitor<'ast, Loc> for StripFlow {
             _ => {}
         }
         element
+    }
+
+    fn map_variable_declarator(
+        &mut self,
+        kind: ast::VariableKind,
+        declarator: &'ast statement::variable::Declarator<Loc, Loc>,
+    ) -> statement::variable::Declarator<Loc, Loc> {
+        let mut declarator = ast_visitor::map_variable_declarator_default(self, kind, declarator);
+        declarator.definite = false;
+        declarator
     }
 
     fn map_call(

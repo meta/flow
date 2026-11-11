@@ -358,6 +358,9 @@ impl Writer {
                     writer.token(", ")?;
                 }
                 writer.at(&declarator.loc, |writer| {
+                    if declarator.definite {
+                        return Err(PrintError::TypeAnnotation(declarator.loc.dupe()));
+                    }
                     writer.pattern(&declarator.id)?;
                     if let Some(init) = &declarator.init {
                         writer.token(" = ")?;
@@ -516,6 +519,7 @@ impl Writer {
                 writer.annotation(&property.annot)?;
                 if property.override_
                     || property.optional
+                    || property.definite
                     || property.variance.is_some()
                     || property.ts_accessibility.is_some()
                     || !property.decorators.is_empty()
@@ -534,6 +538,7 @@ impl Writer {
                 writer.annotation(&property.annot)?;
                 if property.override_
                     || property.optional
+                    || property.definite
                     || property.variance.is_some()
                     || property.ts_accessibility.is_some()
                     || !property.decorators.is_empty()
