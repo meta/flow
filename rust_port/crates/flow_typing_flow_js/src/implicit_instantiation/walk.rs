@@ -572,6 +572,11 @@ struct Walker<'e> {
     /// check type mentions an unsolved marker), walked again after the other arguments.
     deferred: Vec<(Type, Type)>,
     second_pass: bool,
+    /// Spreads of a marker against an object whose other operands have markers inside, walked
+    /// again at the end of the walk: if the marker has evidence by then, the spread is evaluated
+    /// with it and walked against the object.
+    pending_spreads: Vec<(Type, Type)>,
+    spreads_pass: bool,
     /// The pairs that the walk is comparing structurally, with how deeply their type arguments
     /// nest on each side.
     nesting: Vec<(Nesting, usize, usize)>,
@@ -674,6 +679,7 @@ struct Snapshot {
     vars: BTreeMap<SubstName, Bounds>,
     seen_len: usize,
     deferred: Vec<(Type, Type)>,
+    pending_spreads: Vec<(Type, Type)>,
     spread_tuple_pairs: Vec<(Type, Type)>,
 }
 
@@ -785,6 +791,8 @@ impl<'e> Walker<'e> {
             expanded_from: std::cell::RefCell::new(BTreeMap::new()),
             deferred: Vec::new(),
             second_pass: false,
+            pending_spreads: Vec::new(),
+            spreads_pass: false,
             nesting: Vec::new(),
             defaults: BTreeMap::new(),
             tparams: BTreeMap::new(),
@@ -814,10 +822,29 @@ impl<'e> Walker<'e> {
         Ok(())
     }
 
+    /// The deferred pairs, at the end of a walk, and then the pending spreads.
     fn walk_deferred<'cx>(&mut self, cx: &mut Context<'cx>) -> Result<(), FlowJsException> {
+        self.walk_deferred_pairs(cx)?;
+        let spreads = std::mem::take(&mut self.pending_spreads);
+        self.spreads_pass = true;
+        let result = self.walk_again(cx, spreads);
+        self.spreads_pass = false;
+        result
+    }
+
+    /// The deferred pairs, also before the generic values among the props of an object.
+    fn walk_deferred_pairs<'cx>(&mut self, cx: &mut Context<'cx>) -> Result<(), FlowJsException> {
         self.second_pass = true;
         let deferred = std::mem::take(&mut self.deferred);
-        for (l, u) in deferred {
+        self.walk_again(cx, deferred)
+    }
+
+    fn walk_again<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        pairs: Vec<(Type, Type)>,
+    ) -> Result<(), FlowJsException> {
+        for (l, u) in pairs {
             let key = (addr(&l), addr(&u));
             if let Some(pair) = self.seen.remove(&key) {
                 self.seen_log.push(SeenChange::Removed(key, pair));
@@ -2764,7 +2791,7 @@ impl<'e> Walker<'e> {
             true,
             lo.literal.is_literal(),
         )?;
-        self.walk_deferred(cx)?;
+        self.walk_deferred_pairs(cx)?;
         self.walk_props(
             cx,
             &generic_values,
@@ -4049,6 +4076,7 @@ impl<'e> Walker<'e> {
             vars: self.vars.clone(),
             seen_len: self.seen_log.len(),
             deferred: self.deferred.clone(),
+            pending_spreads: self.pending_spreads.clone(),
             spread_tuple_pairs: self.spread_tuple_pairs.clone(),
         }
     }
@@ -4067,6 +4095,7 @@ impl<'e> Walker<'e> {
             }
         }
         self.deferred = snapshot.deferred;
+        self.pending_spreads = snapshot.pending_spreads;
         self.spread_tuple_pairs = snapshot.spread_tuple_pairs;
     }
 
@@ -5387,11 +5416,31 @@ impl<'e> Walker<'e> {
                     return Ok(());
                 }
                 if let Some((target, d)) = self.reversal_target(cx, type_, d) {
+                    // A pending spread whose marker still has no evidence at the end gives nothing
+                    // more.
+                    if self.spreads_pass {
+                        return Ok(());
+                    }
                     let u = self.evaluated(cx, u)?;
-                    return match self.reverse_destructor(cx, reason, &d, &u)? {
-                        Some(reversed) => self.add_reversal(cx, &target, &reversed),
-                        None => self.give_up(cx, "destructor", l, &u),
+                    let Some(reversed) = self.reverse_destructor(cx, reason, &d, &u)? else {
+                        return self.give_up(cx, "destructor", l, &u);
                     };
+                    self.add_reversal(cx, &target, &reversed)?;
+                    // Once the marker has a lower bound from the other arguments, the spread is
+                    // also walked against `u`, so that the props of the other operands, such as
+                    // `onClose: C` in `{...T, ...{onClose: C}}`, meet those of `u`. That waits for
+                    // the end of the walk.
+                    if matches!(target, ReversalTarget::Marker(_))
+                        && let Destructor::SpreadType(box DestructorSpreadTypeData(_, others, _)) =
+                            &d
+                        && others.iter().any(|operand| match operand {
+                            object::spread::Operand::Type(t) => self.mentions(cx, t),
+                            object::spread::Operand::Slice(_) => false,
+                        })
+                    {
+                        self.pending_spreads.push((l.dupe(), u.dupe()));
+                    }
+                    return Ok(());
                 }
                 if self.spread_waits(cx, type_, d) {
                     self.deferred.push((l.dupe(), u.dupe()));
@@ -5412,6 +5461,19 @@ impl<'e> Walker<'e> {
                     let u = self.evaluated(cx, u)?;
                     if let Some(rest) = self.reverse_destructor(cx, reason, d, &u)? {
                         self.walk(cx, type_, &rest)?;
+                    }
+                }
+                // A pending spread whose marker has evidence at the end: the spread with the
+                // solutions so far, against `u`.
+                if self.spreads_pass && matches!(d.deref(), Destructor::SpreadType(_)) {
+                    let spread = self.with_evidence(cx, l, reason);
+                    if let TypeInner::EvalT {
+                        type_, defer_use_t, ..
+                    } = spread.deref()
+                        && let Some(result) = self.evaluate(cx, type_, defer_use_t)?
+                        && self.is_structure(cx, &result)
+                    {
+                        return self.walk(cx, &result, u);
                     }
                 }
                 match self.evaluate(cx, type_, defer_use_t)? {
