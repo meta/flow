@@ -8718,9 +8718,11 @@ fn ts_interface_key_sources<E>(
             return Ok(empty_key_sources());
         }
 
-        let own_sources = instance_own_key_sources(&instance.inst);
+        // TS `keyof` also sees methods, which interfaces keep in their proto props.
+        let (mut prop_ids, dict_keys) = instance_own_key_sources(&instance.inst);
+        prop_ids.push(instance.inst.proto_props.dupe());
         let super_sources = collect_type(concretize, seen, &instance.super_)?;
-        Ok(append_key_sources(own_sources, super_sources))
+        Ok(append_key_sources((prop_ids, dict_keys), super_sources))
     }
 
     let mut seen = BTreeSet::new();

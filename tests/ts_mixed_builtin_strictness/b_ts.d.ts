@@ -25,6 +25,14 @@ interface TsDerivedMap extends TsBaseMap {
 }
 declare var tsKeys: keyof TsDerivedMap;
 
+interface TsBaseMethods {
+  inherited(): void;
+}
+interface TsMethods extends TsBaseMethods {
+  own(): void;
+}
+declare var tsMethodKeys: keyof TsMethods;
+
 interface TsListener {
   on<K extends keyof TsDerivedMap>(type: K, value: TsDerivedMap[K]): void;
   on(type: string, value: string): void;

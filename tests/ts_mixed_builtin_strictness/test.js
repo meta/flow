@@ -7,6 +7,9 @@ tsDogFlowBox as FlowBuiltinBox<TsAnimal>; // ERROR: Flow generic with TypeScript
 'mousedown' as typeof tsKeys; // OK: inherited through `extends`.
 'custom' as typeof flowKeys; // OK: own member.
 'mousedown' as typeof flowKeys; // ERROR: inherited members are not Flow keys.
+'own' as typeof tsMethodKeys; // OK: TypeScript `keyof` sees methods.
+'inherited' as typeof tsMethodKeys; // OK
+'other' as typeof tsMethodKeys; // ERROR
 
 // An inherited key still selects the keyed overload rather than the `string` fallback.
 tsListener.on('mousedown', 1); // OK

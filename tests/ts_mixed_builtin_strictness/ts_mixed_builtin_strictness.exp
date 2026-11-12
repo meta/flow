@@ -35,47 +35,61 @@ References:
                      ^^^^^^^^^^^^^^^ [1]
 
 
-Error ---------------------------------------------------------------------------------------------------- test.js:13:12
+Error ----------------------------------------------------------------------------------------------------- test.js:12:1
+
+Cannot cast `'other'` to `keyof TsMethods` because property `other` is missing in `TsMethods` [1]. [prop-missing]
+
+   test.js:12:1
+   12| 'other' as typeof tsMethodKeys; // ERROR
+       ^^^^^^^
+
+References:
+   test.js:12:12
+   12| 'other' as typeof tsMethodKeys; // ERROR
+                  ^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:16:12
 
 Cannot call `tsListener.on` because: [incompatible-type]
  - Either `1` [1] is incompatible with `string` [2].
  - Or `1` [1] is incompatible with `string` [3].
 
-   test.js:13:12
-   13| tsListener.on('custom', 1); // ERROR: the keyed overload types `custom` as `string`.
+   test.js:16:12
+   16| tsListener.on('custom', 1); // ERROR: the keyed overload types `custom` as `string`.
                   ^^
 
 References:
-   test.js:13:25
-   13| tsListener.on('custom', 1); // ERROR: the keyed overload types `custom` as `string`.
+   test.js:16:25
+   16| tsListener.on('custom', 1); // ERROR: the keyed overload types `custom` as `string`.
                                ^ [1]
    b_ts.d.ts:24:11
    24|   custom: string;
                  ^^^^^^ [2]
-   b_ts.d.ts:30:27
-   30|   on(type: string, value: string): void;
+   b_ts.d.ts:38:27
+   38|   on(type: string, value: string): void;
                                  ^^^^^^ [3]
 
 
-Error ----------------------------------------------------------------------------------------------------- test.js:20:1
+Error ----------------------------------------------------------------------------------------------------- test.js:23:1
 
 Cannot cast `tsIfaceClass` to `{name: string | number, ...}` because `{name: string, ...}` [1] is incompatible with
 `Object` [2]. [incompatible-type]
 
-   test.js:20:1
-   20| tsIfaceClass as {name: string | number, ...}; // ERROR: a null prototype, but `name` is OK.
+   test.js:23:1
+   23| tsIfaceClass as {name: string | number, ...}; // ERROR: a null prototype, but `name` is OK.
        ^^^^^^^^^^^^
 
 References:
-   b_ts.d.ts:44:11
-   44| interface TsIface {
+   b_ts.d.ts:52:11
+   52| interface TsIface {
                  ^^^^^^^ [1]
-   test.js:20:17
-   20| tsIfaceClass as {name: string | number, ...}; // ERROR: a null prototype, but `name` is OK.
+   test.js:23:17
+   23| tsIfaceClass as {name: string | number, ...}; // ERROR: a null prototype, but `name` is OK.
                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------------- test.js:21:1
+Error ----------------------------------------------------------------------------------------------------- test.js:24:1
 
 Cannot cast `FlowStatics` to `{s: number | string, ...}` because in property `s`: `number` [1] is not exactly the same
 as `number | string` [2]. [incompatible-type]
@@ -85,44 +99,44 @@ The above-mentioned two types must be the same because property `s` is invariant
 - Or make property `s` in `{s: number | string, ...}` [4] readonly. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
-   test.js:21:1
-   21| FlowStatics as {s: number | string, ...}; // ERROR: Flow fields are invariant.
+   test.js:24:1
+   24| FlowStatics as {s: number | string, ...}; // ERROR: Flow fields are invariant.
        ^^^^^^^^^^^
 
 References:
    a_flow.js:20:13
    20|   static s: number;
                    ^^^^^^ [1]
-   test.js:21:20
-   21| FlowStatics as {s: number | string, ...}; // ERROR: Flow fields are invariant.
+   test.js:24:20
+   24| FlowStatics as {s: number | string, ...}; // ERROR: Flow fields are invariant.
                           ^^^^^^^^^^^^^^^ [2]
    a_flow.js:19:15
    19| declare class FlowStatics {
                      ^^^^^^^^^^^ [3]
-   test.js:21:16
-   21| FlowStatics as {s: number | string, ...}; // ERROR: Flow fields are invariant.
+   test.js:24:16
+   24| FlowStatics as {s: number | string, ...}; // ERROR: Flow fields are invariant.
                       ^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
-Error ----------------------------------------------------------------------------------------------------- test.js:22:1
+Error ----------------------------------------------------------------------------------------------------- test.js:25:1
 
 Cannot cast `FlowNs` to `{v: number | string, ...}` because property `v` is read-only in `{readonly v: number}` [1] but
 writable in `{v: number | string, ...}` [2]. [incompatible-variance]
 
-   test.js:22:1
-   22| FlowNs as {v: number | string, ...}; // ERROR: read-only in Flow.
+   test.js:25:1
+   25| FlowNs as {v: number | string, ...}; // ERROR: read-only in Flow.
        ^^^^^^
 
 References:
    a_flow.js:22:19
    22| declare namespace FlowNs {
                          ^^^^^^ [1]
-   test.js:22:11
-   22| FlowNs as {v: number | string, ...}; // ERROR: read-only in Flow.
+   test.js:25:11
+   25| FlowNs as {v: number | string, ...}; // ERROR: read-only in Flow.
                  ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------------- test.js:28:1
+Error ----------------------------------------------------------------------------------------------------- test.js:31:1
 
 Cannot cast `mergedIface.arr` to `Array<number | string>` because in array element: `number` [1] is not exactly the same
 as `number | string` [2]. [incompatible-type]
@@ -132,45 +146,45 @@ The above-mentioned two types must be the same because arrays are invariantly ty
 - Or make `Array<number | string>` [4] a `ReadonlyArray`.
 See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
 
-   test.js:28:1
-   28| mergedIface.arr as Array<number | string>; // ERROR: a Flow array is invariant.
+   test.js:31:1
+   31| mergedIface.arr as Array<number | string>; // ERROR: a Flow array is invariant.
        ^^^^^^^^^^^^^^^
 
 References:
    a_flow.js:26:14
    26|   arr: Array<number>;
                     ^^^^^^ [1]
-   test.js:28:26
-   28| mergedIface.arr as Array<number | string>; // ERROR: a Flow array is invariant.
+   test.js:31:26
+   31| mergedIface.arr as Array<number | string>; // ERROR: a Flow array is invariant.
                                 ^^^^^^^^^^^^^^^ [2]
    a_flow.js:26:8
    26|   arr: Array<number>;
               ^^^^^^^^^^^^^ [3]
-   test.js:28:20
-   28| mergedIface.arr as Array<number | string>; // ERROR: a Flow array is invariant.
+   test.js:31:20
+   31| mergedIface.arr as Array<number | string>; // ERROR: a Flow array is invariant.
                           ^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
-Error ---------------------------------------------------------------------------------------------------- test.js:38:22
+Error ---------------------------------------------------------------------------------------------------- test.js:41:22
 
 Cannot extend `FlowBuiltinNode` [1] with `FlowBuiltinSubNode` [2] because in property `clone` > the first parameter:
 `FlowBuiltinSubNode` [3] is incompatible with `unknown` [4]. [incompatible-type]
 
-   test.js:38:22
-   38|   static clone(node: FlowBuiltinSubNode): FlowBuiltinSubNode { // ERROR: overrides a Flow method.
+   test.js:41:22
+   41|   static clone(node: FlowBuiltinSubNode): FlowBuiltinSubNode { // ERROR: overrides a Flow method.
                             ^^^^^^^^^^^^^^^^^^ [3]
 
 References:
-   test.js:37:34
-   37| class FlowBuiltinSubNode extends FlowBuiltinNode {
+   test.js:40:34
+   40| class FlowBuiltinSubNode extends FlowBuiltinNode {
                                         ^^^^^^^^^^^^^^^ [1]
-   test.js:37:1
+   test.js:40:1
        v-------------------------------------------------
-   37| class FlowBuiltinSubNode extends FlowBuiltinNode {
-   38|   static clone(node: FlowBuiltinSubNode): FlowBuiltinSubNode { // ERROR: overrides a Flow method.
-   39|     return new FlowBuiltinSubNode();
-   40|   }
-   41| }
+   40| class FlowBuiltinSubNode extends FlowBuiltinNode {
+   41|   static clone(node: FlowBuiltinSubNode): FlowBuiltinSubNode { // ERROR: overrides a Flow method.
+   42|     return new FlowBuiltinSubNode();
+   43|   }
+   44| }
        ^ [2]
    a_flow.js:31:22
    31|   static clone(data: unknown): FlowBuiltinNode;
@@ -178,4 +192,4 @@ References:
 
 
 
-Found 8 errors
+Found 9 errors
