@@ -184,60 +184,100 @@ pub(super) fn assignment_cover(env: &mut ParserEnv) -> Result<PatternCover, Roll
 
     fn try_assignment_but_not_arrow_function(
         env: &mut ParserEnv,
-    ) -> Result<PatternCover, Rollback> {
-        env.with_error_callback(error_callback, |env| {
-            let ret = assignment_but_not_arrow_function_cover(env)?;
-            match peek::token(env) {
-                // x => 123
-                TokenKind::TArrow => Err(Rollback),
-                // (x): number => 123
-                TokenKind::TColon => {
-                    if env.last_token() == Some(&TokenKind::TRparen) {
-                        Err(Rollback)
-                    } else {
-                        Ok(ret)
-                    }
+    ) -> Result<try_parse::Outcome<PatternCover>, Rollback> {
+        let (outcome, rejected) =
+            env.with_error_callback_reporting_rejection(error_callback, try_assignment_parse);
+        match outcome? {
+            // A try within this parse recovered from a rollback on an error that only this
+            // parse's callback rejected. Parsing these tokens again without the callback may
+            // take another path, so don't keep this parse.
+            try_parse::Outcome::Defer(_) if rejected => Err(Rollback),
+            outcome => Ok(outcome),
+        }
+    }
+
+    fn try_assignment_parse(
+        env: &mut ParserEnv,
+    ) -> Result<try_parse::Outcome<PatternCover>, Rollback> {
+        let ret = assignment_but_not_arrow_function_cover(env)?;
+        match peek::token(env) {
+            // x => 123
+            TokenKind::TArrow => Err(Rollback),
+            // (x): number => 123
+            TokenKind::TColon => {
+                if env.last_token() == Some(&TokenKind::TRparen) {
+                    Ok(try_parse::Outcome::Defer(ret))
+                } else {
+                    Ok(try_parse::Outcome::Accept(ret))
                 }
-                _ => {
-                    // async x => 123 -- and we've already parsed async as an identifier expression
-                    if peek::is_identifier(env) {
-                        if let PatternCover::CoverExpr(expr) = &ret {
-                            if let ExpressionInner::Identifier { inner, .. } = &**expr {
-                                if &inner.name == "async" && !peek::is_line_terminator(env) {
-                                    return Err(Rollback);
-                                }
+            }
+            _ => {
+                // async x => 123 -- and we've already parsed async as an identifier expression
+                if peek::is_identifier(env) {
+                    if let PatternCover::CoverExpr(expr) = &ret {
+                        if let ExpressionInner::Identifier { inner, .. } = &**expr {
+                            if &inner.name == "async" && !peek::is_line_terminator(env) {
+                                return Err(Rollback);
                             }
                         }
                     }
-                    Ok(ret)
                 }
+                Ok(try_parse::Outcome::Accept(ret))
             }
-        })
+        }
+    }
+
+    fn try_assignment_but_not_arrow_function_or_rollback(
+        env: &mut ParserEnv,
+    ) -> Result<PatternCover, Rollback> {
+        match try_assignment_but_not_arrow_function(env)? {
+            try_parse::Outcome::Accept(ret) => Ok(ret),
+            try_parse::Outcome::Defer(_) => Err(Rollback),
+        }
     }
 
     fn try_assignment_or_arrow_function(
         env: &mut ParserEnv,
         try_arrow_function_first: bool,
     ) -> Result<PatternCover, Rollback> {
-        match if try_arrow_function_first {
-            try_parse::to_parse(env, try_arrow_function)
-        } else {
-            try_parse::to_parse(env, try_assignment_but_not_arrow_function)
-        } {
-            try_parse::ParseResult::ParsedSuccessfully(expr) => Ok(expr),
-            try_parse::ParseResult::FailedToParse => {
-                match if try_arrow_function_first {
-                    try_parse::to_parse(env, try_assignment_but_not_arrow_function)
-                } else {
-                    try_parse::to_parse(env, try_arrow_function)
-                } {
+        // Well shoot. It doesn't parse cleanly as a normal expression or as an
+        // arrow_function. Let's treat it as a normal assignment expression gone wrong
+        fn assignment_gone_wrong(env: &mut ParserEnv) -> Result<PatternCover, Rollback> {
+            assignment_but_not_arrow_function_cover(env)
+        }
+
+        if try_arrow_function_first {
+            return match try_parse::to_parse(env, try_arrow_function) {
+                try_parse::ParseResult::ParsedSuccessfully(expr) => Ok(expr),
+                try_parse::ParseResult::FailedToParse => match try_parse::to_parse(
+                    env,
+                    try_assignment_but_not_arrow_function_or_rollback,
+                ) {
                     try_parse::ParseResult::ParsedSuccessfully(expr) => Ok(expr),
-                    try_parse::ParseResult::FailedToParse => {
-                        // Well shoot. It doesn't parse cleanly as a normal
-                        // expression or as an arrow_function. Let's treat it as a
-                        // normal assignment expression gone wrong
-                        assignment_but_not_arrow_function_cover(env)
+                    try_parse::ParseResult::FailedToParse => assignment_gone_wrong(env),
+                },
+            };
+        }
+        match try_parse::to_parse_or_defer(env, try_assignment_but_not_arrow_function) {
+            try_parse::DeferredParseResult::ParsedSuccessfully(expr) => Ok(expr),
+            // It parsed cleanly, but `(x):` may also begin an arrow function with a return
+            // type, so try that first.
+            try_parse::DeferredParseResult::Deferred(deferred) => {
+                match try_parse::to_parse(env, try_arrow_function) {
+                    try_parse::ParseResult::ParsedSuccessfully(expr) => Ok(expr),
+                    // Reuse the first parse rather than parse the same tokens again. In
+                    // `a ? (b ? (c) : d) : e`, every parenthesized consequent is followed by
+                    // `:`, so parsing again would double the work at each level of nesting.
+                    try_parse::ParseResult::FailedToParse if deferred.can_commit(env) => {
+                        Ok(try_parse::commit_deferred(env, deferred))
                     }
+                    try_parse::ParseResult::FailedToParse => assignment_gone_wrong(env),
+                }
+            }
+            try_parse::DeferredParseResult::FailedToParse => {
+                match try_parse::to_parse(env, try_arrow_function) {
+                    try_parse::ParseResult::ParsedSuccessfully(expr) => Ok(expr),
+                    try_parse::ParseResult::FailedToParse => assignment_gone_wrong(env),
                 }
             }
         }

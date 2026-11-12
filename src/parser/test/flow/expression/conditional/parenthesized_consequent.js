@@ -1,0 +1,10 @@
+a ? (b) : c;
+a ? (b): c => d : e;
+a ? (b ? (c) : d) : e;
+a ? (b ? (c): d => e : f) : g;
+a ? (/* comment */ b) : c;
+a ? (b, c) : d;
+a ? ({b}) : c;
+a ? ([b]) : c;
+a ? (b = c) : d;
+a ? (b: c) : d;

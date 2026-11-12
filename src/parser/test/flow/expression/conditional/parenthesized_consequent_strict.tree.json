@@ -1,0 +1,672 @@
+{
+  "body": [
+    {
+      "directive": "use strict",
+      "expression": {
+        "loc": {
+          "end": {
+            "column": 12,
+            "line": 1
+          },
+          "source": null,
+          "start": {
+            "column": 0,
+            "line": 1
+          }
+        },
+        "range": [
+          0,
+          12
+        ],
+        "raw": "\"use strict\"",
+        "type": "Literal",
+        "value": "use strict"
+      },
+      "loc": {
+        "end": {
+          "column": 13,
+          "line": 1
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
+      "range": [
+        0,
+        13
+      ],
+      "type": "ExpressionStatement"
+    },
+    {
+      "directive": null,
+      "expression": {
+        "left": {
+          "left": {
+            "loc": {
+              "end": {
+                "column": 1,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 0,
+                "line": 2
+              }
+            },
+            "name": "f",
+            "optional": false,
+            "range": [
+              14,
+              15
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          },
+          "loc": {
+            "end": {
+              "column": 3,
+              "line": 2
+            },
+            "source": null,
+            "start": {
+              "column": 0,
+              "line": 2
+            }
+          },
+          "operator": "<",
+          "range": [
+            14,
+            17
+          ],
+          "right": {
+            "loc": {
+              "end": {
+                "column": 3,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 2
+              }
+            },
+            "name": "T",
+            "optional": false,
+            "range": [
+              16,
+              17
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          },
+          "type": "BinaryExpression"
+        },
+        "loc": {
+          "end": {
+            "column": 22,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 0,
+            "line": 2
+          }
+        },
+        "operator": ">",
+        "range": [
+          14,
+          36
+        ],
+        "right": {
+          "alternate": {
+            "loc": {
+              "end": {
+                "column": 21,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 20,
+                "line": 2
+              }
+            },
+            "name": "c",
+            "optional": false,
+            "range": [
+              34,
+              35
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          },
+          "consequent": {
+            "loc": {
+              "end": {
+                "column": 16,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 10,
+                "line": 2
+              }
+            },
+            "name": "public",
+            "optional": false,
+            "range": [
+              24,
+              30
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          },
+          "loc": {
+            "end": {
+              "column": 21,
+              "line": 2
+            },
+            "source": null,
+            "start": {
+              "column": 5,
+              "line": 2
+            }
+          },
+          "range": [
+            19,
+            35
+          ],
+          "test": {
+            "loc": {
+              "end": {
+                "column": 6,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 5,
+                "line": 2
+              }
+            },
+            "range": [
+              19,
+              20
+            ],
+            "raw": "0",
+            "type": "Literal",
+            "value": 0
+          },
+          "type": "ConditionalExpression"
+        },
+        "type": "BinaryExpression"
+      },
+      "loc": {
+        "end": {
+          "column": 23,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 2
+        }
+      },
+      "range": [
+        14,
+        37
+      ],
+      "type": "ExpressionStatement"
+    },
+    {
+      "directive": null,
+      "expression": {
+        "arguments": [
+          {
+            "alternate": {
+              "loc": {
+                "end": {
+                  "column": 26,
+                  "line": 3
+                },
+                "source": null,
+                "start": {
+                  "column": 25,
+                  "line": 3
+                }
+              },
+              "name": "c",
+              "optional": false,
+              "range": [
+                63,
+                64
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "consequent": {
+              "async": false,
+              "body": {
+                "loc": {
+                  "end": {
+                    "column": 21,
+                    "line": 3
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 15,
+                    "line": 3
+                  }
+                },
+                "name": "public",
+                "optional": false,
+                "range": [
+                  53,
+                  59
+                ],
+                "type": "Identifier",
+                "typeAnnotation": null
+              },
+              "expression": true,
+              "generator": false,
+              "id": null,
+              "loc": {
+                "end": {
+                  "column": 21,
+                  "line": 3
+                },
+                "source": null,
+                "start": {
+                  "column": 10,
+                  "line": 3
+                }
+              },
+              "params": [
+                {
+                  "loc": {
+                    "end": {
+                      "column": 11,
+                      "line": 3
+                    },
+                    "source": null,
+                    "start": {
+                      "column": 10,
+                      "line": 3
+                    }
+                  },
+                  "name": "q",
+                  "optional": false,
+                  "range": [
+                    48,
+                    49
+                  ],
+                  "type": "Identifier",
+                  "typeAnnotation": null
+                }
+              ],
+              "predicate": null,
+              "range": [
+                48,
+                59
+              ],
+              "returnType": null,
+              "type": "ArrowFunctionExpression",
+              "typeParameters": null
+            },
+            "loc": {
+              "end": {
+                "column": 26,
+                "line": 3
+              },
+              "source": null,
+              "start": {
+                "column": 5,
+                "line": 3
+              }
+            },
+            "range": [
+              43,
+              64
+            ],
+            "test": {
+              "loc": {
+                "end": {
+                  "column": 6,
+                  "line": 3
+                },
+                "source": null,
+                "start": {
+                  "column": 5,
+                  "line": 3
+                }
+              },
+              "range": [
+                43,
+                44
+              ],
+              "raw": "0",
+              "type": "Literal",
+              "value": 0
+            },
+            "type": "ConditionalExpression"
+          }
+        ],
+        "callee": {
+          "loc": {
+            "end": {
+              "column": 1,
+              "line": 3
+            },
+            "source": null,
+            "start": {
+              "column": 0,
+              "line": 3
+            }
+          },
+          "name": "f",
+          "optional": false,
+          "range": [
+            38,
+            39
+          ],
+          "type": "Identifier",
+          "typeAnnotation": null
+        },
+        "loc": {
+          "end": {
+            "column": 27,
+            "line": 3
+          },
+          "source": null,
+          "start": {
+            "column": 0,
+            "line": 3
+          }
+        },
+        "optional": false,
+        "range": [
+          38,
+          65
+        ],
+        "type": "CallExpression",
+        "typeArguments": {
+          "loc": {
+            "end": {
+              "column": 4,
+              "line": 3
+            },
+            "source": null,
+            "start": {
+              "column": 1,
+              "line": 3
+            }
+          },
+          "params": [
+            {
+              "id": {
+                "loc": {
+                  "end": {
+                    "column": 3,
+                    "line": 3
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 2,
+                    "line": 3
+                  }
+                },
+                "name": "T",
+                "optional": false,
+                "range": [
+                  40,
+                  41
+                ],
+                "type": "Identifier",
+                "typeAnnotation": null
+              },
+              "loc": {
+                "end": {
+                  "column": 3,
+                  "line": 3
+                },
+                "source": null,
+                "start": {
+                  "column": 2,
+                  "line": 3
+                }
+              },
+              "range": [
+                40,
+                41
+              ],
+              "type": "GenericTypeAnnotation",
+              "typeArguments": null
+            }
+          ],
+          "range": [
+            39,
+            42
+          ],
+          "type": "TypeParameterInstantiation"
+        }
+      },
+      "loc": {
+        "end": {
+          "column": 28,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 3
+        }
+      },
+      "range": [
+        38,
+        66
+      ],
+      "type": "ExpressionStatement"
+    },
+    {
+      "directive": null,
+      "expression": {
+        "left": {
+          "loc": {
+            "end": {
+              "column": 1,
+              "line": 4
+            },
+            "source": null,
+            "start": {
+              "column": 0,
+              "line": 4
+            }
+          },
+          "name": "x",
+          "optional": false,
+          "range": [
+            67,
+            68
+          ],
+          "type": "Identifier",
+          "typeAnnotation": null
+        },
+        "loc": {
+          "end": {
+            "column": 20,
+            "line": 4
+          },
+          "source": null,
+          "start": {
+            "column": 0,
+            "line": 4
+          }
+        },
+        "operator": "=",
+        "range": [
+          67,
+          87
+        ],
+        "right": {
+          "alternate": {
+            "loc": {
+              "end": {
+                "column": 20,
+                "line": 4
+              },
+              "source": null,
+              "start": {
+                "column": 19,
+                "line": 4
+              }
+            },
+            "name": "c",
+            "optional": false,
+            "range": [
+              86,
+              87
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          },
+          "consequent": {
+            "loc": {
+              "end": {
+                "column": 15,
+                "line": 4
+              },
+              "source": null,
+              "start": {
+                "column": 9,
+                "line": 4
+              }
+            },
+            "name": "public",
+            "optional": false,
+            "range": [
+              76,
+              82
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          },
+          "loc": {
+            "end": {
+              "column": 20,
+              "line": 4
+            },
+            "source": null,
+            "start": {
+              "column": 4,
+              "line": 4
+            }
+          },
+          "range": [
+            71,
+            87
+          ],
+          "test": {
+            "loc": {
+              "end": {
+                "column": 5,
+                "line": 4
+              },
+              "source": null,
+              "start": {
+                "column": 4,
+                "line": 4
+              }
+            },
+            "name": "a",
+            "optional": false,
+            "range": [
+              71,
+              72
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          },
+          "type": "ConditionalExpression"
+        },
+        "type": "AssignmentExpression"
+      },
+      "loc": {
+        "end": {
+          "column": 21,
+          "line": 4
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 4
+        }
+      },
+      "range": [
+        67,
+        88
+      ],
+      "type": "ExpressionStatement"
+    }
+  ],
+  "comments": [],
+  "errors": [
+    {
+      "loc": {
+        "end": {
+          "column": 16,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 10,
+          "line": 2
+        }
+      },
+      "message": "Use of reserved word in strict mode"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 21,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 15,
+          "line": 3
+        }
+      },
+      "message": "Use of reserved word in strict mode"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 15,
+          "line": 4
+        },
+        "source": null,
+        "start": {
+          "column": 9,
+          "line": 4
+        }
+      },
+      "message": "Use of reserved word in strict mode"
+    }
+  ],
+  "loc": {
+    "end": {
+      "column": 0,
+      "line": 5
+    },
+    "source": null,
+    "start": {
+      "column": 0,
+      "line": 1
+    }
+  },
+  "range": [
+    0,
+    89
+  ],
+  "type": "Program"
+}

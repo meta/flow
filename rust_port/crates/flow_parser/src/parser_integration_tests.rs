@@ -6,6 +6,72 @@
  */
 
 #[cfg(test)]
+mod parenthesized_expression_locations_tests {
+    use crate::do_parse;
+    use crate::init_env;
+    use crate::parse_program_in_context;
+    use crate::parser_env::PERMISSIVE_PARSE_OPTIONS;
+
+    #[test]
+    fn keeps_deferred_parenthesized_expression_locations() {
+        let cases = [
+            ("x = a ? (b) : c;", vec![((8, 11), (9, 10))], 0),
+            (
+                "a ? ((b)) : c;",
+                vec![((5, 8), (6, 7)), ((4, 9), (6, 7))],
+                0,
+            ),
+            (
+                "a ? (b ? (c) : d) : e;",
+                vec![((9, 12), (10, 11)), ((4, 17), (5, 16))],
+                0,
+            ),
+            (
+                "(p) + (a ? (b) : c) + (q);",
+                vec![
+                    ((0, 3), (1, 2)),
+                    ((11, 14), (12, 13)),
+                    ((6, 19), (7, 18)),
+                    ((22, 25), (23, 24)),
+                ],
+                0,
+            ),
+            ("a ? (b): T => d : e;", vec![], 0),
+            (
+                "\"use strict\"; f<T>(0 ? (public) : c);",
+                vec![((23, 31), (24, 30)), ((18, 36), (19, 35))],
+                1,
+            ),
+            ("(p = a ? (b) : c) => 0;", vec![((9, 12), (10, 11))], 0),
+        ];
+        for (source, expected, expected_errors) in cases {
+            let mut env = init_env::<()>(None, Some(PERMISSIVE_PARSE_OPTIONS), None, Ok(source));
+            env.enable_parenthesized_expression_locations();
+            let ((program, locations), errors) = do_parse(env, false, |env| {
+                let program = parse_program_in_context(env, false);
+                (program, env.take_parenthesized_expression_locations())
+            })
+            .expect("valid source should parse");
+            assert!(program.is_ok(), "{source}: program parse rolled back");
+            assert_eq!(errors.len(), expected_errors, "{source}: {errors:?}");
+            let actual: Vec<_> = locations
+                .iter()
+                .map(|location| {
+                    (
+                        (location.loc.start.column, location.loc.end.column),
+                        (
+                            location.expression_loc.start.column,
+                            location.expression_loc.end.column,
+                        ),
+                    )
+                })
+                .collect();
+            assert_eq!(actual, expected, "{source}");
+        }
+    }
+}
+
+#[cfg(test)]
 mod file_utils {
     use std::collections::BTreeSet;
     use std::fs;

@@ -371,6 +371,8 @@ pub struct ParserEnv<'a> {
     last_lex_result: Option<(Loc, TokenKind)>,
     flags: ParserEnvFlags,
     error_callback: Option<fn(ParseError) -> Result<(), Rollback>>,
+    /* Whether the installed error callback has rolled back on an error. */
+    error_callback_rejected: bool,
     lex_mode_stack: Vec<LexMode>,
     /// This needs to be reset whenever we change lexing context.
     lookahead: lookahead::Lookahead<'a>,
@@ -468,6 +470,7 @@ pub fn init_env<'a, E>(
             in_ambient_context: false,
         },
         error_callback: None,
+        error_callback_rejected: false,
         lex_mode_stack: vec![LexMode::Normal],
         lookahead,
         token_sink: token_sink.map(TokenSink::Direct),
@@ -634,8 +637,11 @@ impl<'a> ParserEnv<'a> {
     // mutators
 
     pub(crate) fn error_at(&mut self, loc: Loc, error: ParseError) -> Result<(), Rollback> {
-        if let Some(callback) = &self.error_callback {
-            callback(error.clone())?;
+        if let Some(callback) = self.error_callback {
+            if let Err(rollback) = callback(error.clone()) {
+                self.error_callback_rejected = true;
+                return Err(rollback);
+            }
         }
         self.errors.push((loc, error));
         Ok(())
@@ -961,11 +967,28 @@ impl<'a> ParserEnv<'a> {
         error_callback: fn(ParseError) -> Result<(), Rollback>,
         f: F,
     ) -> T {
+        self.with_error_callback_reporting_rejection(error_callback, f)
+            .0
+    }
+
+    /// Like `with_error_callback`, and also returns whether `error_callback` rolled back on an
+    /// error during `f`, including in tries within `f` that recovered from that rollback.
+    pub(crate) fn with_error_callback_reporting_rejection<T, F: FnOnce(&mut ParserEnv<'a>) -> T>(
+        &mut self,
+        error_callback: fn(ParseError) -> Result<(), Rollback>,
+        f: F,
+    ) -> (T, bool) {
         let saved_error_callback = self.error_callback;
+        let saved_error_callback_rejected =
+            std::mem::replace(&mut self.error_callback_rejected, false);
         self.error_callback = Some(error_callback);
         let result = f(self);
         self.error_callback = saved_error_callback;
-        result
+        let rejected = std::mem::replace(
+            &mut self.error_callback_rejected,
+            saved_error_callback_rejected,
+        );
+        (result, rejected)
     }
 
     pub(crate) fn without_error_callback(&mut self) {
@@ -2824,6 +2847,11 @@ pub mod try_parse {
     }
 
     fn rollback_state<'a, T>(env: &mut ParserEnv<'a>, saved_state: SavedState) -> ParseResult<T> {
+        restore_state(env, saved_state);
+        ParseResult::FailedToParse
+    }
+
+    fn restore_state<'a>(env: &mut ParserEnv<'a>, saved_state: SavedState) {
         reset_token_sink(env, saved_state.token_buffer, false);
         env.errors.truncate(saved_state.saved_errors_len);
         env.comments.truncate(saved_state.saved_comments_len);
@@ -2836,8 +2864,6 @@ pub mod try_parse {
         let new_lex_mode = env.lex_mode();
         env.lookahead
             .reset_to(new_lex_mode, saved_state.saved_lex_cursor);
-
-        ParseResult::FailedToParse
     }
 
     fn success<'a, T>(
@@ -2868,5 +2894,148 @@ pub mod try_parse {
             ParseResult::ParsedSuccessfully(result) => result,
             ParseResult::FailedToParse => fallback,
         }
+    }
+
+    /// What a parse passed to `to_parse_or_defer` decided.
+    pub(crate) enum Outcome<T> {
+        /// Keep the parse.
+        Accept(T),
+        /// The parse is valid, but another parse of the same tokens should be tried first. It is
+        /// rolled back and returned as a `Deferred` that `commit_deferred` can apply later.
+        Defer(T),
+    }
+
+    /// A parse that was rolled back by `to_parse_or_defer`, with the parser state it ended in.
+    pub(crate) struct Deferred<T> {
+        result: T,
+        errors: Vec<(Loc, ParseError)>,
+        comments: Vec<Comment<Loc>>,
+        parenthesized_expression_locations: Vec<ParenthesizedExpressionLocation>,
+        last_lex_result: Option<(Loc, TokenKind)>,
+        lex_mode_stack: Vec<LexMode>,
+        lex_cursor: wrapped_lex_env::WrappedLexCursor,
+        consumed_comments_pos: Position,
+        // A parse only appends to the innermost class's used privates: classes inside it push
+        // and pop their own frames. So the length of that list is enough to restore them.
+        privates_depth: usize,
+        used_privates_len: usize,
+        tokens: VecDeque<TokenSinkResult>,
+    }
+
+    pub(crate) enum DeferredParseResult<T> {
+        ParsedSuccessfully(T),
+        Deferred(Deferred<T>),
+        FailedToParse,
+    }
+
+    /// Like `to_parse`, but a parse that returns `Outcome::Defer` is rolled back and kept, so
+    /// that the caller can try something else and still commit it without parsing again.
+    pub(crate) fn to_parse_or_defer<'a, T, F>(
+        env: &mut ParserEnv<'a>,
+        parse: F,
+    ) -> DeferredParseResult<T>
+    where
+        F: FnOnce(&mut ParserEnv<'a>) -> Result<Outcome<T>, Rollback>,
+    {
+        let saved_state = save_state(env);
+        match parse(env) {
+            Ok(Outcome::Accept(result)) => {
+                reset_token_sink(env, saved_state.token_buffer, true);
+                DeferredParseResult::ParsedSuccessfully(result)
+            }
+            Ok(Outcome::Defer(result)) => {
+                let tokens = match &mut env.token_sink {
+                    Some(TokenSink::Buffered { buffer, .. }) if saved_state.token_buffer => {
+                        std::mem::take(buffer)
+                    }
+                    _ => VecDeque::new(),
+                };
+                let deferred = Deferred {
+                    result,
+                    errors: env.errors[saved_state.saved_errors_len..].to_vec(),
+                    comments: env.comments[saved_state.saved_comments_len..].to_vec(),
+                    parenthesized_expression_locations: env
+                        .parenthesized_expression_locations
+                        .as_mut()
+                        .map(|locations| {
+                            locations
+                                .split_off(saved_state.saved_parenthesized_expression_locations_len)
+                        })
+                        .unwrap_or_default(),
+                    last_lex_result: env.last_lex_result.clone(),
+                    lex_mode_stack: env.lex_mode_stack.clone(),
+                    lex_cursor: env.lookahead.committed_cursor(),
+                    consumed_comments_pos: env.consumed_comments_pos,
+                    privates_depth: env.privates.len(),
+                    used_privates_len: env.privates.last().map_or(0, |(_, used)| used.len()),
+                    tokens,
+                };
+                restore_state(env, saved_state);
+                DeferredParseResult::Deferred(deferred)
+            }
+            Err(Rollback) => {
+                restore_state(env, saved_state);
+                DeferredParseResult::FailedToParse
+            }
+        }
+    }
+
+    impl<T> Deferred<T> {
+        /// Whether `commit_deferred` gives the same result as parsing the same tokens again. The
+        /// only errors the deferred parse recorded under its own error callback are the ones
+        /// that callback lets through, `StrictReservedWord`. Parsing again would report those
+        /// to the current callback instead, which may roll back on them.
+        pub(crate) fn can_commit(&self, env: &ParserEnv) -> bool {
+            match env.error_callback {
+                None => true,
+                Some(callback) => {
+                    callback(ParseError::StrictReservedWord).is_ok()
+                        || !self
+                            .errors
+                            .iter()
+                            .any(|(_, error)| matches!(error, ParseError::StrictReservedWord))
+                }
+            }
+        }
+    }
+
+    /// Puts the parser back in the state a deferred parse ended in and returns its result.
+    /// Callers check `can_commit` first.
+    pub(crate) fn commit_deferred<'a, T>(env: &mut ParserEnv<'a>, deferred: Deferred<T>) -> T {
+        let Deferred {
+            result,
+            errors,
+            comments,
+            parenthesized_expression_locations,
+            last_lex_result,
+            lex_mode_stack,
+            lex_cursor,
+            consumed_comments_pos,
+            privates_depth,
+            used_privates_len,
+            tokens,
+        } = deferred;
+        env.errors.extend(errors);
+        env.comments.extend(comments);
+        if let Some(locations) = &mut env.parenthesized_expression_locations {
+            locations.extend(parenthesized_expression_locations);
+        }
+        env.last_lex_result = last_lex_result;
+        env.lex_mode_stack = lex_mode_stack;
+        env.consumed_comments_pos = consumed_comments_pos;
+        // Drop what the parses tried since then recorded; rolling back doesn't undo it.
+        env.privates.truncate(privates_depth);
+        if let Some((_, used)) = env.privates.last_mut() {
+            used.truncate(used_privates_len);
+        }
+        let new_lex_mode = env.lex_mode();
+        env.lookahead.reset_to(new_lex_mode, lex_cursor);
+        if let Some(mut token_sink) = env.token_sink.take() {
+            for token_data in tokens {
+                token_sink = send_token_to_sink(token_sink, token_data);
+            }
+            env.token_sink = Some(token_sink);
+        }
+        result
     }
 }

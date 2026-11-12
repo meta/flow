@@ -1,0 +1,1901 @@
+{
+  "body": [
+    {
+      "directive": null,
+      "expression": {
+        "left": {
+          "loc": {
+            "end": {
+              "column": 1,
+              "line": 1
+            },
+            "source": null,
+            "start": {
+              "column": 0,
+              "line": 1
+            }
+          },
+          "name": "x",
+          "optional": false,
+          "range": [
+            0,
+            1
+          ],
+          "type": "Identifier",
+          "typeAnnotation": null
+        },
+        "loc": {
+          "end": {
+            "column": 305,
+            "line": 1
+          },
+          "source": null,
+          "start": {
+            "column": 0,
+            "line": 1
+          }
+        },
+        "operator": "=",
+        "range": [
+          0,
+          305
+        ],
+        "right": {
+          "alternate": {
+            "loc": {
+              "end": {
+                "column": 305,
+                "line": 1
+              },
+              "source": null,
+              "start": {
+                "column": 304,
+                "line": 1
+              }
+            },
+            "name": "c",
+            "optional": false,
+            "range": [
+              304,
+              305
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          },
+          "consequent": {
+            "alternate": {
+              "loc": {
+                "end": {
+                  "column": 300,
+                  "line": 1
+                },
+                "source": null,
+                "start": {
+                  "column": 299,
+                  "line": 1
+                }
+              },
+              "name": "c",
+              "optional": false,
+              "range": [
+                299,
+                300
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "consequent": {
+              "alternate": {
+                "loc": {
+                  "end": {
+                    "column": 295,
+                    "line": 1
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 294,
+                    "line": 1
+                  }
+                },
+                "name": "c",
+                "optional": false,
+                "range": [
+                  294,
+                  295
+                ],
+                "type": "Identifier",
+                "typeAnnotation": null
+              },
+              "consequent": {
+                "alternate": {
+                  "loc": {
+                    "end": {
+                      "column": 290,
+                      "line": 1
+                    },
+                    "source": null,
+                    "start": {
+                      "column": 289,
+                      "line": 1
+                    }
+                  },
+                  "name": "c",
+                  "optional": false,
+                  "range": [
+                    289,
+                    290
+                  ],
+                  "type": "Identifier",
+                  "typeAnnotation": null
+                },
+                "consequent": {
+                  "alternate": {
+                    "loc": {
+                      "end": {
+                        "column": 285,
+                        "line": 1
+                      },
+                      "source": null,
+                      "start": {
+                        "column": 284,
+                        "line": 1
+                      }
+                    },
+                    "name": "c",
+                    "optional": false,
+                    "range": [
+                      284,
+                      285
+                    ],
+                    "type": "Identifier",
+                    "typeAnnotation": null
+                  },
+                  "consequent": {
+                    "alternate": {
+                      "loc": {
+                        "end": {
+                          "column": 280,
+                          "line": 1
+                        },
+                        "source": null,
+                        "start": {
+                          "column": 279,
+                          "line": 1
+                        }
+                      },
+                      "name": "c",
+                      "optional": false,
+                      "range": [
+                        279,
+                        280
+                      ],
+                      "type": "Identifier",
+                      "typeAnnotation": null
+                    },
+                    "consequent": {
+                      "alternate": {
+                        "loc": {
+                          "end": {
+                            "column": 275,
+                            "line": 1
+                          },
+                          "source": null,
+                          "start": {
+                            "column": 274,
+                            "line": 1
+                          }
+                        },
+                        "name": "c",
+                        "optional": false,
+                        "range": [
+                          274,
+                          275
+                        ],
+                        "type": "Identifier",
+                        "typeAnnotation": null
+                      },
+                      "consequent": {
+                        "alternate": {
+                          "loc": {
+                            "end": {
+                              "column": 270,
+                              "line": 1
+                            },
+                            "source": null,
+                            "start": {
+                              "column": 269,
+                              "line": 1
+                            }
+                          },
+                          "name": "c",
+                          "optional": false,
+                          "range": [
+                            269,
+                            270
+                          ],
+                          "type": "Identifier",
+                          "typeAnnotation": null
+                        },
+                        "consequent": {
+                          "alternate": {
+                            "loc": {
+                              "end": {
+                                "column": 265,
+                                "line": 1
+                              },
+                              "source": null,
+                              "start": {
+                                "column": 264,
+                                "line": 1
+                              }
+                            },
+                            "name": "c",
+                            "optional": false,
+                            "range": [
+                              264,
+                              265
+                            ],
+                            "type": "Identifier",
+                            "typeAnnotation": null
+                          },
+                          "consequent": {
+                            "alternate": {
+                              "loc": {
+                                "end": {
+                                  "column": 260,
+                                  "line": 1
+                                },
+                                "source": null,
+                                "start": {
+                                  "column": 259,
+                                  "line": 1
+                                }
+                              },
+                              "name": "c",
+                              "optional": false,
+                              "range": [
+                                259,
+                                260
+                              ],
+                              "type": "Identifier",
+                              "typeAnnotation": null
+                            },
+                            "consequent": {
+                              "alternate": {
+                                "loc": {
+                                  "end": {
+                                    "column": 255,
+                                    "line": 1
+                                  },
+                                  "source": null,
+                                  "start": {
+                                    "column": 254,
+                                    "line": 1
+                                  }
+                                },
+                                "name": "c",
+                                "optional": false,
+                                "range": [
+                                  254,
+                                  255
+                                ],
+                                "type": "Identifier",
+                                "typeAnnotation": null
+                              },
+                              "consequent": {
+                                "alternate": {
+                                  "loc": {
+                                    "end": {
+                                      "column": 250,
+                                      "line": 1
+                                    },
+                                    "source": null,
+                                    "start": {
+                                      "column": 249,
+                                      "line": 1
+                                    }
+                                  },
+                                  "name": "c",
+                                  "optional": false,
+                                  "range": [
+                                    249,
+                                    250
+                                  ],
+                                  "type": "Identifier",
+                                  "typeAnnotation": null
+                                },
+                                "consequent": {
+                                  "alternate": {
+                                    "loc": {
+                                      "end": {
+                                        "column": 245,
+                                        "line": 1
+                                      },
+                                      "source": null,
+                                      "start": {
+                                        "column": 244,
+                                        "line": 1
+                                      }
+                                    },
+                                    "name": "c",
+                                    "optional": false,
+                                    "range": [
+                                      244,
+                                      245
+                                    ],
+                                    "type": "Identifier",
+                                    "typeAnnotation": null
+                                  },
+                                  "consequent": {
+                                    "alternate": {
+                                      "loc": {
+                                        "end": {
+                                          "column": 240,
+                                          "line": 1
+                                        },
+                                        "source": null,
+                                        "start": {
+                                          "column": 239,
+                                          "line": 1
+                                        }
+                                      },
+                                      "name": "c",
+                                      "optional": false,
+                                      "range": [
+                                        239,
+                                        240
+                                      ],
+                                      "type": "Identifier",
+                                      "typeAnnotation": null
+                                    },
+                                    "consequent": {
+                                      "alternate": {
+                                        "loc": {
+                                          "end": {
+                                            "column": 235,
+                                            "line": 1
+                                          },
+                                          "source": null,
+                                          "start": {
+                                            "column": 234,
+                                            "line": 1
+                                          }
+                                        },
+                                        "name": "c",
+                                        "optional": false,
+                                        "range": [
+                                          234,
+                                          235
+                                        ],
+                                        "type": "Identifier",
+                                        "typeAnnotation": null
+                                      },
+                                      "consequent": {
+                                        "alternate": {
+                                          "loc": {
+                                            "end": {
+                                              "column": 230,
+                                              "line": 1
+                                            },
+                                            "source": null,
+                                            "start": {
+                                              "column": 229,
+                                              "line": 1
+                                            }
+                                          },
+                                          "name": "c",
+                                          "optional": false,
+                                          "range": [
+                                            229,
+                                            230
+                                          ],
+                                          "type": "Identifier",
+                                          "typeAnnotation": null
+                                        },
+                                        "consequent": {
+                                          "alternate": {
+                                            "loc": {
+                                              "end": {
+                                                "column": 225,
+                                                "line": 1
+                                              },
+                                              "source": null,
+                                              "start": {
+                                                "column": 224,
+                                                "line": 1
+                                              }
+                                            },
+                                            "name": "c",
+                                            "optional": false,
+                                            "range": [
+                                              224,
+                                              225
+                                            ],
+                                            "type": "Identifier",
+                                            "typeAnnotation": null
+                                          },
+                                          "consequent": {
+                                            "alternate": {
+                                              "loc": {
+                                                "end": {
+                                                  "column": 220,
+                                                  "line": 1
+                                                },
+                                                "source": null,
+                                                "start": {
+                                                  "column": 219,
+                                                  "line": 1
+                                                }
+                                              },
+                                              "name": "c",
+                                              "optional": false,
+                                              "range": [
+                                                219,
+                                                220
+                                              ],
+                                              "type": "Identifier",
+                                              "typeAnnotation": null
+                                            },
+                                            "consequent": {
+                                              "alternate": {
+                                                "loc": {
+                                                  "end": {
+                                                    "column": 215,
+                                                    "line": 1
+                                                  },
+                                                  "source": null,
+                                                  "start": {
+                                                    "column": 214,
+                                                    "line": 1
+                                                  }
+                                                },
+                                                "name": "c",
+                                                "optional": false,
+                                                "range": [
+                                                  214,
+                                                  215
+                                                ],
+                                                "type": "Identifier",
+                                                "typeAnnotation": null
+                                              },
+                                              "consequent": {
+                                                "alternate": {
+                                                  "loc": {
+                                                    "end": {
+                                                      "column": 210,
+                                                      "line": 1
+                                                    },
+                                                    "source": null,
+                                                    "start": {
+                                                      "column": 209,
+                                                      "line": 1
+                                                    }
+                                                  },
+                                                  "name": "c",
+                                                  "optional": false,
+                                                  "range": [
+                                                    209,
+                                                    210
+                                                  ],
+                                                  "type": "Identifier",
+                                                  "typeAnnotation": null
+                                                },
+                                                "consequent": {
+                                                  "alternate": {
+                                                    "loc": {
+                                                      "end": {
+                                                        "column": 205,
+                                                        "line": 1
+                                                      },
+                                                      "source": null,
+                                                      "start": {
+                                                        "column": 204,
+                                                        "line": 1
+                                                      }
+                                                    },
+                                                    "name": "c",
+                                                    "optional": false,
+                                                    "range": [
+                                                      204,
+                                                      205
+                                                    ],
+                                                    "type": "Identifier",
+                                                    "typeAnnotation": null
+                                                  },
+                                                  "consequent": {
+                                                    "alternate": {
+                                                      "loc": {
+                                                        "end": {
+                                                          "column": 200,
+                                                          "line": 1
+                                                        },
+                                                        "source": null,
+                                                        "start": {
+                                                          "column": 199,
+                                                          "line": 1
+                                                        }
+                                                      },
+                                                      "name": "c",
+                                                      "optional": false,
+                                                      "range": [
+                                                        199,
+                                                        200
+                                                      ],
+                                                      "type": "Identifier",
+                                                      "typeAnnotation": null
+                                                    },
+                                                    "consequent": {
+                                                      "alternate": {
+                                                        "loc": {
+                                                          "end": {
+                                                            "column": 195,
+                                                            "line": 1
+                                                          },
+                                                          "source": null,
+                                                          "start": {
+                                                            "column": 194,
+                                                            "line": 1
+                                                          }
+                                                        },
+                                                        "name": "c",
+                                                        "optional": false,
+                                                        "range": [
+                                                          194,
+                                                          195
+                                                        ],
+                                                        "type": "Identifier",
+                                                        "typeAnnotation": null
+                                                      },
+                                                      "consequent": {
+                                                        "alternate": {
+                                                          "loc": {
+                                                            "end": {
+                                                              "column": 190,
+                                                              "line": 1
+                                                            },
+                                                            "source": null,
+                                                            "start": {
+                                                              "column": 189,
+                                                              "line": 1
+                                                            }
+                                                          },
+                                                          "name": "c",
+                                                          "optional": false,
+                                                          "range": [
+                                                            189,
+                                                            190
+                                                          ],
+                                                          "type": "Identifier",
+                                                          "typeAnnotation": null
+                                                        },
+                                                        "consequent": {
+                                                          "alternate": {
+                                                            "loc": {
+                                                              "end": {
+                                                                "column": 185,
+                                                                "line": 1
+                                                              },
+                                                              "source": null,
+                                                              "start": {
+                                                                "column": 184,
+                                                                "line": 1
+                                                              }
+                                                            },
+                                                            "name": "c",
+                                                            "optional": false,
+                                                            "range": [
+                                                              184,
+                                                              185
+                                                            ],
+                                                            "type": "Identifier",
+                                                            "typeAnnotation": null
+                                                          },
+                                                          "consequent": {
+                                                            "alternate": {
+                                                              "loc": {
+                                                                "end": {
+                                                                  "column": 180,
+                                                                  "line": 1
+                                                                },
+                                                                "source": null,
+                                                                "start": {
+                                                                  "column": 179,
+                                                                  "line": 1
+                                                                }
+                                                              },
+                                                              "name": "c",
+                                                              "optional": false,
+                                                              "range": [
+                                                                179,
+                                                                180
+                                                              ],
+                                                              "type": "Identifier",
+                                                              "typeAnnotation": null
+                                                            },
+                                                            "consequent": {
+                                                              "alternate": {
+                                                                "loc": {
+                                                                  "end": {
+                                                                    "column": 175,
+                                                                    "line": 1
+                                                                  },
+                                                                  "source": null,
+                                                                  "start": {
+                                                                    "column": 174,
+                                                                    "line": 1
+                                                                  }
+                                                                },
+                                                                "name": "c",
+                                                                "optional": false,
+                                                                "range": [
+                                                                  174,
+                                                                  175
+                                                                ],
+                                                                "type": "Identifier",
+                                                                "typeAnnotation": null
+                                                              },
+                                                              "consequent": {
+                                                                "alternate": {
+                                                                  "loc": {
+                                                                    "end": {
+                                                                      "column": 170,
+                                                                      "line": 1
+                                                                    },
+                                                                    "source": null,
+                                                                    "start": {
+                                                                      "column": 169,
+                                                                      "line": 1
+                                                                    }
+                                                                  },
+                                                                  "name": "c",
+                                                                  "optional": false,
+                                                                  "range": [
+                                                                    169,
+                                                                    170
+                                                                  ],
+                                                                  "type": "Identifier",
+                                                                  "typeAnnotation": null
+                                                                },
+                                                                "consequent": {
+                                                                  "alternate": {
+                                                                    "loc": {
+                                                                      "end": {
+                                                                        "column": 165,
+                                                                        "line": 1
+                                                                      },
+                                                                      "source": null,
+                                                                      "start": {
+                                                                        "column": 164,
+                                                                        "line": 1
+                                                                      }
+                                                                    },
+                                                                    "name": "c",
+                                                                    "optional": false,
+                                                                    "range": [
+                                                                      164,
+                                                                      165
+                                                                    ],
+                                                                    "type": "Identifier",
+                                                                    "typeAnnotation": null
+                                                                  },
+                                                                  "consequent": {
+                                                                    "alternate": {
+                                                                      "loc": {
+                                                                        "end": {
+                                                                          "column": 160,
+                                                                          "line": 1
+                                                                        },
+                                                                        "source": null,
+                                                                        "start": {
+                                                                          "column": 159,
+                                                                          "line": 1
+                                                                        }
+                                                                      },
+                                                                      "name": "c",
+                                                                      "optional": false,
+                                                                      "range": [
+                                                                        159,
+                                                                        160
+                                                                      ],
+                                                                      "type": "Identifier",
+                                                                      "typeAnnotation": null
+                                                                    },
+                                                                    "consequent": {
+                                                                      "loc": {
+                                                                        "end": {
+                                                                          "column": 155,
+                                                                          "line": 1
+                                                                        },
+                                                                        "source": null,
+                                                                        "start": {
+                                                                          "column": 154,
+                                                                          "line": 1
+                                                                        }
+                                                                      },
+                                                                      "name": "b",
+                                                                      "optional": false,
+                                                                      "range": [
+                                                                        154,
+                                                                        155
+                                                                      ],
+                                                                      "type": "Identifier",
+                                                                      "typeAnnotation": null
+                                                                    },
+                                                                    "loc": {
+                                                                      "end": {
+                                                                        "column": 160,
+                                                                        "line": 1
+                                                                      },
+                                                                      "source": null,
+                                                                      "start": {
+                                                                        "column": 149,
+                                                                        "line": 1
+                                                                      }
+                                                                    },
+                                                                    "range": [
+                                                                      149,
+                                                                      160
+                                                                    ],
+                                                                    "test": {
+                                                                      "loc": {
+                                                                        "end": {
+                                                                          "column": 150,
+                                                                          "line": 1
+                                                                        },
+                                                                        "source": null,
+                                                                        "start": {
+                                                                          "column": 149,
+                                                                          "line": 1
+                                                                        }
+                                                                      },
+                                                                      "name": "a",
+                                                                      "optional": false,
+                                                                      "range": [
+                                                                        149,
+                                                                        150
+                                                                      ],
+                                                                      "type": "Identifier",
+                                                                      "typeAnnotation": null
+                                                                    },
+                                                                    "type": "ConditionalExpression"
+                                                                  },
+                                                                  "loc": {
+                                                                    "end": {
+                                                                      "column": 165,
+                                                                      "line": 1
+                                                                    },
+                                                                    "source": null,
+                                                                    "start": {
+                                                                      "column": 144,
+                                                                      "line": 1
+                                                                    }
+                                                                  },
+                                                                  "range": [
+                                                                    144,
+                                                                    165
+                                                                  ],
+                                                                  "test": {
+                                                                    "loc": {
+                                                                      "end": {
+                                                                        "column": 145,
+                                                                        "line": 1
+                                                                      },
+                                                                      "source": null,
+                                                                      "start": {
+                                                                        "column": 144,
+                                                                        "line": 1
+                                                                      }
+                                                                    },
+                                                                    "name": "a",
+                                                                    "optional": false,
+                                                                    "range": [
+                                                                      144,
+                                                                      145
+                                                                    ],
+                                                                    "type": "Identifier",
+                                                                    "typeAnnotation": null
+                                                                  },
+                                                                  "type": "ConditionalExpression"
+                                                                },
+                                                                "loc": {
+                                                                  "end": {
+                                                                    "column": 170,
+                                                                    "line": 1
+                                                                  },
+                                                                  "source": null,
+                                                                  "start": {
+                                                                    "column": 139,
+                                                                    "line": 1
+                                                                  }
+                                                                },
+                                                                "range": [
+                                                                  139,
+                                                                  170
+                                                                ],
+                                                                "test": {
+                                                                  "loc": {
+                                                                    "end": {
+                                                                      "column": 140,
+                                                                      "line": 1
+                                                                    },
+                                                                    "source": null,
+                                                                    "start": {
+                                                                      "column": 139,
+                                                                      "line": 1
+                                                                    }
+                                                                  },
+                                                                  "name": "a",
+                                                                  "optional": false,
+                                                                  "range": [
+                                                                    139,
+                                                                    140
+                                                                  ],
+                                                                  "type": "Identifier",
+                                                                  "typeAnnotation": null
+                                                                },
+                                                                "type": "ConditionalExpression"
+                                                              },
+                                                              "loc": {
+                                                                "end": {
+                                                                  "column": 175,
+                                                                  "line": 1
+                                                                },
+                                                                "source": null,
+                                                                "start": {
+                                                                  "column": 134,
+                                                                  "line": 1
+                                                                }
+                                                              },
+                                                              "range": [
+                                                                134,
+                                                                175
+                                                              ],
+                                                              "test": {
+                                                                "loc": {
+                                                                  "end": {
+                                                                    "column": 135,
+                                                                    "line": 1
+                                                                  },
+                                                                  "source": null,
+                                                                  "start": {
+                                                                    "column": 134,
+                                                                    "line": 1
+                                                                  }
+                                                                },
+                                                                "name": "a",
+                                                                "optional": false,
+                                                                "range": [
+                                                                  134,
+                                                                  135
+                                                                ],
+                                                                "type": "Identifier",
+                                                                "typeAnnotation": null
+                                                              },
+                                                              "type": "ConditionalExpression"
+                                                            },
+                                                            "loc": {
+                                                              "end": {
+                                                                "column": 180,
+                                                                "line": 1
+                                                              },
+                                                              "source": null,
+                                                              "start": {
+                                                                "column": 129,
+                                                                "line": 1
+                                                              }
+                                                            },
+                                                            "range": [
+                                                              129,
+                                                              180
+                                                            ],
+                                                            "test": {
+                                                              "loc": {
+                                                                "end": {
+                                                                  "column": 130,
+                                                                  "line": 1
+                                                                },
+                                                                "source": null,
+                                                                "start": {
+                                                                  "column": 129,
+                                                                  "line": 1
+                                                                }
+                                                              },
+                                                              "name": "a",
+                                                              "optional": false,
+                                                              "range": [
+                                                                129,
+                                                                130
+                                                              ],
+                                                              "type": "Identifier",
+                                                              "typeAnnotation": null
+                                                            },
+                                                            "type": "ConditionalExpression"
+                                                          },
+                                                          "loc": {
+                                                            "end": {
+                                                              "column": 185,
+                                                              "line": 1
+                                                            },
+                                                            "source": null,
+                                                            "start": {
+                                                              "column": 124,
+                                                              "line": 1
+                                                            }
+                                                          },
+                                                          "range": [
+                                                            124,
+                                                            185
+                                                          ],
+                                                          "test": {
+                                                            "loc": {
+                                                              "end": {
+                                                                "column": 125,
+                                                                "line": 1
+                                                              },
+                                                              "source": null,
+                                                              "start": {
+                                                                "column": 124,
+                                                                "line": 1
+                                                              }
+                                                            },
+                                                            "name": "a",
+                                                            "optional": false,
+                                                            "range": [
+                                                              124,
+                                                              125
+                                                            ],
+                                                            "type": "Identifier",
+                                                            "typeAnnotation": null
+                                                          },
+                                                          "type": "ConditionalExpression"
+                                                        },
+                                                        "loc": {
+                                                          "end": {
+                                                            "column": 190,
+                                                            "line": 1
+                                                          },
+                                                          "source": null,
+                                                          "start": {
+                                                            "column": 119,
+                                                            "line": 1
+                                                          }
+                                                        },
+                                                        "range": [
+                                                          119,
+                                                          190
+                                                        ],
+                                                        "test": {
+                                                          "loc": {
+                                                            "end": {
+                                                              "column": 120,
+                                                              "line": 1
+                                                            },
+                                                            "source": null,
+                                                            "start": {
+                                                              "column": 119,
+                                                              "line": 1
+                                                            }
+                                                          },
+                                                          "name": "a",
+                                                          "optional": false,
+                                                          "range": [
+                                                            119,
+                                                            120
+                                                          ],
+                                                          "type": "Identifier",
+                                                          "typeAnnotation": null
+                                                        },
+                                                        "type": "ConditionalExpression"
+                                                      },
+                                                      "loc": {
+                                                        "end": {
+                                                          "column": 195,
+                                                          "line": 1
+                                                        },
+                                                        "source": null,
+                                                        "start": {
+                                                          "column": 114,
+                                                          "line": 1
+                                                        }
+                                                      },
+                                                      "range": [
+                                                        114,
+                                                        195
+                                                      ],
+                                                      "test": {
+                                                        "loc": {
+                                                          "end": {
+                                                            "column": 115,
+                                                            "line": 1
+                                                          },
+                                                          "source": null,
+                                                          "start": {
+                                                            "column": 114,
+                                                            "line": 1
+                                                          }
+                                                        },
+                                                        "name": "a",
+                                                        "optional": false,
+                                                        "range": [
+                                                          114,
+                                                          115
+                                                        ],
+                                                        "type": "Identifier",
+                                                        "typeAnnotation": null
+                                                      },
+                                                      "type": "ConditionalExpression"
+                                                    },
+                                                    "loc": {
+                                                      "end": {
+                                                        "column": 200,
+                                                        "line": 1
+                                                      },
+                                                      "source": null,
+                                                      "start": {
+                                                        "column": 109,
+                                                        "line": 1
+                                                      }
+                                                    },
+                                                    "range": [
+                                                      109,
+                                                      200
+                                                    ],
+                                                    "test": {
+                                                      "loc": {
+                                                        "end": {
+                                                          "column": 110,
+                                                          "line": 1
+                                                        },
+                                                        "source": null,
+                                                        "start": {
+                                                          "column": 109,
+                                                          "line": 1
+                                                        }
+                                                      },
+                                                      "name": "a",
+                                                      "optional": false,
+                                                      "range": [
+                                                        109,
+                                                        110
+                                                      ],
+                                                      "type": "Identifier",
+                                                      "typeAnnotation": null
+                                                    },
+                                                    "type": "ConditionalExpression"
+                                                  },
+                                                  "loc": {
+                                                    "end": {
+                                                      "column": 205,
+                                                      "line": 1
+                                                    },
+                                                    "source": null,
+                                                    "start": {
+                                                      "column": 104,
+                                                      "line": 1
+                                                    }
+                                                  },
+                                                  "range": [
+                                                    104,
+                                                    205
+                                                  ],
+                                                  "test": {
+                                                    "loc": {
+                                                      "end": {
+                                                        "column": 105,
+                                                        "line": 1
+                                                      },
+                                                      "source": null,
+                                                      "start": {
+                                                        "column": 104,
+                                                        "line": 1
+                                                      }
+                                                    },
+                                                    "name": "a",
+                                                    "optional": false,
+                                                    "range": [
+                                                      104,
+                                                      105
+                                                    ],
+                                                    "type": "Identifier",
+                                                    "typeAnnotation": null
+                                                  },
+                                                  "type": "ConditionalExpression"
+                                                },
+                                                "loc": {
+                                                  "end": {
+                                                    "column": 210,
+                                                    "line": 1
+                                                  },
+                                                  "source": null,
+                                                  "start": {
+                                                    "column": 99,
+                                                    "line": 1
+                                                  }
+                                                },
+                                                "range": [
+                                                  99,
+                                                  210
+                                                ],
+                                                "test": {
+                                                  "loc": {
+                                                    "end": {
+                                                      "column": 100,
+                                                      "line": 1
+                                                    },
+                                                    "source": null,
+                                                    "start": {
+                                                      "column": 99,
+                                                      "line": 1
+                                                    }
+                                                  },
+                                                  "name": "a",
+                                                  "optional": false,
+                                                  "range": [
+                                                    99,
+                                                    100
+                                                  ],
+                                                  "type": "Identifier",
+                                                  "typeAnnotation": null
+                                                },
+                                                "type": "ConditionalExpression"
+                                              },
+                                              "loc": {
+                                                "end": {
+                                                  "column": 215,
+                                                  "line": 1
+                                                },
+                                                "source": null,
+                                                "start": {
+                                                  "column": 94,
+                                                  "line": 1
+                                                }
+                                              },
+                                              "range": [
+                                                94,
+                                                215
+                                              ],
+                                              "test": {
+                                                "loc": {
+                                                  "end": {
+                                                    "column": 95,
+                                                    "line": 1
+                                                  },
+                                                  "source": null,
+                                                  "start": {
+                                                    "column": 94,
+                                                    "line": 1
+                                                  }
+                                                },
+                                                "name": "a",
+                                                "optional": false,
+                                                "range": [
+                                                  94,
+                                                  95
+                                                ],
+                                                "type": "Identifier",
+                                                "typeAnnotation": null
+                                              },
+                                              "type": "ConditionalExpression"
+                                            },
+                                            "loc": {
+                                              "end": {
+                                                "column": 220,
+                                                "line": 1
+                                              },
+                                              "source": null,
+                                              "start": {
+                                                "column": 89,
+                                                "line": 1
+                                              }
+                                            },
+                                            "range": [
+                                              89,
+                                              220
+                                            ],
+                                            "test": {
+                                              "loc": {
+                                                "end": {
+                                                  "column": 90,
+                                                  "line": 1
+                                                },
+                                                "source": null,
+                                                "start": {
+                                                  "column": 89,
+                                                  "line": 1
+                                                }
+                                              },
+                                              "name": "a",
+                                              "optional": false,
+                                              "range": [
+                                                89,
+                                                90
+                                              ],
+                                              "type": "Identifier",
+                                              "typeAnnotation": null
+                                            },
+                                            "type": "ConditionalExpression"
+                                          },
+                                          "loc": {
+                                            "end": {
+                                              "column": 225,
+                                              "line": 1
+                                            },
+                                            "source": null,
+                                            "start": {
+                                              "column": 84,
+                                              "line": 1
+                                            }
+                                          },
+                                          "range": [
+                                            84,
+                                            225
+                                          ],
+                                          "test": {
+                                            "loc": {
+                                              "end": {
+                                                "column": 85,
+                                                "line": 1
+                                              },
+                                              "source": null,
+                                              "start": {
+                                                "column": 84,
+                                                "line": 1
+                                              }
+                                            },
+                                            "name": "a",
+                                            "optional": false,
+                                            "range": [
+                                              84,
+                                              85
+                                            ],
+                                            "type": "Identifier",
+                                            "typeAnnotation": null
+                                          },
+                                          "type": "ConditionalExpression"
+                                        },
+                                        "loc": {
+                                          "end": {
+                                            "column": 230,
+                                            "line": 1
+                                          },
+                                          "source": null,
+                                          "start": {
+                                            "column": 79,
+                                            "line": 1
+                                          }
+                                        },
+                                        "range": [
+                                          79,
+                                          230
+                                        ],
+                                        "test": {
+                                          "loc": {
+                                            "end": {
+                                              "column": 80,
+                                              "line": 1
+                                            },
+                                            "source": null,
+                                            "start": {
+                                              "column": 79,
+                                              "line": 1
+                                            }
+                                          },
+                                          "name": "a",
+                                          "optional": false,
+                                          "range": [
+                                            79,
+                                            80
+                                          ],
+                                          "type": "Identifier",
+                                          "typeAnnotation": null
+                                        },
+                                        "type": "ConditionalExpression"
+                                      },
+                                      "loc": {
+                                        "end": {
+                                          "column": 235,
+                                          "line": 1
+                                        },
+                                        "source": null,
+                                        "start": {
+                                          "column": 74,
+                                          "line": 1
+                                        }
+                                      },
+                                      "range": [
+                                        74,
+                                        235
+                                      ],
+                                      "test": {
+                                        "loc": {
+                                          "end": {
+                                            "column": 75,
+                                            "line": 1
+                                          },
+                                          "source": null,
+                                          "start": {
+                                            "column": 74,
+                                            "line": 1
+                                          }
+                                        },
+                                        "name": "a",
+                                        "optional": false,
+                                        "range": [
+                                          74,
+                                          75
+                                        ],
+                                        "type": "Identifier",
+                                        "typeAnnotation": null
+                                      },
+                                      "type": "ConditionalExpression"
+                                    },
+                                    "loc": {
+                                      "end": {
+                                        "column": 240,
+                                        "line": 1
+                                      },
+                                      "source": null,
+                                      "start": {
+                                        "column": 69,
+                                        "line": 1
+                                      }
+                                    },
+                                    "range": [
+                                      69,
+                                      240
+                                    ],
+                                    "test": {
+                                      "loc": {
+                                        "end": {
+                                          "column": 70,
+                                          "line": 1
+                                        },
+                                        "source": null,
+                                        "start": {
+                                          "column": 69,
+                                          "line": 1
+                                        }
+                                      },
+                                      "name": "a",
+                                      "optional": false,
+                                      "range": [
+                                        69,
+                                        70
+                                      ],
+                                      "type": "Identifier",
+                                      "typeAnnotation": null
+                                    },
+                                    "type": "ConditionalExpression"
+                                  },
+                                  "loc": {
+                                    "end": {
+                                      "column": 245,
+                                      "line": 1
+                                    },
+                                    "source": null,
+                                    "start": {
+                                      "column": 64,
+                                      "line": 1
+                                    }
+                                  },
+                                  "range": [
+                                    64,
+                                    245
+                                  ],
+                                  "test": {
+                                    "loc": {
+                                      "end": {
+                                        "column": 65,
+                                        "line": 1
+                                      },
+                                      "source": null,
+                                      "start": {
+                                        "column": 64,
+                                        "line": 1
+                                      }
+                                    },
+                                    "name": "a",
+                                    "optional": false,
+                                    "range": [
+                                      64,
+                                      65
+                                    ],
+                                    "type": "Identifier",
+                                    "typeAnnotation": null
+                                  },
+                                  "type": "ConditionalExpression"
+                                },
+                                "loc": {
+                                  "end": {
+                                    "column": 250,
+                                    "line": 1
+                                  },
+                                  "source": null,
+                                  "start": {
+                                    "column": 59,
+                                    "line": 1
+                                  }
+                                },
+                                "range": [
+                                  59,
+                                  250
+                                ],
+                                "test": {
+                                  "loc": {
+                                    "end": {
+                                      "column": 60,
+                                      "line": 1
+                                    },
+                                    "source": null,
+                                    "start": {
+                                      "column": 59,
+                                      "line": 1
+                                    }
+                                  },
+                                  "name": "a",
+                                  "optional": false,
+                                  "range": [
+                                    59,
+                                    60
+                                  ],
+                                  "type": "Identifier",
+                                  "typeAnnotation": null
+                                },
+                                "type": "ConditionalExpression"
+                              },
+                              "loc": {
+                                "end": {
+                                  "column": 255,
+                                  "line": 1
+                                },
+                                "source": null,
+                                "start": {
+                                  "column": 54,
+                                  "line": 1
+                                }
+                              },
+                              "range": [
+                                54,
+                                255
+                              ],
+                              "test": {
+                                "loc": {
+                                  "end": {
+                                    "column": 55,
+                                    "line": 1
+                                  },
+                                  "source": null,
+                                  "start": {
+                                    "column": 54,
+                                    "line": 1
+                                  }
+                                },
+                                "name": "a",
+                                "optional": false,
+                                "range": [
+                                  54,
+                                  55
+                                ],
+                                "type": "Identifier",
+                                "typeAnnotation": null
+                              },
+                              "type": "ConditionalExpression"
+                            },
+                            "loc": {
+                              "end": {
+                                "column": 260,
+                                "line": 1
+                              },
+                              "source": null,
+                              "start": {
+                                "column": 49,
+                                "line": 1
+                              }
+                            },
+                            "range": [
+                              49,
+                              260
+                            ],
+                            "test": {
+                              "loc": {
+                                "end": {
+                                  "column": 50,
+                                  "line": 1
+                                },
+                                "source": null,
+                                "start": {
+                                  "column": 49,
+                                  "line": 1
+                                }
+                              },
+                              "name": "a",
+                              "optional": false,
+                              "range": [
+                                49,
+                                50
+                              ],
+                              "type": "Identifier",
+                              "typeAnnotation": null
+                            },
+                            "type": "ConditionalExpression"
+                          },
+                          "loc": {
+                            "end": {
+                              "column": 265,
+                              "line": 1
+                            },
+                            "source": null,
+                            "start": {
+                              "column": 44,
+                              "line": 1
+                            }
+                          },
+                          "range": [
+                            44,
+                            265
+                          ],
+                          "test": {
+                            "loc": {
+                              "end": {
+                                "column": 45,
+                                "line": 1
+                              },
+                              "source": null,
+                              "start": {
+                                "column": 44,
+                                "line": 1
+                              }
+                            },
+                            "name": "a",
+                            "optional": false,
+                            "range": [
+                              44,
+                              45
+                            ],
+                            "type": "Identifier",
+                            "typeAnnotation": null
+                          },
+                          "type": "ConditionalExpression"
+                        },
+                        "loc": {
+                          "end": {
+                            "column": 270,
+                            "line": 1
+                          },
+                          "source": null,
+                          "start": {
+                            "column": 39,
+                            "line": 1
+                          }
+                        },
+                        "range": [
+                          39,
+                          270
+                        ],
+                        "test": {
+                          "loc": {
+                            "end": {
+                              "column": 40,
+                              "line": 1
+                            },
+                            "source": null,
+                            "start": {
+                              "column": 39,
+                              "line": 1
+                            }
+                          },
+                          "name": "a",
+                          "optional": false,
+                          "range": [
+                            39,
+                            40
+                          ],
+                          "type": "Identifier",
+                          "typeAnnotation": null
+                        },
+                        "type": "ConditionalExpression"
+                      },
+                      "loc": {
+                        "end": {
+                          "column": 275,
+                          "line": 1
+                        },
+                        "source": null,
+                        "start": {
+                          "column": 34,
+                          "line": 1
+                        }
+                      },
+                      "range": [
+                        34,
+                        275
+                      ],
+                      "test": {
+                        "loc": {
+                          "end": {
+                            "column": 35,
+                            "line": 1
+                          },
+                          "source": null,
+                          "start": {
+                            "column": 34,
+                            "line": 1
+                          }
+                        },
+                        "name": "a",
+                        "optional": false,
+                        "range": [
+                          34,
+                          35
+                        ],
+                        "type": "Identifier",
+                        "typeAnnotation": null
+                      },
+                      "type": "ConditionalExpression"
+                    },
+                    "loc": {
+                      "end": {
+                        "column": 280,
+                        "line": 1
+                      },
+                      "source": null,
+                      "start": {
+                        "column": 29,
+                        "line": 1
+                      }
+                    },
+                    "range": [
+                      29,
+                      280
+                    ],
+                    "test": {
+                      "loc": {
+                        "end": {
+                          "column": 30,
+                          "line": 1
+                        },
+                        "source": null,
+                        "start": {
+                          "column": 29,
+                          "line": 1
+                        }
+                      },
+                      "name": "a",
+                      "optional": false,
+                      "range": [
+                        29,
+                        30
+                      ],
+                      "type": "Identifier",
+                      "typeAnnotation": null
+                    },
+                    "type": "ConditionalExpression"
+                  },
+                  "loc": {
+                    "end": {
+                      "column": 285,
+                      "line": 1
+                    },
+                    "source": null,
+                    "start": {
+                      "column": 24,
+                      "line": 1
+                    }
+                  },
+                  "range": [
+                    24,
+                    285
+                  ],
+                  "test": {
+                    "loc": {
+                      "end": {
+                        "column": 25,
+                        "line": 1
+                      },
+                      "source": null,
+                      "start": {
+                        "column": 24,
+                        "line": 1
+                      }
+                    },
+                    "name": "a",
+                    "optional": false,
+                    "range": [
+                      24,
+                      25
+                    ],
+                    "type": "Identifier",
+                    "typeAnnotation": null
+                  },
+                  "type": "ConditionalExpression"
+                },
+                "loc": {
+                  "end": {
+                    "column": 290,
+                    "line": 1
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 19,
+                    "line": 1
+                  }
+                },
+                "range": [
+                  19,
+                  290
+                ],
+                "test": {
+                  "loc": {
+                    "end": {
+                      "column": 20,
+                      "line": 1
+                    },
+                    "source": null,
+                    "start": {
+                      "column": 19,
+                      "line": 1
+                    }
+                  },
+                  "name": "a",
+                  "optional": false,
+                  "range": [
+                    19,
+                    20
+                  ],
+                  "type": "Identifier",
+                  "typeAnnotation": null
+                },
+                "type": "ConditionalExpression"
+              },
+              "loc": {
+                "end": {
+                  "column": 295,
+                  "line": 1
+                },
+                "source": null,
+                "start": {
+                  "column": 14,
+                  "line": 1
+                }
+              },
+              "range": [
+                14,
+                295
+              ],
+              "test": {
+                "loc": {
+                  "end": {
+                    "column": 15,
+                    "line": 1
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 14,
+                    "line": 1
+                  }
+                },
+                "name": "a",
+                "optional": false,
+                "range": [
+                  14,
+                  15
+                ],
+                "type": "Identifier",
+                "typeAnnotation": null
+              },
+              "type": "ConditionalExpression"
+            },
+            "loc": {
+              "end": {
+                "column": 300,
+                "line": 1
+              },
+              "source": null,
+              "start": {
+                "column": 9,
+                "line": 1
+              }
+            },
+            "range": [
+              9,
+              300
+            ],
+            "test": {
+              "loc": {
+                "end": {
+                  "column": 10,
+                  "line": 1
+                },
+                "source": null,
+                "start": {
+                  "column": 9,
+                  "line": 1
+                }
+              },
+              "name": "a",
+              "optional": false,
+              "range": [
+                9,
+                10
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "type": "ConditionalExpression"
+          },
+          "loc": {
+            "end": {
+              "column": 305,
+              "line": 1
+            },
+            "source": null,
+            "start": {
+              "column": 4,
+              "line": 1
+            }
+          },
+          "range": [
+            4,
+            305
+          ],
+          "test": {
+            "loc": {
+              "end": {
+                "column": 5,
+                "line": 1
+              },
+              "source": null,
+              "start": {
+                "column": 4,
+                "line": 1
+              }
+            },
+            "name": "a",
+            "optional": false,
+            "range": [
+              4,
+              5
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          },
+          "type": "ConditionalExpression"
+        },
+        "type": "AssignmentExpression"
+      },
+      "loc": {
+        "end": {
+          "column": 306,
+          "line": 1
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
+      "range": [
+        0,
+        306
+      ],
+      "type": "ExpressionStatement"
+    }
+  ],
+  "comments": [],
+  "loc": {
+    "end": {
+      "column": 0,
+      "line": 2
+    },
+    "source": null,
+    "start": {
+      "column": 0,
+      "line": 1
+    }
+  },
+  "range": [
+    0,
+    307
+  ],
+  "type": "Program"
+}
