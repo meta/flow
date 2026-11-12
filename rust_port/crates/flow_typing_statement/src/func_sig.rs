@@ -534,7 +534,13 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
                     flow_typing_tvar::mk(cx, reason.dupe().replace_desc(None))
                 }
                 AnnotatedOrInferred::Inferred(_) => {
-                    type_::void::make(reason.dupe().replace_desc(reason::VirtualReasonDesc::RVoid))
+                    let reason = reason.dupe().replace_desc(reason::VirtualReasonDesc::RVoid);
+                    // Under `ts_void`, as the `TNext = void` of the `Iterator` library types.
+                    if cx.ts_void() {
+                        type_::ts_void::why(reason)
+                    } else {
+                        type_::void::make(reason)
+                    }
                 }
             };
             let return_targ = flow_typing_tvar::mk(cx, reason.dupe());

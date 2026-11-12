@@ -203,6 +203,38 @@ References:
                              ^^^^ [2]
 
 
+Error ----------------------------------------------------------------------------------------------- generators.js:8:43
+
+Cannot assign `g()` to `c` because: [incompatible-type]
+ - in property `@@iterator`: `Iterator<number, undefined, void>` [1] is incompatible with
+   `Iterator<number, void, number>` [2]
+    - in the return value > type argument `Next` [3]: `void` [4] is incompatible with `number` [5]
+
+   generators.js:8:43
+    8| const c: Iterator<number, void, number> = g(); // ERROR
+                                                 ^^^
+
+References:
+   <BUILTINS>/prelude.js:68:17
+   68|   @@iterator(): Iterator<Yield,Return,Next>;
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/prelude.js:57:17
+   57|   @@iterator(): Iterator<Yield,Return,Next>;
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/prelude.js:56:49
+   56| interface Iterator<out Yield,out Return=void,in Next=void> {
+                                                       ^^^^ [3]
+   generators.js:3:15
+                     v
+    3| function* g() {
+    4|   yield 1;
+    5| }
+       ^ [4]
+   generators.js:8:33
+    8| const c: Iterator<number, void, number> = g(); // ERROR
+                                       ^^^^^^ [5]
+
+
 Error ------------------------------------------------------------------------------------------- inferred_return.js:4:1
 
 Cannot cast `noReturn()` to `undefined` because `void` [1] is incompatible with `undefined` [2]. [incompatible-type]
@@ -514,4 +546,4 @@ References:
 
 
 
-Found 32 errors
+Found 33 errors
