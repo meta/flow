@@ -4650,6 +4650,14 @@ impl<'e> Walker<'e> {
         };
         let TypeDestructorTInner(use_op, reason, d) = defer_use_t.deref();
         if !self.mentions(cx, u) {
+            // The config of a component with only a rest parameter is the type of the rest
+            // parameter, which `l` meets as it is: evaluated, an intersection with a type
+            // parameter in it would become a generic, which says nothing about the markers.
+            if let Destructor::ReactCheckComponentConfig { props } = d.deref()
+                && props.is_empty()
+            {
+                return self.walk(cx, l, type_);
+            }
             let Some(result) = self.eval_sandboxed(cx, use_op, reason, type_, d, id)? else {
                 return Ok(());
             };
