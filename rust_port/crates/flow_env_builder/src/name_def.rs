@@ -6868,6 +6868,15 @@ impl<'a, 'ast> AstVisitor<'ast, ALoc, ALoc, &'ast ALoc, EnvInvariant<ALoc>> for 
         Ok(())
     }
 
+    fn ts_satisfies(
+        &mut self,
+        _loc: &ALoc,
+        expr: &ast::expression::TSSatisfies<ALoc, ALoc>,
+    ) -> Result<(), EnvInvariant<ALoc>> {
+        self.cast(&expr.annot, &expr.expression)?;
+        Ok(())
+    }
+
     fn unary_expression(
         &mut self,
         loc: &ALoc,

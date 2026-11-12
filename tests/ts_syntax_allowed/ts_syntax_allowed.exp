@@ -1084,7 +1084,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- satisfies.js:4:1
 
-Cannot cast `"hello"` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `"hello"` to `number` because `"hello"` [1] is incompatible with `number` [2]. [incompatible-type]
 
    satisfies.js:4:1
    4| "hello" satisfies number; // ERROR: string is not a number — the subtype check still runs

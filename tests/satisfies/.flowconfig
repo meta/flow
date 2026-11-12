@@ -1,3 +1,4 @@
 [options]
 all=true
+builtin_lib=default
 experimental.tslib_syntax=true

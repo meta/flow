@@ -1,6 +1,6 @@
 Error -------------------------------------------------------------------------------------------------- boundary.ts:5:1
 
-Cannot cast `3` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `3` to `string` because `3` [1] is incompatible with `string` [2]. [incompatible-type]
 
    boundary.ts:5:1
    5| 3 satisfies string; // ERROR: not suppressed
@@ -14,7 +14,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- boundary.ts:8:1
 
-Cannot cast `3` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `3` to `string` because `3` [1] is incompatible with `string` [2]. [incompatible-type]
 
    boundary.ts:8:1
    8| 3 satisfies string; // ERROR: not suppressed
@@ -28,7 +28,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- boundary.ts:11:1
 
-Cannot cast `3` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `3` to `string` because `3` [1] is incompatible with `string` [2]. [incompatible-type]
 
    boundary.ts:11:1
    11| 3 satisfies string; // ERROR: not suppressed

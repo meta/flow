@@ -1,3 +1,167 @@
+Error ---------------------------------------------------------------------------------------- contextual_typing.js:5:11
+
+Cannot call `handler` with `123` bound to `text` because `123` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   contextual_typing.js:5:11
+   5|   handler(123); // ERROR
+                ^^^ [1]
+
+References:
+   contextual_typing.js:3:67
+   3|   const handler = ((text) => text.toUpperCase()) satisfies (text: string) => string;
+                                                                        ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------- contextual_typing.js:26:11
+
+Cannot call `handler` because in array element: `123` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   contextual_typing.js:26:11
+   26|   handler(123); // ERROR
+                 ^^^ [1]
+
+References:
+   contextual_typing.js:23:21
+   23|     ...texts: Array<string>
+                           ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------- contextual_typing.js:35:12
+
+Cannot get `handlers.missing` because property `missing` is missing in object literal [1]. [prop-missing]
+
+   contextual_typing.js:35:12
+   35|   handlers.missing; // ERROR: the indexer target does not add unknown keys
+                  ^^^^^^^
+
+References:
+   contextual_typing.js:31:20
+                          v
+   31|   const handlers = {
+   32|     upper: (text) => text.toUpperCase(),
+   33|   } satisfies {readonly [string]: (text: string) => string};
+         ^ [1]
+
+
+Error --------------------------------------------------------------------------------------- contextual_typing.js:65:11
+
+Cannot call `handler` with `123` bound to `text` because `123` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   contextual_typing.js:65:11
+   65|   handler(123); // ERROR
+                 ^^^ [1]
+
+References:
+   contextual_typing.js:63:23
+   63|   }) satisfies (text: string) => number;
+                             ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------- contextual_typing.js:68:11
+
+Cannot cast function to `(text: string) => string` because in the first parameter: `number` [1] is incompatible with
+`string` [2]. [incompatible-type]
+
+   contextual_typing.js:68:11
+   68|   ((text: number) => text.toString()) satisfies (text: string) => string; // ERROR
+                 ^^^^^^ [1]
+
+References:
+   contextual_typing.js:68:56
+   68|   ((text: number) => text.toString()) satisfies (text: string) => string; // ERROR
+                                                              ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------- contextual_typing.js:73:19
+
+Cannot call `text.toFixed` because property `toFixed` (did you mean `fixed`?) is missing in `String` [1]. [prop-missing]
+
+   contextual_typing.js:73:19
+   73|   ((text) => text.toFixed()) satisfies (text: string) => string; // ERROR
+                         ^^^^^^^
+
+References:
+   contextual_typing.js:73:47
+   73|   ((text) => text.toFixed()) satisfies (text: string) => string; // ERROR
+                                                     ^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------- contextual_typing.js:74:14
+
+Cannot cast function to `(text: string) => string` because in the return value: `number` [1] is incompatible with
+`string` [2]. [incompatible-type]
+
+   contextual_typing.js:74:14
+    74|   ((text) => text.length) satisfies (text: string) => string; // ERROR
+                     ^^^^^^^^^^^
+
+References:
+   <BUILTINS>/lib.es5.js:502:22
+   502|     readonly length: number;
+                             ^^^^^^ [1]
+   contextual_typing.js:74:55
+    74|   ((text) => text.length) satisfies (text: string) => string; // ERROR
+                                                              ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------- contextual_typing.js:82:3
+
+Cannot cast `value` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   contextual_typing.js:82:3
+   82|   value as number; // ERROR
+         ^^^^^
+
+References:
+   contextual_typing.js:80:34
+   80|   const value = make() satisfies string;
+                                        ^^^^^^ [1]
+   contextual_typing.js:82:12
+   82|   value as number; // ERROR
+                  ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------- contextual_typing.js:96:5
+
+An annotation on this parameter is required because Flow cannot infer its type from local context. [missing-local-annot]
+
+   96|   ((text) => text) satisfies unknown; // ERROR
+           ^^^^
+
+
+Error -------------------------------------------------------------------------------------- contextual_typing.js:104:16
+
+Cannot assign `false` to `value.flag` because `false` [1] is incompatible with `true` [2]. [incompatible-type]
+
+   contextual_typing.js:104:16
+   104|   value.flag = false; // ERROR
+                       ^^^^^ [1]
+
+References:
+   contextual_typing.js:101:24
+   101|   const value = {flag: true} satisfies {readonly flag: boolean};
+                               ^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------- contextual_typing.js:112:3
+
+Cannot cast `cast(...)` to `42` because `number` [1] is incompatible with `42` [2]. [incompatible-type]
+
+   contextual_typing.js:112:3
+   112|   cast('hello') as 42; // ERROR
+          ^^^^^^^^^^^^^
+
+References:
+   contextual_typing.js:110:56
+   110|   const cast = ((text): 42 => 42) as (text: string) => number;
+                                                               ^^^^^^ [1]
+   contextual_typing.js:112:20
+   112|   cast('hello') as 42; // ERROR
+                           ^^ [2]
+
+
 Error ------------------------------------------------------------------------------------------------ importer.js:11:14
 
 Cannot get `keyedNumbers.invalid` because property `invalid` is missing in object literal [1]. [prop-missing]
@@ -14,7 +178,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- satisfies.js:9:3
 
-Cannot cast `"hello"` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `"hello"` to `number` because `"hello"` [1] is incompatible with `number` [2]. [incompatible-type]
 
    satisfies.js:9:3
    9|   "hello" satisfies number; // ERROR: string is not a number
@@ -61,7 +225,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ satisfies.js:63:8
 
-Cannot cast object literal to `{readonly x: number}` because in property `x`: `string` [1] is incompatible with
+Cannot cast object literal to `{readonly x: number}` because in property `x`: `"not a number"` [1] is incompatible with
 `number` [2]. [incompatible-type]
 
    satisfies.js:63:8
@@ -105,7 +269,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- satisfies.js:140:3
 
-Cannot cast `1` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `1` to `empty` because `1` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    satisfies.js:140:3
    140|   1 satisfies empty; // ERROR
@@ -118,4 +282,4 @@ References:
 
 
 
-Found 8 errors
+Found 19 errors

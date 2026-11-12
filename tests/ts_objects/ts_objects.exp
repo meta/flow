@@ -705,7 +705,7 @@ References:
 Error ------------------------------------------------------------------------------------------ object_to_class.ts:19:2
 
 Cannot cast object literal to `Point` because object literal [1] is incompatible with `Point` [2]. For example,
-`string` [3] is incompatible with `number` [4]. [incompatible-type]
+`"two"` [3] is incompatible with `number` [4]. [incompatible-type]
 
    object_to_class.ts:19:2
    19| ({x: 1, y: "two"}) satisfies Point; // ERROR: string vs number
