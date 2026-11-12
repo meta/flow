@@ -1677,6 +1677,7 @@ The following TypeScript features have type-checking support implemented in Flow
 - Inline `import()` type expression - `type A = import('./m').A`.
 - `import X = require('foo')` and `export = X` - CommonJS-style import and export bindings.
 - `unique symbol` and support for symbol-keyed property accesses.
+- Definite assignment assertions - `let x!: T` and class fields `x!: T`, which tell Flow that something assigns the variable or field before it is read.
 
 ## Syntax convergence with TypeScript {#toc-convergence}
 
