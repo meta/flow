@@ -500,7 +500,7 @@ fn eval<'cx>(
 
 fn async_void_return<'cx>(cx: &mut Context<'cx>, loc: ALoc) -> Type {
     let reason = reason::mk_reason(None, loc.dupe());
-    let targs = vec![flow_typing_type::type_::void::at(loc)];
+    let targs = vec![type_::ts_void::annot_at(cx.ts_void(), loc)];
     flow_js_utils::lookup_builtin_typeapp(cx, reason, "Promise", targs)
 }
 

@@ -20204,6 +20204,30 @@ pub fn mk_component_sig<'a>(
 /// in Rust `Reconstruct` is `'static` and cannot capture `Context<'a>`.
 pub type DeferredTypeGuardCheck = flow_typing_loc_env::node_cache::DeferredTypeGuardCheck<Cx>;
 
+/// Whether the contextual return type of a function, whose missing return annotation is at
+/// `loc`, admits `undefined`. TypeScript then infers `undefined` rather than `void` for a
+/// function that returns no value.
+fn contextual_return_admits_undefined<'a>(
+    cx: &mut Context<'a>,
+    loc: &ALoc,
+    reason: &Reason,
+) -> Result<bool, JobError> {
+    let type_::LazyHintT(has_hint, lazy_hint) = type_env::get_hint(cx, loc.dupe());
+    if !has_hint {
+        return Ok(false);
+    }
+    let type_::HintEvalResult::HintAvailable(hint, _) = lazy_hint(cx, false, None, reason.dupe())?
+    else {
+        return Ok(false);
+    };
+    let ts = flow_js_utils::flow_js_result_to_job_error(FlowJs::all_possible_concrete_types(
+        cx, reason, &hint,
+    ))?;
+    Ok(ts.iter().any(
+        |t| matches!(t.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::VoidT)),
+    ))
+}
+
 pub fn mk_func_sig<'a>(
     cx: &mut Context<'a>,
     require_return_annot: bool,
@@ -20617,7 +20641,16 @@ pub fn mk_func_sig<'a>(
             (AnnotatedOrInferred::Annotated(return_t), return_ast, None)
         }
         (ast::function::ReturnAnnot::Missing(loc), _) if !has_nonvoid_return => {
-            let void_t = type_::void::why(ret_reason.dupe());
+            // As in TypeScript, a function that returns no value returns `void`, unless
+            // its contextual return type admits `undefined`.
+            let void_t = if cx.ts_void()
+                && !matches!(kind, func::Kind::Ctor)
+                && !contextual_return_admits_undefined(cx, loc, &ret_reason)?
+            {
+                type_::ts_void::why(ret_reason.dupe())
+            } else {
+                type_::void::why(ret_reason.dupe())
+            };
             let t = if matches!(kind, func::Kind::Async) {
                 let promise_reason = mk_annot_reason(
                     VirtualReasonDesc::RType(FlowSmolStr::new("Promise")),

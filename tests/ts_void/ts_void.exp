@@ -189,6 +189,168 @@ References:
                              ^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------------- inferred_return.js:4:1
+
+Cannot cast `noReturn()` to `undefined` because `void` [1] is incompatible with `undefined` [2]. [incompatible-type]
+
+   inferred_return.js:4:1
+   4| noReturn() as undefined; // ERROR
+      ^^^^^^^^^^
+
+References:
+   inferred_return.js:2:20
+   2| function noReturn() {}
+                         ^ [1]
+   inferred_return.js:4:15
+   4| noReturn() as undefined; // ERROR
+                    ^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------- inferred_return.js:6:1
+
+Cannot cast `arrow()` to `undefined` because `void` [1] is incompatible with `undefined` [2]. [incompatible-type]
+
+   inferred_return.js:6:1
+   6| arrow() as undefined; // ERROR
+      ^^^^^^^
+
+References:
+   inferred_return.js:5:20
+   5| const arrow = () => {};
+                         ^ [1]
+   inferred_return.js:6:12
+   6| arrow() as undefined; // ERROR
+                 ^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------ inferred_return.js:10:1
+
+Cannot cast `bareReturn()` to `undefined` because `void` [1] is incompatible with `undefined` [2]. [incompatible-type]
+
+   inferred_return.js:10:1
+   10| bareReturn() as undefined; // ERROR
+       ^^^^^^^^^^^^
+
+References:
+   inferred_return.js:7:22
+    7| function bareReturn() {
+                            ^ [1]
+   inferred_return.js:10:17
+   10| bareReturn() as undefined; // ERROR
+                       ^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------ inferred_return.js:13:1
+
+Cannot cast `asyncNoReturn()` to `Promise<undefined>` because in type argument `R` [1]: `void` [2] is incompatible with
+`undefined` [3]. [incompatible-type]
+
+   inferred_return.js:13:1
+   13| asyncNoReturn() as Promise<undefined>; // ERROR
+       ^^^^^^^^^^^^^^^
+
+References:
+   <BUILTINS>/prelude.js:48:23
+   48| interface Promise<out R> {}
+                             ^ [1]
+   inferred_return.js:11:31
+   11| async function asyncNoReturn() {}
+                                     ^ [2]
+   inferred_return.js:13:28
+   13| asyncNoReturn() as Promise<undefined>; // ERROR
+                                  ^^^^^^^^^ [3]
+
+
+Error ------------------------------------------------------------------------------------------ inferred_return.js:14:5
+
+An expression of type `void` cannot be tested for truthiness. [constant-condition]
+
+   14| if (noReturn()) {
+           ^^^^^^^^^^
+
+
+Error ----------------------------------------------------------------------------------------- inferred_return.js:28:38
+
+Cannot assign `noReturn` to `f5` because in the return value: [incompatible-type]
+ - Either `void` [1] is incompatible with `undefined` [2].
+ - Or `void` [1] is incompatible with `number` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   inferred_return.js:28:38
+   28| const f5: () => number | undefined = noReturn; // ERROR
+                                            ^^^^^^^^
+
+References:
+   inferred_return.js:2:20
+    2| function noReturn() {}
+                          ^ [1]
+   inferred_return.js:28:26
+   28| const f5: () => number | undefined = noReturn; // ERROR
+                                ^^^^^^^^^ [2]
+   inferred_return.js:28:17
+   28| const f5: () => number | undefined = noReturn; // ERROR
+                       ^^^^^^ [3]
+
+
+Error ------------------------------------------------------------------------------------ inferred_return_import.js:5:1
+
+Cannot cast `exportedNoReturn()` to `undefined` because `void` [1] is incompatible with `undefined` [2].
+[incompatible-type]
+
+   inferred_return_import.js:5:1
+    5| exportedNoReturn() as undefined; // ERROR
+       ^^^^^^^^^^^^^^^^^^
+
+References:
+   inferred_return.js:30:35
+   30| export function exportedNoReturn() {}
+                                          [1]
+   inferred_return_import.js:5:23
+    5| exportedNoReturn() as undefined; // ERROR
+                             ^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------ inferred_return_import.js:6:1
+
+Cannot cast `exportedArrow()` to `undefined` because `void` [1] is incompatible with `undefined` [2].
+[incompatible-type]
+
+   inferred_return_import.js:6:1
+    6| exportedArrow() as undefined; // ERROR
+       ^^^^^^^^^^^^^^^
+
+References:
+   inferred_return.js:31:32
+   31| export const exportedArrow = () => {};
+                                       [1]
+   inferred_return_import.js:6:20
+    6| exportedArrow() as undefined; // ERROR
+                          ^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------ inferred_return_import.js:7:1
+
+Cannot cast `exportedAsync()` to `Promise<undefined>` because in type argument `R` [1]: `void` [2] is incompatible with
+`undefined` [3]. [incompatible-type]
+
+   inferred_return_import.js:7:1
+    7| exportedAsync() as Promise<undefined>; // ERROR
+       ^^^^^^^^^^^^^^^
+
+References:
+   <BUILTINS>/prelude.js:48:23
+   48| interface Promise<out R> {}
+                             ^ [1]
+   inferred_return.js:32:38
+   32| export async function exportedAsync() {}
+                                             [2]
+   inferred_return_import.js:7:28
+    7| exportedAsync() as Promise<undefined>; // ERROR
+                                  ^^^^^^^^^ [3]
+
+
 Error ---------------------------------------------------------------------------------------------- refinements.js:15:3
 
 Cannot cast `sv` to `undefined` because `void` [1] is incompatible with `undefined` [2]. [incompatible-type]
@@ -296,4 +458,4 @@ References:
 
 
 
-Found 18 errors
+Found 27 errors

@@ -11952,6 +11952,10 @@ pub mod ts_void {
         ))
     }
 
+    pub fn why(reason: Reason) -> Type {
+        make(reason.replace_desc(flow_common::reason::VirtualReasonDesc::RTsVoid))
+    }
+
     /// The type a `void` annotation at `tok` stands for: TypeScript's `void`
     /// when `ts_void` is on, `undefined` otherwise.
     pub fn annot_at(ts_void: bool, tok: ALoc) -> Type {
