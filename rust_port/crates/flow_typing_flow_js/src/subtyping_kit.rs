@@ -796,16 +796,13 @@ fn funt_to_funt_check<'cx>(
     }
     let assertion_kind_mismatch =
         is_asserts(&ft1.type_guard) != is_asserts(&ft2.type_guard) && ft2.type_guard.is_some();
-    // An unresolved return type is an inference variable, which isn't `void`
-    // whatever flowed into it so far.
-    let ignores_return = ignores_return(cx, ft2, |cx, t| match cx.find_resolved(t) {
-        Some(t) => FlowJs::possible_concrete_types_for_inspection_with_env(
+    let ignores_return = ignores_return(cx, ft2, |cx, t| {
+        FlowJs::possible_concrete_types_for_inspection_with_env(
             cx,
             env,
-            type_util::reason_of_t(&t),
-            &t,
-        ),
-        None => Ok(Vec::new()),
+            type_util::reason_of_t(t),
+            t,
+        )
     })?;
     if !assertion_kind_mismatch && !ignores_return {
         let ret_use_op = VirtualUseOp::Frame(
