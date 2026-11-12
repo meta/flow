@@ -2043,7 +2043,8 @@ fn merge_annot<'cx>(
         Annot::Any(box loc) => type_::any_t::at(type_::AnySource::AnnotatedAny, loc.dupe()),
         Annot::Mixed(box loc) => type_::mixed_t::at(loc.dupe()),
         Annot::Empty(box loc) => type_::empty_t::at(loc.dupe()),
-        Annot::Void(box loc) => type_::void::at(loc.dupe()),
+        Annot::Void(box loc) => type_::ts_void::annot_at(cx.ts_void(), loc.dupe()),
+        Annot::Undefined(box loc) => type_::void::at(loc.dupe()),
         Annot::Null(box loc) => type_::null::at(loc.dupe()),
         Annot::Symbol(box loc) => type_::symbol_t::at(loc.dupe()),
         Annot::UniqueSymbol(box loc) => {

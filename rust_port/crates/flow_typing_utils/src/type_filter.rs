@@ -558,7 +558,7 @@ pub fn maybe<'cx>(cx: &mut Context<'cx>, t: Type) -> FilterResult {
             DefTInner::MixedT(MixedFlavor::MixedNonVoid) => changed_result(null::why(r.dupe())),
             DefTInner::MixedT(MixedFlavor::MixedNonNull) => changed_result(void::why(r.dupe())),
             DefTInner::NullT => unchanged_result(t),
-            DefTInner::VoidT => unchanged_result(t),
+            DefTInner::VoidT | DefTInner::TsVoidT => unchanged_result(t),
             _ => changed_result(empty_t::why(r.dupe())),
         },
         TypeInner::OptionalT {
@@ -588,7 +588,9 @@ pub fn not_maybe<'cx>(cx: &mut Context<'cx>, t: Type) -> FilterResult {
         TypeInner::MaybeT(_, inner) => filter_inner(cx, &not_maybe, inner),
         TypeInner::OptionalT { type_, .. } => filter_inner(cx, &not_maybe, type_),
         TypeInner::DefT(r, d) => match d.deref() {
-            DefTInner::NullT | DefTInner::VoidT => changed_result(empty_t::why(r.dupe())),
+            DefTInner::NullT | DefTInner::VoidT | DefTInner::TsVoidT => {
+                changed_result(empty_t::why(r.dupe()))
+            }
             DefTInner::MixedT(MixedFlavor::MixedTruthy) => unchanged_result(t),
             DefTInner::MixedT(MixedFlavor::MixedNonMaybe) => unchanged_result(t),
             DefTInner::MixedT(MixedFlavor::MixedEverything)
@@ -698,7 +700,9 @@ pub fn undefined(t: Type) -> FilterResult {
             nominal_type,
         } => filter_opaque(&mut undefined, reason.dupe(), nominal_type),
         TypeInner::MaybeT(r, _) => changed_result(void::why(r.dupe())),
-        TypeInner::DefT(_, d) if matches!(&**d, DefTInner::VoidT) => unchanged_result(t),
+        TypeInner::DefT(_, d) if matches!(&**d, DefTInner::VoidT | DefTInner::TsVoidT) => {
+            unchanged_result(t)
+        }
         TypeInner::OptionalT {
             reason, use_desc, ..
         } => changed_result(void::why_with_use_desc(*use_desc, reason.dupe())),
@@ -740,7 +744,7 @@ pub fn not_undefined<'cx>(cx: &mut Context<'cx>, t: Type) -> FilterResult {
             rep.members_iter().duped().collect(),
         ),
         TypeInner::DefT(r, d) => match d.deref() {
-            DefTInner::VoidT => changed_result(empty_t::why(r.dupe())),
+            DefTInner::VoidT | DefTInner::TsVoidT => changed_result(empty_t::why(r.dupe())),
             DefTInner::MixedT(MixedFlavor::MixedEverything) => {
                 changed_result(Type::new(TypeInner::DefT(
                     r.dupe(),

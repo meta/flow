@@ -1300,7 +1300,7 @@ fn __flow_impl<'cx>(
         // * optional indexed access *
         // ***************************
         (
-            DefT(r, deref!(EmptyT | VoidT | NullT)),
+            DefT(r, deref!(EmptyT | VoidT | TsVoidT | NullT)),
             OptionalIndexedAccessT(box OptionalIndexedAccessTData {
                 use_op, tout_tvar, ..
             }),
@@ -2082,7 +2082,7 @@ fn __flow_impl<'cx>(
         // ***************
 
         // The type maybe(T) is the same as null | undefined | UseT<Cx>
-        (DefT(r, deref!(NullT | VoidT)), FilterMaybeT(use_op, tout)) => {
+        (DefT(r, deref!(NullT | VoidT | TsVoidT)), FilterMaybeT(use_op, tout)) => {
             let empty = empty_t::why(r.dupe());
             rec_flow_t(cx, env, trace, use_op.dupe(), (&empty, tout))?;
         }
@@ -2156,7 +2156,7 @@ fn __flow_impl<'cx>(
         // ******************
 
         // The type optional(T) is the same as undefined | UseT<Cx>
-        (DefT(r, deref!(VoidT)), FilterOptionalT(use_op, tout)) => {
+        (DefT(r, deref!(VoidT | TsVoidT)), FilterOptionalT(use_op, tout)) => {
             let empty = empty_t::why(r.dupe());
             rec_flow_t(cx, env, trace, use_op.dupe(), (&empty, tout))?;
         }
@@ -7328,7 +7328,7 @@ fn __flow_impl<'cx>(
             );
             rec_flow_t(cx, env, trace, unknown_use(), (&obj, t))?;
         }
-        (DefT(_, deref!(NullT | VoidT)), ObjRestT(reason, _, t, _, literal)) => {
+        (DefT(_, deref!(NullT | VoidT | TsVoidT)), ObjRestT(reason, _, t, _, literal)) => {
             let o = obj_type::mk(
                 ObjKind::Exact,
                 cx,
@@ -9828,7 +9828,7 @@ fn __flow_impl<'cx>(
         // result of the read cannot be used in any interesting way.
         // **************************************************************************
         (
-            DefT(_, deref!(NullT | VoidT)),
+            DefT(_, deref!(NullT | VoidT | TsVoidT)),
             TestPropT(box TestPropTData {
                 use_op,
                 reason,

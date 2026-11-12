@@ -1127,6 +1127,7 @@ pub fn ast_transforms_of_error(
         (
             true,
             r @ (VirtualReasonDesc::RVoid
+            | VirtualReasonDesc::RTsVoid
             | VirtualReasonDesc::RNull
             | VirtualReasonDesc::RVoidedNull
             | VirtualReasonDesc::RNullOrVoid),
@@ -2363,7 +2364,10 @@ pub fn ast_transforms_of_error(
                 lower_desc: ErrorTypeDesc::Normalized(Elt::Type(lower_ty)),
                 ..
             }) => match lower_ty.as_ref() {
-                Ty::Void => optional_chaining_actions(error_loc, &VirtualReasonDesc::RVoid),
+                Ty::Void | Ty::Undefined => {
+                    optional_chaining_actions(error_loc, &VirtualReasonDesc::RVoid)
+                }
+                Ty::TsVoid => optional_chaining_actions(error_loc, &VirtualReasonDesc::RTsVoid),
                 Ty::Null => optional_chaining_actions(error_loc, &VirtualReasonDesc::RNull),
                 _ => vec![],
             },

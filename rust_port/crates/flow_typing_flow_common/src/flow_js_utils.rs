@@ -962,6 +962,7 @@ pub mod invalid_cyclic_type_validation {
                         | DefTInner::MixedT(_)
                         | DefTInner::NullT
                         | DefTInner::VoidT
+                        | DefTInner::TsVoidT
                         | DefTInner::SymbolT
                         | DefTInner::UniqueSymbolT(_)
                         | DefTInner::SingletonStrT { .. }
@@ -1581,7 +1582,7 @@ pub fn error_message_kind_of_lower(
     match t.deref() {
         TypeInner::DefT(_, def_t) => match def_t.deref() {
             DefTInner::NullT => Some(LowerKind::PossiblyNull),
-            DefTInner::VoidT => Some(LowerKind::PossiblyVoid),
+            DefTInner::VoidT | DefTInner::TsVoidT => Some(LowerKind::PossiblyVoid),
             _ => None,
         },
         TypeInner::MaybeT(_, _) => Some(LowerKind::PossiblyNullOrVoid),
@@ -2159,7 +2160,7 @@ pub fn instanceof_rhs_error(t: &Type) -> ErrorMessage<ALoc> {
         && matches!(
             t.deref(),
             TypeInner::DefT(_, def_t)
-                if matches!(def_t.deref(), DefTInner::NullT | DefTInner::VoidT)
+                if matches!(def_t.deref(), DefTInner::NullT | DefTInner::VoidT | DefTInner::TsVoidT)
         ) {
         TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::ReasonDesc(desc.clone()))
     } else {

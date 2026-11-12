@@ -281,6 +281,7 @@ pub enum VirtualReasonDesc<L: Dupe> {
     RBoolean,
     RMixed,
     RVoid,
+    RTsVoid,
     RNull,
     RVoidedNull,
     RSymbol,
@@ -360,6 +361,7 @@ impl<A: Dupe> VirtualReasonDesc<A> {
             RBoolean => RBoolean,
             RMixed => RMixed,
             RVoid => RVoid,
+            RTsVoid => RTsVoid,
             RNull => RNull,
             RVoidedNull => RVoidedNull,
             RSymbol => RSymbol,
@@ -456,7 +458,13 @@ impl<L: Dupe> VirtualReasonDesc<L> {
             ) => Scalar,
 
             Some(
-                RVoid | RNull | RVoidedNull | RUninitialized | RPossiblyUninitialized | RNullOrVoid,
+                RVoid
+                | RTsVoid
+                | RNull
+                | RVoidedNull
+                | RUninitialized
+                | RPossiblyUninitialized
+                | RNullOrVoid,
             ) => Nullish,
 
             Some(RArrayType | RROArrayType | RTupleType | RArrayPatternRestProp) => Array,
@@ -1089,6 +1097,7 @@ pub fn string_of_desc<L: Dupe>(desc: &VirtualReasonDesc<L>) -> String {
         RBoolean => "boolean".to_string(),
         RMixed => "`unknown`".to_string(),
         RVoid => "undefined".to_string(),
+        RTsVoid => "void".to_string(),
         RNull => "null".to_string(),
         RVoidedNull => "undefined (result of null short-circuiting an optional chain)".to_string(),
         RNullOrVoid => "null or undefined".to_string(),

@@ -1478,7 +1478,9 @@ impl<'a, 'cx> TypeNormalizationHardcodedFixesMapper<'a, 'cx> {
 
                 let ts = if self.generalize_maybe && from_bounds && ts.len() > 1 {
                     let has_null = ts.iter().any(|t| matches!(t.as_ref(), ty::Ty::Null));
-                    let has_void = ts.iter().any(|t| matches!(t.as_ref(), ty::Ty::Void));
+                    let has_void = ts
+                        .iter()
+                        .any(|t| matches!(t.as_ref(), ty::Ty::Void | ty::Ty::Undefined));
                     if has_null && !has_void {
                         let mut new_ts = vec![Arc::new(ty::Ty::Void)];
                         new_ts.extend(ts);

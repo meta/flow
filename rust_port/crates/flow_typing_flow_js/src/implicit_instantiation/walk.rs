@@ -510,6 +510,7 @@ enum Head {
     BigInt,
     Null,
     Void,
+    TsVoid,
     Symbol,
     Fun,
     Obj,
@@ -521,7 +522,8 @@ enum Head {
 
 impl Head {
     /// Whether a type of this head may be a subtype of one of head `other`: a primitive only of
-    /// the same primitive, a structure only of a structure.
+    /// the same primitive (and `undefined` of TypeScript's `void`), a structure only of a
+    /// structure.
     fn may_match(&self, other: &Head) -> bool {
         let structure = |h: &Head| {
             matches!(
@@ -532,6 +534,7 @@ impl Head {
         match (self, other) {
             (Head::Other, _) | (_, Head::Other) => true,
             (a, b) if structure(a) => structure(b),
+            (Head::Void, Head::TsVoid) => true,
             (a, b) => a == b,
         }
     }
@@ -3750,6 +3753,7 @@ impl<'e> Walker<'e> {
             };
             if lhead != Head::Other
                 && (mhead == lhead
+                    || (lhead == Head::Void && mhead == Head::TsVoid)
                     || matches!(&mhead, Head::Inst(c) if ancestors.contains(c))
                     || array_class.is_some_and(|name| {
                         (ancestors.iter())
@@ -4209,6 +4213,7 @@ impl<'e> Walker<'e> {
                 DefTInner::BigIntGeneralT(_) | DefTInner::SingletonBigIntT { .. } => Head::BigInt,
                 DefTInner::NullT => Head::Null,
                 DefTInner::VoidT => Head::Void,
+                DefTInner::TsVoidT => Head::TsVoid,
                 DefTInner::SymbolT | DefTInner::UniqueSymbolT(_) => Head::Symbol,
                 DefTInner::FunT(..) | DefTInner::PolyT(_) => Head::Fun,
                 DefTInner::ObjT(_) => Head::Obj,
@@ -6358,6 +6363,7 @@ fn is_atomic(d: &DefTInner) -> bool {
             | DefTInner::MixedT(_)
             | DefTInner::NullT
             | DefTInner::VoidT
+            | DefTInner::TsVoidT
             | DefTInner::SymbolT
             | DefTInner::UniqueSymbolT(_)
             | DefTInner::SingletonStrT { .. }

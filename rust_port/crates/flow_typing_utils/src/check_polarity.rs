@@ -400,6 +400,7 @@ fn check_polarity_impl<'cx>(
             | DefTInner::SingletonBigIntT { .. }
             | DefTInner::StrGeneralT(_)
             | DefTInner::VoidT
+            | DefTInner::TsVoidT
             | DefTInner::SymbolT
             | DefTInner::UniqueSymbolT(_) => {}
             DefTInner::ClassT(inner_t) => {

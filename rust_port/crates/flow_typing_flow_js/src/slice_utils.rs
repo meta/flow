@@ -2595,7 +2595,7 @@ fn resolve_with_env<'cx, A>(
             }
             // `null` and `void` should pass through Partial, Required, $Exact,
             // since we would like e.g. Partial<?Foo> to be equivalent to ?Partial<Foo>
-            DefTInner::NullT | DefTInner::VoidT
+            DefTInner::NullT | DefTInner::VoidT | DefTInner::TsVoidT
                 if matches!(
                     tool,
                     object::Tool::Partial
@@ -2608,7 +2608,7 @@ fn resolve_with_env<'cx, A>(
             }
             // Mirroring Object.assign() and {...null} semantics, treat null/void as
             // empty objects.
-            DefTInner::NullT | DefTInner::VoidT => {
+            DefTInner::NullT | DefTInner::VoidT | DefTInner::TsVoidT => {
                 let flags = Flags {
                     obj_kind: ObjKind::Exact,
                     react_dro: None,

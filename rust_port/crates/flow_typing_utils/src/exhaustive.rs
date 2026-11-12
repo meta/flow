@@ -1091,7 +1091,7 @@ mod value_union_builder {
                             .leafs
                             .insert(leaf::Leaf(enum_reason.dupe(), leaf::LeafCtor::NullC));
                     }
-                    DefTInner::VoidT => {
+                    DefTInner::VoidT | DefTInner::TsVoidT => {
                         value_union
                             .leafs
                             .insert(leaf::Leaf(enum_reason.dupe(), leaf::LeafCtor::VoidC));

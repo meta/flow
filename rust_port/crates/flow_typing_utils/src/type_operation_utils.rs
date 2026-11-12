@@ -517,7 +517,11 @@ pub mod operators {
                 }) => true,
                 TypeInner::DefT(_, def_t) => matches!(
                     def_t.deref(),
-                    DefTInner::EmptyT | DefTInner::MixedT(_) | DefTInner::VoidT | DefTInner::NullT
+                    DefTInner::EmptyT
+                        | DefTInner::MixedT(_)
+                        | DefTInner::VoidT
+                        | DefTInner::TsVoidT
+                        | DefTInner::NullT
                 ),
                 _ => false,
             }
@@ -835,9 +839,9 @@ pub mod operators {
                         (def_l.deref(), def_r.deref()),
                         (
                             DefTInner::EnumValueT(_),
-                            DefTInner::NullT | DefTInner::VoidT
+                            DefTInner::NullT | DefTInner::VoidT | DefTInner::TsVoidT
                         ) | (
-                            DefTInner::NullT | DefTInner::VoidT,
+                            DefTInner::NullT | DefTInner::VoidT | DefTInner::TsVoidT,
                             DefTInner::EnumValueT(_)
                         )
                     ) =>
@@ -1348,7 +1352,10 @@ pub mod operators {
                     ))
                 }
                 TypeInner::DefT(_, def_t)
-                    if matches!(def_t.deref(), DefTInner::NullT | DefTInner::VoidT) =>
+                    if matches!(
+                        def_t.deref(),
+                        DefTInner::NullT | DefTInner::VoidT | DefTInner::TsVoidT
+                    ) =>
                 {
                     let reason = reason
                         .dupe()
@@ -1410,7 +1417,10 @@ pub mod operators {
         fn f(t: &Type) -> Type {
             match t.deref() {
                 TypeInner::DefT(r, def_t)
-                    if matches!(def_t.deref(), DefTInner::NullT | DefTInner::VoidT) =>
+                    if matches!(
+                        def_t.deref(),
+                        DefTInner::NullT | DefTInner::VoidT | DefTInner::TsVoidT
+                    ) =>
                 {
                     type_::empty_t::why(r.dupe())
                 }
@@ -1798,7 +1808,10 @@ pub mod special_cased_functions {
                 }
                 // Object.assign semantics
                 (TypeInner::DefT(_, def_t), ObjAssignKind::ObjAssign { .. })
-                    if matches!(def_t.deref(), DefTInner::NullT | DefTInner::VoidT) =>
+                    if matches!(
+                        def_t.deref(),
+                        DefTInner::NullT | DefTInner::VoidT | DefTInner::TsVoidT
+                    ) =>
                 {
                     flow_js::flow_t_with_env(cx, env, (to_obj, t))?;
                     Ok(())
@@ -2546,7 +2559,10 @@ pub mod type_assertions {
                     TypeInner::ObjProtoT(_) => Ok(()),
                     // null/undefined are allowed
                     TypeInner::DefT(_, def_t)
-                        if matches!(def_t.deref(), DefTInner::NullT | DefTInner::VoidT) =>
+                        if matches!(
+                            def_t.deref(),
+                            DefTInner::NullT | DefTInner::VoidT | DefTInner::TsVoidT
+                        ) =>
                     {
                         Ok(())
                     }
@@ -2858,7 +2874,7 @@ pub mod type_assertions {
             (TypeInner::DefT(_, def_t), _)
                 if matches!(
                     def_t.deref(),
-                    DefTInner::EmptyT | DefTInner::NullT | DefTInner::VoidT
+                    DefTInner::EmptyT | DefTInner::NullT | DefTInner::VoidT | DefTInner::TsVoidT
                 ) =>
             {
                 Ok(())
@@ -3050,6 +3066,7 @@ pub mod type_assertions {
                     def_t.deref(),
                     DefTInner::NullT
                         | DefTInner::VoidT
+                        | DefTInner::TsVoidT
                         | DefTInner::MixedT(
                             MixedFlavor::MixedEverything
                                 | MixedFlavor::MixedNonNull

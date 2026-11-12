@@ -605,7 +605,8 @@ fn dump_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, t: &Type) -> Str
             | DefTInner::SymbolT
             | DefTInner::UniqueSymbolT(_)
             | DefTInner::NullT
-            | DefTInner::VoidT => p(cx, t, true, ""),
+            | DefTInner::VoidT
+            | DefTInner::TsVoidT => p(cx, t, true, ""),
             DefTInner::PolyT(box PolyTData {
                 tparams, t_out, id, ..
             }) => {
@@ -4673,6 +4674,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 ConstantConditionKind::UnawaitedPromise => "UnawaitedPromise",
                 ConstantConditionKind::UncalledFunction => "UncalledFunction",
                 ConstantConditionKind::ConstCondGeneral => "General",
+                ConstantConditionKind::TsVoid => "TsVoid",
             };
             format!(
                 "EInvalidComparison ({}). is_truthy={} warning={:?} constant_condition_kind={}",

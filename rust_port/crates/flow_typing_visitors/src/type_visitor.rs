@@ -424,7 +424,8 @@ pub fn def_type_default<'cx, Acc, V: TypeVisitor<Acc> + ?Sized>(
         | DefTInner::SymbolT
         | DefTInner::UniqueSymbolT(_)
         | DefTInner::NullT
-        | DefTInner::VoidT => acc,
+        | DefTInner::VoidT
+        | DefTInner::TsVoidT => acc,
 
         DefTInner::EnumValueT(enum_info) => {
             use flow_typing_type::type_::EnumInfoInner;

@@ -200,6 +200,8 @@ fn lsp_completion_of_type(ty_: &Ty<ALoc>) -> LspCompletionItemKind {
         | Ty::Any(_)
         | Ty::Top
         | Ty::Void
+        | Ty::Undefined
+        | Ty::TsVoid
         | Ty::Symbol
         | Ty::UniqueSymbol
         | Ty::Num
@@ -2181,12 +2183,17 @@ fn autocomplete_member(
                         ty::PropSource::PrimitiveProto(_) => 1,
                         _ => 0,
                     };
+                    let undefined = if typing.cx.ts_void() {
+                        Ty::Undefined
+                    } else {
+                        Ty::Void
+                    };
                     let opt_chain_ty = ty_utils::simplify_type(
                         true,
                         None,
                         Arc::new(Ty::Union(
                             false,
-                            Arc::new(Ty::Void),
+                            Arc::new(undefined),
                             info.ty.dupe(),
                             Arc::from([]),
                         )),

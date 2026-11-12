@@ -5740,7 +5740,7 @@ fn create_computed_prop<'a>(
     let has_void = concretized_keys.iter().any(|key| {
         matches!(
             key.deref(),
-            TypeInner::DefT(_, def) if matches!(def.deref(), DefTInner::VoidT)
+            TypeInner::DefT(_, def) if matches!(def.deref(), DefTInner::VoidT | DefTInner::TsVoidT)
         )
     });
     let invalid_obj_key_kind = |key: &Type| {
@@ -5748,8 +5748,10 @@ fn create_computed_prop<'a>(
             && has_void
             && matches!(
                 key.deref(),
-                TypeInner::DefT(_, def)
-                    if matches!(def.deref(), DefTInner::NullT | DefTInner::VoidT)
+                TypeInner::DefT(_, def) if matches!(
+                    def.deref(),
+                    DefTInner::NullT | DefTInner::VoidT | DefTInner::TsVoidT
+                )
             )
         {
             intermediate_error_types::InvalidObjKey::NullOrVoid

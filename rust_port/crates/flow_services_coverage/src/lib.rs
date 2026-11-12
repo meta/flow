@@ -234,6 +234,7 @@ impl CoverageVisitor {
                 | DefTInner::SingletonBoolT { .. }
                 | DefTInner::StrGeneralT(_)
                 | DefTInner::VoidT
+                | DefTInner::TsVoidT
                 | DefTInner::EnumObjectT { .. }
                 | DefTInner::EnumValueT(_) => Kind::Checked,
                 // Concrete uncovered

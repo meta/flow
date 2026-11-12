@@ -1036,7 +1036,7 @@ fn call_latent_pred<'cx>(
     // dilute the positive refinement, but it keeps the negative one unrefined.
     let is_nullish = |t: &Type| {
         matches!(t.deref(), TypeInner::DefT(_, def_t)
-            if matches!(def_t.deref(), DefTInner::NullT | DefTInner::VoidT))
+            if matches!(def_t.deref(), DefTInner::NullT | DefTInner::VoidT | DefTInner::TsVoidT))
     };
     if sense && ts.iter().any(|t| !is_nullish(t)) {
         ts.retain(|t| !is_nullish(t));
@@ -1599,7 +1599,9 @@ fn intersect_type_guard<'cx>(
 
     fn is_void(t: &ConcretizedType) -> bool {
         match t.unwrap().deref() {
-            TypeInner::DefT(_, def_t) => matches!(def_t.deref(), DefTInner::VoidT),
+            TypeInner::DefT(_, def_t) => {
+                matches!(def_t.deref(), DefTInner::VoidT | DefTInner::TsVoidT)
+            }
             _ => false,
         }
     }

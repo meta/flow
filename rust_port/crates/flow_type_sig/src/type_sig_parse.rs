@@ -7229,7 +7229,9 @@ fn annot_with_loc<'arena, 'ast>(
         TypeInner::Boolean { .. } => Parsed::Annot(Box::new(ParsedAnnot::Boolean(Box::new(loc)))),
         TypeInner::Unknown { .. } => Parsed::Annot(Box::new(ParsedAnnot::Mixed(Box::new(loc)))),
         TypeInner::Never { .. } => Parsed::Annot(Box::new(ParsedAnnot::Empty(Box::new(loc)))),
-        TypeInner::Undefined { .. } => Parsed::Annot(Box::new(ParsedAnnot::Void(Box::new(loc)))),
+        TypeInner::Undefined { .. } => {
+            Parsed::Annot(Box::new(ParsedAnnot::Undefined(Box::new(loc))))
+        }
         TypeInner::UniqueSymbol { .. } => {
             Parsed::Annot(Box::new(ParsedAnnot::UniqueSymbol(Box::new(loc))))
         }
@@ -11569,7 +11571,7 @@ fn function_def_helper<'arena: 'ast, 'ast>(
             ast::function::ReturnAnnot::TypeGuard(tg) => tbls.push_loc(tg.loc.dupe()),
         };
         (
-            Parsed::Annot(Box::new(ParsedAnnot::Void(Box::new(loc_node)))),
+            Parsed::Annot(Box::new(ParsedAnnot::Undefined(Box::new(loc_node)))),
             None,
         )
     } else {

@@ -310,7 +310,8 @@ fn type_impl<L: Dupe>(
         Ty::Any(_) => LayoutNode::atom("any".to_string()),
         Ty::Top => LayoutNode::atom("unknown".to_string()),
         Ty::Bot(_) => LayoutNode::atom("empty".to_string()),
-        Ty::Void => LayoutNode::atom("void".to_string()),
+        Ty::Void | Ty::TsVoid => LayoutNode::atom("void".to_string()),
+        Ty::Undefined => LayoutNode::atom("undefined".to_string()),
         Ty::Null => LayoutNode::atom("null".to_string()),
         Ty::Num => LayoutNode::atom("number".to_string()),
         Ty::Str => LayoutNode::atom("string".to_string()),
@@ -1375,14 +1376,14 @@ fn type_union<L: Dupe>(
     size: &mut PrintState<L>,
 ) -> LayoutNode {
     let has_null = types.iter().any(|t| matches!(t, Ty::Null));
-    let has_void = types.iter().any(|t| matches!(t, Ty::Void));
+    let has_void = types.iter().any(|t| matches!(t, Ty::Void | Ty::Undefined));
 
     let prefix_is_maybe = has_null && has_void && types.len() > 2;
     let (prefix, filtered_types): (LayoutNode, Vec<&Ty<L>>) = if prefix_is_maybe {
         let filtered: Vec<&Ty<L>> = types
             .iter()
             .copied()
-            .filter(|t| !matches!(t, Ty::Null | Ty::Void))
+            .filter(|t| !matches!(t, Ty::Null | Ty::Void | Ty::Undefined))
             .collect();
         let final_types = if filtered.is_empty() {
             vec![&Ty::Bot(BotKind::EmptyType) as &Ty<L>]

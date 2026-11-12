@@ -541,6 +541,10 @@ fn try_eval_concrete_type_truthyness<'cx>(cx: &mut Context<'cx>, t: &Type) -> Tr
                 constant_condition_kind: ConstantConditionKind::ConstCondGeneral,
                 reason: Some(reason.dupe()),
             },
+            DefTInner::TsVoidT => TruthynessResult::ConstCondFalsy {
+                constant_condition_kind: ConstantConditionKind::TsVoid,
+                reason: Some(reason.dupe()),
+            },
             DefTInner::SymbolT | DefTInner::UniqueSymbolT(_) => TruthynessResult::ConstCondUnknown,
             DefTInner::FunT(..) => TruthynessResult::ConstCondTruthy {
                 constant_condition_kind: ConstantConditionKind::UncalledFunction,
@@ -1078,8 +1082,16 @@ fn check_strict_comparison<'cx>(
                         ..
                     }),
                 ) => None,
-                (TypeInner::DefT(_, d), _) if matches!(d.deref(), DefTInner::VoidT) => None,
-                (_, TypeInner::DefT(_, d)) if matches!(d.deref(), DefTInner::VoidT) => None,
+                (TypeInner::DefT(_, d), _)
+                    if matches!(d.deref(), DefTInner::VoidT | DefTInner::TsVoidT) =>
+                {
+                    None
+                }
+                (_, TypeInner::DefT(_, d))
+                    if matches!(d.deref(), DefTInner::VoidT | DefTInner::TsVoidT) =>
+                {
+                    None
+                }
                 (TypeInner::DefT(_, d1), TypeInner::DefT(_, d2))
                     if matches!(d1.deref(), DefTInner::EmptyT)
                         && matches!(d2.deref(), DefTInner::EmptyT) =>
@@ -1351,6 +1363,7 @@ fn detect_non_voidable_properties<'cx>(cx: &mut Context<'cx>) {
             TypeInner::DefT(_, def_t) => matches!(
                 def_t.deref(),
                 DefTInner::VoidT
+                    | DefTInner::TsVoidT
                     | DefTInner::MixedT(MixedFlavor::MixedEverything | MixedFlavor::MixedNonNull)
             ),
             // conservatively assume all other types are non-voidable

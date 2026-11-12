@@ -843,7 +843,10 @@ fn is_initializing(ev_cx: &EffectVisitorContext, cx: &mut Context<'_>, loc: &ALo
             }),
             TypeInner::UnionT(_, rep) => rep.members_iter().all(|t| is_nullish(cx, seen, t)),
             TypeInner::DefT(_, def_t)
-                if matches!(def_t.deref(), DefTInner::NullT | DefTInner::VoidT) =>
+                if matches!(
+                    def_t.deref(),
+                    DefTInner::NullT | DefTInner::VoidT | DefTInner::TsVoidT
+                ) =>
             {
                 true
             }

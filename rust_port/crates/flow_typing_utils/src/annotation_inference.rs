@@ -1545,7 +1545,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         //  Filter optional
         // *****************
         (TypeInner::DefT(r, def_t), OpInner::AnnotFilterOptionalT(_))
-            if matches!(def_t.deref(), DefTInner::VoidT) =>
+            if matches!(def_t.deref(), DefTInner::VoidT | DefTInner::TsVoidT) =>
         {
             type_::empty_t::why(r.dupe())
         }
@@ -1766,7 +1766,8 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                         // !x when x is falsy
                         DefTInner::SingletonBoolT { value: false, .. }
                         | DefTInner::NullT
-                        | DefTInner::VoidT => {
+                        | DefTInner::VoidT
+                        | DefTInner::TsVoidT => {
                             let reason = reason.dupe().replace_desc(
                                 flow_common::reason::VirtualReasonDesc::RBooleanLit(true),
                             );
@@ -2564,7 +2565,10 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                     )
                 }
                 TypeInner::DefT(_, def_t)
-                    if matches!(def_t.deref(), DefTInner::NullT | DefTInner::VoidT) =>
+                    if matches!(
+                        def_t.deref(),
+                        DefTInner::NullT | DefTInner::VoidT | DefTInner::TsVoidT
+                    ) =>
                 {
                     flow_typing_flow_common::obj_type::mk_with_proto_and_strictness(
                         cx,

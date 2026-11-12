@@ -89,7 +89,8 @@ fn merge_type<'cx>(cx: &mut Context<'cx>, pair: (Type, Type)) -> Type {
             | (DefTInner::StrGeneralT(_), DefTInner::StrGeneralT(_))
             | (DefTInner::BoolGeneralT, DefTInner::BoolGeneralT)
             | (DefTInner::NullT, DefTInner::NullT)
-            | (DefTInner::VoidT, DefTInner::VoidT) => t2,
+            | (DefTInner::VoidT, DefTInner::VoidT)
+            | (DefTInner::TsVoidT, DefTInner::TsVoidT) => t2,
             (DefTInner::EmptyT, _) => t2,
             (_, DefTInner::EmptyT) => t1,
             (_, DefTInner::MixedT(_)) => t2,
@@ -950,7 +951,9 @@ pub fn extract_type<'cx>(cx: &mut Context<'cx>, this_t: Type) -> GenericT<Type, 
         | TypeInner::NullProtoT(_)
         | TypeInner::ObjProtoT(_) => GenericT::FailureUnhandledType(this_t),
         TypeInner::DefT(reason, def_t) => match def_t.deref() {
-            DefTInner::NullT | DefTInner::VoidT => GenericT::FailureNullishType,
+            DefTInner::NullT | DefTInner::VoidT | DefTInner::TsVoidT => {
+                GenericT::FailureNullishType
+            }
             DefTInner::InstanceT(_) => GenericT::Success(this_t),
             DefTInner::ObjT(_) => GenericT::Success(this_t),
             DefTInner::EnumObjectT { .. } => GenericT::Success(this_t),
@@ -1209,9 +1212,10 @@ pub fn extract_members<'cx>(
                     let members: Vec<_> = rep
                         .members_iter()
                         .filter(|t| match t.deref().deref() {
-                            TypeInner::DefT(_, d) => {
-                                !matches!(d.deref(), DefTInner::NullT | DefTInner::VoidT)
-                            }
+                            TypeInner::DefT(_, d) => !matches!(
+                                d.deref(),
+                                DefTInner::NullT | DefTInner::VoidT | DefTInner::TsVoidT
+                            ),
                             TypeInner::AnyT(_, _)
                             | TypeInner::ImplicitInstantiationTvar(
                                 box ImplicitInstantiationTvarData {

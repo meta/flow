@@ -318,7 +318,9 @@ pub fn score_of_msg<L: Dupe + PartialEq + Eq + PartialOrd + Ord>(msg: &FlowError
         match type_or_desc {
             TypeOrTypeDescT::Type(t) => match &**t {
                 TypeInner::DefT(_, def_t) => match &**def_t {
-                    DefTInner::NullT | DefTInner::VoidT => TypeCategory::Nullish,
+                    DefTInner::NullT | DefTInner::VoidT | DefTInner::TsVoidT => {
+                        TypeCategory::Nullish
+                    }
                     DefTInner::NumGeneralT(_)
                     | DefTInner::StrGeneralT(_)
                     | DefTInner::BoolGeneralT
@@ -337,7 +339,7 @@ pub fn score_of_msg<L: Dupe + PartialEq + Eq + PartialOrd + Ord>(msg: &FlowError
             },
             TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::Normalized(Elt::Type(t))) => {
                 match t.as_ref() {
-                    Ty::Null | Ty::Void => TypeCategory::Nullish,
+                    Ty::Null | Ty::Void | Ty::Undefined | Ty::TsVoid => TypeCategory::Nullish,
                     Ty::Symbol
                     | Ty::UniqueSymbol
                     | Ty::Num
@@ -5893,7 +5895,8 @@ where
                         Ty::BigInt => features.push(text("bigint")),
                         Ty::Symbol => features.push(text("symbol")),
                         Ty::UniqueSymbol => features.push(text("unique symbol")),
-                        Ty::Void => features.push(text("undefined")),
+                        Ty::Void | Ty::Undefined => features.push(text("undefined")),
+                        Ty::TsVoid => features.push(text("void")),
                         Ty::Null => features.push(text("null")),
                         _ => features.push(desc_of_type_desc(description)),
                     },
@@ -10925,6 +10928,17 @@ where
                 text(" cannot be declared as 'const'. "),
                 text("'const' modifier can only appear on a function or method type parameter."),
             ]),
+            // As in TypeScript, whose `void` says that the value is not to be used: a callback
+            // typed `=> void` may well return a truthy value.
+            MessageConstantCondition {
+                constant_condition_kind:
+                    crate::intermediate_error_types::ConstantConditionKind::TsVoid,
+                ..
+            } => friendly::Message(vec![
+                text("An expression of type "),
+                code("void"),
+                text(" cannot be tested for truthiness."),
+            ]),
             MessageConstantCondition {
                 is_truthy,
                 warning,
@@ -10942,7 +10956,9 @@ where
                     likely_str, truthy_str
                 ))];
                 let help_message = match constant_condition_kind {
-                    ConstantConditionKind::ConstCondGeneral => vec![],
+                    ConstantConditionKind::ConstCondGeneral | ConstantConditionKind::TsVoid => {
+                        vec![]
+                    }
                     ConstantConditionKind::UnawaitedPromise => {
                         vec![text(
                             " Perhaps you meant to use `await` to resolve the promise?",

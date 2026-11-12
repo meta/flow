@@ -840,7 +840,8 @@ pub fn def_type_default<'cx, A, M: TypeMapper<'cx, A> + ?Sized>(
         | DefTInner::SymbolT
         | DefTInner::UniqueSymbolT(_)
         | DefTInner::NullT
-        | DefTInner::VoidT => t.dupe(),
+        | DefTInner::VoidT
+        | DefTInner::TsVoidT => t.dupe(),
         DefTInner::FunT(s, f) => {
             let s_prime = mapper.type_(cx, map_cx, s.dupe());
             let f_prime = mapper.fun_type(cx, map_cx, f.dupe());

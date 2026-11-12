@@ -339,7 +339,7 @@ fn owner_of_receiver_ty(ty: &Ty<ALoc>) -> Option<FlowSmolStr> {
         Ty::Union(_, t1, t2, ts) => [t1, t2]
             .into_iter()
             .chain(ts.iter())
-            .filter(|t| !matches!(t.as_ref(), Ty::Null | Ty::Void))
+            .filter(|t| !matches!(t.as_ref(), Ty::Null | Ty::Void | Ty::Undefined | Ty::TsVoid))
             .map(|t| owner_of_receiver_ty(t))
             .reduce(|a, b| if a == b { a } else { None })
             .flatten(),

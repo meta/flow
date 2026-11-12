@@ -8,6 +8,7 @@
 use std::sync::Arc;
 
 use dupe::Dupe;
+use dupe::OptionDupedExt;
 use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 use flow_parser::ast;
 use flow_parser::ast::types::TypeInner;
@@ -189,7 +190,11 @@ impl Serializer {
                 loc: LOC_NONE,
                 comments: None,
             }),
-            Ty::Void => ast::types::Type::new(TypeInner::Void {
+            Ty::Void | Ty::TsVoid => ast::types::Type::new(TypeInner::Void {
+                loc: LOC_NONE,
+                comments: None,
+            }),
+            Ty::Undefined => ast::types::Type::new(TypeInner::Undefined {
                 loc: LOC_NONE,
                 comments: None,
             }),
@@ -430,12 +435,15 @@ impl Serializer {
     fn union<L: Dupe>(&self, t: &Arc<Ty<L>>, from_bounds: bool) -> AstType {
         let ts = bk_union(t);
         let has_null = ts.iter().any(|t| matches!(t.as_ref(), Ty::Null));
-        let has_void = ts.iter().any(|t| matches!(t.as_ref(), Ty::Void));
+        let void = ts
+            .iter()
+            .find(|t| matches!(t.as_ref(), Ty::Void | Ty::Undefined))
+            .duped();
 
-        if has_null && has_void {
+        if has_null && let Some(void) = void {
             let filtered: Vec<Arc<Ty<L>>> = ts
                 .into_iter()
-                .filter(|t| !matches!(t.as_ref(), Ty::Null | Ty::Void))
+                .filter(|t| !matches!(t.as_ref(), Ty::Null | Ty::Void | Ty::Undefined))
                 .collect();
             match filtered.len() {
                 0 => {
@@ -443,10 +451,7 @@ impl Serializer {
                         loc: LOC_NONE,
                         comments: None,
                     });
-                    let t1 = ast::types::Type::new(TypeInner::Void {
-                        loc: LOC_NONE,
-                        comments: None,
-                    });
+                    let t1 = self.type_(&void);
                     ast::types::Type::new(TypeInner::Union {
                         loc: LOC_NONE,
                         inner: Arc::new(ast::types::Union {

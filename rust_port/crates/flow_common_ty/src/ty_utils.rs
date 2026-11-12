@@ -782,7 +782,7 @@ pub fn unmaybe_ty(t: ALocTy) -> ALocTy {
                 .chain(std::iter::once(t2))
                 .chain(ts.iter())
                 .filter_map(|ty| match ty.as_ref() {
-                    Ty::Null | Ty::Void => None,
+                    Ty::Null | Ty::Void | Ty::Undefined | Ty::TsVoid => None,
                     _ => Some(unmaybe_ty(ty.dupe())),
                 })
                 .collect();

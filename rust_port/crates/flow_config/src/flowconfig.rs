@@ -255,6 +255,7 @@ pub mod opts {
         pub export_star_excludes_default: Option<bool>,
         pub implicit_instantiation_walk: bool,
         pub ts_syntax: Option<bool>,
+        pub ts_void: bool,
         pub tslib_syntax: Option<bool>,
         pub typescript_library_definition_support: bool,
         pub typescript_library_definition_support_includes: Vec<FlowconfigGlobPattern>,
@@ -412,6 +413,7 @@ pub mod opts {
             export_star_excludes_default: None,
             implicit_instantiation_walk: false,
             ts_syntax: None,
+            ts_void: false,
             tslib_syntax: None,
             typescript_library_definition_support: false,
             typescript_library_definition_support_includes: Vec::new(),
@@ -2311,6 +2313,16 @@ pub mod opts {
                 parse_boolean(
                     |opts, v| {
                         opts.ts_syntax = Some(v);
+                        Ok(())
+                    },
+                    values,
+                    config,
+                )
+            }),
+            ("experimental.ts_void", |values, config| {
+                parse_boolean(
+                    |opts, v| {
+                        opts.ts_void = v;
                         Ok(())
                     },
                     values,

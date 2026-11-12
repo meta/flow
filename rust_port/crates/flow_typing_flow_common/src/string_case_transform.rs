@@ -183,7 +183,8 @@ fn can_be_empty_string(t: &Type) -> bool {
             | DefTInner::BoolGeneralT
             | DefTInner::SingletonBoolT { .. }
             | DefTInner::NullT
-            | DefTInner::VoidT => false,
+            | DefTInner::VoidT
+            | DefTInner::TsVoidT => false,
             _ => true,
         },
         TypeInner::UnionT(_, rep) => rep.members_iter().any(can_be_empty_string),

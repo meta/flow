@@ -36,7 +36,12 @@ pub enum Ty<L> {
     Any(AnyKind<L>),
     Top,
     Bot(BotKind<L>),
+    /// `undefined`, as Flow spells it without `experimental.ts_void`.
     Void,
+    /// `undefined`, under `experimental.ts_void`.
+    Undefined,
+    /// TypeScript's `void`, under `experimental.ts_void`.
+    TsVoid,
     Null,
     Symbol,
     UniqueSymbol,
@@ -1074,6 +1079,8 @@ pub fn mk_exact<L>(ty: Ty<L>) -> Ty<L> {
         | Ty::Top
         | Ty::Bot(_)
         | Ty::Void
+        | Ty::Undefined
+        | Ty::TsVoid
         | Ty::Null
         | Ty::Symbol
         | Ty::UniqueSymbol
@@ -1204,6 +1211,8 @@ where
             Ty::Truncated
             | Ty::Top
             | Ty::Void
+            | Ty::Undefined
+            | Ty::TsVoid
             | Ty::Null
             | Ty::Symbol
             | Ty::UniqueSymbol
@@ -1734,6 +1743,8 @@ where
             (Ty::Truncated, Ty::Truncated)
             | (Ty::Top, Ty::Top)
             | (Ty::Void, Ty::Void)
+            | (Ty::Undefined, Ty::Undefined)
+            | (Ty::TsVoid, Ty::TsVoid)
             | (Ty::Null, Ty::Null)
             | (Ty::Symbol, Ty::Symbol)
             | (Ty::UniqueSymbol, Ty::UniqueSymbol)
@@ -2825,6 +2836,8 @@ where
             Ty::Truncated
             | Ty::Top
             | Ty::Void
+            | Ty::Undefined
+            | Ty::TsVoid
             | Ty::Null
             | Ty::Symbol
             | Ty::UniqueSymbol
@@ -3311,6 +3324,8 @@ where
             Ty::Truncated
             | Ty::Top
             | Ty::Void
+            | Ty::Undefined
+            | Ty::TsVoid
             | Ty::Null
             | Ty::Symbol
             | Ty::UniqueSymbol
@@ -4194,35 +4209,37 @@ pub fn tag_of_t<L>(_t: &Ty<L>) -> i32 {
         Ty::Top => 1,
         Ty::Any(_) => 2,
         Ty::Void => 3,
-        Ty::Null => 4,
-        Ty::BoolLit(_) => 5,
-        Ty::Bool => 6,
-        Ty::NumLit(_) => 7,
-        Ty::Num => 8,
-        Ty::BigIntLit(_) => 9,
-        Ty::BigInt => 10,
-        Ty::StrLit(_) => 11,
-        Ty::Str => 12,
-        Ty::UniqueSymbol => 13,
-        Ty::Symbol => 14,
-        Ty::Bound(_) => 15,
-        Ty::Generic(_) => 16,
-        Ty::TypeOf(_) => 17,
-        Ty::Utility(_) => 18,
-        Ty::IndexedAccess { .. } => 19,
-        Ty::Tup { .. } => 20,
-        Ty::Arr(_) => 21,
-        Ty::Fun(_) => 22,
-        Ty::Obj(_) => 23,
-        Ty::Inter(_, _, _) => 24,
-        Ty::Union(_, _, _, _) => 25,
-        Ty::InlineInterface(_) => 26,
-        Ty::Conditional { .. } => 27,
-        Ty::Infer { .. } => 28,
-        Ty::Component { .. } => 29,
-        Ty::Renders { .. } => 30,
-        Ty::TemplateLiteral { .. } => 31,
-        Ty::Truncated => 32,
+        Ty::Undefined => 4,
+        Ty::TsVoid => 5,
+        Ty::Null => 6,
+        Ty::BoolLit(_) => 7,
+        Ty::Bool => 8,
+        Ty::NumLit(_) => 9,
+        Ty::Num => 10,
+        Ty::BigIntLit(_) => 11,
+        Ty::BigInt => 12,
+        Ty::StrLit(_) => 13,
+        Ty::Str => 14,
+        Ty::UniqueSymbol => 15,
+        Ty::Symbol => 16,
+        Ty::Bound(_) => 17,
+        Ty::Generic(_) => 18,
+        Ty::TypeOf(_) => 19,
+        Ty::Utility(_) => 20,
+        Ty::IndexedAccess { .. } => 21,
+        Ty::Tup { .. } => 22,
+        Ty::Arr(_) => 23,
+        Ty::Fun(_) => 24,
+        Ty::Obj(_) => 25,
+        Ty::Inter(_, _, _) => 26,
+        Ty::Union(_, _, _, _) => 27,
+        Ty::InlineInterface(_) => 28,
+        Ty::Conditional { .. } => 29,
+        Ty::Infer { .. } => 30,
+        Ty::Component { .. } => 31,
+        Ty::Renders { .. } => 32,
+        Ty::TemplateLiteral { .. } => 33,
+        Ty::Truncated => 34,
     }
 }
 
@@ -4970,6 +4987,8 @@ impl<L: Dupe> Ty<L> {
             Ty::Top => Ty::Top,
             Ty::Bot(bot_kind) => Ty::Bot(bot_kind.map_locs(f)),
             Ty::Void => Ty::Void,
+            Ty::Undefined => Ty::Undefined,
+            Ty::TsVoid => Ty::TsVoid,
             Ty::Null => Ty::Null,
             Ty::Symbol => Ty::Symbol,
             Ty::UniqueSymbol => Ty::UniqueSymbol,

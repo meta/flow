@@ -72,6 +72,8 @@ pub fn string_of_ctor_t<L>(t: &Ty<L>) -> &'static str {
         Ty::Top => "Top",
         Ty::Bot(_) => "Bot",
         Ty::Void => "Void",
+        Ty::Undefined => "Undefined",
+        Ty::TsVoid => "TsVoid",
         Ty::Null => "Null",
         Ty::Symbol => "Symbol",
         Ty::UniqueSymbol => "UniqueSymbol",
@@ -579,6 +581,8 @@ fn dump_t<L: Debug + Clone + Dupe>(depth: i32, t: &Ty<L>) -> String {
         Ty::Top => "Top".to_string(),
         Ty::Bot(k) => format!("Bot ({})", dump_bot_kind(k)),
         Ty::Void => "Void".to_string(),
+        Ty::Undefined => "Undefined".to_string(),
+        Ty::TsVoid => "TsVoid".to_string(),
         Ty::Null => "Null".to_string(),
         Ty::Symbol => "Symbol".to_string(),
         Ty::UniqueSymbol => "UniqueSymbol".to_string(),
@@ -1431,6 +1435,8 @@ fn json_of_t_list<L: Debug + Clone + Dupe>(
         Ty::Top
         | Ty::Bot(_)
         | Ty::Void
+        | Ty::Undefined
+        | Ty::TsVoid
         | Ty::Null
         | Ty::Symbol
         | Ty::UniqueSymbol

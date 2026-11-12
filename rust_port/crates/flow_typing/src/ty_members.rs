@@ -72,7 +72,7 @@ enum MembershipBehavior {
 fn membership_behavior(ty: &Ty<ALoc>) -> MembershipBehavior {
     match ty {
         Ty::Bot(_) | Ty::Any(_) => MembershipBehavior::EmptyOrAny,
-        Ty::Void | Ty::Null => MembershipBehavior::Nullish,
+        Ty::Void | Ty::Undefined | Ty::TsVoid | Ty::Null => MembershipBehavior::Nullish,
         _ => MembershipBehavior::Normal,
     }
 }
@@ -93,8 +93,12 @@ fn merge_sources(src1: PropSource, src2: PropSource) -> PropSource {
     }
 }
 
-fn members_of_ty(ty: &Ty<ALoc>) -> (BTreeMap<Name, MemberInfo<ALocTy>>, Vec<String>) {
-    fn ty_of_named_prop(prop: &NamedProp<ALoc>) -> (ALocTy, bool) {
+fn members_of_ty(
+    ts_void: bool,
+    ty: &Ty<ALoc>,
+) -> (BTreeMap<Name, MemberInfo<ALocTy>>, Vec<String>) {
+    fn ty_of_named_prop(ts_void: bool, prop: &NamedProp<ALoc>) -> (ALocTy, bool) {
+        let undefined = || Arc::new(if ts_void { Ty::Undefined } else { Ty::Void });
         match prop {
             NamedProp::Field {
                 t, optional: false, ..
@@ -104,18 +108,13 @@ fn members_of_ty(ty: &Ty<ALoc>) -> (BTreeMap<Name, MemberInfo<ALocTy>>, Vec<Stri
             NamedProp::Field {
                 t, optional: true, ..
             } => (
-                Arc::new(Ty::Union(
-                    false,
-                    t.dupe(),
-                    Arc::new(Ty::Void),
-                    Arc::from([]),
-                )),
+                Arc::new(Ty::Union(false, t.dupe(), undefined(), Arc::from([]))),
                 true,
             ),
             NamedProp::Method { fun, optional } => {
                 let t = Arc::new(Ty::Fun(Box::new(fun.clone())));
                 let t = if *optional {
-                    Arc::new(Ty::Union(false, t, Arc::new(Ty::Void), Arc::from([])))
+                    Arc::new(Ty::Union(false, t, undefined(), Arc::from([])))
                 } else {
                     t
                 };
@@ -125,6 +124,7 @@ fn members_of_ty(ty: &Ty<ALoc>) -> (BTreeMap<Name, MemberInfo<ALocTy>>, Vec<Stri
     }
 
     fn members_of_obj(
+        ts_void: bool,
         obj_props: &[Prop<ALoc>],
     ) -> (BTreeMap<Name, MemberInfo<ALocTy>>, Vec<String>) {
         let mut mems1: BTreeMap<Name, MemberInfo<ALocTy>> = BTreeMap::new();
@@ -138,7 +138,7 @@ fn members_of_ty(ty: &Ty<ALoc>) -> (BTreeMap<Name, MemberInfo<ALocTy>>, Vec<Stri
                     source,
                     def_locs,
                 } => {
-                    let (ty, optional) = ty_of_named_prop(prop);
+                    let (ty, optional) = ty_of_named_prop(ts_void, prop);
                     let member = MemberInfo {
                         ty,
                         optional,
@@ -151,7 +151,7 @@ fn members_of_ty(ty: &Ty<ALoc>) -> (BTreeMap<Name, MemberInfo<ALocTy>>, Vec<Stri
                     m.insert(name.dupe(), member);
                     (m, vec![])
                 }
-                Prop::SpreadProp(ty) => members_of_ty(ty),
+                Prop::SpreadProp(ty) => members_of_ty(ts_void, ty),
                 // TODO(jmbrown): Mapped Type autocomplete
                 Prop::MappedTypeProp { .. } => (BTreeMap::new(), vec![]),
                 Prop::CallProp(_) => (BTreeMap::new(), vec![]),
@@ -341,15 +341,16 @@ fn members_of_ty(ty: &Ty<ALoc>) -> (BTreeMap<Name, MemberInfo<ALocTy>>, Vec<Stri
     }
 
     fn members_of_union(
+        ts_void: bool,
         from_bounds: bool,
         t1: &Ty<ALoc>,
         t2: &Ty<ALoc>,
         ts: &[Arc<Ty<ALoc>>],
     ) -> (BTreeMap<Name, MemberInfo<ALocTy>>, Vec<String>) {
-        let (t1_members, errs1) = members_of_ty(t1);
-        let (t2_members, errs2) = members_of_ty(t2);
+        let (t1_members, errs1) = members_of_ty(ts_void, t1);
+        let (t2_members, errs2) = members_of_ty(ts_void, t2);
         let ts_results: Vec<(BTreeMap<Name, MemberInfo<ALocTy>>, Vec<String>)> =
-            ts.iter().map(|t| members_of_ty(t)).collect();
+            ts.iter().map(|t| members_of_ty(ts_void, t)).collect();
         let (ts_members, errss): (Vec<_>, Vec<_>) = ts_results.into_iter().unzip();
         let mut errs = errs1;
         errs.extend(errs2);
@@ -425,14 +426,15 @@ fn members_of_ty(ty: &Ty<ALoc>) -> (BTreeMap<Name, MemberInfo<ALocTy>>, Vec<Stri
     }
 
     fn members_of_intersection(
+        ts_void: bool,
         t1: &Ty<ALoc>,
         t2: &Ty<ALoc>,
         ts: &[Arc<Ty<ALoc>>],
     ) -> (BTreeMap<Name, MemberInfo<ALocTy>>, Vec<String>) {
-        let (t1_members, errs1) = members_of_ty(t1);
-        let (t2_members, errs2) = members_of_ty(t2);
+        let (t1_members, errs1) = members_of_ty(ts_void, t1);
+        let (t2_members, errs2) = members_of_ty(ts_void, t2);
         let ts_results: Vec<(BTreeMap<Name, MemberInfo<ALocTy>>, Vec<String>)> =
-            ts.iter().map(|t| members_of_ty(t)).collect();
+            ts.iter().map(|t| members_of_ty(ts_void, t)).collect();
         let (ts_members, errss): (Vec<_>, Vec<_>) = ts_results.into_iter().unzip();
         let mut errs = errs1;
         errs.extend(errs2);
@@ -460,10 +462,10 @@ fn members_of_ty(ty: &Ty<ALoc>) -> (BTreeMap<Name, MemberInfo<ALocTy>>, Vec<Stri
     }
 
     match ty {
-        Ty::Obj(obj) => members_of_obj(&obj.obj_props),
-        Ty::Fun(fun) => members_of_ty(&fun.fun_static),
-        Ty::Union(from_bounds, t1, t2, ts) => members_of_union(*from_bounds, t1, t2, ts),
-        Ty::Inter(t1, t2, ts) => members_of_intersection(t1, t2, ts),
+        Ty::Obj(obj) => members_of_obj(ts_void, &obj.obj_props),
+        Ty::Fun(fun) => members_of_ty(ts_void, &fun.fun_static),
+        Ty::Union(from_bounds, t1, t2, ts) => members_of_union(ts_void, *from_bounds, t1, t2, ts),
+        Ty::Inter(t1, t2, ts) => members_of_intersection(ts_void, t1, t2, ts),
         Ty::Bound(..)
         | Ty::Generic(..)
         | Ty::Symbol
@@ -489,6 +491,8 @@ fn members_of_ty(ty: &Ty<ALoc>) -> (BTreeMap<Name, MemberInfo<ALocTy>>, Vec<Stri
         | Ty::Top
         | Ty::Bot(_)
         | Ty::Void
+        | Ty::Undefined
+        | Ty::TsVoid
         | Ty::Null
         | Ty::InlineInterface(_)
         | Ty::TypeOf(_)
@@ -544,7 +548,7 @@ pub fn extract<'a, 'cx>(
             Err("not enough type information to extract members".to_string())
         }
         Ok(this_ty) => {
-            let (members, errors) = members_of_ty(&this_ty);
+            let (members, errors) = members_of_ty(cx.ts_void(), &this_ty);
             Ok(TyMembers { members, errors })
         }
     }

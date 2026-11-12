@@ -225,6 +225,7 @@ fn config_options(config: Option<&Value>) -> Result<Options, String> {
         ),
         strip_root: true,
         ts_syntax: bool_config(config, "experimental.ts_syntax", true),
+        ts_void: bool_config(config, "experimental.ts_void", false),
         tslib_syntax: true,
         type_expansion_recursion_limit: 3,
         use_unknown_in_catch_variables: bool_config(

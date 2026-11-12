@@ -1,0 +1,230 @@
+Error -------------------------------------------------------------------------------------------- assignability.js:10:1
+
+Cannot cast `v` to `undefined` because `void` [1] is incompatible with `undefined` [2]. [incompatible-type]
+
+   assignability.js:10:1
+   10| v as undefined; // ERROR
+       ^
+
+References:
+   assignability.js:1:18
+    1| declare const v: void;
+                        ^^^^ [1]
+   assignability.js:10:6
+   10| v as undefined; // ERROR
+            ^^^^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- assignability.js:11:1
+
+Cannot cast `v` to `?number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   assignability.js:11:1
+   11| v as ?number; // ERROR
+       ^
+
+References:
+   assignability.js:1:18
+    1| declare const v: void;
+                        ^^^^ [1]
+   assignability.js:11:7
+   11| v as ?number; // ERROR
+             ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- assignability.js:13:1
+
+Cannot cast `v` to `number | undefined` because: [incompatible-type]
+ - Either `void` [1] is incompatible with `undefined` [2].
+ - Or `void` [1] is incompatible with `number` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   assignability.js:13:1
+   13| v as number | undefined; // ERROR
+       ^
+
+References:
+   assignability.js:1:18
+    1| declare const v: void;
+                        ^^^^ [1]
+   assignability.js:13:15
+   13| v as number | undefined; // ERROR
+                     ^^^^^^^^^ [2]
+   assignability.js:13:6
+   13| v as number | undefined; // ERROR
+            ^^^^^^ [3]
+
+
+Error -------------------------------------------------------------------------------------------- assignability.js:16:1
+
+Cannot cast `null` to `void` because `null` [1] is incompatible with `void` [2]. [incompatible-type]
+
+   assignability.js:16:1
+   16| null as void; // ERROR
+       ^^^^ [1]
+
+References:
+   assignability.js:16:9
+   16| null as void; // ERROR
+               ^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- assignability.js:17:6
+
+Cannot cast object literal to `{f?: number}` because in property `f`: `void` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   assignability.js:17:6
+   17| ({f: v}) as {f?: number}; // ERROR
+            ^
+
+References:
+   assignability.js:1:18
+    1| declare const v: void;
+                        ^^^^ [1]
+   assignability.js:17:18
+   17| ({f: v}) as {f?: number}; // ERROR
+                        ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- assignability.js:20:3
+
+Cannot call `f` with `v` bound to `x` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   assignability.js:20:3
+   20| f(v); // ERROR
+         ^
+
+References:
+   assignability.js:1:18
+    1| declare const v: void;
+                        ^^^^ [1]
+   assignability.js:19:16
+   19| function f(x?: number) {}
+                      ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------- assignability.js:24:10
+
+Cannot return `1` because `1` [1] is incompatible with `void` [2]. [incompatible-type]
+
+   assignability.js:24:10
+   24|   return 1; // ERROR
+                ^ [1]
+
+References:
+   assignability.js:23:29
+   23| function annotatedReturn(): void {
+                                   ^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- refinements.js:15:3
+
+Cannot cast `sv` to `undefined` because `void` [1] is incompatible with `undefined` [2]. [incompatible-type]
+
+   refinements.js:15:3
+   15|   sv as undefined; // ERROR: `void` stays `void`
+         ^^
+
+References:
+   refinements.js:1:28
+    1| declare const sv: string | void;
+                                  ^^^^ [1]
+   refinements.js:15:9
+   15|   sv as undefined; // ERROR: `void` stays `void`
+               ^^^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- refinements.js:17:5
+
+Cannot get `sv?.length` because property `length` is missing in `String` [1]. [prop-missing]
+
+   refinements.js:17:5
+   17| sv?.length as number | void; // OK
+           ^^^^^^
+
+References:
+   refinements.js:1:19
+    1| declare const sv: string | void;
+                         ^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------- refinements.js:18:5
+
+Cannot get `sv?.length` because property `length` is missing in `String` [1]. [prop-missing]
+
+   refinements.js:18:5
+   18| sv?.length as number | undefined; // OK: the short-circuited chain is `undefined`
+           ^^^^^^
+
+References:
+   refinements.js:1:19
+    1| declare const sv: string | void;
+                         ^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------- refinements.js:24:5
+
+An expression of type `void` cannot be tested for truthiness. [constant-condition]
+
+   24| if (v) {
+           ^
+
+
+Error ------------------------------------------------------------------------------------------ ts_declarations.js:4:24
+
+Cannot call `takeTsUndefinedHandler` with `returnsNumber` bound to `handler` because in the return value: `number` [1]
+is incompatible with `undefined` [2]. [incompatible-type]
+
+   ts_declarations.js:4:24
+   4| takeTsUndefinedHandler(returnsNumber); // ERROR: `undefined` is not `void`
+                             ^^^^^^^^^^^^^
+
+References:
+   ts_declarations.js:1:49
+   1| declare const returnsNumber: (event: string) => number;
+                                                      ^^^^^^ [1]
+   lib.d.ts:2:46
+   2| type TsUndefinedHandler = (event: string) => undefined;
+                                                   ^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------- ts_declarations.js:7:1
+
+Cannot cast `tsReturnsVoid()` to `undefined` because `void` [1] is incompatible with `undefined` [2].
+[incompatible-type]
+
+   ts_declarations.js:7:1
+   7| tsReturnsVoid() as undefined; // ERROR
+      ^^^^^^^^^^^^^^^
+
+References:
+   lib.d.ts:6:35
+   6| declare function tsReturnsVoid(): void;
+                                        ^^^^ [1]
+   ts_declarations.js:7:20
+   7| tsReturnsVoid() as undefined; // ERROR
+                         ^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------- undefined_type.js:4:22
+
+Cannot assign `v` to `x` because `void` [1] is incompatible with `undefined` [2]. [incompatible-type]
+
+   undefined_type.js:4:22
+   4| const x: undefined = v; // ERROR
+                           ^
+
+References:
+   undefined_type.js:3:18
+   3| declare const v: void;
+                       ^^^^ [1]
+   undefined_type.js:4:10
+   4| const x: undefined = v; // ERROR
+               ^^^^^^^^^ [2]
+
+
+
+Found 14 errors

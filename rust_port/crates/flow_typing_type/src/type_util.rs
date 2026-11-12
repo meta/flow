@@ -1917,7 +1917,7 @@ pub fn is_falsy(t: &Type) -> bool {
     use crate::type_::EnumInfoInner;
     match t.deref() {
         TypeInner::DefT(_, def_t) => match &**def_t {
-            D::NullT | D::VoidT => true,
+            D::NullT | D::VoidT | D::TsVoidT => true,
             D::SingletonBoolT { value: false, .. } => true,
             D::EnumValueT(info) => match info.deref().deref() {
                 EnumInfoInner::ConcreteEnum(concrete) => match concrete.representation_t.deref() {
@@ -1997,7 +1997,7 @@ pub fn is_mixed_subtype(l: &Type, mixed_flavor: MixedFlavor) -> bool {
             false
         }
         TypeInner::DefT(_, def_t)
-            if matches!(&**def_t, D::VoidT)
+            if matches!(&**def_t, D::VoidT | D::TsVoidT)
                 && matches!(mixed_flavor, MixedNonMaybe | MixedNonVoid) =>
         {
             false
@@ -2079,7 +2079,10 @@ where
             true
         }
         (TypeInner::DefT(_, l_def), TypeInner::DefT(_, u_def))
-            if matches!((&**l_def, &**u_def), (D::VoidT, D::VoidT)) =>
+            if matches!(
+                (&**l_def, &**u_def),
+                (D::VoidT, D::VoidT) | (D::VoidT | D::TsVoidT, D::TsVoidT)
+            ) =>
         {
             true
         }

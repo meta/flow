@@ -2264,7 +2264,9 @@ pub enum Annot<Loc, T> {
     Any(Box<Loc>),
     Mixed(Box<Loc>),
     Empty(Box<Loc>),
+    /// `void`: TypeScript's `void` under `experimental.ts_void`, `undefined` otherwise.
     Void(Box<Loc>),
+    Undefined(Box<Loc>),
     Null(Box<Loc>),
     Symbol(Box<Loc>),
     UniqueSymbol(Box<Loc>),
@@ -2333,6 +2335,7 @@ impl<Loc: std::hash::Hash, T: std::hash::Hash> std::hash::Hash for Annot<Loc, T>
             | Annot::Mixed(l)
             | Annot::Empty(l)
             | Annot::Void(l)
+            | Annot::Undefined(l)
             | Annot::Null(l)
             | Annot::Symbol(l)
             | Annot::UniqueSymbol(l)
@@ -2541,6 +2544,7 @@ impl<Loc, T> Annot<Loc, T> {
             | Annot::Mixed(box loc)
             | Annot::Empty(box loc)
             | Annot::Void(box loc)
+            | Annot::Undefined(box loc)
             | Annot::Null(box loc)
             | Annot::Symbol(box loc)
             | Annot::UniqueSymbol(box loc)
@@ -2867,6 +2871,7 @@ impl<Loc, T> Annot<Loc, T> {
             Annot::Mixed(loc) => Annot::Mixed(Box::new(f_loc(cx, loc))),
             Annot::Empty(loc) => Annot::Empty(Box::new(f_loc(cx, loc))),
             Annot::Void(loc) => Annot::Void(Box::new(f_loc(cx, loc))),
+            Annot::Undefined(loc) => Annot::Undefined(Box::new(f_loc(cx, loc))),
             Annot::Null(loc) => Annot::Null(Box::new(f_loc(cx, loc))),
             Annot::Symbol(loc) => Annot::Symbol(Box::new(f_loc(cx, loc))),
             Annot::UniqueSymbol(loc) => Annot::UniqueSymbol(Box::new(f_loc(cx, loc))),

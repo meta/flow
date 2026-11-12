@@ -53,6 +53,14 @@ fn run_on_concretized<'cx>(
             }
             return Ok(());
         }
+        TypeInner::DefT(r, def_t) if matches!(def_t.deref(), DefTInner::TsVoidT) => {
+            callee_recorder::add_callee_use(env, callee_recorder::Kind::Tast, l.dupe(), upper);
+            cx.mark_optional_chain(reason.loc().dupe(), lhs_expression.dupe(), true);
+            if let Some(c) = voided_out_collector {
+                c.add(flow_typing_type::type_::void::why(r.dupe()));
+            }
+            return Ok(());
+        }
         TypeInner::DefT(r, def_t) if matches!(def_t.deref(), DefTInner::NullT) => {
             callee_recorder::add_callee_use(env, callee_recorder::Kind::Tast, l.dupe(), upper);
             let void = {

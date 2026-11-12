@@ -1,0 +1,72 @@
+Error --------------------------------------------------------------------------------------------- union_members.js:6:1
+
+Cannot call `f` because `T` [1] is underconstrained by call of `f` [2]. Either add explicit type arguments or cast the
+expression to your expected type. [underconstrained-implicit-instantiation]
+
+   union_members.js:6:1
+   6| f(undefined); // ERROR: underconstrained
+      ^
+
+References:
+   union_members.js:5:20
+   5| declare function f<T>(x: T | void): T;
+                         ^ [1]
+   union_members.js:6:1
+   6| f(undefined); // ERROR: underconstrained
+      ^^^^^^^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- union_members.js:7:1
+
+Cannot call `f` because `T` [1] is underconstrained by call of `f` [2]. Either add explicit type arguments or cast the
+expression to your expected type. [underconstrained-implicit-instantiation]
+
+   union_members.js:7:1
+   7| f(v); // ERROR: underconstrained
+      ^
+
+References:
+   union_members.js:5:20
+   5| declare function f<T>(x: T | void): T;
+                         ^ [1]
+   union_members.js:7:1
+   7| f(v); // ERROR: underconstrained
+      ^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- union_members.js:19:1
+
+Cannot cast `g(...)` to `undefined` because `void` [1] is incompatible with `undefined` [2]. [incompatible-type]
+
+   union_members.js:19:1
+   19| g(v) as undefined; // ERROR
+       ^^^^
+
+References:
+   union_members.js:3:18
+    3| declare const v: void;
+                        ^^^^ [1]
+   union_members.js:19:9
+   19| g(v) as undefined; // ERROR
+               ^^^^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- union_members.js:23:1
+
+Cannot cast `k(...)` to `undefined` because `void` [1] is incompatible with `undefined` [2]. [incompatible-type]
+
+   union_members.js:23:1
+   23| k(v, undefined) as undefined; // ERROR
+       ^^^^^^^^^^^^^^^
+
+References:
+   union_members.js:3:18
+    3| declare const v: void;
+                        ^^^^ [1]
+   union_members.js:23:20
+   23| k(v, undefined) as undefined; // ERROR
+                          ^^^^^^^^^ [2]
+
+
+
+Found 4 errors

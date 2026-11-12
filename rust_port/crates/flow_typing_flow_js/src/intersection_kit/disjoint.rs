@@ -57,7 +57,9 @@ fn tag_of_def_t<'cx>(cx: &mut Context<'cx>, d: &DefTInner) -> Option<TypeTagSet>
     use type_tag::TypeTagInner;
     match d {
         DefTInner::NullT => Some(BTreeSet::from([TypeTag(TypeTagInner::NullTag)])),
-        DefTInner::VoidT => Some(BTreeSet::from([TypeTag(TypeTagInner::VoidTag)])),
+        DefTInner::VoidT | DefTInner::TsVoidT => {
+            Some(BTreeSet::from([TypeTag(TypeTagInner::VoidTag)]))
+        }
         DefTInner::SymbolT | DefTInner::UniqueSymbolT(_) => {
             Some(BTreeSet::from([TypeTag(TypeTagInner::SymbolTag)]))
         }

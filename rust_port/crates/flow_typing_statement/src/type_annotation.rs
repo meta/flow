@@ -1198,7 +1198,7 @@ fn convert_inner<'a>(
             })
         }
         TypeInner::Void { loc, comments } => {
-            let rt = void::at(loc.dupe());
+            let rt = type_::ts_void::annot_at(cx.ts_void(), loc.dupe());
             ast::types::Type::new(TypeInner::Void {
                 loc: (loc.dupe(), rt),
                 comments: comments.clone(),
@@ -1277,7 +1277,7 @@ fn convert_inner<'a>(
             })
         }
         TypeInner::Undefined { loc, comments } => {
-            if !cx.ts_syntax() {
+            if !cx.ts_syntax() && !cx.ts_void() {
                 flow_js_utils::add_output_non_speculating(
                     cx,
                     ErrorMessage::ETSSyntax(Box::new(ETSSyntaxData {
@@ -5706,9 +5706,9 @@ fn has_guard_payload(guard: &ast::types::TypeGuard<ALoc, ALoc>) -> bool {
     guard.guard.1.is_some() || guard.kind == ast::types::TypeGuardKind::Asserts
 }
 
-fn type_guard_return_t(kind: ast::types::TypeGuardKind, loc: &ALoc) -> Type {
+fn type_guard_return_t(cx: &Context, kind: ast::types::TypeGuardKind, loc: &ALoc) -> Type {
     match kind {
-        ast::types::TypeGuardKind::Asserts => type_::void::at(loc.dupe()),
+        ast::types::TypeGuardKind::Asserts => type_::ts_void::annot_at(cx.ts_void(), loc.dupe()),
         _ => type_::bool_module_t::at(loc.dupe()),
     }
 }
@@ -5740,7 +5740,7 @@ fn convert_type_guard_inner<'a>(
         let (_, type_guard_t) = t_prime.loc();
         type_guard_t.dupe()
     });
-    let return_t = type_guard_return_t(kind, &gloc);
+    let return_t = type_guard_return_t(cx, kind, &gloc);
     let id_name_typed: ast::Identifier<ALoc, ALoc> = ast::Identifier::new(ast::IdentifierInner {
         loc: id_name.loc.dupe(),
         name: id_name.name.dupe(),
@@ -5799,7 +5799,7 @@ fn error_type_guard<'a>(
         guard: (x_typed, t_ast),
         comments: comments.cloned(),
     };
-    let return_t = type_guard_return_t(kind, &loc);
+    let return_t = type_guard_return_t(cx, kind, &loc);
     Ok((return_t, guard_prime, None))
 }
 
@@ -5951,11 +5951,11 @@ fn convert_return_annotation_inner<'a>(
                             ))),
                         );
                     }
-                    let void_t = type_::void::at(loc.dupe());
+                    let void_t = type_::ts_void::annot_at(cx.ts_void(), loc.dupe());
                     (void_t, ReturnAnnotation::Missing(loc.dupe()), None)
                 }
                 MethodKind::SetterKind => {
-                    let void_t = type_::void::at(loc.dupe());
+                    let void_t = type_::ts_void::annot_at(cx.ts_void(), loc.dupe());
                     (void_t, ReturnAnnotation::Missing(loc.dupe()), None)
                 }
                 MethodKind::MethodKind { .. } => {

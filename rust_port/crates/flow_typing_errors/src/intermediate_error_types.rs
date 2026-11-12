@@ -573,6 +573,8 @@ pub enum ConstantConditionKind {
     ConstCondGeneral,
     UnawaitedPromise,
     UncalledFunction,
+    /// A condition of TypeScript's `void` type, under `experimental.ts_void`.
+    TsVoid,
 }
 
 #[derive(
