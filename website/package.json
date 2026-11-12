@@ -25,7 +25,7 @@
     "clsx": "^1.2.1",
     "docusaurus-plugin-internaldocs-fb": "1.19.1",
     "file-loader": "^6.2.0",
-    "flow-parser": "0.339.0",
+    "flow-parser": "0.340.0",
     "lz-string": "^1.4.4",
     "monaco-editor": "^0.34.0",
     "monaco-editor-webpack-plugin": "^7.1.0",

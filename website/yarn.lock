@@ -7355,17 +7355,17 @@ flat@^5.0.2:
   resolved "https://registry.yarnpkg.com/flat/-/flat-5.0.2.tgz#8ca6fe332069ffa9d324c327198c598259ceb241"
   integrity sha512-b6suED+5/3rTpUBdG1gupIl8MPFCAMA0QXwmljLhvCUKcUvdE4gWky9zpuGCcXHOsz4J9wPGNWq6OKpmIzz3hQ==
 
-flow-estree@0.339.0:
-  version "0.339.0"
-  resolved "https://registry.yarnpkg.com/flow-estree/-/flow-estree-0.339.0.tgz#79766dd2c763bb5d60a8c5c1ca75a9bb4eac129a"
-  integrity sha512-uPUC/TsoXrHUklSF6qXke8rhHJZhdt/IUcPhN5SHk4V5YeJOQ+3DDoS8l2pOWx4CR6ZXIWS51OpDwpl74U3ZrQ==
+flow-estree@0.340.0:
+  version "0.340.0"
+  resolved "https://registry.yarnpkg.com/flow-estree/-/flow-estree-0.340.0.tgz#e86e368f5f33f4f5cc8871a18d3f79122569ebc2"
+  integrity sha512-LpYdzPWHsfDAc5nNmVrUPLo8UedFkJqogIxNyVO19tG7qBhvNwjs+Oo4TfWB+2Qa4arFevu3vdbxR5tfWps53g==
 
-flow-parser@0.339.0:
-  version "0.339.0"
-  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.339.0.tgz#6a4837ff1e95683ce7b8164e777a28b618751e5c"
-  integrity sha512-v47E/2/ii6g+3QuPzQDohVq5MFqCO+mfLLFT0c2YJq2kjz2StZZ4e9qoqePINIj4W8vqexQ0G0RaefpunjdQAw==
+flow-parser@0.340.0:
+  version "0.340.0"
+  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.340.0.tgz#7e1790634772a462612cc3d3347e2979ca4261af"
+  integrity sha512-zB1DgZcBVes/hHj/upWKLhukHAIkj+6g2o0yVnxCxS1Wyi/YLX513w8XpFLJ7/LUrbSE7CIHJAEZ94smHujt9Q==
   dependencies:
-    flow-estree "0.339.0"
+    flow-estree "0.340.0"
 
 flow-typed@^3.7.0:
   version "3.8.0"
