@@ -351,6 +351,24 @@ References:
                                   ^^^^^^^^^ [3]
 
 
+Error -------------------------------------------------------------------------------- inferred_return_neighbors.js:23:1
+
+Cannot cast `fromConditional(...)()` to `undefined` because `void` [1] is incompatible with `undefined` [2].
+[incompatible-type]
+
+   inferred_return_neighbors.js:23:1
+   23| fromConditional(true)() as undefined; // ERROR
+       ^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   inferred_return_neighbors.js:14:46
+   14| const fromConditional = (c: boolean): (() => void) =>
+                                                    ^^^^ [1]
+   inferred_return_neighbors.js:23:28
+   23| fromConditional(true)() as undefined; // ERROR
+                                  ^^^^^^^^^ [2]
+
+
 Error ---------------------------------------------------------------------------------------------- refinements.js:15:3
 
 Cannot cast `sv` to `undefined` because `void` [1] is incompatible with `undefined` [2]. [incompatible-type]
@@ -458,4 +476,4 @@ References:
 
 
 
-Found 27 errors
+Found 28 errors

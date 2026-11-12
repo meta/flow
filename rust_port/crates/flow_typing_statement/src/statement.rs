@@ -20206,7 +20206,8 @@ pub type DeferredTypeGuardCheck = flow_typing_loc_env::node_cache::DeferredTypeG
 
 /// Whether the contextual return type of a function, whose missing return annotation is at
 /// `loc`, admits `undefined`. TypeScript then infers `undefined` rather than `void` for a
-/// function that returns no value.
+/// function that returns no value. As TypeScript's contextual types, only expected-type hints
+/// count, not the values of neighboring expressions.
 fn contextual_return_admits_undefined<'a>(
     cx: &mut Context<'a>,
     loc: &ALoc,
@@ -20216,16 +20217,23 @@ fn contextual_return_admits_undefined<'a>(
     if !has_hint {
         return Ok(false);
     }
-    let type_::HintEvalResult::HintAvailable(hint, _) = lazy_hint(cx, false, None, reason.dupe())?
-    else {
-        return Ok(false);
-    };
-    let ts = flow_js_utils::flow_js_result_to_job_error(FlowJs::all_possible_concrete_types(
-        cx, reason, &hint,
-    ))?;
-    Ok(ts.iter().any(
-        |t| matches!(t.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::VoidT)),
-    ))
+    // Resolving the hints can type this function again, e.g. through the value hints of the
+    // other cases of a `match`. They are resolved in synthesis mode, where that typing sees no
+    // hints, and only to look at the result.
+    let (_, (admits_undefined, _)) = cx.run_in_synthesis_mode_with_errors(None, |cx| {
+        let type_::HintEvalResult::HintAvailable(hint, _) =
+            lazy_hint(cx, true, None, reason.dupe())?
+        else {
+            return Ok(false);
+        };
+        let ts = flow_js_utils::flow_js_result_to_job_error(FlowJs::all_possible_concrete_types(
+            cx, reason, &hint,
+        ))?;
+        Ok(ts.iter().any(
+            |t| matches!(t.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::VoidT)),
+        ))
+    });
+    admits_undefined
 }
 
 pub fn mk_func_sig<'a>(
