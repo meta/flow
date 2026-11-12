@@ -20,9 +20,6 @@ export type Formatter = (
   cursorOffset: number,
 ) => Promise<FormatResult>;
 
-const [prettierMajor, prettierMinor] = prettierVersion.split('.').map(Number);
-const needsLegacyBoundColon =
-  prettierMajor < 3 || (prettierMajor === 3 && prettierMinor < 10);
 const estreePrinter = estree.printers.estree;
 const flowPlugin = {
   parsers: {
@@ -47,29 +44,6 @@ const flowPlugin = {
   },
   printers: {
     ...estree.printers,
-    estree: {
-      ...estreePrinter,
-      // Match flow-transform/src/transform/print.js for legacy `T: Bound` syntax.
-      print(path: any, options: any, print: any, args: any): any {
-        if (
-          needsLegacyBoundColon &&
-          path.node.type === 'TypeParameter' &&
-          path.node.bound != null &&
-          !path.node.usesExtendsBound
-        ) {
-          return estreePrinter.print(
-            path,
-            options,
-            (...properties) => {
-              const doc = print(...properties);
-              return properties[0] === 'bound' ? [': ', doc] : doc;
-            },
-            args,
-          );
-        }
-        return estreePrinter.print(path, options, print, args);
-      },
-    },
   },
 };
 

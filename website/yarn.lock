@@ -7355,17 +7355,17 @@ flat@^5.0.2:
   resolved "https://registry.yarnpkg.com/flat/-/flat-5.0.2.tgz#8ca6fe332069ffa9d324c327198c598259ceb241"
   integrity sha512-b6suED+5/3rTpUBdG1gupIl8MPFCAMA0QXwmljLhvCUKcUvdE4gWky9zpuGCcXHOsz4J9wPGNWq6OKpmIzz3hQ==
 
-flow-estree@0.338.0:
-  version "0.338.0"
-  resolved "https://registry.yarnpkg.com/flow-estree/-/flow-estree-0.338.0.tgz#8e0b11e457983cb03fbc506d0fce3894b3b936da"
-  integrity sha512-ol4C6cIEcL9nep6G0qa3BuJcO5cZCH07shxNpChJ/TotKQaz5OWtn4IqgpMNF0kHISdOnMApirDwp2LwWL+KhQ==
+flow-estree@0.339.0:
+  version "0.339.0"
+  resolved "https://registry.yarnpkg.com/flow-estree/-/flow-estree-0.339.0.tgz#79766dd2c763bb5d60a8c5c1ca75a9bb4eac129a"
+  integrity sha512-uPUC/TsoXrHUklSF6qXke8rhHJZhdt/IUcPhN5SHk4V5YeJOQ+3DDoS8l2pOWx4CR6ZXIWS51OpDwpl74U3ZrQ==
 
-flow-parser@0.338.0:
-  version "0.338.0"
-  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.338.0.tgz#9af43844156b3d44b93792000200b7948519d399"
-  integrity sha512-GF+ohfrTVlvsNhxfRkON49QKG5j+5oqGb8qpGwE6mYlhIBaXDsss/JzfIxpSwVXgWtw8z8kabf/pNo1jXor5NA==
+flow-parser@0.339.0:
+  version "0.339.0"
+  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.339.0.tgz#6a4837ff1e95683ce7b8164e777a28b618751e5c"
+  integrity sha512-v47E/2/ii6g+3QuPzQDohVq5MFqCO+mfLLFT0c2YJq2kjz2StZZ4e9qoqePINIj4W8vqexQ0G0RaefpunjdQAw==
   dependencies:
-    flow-estree "0.338.0"
+    flow-estree "0.339.0"
 
 flow-typed@^3.7.0:
   version "3.8.0"
@@ -11776,10 +11776,10 @@ postcss@^8.4.21, postcss@^8.4.24, postcss@^8.4.26, postcss@^8.4.33, postcss@^8.4
     picocolors "^1.1.1"
     source-map-js "^1.2.1"
 
-prettier@3.9.10:
-  version "3.9.10"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.9.10.tgz#ac378e432f1a7381518f2e080816bbaefa38d585"
-  integrity sha512-skGHTH1Yb9QvaTC4hWnRTzEYtCpApF0UMBPz+t/0ZPzP8ihefo/btKd+QA7pUE0fEwA1SbS/NmhyEcstdXOIdA==
+prettier@3.10.0:
+  version "3.10.0"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.10.0.tgz#b546ab979f85b850be17ed5e41ea6719e3be8681"
+  integrity sha512-mBi4765LgjO1PFjlEs7pUeK0nb1bw71c+N4/ItfeUWNdY5cV2pRKaFpbbFRYmDJMO+5ZwzGxHRqHxFZna7iv5w==
 
 prettier@^1.19.1:
   version "1.19.1"
