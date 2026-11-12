@@ -11628,13 +11628,16 @@ fn logical<'a>(
             )
         }
         LogicalOperator::NullishCoalesce => {
-            let left = condition(
-                cx,
-                encl_ctx.dupe(),
+            let left = expression_inner(
+                Some(encl_ctx.dupe()),
                 *decl,
+                None,
+                FrozenKind::NotFrozen,
                 Some(has_hint.dupe()),
+                cx,
                 &expr.left,
             )?;
+            cx.add_condition(left.clone(), true);
             let t1 = left.loc().1.dupe();
             let (right, right_throws) =
                 flow_typing_utils::abnormal::catch_expr_control_flow_exception(|| {
@@ -14320,7 +14323,7 @@ fn condition<'a>(
         cx,
         e,
     )?;
-    cx.add_condition(result.clone());
+    cx.add_condition(result.clone(), false);
     Ok(result)
 }
 

@@ -638,14 +638,23 @@ fn try_eval_concrete_type_truthyness<'cx>(cx: &mut Context<'cx>, t: &Type) -> Tr
 fn try_eval_type_truthyness<'cx>(
     cx: &mut Context<'cx>,
     t: &Type,
+    nullish_test: bool,
 ) -> Result<TruthynessResult, JobError> {
     let reason = reason_of_t(t);
     let concrete_types = flow_js_utils::flow_js_result_to_job_error(
         FlowJs::all_possible_concrete_types(cx, reason, t),
     )?;
+    // A TypeScript `void` value may be anything, so as in TypeScript only a condition of type
+    // `void` alone, tested for truthiness, is an error.
     let results: Vec<_> = concrete_types
         .iter()
-        .map(|t| try_eval_concrete_type_truthyness(cx, t))
+        .map(|t| match try_eval_concrete_type_truthyness(cx, t) {
+            TruthynessResult::ConstCondFalsy {
+                constant_condition_kind: ConstantConditionKind::TsVoid,
+                ..
+            } if nullish_test || concrete_types.len() > 1 => TruthynessResult::ConstCondUnknown,
+            result => result,
+        })
         .collect();
     Ok(match results.len() {
         0 => TruthynessResult::ConstCondUnknown,
@@ -712,9 +721,10 @@ fn condition_allowed() -> CheckConditionResult {
 fn use_type_to_check_conditional<'cx>(
     cx: &mut Context<'cx>,
     ttype: &Type,
+    nullish_test: bool,
 ) -> Result<CheckConditionResult, JobError> {
     // We always show warning for errors generated from type inferrence
-    Ok(match try_eval_type_truthyness(cx, ttype)? {
+    Ok(match try_eval_type_truthyness(cx, ttype, nullish_test)? {
         TruthynessResult::ConstCondTruthy {
             constant_condition_kind,
             reason,
@@ -740,8 +750,11 @@ fn use_type_to_check_conditional<'cx>(
     })
 }
 
+/// `nullish_test` is whether `e` is tested for nullishness, as the left operand of `??`, rather
+/// than for truthiness.
 fn check_conditional<'cx>(
     should_report_error: bool,
+    nullish_test: bool,
     cx: &mut Context<'cx>,
     e: &ast::expression::Expression<ALoc, (ALoc, Type)>,
     cached_results: &mut ALocMap<CheckConditionResult>,
@@ -782,8 +795,9 @@ fn check_conditional<'cx>(
         ast::expression::ExpressionInner::Update { .. } => condition_allowed(),
         ast::expression::ExpressionInner::Logical { inner, .. } => match inner.operator {
             ast::expression::LogicalOperator::Or | ast::expression::LogicalOperator::And => {
-                let left_result = check_conditional(false, cx, &inner.left, cached_results)?;
-                let right_result = check_conditional(false, cx, &inner.right, cached_results)?;
+                let left_result = check_conditional(false, false, cx, &inner.left, cached_results)?;
+                let right_result =
+                    check_conditional(false, false, cx, &inner.right, cached_results)?;
                 match (&left_result, &right_result) {
                     (
                         CheckConditionResult::ConditionBanned {
@@ -818,15 +832,33 @@ fn check_conditional<'cx>(
         },
         ast::expression::ExpressionInner::TypeCast { inner, .. } => {
             should_report_error_ref = false;
-            check_conditional(should_report_error, cx, &inner.expression, cached_results)?
+            check_conditional(
+                should_report_error,
+                nullish_test,
+                cx,
+                &inner.expression,
+                cached_results,
+            )?
         }
         ast::expression::ExpressionInner::AsConstExpression { inner, .. } => {
             should_report_error_ref = false;
-            check_conditional(should_report_error, cx, &inner.expression, cached_results)?
+            check_conditional(
+                should_report_error,
+                nullish_test,
+                cx,
+                &inner.expression,
+                cached_results,
+            )?
         }
         ast::expression::ExpressionInner::TSSatisfies { inner, .. } => {
             should_report_error_ref = false;
-            check_conditional(should_report_error, cx, &inner.expression, cached_results)?
+            check_conditional(
+                should_report_error,
+                nullish_test,
+                cx,
+                &inner.expression,
+                cached_results,
+            )?
         }
         ast::expression::ExpressionInner::Member { .. } => condition_allowed(),
         ast::expression::ExpressionInner::OptionalMember { .. } => condition_allowed(),
@@ -836,8 +868,10 @@ fn check_conditional<'cx>(
         ast::expression::ExpressionInner::Conditional { inner, .. } => {
             // we don't need to check or unnest `test` here because they are unnested and checked
             // in `expression` function
-            let left_result = check_conditional(false, cx, &inner.consequent, cached_results)?;
-            let right_result = check_conditional(false, cx, &inner.alternate, cached_results)?;
+            let left_result =
+                check_conditional(false, nullish_test, cx, &inner.consequent, cached_results)?;
+            let right_result =
+                check_conditional(false, nullish_test, cx, &inner.alternate, cached_results)?;
             match (&left_result, &right_result) {
                 (
                     CheckConditionResult::ConditionBanned {
@@ -868,7 +902,7 @@ fn check_conditional<'cx>(
         ast::expression::ExpressionInner::Sequence { inner, .. } => {
             let last = inner.expressions.last().unwrap();
             should_report_error_ref = false;
-            check_conditional(should_report_error, cx, last, cached_results)?
+            check_conditional(should_report_error, nullish_test, cx, last, cached_results)?
         }
         ast::expression::ExpressionInner::Function { .. } => condition_banned_and_truthy(),
         ast::expression::ExpressionInner::ArrowFunction { .. } => condition_banned_and_truthy(),
@@ -882,7 +916,7 @@ fn check_conditional<'cx>(
         ast::expression::ExpressionInner::Unary { inner, .. } => match inner.operator {
             ast::expression::UnaryOperator::Not => {
                 let arg_eval_result =
-                    check_conditional(false, cx, &inner.argument, cached_results)?;
+                    check_conditional(false, false, cx, &inner.argument, cached_results)?;
                 match arg_eval_result {
                     CheckConditionResult::ConditionBanned {
                         is_truthy,
@@ -904,11 +938,11 @@ fn check_conditional<'cx>(
             | ast::expression::UnaryOperator::Plus
             | ast::expression::UnaryOperator::BitNot
             | ast::expression::UnaryOperator::Typeof => {
-                check_conditional(false, cx, &inner.argument, cached_results)?
+                check_conditional(false, false, cx, &inner.argument, cached_results)?
             }
             ast::expression::UnaryOperator::Void => condition_banned_and_falsy(),
             ast::expression::UnaryOperator::Delete | ast::expression::UnaryOperator::Nonnull => {
-                use_type_to_check_conditional(cx, ttype)?
+                use_type_to_check_conditional(cx, ttype, nullish_test)?
             }
             ast::expression::UnaryOperator::Await => condition_allowed(),
         },
@@ -917,7 +951,13 @@ fn check_conditional<'cx>(
                 // vanilla assignment (e.g. `a='test_str'`) is represented by `None`
                 None => {
                     should_report_error_ref = false;
-                    check_conditional(should_report_error, cx, &inner.right, cached_results)?
+                    check_conditional(
+                        should_report_error,
+                        nullish_test,
+                        cx,
+                        &inner.right,
+                        cached_results,
+                    )?
                 }
                 // we don't check compound assignment (e.g. `++`, `--`, `+=`, ...)
                 // because their value could change
@@ -933,7 +973,7 @@ fn check_conditional<'cx>(
         | ast::expression::ExpressionInner::Identifier { .. }
         | ast::expression::ExpressionInner::Record { .. }
         | ast::expression::ExpressionInner::This { .. } => {
-            use_type_to_check_conditional(cx, ttype)?
+            use_type_to_check_conditional(cx, ttype, nullish_test)?
         }
     };
     if should_report_error_ref {
@@ -945,8 +985,14 @@ fn check_conditional<'cx>(
 fn detect_constant_conditions<'cx>(cx: &mut Context<'cx>) -> Result<(), JobError> {
     let all_conditions = cx.get_all_conditions();
     let mut all_condition_results: ALocMap<CheckConditionResult> = ALocMap::new();
-    for condition in all_conditions.iter() {
-        check_conditional(true, cx, condition, &mut all_condition_results)?;
+    for (condition, nullish_test) in all_conditions.iter() {
+        check_conditional(
+            true,
+            *nullish_test,
+            cx,
+            condition,
+            &mut all_condition_results,
+        )?;
     }
     let mut banned_conditions: Vec<(ALoc, bool, bool, ConstantConditionKind, Option<Reason>)> =
         Vec::new();

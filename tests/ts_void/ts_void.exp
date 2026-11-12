@@ -436,6 +436,30 @@ An expression of type `void` cannot be tested for truthiness. [constant-conditio
            ^
 
 
+Error ------------------------------------------------------------------------------------------------ truthiness.js:9:5
+
+An expression of type `void` cannot be tested for truthiness. [constant-condition]
+
+   9| if (v) {} // ERROR
+          ^
+
+
+Error ----------------------------------------------------------------------------------------------- truthiness.js:10:1
+
+An expression of type `void` cannot be tested for truthiness. [constant-condition]
+
+   10| v && 1; // ERROR
+       ^
+
+
+Error ---------------------------------------------------------------------------------------------- truthiness.js:11:11
+
+An expression of type `void` cannot be tested for truthiness. [constant-condition]
+
+   11| const t = v ? 1 : 2; // ERROR
+                 ^
+
+
 Error ------------------------------------------------------------------------------------------ ts_declarations.js:4:24
 
 Cannot call `takeTsUndefinedHandler` with `returnsNumber` bound to `handler` because in the return value: `number` [1]
@@ -490,4 +514,4 @@ References:
 
 
 
-Found 29 errors
+Found 32 errors

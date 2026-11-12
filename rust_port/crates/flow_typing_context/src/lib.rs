@@ -415,7 +415,11 @@ pub struct ComponentT {
     voidable_checks: Vec<VoidableCheck>,
     test_prop_hits_and_misses: IntHashMap<i32, TestPropHitOrMiss>,
     optional_chains_useful: ALocMap<(ExpressionReferenceData<ALoc>, bool)>,
-    conditions: FlowVector<flow_parser::ast::expression::Expression<ALoc, (ALoc, Type)>>,
+    /// Each condition with whether it is the left operand of `??`, tested for nullishness.
+    conditions: FlowVector<(
+        flow_parser::ast::expression::Expression<ALoc, (ALoc, Type)>,
+        bool,
+    )>,
     strict_comparisons: FlowVector<(
         ALoc,
         (
@@ -3049,13 +3053,17 @@ impl<'a> Context<'a> {
     pub fn add_condition(
         &mut self,
         e: flow_parser::ast::expression::Expression<ALoc, (ALoc, Type)>,
+        nullish_test: bool,
     ) {
-        self.ccx_mut().conditions.push(e);
+        self.ccx_mut().conditions.push((e, nullish_test));
     }
 
     pub fn get_all_conditions(
         &self,
-    ) -> FlowVector<flow_parser::ast::expression::Expression<ALoc, (ALoc, Type)>> {
+    ) -> FlowVector<(
+        flow_parser::ast::expression::Expression<ALoc, (ALoc, Type)>,
+        bool,
+    )> {
         self.ccx().conditions.dupe()
     }
 
