@@ -20827,11 +20827,13 @@ pub fn mk_func_sig<'a>(
             let use_op = UseOp::Op(Arc::new(type_::RootUseOp::FunReturnStatement {
                 value: type_::ValueReference::Reason(reason_of_t(return_type).dupe()),
             }));
-            cx.add_post_inference_subtyping_check(
-                return_type.dupe(),
-                use_op,
-                type_::void::make(mk_reason(None, ret_loc.dupe())),
-            );
+            let void_reason = mk_reason(None, ret_loc.dupe());
+            let void_t = if cx.ts_void() {
+                type_::ts_void::make(void_reason)
+            } else {
+                type_::void::make(void_reason)
+            };
+            cx.add_post_inference_subtyping_check(return_type.dupe(), use_op, void_t);
         }
         _ => {}
     }

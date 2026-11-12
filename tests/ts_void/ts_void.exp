@@ -120,6 +120,20 @@ References:
                                    ^^^^ [2]
 
 
+Error ---------------------------------------------------------------------------------------------- constructor.js:8:18
+
+Cannot return number because `number` [1] is incompatible with `void` [2]. [incompatible-type]
+
+   constructor.js:8:18
+   8|   constructor(): number { // ERROR
+                       ^^^^^^ [1]
+
+References:
+   constructor.js:8:16
+   8|   constructor(): number { // ERROR
+                     ^^^^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------------------ function_return.js:22:1
 
 Cannot cast `returnsNumber` to `() => undefined` because in the return value: `number` [1] is incompatible with
@@ -476,4 +490,4 @@ References:
 
 
 
-Found 28 errors
+Found 29 errors
