@@ -46,8 +46,8 @@ References:
     10| class A extends React.Component<{p: ?number, ...}> {
                                              ^^^^^^ [2]
    <BUILTINS>/react.js:141:53
-   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
-                                                            ^^^^ [3]
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | undefined};
+                                                            ^^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------ component_props.js:56:6
@@ -68,8 +68,8 @@ References:
     14| class B extends React.Component<{p: ?number, ...}> {
                                              ^^^^^^ [2]
    <BUILTINS>/react.js:141:53
-   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
-                                                            ^^^^ [3]
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | undefined};
+                                                            ^^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------ component_props.js:58:9
@@ -106,8 +106,8 @@ References:
     18| class C extends React.Component<{p: ?number, ...}> {
                                              ^^^^^^ [2]
    <BUILTINS>/react.js:141:53
-   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
-                                                            ^^^^ [3]
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | undefined};
+                                                            ^^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------ component_props.js:62:9
@@ -144,8 +144,8 @@ References:
     22| class D extends React.Component<{p: ?number, ...}> {
                                              ^^^^^^ [2]
    <BUILTINS>/react.js:141:53
-   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
-                                                            ^^^^ [3]
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | undefined};
+                                                            ^^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------ component_props.js:71:2
@@ -198,8 +198,8 @@ References:
     34| class G extends React.Component<{p: ?number, ...}> {
                                              ^^^^^^ [2]
    <BUILTINS>/react.js:141:53
-   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
-                                                            ^^^^ [3]
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | undefined};
+                                                            ^^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------ component_props.js:80:6
@@ -220,8 +220,8 @@ References:
     38| class H extends React.Component<{p?: ?number, ...}> {
                                               ^^^^^^ [2]
    <BUILTINS>/react.js:141:53
-   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
-                                                            ^^^^ [3]
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | undefined};
+                                                            ^^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------ component_props.js:84:6
@@ -242,8 +242,8 @@ References:
     42| class I extends React.Component<{p?: ?number, ...}> {
                                               ^^^^^^ [2]
    <BUILTINS>/react.js:141:53
-   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
-                                                            ^^^^ [3]
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | undefined};
+                                                            ^^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------ component_props.js:88:6
@@ -264,8 +264,8 @@ References:
     46| class J extends React.Component<{p?: ?number, ...}> {
                                               ^^^^^^ [2]
    <BUILTINS>/react.js:141:53
-   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
-                                                            ^^^^ [3]
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | undefined};
+                                                            ^^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------ component_props.js:98:1
@@ -453,8 +453,8 @@ References:
      3| class Foo extends React.Component<{bar: number, ...}, void> {
                                                 ^^^^^^ [2]
    <BUILTINS>/react.js:141:53
-   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
-                                                            ^^^^ [3]
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | undefined};
+                                                            ^^^^^^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------- default_props_write_only.js:7:2
@@ -857,8 +857,8 @@ References:
     14| class MyComponent1 extends React.Component<{foo: string, bar: number, ...}> {
                                                          ^^^^^^ [2]
    <BUILTINS>/react.js:141:53
-   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
-                                                            ^^^^ [3]
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | undefined};
+                                                            ^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- hoc5.js:30:2
@@ -913,8 +913,8 @@ References:
     14| class MyComponent1 extends React.Component<{foo: string, bar: number, ...}> {
                                                          ^^^^^^ [2]
    <BUILTINS>/react.js:141:53
-   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | void};
-                                                            ^^^^ [3]
+   141|   type InexactPartial<T> = {[K in keyof T]?: T[K] | undefined};
+                                                            ^^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------- hoc_omit_regressions.js:78:2
@@ -1287,8 +1287,8 @@ References:
    107|     | { writeonly current: T | null, ... }
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/react.js:108:8
-   108|     | ((T | null) => void | (() => void))
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   108|     | ((T | null) => undefined | (() => void))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- ref.js:10:11
@@ -1327,7 +1327,7 @@ Cannot cast `foo` to `Foo` because `null` [1] is incompatible with `Foo` [2]. [i
 
 References:
    <BUILTINS>/react.js:108:13
-   108|     | ((T | null) => void | (() => void))
+   108|     | ((T | null) => undefined | (() => void))
                     ^^^^ [1]
    ref.js:11:27
     11| <Foo ref={foo => { foo as Foo }} />; // Error: `Foo` may be null.
@@ -1376,12 +1376,12 @@ References:
    ref.js:15:18
     15| <Foo ref={foo => 42} />; // Error: ref callbacks may only return cleanup functions.
                          ^^ [1]
-   <BUILTINS>/react.js:108:30
-   108|     | ((T | null) => void | (() => void))
-                                     ^^^^^^^^^^ [2]
+   <BUILTINS>/react.js:108:35
+   108|     | ((T | null) => undefined | (() => void))
+                                          ^^^^^^^^^^ [2]
    <BUILTINS>/react.js:108:22
-   108|     | ((T | null) => void | (() => void))
-                             ^^^^ [3]
+   108|     | ((T | null) => undefined | (() => void))
+                             ^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- ref.js:16:11
@@ -1401,15 +1401,15 @@ References:
    ref.js:16:38
     16| <Foo ref={(foo: Foo | null) => () => 42} />; // Error: cleanup functions may not return values.
                                              ^^ [1]
-   <BUILTINS>/react.js:108:36
-   108|     | ((T | null) => void | (() => void))
-                                           ^^^^ [2]
+   <BUILTINS>/react.js:108:41
+   108|     | ((T | null) => undefined | (() => void))
+                                                ^^^^ [2]
    ref.js:16:32
     16| <Foo ref={(foo: Foo | null) => () => 42} />; // Error: cleanup functions may not return values.
                                        ^^^^^^^^ [3]
    <BUILTINS>/react.js:108:22
-   108|     | ((T | null) => void | (() => void))
-                             ^^^^ [4]
+   108|     | ((T | null) => undefined | (() => void))
+                             ^^^^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- ref.js:21:15
@@ -1430,8 +1430,8 @@ References:
    107|     | { writeonly current: T | null, ... }
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/react.js:108:8
-   108|     | ((T | null) => void | (() => void))
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   108|     | ((T | null) => undefined | (() => void))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- ref.js:24:16
@@ -1479,7 +1479,7 @@ References:
     25| <FooExact ref={(foo: FooExact) => {}} />; // Error: `FooExact` may be null.
                              ^^^^^^^^ [1]
    <BUILTINS>/react.js:108:13
-   108|     | ((T | null) => void | (() => void))
+   108|     | ((T | null) => undefined | (() => void))
                     ^^^^ [2]
    <BUILTINS>/react.js:107:7
    107|     | { writeonly current: T | null, ... }
@@ -1796,12 +1796,12 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
                                      ^ [1]
 
 References:
-   <BUILTINS>/react.js:671:41
-   671|   declare type MaybeCleanUpFn = void | (() => void);
-                                                ^^^^^^^^^^ [2]
+   <BUILTINS>/react.js:671:46
+   671|   declare type MaybeCleanUpFn = undefined | (() => void);
+                                                     ^^^^^^^^^^ [2]
    <BUILTINS>/react.js:671:33
-   671|   declare type MaybeCleanUpFn = void | (() => void);
-                                        ^^^^ [3]
+   671|   declare type MaybeCleanUpFn = undefined | (() => void);
+                                        ^^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------ useEffect_hook.js:23:25
@@ -1821,12 +1821,12 @@ References:
    useEffect_hook.js:23:31
     23|   React.useEffect(() => () => 123) // Error: cleanup function should not return a value
                                       ^^^ [1]
-   <BUILTINS>/react.js:671:47
-   671|   declare type MaybeCleanUpFn = void | (() => void);
-                                                      ^^^^ [2]
+   <BUILTINS>/react.js:671:52
+   671|   declare type MaybeCleanUpFn = undefined | (() => void);
+                                                           ^^^^ [2]
    <BUILTINS>/react.js:671:33
-   671|   declare type MaybeCleanUpFn = void | (() => void);
-                                        ^^^^ [4]
+   671|   declare type MaybeCleanUpFn = undefined | (() => void);
+                                        ^^^^^^^^^ [4]
 
 
 Error ---------------------------------------------------------------------------------- useImperativeHandle_hook.js:4:9
@@ -1843,7 +1843,7 @@ References:
    <BUILTINS>/react.js:1541:37
                                              v---
    1541|     declare hook useImperativeHandle<T>(
-   1542|       ref: React.RefSetter<T> | null | void,
+   1542|       ref: React.RefSetter<T> | null | undefined,
    1543|       create: () => T,
    1544|       inputs: ?ReadonlyArray<unknown>,
    1545|     ): void;
@@ -1965,12 +1965,12 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
                                            ^ [1]
 
 References:
-   <BUILTINS>/react.js:671:41
-   671|   declare type MaybeCleanUpFn = void | (() => void);
-                                                ^^^^^^^^^^ [2]
+   <BUILTINS>/react.js:671:46
+   671|   declare type MaybeCleanUpFn = undefined | (() => void);
+                                                     ^^^^^^^^^^ [2]
    <BUILTINS>/react.js:671:33
-   671|   declare type MaybeCleanUpFn = void | (() => void);
-                                        ^^^^ [3]
+   671|   declare type MaybeCleanUpFn = undefined | (() => void);
+                                        ^^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------ useLayoutEffect_hook.js:23:31
@@ -1990,12 +1990,12 @@ References:
    useLayoutEffect_hook.js:23:37
     23|   React.useLayoutEffect(() => () => 123) // Error: cleanup function should not return a value
                                             ^^^ [1]
-   <BUILTINS>/react.js:671:47
-   671|   declare type MaybeCleanUpFn = void | (() => void);
-                                                      ^^^^ [2]
+   <BUILTINS>/react.js:671:52
+   671|   declare type MaybeCleanUpFn = undefined | (() => void);
+                                                           ^^^^ [2]
    <BUILTINS>/react.js:671:33
-   671|   declare type MaybeCleanUpFn = void | (() => void);
-                                        ^^^^ [4]
+   671|   declare type MaybeCleanUpFn = undefined | (() => void);
+                                        ^^^^^^^^^ [4]
 
 
 Error ---------------------------------------------------------------------------------------------- useMemo_hook.js:4:9
@@ -2191,7 +2191,7 @@ References:
    1461|     declare hook useReducer<S, A>(
    1462|       reducer: (S, A) => S,
    1463|       initialState: S,
-   1464|       init: void,
+   1464|       init: undefined,
    1465|     ): [S, Dispatch<A>];
              ------------------^ [3]
    <BUILTINS>/react.js:1467:28
