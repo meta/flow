@@ -8690,6 +8690,7 @@ fn ts_interface_key_sources<E>(
             TypeInner::DefT(_, def_t) => match def_t.deref() {
                 DefTInner::InstanceT(instance) => collect_instance(concretize, seen, instance),
                 DefTInner::ClassT(t) => collect_type(concretize, seen, t),
+                DefTInner::ObjT(obj) => Ok(obj_own_key_sources(obj)),
                 _ => Ok(empty_key_sources()),
             },
             TypeInner::ThisInstanceT(box ThisInstanceTData { instance, .. }) => {

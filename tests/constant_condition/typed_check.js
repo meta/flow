@@ -253,8 +253,8 @@
   type comb = aa & bb;
   type KEYS_AGG = keyof comb;
   let v1: KEYS_AGG = 'a';
-  if (v1 === ('b' as const)) {} // not supposed to error, but there's bug with intersections: T230742740
-  if (v1 !== ('b' as const)) {} // not supposed to error, but there's bug with intersections: T230742740
+  if (v1 === ('b' as const)) {} // ok
+  if (v1 !== ('b' as const)) {} // ok
 }
 
 {

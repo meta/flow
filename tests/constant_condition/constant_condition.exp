@@ -1502,50 +1502,6 @@ References:
                   ^^^^ [2]
 
 
-Error --------------------------------------------------------------------------------------------- typed_check.js:256:7
-
-Cannot compare `KEYS_AGG` [1] to `"b"` [2], because `"a"` [3] is not a subtype of `"b"` [2] and `"b"` [2] is not a
-subtype of `"a"` [3]. In **rare** cases, these types may have overlapping values but lack a subtyping relationship. If
-that happens, you can cast one side to the union of both types to pass the flow check.  [invalid-compare]
-
-   typed_check.js:256:7
-   256|   if (v1 === ('b' as const)) {} // not supposed to error, but there's bug with intersections: T230742740
-              ^^^^^^^^^^^^^^^^^^^^^
-
-References:
-   typed_check.js:255:7
-   255|   let v1: KEYS_AGG = 'a';
-              ^^ [1]
-   typed_check.js:256:15
-   256|   if (v1 === ('b' as const)) {} // not supposed to error, but there's bug with intersections: T230742740
-                      ^^^ [2]
-   typed_check.js:256:7
-   256|   if (v1 === ('b' as const)) {} // not supposed to error, but there's bug with intersections: T230742740
-              ^^ [3]
-
-
-Error --------------------------------------------------------------------------------------------- typed_check.js:257:7
-
-Cannot compare `KEYS_AGG` [1] to `"b"` [2], because `"a"` [3] is not a subtype of `"b"` [2] and `"b"` [2] is not a
-subtype of `"a"` [3]. In **rare** cases, these types may have overlapping values but lack a subtyping relationship. If
-that happens, you can cast one side to the union of both types to pass the flow check.  [invalid-compare]
-
-   typed_check.js:257:7
-   257|   if (v1 !== ('b' as const)) {} // not supposed to error, but there's bug with intersections: T230742740
-              ^^^^^^^^^^^^^^^^^^^^^
-
-References:
-   typed_check.js:255:7
-   255|   let v1: KEYS_AGG = 'a';
-              ^^ [1]
-   typed_check.js:257:15
-   257|   if (v1 !== ('b' as const)) {} // not supposed to error, but there's bug with intersections: T230742740
-                      ^^^ [2]
-   typed_check.js:257:7
-   257|   if (v1 !== ('b' as const)) {} // not supposed to error, but there's bug with intersections: T230742740
-              ^^ [3]
-
-
 Error --------------------------------------------------------------------------------------------- typed_check.js:268:3
 
 Cannot compare `string` [1] to `null` [2], because [2] is null and `string` [3] does not contain null. Perhaps you meant
@@ -1922,4 +1878,4 @@ This condition is falsy. [constant-condition]
 
 
 
-Found 175 errors
+Found 173 errors

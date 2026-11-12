@@ -430,6 +430,81 @@ fn dict_key_at_key_set(keys_reason: &Reason, key: &Type) -> Type {
     type_util::mod_reason_of_t(&|r: Reason| r.reposition(keys_reason.loc().dupe()), key)
 }
 
+/// Whether the concrete type `t` is not an object to `keyof`: a primitive, `mixed`, an array, an
+/// enum, a component, or a type parameter bounded by one. A bound that is not resolved yet is not
+/// known to be one.
+fn is_not_object<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    reason: &Reason,
+    t: &Type,
+) -> Result<bool, FlowJsException> {
+    Ok(match t.deref() {
+        GenericT(box GenericTData { bound, .. }) => {
+            let bounds = helpers::possible_concrete_types_for_inspection(cx, env, reason, bound)?;
+            let mut not_object = !bounds.is_empty();
+            for bound in &bounds {
+                not_object = not_object && is_not_object(cx, env, reason, bound)?;
+            }
+            not_object
+        }
+        DefT(
+            _,
+            deref!(
+                NumGeneralT(_)
+                    | StrGeneralT(_)
+                    | BoolGeneralT
+                    | BigIntGeneralT(_)
+                    | MixedT(_)
+                    | NullT
+                    | VoidT
+                    | SymbolT
+                    | UniqueSymbolT(_)
+                    | SingletonStrT { .. }
+                    | NumericStrKeyT(_)
+                    | SingletonNumT { .. }
+                    | SingletonBoolT { .. }
+                    | SingletonBigIntT { .. }
+                    | ArrT(_)
+                    | EnumValueT(_)
+                    | EnumObjectT { .. }
+                    | ReactAbstractComponentT(_)
+            ),
+        )
+        | TemplateLiteralT { .. }
+        | StringMappingT { .. } => true,
+        _ => false,
+    })
+}
+
+/// The part of the member `t` of an intersection that has keys and values: `t` itself, the union
+/// of its possible types that are objects, or none.
+fn object_part_of_member<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    reason: &Reason,
+    t: &Type,
+) -> Result<Option<Type>, FlowJsException> {
+    let ts = helpers::possible_concrete_types_for_inspection(cx, env, reason, t)?;
+    let mut objects = vec![];
+    for t in &ts {
+        if !is_not_object(cx, env, reason, t)? {
+            objects.push(t.dupe());
+        }
+    }
+    Ok(if objects.len() == ts.len() {
+        Some(t.dupe())
+    } else if objects.is_empty() {
+        None
+    } else {
+        Some(type_util::union_of_ts(
+            type_util::reason_of_t(t).dupe(),
+            objects,
+            None,
+        ))
+    })
+}
+
 /// Whether two evals are both `M[K]` for the same non-generic instance type `M` and the same
 /// generic `K`. Overriding generic methods restate the same indexed access at a new annotation
 /// site (e.g. `ev: HTMLElementEventMap[K]` in every `HTML*Element.addEventListener`), so their
@@ -3650,6 +3725,43 @@ fn __flow_impl<'cx>(
                 ),
             )?;
         }
+        // An element of an intersection is read key by key, so a union key such as
+        // `keyof (A & B)` reads each of its keys from the members that have it.
+        (
+            IntersectionT(_, _),
+            GetElemT(box GetElemTData {
+                use_op,
+                reason,
+                id,
+                from_annot,
+                skip_optional,
+                access_iterables,
+                key_t,
+                tout,
+            }),
+        ) => {
+            let action = ElemAction::ReadElem(Box::new(ReadElemData {
+                id: *id,
+                from_annot: *from_annot,
+                skip_optional: *skip_optional,
+                access_iterables: *access_iterables,
+                tout: (**tout).dupe(),
+            }));
+            rec_flow(
+                cx,
+                env,
+                trace,
+                (
+                    key_t,
+                    &UseT::new(ElemT(Box::new(ElemTData {
+                        use_op: use_op.dupe(),
+                        reason: reason.dupe(),
+                        obj: l.dupe(),
+                        action: Box::new(action),
+                    }))),
+                ),
+            )?;
+        }
         // extends
         (
             IntersectionT(_, rep),
@@ -3748,6 +3860,74 @@ fn __flow_impl<'cx>(
                     };
                 rec_flow(cx, env, trace, (t, &u_inner))?;
             }
+        }
+        // the keys of an intersection are the keys of all its members; a member, or a
+        // possible type of a member, that is not an object has none
+        (
+            IntersectionT(_, rep),
+            GetKeysT {
+                reason: reason_op,
+                t_out: keys,
+                include_symbols,
+            },
+        ) => {
+            let reason = reason_op
+                .dupe()
+                .update_desc(|d| d.map(VirtualReasonDesc::invalidate_rtype_alias));
+            let mut member_keys = vec![];
+            for t in rep.members_iter() {
+                let Some(t) = object_part_of_member(cx, env, &reason, t)? else {
+                    continue;
+                };
+                member_keys.push(flow_typing_tvar::mk_where(
+                    cx,
+                    reason.dupe(),
+                    |cx, tout| {
+                        rec_flow(
+                            cx,
+                            env,
+                            trace,
+                            (
+                                &t,
+                                &UseT::new(GetKeysT {
+                                    reason: reason.dupe(),
+                                    t_out: Box::new(UseT::new(UseT(unknown_use(), tout.dupe()))),
+                                    include_symbols: *include_symbols,
+                                }),
+                            ),
+                        )
+                    },
+                )?);
+            }
+            let union_t = type_util::union_of_ts(reason_op.dupe(), member_keys, None);
+            rec_flow(cx, env, trace, (&union_t, keys))?;
+        }
+        // the values of an intersection are the values of all its members, as its keys
+        // are the keys of all its members
+        (IntersectionT(_, rep), GetValuesT(reason_op, values)) => {
+            let reason = reason_op
+                .dupe()
+                .update_desc(|d| d.map(VirtualReasonDesc::invalidate_rtype_alias));
+            let mut member_values = vec![];
+            for t in rep.members_iter() {
+                let Some(t) = object_part_of_member(cx, env, &reason, t)? else {
+                    continue;
+                };
+                member_values.push(flow_typing_tvar::mk_where(
+                    cx,
+                    reason.dupe(),
+                    |cx, tout| {
+                        rec_flow(
+                            cx,
+                            env,
+                            trace,
+                            (&t, &UseT::new(GetValuesT(reason.dupe(), tout.dupe()))),
+                        )
+                    },
+                )?);
+            }
+            let union_t = type_util::union_of_ts(reason_op.dupe(), member_values, None);
+            rec_flow_t(cx, env, trace, unknown_use(), (&union_t, values))?;
         }
         // predicates: prevent a predicate upper bound from prematurely decomposing
         // an intersection lower bound
@@ -7743,6 +7923,36 @@ fn __flow_impl<'cx>(
         ) => {
             let propref = flow_js_utils::propref_for_elem_t_with_env(cx, env, l);
             elem_action_on_obj(cx, env, trace, use_op, propref, obj, reason, action)?;
+        }
+        // A union key has been split by now, and each of its keys is read from the
+        // members of the intersection.
+        (
+            _,
+            ElemT(box ElemTData {
+                use_op,
+                reason,
+                obj: obj @ deref!(IntersectionT(_, rep)),
+                action:
+                    box ElemAction::ReadElem(box ReadElemData {
+                        id,
+                        from_annot,
+                        skip_optional,
+                        access_iterables,
+                        tout,
+                    }),
+            }),
+        ) => {
+            let get_elem = UseT::new(GetElemT(Box::new(GetElemTData {
+                use_op: use_op.dupe(),
+                reason: reason.dupe(),
+                id: *id,
+                from_annot: *from_annot,
+                skip_optional: *skip_optional,
+                access_iterables: *access_iterables,
+                key_t: l.dupe(),
+                tout: Box::new(tout.dupe()),
+            })));
+            speculation_kit::try_intersection(cx, env, trace, get_elem, obj.dupe(), rep)?;
         }
         (
             _,

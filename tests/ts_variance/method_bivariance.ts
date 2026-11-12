@@ -239,3 +239,26 @@ interface BodyWithThisElement extends WindowishHandlersWithThis {
     listener: (this: BodyWithThisElement, ev: BodyWithThisEventMap[K]) => void,
   ): void;
 }
+
+// An interface can extend an object type, here an intersection, as Node's
+// `TLSSocketEventMap extends SocketEventMap` does, and its keys include the
+// object type's.
+type SocketishEventMap = {close: Animal} & {connect: Animal};
+
+interface TLSSocketishEventMap extends SocketishEventMap {
+  secure: Animal;
+}
+
+interface Socketish {
+  addListener<K extends keyof SocketishEventMap>(
+    type: K,
+    listener: (ev: SocketishEventMap[K]) => void,
+  ): void;
+}
+
+interface TLSSocketish extends Socketish {
+  addListener<K extends keyof TLSSocketishEventMap>(
+    type: K,
+    listener: (ev: TLSSocketishEventMap[K]) => void,
+  ): void;
+}

@@ -1090,7 +1090,7 @@ type FromIntersected =
   | "k096"
   | "k097"
   | "k098"
-  | ... 21 more union members ...
+  | ... 22 more union members ...
 unestimable-operand.js:17:6,17:20
 
 unestimable-operand.js:143:6
