@@ -3079,6 +3079,9 @@ impl<'e> Walker<'e> {
         if !(lf.this_t.1.is_method() && uf.this_t.1.is_method()) {
             self.walk(cx, &uf.this_t.0, &lf.this_t.0)?;
         }
+        if crate::subtyping_kit::ignores_return(cx, uf) {
+            return Ok(());
+        }
         self.walk(cx, &lf.return_t, &uf.return_t)
     }
 

@@ -120,6 +120,75 @@ References:
                                    ^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------------ function_return.js:22:1
+
+Cannot cast `returnsNumber` to `() => undefined` because in the return value: `number` [1] is incompatible with
+`undefined` [2]. [incompatible-type]
+
+   function_return.js:22:1
+   22| returnsNumber as () => undefined; // ERROR
+       ^^^^^^^^^^^^^
+
+References:
+   function_return.js:2:36
+    2| declare const returnsNumber: () => number;
+                                          ^^^^^^ [1]
+   function_return.js:22:24
+   22| returnsNumber as () => undefined; // ERROR
+                              ^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------ function_return.js:23:8
+
+Cannot cast function to `() => void | number` because in the return value: [incompatible-type]
+ - Either `"a"` [1] is incompatible with `number` [2].
+ - Or `"a"` [1] is incompatible with `void` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   function_return.js:23:8
+   23| (() => 'a') as () => void | number; // ERROR
+              ^^^ [1]
+
+References:
+   function_return.js:23:29
+   23| (() => 'a') as () => void | number; // ERROR
+                                   ^^^^^^ [2]
+   function_return.js:23:22
+   23| (() => 'a') as () => void | number; // ERROR
+                            ^^^^ [3]
+
+
+Error ------------------------------------------------------------------------------------------ function_return.js:26:6
+
+Cannot cast function to `(x: number) => void` because in the first parameter: `string` [1] is incompatible with
+`number` [2]. [incompatible-type]
+
+   function_return.js:26:6
+   26| ((x: string) => 1) as (x: number) => void; // ERROR
+            ^^^^^^ [1]
+
+References:
+   function_return.js:26:27
+   26| ((x: string) => 1) as (x: number) => void; // ERROR
+                                 ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------- function_return.js:30:10
+
+Cannot return `1` because `1` [1] is incompatible with `void` [2]. [incompatible-type]
+
+   function_return.js:30:10
+   30|   return 1; // ERROR
+                ^ [1]
+
+References:
+   function_return.js:29:23
+   29| function annotated(): void {
+                             ^^^^ [2]
+
+
 Error ---------------------------------------------------------------------------------------------- refinements.js:15:3
 
 Cannot cast `sv` to `undefined` because `void` [1] is incompatible with `undefined` [2]. [incompatible-type]
@@ -227,4 +296,4 @@ References:
 
 
 
-Found 14 errors
+Found 18 errors

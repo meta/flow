@@ -644,6 +644,19 @@ fn funt_to_funt_check_this_ignore(_use_op: &UseOp) -> Result<(), FlowJsException
     Ok(())
 }
 
+// As in TypeScript, a function type returning `void` accepts functions with
+// any return type. Without `experimental.ts_void`, only a TS-declared one
+// does, and `void` is `undefined` there.
+pub(crate) fn ignores_return(cx: &mut Context, upper: &flow_typing_type::type_::FunType) -> bool {
+    match cx.find_resolved(&upper.return_t).as_deref() {
+        Some(DefT(_, deref!(TsVoidT))) => true,
+        Some(DefT(_, deref!(VoidT))) => {
+            !cx.ts_void() && upper.strictness_kind.is_typescript_loose()
+        }
+        _ => false,
+    }
+}
+
 // Shared FunT ~> FunT subtyping driver. The effect, return, and type-guard
 // checks are identical across callers; the differences are how `this` and
 // regular params are flowed. `check_params` receives the FunCompatibility-
@@ -776,16 +789,7 @@ fn funt_to_funt_check<'cx>(
     }
     let assertion_kind_mismatch =
         is_asserts(&ft1.type_guard) != is_asserts(&ft2.type_guard) && ft2.type_guard.is_some();
-    // As in TypeScript, a TS-declared function type returning `void` accepts
-    // functions with any return type. Without `experimental.ts_void`, `void`
-    // is `undefined`.
-    let ts_void_return = ft2.strictness_kind.is_typescript_loose()
-        && match ft2.return_t.deref() {
-            DefT(_, deref!(TsVoidT)) => true,
-            DefT(_, deref!(VoidT)) => !cx.ts_void(),
-            _ => false,
-        };
-    if !assertion_kind_mismatch && !ts_void_return {
+    if !assertion_kind_mismatch && !ignores_return(cx, ft2) {
         let ret_use_op = VirtualUseOp::Frame(
             Arc::new(VirtualFrameUseOp::FunReturn(Box::new(FunReturnData {
                 lower: type_util::reason_of_t(&ft1.return_t).clone(),
