@@ -12876,6 +12876,7 @@ impl RefinementOfId {
 pub struct NameResolverResult {
     pub scopes: flow_analysis::scope_api::ScopeInfo<ALoc>,
     pub env_values: Values<ALoc>,
+    pub field_init_uses: BTreeMap<ALoc, Vec<ALoc>>,
     pub env_refinement_invalidation_info: FlowOrdMap<ALoc, RefinementInvalidation>,
     pub env_entries: EnvMap<ALoc, EnvEntry<ALoc>>,
     pub providers: Rc<provider_api::Info<ALoc>>,
@@ -12899,6 +12900,7 @@ impl NameResolverResult {
         env_api::EnvInfo {
             scopes: self.scopes,
             env_values: self.env_values,
+            field_init_uses: self.field_init_uses,
             env_refinement_invalidation_info: self.env_refinement_invalidation_info,
             env_entries: self.env_entries,
             type_guard_consistency_maps: self.type_guard_consistency_maps,
@@ -13022,6 +13024,15 @@ pub fn walk_with_prepass<Cx: Context, Fl: Flow<Cx = Cx>>(
         DeadCodeMarker::new(env_walk.cx, jsx_base_name, values, write_entries);
     dead_code_marker.run(typed_program);
     let (env_values, env_entries) = dead_code_marker.into_values_and_entries();
+    let mut field_init_uses: BTreeMap<ALoc, Vec<ALoc>> = BTreeMap::new();
+    for (loc, read) in env_values.iter_kind(ReadKind::FieldInitUse) {
+        if let Some(def_loc) = &read.def_loc {
+            field_init_uses
+                .entry(def_loc.dupe())
+                .or_default()
+                .push(loc.dupe());
+        }
+    }
     let env_refinement_invalidation_info = env_walk.refinement_invalidation_info();
     let type_guard_consistency_maps = env_walk.take_type_guard_consistency_maps();
     let assertion_consistency_maps = env_walk.take_assertion_consistency_maps();
@@ -13044,6 +13055,7 @@ pub fn walk_with_prepass<Cx: Context, Fl: Flow<Cx = Cx>>(
         NameResolverResult {
             scopes,
             env_values,
+            field_init_uses,
             env_refinement_invalidation_info,
             env_entries,
             providers,

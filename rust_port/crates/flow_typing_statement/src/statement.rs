@@ -15249,7 +15249,7 @@ fn check_property_initialization<'a>(
             .any(|write| matches!(write, WriteLoc::Uninitialized(_)))
     }
 
-    let env_values = cx.environment().var_info.env_values.dupe();
+    let var_info = cx.environment().var_info.dupe();
     // A type that depends on the class's type parameters must include `void` for every type the
     // parameters can be, so it is checked with each parameter replaced by `empty`, which every
     // bound accepts, rather than through the parameter's bound.
@@ -15258,14 +15258,7 @@ fn check_property_initialization<'a>(
         .iter()
         .map(|(name, t)| (name.dupe(), empty_t::why(reason_of_t(t).dupe())))
         .collect();
-    let mut early_reads: BTreeMap<&ALoc, Vec<&ALoc>> = BTreeMap::new();
-    for (loc, read) in env_values.iter_kind(ReadKind::FieldInitUse) {
-        if let Some(decl_loc) = &read.def_loc
-            && may_be_unassigned(read)
-        {
-            early_reads.entry(decl_loc).or_default().push(loc);
-        }
-    }
+    let env_values = &var_info.env_values;
     for element in c.body.body.iter() {
         let (decl_loc, name, field) = match element {
             BodyElement::Property(prop) => match property_key_name(&prop.key) {
@@ -15285,7 +15278,17 @@ fn check_property_initialization<'a>(
         let unassigned_at_end = env_values
             .get(&ReadKey::new(ReadKind::FieldInitCheck, decl_loc.dupe()))
             .is_some_and(may_be_unassigned);
-        let reads = early_reads.remove(&decl_loc).unwrap_or_default();
+        let reads: Vec<&ALoc> = var_info
+            .field_init_uses
+            .get(decl_loc)
+            .into_iter()
+            .flatten()
+            .filter(|loc| {
+                env_values
+                    .get(&ReadKey::new(ReadKind::FieldInitUse, (*loc).dupe()))
+                    .is_some_and(may_be_unassigned)
+            })
+            .collect();
         if !unassigned_at_end && reads.is_empty() {
             continue;
         }

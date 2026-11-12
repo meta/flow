@@ -611,6 +611,10 @@ where
 {
     pub scopes: ScopeInfo<L>,
     pub env_values: Values<L>,
+    /// The locations of the `ReadKind::FieldInitUse` reads in `env_values`, keyed by the
+    /// declaration of the field they read, so that checking a class finds the reads of its own
+    /// fields without going through the reads of the whole file.
+    pub field_init_uses: BTreeMap<L, Vec<L>>,
     pub env_refinement_invalidation_info: FlowOrdMap<L, RefinementInvalidation>,
     pub env_entries: EnvMap<L, EnvEntry<L>>,
     pub type_guard_consistency_maps: TypeGuardConsistencyMaps<L>,
@@ -676,6 +680,7 @@ where
         EnvInfo {
             scopes: ScopeInfo::empty(),
             env_values: Values::new(),
+            field_init_uses: BTreeMap::new(),
             env_refinement_invalidation_info: FlowOrdMap::new(),
             env_entries: EnvMap::empty(),
             type_guard_consistency_maps: TypeGuardConsistencyMaps::new(),
