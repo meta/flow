@@ -2684,33 +2684,69 @@ impl<'e> Walker<'e> {
         jsx_props: &Type,
         config: &Type,
     ) -> Result<(), FlowJsException> {
-        let jsx_props = &self.without_key(cx, jsx_props);
         let config = self.resolve(cx, config);
+        let TypeInner::EvalT { defer_use_t, .. } = config.deref() else {
+            return self.walk(cx, jsx_props, &config);
+        };
+        if !matches!(
+            defer_use_t.2.deref(),
+            Destructor::ReactCheckComponentConfig { .. }
+        ) || self.mentions(cx, jsx_props)
+        {
+            return self.walk(cx, jsx_props, &config);
+        }
+        // The concrete types of the props: each object goes to the config on its own, as a union
+        // of them, such as from a spread of a union of objects, flows into it. An element without
+        // attributes gives its component no props.
+        let concrete = self.concretize(cx, jsx_props)?;
+        let mut objects = Vec::new();
+        for t in &concrete {
+            match t.deref() {
+                TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::ObjT(_)) => {
+                    objects.push(t.dupe())
+                }
+                TypeInner::DefT(_, d)
+                    if matches!(d.deref(), DefTInner::NullT | DefTInner::VoidT) => {}
+                _ => return self.walk(cx, jsx_props, &config),
+            }
+        }
+        if concrete.is_empty() {
+            return self.walk(cx, jsx_props, &config);
+        }
+        for object in &objects {
+            self.walk_object_to_config(cx, object, &config)?;
+        }
+        Ok(())
+    }
+
+    /// An object of props against the config of a component of component syntax, `config`: its
+    /// props go to the declared props by name, generic values last, and the rest to the rest
+    /// parameter.
+    fn walk_object_to_config<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        object: &Type,
+        config: &Type,
+    ) -> Result<(), FlowJsException> {
         let TypeInner::EvalT {
             type_: rest,
             defer_use_t,
             ..
         } = config.deref()
         else {
-            return self.walk(cx, jsx_props, &config);
+            return Ok(());
         };
         let TypeDestructorTInner(_, reason, d) = defer_use_t.deref();
         let Destructor::ReactCheckComponentConfig { props } = d.deref() else {
-            return self.walk(cx, jsx_props, &config);
+            return Ok(());
         };
-        let resolved = self.resolve(cx, jsx_props);
-        let TypeInner::DefT(_, ld) = resolved.deref() else {
-            return self.walk(cx, jsx_props, &config);
+        let object = &self.without_key(cx, object);
+        let TypeInner::DefT(_, ld) = object.deref() else {
+            return Ok(());
         };
-        let lo = match ld.deref() {
-            DefTInner::ObjT(lo) => lo,
-            // An element without attributes gives its component no props.
-            DefTInner::NullT | DefTInner::VoidT => return Ok(()),
-            _ => return self.walk(cx, jsx_props, &config),
+        let DefTInner::ObjT(lo) = ld.deref() else {
+            return Ok(());
         };
-        if self.mentions(cx, jsx_props) {
-            return self.walk(cx, jsx_props, &config);
-        }
         let lp = cx.find_props(lo.props_tmap.dupe());
         let dict = obj_type::get_dict_opt(&lo.flags.obj_kind).cloned();
         // As with arguments, generic values go after the other props.
@@ -2744,7 +2780,7 @@ impl<'e> Walker<'e> {
         )?;
         let env = self.env;
         match sandbox(cx, env, self.preserve, |cx| {
-            reverse_config(cx, env, reason, props, jsx_props)
+            reverse_config(cx, env, reason, props, object)
         })?
         .flatten()
         {
