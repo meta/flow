@@ -1,6 +1,6 @@
 {
   "name": "flow-transform",
-  "version": "0.339.0",
+  "version": "0.340.0",
   "description": "Tools built on top of flow-estree to enable codebase transformation",
   "homepage": "https://flow.org",
   "license": "MIT",
@@ -13,9 +13,9 @@
     "@babel/code-frame": "^7.16.0",
     "esquery": "^1.4.0",
     "flow-enums-runtime": "^0.0.6",
-    "flow-eslint": "0.339.0",
-    "flow-estree": "0.339.0",
-    "flow-parser": "0.339.0",
+    "flow-eslint": "0.340.0",
+    "flow-estree": "0.340.0",
+    "flow-parser": "0.340.0",
     "string-width": "4.2.3"
   },
   "peerDependencies": {

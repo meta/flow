@@ -1,6 +1,6 @@
 {
   "name": "try-flow-website-js",
-  "version": "0.339.0",
+  "version": "0.340.0",
   "description": "An NPM package to hold compiled `flow.js` and libdefs for every Flow version.",
   "license": "MIT",
   "repository": "meta/flow",

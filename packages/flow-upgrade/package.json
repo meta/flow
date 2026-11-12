@@ -1,6 +1,6 @@
 {
   "name": "flow-upgrade",
-  "version": "2.50.0",
+  "version": "2.51.0",
   "description": "A utility for upgrading your codebase to the latest version of Flow.",
   "engines": {
     "node": ">=18"
@@ -32,10 +32,10 @@
   "dependencies": {
     "@babel/highlight": "^7.18.6",
     "chalk": "^2.0.1",
-    "flow-eslint": "^0.339.0",
-    "flow-estree": "^0.339.0",
-    "flow-parser": "^0.339.0",
-    "flow-transform": "^0.339.0",
+    "flow-eslint": "^0.340.0",
+    "flow-estree": "^0.340.0",
+    "flow-parser": "^0.340.0",
+    "flow-transform": "^0.340.0",
     "fs-extra": "10.1.0",
     "klaw-sync": "^6.0.0",
     "ora": "^5.4.1",

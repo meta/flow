@@ -1,3 +1,32 @@
+### 0.340.0
+
+Likely to cause new Flow errors:
+* Class component configs are computed with `React.ReactManagedAttributes`
+* Errors on keys read from `keyof` over an object with an indexer are now reported at the use of the key instead of at the indexer
+* Arguments of `Object` static method calls that Flow doesn't type specially now get contextual types from the method's signature, like other method calls.
+* `use()` calls in functions that Flow can't place in a component or hook now get the `react-rule-hook-conditional` error code instead of `react-rule-hook`.
+* JSX intrinsics are typed by `React.JSX.IntrinsicElements` instead of `$JSXIntrinsics`, which Flow no longer reads. `experimental.jsx_intrinsic_elements` only accepts `true`.
+* Class component configs always merge default props with `React.ReactManagedAttributes`. `experimental.react_managed_attributes` only accepts `true`.
+
+New Features:
+* Support fractional and other finite numeric property keys in Flow, using JavaScript property-name stringification.
+
+Notable bug fixes:
+* `!= null` and truthiness refinements remove `null` and `undefined` from unions with optional or nested maybe members also when the union is optimized
+* Truthiness and falsiness refinements filter intersection members represented by chains of type variables
+* Methods of an interface with a construct signature, such as `Number.isFinite` and `Date.parse`, can be read without their receiver, like class statics.
+* Reading `prototype` from a function or a callable object that doesn't declare it gives `any`, as declared by the builtin `Function`, instead of a `prop-missing` error
+* Preserve nominal and intrinsic render types in match pattern bindings.
+* `flow-node` no longer drops script arguments that equal a Node option passed before the script path.
+* `flow-upgrade` adds the `nameFunctionTypeParams` and `nameIndexerKeys` codemods, and `removeExplicitlyExactObjectTypeSyntax` also removes `ambiguous-object-type` lint comments.
+
+Parser:
+* Parse TypeScript's definite assignment assertions on class fields, `value!: T`, and variables, `let x!: T`
+* Fixed parse time that doubled with each level of nested conditional expressions with parenthesized consequents
+* `PropertyDescriptor` and `PropertyDescriptorMap` are now interfaces, as in TypeScript
+* `Object` is now declared as `interface Object` + `interface ObjectConstructor`, as in TypeScript
+* `Function` is now declared as `interface Function` + `interface FunctionConstructor`, with `CallableFunction` and `NewableFunction`, as in TypeScript
+
 ### 0.339.0
 
 Breaking Changes:
