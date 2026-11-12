@@ -17,8 +17,8 @@ Cannot cast `3` to `...` because `3` [1] is incompatible with component Fragment
 
 References:
    <BUILTINS>/react.js:1360:5
-             v-------------------------------------------------------------
-   1360|     declare component Fragment<Renders extends React$Node = void>(
+             v------------------------------------------------------------------
+   1360|     declare component Fragment<Renders extends React$Node = undefined>(
    1361|       children?: Renders,
    1362|     ) renders Renders;
              -----------------^ [2]
