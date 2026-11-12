@@ -15,6 +15,7 @@ const path = require('node:path');
 const {test} = require('node:test');
 const {transformFileSync} = require('@babel/core');
 const flowParser = require('flow-parser');
+const {version: prettierVersion} = require('prettier/standalone');
 
 function loadModule(name, overrides = {}) {
   const filename = path.resolve(__dirname, '../src/try-flow', name);
@@ -79,6 +80,8 @@ const fixtures = {
   'comments and JSX':
     '/* leading */\nconst el: React.Node=<div title="hi">{name}</div>; // trailing\n',
   enums: 'enum Status { Active, Inactive }',
+  'explicit enum representations':
+    'enum S of string {A="a",...} enum N of number {A=1} enum B of boolean {A=true} enum Y of symbol {}',
   components:
     'component Foo(name: string) renders React.Node { return <div>{name}</div>; }',
   'hooks and type guards':
@@ -139,6 +142,7 @@ test('preserves hashbangs, including comment-only scripts', async () => {
 test('uses flow-parser explicitly and rejects invalid programs', async () => {
   let options;
   let mutations = 0;
+  let printerArguments;
   const {formatCode} = loadModule('formatCode.js', {
     'flow-parser': {
       ...flowParser,
@@ -146,9 +150,10 @@ test('uses flow-parser explicitly and rejects invalid programs', async () => {
         options = opts;
         return flowParser.parse(code, opts);
       },
-      mutateESTreeASTForPrettier(ast) {
+      mutateESTreeASTForPrettier(ast, visitorKeys, version) {
         mutations++;
-        flowParser.mutateESTreeASTForPrettier(ast);
+        printerArguments = {visitorKeys, version};
+        flowParser.mutateESTreeASTForPrettier(ast, visitorKeys, version);
       },
     },
   });
@@ -162,6 +167,10 @@ test('uses flow-parser explicitly and rejects invalid programs', async () => {
     throwOnParseErrors: true,
   }); // OK
   assert.equal(mutations, 1); // OK
+  assert.deepEqual(printerArguments, {
+    visitorKeys: undefined,
+    version: prettierVersion,
+  }); // OK
   await assert.rejects(formatCode('const x = ;', 0), SyntaxError); // OK
 });
 

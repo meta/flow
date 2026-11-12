@@ -9,6 +9,11 @@
  */
 
 import {t, transform} from '../test_codemods/test-utils';
+import * as prettier from 'prettier';
+
+const [prettierMajor, prettierMinor] = prettier.version.split('.').map(Number);
+const bodyCommentBlankLine =
+  prettierMajor > 3 || (prettierMajor === 3 && prettierMinor >= 10) ? '\n' : '';
 
 describe('function parameter spacing', () => {
   function codemod(code: string) {
@@ -47,7 +52,7 @@ const foo = function foo(a, b, c, d, e, f) {
 
 const foo = (a, b, c, d, e, f) => {
   // body
-  // the above double empty line should be collapsed
+${bodyCommentBlankLine}  // the above double empty line should be collapsed
 };
 `);
   });
@@ -79,7 +84,7 @@ const foo = (
   that_forces_this_onto_a_new_line,
 ) => {
   // body
-  // the above double empty line should be collapsed
+${bodyCommentBlankLine}  // the above double empty line should be collapsed
 };
 `);
   });
@@ -192,7 +197,7 @@ const foo = [].forEach(function foo(a, b, c) {
 
 const foo = [].forEach((a, b, c) => {
   // body
-  // the above double empty line should be collapsed
+${bodyCommentBlankLine}  // the above double empty line should be collapsed
 });
 `);
   });
@@ -232,7 +237,7 @@ const foo = [].forEach(
     _function,
   ) => {
     // body
-    // the above double empty line should be collapsed
+${bodyCommentBlankLine}    // the above double empty line should be collapsed
   },
 );
 `); // OK

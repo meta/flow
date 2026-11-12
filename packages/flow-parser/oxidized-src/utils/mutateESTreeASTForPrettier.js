@@ -52,6 +52,7 @@ function transformChainExpression(
 export default function mutate(
   rootNode: Program,
   visitorKeys: ?VisitorKeysType,
+  prettierVersion?: string,
 ): void {
   // Since we don't return the result of `transform` we need to be careful not to replace the Program root node.
   SimpleTransform.transform(rootNode, {
@@ -129,6 +130,13 @@ export default function mutate(
     },
     visitorKeys,
   });
+
+  if (prettierVersion != null) {
+    const [major, minor] = prettierVersion.split('.').map(Number);
+    if (major > 3 || (major === 3 && minor >= 10)) {
+      return;
+    }
+  }
 
   SimpleTraverser.traverse(rootNode, {
     enter() {},

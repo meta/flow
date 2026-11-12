@@ -11,11 +11,16 @@
 import type {Program} from 'flow-estree';
 
 import {SimpleTraverser} from 'flow-parser';
+import * as prettier from 'prettier';
 import {parse, print} from '../../src';
 import {parse as parseTS} from '@typescript-eslint/parser';
 import {visitorKeys as tsVisitorKeys} from '@typescript-eslint/visitor-keys';
 // $FlowExpectedError[cannot-resolve-module]
 import prettierConfig from '../../../.prettierrc.json';
+
+const [prettierMajor, prettierMinor] = prettier.version.split('.').map(Number);
+const modernFlowAST =
+  prettierMajor > 3 || (prettierMajor === 3 && prettierMinor >= 10);
 
 function referenceShapes(ast: Program): Array<mixed> {
   const shapes = [];
@@ -84,8 +89,15 @@ describe('Prettier type-argument compatibility', () => {
     const argumentsNode = reference.typeArguments;
     const output = await print(ast, code, prettierConfig);
     expect(output).toBe(code + '\n'); // OK
-    expect(reference).not.toHaveProperty('typeArguments'); // OK
-    expect(reference).toHaveProperty('typeParameters', argumentsNode); // OK
+    if (modernFlowAST) {
+      expect(reference).not.toHaveProperty('typeParameters'); // OK
+      expect(reference.typeArguments).toBe(argumentsNode); // OK
+    } else {
+      expect(reference).not.toHaveProperty('typeArguments'); // OK
+      expect(
+        Object.getOwnPropertyDescriptor(reference, 'typeParameters')?.value,
+      ).toBe(argumentsNode); // OK
+    }
   });
 
   // Shared references must not lose arguments on a second traversal visit.

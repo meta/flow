@@ -8,6 +8,7 @@
  */
 
 declare module 'prettier/standalone' {
+  declare export const version: string;
   declare export function formatWithCursor(
     code: string,
     options: {

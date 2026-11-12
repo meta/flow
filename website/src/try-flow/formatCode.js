@@ -8,7 +8,10 @@
  */
 
 import {mutateESTreeASTForPrettier, parse} from 'flow-parser';
-import {formatWithCursor} from 'prettier/standalone';
+import {
+  formatWithCursor,
+  version as prettierVersion,
+} from 'prettier/standalone';
 import * as estree from 'prettier/plugins/estree';
 
 export type FormatResult = {formatted: string, cursorOffset: number};
@@ -17,6 +20,9 @@ export type Formatter = (
   cursorOffset: number,
 ) => Promise<FormatResult>;
 
+const [prettierMajor, prettierMinor] = prettierVersion.split('.').map(Number);
+const needsLegacyBoundColon =
+  prettierMajor < 3 || (prettierMajor === 3 && prettierMinor < 10);
 const estreePrinter = estree.printers.estree;
 const flowPlugin = {
   parsers: {
@@ -27,7 +33,7 @@ const flowPlugin = {
           babel: false,
           throwOnParseErrors: true,
         });
-        mutateESTreeASTForPrettier(ast);
+        mutateESTreeASTForPrettier(ast, undefined, prettierVersion);
         if (ast.interpreter != null) {
           ast.comments.unshift(ast.interpreter);
           delete ast.interpreter;
@@ -46,6 +52,7 @@ const flowPlugin = {
       // Match flow-transform/src/transform/print.js for legacy `T: Bound` syntax.
       print(path: any, options: any, print: any, args: any): any {
         if (
+          needsLegacyBoundColon &&
           path.node.type === 'TypeParameter' &&
           path.node.bound != null &&
           !path.node.usesExtendsBound

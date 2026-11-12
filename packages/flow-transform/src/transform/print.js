@@ -18,6 +18,10 @@ import * as prettier from 'prettier';
 import {mutateESTreeASTCommentsForPrettier} from './comments/comments';
 import type {VisitorKeysType} from 'flow-parser';
 
+const [prettierMajor, prettierMinor] = prettier.version.split('.').map(Number);
+const needsLegacyBoundColon =
+  prettierMajor < 3 || (prettierMajor === 3 && prettierMinor < 10);
+
 /**
  * Prints the AST as source code, mutating it in place for Prettier.
  * Treat the input AST as consumed after printing.
@@ -73,7 +77,7 @@ async function printProgram(
   );
 
   // Fix up the AST to match what prettier expects.
-  mutateESTreeASTForPrettier(program, visitorKeys);
+  mutateESTreeASTForPrettier(program, visitorKeys, prettier.version);
 
   const prettierEstreePlugin = require('prettier/plugins/estree');
   const estreePrinter = prettierEstreePlugin.printers.estree;
@@ -111,6 +115,7 @@ async function printProgram(
                 args: unknown,
               ): unknown {
                 if (
+                  needsLegacyBoundColon &&
                   path.node.type === 'TypeParameter' &&
                   path.node.bound != null &&
                   !path.node.usesExtendsBound
