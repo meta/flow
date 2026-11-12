@@ -134,25 +134,25 @@ References:
                      ^^^^^^^^ [2]
 
 
-Error ------------------------------------------------------------------------------------------ function_return.js:22:1
+Error ------------------------------------------------------------------------------------------ function_return.js:28:1
 
 Cannot cast `returnsNumber` to `() => undefined` because in the return value: `number` [1] is incompatible with
 `undefined` [2]. [incompatible-type]
 
-   function_return.js:22:1
-   22| returnsNumber as () => undefined; // ERROR
+   function_return.js:28:1
+   28| returnsNumber as () => undefined; // ERROR
        ^^^^^^^^^^^^^
 
 References:
    function_return.js:2:36
     2| declare const returnsNumber: () => number;
                                           ^^^^^^ [1]
-   function_return.js:22:24
-   22| returnsNumber as () => undefined; // ERROR
+   function_return.js:28:24
+   28| returnsNumber as () => undefined; // ERROR
                               ^^^^^^^^^ [2]
 
 
-Error ------------------------------------------------------------------------------------------ function_return.js:23:8
+Error ------------------------------------------------------------------------------------------ function_return.js:29:8
 
 Cannot cast function to `() => void | number` because in the return value: [incompatible-type]
  - Either `"a"` [1] is incompatible with `number` [2].
@@ -161,45 +161,45 @@ Cannot cast function to `() => void | number` because in the return value: [inco
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
-   function_return.js:23:8
-   23| (() => 'a') as () => void | number; // ERROR
+   function_return.js:29:8
+   29| (() => 'a') as () => void | number; // ERROR
               ^^^ [1]
 
 References:
-   function_return.js:23:29
-   23| (() => 'a') as () => void | number; // ERROR
+   function_return.js:29:29
+   29| (() => 'a') as () => void | number; // ERROR
                                    ^^^^^^ [2]
-   function_return.js:23:22
-   23| (() => 'a') as () => void | number; // ERROR
+   function_return.js:29:22
+   29| (() => 'a') as () => void | number; // ERROR
                             ^^^^ [3]
 
 
-Error ------------------------------------------------------------------------------------------ function_return.js:26:6
+Error ------------------------------------------------------------------------------------------ function_return.js:32:6
 
 Cannot cast function to `(x: number) => void` because in the first parameter: `string` [1] is incompatible with
 `number` [2]. [incompatible-type]
 
-   function_return.js:26:6
-   26| ((x: string) => 1) as (x: number) => void; // ERROR
+   function_return.js:32:6
+   32| ((x: string) => 1) as (x: number) => void; // ERROR
             ^^^^^^ [1]
 
 References:
-   function_return.js:26:27
-   26| ((x: string) => 1) as (x: number) => void; // ERROR
+   function_return.js:32:27
+   32| ((x: string) => 1) as (x: number) => void; // ERROR
                                  ^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------- function_return.js:30:10
+Error ----------------------------------------------------------------------------------------- function_return.js:36:10
 
 Cannot return `1` because `1` [1] is incompatible with `void` [2]. [incompatible-type]
 
-   function_return.js:30:10
-   30|   return 1; // ERROR
+   function_return.js:36:10
+   36|   return 1; // ERROR
                 ^ [1]
 
 References:
-   function_return.js:29:23
-   29| function annotated(): void {
+   function_return.js:35:23
+   35| function annotated(): void {
                              ^^^^ [2]
 
 

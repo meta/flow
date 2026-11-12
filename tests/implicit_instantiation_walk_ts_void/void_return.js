@@ -5,3 +5,7 @@ apply(() => 1, (h: () => void) => {}) as number; // OK
 
 declare function useCallback<T>(f: (x: T) => void, x: T): T;
 useCallback((x: number) => 'a', 1) as number; // OK
+
+type Id<T> = T;
+declare function useAliased<T>(f: (x: T) => Id<void>, x: T): T;
+useAliased((x: number) => 'a', 1) as number; // OK

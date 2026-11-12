@@ -646,15 +646,22 @@ fn funt_to_funt_check_this_ignore(_use_op: &UseOp) -> Result<(), FlowJsException
 
 // As in TypeScript, a function type returning `void` accepts functions with
 // any return type. Without `experimental.ts_void`, only a TS-declared one
-// does, and `void` is `undefined` there.
-pub(crate) fn ignores_return(cx: &mut Context, upper: &flow_typing_type::type_::FunType) -> bool {
-    match cx.find_resolved(&upper.return_t).as_deref() {
-        Some(DefT(_, deref!(TsVoidT))) => true,
-        Some(DefT(_, deref!(VoidT))) => {
-            !cx.ts_void() && upper.strictness_kind.is_typescript_loose()
-        }
-        _ => false,
+// does, and `void` is `undefined` there. `concretize` gives the types the
+// upper return type stands for.
+pub(crate) fn ignores_return<'cx>(
+    cx: &mut Context<'cx>,
+    upper: &flow_typing_type::type_::FunType,
+    concretize: impl FnOnce(&mut Context<'cx>, &Type) -> Result<Vec<Type>, FlowJsException>,
+) -> Result<bool, FlowJsException> {
+    if !cx.ts_void() {
+        return Ok(upper.strictness_kind.is_typescript_loose()
+            && matches!(upper.return_t.deref(), DefT(_, deref!(VoidT))));
     }
+    let ts = concretize(cx, &upper.return_t)?;
+    Ok(!ts.is_empty()
+        && ts
+            .iter()
+            .all(|t| matches!(t.deref(), DefT(_, deref!(TsVoidT)))))
 }
 
 // Shared FunT ~> FunT subtyping driver. The effect, return, and type-guard
@@ -789,7 +796,18 @@ fn funt_to_funt_check<'cx>(
     }
     let assertion_kind_mismatch =
         is_asserts(&ft1.type_guard) != is_asserts(&ft2.type_guard) && ft2.type_guard.is_some();
-    if !assertion_kind_mismatch && !ignores_return(cx, ft2) {
+    // An unresolved return type is an inference variable, which isn't `void`
+    // whatever flowed into it so far.
+    let ignores_return = ignores_return(cx, ft2, |cx, t| match cx.find_resolved(t) {
+        Some(t) => FlowJs::possible_concrete_types_for_inspection_with_env(
+            cx,
+            env,
+            type_util::reason_of_t(&t),
+            &t,
+        ),
+        None => Ok(Vec::new()),
+    })?;
+    if !assertion_kind_mismatch && !ignores_return {
         let ret_use_op = VirtualUseOp::Frame(
             Arc::new(VirtualFrameUseOp::FunReturn(Box::new(FunReturnData {
                 lower: type_util::reason_of_t(&ft1.return_t).clone(),

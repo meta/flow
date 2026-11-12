@@ -6,6 +6,12 @@ type V = void;
 returnsNumber as () => V; // OK
 type Callback<R> = () => R;
 returnsNumber as Callback<void>; // OK
+type O = {k: void};
+returnsNumber as () => O['k']; // OK
+type Cond<T> = T extends string ? void : number;
+returnsNumber as () => Cond<string>; // OK
+type Id<T> = T;
+returnsNumber as () => Id<void>; // OK
 declare function takesCallback(cb: (x: number) => void): void;
 takesCallback(x => x * 2); // OK
 ({m: () => 1}) as {m(): void}; // OK
