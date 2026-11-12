@@ -3394,6 +3394,30 @@ fn __flow_impl<'cx>(
                 tout,
             )?;
         }
+        // The type-level keys of a union are the keys of every member: the keys of
+        // one member that a `keyof` upper bound of the whole union accepts.
+        (
+            UnionT(_, rep),
+            GetKeysT {
+                reason: reason_op,
+                t_out: keys,
+                include_symbols: true,
+            },
+        ) => {
+            let first = rep.members_iter().next().unwrap();
+            let first_keys = Type::new(KeysT(reason_op.dupe(), first.dupe()));
+            let union_keys = Type::new(KeysT(reason_op.dupe(), l.dupe()));
+            let mut shared_keys = vec![];
+            for key in
+                helpers::possible_concrete_types_for_inspection(cx, env, reason_op, &first_keys)?
+            {
+                if speculative_subtyping_succeeds(cx, env, &key, &union_keys)? {
+                    shared_keys.push(key);
+                }
+            }
+            let union_t = type_util::union_of_ts(reason_op.dupe(), shared_keys, None);
+            rec_flow(cx, env, trace, (&union_t, keys))?;
+        }
         // Shortcut for indexed accesses with the same type as the dict key.
         #[rustfmt::skip]
         (

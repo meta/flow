@@ -424,5 +424,65 @@ References:
                   ^^^ [1]
 
 
+Error ---------------------------------------------------------------------------------------------------- union.js:11:1
 
-Found 29 errors
+Cannot cast `k` to `"type"` because `"type" | "x"` [1] is incompatible with `"type"` [2]. [incompatible-type]
+
+   union.js:11:1
+   11| k as 'type'; // error: 'x' is a key too
+       ^
+
+References:
+   union.js:9:18
+    9| declare const k: keyof (A | B);
+                        ^^^^^^^^^^^^^ [1]
+   union.js:11:6
+   11| k as 'type'; // error: 'x' is a key too
+            ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- union.js:12:1
+
+Cannot cast `'a'` to `keyof (A | B)` because property `a` is missing in `B` [1]. [prop-missing]
+
+   union.js:12:1
+   12| 'a' as keyof (A | B); // error: 'a' is not a key of B
+       ^^^
+
+References:
+   union.js:12:19
+   12| 'a' as keyof (A | B); // error: 'a' is not a key of B
+                         ^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------------- union.js:16:1
+
+Cannot cast `'a'` to `Without<keyof (A | B), "x">` because `"a"` [1] is incompatible with `"type"` [2].
+[incompatible-type]
+
+   union.js:16:1
+   16| 'a' as Without<keyof (A | B), 'x'>; // error
+       ^^^ [1]
+
+References:
+   union.js:16:8
+   16| 'a' as Without<keyof (A | B), 'x'>; // error
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- union.js:21:3
+
+Cannot get `p.a` because property `a` is missing in `{type: A["type"]}` [1]. [prop-missing]
+
+   union.js:21:3
+   21| p.a; // error
+         ^
+
+References:
+   union.js:19:18
+   19| declare const p: Select<A | B, Without<keyof (A | B), 'x'>>; // ok
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+
+Found 33 errors
