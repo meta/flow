@@ -200,9 +200,98 @@ References:
 Found 1 error
 
 === block 21 ===
-No errors!
+Error ------------------------------------------------------------------------------ -:23:1
+
+Cannot instantiate an `abstract` class. [invalid-abstract]
+
+   23| new Animal(); // Error!
+       ^^^^^^^^^^^^
+
+
+Found 1 error
 
 === block 22 ===
+Error ------------------------------------------------------------------------------- -:7:1
+
+Non-`abstract` class `Cat` does not implement inherited `abstract` member makeSound [1]. [invalid-abstract]
+
+   -:7:1
+      v------------------------------------------------------------------
+   7| class Cat extends Animal { // Error! `makeSound` is not implemented
+   8|   name: string = 'Tom';
+   9| }
+      ^
+
+References:
+   -:4:12
+   4|   abstract makeSound(): string;
+                 ^^^^^^^^^ [1]
+
+Error ------------------------------------------------------------------------------ -:11:1
+
+Non-`abstract` class `Mute` does not implement inherited `abstract` member name [1]. [invalid-abstract]
+
+   -:11:1
+       v--------------------------------------------------------------
+   11| class Mute extends Animal { // Error! `name` is not implemented
+   12|   makeSound(): string {
+   13|     return '';
+   14|   }
+   15| }
+       ^
+
+References:
+   -:3:12
+    3|   abstract name: string;
+                  ^^^^ [1]
+
+
+Found 2 errors
+
+=== block 23 ===
+Error ------------------------------------------------------------------------------ -:25:1
+
+Non-`abstract` class `Triangle` does not implement inherited `abstract` member area [1]. [invalid-abstract]
+
+   -:25:1
+       v-------------------------------------------------------------------
+   25| class Triangle extends Polygon { // Error! `area` is not implemented
+   26|   sides(): number {
+   27|     return 3;
+   28|   }
+   29| }
+       ^
+
+References:
+   -:3:12
+    3|   abstract area(): number;
+                  ^^^^ [1]
+
+Error ------------------------------------------------------------------------------ -:32:1
+
+Cannot instantiate an `abstract` class. [invalid-abstract]
+
+   32| new Polygon(); // Error!
+       ^^^^^^^^^^^^^
+
+
+Found 2 errors
+
+=== block 24 ===
+Error ------------------------------------------------------------------------------ -:15:5
+
+`abstract` member `write` cannot be accessed via `super`. [invalid-abstract]
+
+   15|     super.write(message); // Error!
+           ^^^^^
+
+
+Found 1 error
+
+=== block 25 ===
+No errors!
+
+=== block 26 ===
 Error ------------------------------------------------------------------------------ -:10:5
 
 Must call `super` before accessing `this` [1] in a derived constructor. [reference-before-declaration]
@@ -245,16 +334,16 @@ References:
 
 Found 3 errors
 
-=== block 23 ===
+=== block 27 ===
 No errors!
 
-=== block 24 ===
+=== block 28 ===
 No errors!
 
-=== block 25 ===
+=== block 29 ===
 No errors!
 
-=== block 26 ===
+=== block 30 ===
 Error ------------------------------------------------------------------------------ -:5:20
 
 Cannot assign `MyClass` to `a` because class `MyClass` [1] is incompatible with `MyClass` [2]. [incompatible-type]
@@ -274,7 +363,7 @@ References:
 
 Found 1 error
 
-=== block 27 ===
+=== block 31 ===
 Error ------------------------------------------------------------------------------- -:8:1
 
 Cannot call `tick` as a standalone function because its `this` parameter requires `Counter` [1] as the receiver. Call it
@@ -292,7 +381,7 @@ References:
 
 Found 1 error
 
-=== block 28 ===
+=== block 32 ===
 Error ------------------------------------------------------------------------------- -:5:1
 
 Cannot call `method` as a standalone function because its `this` parameter requires `MyClass` [1] as the receiver. Call
@@ -310,7 +399,7 @@ References:
 
 Found 1 error
 
-=== block 29 ===
+=== block 33 ===
 Error ----------------------------------------------------------------------------- -:11:19
 
 Cannot use `call` because its first argument must be the exact same value as the receiver `counter` [1] the method was

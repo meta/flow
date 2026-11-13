@@ -4,6 +4,8 @@ slug: /types/classes
 description: "How to type classes in Flow, including class fields, methods, generics, and the relationship between class types and interface types."
 ---
 
+import {SinceVersion} from '../../components/VersionTags';
+
 JavaScript [classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)
 in Flow operate both as a value and a type. You can use the name of the class as the type of its instances:
 
@@ -298,6 +300,125 @@ class MyClass implements WithXNum { // Error!
 ```
 
 The right-hand side of `implements` and `extends` is constrained — see [Common Issues](#toc-cannot-implement) below.
+
+### Abstract classes and members <SinceVersion version="0.339" /> {#toc-abstract-classes}
+
+An `abstract` class is a base class that you cannot instantiate directly. Besides ordinary implemented members, it can declare `abstract` fields and methods, which every concrete subclass must implement.
+
+```js flow-check
+abstract class Animal {
+  abstract name: string;
+  abstract makeSound(): string;
+
+  describe(): string {
+    return this.name + ' says ' + this.makeSound();
+  }
+}
+
+class Dog extends Animal {
+  name: string = 'Rex';
+  makeSound(): string {
+    return 'woof';
+  }
+}
+
+function introduce(animal: Animal): string {
+  return animal.describe(); // OK
+}
+
+introduce(new Dog()); // OK
+new Animal(); // Error!
+```
+
+An abstract class name still works as the type of its instances, so an `Animal` annotation accepts an instance of any subclass. An abstract field has a type annotation but no initializer. An abstract method has a signature but no body. You can declare `abstract` members only inside an `abstract` class.
+
+A subclass that isn't abstract must implement every abstract field and method it inherits:
+
+```js flow-check
+abstract class Animal {
+  abstract name: string;
+  abstract makeSound(): string;
+}
+
+class Cat extends Animal { // Error! `makeSound` is not implemented
+  name: string = 'Tom';
+}
+
+class Mute extends Animal { // Error! `name` is not implemented
+  makeSound(): string {
+    return '';
+  }
+}
+```
+
+An abstract subclass can leave inherited obligations to its own subclasses and add new ones. A concrete class can satisfy an obligation with an implementation it inherits from an intermediate class. Like any abstract class, an abstract subclass cannot be instantiated:
+
+```js flow-check
+abstract class Shape {
+  abstract area(): number;
+  abstract label(): string;
+}
+
+abstract class Polygon extends Shape {
+  abstract sides(): number;
+  label(): string {
+    return String(this.sides()) + '-sided polygon';
+  }
+}
+
+class Square extends Polygon { // OK: inherits `label` from `Polygon`
+  area(): number {
+    return 1;
+  }
+  sides(): number {
+    return 4;
+  }
+}
+
+class UnitSquare extends Square {} // OK: inherits every implementation
+
+class Triangle extends Polygon { // Error! `area` is not implemented
+  sides(): number {
+    return 3;
+  }
+}
+
+new UnitSquare().label() as string; // OK
+new Polygon(); // Error!
+```
+
+Because an abstract member has no implementation, you cannot access it through `super`, even from a subclass that implements it. Concrete inherited members are still available through `super`:
+
+```js flow-check
+abstract class Logger {
+  abstract write(message: string): void;
+  log(message: string): void {
+    this.write('[log] ' + message);
+  }
+}
+
+class ConsoleLogger extends Logger {
+  write(message: string): void {
+    console.log(message);
+  }
+  info(message: string): void {
+    super.log(message); // OK
+    super.write(message); // Error!
+  }
+}
+```
+
+Abstract classes and members are ordinary class syntax, so you can use them in regular source files. Declaration files and [library definitions](../libdefs/creation.md) can also use `declare abstract class`. When types are stripped, `abstract` modifiers and abstract members are removed like other type annotations, so Flow enforces these rules only during type checking.
+
+An abstract member must be a public instance member that a subclass can implement, so you cannot combine `abstract` with `static` or with a `#private` name.
+
+:::info TypeScript comparison
+Abstract classes and members follow TypeScript's model of an abstract base class. Classes are still [nominally typed](../lang/nominal-structural.md) in Flow. An implementation must also be compatible with the abstract member's type: for example, an implementation of `abstract m(x: string | number): void` cannot narrow its parameter to `string`.
+:::
+
+#### Adoption {#toc-abstract-classes-adoption}
+
+To use this syntax, set `experimental.tslib_syntax=true` in `.flowconfig` and use Flow and flow-parser 0.339.0+ and Prettier 3.10.0+ with its built-in [`flow` parser](../tools/prettier.md).
 
 ### Class Constructors {#toc-class-fields-constructors}
 

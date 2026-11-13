@@ -1666,11 +1666,11 @@ No equivalent at the source level. TypeScript users routinely re-open third-part
 
 ## Coming soon {#toc-coming-soon}
 
-The following TypeScript features have type-checking support implemented in Flow, but are waiting for tooling updates (e.g. Prettier) before Flow removes the release gate. They are enabled in the [Flow playground](../../../try).
+The following TypeScript features have type-checking support implemented in Flow, but are not enabled by default. They are enabled in the [Flow playground](../../../try).
 
 - Template literal types - e.g. `` `${'a' | 'b'}-${'x' | 'y'}` ``.
 - Mapped type modifiers - variance removal `-readonly` and `as` key remapping.
-- Abstract classes and methods.
+- [Abstract classes and members](./types/classes.md#toc-abstract-classes).
 - `override` on class members.
 - Constructor types - `type Ctor = new (x: number) => R`.
 - `satisfies` expression - validates an expression against a type without widening the inferred type.
