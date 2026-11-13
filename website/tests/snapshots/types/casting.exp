@@ -104,6 +104,72 @@ References:
 Found 1 error
 
 === block 8 ===
+Error ------------------------------------------------------------------------------- -:6:1
+
+Cannot cast `widened.port` to `8080` because `number` [1] is incompatible with `8080` [2]. [incompatible-type]
+
+   -:6:1
+   6| widened.port as 8080; // ERROR: the result property type is number
+      ^^^^^^^^^^^^
+
+References:
+   -:3:43
+   3| const widened = source as {readonly port: number};
+                                                ^^^^^^ [1]
+   -:6:17
+   6| widened.port as 8080; // ERROR: the result property type is number
+                      ^^^^ [2]
+
+
+Found 1 error
+
+=== block 9 ===
+Error ------------------------------------------------------------------------------- -:9:8
+
+Cannot assign `3000` to `config.port` because property `port` is not writable. [cannot-write]
+
+   9| config.port = 3000; // ERROR: read-only property
+             ^^^^
+
+
+Found 1 error
+
+=== block 10 ===
+Error ------------------------------------------------------------------------------ -:11:9
+
+Cannot get `checked.missing` because property `missing` is missing in object literal [1]. [prop-missing]
+
+   -:11:9
+   11| checked.missing; // ERROR: not one of the known keys
+               ^^^^^^^
+
+References:
+   -:3:16
+    3| const source = {home: '/', settings: '/settings'};
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Found 1 error
+
+=== block 11 ===
+Error ------------------------------------------------------------------------------ -:7:17
+
+Cannot call `handlers.length` with `42` bound to `text` because `42` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   -:7:17
+   7| handlers.length(42); // ERROR: text must be a string
+                      ^^ [1]
+
+References:
+   -:4:18
+   4|   length: (text: string) => text.length,
+                       ^^^^^^ [2]
+
+
+Found 1 error
+
+=== block 12 ===
 Error ------------------------------------------------------------------------------- -:5:1
 
 Cannot cast `value` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -139,8 +205,8 @@ References:
 
 Found 2 errors
 
-=== block 9 ===
+=== block 13 ===
 No errors!
 
-=== block 10 ===
+=== block 14 ===
 No errors!

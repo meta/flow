@@ -1,10 +1,14 @@
 ---
-title: Type Casting Expressions
+title: Type Casts and Satisfies Expressions
 slug: /types/casting
-description: "How to use type cast expressions in Flow to widen or assert types using the as keyword."
+description: "Use as to expose a target type or satisfies to check compatibility while retaining an expression's inferred type."
 ---
 
-Type cast expressions let you widen or assert a value's type inline using the `as` keyword.
+import {SinceVersion} from '../../components/VersionTags';
+
+Type cast expressions (`value as T`) check compatibility and give the result the target type `T`.
+[Satisfies expressions](#toc-satisfies) (`value satisfies T`) also check compatibility, but keep the operand's inferred type.
+Neither changes the value at runtime.
 
 ```js flow-check
 const x = 42 as number;
@@ -112,6 +116,84 @@ To use the `as` keyword for type casts, you need to upgrade your infrastructure 
 - Prettier: 3.1+
 - Babel: use [flow-parser/babel-plugin](https://www.npmjs.com/package/flow-parser), see our [Babel guide](../tools/babel.md) for more details.
 - ESLint: use [flow-eslint](https://www.npmjs.com/package/flow-eslint), see our [ESLint guide](../tools/eslint.md) for more details.
+
+## Satisfies Expressions {#toc-satisfies}
+
+<SinceVersion version="0.339" />
+
+Like a class's `implements` clause, `satisfies` checks compatibility with a contract.
+It applies to an expression and preserves its inferred type.
+
+```js flow-check
+const source = {port: 8080} as const;
+const widened = source as {readonly port: number};
+const checked = source satisfies {readonly port: number};
+
+widened.port as 8080; // ERROR: the result property type is number
+checked.port as 8080; // OK: the operand's literal type is retained
+```
+
+Unlike `as`, `satisfies` is not a cast: its result keeps the operand's type.
+When [types are stripped](../tools/babel.md), both operators disappear and only the operand remains.
+Neither validates data at runtime. Use [runtime checks and refinements](../lang/refinements.md) for untrusted data.
+
+### Combining with `as const` {#toc-as-const-satisfies}
+
+`satisfies` does not itself make an object read-only or preserve every literal type.
+Apply [`as const`](./const-expression.md) first to retain literal and discriminant types and read-only typing. Then use `satisfies` to check the contract:
+
+```js flow-check
+type Transport =
+  | {readonly kind: 'http', readonly port: number}
+  | {readonly kind: 'socket', readonly path: string};
+const config = {kind: 'http', port: 8080} as const satisfies Transport;
+
+config.kind as 'http'; // OK: the specific union arm is retained
+config.port as 8080; // OK
+config.port = 3000; // ERROR: read-only property
+```
+
+The read-only typing applies only to static checks, **not runtime freezing**. Neither `as const` nor `satisfies` calls `Object.freeze`.
+
+### Adoption {#toc-satisfies-adoption}
+
+To use `satisfies`, set `experimental.tslib_syntax=true` in `.flowconfig` and use Flow and flow-parser 0.339.0+ and [Prettier 3.10.0+](../tools/prettier.md) with its built-in `flow` parser.
+
+## When to use `as` versus `satisfies` {#toc-as-vs-satisfies}
+
+- Use `as` (or a variable annotation `const value: T = ...`) when you intentionally want subsequent code to use the target type. This is useful for exposing a public interface or a wider abstraction. Flow still rejects unsafe downcasts.
+- Use `satisfies` to check a contract for configuration objects, lookup maps, or handler tables while keeping their known keys and specific property types.
+- Use `as const satisfies` when you also need to retain literal and discriminant types and a read-only structure for constants.
+
+Casting a lookup map to a dictionary lets subsequent code access general string keys. With `satisfies`, the result keeps exactly the keys you provided:
+
+```js flow-check
+type Lookup = {readonly [string]: string};
+const source = {home: '/', settings: '/settings'};
+const widened = source as Lookup;
+const annotated: Lookup = source;
+const checked = source satisfies Lookup;
+
+widened.missing as string; // OK statically, but the runtime property is absent
+annotated.missing as string; // OK statically for the same reason
+checked.home as string; // OK
+checked.missing; // ERROR: not one of the known keys
+```
+
+You can explicitly annotate function parameters in a handler table to make their contracts visible.
+The check still retains each function's specific result type:
+
+```js flow-check
+type Handlers = {readonly length: (text: string) => number};
+const handlers = {
+  length: (text: string) => text.length,
+} satisfies Handlers;
+handlers.length('hello') as number; // OK
+handlers.length(42); // ERROR: text must be a string
+
+const answer = ((): 42 => 42) satisfies () => number;
+answer() as 42; // OK: the specific return type is retained
+```
 
 ## Using type cast expressions {#toc-using-type-cast-expressions}
 

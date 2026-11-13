@@ -67,6 +67,8 @@ export const STATUS = {
 ```
 The type of `STATUS.INIT` is `"INIT"`, the type of `STATUS.LOADING` is `"LOADING"` and so on.
 
+Combine `as const` with [`satisfies`](./casting.md#toc-as-const-satisfies) to check a configuration contract while keeping these literal types. The read-only typing does not freeze the object at runtime.
+
 With this definition it is also possible to effectively lift the values of the various fields
 to type annotations. For example:
 ```js flow-check
@@ -136,6 +138,6 @@ To use the `const` type parameter syntax, you need to upgrade your infrastructur
 
 - [Literal Types](./literals.md) — the literal types that `as const` infers for primitive values
 - [Tuples](./tuples.md) — `as const` on arrays produces read-only tuple types
-- [Type Casting](./casting.md) — the `as` keyword for general type assertions (distinct from `as const`)
+- [Type Casts and Satisfies Expressions](./casting.md#toc-as-vs-satisfies) — how to expose a target type or retain the inferred type
 - [Generics](./generics.md) — `const` type parameters for enforcing const-expression inference on function arguments
 - [Variance](../lang/variance.md) — `as const` produces read-only (covariant) properties

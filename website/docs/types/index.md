@@ -57,4 +57,5 @@ you can have in Flow.
 - [Generics](./generics.md) — parameterized types for reusable, type-safe code
 - [Type Aliases](./aliases.md) — giving names to complex types
 - [Opaque Type Aliases](./opaque-types.md) — type aliases that hide their underlying type
+- [Type Casts and Satisfies Expressions](./casting.md#toc-as-vs-satisfies) — expose a target type with `as` or keep the inferred type with [`satisfies`](./casting.md#toc-satisfies)
 - [Utility Types](./utilities.md) — built-in type transformations like `Partial`, `Readonly`, `keyof`
