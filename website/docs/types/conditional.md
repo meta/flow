@@ -117,6 +117,15 @@ type ReturnType<T extends (...args: ReadonlyArray<empty>) => unknown> =
 1 as ReturnType<string>; // Error
 ```
 
+You can also extract parts of strings with [template literal types](./template-literal-types.md#toc-conditional-inference). See their [adoption requirements](./template-literal-types.md#toc-adoption) before using this syntax:
+
+```js flow-check
+type DataName<S extends string> = S extends `data-${infer Name}` ? Name : empty;
+
+'name' as DataName<'data-name'>; // OK
+'name' as DataName<'name'>; // ERROR: no match, so the result is empty
+```
+
 ### Constraining Inferred Types with `extends` {#toc-infer-extends}
 
 An `infer` variable can carry its own constraint, written `infer T extends Bound`. The bound does two things.

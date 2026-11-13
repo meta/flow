@@ -78,6 +78,7 @@ readKind(e); // Works!
 ## See Also {#toc-see-also}
 
 - [Primitive Types](./primitives.md) — the base types (`number`, `string`, etc.) that literals specialize
+- [Template Literal Types](./template-literal-types.md) — composing string literals and patterns from other types
 - [Unions](./unions.md) — commonly used with literals to define finite sets of values
 - [Const Expressions](./const-expression.md) — `as const` for preserving literal types past assignment, especially inside containers
 - [Variance](../lang/variance.md) — why a `readonly` value can't flow into a writable slot

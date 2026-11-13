@@ -648,6 +648,37 @@ Found 1 error
 === block 41 ===
 Error ----------------------------------------------------------------------------- -:5:1
 
+Cannot cast `'other-name'` to `DataProp` because `"other-name"` [1] is incompatible with `DataProp` [2].
+[incompatible-type]
+
+   -:5:1
+   5| 'other-name' as DataProp; // ERROR: wrong prefix
+      ^^^^^^^^^^^^ [1]
+
+References:
+   -:5:17
+   5| 'other-name' as DataProp; // ERROR: wrong prefix
+                      ^^^^^^^^ [2]
+
+Error ---------------------------------------------------------------------------- -:10:1
+
+Cannot cast `'yay'` to `Exclaim` because `"yay"` [1] is incompatible with `Exclaim` [2]. [incompatible-type]
+
+   -:10:1
+   10| 'yay' as Exclaim; // ERROR: missing suffix
+       ^^^^^ [1]
+
+References:
+   -:10:10
+   10| 'yay' as Exclaim; // ERROR: missing suffix
+                ^^^^^^^ [2]
+
+
+Found 2 errors
+
+=== block 42 ===
+Error ----------------------------------------------------------------------------- -:5:1
+
 Cannot cast `'random string'` to `DataProp` because `"random string"` [1] is incompatible with
 `` `${"data-"}${string}` `` [2]. [incompatible-type]
 
@@ -663,7 +694,7 @@ References:
 
 Found 1 error
 
-=== block 42 ===
+=== block 43 ===
 Error ----------------------------------------------------------------------------- -:5:1
 
 Cannot cast `'random string'` to `Exclaim` because `"random string"` [1] is incompatible with
@@ -681,7 +712,7 @@ References:
 
 Found 1 error
 
-=== block 43 ===
+=== block 44 ===
 Error ----------------------------------------------------------------------------- -:4:1
 
 Cannot cast `'random string'` to `CSSVar` because `"random string"` [1] is incompatible with
@@ -713,7 +744,7 @@ References:
 
 Found 2 errors
 
-=== block 44 ===
+=== block 45 ===
 Error ----------------------------------------------------------------------------- -:5:1
 
 Cannot cast `'$999'` to `Price` because `"$999"` [1] is incompatible with `` `${"$"}${"1" | "2"}` `` [2].
@@ -731,7 +762,7 @@ References:
 
 Found 1 error
 
-=== block 45 ===
+=== block 46 ===
 Error ----------------------------------------------------------------------------- -:4:1
 
 Cannot cast `'hello'` to `Greeting` because `"hello"` [1] is incompatible with `Greeting` [2]. [incompatible-type]
@@ -748,7 +779,7 @@ References:
 
 Found 1 error
 
-=== block 46 ===
+=== block 47 ===
 Error ----------------------------------------------------------------------------- -:4:1
 
 Cannot cast `'WARNING'` to `Tag` because `"WARNING"` [1] is incompatible with `Tag` [2]. [incompatible-type]
@@ -765,7 +796,7 @@ References:
 
 Found 1 error
 
-=== block 47 ===
+=== block 48 ===
 Error ----------------------------------------------------------------------------- -:4:1
 
 Cannot cast `'flow'` to `Name` because `"flow"` [1] is incompatible with `Name` [2]. [incompatible-type]
@@ -795,7 +826,7 @@ References:
 
 Found 2 errors
 
-=== block 48 ===
+=== block 49 ===
 Error ----------------------------------------------------------------------------- -:4:1
 
 Cannot cast `'FullName'` to `Field` because `"FullName"` [1] is incompatible with `Field` [2]. [incompatible-type]
@@ -825,7 +856,7 @@ References:
 
 Found 2 errors
 
-=== block 49 ===
+=== block 50 ===
 Error ----------------------------------------------------------------------------- -:5:1
 
 Cannot cast `'south'` to `Direction` because `"south"` [1] is incompatible with `Direction` [2]. [incompatible-type]
@@ -842,10 +873,10 @@ References:
 
 Found 1 error
 
-=== block 50 ===
+=== block 51 ===
 No errors!
 
-=== block 51 ===
+=== block 52 ===
 Error ----------------------------------------------------------------------------- -:6:1
 
 Cannot cast `'anything'` to `Loud` because `"anything"` [1] is incompatible with `Loud` [2]. [incompatible-type]
@@ -864,8 +895,26 @@ References:
 
 Found 1 error
 
-=== block 52 ===
+=== block 53 ===
+Error ----------------------------------------------------------------------------- -:8:1
+
+Cannot cast `'onclick'` to `EventName` because `"click"` [1] is incompatible with `"Change" | "Click"` [2].
+[incompatible-type]
+
+   -:8:1
+   8| 'onclick' as EventName; // ERROR: wrong capitalization
+      ^^^^^^^^^ [1]
+
+References:
+   -:4:23
+   4| type EventName = `on${Capitalize<Event>}`;
+                            ^^^^^^^^^^^^^^^^^ [2]
+
+
+Found 1 error
+
+=== block 54 ===
 No errors!
 
-=== block 53 ===
+=== block 55 ===
 No errors!

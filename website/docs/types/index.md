@@ -45,6 +45,7 @@ you can have in Flow.
 
 - [Primitive Types](./primitives.md) — `boolean`, `string`, `number`, `null`, `void`, `symbol`, `bigint`
 - [Literal Types](./literals.md) — using specific values like `2` or `"foo"` as types
+- [Template Literal Types](./template-literal-types.md) — constructing string types and matching string patterns
 - [Objects](./objects.md) — typing the shape of JavaScript objects
 - [Arrays](./arrays.md) — variable-length lists of values
 - [Tuples](./tuples.md) — fixed-length lists with per-element types

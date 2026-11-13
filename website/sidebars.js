@@ -54,6 +54,7 @@ module.exports = {
             'types/intersections',
             'types/indexed-access',
             'types/conditional',
+            'types/template-literal-types',
             'types/mapped-types',
             'types/type-guards',
             'types/assertion-functions',

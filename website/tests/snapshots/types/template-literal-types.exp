@@ -1,0 +1,228 @@
+=== block 1 ===
+No errors!
+
+=== block 2 ===
+Error --------------------------------------------------------------- -:11:1
+
+Cannot cast `'item-0xff'` to `Label` because `"item-0xff"` [1] is incompatible with `Label` [2]. [incompatible-type]
+
+   -:11:1
+   11| 'item-0xff' as Label; // ERROR: the number's value is 255
+       ^^^^^^^^^^^ [1]
+
+References:
+   -:11:16
+   11| 'item-0xff' as Label; // ERROR: the number's value is 255
+                      ^^^^^ [2]
+
+
+Found 1 error
+
+=== block 3 ===
+Error ---------------------------------------------------------------- -:6:1
+
+Cannot cast `'a-z'` to `Name` because `"a-z"` [1] is incompatible with `Name` [2]. [incompatible-type]
+
+   -:6:1
+   6| 'a-z' as Name; // ERROR
+      ^^^^^ [1]
+
+References:
+   -:6:10
+   6| 'a-z' as Name; // ERROR
+               ^^^^ [2]
+
+
+Found 1 error
+
+=== block 4 ===
+Error ---------------------------------------------------------------- -:9:1
+
+Cannot cast `'other-name'` to `DataKey` because `"other-name"` [1] is incompatible with `DataKey` [2].
+[incompatible-type]
+
+   -:9:1
+   9| 'other-name' as DataKey; // ERROR: wrong prefix
+      ^^^^^^^^^^^^ [1]
+
+References:
+   -:9:17
+   9| 'other-name' as DataKey; // ERROR: wrong prefix
+                      ^^^^^^^ [2]
+
+Error --------------------------------------------------------------- -:10:1
+
+Cannot cast `'item-many'` to `NumericId` because `"item-many"` [1] is incompatible with `NumericId` [2].
+[incompatible-type]
+
+   -:10:1
+   10| 'item-many' as NumericId; // ERROR: not numeric text
+       ^^^^^^^^^^^ [1]
+
+References:
+   -:10:16
+   10| 'item-many' as NumericId; // ERROR: not numeric text
+                      ^^^^^^^^^ [2]
+
+Error --------------------------------------------------------------- -:11:1
+
+Cannot cast `'item-1.5'` to `IntegerId` because `"item-1.5"` [1] is incompatible with `IntegerId` [2].
+[incompatible-type]
+
+   -:11:1
+   11| 'item-1.5' as IntegerId; // ERROR: not integer text
+       ^^^^^^^^^^ [1]
+
+References:
+   -:11:15
+   11| 'item-1.5' as IntegerId; // ERROR: not integer text
+                     ^^^^^^^^^ [2]
+
+Error --------------------------------------------------------------- -:12:1
+
+Cannot cast `'item-42n'` to `IntegerId` because `"item-42n"` [1] is incompatible with `IntegerId` [2].
+[incompatible-type]
+
+   -:12:1
+   12| 'item-42n' as IntegerId; // ERROR: the placeholder does not include n
+       ^^^^^^^^^^ [1]
+
+References:
+   -:12:15
+   12| 'item-42n' as IntegerId; // ERROR: the placeholder does not include n
+                     ^^^^^^^^^ [2]
+
+
+Found 4 errors
+
+=== block 5 ===
+Error ---------------------------------------------------------------- -:7:1
+
+Cannot cast `'NaN'` to `NumericText` because `"NaN"` [1] is incompatible with `NumericText` [2]. [incompatible-type]
+
+   -:7:1
+   7| 'NaN' as NumericText; // ERROR
+      ^^^^^ [1]
+
+References:
+   -:7:10
+   7| 'NaN' as NumericText; // ERROR
+               ^^^^^^^^^^^ [2]
+
+Error ---------------------------------------------------------------- -:8:1
+
+Cannot cast `'Infinity'` to `NumericText` because `"Infinity"` [1] is incompatible with `NumericText` [2].
+[incompatible-type]
+
+   -:8:1
+   8| 'Infinity' as NumericText; // ERROR
+      ^^^^^^^^^^ [1]
+
+References:
+   -:8:15
+   8| 'Infinity' as NumericText; // ERROR
+                    ^^^^^^^^^^^ [2]
+
+Error ---------------------------------------------------------------- -:9:1
+
+Cannot cast `'1_000'` to `NumericText` because `"1_000"` [1] is incompatible with `NumericText` [2]. [incompatible-type]
+
+   -:9:1
+   9| '1_000' as NumericText; // ERROR
+      ^^^^^^^ [1]
+
+References:
+   -:9:12
+   9| '1_000' as NumericText; // ERROR
+                 ^^^^^^^^^^^ [2]
+
+
+Found 3 errors
+
+=== block 6 ===
+Error ---------------------------------------------------------------- -:5:1
+
+Cannot cast `stripPrefix(...)` to `"email"` because `"name"` [1] is incompatible with `"email"` [2]. [incompatible-type]
+
+   -:5:1
+   5| stripPrefix('data-name') as 'email'; // ERROR
+      ^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   -:5:13
+   5| stripPrefix('data-name') as 'email'; // ERROR
+                  ^^^^^^^^^^^ [1]
+   -:5:29
+   5| stripPrefix('data-name') as 'email'; // ERROR
+                                  ^^^^^^^ [2]
+
+
+Found 1 error
+
+=== block 7 ===
+Error ---------------------------------------------------------------- -:5:1
+
+Cannot cast `'email'` to `DataName<"data-name">` because `"email"` [1] is incompatible with `"name"` [2].
+[incompatible-type]
+
+   -:5:1
+   5| 'email' as DataName<'data-name'>; // ERROR
+      ^^^^^^^ [1]
+
+References:
+   -:5:12
+   5| 'email' as DataName<'data-name'>; // ERROR
+                 ^^^^^^^^^^^^^^^^^^^^^ [2]
+
+Error ---------------------------------------------------------------- -:6:1
+
+Cannot cast `'name'` to `DataName<"name">` because `"name"` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   -:6:1
+   6| 'name' as DataName<'name'>; // ERROR: the result is empty
+      ^^^^^^ [1]
+
+References:
+   -:6:11
+   6| 'name' as DataName<'name'>; // ERROR: the result is empty
+                ^^^^^^^^^^^^^^^^ [2]
+
+
+Found 2 errors
+
+=== block 8 ===
+Error ---------------------------------------------------------------- -:6:1
+
+Cannot cast `'onclick'` to `EventName` because `"onclick"` [1] is incompatible with `EventName` [2]. [incompatible-type]
+
+   -:6:1
+   6| 'onclick' as EventName; // ERROR
+      ^^^^^^^^^ [1]
+
+References:
+   -:6:14
+   6| 'onclick' as EventName; // ERROR
+                   ^^^^^^^^^ [2]
+
+
+Found 1 error
+
+=== block 9 ===
+Error --------------------------------------------------------------- -:2:19
+
+Template literal type placeholder must be a subtype of `string | number | bigint | boolean | null | undefined`.
+[invalid-template-literal-type]
+
+   2| type ObjectText = `${{name: string}}`; // ERROR
+                        ^^^^^^^^^^^^^^^^^^^
+
+Error --------------------------------------------------------------- -:3:20
+
+Template literal type placeholder must be a subtype of `string | number | bigint | boolean | null | undefined`.
+[invalid-template-literal-type]
+
+   3| type UnknownText = `${unknown}`; // ERROR
+                         ^^^^^^^^^^^^
+
+
+Found 2 errors

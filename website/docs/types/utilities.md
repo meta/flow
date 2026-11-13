@@ -628,6 +628,20 @@ export type MyModuleType = T;
 
 ## `StringPrefix` and `StringSuffix` {#toc-string-prefix-suffix}
 
+Prefer [template literal types](./template-literal-types.md) for new code. They express prefix and suffix patterns directly:
+
+```js flow-check
+// Strings with a data- prefix.
+type DataProp = `data-${string}`;
+'data-name' as DataProp; // OK
+'other-name' as DataProp; // ERROR: wrong prefix
+
+// Strings with an ! suffix.
+type Exclaim = `${string}!`;
+'yay!' as Exclaim; // OK
+'yay' as Exclaim; // ERROR: missing suffix
+```
+
 The `StringPrefix` and `StringSuffix` types represent strings with the specified prefix or suffix, respectively.
 Their first type argument must be a string literal type, representing the prefix or suffix.
 
@@ -670,7 +684,7 @@ When not specified, the type of the remainder is just `string`.
 
 ## `Uppercase<T>`, `Lowercase<T>`, `Capitalize<T>`, `Uncapitalize<T>` <SinceVersion version="0.316" /> {#toc-string-casing}
 
-These four utility types transform the casing of a string type:
+These four utility types transform the casing of a string type. You can also [combine them with template literal types](./template-literal-types.md#toc-string-casing):
 
 - `Uppercase<T>` converts every character to upper case.
 - `Lowercase<T>` converts every character to lower case.
@@ -734,6 +748,18 @@ declare const x: Loud;
 x as string; // OK
 'ANYTHING' as Loud; // OK
 'anything' as Loud; // ERROR (not already upper case)
+```
+
+Use a casing utility inside a template to construct names from a union:
+
+```js flow-check
+// Construct handler names from each event.
+type Event = 'click' | 'change';
+type EventName = `on${Capitalize<Event>}`;
+
+'onClick' as EventName; // OK
+'onChange' as EventName; // OK
+'onclick' as EventName; // ERROR: wrong capitalization
 ```
 
 ## `$Exact<T>` (Discouraged) {#toc-exact}

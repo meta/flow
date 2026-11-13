@@ -38,6 +38,23 @@ References:
 Found 1 error
 
 === block 9 ===
+Error --------------------------------------------------------------------------- -:5:1
+
+Cannot cast `'name'` to `DataName<"name">` because `"name"` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   -:5:1
+   5| 'name' as DataName<'name'>; // ERROR: no match, so the result is empty
+      ^^^^^^ [1]
+
+References:
+   -:5:11
+   5| 'name' as DataName<'name'>; // ERROR: no match, so the result is empty
+                ^^^^^^^^^^^^^^^^ [2]
+
+
+Found 1 error
+
+=== block 10 ===
 Error --------------------------------------------------------------------------- -:7:1
 
 Cannot cast `1` to `B` because `1` [1] is incompatible with `false` [2]. [incompatible-type]
@@ -54,7 +71,7 @@ References:
 
 Found 1 error
 
-=== block 10 ===
+=== block 11 ===
 Error -------------------------------------------------------------------------- -:11:1
 
 Cannot cast `1` to `R2` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -71,8 +88,8 @@ References:
 
 Found 1 error
 
-=== block 11 ===
+=== block 12 ===
 No errors!
 
-=== block 12 ===
+=== block 13 ===
 No errors!

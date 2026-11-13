@@ -1668,7 +1668,7 @@ No equivalent at the source level. TypeScript users routinely re-open third-part
 
 The following TypeScript features have type-checking support implemented in Flow, but are not enabled by default. They are enabled in the [Flow playground](../../../try).
 
-- Template literal types - e.g. `` `${'a' | 'b'}-${'x' | 'y'}` ``.
+- [Template literal types](./types/template-literal-types.md).
 - Mapped type modifiers - variance removal `-readonly` and `as` key remapping.
 - [Abstract classes and members](./types/classes.md#toc-abstract-classes).
 - [`override` on class members](./types/classes.md#toc-override).
