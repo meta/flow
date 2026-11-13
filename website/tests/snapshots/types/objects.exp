@@ -308,10 +308,59 @@ Found 1 error
 No errors!
 
 === block 26 ===
-No errors!
+Error ------------------------------------------------------------------------------- -:9:8
+
+Cannot access `Tagged` [1] with computed property using `symbol` [2]. [invalid-computed-prop]
+
+   -:9:8
+    9| tagged[Symbol('id')]; // Error! A different symbol is not a key of `Tagged`
+              ^^^^^^^^^^^^
+
+References:
+   -:5:15
+    5| const tagged: Tagged = {[id]: 1, name: 'tagged'};
+                     ^^^^^^ [1]
+   <BUILTINS>/lib.es2015.symbol.js:30:38
+   30|     (description?: string | number): symbol;
+                                            ^^^^^^ [2]
+
+
+Found 1 error
 
 === block 27 ===
-No errors!
+Error ------------------------------------------------------------------------------- -:7:8
+
+Cannot access `Tagged` [1] with computed property using `symbol` [2]. [invalid-computed-prop]
+
+   -:7:8
+   7| tagged[someSymbol]; // Error!
+             ^^^^^^^^^^
+
+References:
+   -:4:23
+   4| declare const tagged: Tagged;
+                            ^^^^^^ [1]
+   -:5:27
+   5| declare const someSymbol: symbol;
+                                ^^^^^^ [2]
+
+Error ------------------------------------------------------------------------------ -:8:23
+
+Cannot use `someSymbol` [1] to assign a computed property. Computed properties may only be numeric or string literal
+values, but this one is a `symbol` [2]. Can you add an appropriate type annotation to `someSymbol` [1]? See
+https://flow.org/en/docs/types/literals/ for more information on literal types. [invalid-computed-prop]
+
+   -:8:23
+   8| const fromGeneral = {[someSymbol]: 1}; // Error!
+                            ^^^^^^^^^^ [1]
+
+References:
+   -:5:27
+   5| declare const someSymbol: symbol;
+                                ^^^^^^ [2]
+
+
+Found 2 errors
 
 === block 28 ===
 No errors!
@@ -323,6 +372,43 @@ No errors!
 No errors!
 
 === block 31 ===
+No errors!
+
+=== block 32 ===
+No errors!
+
+=== block 33 ===
+Error ------------------------------------------------------------------------------ -:8:22
+
+Cannot assign object literal to `named` because property `[symbol]` is missing in object literal [1] but exists in
+`Named` [2]. [incompatible-type]
+
+   -:8:22
+   8| const named: Named = {}; // Error! Missing property
+                           ^^ [1]
+
+References:
+   -:8:14
+   8| const named: Named = {}; // Error! Missing property
+                   ^^^^^ [2]
+
+Error ------------------------------------------------------------------------------ -:13:6
+
+Cannot assign `3` to `dict['name']` because property `name` is missing in `Dictionary` [1]. [prop-missing]
+
+   -:13:6
+   13| dict['name'] = 3; // Error! Only symbol keys
+            ^^^^^^
+
+References:
+   -:10:13
+   10| const dict: Dictionary = {};
+                   ^^^^^^^^^^ [1]
+
+
+Found 2 errors
+
+=== block 34 ===
 Error ----------------------------------------------------------------------------- -:13:13
 
 Cannot call `acceptsKeys` with `'hi'` bound to `k` because property `hi` is missing in `Obj` [1]. [prop-missing]
@@ -339,7 +425,7 @@ References:
 
 Found 1 error
 
-=== block 32 ===
+=== block 35 ===
 Error ----------------------------------------------------------------------------- -:13:15
 
 Cannot call `acceptsValues` with `true` bound to `v` because: [incompatible-type]
@@ -361,7 +447,7 @@ References:
 
 Found 1 error
 
-=== block 33 ===
+=== block 36 ===
 Error ----------------------------------------------------------------------------- -:12:12
 
 Cannot call `acceptsStr` with `1` bound to `x` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -378,16 +464,16 @@ References:
 
 Found 1 error
 
-=== block 34 ===
-No errors!
-
-=== block 35 ===
-No errors!
-
-=== block 36 ===
-No errors!
-
 === block 37 ===
+No errors!
+
+=== block 38 ===
+No errors!
+
+=== block 39 ===
+No errors!
+
+=== block 40 ===
 Error ------------------------------------------------------------------------------- -:5:5
 
 Cannot access object literal [1] with computed property using `string` [2]. [invalid-computed-prop]
@@ -407,13 +493,13 @@ References:
 
 Found 1 error
 
-=== block 38 ===
+=== block 41 ===
 No errors!
 
-=== block 39 ===
+=== block 42 ===
 No errors!
 
-=== block 40 ===
+=== block 43 ===
 Error ------------------------------------------------------------------------------- -:9:6
 
 Computing the spread [1] may lead to an exponentially large number of cases to reason about because
@@ -443,5 +529,5 @@ References:
 
 Found 1 error
 
-=== block 41 ===
+=== block 44 ===
 No errors!

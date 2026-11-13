@@ -16,6 +16,27 @@ References:
 Found 1 error
 
 === block 2 ===
+Error ----------------------------------------------------------------------------- -:8:1
+
+Cannot cast `Symbol()` to `Keys` because `symbol` [1] is incompatible with `keyof {name: string, [symbol]: number}` [2].
+[incompatible-type]
+
+   -:8:1
+    8| Symbol() as Keys; // Error!
+       ^^^^^^^^
+
+References:
+   <BUILTINS>/lib.es2015.symbol.js:30:38
+   30|     (description?: string | number): symbol;
+                                            ^^^^^^ [1]
+   -:8:13
+    8| Symbol() as Keys; // Error!
+                   ^^^^ [2]
+
+
+Found 1 error
+
+=== block 3 ===
 Error --------------------------------------------------------------------------- -:13:25
 
 Cannot assign `true` to `fn` because: [incompatible-type]
@@ -37,13 +58,13 @@ References:
 
 Found 1 error
 
-=== block 3 ===
-No errors!
-
 === block 4 ===
 No errors!
 
 === block 5 ===
+No errors!
+
+=== block 6 ===
 Error --------------------------------------------------------------------------- -:10:15
 
 Cannot call `acceptsValues` with `3` bound to `x` because `3` [1] is incompatible with `empty` [2]. [incompatible-type]
@@ -60,13 +81,13 @@ References:
 
 Found 1 error
 
-=== block 6 ===
-No errors!
-
 === block 7 ===
 No errors!
 
 === block 8 ===
+No errors!
+
+=== block 9 ===
 Error ---------------------------------------------------------------------------- -:11:9
 
 Cannot assign `42` to `props.age` because property `age` is not writable. [cannot-write]
@@ -77,10 +98,10 @@ Cannot assign `42` to `props.age` because property `age` is not writable. [canno
 
 Found 1 error
 
-=== block 9 ===
+=== block 10 ===
 No errors!
 
-=== block 10 ===
+=== block 11 ===
 Error ---------------------------------------------------------------------------- -:13:1
 
 Cannot cast `c` to `Person` because properties `age` and `name` of `{age?: number, name?: string}` [1] are not exactly
@@ -111,10 +132,10 @@ References:
 
 Found 1 error
 
-=== block 11 ===
+=== block 12 ===
 No errors!
 
-=== block 12 ===
+=== block 13 ===
 Error --------------------------------------------------------------------------- -:13:10
 
 Cannot call `noPerson` with `person` bound to `o` because properties `age` and `name` of `Person` [1] are not exactly
@@ -145,7 +166,7 @@ References:
 
 Found 1 error
 
-=== block 13 ===
+=== block 14 ===
 Error --------------------------------------------------------------------------- -:10:19
 
 Cannot assign object literal to `b` because property `name` is missing in object literal [1] but exists in
@@ -163,7 +184,7 @@ References:
 
 Found 1 error
 
-=== block 14 ===
+=== block 15 ===
 Error ----------------------------------------------------------------------------- -:3:1
 
 Cannot cast array literal to `Required<AllOptional>` because `Readonly<[]>` [1] has 0 elements but `AllOptional` [2] has
@@ -181,7 +202,7 @@ References:
 
 Found 1 error
 
-=== block 15 ===
+=== block 16 ===
 Error ---------------------------------------------------------------------------- -:6:11
 
 Cannot get `fooAndBar.baz` because property `baz` (did you mean `bar`?) is missing in
@@ -199,7 +220,7 @@ References:
 
 Found 1 error
 
-=== block 16 ===
+=== block 17 ===
 Error ----------------------------------------------------------------------------- -:7:9
 
 Cannot get `justBaz.foo` because property `foo` is missing in `{baz: boolean}` [1]. [prop-missing]
@@ -229,7 +250,24 @@ References:
 
 Found 2 errors
 
-=== block 17 ===
+=== block 18 ===
+Error ---------------------------------------------------------------------------- -:7:11
+
+Cannot get `withoutId[id]` because property `[symbol]` is missing in `{name: string}` [1]. [prop-missing]
+
+   -:7:11
+   7| withoutId[id]; // Error! `id` was omitted
+                ^^
+
+References:
+   -:5:26
+   5| declare const withoutId: Omit<Tagged, typeof id>;
+                               ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Found 1 error
+
+=== block 19 ===
 Error ---------------------------------------------------------------------------- -:6:14
 
 Cannot get `numberRecord.baz` because property `baz` (did you mean `bar`?) is missing in
@@ -247,7 +285,25 @@ References:
 
 Found 1 error
 
-=== block 18 ===
+=== block 20 ===
+Error ---------------------------------------------------------------------------- -:6:20
+
+Cannot assign object literal to `size` because property `[symbol]` is missing in object literal [1] but exists in
+`{[symbol]: number, [symbol]: number}` [2]. [incompatible-type]
+
+   -:6:20
+   6| const size: Size = {[width]: 1}; // Error! Missing the `height` property
+                         ^^^^^^^^^^^^ [1]
+
+References:
+   -:6:13
+   6| const size: Size = {[width]: 1}; // Error! Missing the `height` property
+                  ^^^^ [2]
+
+
+Found 1 error
+
+=== block 21 ===
 Error ---------------------------------------------------------------------------- -:6:27
 
 Cannot assign object literal to `rec` because properties `bar` and `foo` are missing in object literal [1] but exist in
@@ -265,7 +321,7 @@ References:
 
 Found 1 error
 
-=== block 19 ===
+=== block 22 ===
 Error ----------------------------------------------------------------------------- -:3:1
 
 Cannot cast `1` to `T` because `1` [1] is incompatible with `empty` [2]. [incompatible-type]
@@ -295,7 +351,7 @@ References:
 
 Found 2 errors
 
-=== block 20 ===
+=== block 23 ===
 Error ----------------------------------------------------------------------------- -:7:1
 
 Cannot cast `new Car()` to `T` because: [incompatible-type]
@@ -317,7 +373,7 @@ References:
 
 Found 1 error
 
-=== block 21 ===
+=== block 24 ===
 Error ----------------------------------------------------------------------------- -:5:1
 
 Cannot cast `1` to `Bool` because `1` [1] is incompatible with `boolean` [2]. [incompatible-type]
@@ -334,7 +390,7 @@ References:
 
 Found 1 error
 
-=== block 22 ===
+=== block 25 ===
 Error ---------------------------------------------------------------------------- -:6:16
 
 Cannot access `2` on `Tuple` because `[s: string, n: number]` [1] only has 2 elements, so index 2 is out of bounds.
@@ -352,7 +408,7 @@ References:
 
 Found 1 error
 
-=== block 23 ===
+=== block 26 ===
 Error ---------------------------------------------------------------------------- -:13:1
 
 Cannot cast `'x'` to `PointArgs[0]` because `"x"` [1] is incompatible with `number` [2]. [incompatible-type]
@@ -369,7 +425,7 @@ References:
 
 Found 1 error
 
-=== block 24 ===
+=== block 27 ===
 Error ----------------------------------------------------------------------------- -:7:2
 
 Cannot cast array literal to `ItemArgs` because in index `0`: `123` [1] is incompatible with `string` [2].
@@ -387,7 +443,7 @@ References:
 
 Found 1 error
 
-=== block 25 ===
+=== block 28 ===
 Error ----------------------------------------------------------------------------- -:5:1
 
 Cannot cast array literal to `EmptyArgs` because array literal [1] has 1 element but `Readonly<[]>` [2] has 0 elements.
@@ -405,7 +461,7 @@ References:
 
 Found 1 error
 
-=== block 26 ===
+=== block 29 ===
 Error ---------------------------------------------------------------------------- -:12:2
 
 Cannot cast array literal to `DogArgs` because in index `0`: `1` [1] is incompatible with `string` [2].
@@ -423,13 +479,13 @@ References:
 
 Found 1 error
 
-=== block 27 ===
+=== block 30 ===
 No errors!
 
-=== block 28 ===
+=== block 31 ===
 No errors!
 
-=== block 29 ===
+=== block 32 ===
 Error ----------------------------------------------------------------------------- -:3:1
 
 Cannot cast `'1'` to `T` because `"1"` [1] is incompatible with `number` [2]. [incompatible-type]
@@ -446,7 +502,7 @@ References:
 
 Found 1 error
 
-=== block 30 ===
+=== block 33 ===
 Error ----------------------------------------------------------------------------- -:7:1
 
 Cannot call `hasThisParam` as a standalone function because its `this` parameter requires `number` [1] as the receiver.
@@ -464,7 +520,7 @@ References:
 
 Found 1 error
 
-=== block 31 ===
+=== block 34 ===
 Error ----------------------------------------------------------------------------- -:4:1
 
 Cannot cast `42` to `Response` because `42` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -481,7 +537,7 @@ References:
 
 Found 1 error
 
-=== block 32 ===
+=== block 35 ===
 Error ----------------------------------------------------------------------------- -:7:1
 
 Cannot cast `'hello'` to `A` because `"hello"` [1] is incompatible with `number` [2]. [incompatible-type]
@@ -511,7 +567,7 @@ References:
 
 Found 2 errors
 
-=== block 33 ===
+=== block 36 ===
 Error ---------------------------------------------------------------------------- -:9:19
 
 Cannot assign `'not a user'` to `bad` because `"not a user"` [1] is incompatible with `{name: string}` [2].
@@ -529,7 +585,7 @@ References:
 
 Found 1 error
 
-=== block 34 ===
+=== block 37 ===
 Error ----------------------------------------------------------------------------- -:8:1
 
 Cannot cast `null` to `Name` because `null` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -546,10 +602,10 @@ References:
 
 Found 1 error
 
-=== block 35 ===
+=== block 38 ===
 No errors!
 
-=== block 36 ===
+=== block 39 ===
 Error ---------------------------------------------------------------------------- -:5:22
 
 Cannot call `assertEqual` with `42` bound to `expected` because `42` [1] is incompatible with `string` [2].
@@ -567,7 +623,7 @@ References:
 
 Found 1 error
 
-=== block 37 ===
+=== block 40 ===
 Error ---------------------------------------------------------------------------- -:8:23
 
 Cannot call `createSignal` with `42` bound to `defaultValue` because `42` [1] is incompatible with `string` [2].
@@ -585,10 +641,10 @@ References:
 
 Found 1 error
 
-=== block 38 ===
+=== block 41 ===
 No errors!
 
-=== block 39 ===
+=== block 42 ===
 Error ---------------------------------------------------------------------------- -:13:1
 
 Cannot cast `newObj.b` to `"a"` because `"b"` [1] is incompatible with `"a"` [2]. [incompatible-type]
@@ -608,7 +664,7 @@ References:
 
 Found 1 error
 
-=== block 40 ===
+=== block 43 ===
 Error ---------------------------------------------------------------------------- -:12:1
 
 Cannot cast `makeStore(...)` to `Model` because `Store` [1] is incompatible with `Model` [2]. [incompatible-type]
@@ -645,7 +701,7 @@ References:
 
 Found 2 errors
 
-=== block 41 ===
+=== block 44 ===
 Error --------------------------------------------------------------------------- -:10:28
 
 Cannot call `makeParamStore` with `1` bound to `data` because `1` [1] is incompatible with `boolean` [2].
@@ -663,7 +719,7 @@ References:
 
 Found 1 error
 
-=== block 42 ===
+=== block 45 ===
 Error ----------------------------------------------------------------------------- -:5:1
 
 Cannot cast `'other-name'` to `DataProp` because `"other-name"` [1] is incompatible with `DataProp` [2].
@@ -694,7 +750,7 @@ References:
 
 Found 2 errors
 
-=== block 43 ===
+=== block 46 ===
 Error ----------------------------------------------------------------------------- -:5:1
 
 Cannot cast `'random string'` to `DataProp` because `"random string"` [1] is incompatible with
@@ -712,7 +768,7 @@ References:
 
 Found 1 error
 
-=== block 44 ===
+=== block 47 ===
 Error ----------------------------------------------------------------------------- -:5:1
 
 Cannot cast `'random string'` to `Exclaim` because `"random string"` [1] is incompatible with
@@ -730,7 +786,7 @@ References:
 
 Found 1 error
 
-=== block 45 ===
+=== block 48 ===
 Error ----------------------------------------------------------------------------- -:4:1
 
 Cannot cast `'random string'` to `CSSVar` because `"random string"` [1] is incompatible with
@@ -762,7 +818,7 @@ References:
 
 Found 2 errors
 
-=== block 46 ===
+=== block 49 ===
 Error ----------------------------------------------------------------------------- -:5:1
 
 Cannot cast `'$999'` to `Price` because `"$999"` [1] is incompatible with `` `${"$"}${"1" | "2"}` `` [2].
@@ -780,7 +836,7 @@ References:
 
 Found 1 error
 
-=== block 47 ===
+=== block 50 ===
 Error ----------------------------------------------------------------------------- -:4:1
 
 Cannot cast `'hello'` to `Greeting` because `"hello"` [1] is incompatible with `Greeting` [2]. [incompatible-type]
@@ -797,7 +853,7 @@ References:
 
 Found 1 error
 
-=== block 48 ===
+=== block 51 ===
 Error ----------------------------------------------------------------------------- -:4:1
 
 Cannot cast `'WARNING'` to `Tag` because `"WARNING"` [1] is incompatible with `Tag` [2]. [incompatible-type]
@@ -814,7 +870,7 @@ References:
 
 Found 1 error
 
-=== block 49 ===
+=== block 52 ===
 Error ----------------------------------------------------------------------------- -:4:1
 
 Cannot cast `'flow'` to `Name` because `"flow"` [1] is incompatible with `Name` [2]. [incompatible-type]
@@ -844,7 +900,7 @@ References:
 
 Found 2 errors
 
-=== block 50 ===
+=== block 53 ===
 Error ----------------------------------------------------------------------------- -:4:1
 
 Cannot cast `'FullName'` to `Field` because `"FullName"` [1] is incompatible with `Field` [2]. [incompatible-type]
@@ -874,7 +930,7 @@ References:
 
 Found 2 errors
 
-=== block 51 ===
+=== block 54 ===
 Error ----------------------------------------------------------------------------- -:5:1
 
 Cannot cast `'south'` to `Direction` because `"south"` [1] is incompatible with `Direction` [2]. [incompatible-type]
@@ -891,10 +947,10 @@ References:
 
 Found 1 error
 
-=== block 52 ===
+=== block 55 ===
 No errors!
 
-=== block 53 ===
+=== block 56 ===
 Error ----------------------------------------------------------------------------- -:6:1
 
 Cannot cast `'anything'` to `Loud` because `"anything"` [1] is incompatible with `Loud` [2]. [incompatible-type]
@@ -913,7 +969,7 @@ References:
 
 Found 1 error
 
-=== block 54 ===
+=== block 57 ===
 Error ----------------------------------------------------------------------------- -:8:1
 
 Cannot cast `'onclick'` to `EventName` because `"click"` [1] is incompatible with `"Change" | "Click"` [2].
@@ -931,8 +987,8 @@ References:
 
 Found 1 error
 
-=== block 55 ===
+=== block 58 ===
 No errors!
 
-=== block 56 ===
+=== block 59 ===
 No errors!

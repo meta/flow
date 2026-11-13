@@ -36,7 +36,25 @@ No errors!
 No errors!
 
 === block 8 ===
-No errors!
+Error -------------------------------------------------------------------------- -:9:6
+
+Cannot access `{[symbol]: string, [symbol]: string}` [1] with computed property using `symbol` [2].
+[invalid-computed-prop]
+
+   -:9:6
+    9| meta[Symbol()]; // ERROR: not a key of `Meta`
+            ^^^^^^^^
+
+References:
+   -:7:21
+    7| declare const meta: Meta;
+                           ^^^^ [1]
+   <BUILTINS>/lib.es2015.symbol.js:30:38
+   30|     (description?: string | number): symbol;
+                                            ^^^^^^ [2]
+
+
+Found 1 error
 
 === block 9 ===
 No errors!
@@ -45,6 +63,9 @@ No errors!
 No errors!
 
 === block 11 ===
+No errors!
+
+=== block 12 ===
 Error -------------------------------------------------------------------------- -:4:2
 
 Cannot cast object literal to `RequiredO` because property `bar` is missing in object literal [1] but exists in
@@ -62,7 +83,7 @@ References:
 
 Found 1 error
 
-=== block 12 ===
+=== block 13 ===
 Error -------------------------------------------------------------------------- -:6:1
 
 Cannot cast `m.a` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -82,7 +103,7 @@ References:
 
 Found 1 error
 
-=== block 13 ===
+=== block 14 ===
 Error -------------------------------------------------------------------------- -:4:2
 
 Cannot cast array literal to `AllRequired` because array literal [1] has 1 element but
@@ -100,7 +121,7 @@ References:
 
 Found 1 error
 
-=== block 14 ===
+=== block 15 ===
 Error -------------------------------------------------------------------------- -:6:1
 
 Cannot cast empty string to `MappedTuple[0]` because `""` [1] is incompatible with `boolean` [2]. [incompatible-type]
@@ -137,7 +158,7 @@ Cannot assign `true` to `mapped[0]` because tuple element at index `0` [1] label
 
 Found 3 errors
 
-=== block 15 ===
+=== block 16 ===
 Error ------------------------------------------------------------------------- -:7:20
 
 Mapped Types do not yet support write-only variance annotations on array inputs. [invalid-mapped-type]

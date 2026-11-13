@@ -364,6 +364,38 @@ type ObjB = {
 const x: ObjB = {a: 1, b: 'hi', c: true};
 ```
 
+## Symbol-keyed properties {#toc-symbol-keyed-properties}
+
+A computed key in an object type, `{[key]: T}`, names a single property when `key` is a [unique symbol](./primitives.md#toc-unique-symbols). Flow infers a unique symbol type for a `const` initialized directly with `Symbol()` or `Symbol.for()`. You can also annotate a symbol with `unique symbol`, for example on a `static readonly` class field or a `readonly` property:
+
+```js flow-check
+const id = Symbol('id');
+
+type Tagged = {[id]: number, name: string};
+const tagged: Tagged = {[id]: 1, name: 'tagged'};
+
+tagged[id] as number; // Works
+tagged[id] = 2; // Works: a symbol key does not make the property read-only
+tagged[Symbol('id')]; // Error! A different symbol is not a key of `Tagged`
+
+const copy = {...tagged};
+copy[id] as number; // Works: spread keeps symbol-keyed properties
+```
+
+Each unique symbol names a different property. Its variance and type follow the same rules as any named property. Use [`typeof id`](./primitives.md#toc-unique-symbols) to refer to the key's type, as in the [indexed access](./indexed-access.md) type `Tagged[typeof id]`. You can also use [well-known symbols](./primitives.md#toc-well-known-symbols) such as `Symbol.iterator` as keys.
+
+A value of the general `symbol` type does not name a specific property. Flow rejects it as a computed key in an object literal. To read a property using such a value, the object needs a [symbol indexer](#toc-symbol-indexers):
+
+```js flow-check
+const id = Symbol('id');
+type Tagged = {[id]: number};
+declare const tagged: Tagged;
+declare const someSymbol: symbol;
+
+tagged[someSymbol]; // Error!
+const fromGeneral = {[someSymbol]: 1}; // Error!
+```
+
 ## Objects as maps {#toc-objects-as-maps}
 
 JavaScript includes a [`Map`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) class,
@@ -425,6 +457,27 @@ You can mark an indexer property as read-only (or write-only) using [variance](.
 type ReadOnly = {readonly [string]: number};
 type WriteOnly = {writeonly [string]: number};
 ```
+
+### Symbol indexers {#toc-symbol-indexers}
+
+An indexer keyed by `symbol` accepts any symbol. Writing `typeof id` as the indexer key limits it to `id`. Neither indexer requires a key to be present. In contrast, a [symbol-keyed property](#toc-symbol-keyed-properties) `{[id]: T}` is required:
+
+```js flow-check
+const id = Symbol('id');
+
+type Named = {[id]: number}; // a required property
+type Indexed = {[typeof id]: number}; // an indexer accepting only `id`
+type Dictionary = {[key: symbol]: number}; // an indexer accepting any symbol
+
+const named: Named = {}; // Error! Missing property
+const indexed: Indexed = {}; // Works: indexers don't require keys
+const dict: Dictionary = {};
+dict[Symbol()] = 1; // Works
+dict[id] = 2; // Works
+dict['name'] = 3; // Error! Only symbol keys
+```
+
+[`keyof`](./utilities.md#toc-keys) includes symbol keys and symbol indexers, but `Object.keys` and `Object.entries` omit them, matching JavaScript's runtime behavior.
 
 ## Keys, values, and indexed access
 

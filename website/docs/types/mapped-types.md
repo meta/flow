@@ -83,6 +83,18 @@ type MappedFooAndBarWithIndexer = MappedTypeFromKeys<'foo' | 'bar' | string>;
 // = {foo: number, bar: number, [string]: number}
 ```
 
+A source can also contain [unique symbols](./primitives.md#toc-unique-symbols). Each becomes a [symbol-keyed property](./objects.md#toc-symbol-keyed-properties) in the result. Mapped types over `keyof` likewise preserve the source's symbol keys:
+```js flow-check
+const id = Symbol('id');
+const version = Symbol('version');
+
+type Meta = {[K in typeof id | typeof version]: string};
+// = {[id]: string, [version]: string}
+declare const meta: Meta;
+meta[id] as string; // OK
+meta[Symbol()]; // ERROR: not a key of `Meta`
+```
+
 ## Distributive Mapped Types {#toc-distributive-mapped-types}
 
 When the mapped type uses an inline `keyof` or a type parameter bound by `keyof`

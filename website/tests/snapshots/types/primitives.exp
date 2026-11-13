@@ -300,6 +300,245 @@ Found 1 error
 No errors!
 
 === block 27 ===
+Error ---------------------------------------------------------------------------- -:8:1
+
+Cannot cast `annotated` to `unique symbol` because unique symbol [1] is incompatible with unique symbol [2].
+[incompatible-type]
+
+   -:8:1
+   8| annotated as typeof inferred; // Error! A different symbol
+      ^^^^^^^^^
+
+References:
+   -:3:18
+   3| const annotated: unique symbol = Symbol('annotated');
+                       ^^^^^^^^^^^^^ [1]
+   -:8:14
+   8| annotated as typeof inferred; // Error! A different symbol
+                   ^^^^^^^^^^^^^^^ [2]
+
+Error -------------------------------------------------------------------------- -:12:17
+
+Cannot call `acceptsDeclared` with `Symbol()` bound to `key` because `symbol` [1] is incompatible with unique
+symbol [2]. [incompatible-type]
+
+   -:12:17
+   12| acceptsDeclared(Symbol()); // Error!
+                       ^^^^^^^^
+
+References:
+   <BUILTINS>/lib.es2015.symbol.js:30:38
+   30|     (description?: string | number): symbol;
+                                            ^^^^^^ [1]
+   -:10:31
+   10| function acceptsDeclared(key: typeof declared) { /* ... */ }
+                                     ^^^^^^^^^^^^^^^ [2]
+
+
+Found 2 errors
+
+=== block 28 ===
+Error --------------------------------------------------------------------------- -:8:13
+
+Cannot use `general` [1] to assign a computed property. Computed properties may only be numeric or string literal
+values, but this one is a `symbol` [2]. Can you add an appropriate type annotation to `general` [1]? See
+https://flow.org/en/docs/types/literals/ for more information on literal types. [invalid-computed-prop]
+
+   -:8:13
+   8| const b = {[general]: 1}; // Error!
+                  ^^^^^^^ [1]
+
+References:
+   -:3:16
+   3| const general: symbol = Symbol();
+                     ^^^^^^ [2]
+
+Error --------------------------------------------------------------------------- -:9:13
+
+Cannot use `rebindable` [1] to assign a computed property. Computed properties may only be numeric or string literal
+values, but this one is a `symbol` [2]. Can you add an appropriate type annotation to `rebindable` [1]? See
+https://flow.org/en/docs/types/literals/ for more information on literal types. [invalid-computed-prop]
+
+   -:9:13
+    9| const c = {[rebindable]: 1}; // Error!
+                   ^^^^^^^^^^ [1]
+
+References:
+   <BUILTINS>/lib.es2015.symbol.js:30:38
+   30|     (description?: string | number): symbol;
+                                            ^^^^^^ [2]
+
+Error -------------------------------------------------------------------------- -:10:13
+
+Cannot use `holder.key` [1] to assign a computed property. Computed properties may only be numeric or string literal
+values, but this one is a `symbol` [2]. Can you add an appropriate type annotation to `holder.key` [1]? See
+https://flow.org/en/docs/types/literals/ for more information on literal types. [invalid-computed-prop]
+
+   -:10:13
+   10| const d = {[holder.key]: 1}; // Error!
+                   ^^^^^^^^^^ [1]
+
+References:
+   <BUILTINS>/lib.es2015.symbol.js:30:38
+   30|     (description?: string | number): symbol;
+                                            ^^^^^^ [2]
+
+
+Found 3 errors
+
+=== block 29 ===
+Error --------------------------------------------------------------------------- -:7:20
+
+Cannot assign `Symbol()` to `holder.annotated` because `symbol` [1] is incompatible with unique symbol [2].
+[incompatible-type]
+
+   -:7:20
+    7| holder.annotated = Symbol(); // Error!
+                          ^^^^^^^^
+
+References:
+   <BUILTINS>/lib.es2015.symbol.js:30:38
+   30|     (description?: string | number): symbol;
+                                            ^^^^^^ [1]
+   -:3:18
+    3| const annotated: unique symbol = Symbol();
+                        ^^^^^^^^^^^^^ [2]
+
+
+Found 1 error
+
+=== block 30 ===
+Error ---------------------------------------------------------------------------- -:4:1
+
+Cannot cast `second` to `unique symbol` because unique symbol [1] is incompatible with unique symbol [2].
+[incompatible-type]
+
+   -:4:1
+   4| second as typeof first; // Error!
+      ^^^^^^
+
+References:
+   -:3:16
+   3| const second = Symbol.for('app');
+                     ^^^^^^^^^^^^^^^^^ [1]
+   -:4:11
+   4| second as typeof first; // Error!
+                ^^^^^^^^^^^^ [2]
+
+
+Found 1 error
+
+=== block 31 ===
+Error -------------------------------------------------------------------------- -:13:14
+
+A variable whose type is `unique symbol` must be `const`. A binding that can be reassigned would let a different symbol
+take the place of the one this annotation names. [unsupported-syntax]
+
+   13| let mutable: unique symbol = Symbol(); // Error! Must be `const`
+                    ^^^^^^^^^^^^^
+
+Error -------------------------------------------------------------------------- -:14:22
+
+A property whose type is `unique symbol` must be `readonly`. A property that can be written would let a different symbol
+take the place of the one this annotation names. [unsupported-syntax]
+
+   14| type Writable = {id: unique symbol}; // Error! Must be `readonly`
+                            ^^^^^^^^^^^^^
+
+Error -------------------------------------------------------------------------- -:16:17
+
+A class property whose type is `unique symbol` must be both `static` and `readonly`. An instance property declares one
+member per instance, and a property that can be written would let a different symbol take the place of the one this
+annotation names. [unsupported-syntax]
+
+   16|   readonly key: unique symbol = Symbol(); // Error! Must be `static readonly`
+                       ^^^^^^^^^^^^^
+
+Error -------------------------------------------------------------------------- -:18:14
+
+`unique symbol` is only allowed as the type of a `const` variable, of a `readonly` property, or of a `static readonly`
+class field. Anywhere else one annotation would stand for every value written against it, so distinct symbols would be
+treated as the same property. Use `symbol` instead, or `typeof` a binding declared with `unique symbol`.
+[unsupported-syntax]
+
+   18| type Alias = unique symbol; // Error! Use `typeof` an existing symbol
+                    ^^^^^^^^^^^^^
+
+Error -------------------------------------------------------------------------- -:19:26
+
+`unique symbol` is only allowed as the type of a `const` variable, of a `readonly` property, or of a `static readonly`
+class field. Anywhere else one annotation would stand for every value written against it, so distinct symbols would be
+treated as the same property. Use `symbol` instead, or `typeof` a binding declared with `unique symbol`.
+[unsupported-syntax]
+
+   19| declare function make(): unique symbol; // Error!
+                                ^^^^^^^^^^^^^
+
+Error -------------------------------------------------------------------------- -:20:27
+
+`unique symbol` is only allowed as the type of a `const` variable, of a `readonly` property, or of a `static readonly`
+class field. Anywhere else one annotation would stand for every value written against it, so distinct symbols would be
+treated as the same property. Use `symbol` instead, or `typeof` a binding declared with `unique symbol`.
+[unsupported-syntax]
+
+   20| declare const list: Array<unique symbol>; // Error!
+                                 ^^^^^^^^^^^^^
+
+Error -------------------------------------------------------------------------- -:21:33
+
+Cannot assign object literal to `registry` because in property `id`: `symbol` [1] is incompatible with unique
+symbol [2]. [incompatible-type]
+
+   -:21:33
+   21| const registry: Registry = {id: Symbol()}; // Error!
+                                       ^^^^^^^^
+
+References:
+   <BUILTINS>/lib.es2015.symbol.js:30:38
+   30|     (description?: string | number): symbol;
+                                            ^^^^^^ [1]
+   -:5:31
+    5| type Registry = {readonly id: unique symbol};
+                                     ^^^^^^^^^^^^^ [2]
+
+
+Found 7 errors
+
+=== block 32 ===
+No errors!
+
+=== block 33 ===
+Error ---------------------------------------------------------------------------- -:9:1
+
+Cannot cast `countdown` to `Iterable<string>` because: [incompatible-type]
+ - in property `@@iterator`: `Iterator<number>` [1] is incompatible with `Iterator<string, void, void>` [2]
+    - in the return value > type argument `T` [3]: `number` [4] is incompatible with `string` [5]
+
+   -:9:1
+     9| countdown as Iterable<string>; // Error!
+        ^^^^^^^^^
+
+References:
+   -:3:24
+     3|   [Symbol.iterator](): Iterator<number>,
+                               ^^^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es2015.iterable.js:50:26
+    50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/misc.js:294:24
+   294| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+                               ^ [3]
+   -:3:33
+     3|   [Symbol.iterator](): Iterator<number>,
+                                        ^^^^^^ [4]
+   -:9:23
+     9| countdown as Iterable<string>; // Error!
+                              ^^^^^^ [5]
+
+
+Found 1 error
+
+=== block 34 ===
 Error --------------------------------------------------------------------------- -:5:15
 
 Cannot call `acceptsBigInt` with `42` bound to `value` because `42` [1] is incompatible with `bigint` [2].
@@ -317,5 +556,5 @@ References:
 
 Found 1 error
 
-=== block 28 ===
+=== block 35 ===
 No errors!

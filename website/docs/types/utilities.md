@@ -31,6 +31,20 @@ const nope: Country = 'nope'; // Error!
 
 In the example above, the type of `Country` is equivalent to `type Country = 'US' | 'IT' | 'FR'`, but Flow was able to extract it from the keys of `countries`.
 
+`keyof` also includes [symbol keys](./objects.md#toc-symbol-keyed-properties), each as its own unique symbol type. In contrast, `Object.keys` and `Object.entries` omit symbol keys during runtime enumeration, matching JavaScript's behavior:
+
+```js flow-check
+const id = Symbol('id');
+const tagged = {[id]: 1, name: 'tagged'};
+
+type Keys = keyof typeof tagged; // 'name' | typeof id
+id as Keys; // Works
+'name' as Keys; // Works
+Symbol() as Keys; // Error!
+
+Object.keys(tagged) as Array<'name'>; // Works: no symbol keys at runtime
+```
+
 If you want to create an enum type, [Flow Enums](../enums/index.md) might be a better fit for your use-case.
 
 ## `Values<T>` {#toc-values}
@@ -260,6 +274,23 @@ justBaz.foo; // error: missing foo
 justBaz.bar; // error: missing bar
 ```
 
+`Pick`, `Omit`, and `Partial` preserve the distinct identities of [symbol keys](./objects.md#toc-symbol-keyed-properties). To select or remove a specific symbol-keyed property, use `typeof key`:
+
+```js flow-check
+const id = Symbol('id');
+type Tagged = {[id]: number, name: string};
+
+declare const withoutId: Omit<Tagged, typeof id>;
+withoutId.name as string; // Works
+withoutId[id]; // Error! `id` was omitted
+
+declare const onlyId: Pick<Tagged, typeof id>;
+onlyId[id] as number; // Works
+
+declare const partial: Partial<Tagged>;
+partial[id] as number | void; // Works
+```
+
 ## `Record<Keys, Type>` {#toc-record}
 
 This utility type allows you to generate an object type from a union of keys with the given
@@ -270,6 +301,15 @@ declare const numberRecord: NumberRecord;
 numberRecord.foo as number; // ok
 numberRecord.bar as number; // ok
 numberRecord.baz; // error
+```
+
+Unique symbol keys also create required properties:
+```js flow-check
+const width = Symbol('width');
+const height = Symbol('height');
+
+type Size = Record<typeof width | typeof height, number>;
+const size: Size = {[width]: 1}; // Error! Missing the `height` property
 ```
 
 Note that `Record` is different than using an indexer:

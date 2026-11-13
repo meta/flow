@@ -38,6 +38,16 @@ type Age = Cat[AgeProp]; // type Age = number
 const catAge: Age = 6; // OK - `Age` is an alias for `number`
 ```
 
+For a [symbol-keyed property](./objects.md#toc-symbol-keyed-properties), apply `typeof` to the symbol and use the resulting type as the index:
+```js flow-check
+const id = Symbol('id');
+type Tagged = {[id]: number, name: string};
+
+type Id = Tagged[typeof id]; // number
+const value: Id = 1; // OK
+const wrong: Id = 'one'; // Error
+```
+
 Access an array type's element, by getting the type at the array's indices (which are `number`s):
 ```js flow-check
 type CatNames = Array<string>;

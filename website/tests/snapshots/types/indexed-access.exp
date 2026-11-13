@@ -5,9 +5,26 @@ No errors!
 No errors!
 
 === block 3 ===
-No errors!
+Error ----------------------------------------------------------------------- -:7:19
+
+Cannot assign `'one'` to `wrong` because `"one"` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   -:7:19
+   7| const wrong: Id = 'one'; // Error
+                        ^^^^^ [1]
+
+References:
+   -:7:14
+   7| const wrong: Id = 'one'; // Error
+                   ^^ [2]
+
+
+Found 1 error
 
 === block 4 ===
+No errors!
+
+=== block 5 ===
 Error ----------------------------------------------------------------------- -:6:19
 
 Cannot access `2` on `Pair` because `Pair` [1] only has 2 elements, so index 2 is out of bounds. [invalid-tuple-index]
@@ -24,10 +41,10 @@ References:
 
 Found 1 error
 
-=== block 5 ===
+=== block 6 ===
 No errors!
 
-=== block 6 ===
+=== block 7 ===
 Error ----------------------------------------------------------------------- -:7:19
 
 Cannot assign `getProp(...)` to `y` because `42` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -73,8 +90,8 @@ References:
 
 Found 3 errors
 
-=== block 7 ===
+=== block 8 ===
 No errors!
 
-=== block 8 ===
+=== block 9 ===
 No errors!

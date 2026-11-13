@@ -1,8 +1,10 @@
 ---
 title: Primitive Types
 slug: /types/primitives
-description: "Reference for Flow's primitive types: boolean, string, number, null, void, symbol, and bigint."
+description: "Reference for Flow's primitive types: boolean, string, number, null, void, symbol (including unique symbols), and bigint."
 ---
+
+import {SinceVersion} from '../../components/VersionTags';
 
 JavaScript has a number of different primitive types
 ([MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#primitive_values)):
@@ -357,7 +359,7 @@ acceptsOptionalString(null);      // Error!
 
 ## Symbols {#toc-symbols}
 
-Symbols are created with `Symbol()` in JavaScript. Flow has basic support for symbols, using the `symbol` type.
+Symbols are created with `Symbol()` in JavaScript. The `symbol` type accepts any symbol. Flow can also track the identity of a specific symbol with a [unique symbol type](#toc-unique-symbols), so you can use it as an [object property key](./objects.md#toc-symbol-keyed-properties).
 
 ```js flow-check
 function acceptsSymbol(value: symbol) { /* ... */ }
@@ -379,6 +381,132 @@ function func(value: unknown) {
   }
 }
 ```
+
+### Unique symbols <SinceVersion version="0.339" /> {#toc-unique-symbols}
+
+A `unique symbol` type stands for one specific symbol. It is a subtype of `symbol`, and two unique symbols declared separately are different types. Use `typeof key` to refer to the type of an existing symbol `key`:
+
+```js flow-check
+const inferred = Symbol('inferred');
+const annotated: unique symbol = Symbol('annotated');
+declare const declared: unique symbol;
+
+inferred as symbol; // Works: a unique symbol is a symbol
+inferred as typeof inferred; // Works
+annotated as typeof inferred; // Error! A different symbol
+
+function acceptsDeclared(key: typeof declared) { /* ... */ }
+acceptsDeclared(declared); // Works
+acceptsDeclared(Symbol()); // Error!
+```
+
+When you initialize a `const` directly with a call to `Symbol()` or `Symbol.for()`, Flow infers a unique symbol type without an annotation or configuration. A `const` annotated as `symbol` and a `let` or `var` binding instead have the general `symbol` type, which does not name a specific property. The same is true of a `Symbol()` call nested inside an object, an array, or a function result.
+
+```js flow-check
+const key = Symbol();
+const general: symbol = Symbol();
+let rebindable = Symbol();
+const holder = {key: Symbol()};
+
+const a = {[key]: 1}; // Works
+const b = {[general]: 1}; // Error!
+const c = {[rebindable]: 1}; // Error!
+const d = {[holder.key]: 1}; // Error!
+```
+
+Like an inferred [literal type](./literals.md), an inferred unique symbol widens back to `symbol` when it is stored in a mutable binding or property. An annotated unique symbol does not widen:
+
+```js flow-check
+const inferred = Symbol();
+const annotated: unique symbol = Symbol();
+
+const holder = {inferred, annotated};
+holder.inferred = Symbol(); // Works: the property widened to `symbol`
+holder.annotated = Symbol(); // Error!
+```
+
+Flow tracks a unique symbol's identity by its declaration, not by runtime equality. Two separate `Symbol.for('app')` calls return the same runtime symbol but have different types. Conversely, a declaration inside a function or a loop has one type for all the symbols it creates, even if it runs more than once:
+
+```js flow-check
+const first = Symbol.for('app');
+const second = Symbol.for('app');
+second as typeof first; // Error!
+```
+
+:::info TypeScript comparison
+As in TypeScript, `unique symbol` annotations are limited to `const` declarations, `readonly` properties, and `static readonly` class fields. Use `typeof key` to refer to the type of an existing symbol. Follow the Flow rules described here rather than assuming every TypeScript edge case behaves the same.
+:::
+
+#### Allowed annotation positions {#toc-unique-symbol-positions}
+
+A bare `unique symbol` annotation introduces a new symbol identity, so it is only allowed where it describes exactly one value:
+
+- `const` declarations, including `declare const` and exported `const` declarations
+- `readonly` properties of object types and interfaces, including optional and computed properties
+- `static readonly` fields of classes and `declare class` declarations
+
+```js flow-check
+declare const fromLibrary: unique symbol;
+export const exported: unique symbol = Symbol();
+
+type Registry = {readonly id: unique symbol};
+interface Plugin {
+  readonly id: unique symbol;
+}
+class Tokens {
+  static readonly key: unique symbol = Symbol();
+}
+
+let mutable: unique symbol = Symbol(); // Error! Must be `const`
+type Writable = {id: unique symbol}; // Error! Must be `readonly`
+class Instance {
+  readonly key: unique symbol = Symbol(); // Error! Must be `static readonly`
+}
+type Alias = unique symbol; // Error! Use `typeof` an existing symbol
+declare function make(): unique symbol; // Error!
+declare const list: Array<unique symbol>; // Error!
+const registry: Registry = {id: Symbol()}; // Error!
+```
+
+Flow also rejects `unique symbol` on `var` bindings, function parameters, getters, and indexer values. It rejects destructuring patterns, loop bindings, and other nested positions such as `unique symbol | string` as well.
+
+If an annotated declaration has an initializer, it must be a direct `Symbol()` or `Symbol.for()` call. A `readonly` property annotated with `unique symbol` describes a symbol held by a declared value. An object literal such as `{id: Symbol()}` does not create that symbol.
+
+These rules apply to `unique symbol` as a value type. Using a unique symbol as a property *key* does not make the property `readonly`; see [symbol-keyed properties](./objects.md#toc-symbol-keyed-properties).
+
+To reuse a symbol's type in any other position, write `typeof key`:
+
+```js flow-check
+declare const key: unique symbol;
+
+type Key = typeof key;
+function getKey(): Key {
+  return key;
+}
+function acceptsKey(k: Key) { /* ... */ }
+const keys: Array<Key> = [key];
+```
+
+#### Adoption {#toc-unique-symbols-adoption}
+
+To use `unique symbol` annotations, set `experimental.tslib_syntax=true` in `.flowconfig` and use Flow and flow-parser 0.339.0+ and Prettier 3.10.0+ with its built-in [`flow` parser](../tools/prettier.md).
+
+### Well-known symbols {#toc-well-known-symbols}
+
+Flow recognizes JavaScript's well-known symbols, such as `Symbol.iterator`, `Symbol.asyncIterator`, and `Symbol.dispose`. You can use them as computed keys in object types, interfaces, and classes. Flow uses these symbols to check language protocols; for example, a `[Symbol.iterator]()` method makes a type iterable:
+
+```js flow-check
+type Countdown = {
+  [Symbol.iterator](): Iterator<number>,
+};
+declare const countdown: Countdown;
+for (const n of countdown) {
+  n as number; // Works
+}
+countdown as Iterable<string>; // Error!
+```
+
+Flow's types for these symbols describe the language; they do not polyfill a symbol for a runtime that lacks it.
 
 
 ## BigInts {#toc-bigints}
