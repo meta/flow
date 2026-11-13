@@ -224,6 +224,30 @@ pub fn free_var_finder<'cx>(
     result.free
 }
 
+/// The type parameters free in the property map `id`.
+fn props_free_vars(cx: &mut Context<'_>, id: &properties::Id) -> Rc<[SubstName]> {
+    if let Some(free_vars) = cx.property_map_free_vars(id) {
+        return free_vars;
+    }
+    let mut visitor = FreeVarVisitor;
+    let free_vars: Rc<[SubstName]> = visitor
+        .props(
+            cx,
+            Polarity::Positive,
+            FvAcc {
+                free: FlowOrdSet::new(),
+                bound: FlowOrdSet::new(),
+            },
+            id.dupe(),
+        )
+        .free
+        .iter()
+        .map(Dupe::dupe)
+        .collect();
+    cx.set_property_map_free_vars(id.dupe(), free_vars.dupe());
+    free_vars
+}
+
 pub fn free_var_finder_in_destructor<'cx>(
     cx: &mut Context<'cx>,
     bound: Option<FlowOrdSet<SubstName>>,
@@ -427,6 +451,8 @@ struct Substituter {
     change_id: bool,
     obj_reachable_targs: Option<Vec<(Type, Polarity)>>,
     cached_fvs: Option<(FlowOrdMap<SubstName, Replacement>, FlowOrdSet<SubstName>)>,
+    /// How many polymorphic types the substitution is inside of.
+    poly_depth: usize,
 }
 
 impl Substituter {
@@ -435,7 +461,60 @@ impl Substituter {
             change_id: false,
             obj_reachable_targs: None,
             cached_fvs: None,
+            poly_depth: 0,
         }
+    }
+
+    /// The property map `id` with the substitution applied to each property when it is read.
+    ///
+    /// Only maps in which a substituted type parameter occurs free are substituted this way, so
+    /// that, as when substituting them right away, the result is a new map exactly when a property
+    /// changes. Under a polymorphic type, whether something was substituted decides the id of that
+    /// type, and in an object, the substitution collects the type arguments the object reaches, so
+    /// both are substituted right away.
+    fn lazy_props(
+        &mut self,
+        cx: &mut Context<'_>,
+        map_cx: &MapCx,
+        id: &properties::Id,
+    ) -> Option<properties::Id> {
+        let (map, _, placeholder_no_infer, _, _) = map_cx;
+        if self.poly_depth > 0 || self.obj_reachable_targs.is_some() || *placeholder_no_infer {
+            return None;
+        }
+        let free_vars = props_free_vars(cx, id);
+        if !free_vars.iter().any(|name| map.contains_key(name)) {
+            return None;
+        }
+        if free_vars
+            .iter()
+            .any(|name| matches!(map.get(name), Some(Replacement::TypeSubst(..))))
+        {
+            self.change_id = true;
+        }
+        let substituted_free_vars: BTreeSet<SubstName> = free_vars
+            .iter()
+            .flat_map(|name| match map.get(name) {
+                None => vec![name.dupe()],
+                Some(Replacement::TypeSubst(_, fvs)) => {
+                    fvs.get_forced(cx).iter().map(Dupe::dupe).collect()
+                }
+                Some(Replacement::AlphaRename(name_prime)) => vec![name_prime.dupe()],
+            })
+            .collect();
+        let new_id = properties::Id::generate_id();
+        let map_cx = map_cx.clone();
+        cx.add_lazy_property_map(
+            new_id.dupe(),
+            id.dupe(),
+            Rc::new(move |cx: &mut Context<'_>, prop| {
+                let mut substituter = Substituter::new();
+                property::ident_map_t(|t| substituter.type_(cx, &map_cx, t.dupe()), prop)
+                    .into_owned()
+            }),
+            substituted_free_vars.into_iter().collect(),
+        );
+        Some(new_id)
     }
 
     fn get_fvs_of_map(
@@ -542,6 +621,8 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
         let (map, _, _, _, _) = map_cx;
         if map.is_empty() {
             id
+        } else if let Some(new_id) = self.lazy_props(cx, map_cx, &id) {
+            new_id
         } else {
             props(self, cx, map_cx, id)
         }
@@ -659,6 +740,7 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
                 {
                     let prev_change_id = self.change_id;
                     self.change_id = false;
+                    self.poly_depth += 1;
                     let mut xs_new: Option<Vec<TypeParam>> = None;
                     let mut current_map = map.dupe();
                     let mut changed = false;
@@ -743,6 +825,7 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
                         &(current_map, false, *placeholder_no_infer, *purpose, None),
                         inner.dupe(),
                     );
+                    self.poly_depth -= 1;
                     let changed = changed || !inner.ptr_eq(&inner_prime);
                     let new_id = if self.change_id {
                         poly::Id::generate_id()

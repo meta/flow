@@ -2565,7 +2565,8 @@ fn merge_props_by_id<'cx>(
     use flow_typing_type::type_::TypeInner;
     use flow_typing_type::type_::inter_rep;
     let target_own_map = cx.find_props(target_own.dupe());
-    let source_own_map = subst_merge_props(cx, tparam_subst_map, cx.find_props(source_own.dupe()));
+    let source_own_map = cx.find_props(source_own.dupe());
+    let source_own_map = subst_merge_props(cx, tparam_subst_map, source_own_map);
     let mut merged_own = target_own_map.clone();
     for (name, prop) in source_own_map.iter() {
         if !merged_own.contains_key(name) {
@@ -2574,8 +2575,8 @@ fn merge_props_by_id<'cx>(
     }
     cx.add_property_map(target_own.dupe(), merged_own);
     let target_proto_map = cx.find_props(target_proto.dupe());
-    let source_proto_map =
-        subst_merge_props(cx, tparam_subst_map, cx.find_props(source_proto.dupe()));
+    let source_proto_map = cx.find_props(source_proto.dupe());
+    let source_proto_map = subst_merge_props(cx, tparam_subst_map, source_proto_map);
     let mut merged_proto = target_proto_map.clone();
     for (name, source_prop) in source_proto_map.iter() {
         match merged_proto.get(name).cloned() {

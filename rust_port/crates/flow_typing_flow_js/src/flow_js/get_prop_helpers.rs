@@ -192,7 +192,7 @@ impl flow_js_utils::GetPropHelper for FlowJs {
 // Property lookup functions in objects and instances
 
 pub(crate) fn prop_typo_suggestion<'cx>(
-    cx: &Context<'cx>,
+    cx: &mut Context<'cx>,
     ids: &[properties::Id],
     name: &str,
 ) -> Option<FlowSmolStr> {
@@ -217,7 +217,7 @@ pub(crate) fn prop_typo_suggestion<'cx>(
 /// suggestion. Passing its empty string accessor instead would land in
 /// `typo_suggestion`'s longest-name bucket and suggest every short property.
 pub(crate) fn prop_typo_suggestion_for_name<'cx>(
-    cx: &Context<'cx>,
+    cx: &mut Context<'cx>,
     ids: &[properties::Id],
     name: &Name,
 ) -> Option<FlowSmolStr> {

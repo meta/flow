@@ -7824,9 +7824,17 @@ pub mod properties {
         where
             F: FnMut(&Property) -> Property,
         {
+            self.ident_map_with_name(|_, prop| f(prop))
+        }
+
+        /// Like [PropertiesMap::ident_map], with the name of each property passed to `f`.
+        pub fn ident_map_with_name<F>(&self, mut f: F) -> Self
+        where
+            F: FnMut(&Name, &Property) -> Property,
+        {
             let mut map_prime: Option<Vec<(Name, Property)>> = None;
             for (index, (name, prop)) in self.0.iter().enumerate() {
-                let prop_prime = f(prop);
+                let prop_prime = f(name, prop);
                 if let Some(map_prime) = map_prime.as_mut() {
                     map_prime.push((name.dupe(), prop_prime));
                 } else if !prop.ptr_eq(&prop_prime) {

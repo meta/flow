@@ -382,8 +382,23 @@ impl MasterContext {
     }
 }
 
+/// Substitutes type parameters in a property, for a [LazyPropertyMap].
+pub type SubstProperty = Rc<dyn for<'a> Fn(&mut Context<'a>, &type_::Property) -> type_::Property>;
+
+/// The properties of `source` with a substitution applied, each substituted the first time it is
+/// read. The whole map is substituted, and becomes an ordinary property map, the first time all of
+/// its properties are asked for.
+struct LazyPropertyMap {
+    source: type_::properties::Id,
+    subst: SubstProperty,
+    substituted: HashMap<Name, type_::Property>,
+}
+
 pub struct ComponentT {
     sig_cx: TypeContext<Cx>,
+    lazy_property_maps: HashMap<type_::properties::Id, LazyPropertyMap>,
+    // The names of the type parameters free in a property map, by its id.
+    property_map_free_vars: HashMap<type_::properties::Id, Rc<[SubstName]>>,
     // mapping from keyed alocs to concrete locations
     aloc_tables: HashMap<FileKey, LazyALocTable>,
     synthesis_produced_uncacheable_result: bool,
@@ -1081,6 +1096,8 @@ fn make_ccx() -> ComponentT {
     }
     ComponentT {
         sig_cx: empty_sig_cx(),
+        lazy_property_maps: HashMap::new(),
+        property_map_free_vars: HashMap::new(),
         aloc_tables: HashMap::new(),
         synthesis_produced_uncacheable_result: false,
         delayed_forcing_tvars: CACHED_ORD_SET.with(|c| c.clone()),
@@ -1523,21 +1540,84 @@ impl<'a> Context<'a> {
         &self.ccx().aloc_tables
     }
 
-    pub fn find_props(&self, id: type_::properties::Id) -> type_::properties::PropertiesMap {
-        self.ccx()
-            .sig_cx
-            .property_maps
-            .get(&id)
-            .cloned()
-            .ok_or(PropsNotFound(id))
-            .unwrap()
+    pub fn find_props(&mut self, id: type_::properties::Id) -> type_::properties::PropertiesMap {
+        if let Some(pmap) = self.ccx().sig_cx.property_maps.get(&id) {
+            return pmap.dupe();
+        }
+        self.force_lazy_property_map(id)
     }
 
     pub fn find_props_opt(
-        &self,
+        &mut self,
         id: type_::properties::Id,
     ) -> Option<type_::properties::PropertiesMap> {
-        self.ccx().sig_cx.property_maps.get(&id).cloned()
+        if self.has_property_map(&id) {
+            Some(self.find_props(id))
+        } else {
+            None
+        }
+    }
+
+    /// Substitutes the properties of the lazy property map `id` that have not been read yet, and
+    /// makes it an ordinary property map.
+    fn force_lazy_property_map(
+        &mut self,
+        id: type_::properties::Id,
+    ) -> type_::properties::PropertiesMap {
+        let (source, subst) = match self.ccx().lazy_property_maps.get(&id) {
+            Some(lazy) => (lazy.source.dupe(), lazy.subst.dupe()),
+            None => panic!("{:?}", PropsNotFound(id)),
+        };
+        let source_map = self.find_props(source);
+        let pmap = source_map.ident_map_with_name(|name, prop| {
+            let substituted = self
+                .ccx()
+                .lazy_property_maps
+                .get(&id)
+                .and_then(|lazy| lazy.substituted.get(name))
+                .duped();
+            match substituted {
+                Some(prop) => prop,
+                None => subst(self, prop),
+            }
+        });
+        let ccx = self.ccx_mut();
+        ccx.lazy_property_maps.remove(&id);
+        ccx.sig_cx.property_maps.insert(id, pmap.dupe());
+        pmap
+    }
+
+    /// Adds the property map `id`, whose properties are those of `source` substituted with
+    /// `subst` when they are read, and in which `free_vars` are the free type parameters.
+    pub fn add_lazy_property_map(
+        &mut self,
+        id: type_::properties::Id,
+        source: type_::properties::Id,
+        subst: SubstProperty,
+        free_vars: Rc<[SubstName]>,
+    ) {
+        let ccx = self.ccx_mut();
+        ccx.property_map_free_vars.insert(id.dupe(), free_vars);
+        ccx.lazy_property_maps.insert(
+            id,
+            LazyPropertyMap {
+                source,
+                subst,
+                substituted: HashMap::new(),
+            },
+        );
+    }
+
+    pub fn property_map_free_vars(&self, id: &type_::properties::Id) -> Option<Rc<[SubstName]>> {
+        self.ccx().property_map_free_vars.get(id).duped()
+    }
+
+    pub fn set_property_map_free_vars(
+        &mut self,
+        id: type_::properties::Id,
+        free_vars: Rc<[SubstName]>,
+    ) {
+        self.ccx_mut().property_map_free_vars.insert(id, free_vars);
     }
 
     pub fn find_call(&self, id: i32) -> Type {
@@ -1645,6 +1725,7 @@ impl<'a> Context<'a> {
 
     pub fn has_property_map(&self, id: &type_::properties::Id) -> bool {
         self.ccx().sig_cx.property_maps.contains_key(id)
+            || self.ccx().lazy_property_maps.contains_key(id)
     }
 
     pub fn has_call_prop(&self, id: &i32) -> bool {
@@ -2293,7 +2374,10 @@ impl<'a> Context<'a> {
         id: type_::properties::Id,
         pmap: type_::properties::PropertiesMap,
     ) {
-        self.ccx_mut().sig_cx.property_maps.insert(id, pmap);
+        let ccx = self.ccx_mut();
+        ccx.lazy_property_maps.remove(&id);
+        ccx.property_map_free_vars.remove(&id);
+        ccx.sig_cx.property_maps.insert(id, pmap);
     }
 
     pub fn add_call_prop(&mut self, id: i32, t: Type) {
@@ -3135,7 +3219,7 @@ impl<'a> Context<'a> {
 
     // utils
 
-    pub fn iter_props<F>(&self, id: type_::properties::Id, f: F)
+    pub fn iter_props<F>(&mut self, id: type_::properties::Id, f: F)
     where
         F: Fn(&flow_common::reason::Name, &type_::Property),
     {
@@ -3152,7 +3236,7 @@ impl<'a> Context<'a> {
         Ok(())
     }
 
-    pub fn fold_props<F, A>(&self, id: type_::properties::Id, f: F, init: A) -> A
+    pub fn fold_props<F, A>(&mut self, id: type_::properties::Id, f: F, init: A) -> A
     where
         F: Fn(&flow_common::reason::Name, &type_::Property, A) -> A,
     {
@@ -3162,28 +3246,38 @@ impl<'a> Context<'a> {
     }
 
     pub fn has_prop(&self, id: type_::properties::Id, x: &flow_common::reason::Name) -> bool {
-        self.ccx()
-            .sig_cx
-            .property_maps
-            .get(&id)
-            .ok_or(PropsNotFound(id))
-            .unwrap()
-            .contains_key(x)
+        if let Some(pmap) = self.ccx().sig_cx.property_maps.get(&id) {
+            return pmap.contains_key(x);
+        }
+        match self.ccx().lazy_property_maps.get(&id) {
+            Some(lazy) => self.has_prop(lazy.source.dupe(), x),
+            None => panic!("{:?}", PropsNotFound(id)),
+        }
     }
 
     pub fn get_prop(
-        &self,
+        &mut self,
         id: type_::properties::Id,
         x: &flow_common::reason::Name,
     ) -> Option<type_::Property> {
-        self.ccx()
-            .sig_cx
-            .property_maps
-            .get(&id)
-            .ok_or(PropsNotFound(id))
-            .unwrap()
-            .get(x)
-            .duped()
+        if let Some(pmap) = self.ccx().sig_cx.property_maps.get(&id) {
+            return pmap.get(x).duped();
+        }
+        let (source, subst) = match self.ccx().lazy_property_maps.get(&id) {
+            Some(lazy) => {
+                if let Some(prop) = lazy.substituted.get(x) {
+                    return Some(prop.dupe());
+                }
+                (lazy.source.dupe(), lazy.subst.dupe())
+            }
+            None => panic!("{:?}", PropsNotFound(id)),
+        };
+        let prop = self.get_prop(source, x)?;
+        let prop = subst(self, &prop);
+        if let Some(lazy) = self.ccx_mut().lazy_property_maps.get_mut(&id) {
+            lazy.substituted.insert(x.dupe(), prop.dupe());
+        }
+        Some(prop)
     }
 
     // constructors

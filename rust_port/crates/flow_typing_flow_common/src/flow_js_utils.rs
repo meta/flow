@@ -6314,7 +6314,7 @@ pub mod cjs_extract_named_exports_t_kit {
                     let proto_props = inst.inst.proto_props.dupe();
 
                     let extract_named_exports =
-                        |cx: &Context<'_>, id: properties::Id| -> exports::T {
+                        |cx: &mut Context<'_>, id: properties::Id| -> exports::T {
                             let props = cx.find_props(id);
                             let filtered: properties::PropertiesMap = props
                                 .iter()
@@ -7271,7 +7271,6 @@ pub mod get_prop_t_kit {
     use std::ops::Deref;
 
     use dupe::Dupe;
-    use dupe::OptionDupedExt;
     use flow_aloc::ALoc;
     use flow_common::reason::Name;
     use flow_common::reason::Reason;
@@ -7466,22 +7465,17 @@ pub mod get_prop_t_kit {
         reason_op: &Reason,
     ) -> Result<Option<(Property, PropertySource)>, FlowJsException> {
         let named_prop = match propref {
-            PropRef::Named { name, .. } => {
-                let own_props = cx.find_props(inst.own_props.dupe());
-                let proto_props = cx.find_props(inst.proto_props.dupe());
-                match &inst.inst_kind {
-                    // A class's `constructor` method is its constructor, not a member.
-                    InstanceKind::ClassKind | InstanceKind::RecordKind { .. }
-                        if name.matches_str("constructor") =>
-                    {
-                        own_props.get(name).duped()
-                    }
-                    _ => own_props
-                        .get(name)
-                        .duped()
-                        .or_else(|| proto_props.get(name).duped()),
+            PropRef::Named { name, .. } => match &inst.inst_kind {
+                // A class's `constructor` method is its constructor, not a member.
+                InstanceKind::ClassKind | InstanceKind::RecordKind { .. }
+                    if name.matches_str("constructor") =>
+                {
+                    cx.get_prop(inst.own_props.dupe(), name)
                 }
-            }
+                _ => cx
+                    .get_prop(inst.own_props.dupe(), name)
+                    .or_else(|| cx.get_prop(inst.proto_props.dupe(), name)),
+            },
             PropRef::Constructor(_) => {
                 cx.get_prop(inst.proto_props.dupe(), &Name::new("constructor"))
             }

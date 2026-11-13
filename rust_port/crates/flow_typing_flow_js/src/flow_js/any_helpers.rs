@@ -331,6 +331,7 @@ pub(super) fn any_prop_inst<'cx>(
             for impl_t in implements.iter() {
                 covariant_flow(cx, use_op, impl_t)?;
             }
+            let own_props = cx.find_props(own_props.dupe());
             any_prop_properties(
                 cx,
                 env,
@@ -339,8 +340,9 @@ pub(super) fn any_prop_inst<'cx>(
                 covariant_flow,
                 contravariant_flow,
                 any,
-                &cx.find_props(own_props.dupe()),
+                &own_props,
             )?;
+            let proto_props = cx.find_props(proto_props.dupe());
             any_prop_properties(
                 cx,
                 env,
@@ -349,7 +351,7 @@ pub(super) fn any_prop_inst<'cx>(
                 covariant_flow,
                 contravariant_flow,
                 any,
-                &cx.find_props(proto_props.dupe()),
+                &proto_props,
             )?;
             any_prop_call_prop(cx, use_op, covariant_flow, inst_call_t)?;
             any_prop_call_prop(cx, use_op, covariant_flow, inst_construct_t)

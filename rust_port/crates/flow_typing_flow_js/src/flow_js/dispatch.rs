@@ -8851,7 +8851,7 @@ fn __flow_impl<'cx>(
                             match t.deref() {
                                 // Private (`#`) members are not checked.
                                 DefT(_, deref!(InstanceT(_) | ObjT(_))) => {
-                                    let unchecked = |props: properties::Id| {
+                                    let mut unchecked = |props: properties::Id| {
                                         properties::PropertiesMap::from_btree_map(
                                             cx.find_props(props)
                                                 .iter()

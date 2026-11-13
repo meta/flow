@@ -1964,17 +1964,10 @@ fn flow_obj_to_obj<'cx>(
             flow_js_utils::exact_obj_error(cx, env, &lflags.obj_kind, use_op.dupe(), u, &l_t)?;
         }
         let missing_props: Vec<Name> = cx
-            .fold_props(
-                lflds.dupe(),
-                |name, _prop, mut acc: Vec<Name>| {
-                    if !cx.has_prop(uflds.dupe(), name) {
-                        acc.push(name.dupe());
-                    }
-                    acc
-                },
-                Vec::new(),
-            )
-            .into_iter()
+            .find_props(lflds.dupe())
+            .keys()
+            .filter(|name| !cx.has_prop(uflds.dupe(), name))
+            .map(Dupe::dupe)
             .collect();
         if let Ok(missing_props) = Vec1::try_from_vec(missing_props) {
             let l_t = Type::new(DefT(lreason.dupe(), DefT::new(ObjT(l_obj.dupe()))));
@@ -6445,15 +6438,8 @@ pub fn rec_sub_t<'cx>(
         // members, clearly intending for function types to match the former
         // instead of the latter.
         (DefT(_, deref!(FunT(statics, _))), DefT(_, deref!(ObjT(obj)))) => {
-            if !flow_js_utils::quick_error_fun_as_obj(
-                cx,
-                env,
-                &use_op,
-                l,
-                statics,
-                u,
-                &cx.find_props(obj.props_tmap.dupe()),
-            )? {
+            let props = cx.find_props(obj.props_tmap.dupe());
+            if !flow_js_utils::quick_error_fun_as_obj(cx, env, &use_op, l, statics, u, &props)? {
                 FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, statics, u)?;
             }
             Ok(())

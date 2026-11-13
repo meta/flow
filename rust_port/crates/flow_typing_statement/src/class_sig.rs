@@ -1788,7 +1788,7 @@ fn post_inference_check_abstract_obligations<'cx>(
     let add_obligation = |name: Name, loc: ALoc| {
         obligations.borrow_mut().entry(name).or_insert(loc);
     };
-    let process_inst = |cx: &Context<'cx>, inst: &InstType| -> bool {
+    let process_inst = |cx: &mut Context<'cx>, inst: &InstType| -> bool {
         if seen.borrow().contains(&inst.own_props) {
             false
         } else {
@@ -1829,7 +1829,7 @@ fn post_inference_check_abstract_obligations<'cx>(
     };
     fn walk<'cx>(
         cx: &mut Context<'cx>,
-        process_inst: &dyn Fn(&Context<'cx>, &InstType) -> bool,
+        process_inst: &dyn Fn(&mut Context<'cx>, &InstType) -> bool,
         t: &Type,
     ) -> Result<(), FlowJsException> {
         let concretes = cx.with_suppressed_errors(|cx| {
@@ -1842,7 +1842,7 @@ fn post_inference_check_abstract_obligations<'cx>(
     }
     fn walk_one<'cx>(
         cx: &mut Context<'cx>,
-        process_inst: &dyn Fn(&Context<'cx>, &InstType) -> bool,
+        process_inst: &dyn Fn(&mut Context<'cx>, &InstType) -> bool,
         t: &Type,
     ) -> Result<(), FlowJsException> {
         match t.deref() {
@@ -1875,7 +1875,7 @@ fn post_inference_check_abstract_obligations<'cx>(
         Ok(())
     }
     let walk_result = {
-        let pi: &dyn Fn(&Context<'cx>, &InstType) -> bool = &process_inst;
+        let pi: &dyn Fn(&mut Context<'cx>, &InstType) -> bool = &process_inst;
         walk(cx, pi, super_)
     };
     match walk_result {
