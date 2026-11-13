@@ -697,6 +697,28 @@ impl<'a, 'ast, T: Dupe + PartialEq + 'ast, C: SearcherCallback<T>>
         }
         ast_visitor::indexed_access_type_default(self, _loc, expr)
     }
+
+    fn typeof_qualified_identifier(
+        &mut self,
+        qual: &'ast ast::types::typeof_::Qualified<ALoc, T>,
+    ) -> Result<(), Found> {
+        let id = &qual.id;
+        if self.annot_covers_target(&id.loc) {
+            let qualification_annot = qual.qualification.loc();
+            let qualification_type = self.type_from_enclosing_node(qualification_annot)?;
+            let result = GetDefRequest::Member(MemberInfo {
+                prop_name: id.name.dupe(),
+                object_type: (
+                    self.callback.loc_of_annot(qualification_annot),
+                    qualification_type,
+                ),
+                force_instance: false,
+            });
+            self.request(result)?;
+        }
+        ast_visitor::typeof_qualified_identifier_default(self, qual)
+    }
+
     fn type_identifier(&mut self, id: &'ast ast::Identifier<ALoc, T>) -> Result<(), Found> {
         let loc = &id.loc;
         let name = &id.name;

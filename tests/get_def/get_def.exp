@@ -356,6 +356,18 @@ Flags:
 type_literals.js:7:11
 Flags:
 
+typeof_member.js:5:21
+Flags:
+typeof_member.js:2:3,2:5
+
+typeof_member.js:9:24
+Flags:
+typeof_member.js:2:3,2:5
+
+typeof_member.js:14:20
+Flags:
+helpers/exports_named.js:3:14,3:16
+
 unbound.js:3:4
 Flags:
 unbound.js:3:2,3:4
