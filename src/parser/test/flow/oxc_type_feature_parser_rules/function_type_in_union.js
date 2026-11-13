@@ -1,0 +1,10 @@
+type A = string | () => void;
+type B = string & () => void;
+type C = | () => void;
+type D = string | new () => void;
+type E = string | <T>(x: T) => T;
+type F = keyof () => void;
+type G = string | (() => void);
+type H = () => void | string;
+type I = ?() => void;
+type J = string | Array<() => void>;

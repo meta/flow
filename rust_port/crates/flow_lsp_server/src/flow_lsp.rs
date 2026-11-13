@@ -1997,6 +1997,7 @@ fn parse_and_cache(
     let parse_options = Some(flow_parser::ParseOptions {
         use_strict,
         module_ref_prefix: module_ref_prefix.map(|s| s.into()),
+        oxc_type_feature_parser_rules: flowconfig.options.oxc_type_feature_parser_rules,
         ..flow_parser::PERMISSIVE_PARSE_OPTIONS
     });
 

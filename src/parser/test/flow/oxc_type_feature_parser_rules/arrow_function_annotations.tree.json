@@ -1,0 +1,726 @@
+{
+  "body": [
+    {
+      "declarations": [
+        {
+          "id": {
+            "loc": {
+              "end": {
+                "column": 7,
+                "line": 1
+              },
+              "source": null,
+              "start": {
+                "column": 6,
+                "line": 1
+              }
+            },
+            "name": "f",
+            "optional": false,
+            "range": [
+              6,
+              7
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          },
+          "init": {
+            "async": false,
+            "body": {
+              "body": [],
+              "loc": {
+                "end": {
+                  "column": 38,
+                  "line": 1
+                },
+                "source": null,
+                "start": {
+                  "column": 36,
+                  "line": 1
+                }
+              },
+              "range": [
+                36,
+                38
+              ],
+              "type": "BlockStatement"
+            },
+            "expression": false,
+            "generator": false,
+            "id": null,
+            "loc": {
+              "end": {
+                "column": 38,
+                "line": 1
+              },
+              "source": null,
+              "start": {
+                "column": 10,
+                "line": 1
+              }
+            },
+            "params": [
+              {
+                "loc": {
+                  "end": {
+                    "column": 31,
+                    "line": 1
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 11,
+                    "line": 1
+                  }
+                },
+                "name": "cb",
+                "optional": false,
+                "range": [
+                  11,
+                  31
+                ],
+                "type": "Identifier",
+                "typeAnnotation": {
+                  "loc": {
+                    "end": {
+                      "column": 31,
+                      "line": 1
+                    },
+                    "source": null,
+                    "start": {
+                      "column": 13,
+                      "line": 1
+                    }
+                  },
+                  "range": [
+                    13,
+                    31
+                  ],
+                  "type": "TypeAnnotation",
+                  "typeAnnotation": {
+                    "loc": {
+                      "end": {
+                        "column": 31,
+                        "line": 1
+                      },
+                      "source": null,
+                      "start": {
+                        "column": 15,
+                        "line": 1
+                      }
+                    },
+                    "params": [
+                      {
+                        "loc": {
+                          "end": {
+                            "column": 22,
+                            "line": 1
+                          },
+                          "source": null,
+                          "start": {
+                            "column": 16,
+                            "line": 1
+                          }
+                        },
+                        "name": null,
+                        "optional": false,
+                        "range": [
+                          16,
+                          22
+                        ],
+                        "type": "FunctionTypeParam",
+                        "typeAnnotation": {
+                          "loc": {
+                            "end": {
+                              "column": 22,
+                              "line": 1
+                            },
+                            "source": null,
+                            "start": {
+                              "column": 16,
+                              "line": 1
+                            }
+                          },
+                          "range": [
+                            16,
+                            22
+                          ],
+                          "type": "StringTypeAnnotation"
+                        }
+                      }
+                    ],
+                    "range": [
+                      15,
+                      31
+                    ],
+                    "rest": null,
+                    "returnType": {
+                      "loc": {
+                        "end": {
+                          "column": 31,
+                          "line": 1
+                        },
+                        "source": null,
+                        "start": {
+                          "column": 27,
+                          "line": 1
+                        }
+                      },
+                      "range": [
+                        27,
+                        31
+                      ],
+                      "type": "VoidTypeAnnotation"
+                    },
+                    "this": null,
+                    "type": "FunctionTypeAnnotation",
+                    "typeParameters": null
+                  }
+                }
+              }
+            ],
+            "predicate": null,
+            "range": [
+              10,
+              38
+            ],
+            "returnType": null,
+            "type": "ArrowFunctionExpression",
+            "typeParameters": null
+          },
+          "loc": {
+            "end": {
+              "column": 38,
+              "line": 1
+            },
+            "source": null,
+            "start": {
+              "column": 6,
+              "line": 1
+            }
+          },
+          "range": [
+            6,
+            38
+          ],
+          "type": "VariableDeclarator"
+        }
+      ],
+      "kind": "const",
+      "loc": {
+        "end": {
+          "column": 39,
+          "line": 1
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
+      "range": [
+        0,
+        39
+      ],
+      "type": "VariableDeclaration"
+    },
+    {
+      "declarations": [
+        {
+          "id": {
+            "loc": {
+              "end": {
+                "column": 7,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 6,
+                "line": 2
+              }
+            },
+            "name": "g",
+            "optional": false,
+            "range": [
+              46,
+              47
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          },
+          "init": {
+            "async": false,
+            "body": {
+              "body": [],
+              "loc": {
+                "end": {
+                  "column": 46,
+                  "line": 2
+                },
+                "source": null,
+                "start": {
+                  "column": 44,
+                  "line": 2
+                }
+              },
+              "range": [
+                84,
+                86
+              ],
+              "type": "BlockStatement"
+            },
+            "expression": false,
+            "generator": false,
+            "id": null,
+            "loc": {
+              "end": {
+                "column": 46,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 10,
+                "line": 2
+              }
+            },
+            "params": [
+              {
+                "loc": {
+                  "end": {
+                    "column": 33,
+                    "line": 2
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 11,
+                    "line": 2
+                  }
+                },
+                "name": "x",
+                "optional": false,
+                "range": [
+                  51,
+                  73
+                ],
+                "type": "Identifier",
+                "typeAnnotation": {
+                  "loc": {
+                    "end": {
+                      "column": 33,
+                      "line": 2
+                    },
+                    "source": null,
+                    "start": {
+                      "column": 12,
+                      "line": 2
+                    }
+                  },
+                  "range": [
+                    52,
+                    73
+                  ],
+                  "type": "TypeAnnotation",
+                  "typeAnnotation": {
+                    "loc": {
+                      "end": {
+                        "column": 33,
+                        "line": 2
+                      },
+                      "source": null,
+                      "start": {
+                        "column": 14,
+                        "line": 2
+                      }
+                    },
+                    "range": [
+                      54,
+                      73
+                    ],
+                    "type": "UnionTypeAnnotation",
+                    "types": [
+                      {
+                        "loc": {
+                          "end": {
+                            "column": 20,
+                            "line": 2
+                          },
+                          "source": null,
+                          "start": {
+                            "column": 14,
+                            "line": 2
+                          }
+                        },
+                        "range": [
+                          54,
+                          60
+                        ],
+                        "type": "StringTypeAnnotation"
+                      },
+                      {
+                        "loc": {
+                          "end": {
+                            "column": 33,
+                            "line": 2
+                          },
+                          "source": null,
+                          "start": {
+                            "column": 23,
+                            "line": 2
+                          }
+                        },
+                        "params": [],
+                        "range": [
+                          63,
+                          73
+                        ],
+                        "rest": null,
+                        "returnType": {
+                          "loc": {
+                            "end": {
+                              "column": 33,
+                              "line": 2
+                            },
+                            "source": null,
+                            "start": {
+                              "column": 29,
+                              "line": 2
+                            }
+                          },
+                          "range": [
+                            69,
+                            73
+                          ],
+                          "type": "VoidTypeAnnotation"
+                        },
+                        "this": null,
+                        "type": "FunctionTypeAnnotation",
+                        "typeParameters": null
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "predicate": null,
+            "range": [
+              50,
+              86
+            ],
+            "returnType": {
+              "loc": {
+                "end": {
+                  "column": 40,
+                  "line": 2
+                },
+                "source": null,
+                "start": {
+                  "column": 34,
+                  "line": 2
+                }
+              },
+              "range": [
+                74,
+                80
+              ],
+              "type": "TypeAnnotation",
+              "typeAnnotation": {
+                "loc": {
+                  "end": {
+                    "column": 40,
+                    "line": 2
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 36,
+                    "line": 2
+                  }
+                },
+                "range": [
+                  76,
+                  80
+                ],
+                "type": "VoidTypeAnnotation"
+              }
+            },
+            "type": "ArrowFunctionExpression",
+            "typeParameters": null
+          },
+          "loc": {
+            "end": {
+              "column": 46,
+              "line": 2
+            },
+            "source": null,
+            "start": {
+              "column": 6,
+              "line": 2
+            }
+          },
+          "range": [
+            46,
+            86
+          ],
+          "type": "VariableDeclarator"
+        }
+      ],
+      "kind": "const",
+      "loc": {
+        "end": {
+          "column": 47,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 2
+        }
+      },
+      "range": [
+        40,
+        87
+      ],
+      "type": "VariableDeclaration"
+    },
+    {
+      "directive": null,
+      "expression": {
+        "arguments": [
+          {
+            "loc": {
+              "end": {
+                "column": 21,
+                "line": 3
+              },
+              "source": null,
+              "start": {
+                "column": 20,
+                "line": 3
+              }
+            },
+            "name": "x",
+            "optional": false,
+            "range": [
+              108,
+              109
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          }
+        ],
+        "callee": {
+          "loc": {
+            "end": {
+              "column": 1,
+              "line": 3
+            },
+            "source": null,
+            "start": {
+              "column": 0,
+              "line": 3
+            }
+          },
+          "name": "f",
+          "optional": false,
+          "range": [
+            88,
+            89
+          ],
+          "type": "Identifier",
+          "typeAnnotation": null
+        },
+        "loc": {
+          "end": {
+            "column": 22,
+            "line": 3
+          },
+          "source": null,
+          "start": {
+            "column": 0,
+            "line": 3
+          }
+        },
+        "optional": false,
+        "range": [
+          88,
+          110
+        ],
+        "type": "CallExpression",
+        "typeArguments": {
+          "loc": {
+            "end": {
+              "column": 19,
+              "line": 3
+            },
+            "source": null,
+            "start": {
+              "column": 1,
+              "line": 3
+            }
+          },
+          "params": [
+            {
+              "loc": {
+                "end": {
+                  "column": 18,
+                  "line": 3
+                },
+                "source": null,
+                "start": {
+                  "column": 2,
+                  "line": 3
+                }
+              },
+              "params": [
+                {
+                  "loc": {
+                    "end": {
+                      "column": 9,
+                      "line": 3
+                    },
+                    "source": null,
+                    "start": {
+                      "column": 3,
+                      "line": 3
+                    }
+                  },
+                  "name": null,
+                  "optional": false,
+                  "range": [
+                    91,
+                    97
+                  ],
+                  "type": "FunctionTypeParam",
+                  "typeAnnotation": {
+                    "loc": {
+                      "end": {
+                        "column": 9,
+                        "line": 3
+                      },
+                      "source": null,
+                      "start": {
+                        "column": 3,
+                        "line": 3
+                      }
+                    },
+                    "range": [
+                      91,
+                      97
+                    ],
+                    "type": "StringTypeAnnotation"
+                  }
+                }
+              ],
+              "range": [
+                90,
+                106
+              ],
+              "rest": null,
+              "returnType": {
+                "loc": {
+                  "end": {
+                    "column": 18,
+                    "line": 3
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 14,
+                    "line": 3
+                  }
+                },
+                "range": [
+                  102,
+                  106
+                ],
+                "type": "VoidTypeAnnotation"
+              },
+              "this": null,
+              "type": "FunctionTypeAnnotation",
+              "typeParameters": null
+            }
+          ],
+          "range": [
+            89,
+            107
+          ],
+          "type": "TypeParameterInstantiation"
+        }
+      },
+      "loc": {
+        "end": {
+          "column": 23,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 3
+        }
+      },
+      "range": [
+        88,
+        111
+      ],
+      "type": "ExpressionStatement"
+    }
+  ],
+  "comments": [],
+  "errors": [
+    {
+      "loc": {
+        "end": {
+          "column": 22,
+          "line": 1
+        },
+        "source": null,
+        "start": {
+          "column": 16,
+          "line": 1
+        }
+      },
+      "message": "Missing a name on this function type parameter. Write it as `name: Type`."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 33,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 23,
+          "line": 2
+        }
+      },
+      "message": "Function type notation must be parenthesized when used in a union type."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 9,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 3,
+          "line": 3
+        }
+      },
+      "message": "Missing a name on this function type parameter. Write it as `name: Type`."
+    }
+  ],
+  "loc": {
+    "end": {
+      "column": 0,
+      "line": 4
+    },
+    "source": null,
+    "start": {
+      "column": 0,
+      "line": 1
+    }
+  },
+  "range": [
+    0,
+    112
+  ],
+  "type": "Program"
+}

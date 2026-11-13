@@ -1,0 +1,50 @@
+Error -------------------------------------------------------------------------------------------- declare_class.js:2:12
+
+Unexpected `,` between class members, expected `;` or a line break [ParseError]
+
+   2|   a: string, // error
+                 ^
+
+
+Error ----------------------------------------------------------------------------------------- declare_function.js:1:26
+
+Missing a name on this function type parameter. Write it as `name: Type`. [ParseError]
+
+   1| declare function unnamed(string): void; // error
+                               ^^^^^^
+
+
+Error -------------------------------------------------------------------------------------------- function_type.js:1:17
+
+Missing a name on this function type parameter. Write it as `name: Type`. [ParseError]
+
+   1| type Unnamed = (number) => void; // error
+                      ^^^^^^
+
+
+Error -------------------------------------------------------------------------------------------------- indexer.js:1:18
+
+Missing a name on this indexer key. Write it as `[name: Type]`. [ParseError]
+
+   1| type Indexer = {[string]: number}; // error
+                       ^^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------- mapped_type.js:2:23
+
+Unexpected `,` after a mapped type, expected `;` or `}` [ParseError]
+
+   2|   [K in keyof O]: O[K], // error
+                            ^
+
+
+Error ---------------------------------------------------------------------------------------------------- union.js:1:25
+
+Function type notation must be parenthesized when used in a union type. [ParseError]
+
+   1| type InUnion = string | () => void; // error
+                              ^^^^^^^^^^
+
+
+
+Found 6 errors

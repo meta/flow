@@ -300,6 +300,7 @@ pub extern "C" fn hermesParse(
         module_ref_prefix: None,
         ambient: false,
         allow_return_outside_function: allow_return_outside != 0,
+        oxc_type_feature_parser_rules: false,
     };
 
     let file_key = flow_parser::file_key::FileKey::new(
@@ -861,6 +862,7 @@ mod tests {
             module_ref_prefix: None,
             ambient: false,
             allow_return_outside_function: false,
+            oxc_type_feature_parser_rules: false,
         };
         let file_key = flow_parser::file_key::FileKey::new(
             flow_parser::file_key::FileKeyInner::SourceFile(filename.to_string()),

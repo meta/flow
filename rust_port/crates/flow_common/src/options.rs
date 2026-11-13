@@ -175,6 +175,7 @@ pub struct Options {
     pub node_package_export_conditions: Arc<[String]>,
     pub node_resolver_allow_root_relative: bool,
     pub node_resolver_root_relative_dirnames: Arc<[(Option<String>, String)]>,
+    pub oxc_type_feature_parser_rules: bool,
     pub profile: bool,
     pub projects_options: Arc<ProjectsOptions>,
     pub quiet: bool,

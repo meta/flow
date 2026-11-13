@@ -20,6 +20,7 @@ use crate::flow_lexer::LexResult;
 use crate::loc::LOC_NONE;
 use crate::loc::Loc;
 use crate::loc::Position;
+use crate::parse_error::FunctionTypeParensContext;
 use crate::parse_error::ParseError;
 use crate::parser_env::try_parse::Rollback;
 use crate::token::TokenKind;
@@ -294,6 +295,9 @@ pub struct ParseOptions {
     /// suppress the [IllegalReturn] diagnostic for top-level [return]
     /// statements; matches hermes-parser [allowReturnOutsideFunction]
     pub allow_return_outside_function: bool,
+    /// parse type syntax shared by Flow and TypeScript by the rules of the oxc
+    /// TypeScript parser, reporting Flow-only spellings of that syntax
+    pub oxc_type_feature_parser_rules: bool,
 }
 
 impl Default for ParseOptions {
@@ -311,6 +315,7 @@ impl Default for ParseOptions {
             module_ref_prefix: None,
             ambient: false,
             allow_return_outside_function: false,
+            oxc_type_feature_parser_rules: false,
         }
     }
 }
@@ -328,6 +333,7 @@ pub const PERMISSIVE_PARSE_OPTIONS: ParseOptions = ParseOptions {
     module_ref_prefix: None,
     ambient: false,
     allow_return_outside_function: false,
+    oxc_type_feature_parser_rules: false,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -353,6 +359,7 @@ pub(crate) struct ParserEnvFlags {
     no_let: bool,
     no_anon_function_type: bool,
     no_conditional_type: bool,
+    function_type_parens_context: Option<FunctionTypeParensContext>,
     no_new: bool,
     no_record: bool,
     allow_yield: bool,
@@ -461,6 +468,7 @@ pub fn init_env<'a, E>(
             no_let: false,
             no_anon_function_type: false,
             no_conditional_type: false,
+            function_type_parens_context: None,
             no_new: false,
             no_record: false,
             allow_yield: false,
@@ -596,6 +604,10 @@ impl<'a> ParserEnv<'a> {
         self.flags.no_conditional_type
     }
 
+    pub(crate) fn function_type_parens_context(&self) -> Option<FunctionTypeParensContext> {
+        self.flags.function_type_parens_context
+    }
+
     pub(crate) fn no_new(&self) -> bool {
         self.flags.no_new
     }
@@ -618,6 +630,10 @@ impl<'a> ParserEnv<'a> {
 
     pub(crate) fn should_parse_ambiguous_types(&self) -> bool {
         self.parse_options.types && self.parse_options.ambiguous_types
+    }
+
+    pub(crate) fn oxc_type_feature_parser_rules(&self) -> bool {
+        self.parse_options.oxc_type_feature_parser_rules
     }
 
     pub fn is_d_ts(&self) -> bool {
@@ -645,6 +661,13 @@ impl<'a> ParserEnv<'a> {
         }
         self.errors.push((loc, error));
         Ok(())
+    }
+
+    /// Record an error without consulting the error callback, so it never rolls
+    /// back a speculative parse. For syntax that parses unambiguously but that
+    /// a parse option disallows.
+    pub(crate) fn error_at_without_rollback(&mut self, loc: Loc, error: ParseError) {
+        self.errors.push((loc, error));
     }
 
     /* Since private fields out of scope are a parse error, we keep track of the declared and used
@@ -885,6 +908,18 @@ impl<'a> ParserEnv<'a> {
     ) -> T {
         let saved_flags = self.flags;
         self.flags.no_conditional_type = no_conditional_type;
+        let result = f(self);
+        self.flags = saved_flags;
+        result
+    }
+
+    pub(crate) fn with_function_type_parens_context<T, F: FnOnce(&mut ParserEnv<'a>) -> T>(
+        &mut self,
+        function_type_parens_context: Option<FunctionTypeParensContext>,
+        f: F,
+    ) -> T {
+        let saved_flags = self.flags;
+        self.flags.function_type_parens_context = function_type_parens_context;
         let result = f(self);
         self.flags = saved_flags;
         result

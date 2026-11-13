@@ -195,6 +195,11 @@ mod common {
                         .as_bool()
                         .ok_or_else(|| format!("invalid value for {:?}, expected bool", key))?;
                 }
+                "oxc_type_feature_parser_rules" => {
+                    parse_opts.oxc_type_feature_parser_rules = value
+                        .as_bool()
+                        .ok_or_else(|| format!("invalid value for {:?}, expected bool", key))?;
+                }
                 "esproposal_decorators" => {
                     parse_opts.esproposal_decorators = value
                         .as_bool()

@@ -65,6 +65,24 @@ pub enum TSClassVisibilityKind {
 #[derive(
     Debug,
     Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    serde::Serialize,
+    serde::Deserialize
+)]
+pub enum FunctionTypeParensContext {
+    Union,
+    Intersection,
+    TypeOperator,
+}
+
+#[derive(
+    Debug,
+    Clone,
     PartialEq,
     Eq,
     PartialOrd,
@@ -127,6 +145,10 @@ pub enum ParseError {
     FunctionAsStatement {
         in_strict_mode: bool,
     },
+    FunctionTypeNeedsParens {
+        constructor: bool,
+        context: FunctionTypeParensContext,
+    },
     GeneratorFunctionAsStatement,
     GetterArity,
     GetterMayNotHaveThisParam,
@@ -183,6 +205,8 @@ pub enum ParseError {
     MatchExpressionAwait,
     MatchExpressionYield,
     MethodInDestructuring,
+    MissingFunctionTypeParamName,
+    MissingIndexerKeyName,
     MissingJSXClosingTag(String),
     MissingTypeParam,
     MissingTypeParamDefault,
@@ -213,6 +237,7 @@ pub enum ParseError {
     RecordPropertyAnnotationRequired,
     Redeclaration(String, String),
     SetterArity,
+    SetterMayNotHaveOptionalParam,
     SetterMayNotHaveThisParam,
     StrictCatchVariable,
     StrictDelete,
@@ -242,6 +267,8 @@ pub enum ParseError {
     UnboundPrivate(String),
     Unexpected(String),
     UnexpectedTokenIllegal,
+    UnexpectedCommaAfterMappedType,
+    UnexpectedCommaBetweenClassMembers,
     UnexpectedEOS,
     UnexpectedExplicitInexactInObject,
     UnexpectedOpaqueTypeAlias,
@@ -536,6 +563,26 @@ impl fmt::Display for ParseError {
                     )
                 }
             }
+            Self::FunctionTypeNeedsParens {
+                constructor,
+                context,
+            } => {
+                let kind = if *constructor {
+                    "Constructor"
+                } else {
+                    "Function"
+                };
+                let position = match context {
+                    FunctionTypeParensContext::Union => "in a union type",
+                    FunctionTypeParensContext::Intersection => "in an intersection type",
+                    FunctionTypeParensContext::TypeOperator => "as the operand of a type operator",
+                };
+                write!(
+                    f,
+                    "{} type notation must be parenthesized when used {}.",
+                    kind, position
+                )
+            }
             Self::GeneratorFunctionAsStatement => {
                 write!(
                     f,
@@ -740,6 +787,18 @@ impl fmt::Display for ParseError {
             Self::MethodInDestructuring => {
                 write!(f, "Object pattern can't contain methods")
             }
+            Self::MissingFunctionTypeParamName => {
+                write!(
+                    f,
+                    "Missing a name on this function type parameter. Write it as `name: Type`."
+                )
+            }
+            Self::MissingIndexerKeyName => {
+                write!(
+                    f,
+                    "Missing a name on this indexer key. Write it as `[name: Type]`."
+                )
+            }
             Self::MissingJSXClosingTag(name) => {
                 write!(f, "JSX element {} has no corresponding closing tag.", name)
             }
@@ -858,6 +917,9 @@ impl fmt::Display for ParseError {
             }
             Self::SetterArity => {
                 write!(f, "Setter should have exactly one parameter")
+            }
+            Self::SetterMayNotHaveOptionalParam => {
+                write!(f, "A setter cannot have an optional parameter.")
             }
             Self::SetterMayNotHaveThisParam => {
                 write!(f, "A setter cannot have a `this` parameter.")
@@ -1015,6 +1077,18 @@ impl fmt::Display for ParseError {
             }
             Self::UnexpectedTokenIllegal => {
                 write!(f, "Unexpected token ILLEGAL")
+            }
+            Self::UnexpectedCommaAfterMappedType => {
+                write!(
+                    f,
+                    "Unexpected `,` after a mapped type, expected `;` or `}}`"
+                )
+            }
+            Self::UnexpectedCommaBetweenClassMembers => {
+                write!(
+                    f,
+                    "Unexpected `,` between class members, expected `;` or a line break"
+                )
             }
             Self::UnexpectedEOS => {
                 write!(f, "Unexpected end of input")

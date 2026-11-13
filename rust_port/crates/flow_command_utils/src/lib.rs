@@ -2255,6 +2255,7 @@ pub fn make_options(
                 node_resolver_dirnames: _,
                 node_resolver_root_relative_dirnames,
                 normalize_intersections,
+                oxc_type_feature_parser_rules,
                 package_boundary,
                 pattern_matching,
                 projects,
@@ -2605,6 +2606,7 @@ pub fn make_options(
                 })
                 .collect::<Vec<_>>(),
         ),
+        oxc_type_feature_parser_rules,
         profile: profile_override,
         projects_options,
         quiet: quiet_override,

@@ -1,0 +1,1413 @@
+{
+  "body": [
+    {
+      "id": {
+        "loc": {
+          "end": {
+            "column": 6,
+            "line": 1
+          },
+          "source": null,
+          "start": {
+            "column": 5,
+            "line": 1
+          }
+        },
+        "name": "A",
+        "optional": false,
+        "range": [
+          5,
+          6
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "loc": {
+        "end": {
+          "column": 29,
+          "line": 1
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
+      "range": [
+        0,
+        29
+      ],
+      "right": {
+        "loc": {
+          "end": {
+            "column": 28,
+            "line": 1
+          },
+          "source": null,
+          "start": {
+            "column": 9,
+            "line": 1
+          }
+        },
+        "range": [
+          9,
+          28
+        ],
+        "type": "UnionTypeAnnotation",
+        "types": [
+          {
+            "loc": {
+              "end": {
+                "column": 15,
+                "line": 1
+              },
+              "source": null,
+              "start": {
+                "column": 9,
+                "line": 1
+              }
+            },
+            "range": [
+              9,
+              15
+            ],
+            "type": "StringTypeAnnotation"
+          },
+          {
+            "loc": {
+              "end": {
+                "column": 28,
+                "line": 1
+              },
+              "source": null,
+              "start": {
+                "column": 18,
+                "line": 1
+              }
+            },
+            "params": [],
+            "range": [
+              18,
+              28
+            ],
+            "rest": null,
+            "returnType": {
+              "loc": {
+                "end": {
+                  "column": 28,
+                  "line": 1
+                },
+                "source": null,
+                "start": {
+                  "column": 24,
+                  "line": 1
+                }
+              },
+              "range": [
+                24,
+                28
+              ],
+              "type": "VoidTypeAnnotation"
+            },
+            "this": null,
+            "type": "FunctionTypeAnnotation",
+            "typeParameters": null
+          }
+        ]
+      },
+      "type": "TypeAlias",
+      "typeParameters": null
+    },
+    {
+      "id": {
+        "loc": {
+          "end": {
+            "column": 6,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 5,
+            "line": 2
+          }
+        },
+        "name": "B",
+        "optional": false,
+        "range": [
+          35,
+          36
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "loc": {
+        "end": {
+          "column": 29,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 2
+        }
+      },
+      "range": [
+        30,
+        59
+      ],
+      "right": {
+        "loc": {
+          "end": {
+            "column": 28,
+            "line": 2
+          },
+          "source": null,
+          "start": {
+            "column": 9,
+            "line": 2
+          }
+        },
+        "range": [
+          39,
+          58
+        ],
+        "type": "IntersectionTypeAnnotation",
+        "types": [
+          {
+            "loc": {
+              "end": {
+                "column": 15,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 9,
+                "line": 2
+              }
+            },
+            "range": [
+              39,
+              45
+            ],
+            "type": "StringTypeAnnotation"
+          },
+          {
+            "loc": {
+              "end": {
+                "column": 28,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 18,
+                "line": 2
+              }
+            },
+            "params": [],
+            "range": [
+              48,
+              58
+            ],
+            "rest": null,
+            "returnType": {
+              "loc": {
+                "end": {
+                  "column": 28,
+                  "line": 2
+                },
+                "source": null,
+                "start": {
+                  "column": 24,
+                  "line": 2
+                }
+              },
+              "range": [
+                54,
+                58
+              ],
+              "type": "VoidTypeAnnotation"
+            },
+            "this": null,
+            "type": "FunctionTypeAnnotation",
+            "typeParameters": null
+          }
+        ]
+      },
+      "type": "TypeAlias",
+      "typeParameters": null
+    },
+    {
+      "id": {
+        "loc": {
+          "end": {
+            "column": 6,
+            "line": 3
+          },
+          "source": null,
+          "start": {
+            "column": 5,
+            "line": 3
+          }
+        },
+        "name": "C",
+        "optional": false,
+        "range": [
+          65,
+          66
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "loc": {
+        "end": {
+          "column": 22,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 3
+        }
+      },
+      "range": [
+        60,
+        82
+      ],
+      "right": {
+        "loc": {
+          "end": {
+            "column": 21,
+            "line": 3
+          },
+          "source": null,
+          "start": {
+            "column": 11,
+            "line": 3
+          }
+        },
+        "params": [],
+        "range": [
+          71,
+          81
+        ],
+        "rest": null,
+        "returnType": {
+          "loc": {
+            "end": {
+              "column": 21,
+              "line": 3
+            },
+            "source": null,
+            "start": {
+              "column": 17,
+              "line": 3
+            }
+          },
+          "range": [
+            77,
+            81
+          ],
+          "type": "VoidTypeAnnotation"
+        },
+        "this": null,
+        "type": "FunctionTypeAnnotation",
+        "typeParameters": null
+      },
+      "type": "TypeAlias",
+      "typeParameters": null
+    },
+    {
+      "id": {
+        "loc": {
+          "end": {
+            "column": 6,
+            "line": 4
+          },
+          "source": null,
+          "start": {
+            "column": 5,
+            "line": 4
+          }
+        },
+        "name": "D",
+        "optional": false,
+        "range": [
+          88,
+          89
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "loc": {
+        "end": {
+          "column": 33,
+          "line": 4
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 4
+        }
+      },
+      "range": [
+        83,
+        116
+      ],
+      "right": {
+        "loc": {
+          "end": {
+            "column": 32,
+            "line": 4
+          },
+          "source": null,
+          "start": {
+            "column": 9,
+            "line": 4
+          }
+        },
+        "range": [
+          92,
+          115
+        ],
+        "type": "UnionTypeAnnotation",
+        "types": [
+          {
+            "loc": {
+              "end": {
+                "column": 15,
+                "line": 4
+              },
+              "source": null,
+              "start": {
+                "column": 9,
+                "line": 4
+              }
+            },
+            "range": [
+              92,
+              98
+            ],
+            "type": "StringTypeAnnotation"
+          },
+          {
+            "abstract": false,
+            "loc": {
+              "end": {
+                "column": 32,
+                "line": 4
+              },
+              "source": null,
+              "start": {
+                "column": 18,
+                "line": 4
+              }
+            },
+            "params": [],
+            "range": [
+              101,
+              115
+            ],
+            "rest": null,
+            "returnType": {
+              "loc": {
+                "end": {
+                  "column": 32,
+                  "line": 4
+                },
+                "source": null,
+                "start": {
+                  "column": 28,
+                  "line": 4
+                }
+              },
+              "range": [
+                111,
+                115
+              ],
+              "type": "VoidTypeAnnotation"
+            },
+            "type": "ConstructorTypeAnnotation",
+            "typeParameters": null
+          }
+        ]
+      },
+      "type": "TypeAlias",
+      "typeParameters": null
+    },
+    {
+      "id": {
+        "loc": {
+          "end": {
+            "column": 6,
+            "line": 5
+          },
+          "source": null,
+          "start": {
+            "column": 5,
+            "line": 5
+          }
+        },
+        "name": "E",
+        "optional": false,
+        "range": [
+          122,
+          123
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "loc": {
+        "end": {
+          "column": 33,
+          "line": 5
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 5
+        }
+      },
+      "range": [
+        117,
+        150
+      ],
+      "right": {
+        "loc": {
+          "end": {
+            "column": 32,
+            "line": 5
+          },
+          "source": null,
+          "start": {
+            "column": 9,
+            "line": 5
+          }
+        },
+        "range": [
+          126,
+          149
+        ],
+        "type": "UnionTypeAnnotation",
+        "types": [
+          {
+            "loc": {
+              "end": {
+                "column": 15,
+                "line": 5
+              },
+              "source": null,
+              "start": {
+                "column": 9,
+                "line": 5
+              }
+            },
+            "range": [
+              126,
+              132
+            ],
+            "type": "StringTypeAnnotation"
+          },
+          {
+            "loc": {
+              "end": {
+                "column": 32,
+                "line": 5
+              },
+              "source": null,
+              "start": {
+                "column": 18,
+                "line": 5
+              }
+            },
+            "params": [
+              {
+                "loc": {
+                  "end": {
+                    "column": 26,
+                    "line": 5
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 22,
+                    "line": 5
+                  }
+                },
+                "name": {
+                  "loc": {
+                    "end": {
+                      "column": 23,
+                      "line": 5
+                    },
+                    "source": null,
+                    "start": {
+                      "column": 22,
+                      "line": 5
+                    }
+                  },
+                  "name": "x",
+                  "optional": false,
+                  "range": [
+                    139,
+                    140
+                  ],
+                  "type": "Identifier",
+                  "typeAnnotation": null
+                },
+                "optional": false,
+                "range": [
+                  139,
+                  143
+                ],
+                "type": "FunctionTypeParam",
+                "typeAnnotation": {
+                  "id": {
+                    "loc": {
+                      "end": {
+                        "column": 26,
+                        "line": 5
+                      },
+                      "source": null,
+                      "start": {
+                        "column": 25,
+                        "line": 5
+                      }
+                    },
+                    "name": "T",
+                    "optional": false,
+                    "range": [
+                      142,
+                      143
+                    ],
+                    "type": "Identifier",
+                    "typeAnnotation": null
+                  },
+                  "loc": {
+                    "end": {
+                      "column": 26,
+                      "line": 5
+                    },
+                    "source": null,
+                    "start": {
+                      "column": 25,
+                      "line": 5
+                    }
+                  },
+                  "range": [
+                    142,
+                    143
+                  ],
+                  "type": "GenericTypeAnnotation",
+                  "typeArguments": null
+                }
+              }
+            ],
+            "range": [
+              135,
+              149
+            ],
+            "rest": null,
+            "returnType": {
+              "id": {
+                "loc": {
+                  "end": {
+                    "column": 32,
+                    "line": 5
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 31,
+                    "line": 5
+                  }
+                },
+                "name": "T",
+                "optional": false,
+                "range": [
+                  148,
+                  149
+                ],
+                "type": "Identifier",
+                "typeAnnotation": null
+              },
+              "loc": {
+                "end": {
+                  "column": 32,
+                  "line": 5
+                },
+                "source": null,
+                "start": {
+                  "column": 31,
+                  "line": 5
+                }
+              },
+              "range": [
+                148,
+                149
+              ],
+              "type": "GenericTypeAnnotation",
+              "typeArguments": null
+            },
+            "this": null,
+            "type": "FunctionTypeAnnotation",
+            "typeParameters": {
+              "loc": {
+                "end": {
+                  "column": 21,
+                  "line": 5
+                },
+                "source": null,
+                "start": {
+                  "column": 18,
+                  "line": 5
+                }
+              },
+              "params": [
+                {
+                  "bound": null,
+                  "const": false,
+                  "default": null,
+                  "loc": {
+                    "end": {
+                      "column": 20,
+                      "line": 5
+                    },
+                    "source": null,
+                    "start": {
+                      "column": 19,
+                      "line": 5
+                    }
+                  },
+                  "name": "T",
+                  "range": [
+                    136,
+                    137
+                  ],
+                  "type": "TypeParameter",
+                  "variance": null
+                }
+              ],
+              "range": [
+                135,
+                138
+              ],
+              "type": "TypeParameterDeclaration"
+            }
+          }
+        ]
+      },
+      "type": "TypeAlias",
+      "typeParameters": null
+    },
+    {
+      "id": {
+        "loc": {
+          "end": {
+            "column": 6,
+            "line": 6
+          },
+          "source": null,
+          "start": {
+            "column": 5,
+            "line": 6
+          }
+        },
+        "name": "F",
+        "optional": false,
+        "range": [
+          156,
+          157
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "loc": {
+        "end": {
+          "column": 26,
+          "line": 6
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 6
+        }
+      },
+      "range": [
+        151,
+        177
+      ],
+      "right": {
+        "argument": {
+          "loc": {
+            "end": {
+              "column": 25,
+              "line": 6
+            },
+            "source": null,
+            "start": {
+              "column": 15,
+              "line": 6
+            }
+          },
+          "params": [],
+          "range": [
+            166,
+            176
+          ],
+          "rest": null,
+          "returnType": {
+            "loc": {
+              "end": {
+                "column": 25,
+                "line": 6
+              },
+              "source": null,
+              "start": {
+                "column": 21,
+                "line": 6
+              }
+            },
+            "range": [
+              172,
+              176
+            ],
+            "type": "VoidTypeAnnotation"
+          },
+          "this": null,
+          "type": "FunctionTypeAnnotation",
+          "typeParameters": null
+        },
+        "loc": {
+          "end": {
+            "column": 25,
+            "line": 6
+          },
+          "source": null,
+          "start": {
+            "column": 9,
+            "line": 6
+          }
+        },
+        "range": [
+          160,
+          176
+        ],
+        "type": "KeyofTypeAnnotation"
+      },
+      "type": "TypeAlias",
+      "typeParameters": null
+    },
+    {
+      "id": {
+        "loc": {
+          "end": {
+            "column": 6,
+            "line": 7
+          },
+          "source": null,
+          "start": {
+            "column": 5,
+            "line": 7
+          }
+        },
+        "name": "G",
+        "optional": false,
+        "range": [
+          183,
+          184
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "loc": {
+        "end": {
+          "column": 31,
+          "line": 7
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 7
+        }
+      },
+      "range": [
+        178,
+        209
+      ],
+      "right": {
+        "loc": {
+          "end": {
+            "column": 30,
+            "line": 7
+          },
+          "source": null,
+          "start": {
+            "column": 9,
+            "line": 7
+          }
+        },
+        "range": [
+          187,
+          208
+        ],
+        "type": "UnionTypeAnnotation",
+        "types": [
+          {
+            "loc": {
+              "end": {
+                "column": 15,
+                "line": 7
+              },
+              "source": null,
+              "start": {
+                "column": 9,
+                "line": 7
+              }
+            },
+            "range": [
+              187,
+              193
+            ],
+            "type": "StringTypeAnnotation"
+          },
+          {
+            "loc": {
+              "end": {
+                "column": 29,
+                "line": 7
+              },
+              "source": null,
+              "start": {
+                "column": 19,
+                "line": 7
+              }
+            },
+            "params": [],
+            "range": [
+              197,
+              207
+            ],
+            "rest": null,
+            "returnType": {
+              "loc": {
+                "end": {
+                  "column": 29,
+                  "line": 7
+                },
+                "source": null,
+                "start": {
+                  "column": 25,
+                  "line": 7
+                }
+              },
+              "range": [
+                203,
+                207
+              ],
+              "type": "VoidTypeAnnotation"
+            },
+            "this": null,
+            "type": "FunctionTypeAnnotation",
+            "typeParameters": null
+          }
+        ]
+      },
+      "type": "TypeAlias",
+      "typeParameters": null
+    },
+    {
+      "id": {
+        "loc": {
+          "end": {
+            "column": 6,
+            "line": 8
+          },
+          "source": null,
+          "start": {
+            "column": 5,
+            "line": 8
+          }
+        },
+        "name": "H",
+        "optional": false,
+        "range": [
+          215,
+          216
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "loc": {
+        "end": {
+          "column": 29,
+          "line": 8
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 8
+        }
+      },
+      "range": [
+        210,
+        239
+      ],
+      "right": {
+        "loc": {
+          "end": {
+            "column": 28,
+            "line": 8
+          },
+          "source": null,
+          "start": {
+            "column": 9,
+            "line": 8
+          }
+        },
+        "params": [],
+        "range": [
+          219,
+          238
+        ],
+        "rest": null,
+        "returnType": {
+          "loc": {
+            "end": {
+              "column": 28,
+              "line": 8
+            },
+            "source": null,
+            "start": {
+              "column": 15,
+              "line": 8
+            }
+          },
+          "range": [
+            225,
+            238
+          ],
+          "type": "UnionTypeAnnotation",
+          "types": [
+            {
+              "loc": {
+                "end": {
+                  "column": 19,
+                  "line": 8
+                },
+                "source": null,
+                "start": {
+                  "column": 15,
+                  "line": 8
+                }
+              },
+              "range": [
+                225,
+                229
+              ],
+              "type": "VoidTypeAnnotation"
+            },
+            {
+              "loc": {
+                "end": {
+                  "column": 28,
+                  "line": 8
+                },
+                "source": null,
+                "start": {
+                  "column": 22,
+                  "line": 8
+                }
+              },
+              "range": [
+                232,
+                238
+              ],
+              "type": "StringTypeAnnotation"
+            }
+          ]
+        },
+        "this": null,
+        "type": "FunctionTypeAnnotation",
+        "typeParameters": null
+      },
+      "type": "TypeAlias",
+      "typeParameters": null
+    },
+    {
+      "id": {
+        "loc": {
+          "end": {
+            "column": 6,
+            "line": 9
+          },
+          "source": null,
+          "start": {
+            "column": 5,
+            "line": 9
+          }
+        },
+        "name": "I",
+        "optional": false,
+        "range": [
+          245,
+          246
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "loc": {
+        "end": {
+          "column": 21,
+          "line": 9
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 9
+        }
+      },
+      "range": [
+        240,
+        261
+      ],
+      "right": {
+        "loc": {
+          "end": {
+            "column": 20,
+            "line": 9
+          },
+          "source": null,
+          "start": {
+            "column": 9,
+            "line": 9
+          }
+        },
+        "range": [
+          249,
+          260
+        ],
+        "type": "NullableTypeAnnotation",
+        "typeAnnotation": {
+          "loc": {
+            "end": {
+              "column": 20,
+              "line": 9
+            },
+            "source": null,
+            "start": {
+              "column": 10,
+              "line": 9
+            }
+          },
+          "params": [],
+          "range": [
+            250,
+            260
+          ],
+          "rest": null,
+          "returnType": {
+            "loc": {
+              "end": {
+                "column": 20,
+                "line": 9
+              },
+              "source": null,
+              "start": {
+                "column": 16,
+                "line": 9
+              }
+            },
+            "range": [
+              256,
+              260
+            ],
+            "type": "VoidTypeAnnotation"
+          },
+          "this": null,
+          "type": "FunctionTypeAnnotation",
+          "typeParameters": null
+        }
+      },
+      "type": "TypeAlias",
+      "typeParameters": null
+    },
+    {
+      "id": {
+        "loc": {
+          "end": {
+            "column": 6,
+            "line": 10
+          },
+          "source": null,
+          "start": {
+            "column": 5,
+            "line": 10
+          }
+        },
+        "name": "J",
+        "optional": false,
+        "range": [
+          267,
+          268
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "loc": {
+        "end": {
+          "column": 36,
+          "line": 10
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 10
+        }
+      },
+      "range": [
+        262,
+        298
+      ],
+      "right": {
+        "loc": {
+          "end": {
+            "column": 35,
+            "line": 10
+          },
+          "source": null,
+          "start": {
+            "column": 9,
+            "line": 10
+          }
+        },
+        "range": [
+          271,
+          297
+        ],
+        "type": "UnionTypeAnnotation",
+        "types": [
+          {
+            "loc": {
+              "end": {
+                "column": 15,
+                "line": 10
+              },
+              "source": null,
+              "start": {
+                "column": 9,
+                "line": 10
+              }
+            },
+            "range": [
+              271,
+              277
+            ],
+            "type": "StringTypeAnnotation"
+          },
+          {
+            "id": {
+              "loc": {
+                "end": {
+                  "column": 23,
+                  "line": 10
+                },
+                "source": null,
+                "start": {
+                  "column": 18,
+                  "line": 10
+                }
+              },
+              "name": "Array",
+              "optional": false,
+              "range": [
+                280,
+                285
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "loc": {
+              "end": {
+                "column": 35,
+                "line": 10
+              },
+              "source": null,
+              "start": {
+                "column": 18,
+                "line": 10
+              }
+            },
+            "range": [
+              280,
+              297
+            ],
+            "type": "GenericTypeAnnotation",
+            "typeArguments": {
+              "loc": {
+                "end": {
+                  "column": 35,
+                  "line": 10
+                },
+                "source": null,
+                "start": {
+                  "column": 23,
+                  "line": 10
+                }
+              },
+              "params": [
+                {
+                  "loc": {
+                    "end": {
+                      "column": 34,
+                      "line": 10
+                    },
+                    "source": null,
+                    "start": {
+                      "column": 24,
+                      "line": 10
+                    }
+                  },
+                  "params": [],
+                  "range": [
+                    286,
+                    296
+                  ],
+                  "rest": null,
+                  "returnType": {
+                    "loc": {
+                      "end": {
+                        "column": 34,
+                        "line": 10
+                      },
+                      "source": null,
+                      "start": {
+                        "column": 30,
+                        "line": 10
+                      }
+                    },
+                    "range": [
+                      292,
+                      296
+                    ],
+                    "type": "VoidTypeAnnotation"
+                  },
+                  "this": null,
+                  "type": "FunctionTypeAnnotation",
+                  "typeParameters": null
+                }
+              ],
+              "range": [
+                285,
+                297
+              ],
+              "type": "TypeParameterInstantiation"
+            }
+          }
+        ]
+      },
+      "type": "TypeAlias",
+      "typeParameters": null
+    }
+  ],
+  "comments": [],
+  "errors": [
+    {
+      "loc": {
+        "end": {
+          "column": 28,
+          "line": 1
+        },
+        "source": null,
+        "start": {
+          "column": 18,
+          "line": 1
+        }
+      },
+      "message": "Function type notation must be parenthesized when used in a union type."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 28,
+          "line": 2
+        },
+        "source": null,
+        "start": {
+          "column": 18,
+          "line": 2
+        }
+      },
+      "message": "Function type notation must be parenthesized when used in an intersection type."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 21,
+          "line": 3
+        },
+        "source": null,
+        "start": {
+          "column": 11,
+          "line": 3
+        }
+      },
+      "message": "Function type notation must be parenthesized when used in a union type."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 32,
+          "line": 4
+        },
+        "source": null,
+        "start": {
+          "column": 18,
+          "line": 4
+        }
+      },
+      "message": "Constructor type notation must be parenthesized when used in a union type."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 32,
+          "line": 5
+        },
+        "source": null,
+        "start": {
+          "column": 18,
+          "line": 5
+        }
+      },
+      "message": "Function type notation must be parenthesized when used in a union type."
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 25,
+          "line": 6
+        },
+        "source": null,
+        "start": {
+          "column": 15,
+          "line": 6
+        }
+      },
+      "message": "Function type notation must be parenthesized when used as the operand of a type operator."
+    }
+  ],
+  "loc": {
+    "end": {
+      "column": 0,
+      "line": 11
+    },
+    "source": null,
+    "start": {
+      "column": 0,
+      "line": 1
+    }
+  },
+  "range": [
+    0,
+    299
+  ],
+  "type": "Program"
+}

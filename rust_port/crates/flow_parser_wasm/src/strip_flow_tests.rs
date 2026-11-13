@@ -28,6 +28,7 @@ fn parse(source: &str) -> Program {
         module_ref_prefix: None,
         ambient: false,
         allow_return_outside_function: false,
+        oxc_type_feature_parser_rules: false,
     };
     let file_key = flow_parser::file_key::FileKey::new(
         flow_parser::file_key::FileKeyInner::SourceFile("lowering-test.js".to_owned()),

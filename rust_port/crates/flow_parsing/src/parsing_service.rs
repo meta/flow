@@ -142,6 +142,7 @@ fn parse_source_file(
     let parse_options = Some(ParseOptions {
         use_strict,
         module_ref_prefix: options.haste_module_ref_prefix.dupe(),
+        oxc_type_feature_parser_rules: options.oxc_type_feature_parser_rules && !is_lib_file,
         ..PERMISSIVE_PARSE_OPTIONS
     });
 

@@ -224,6 +224,7 @@ pub mod opts {
         pub node_resolver_dirnames: Vec<String>,
         pub node_resolver_root_relative_dirnames: Vec<(Option<String>, String)>,
         pub normalize_intersections: bool,
+        pub oxc_type_feature_parser_rules: bool,
         pub package_boundary: bool,
         pub pattern_matching: Option<bool>,
         pub projects: Vec<FlowSmolStr>,
@@ -371,6 +372,7 @@ pub mod opts {
             node_resolver_dirnames: vec!["node_modules".to_owned()],
             node_resolver_root_relative_dirnames: vec![(None, String::new())],
             normalize_intersections: false,
+            oxc_type_feature_parser_rules: false,
             package_boundary: false,
             pattern_matching: None,
             projects: vec![FlowSmolStr::new_inline("default")],
@@ -2174,6 +2176,19 @@ pub mod opts {
                     config,
                 )
             }),
+            (
+                "experimental.oxc_type_feature_parser_rules",
+                |values, config| {
+                    parse_boolean(
+                        |opts, v| {
+                            opts.oxc_type_feature_parser_rules = v;
+                            Ok(())
+                        },
+                        values,
+                        config,
+                    )
+                },
+            ),
             ("experimental.package_boundary", |values, config| {
                 parse_boolean(
                     |opts, v| {

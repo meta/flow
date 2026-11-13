@@ -35,6 +35,7 @@ use flow_lint_settings::lints::LintKind;
 use flow_lint_settings::severity::Severity;
 use flow_parser::LexMode;
 use flow_parser::PERMISSIVE_PARSE_OPTIONS;
+use flow_parser::ParseOptions;
 use flow_parser::TokenSinkResult;
 use flow_parser::ast;
 use flow_parser::comment_utils;
@@ -199,6 +200,11 @@ fn config_options(config: Option<&Value>) -> Result<Options, String> {
         lint_severities,
         max_header_tokens: 10,
         normalize_intersections: bool_config(config, "experimental.normalize_intersections", false),
+        oxc_type_feature_parser_rules: bool_config(
+            config,
+            "experimental.oxc_type_feature_parser_rules",
+            false,
+        ),
         react_rules: Arc::from([
             ReactRule::ValidateRefAccessDuringRender,
             ReactRule::DeepReadOnlyProps,
@@ -284,7 +290,10 @@ fn parse_file(file_key: FileKey, content: &str, options: &Options) -> ParsedFile
     let (ast, parse_errors) = flow_parser::parse_program_file::<()>(
         false,
         None,
-        Some(PERMISSIVE_PARSE_OPTIONS),
+        Some(ParseOptions {
+            oxc_type_feature_parser_rules: options.oxc_type_feature_parser_rules,
+            ..PERMISSIVE_PARSE_OPTIONS
+        }),
         file_key.dupe(),
         Ok(content),
     );

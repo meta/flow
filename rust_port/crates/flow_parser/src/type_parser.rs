@@ -23,6 +23,7 @@ use crate::loc::LOC_NONE;
 use crate::loc::Loc;
 use crate::main_parser;
 use crate::object_parser;
+use crate::parse_error::FunctionTypeParensContext;
 use crate::parse_error::ParseError;
 use crate::parser_common;
 use crate::parser_common::*;
@@ -239,6 +240,9 @@ fn conditional_with(
     start_loc: Loc,
     check_type: types::Type<Loc, Loc>,
 ) -> Result<types::Type<Loc, Loc>, Rollback> {
+    if env.oxc_type_feature_parser_rules() && peek::is_line_terminator(env) {
+        return Ok(check_type);
+    }
     match peek::token(env) {
         TokenKind::TExtends => {
             let (loc, conditional) = with_loc(Some(start_loc), env, |env| {
@@ -268,14 +272,18 @@ fn conditional_with(
 
 pub(super) fn parse_union_no_wrap(env: &mut ParserEnv) -> Result<types::Type<Loc, Loc>, Rollback> {
     let start_loc = peek::loc(env).dupe();
-    let leading = if peek::token(env) == &TokenKind::TBitOr {
+    let has_leading_operator = peek::token(env) == &TokenKind::TBitOr;
+    let leading = if has_leading_operator {
         let leading = peek::comments(env);
         eat::token(env)?;
         leading
     } else {
         Vec::new()
     };
-    let left = intersection(env)?;
+    let left = env.with_function_type_parens_context(
+        has_leading_operator.then_some(FunctionTypeParensContext::Union),
+        intersection,
+    )?;
     union_with(env, leading, start_loc, left)
 }
 
@@ -291,7 +299,10 @@ fn union_with(
         mut acc: Vec<types::Type<Loc, Loc>>,
     ) -> Result<types::Union<Loc, Loc>, Rollback> {
         while eat::maybe(env, TokenKind::TBitOr)? {
-            acc.push(intersection(env)?);
+            acc.push(env.with_function_type_parens_context(
+                Some(FunctionTypeParensContext::Union),
+                intersection,
+            )?);
         }
         let mut types = acc.into_iter().collect::<Vec<_>>();
         if types.len() < 2 {
@@ -319,14 +330,22 @@ fn union_with(
 
 fn intersection(env: &mut ParserEnv) -> Result<types::Type<Loc, Loc>, Rollback> {
     let start_loc = peek::loc(env).dupe();
-    let leading = if peek::token(env) == &TokenKind::TBitAnd {
+    let has_leading_operator = peek::token(env) == &TokenKind::TBitAnd;
+    let leading = if has_leading_operator {
         let leading = peek::comments(env);
         eat::token(env)?;
         leading
     } else {
         Vec::new()
     };
-    let left = anon_function_without_parens(env)?;
+    let left = if has_leading_operator {
+        env.with_function_type_parens_context(
+            Some(FunctionTypeParensContext::Intersection),
+            anon_function_without_parens,
+        )?
+    } else {
+        anon_function_without_parens(env)?
+    };
     intersection_with(env, leading, start_loc, left)
 }
 
@@ -342,7 +361,10 @@ fn intersection_with(
         mut acc: Vec<types::Type<Loc, Loc>>,
     ) -> Result<types::Intersection<Loc, Loc>, Rollback> {
         while eat::maybe(env, TokenKind::TBitAnd)? {
-            acc.push(anon_function_without_parens(env)?);
+            acc.push(env.with_function_type_parens_context(
+                Some(FunctionTypeParensContext::Intersection),
+                anon_function_without_parens,
+            )?);
         }
         let mut types = acc.into_iter().collect::<Vec<_>>();
         if types.len() < 2 {
@@ -381,7 +403,7 @@ fn anon_function_without_parens_with(
     if matches!(peek::token(env), TokenKind::TArrow) {
         if !env.no_anon_function_type() {
             let param_loc = param.loc().dupe();
-            let param = anonymous_function_param(param);
+            let param = anonymous_function_param(env, param);
             let start_loc = param_loc.dupe();
             let tparams = None;
             let params = types::function::Params {
@@ -409,7 +431,7 @@ fn prefix(env: &mut ParserEnv) -> Result<types::Type<Loc, Loc>, Rollback> {
             let (loc, nullable) = with_loc(None, env, |env| {
                 let leading = peek::comments(env);
                 expect::token(env, TokenKind::TPling)?;
-                let argument = prefix(env)?;
+                let argument = env.with_function_type_parens_context(None, prefix)?;
                 Ok(types::Nullable {
                     argument,
                     comments: mk_comments_opt(Some(leading.into()), None),
@@ -672,7 +694,11 @@ fn primary(env: &mut ParserEnv) -> Result<types::Type<Loc, Loc>, Rollback> {
                 comments: mk_comments_opt(Some(leading.into()), Some(trailing.into())),
             }))
         }
-        TokenKind::TLessThan => function_type(env),
+        TokenKind::TLessThan => {
+            let t = function_type(env)?;
+            error_on_unparenthesized_function_type(env, &t);
+            Ok(t)
+        }
         TokenKind::TLparen => function_or_group(env),
         TokenKind::TLcurly | TokenKind::TLcurlybar => {
             let (loc, obj) = object_type(env, false, true, true)?;
@@ -780,7 +806,9 @@ fn primary(env: &mut ParserEnv) -> Result<types::Type<Loc, Loc>, Rollback> {
         }
         TokenKind::TNew => {
             if peek::token_after_current_starts_type_call(env) {
-                constructor_type(env, false)
+                let t = constructor_type(env, false)?;
+                error_on_unparenthesized_function_type(env, &t);
+                Ok(t)
             } else {
                 let (loc, g) = generic(env)?;
                 Ok(types::Type::new(TypeInner::Generic {
@@ -791,7 +819,9 @@ fn primary(env: &mut ParserEnv) -> Result<types::Type<Loc, Loc>, Rollback> {
         }
         TokenKind::TIdentifier { raw, .. } if raw == "abstract" => {
             if peek::token_after_current_is_new(env) {
-                constructor_type(env, true)
+                let t = constructor_type(env, true)?;
+                error_on_unparenthesized_function_type(env, &t);
+                Ok(t)
             } else {
                 let (loc, g) = generic(env)?;
                 Ok(types::Type::new(TypeInner::Generic {
@@ -859,7 +889,10 @@ fn primary(env: &mut ParserEnv) -> Result<types::Type<Loc, Loc>, Rollback> {
                 let leading = peek::comments(env);
                 eat::token(env)?;
                 let trailing = eat::trailing_comments(env);
-                let argument = prefix(env)?;
+                let argument = env.with_function_type_parens_context(
+                    Some(FunctionTypeParensContext::TypeOperator),
+                    prefix,
+                )?;
                 Ok(types::Keyof {
                     argument,
                     comments: mk_comments_opt(Some(leading.into()), Some(trailing.into())),
@@ -878,7 +911,10 @@ fn primary(env: &mut ParserEnv) -> Result<types::Type<Loc, Loc>, Rollback> {
                 let argument = if token_needs_identifier_reparse_before_label(env) {
                     generic_type_from_current_identifier_name(env)?
                 } else {
-                    prefix(env)?
+                    env.with_function_type_parens_context(
+                        Some(FunctionTypeParensContext::TypeOperator),
+                        prefix,
+                    )?
                 };
                 Ok(types::ReadOnly {
                     argument,
@@ -1498,11 +1534,34 @@ fn render_type(env: &mut ParserEnv) -> Result<types::Renders<Loc, Loc>, Rollback
     })
 }
 
-fn anonymous_function_param(annot: types::Type<Loc, Loc>) -> types::function::Param<Loc, Loc> {
+fn anonymous_function_param(
+    env: &mut ParserEnv,
+    annot: types::Type<Loc, Loc>,
+) -> types::function::Param<Loc, Loc> {
+    if env.oxc_type_feature_parser_rules() {
+        env.error_at_without_rollback(annot.loc().dupe(), ParseError::MissingFunctionTypeParamName);
+    }
     types::function::Param {
         loc: annot.loc().dupe(),
         param: types::function::ParamKind::Anonymous(annot),
     }
+}
+
+fn error_on_unparenthesized_function_type(env: &mut ParserEnv, t: &types::Type<Loc, Loc>) {
+    if !env.oxc_type_feature_parser_rules() {
+        return;
+    }
+    let Some(context) = env.function_type_parens_context() else {
+        return;
+    };
+    let constructor = matches!(t.deref(), TypeInner::ConstructorType { .. });
+    env.error_at_without_rollback(
+        t.loc().dupe(),
+        ParseError::FunctionTypeNeedsParens {
+            constructor,
+            context,
+        },
+    );
 }
 
 fn primitive_type_annotation_as_identifier(
@@ -1746,7 +1805,7 @@ fn function_param_list_without_parens(
                                 if peek::token(env) == &TokenKind::TColon {
                                     return Err(Rollback);
                                 }
-                                Ok(anonymous_function_param(annot))
+                                Ok(anonymous_function_param(env, annot))
                             },
                         )
                     }) {
@@ -1757,7 +1816,7 @@ fn function_param_list_without_parens(
                     }
                 } else {
                     let annot = type_inner(env)?;
-                    Ok(anonymous_function_param(annot))
+                    Ok(anonymous_function_param(env, annot))
                 }
             }
             _ => {
@@ -1768,7 +1827,7 @@ fn function_param_list_without_parens(
                 if matches!(peek::token(env), TokenKind::TPling | TokenKind::TColon) {
                     function_param_from_type_annotation(env, annot)
                 } else {
-                    Ok(anonymous_function_param(annot))
+                    Ok(anonymous_function_param(env, annot))
                 }
             }
         }
@@ -2166,7 +2225,7 @@ fn param_list_or_type(env: &mut ParserEnv) -> Result<ParamListOrType, Rollback> 
             TokenKind::TComma => {
                 // Reinterpret `(type,` as a ParamList
                 expect::token(env, TokenKind::TComma)?;
-                let param = anonymous_function_param(t);
+                let param = anonymous_function_param(env, t);
                 ParamListOrType::ParamList(function_param_list_without_parens(env, vec![param])?)
             }
             _ => ParamListOrType::Type(t),
@@ -2193,7 +2252,7 @@ fn param_list_or_type(env: &mut ParserEnv) -> Result<ParamListOrType, Rollback> 
             // arrow is the current token instead of token 2.
             let mut params = types::function::Params {
                 loc: LOC_NONE,
-                params: vec![anonymous_function_param(t)].into(),
+                params: vec![anonymous_function_param(env, t)].into(),
                 rest: None,
                 this: None,
                 comments: None,
@@ -2233,7 +2292,10 @@ fn function_or_group(env: &mut ParserEnv) -> Result<types::Type<Loc, Loc>, Rollb
     let start_loc = peek::loc(env).dupe();
     match param_list_or_type(env)? {
         ParamListOrType::ParamList(params) => {
-            function_with_params(env, start_loc, None, params, function::Effect::Arbitrary)
+            let t =
+                function_with_params(env, start_loc, None, params, function::Effect::Arbitrary)?;
+            error_on_unparenthesized_function_type(env, &t);
+            Ok(t)
         }
         ParamListOrType::Type(t) => Ok(t),
     }
@@ -2580,6 +2642,25 @@ fn object_type(
         let (loc, mut prop) = with_loc(Some(start_loc.dupe()), env, |env| {
             comment_attachment::object_key_remove_trailing(env, &mut key);
             let (value_loc, func) = methodish(env, start_loc, None)?;
+
+            if !is_getter
+                && env.oxc_type_feature_parser_rules()
+                && let [param] = &*func.params.params
+            {
+                let optional = match &param.param {
+                    types::function::ParamKind::Anonymous(_) => false,
+                    types::function::ParamKind::Labeled { optional, .. } => *optional,
+                    types::function::ParamKind::Destructuring(pattern) => {
+                        ast_utils::pattern_optional(pattern)
+                    }
+                };
+                if optional {
+                    env.error_at_without_rollback(
+                        param.loc.dupe(),
+                        ParseError::SetterMayNotHaveOptionalParam,
+                    );
+                }
+            }
 
             match (is_getter, &func.params) {
                 (true, types::function::Params { this: Some(_), .. }) => {
@@ -2990,7 +3071,9 @@ fn object_type(
             TokenKind::TRcurlybar if exact => {}
             TokenKind::TRcurly if !exact => {}
             _ => {
-                if !(env.is_ts() && peek::is_implicit_semicolon(env)) {
+                if !((env.is_ts() || env.oxc_type_feature_parser_rules())
+                    && peek::is_implicit_semicolon(env))
+                {
                     expect::error(env, &TokenKind::TComma)?
                 }
             }
@@ -3154,6 +3237,12 @@ fn object_type(
         let computed_loc = Loc::between(&start_loc, peek::loc(env));
         expect::token(env, TokenKind::TRbracket)?;
         if !method_continuation(env) {
+            if env.oxc_type_feature_parser_rules() {
+                env.error_at_without_rollback(
+                    key_type.loc().dupe(),
+                    ParseError::MissingIndexerKeyName,
+                );
+            }
             return finish_indexer(env, start_loc, static_, variance, leading, None, key_type);
         }
         let expression = match computed_key_expression_of_type(&key_type) {
@@ -3472,6 +3561,21 @@ fn object_type(
                         None,
                         Vec::new(),
                     )?;
+                    if env.oxc_type_feature_parser_rules() && peek::token(env) == &TokenKind::TComma
+                    {
+                        let comma_loc = peek::loc(env).dupe();
+                        if is_class {
+                            env.error_at_without_rollback(
+                                comma_loc,
+                                ParseError::UnexpectedCommaBetweenClassMembers,
+                            );
+                        } else if matches!(prop, types::object::Property::MappedType(_)) {
+                            env.error_at_without_rollback(
+                                comma_loc,
+                                ParseError::UnexpectedCommaAfterMappedType,
+                            );
+                        }
+                    }
                     semicolon(env, exact)?;
                     props.push(prop);
                 }
@@ -4244,7 +4348,8 @@ fn raw_generic_with_identifier(
         let id = (id.loc.dupe(), types::generic::Identifier::Unqualified(id));
         let (_, id) = identifier_helper(env, id)?;
 
-        let id = if peek::token(env) != &TokenKind::TLessThan {
+        let has_targs = type_reference_args_follow(env);
+        let id = if !has_targs {
             id
         } else if let Some(mut remover) = comment_attachment::trailing_and_remover(env).remover {
             remover.map_generic_identifier_type(&id)
@@ -4252,13 +4357,20 @@ fn raw_generic_with_identifier(
             id
         };
 
-        let targs = type_args(env)?;
+        let targs = if has_targs { type_args(env)? } else { None };
         Ok(types::Generic {
             id,
             targs,
             comments: None,
         })
     })
+}
+
+/// Whether type arguments of a type reference follow. TypeScript only reads
+/// them from the same line as the reference.
+fn type_reference_args_follow(env: &mut ParserEnv) -> bool {
+    peek::token(env) == &TokenKind::TLessThan
+        && !(env.oxc_type_feature_parser_rules() && peek::is_line_terminator(env))
 }
 
 fn import_type_generic(env: &mut ParserEnv) -> Result<types::Type<Loc, Loc>, Rollback> {
@@ -4330,7 +4442,8 @@ fn import_type_generic(env: &mut ParserEnv) -> Result<types::Type<Loc, Loc>, Rol
         }
 
         let (_, id) = qualification;
-        let id = if peek::token(env) != &TokenKind::TLessThan {
+        let has_targs = type_reference_args_follow(env);
+        let id = if !has_targs {
             id
         } else if let Some(mut remover) = comment_attachment::trailing_and_remover(env).remover {
             remover.map_generic_identifier_type(&id)
@@ -4338,7 +4451,7 @@ fn import_type_generic(env: &mut ParserEnv) -> Result<types::Type<Loc, Loc>, Rol
             id
         };
 
-        let targs = type_args(env)?;
+        let targs = if has_targs { type_args(env)? } else { None };
         Ok(TypeInner::Generic {
             loc: LOC_NONE,
             inner: Arc::new(types::Generic {

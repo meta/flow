@@ -104,6 +104,7 @@ pub fn flow_to_runnable_program(
         module_ref_prefix: None,
         ambient: false,
         allow_return_outside_function: options.allow_return_outside_function,
+        oxc_type_feature_parser_rules: false,
     };
     let (program, errors) = match options.source_type {
         SourceType::CommonJs => flow_parser::parse_program_file::<()>(

@@ -77,6 +77,57 @@ const EXPECTED_PACKAGE_ERRORS = new Map([
       },
     ],
   ],
+  // `oxc_type_feature_parser_rules` is not exposed on the package parser
+  // boundary, so these fixtures parse there under the default rules.
+  ...[
+    'arrow_function_annotations',
+    'declare_class_separator',
+    'declare_function_param_names',
+    'function_type_in_union',
+    'function_type_param_names',
+    'indexer_key_names',
+    'mapped_type_separator',
+    'method_param_names',
+    'setters',
+    'typescript_file',
+  ].map(name => [`oxc_type_feature_parser_rules/${name}`, []]),
+  [
+    'oxc_type_feature_parser_rules/newlines',
+    [
+      {
+        loc: {
+          start: {line: 3, column: 5},
+          end: {line: 3, column: 6},
+          source: null,
+        },
+        message: 'Unexpected token `(`, expected the token `,`',
+        range: [26, 27],
+      },
+    ],
+  ],
+  [
+    'oxc_type_feature_parser_rules/object_type_asi',
+    [
+      {
+        loc: {
+          start: {line: 3, column: 2},
+          end: {line: 3, column: 3},
+          source: null,
+        },
+        message: 'Unexpected identifier, expected the token `,`',
+        range: [25, 26],
+      },
+      {
+        loc: {
+          start: {line: 7, column: 2},
+          end: {line: 7, column: 3},
+          source: null,
+        },
+        message: 'Unexpected identifier, expected the token `,`',
+        range: [75, 76],
+      },
+    ],
+  ],
 ]);
 
 // Walk directory tree returning sorted list of files relative to root.

@@ -1,0 +1,877 @@
+{
+  "body": [
+    {
+      "body": {
+        "callProperties": [
+          {
+            "loc": {
+              "end": {
+                "column": 17,
+                "line": 3
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 3
+              }
+            },
+            "range": [
+              23,
+              38
+            ],
+            "static": false,
+            "type": "ObjectTypeCallProperty",
+            "value": {
+              "loc": {
+                "end": {
+                  "column": 17,
+                  "line": 3
+                },
+                "source": null,
+                "start": {
+                  "column": 2,
+                  "line": 3
+                }
+              },
+              "params": [
+                {
+                  "loc": {
+                    "end": {
+                      "column": 10,
+                      "line": 3
+                    },
+                    "source": null,
+                    "start": {
+                      "column": 6,
+                      "line": 3
+                    }
+                  },
+                  "name": {
+                    "loc": {
+                      "end": {
+                        "column": 7,
+                        "line": 3
+                      },
+                      "source": null,
+                      "start": {
+                        "column": 6,
+                        "line": 3
+                      }
+                    },
+                    "name": "x",
+                    "optional": false,
+                    "range": [
+                      27,
+                      28
+                    ],
+                    "type": "Identifier",
+                    "typeAnnotation": null
+                  },
+                  "optional": false,
+                  "range": [
+                    27,
+                    31
+                  ],
+                  "type": "FunctionTypeParam",
+                  "typeAnnotation": {
+                    "id": {
+                      "loc": {
+                        "end": {
+                          "column": 10,
+                          "line": 3
+                        },
+                        "source": null,
+                        "start": {
+                          "column": 9,
+                          "line": 3
+                        }
+                      },
+                      "name": "T",
+                      "optional": false,
+                      "range": [
+                        30,
+                        31
+                      ],
+                      "type": "Identifier",
+                      "typeAnnotation": null
+                    },
+                    "loc": {
+                      "end": {
+                        "column": 10,
+                        "line": 3
+                      },
+                      "source": null,
+                      "start": {
+                        "column": 9,
+                        "line": 3
+                      }
+                    },
+                    "range": [
+                      30,
+                      31
+                    ],
+                    "type": "GenericTypeAnnotation",
+                    "typeArguments": null
+                  }
+                }
+              ],
+              "range": [
+                23,
+                38
+              ],
+              "rest": null,
+              "returnType": {
+                "loc": {
+                  "end": {
+                    "column": 17,
+                    "line": 3
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 13,
+                    "line": 3
+                  }
+                },
+                "range": [
+                  34,
+                  38
+                ],
+                "type": "VoidTypeAnnotation"
+              },
+              "this": null,
+              "type": "FunctionTypeAnnotation",
+              "typeParameters": {
+                "loc": {
+                  "end": {
+                    "column": 5,
+                    "line": 3
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 2,
+                    "line": 3
+                  }
+                },
+                "params": [
+                  {
+                    "bound": null,
+                    "const": false,
+                    "default": null,
+                    "loc": {
+                      "end": {
+                        "column": 4,
+                        "line": 3
+                      },
+                      "source": null,
+                      "start": {
+                        "column": 3,
+                        "line": 3
+                      }
+                    },
+                    "name": "T",
+                    "range": [
+                      24,
+                      25
+                    ],
+                    "type": "TypeParameter",
+                    "variance": null
+                  }
+                ],
+                "range": [
+                  23,
+                  26
+                ],
+                "type": "TypeParameterDeclaration"
+              }
+            }
+          }
+        ],
+        "exact": false,
+        "indexers": [],
+        "internalSlots": [],
+        "loc": {
+          "end": {
+            "column": 1,
+            "line": 4
+          },
+          "source": null,
+          "start": {
+            "column": 12,
+            "line": 1
+          }
+        },
+        "properties": [
+          {
+            "abstract": false,
+            "init": null,
+            "key": {
+              "loc": {
+                "end": {
+                  "column": 3,
+                  "line": 2
+                },
+                "source": null,
+                "start": {
+                  "column": 2,
+                  "line": 2
+                }
+              },
+              "name": "a",
+              "optional": false,
+              "range": [
+                16,
+                17
+              ],
+              "type": "Identifier",
+              "typeAnnotation": null
+            },
+            "kind": "init",
+            "loc": {
+              "end": {
+                "column": 6,
+                "line": 2
+              },
+              "source": null,
+              "start": {
+                "column": 2,
+                "line": 2
+              }
+            },
+            "method": false,
+            "optional": false,
+            "proto": false,
+            "range": [
+              16,
+              20
+            ],
+            "static": false,
+            "type": "ObjectTypeProperty",
+            "value": {
+              "id": {
+                "loc": {
+                  "end": {
+                    "column": 6,
+                    "line": 2
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 5,
+                    "line": 2
+                  }
+                },
+                "name": "B",
+                "optional": false,
+                "range": [
+                  19,
+                  20
+                ],
+                "type": "Identifier",
+                "typeAnnotation": null
+              },
+              "loc": {
+                "end": {
+                  "column": 6,
+                  "line": 2
+                },
+                "source": null,
+                "start": {
+                  "column": 5,
+                  "line": 2
+                }
+              },
+              "range": [
+                19,
+                20
+              ],
+              "type": "GenericTypeAnnotation",
+              "typeArguments": null
+            },
+            "variance": null
+          }
+        ],
+        "range": [
+          12,
+          40
+        ],
+        "type": "ObjectTypeAnnotation"
+      },
+      "extends": [],
+      "id": {
+        "loc": {
+          "end": {
+            "column": 11,
+            "line": 1
+          },
+          "source": null,
+          "start": {
+            "column": 10,
+            "line": 1
+          }
+        },
+        "name": "I",
+        "optional": false,
+        "range": [
+          10,
+          11
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "loc": {
+        "end": {
+          "column": 1,
+          "line": 4
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 1
+        }
+      },
+      "range": [
+        0,
+        40
+      ],
+      "type": "InterfaceDeclaration",
+      "typeParameters": null
+    },
+    {
+      "id": {
+        "loc": {
+          "end": {
+            "column": 6,
+            "line": 5
+          },
+          "source": null,
+          "start": {
+            "column": 5,
+            "line": 5
+          }
+        },
+        "name": "C",
+        "optional": false,
+        "range": [
+          46,
+          47
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "loc": {
+        "end": {
+          "column": 29,
+          "line": 5
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 5
+        }
+      },
+      "range": [
+        41,
+        70
+      ],
+      "right": {
+        "checkType": {
+          "id": {
+            "loc": {
+              "end": {
+                "column": 10,
+                "line": 5
+              },
+              "source": null,
+              "start": {
+                "column": 9,
+                "line": 5
+              }
+            },
+            "name": "D",
+            "optional": false,
+            "range": [
+              50,
+              51
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          },
+          "loc": {
+            "end": {
+              "column": 10,
+              "line": 5
+            },
+            "source": null,
+            "start": {
+              "column": 9,
+              "line": 5
+            }
+          },
+          "range": [
+            50,
+            51
+          ],
+          "type": "GenericTypeAnnotation",
+          "typeArguments": null
+        },
+        "extendsType": {
+          "id": {
+            "loc": {
+              "end": {
+                "column": 20,
+                "line": 5
+              },
+              "source": null,
+              "start": {
+                "column": 19,
+                "line": 5
+              }
+            },
+            "name": "E",
+            "optional": false,
+            "range": [
+              60,
+              61
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          },
+          "loc": {
+            "end": {
+              "column": 20,
+              "line": 5
+            },
+            "source": null,
+            "start": {
+              "column": 19,
+              "line": 5
+            }
+          },
+          "range": [
+            60,
+            61
+          ],
+          "type": "GenericTypeAnnotation",
+          "typeArguments": null
+        },
+        "falseType": {
+          "id": {
+            "loc": {
+              "end": {
+                "column": 28,
+                "line": 5
+              },
+              "source": null,
+              "start": {
+                "column": 27,
+                "line": 5
+              }
+            },
+            "name": "G",
+            "optional": false,
+            "range": [
+              68,
+              69
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          },
+          "loc": {
+            "end": {
+              "column": 28,
+              "line": 5
+            },
+            "source": null,
+            "start": {
+              "column": 27,
+              "line": 5
+            }
+          },
+          "range": [
+            68,
+            69
+          ],
+          "type": "GenericTypeAnnotation",
+          "typeArguments": null
+        },
+        "loc": {
+          "end": {
+            "column": 28,
+            "line": 5
+          },
+          "source": null,
+          "start": {
+            "column": 9,
+            "line": 5
+          }
+        },
+        "range": [
+          50,
+          69
+        ],
+        "trueType": {
+          "id": {
+            "loc": {
+              "end": {
+                "column": 24,
+                "line": 5
+              },
+              "source": null,
+              "start": {
+                "column": 23,
+                "line": 5
+              }
+            },
+            "name": "F",
+            "optional": false,
+            "range": [
+              64,
+              65
+            ],
+            "type": "Identifier",
+            "typeAnnotation": null
+          },
+          "loc": {
+            "end": {
+              "column": 24,
+              "line": 5
+            },
+            "source": null,
+            "start": {
+              "column": 23,
+              "line": 5
+            }
+          },
+          "range": [
+            64,
+            65
+          ],
+          "type": "GenericTypeAnnotation",
+          "typeArguments": null
+        },
+        "type": "ConditionalTypeAnnotation"
+      },
+      "type": "TypeAlias",
+      "typeParameters": null
+    },
+    {
+      "id": {
+        "loc": {
+          "end": {
+            "column": 6,
+            "line": 6
+          },
+          "source": null,
+          "start": {
+            "column": 5,
+            "line": 6
+          }
+        },
+        "name": "H",
+        "optional": false,
+        "range": [
+          76,
+          77
+        ],
+        "type": "Identifier",
+        "typeAnnotation": null
+      },
+      "loc": {
+        "end": {
+          "column": 21,
+          "line": 7
+        },
+        "source": null,
+        "start": {
+          "column": 0,
+          "line": 6
+        }
+      },
+      "range": [
+        71,
+        109
+      ],
+      "right": {
+        "id": {
+          "loc": {
+            "end": {
+              "column": 14,
+              "line": 6
+            },
+            "source": null,
+            "start": {
+              "column": 9,
+              "line": 6
+            }
+          },
+          "name": "Array",
+          "optional": false,
+          "range": [
+            80,
+            85
+          ],
+          "type": "Identifier",
+          "typeAnnotation": null
+        },
+        "loc": {
+          "end": {
+            "column": 20,
+            "line": 7
+          },
+          "source": null,
+          "start": {
+            "column": 9,
+            "line": 6
+          }
+        },
+        "range": [
+          80,
+          108
+        ],
+        "type": "GenericTypeAnnotation",
+        "typeArguments": {
+          "loc": {
+            "end": {
+              "column": 20,
+              "line": 7
+            },
+            "source": null,
+            "start": {
+              "column": 14,
+              "line": 6
+            }
+          },
+          "params": [
+            {
+              "id": {
+                "loc": {
+                  "end": {
+                    "column": 16,
+                    "line": 6
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 15,
+                    "line": 6
+                  }
+                },
+                "name": "J",
+                "optional": false,
+                "range": [
+                  86,
+                  87
+                ],
+                "type": "Identifier",
+                "typeAnnotation": null
+              },
+              "loc": {
+                "end": {
+                  "column": 16,
+                  "line": 6
+                },
+                "source": null,
+                "start": {
+                  "column": 15,
+                  "line": 6
+                }
+              },
+              "range": [
+                86,
+                87
+              ],
+              "type": "GenericTypeAnnotation",
+              "typeArguments": null
+            },
+            {
+              "id": {
+                "loc": {
+                  "end": {
+                    "column": 11,
+                    "line": 7
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 10,
+                    "line": 7
+                  }
+                },
+                "name": "K",
+                "optional": false,
+                "range": [
+                  98,
+                  99
+                ],
+                "type": "Identifier",
+                "typeAnnotation": null
+              },
+              "loc": {
+                "end": {
+                  "column": 11,
+                  "line": 7
+                },
+                "source": null,
+                "start": {
+                  "column": 10,
+                  "line": 7
+                }
+              },
+              "range": [
+                98,
+                99
+              ],
+              "type": "GenericTypeAnnotation",
+              "typeArguments": null
+            },
+            {
+              "id": {
+                "loc": {
+                  "end": {
+                    "column": 15,
+                    "line": 7
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 14,
+                    "line": 7
+                  }
+                },
+                "name": "L",
+                "optional": false,
+                "range": [
+                  102,
+                  103
+                ],
+                "type": "Identifier",
+                "typeAnnotation": null
+              },
+              "loc": {
+                "end": {
+                  "column": 15,
+                  "line": 7
+                },
+                "source": null,
+                "start": {
+                  "column": 14,
+                  "line": 7
+                }
+              },
+              "range": [
+                102,
+                103
+              ],
+              "type": "GenericTypeAnnotation",
+              "typeArguments": null
+            },
+            {
+              "id": {
+                "loc": {
+                  "end": {
+                    "column": 19,
+                    "line": 7
+                  },
+                  "source": null,
+                  "start": {
+                    "column": 18,
+                    "line": 7
+                  }
+                },
+                "name": "M",
+                "optional": false,
+                "range": [
+                  106,
+                  107
+                ],
+                "type": "Identifier",
+                "typeAnnotation": null
+              },
+              "loc": {
+                "end": {
+                  "column": 19,
+                  "line": 7
+                },
+                "source": null,
+                "start": {
+                  "column": 18,
+                  "line": 7
+                }
+              },
+              "range": [
+                106,
+                107
+              ],
+              "type": "GenericTypeAnnotation",
+              "typeArguments": null
+            }
+          ],
+          "range": [
+            85,
+            108
+          ],
+          "type": "TypeParameterInstantiation"
+        }
+      },
+      "type": "TypeAlias",
+      "typeParameters": null
+    }
+  ],
+  "comments": [],
+  "errors": [
+    {
+      "loc": {
+        "end": {
+          "column": 9,
+          "line": 7
+        },
+        "source": null,
+        "start": {
+          "column": 2,
+          "line": 7
+        }
+      },
+      "message": "Unexpected token `extends`, expected the token `,`"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 13,
+          "line": 7
+        },
+        "source": null,
+        "start": {
+          "column": 12,
+          "line": 7
+        }
+      },
+      "message": "Unexpected token `?`, expected the token `,`"
+    },
+    {
+      "loc": {
+        "end": {
+          "column": 17,
+          "line": 7
+        },
+        "source": null,
+        "start": {
+          "column": 16,
+          "line": 7
+        }
+      },
+      "message": "Unexpected token `:`, expected the token `,`"
+    }
+  ],
+  "loc": {
+    "end": {
+      "column": 0,
+      "line": 8
+    },
+    "source": null,
+    "start": {
+      "column": 0,
+      "line": 1
+    }
+  },
+  "range": [
+    0,
+    110
+  ],
+  "type": "Program"
+}
