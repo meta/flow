@@ -1674,7 +1674,7 @@ The following TypeScript features have type-checking support implemented in Flow
 - [`override` on class members](./types/classes.md#toc-override).
 - [Constructor types](./types/functions.md#toc-constructor-types), including `abstract new`.
 - [`satisfies` expressions](./types/casting.md#toc-satisfies) - check compatibility without widening the inferred type; see [`as` versus `satisfies`](./types/casting.md#toc-as-vs-satisfies).
-- Inline `import()` type expression - `type A = import('./m').A`.
+- [Inline import type annotations and `typeof import(...)`](./types/modules.md#toc-inline-import-types).
 - `import X = require('foo')` and `export = X` - CommonJS-style import and export bindings.
 - [`unique symbol` annotations](./types/primitives.md#toc-unique-symbols) and [symbol-keyed properties](./types/objects.md#toc-symbol-keyed-properties).
 - Definite assignment assertions - `let x!: T` and class fields `x!: T`, which tell Flow that something assigns the variable or field before it is read.

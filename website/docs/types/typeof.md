@@ -4,6 +4,8 @@ slug: /types/typeof
 description: "How to use typeof types in Flow to extract the type of a value at the type level."
 ---
 
+import {SinceVersion} from '../../components/VersionTags';
+
 Flow's `typeof` type operator extracts the Flow type of a value, so you can use it as a type annotation.
 
 ```js flow-check
@@ -34,7 +36,7 @@ let str2: typeof str1 = 'world'; // Works!
 let str3: typeof str1 = false;   // Error!
 ```
 
-You can use any value with `typeof`, as long as the argument itself is a variable or member access:
+The argument to `typeof` can be a variable, a member access, or the [inline import form](#toc-imported-values) described below. Arbitrary runtime expressions are not allowed:
 
 ```js flow-check
 let obj1 = {foo: 1, bar: true, baz: 'three'};
@@ -46,6 +48,20 @@ let arr2: typeof arr1 = [3, 2, 1];
 
 type T = typeof {a: 1}; // Error
 ```
+
+### Imported values {#toc-imported-values}
+
+<SinceVersion version="0.339" />
+
+`typeof import('./config').Config` gives you the type of an exported value without a local import binding. `typeof import('./config')` gives you the type of the module-namespace value. These examples use the `config.js` file from [Modules](./modules.md#toc-inline-import-types):
+
+```js
+type Constructor = typeof import('./config').Config;
+type DefaultPort = typeof import('./config').default;
+type ModuleNamespace = typeof import('./config');
+```
+
+`Constructor` describes the class value itself, while `import('./config').Config` describes its instances. `DefaultPort` is the type of the default-exported number. None of these annotations performs a runtime dynamic import. For more examples, see [inline import annotations](./modules.md#toc-inline-imported-values). The [Adoption](./modules.md#toc-inline-import-types-adoption) section lists the required option and tooling versions.
 
 ## `typeof` inherits behaviors of inference {#toc-typeof-inherits-behaviors-of-inference}
 
