@@ -1,8 +1,10 @@
 ---
 title: Functions
 slug: /types/functions
-description: "How to type functions in Flow, including parameters, return types, rest parameters, generics, and callable objects."
+description: "How to type functions in Flow, including parameters, return types, rest parameters, generics, constructor types, and callable objects."
 ---
+
+import {SinceVersion} from '../../components/VersionTags';
 
 Functions can be typed at their parameters (input) and return value (output).
 
@@ -216,6 +218,128 @@ function isString(x: unknown): x is string {
   return typeof x === 'string';
 }
 ```
+
+## Constructor Types <SinceVersion version="0.339" /> {#toc-constructor-types}
+
+A constructor type `new (...) => T` describes a value that you can call with `new` to produce `T`. Use it to accept a class constructor in a function, such as this generic factory:
+
+```js flow-check
+function create<T>(C: new () => T): T {
+  return new C();
+}
+
+class Item {
+  value: number = 1;
+}
+
+create(Item).value as number; // OK
+```
+
+Unlike a function type `(...) => T`, a constructor type describes construction, not an ordinary function call. It is a type annotation, not syntax for declaring a runtime function. For the distinction between an instance type and the class value, see [Classes in annotations](./classes.md#toc-classes-in-annotations).
+
+Flow checks constructor arguments when you use `new`. If a constructor requires an argument, you cannot assign it to a zero-argument constructor type:
+
+```js flow-check
+class Item {
+  name: string;
+  constructor(name: string) {
+    this.name = name;
+  }
+}
+
+const C: new (name: string) => Item = Item; // OK
+new C('book').name as string; // OK
+new C(123); // Error! `name` must be a string
+new C(); // Error! `name` is required
+const noArgs: new () => Item = Item; // Error! `Item` requires an argument
+```
+
+You can capture the parameter list with a [tuple type](./tuples.md) to write a variadic factory:
+
+```js flow-check
+function instantiate<T, Args extends ReadonlyArray<unknown>>(
+  C: new (...args: Args) => T,
+  ...args: Args
+): T {
+  return new C(...args);
+}
+
+class Point {
+  x: number;
+  label: string;
+  constructor(x: number, label: string) {
+    this.x = x;
+    this.label = label;
+  }
+}
+
+instantiate(Point, 1, 'start').x as number; // OK
+instantiate(Point, 'bad', 'start'); // Error! The first argument must be a number
+```
+
+When you use a class as the result type, Flow preserves its [nominal class identity](../lang/nominal-structural.md). To accept different classes that share a structural contract, use an [interface](./interfaces.md) as the result type rather than a plain object type:
+
+```js flow-check
+class Item {
+  value: number = 1;
+}
+class OtherItem {
+  value: number = 2;
+}
+
+const specific: new () => Item = Item; // OK
+const wrong: new () => Item = OtherItem; // Error! Different class identity
+
+interface WithValue {
+  value: number;
+}
+const structural: new () => WithValue = OtherItem; // OK
+new structural().value as number; // OK
+```
+
+In ordinary Flow source, `{new(): T}` describes an object **method named `new`**, not TypeScript's object construct signature. An interface can instead declare a construct signature:
+
+```js flow-check
+declare const methods: {new(): {value: number}};
+methods.new().value as number; // OK: method call
+new methods(); // Error! Not a constructor
+
+interface ItemConstructor {
+  new(): {value: number};
+}
+declare const C: ItemConstructor;
+new C().value as number; // OK: construction
+```
+
+[`ConstructorParameters<C>`](./utilities.md#toc-constructor-parameters) extracts the constructor's parameter tuple. To extract its result type, use [`InstanceType<C>`](./utilities.md#toc-instance-type). Both utilities accept constructor types.
+
+### Abstract constructor types {#toc-abstract-constructor-types}
+
+Use `abstract new (...) => T` when a constructor value may be an [abstract class](./classes.md#toc-abstract-classes). This type accepts both abstract and concrete constructors with compatible parameters and results. You cannot construct an instance through it, even if the underlying class is concrete:
+
+```js flow-check
+abstract class Animal {
+  abstract makeSound(): string;
+}
+class Dog extends Animal {
+  makeSound(): string {
+    return 'woof';
+  }
+}
+
+const base = Animal as abstract new () => Animal; // OK
+const pet = Dog as abstract new () => Animal; // OK
+new base(); // Error! Abstract constructor type
+new pet(); // Error! Still an abstract constructor type
+
+Animal as new () => Animal; // Error! Abstract class in a concrete constructor slot
+const concrete = Dog as new () => Animal; // OK
+new concrete().makeSound() as string; // OK
+```
+
+### Adoption {#toc-constructor-types-adoption}
+
+To use this syntax, set `experimental.tslib_syntax=true` in `.flowconfig` and use Flow and flow-parser 0.339.0+ and Prettier 3.10.0+ with its built-in [`flow` parser](../tools/prettier.md).
 
 ## Callable Objects
 

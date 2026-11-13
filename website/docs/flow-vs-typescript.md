@@ -1672,7 +1672,7 @@ The following TypeScript features have type-checking support implemented in Flow
 - Mapped type modifiers - variance removal `-readonly` and `as` key remapping.
 - [Abstract classes and members](./types/classes.md#toc-abstract-classes).
 - [`override` on class members](./types/classes.md#toc-override).
-- Constructor types - `type Ctor = new (x: number) => R`.
+- [Constructor types](./types/functions.md#toc-constructor-types), including `abstract new`.
 - `satisfies` expression - validates an expression against a type without widening the inferred type.
 - Inline `import()` type expression - `type A = import('./m').A`.
 - `import X = require('foo')` and `export = X` - CommonJS-style import and export bindings.

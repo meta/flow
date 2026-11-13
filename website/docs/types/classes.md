@@ -646,8 +646,28 @@ const b: MyClass = new MyClass(); // Works!
 const a: MyClass = MyClass; // Error!
 ```
 
-See [here](./utilities.md#toc-class) for details on `Class<T>`, which allows you
-to refer to the type of the class in an annotation.
+For a class `C`, an annotation of `C` describes an instance. Use [`typeof C`](./typeof.md) to refer to the type of that specific class value. The type [`Class<C>`](./utilities.md#toc-class) describes a class value associated with the instance type `C`.
+
+If you only need the construction parameters and result, use a [constructor type](./functions.md#toc-constructor-types) `new (...) => C`. This annotation does not include static members:
+
+```js flow-check
+class Item {
+  static category: string = 'inventory';
+  name: string;
+  constructor(name: string) {
+    this.name = name;
+  }
+}
+
+const specific: typeof Item = Item; // OK
+const classValue: Class<Item> = Item; // OK
+const C: new (name: string) => Item = Item; // OK
+specific.category as string; // OK
+new C('book').name as string; // OK
+C.category; // Error! The constructor signature does not include static members
+```
+
+For values that may be abstract classes, use an [abstract constructor type](./functions.md#toc-abstract-constructor-types). Unlike a concrete constructor type, it does not let you construct an instance.
 
 ## Common Issues {#toc-common-issues}
 

@@ -352,6 +352,21 @@ type PointArgs = ConstructorParameters<typeof Point>; // Evaluates to [number, n
 'x' as PointArgs[0]; // Error: string is not number
 ```
 
+[`Constructor types`](./functions.md#toc-constructor-types) also work with this utility:
+
+```js flow-check
+type ItemConstructor = new (name: string) => interface {name: string};
+type ItemArgs = ConstructorParameters<ItemConstructor>; // [string]
+type Item = InstanceType<ItemConstructor>; // interface {name: string}
+
+['book'] as ItemArgs; // OK
+[123] as ItemArgs; // Error! The constructor parameter is a string
+declare const item: Item;
+item.name as string; // OK
+```
+
+For overloaded constructors, Flow currently extracts parameters from the **first** overload, whereas TypeScript uses the last overload. This difference affects parameter extraction, not which overloads you can call with `new`.
+
 A class with no explicit constructor uses its synthesized default constructor, which takes no arguments:
 
 ```js flow-check
@@ -379,7 +394,7 @@ type DogArgs = ConstructorParameters<typeof Dog>; // Inherited [string]
 
 ## `InstanceType<C>` <SinceVersion version="0.317" /> {#toc-instance-type}
 
-This utility type extracts the instance type produced by a class's constructor. Pass the class itself via [`typeof`](./typeof.md):
+This utility type extracts the instance type produced by a class's constructor. Pass the class itself via [`typeof`](./typeof.md). You can also pass a [constructor type](./functions.md#toc-constructor-types) to extract its result type:
 
 ```js flow-check
 class User {

@@ -370,6 +370,24 @@ References:
 Found 1 error
 
 === block 24 ===
+Error ----------------------------------------------------------------------------- -:7:2
+
+Cannot cast array literal to `ItemArgs` because in index `0`: `123` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   -:7:2
+   7| [123] as ItemArgs; // Error! The constructor parameter is a string
+       ^^^ [1]
+
+References:
+   -:2:35
+   2| type ItemConstructor = new (name: string) => interface {name: string};
+                                        ^^^^^^ [2]
+
+
+Found 1 error
+
+=== block 25 ===
 Error ----------------------------------------------------------------------------- -:5:1
 
 Cannot cast array literal to `EmptyArgs` because array literal [1] has 1 element but `Readonly<[]>` [2] has 0 elements.
@@ -387,7 +405,7 @@ References:
 
 Found 1 error
 
-=== block 25 ===
+=== block 26 ===
 Error ---------------------------------------------------------------------------- -:12:2
 
 Cannot cast array literal to `DogArgs` because in index `0`: `1` [1] is incompatible with `string` [2].
@@ -405,13 +423,13 @@ References:
 
 Found 1 error
 
-=== block 26 ===
-No errors!
-
 === block 27 ===
 No errors!
 
 === block 28 ===
+No errors!
+
+=== block 29 ===
 Error ----------------------------------------------------------------------------- -:3:1
 
 Cannot cast `'1'` to `T` because `"1"` [1] is incompatible with `number` [2]. [incompatible-type]
@@ -428,7 +446,7 @@ References:
 
 Found 1 error
 
-=== block 29 ===
+=== block 30 ===
 Error ----------------------------------------------------------------------------- -:7:1
 
 Cannot call `hasThisParam` as a standalone function because its `this` parameter requires `number` [1] as the receiver.
@@ -446,7 +464,7 @@ References:
 
 Found 1 error
 
-=== block 30 ===
+=== block 31 ===
 Error ----------------------------------------------------------------------------- -:4:1
 
 Cannot cast `42` to `Response` because `42` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -463,7 +481,7 @@ References:
 
 Found 1 error
 
-=== block 31 ===
+=== block 32 ===
 Error ----------------------------------------------------------------------------- -:7:1
 
 Cannot cast `'hello'` to `A` because `"hello"` [1] is incompatible with `number` [2]. [incompatible-type]
@@ -493,7 +511,7 @@ References:
 
 Found 2 errors
 
-=== block 32 ===
+=== block 33 ===
 Error ---------------------------------------------------------------------------- -:9:19
 
 Cannot assign `'not a user'` to `bad` because `"not a user"` [1] is incompatible with `{name: string}` [2].
@@ -511,7 +529,7 @@ References:
 
 Found 1 error
 
-=== block 33 ===
+=== block 34 ===
 Error ----------------------------------------------------------------------------- -:8:1
 
 Cannot cast `null` to `Name` because `null` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -528,10 +546,10 @@ References:
 
 Found 1 error
 
-=== block 34 ===
+=== block 35 ===
 No errors!
 
-=== block 35 ===
+=== block 36 ===
 Error ---------------------------------------------------------------------------- -:5:22
 
 Cannot call `assertEqual` with `42` bound to `expected` because `42` [1] is incompatible with `string` [2].
@@ -549,7 +567,7 @@ References:
 
 Found 1 error
 
-=== block 36 ===
+=== block 37 ===
 Error ---------------------------------------------------------------------------- -:8:23
 
 Cannot call `createSignal` with `42` bound to `defaultValue` because `42` [1] is incompatible with `string` [2].
@@ -567,10 +585,10 @@ References:
 
 Found 1 error
 
-=== block 37 ===
+=== block 38 ===
 No errors!
 
-=== block 38 ===
+=== block 39 ===
 Error ---------------------------------------------------------------------------- -:13:1
 
 Cannot cast `newObj.b` to `"a"` because `"b"` [1] is incompatible with `"a"` [2]. [incompatible-type]
@@ -590,7 +608,7 @@ References:
 
 Found 1 error
 
-=== block 39 ===
+=== block 40 ===
 Error ---------------------------------------------------------------------------- -:12:1
 
 Cannot cast `makeStore(...)` to `Model` because `Store` [1] is incompatible with `Model` [2]. [incompatible-type]
@@ -627,7 +645,7 @@ References:
 
 Found 2 errors
 
-=== block 40 ===
+=== block 41 ===
 Error --------------------------------------------------------------------------- -:10:28
 
 Cannot call `makeParamStore` with `1` bound to `data` because `1` [1] is incompatible with `boolean` [2].
@@ -645,7 +663,7 @@ References:
 
 Found 1 error
 
-=== block 41 ===
+=== block 42 ===
 Error ----------------------------------------------------------------------------- -:5:1
 
 Cannot cast `'other-name'` to `DataProp` because `"other-name"` [1] is incompatible with `DataProp` [2].
@@ -676,7 +694,7 @@ References:
 
 Found 2 errors
 
-=== block 42 ===
+=== block 43 ===
 Error ----------------------------------------------------------------------------- -:5:1
 
 Cannot cast `'random string'` to `DataProp` because `"random string"` [1] is incompatible with
@@ -694,7 +712,7 @@ References:
 
 Found 1 error
 
-=== block 43 ===
+=== block 44 ===
 Error ----------------------------------------------------------------------------- -:5:1
 
 Cannot cast `'random string'` to `Exclaim` because `"random string"` [1] is incompatible with
@@ -712,7 +730,7 @@ References:
 
 Found 1 error
 
-=== block 44 ===
+=== block 45 ===
 Error ----------------------------------------------------------------------------- -:4:1
 
 Cannot cast `'random string'` to `CSSVar` because `"random string"` [1] is incompatible with
@@ -744,7 +762,7 @@ References:
 
 Found 2 errors
 
-=== block 45 ===
+=== block 46 ===
 Error ----------------------------------------------------------------------------- -:5:1
 
 Cannot cast `'$999'` to `Price` because `"$999"` [1] is incompatible with `` `${"$"}${"1" | "2"}` `` [2].
@@ -762,7 +780,7 @@ References:
 
 Found 1 error
 
-=== block 46 ===
+=== block 47 ===
 Error ----------------------------------------------------------------------------- -:4:1
 
 Cannot cast `'hello'` to `Greeting` because `"hello"` [1] is incompatible with `Greeting` [2]. [incompatible-type]
@@ -779,7 +797,7 @@ References:
 
 Found 1 error
 
-=== block 47 ===
+=== block 48 ===
 Error ----------------------------------------------------------------------------- -:4:1
 
 Cannot cast `'WARNING'` to `Tag` because `"WARNING"` [1] is incompatible with `Tag` [2]. [incompatible-type]
@@ -796,7 +814,7 @@ References:
 
 Found 1 error
 
-=== block 48 ===
+=== block 49 ===
 Error ----------------------------------------------------------------------------- -:4:1
 
 Cannot cast `'flow'` to `Name` because `"flow"` [1] is incompatible with `Name` [2]. [incompatible-type]
@@ -826,7 +844,7 @@ References:
 
 Found 2 errors
 
-=== block 49 ===
+=== block 50 ===
 Error ----------------------------------------------------------------------------- -:4:1
 
 Cannot cast `'FullName'` to `Field` because `"FullName"` [1] is incompatible with `Field` [2]. [incompatible-type]
@@ -856,7 +874,7 @@ References:
 
 Found 2 errors
 
-=== block 50 ===
+=== block 51 ===
 Error ----------------------------------------------------------------------------- -:5:1
 
 Cannot cast `'south'` to `Direction` because `"south"` [1] is incompatible with `Direction` [2]. [incompatible-type]
@@ -873,10 +891,10 @@ References:
 
 Found 1 error
 
-=== block 51 ===
+=== block 52 ===
 No errors!
 
-=== block 52 ===
+=== block 53 ===
 Error ----------------------------------------------------------------------------- -:6:1
 
 Cannot cast `'anything'` to `Loud` because `"anything"` [1] is incompatible with `Loud` [2]. [incompatible-type]
@@ -895,7 +913,7 @@ References:
 
 Found 1 error
 
-=== block 53 ===
+=== block 54 ===
 Error ----------------------------------------------------------------------------- -:8:1
 
 Cannot cast `'onclick'` to `EventName` because `"click"` [1] is incompatible with `"Change" | "Click"` [2].
@@ -913,8 +931,8 @@ References:
 
 Found 1 error
 
-=== block 54 ===
+=== block 55 ===
 No errors!
 
-=== block 55 ===
+=== block 56 ===
 No errors!

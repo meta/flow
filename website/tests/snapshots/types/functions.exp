@@ -125,6 +125,144 @@ No errors!
 No errors!
 
 === block 20 ===
+Error ---------------------------------------------------------------------------- -:11:7
+
+Cannot call `C` with `123` bound to `name` because `123` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   -:11:7
+   11| new C(123); // Error! `name` must be a string
+             ^^^ [1]
+
+References:
+   -:9:21
+    9| const C: new (name: string) => Item = Item; // OK
+                           ^^^^^^ [2]
+
+Error ---------------------------------------------------------------------------- -:12:5
+
+Cannot call `C` because `(name: string) => Item` [1] requires another argument. [incompatible-type]
+
+   -:12:5
+   12| new C(); // Error! `name` is required
+           ^
+
+References:
+   -:9:10
+    9| const C: new (name: string) => Item = Item; // OK
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+Error --------------------------------------------------------------------------- -:13:32
+
+Cannot assign `Item` to `noArgs` because `(name: string) => Item` [1] requires another argument from function type [2].
+[incompatible-type]
+
+   -:13:32
+   13| const noArgs: new () => Item = Item; // Error! `Item` requires an argument
+                                      ^^^^
+
+References:
+   -:4:3
+         v--------------------------
+    4|   constructor(name: string) {
+    5|     this.name = name;
+    6|   }
+         ^ [1]
+   -:13:15
+   13| const noArgs: new () => Item = Item; // Error! `Item` requires an argument
+                     ^^^^^^^^^^^^^^ [2]
+
+
+Found 3 errors
+
+=== block 21 ===
+Error --------------------------------------------------------------------------- -:19:13
+
+Cannot call `instantiate` with `Point` bound to `C` because in the first argument: `string` [1] is incompatible with
+`number` [2]. [incompatible-type]
+
+   -:19:13
+   19| instantiate(Point, 'bad', 'start'); // Error! The first argument must be a number
+                   ^^^^^
+
+References:
+   -:19:20
+   19| instantiate(Point, 'bad', 'start'); // Error! The first argument must be a number
+                          ^^^^^ [1]
+   -:12:18
+   12|   constructor(x: number, label: string) {
+                        ^^^^^^ [2]
+
+
+Found 1 error
+
+=== block 22 ===
+Error --------------------------------------------------------------------------- -:10:31
+
+Cannot assign `OtherItem` to `wrong` because in the return value: `OtherItem` [1] is incompatible with `Item` [2].
+[incompatible-type]
+
+   -:10:31
+   10| const wrong: new () => Item = OtherItem; // Error! Different class identity
+                                     ^^^^^^^^^
+
+References:
+   -:5:7
+    5| class OtherItem {
+             ^^^^^^^^^ [1]
+   -:10:24
+   10| const wrong: new () => Item = OtherItem; // Error! Different class identity
+                              ^^^^ [2]
+
+
+Found 1 error
+
+=== block 23 ===
+Error ----------------------------------------------------------------------------- -:4:5
+
+Cannot use `new` on `{new(): {value: number}}` [1]. Only classes and interfaces with a construct signature can be
+constructed. [invalid-constructor]
+
+   -:4:5
+   4| new methods(); // Error! Not a constructor
+          ^^^^^^^
+
+References:
+   -:2:24
+   2| declare const methods: {new(): {value: number}};
+                             ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Found 1 error
+
+=== block 24 ===
+Error ---------------------------------------------------------------------------- -:13:1
+
+Cannot instantiate an `abstract` class. [invalid-abstract]
+
+   13| new base(); // Error! Abstract constructor type
+       ^^^^^^^^^^
+
+Error ---------------------------------------------------------------------------- -:14:1
+
+Cannot instantiate an `abstract` class. [invalid-abstract]
+
+   14| new pet(); // Error! Still an abstract constructor type
+       ^^^^^^^^^
+
+Error --------------------------------------------------------------------------- -:16:11
+
+Cannot assign an `abstract` constructor type to a non-`abstract` constructor type. [invalid-abstract]
+
+   16| Animal as new () => Animal; // Error! Abstract class in a concrete constructor slot
+                 ^^^^^^^^^^^^^^^^
+
+
+Found 3 errors
+
+=== block 25 ===
+No errors!
+
+=== block 26 ===
 Error --------------------------------------------------------------------------- -:10:38
 
 Cannot assign function to `badFormat` because in the first parameter: `number` [1] is incompatible with `string` [2].
@@ -142,7 +280,7 @@ References:
 
 Found 1 error
 
-=== block 21 ===
+=== block 27 ===
 Error ---------------------------------------------------------------------------- -:6:10
 
 Cannot assign `"runs later"` to `callback.description` because property `description` is missing in `{...}` [1].
@@ -160,11 +298,11 @@ References:
 
 Found 1 error
 
-=== block 22 ===
+=== block 28 ===
 No errors!
 
-=== block 23 ===
+=== block 29 ===
 No errors!
 
-=== block 24 ===
+=== block 30 ===
 No errors!

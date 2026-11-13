@@ -422,6 +422,24 @@ References:
 Found 1 error
 
 === block 36 ===
+Error ------------------------------------------------------------------------------ -:15:3
+
+Cannot get `C.category` because property `category` is missing in `interface {new(name: string): Item}` [1].
+[prop-missing]
+
+   -:15:3
+   15| C.category; // Error! The constructor signature does not include static members
+         ^^^^^^^^
+
+References:
+   -:12:10
+   12| const C: new (name: string) => Item = Item; // OK
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Found 1 error
+
+=== block 37 ===
 Error ------------------------------------------------------------------------------- -:8:1
 
 Cannot call `tick` as a standalone function because its `this` parameter requires `Counter` [1] as the receiver. Call it
@@ -439,7 +457,7 @@ References:
 
 Found 1 error
 
-=== block 37 ===
+=== block 38 ===
 Error ------------------------------------------------------------------------------- -:5:1
 
 Cannot call `method` as a standalone function because its `this` parameter requires `MyClass` [1] as the receiver. Call
@@ -457,7 +475,7 @@ References:
 
 Found 1 error
 
-=== block 38 ===
+=== block 39 ===
 Error ----------------------------------------------------------------------------- -:11:19
 
 Cannot use `call` because its first argument must be the exact same value as the receiver `counter` [1] the method was
