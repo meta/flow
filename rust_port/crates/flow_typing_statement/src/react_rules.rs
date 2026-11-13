@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+use std::cell::OnceCell;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -895,7 +896,7 @@ fn is_initializing(ev_cx: &EffectVisitorContext, cx: &mut Context<'_>, loc: &ALo
 struct EffectVisitorContext {
     is_hook: bool,
     rrid: Option<type_::nominal::Id>,
-    type_map: ALocMap<Type>,
+    type_map: Rc<ALocMap<Type>>,
     var_info: std::rc::Rc<flow_env_builder::env_api::EnvInfo<ALoc>>,
     name_defs: flow_env_builder::name_def_types::EnvEntriesMap,
 }
@@ -1305,6 +1306,27 @@ impl<'ast>
     }
 }
 
+/// The types of a typed AST by location, built the first time an effect visitor asks for them.
+struct TypeMap<'t> {
+    tast: &'t ast::Program<ALoc, (ALoc, Type)>,
+    map: OnceCell<Rc<ALocMap<Type>>>,
+}
+
+impl<'t> TypeMap<'t> {
+    fn new(tast: &'t ast::Program<ALoc, (ALoc, Type)>) -> Self {
+        TypeMap {
+            tast,
+            map: OnceCell::new(),
+        }
+    }
+
+    fn get(&self) -> Rc<ALocMap<Type>> {
+        self.map
+            .get_or_init(|| Rc::new(typed_ast_utils::typed_ast_to_map(self.tast)))
+            .dupe()
+    }
+}
+
 struct EffectVisitorFactory<'b, 'cx> {
     cx: &'b mut Context<'cx>,
     ev_cx: EffectVisitorContext,
@@ -1315,12 +1337,12 @@ impl<'b, 'cx> EffectVisitorFactory<'b, 'cx> {
         cx: &'b mut Context<'cx>,
         is_hook: bool,
         rrid: Option<type_::nominal::Id>,
-        tast: &ast::Program<ALoc, (ALoc, Type)>,
+        type_map: &TypeMap<'_>,
     ) -> Self {
         let env = cx.environment();
         let var_info = env.var_info.dupe();
         let name_defs = env.name_defs.dupe();
-        let type_map = typed_ast_utils::typed_ast_to_map(tast);
+        let type_map = type_map.get();
         Self {
             cx,
             ev_cx: EffectVisitorContext {
@@ -1380,7 +1402,7 @@ enum HookCallContext {
 }
 
 struct WholeAstVisitor<'b, 'cx, 't> {
-    tast: &'t ast::Program<ALoc, (ALoc, Type)>,
+    type_map: &'t TypeMap<'t>,
     under_function_or_class_body: bool,
     cx: &'b mut Context<'cx>,
     rrid: Option<type_::nominal::Id>,
@@ -1392,14 +1414,14 @@ struct WholeAstVisitor<'b, 'cx, 't> {
 
 impl<'b, 'cx, 't> WholeAstVisitor<'b, 'cx, 't> {
     fn new(
-        tast: &'t ast::Program<ALoc, (ALoc, Type)>,
+        type_map: &'t TypeMap<'t>,
         under_function_or_class_body: bool,
         initial_hook_call_context: HookCallContext,
         cx: &'b mut Context<'cx>,
         rrid: Option<type_::nominal::Id>,
     ) -> Self {
         Self {
-            tast,
+            type_map,
             under_function_or_class_body,
             cx,
             rrid,
@@ -1440,7 +1462,7 @@ impl<'b, 'cx, 't> WholeAstVisitor<'b, 'cx, 't> {
                     body,
                 );
                 let mut factory =
-                    EffectVisitorFactory::new(self.cx, true, self.rrid.clone(), self.tast);
+                    EffectVisitorFactory::new(self.cx, true, self.rrid.clone(), self.type_map);
                 factory.run_function_entry(&untyped_body)?
             };
             emit_effect_errors(self.cx, effects);
@@ -1451,16 +1473,16 @@ impl<'b, 'cx, 't> WholeAstVisitor<'b, 'cx, 't> {
                 self.type_params(&ast_visitor::TypeParamsContext::Function, tparams)?;
             }
             {
-                let mut cav = ComponentAstVisitor::new(self.tast, self.cx, self.rrid.clone());
+                let mut cav = ComponentAstVisitor::new(self.type_map, self.cx, self.rrid.clone());
                 cav.function_params(params)?;
             }
             self.function_return_annotation(return_)?;
             {
-                let mut cav = ComponentAstVisitor::new(self.tast, self.cx, self.rrid.clone());
+                let mut cav = ComponentAstVisitor::new(self.type_map, self.cx, self.rrid.clone());
                 cav.function_component_body(body)?;
             }
             if let Some(predicate) = &fn_.predicate {
-                let mut cav = ComponentAstVisitor::new(self.tast, self.cx, self.rrid.clone());
+                let mut cav = ComponentAstVisitor::new(self.type_map, self.cx, self.rrid.clone());
                 cav.predicate(predicate)?;
             }
         } else {
@@ -1656,12 +1678,12 @@ impl<'b, 'cx, 't>
                     body,
                 );
                 let mut factory =
-                    EffectVisitorFactory::new(self.cx, false, self.rrid.clone(), self.tast);
+                    EffectVisitorFactory::new(self.cx, false, self.rrid.clone(), self.type_map);
                 factory.run_component_entry(&untyped_body)?
             }
         };
         emit_effect_errors(self.cx, effects);
-        let mut cav = ComponentAstVisitor::new(self.tast, self.cx, self.rrid.clone());
+        let mut cav = ComponentAstVisitor::new(self.type_map, self.cx, self.rrid.clone());
         cav.visit_toplevel_component(cmp)?;
         Ok(())
     }
@@ -1977,7 +1999,7 @@ impl<'b, 'cx, 't>
 }
 
 struct ComponentAstVisitor<'b, 'cx, 't> {
-    tast: &'t ast::Program<ALoc, (ALoc, Type)>,
+    type_map: &'t TypeMap<'t>,
     cx: &'b mut Context<'cx>,
     rrid: Option<type_::nominal::Id>,
     conditional_state: conditional_state::ConditionalState,
@@ -1985,12 +2007,12 @@ struct ComponentAstVisitor<'b, 'cx, 't> {
 
 impl<'b, 'cx, 't> ComponentAstVisitor<'b, 'cx, 't> {
     fn new(
-        tast: &'t ast::Program<ALoc, (ALoc, Type)>,
+        type_map: &'t TypeMap<'t>,
         cx: &'b mut Context<'cx>,
         rrid: Option<type_::nominal::Id>,
     ) -> Self {
         Self {
-            tast,
+            type_map,
             cx,
             rrid,
             conditional_state: conditional_state::ConditionalState::init(),
@@ -2067,7 +2089,7 @@ impl<'b, 'cx, 't>
         _loc: &'t ALoc,
         cmp: &'t ast::statement::ComponentDeclaration<ALoc, (ALoc, Type)>,
     ) -> Result<(), flow_utils_concurrency::job_error::JobError> {
-        let mut cav = ComponentAstVisitor::new(self.tast, self.cx, self.rrid.clone());
+        let mut cav = ComponentAstVisitor::new(self.type_map, self.cx, self.rrid.clone());
         cav.visit_toplevel_component(cmp)?;
         Ok(())
     }
@@ -2337,7 +2359,7 @@ impl<'b, 'cx, 't>
                 HookCallContext::HookCallNotAllowedUnderNormalFunctionInComponentOrHooks
             };
             let mut wav =
-                WholeAstVisitor::new(self.tast, true, initial_ctx, self.cx, self.rrid.clone());
+                WholeAstVisitor::new(self.type_map, true, initial_ctx, self.cx, self.rrid.clone());
             wav.function_body_any(&expr.body)?;
         }
         if let Some(predicate) = &expr.predicate {
@@ -2351,7 +2373,7 @@ impl<'b, 'cx, 't>
         cls_body: &'t ast::class::Body<ALoc, (ALoc, Type)>,
     ) -> Result<(), flow_utils_concurrency::job_error::JobError> {
         let mut wav = WholeAstVisitor::new(
-            self.tast,
+            self.type_map,
             true,
             HookCallContext::HookCallNotAllowedInClass,
             self.cx,
@@ -2409,8 +2431,9 @@ pub fn check_react_rules<'cx>(
         }
     };
 
+    let type_map = TypeMap::new(ast);
     let mut visitor = WholeAstVisitor::new(
-        ast,
+        &type_map,
         false,
         HookCallContext::HookCallNotAllowedUnderUnknownContext,
         cx,
