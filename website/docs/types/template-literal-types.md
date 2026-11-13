@@ -128,6 +128,10 @@ type EventName = `on${Capitalize<'click' | 'change'>}`;
 'onclick' as EventName; // ERROR
 ```
 
+## Templates as Mapped Keys {#toc-mapped-keys}
+
+Use a template literal type in a mapped type's `as` clause to rename properties, such as turning `mark` into `onmark`. The [key remapping](./mapped-types.md#toc-key-remapping) example keeps each original property's value type. See [filtering keys](./mapped-types.md#toc-filtering-keys) when the source also has symbol keys.
+
 ## Limits {#toc-limits}
 
 Placeholders must be compatible with `string | number | bigint | boolean | null | void`. Flow does not support object-like types or `unknown` as placeholders:

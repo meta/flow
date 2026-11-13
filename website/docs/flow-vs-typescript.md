@@ -1669,7 +1669,7 @@ No equivalent at the source level. TypeScript users routinely re-open third-part
 The following TypeScript features have type-checking support implemented in Flow, but are not enabled by default. They are enabled in the [Flow playground](../../../try).
 
 - [Template literal types](./types/template-literal-types.md).
-- Mapped type modifiers - variance removal `-readonly` and `as` key remapping.
+- [Mapped key remapping via `as`](./types/mapped-types.md#toc-key-remapping) and [signed `+readonly`/`-readonly` modifiers](./types/mapped-types.md#toc-signed-readonly).
 - [Abstract classes and members](./types/classes.md#toc-abstract-classes).
 - [`override` on class members](./types/classes.md#toc-override).
 - [Constructor types](./types/functions.md#toc-constructor-types), including `abstract new`.

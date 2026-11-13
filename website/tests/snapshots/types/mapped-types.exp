@@ -57,15 +57,181 @@ References:
 Found 1 error
 
 === block 9 ===
-No errors!
+Error ------------------------------------------------------------------------ -:10:17
+
+Cannot call `handlers.onmark` with `'start'` bound to `event` because `"start"` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   -:10:17
+   10| handlers.onmark('start'); // ERROR: the original mark value type is number
+                       ^^^^^^^ [1]
+
+References:
+   -:2:22
+    2| type Events = {mark: number, measure: string};
+                            ^^^^^^ [2]
+
+Error ------------------------------------------------------------------------ -:11:10
+
+Cannot get `handlers.mark` because property `mark` is missing in
+`{onmark: (event: Events["mark"]) => void, onmeasure: (event: Events["measure"]) => void}` [1]. [prop-missing]
+
+   -:11:10
+   11| handlers.mark; // ERROR: the key is now onmark
+                ^^^^
+
+References:
+   -:7:25
+    7| declare const handlers: Handlers;
+                               ^^^^^^^^ [1]
+
+
+Found 2 errors
 
 === block 10 ===
-No errors!
+Error ------------------------------------------------------------------------- -:10:8
+
+Cannot get `labels.count` because property `count` is missing in
+`{description: {count: number, description: string, name: string}["description"], name: {count: numbe...` [1].
+[prop-missing]
+
+   -:10:8
+   10| labels.count; // ERROR: the number-valued property was filtered out
+              ^^^^^
+
+References:
+   -:7:23
+    7| declare const labels: Labels;
+                             ^^^^^^ [1]
+
+
+Found 1 error
 
 === block 11 ===
-No errors!
+Error ------------------------------------------------------------------------ -:10:10
+
+Cannot get `handlers[id]` because property `[symbol]` is missing in `{onchange: (event: Events["change"]) => void}` [1].
+[prop-missing]
+
+   -:10:10
+   10| handlers[id]; // ERROR: symbol keys were filtered out
+                ^^
+
+References:
+   -:8:25
+    8| declare const handlers: StringHandlers<Events>;
+                               ^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Found 1 error
 
 === block 12 ===
+Error -------------------------------------------------------------------------- -:7:1
+
+Cannot cast `combined.value` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   -:7:1
+   7| combined.value as number; // ERROR: the value can also be a string
+      ^^^^^^^^^^^^^^
+
+References:
+   -:3:50
+   3| type Combined = {[K in keyof Source as 'value']: Source[K]};
+                                                       ^^^^^^^^^ [1]
+   -:7:19
+   7| combined.value as number; // ERROR: the value can also be a string
+                        ^^^^^^ [2]
+
+
+Found 1 error
+
+=== block 13 ===
+Error ------------------------------------------------------------------------- -:6:22
+
+Key remapping (`as`) on tuple/array sources is not yet supported in mapped types. [unsupported-syntax]
+
+   6| type RemappedTuple = {[K in keyof Tuple as K]: Tuple[K]}; // ERROR: tuple remapping
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Error ------------------------------------------------------------------------- -:7:22
+
+Key remapping (`as`) on tuple/array sources is not yet supported in mapped types. [unsupported-syntax]
+
+   7| type RemappedArray = {[K in keyof ArraySource as K]: ArraySource[K]}; // ERROR: array remapping
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Found 2 errors
+
+=== block 14 ===
+No errors!
+
+=== block 15 ===
+No errors!
+
+=== block 16 ===
+No errors!
+
+=== block 17 ===
+Error ------------------------------------------------------------------------- -:8:10
+
+Cannot assign `1` to `readOnly.volume` because property `volume` is not writable. [cannot-write]
+
+   8| readOnly.volume = 1; // ERROR: the property is read-only
+               ^^^^^^
+
+
+Found 1 error
+
+=== block 18 ===
+Error -------------------------------------------------------------------------- -:8:2
+
+Cannot cast object literal to `MutableRequired<Settings>` because property `volume` is missing in object literal [1] but
+exists in `{volume: number}` [2]. [incompatible-type]
+
+   -:8:2
+   8| ({}) as MutableRequired<Settings>; // ERROR: volume is now required
+       ^^ [1]
+
+References:
+   -:8:9
+   8| ({}) as MutableRequired<Settings>; // ERROR: volume is now required
+              ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Found 1 error
+
+=== block 19 ===
+Error ------------------------------------------------------------------------- -:5:23
+
+Cannot instantiate `Mutable` because an index signature declaring the expected key / value type is not readable.
+[cannot-read]
+
+   5| declare const output: Mutable<Output>; // ERROR: T[K] cannot read the input property
+                            ^^^^^^^^^^^^^^^
+
+Error -------------------------------------------------------------------------- -:6:8
+
+Cannot get `output.value` because property `value` is not readable. [cannot-read]
+
+   6| output.value as number; // ERROR: the property is still write-only
+             ^^^^^
+
+
+Found 2 errors
+
+=== block 20 ===
+Error ------------------------------------------------------------------------- -:6:11
+
+Cannot get `writeOnly.volume` because property `volume` is not readable. [cannot-read]
+
+   6| writeOnly.volume as number; // ERROR: write-only
+                ^^^^^^
+
+
+Found 1 error
+
+=== block 21 ===
 Error -------------------------------------------------------------------------- -:4:2
 
 Cannot cast object literal to `RequiredO` because property `bar` is missing in object literal [1] but exists in
@@ -83,7 +249,7 @@ References:
 
 Found 1 error
 
-=== block 13 ===
+=== block 22 ===
 Error -------------------------------------------------------------------------- -:6:1
 
 Cannot cast `m.a` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -103,7 +269,7 @@ References:
 
 Found 1 error
 
-=== block 14 ===
+=== block 23 ===
 Error -------------------------------------------------------------------------- -:4:2
 
 Cannot cast array literal to `AllRequired` because array literal [1] has 1 element but
@@ -121,7 +287,7 @@ References:
 
 Found 1 error
 
-=== block 15 ===
+=== block 24 ===
 Error -------------------------------------------------------------------------- -:6:1
 
 Cannot cast empty string to `MappedTuple[0]` because `""` [1] is incompatible with `boolean` [2]. [incompatible-type]
@@ -158,7 +324,7 @@ Cannot assign `true` to `mapped[0]` because tuple element at index `0` [1] label
 
 Found 3 errors
 
-=== block 16 ===
+=== block 25 ===
 Error ------------------------------------------------------------------------- -:7:20
 
 Mapped Types do not yet support write-only variance annotations on array inputs. [invalid-mapped-type]

@@ -4,6 +4,8 @@ slug: /types/mapped-types
 description: "How to use mapped types in Flow to transform object types or tuple types by iterating over their keys."
 ---
 
+import {SinceVersion} from '../../components/VersionTags';
+
 Mapped types transform object types by iterating over their keys and producing new property types.
 
 ```js flow-check
@@ -12,7 +14,7 @@ type ReadOnly = {readonly [key in keyof O]: O[key]};
 ```
 
 :::info TypeScript comparison
-Mapped types match TypeScript including distributivity, `keyof`-based source iteration, and the homomorphic `{[K in keyof T]: ...}` form.
+Flow shares TypeScript's `keyof`-based iteration, homomorphic `{[K in keyof T]: ...}` form, and distributivity over object unions. Flow's source restrictions, exactness, and variance rules still apply.
 :::
 
 ## When to use this {#toc-when-to-use}
@@ -95,6 +97,91 @@ meta[id] as string; // OK
 meta[Symbol()]; // ERROR: not a key of `Meta`
 ```
 
+## Key remapping via `as` <SinceVersion version="0.339" /> {#toc-key-remapping}
+
+Add an `as` clause after the source to choose a new key for each property. You can use [template literal types](./template-literal-types.md) to construct names:
+
+```js flow-check
+type Events = {mark: number, measure: string};
+type Handlers = {
+  [K in keyof Events as `on${K}`]: (event: Events[K]) => void
+};
+
+declare const handlers: Handlers;
+handlers.onmark(1); // OK
+handlers.onmeasure('start'); // OK
+handlers.onmark('start'); // ERROR: the original mark value type is number
+handlers.mark; // ERROR: the key is now onmark
+```
+
+`Handlers` has `onmark` and `onmeasure` properties. The value expression still uses the **original** key `K`. For example, `Events[K]` reads `Events['mark']`, not `Events['onmark']`.
+
+The `as` expression can also be a conditional type or an [indexed access type](./indexed-access.md). It must return a valid property-key type (`string | number | symbol`) or return `empty` to omit the key. The source still follows the [mapped type source rules](#toc-mapped-type-sources). You cannot use an arbitrary union of objects as the source.
+
+### Filtering keys {#toc-filtering-keys}
+
+Return [`empty`](./empty.md) from the `as` clause to remove a property:
+
+```js flow-check
+type PickStrings<T> = {
+  [K in keyof T as T[K] extends string ? K : empty]: T[K]
+};
+type Labels = PickStrings<{count: number, name: string, description: string}>;
+
+declare const labels: Labels;
+labels.name as string; // OK
+labels.description as string; // OK
+labels.count; // ERROR: the number-valued property was filtered out
+```
+
+Remapping can preserve or produce [unique-symbol keys](./primitives.md#toc-unique-symbols). If the source also has symbols and you want to rename only its string keys, filter with `K extends string` before interpolating `K`:
+
+```js flow-check
+const id = Symbol('id');
+type Events = {[id]: number, change: string};
+type StringHandlers<T> = {
+  [K in keyof T as K extends string ? `on${K}` : empty]: (event: T[K]) => void
+};
+
+declare const handlers: StringHandlers<Events>;
+handlers.onchange('new'); // OK
+handlers[id]; // ERROR: symbol keys were filtered out
+```
+
+### Collisions and object shape {#toc-remapping-collisions}
+
+If multiple source keys map to the same destination, Flow combines their value types into a union:
+
+```js flow-check
+type Source = {count: number, label: string};
+type Combined = {[K in keyof Source as 'value']: Source[K]};
+
+declare const combined: Combined;
+combined.value as number | string; // OK
+combined.value as number; // ERROR: the value can also be a string
+```
+
+Without explicit property modifiers, a merged property is optional if any contributor is optional. It remains read-only if any contributor is `readonly`. You can omit an optional merged property, and reading it includes `void` in the value type. Use the [property modifiers](#toc-property-modifiers) to change these attributes.
+
+Identity remapping (`as K`) over an inline `keyof` preserves an inexact source's open shape and dictionary indexers. A nonidentity remapping produces an exact object when no destination indexer survives. Dropping every indexer and property with `as empty` produces `{}`. Do not assume that remapping an open-ended string pattern behaves the same as remapping a finite union of names.
+
+### Array and tuple restriction {#toc-remapping-arrays}
+
+Flow does not support key remapping on array or tuple sources, **even for the identity `as K`**. The existing [mapping without an `as` clause](#toc-mapped-type-on-arrays) still works:
+
+```js flow-check
+type Tuple = [string, number];
+type ArraySource = Array<number>;
+type MappedTuple = {[K in keyof Tuple]: Tuple[K]};
+type MappedArray = {[K in keyof ArraySource]: ArraySource[K]};
+type RemappedTuple = {[K in keyof Tuple as K]: Tuple[K]}; // ERROR: tuple remapping
+type RemappedArray = {[K in keyof ArraySource as K]: ArraySource[K]}; // ERROR: array remapping
+```
+
+### Adoption {#toc-key-remapping-adoption}
+
+To use key remapping and signed `+readonly`/`-readonly` modifiers, set `experimental.tslib_syntax=true` in `.flowconfig` and use Flow and flow-parser 0.339.0+ and [Prettier 3.10.0+ with its built-in `flow` parser](../tools/prettier.md).
+
 ## Distributive Mapped Types {#toc-distributive-mapped-types}
 
 When the mapped type uses an inline `keyof` or a type parameter bound by `keyof`
@@ -139,6 +226,70 @@ type O = {foo: number, bar: string}
 type ReadOnlyPartialO = {readonly [key in keyof O]?: O[key]}; // = {readonly foo?: number, readonly bar?: string};
 ```
 
+### Adding and removing `readonly` <SinceVersion version="0.339" /> {#toc-signed-readonly}
+
+`+readonly` works like plain `readonly`, making every output property read-only. `-readonly` removes a source property's `readonly` modifier. An already-mutable property stays mutable:
+
+```js flow-check
+type ReadOnly<T> = {+readonly [K in keyof T]: T[K]};
+type Mutable<T> = {-readonly [K in keyof T]: T[K]};
+type Settings = {volume: number};
+
+declare const readOnly: ReadOnly<Settings>;
+readOnly.volume as number; // OK
+readOnly.volume = 1; // ERROR: the property is read-only
+
+declare const mutable: Mutable<ReadOnly<Settings>>;
+mutable.volume as number; // OK
+mutable.volume = 1; // OK: readonly was removed
+```
+
+You can combine `-readonly` with key remapping and use the existing `-?` modifier to remove optionality:
+
+```js flow-check
+type MutableRequired<T> = {-readonly [K in keyof T as K]-?: T[K]};
+type Settings = {readonly volume?: number};
+
+declare const settings: MutableRequired<Settings>;
+settings.volume as number; // OK: the property is required
+settings.volume = 1; // OK: the property is mutable
+({}) as MutableRequired<Settings>; // ERROR: volume is now required
+```
+
+These modifiers transform types, not runtime objects. They do not freeze, unfreeze, or copy an object. Removing `readonly` does not let you assign a read-only value directly to a mutable type. You still need to provide a value compatible with the result.
+
+`-readonly` does not remove `writeonly`. If the value expression uses `T[K]`, the input properties must still be readable:
+
+```js flow-check
+type Mutable<T> = {-readonly [K in keyof T]: T[K]};
+type Output = {writeonly value: number};
+
+declare const output: Mutable<Output>; // ERROR: T[K] cannot read the input property
+output.value as number; // ERROR: the property is still write-only
+output.value = 1; // OK: writes remain allowed
+```
+
+### Adding and removing `writeonly` <SinceVersion version="0.339" /> {#toc-signed-writeonly}
+
+`+writeonly` works like plain `writeonly`, making every output property write-only. `-writeonly` removes write-only variance, making those output properties read-write. It does not remove an existing `readonly` modifier.
+
+```js flow-check
+// Add writeonly to readable input properties.
+type WriteOnly<T> = {+writeonly [K in keyof T]: T[K]};
+type Settings = {volume: number};
+declare const writeOnly: WriteOnly<Settings>;
+writeOnly.volume as number; // ERROR: write-only
+writeOnly.volume = 1; // OK
+
+// Remove writeonly without reading a write-only input property.
+type ReadWrite<T> = {-writeonly [K in keyof T]: number};
+declare const readWrite: ReadWrite<WriteOnly<Settings>>;
+readWrite.volume as number; // OK
+readWrite.volume = 1; // OK
+```
+
+Removing `writeonly` affects output modifiers, not what the value expression can read. `T[K]` still cannot read a write-only input property, so `ReadWrite` intentionally uses `number` instead.
+
 ### Removing optionality with `-?` {#toc-removing-optionality}
 
 The `?` modifier makes every property optional. Prefixing it with `-` does the opposite: `-?` removes optionality, turning every optional property into a required one. This works like the [`Required<T>`](./utilities.md#toc-required) utility type.
@@ -166,8 +317,6 @@ type AllRequired = {[K in keyof Tuple]-?: Tuple[K]};
 declare const t: AllRequired;
 t as [string, number, boolean]; // OK
 ```
-
-> Note: Flow does not yet support `+readonly`/`-readonly` variance modifiers. They are [coming soon](../flow-vs-typescript.md#toc-coming-soon).
 
 ## Mapped Type on Arrays {#toc-mapped-type-on-arrays}
 
