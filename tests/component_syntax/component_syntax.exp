@@ -1047,8 +1047,8 @@ References:
    107|     | { writeonly current: T | null, ... }
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/react.js:108:8
-   108|     | ((T | null) => undefined | (() => void))
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   108|     | ((T | null) => void | (() => void))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------------ declared.js:56:52
@@ -1995,8 +1995,8 @@ References:
    107|     | { writeonly current: T | null, ... }
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/react.js:108:8
-   108|     | ((T | null) => undefined | (() => void))
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   108|     | ((T | null) => void | (() => void))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- names.js:23:2
@@ -2492,7 +2492,7 @@ References:
      3| component A(foo: string, bar: number, ref: React.RefSetter<AInstance>) {
                                                                    ^^^^^^^^^ [2]
    <BUILTINS>/react.js:108:13
-   108|     | ((T | null) => undefined | (() => void))
+   108|     | ((T | null) => void | (() => void))
                     ^^^^ [3]
 
 
@@ -2517,7 +2517,7 @@ References:
      3| component A(foo: string, bar: number, ref: React.RefSetter<AInstance>) {
                                                                    ^^^^^^^^^ [2]
    <BUILTINS>/react.js:108:13
-   108|     | ((T | null) => undefined | (() => void))
+   108|     | ((T | null) => void | (() => void))
                     ^^^^ [3]
 
 
@@ -2585,8 +2585,8 @@ References:
      3| component Foo(ref: {current: typeof Reffed}) { return null };
                            ^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    <BUILTINS>/react.js:108:8
-   108|     | ((T | null) => undefined | (() => void))
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   108|     | ((T | null) => void | (() => void))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- refs.js:12:1
@@ -2921,7 +2921,7 @@ References:
     88|   declare component Foo(ref?: React.RefSetter<{foo: string, bar: number}>)
                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    <BUILTINS>/react.js:108:13
-   108|     | ((T | null) => undefined | (() => void))
+   108|     | ((T | null) => void | (() => void))
                     ^^^^ [4]
 
 
@@ -2971,8 +2971,8 @@ References:
    107|     | { writeonly current: T | null, ... }
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/react.js:108:8
-   108|     | ((T | null) => undefined | (() => void))
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   108|     | ((T | null) => void | (() => void))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------------- refs.js:108:23

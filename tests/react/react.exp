@@ -1287,8 +1287,8 @@ References:
    107|     | { writeonly current: T | null, ... }
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/react.js:108:8
-   108|     | ((T | null) => undefined | (() => void))
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   108|     | ((T | null) => void | (() => void))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- ref.js:10:11
@@ -1327,7 +1327,7 @@ Cannot cast `foo` to `Foo` because `null` [1] is incompatible with `Foo` [2]. [i
 
 References:
    <BUILTINS>/react.js:108:13
-   108|     | ((T | null) => undefined | (() => void))
+   108|     | ((T | null) => void | (() => void))
                     ^^^^ [1]
    ref.js:11:27
     11| <Foo ref={foo => { foo as Foo }} />; // Error: `Foo` may be null.
@@ -1376,12 +1376,12 @@ References:
    ref.js:15:18
     15| <Foo ref={foo => 42} />; // Error: ref callbacks may only return cleanup functions.
                          ^^ [1]
-   <BUILTINS>/react.js:108:35
-   108|     | ((T | null) => undefined | (() => void))
-                                          ^^^^^^^^^^ [2]
+   <BUILTINS>/react.js:108:30
+   108|     | ((T | null) => void | (() => void))
+                                     ^^^^^^^^^^ [2]
    <BUILTINS>/react.js:108:22
-   108|     | ((T | null) => undefined | (() => void))
-                             ^^^^^^^^^ [3]
+   108|     | ((T | null) => void | (() => void))
+                             ^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- ref.js:16:11
@@ -1401,15 +1401,15 @@ References:
    ref.js:16:38
     16| <Foo ref={(foo: Foo | null) => () => 42} />; // Error: cleanup functions may not return values.
                                              ^^ [1]
-   <BUILTINS>/react.js:108:41
-   108|     | ((T | null) => undefined | (() => void))
-                                                ^^^^ [2]
+   <BUILTINS>/react.js:108:36
+   108|     | ((T | null) => void | (() => void))
+                                           ^^^^ [2]
    ref.js:16:32
     16| <Foo ref={(foo: Foo | null) => () => 42} />; // Error: cleanup functions may not return values.
                                        ^^^^^^^^ [3]
    <BUILTINS>/react.js:108:22
-   108|     | ((T | null) => undefined | (() => void))
-                             ^^^^^^^^^ [4]
+   108|     | ((T | null) => void | (() => void))
+                             ^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- ref.js:21:15
@@ -1430,8 +1430,8 @@ References:
    107|     | { writeonly current: T | null, ... }
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/react.js:108:8
-   108|     | ((T | null) => undefined | (() => void))
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   108|     | ((T | null) => void | (() => void))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- ref.js:24:16
@@ -1479,7 +1479,7 @@ References:
     25| <FooExact ref={(foo: FooExact) => {}} />; // Error: `FooExact` may be null.
                              ^^^^^^^^ [1]
    <BUILTINS>/react.js:108:13
-   108|     | ((T | null) => undefined | (() => void))
+   108|     | ((T | null) => void | (() => void))
                     ^^^^ [2]
    <BUILTINS>/react.js:107:7
    107|     | { writeonly current: T | null, ... }
@@ -1796,12 +1796,12 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
                                      ^ [1]
 
 References:
-   <BUILTINS>/react.js:671:46
-   671|   declare type MaybeCleanUpFn = undefined | (() => void);
-                                                     ^^^^^^^^^^ [2]
+   <BUILTINS>/react.js:671:41
+   671|   declare type MaybeCleanUpFn = void | (() => void);
+                                                ^^^^^^^^^^ [2]
    <BUILTINS>/react.js:671:33
-   671|   declare type MaybeCleanUpFn = undefined | (() => void);
-                                        ^^^^^^^^^ [3]
+   671|   declare type MaybeCleanUpFn = void | (() => void);
+                                        ^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------ useEffect_hook.js:23:25
@@ -1821,12 +1821,12 @@ References:
    useEffect_hook.js:23:31
     23|   React.useEffect(() => () => 123) // Error: cleanup function should not return a value
                                       ^^^ [1]
-   <BUILTINS>/react.js:671:52
-   671|   declare type MaybeCleanUpFn = undefined | (() => void);
-                                                           ^^^^ [2]
+   <BUILTINS>/react.js:671:47
+   671|   declare type MaybeCleanUpFn = void | (() => void);
+                                                      ^^^^ [2]
    <BUILTINS>/react.js:671:33
-   671|   declare type MaybeCleanUpFn = undefined | (() => void);
-                                        ^^^^^^^^^ [4]
+   671|   declare type MaybeCleanUpFn = void | (() => void);
+                                        ^^^^ [4]
 
 
 Error ---------------------------------------------------------------------------------- useImperativeHandle_hook.js:4:9
@@ -1965,12 +1965,12 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
                                            ^ [1]
 
 References:
-   <BUILTINS>/react.js:671:46
-   671|   declare type MaybeCleanUpFn = undefined | (() => void);
-                                                     ^^^^^^^^^^ [2]
+   <BUILTINS>/react.js:671:41
+   671|   declare type MaybeCleanUpFn = void | (() => void);
+                                                ^^^^^^^^^^ [2]
    <BUILTINS>/react.js:671:33
-   671|   declare type MaybeCleanUpFn = undefined | (() => void);
-                                        ^^^^^^^^^ [3]
+   671|   declare type MaybeCleanUpFn = void | (() => void);
+                                        ^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------ useLayoutEffect_hook.js:23:31
@@ -1990,12 +1990,12 @@ References:
    useLayoutEffect_hook.js:23:37
     23|   React.useLayoutEffect(() => () => 123) // Error: cleanup function should not return a value
                                             ^^^ [1]
-   <BUILTINS>/react.js:671:52
-   671|   declare type MaybeCleanUpFn = undefined | (() => void);
-                                                           ^^^^ [2]
+   <BUILTINS>/react.js:671:47
+   671|   declare type MaybeCleanUpFn = void | (() => void);
+                                                      ^^^^ [2]
    <BUILTINS>/react.js:671:33
-   671|   declare type MaybeCleanUpFn = undefined | (() => void);
-                                        ^^^^^^^^^ [4]
+   671|   declare type MaybeCleanUpFn = void | (() => void);
+                                        ^^^^ [4]
 
 
 Error ---------------------------------------------------------------------------------------------- useMemo_hook.js:4:9
