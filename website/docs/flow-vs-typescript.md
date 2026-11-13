@@ -32,7 +32,7 @@ This page is organized in four sections:
 - [Concepts that transfer cleanly from TypeScript](#toc-transfer-cleanly) - start here for syntax and concepts you can reuse directly.
 - [Shared concepts, different rules](#toc-shared-concepts-different-rules) - if TypeScript-shaped code is rejected by Flow, these are the most likely culprits.
 - [Flow-only concepts with no built-in TypeScript equivalent](#toc-flow-only).
-- [TypeScript-only features that do not exist in Flow](#toc-ts-only).
+- [TypeScript-only features and legacy syntax](#toc-ts-only).
 
 Additional reference sections cover [upcoming TS-aligned work](#toc-coming-soon), [legacy Flow syntax convergence](#toc-convergence), [shared config options](#toc-shared-options), and [external declaration mechanisms](#toc-declaration-mechanisms).
 
@@ -1549,9 +1549,15 @@ const data = useFragment<MyFragment$key>(
 );
 ```
 
-## TypeScript-only features that do not exist in Flow {#toc-ts-only}
+## TypeScript-only features and legacy syntax {#toc-ts-only}
 
-These are TypeScript features that have no Flow equivalent today. Some Flow has deliberately not adopted, either because they overlap a Flow feature with different (usually more conservative) defaults or because they introduce footguns Flow's design avoids. Others are simply not implemented yet (see the separate [Coming soon](#toc-coming-soon) section for features in progress or pending a release gate). Reaching for any of the items below in Flow code won't work, and in some cases the TypeScript syntax will parse, so the failure shows up later than expected.
+This section covers TypeScript features without a Flow equivalent and legacy TypeScript syntax that is not recommended for modern Flow source.
+
+### Legacy TypeScript CommonJS bindings {#toc-ts-commonjs-bindings}
+
+TypeScript's `import X = require('foo')` and `export = X` are legacy CommonJS import/export bindings. In modern Flow source, use standard ES module `import` and `export` instead (see [Modules](./types/modules.md)).
+
+Flow reports a type error for these forms. It still supports declaration interoperability and JavaScript CommonJS `require` and `module.exports`.
 
 ### TS-only syntactic forms {#toc-ts-only-syntax}
 
@@ -1675,7 +1681,6 @@ The following TypeScript features have type-checking support implemented in Flow
 - [Constructor types](./types/functions.md#toc-constructor-types), including `abstract new`.
 - [`satisfies` expressions](./types/casting.md#toc-satisfies) - check compatibility without widening the inferred type; see [`as` versus `satisfies`](./types/casting.md#toc-as-vs-satisfies).
 - [Inline import type annotations and `typeof import(...)`](./types/modules.md#toc-inline-import-types).
-- `import X = require('foo')` and `export = X` - CommonJS-style import and export bindings.
 - [`unique symbol` annotations](./types/primitives.md#toc-unique-symbols) and [symbol-keyed properties](./types/objects.md#toc-symbol-keyed-properties).
 - Definite assignment assertions - `let x!: T` and class fields `x!: T`, which tell Flow that something assigns the variable or field before it is read.
 
