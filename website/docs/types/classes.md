@@ -420,6 +420,141 @@ Abstract classes and members follow TypeScript's model of an abstract base class
 
 To use this syntax, set `experimental.tslib_syntax=true` in `.flowconfig` and use Flow and flow-parser 0.339.0+ and Prettier 3.10.0+ with its built-in [`flow` parser](../tools/prettier.md).
 
+### Overriding class members <SinceVersion version="0.339" /> {#toc-override}
+
+Use `override` to state that a member replaces an inherited member. Flow checks for that name in the superclass chain. This catches stale overrides when you rename or remove a base-class member:
+
+```js flow-check
+class Animal {
+  speak(): string {
+    return '...';
+  }
+}
+
+class Pet extends Animal {}
+
+class Dog extends Pet {
+  override speak(): string { // OK: inherited through `Pet`
+    return 'woof';
+  }
+  override bark(): string { // Error! No inherited `bark`
+    return 'woof';
+  }
+}
+
+new Dog().speak() as string; // OK
+```
+
+The target comes from `extends`, not `implements`: satisfying an interface does not make its members override targets. A class with no superclass cannot use `override`.
+
+You can mark fields and getters/setters as well as methods:
+
+```js flow-check
+class Counter {
+  count: number = 0;
+  get label(): string {
+    return String(this.count);
+  }
+  set label(value: string): void {
+    this.count = Number(value);
+  }
+}
+
+class NamedCounter extends Counter {
+  override count: number = 1; // OK
+  override get label(): string {
+    return 'Count: ' + String(this.count);
+  }
+  override set label(value: string): void {
+    this.count = Number(value);
+  }
+}
+
+new NamedCounter().label as string; // OK
+```
+
+For static members, write `static override`. Static and instance members are checked separately, so an inherited instance member cannot satisfy a static override (or vice versa):
+
+```js flow-check
+class Animal {
+  static describe(): string {
+    return 'animal';
+  }
+  speak(): string {
+    return '...';
+  }
+}
+
+class Dog extends Animal {
+  static override describe(): string { // OK
+    return 'dog';
+  }
+  static override speak(): string { // Error! `speak` is an instance member
+    return 'woof';
+  }
+}
+
+Dog.describe() as string; // OK
+```
+
+`override` does not relax inherited type compatibility. A method must accept every input its inherited signature accepts. Flow therefore rejects narrowing a parameter from `string | number` to `string`:
+
+```js flow-check
+class Formatter {
+  format(value: string | number): string {
+    return String(value);
+  }
+}
+
+class StringFormatter extends Formatter {
+  override format(value: string): string { // Error! Cannot narrow the parameter
+    return value.toUpperCase();
+  }
+}
+
+class UppercaseFormatter extends Formatter {
+  override format(value: string | number): string { // OK
+    return String(value).toUpperCase();
+  }
+}
+```
+
+In an [abstract subclass](#toc-abstract-classes), `abstract override` redeclares an inherited member as an obligation without implementing it. Write the modifiers in that order:
+
+```js flow-check
+abstract class Animal {
+  abstract speak(): string;
+}
+
+abstract class Pet extends Animal {
+  abstract override speak(): string; // OK: still an obligation
+}
+
+class Dog extends Pet {
+  override speak(): string {
+    return 'woof';
+  }
+}
+
+new Dog().speak() as string; // OK
+```
+
+Constructors cannot have an `override` modifier: `override constructor()` is a parse error. Each class gives a `#private` member its own identity, so a private member cannot override one in a superclass, even if their names have the same spelling.
+
+Flow removes `override` when types are stripped, just like other type-only modifiers. It does not change runtime dispatch.
+
+By default, you can leave concrete overrides unmarked. To require explicit modifiers, enable [`no_implicit_override=true`](../config/options.md#toc-no-implicit-override).
+
+Implementations of inherited abstract members and ambient `declare class` bodies are exempt from that requirement. Flow still checks explicit `override` modifiers in those cases.
+
+:::info TypeScript comparison
+Use `override` to catch refactoring mistakes, as you would in TypeScript. Flow's `no_implicit_override` corresponds to TypeScript's `noImplicitOverride`, but the languages differ in their compatibility and ambient rules. Flow rejects method parameter narrowing and exempts the cases described above from the explicit-modifier requirement.
+:::
+
+#### Adoption {#toc-override-adoption}
+
+To use this syntax, set `experimental.tslib_syntax=true` in `.flowconfig` and use Flow and flow-parser 0.339.0+ and Prettier 3.10.0+ with its built-in [`flow` parser](../tools/prettier.md).
+
 ### Class Constructors {#toc-class-fields-constructors}
 
 You can initialize your class properties in class constructors:

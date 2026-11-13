@@ -4,6 +4,8 @@ slug: /config/options
 description: "Reference for all available .flowconfig [options] settings, including type checking behavior, module resolution, and more."
 ---
 
+import {SinceVersion} from '../../components/VersionTags';
+
 The `[options]` section in a `.flowconfig` file can contain several key-value
 pairs of the form:
 
@@ -608,6 +610,48 @@ refers to.
 The name is also included in Flow's internal logging for diagnostic purposes.
 
 There is no default value for `name`.
+
+### no_implicit_override <SinceVersion version="0.339" /> {#toc-no-implicit-override}
+
+Type: `boolean`
+
+Set this to `true` to require an explicit [`override` modifier](../types/classes.md#toc-override) on concrete class members that replace inherited concrete members. Flow applies this requirement to instance and static methods, fields, and accessors.
+
+Enable the syntax as well as the requirement in `.flowconfig`:
+
+```
+[options]
+experimental.tslib_syntax=true
+no_implicit_override=true
+```
+
+With these options enabled:
+
+```js
+class Base {
+  greet(): string {
+    return 'hello';
+  }
+}
+
+class Unmarked extends Base {
+  greet(): string { // Error! Add `override`
+    return 'hi';
+  }
+}
+
+class Marked extends Base {
+  override greet(): string { // OK
+    return 'hi';
+  }
+}
+```
+
+You do not need `override` when implementing an inherited abstract member or redeclaring a member as abstract. Flow also skips this requirement for ambient declarations, including `declare class` bodies.
+
+Flow still checks that every explicit `override` modifier has a valid inherited target, even in an ambient declaration. Members must also remain compatible with their inherited types.
+
+The default value for `no_implicit_override` is `false`. See [override adoption](../types/classes.md#toc-override-adoption) for the required syntax option and tooling versions.
 
 ### no_unchecked_indexed_access {#toc-no-unchecked-indexed-access}
 

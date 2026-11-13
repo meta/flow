@@ -1671,7 +1671,7 @@ The following TypeScript features have type-checking support implemented in Flow
 - Template literal types - e.g. `` `${'a' | 'b'}-${'x' | 'y'}` ``.
 - Mapped type modifiers - variance removal `-readonly` and `as` key remapping.
 - [Abstract classes and members](./types/classes.md#toc-abstract-classes).
-- `override` on class members.
+- [`override` on class members](./types/classes.md#toc-override).
 - Constructor types - `type Ctor = new (x: number) => R`.
 - `satisfies` expression - validates an expression against a type without widening the inferred type.
 - Inline `import()` type expression - `type A = import('./m').A`.
@@ -1705,10 +1705,15 @@ For the full picture see [Modernizing Legacy Flow Syntax](./modernizing-legacy-s
 
 ## Config options aligned with TypeScript {#toc-shared-options}
 
-A few Flow [`.flowconfig`](./config/index.md) `[options]` toggles correspond directly to TypeScript `compilerOptions` strictness flags - same semantics, but different defaults. In the TypeScript `strict` baseline used on this page, `useUnknownInCatchVariables` is enabled through `strict`, while `noUncheckedIndexedAccess` is not part of `strict` and stays opt-in. Flow has no `strict` options umbrella - both flags are opt-in individually and default to `false`, so porting from a TS project with `strict` enabled means turning `use_unknown_in_catch_variables` on to match.
+A few Flow [`.flowconfig`](./config/index.md) `[options]` toggles correspond to TypeScript `compilerOptions` strictness flags. They have similar semantics but different defaults.
+
+In the TypeScript `strict` baseline used on this page, `strict` enables `useUnknownInCatchVariables`. It does not enable `noUncheckedIndexedAccess` or `noImplicitOverride`; you must enable those separately.
+
+Flow has no `strict` options umbrella. Each of these flags defaults to `false` and must be enabled individually. When porting from a TypeScript project with `strict` enabled, turn on `use_unknown_in_catch_variables` to match its catch-variable behavior.
 
 | TypeScript option | Flow option | Description |
 | --- | --- | --- |
+| `noImplicitOverride` | `no_implicit_override` | Requires `override` on concrete class members that replace inherited concrete members. The default is `false`. Flow exempts abstract-member implementations and ambient declarations. See [config](./config/options.md#toc-no-implicit-override) and [`override` docs](./types/classes.md#toc-override). |
 | `noUncheckedIndexedAccess` | `no_unchecked_indexed_access` | Indexed access through an array or dictionary widens the result type with `undefined` (Flow: `void`), so reading `arr[i]` or `dict[k]` returns `T \| void` instead of `T` and forces the caller to refine before use. Tuple access with a *literal* index is unaffected in both languages. See [docs](./config/options.md#toc-no-unchecked-indexed-access) for more. |
 | `useUnknownInCatchVariables` | `use_unknown_in_catch_variables` | Changes the default type of an un-annotated `catch` binding from `any` to `unknown`. The caller has to narrow the value (`instanceof Error`, `typeof e === 'string'`, …) before using it. See [docs](./config/options.md#toc-use-unknown-in-catch-variables) for more. |
 
