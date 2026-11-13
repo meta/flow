@@ -14,5 +14,5 @@ flow_imports_exports = { path = "../flow_imports_exports" }
 flow_parser = { path = "../flow_parser" }
 flow_parser_utils = { path = "../flow_parser_utils" }
 flow_type_sig = { path = "../flow_type_sig" }
-lz4_flex = "0.13.1"
+lz4_flex = "0.14.0"
 parking_lot = { version = "0.13.0", features = ["arc_lock", "send_guard", "serde"] }
