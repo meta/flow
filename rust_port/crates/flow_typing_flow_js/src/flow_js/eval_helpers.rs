@@ -539,14 +539,15 @@ pub(super) fn eval_destructor<'cx>(
             .rev()
             .map(|t| flow_cache::eval::id(cx, f(t), destructor.dupe()));
         let first = unresolved.next().unwrap();
+        let id = flow_common::reason::mk_id() as i32;
         let u = UseT::new(UseTInner::ResolveUnionT(Box::new(ResolveUnionTData {
             reason: r,
             unresolved: unresolved.collect(),
             resolved: flow_data_structure_wrapper::list::FlowOcamlList::new(),
             upper: Box::new(upper),
-            id: flow_common::reason::mk_id() as i32,
+            id,
         })));
-        rec_flow(cx, env, trace, (&first, &u))
+        rec_flow(cx, &env.push_parts_marker(id), trace, (&first, &u))
     };
 
     let destruct_maybe = |cx: &mut Context<'cx>,
@@ -1135,6 +1136,7 @@ pub(super) fn eval_destructor<'cx>(
                 ),
                 Destructor::OptionalIndexedAccessResultType { void_reason } => {
                     let void = void::why(void_reason.dupe());
+                    let id = flow_common::reason::mk_id() as i32;
                     let u = UseT::new(UseTInner::ResolveUnionT(Box::new(ResolveUnionTData {
                         reason: reason.dupe(),
                         resolved: flow_data_structure_wrapper::list::FlowOcamlList::unit(void),
@@ -1143,9 +1145,9 @@ pub(super) fn eval_destructor<'cx>(
                             unknown_use(),
                             Type::new(TypeInner::OpenT(tout.dupe())),
                         ))),
-                        id: flow_common::reason::mk_id() as i32,
+                        id,
                     })));
-                    rec_flow(cx, env, trace, (t, &u))
+                    rec_flow(cx, &env.push_parts_marker(id), trace, (t, &u))
                 }
                 Destructor::SpreadType(box DestructorSpreadTypeData(
                     options,
@@ -1162,10 +1164,11 @@ pub(super) fn eval_destructor<'cx>(
                         ),
                         None => flow_data_structure_wrapper::list::FlowOcamlList::new(),
                     };
+                    let spread_id = flow_common::reason::mk_id() as i32;
                     let state = object::spread::State {
                         todo_rev: todo_rev.dupe(),
                         acc,
-                        spread_id: flow_common::reason::mk_id() as i32,
+                        spread_id,
                         union_t: None,
                         curr_resolve_idx: 0,
                     };
@@ -1176,7 +1179,7 @@ pub(super) fn eval_destructor<'cx>(
                         Box::new(object::Tool::Spread(Box::new((options.clone(), state)))),
                         Type::new(TypeInner::OpenT(tout.dupe())),
                     ));
-                    rec_flow(cx, env, trace, (t, &u))
+                    rec_flow(cx, &env.push_parts_marker(spread_id), trace, (t, &u))
                 }
                 Destructor::SpreadTupleType(box DestructorSpreadTupleTypeData {
                     reason_tuple,

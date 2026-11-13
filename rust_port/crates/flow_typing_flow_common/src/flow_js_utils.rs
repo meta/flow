@@ -2706,13 +2706,19 @@ where
 pub fn iter_resolve_union<'cx, F, CX: ContextFamily>(
     f: F,
     cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
     trace: &DepthTrace,
     reason: Reason,
     rep: &flow_typing_type::type_::union_rep::UnionRep,
     upper: UseT<CX>,
 ) -> Result<(), FlowJsException>
 where
-    F: FnOnce(&mut Context<'cx>, &DepthTrace, (Type, UseT<CX>)) -> Result<(), FlowJsException>,
+    F: FnOnce(
+        &mut Context<'cx>,
+        &FlowJsEnv,
+        &DepthTrace,
+        (Type, UseT<CX>),
+    ) -> Result<(), FlowJsException>,
 {
     use flow_common::reason::mk_id;
     use flow_typing_type::type_::UseTInner;
@@ -2726,14 +2732,20 @@ where
 
     let mut evals_iter = evals.into_iter();
     if let Some(first) = evals_iter.next() {
+        let id = mk_id() as i32;
         let resolve_union_t = UseT::new(UseTInner::ResolveUnionT(Box::new(ResolveUnionTData {
             reason: reason.dupe(),
             resolved: resolved.into_iter().collect(),
             unresolved: evals_iter.collect(),
             upper: Box::new(upper),
-            id: mk_id() as i32,
+            id,
         })));
-        f(cx, trace, (first, resolve_union_t))?;
+        f(
+            cx,
+            &env.push_parts_marker(id),
+            trace,
+            (first, resolve_union_t),
+        )?;
     }
     Ok(())
 }

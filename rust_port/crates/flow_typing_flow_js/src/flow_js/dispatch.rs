@@ -115,12 +115,12 @@ use crate::tvar_resolver;
 /// optimized by the compiler to reuse the stack frame. In Rust, we return
 /// these as continuations for the trampoline to process iteratively.
 enum TailCall {
-    /// Continue by flowing the lower type into the upper use under a fresh
-    /// trace. The `Reason` is not part of the flow itself; it is the diagnostic
-    /// reason to report for the upper side if this continuation hits the
-    /// recursion limit. `resolve_union` uses the reason of the union it is
-    /// rebuilding here.
-    Flow(Type, UseT<Cx>, Reason),
+    /// Continue by flowing the lower type into the upper use in the given env,
+    /// under a fresh trace. The `Reason` is not part of the flow itself; it is
+    /// the diagnostic reason to report for the upper side if this continuation
+    /// hits the recursion limit. `resolve_union` uses the reason of the union it
+    /// is rebuilding here.
+    Flow(FlowJsEnv, Type, UseT<Cx>, Reason),
     /// Replaces a tail call to `rec_flow()` (e.g. from EvalT, OpenT handlers):
     /// uses given trace, propagates LimitExceeded.
     RecFlow(Type, UseT<Cx>, DepthTrace),
@@ -598,14 +598,18 @@ pub(super) fn __flow<'cx>(
     trace: DepthTrace,
 ) -> Result<(), FlowJsException> {
     let mut tc = __flow_impl(cx, env, (l, u), trace)?;
+    let mut env = env.dupe();
 
     // Process tail calls iteratively instead of recursing
     while let Some(tail_call) = tc {
         let (tc_l, tc_u, tc_trace, catch_limit_reason) = match tail_call {
-            TailCall::Flow(l, u, reason) => (l, u, DepthTrace::unit_trace(), Some(reason)),
+            TailCall::Flow(tc_env, l, u, reason) => {
+                env = tc_env;
+                (l, u, DepthTrace::unit_trace(), Some(reason))
+            }
             TailCall::RecFlow(l, u, t) => (l, u, t, None),
         };
-        match __flow_impl(cx, env, (&tc_l, &tc_u), tc_trace) {
+        match __flow_impl(cx, &env, (&tc_l, &tc_u), tc_trace) {
             Ok(next) => tc = next,
             Err(FlowJsException::LimitExceeded) if let Some(ru) = catch_limit_reason => {
                 // flow() handles LimitExceeded by recording an error and continuing
@@ -2129,10 +2133,10 @@ fn __flow_impl<'cx>(
                 id,
             }),
         ) => {
-            if let Some((tc_l, tc_u, reason)) =
+            if let Some((tc_env, tc_l, tc_u, reason)) =
                 resolve_union(cx, env, trace, reason, *id, resolved, unresolved, l, upper)?
             {
-                return Ok(Some(TailCall::Flow(tc_l, tc_u, reason)));
+                return Ok(Some(TailCall::Flow(tc_env, tc_l, tc_u, reason)));
             }
         }
         (MaybeT(reason, t), _)
@@ -2186,10 +2190,10 @@ fn __flow_impl<'cx>(
                 id,
             }),
         ) => {
-            if let Some((tc_l, tc_u, reason)) =
+            if let Some((tc_env, tc_l, tc_u, reason)) =
                 resolve_union(cx, env, trace, reason, *id, resolved, unresolved, l, upper)?
             {
-                return Ok(Some(TailCall::Flow(tc_l, tc_u, reason)));
+                return Ok(Some(TailCall::Flow(tc_env, tc_l, tc_u, reason)));
             }
         }
         (
@@ -3285,10 +3289,10 @@ fn __flow_impl<'cx>(
                 id,
             }),
         ) => {
-            if let Some((tc_l, tc_u, reason)) =
+            if let Some((tc_env, tc_l, tc_u, reason)) =
                 resolve_union(cx, env, trace, reason, *id, resolved, unresolved, l, upper)?
             {
-                return Ok(Some(TailCall::Flow(tc_l, tc_u, reason)));
+                return Ok(Some(TailCall::Flow(tc_env, tc_l, tc_u, reason)));
             }
         }
         (UnionT(reason, rep), FilterMaybeT(use_op, tout)) => {
@@ -3337,11 +3341,12 @@ fn __flow_impl<'cx>(
         }
         (UnionT(reason, rep), _) if rep.members_iter().any(flow_js_utils::is_union_resolvable) => {
             flow_js_utils::iter_resolve_union(
-                |cx_inner, trace_inner, (t_inner, u_inner)| {
-                    rec_flow(cx_inner, env, *trace_inner, (&t_inner, &u_inner))?;
+                |cx_inner, env_inner, trace_inner, (t_inner, u_inner)| {
+                    rec_flow(cx_inner, env_inner, *trace_inner, (&t_inner, &u_inner))?;
                     Ok(())
                 },
                 cx,
+                env,
                 &trace,
                 reason.dupe(),
                 rep,
@@ -7267,19 +7272,20 @@ fn __flow_impl<'cx>(
                 strictness_kind: cx.type_strictness_kind(),
                 literal: ObjLiteral::of_literal(*literal),
             };
+            let spread_id = flow_common::reason::mk_id() as i32;
             let spread_state = object::spread::State {
                 todo_rev: flow_data_structure_wrapper::list::FlowOcamlList::unit(
                     object::spread::Operand::Type(o?),
                 ),
                 acc: flow_data_structure_wrapper::list::FlowOcamlList::new(),
-                spread_id: flow_common::reason::mk_id() as i32,
+                spread_id,
                 union_t: None,
                 curr_resolve_idx: 0,
             };
             let o2 = flow_typing_tvar::mk_where(cx, reason_op.dupe(), |cx, tvar| {
                 rec_flow(
                     cx,
-                    env,
+                    &env.push_parts_marker(spread_id),
                     trace,
                     (
                         &obj_super,

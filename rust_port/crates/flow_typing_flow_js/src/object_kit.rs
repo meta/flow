@@ -578,6 +578,7 @@ pub(super) fn run_with_env<'cx>(
                          reason: &Reason,
                          x: Vec1<object::Slice>,
                          tout: &Type| {
+        let env = &env.pop_to_parts_marker(state.spread_id);
         let dict_check = |cx: &mut Context<'cx>,
                           use_op: UseOp,
                           d1: &DictType,

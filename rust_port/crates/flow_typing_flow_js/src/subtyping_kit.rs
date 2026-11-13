@@ -4133,8 +4133,9 @@ pub fn rec_sub_t<'cx>(
             if rep.members_iter().any(flow_js_utils::is_union_resolvable) =>
         {
             flow_js_utils::iter_resolve_union(
-                |cx, trace, (t, u)| FlowJs::rec_flow_with_env(cx, env, *trace, &t, &u),
+                |cx, env, trace, (t, u)| FlowJs::rec_flow_with_env(cx, env, *trace, &t, &u),
                 cx,
+                env,
                 &trace,
                 reason.dupe(),
                 rep,

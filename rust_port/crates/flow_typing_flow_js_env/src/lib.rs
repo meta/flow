@@ -109,11 +109,18 @@ struct SpeculationFrame {
     enclosing: Option<Rc<SpeculationFrame>>,
 }
 
-/// One type application being expanded, holding the expansions it is nested in.
+/// One entry of the expansion stack, holding the entries below it.
 #[derive(Debug)]
 struct TypeAppFrame {
-    entry: Entry,
+    entry: StackEntry,
     enclosing: Option<Rc<TypeAppFrame>>,
+}
+
+#[derive(Debug)]
+enum StackEntry {
+    TypeApp(Entry),
+    /// Where the union or object spread with this id started resolving its parts.
+    Parts(i32),
 }
 
 /// One check of a generic value against a type (`PolyT ~> u`), holding the checks it is nested in.
@@ -517,8 +524,11 @@ impl FlowJsEnv {
         });
         let mut count = 0;
         for frame in expanding {
-            let Entry(prev_c, prev_tss, prev_side) = &frame.entry;
-            if c == prev_c && possibly_expanding_targs(prev_tss, &tss) && side == *prev_side {
+            if let StackEntry::TypeApp(Entry(prev_c, prev_tss, prev_side)) = &frame.entry
+                && c == prev_c
+                && possibly_expanding_targs(prev_tss, &tss)
+                && side == *prev_side
+            {
                 count += 1;
                 if count >= limit {
                     return None;
@@ -528,13 +538,37 @@ impl FlowJsEnv {
         Some(Self {
             speculation: self.speculation.dupe(),
             instantiation_stack: Some(Rc::new(TypeAppFrame {
-                entry: Entry(c.dupe(), tss, side),
+                entry: StackEntry::TypeApp(Entry(c.dupe(), tss, side)),
                 enclosing: self.instantiation_stack.dupe(),
             })),
             polymorphic_lower_stack: self.polymorphic_lower_stack.dupe(),
             implicit_instantiation: self.implicit_instantiation.dupe(),
             restrictive_frozen_tvars: self.restrictive_frozen_tvars,
         })
+    }
+
+    pub fn push_parts_marker(&self, id: i32) -> Self {
+        Self {
+            instantiation_stack: Some(Rc::new(TypeAppFrame {
+                entry: StackEntry::Parts(id),
+                enclosing: self.instantiation_stack.dupe(),
+            })),
+            ..self.dupe()
+        }
+    }
+
+    /// Pops the type applications expanded since `push_parts_marker(id)`.
+    pub fn pop_to_parts_marker(&self, id: i32) -> Self {
+        let mut stack = &self.instantiation_stack;
+        while let Some(frame) = stack
+            && !matches!(frame.entry, StackEntry::Parts(marker) if marker == id)
+        {
+            stack = &frame.enclosing;
+        }
+        Self {
+            instantiation_stack: stack.dupe(),
+            ..self.dupe()
+        }
     }
 
     /// Detect whether checking the generic value declared at `tparams_loc` against a type would

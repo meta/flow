@@ -1,3 +1,69 @@
+Error --------------------------------------------------------------------------------------- sibling_expansions.js:10:1
+
+Cannot cast `'a'` to `B<1 | 2 | 3 | 4 | 5>` because `"a"` [1] is incompatible with `"b"` [2]. [incompatible-type]
+
+   sibling_expansions.js:10:1
+   10| 'a' as B<1 | 2 | 3 | 4 | 5>; // error
+       ^^^ [1]
+
+References:
+   sibling_expansions.js:10:8
+   10| 'a' as B<1 | 2 | 3 | 4 | 5>; // error
+              ^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------- sibling_expansions.js:18:2
+
+Cannot cast object literal to `Omitted` because: [incompatible-type]
+ - Either property `k` is extra in object literal [1] but missing in `{a: {a: 1, k: 1}["a"]}` [2]. Exact objects do not
+   accept extra props.
+ - Or property `k` is extra in object literal [1] but missing in `{b: {b: 1, k: 2}["b"]}` [2]. Exact objects do not
+   accept extra props.
+ - Or property `k` is extra in object literal [1] but missing in `{c: {c: 1, k: 3}["c"]}` [2]. Exact objects do not
+   accept extra props.
+ - Or property `k` is extra in object literal [1] but missing in `{d: {d: 1, k: 4}["d"]}` [2]. Exact objects do not
+   accept extra props.
+ - Or property `k` is extra in object literal [1] but missing in `{e: {e: 1, k: 5}["e"]}` [2]. Exact objects do not
+   accept extra props.
+
+   sibling_expansions.js:18:2
+   18| ({k: 5}) as Omitted; // error
+        ^^^^^^ [1]
+
+References:
+   sibling_expansions.js:12:51
+   12| type DistributiveOmit<T, K> = T extends unknown ? Omit2<T, K> : empty;
+                                                         ^^^^^^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------- sibling_expansions.js:31:3
+
+Cannot get `s.a` because property `a` is missing in `{b: O["b"]}` [1]. [prop-missing]
+
+   sibling_expansions.js:31:3
+   31| s.a; // error
+         ^
+
+References:
+   sibling_expansions.js:29:18
+   29| declare const s: Spread5;
+                        ^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------- sibling_expansions.js:36:3
+
+Cannot get `v.a` because property `a` is missing in object literal [1]. [prop-missing]
+
+   sibling_expansions.js:36:3
+   36| v.a; // error
+         ^
+
+References:
+   sibling_expansions.js:34:11
+   34| const v = {...o, ...o, ...o, ...o, ...o};
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
 Error ------------------------------------------------------------------------------------------------- soundness.js:8:5
 
 Cannot cast `x` to `Bak<empty>` because in type argument `T` [1]: `unknown` [2] is incompatible with `empty` [3].
@@ -42,4 +108,4 @@ References:
 
 
 
-Found 2 errors
+Found 6 errors

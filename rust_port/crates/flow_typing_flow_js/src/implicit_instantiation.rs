@@ -1088,12 +1088,13 @@ fn flow_rest_reversal<'cx>(
         strictness_kind: cx.type_strictness_kind(),
         literal: ObjLiteral::of_literal(literal),
     };
+    let spread_id = flow_common::reason::mk_id() as i32;
     let state = object::spread::State {
         todo_rev: flow_data_structure_wrapper::list::FlowOcamlList::unit(
             object::spread::Operand::Type(t_rest.dupe()),
         ),
         acc: flow_data_structure_wrapper::list::FlowOcamlList::new(),
-        spread_id: flow_common::reason::mk_id() as i32,
+        spread_id,
         union_t: None,
         curr_resolve_idx: 0,
     };
@@ -1104,7 +1105,12 @@ fn flow_rest_reversal<'cx>(
         Box::new(object::Tool::Spread(Box::new((options, state)))),
         t_prime.dupe(),
     );
-    FlowJs::flow_with_env(cx, env, tout, &UseT::new(u_inner))
+    FlowJs::flow_with_env(
+        cx,
+        &env.push_parts_marker(spread_id),
+        tout,
+        &UseT::new(u_inner),
+    )
 }
 
 fn reverse_obj_kit_rest<'cx>(

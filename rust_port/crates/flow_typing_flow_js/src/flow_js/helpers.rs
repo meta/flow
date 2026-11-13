@@ -1324,13 +1324,13 @@ pub(super) fn handle_frozen_tvar<'cx>(
 /// `Ok(None)` means union resolution is complete: the resolved members have
 /// been rebuilt into a union and flowed to `upper`.
 ///
-/// `Ok(Some((next_l, next_u, reason)))` means there are still unresolved
-/// members. `next_l` is the next union member to resolve. `next_u` is a
-/// `ResolveUnionT` continuation carrying the resolved prefix, the remaining
-/// unresolved members, and the original `upper`. The returned `reason` is the
-/// reason of the union being rebuilt; the trampoline uses it as the diagnostic
-/// reason for this continuation if resolving the next member hits the recursion
-/// limit.
+/// `Ok(Some((next_env, next_l, next_u, reason)))` means there are still
+/// unresolved members. `next_l` is the next union member to resolve, in
+/// `next_env`. `next_u` is a `ResolveUnionT` continuation carrying the resolved
+/// prefix, the remaining unresolved members, and the original `upper`. The
+/// returned `reason` is the reason of the union being rebuilt; the trampoline
+/// uses it as the diagnostic reason for this continuation if resolving the next
+/// member hits the recursion limit.
 pub(super) fn resolve_union<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
@@ -1341,10 +1341,11 @@ pub(super) fn resolve_union<'cx>(
     unresolved: &flow_data_structure_wrapper::list::FlowOcamlList<Type>,
     l: &Type,
     upper: &UseT<Cx>,
-) -> Result<Option<(Type, UseT<Cx>, Reason)>, FlowJsException> {
+) -> Result<Option<(FlowJsEnv, Type, UseT<Cx>, Reason)>, FlowJsException> {
+    let env = &env.pop_to_parts_marker(id);
     let do_continue = |cx: &mut Context<'cx>,
                        resolved: flow_data_structure_wrapper::list::FlowOcamlList<Type>|
-     -> Result<Option<(Type, UseT<Cx>, Reason)>, FlowJsException> {
+     -> Result<Option<(FlowJsEnv, Type, UseT<Cx>, Reason)>, FlowJsException> {
         match unresolved.first() {
             None => {
                 let ts: Vec<Type> = resolved.iter().duped().collect();
@@ -1360,6 +1361,7 @@ pub(super) fn resolve_union<'cx>(
                 let mut rest = unresolved.dupe();
                 rest.drop_first();
                 Ok(Some((
+                    env.dupe(),
                     next,
                     UseT::new(UseTInner::ResolveUnionT(Box::new(ResolveUnionTData {
                         reason: reason.dupe(),
