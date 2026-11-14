@@ -4678,8 +4678,9 @@ impl<'e> Walker<'e> {
             return Ok(());
         }
         match d.deref() {
-            // The read-only object, whose fields are compared covariantly.
-            Destructor::ReadOnlyType
+            // The read-only object, whose fields are compared covariantly, or the partial object,
+            // whose fields are optional.
+            Destructor::ReadOnlyType | Destructor::PartialType
                 if matches!(
                     self.resolve(cx, type_).deref(),
                     TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::ObjT(_))
@@ -4689,26 +4690,28 @@ impl<'e> Walker<'e> {
                 let result = self.resolve(cx, &result);
                 self.walk(cx, l, &result)
             }
-            // `Readonly<A<T>>` of an alias of an object type: the read-only object of its body.
-            Destructor::ReadOnlyType
+            // `Readonly<A<T>>` (or `Partial<A<T>>`) of an alias of an object type: the read-only (or
+            // partial) object of its body.
+            Destructor::ReadOnlyType | Destructor::PartialType
                 if let Some(body) = self.object_alias_body(cx, type_)
                     && let Some(result) = self.evaluate(cx, &body, defer_use_t)? =>
             {
                 let result = self.resolve(cx, &result);
                 self.walk(cx, l, &result)
             }
-            // `Readonly<A<T>>` of an alias of a union: the union of the read-only members, so that
-            // their fields are compared covariantly.
-            Destructor::ReadOnlyType
+            // `Readonly<A<T>>` (or `Partial<A<T>>`) of an alias of a union: the union of the read-only
+            // (or partial) members, so that their fields are compared covariantly (or as optional).
+            Destructor::ReadOnlyType | Destructor::PartialType
                 if let Some(body) = self.union_alias_body(cx, type_)
                     && let Some(result) = self.evaluate(cx, &body, defer_use_t)?
                     && self.is_structure_or_union_of(cx, &result) =>
             {
                 self.walk(cx, l, &result)
             }
-            // `Readonly<{...A, ...B}>` where no operand is a marker: made in full, so that the
-            // fields of the spread are compared covariantly. (A spread of a union makes a union.)
-            Destructor::ReadOnlyType
+            // `Readonly<{...A, ...B}>` (or `Partial<{...A, ...B}>`) where no operand is a marker:
+            // made in full, so that the fields of the spread are compared covariantly (or as
+            // optional). (A spread of a union makes a union.)
+            Destructor::ReadOnlyType | Destructor::PartialType
                 if !self.mentions(cx, l)
                     && self.is_spread_of_types(type_)
                     && let Some(result) = self.evaluate(cx, type_, defer_use_t)?
