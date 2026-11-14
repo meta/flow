@@ -43,8 +43,7 @@ import {foo4Inst, foo5Inst} from './ExportCJSNamed_Class';
 var d1: ClassFoo4 = foo4Inst;
 var d2: number = foo4Inst; // Error: ClassFoo4 ~> number
 new ClassFoo4(); // Error: ClassFoo4 is not a value-identifier
-// TODO: this errors correctly, but the message is just 'can't resolve name'
-var d3: typeof ClassFoo5 = foo5Inst; // Error: Can't typeof a type alias
+var d3: typeof ClassFoo5 = foo5Inst; // Error: an instance is not the class
 
 ////////////////////////////////////////////
 // == Import Type Alias (Named Export) == //
@@ -68,7 +67,7 @@ var e3: typeof AliasFoo3 = givesAFoo3Obj(); // Error: Can't typeof a type alias
 // == Import Type With Non-Alias Compatible Value == //
 ///////////////////////////////////////////////////////
 
-import type {numValue} from './ExportsANumber'; // Error: Cannot import-type a number value
+import type {numValue} from './ExportsANumber'; // OK: `typeof numValue` reads the value
 
 ////////////////////////////////////////////////////////////////////////
 // == Regression Test: https://github.com/meta/flow/issues/359 == //

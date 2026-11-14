@@ -373,7 +373,7 @@ rtype-main.js:4:15
 Flags:
 const x: Value<unknown>
 
-'Value' defined at rtype-c.js:3:14
+'Value' defined at rtype-main.js:3:14
 
 rtype-main.js:4:15,4:15
 
@@ -902,7 +902,7 @@ rtype-main.js:4:15
 Flags: --do_not_use_typed_AST_for_imports
 const x: Value<unknown>
 
-'Value' defined at rtype-c.js:3:14
+'Value' defined at rtype-main.js:3:14
 
 rtype-main.js:4:15,4:15
 

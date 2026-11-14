@@ -68,7 +68,8 @@ use crate::type_operation_utils;
 /// - ForValue is a lookup from a syntactic value location, i.e. standard JS code
 /// - ForType is a lookup from a syntactic type location,
 ///   e.g. annotations, interface declarations etc.
-/// - ForTypeof is a lookup from a typeof expression (necessarily in a type location)
+/// - ForTypeof is a lookup from a typeof expression (necessarily in a type location), or
+///   from another value position that is not emitted, like the heritage of a declared class
 ///
 /// Rules:
 ///
@@ -1740,7 +1741,7 @@ fn read_entry<'cx>(
             }
             (
                 ValKind::Type {
-                    imported,
+                    imported: false,
                     type_only_namespace,
                 },
                 Some(name),
@@ -1751,7 +1752,7 @@ fn read_entry<'cx>(
                     cx,
                     ErrorMessage::EBindingError(Box::new((
                         BindingError::ETypeInValuePosition {
-                            imported: *imported,
+                            imported: false,
                             type_only_namespace: *type_only_namespace,
                             name: name.dupe(),
                         },
@@ -1762,11 +1763,22 @@ fn read_entry<'cx>(
                 );
                 Ok(any_t::at(AnySource::AnyError(None), loc))
             }
+            // `import type` binds every meaning of the export, so `typeof` reads it as it reads a
+            // TS import.
             (
                 ValKind::TsImport,
                 Some(name),
                 Some(def_loc),
                 LookupMode::ForValue | LookupMode::ForTypeof,
+            )
+            | (
+                ValKind::Type {
+                    imported: true,
+                    type_only_namespace: false,
+                },
+                Some(name),
+                Some(def_loc),
+                LookupMode::ForTypeof,
             ) => {
                 let t = type_of_state(
                     lookup_mode,

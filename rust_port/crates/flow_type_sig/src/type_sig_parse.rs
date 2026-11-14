@@ -12832,7 +12832,7 @@ fn array_literal<'arena: 'ast, 'ast>(
 
 #[derive(Clone, Copy)]
 enum GenericIdRootLookup {
-    Value,
+    Typeof,
     Type,
 }
 
@@ -12855,8 +12855,10 @@ fn member_expr_of_generic_id<'arena, 'ast>(
             ast::types::generic::Identifier::Unqualified(id) => {
                 let ref_loc = tbls.push_loc(id.loc.dupe());
                 let name = id.name.dupe();
-                let type_only = matches!(lookup, GenericIdRootLookup::Type);
-                let mut t = val_ref(type_only, scope, ref_loc, name);
+                let mut t = match lookup {
+                    GenericIdRootLookup::Typeof => typeof_ref(scope, ref_loc, name),
+                    GenericIdRootLookup::Type => val_ref(true, scope, ref_loc, name),
+                };
                 for (loc, name) in chain.into_iter().rev() {
                     t = Parsed::Eval(
                         loc.dupe(),
@@ -12925,7 +12927,9 @@ fn declare_class_def<'arena, 'ast>(
         }
         Some((loc, ast::statement::DeclareClassExtends::ExtendsIdent(generic))) => {
             let loc = tbls.push_loc(loc.dupe());
-            let t = member_expr_of_generic_id(scope, tbls, GenericIdRootLookup::Value, &generic.id);
+            // A declared class is ambient, so its heritage is read like `typeof`.
+            let t =
+                member_expr_of_generic_id(scope, tbls, GenericIdRootLookup::Typeof, &generic.id);
             match &generic.targs {
                 None => ClassExtends::ClassExplicitExtends(Box::new((loc, t))),
                 Some(type_args) => {

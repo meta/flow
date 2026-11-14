@@ -5247,7 +5247,6 @@ pub mod import_default_t_kit {
     use super::FlowJsException;
     use super::add_output_with_env;
     use super::check_nonstrict_import;
-    use super::import_type_t_kit;
     use super::import_typeof_t_kit;
 
     pub fn on_module_t<'cx>(
@@ -5356,23 +5355,6 @@ pub mod import_default_t_kit {
         };
 
         match import_kind {
-            ImportKind::ImportType => {
-                let cx_id = cx.id();
-                let t = with_concretized_type(
-                    cx,
-                    reason.dupe(),
-                    Rc::new(move |cx: &mut Context<'_>, t: Type| {
-                        import_type_t_kit::on_concrete_type(
-                            &mut cx.switch_to(cx_id),
-                            reason.dupe(),
-                            "default",
-                            t,
-                        )
-                    }),
-                    export_t,
-                );
-                Ok((loc_opt, t))
-            }
             ImportKind::ImportTypeof => {
                 let cx_id = cx.id();
                 let t = with_concretized_type(
@@ -5390,7 +5372,7 @@ pub mod import_default_t_kit {
                 );
                 Ok((loc_opt, t))
             }
-            ImportKind::ImportValue => Ok((loc_opt, export_t)),
+            ImportKind::ImportValue | ImportKind::ImportType => Ok((loc_opt, export_t)),
         }
     }
 
@@ -5577,7 +5559,9 @@ pub mod import_named_t_kit {
         };
 
         match (&import_kind, exported_symbol_opt) {
-            (ImportKind::ImportType, Some(ns)) => {
+            (ImportKind::ImportType, Some(ns))
+                if type_exports_tmap.contains_key(&export_name_key) =>
+            {
                 let cx_id = cx.id();
                 let export_name = export_name.dupe();
                 let t = with_concretized_type(
@@ -5651,7 +5635,10 @@ pub mod import_named_t_kit {
                 );
                 Ok((None, t))
             }
-            (ImportKind::ImportValue, Some(ns)) => Ok((ns.name_loc.dupe(), ns.type_.dupe())),
+            // A value export keeps every meaning, so `import type` binds it as `import` does.
+            (ImportKind::ImportValue | ImportKind::ImportType, Some(ns)) => {
+                Ok((ns.name_loc.dupe(), ns.type_.dupe()))
+            }
             (ImportKind::ImportValue, None) if has_every_named_export => {
                 let t = Type::new(TypeInner::AnyT(reason, AnySource::Untyped));
                 Ok((None, t))

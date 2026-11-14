@@ -711,7 +711,8 @@ fn binding_allowed_in_typeof<'arena, 'ast>(binding: &parse::BindingNode<'arena, 
         }
         parse::BindingNode::RemoteBinding(node) => matches!(
             &*node.0.data(),
-            parse::RemoteBinding::ImportTypeNsBinding { .. }
+            parse::RemoteBinding::ImportTypeBinding { .. }
+                | parse::RemoteBinding::ImportTypeNsBinding { .. }
                 | parse::RemoteBinding::ImportTypeofNsBinding { .. }
         ),
     }

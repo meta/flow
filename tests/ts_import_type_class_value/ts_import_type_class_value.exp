@@ -1,34 +1,195 @@
-Error ------------------------------------------------------------------------------------------------- index.d.ts:10:32
+Error ------------------------------------------------------------------------------------------------- flow_file.js:5:1
+
+Cannot cast `(new nodeClass()).getKey()` to `number` because `string` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   flow_file.js:5:1
+   5| new nodeClass().getKey() as number; // error: string ~> number
+      ^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   node.d.ts:8:46
+   8| export declare class LexicalNode { getKey(): string; }
+                                                   ^^^^^^ [1]
+   flow_file.js:5:29
+   5| new nodeClass().getKey() as number; // error: string ~> number
+                                  ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- flow_file.js:6:5
 
 Cannot use type `LexicalNode` [1] as a value. Types are erased and don't exist at runtime. If the exported binding can
 also be used as a value, try importing it using `import LexicalNode` instead of `import type LexicalNode` and
 `import {LexicalNode}` instead of `import type {LexicalNode}`. [type-as-value]
 
-   index.d.ts:10:32
-   10| export type NodeClass = typeof LexicalNode;
-                                      ^^^^^^^^^^^
+   flow_file.js:6:5
+   6| new LexicalNode(); // error: imported with `import type`
+          ^^^^^^^^^^^
 
 References:
-   index.d.ts:9:15
-    9| import type { LexicalNode } from './node';
-                     ^^^^^^^^^^^ [1]
+   flow_file.js:2:15
+   2| import type { LexicalNode } from './node';
+                    ^^^^^^^^^^^ [1]
 
 
-Error ------------------------------------------------------------------------------------------------- index.d.ts:11:44
+Error ------------------------------------------------------------------------------------------------------ test.js:5:1
+
+Cannot cast `(new nodeClass()).getKey()` to `number` because `string` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   test.js:5:1
+   5| new nodeClass().getKey() as number; // tsc reports string ~> number (TS2352)
+      ^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   node.d.ts:8:46
+   8| export declare class LexicalNode { getKey(): string; }
+                                                   ^^^^^^ [1]
+   test.js:5:29
+   5| new nodeClass().getKey() as number; // tsc reports string ~> number (TS2352)
+                                  ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------------ test.js:6:1
+
+Cannot cast `(new ParagraphNode()).getKey()` to `number` because `string` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   test.js:6:1
+   6| new ParagraphNode().getKey() as number; // tsc reports string ~> number (TS2352)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   node.d.ts:8:46
+   8| export declare class LexicalNode { getKey(): string; }
+                                                   ^^^^^^ [1]
+   test.js:6:33
+   6| new ParagraphNode().getKey() as number; // tsc reports string ~> number (TS2352)
+                                      ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------------ uses.ts:5:1
+
+Cannot cast `(new nodeClass()).getKey()` to `number` because `string` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   uses.ts:5:1
+   5| new nodeClass().getKey() as number; // error: string ~> number
+      ^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   node.d.ts:8:46
+   8| export declare class LexicalNode { getKey(): string; }
+                                                   ^^^^^^ [1]
+   uses.ts:5:29
+   5| new nodeClass().getKey() as number; // error: string ~> number
+                                  ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------------ uses.ts:7:1
+
+Cannot cast `(new SubNode()).getKey()` to `number` because `string` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   uses.ts:7:1
+   7| new SubNode().getKey() as number; // error: string ~> number
+      ^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   node.d.ts:8:46
+   8| export declare class LexicalNode { getKey(): string; }
+                                                   ^^^^^^ [1]
+   uses.ts:7:27
+   7| new SubNode().getKey() as number; // error: string ~> number
+                                ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------------ uses.ts:8:5
 
 Cannot use type `LexicalNode` [1] as a value. Types are erased and don't exist at runtime. If the exported binding can
 also be used as a value, try importing it using `import LexicalNode` instead of `import type LexicalNode` and
 `import {LexicalNode}` instead of `import type {LexicalNode}`. [type-as-value]
 
-   index.d.ts:11:44
-   11| export declare class ParagraphNode extends LexicalNode {}
-                                                  ^^^^^^^^^^^
+   uses.ts:8:5
+   8| new LexicalNode(); // error: imported with `import type`
+          ^^^^^^^^^^^
 
 References:
-   index.d.ts:9:15
-    9| import type { LexicalNode } from './node';
-                     ^^^^^^^^^^^ [1]
+   uses.ts:2:15
+   2| import type { LexicalNode, I, f, Foo } from './node';
+                    ^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------------- uses.ts:11:1
+
+Cannot cast `fn()` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   uses.ts:11:1
+   11| fn() as number; // error: string ~> number
+       ^^^^
+
+References:
+   node.d.ts:10:30
+   10| export declare function f(): string;
+                                    ^^^^^^ [1]
+   uses.ts:11:9
+   11| fn() as number; // error: string ~> number
+               ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- uses.ts:12:24
+
+Cannot use `f` as a type. A name can be used as a type only if it refers to a type, interface, class, or enum
+definition. To get the type of a non-class value, use `typeof`. [value-as-type]
+
+   12| declare const notType: f; // error: `f` is a value
+                              ^
+
+
+Error ---------------------------------------------------------------------------------------------------- uses.ts:13:32
+
+Cannot use type `I` [1] as a value. Types are erased and don't exist at runtime. [type-as-value]
+
+   uses.ts:13:32
+   13| declare const notValue: typeof I; // error: `I` is only a type
+                                      ^
+
+References:
+   uses.ts:2:28
+    2| import type { LexicalNode, I, f, Foo } from './node';
+                                  ^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------------- uses.ts:15:32
+
+Cannot use type `Foo` [1] as a value. Types are erased and don't exist at runtime. [type-as-value]
+
+   uses.ts:15:32
+   15| declare const fooValue: typeof Foo; // error: Flow binds the interface, tsc reads the const
+                                      ^^^
+
+References:
+   uses.ts:2:34
+    2| import type { LexicalNode, I, f, Foo } from './node';
+                                        ^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------------- uses.ts:17:1
+
+Cannot cast `foo.a` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   uses.ts:17:1
+   17| foo.a as number; // error: string ~> number
+       ^^^^^
+
+References:
+   node.d.ts:11:27
+   11| export interface Foo { a: string }
+                                 ^^^^^^ [1]
+   uses.ts:17:10
+   17| foo.a as number; // error: string ~> number
+                ^^^^^^ [2]
 
 
 
-Found 2 errors
+Found 12 errors

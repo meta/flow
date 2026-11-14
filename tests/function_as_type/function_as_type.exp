@@ -1,10 +1,10 @@
-Error ------------------------------------------------------------------------------------------------- uses_fun.js:1:14
+Error -------------------------------------------------------------------------------------------------- uses_fun.js:3:9
 
-Cannot import the value `fun` as a type. `import type` only works on type exports like type aliases, interfaces, and
-classes. If you intended to import the type of a value use `import typeof` instead. [import-value-as-type]
+Cannot use `fun` as a type. A name can be used as a type only if it refers to a type, interface, class, or enum
+definition. To get the type of a non-class value, use `typeof`. [value-as-type]
 
-   1| import type {fun} from './fun';
-                   ^^^
+   3| ({}) as fun
+              ^^^
 
 
 

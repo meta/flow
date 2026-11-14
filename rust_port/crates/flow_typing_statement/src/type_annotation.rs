@@ -9432,9 +9432,10 @@ pub fn mk_declare_class_sig<'a>(
             reason::VirtualReasonDesc::RType(FlowSmolStr::new(&name)),
             loc.dupe(),
         );
+        // A declared class is ambient, so its heritage is read like `typeof`.
         let (i, id_ast) = convert_qualification_with_lookup_mode(
             cx,
-            Some(type_env::LookupMode::ForValue),
+            Some(type_env::LookupMode::ForTypeof),
             &generic.id,
         )?;
         let props_bag = crate::type_annotation_cons_gen::mixin(cx, r, i);
@@ -9498,9 +9499,10 @@ pub fn mk_declare_class_sig<'a>(
             use ast::statement::DeclareClassExtends;
             match &decl.extends {
                 Some((loc, DeclareClassExtends::ExtendsIdent(generic))) => {
+                    // A declared class is ambient, so its heritage is read like `typeof`.
                     let (i, id_ast) = convert_qualification_with_lookup_mode(
                         cx,
-                        Some(type_env::LookupMode::ForValue),
+                        Some(type_env::LookupMode::ForTypeof),
                         &generic.id,
                     )?;
                     let (t, targs_ast) =

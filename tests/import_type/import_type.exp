@@ -113,116 +113,97 @@ References:
                     ^^^^^^^^^ [1]
 
 
-Error --------------------------------------------------------------------------------------------- import_type.js:47:16
+Error --------------------------------------------------------------------------------------------- import_type.js:46:28
 
-Cannot use type `ClassFoo5` [1] as a value. Types are erased and don't exist at runtime. If the exported binding can
-also be used as a value, try importing it using `import ClassFoo5` instead of `import type ClassFoo5` and
-`import {ClassFoo5}` instead of `import type {ClassFoo5}`. [type-as-value]
+Cannot assign `foo5Inst` to `d3` because `ClassFoo5` [1] is incompatible with class `ClassFoo5` [2]. [incompatible-type]
 
-   import_type.js:47:16
-   47| var d3: typeof ClassFoo5 = foo5Inst; // Error: Can't typeof a type alias
-                      ^^^^^^^^^
+   import_type.js:46:28
+   46| var d3: typeof ClassFoo5 = foo5Inst; // Error: an instance is not the class
+                                  ^^^^^^^^
 
 References:
-   import_type.js:40:25
-   40| import type {ClassFoo4, ClassFoo5} from './ExportCJSNamed_Class';
-                               ^^^^^^^^^ [1]
+   ExportCJSNamed_Class.js:24:39
+   24| exports.foo5Inst = new ClassFoo5() as ClassFoo5;
+                                             ^^^^^^^^^ [1]
+   import_type.js:46:9
+   46| var d3: typeof ClassFoo5 = foo5Inst; // Error: an instance is not the class
+               ^^^^^^^^^^^^^^^^ [2]
 
 
-Error --------------------------------------------------------------------------------------------- import_type.js:56:18
+Error --------------------------------------------------------------------------------------------- import_type.js:55:18
 
 Cannot assign `givesAFoo3Obj()` to `e2` because `AliasFoo3` [1] is incompatible with `number` [2]. [incompatible-type]
 
-   import_type.js:56:18
-   56| var e2: number = givesAFoo3Obj(); // Error: AliasFoo3 ~> number
+   import_type.js:55:18
+   55| var e2: number = givesAFoo3Obj(); // Error: AliasFoo3 ~> number
                         ^^^^^^^^^^^^^^^
 
 References:
    ExportNamed_Alias.js:8:34
     8| export function givesAFoo3Obj(): AliasFoo3 {
                                         ^^^^^^^^^ [1]
-   import_type.js:56:9
-   56| var e2: number = givesAFoo3Obj(); // Error: AliasFoo3 ~> number
+   import_type.js:55:9
+   55| var e2: number = givesAFoo3Obj(); // Error: AliasFoo3 ~> number
                ^^^^^^ [2]
 
 
-Error --------------------------------------------------------------------------------------------- import_type.js:57:16
+Error --------------------------------------------------------------------------------------------- import_type.js:56:16
 
-Cannot use type `AliasFoo3` [1] as a value. Types are erased and don't exist at runtime. If the exported binding can
-also be used as a value, try importing it using `import AliasFoo3` instead of `import type AliasFoo3` and
-`import {AliasFoo3}` instead of `import type {AliasFoo3}`. [type-as-value]
+Cannot use type `AliasFoo3` [1] as a value. Types are erased and don't exist at runtime. [type-as-value]
 
-   import_type.js:57:16
-   57| var e3: typeof AliasFoo3 = givesAFoo3Obj(); // Error: Can't typeof a type alias
+   import_type.js:56:16
+   56| var e3: typeof AliasFoo3 = givesAFoo3Obj(); // Error: Can't typeof a type alias
                       ^^^^^^^^^
 
 References:
-   import_type.js:53:14
-   53| import type {AliasFoo3} from './ExportNamed_Alias';
+   import_type.js:52:14
+   52| import type {AliasFoo3} from './ExportNamed_Alias';
                     ^^^^^^^^^ [1]
 
 
-Error --------------------------------------------------------------------------------------------- import_type.js:71:14
-
-Cannot import the value `numValue` as a type. `import type` only works on type exports like type aliases, interfaces,
-and classes. If you intended to import the type of a value use `import typeof` instead. [import-value-as-type]
-
-   71| import type {numValue} from './ExportsANumber'; // Error: Cannot import-type a number value
-                    ^^^^^^^^
-
-
-Error ---------------------------------------------------------------------------------------------- import_type.js:81:3
+Error ---------------------------------------------------------------------------------------------- import_type.js:80:3
 
 Cannot use type `ClassFoo6` [1] as a value. Types are erased and don't exist at runtime. If the exported binding can
 also be used as a value, try importing it using `import ClassFoo6` instead of `import type ClassFoo6` and
 `import {ClassFoo6}` instead of `import type {ClassFoo6}`. [type-as-value]
 
-   import_type.js:81:3
-   81|   ClassFoo6; // Error: Not a value binding
+   import_type.js:80:3
+   80|   ClassFoo6; // Error: Not a value binding
          ^^^^^^^^^
 
 References:
-   import_type.js:79:13
-   79| import type ClassFoo6 from './issue-359';
+   import_type.js:78:13
+   78| import type ClassFoo6 from './issue-359';
                    ^^^^^^^^^ [1]
 
 
-Error -------------------------------------------------------------------------------------------- import_type.js:100:13
-
-Cannot import the default export as a type. `import type` only works on type exports like type aliases, interfaces, and
-classes. If you intended to import the type of a value use `import typeof` instead. [import-value-as-type]
-
-   100| import type x from './ExportDefaultNonType';
-                    ^
-
-
-Error --------------------------------------------------------------------------------------------- import_type.js:109:1
+Error --------------------------------------------------------------------------------------------- import_type.js:108:1
 
 Cannot cast `'str'` to `T` because `"str"` [1] is incompatible with `T` [2]. [incompatible-type]
 
-   import_type.js:109:1
-   109| 'str' as T; // error
+   import_type.js:108:1
+   108| 'str' as T; // error
         ^^^^^ [1]
 
 References:
-   import_type.js:109:10
-   109| 'str' as T; // error
+   import_type.js:108:10
+   108| 'str' as T; // error
                  ^ [2]
 
 
-Error --------------------------------------------------------------------------------------------- import_type.js:117:1
+Error --------------------------------------------------------------------------------------------- import_type.js:116:1
 
 Cannot cast `'str'` to `T` because `"str"` [1] is incompatible with `T` [2]. [incompatible-type]
 
-   import_type.js:117:1
-   117| 'str' as U; // error
+   import_type.js:116:1
+   116| 'str' as U; // error
         ^^^^^ [1]
 
 References:
-   import_type.js:117:10
-   117| 'str' as U; // error
+   import_type.js:116:10
+   116| 'str' as U; // error
                  ^ [2]
 
 
 
-Found 15 errors
+Found 13 errors
