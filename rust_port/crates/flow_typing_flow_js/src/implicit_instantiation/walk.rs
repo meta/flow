@@ -2863,7 +2863,7 @@ impl<'e> Walker<'e> {
         }
     }
 
-    /// The body of the application `t` of an alias of an object type.
+    /// The body of the application `t` of an alias of an object, array or tuple type.
     fn object_alias_body<'cx>(&self, cx: &mut Context<'cx>, t: &Type) -> Option<Type> {
         let resolved = self.resolve(cx, t);
         if !matches!(resolved.deref(), TypeInner::TypeAppT(a) if self.is_alias(cx, &a.type_)) {
@@ -2871,8 +2871,11 @@ impl<'e> Walker<'e> {
         }
         let body = self.expand_typeapp(cx, &resolved)?;
         let body = self.resolve(cx, &body);
-        matches!(body.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::ObjT(_)))
-            .then_some(body)
+        matches!(
+            body.deref(),
+            TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::ObjT(_) | DefTInner::ArrT(_))
+        )
+        .then_some(body)
     }
 
     /// The body of the application `t` of an alias of a union.
@@ -4678,20 +4681,21 @@ impl<'e> Walker<'e> {
             return Ok(());
         }
         match d.deref() {
-            // The read-only object, whose fields are compared covariantly, or the partial object,
-            // whose fields are optional.
+            // The read-only object, array or tuple, whose fields or elements are compared
+            // covariantly, or the partial object or tuple, whose fields or elements are optional.
             Destructor::ReadOnlyType | Destructor::PartialType
                 if matches!(
                     self.resolve(cx, type_).deref(),
-                    TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::ObjT(_))
+                    TypeInner::DefT(_, d)
+                        if matches!(d.deref(), DefTInner::ObjT(_) | DefTInner::ArrT(_))
                 ) && let Some(result) =
                     self.eval_sandboxed(cx, use_op, reason, type_, d, id)? =>
             {
                 let result = self.resolve(cx, &result);
                 self.walk(cx, l, &result)
             }
-            // `Readonly<A<T>>` (or `Partial<A<T>>`) of an alias of an object type: the read-only (or
-            // partial) object of its body.
+            // `Readonly<A<T>>` (or `Partial<A<T>>`) of an alias of an object, array or tuple type:
+            // the read-only (or partial) object, array or tuple of its body.
             Destructor::ReadOnlyType | Destructor::PartialType
                 if let Some(body) = self.object_alias_body(cx, type_)
                     && let Some(result) = self.evaluate(cx, &body, defer_use_t)? =>
