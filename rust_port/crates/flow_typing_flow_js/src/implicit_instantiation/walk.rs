@@ -2273,14 +2273,16 @@ impl<'e> Walker<'e> {
         }
         if let Some((hint, kind)) = return_hint {
             // The flow-based solve drops a best-effort hint whose flow fails: keep its evidence
-            // only if it agrees with the evidence of the arguments.
+            // only if it agrees with the evidence of the arguments, and if the return type fits
+            // the hint with the solution so far.
             let snapshot =
                 (*kind == flow_common::hint::HintKind::BestEffortHint).then(|| self.snapshot());
             self.in_hint = true;
             self.walk(cx, signature.return_t, hint)?;
             self.in_hint = false;
             if let Some(snapshot) = snapshot
-                && !self.agrees_with(cx, &snapshot.vars)?
+                && !(self.agrees_with(cx, &snapshot.vars)?
+                    && self.fits_solution_so_far(cx, signature.return_t, hint)?)
             {
                 self.restore(snapshot);
             }
