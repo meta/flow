@@ -1645,6 +1645,14 @@ impl<'e> Walker<'e> {
             {
                 self.walk(cx, &l, &e)
             }
+            // As in subtyping, a type that is not a render type meets a render type before a rigid
+            // type parameter is replaced by its bound: against `renders T`, the parameter itself
+            // goes to `T`.
+            (TypeInner::GenericT(_), TypeInner::DefT(_, ud))
+                if matches!(ud.deref(), DefTInner::RendersT(_)) =>
+            {
+                self.walk_renders(cx, &l, &u)
+            }
             (TypeInner::GenericT(box GenericTData { bound, .. }), _) => self.walk(cx, bound, &u),
             (TypeInner::TypeAppT(a), TypeInner::TypeAppT(b)) => {
                 // Applications of the same alias or class are compared argument by argument
