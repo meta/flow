@@ -133,6 +133,29 @@ fn types(bounds: &[(Type, Priority)]) -> impl Iterator<Item = &Type> {
     bounds.iter().map(|(t, _)| t)
 }
 
+/// The bounds among `bounds` that flows into the type variable of a marker would meet: not the
+/// reversals, which stand for a destructor that the flow-based solve evaluates on the solution,
+/// nor the soft ones, which the solution so far does not read either.
+fn direct(bounds: &[(Type, Priority)]) -> impl Iterator<Item = &Type> {
+    (bounds.iter())
+        .filter(|(_, p)| *p <= Priority::Direct)
+        .map(|(t, _)| t)
+}
+
+/// The `direct` bounds among `now` that were not `direct` among `old`, the same bounds earlier:
+/// `add_bound` appends a bound or raises the priority of one in place, so a bound may become
+/// `direct` without being appended.
+fn newly_direct<'a>(
+    old: &'a [(Type, Priority)],
+    now: &'a [(Type, Priority)],
+) -> impl Iterator<Item = &'a Type> {
+    (now.iter().enumerate())
+        .filter(|(i, (_, p))| {
+            *p <= Priority::Direct && old.get(*i).is_none_or(|(_, q)| *q > Priority::Direct)
+        })
+        .map(|(_, (t, _))| t)
+}
+
 /// Adds `t` to `bounds` with `priority`, or raises the priority of `t` if it is there.
 fn add_bound(bounds: &mut Vec<(Type, Priority)>, t: &Type, priority: Priority) {
     match bounds.iter_mut().find(|(b, _)| b.ptr_eq(t)) {
@@ -4245,7 +4268,9 @@ impl<'e> Walker<'e> {
     /// Whether the evidence added since `before` agrees with the evidence there and with itself, as
     /// flows into a type variable meet its bounds: each lower bound of a marker, or its first exact
     /// one, is a subtype of each exact or upper bound the marker got since, and each lower or exact
-    /// bound it got since is a subtype of its earlier upper bounds and first exact one.
+    /// bound it got since is a subtype of its earlier upper bounds and first exact one. Only the
+    /// bounds that such flows would meet count (`direct`), and one that became such a bound since
+    /// is one the marker got since (`newly_direct`).
     fn agrees_with<'cx>(
         &mut self,
         cx: &mut Context<'cx>,
@@ -4257,19 +4282,23 @@ impl<'e> Walker<'e> {
             .iter()
             .filter_map(|(name, now)| Some((before.get(name)?, now)))
             .flat_map(|(old, now)| {
-                let lowers: Vec<Type> =
-                    types(&old.lower).chain(old.exact.first()).duped().collect();
-                let uppers: Vec<Type> = now.exact[old.exact.len()..]
-                    .iter()
-                    .chain(types(&now.upper[old.upper.len()..]))
+                let lowers: Vec<Type> = direct(&old.lower)
+                    .chain(old.exact.first())
                     .duped()
                     .collect();
-                let new_lowers: Vec<Type> = types(&now.lower[old.lower.len()..])
+                let uppers: Vec<Type> = now.exact[old.exact.len()..]
+                    .iter()
+                    .chain(newly_direct(&old.upper, &now.upper))
+                    .duped()
+                    .collect();
+                let new_lowers: Vec<Type> = newly_direct(&old.lower, &now.lower)
                     .chain(now.exact[old.exact.len()..].iter())
                     .duped()
                     .collect();
-                let old_uppers: Vec<Type> =
-                    types(&old.upper).chain(old.exact.first()).duped().collect();
+                let old_uppers: Vec<Type> = direct(&old.upper)
+                    .chain(old.exact.first())
+                    .duped()
+                    .collect();
                 let forward: Vec<(Type, Type)> = lowers
                     .iter()
                     .chain(new_lowers.iter())
@@ -4298,7 +4327,7 @@ impl<'e> Walker<'e> {
     }
 
     /// Whether the evidence added since `before` agrees with itself: each new lower or exact
-    /// bound of a marker is a subtype of each of its new upper or exact bounds.
+    /// bound of a marker is a subtype of each of its new upper or exact bounds (`direct` ones).
     fn self_consistent<'cx>(
         &mut self,
         cx: &mut Context<'cx>,
@@ -4311,13 +4340,13 @@ impl<'e> Walker<'e> {
             .filter_map(|(name, now)| Some((before.get(name)?, now)))
             .flat_map(|(old, now)| {
                 let new_exact = &now.exact[old.exact.len()..];
-                let lowers: Vec<Type> = types(&now.lower[old.lower.len()..])
+                let lowers: Vec<Type> = newly_direct(&old.lower, &now.lower)
                     .chain(new_exact)
                     .duped()
                     .collect();
                 let uppers: Vec<Type> = new_exact
                     .iter()
-                    .chain(types(&now.upper[old.upper.len()..]))
+                    .chain(newly_direct(&old.upper, &now.upper))
                     .duped()
                     .collect();
                 lowers

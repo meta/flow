@@ -879,6 +879,35 @@ References:
                       ^^ [4]
 
 
+Error ---------------------------------------------------------------------------- union_member_partial_reversal.js:12:1
+
+Cannot call `f` because: [incompatible-type]
+ - Either in index `1`: property `c` is extra in object literal [1] but missing in `{a?: number, b?: string}` [2]. Exact
+   objects do not accept extra props.
+ - Or `[Box<{a: number, b: string}>, {c: 1}]` [3] has 2 elements but `[Box<{a: number, b: string}>]` [4] has 1 element.
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   union_member_partial_reversal.js:12:1
+   12| f(box, {c: 1}); // error: `c` is not a property of the config
+       ^
+
+References:
+   union_member_partial_reversal.js:12:8
+   12| f(box, {c: 1}); // error: `c` is not a property of the config
+              ^^^^^^ [1]
+   union_member_partial_reversal.js:5:22
+    5| declare var box: Box<{a: number, b: string}>;
+                            ^^^^^^^^^^^^^^^^^^^^^^ [2]
+   union_member_partial_reversal.js:12:1
+   12| f(box, {c: 1}); // error: `c` is not a property of the config
+       ^^^^^^^^^^^^^^ [3]
+   union_member_partial_reversal.js:7:46
+    7| declare function f<C extends {...}>(...args: [Box<C>] | [Box<C>, Partial<C>]): C;
+                                                    ^^^^^^^^ [4]
+
+
 Error -------------------------------------------------------------------------------------- union_same_class_fit.js:9:1
 
 Cannot cast `f(...)` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
@@ -897,4 +926,4 @@ References:
 
 
 
-Found 49 errors
+Found 50 errors
