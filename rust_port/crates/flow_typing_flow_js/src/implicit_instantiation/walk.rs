@@ -2417,6 +2417,25 @@ impl<'e> Walker<'e> {
                             // A spread of a type parameter, such as a generic rest parameter, is
                             // also that type parameter as the array.
                             TypeInner::GenericT(_) => (self.iterable_elem(cx, &t)?, Some(t.dupe())),
+                            // A spread of a union of tuples is also that union as the array, as the
+                            // call spreads each member, whose elements may be at any position.
+                            TypeInner::UnionT(_, rep)
+                                if rep
+                                    .members_iter()
+                                    .all(|m| tuple_elements(&self.resolve(cx, m)).is_some()) =>
+                            {
+                                let elems: Vec<Type> = rep
+                                    .members_iter()
+                                    .flat_map(|m| {
+                                        tuple_elements(&self.resolve(cx, m)).unwrap_or_default()
+                                    })
+                                    .collect();
+                                let reason = type_util::reason_of_t(&t).dupe();
+                                (
+                                    Some(type_util::union_of_ts(reason, elems, None)),
+                                    Some(t.dupe()),
+                                )
+                            }
                             _ => (self.iterable_elem(cx, &t)?, None),
                         };
                         let Some(elem) = elem else {
