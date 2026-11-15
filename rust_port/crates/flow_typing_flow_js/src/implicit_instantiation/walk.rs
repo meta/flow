@@ -729,6 +729,21 @@ impl TypeVisitor<()> for MarkerVisitor<'_> {
                     self.type_(cx, pole, (), t);
                 }
             }
+            // A type variable resolved to an instance, such as the `this` of a fixed instance, has
+            // the markers of the instance's type arguments.
+            TypeInner::OpenT(tvar) => {
+                if let constraint::Constraints::FullyResolved(s) =
+                    cx.find_constraints(tvar.id() as i32).1
+                    && let resolved = cx.force_fully_resolved_tvar(&s)
+                    && let TypeInner::DefT(_, d) = resolved.deref()
+                    && let DefTInner::InstanceT(i) = d.deref()
+                    && i.inst.class_name.is_some()
+                {
+                    for (_, _, t, _) in i.inst.type_args.iter() {
+                        self.type_(cx, pole, (), t);
+                    }
+                }
+            }
             _ => type_visitor::type_default(self, cx, pole, (), t),
         }
         // Unless a marker was found, the whole of `t` was visited.
@@ -4478,7 +4493,9 @@ impl<'e> Walker<'e> {
     }
 
     /// Walks the config of a component with only a rest parameter (`rest`) against `other` as if
-    /// it were `rest`, if that gives every marker of `rest` evidence; otherwise undoes the walk.
+    /// it were the expansion of `rest`, if that gives every marker of `rest` evidence; otherwise
+    /// undoes the walk. As the evaluation of the config expands `rest`, it never meets another
+    /// application of its alias argument by argument.
     fn walk_config_as_rest<'cx>(
         &mut self,
         cx: &mut Context<'cx>,
@@ -4487,9 +4504,16 @@ impl<'e> Walker<'e> {
         rest_is_upper: bool,
     ) -> Result<bool, FlowJsException> {
         let rest = if rest_is_upper { b } else { a };
+        let Some(expanded) = self.expand_typeapp(cx, rest) else {
+            return Ok(false);
+        };
         let markers = self.markers_in(cx, rest);
         let snapshot = self.snapshot();
-        self.walk(cx, a, b)?;
+        if rest_is_upper {
+            self.walk(cx, a, &expanded)?;
+        } else {
+            self.walk(cx, &expanded, b)?;
+        }
         let all = markers.iter().all(|m| {
             let bounds = &self.vars[m];
             !(bounds.lower.is_empty() && bounds.upper.is_empty() && bounds.exact.is_empty())
