@@ -1360,9 +1360,10 @@ impl<'e> Walker<'e> {
                 Ok(())
             }
             // An application meets the applications of the same alias or class among the members
-            // of a union, which it closely matches, and not the others: the first that it fits
-            // with the markers open and whose evidence agrees with the evidence so far, and none if
-            // no member does, as in the speculative match of the flow-based solve.
+            // of a union, which it closely matches, before the others: the first that it fits
+            // with the markers open and whose evidence agrees with the evidence so far, and the
+            // other members if no such member does, as in the speculative match of the flow-based
+            // solve.
             // The flow-based solve expands an alias first, so its body meets the members.
             (TypeInner::TypeAppT(a), TypeInner::UnionT(_, rep))
                 if !self.is_alias(cx, &a.type_)
@@ -1389,7 +1390,15 @@ impl<'e> Walker<'e> {
                     }
                     self.restore(snapshot);
                 }
-                Ok(())
+                let others: Vec<Type> = rep
+                    .members_iter()
+                    .filter(|m| !members.iter().any(|s| s.ptr_eq(m)))
+                    .duped()
+                    .collect();
+                if others.is_empty() {
+                    return Ok(());
+                }
+                self.walk_to_union(cx, &l, others)
             }
             // Nor does an application of a class meet an optional or maybe application of the same
             // class through its expansion: `null` and `void` play no part. (The flow-based solve
