@@ -94,15 +94,23 @@ pub mod implicit_type_argument {
 // and is contained in Ai.
 
 pub mod type_app_expansion {
+    use std::collections::BTreeSet;
+
     use flow_typing_flow_js_env::FlowJsEnv;
     use flow_typing_flow_js_env::type_app_expansion::Bound;
     use flow_typing_flow_js_env::type_app_expansion::Root;
     use flow_typing_flow_js_env::type_app_expansion::RootSet;
+    use flow_typing_type::type_::properties;
 
     use super::*;
 
     // visitor to collect roots of type applications nested in a type
-    struct RootsCollector;
+    #[derive(Default)]
+    struct RootsCollector {
+        /// The property maps already visited. Many properties can reach the same map, such as
+        /// the source object of a mapped type, which each property's type refers to.
+        seen_props: BTreeSet<properties::Id>,
+    }
 
     impl RootsCollector {
         fn arrtype(&self, r: &Reason, arr: &ArrType) -> Root {
@@ -150,10 +158,24 @@ pub mod type_app_expansion {
                 _ => flow_typing_visitors::type_visitor::type_default(self, cx, pole, acc, t),
             }
         }
+
+        fn props<'cx>(
+            &mut self,
+            cx: &mut Context<'cx>,
+            pole: Polarity,
+            acc: RootSet,
+            props_id: properties::Id,
+        ) -> RootSet {
+            if self.seen_props.insert(props_id.dupe()) {
+                flow_typing_visitors::type_visitor::props_default(self, cx, pole, acc, props_id)
+            } else {
+                acc
+            }
+        }
     }
 
     fn collect_roots<'cx>(cx: &mut Context<'cx>, t: &Type) -> RootSet {
-        let mut collector = RootsCollector;
+        let mut collector = RootsCollector::default();
         collector.type_(cx, Polarity::Neutral, RootSet::new(), t)
     }
 

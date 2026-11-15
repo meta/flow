@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::ops::Deref;
 use std::rc::Rc;
@@ -75,7 +76,13 @@ struct FvAcc {
     free: FlowOrdSet<SubstName>,
 }
 
-struct FreeVarVisitor;
+#[derive(Default)]
+struct FreeVarVisitor {
+    /// The type parameters free in each property map already visited. Many properties can reach
+    /// the same map, such as the source object of a mapped type, which each property's type
+    /// refers to.
+    seen_props: BTreeMap<properties::Id, FlowOrdSet<SubstName>>,
+}
 
 impl TypeVisitor<FvAcc> for FreeVarVisitor {
     fn type_<'cx>(
@@ -131,6 +138,40 @@ impl TypeVisitor<FvAcc> for FreeVarVisitor {
             }
             _ => flow_typing_visitors::type_visitor::type_default(self, cx, pole, acc, t),
         }
+    }
+
+    fn props<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        pole: Polarity,
+        mut acc: FvAcc,
+        props_id: properties::Id,
+    ) -> FvAcc {
+        let free_vars = match self.seen_props.get(&props_id) {
+            Some(free_vars) => free_vars.dupe(),
+            None => {
+                let free_vars = flow_typing_visitors::type_visitor::props_default(
+                    self,
+                    cx,
+                    pole,
+                    FvAcc {
+                        free: FlowOrdSet::new(),
+                        bound: FlowOrdSet::new(),
+                    },
+                    props_id.dupe(),
+                )
+                .free;
+                self.seen_props.insert(props_id, free_vars.dupe());
+                free_vars
+            }
+        };
+        acc.free.extend(
+            free_vars
+                .iter()
+                .filter(|name| !acc.bound.contains(*name))
+                .map(Dupe::dupe),
+        );
+        acc
     }
 
     fn destructor<'cx>(&mut self, cx: &mut Context<'cx>, acc: FvAcc, t: &Destructor) -> FvAcc {
@@ -211,7 +252,7 @@ pub fn free_var_finder<'cx>(
     t: &Type,
 ) -> FlowOrdSet<SubstName> {
     let bound = bound.unwrap_or_default();
-    let mut visitor = FreeVarVisitor;
+    let mut visitor = FreeVarVisitor::default();
     let result = visitor.type_(
         cx,
         Polarity::Positive,
@@ -229,7 +270,7 @@ fn props_free_vars(cx: &mut Context<'_>, id: &properties::Id) -> Rc<[SubstName]>
     if let Some(free_vars) = cx.property_map_free_vars(id) {
         return free_vars;
     }
-    let mut visitor = FreeVarVisitor;
+    let mut visitor = FreeVarVisitor::default();
     let free_vars: Rc<[SubstName]> = visitor
         .props(
             cx,
@@ -254,7 +295,7 @@ pub fn free_var_finder_in_destructor<'cx>(
     d: &Destructor,
 ) -> FlowOrdSet<SubstName> {
     let bound = bound.unwrap_or_default();
-    let mut visitor = FreeVarVisitor;
+    let mut visitor = FreeVarVisitor::default();
     let result = visitor.destructor(
         cx,
         FvAcc {
@@ -453,6 +494,10 @@ struct Substituter {
     cached_fvs: Option<(FlowOrdMap<SubstName, Replacement>, FlowOrdSet<SubstName>)>,
     /// How many polymorphic types the substitution is inside of.
     poly_depth: usize,
+    /// Finds the type parameters free in the property maps the substitution reaches, visiting
+    /// each map once. Many properties can reach the same map, such as the source object of a
+    /// mapped type, which each property's type refers to.
+    free_var_visitor: FreeVarVisitor,
 }
 
 impl Substituter {
@@ -462,7 +507,36 @@ impl Substituter {
             obj_reachable_targs: None,
             cached_fvs: None,
             poly_depth: 0,
+            free_var_visitor: FreeVarVisitor::default(),
         }
+    }
+
+    /// Whether `map` replaces a type parameter free in the property map `id`. The saved free type
+    /// parameters of the map can include more than it has now, so only a `false` from them is
+    /// checked against the map itself.
+    fn substitutes_in_props(
+        &mut self,
+        cx: &mut Context<'_>,
+        map: &FlowOrdMap<SubstName, Replacement>,
+        id: &properties::Id,
+    ) -> bool {
+        props_free_vars(cx, id)
+            .iter()
+            .any(|name| map.contains_key(name))
+            || self
+                .free_var_visitor
+                .props(
+                    cx,
+                    Polarity::Positive,
+                    FvAcc {
+                        free: FlowOrdSet::new(),
+                        bound: FlowOrdSet::new(),
+                    },
+                    id.dupe(),
+                )
+                .free
+                .iter()
+                .any(|name| map.contains_key(name))
     }
 
     /// The property map `id` with the substitution applied to each property when it is read.
@@ -623,6 +697,8 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
             id
         } else if let Some(new_id) = self.lazy_props(cx, map_cx, &id) {
             new_id
+        } else if !self.substitutes_in_props(cx, map, &id) {
+            id
         } else {
             props(self, cx, map_cx, id)
         }

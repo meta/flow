@@ -1314,6 +1314,7 @@ pub mod tvar_visitors {
     use std::collections::BTreeSet;
     use std::ops::Deref;
 
+    use dupe::Dupe;
     use flow_common::polarity::Polarity;
     use flow_typing_context::Context;
     use flow_typing_type::type_::Destructor;
@@ -1323,9 +1324,11 @@ pub mod tvar_visitors {
     use flow_typing_type::type_::TypeInner;
     use flow_typing_type::type_::constraint::Constraints;
     use flow_typing_type::type_::eval;
+    use flow_typing_type::type_::properties;
     use flow_typing_type::type_util;
     use flow_typing_visitors::type_visitor::TypeVisitor;
     use flow_typing_visitors::type_visitor::eval_id_default;
+    use flow_typing_visitors::type_visitor::props_default;
     use flow_typing_visitors::type_visitor::type_default;
 
     enum TvarVisitorResult {
@@ -1333,7 +1336,27 @@ pub mod tvar_visitors {
         EncounteredUnresolvedTvar,
     }
 
-    type Seen = BTreeSet<i32>;
+    /// The tvars and the property maps already visited. Many properties can reach the same map,
+    /// such as the source object of a mapped type, which each property's type refers to.
+    #[derive(Default)]
+    struct Seen {
+        tvars: BTreeSet<i32>,
+        props: BTreeSet<properties::Id>,
+    }
+
+    fn props_once<'cx, V: TypeVisitor<Result<Seen, TvarVisitorResult>>>(
+        visitor: &mut V,
+        cx: &mut Context<'cx>,
+        pole: Polarity,
+        acc: Result<Seen, TvarVisitorResult>,
+        props_id: properties::Id,
+    ) -> Result<Seen, TvarVisitorResult> {
+        let mut seen = acc?;
+        if !seen.props.insert(props_id.dupe()) {
+            return Ok(seen);
+        }
+        props_default(visitor, cx, pole, Ok(seen), props_id)
+    }
 
     struct HasPlaceholdersVisitor;
 
@@ -1347,11 +1370,11 @@ pub mod tvar_visitors {
         ) -> Result<Seen, TvarVisitorResult> {
             let mut seen = acc?;
             let (root_id, constraints) = cx.find_constraints(id);
-            if seen.contains(&root_id) {
+            if seen.tvars.contains(&root_id) {
                 return Ok(seen);
             }
 
-            seen.insert(root_id);
+            seen.tvars.insert(root_id);
             match constraints {
                 Constraints::FullyResolved(_) => Ok(seen),
                 Constraints::Resolved(t) => self.type_(cx, pole, Ok(seen), &t),
@@ -1396,11 +1419,21 @@ pub mod tvar_visitors {
         ) -> Result<Seen, TvarVisitorResult> {
             self.constraint_node(cx, pole, acc, id as i32)
         }
+
+        fn props<'cx>(
+            &mut self,
+            cx: &mut Context<'cx>,
+            pole: Polarity,
+            acc: Result<Seen, TvarVisitorResult>,
+            props_id: properties::Id,
+        ) -> Result<Seen, TvarVisitorResult> {
+            props_once(self, cx, pole, acc, props_id)
+        }
     }
 
     pub fn has_placeholders(cx: &mut Context<'_>, t: &Type) -> bool {
         let mut visitor = HasPlaceholdersVisitor;
-        match visitor.type_(cx, Polarity::Positive, Ok(BTreeSet::new()), t) {
+        match visitor.type_(cx, Polarity::Positive, Ok(Seen::default()), t) {
             Err(TvarVisitorResult::EncounteredPlaceholderType) => true,
             _ => false,
         }
@@ -1420,10 +1453,10 @@ pub mod tvar_visitors {
         ) -> Result<Seen, TvarVisitorResult> {
             let mut seen = acc?;
             let (root_id, constraints) = cx.find_constraints(id);
-            if seen.contains(&root_id) {
+            if seen.tvars.contains(&root_id) {
                 Ok(seen)
             } else {
-                seen.insert(root_id);
+                seen.tvars.insert(root_id);
                 match constraints {
                     Constraints::FullyResolved(_) => Ok(seen),
                     Constraints::Resolved(t) => self.type_(cx, pole, Ok(seen), &t),
@@ -1471,6 +1504,16 @@ pub mod tvar_visitors {
                 acc
             }
         }
+
+        fn props<'cx>(
+            &mut self,
+            cx: &mut Context<'cx>,
+            pole: Polarity,
+            acc: Result<Seen, TvarVisitorResult>,
+            props_id: properties::Id,
+        ) -> Result<Seen, TvarVisitorResult> {
+            props_once(self, cx, pole, acc, props_id)
+        }
     }
 
     struct HasUnresolvedTvarsOrPlaceholdersVisitor;
@@ -1485,10 +1528,10 @@ pub mod tvar_visitors {
         ) -> Result<Seen, TvarVisitorResult> {
             let mut seen = acc?;
             let (root_id, constraints) = cx.find_constraints(id);
-            if seen.contains(&root_id) {
+            if seen.tvars.contains(&root_id) {
                 Ok(seen)
             } else {
-                seen.insert(root_id);
+                seen.tvars.insert(root_id);
                 match constraints {
                     Constraints::FullyResolved(_) => Ok(seen),
                     Constraints::Resolved(t) => self.type_(cx, pole, Ok(seen), &t),
@@ -1529,11 +1572,21 @@ pub mod tvar_visitors {
         ) -> Result<Seen, TvarVisitorResult> {
             self.constraint_node(cx, pole, acc, id as i32)
         }
+
+        fn props<'cx>(
+            &mut self,
+            cx: &mut Context<'cx>,
+            pole: Polarity,
+            acc: Result<Seen, TvarVisitorResult>,
+            props_id: properties::Id,
+        ) -> Result<Seen, TvarVisitorResult> {
+            props_once(self, cx, pole, acc, props_id)
+        }
     }
 
     pub fn has_unresolved_tvars_or_placeholders<'cx>(cx: &mut Context<'cx>, t: &Type) -> bool {
         let mut visitor = HasUnresolvedTvarsOrPlaceholdersVisitor;
-        match visitor.type_(cx, Polarity::Positive, Ok(BTreeSet::new()), t) {
+        match visitor.type_(cx, Polarity::Positive, Ok(Seen::default()), t) {
             Err(TvarVisitorResult::EncounteredUnresolvedTvar) => true,
             Err(TvarVisitorResult::EncounteredPlaceholderType) => true,
             Ok(_) => false,
@@ -1556,7 +1609,7 @@ pub mod tvar_visitors {
         visit_eval_cache: bool,
     ) -> bool {
         let mut visitor = HasUnresolvedTvarsVisitor { visit_eval_cache };
-        match visitor.type_(cx, Polarity::Positive, Ok(BTreeSet::new()), t) {
+        match visitor.type_(cx, Polarity::Positive, Ok(Seen::default()), t) {
             Err(TvarVisitorResult::EncounteredUnresolvedTvar) => true,
             _ => false,
         }
@@ -1566,7 +1619,7 @@ pub mod tvar_visitors {
         let mut visitor = HasUnresolvedTvarsVisitor {
             visit_eval_cache: true,
         };
-        match visitor.destructor(cx, Ok(BTreeSet::new()), d) {
+        match visitor.destructor(cx, Ok(Seen::default()), d) {
             Err(TvarVisitorResult::EncounteredUnresolvedTvar) => true,
             _ => false,
         }

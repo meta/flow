@@ -6,6 +6,7 @@
  */
 
 use std::collections::BTreeMap;
+use std::mem;
 use std::ops::Deref;
 
 use dupe::Dupe;
@@ -20,6 +21,7 @@ use flow_typing_type::type_::TypeInner;
 use flow_typing_type::type_::constraint::Constraints;
 use flow_typing_type::type_::constraint::forcing_state::ForcingState;
 use flow_typing_type::type_::empty_t;
+use flow_typing_type::type_::properties;
 use flow_typing_type::type_::union_rep::UnionKind;
 use flow_typing_type::type_util;
 use flow_typing_visitors::type_visitor;
@@ -35,6 +37,12 @@ where
 {
     no_lowers: F,
     filter_empty: bool,
+    /// The property maps already visited, and whether placeholders occur in them, or `None`
+    /// while a map is being visited. Many properties can reach the same map, such as the source
+    /// object of a mapped type, which each property's type refers to.
+    seen_props: BTreeMap<properties::Id, Option<bool>>,
+    /// Whether the walk reached a tvar that is still being resolved since this was last reset.
+    reached_unfinished_tvar: bool,
 }
 
 type Acc = (BTreeMap<i32, bool>, bool);
@@ -57,6 +65,9 @@ where
             Constraints::Unresolved(_) | Constraints::Resolved(_) => {
                 let (mut seen_tvars, seen_placeholders) = seen;
                 if let Some(&seen_placeholders_in_map) = seen_tvars.get(&root_id) {
+                    // A finished tvar without placeholders is fully resolved, so only a tvar
+                    // that is still being resolved maps to `false` here.
+                    self.reached_unfinished_tvar |= !seen_placeholders_in_map;
                     return (seen_tvars, seen_placeholders_in_map);
                 }
                 seen_tvars.insert(root_id, false);
@@ -115,6 +126,47 @@ where
     ) -> Acc {
         self.constraint_node(cx, pole, seen, r, id as i32)
     }
+
+    fn props<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        pole: Polarity,
+        seen: Acc,
+        props_id: properties::Id,
+    ) -> Acc {
+        match self.seen_props.get(&props_id).copied() {
+            Some(Some(seen_placeholders_in_props)) => {
+                let (seen_tvars, seen_placeholders) = seen;
+                (seen_tvars, seen_placeholders || seen_placeholders_in_props)
+            }
+            // A map reached again through a cycle is visited again, so that the tvars on the
+            // cycle see all of its placeholders.
+            Some(None) => type_visitor::props_default(self, cx, pole, seen, props_id),
+            None => {
+                let (seen_tvars, seen_placeholders) = seen;
+                let reached_unfinished_tvar =
+                    mem::replace(&mut self.reached_unfinished_tvar, false);
+                self.seen_props.insert(props_id.dupe(), None);
+                let (seen_tvars, seen_placeholders_in_props) = type_visitor::props_default(
+                    self,
+                    cx,
+                    pole,
+                    (seen_tvars, false),
+                    props_id.dupe(),
+                );
+                // A tvar that is still being resolved hides its placeholders until it is
+                // finished, so a map whose walk reached one is visited again when reached again.
+                if self.reached_unfinished_tvar {
+                    self.seen_props.remove(&props_id);
+                } else {
+                    self.seen_props
+                        .insert(props_id, Some(seen_placeholders_in_props));
+                }
+                self.reached_unfinished_tvar |= reached_unfinished_tvar;
+                (seen_tvars, seen_placeholders || seen_placeholders_in_props)
+            }
+        }
+    }
 }
 
 pub fn resolve<'cx, F>(cx: &mut Context<'cx>, no_lowers: F, filter_empty: bool, t: &Type)
@@ -124,6 +176,8 @@ where
     let mut resolver = Resolver {
         no_lowers,
         filter_empty,
+        seen_props: BTreeMap::new(),
+        reached_unfinished_tvar: false,
     };
     resolver.type_(cx, Polarity::Positive, (BTreeMap::new(), false), t);
 }
@@ -139,6 +193,9 @@ where
 struct AbortableResolver {
     filter_empty: bool,
     aborted: bool,
+    /// As in [`Resolver`].
+    seen_props: BTreeMap<properties::Id, Option<bool>>,
+    reached_unfinished_tvar: bool,
 }
 
 impl AbortableResolver {
@@ -159,6 +216,9 @@ impl AbortableResolver {
             Constraints::Unresolved(_) | Constraints::Resolved(_) => {
                 let (mut seen_tvars, seen_placeholders) = seen;
                 if let Some(&seen_placeholders_in_map) = seen_tvars.get(&root_id) {
+                    // A finished tvar without placeholders is fully resolved, so only a tvar
+                    // that is still being resolved maps to `false` here.
+                    self.reached_unfinished_tvar |= !seen_placeholders_in_map;
                     return (seen_tvars, seen_placeholders_in_map);
                 }
                 seen_tvars.insert(root_id, false);
@@ -223,6 +283,48 @@ impl TypeVisitor<Acc> for AbortableResolver {
     ) -> Acc {
         self.constraint_node(cx, pole, seen, r, id as i32)
     }
+
+    fn props<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        pole: Polarity,
+        seen: Acc,
+        props_id: properties::Id,
+    ) -> Acc {
+        if self.aborted {
+            return seen;
+        }
+        match self.seen_props.get(&props_id).copied() {
+            Some(Some(seen_placeholders_in_props)) => {
+                let (seen_tvars, seen_placeholders) = seen;
+                (seen_tvars, seen_placeholders || seen_placeholders_in_props)
+            }
+            Some(None) => type_visitor::props_default(self, cx, pole, seen, props_id),
+            None => {
+                let (seen_tvars, seen_placeholders) = seen;
+                let reached_unfinished_tvar =
+                    mem::replace(&mut self.reached_unfinished_tvar, false);
+                self.seen_props.insert(props_id.dupe(), None);
+                let (seen_tvars, seen_placeholders_in_props) = type_visitor::props_default(
+                    self,
+                    cx,
+                    pole,
+                    (seen_tvars, false),
+                    props_id.dupe(),
+                );
+                // A tvar that is still being resolved hides its placeholders until it is
+                // finished, so a map whose walk reached one is visited again when reached again.
+                if self.reached_unfinished_tvar {
+                    self.seen_props.remove(&props_id);
+                } else {
+                    self.seen_props
+                        .insert(props_id, Some(seen_placeholders_in_props));
+                }
+                self.reached_unfinished_tvar |= reached_unfinished_tvar;
+                (seen_tvars, seen_placeholders || seen_placeholders_in_props)
+            }
+        }
+    }
 }
 
 pub fn resolved_t_abortable<'cx>(
@@ -233,6 +335,8 @@ pub fn resolved_t_abortable<'cx>(
     let mut resolver = AbortableResolver {
         filter_empty,
         aborted: false,
+        seen_props: BTreeMap::new(),
+        reached_unfinished_tvar: false,
     };
     resolver.type_(cx, Polarity::Positive, (BTreeMap::new(), false), &t);
     if resolver.aborted { None } else { Some(t) }

@@ -2876,6 +2876,10 @@ pub mod kit {
         unresolved: Option<Type>,
         expanding: BTreeSet<i32>,
         replaced_frozen_tvar_ids: BTreeSet<i32>,
+        /// The property maps already substituted outside of any expansion, and what they became.
+        /// Many properties can reach the same map, such as the source object of a mapped type,
+        /// which each property's type refers to.
+        substituted_props: BTreeMap<properties::Id, properties::Id>,
     }
 
     impl<'cx> TypeMapper<'cx, ()> for FrozenTvarSubstituter<'_> {
@@ -2897,7 +2901,16 @@ pub mod kit {
             map_cx: &(),
             id: properties::Id,
         ) -> properties::Id {
-            type_subst::props(self, cx, map_cx, id)
+            // Inside an expansion, what a tvar becomes depends on the tvars being expanded.
+            if !self.expanding.is_empty() {
+                return type_subst::props(self, cx, map_cx, id);
+            }
+            if let Some(substituted) = self.substituted_props.get(&id) {
+                return substituted.dupe();
+            }
+            let substituted = type_subst::props(self, cx, map_cx, id.dupe());
+            self.substituted_props.insert(id, substituted.dupe());
+            substituted
         }
 
         fn eval_id(&mut self, _cx: &mut Context<'cx>, _map_cx: &(), id: eval::Id) -> eval::Id {
@@ -2958,6 +2971,9 @@ pub mod kit {
     struct FrozenTvarCollector<'a> {
         env: &'a FlowJsEnv,
         frozen_tvars: BTreeMap<i32, FrozenTvarInfo>,
+        /// The property maps already visited. Many properties can reach the same map, such as
+        /// the source object of a mapped type, which each property's type refers to.
+        seen_props: BTreeSet<properties::Id>,
     }
 
     impl TypeVisitor<()> for FrozenTvarCollector<'_> {
@@ -2966,6 +2982,18 @@ pub mod kit {
                 self.frozen_tvars.insert(id, info);
             } else {
                 type_visitor::type_default(self, cx, pole, (), t);
+            }
+        }
+
+        fn props<'cx>(
+            &mut self,
+            cx: &mut Context<'cx>,
+            pole: Polarity,
+            acc: (),
+            props_id: properties::Id,
+        ) {
+            if self.seen_props.insert(props_id.dupe()) {
+                type_visitor::props_default(self, cx, pole, acc, props_id);
             }
         }
     }
@@ -3017,6 +3045,7 @@ pub mod kit {
             let mut collector = FrozenTvarCollector {
                 env: &env.solving_implicit_instantiation(),
                 frozen_tvars: BTreeMap::new(),
+                seen_props: BTreeSet::new(),
             };
             for t in ts {
                 collector.type_(cx, Polarity::Positive, (), t);
@@ -3123,6 +3152,7 @@ pub mod kit {
             )),
             expanding: BTreeSet::new(),
             replaced_frozen_tvar_ids: BTreeSet::new(),
+            substituted_props: BTreeMap::new(),
         };
         let hinted_l = substituter.type_(cx, &(), l.dupe());
         let hinted_u = substituter.type_(cx, &(), u.dupe());
@@ -3810,6 +3840,7 @@ pub mod kit {
                 let mut condition_collector = FrozenTvarCollector {
                     env: &nested_env,
                     frozen_tvars: BTreeMap::new(),
+                    seen_props: BTreeSet::new(),
                 };
                 condition_collector.type_(cx, Polarity::Positive, (), check_t);
                 condition_collector.type_(cx, Polarity::Positive, (), extends_t);
@@ -3817,6 +3848,7 @@ pub mod kit {
                 let mut branch_collector = FrozenTvarCollector {
                     env: &nested_env,
                     frozen_tvars: BTreeMap::new(),
+                    seen_props: BTreeSet::new(),
                 };
                 branch_collector.type_(cx, Polarity::Positive, (), true_t);
                 branch_collector.type_(cx, Polarity::Positive, (), false_t);
@@ -3883,6 +3915,7 @@ pub mod kit {
                         unresolved: None,
                         expanding: BTreeSet::new(),
                         replaced_frozen_tvar_ids: BTreeSet::new(),
+                        substituted_props: BTreeMap::new(),
                     };
                     let any_check = frozen_tvar_substituter.type_(cx, &(), check_t.dupe());
                     let any_extends = frozen_tvar_substituter.type_(cx, &(), extends_t.dupe());
