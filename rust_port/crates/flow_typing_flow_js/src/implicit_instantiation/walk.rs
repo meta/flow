@@ -3816,6 +3816,26 @@ impl<'e> Walker<'e> {
         if members.iter().any(|m| m.ptr_eq(l)) {
             return Ok(());
         }
+        // A type flows to an opaque type through its lower bound: an opaque member whose lower
+        // bound is a union, such as `React.Node`, stands for the members of that union.
+        let resolved_l = self.resolve(cx, l);
+        let members = members
+            .into_iter()
+            .map(|m| {
+                let resolved = self.resolve(cx, &m);
+                match resolved.deref() {
+                    TypeInner::NominalT { nominal_type, .. }
+                        if let Some(lower) = &nominal_type.lower_t
+                            && !same_nominal(&resolved_l, &resolved)
+                            && let lower = self.resolve(cx, lower)
+                            && matches!(lower.deref(), TypeInner::UnionT(..)) =>
+                    {
+                        lower
+                    }
+                    _ => m,
+                }
+            })
+            .collect();
         let members = self.flatten_aliases(cx, members);
         let n_members = members.len();
         let (naked, others): (Vec<Type>, Vec<Type>) = members
@@ -3837,6 +3857,15 @@ impl<'e> Walker<'e> {
         for m in &others {
             let m = self.resolve(cx, m);
             let mhead = self.head(cx, &m);
+            // An array type also matches an interface that it fits, such as `Iterable`, which
+            // subtyping compares structurally.
+            let fitting_interface = lhead == Head::Arr
+                && matches!(mhead, Head::Inst(_))
+                && matches!(
+                    self.instance_of(cx, &m),
+                    Some(i) if matches!(i.inst.inst_kind, InstanceKind::InterfaceKind { .. })
+                )
+                && self.fits_open(cx, l, &m)?;
             // An array type stands for its builtin class against an instance, as subtyping
             // relates an instance to the array type the member concretizes to: an `Array` to an
             // array, a `ReadonlyArray` to a read-only array, and nothing to a tuple.
@@ -3861,7 +3890,8 @@ impl<'e> Walker<'e> {
                         (ancestors.iter())
                             .any(|c| flow_js_utils::is_builtin_class_id(name, c.dupe(), cx))
                     })
-                    || (callable && mhead == Head::Fun))
+                    || (callable && mhead == Head::Fun)
+                    || fitting_interface)
             {
                 matching.push(m);
             }
