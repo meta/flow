@@ -397,6 +397,23 @@ References:
                                    ^^^^^^ [2]
 
 
+Error -------------------------------------------------------------------------------------- indexer_key_literal.js:22:1
+
+Cannot cast `get(...)` to `string` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   indexer_key_literal.js:22:1
+   22| get({a: 1, b: 'b'}, 'a') as string; // error
+       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   indexer_key_literal.js:22:9
+   22| get({a: 1, b: 'b'}, 'a') as string; // error
+               ^ [1]
+   indexer_key_literal.js:22:29
+   22| get({a: 1, b: 'b'}, 'a') as string; // error
+                                   ^^^^^^ [2]
+
+
 Error ---------------------------------------------------------------------------- interface_construct_signature.js:18:1
 
 Cannot cast `box` to `string` because `Box` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -844,4 +861,4 @@ References:
 
 
 
-Found 46 errors
+Found 47 errors

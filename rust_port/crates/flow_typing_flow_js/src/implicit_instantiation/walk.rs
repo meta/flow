@@ -6000,8 +6000,8 @@ fn branches<'cx>(
     }
 }
 
-/// The markers that `t` uses as the key of an indexer or as the index of an indexed access,
-/// including through the type arguments of an alias that uses its parameter so.
+/// The markers that `t` uses as the index of an indexed access, including through the type
+/// arguments of an alias that uses its parameter so.
 fn key_markers<'cx>(cx: &mut Context<'cx>, t: &Type, out: &mut BTreeSet<SubstName>) {
     key_markers_seen(cx, t, out, &mut BTreeSet::new());
 }
@@ -6038,13 +6038,6 @@ fn key_markers_seen<'cx>(
                     }
                     self.out.extend(inner);
                     return;
-                }
-                TypeInner::DefT(_, d) if let DefTInner::ObjT(o) = d.deref() => {
-                    if let Some(dict) = obj_type::get_dict_opt(&o.flags.obj_kind)
-                        && let Some(name) = marker(&dict.key)
-                    {
-                        self.out.insert(name);
-                    }
                 }
                 TypeInner::EvalT { defer_use_t, .. } => match defer_use_t.2.deref() {
                     Destructor::ElementType { index_type } => self.out.extend(marker(index_type)),
@@ -6913,8 +6906,8 @@ fn solve_targs_in_snapshot<'cx>(
             }
         }
     }
-    // A literal that a marker carries into a computed key or an index is needed precise too,
-    // as when the flow-based solve flows it there.
+    // A literal that a marker carries into an index is needed precise too, as when the
+    // flow-based solve flows it there.
     let mut literal_lowers: BTreeMap<SubstName, Vec<Type>> = BTreeMap::new();
     for (name, bounds) in walker.vars.iter() {
         for l in types(&bounds.lower) {
