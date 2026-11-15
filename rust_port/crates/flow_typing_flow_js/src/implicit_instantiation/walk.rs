@@ -69,6 +69,7 @@ use flow_typing_type::type_::UnionEnum;
 use flow_typing_type::type_::UnresolvedArgData;
 use flow_typing_type::type_::UnresolvedParam;
 use flow_typing_type::type_::UnsoundnessKind;
+use flow_typing_type::type_::dummy_prototype;
 use flow_typing_type::type_::inter_rep;
 use flow_typing_type::type_::mixed_t;
 use flow_typing_type::type_::null;
@@ -1563,6 +1564,37 @@ impl<'e> Walker<'e> {
                 if let Some(e) = self.expand_typeapp(cx, &u) =>
             {
                 self.walk(cx, &l, &e)
+            }
+            // An inexact object type of several properties meets an intersection one property at a
+            // time, as in subtyping: a member may have some of its properties, and another member
+            // the others.
+            (TypeInner::IntersectionT(..), TypeInner::DefT(r, d))
+                if let DefTInner::ObjT(uo) = d.deref()
+                    && uo.flags.obj_kind != ObjKind::Exact
+                    && cx.find_props(uo.props_tmap.dupe()).len() > 1 =>
+            {
+                let props: Vec<_> = (cx.find_props(uo.props_tmap.dupe()).iter())
+                    .map(|(name, p)| (name.dupe(), p.dupe()))
+                    .collect();
+                for (name, p) in props {
+                    let pmap =
+                        properties::PropertiesMap::from_btree_map(BTreeMap::from([(name, p)]));
+                    let single = ObjType {
+                        flags: uo.flags.clone(),
+                        props_tmap: cx.generate_property_map(pmap),
+                        proto_t: dummy_prototype(),
+                        call_t: uo.call_t,
+                        reachable_targs: Rc::from([]),
+                        strictness_kind: uo.strictness_kind,
+                        literal: uo.literal,
+                    };
+                    let single = Type::new(TypeInner::DefT(
+                        r.dupe(),
+                        DefT::new(DefTInner::ObjT(Rc::new(single))),
+                    ));
+                    self.walk(cx, &l, &single)?;
+                }
+                Ok(())
             }
             // An intersection of objects meets an object type through the first member that has
             // its required properties, fits it with the markers open, and whose evidence agrees,

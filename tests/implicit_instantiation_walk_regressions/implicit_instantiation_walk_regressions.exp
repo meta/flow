@@ -431,6 +431,24 @@ References:
               ^^^^^^ [2]
 
 
+Error ----------------------------------------------------------------------------- intersection_inexact_object.js:21:29
+
+Cannot call `listing` with `bad` bound to `items` because in array element > property `id`: `number` [1] is incompatible
+with `string` [2]. [incompatible-type]
+
+   intersection_inexact_object.js:21:29
+   21| listing({extra: 1}, render, bad); // error: `number` is not `string`
+                                   ^^^
+
+References:
+   intersection_inexact_object.js:18:48
+   18| declare const bad: ReadonlyArray<{readonly id: number}>;
+                                                      ^^^^^^ [1]
+   intersection_inexact_object.js:3:27
+    3| type Base = {readonly id: string, ...};
+                                 ^^^^^^ [2]
+
+
 Error ---------------------------------------------------------------------------------------- intersection_lower.js:6:1
 
 Cannot cast `i(...)` to `empty` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
@@ -861,4 +879,4 @@ References:
 
 
 
-Found 47 errors
+Found 48 errors
