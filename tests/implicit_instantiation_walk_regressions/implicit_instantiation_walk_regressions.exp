@@ -431,6 +431,21 @@ References:
               ^^^^^ [2]
 
 
+Error ----------------------------------------------------------------------------------------- jsx_render_hint.js:33:16
+
+Cannot create `Page` element because in property `header`: `Boundary` element [1] does not render `Header` [2].
+[incompatible-type]
+
+   jsx_render_hint.js:33:16
+   33| <Page header={<Boundary><Other /></Boundary>} />; // error
+                      ^^^^^^^^ [1]
+
+References:
+   jsx_render_hint.js:9:24
+    9| component Page(header: renders Header, footer?: renders Header) {
+                              ^^^^^^^^^^^^^^ [2]
+
+
 Error ---------------------------------------------------------------------------- literal_bound_mentions_other.js:18:15
 
 Cannot call `listenTo` because in type argument `N`: [incompatible-type]
@@ -829,4 +844,4 @@ References:
 
 
 
-Found 45 errors
+Found 46 errors

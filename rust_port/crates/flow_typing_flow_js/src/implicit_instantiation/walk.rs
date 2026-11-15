@@ -2287,24 +2287,36 @@ impl<'e> Walker<'e> {
             self.walk(cx, arg, param)?;
         }
         if let Some((hint, kind)) = return_hint {
-            // The flow-based solve drops a best-effort hint whose flow fails: keep its evidence
-            // only if it agrees with the evidence of the arguments, and if the return type fits
-            // the hint with the solution so far.
-            let snapshot =
-                (*kind == flow_common::hint::HintKind::BestEffortHint).then(|| self.snapshot());
-            self.in_hint = true;
-            self.walk(cx, signature.return_t, hint)?;
-            self.in_hint = false;
-            if let Some(snapshot) = snapshot
-                && !(self.agrees_with(cx, &snapshot.vars)?
-                    && self.fits_solution_so_far(cx, signature.return_t, hint)?)
-            {
-                self.restore(snapshot);
-            }
+            self.walk_return_hint(cx, signature.return_t, hint, kind)?;
         }
         self.walk_deferred(cx)?;
         for (arg, param) in &generic_values {
             self.walk(cx, arg, param)?;
+        }
+        Ok(())
+    }
+
+    /// The result of an operation against its hint.
+    fn walk_return_hint<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        result: &Type,
+        hint: &Type,
+        kind: &flow_common::hint::HintKind,
+    ) -> Result<(), FlowJsException> {
+        // The flow-based solve drops a best-effort hint whose flow fails: keep its evidence
+        // only if it agrees with the evidence of the arguments, and if the return type fits
+        // the hint with the solution so far.
+        let snapshot =
+            (*kind == flow_common::hint::HintKind::BestEffortHint).then(|| self.snapshot());
+        self.in_hint = true;
+        self.walk(cx, result, hint)?;
+        self.in_hint = false;
+        if let Some(snapshot) = snapshot
+            && !(self.agrees_with(cx, &snapshot.vars)?
+                && self.fits_solution_so_far(cx, result, hint)?)
+        {
+            self.restore(snapshot);
         }
         Ok(())
     }
@@ -6760,6 +6772,41 @@ fn solve_targs_in_snapshot<'cx>(
                 };
                 if let Some(props) = props {
                     walker.walk_jsx_props(cx, &jsx_props, &props)?;
+                    // The element renders what the component renders, which the flow-based solve
+                    // flows to the hint. Only a render type expected of the element, such as that
+                    // of a prop, also an optional one, is walked: the flow-based solve drops a
+                    // best-effort hint, such as the `React.Node` of a return, when its solution
+                    // fails, which the evidence of the walk does not show. (The element of a
+                    // component without a render type is a `React.MixedElement`.)
+                    let is_renders = |t: &Type| {
+                        matches!(t.deref(), TypeInner::DefT(_, d)
+                            if matches!(d.deref(), DefTInner::RendersT(_)))
+                    };
+                    let renders = match component.deref() {
+                        TypeInner::DefT(_, d) => match d.deref() {
+                            DefTInner::FunT(_, f) => Some(f.return_t.dupe()),
+                            DefTInner::ReactAbstractComponentT(c) => Some(c.renders.dupe()),
+                            _ => None,
+                        },
+                        _ => None,
+                    };
+                    let expected = return_hint.as_ref().map(|(hint, _)| {
+                        let mut t = walker.resolve(cx, hint);
+                        while let TypeInner::OptionalT { type_: inner, .. }
+                        | TypeInner::MaybeT(_, inner) = t.deref()
+                        {
+                            let inner = inner.dupe();
+                            t = walker.resolve(cx, &inner);
+                        }
+                        t
+                    });
+                    if let Some((hint, kind)) = return_hint
+                        && expected.as_ref().is_some_and(is_renders)
+                        && let Some(renders) = renders.map(|t| walker.resolve(cx, &t))
+                        && is_renders(&renders)
+                    {
+                        walker.walk_return_hint(cx, &renders, hint, kind)?;
+                    }
                     walker.walk_deferred(cx)?;
                 }
             }
