@@ -16,8 +16,8 @@
 //! and the operation is checked with the solution by the usual flows, which report the errors.
 //!
 //! A generic value is instantiated where the walk meets it, against the type it flows to with
-//! the solution so far in place of the markers. Generic values that are arguments are visited after
-//! the other arguments and the return hint.
+//! the solution so far in place of the markers. Generic values that are arguments, or props of an
+//! object literal argument, are visited after the other arguments and the return hint.
 //!
 //! A type destructor whose parts don't mention a marker is evaluated as usual. One that does is
 //! walked through: utilities that keep the shape of their argument (`$ReadOnly`, `Partial`, ...)
@@ -590,6 +590,11 @@ struct Walker<'e> {
     in_hint: bool,
     /// Set while the solution of a type parameter is walked against its bound.
     in_bound: bool,
+    /// Set while the arguments other than generic values are walked.
+    in_args: bool,
+    /// The props of object literal arguments that are generic values, with the props they flow
+    /// to, walked with the arguments that are generic values.
+    generic_props: Vec<(Property, Property)>,
     /// The type parameters the markers stand for.
     tparams: BTreeMap<SubstName, TypeParam>,
     /// The pairs `l <: [...prefix, ...T]` met, for the literals they need precise.
@@ -685,6 +690,7 @@ struct Snapshot {
     deferred: Vec<(Type, Type)>,
     pending_spreads: Vec<(Type, Type)>,
     spread_tuple_pairs: Vec<(Type, Type)>,
+    generic_props_len: usize,
 }
 
 /// Finds the markers in a type. An instance has them only through its type arguments, so its
@@ -818,6 +824,8 @@ impl<'e> Walker<'e> {
             spread_tuple_pairs: Vec::new(),
             in_hint: false,
             in_bound: false,
+            in_args: false,
+            generic_props: Vec::new(),
         }
     }
 
@@ -2231,7 +2239,8 @@ impl<'e> Walker<'e> {
     /// Walks the arguments of a call (or of `new`, or of a method call) against the signature it
     /// calls, and its result against the return hint, in this order: the receiver and the ordinary
     /// arguments, then the return hint, then the conditional types that waited for those, then the
-    /// generic values. `Err` names what the walk does not handle.
+    /// generic values, those among the props of object literal arguments first. `Err` names what the
+    /// walk does not handle.
     fn walk_call<'cx>(
         &mut self,
         cx: &mut Context<'cx>,
@@ -2323,13 +2332,20 @@ impl<'e> Walker<'e> {
             let arg = self.resolve(cx, arg);
             matches!(arg.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::PolyT(_)))
         });
-        for (arg, param) in &others {
-            self.walk(cx, arg, param)?;
-        }
+        self.in_args = true;
+        let walked = others
+            .iter()
+            .try_for_each(|(arg, param)| self.walk(cx, arg, param));
+        self.in_args = false;
+        walked?;
         if let Some((hint, kind)) = return_hint {
             self.walk_return_hint(cx, signature.return_t, hint, kind)?;
         }
         self.walk_deferred(cx)?;
+        let generic_props = std::mem::take(&mut self.generic_props);
+        generic_props
+            .iter()
+            .try_for_each(|(lprop, uprop)| self.walk_prop(cx, lprop, uprop, true))?;
         for (arg, param) in &generic_values {
             self.walk(cx, arg, param)?;
         }
@@ -3245,7 +3261,8 @@ impl<'e> Walker<'e> {
         lower_is_literal: bool,
     ) -> Result<(), FlowJsException> {
         // As with arguments, generic values go after the other props, which they are
-        // instantiated against the evidence of.
+        // instantiated against the evidence of: those of an object literal argument after the other
+        // arguments and the hint.
         let (generic_values, others): (Vec<_>, Vec<_>) = up.iter().partition(|(name, _)| {
             lp.get(name)
                 .and_then(property::read_t)
@@ -3254,6 +3271,16 @@ impl<'e> Walker<'e> {
                     matches!(t.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::PolyT(_)))
                 })
         });
+        let generic_values = if self.in_args && lower_is_literal {
+            for (name, uprop) in generic_values {
+                if let Some(lprop) = lp.get(name) {
+                    self.generic_props.push((lprop.dupe(), uprop.dupe()));
+                }
+            }
+            Vec::new()
+        } else {
+            generic_values
+        };
         for (name, uprop) in others.into_iter().chain(generic_values) {
             match lp.get(name) {
                 Some(lprop) => self.walk_prop(cx, lprop, uprop, lower_is_literal)?,
@@ -4134,6 +4161,7 @@ impl<'e> Walker<'e> {
             deferred: self.deferred.clone(),
             pending_spreads: self.pending_spreads.clone(),
             spread_tuple_pairs: self.spread_tuple_pairs.clone(),
+            generic_props_len: self.generic_props.len(),
         }
     }
 
@@ -4153,6 +4181,7 @@ impl<'e> Walker<'e> {
         self.deferred = snapshot.deferred;
         self.pending_spreads = snapshot.pending_spreads;
         self.spread_tuple_pairs = snapshot.spread_tuple_pairs;
+        self.generic_props.truncate(snapshot.generic_props_len);
     }
 
     /// Whether the evidence added since `before` agrees with the evidence there and with itself, as
