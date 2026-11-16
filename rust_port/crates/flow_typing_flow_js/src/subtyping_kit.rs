@@ -172,6 +172,66 @@ fn has_syntactic_nullish_member(t: &Type) -> bool {
     }
 }
 
+/// Whether `keyof o1` and `keyof o2` are the same keys, which needs no enumerating them: `o1`
+/// and `o2` are the same type parameter, or the same object or instance type.
+pub(crate) fn has_keys_of<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    o1: &Type,
+    o2: &Type,
+) -> Result<bool, FlowJsException> {
+    use flow_typing_generics::GenericBound;
+    use flow_typing_generics::GenericId;
+
+    // The id of a type parameter also records the type parameters that bound it, which do not
+    // change what it is.
+    fn is_same_type_parameter(g1: &GenericTData, g2: &GenericTData) -> bool {
+        match (&g1.id, &g2.id) {
+            (
+                GenericId::Bound(GenericBound { generic: p1, .. }),
+                GenericId::Bound(GenericBound { generic: p2, .. }),
+            ) => p1 == p2,
+            _ => false,
+        }
+    }
+
+    if let (GenericT(g1), GenericT(g2)) = (o1.deref(), o2.deref()) {
+        return Ok(is_same_type_parameter(g1, g2));
+    }
+    // Concretizing would add an upper bound to the placeholders of the type arguments being
+    // inferred.
+    if env.in_implicit_instantiation() {
+        return Ok(false);
+    }
+    let ts1 = FlowJs::possible_concrete_types_for_inspection_with_env(
+        cx,
+        env,
+        type_util::reason_of_t(o1),
+        o1,
+    )?;
+    let ts2 = FlowJs::possible_concrete_types_for_inspection_with_env(
+        cx,
+        env,
+        type_util::reason_of_t(o2),
+        o2,
+    )?;
+    let ([t1], [t2]) = (&ts1[..], &ts2[..]) else {
+        return Ok(false);
+    };
+    Ok(match (t1.deref(), t2.deref()) {
+        (GenericT(g1), GenericT(g2)) => is_same_type_parameter(g1, g2),
+        (DefT(_, deref!(ObjT(obj1))), DefT(_, deref!(ObjT(obj2)))) => {
+            obj1.props_tmap == obj2.props_tmap && obj1.flags.obj_kind == obj2.flags.obj_kind
+        }
+        (DefT(_, deref!(InstanceT(i1))), DefT(_, deref!(InstanceT(i2)))) => {
+            flow_js_utils::is_same_instance_type(i1, i2)
+                && i1.inst.type_args.is_empty()
+                && i2.inst.type_args.is_empty()
+        }
+        _ => t1.ptr_eq(t2),
+    })
+}
+
 struct OpaqueUpperBoundSpeculation<'a> {
     trace: DepthTrace,
     use_op: UseOp,
@@ -4113,6 +4173,11 @@ pub fn rec_sub_t<'cx>(
             Ok(())
         }
         (KeysT(reason1, o1), _) => {
+            if let KeysT(_, o2) = u.deref()
+                && has_keys_of(cx, env, o1, o2)?
+            {
+                return Ok(());
+            }
             // flow all keys of o1 to u
             FlowJs::rec_flow_with_env(
                 cx, env,

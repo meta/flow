@@ -60,3 +60,11 @@ function testKeysOfOtherObj(str: string, lit: 'hi') {
 
   123 as keyof ObjLit; // Error: number -> keys of ObjLit
 }
+
+function testKeysOfSameTypeParam<T>(k: keyof T): keyof T {
+  return k; // OK
+}
+
+function testKeysOfOtherTypeParam<T, S>(k: keyof T): keyof S {
+  return k; // Error
+}

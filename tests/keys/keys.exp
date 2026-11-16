@@ -394,6 +394,20 @@ References:
                 ^^^^^^^^^^^^ [2]
 
 
+Error ---------------------------------------------------------------------------------------------------- keys.js:69:10
+
+Cannot return `k` because `unknown` [1] is not an object. [not-an-object]
+
+   keys.js:69:10
+   69|   return k; // Error
+                ^
+
+References:
+   keys.js:68:50
+   68| function testKeysOfOtherTypeParam<T, S>(k: keyof T): keyof S {
+                                                        ^ [1]
+
+
 Error --------------------------------------------------------------------------------------------- suppressions.js:29:1
 
 Cannot cast `s` to `keyof ObjLit` because an index signature declaring the expected key / value type is missing in
@@ -485,4 +499,4 @@ References:
 
 
 
-Found 33 errors
+Found 34 errors

@@ -680,7 +680,13 @@ pub(super) fn handle_generic<'cx>(
             rec_flow(cx, env, trace, (&class_t, u))?;
             true
         }
-        TypeInner::KeysT(..) => {
+        TypeInner::KeysT(_, o1) => {
+            if let UseTInner::UseT(_, upper) = u.deref()
+                && let TypeInner::KeysT(_, o2) = upper.deref()
+                && crate::subtyping_kit::has_keys_of(cx, env, o1, o2)?
+            {
+                return Ok(true);
+            }
             let repos_bound = reposition_reason(cx, env, Some(trace), reason, false, bound)?;
             let seal = UseT::new(UseTInner::SealGenericT(Box::new(SealGenericTData {
                 loc: reason.loc().dupe(),
