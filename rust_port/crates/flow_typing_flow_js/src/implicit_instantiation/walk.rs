@@ -2370,6 +2370,13 @@ impl<'e> Walker<'e> {
             .try_for_each(|(arg, param)| self.walk(cx, arg, param));
         self.in_args = false;
         walked?;
+        // Pairs that wait for the evidence of other arguments, such as a spread tuple
+        // `[...A, ...B]` that waits for `A` from a rest argument, are walked again before the
+        // hint, so that the hint meets their evidence. Those still waiting wait again.
+        if return_hint.is_some() {
+            let deferred = std::mem::take(&mut self.deferred);
+            self.walk_again(cx, deferred)?;
+        }
         if let Some((hint, kind)) = return_hint {
             self.walk_return_hint(cx, signature.return_t, hint, kind)?;
         }
