@@ -433,22 +433,22 @@ Found exact match 'OptionalTuple' defined at complex_types.js:75:6,75:18 with ty
 === Promise Types ===
 Found exact match 'StringPromise' defined at complex_types.js:79:6,79:18 with type `type StringPromise = Promise<string>` 
 where
-'Promise' is defined at [LIB] misc.js:208:11-17
+'Promise' is defined at [LIB] misc.js:207:11-17
 
 Found exact match 'NestedPromise' defined at complex_types.js:80:6,80:18 with type `type NestedPromise = Promise<Promise<number>>` 
 where
-'Promise' is defined at [LIB] misc.js:208:11-17
+'Promise' is defined at [LIB] misc.js:207:11-17
 
 
 === Readonly Collections ===
 Found exact match 'ReadOnlyArray_t' defined at complex_types.js:84:6,84:20 with type `type ReadOnlyArray_t = ReadonlyArray<number>` 
 Found exact match 'ReadOnlyMap_t' defined at complex_types.js:85:6,85:18 with type `type ReadOnlyMap_t = ReadonlyMap<string, number>` 
 where
-'ReadonlyMap' is defined at [LIB] misc.js:243:11-21
+'ReadonlyMap' is defined at [LIB] misc.js:242:11-21
 
 Found exact match 'ReadOnlySet_t' defined at complex_types.js:86:6,86:18 with type `type ReadOnlySet_t = ReadonlySet<string>` 
 where
-'ReadonlySet' is defined at [LIB] misc.js:247:11-21
+'ReadonlySet' is defined at [LIB] misc.js:246:11-21
 
 
 === Interfaces ===
@@ -475,7 +475,7 @@ Found exact match 'Validators' defined at complex_types.js:210:6,210:15 with typ
 === Conditional Types ===
 Found exact match 'UnwrapPromise' defined at complex_types.js:125:6,125:18 with type `type UnwrapPromise<T> = T extends Promise<infer V> ? V : T` 
 where
-'Promise' is defined at [LIB] misc.js:208:11-17
+'Promise' is defined at [LIB] misc.js:207:11-17
 'V' is defined at complex_types.js:125:49
 
 Found exact match 'UnwrapArray' defined at complex_types.js:126:6,126:16 with type `type UnwrapArray<T> = T extends ReadonlyArray<infer V> ? V : T` 
@@ -488,11 +488,11 @@ Found exact match 'IsString' defined at complex_types.js:127:6,127:13 with type 
 Found exact match 'Middleware' defined at complex_types.js:143:6,143:15 with type `type Middleware<S, A> = (state: S, action: A, next: (A) => S) => S` 
 Found exact match 'Callback' defined at complex_types.js:144:6,144:13 with type `type Callback<T> = (error: Error | null, result: T) => void` 
 where
-'Error' is defined at [LIB] misc.js:318:11-15
+'Error' is defined at [LIB] misc.js:317:11-15
 
 Found exact match 'AsyncFn' defined at complex_types.js:145:6,145:12 with type `type AsyncFn<T> = () => Promise<T>` 
 where
-'Promise' is defined at [LIB] misc.js:208:11-17
+'Promise' is defined at [LIB] misc.js:207:11-17
 
 
 === Nested/Deep Object Types ===
@@ -522,7 +522,7 @@ component ComplexComponent(
 ```
 where
 'DeepConfig' is defined at complex_types.js:149:6-15 = {cache: {maxSize: number, ttl: number}, database: {credentials: {password: string, username: string}, host: string, port: number}, features: Readonly<{enableLogging: boolean, enableMetrics: boolean}>}
-'Error' is defined at [LIB] misc.js:318:11-15
+'Error' is defined at [LIB] misc.js:317:11-15
 'ReadOnlyUser' is defined at complex_types.js:13:6-17 = Readonly<User>
 'Result' is defined at complex_types.js:110:6-11
 
@@ -580,7 +580,7 @@ component ComplexComponent(
 ```
 where
 'DeepConfig' is defined at complex_types.js:149:6-15 = {cache: {maxSize: number, ttl: number}, database: {credentials: {password: string, username: string}, host: string, port: number}, features: Readonly<{enableLogging: boolean, enableMetrics: boolean}>}
-'Error' is defined at [LIB] misc.js:318:11-15
+'Error' is defined at [LIB] misc.js:317:11-15
 'ReadOnlyUser' is defined at complex_types.js:13:6-17 = Readonly<User>
 'Result' is defined at complex_types.js:110:6-11
 

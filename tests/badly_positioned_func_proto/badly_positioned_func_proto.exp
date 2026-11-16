@@ -12,8 +12,8 @@ References:
    test.js:1:16
      1| const arr = [1,2,3];
                        ^ [1]
-   <BUILTINS>/misc.js:296:11
-   296| interface Iterable<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:295:11
+   295| interface Iterable<out T, out TReturn = void, in TNext = void> {}
                   ^^^^^^^^ [2]
 
 
@@ -64,8 +64,8 @@ References:
    test.js:1:14
      1| const arr = [1,2,3];
                      ^ [1]
-   <BUILTINS>/misc.js:296:11
-   296| interface Iterable<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:295:11
+   295| interface Iterable<out T, out TReturn = void, in TNext = void> {}
                   ^^^^^^^^ [2]
 
 
@@ -116,8 +116,8 @@ References:
    test.js:1:16
      1| const arr = [1,2,3];
                        ^ [1]
-   <BUILTINS>/misc.js:296:11
-   296| interface Iterable<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:295:11
+   295| interface Iterable<out T, out TReturn = void, in TNext = void> {}
                   ^^^^^^^^ [2]
 
 

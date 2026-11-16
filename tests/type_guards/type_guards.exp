@@ -1725,8 +1725,8 @@ Error --------------------------------------------------------------------------
                                          ^^^^^^^^^^^ [2]
 
 References:
-   <BUILTINS>/misc.js:268:11
-   268| interface Generator<out T = unknown, out TReturn = any, in TNext = any> {}
+   <BUILTINS>/misc.js:267:11
+   267| interface Generator<out T = unknown, out TReturn = any, in TNext = any> {}
                   ^^^^^^^^^ [1]
 
 
@@ -1740,8 +1740,8 @@ Error --------------------------------------------------------------------------
                                          ^^^^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/misc.js:296:11
-   296| interface Iterable<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:295:11
+   295| interface Iterable<out T, out TReturn = void, in TNext = void> {}
                   ^^^^^^^^ [2]
 
 
@@ -1755,8 +1755,8 @@ Cannot return `(typeof x) == "number"` because `Generator<empty, boolean, empty>
                  ^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:268:11
-   268| interface Generator<out T = unknown, out TReturn = any, in TNext = any> {}
+   <BUILTINS>/misc.js:267:11
+   267| interface Generator<out T = unknown, out TReturn = any, in TNext = any> {}
                   ^^^^^^^^^ [1]
    invalid.js:19:34
     19| function *generator(x: unknown): x is number { // error
@@ -1798,8 +1798,8 @@ Cannot return `(typeof x) == "number"` because `Promise<boolean>` [1] is incompa
                  ^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:208:11
-   208| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:207:11
+   207| interface Promise<out T = unknown> {
                   ^^^^^^^ [1]
    invalid.js:28:35
     28| async function async(x: unknown): x is number { // error

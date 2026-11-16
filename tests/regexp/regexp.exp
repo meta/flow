@@ -186,11 +186,11 @@ References:
    <BUILTINS>/lib.es2020.string.js:30:22
     30|     matchAll(regexp: RegExp): RegExpStringIterator<RegExpExecArray>;
                              ^^^^^^ [2]
-   <BUILTINS>/misc.js:213:20
-   213|   matchAll(regexp: string | RegExp): RegExpStringIterator<RegExpExecArray>;
+   <BUILTINS>/misc.js:212:20
+   212|   matchAll(regexp: string | RegExp): RegExpStringIterator<RegExpExecArray>;
                            ^^^^^^ [3]
-   <BUILTINS>/misc.js:213:29
-   213|   matchAll(regexp: string | RegExp): RegExpStringIterator<RegExpExecArray>;
+   <BUILTINS>/misc.js:212:29
+   212|   matchAll(regexp: string | RegExp): RegExpStringIterator<RegExpExecArray>;
                                     ^^^^^^ [4]
 
 
