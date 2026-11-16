@@ -4044,6 +4044,35 @@ fn __flow_impl<'cx>(
         ) => {
             collector.add(l.dupe());
         }
+        (
+            IntersectionT(_, rep),
+            SpecializeT(box SpecializeTData {
+                targs: Some(ts), ..
+            }),
+        ) => {
+            // As in TypeScript, type arguments apply to the overloads that take that many.
+            let members = rep
+                .members_iter()
+                .map(|t| {
+                    helpers::possible_concrete_types_for_inspection(cx, env, reason_of_t(t), t)
+                })
+                .collect::<Result<Vec<_>, _>>()?
+                .concat();
+            let accepting = flow_js_utils::construct_ts_for_targs(&members, ts.len());
+            let all_accept = accepting.len() == members.len();
+            match flow_js_utils::combine_construct_ts(accepting) {
+                Some(t) if !all_accept => rec_flow(cx, env, trace, (&t, u))?,
+                _ => {
+                    callee_recorder::add_callee_use(
+                        env,
+                        callee_recorder::Kind::SigHelp,
+                        l.dupe(),
+                        u,
+                    );
+                    speculation_kit::try_intersection(cx, env, trace, u.dupe(), l.dupe(), rep)?;
+                }
+            }
+        }
         (IntersectionT(_, rep), _) => {
             // We only call CalleeRecorder here for sig-help information. As far as
             // the typed AST is concerned when dealing with intersections we record

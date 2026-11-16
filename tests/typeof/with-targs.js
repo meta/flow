@@ -42,3 +42,9 @@ class EscapedGeneric<T> {
 }
 emptyValue as typeof EscapedGeneric.x<number, boolean>; // ok: x is any
 emptyValue as typeof EscapedGenericExported.x<number, boolean>; // ok: x is any
+
+// Type arguments apply to the overloads that take that many
+declare function overloaded<A, B>(x: A, y: B): [A, B];
+declare function overloaded<T>(x: T): T;
+type Ret<F> = F extends (...args: ReadonlyArray<empty>) => infer R ? R : empty;
+1 as Ret<typeof overloaded<number>>; // ok
