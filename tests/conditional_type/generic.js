@@ -75,3 +75,10 @@ function union_as_upper_bound() {
   declare function getConditionalWithInfer<T>(v: T): ConditionalWithInfer<T>;
   <T>(t:T): T[0] | 'other' => getConditionalWithInfer(t); // error
 }
+
+// In the true branch, the check type is known to satisfy the extends type.
+type Upper<T> = T extends string ? Uppercase<T> : empty; // ok
+type UpperOfTuple<T> = [T] extends [string] ? Uppercase<T> : empty; // ok
+type UpperOfFalseBranch<T> = T extends string ? empty : Uppercase<T>; // error
+type UpperOfAny<T> = T extends any ? Uppercase<T> : empty; // error
+type UpperOfOptional<T> = [a?: T] extends [b?: string] ? Uppercase<T> : empty; // error

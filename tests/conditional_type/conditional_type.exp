@@ -806,6 +806,48 @@ References:
                           ^^^^^^^ [3]
 
 
+Error ------------------------------------------------------------------------------------------------- generic.js:82:67
+
+Cannot instantiate `Uppercase` because `unknown` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   generic.js:82:67
+   82| type UpperOfFalseBranch<T> = T extends string ? empty : Uppercase<T>; // error
+                                                                         ^ [1]
+
+References:
+   generic.js:82:57
+   82| type UpperOfFalseBranch<T> = T extends string ? empty : Uppercase<T>; // error
+                                                               ^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- generic.js:83:48
+
+Cannot instantiate `Uppercase` because `unknown` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   generic.js:83:48
+   83| type UpperOfAny<T> = T extends any ? Uppercase<T> : empty; // error
+                                                      ^ [1]
+
+References:
+   generic.js:83:38
+   83| type UpperOfAny<T> = T extends any ? Uppercase<T> : empty; // error
+                                            ^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- generic.js:84:68
+
+Cannot instantiate `Uppercase` because `unknown` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   generic.js:84:68
+   84| type UpperOfOptional<T> = [a?: T] extends [b?: string] ? Uppercase<T> : empty; // error
+                                                                          ^ [1]
+
+References:
+   generic.js:84:58
+   84| type UpperOfOptional<T> = [a?: T] extends [b?: string] ? Uppercase<T> : empty; // error
+                                                                ^^^^^^^^^^^^ [2]
+
+
 Error ---------------------------------------------------------------------------------------- infer_rest_bound.js:22:10
 
 Cannot return `x` because `unknown` [1] is incompatible with `ReadonlyArray<unknown>` [2]. [incompatible-type]
@@ -1719,4 +1761,4 @@ References:
 
 
 
-Found 109 errors
+Found 112 errors

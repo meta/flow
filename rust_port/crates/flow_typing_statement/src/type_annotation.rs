@@ -522,6 +522,107 @@ fn use_distributive_tparam_name_from_ast<'a>(
     }
 }
 
+/// The type parameter `t` where it is also known to satisfy `bound`, as in TypeScript: in the
+/// true branch of a conditional type that checks it.
+fn narrow_tparam(t: &Type, bound: Type) -> Option<Type> {
+    let type_::TypeInner::GenericT(box type_::GenericTData {
+        reason,
+        name,
+        id,
+        bound: declared_bound,
+        no_infer,
+    }) = t.deref()
+    else {
+        return None;
+    };
+    let bound = match declared_bound.deref() {
+        type_::TypeInner::DefT(_, d)
+            if matches!(
+                d.deref(),
+                type_::DefTInner::MixedT(type_::MixedFlavor::MixedEverything)
+            ) =>
+        {
+            bound
+        }
+        _ => Type::new(type_::TypeInner::IntersectionT(
+            type_util::reason_of_t(&bound).dupe(),
+            type_::inter_rep::make(declared_bound.dupe(), bound, Rc::from([])),
+        )),
+    };
+    Some(Type::new(type_::TypeInner::GenericT(Box::new(
+        type_::GenericTData {
+            reason: reason.dupe(),
+            name: name.dupe(),
+            id: id.clone(),
+            bound,
+            no_infer: *no_infer,
+        },
+    ))))
+}
+
+/// TypeScript's implied constraint of a conditional type: when its check type is a type
+/// parameter `T`, or `[T]` checked against a one element tuple, the name of `T` and the type
+/// that `T` is known to satisfy in the true branch. As in TypeScript, `any` and `unknown` imply
+/// nothing.
+fn implied_constraint(
+    check_type: &ast::types::Type<ALoc, ALoc>,
+    extends_type: &ast::types::Type<ALoc, (ALoc, Type)>,
+) -> Option<(SubstName, Type)> {
+    use flow_parser::ast::types::TypeInner;
+    use flow_parser::ast::types::generic::Identifier as GenericId;
+    use flow_parser::ast::types::tuple::Element;
+
+    // An optional element is `T | void`, not `T`.
+    fn element_type<M: Dupe, T: Dupe>(element: &Element<M, T>) -> Option<&ast::types::Type<M, T>> {
+        match element {
+            Element::UnlabeledElement {
+                annot,
+                optional: false,
+                ..
+            } => Some(annot),
+            Element::LabeledElement { element, .. } if !element.optional => Some(&element.annot),
+            Element::UnlabeledElement { .. }
+            | Element::LabeledElement { .. }
+            | Element::SpreadElement { .. } => None,
+        }
+    }
+
+    match (check_type.deref(), extends_type.deref()) {
+        (TypeInner::Generic { inner, .. }, _)
+            if let GenericId::Unqualified(ident) = &inner.id
+                && inner.targs.is_none() =>
+        {
+            let constraint = &extends_type.loc().1;
+            match constraint.deref() {
+                type_::TypeInner::AnyT(..) => None,
+                type_::TypeInner::DefT(_, d)
+                    if matches!(
+                        d.deref(),
+                        type_::DefTInner::MixedT(type_::MixedFlavor::MixedEverything)
+                    ) =>
+                {
+                    None
+                }
+                _ => Some((SubstName::name(ident.name.dupe()), constraint.dupe())),
+            }
+        }
+        (
+            TypeInner::Tuple {
+                inner: check_tuple, ..
+            },
+            TypeInner::Tuple {
+                inner: extends_tuple,
+                ..
+            },
+        ) if let [check_element] = &check_tuple.elements[..]
+            && let [extends_element] = &extends_tuple.elements[..] =>
+        {
+            implied_constraint(element_type(check_element)?, element_type(extends_element)?)
+        }
+        _ => None,
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MethodKind {
     FunctionKind,
@@ -1707,6 +1808,17 @@ fn convert_inner<'a>(
             let extends_type_ast = convert_inner(cx, &mut *env, &inner.extends_type)?;
             let extends_t = extends_type_ast.loc().1.dupe();
             env.infer_tparams_map = old_infer_tparams_map;
+            // An `infer` type parameter of the same name shadows the check type in the true branch.
+            if let Some((subst_name, constraint)) =
+                implied_constraint(&inner.check_type, &extends_type_ast)
+                && !additional_true_type_tparams_map.contains_key(&subst_name)
+                && let Some(narrowed) = env
+                    .tparams_map
+                    .get(&subst_name)
+                    .and_then(|t| narrow_tparam(t, constraint))
+            {
+                additional_true_type_tparams_map.insert(subst_name, narrowed);
+            }
             let mut old_true_tparams = Vec::new();
             for (k, v) in additional_true_type_tparams_map.iter() {
                 let old = env.tparams_map.get(k).map(|v| v.dupe());
