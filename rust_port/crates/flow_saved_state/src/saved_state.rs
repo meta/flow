@@ -7,10 +7,12 @@
 
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
+use std::collections::HashMap;
 use std::fmt;
 use std::fs::File;
 use std::io::Read;
 use std::io::Write;
+use std::iter;
 use std::path::Path;
 use std::sync::Arc;
 use std::time::Instant;
@@ -370,10 +372,63 @@ fn collect_saved_state_env_data(env: &Env, options: &Options) -> SavedStateEnvDa
     }
 }
 
-fn file_index(file_to_index: &BTreeMap<FileKey, u32>, file: &FileKey) -> u32 {
+fn file_index(file_to_index: &HashMap<FileKey, u32>, file: &FileKey) -> u32 {
     *file_to_index
         .get(file)
         .expect("file should have been collected in saved-state file table")
+}
+
+fn file_to_index(files: &[FileKey]) -> HashMap<FileKey, u32> {
+    files
+        .iter()
+        .enumerate()
+        .map(|(index, file)| {
+            (
+                file.dupe(),
+                u32::try_from(index).expect("saved-state file table index should fit in u32"),
+            )
+        })
+        .collect()
+}
+
+/// Merges `new_files`, none of which is in `files` yet, into the sorted file table `files`, keeping
+/// `file_to_index` up to date.
+fn add_to_file_table(
+    files: &mut Vec<FileKey>,
+    file_to_index: &mut HashMap<FileKey, u32>,
+    mut new_files: Vec<FileKey>,
+) {
+    if new_files.is_empty() {
+        return;
+    }
+    new_files.sort_unstable();
+    new_files.dedup();
+    let positions = new_files
+        .iter()
+        .map(|new_file| files.partition_point(|file| file < new_file))
+        .collect::<Vec<_>>();
+    for index in file_to_index.values_mut() {
+        let moved_by = positions.partition_point(|&position| position <= *index as usize);
+        *index += u32::try_from(moved_by).expect("saved-state file table index should fit in u32");
+    }
+    let mut merged = Vec::with_capacity(files.len() + new_files.len());
+    let mut start = 0;
+    for (new_file, &position) in new_files.iter().zip(&positions) {
+        merged.extend_from_slice(&files[start..position]);
+        merged.push(new_file.dupe());
+        start = position;
+    }
+    merged.extend_from_slice(&files[start..]);
+    *files = merged;
+    file_to_index.extend(new_files.into_iter().zip(positions).enumerate().map(
+        |(moved_by, (new_file, position))| {
+            (
+                new_file,
+                u32::try_from(position + moved_by)
+                    .expect("saved-state file table index should fit in u32"),
+            )
+        },
+    ));
 }
 
 fn file_from_index(files: &[FileKey], index: u32) -> Result<FileKey, InvalidReason> {
@@ -511,36 +566,51 @@ fn deserialize_file_table(bytes: &[u8]) -> Result<SavedStateEnvFileTable, Invali
     Ok(SavedStateEnvFileTable { files })
 }
 
-fn collect_graph_file_keys(graph: &Graph<FileKey>, file_keys: &mut BTreeSet<FileKey>) {
+fn graph_keys(graph: &Graph<FileKey>) -> Vec<FileKey> {
     graph.fold(
-        |file, dependencies, ()| {
-            file_keys.insert(file.dupe());
-            file_keys.extend(dependencies.iter().duped());
-            file_keys.extend(graph.find_backward(file).iter().duped());
+        |file, _dependencies, mut keys| {
+            keys.push(file.dupe());
+            keys
         },
-        (),
-    );
+        Vec::new(),
+    )
+}
+
+fn collect_graph_file_keys(
+    graph: &Graph<FileKey>,
+    is_new: &(impl Fn(&FileKey) -> bool + Sync),
+    file_keys: &mut Vec<FileKey>,
+) {
+    file_keys.par_extend(graph_keys(graph).par_iter().flat_map_iter(|file| {
+        iter::once(file)
+            .chain(graph.find(file))
+            .chain(graph.find_backward(file))
+            .filter(|file| is_new(file))
+            .duped()
+    }));
 }
 
 fn collect_export_index_file_keys(
     export_index: Option<&ExportIndex>,
-    file_keys: &mut BTreeSet<FileKey>,
+    is_new: &(impl Fn(&FileKey) -> bool + Sync),
+    file_keys: &mut Vec<FileKey>,
 ) {
     if let Some(export_index) = export_index {
-        for (_name, exports) in export_index {
-            for export in exports.as_ref().keys() {
-                let Export(source, _kind) = export;
-                if let Source::FileKey(file) = source {
-                    file_keys.insert(file.dupe());
-                }
-            }
-        }
+        let exports = export_index.values().collect::<Vec<_>>();
+        file_keys.par_extend(exports.par_iter().flat_map_iter(|exports| {
+            exports
+                .keys()
+                .filter_map(|Export(source, _kind)| match source {
+                    Source::FileKey(file) if is_new(file) => Some(file.dupe()),
+                    _ => None,
+                })
+        }));
     }
 }
 
 fn file_set_to_indices(
     files: FlowOrdSet<FileKey>,
-    file_to_index: &BTreeMap<FileKey, u32>,
+    file_to_index: &HashMap<FileKey, u32>,
 ) -> Vec<u32> {
     files
         .into_iter()
@@ -560,7 +630,7 @@ fn indices_to_file_set(
 
 fn file_key_set_to_indices(
     files: &BTreeSet<FileKey>,
-    file_to_index: &BTreeMap<FileKey, u32>,
+    file_to_index: &HashMap<FileKey, u32>,
 ) -> Vec<u32> {
     files
         .iter()
@@ -570,17 +640,11 @@ fn file_key_set_to_indices(
 
 fn indexed_graph_from_graph(
     graph: &Graph<FileKey>,
-    file_to_index: &BTreeMap<FileKey, u32>,
+    file_to_index: &HashMap<FileKey, u32>,
 ) -> SerializedIndexedGraph {
-    let keys = graph.fold(
-        |file, _dependencies, mut keys| {
-            keys.push(file.dupe());
-            keys
-        },
-        Vec::new(),
-    );
+    let keys = graph_keys(graph);
     let forward = keys
-        .iter()
+        .par_iter()
         .map(|file| {
             graph
                 .find_opt(file)
@@ -589,7 +653,7 @@ fn indexed_graph_from_graph(
         })
         .collect();
     let backward = keys
-        .iter()
+        .par_iter()
         .map(|file| {
             graph
                 .find_backward_opt(file)
@@ -598,7 +662,7 @@ fn indexed_graph_from_graph(
         })
         .collect();
     let keys = keys
-        .iter()
+        .par_iter()
         .map(|file| file_index(file_to_index, file))
         .collect();
     SerializedIndexedGraph {
@@ -614,7 +678,7 @@ fn graph_from_indexed_graph(files: &[FileKey], graph: SerializedIndexedGraph) ->
 
 fn source_to_serialized(
     source: &Source,
-    file_to_index: &BTreeMap<FileKey, u32>,
+    file_to_index: &HashMap<FileKey, u32>,
 ) -> SerializedSource {
     match source {
         Source::Global => SerializedSource::Global,
@@ -636,11 +700,13 @@ fn source_from_serialized(
 
 fn export_index_to_serialized(
     export_index: Option<ExportIndex>,
-    file_to_index: &BTreeMap<FileKey, u32>,
+    file_to_index: &HashMap<FileKey, u32>,
 ) -> Option<SerializedExportIndex> {
     export_index.map(|export_index| SerializedExportIndex {
         entries: export_index
             .into_iter()
+            .collect::<Vec<_>>()
+            .into_par_iter()
             .map(|(name, exports)| {
                 let exports = exports
                     .as_ref()
@@ -695,36 +761,41 @@ fn serialize_saved_state_env_data(
     SavedStateEnvBaseData,
     SerializedIndexedGraph,
     SerializedIndexedGraph,
+    HashMap<FileKey, u32>,
 ) {
-    let mut file_keys = BTreeSet::new();
-    file_keys.extend(heap_files);
-    file_keys.extend(data.parsed_files.iter().duped());
-    file_keys.extend(data.unparsed_files.iter().duped());
-    file_keys.extend(data.package_json_files.iter().duped());
-    file_keys.extend(data.global_lib_files.discovered.iter().duped());
-    file_keys.extend(data.global_lib_files.global_augmentations.iter().duped());
-    file_keys.extend(data.local_errors.keys().duped());
-    for (leader, others) in data.duplicate_providers.values() {
-        file_keys.insert(leader.dupe());
-        file_keys.extend(others.iter().duped());
-    }
-    collect_graph_file_keys(dependency_info.sig_dependency_graph(), &mut file_keys);
+    // The heap's file table is sorted and already holds nearly every file the env data refers
+    // to, so look those files up in it and add only the ones it lacks.
+    let mut files = heap_files;
+    let mut file_to_index = file_to_index(&files);
+    let is_new = |file: &FileKey| !file_to_index.contains_key(file);
+    let mut new_files = data
+        .parsed_files
+        .iter()
+        .chain(data.unparsed_files.iter())
+        .chain(data.package_json_files.iter())
+        .chain(data.global_lib_files.discovered.iter())
+        .chain(data.global_lib_files.global_augmentations.iter())
+        .chain(data.local_errors.keys())
+        .chain(
+            data.duplicate_providers
+                .values()
+                .flat_map(|(leader, others)| iter::once(leader).chain(others)),
+        )
+        .filter(|file| is_new(file))
+        .duped()
+        .collect::<Vec<_>>();
+    collect_graph_file_keys(
+        dependency_info.sig_dependency_graph(),
+        &is_new,
+        &mut new_files,
+    );
     collect_graph_file_keys(
         dependency_info.implementation_dependency_graph(),
-        &mut file_keys,
+        &is_new,
+        &mut new_files,
     );
-    collect_export_index_file_keys(data.export_index.as_ref(), &mut file_keys);
-    let files = file_keys.into_iter().collect::<Vec<_>>();
-    let file_to_index = files
-        .iter()
-        .enumerate()
-        .map(|(index, file)| {
-            (
-                file.dupe(),
-                u32::try_from(index).expect("saved-state file table index should fit in u32"),
-            )
-        })
-        .collect::<BTreeMap<_, _>>();
+    collect_export_index_file_keys(data.export_index.as_ref(), &is_new, &mut new_files);
+    add_to_file_table(&mut files, &mut file_to_index, new_files);
     let sig_dependency_graph =
         indexed_graph_from_graph(dependency_info.sig_dependency_graph(), &file_to_index);
     let implementation_dependency_graph = indexed_graph_from_graph(
@@ -784,6 +855,7 @@ fn serialize_saved_state_env_data(
         },
         sig_dependency_graph,
         implementation_dependency_graph,
+        file_to_index,
     )
 }
 
@@ -977,10 +1049,9 @@ fn write_serialized_env_data_with_heap_files(
     data: SavedStateEnvDataForSerialization,
     dependency_info: &DependencyInfo,
     heap_files: Vec<FileKey>,
-) -> Result<Vec<FileKey>, InvalidReason> {
-    let (file_table, data, sig_dependency_graph, implementation_dependency_graph) =
+) -> Result<(SavedStateEnvFileTable, HashMap<FileKey, u32>), InvalidReason> {
+    let (file_table, data, sig_dependency_graph, implementation_dependency_graph, file_to_index) =
         serialize_saved_state_env_data(data, dependency_info, heap_files);
-    let files = file_table.files.clone();
     write_serialized_file_table(file, &file_table)?;
     write_serialized_raw(file, "base", &data)?;
     write_serialized_raw(file, "sig graph", &sig_dependency_graph)?;
@@ -989,7 +1060,7 @@ fn write_serialized_env_data_with_heap_files(
         "implementation graph",
         &implementation_dependency_graph,
     )?;
-    Ok(files)
+    Ok((file_table, file_to_index))
 }
 
 fn read_serialized_env_data_with_files(
@@ -1055,7 +1126,7 @@ pub fn save(
     let env_data = collect_saved_state_env_data(env, options);
     flow_hh_logger::info!("Serializing env metadata");
     let heap_files = transaction.collect_heap_file_table();
-    let files = {
+    let (file_table, file_to_index) = {
         let dependency_info = env.dependency_info();
         write_serialized_env_data_with_heap_files(
             &mut file,
@@ -1066,7 +1137,7 @@ pub fn save(
     };
     flow_hh_logger::info!("Saving heap to saved-state file");
     let result = transaction
-        .save_heap_with_file_table(&mut file, &files)
+        .save_heap_with_file_table(&mut file, &file_table.files, &file_to_index)
         .map_err(|err| InvalidReason::Failed_to_load_heap(err.to_string()));
     drop(file);
     match result {

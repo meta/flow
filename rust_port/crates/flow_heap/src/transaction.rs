@@ -6,7 +6,6 @@
  */
 
 use std::collections::BTreeMap;
-use std::collections::BTreeSet;
 use std::collections::HashMap;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::Hash;
@@ -742,10 +741,17 @@ fn read_u64(reader: &mut impl Read) -> io::Result<u64> {
     Ok(u64::from_le_bytes(bytes))
 }
 
-fn write_compressed_block(writer: &mut impl Write, bytes: &[u8]) -> io::Result<()> {
-    let compressed = lz4_flex::compress_prepend_size(bytes);
+fn compress_block(bytes: &[u8]) -> Vec<u8> {
+    lz4_flex::compress_prepend_size(bytes)
+}
+
+fn write_block(writer: &mut impl Write, compressed: &[u8]) -> io::Result<()> {
     write_u64(writer, compressed.len() as u64)?;
-    writer.write_all(&compressed)
+    writer.write_all(compressed)
+}
+
+fn write_compressed_block(writer: &mut impl Write, bytes: &[u8]) -> io::Result<()> {
+    write_block(writer, &compress_block(bytes))
 }
 
 fn read_compressed_block(reader: &mut impl Read) -> io::Result<Vec<u8>> {
@@ -894,7 +900,7 @@ impl Transaction {
         });
     }
 
-    fn file_index(file_to_index: &BTreeMap<FileKey, u32>, file: &FileKey) -> u32 {
+    fn file_index(file_to_index: &HashMap<FileKey, u32>, file: &FileKey) -> u32 {
         *file_to_index
             .get(file)
             .expect("file should have been collected in heap file table")
@@ -907,18 +913,18 @@ impl Transaction {
             .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "invalid file index"))
     }
 
-    fn collect_dependency_file_keys(dependency: &Dependency, file_keys: &mut BTreeSet<FileKey>) {
+    fn collect_dependency_file_keys(dependency: &Dependency, file_keys: &mut Vec<FileKey>) {
         match dependency.target() {
             DependencyTarget::HasteModule(_) => {}
             DependencyTarget::File(file) => {
-                file_keys.insert(file.dupe());
+                file_keys.push(file.dupe());
             }
         }
     }
 
     fn collect_resolved_module_file_keys(
         module: &crate::resolved_requires::ResolvedModule,
-        file_keys: &mut BTreeSet<FileKey>,
+        file_keys: &mut Vec<FileKey>,
     ) {
         if let Some(dependency) = module.as_dependency() {
             Self::collect_dependency_file_keys(&dependency, file_keys);
@@ -927,7 +933,7 @@ impl Transaction {
 
     fn collect_resolved_requires_file_keys(
         resolved_requires: Option<ResolvedRequires>,
-        file_keys: &mut BTreeSet<FileKey>,
+        file_keys: &mut Vec<FileKey>,
     ) {
         if let Some(resolved_requires) = resolved_requires {
             for module in resolved_requires.get_resolved_modules() {
@@ -939,7 +945,7 @@ impl Transaction {
         }
     }
 
-    fn collect_parse_file_keys(parse: &Parse, file_keys: &mut BTreeSet<FileKey>) {
+    fn collect_parse_file_keys(parse: &Parse, file_keys: &mut Vec<FileKey>) {
         match parse {
             Parse::Typed(typed) => {
                 Self::collect_resolved_requires_file_keys(
@@ -947,7 +953,7 @@ impl Transaction {
                     file_keys,
                 );
                 if let Some(leader) = typed.leader.dupe() {
-                    file_keys.insert(leader);
+                    file_keys.push(leader);
                 }
             }
             Parse::Untyped(_) | Parse::Package(_) => {}
@@ -957,7 +963,7 @@ impl Transaction {
     fn collect_file_entry_file_keys(
         file_entry: Option<&FileEntry>,
         dependents: Option<&[FileKey]>,
-        file_keys: &mut BTreeSet<FileKey>,
+        file_keys: &mut Vec<FileKey>,
     ) {
         if let Some(dependents) = dependents {
             file_keys.extend(dependents.iter().map(Dupe::dupe));
@@ -967,7 +973,7 @@ impl Transaction {
                 Self::collect_parse_file_keys(&parse, file_keys);
             }
             if let Some(alternate_file) = file_entry.get_alternate_file() {
-                file_keys.insert(alternate_file);
+                file_keys.push(alternate_file);
             }
         }
     }
@@ -976,10 +982,10 @@ impl Transaction {
         haste_module: &HasteModule,
         dependents: Option<&[FileKey]>,
         provider_candidates: Option<&[FileKey]>,
-        file_keys: &mut BTreeSet<FileKey>,
+        file_keys: &mut Vec<FileKey>,
     ) {
         if let Some(provider) = haste_module.get_provider() {
-            file_keys.insert(provider);
+            file_keys.push(provider);
         }
         if let Some(dependents) = dependents {
             file_keys.extend(dependents.iter().map(Dupe::dupe));
@@ -1000,48 +1006,71 @@ impl Transaction {
     }
 
     /// Writes the heap this transaction reads. See [`Transaction::collect_heap_file_table`].
+    ///
+    /// `files` is a sorted file table that holds at least the heap's own file table, and
+    /// `file_to_index` maps each of its files to its position in it.
     pub fn save_heap_with_file_table(
         &self,
         writer: &mut impl Write,
         files: &[FileKey],
+        file_to_index: &HashMap<FileKey, u32>,
     ) -> io::Result<()> {
         self.with_committed_state(|state| {
-            Self::write_heap_with_file_table(writer, &state.data, files)
+            Self::write_heap_with_file_table(writer, &state.data, files, file_to_index)
         })
     }
 
     pub(crate) fn heap_file_table(data: &CommittedHeapData) -> Vec<FileKey> {
-        let mut file_keys = BTreeSet::new();
-        for (file, entry) in data.files.iter() {
-            file_keys.insert(file.dupe());
-            Self::collect_file_entry_file_keys(
-                Some(entry),
-                data.file_dependents
-                    .get(file)
-                    .map(|values| values.as_slice()),
-                &mut file_keys,
-            );
-        }
-        for (owner, dependents) in data.file_dependents.iter() {
-            file_keys.insert(owner.dupe());
-            file_keys.extend(dependents.iter().map(Dupe::dupe));
-        }
-        for (info, module) in data.haste_modules.iter() {
+        // Nearly every file the heap refers to has an entry or dependents of its own, so the table
+        // is those files plus the referenced files that are in neither map.
+        let is_key = |file: &FileKey| {
+            data.files.contains_key(file) || data.file_dependents.contains_key(file)
+        };
+        let entries = data.files.iter().collect::<Vec<_>>();
+        let file_dependents = data.file_dependents.iter().collect::<Vec<_>>();
+        let haste_modules = data.haste_modules.iter().collect::<Vec<_>>();
+        let entry_references = entries.par_iter().flat_map_iter(|(_, entry)| {
+            let mut file_keys = Vec::new();
+            Self::collect_file_entry_file_keys(Some(entry), None, &mut file_keys);
+            file_keys.into_iter().filter(|file| !is_key(file))
+        });
+        let dependent_references = file_dependents.par_iter().flat_map_iter(|(_, dependents)| {
+            dependents
+                .iter()
+                .filter(|file| !is_key(file))
+                .map(Dupe::dupe)
+        });
+        let haste_references = haste_modules.par_iter().flat_map_iter(|(info, module)| {
+            let mut file_keys = Vec::new();
             Self::collect_haste_module_file_keys(
                 module,
                 data.haste_dependents
-                    .get(info)
+                    .get(*info)
                     .map(|values| values.as_slice()),
                 data.haste_provider_candidates
-                    .get(info)
+                    .get(*info)
                     .map(|values| values.as_slice()),
                 &mut file_keys,
             );
-        }
-        file_keys.into_iter().collect()
+            file_keys.into_iter().filter(|file| !is_key(file))
+        });
+        let mut file_keys = entry_references
+            .chain(dependent_references)
+            .chain(haste_references)
+            .collect::<Vec<_>>();
+        file_keys.par_extend(entries.par_iter().map(|(file, _)| (*file).dupe()));
+        file_keys.par_extend(
+            file_dependents
+                .par_iter()
+                .filter(|(owner, _)| !data.files.contains_key(*owner))
+                .map(|(owner, _)| (*owner).dupe()),
+        );
+        file_keys.par_sort_unstable();
+        file_keys.dedup();
+        file_keys
     }
 
-    fn file_to_index(files: &[FileKey]) -> BTreeMap<FileKey, u32> {
+    fn file_to_index(files: &[FileKey]) -> HashMap<FileKey, u32> {
         files
             .iter()
             .enumerate()
@@ -1080,9 +1109,9 @@ impl Transaction {
         for (info, module) in data.haste_modules.iter() {
             shards[Self::shard_index(info)].push((info.dupe(), module.dupe()));
         }
-        for shard in &mut shards {
-            shard.sort_unstable_by(|(left, _), (right, _)| left.cmp(right));
-        }
+        shards
+            .par_iter_mut()
+            .for_each(|shard| shard.sort_unstable_by(|(left, _), (right, _)| left.cmp(right)));
         shards
     }
 
@@ -1100,9 +1129,9 @@ impl Transaction {
         };
         encode_into_writer(writer, &header)?;
         for shard in file_shards {
-            let mut files = BTreeSet::new();
+            let mut files = Vec::new();
             for (file, entry) in shard.iter() {
-                files.insert(file.dupe());
+                files.push(file.dupe());
                 Self::collect_file_entry_file_keys(
                     entry.as_ref(),
                     data.file_dependents
@@ -1111,7 +1140,8 @@ impl Transaction {
                     &mut files,
                 );
             }
-            let files = files.into_iter().collect::<Vec<_>>();
+            files.sort_unstable();
+            files.dedup();
             let file_to_index = Self::file_to_index(&files);
             let entries = shard
                 .iter()
@@ -1133,7 +1163,7 @@ impl Transaction {
             write_compressed_block(writer, &bytes)?;
         }
         for shard in Self::sharded_haste_modules(data) {
-            let mut files = BTreeSet::new();
+            let mut files = Vec::new();
             for (info, module) in shard.iter() {
                 Self::collect_haste_module_file_keys(
                     module,
@@ -1146,7 +1176,8 @@ impl Transaction {
                     &mut files,
                 );
             }
-            let files = files.into_iter().collect::<Vec<_>>();
+            files.sort_unstable();
+            files.dedup();
             let file_to_index = Self::file_to_index(&files);
             let entries = shard
                 .iter()
@@ -1177,65 +1208,94 @@ impl Transaction {
         writer: &mut impl Write,
         data: &CommittedHeapData,
         files: &[FileKey],
+        file_to_index: &HashMap<FileKey, u32>,
     ) -> std::io::Result<()> {
-        let file_shards = Self::sharded_file_entries(data);
+        // The file table is sorted and holds every file of the heap, so taking the heap's files
+        // in its order leaves each shard sorted.
+        let heap_files = files
+            .par_iter()
+            .enumerate()
+            .filter_map(|(index, file)| {
+                let entry = data.files.get(file);
+                (entry.is_some() || data.file_dependents.contains_key(file)).then(|| {
+                    (
+                        Self::shard_index(file),
+                        u32::try_from(index).expect("heap file table index should fit in u32"),
+                        file,
+                        entry,
+                    )
+                })
+            })
+            .collect::<Vec<_>>();
         let header = SerializedHeapHeader {
             magic: HEAP_MAGIC_RUST_SHARDED_INDEXED_LZ4_EXTERNAL_FILES,
-            file_count: file_shards.iter().map(Vec::len).sum::<usize>() as u64,
+            file_count: heap_files.len() as u64,
             haste_module_count: data.haste_modules.len() as u64,
             file_shard_count: GC_MAP_SHARDS as u64,
             haste_module_shard_count: GC_MAP_SHARDS as u64,
         };
-        let file_to_index = Self::file_to_index(files);
-        encode_into_writer(writer, &header)?;
-        for shard in file_shards {
-            let entries = shard
-                .iter()
-                .map(|(file, entry)| {
-                    (
-                        Self::file_index(&file_to_index, file),
-                        Self::serialized_file_entry(
-                            entry.as_ref(),
-                            data.file_dependents
-                                .get(file)
-                                .map(|values| values.as_slice()),
-                            &file_to_index,
-                        ),
-                    )
-                })
-                .collect();
-            let shard = SerializedFileHeapShard {
-                files: Vec::new(),
-                entries,
-            };
-            let bytes = encode_to_vec(&shard)?;
-            write_compressed_block(writer, &bytes)?;
+        let mut file_shards = (0..GC_MAP_SHARDS).map(|_| Vec::new()).collect::<Vec<_>>();
+        for (shard, index, file, entry) in heap_files {
+            file_shards[shard].push((index, file, entry));
         }
-        for shard in Self::sharded_haste_modules(data) {
-            let entries = shard
-                .iter()
-                .map(|(info, module)| {
-                    (
-                        info.dupe(),
-                        Self::serialized_haste_module(
-                            module,
-                            data.haste_dependents
-                                .get(info)
-                                .map(|values| values.as_slice()),
-                            data.haste_provider_candidates
-                                .get(info)
-                                .map(|values| values.as_slice()),
-                            &file_to_index,
-                        ),
-                    )
-                })
-                .collect();
-            let shard = SerializedHasteModuleHeapShard {
-                files: Vec::new(),
-                entries,
-            };
-            let bytes = encode_to_vec(&shard)?;
-            write_compressed_block(writer, &bytes)?;
+        // Shards are encoded and compressed independently, so build them in parallel and only
+        // write them in order.
+        let file_blocks = file_shards
+            .into_par_iter()
+            .map(|shard| {
+                let entries = shard
+                    .iter()
+                    .map(|(index, file, entry)| {
+                        (
+                            *index,
+                            Self::serialized_file_entry(
+                                *entry,
+                                data.file_dependents
+                                    .get(*file)
+                                    .map(|values| values.as_slice()),
+                                file_to_index,
+                            ),
+                        )
+                    })
+                    .collect();
+                let shard = SerializedFileHeapShard {
+                    files: Vec::new(),
+                    entries,
+                };
+                Ok(compress_block(&encode_to_vec(&shard)?))
+            })
+            .collect::<io::Result<Vec<_>>>()?;
+        let haste_blocks = Self::sharded_haste_modules(data)
+            .into_par_iter()
+            .map(|shard| {
+                let entries = shard
+                    .iter()
+                    .map(|(info, module)| {
+                        (
+                            info.dupe(),
+                            Self::serialized_haste_module(
+                                module,
+                                data.haste_dependents
+                                    .get(info)
+                                    .map(|values| values.as_slice()),
+                                data.haste_provider_candidates
+                                    .get(info)
+                                    .map(|values| values.as_slice()),
+                                file_to_index,
+                            ),
+                        )
+                    })
+                    .collect();
+                let shard = SerializedHasteModuleHeapShard {
+                    files: Vec::new(),
+                    entries,
+                };
+                Ok(compress_block(&encode_to_vec(&shard)?))
+            })
+            .collect::<io::Result<Vec<_>>>()?;
+        encode_into_writer(writer, &header)?;
+        for block in file_blocks.iter().chain(&haste_blocks) {
+            write_block(writer, block)?;
         }
         Ok(())
     }
@@ -1370,7 +1430,7 @@ impl Transaction {
 
     fn serialized_resolved_module(
         module: &ResolvedModule,
-        file_to_index: &BTreeMap<FileKey, u32>,
+        file_to_index: &HashMap<FileKey, u32>,
     ) -> SerializedResolvedModule {
         match module.to_result() {
             Ok(dependency) => match dependency.target() {
@@ -1388,7 +1448,7 @@ impl Transaction {
 
     fn serialized_dependency(
         dependency: &Dependency,
-        file_to_index: &BTreeMap<FileKey, u32>,
+        file_to_index: &HashMap<FileKey, u32>,
     ) -> SerializedDependency {
         match dependency.target() {
             DependencyTarget::HasteModule(info) => {
@@ -1402,7 +1462,7 @@ impl Transaction {
 
     fn serialized_resolved_requires(
         resolved_requires: Option<ResolvedRequires>,
-        file_to_index: &BTreeMap<FileKey, u32>,
+        file_to_index: &HashMap<FileKey, u32>,
     ) -> SerializedResolvedRequires {
         match resolved_requires {
             Some(resolved_requires) => SerializedResolvedRequires {
@@ -1424,7 +1484,7 @@ impl Transaction {
         }
     }
 
-    fn serialized_parse(parse: &Parse, file_to_index: &BTreeMap<FileKey, u32>) -> SerializedParse {
+    fn serialized_parse(parse: &Parse, file_to_index: &HashMap<FileKey, u32>) -> SerializedParse {
         match parse {
             Parse::Typed(typed) => SerializedParse::Typed(SerializedTypedParse {
                 file_hash: typed.file_hash,
@@ -1462,7 +1522,7 @@ impl Transaction {
     fn serialized_file_entry(
         file_entry: Option<&FileEntry>,
         dependents: Option<&[FileKey]>,
-        file_to_index: &BTreeMap<FileKey, u32>,
+        file_to_index: &HashMap<FileKey, u32>,
     ) -> SerializedFileEntry {
         let parse = file_entry.and_then(FileEntry::parse_latest);
         SerializedFileEntry {
@@ -1481,7 +1541,7 @@ impl Transaction {
         haste_module: &HasteModule,
         dependents: Option<&[FileKey]>,
         provider_candidates: Option<&[FileKey]>,
-        file_to_index: &BTreeMap<FileKey, u32>,
+        file_to_index: &HashMap<FileKey, u32>,
     ) -> SerializedHasteModule {
         SerializedHasteModule {
             provider: haste_module
@@ -1589,7 +1649,7 @@ impl Transaction {
         }
     }
 
-    fn sorted_file_indexes(files: &[FileKey], file_to_index: &BTreeMap<FileKey, u32>) -> Vec<u32> {
+    fn sorted_file_indexes(files: &[FileKey], file_to_index: &HashMap<FileKey, u32>) -> Vec<u32> {
         let mut indexes = files
             .iter()
             .map(|file| Self::file_index(file_to_index, file))
