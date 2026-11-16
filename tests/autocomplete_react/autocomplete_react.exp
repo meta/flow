@@ -273,7 +273,7 @@ Flags: --pretty
     },
     {
       "name":"ComponentProps",
-      "type":"type ComponentProps<T extends React$ElementType> = T extends component(...infer Props extends {...}) ? Props : T extends keyof React$JSXIntrinsicElements ? React$JSXIntrinsicElements[T] : empty"
+      "type":"type ComponentProps<T extends React$ElementType> = T extends component(...infer Props extends {...}) ? Props : T extends infer K extends keyof React$JSXIntrinsicElements ? React$JSXIntrinsicElements[K] : empty"
     },
     {
       "name":"ComponentPropsWithRef",
@@ -322,7 +322,7 @@ Flags: --pretty
     },
     {
       "name":"Defaultize",
-      "type":"type Defaultize<P, D> = P extends any ? string extends keyof P ? P : P extends ExactObjectType ? {...Pick<P, Exclude<keyof P, keyof D>>, ...InexactPartial<Pick<P, Extract<keyof P, keyof D>>>, ...InexactPartial<Pick<D, Exclude<keyof D, keyof P>>>} : {...Pick<P, Exclude<keyof P, keyof D>>, ...InexactPartial<Pick<P, Extract<keyof P, keyof D>>>, ...InexactPartial<Pick<D, Exclude<keyof D, keyof P>>>, ...} : empty"
+      "type":"type Defaultize<P extends interface {}, D extends interface {}> = P extends any ? string extends keyof P ? P : P extends ExactObjectType ? {...Pick<P, Exclude<keyof P, keyof D>>, ...InexactPartial<Pick<P, Extract<keyof P, keyof D>>>, ...InexactPartial<Pick<D, Exclude<keyof D, keyof P>>>} : {...Pick<P, Exclude<keyof P, keyof D>>, ...InexactPartial<Pick<P, Extract<keyof P, keyof D>>>, ...InexactPartial<Pick<D, Exclude<keyof D, keyof P>>>, ...} : empty"
     },
     {
       "name":"DelHTMLAttributes",
@@ -580,13 +580,16 @@ Flags: --pretty
     },
     {
       "name":"PropsOf",
-      "type":"type PropsOf<E extends string | MixedElement | React$RendersExactly<React$ElementType>> = E extends ExactReactElement_DEPRECATED<infer C> ? ComponentProps<C> : E extends React$RendersExactly<infer C> ? ComponentProps<C> : E extends string ? ComponentProps<E> : empty"
+      "type":"type PropsOf<E extends string | MixedElement | React$RendersExactly<React$ElementType>> = E extends ExactReactElement_DEPRECATED<infer C extends React$ElementType> ? ComponentProps<C> : E extends React$RendersExactly<infer C extends React$ElementType> ? ComponentProps<C> : E extends string ? ComponentProps<E> : empty"
     },
     {
       "name":"PropsWithChildren",
       "type":"type PropsWithChildren<out P = {...}> = P & {children?: React$Node, ...}"
     },
-    {"name":"PropsWithoutRef","type":"type PropsWithoutRef<P> = Omit<P, \"ref\">"},
+    {
+      "name":"PropsWithoutRef",
+      "type":"type PropsWithoutRef<P extends interface {}> = Omit<P, \"ref\">"
+    },
     {
       "name":"Provider",
       "type":"type Provider<in T> = component(children?: React$Node, value: T)"
@@ -601,7 +604,7 @@ Flags: --pretty
     },
     {
       "name":"ReactElement",
-      "type":"type ReactElement<out P = unknown, out T = React$ElementType> = ExactReactElement_DEPRECATED<T, P>"
+      "type":"type ReactElement<out P = unknown, out T extends React$ElementType = React$ElementType> = ExactReactElement_DEPRECATED<T, P>"
     },
     {
       "name":"ReactEventHandler",
@@ -610,7 +613,7 @@ Flags: --pretty
     {"name":"ReactInstance","type":"type ReactInstance = any"},
     {
       "name":"ReactManagedAttributes",
-      "type":"type ReactManagedAttributes<C, P> = Readonly<C extends {defaultProps: infer D, ...} ? Defaultize<P, D> : P>"
+      "type":"type ReactManagedAttributes<C, P extends interface {}> = Readonly<C extends {defaultProps: infer D extends interface {}, ...} ? Defaultize<P, D> : P>"
     },
     {"name":"ReactNode","type":"type ReactNode = React$Node"},
     {"name":"ReactPortal","type":"type ReactPortal = React$Portal"},
@@ -631,7 +634,7 @@ Flags: --pretty
     {"name":"RefObject","type":"type RefObject<T> = React$RefObject<T>"},
     {
       "name":"RefOf",
-      "type":"type RefOf<E extends string | MixedElement | React$RendersExactly<React$ElementType>> = E extends ExactReactElement_DEPRECATED<infer C> ? ElementRef<C> : E extends React$RendersExactly<infer C> ? ElementRef<C> : E extends string ? ElementRef<E> : empty"
+      "type":"type RefOf<E extends string | MixedElement | React$RendersExactly<React$ElementType>> = E extends ExactReactElement_DEPRECATED<infer C extends React$ElementType> ? ElementRef<C> : E extends React$RendersExactly<infer C extends React$ElementType> ? ElementRef<C> : E extends string ? ElementRef<E> : empty"
     },
     {
       "name":"RefSetter",
