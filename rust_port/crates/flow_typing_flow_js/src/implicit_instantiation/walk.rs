@@ -2360,10 +2360,9 @@ impl<'e> Walker<'e> {
             pairs.insert(0, (this_t.dupe(), this_param.dupe()));
         }
 
-        let (generic_values, others): (Vec<_>, Vec<_>) = pairs.into_iter().partition(|(arg, _)| {
-            let arg = self.resolve(cx, arg);
-            matches!(arg.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::PolyT(_)))
-        });
+        let (generic_values, others): (Vec<_>, Vec<_>) = pairs
+            .into_iter()
+            .partition(|(arg, _)| self.is_generic_value(cx, arg));
         self.in_args = true;
         let walked = others
             .iter()
@@ -2896,13 +2895,10 @@ impl<'e> Walker<'e> {
         let lp = cx.find_props(lo.props_tmap.dupe());
         let dict = obj_type::get_dict_opt(&lo.flags.obj_kind).cloned();
         // As with arguments, generic values go after the other props.
-        let (generic_values, others): (BTreeMap<_, _>, BTreeMap<_, _>) =
-            lp.iter().map(|(n, p)| (n.dupe(), p.dupe())).partition(|(_, p)| {
-                property::read_t(p).is_some_and(|t| {
-                    let t = self.resolve(cx, &t);
-                    matches!(t.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::PolyT(_)))
-                })
-            });
+        let (generic_values, others): (BTreeMap<_, _>, BTreeMap<_, _>) = lp
+            .iter()
+            .map(|(n, p)| (n.dupe(), p.dupe()))
+            .partition(|(_, p)| property::read_t(p).is_some_and(|t| self.is_generic_value(cx, &t)));
         let others = properties::PropertiesMap::from_btree_map(others);
         let generic_values = properties::PropertiesMap::from_btree_map(generic_values);
         self.walk_props(
@@ -3062,6 +3058,28 @@ impl<'e> Walker<'e> {
         });
         cx.reset_errors(errors);
         Ok(instantiation_solver::sandboxed(result)?.unwrap_or_default())
+    }
+
+    /// Whether `t` is a generic value: a polymorphic type, or an object or an instance whose call
+    /// signature is one, which the walk instantiates where it takes it to a function type.
+    fn is_generic_value<'cx>(&self, cx: &mut Context<'cx>, t: &Type) -> bool {
+        let t = self.resolve(cx, t);
+        let TypeInner::DefT(_, d) = t.deref() else {
+            return false;
+        };
+        let call = match d.deref() {
+            DefTInner::PolyT(_) => return true,
+            DefTInner::ObjT(o) => o.call_t,
+            DefTInner::InstanceT(i) => {
+                (self.ancestors(cx, i).into_iter()).find_map(|a| a.inst.inst_call_t)
+            }
+            _ => None,
+        };
+        call.is_some_and(|id| {
+            let call = cx.find_call(id);
+            matches!(self.resolve(cx, &call).deref(), TypeInner::DefT(_, d)
+                if matches!(d.deref(), DefTInner::PolyT(_)))
+        })
     }
 
     /// Whether `t` is an object or an instance with a call signature, or a class with a static one,
@@ -3324,10 +3342,7 @@ impl<'e> Walker<'e> {
         let (generic_values, others): (Vec<_>, Vec<_>) = up.iter().partition(|(name, _)| {
             lp.get(name)
                 .and_then(property::read_t)
-                .is_some_and(|t| {
-                    let t = self.resolve(cx, &t);
-                    matches!(t.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::PolyT(_)))
-                })
+                .is_some_and(|t| self.is_generic_value(cx, &t))
         });
         let generic_values = if self.in_args && lower_is_literal {
             for (name, uprop) in generic_values {

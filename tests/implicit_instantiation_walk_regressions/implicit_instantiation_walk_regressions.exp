@@ -317,6 +317,23 @@ References:
                       ^^^^^ [2]
 
 
+Error ----------------------------------------------------------------------------- generic_value_call_signature.js:22:1
+
+Cannot cast `s` to `empty` because `{x: number}` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   generic_value_call_signature.js:22:1
+   22| s as empty; // error
+       ^
+
+References:
+   generic_value_call_signature.js:16:15
+   16|   getState(): {x: number},
+                     ^^^^^^^^^^^ [1]
+   generic_value_call_signature.js:22:6
+   22| s as empty; // error
+            ^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------------ generic_value_defaults.js:7:1
 
 Cannot cast `a` to `empty` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
@@ -926,4 +943,4 @@ References:
 
 
 
-Found 50 errors
+Found 51 errors
