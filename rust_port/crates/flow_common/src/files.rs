@@ -990,34 +990,41 @@ fn realpath_filter(options: &FileOptions, path: &Path, all: bool, include_libdef
         && wanted_filter(options, path, all, include_libdef)
 }
 
+/// Whether `path` is somewhere the crawl looks: under `subdir` when the crawl is limited to one,
+/// and under the root (when it is implicitly included), an `[include]` path or a libdef.
 fn path_is_in_crawl_scope(
     options: &FileOptions,
     root: &Path,
+    subdir: Option<&Path>,
     path: &Path,
     include_libdef: bool,
 ) -> bool {
-    (options.implicitly_include_root && path.starts_with(root)) || {
-        let path_str = path.to_string_lossy();
-        is_included(options, &path_str)
-            || (include_libdef && is_dynamically_discovered_builtin_ts_libdef(options, &path_str))
-            || (include_libdef && is_configured_lib_file(options, &path_str))
-    }
+    subdir.is_none_or(|subdir| path.starts_with(subdir))
+        && ((options.implicitly_include_root && path.starts_with(root)) || {
+            let path_str = path.to_string_lossy();
+            is_included(options, &path_str)
+                || (include_libdef
+                    && is_dynamically_discovered_builtin_ts_libdef(options, &path_str))
+                || (include_libdef && is_configured_lib_file(options, &path_str))
+        })
 }
 
-fn no_subdir_path_filter(
+/// Whether the crawl reports the file at `path`.
+fn crawl_path_filter(
     options: &FileOptions,
     root: &Path,
+    subdir: Option<&Path>,
     path: &Path,
     all: bool,
     include_libdef: bool,
 ) -> bool {
-    path_is_in_crawl_scope(options, root, path, include_libdef)
+    path_is_in_crawl_scope(options, root, subdir, path, include_libdef)
         && realpath_filter(options, path, all, include_libdef)
 }
 
 /// Whether the initial full crawl covers a path, making an absent alias mapping conclusive.
 pub fn initial_crawl_covers_path(options: &FileOptions, root: &Path, path: &Path) -> bool {
-    path_is_in_crawl_scope(options, root, path, true)
+    path_is_in_crawl_scope(options, root, None, path, true)
         && (wanted_filter(options, path, false, true)
             || has_symlink_ancestor_under_root(root, path, &mut HashMap::new()))
 }
@@ -1039,25 +1046,6 @@ pub fn make_next_files(
     symlink_map: Option<&SymlinkMap>,
     mut send_chunked: impl FnMut(Vec<PathBuf>),
 ) {
-    fn subdir_path_filter(
-        options: &FileOptions,
-        root: &Path,
-        subdir: &Path,
-        path: &Path,
-        all: bool,
-        include_libdef: bool,
-    ) -> bool {
-        path.starts_with(subdir)
-            && ((options.implicitly_include_root && path.starts_with(root)) || {
-                let path_str = path.to_string_lossy();
-                is_included(options, &path_str)
-                    || (include_libdef
-                        && is_dynamically_discovered_builtin_ts_libdef(options, &path_str))
-                    || (include_libdef && is_configured_lib_file(options, &path_str))
-            })
-            && realpath_filter(options, path, all, include_libdef)
-    }
-
     let node_module_filter = |file: &str| is_node_module(&options, file);
 
     let starting_point_paths = {
@@ -1141,12 +1129,7 @@ pub fn make_next_files(
                 symlink_map.insert(path.clone(), real_path);
             }
 
-            if !match subdir {
-                Some(subdir) => {
-                    subdir_path_filter(&options, root, subdir, &path, all, include_libdef)
-                }
-                None => no_subdir_path_filter(&options, root, &path, all, include_libdef),
-            } {
+            if !crawl_path_filter(&options, root, subdir, &path, all, include_libdef) {
                 continue;
             }
             if should_canonicalize_discovered_entry(
