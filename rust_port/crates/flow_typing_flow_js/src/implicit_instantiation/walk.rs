@@ -1964,6 +1964,26 @@ impl<'e> Walker<'e> {
         ud: &DefT,
     ) -> Result<(), FlowJsException> {
         match (ld.deref(), ud.deref()) {
+            // Against a generic upper bound with as many type parameters, as in subtyping, the
+            // bounds and then the bodies, with the type parameters of the lower bound in place of
+            // those of both.
+            (DefTInner::PolyT(lp), DefTInner::PolyT(up))
+                if lp.tparams.len() == up.tparams.len() =>
+            {
+                let (lmap, generics) = flow_js_utils::mk_tparams(cx, &lp.tparams);
+                let umap: FlowOrdMap<SubstName, Type> = (up.tparams.iter())
+                    .zip(generics)
+                    .map(|(tp, generic)| (tp.name.dupe(), generic))
+                    .collect();
+                for (ltp, utp) in lp.tparams.iter().zip(up.tparams.iter()) {
+                    let lbound = subst(cx, &lmap, &ltp.bound);
+                    let ubound = subst(cx, &umap, &utp.bound);
+                    self.walk(cx, &ubound, &lbound)?;
+                }
+                let lbody = subst(cx, &lmap, &lp.t_out);
+                let ubody = subst(cx, &umap, &up.t_out);
+                self.walk(cx, &lbody, &ubody)
+            }
             // A generic upper bound is compared through its body, its type parameters rigid.
             (_, DefTInner::PolyT(up)) => {
                 let body = up.t_out.dupe();

@@ -317,6 +317,45 @@ References:
                       ^^^^^ [2]
 
 
+Error ---------------------------------------------------------------------------------------- generic_callback.js:16:26
+
+Cannot call `promise.then` with function bound to `f` because in the first parameter > type argument `M` [1]:
+`string` [2] is incompatible with `unknown` [3]. [incompatible-type]
+
+   generic_callback.js:16:26
+   16| promise.then(<C>(schema: Schema<C, string>): ListSchema<C, string> => new ListSchema(schema)); // error
+                                ^^^^^^^^^^^^^^^^^
+
+References:
+   generic_callback.js:4:25
+    4| declare class Schema<C, M> {}
+                               ^ [1]
+   generic_callback.js:16:36
+   16| promise.then(<C>(schema: Schema<C, string>): ListSchema<C, string> => new ListSchema(schema)); // error
+                                          ^^^^^^ [2]
+   generic_callback.js:9:39
+    9|   then<R>(f: <C, M>(schema: Schema<C, M>) => R | Promise<R>): Promise<R>;
+                                             ^ [3]
+
+
+Error ---------------------------------------------------------------------------------------- generic_callback.js:16:36
+
+Cannot call `promise.then` with function bound to `f` because in the first parameter > type argument `M` [1]:
+`empty` [2] is incompatible with `string` [3]. [incompatible-type]
+
+   generic_callback.js:16:36
+   16| promise.then(<C>(schema: Schema<C, string>): ListSchema<C, string> => new ListSchema(schema)); // error
+                                          ^^^^^^ [3]
+
+References:
+   generic_callback.js:4:25
+    4| declare class Schema<C, M> {}
+                               ^ [1]
+   generic_callback.js:9:39
+    9|   then<R>(f: <C, M>(schema: Schema<C, M>) => R | Promise<R>): Promise<R>;
+                                             ^ [2]
+
+
 Error ----------------------------------------------------------------------------- generic_value_call_signature.js:22:1
 
 Cannot cast `s` to `empty` because `{x: number}` [1] is incompatible with `empty` [2]. [incompatible-type]
@@ -1034,4 +1073,4 @@ References:
 
 
 
-Found 56 errors
+Found 58 errors
