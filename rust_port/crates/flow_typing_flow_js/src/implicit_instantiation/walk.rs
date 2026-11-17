@@ -3775,10 +3775,12 @@ impl<'e> Walker<'e> {
         u: &Type,
         ui: &InstanceT,
     ) -> Result<(), FlowJsException> {
+        // As in subtyping, an inline interface, such as `Readonly` of an instance, is the same
+        // class as no other instance.
         let ancestor = self
             .ancestors(cx, li)
             .into_iter()
-            .find(|a| a.inst.class_id == ui.inst.class_id);
+            .find(|a| flow_js_utils::is_same_instance_type(a, ui));
         if let Some(a) = ancestor {
             let loose = a.inst.strictness_kind.join(ui.inst.strictness_kind);
             let pairs: Vec<(Type, Type, Polarity)> = a
@@ -5034,6 +5036,15 @@ impl<'e> Walker<'e> {
             {
                 self.add_upper_at(cx, &name, l, Priority::Reversal);
                 Ok(())
+            }
+            // `Readonly<C<T>>` of a class or interface: an inline interface with the read-only
+            // props of the instance, as the flow-based solve evaluates it, which what flows to it
+            // meets structurally.
+            Destructor::ReadOnlyType
+                if matches!(self.head(cx, type_), Head::Inst(_))
+                    && let Some(result) = self.evaluate(cx, type_, defer_use_t)? =>
+            {
+                self.walk(cx, l, &result)
             }
             Destructor::ReadOnlyType
             | Destructor::PartialType

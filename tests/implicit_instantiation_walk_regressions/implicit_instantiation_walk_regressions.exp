@@ -838,6 +838,27 @@ References:
                                                     ^^^^^^ [2]
 
 
+Error ---------------------------------------------------------------------------------------- readonly_instance.js:20:1
+
+Cannot cast `loadable` to `Loadable<number>` because in type argument `T` [1]: `string` [2] is incompatible with
+`number` [3]. [incompatible-type]
+
+   readonly_instance.js:20:1
+   20| loadable as Loadable<number>; // error
+       ^^^^^^^^
+
+References:
+   readonly_instance.js:15:19
+   15| type Loadable<out T> = Readonly<ValueLoadable<T>> | Readonly<ErrorLoadable<T>>;
+                         ^ [1]
+   readonly_instance.js:18:36
+   18| const loadable = loadableWithValue('VALUE').map(value => loadableWithValue(value)); // was an error
+                                          ^^^^^^^ [2]
+   readonly_instance.js:20:22
+   20| loadable as Loadable<number>; // error
+                            ^^^^^^ [3]
+
+
 Error ------------------------------------------------------------------------------------- recursive_alias_union.js:6:1
 
 Cannot call `f` because `T` [1] is underconstrained by call of `f` [2]. Either add explicit type arguments or cast the
@@ -1073,4 +1094,4 @@ References:
 
 
 
-Found 58 errors
+Found 59 errors
