@@ -1,4 +1,4 @@
-type Plugin<K> = {transform: (K) => K};
+type Plugin<K> = {transform: (key: K) => K};
 declare function table<K>(keys: ReadonlyArray<K>, plugin: Plugin<K>): void;
 declare const keys: ReadonlyArray<string>;
 

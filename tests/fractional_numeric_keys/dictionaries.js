@@ -97,17 +97,17 @@ type WithDeclared = {'0.5': 'declared', [key: number]: boolean}; // OK
 // Generic key inference sees property-name strings, not their numeric spellings.
 {
   const o = {0.5: true, 1.5: false}; // OK
-  declare const inferKey: <K, V>(o: {[K]: V}) => K;
+  declare const inferKey: <K, V>(o: {[key: K]: V}) => K;
   const key = inferKey(o); // OK
   key as string; // OK
   key as number; // ERROR
-  declare const numericKey: <K extends number, V>(o: {[K]: V}) => K;
+  declare const numericKey: <K extends number, V>(o: {[key: K]: V}) => K;
   numericKey(o); // ERROR
-  declare const inferValue: <V>(o: {[number]: V}) => V;
+  declare const inferValue: <V>(o: {[key: number]: V}) => V;
   const value = inferValue(o); // OK
   value as boolean; // OK
   value as string; // ERROR
-  type InferredKeys<O> = O extends {readonly [infer K]: unknown} ? K : empty;
+  type InferredKeys<O> = O extends {readonly [key: infer K]: unknown} ? K : empty;
   declare const inferred: InferredKeys<{0.5: boolean, '1.5': string}>;
   inferred as string; // OK
   inferred as number; // ERROR

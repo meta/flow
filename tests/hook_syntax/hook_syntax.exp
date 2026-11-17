@@ -60,13 +60,13 @@ References:
 
 Error ---------------------------------------------------------------------------------------- declare_hook_tests.js:6:1
 
-Cannot cast `useCustom` to `<T>(T) => [T]` because `hook (x: T) => [T]` [1] is a React hook type annotation but
-`(T) => [T]` [2] is not a hook. [react-rule-hook-incompatible]
+Cannot cast `useCustom` to `<T>(x: T) => [T]` because `hook (x: T) => [T]` [1] is a React hook type annotation but
+`(x: T) => [T]` [2] is not a hook. [react-rule-hook-incompatible]
 
 React hooks and other functions are not compatible with each other, because hooks cannot be called conditionally.
 
    declare_hook_tests.js:6:1
-   6| useCustom as <T>(T) => [T]; // error, hook and nonhook incompatible
+   6| useCustom as <T>(x: T) => [T]; // error, hook and nonhook incompatible
       ^^^^^^^^^
 
 References:
@@ -74,13 +74,13 @@ References:
    1| declare hook useCustom<T>(x: T): [T];
                             ^^^^^^^^^^^^^^ [1]
    declare_hook_tests.js:6:14
-   6| useCustom as <T>(T) => [T]; // error, hook and nonhook incompatible
-                   ^^^^^^^^^^^^^ [2]
+   6| useCustom as <T>(x: T) => [T]; // error, hook and nonhook incompatible
+                   ^^^^^^^^^^^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------- declare_hook_tests.js:10:1
 
-Cannot cast `nonhook` to `hook <T>(x: T) => [T]` because `(T) => [T]` [1] is not a React hook but
+Cannot cast `nonhook` to `hook <T>(x: T) => [T]` because `(x: T) => [T]` [1] is not a React hook but
 `hook (x: T) => [T]` [2] is a hook type annotation. [react-rule-hook-incompatible]
 
 React hooks and other functions are not compatible with each other, because hooks cannot be called conditionally.
@@ -91,8 +91,8 @@ React hooks and other functions are not compatible with each other, because hook
 
 References:
    declare_hook_tests.js:9:24
-    9| declare const nonhook: <T>(T) => [T];
-                              ^^^^^^^^^^^^^ [1]
+    9| declare const nonhook: <T>(x: T) => [T];
+                              ^^^^^^^^^^^^^^^^ [1]
    declare_hook_tests.js:1:23
     1| declare hook useCustom<T>(x: T): [T];
                              ^^^^^^^^^^^^^^ [2]
@@ -361,13 +361,13 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ hook_tests.js:6:1
 
-Cannot cast `useCustom` to `<T>(T) => [T]` because `hook (x: T) => [T]` [1] is a React hook but `(T) => [T]` [2] is not
-a hook. [react-rule-hook-incompatible]
+Cannot cast `useCustom` to `<T>(x: T) => [T]` because `hook (x: T) => [T]` [1] is a React hook but `(x: T) => [T]` [2]
+is not a hook. [react-rule-hook-incompatible]
 
 React hooks and other functions are not compatible with each other, because hooks cannot be called conditionally.
 
    hook_tests.js:6:1
-   6| useCustom as <T>(T) => [T]; // error, hook and nonhook incompatible
+   6| useCustom as <T>(x: T) => [T]; // error, hook and nonhook incompatible
       ^^^^^^^^^
 
 References:
@@ -375,13 +375,13 @@ References:
    1| hook useCustom<T>(x: T): [T] { return [x]; }
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    hook_tests.js:6:14
-   6| useCustom as <T>(T) => [T]; // error, hook and nonhook incompatible
-                   ^^^^^^^^^^^^^ [2]
+   6| useCustom as <T>(x: T) => [T]; // error, hook and nonhook incompatible
+                   ^^^^^^^^^^^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------- hook_tests.js:10:1
 
-Cannot cast `nonhook` to `hook <T>(x: T) => [T]` because `(T) => [T]` [1] is not a React hook but
+Cannot cast `nonhook` to `hook <T>(x: T) => [T]` because `(x: T) => [T]` [1] is not a React hook but
 `hook (x: T) => [T]` [2] is a hook. [react-rule-hook-incompatible]
 
 React hooks and other functions are not compatible with each other, because hooks cannot be called conditionally.
@@ -392,8 +392,8 @@ React hooks and other functions are not compatible with each other, because hook
 
 References:
    hook_tests.js:9:24
-    9| declare const nonhook: <T>(T) => [T];
-                              ^^^^^^^^^^^^^ [1]
+    9| declare const nonhook: <T>(x: T) => [T];
+                              ^^^^^^^^^^^^^^^^ [1]
    hook_tests.js:1:1
     1| hook useCustom<T>(x: T): [T] { return [x]; }
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
@@ -896,13 +896,13 @@ References:
 
 Error ------------------------------------------------------------------------------------------- hook_type_tests.js:6:1
 
-Cannot cast `useCustom` to `<T>(T) => [T]` because `hook (x: T) => [T]` [1] is a React hook type annotation but
-`(T) => [T]` [2] is not a hook. [react-rule-hook-incompatible]
+Cannot cast `useCustom` to `<T>(x: T) => [T]` because `hook (x: T) => [T]` [1] is a React hook type annotation but
+`(x: T) => [T]` [2] is not a hook. [react-rule-hook-incompatible]
 
 React hooks and other functions are not compatible with each other, because hooks cannot be called conditionally.
 
    hook_type_tests.js:6:1
-   6| useCustom as <T>(T) => [T]; // error, hook and nonhook incompatible
+   6| useCustom as <T>(x: T) => [T]; // error, hook and nonhook incompatible
       ^^^^^^^^^
 
 References:
@@ -910,13 +910,13 @@ References:
    1| declare const useCustom: hook <T>(x: T) => [T]
                                ^^^^^^^^^^^^^^^^^^^^^ [1]
    hook_type_tests.js:6:14
-   6| useCustom as <T>(T) => [T]; // error, hook and nonhook incompatible
-                   ^^^^^^^^^^^^^ [2]
+   6| useCustom as <T>(x: T) => [T]; // error, hook and nonhook incompatible
+                   ^^^^^^^^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------ hook_type_tests.js:10:1
 
-Cannot cast `nonhook` to `hook <T>(x: T) => [T]` because `(T) => [T]` [1] is not a React hook but
+Cannot cast `nonhook` to `hook <T>(x: T) => [T]` because `(x: T) => [T]` [1] is not a React hook but
 `hook (x: T) => [T]` [2] is a hook type annotation. [react-rule-hook-incompatible]
 
 React hooks and other functions are not compatible with each other, because hooks cannot be called conditionally.
@@ -927,8 +927,8 @@ React hooks and other functions are not compatible with each other, because hook
 
 References:
    hook_type_tests.js:9:24
-    9| declare const nonhook: <T>(T) => [T];
-                              ^^^^^^^^^^^^^ [1]
+    9| declare const nonhook: <T>(x: T) => [T];
+                              ^^^^^^^^^^^^^^^^ [1]
    hook_type_tests.js:1:26
     1| declare const useCustom: hook <T>(x: T) => [T]
                                 ^^^^^^^^^^^^^^^^^^^^^ [2]
@@ -1497,13 +1497,13 @@ value (`current`) property) during render. (https://react.dev/reference/react/us
 
 Error ------------------------------------------------------------------------------ require_specific_suppression.js:2:1
 
-Cannot cast `useH` to `(empty) => unknown` because `hook (x: empty) => [empty]` [1] is a React hook but
-`(empty) => unknown` [2] is not a hook. [react-rule-hook-incompatible]
+Cannot cast `useH` to `(x: empty) => unknown` because `hook (x: empty) => [empty]` [1] is a React hook but
+`(x: empty) => unknown` [2] is not a hook. [react-rule-hook-incompatible]
 
 React hooks and other functions are not compatible with each other, because hooks cannot be called conditionally.
 
    require_specific_suppression.js:2:1
-   2| useH as (empty) => unknown; // error
+   2| useH as (x: empty) => unknown; // error
       ^^^^
 
 References:
@@ -1511,8 +1511,8 @@ References:
    1| hook useH<T>(x: T): [T] { return [x];}
       ^^^^^^^^^^^^^^^^^^^^^^^ [1]
    require_specific_suppression.js:2:9
-   2| useH as (empty) => unknown; // error
-              ^^^^^^^^^^^^^^^^^^ [2]
+   2| useH as (x: empty) => unknown; // error
+              ^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------ require_specific_suppression.js:5:1
@@ -1525,13 +1525,13 @@ Suppression is missing a code. Please update this suppression to use an error co
 
 Error ------------------------------------------------------------------------------ require_specific_suppression.js:6:1
 
-Cannot cast `useH` to `(empty) => unknown` because `hook (x: empty) => [empty]` [1] is a React hook but
-`(empty) => unknown` [2] is not a hook. [react-rule-hook-incompatible]
+Cannot cast `useH` to `(x: empty) => unknown` because `hook (x: empty) => [empty]` [1] is a React hook but
+`(x: empty) => unknown` [2] is not a hook. [react-rule-hook-incompatible]
 
 React hooks and other functions are not compatible with each other, because hooks cannot be called conditionally.
 
    require_specific_suppression.js:6:1
-   6| useH as (empty) => unknown; // error, not suppressed
+   6| useH as (x: empty) => unknown; // error, not suppressed
       ^^^^
 
 References:
@@ -1539,8 +1539,8 @@ References:
    1| hook useH<T>(x: T): [T] { return [x];}
       ^^^^^^^^^^^^^^^^^^^^^^^ [1]
    require_specific_suppression.js:6:9
-   6| useH as (empty) => unknown; // error, not suppressed
-              ^^^^^^^^^^^^^^^^^^ [2]
+   6| useH as (x: empty) => unknown; // error, not suppressed
+              ^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------- rules_of_hooks.js:74:3

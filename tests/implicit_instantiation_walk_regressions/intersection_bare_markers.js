@@ -3,9 +3,9 @@ type Extra = {progress: string};
 
 declare function connect<Own, State, Dispatch>(
   Component: component(...Own & State & Dispatch & Extra),
-  mapParams: (Store, Own) => Array<string>,
-  mapState: (Store, Own) => State,
-  mapDispatch: (string, Own) => Dispatch,
+  mapParams: (store: Store, own: Own) => Array<string>,
+  mapState: (store: Store, own: Own) => State,
+  mapDispatch: (dispatch: string, own: Own) => Dispatch,
 ): void;
 
 type Own = {id: string, ...};

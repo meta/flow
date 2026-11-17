@@ -9,12 +9,12 @@ undefined [2]? [sketchy-null-string]
              ^
 
 References:
-   a.js:11:24
-   11| export type Fn = (cb: ?string => void) => void;
-                              ^^^^^^ [1]
-   a.js:11:23
-   11| export type Fn = (cb: ?string => void) => void;
-                             ^^^^^^^ [2]
+   a.js:11:28
+   11| export type Fn = (cb: (s: ?string) => void) => void;
+                                  ^^^^^^ [1]
+   a.js:11:27
+   11| export type Fn = (cb: (s: ?string) => void) => void;
+                                 ^^^^^^^ [2]
 
 
 

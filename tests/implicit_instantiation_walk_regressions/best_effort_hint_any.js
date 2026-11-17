@@ -4,7 +4,7 @@ type Loose = any;
 declare function emptyBox(n: number): Box<Loose>;
 declare function makeBox<T>(
   items: ReadonlyArray<T>,
-  options: Readonly<{getKey: T => ?string}>,
+  options: Readonly<{getKey: (item: T) => ?string}>,
 ): Box<T>;
 
 type Row = {name: string, note: ?string, ...};

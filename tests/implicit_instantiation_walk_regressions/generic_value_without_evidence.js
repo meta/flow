@@ -5,11 +5,11 @@ type Row<T> = {item: T, index: number};
 type A = {type: 'a', id: string};
 type B = {type: 'b', key: string};
 type Item = A | B;
-type Activation<T> = {transform: (Row<T>) => Row<T>};
+type Activation<T> = {transform: (row: Row<T>) => Row<T>};
 
 declare function useActivation<TItem>(props: {
-  getID: (Row<TItem>) => string,
-  skip: (Row<TItem>) => boolean,
+  getID: (row: Row<TItem>) => string,
+  skip: (row: Row<TItem>) => boolean,
 }): Activation<TItem>;
 
 function getID<T extends Item>({item}: Row<T>): string {

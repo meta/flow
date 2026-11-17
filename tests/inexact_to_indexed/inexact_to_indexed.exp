@@ -8,9 +8,9 @@ Cannot cast `x` to `X` because an unknown property that may exist on the inexact
       ^ [1]
 
 References:
-   test.js:3:13
-   3|   [string]: number,
-                  ^^^^^^ [2]
+   test.js:3:18
+   3|   [key: string]: number,
+                       ^^^^^^ [2]
 
 
 

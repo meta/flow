@@ -15,7 +15,7 @@ type Action = {type: 'a'};
 declare function logger(api: {
   getState(): {x: number},
   ...
-}): (next: (Action) => unknown) => (Action) => unknown;
+}): (next: (action: Action) => unknown) => (action: Action) => unknown;
 
 const [s] = applyMiddleware(thunk, logger); // was an error
 s as {x: number};
@@ -23,4 +23,4 @@ s as empty; // error
 
 declare const untyped: any;
 const [, d] = applyMiddleware<_, unknown, _>(thunk, untyped);
-d as (Action) => Action; // was an error
+d as (action: Action) => Action; // was an error

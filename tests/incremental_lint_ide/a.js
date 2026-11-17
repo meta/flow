@@ -8,4 +8,4 @@
  *
  * The type here is carefully constructed to ensure the position of ?string
  * points here, and is not repositioned into B. */
-export type Fn = (cb: ?string => void) => void;
+export type Fn = (cb: (s: ?string) => void) => void;

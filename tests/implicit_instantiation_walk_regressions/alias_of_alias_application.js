@@ -12,7 +12,7 @@ type BasicSpec<R> = FieldSpec<R, NonNullable<R>, (v: (x: R) => unknown) => unkno
 type Spec<R, P> = Readonly<{...BasicSpec<R>, render: FieldRenderer<R, P>}>;
 declare function useField<R, P>(def: R, r: Renderer<R, P>): Spec<R, P>;
 
-type Props<A, B> = {a: A, cb: (Array<B>) => void};
+type Props<A, B> = {a: A, cb: (items: Array<B>) => void};
 declare function renderer<A, B>(props: Props<A, B>): unknown;
 
 type MySpec<A, B> = Spec<?B, Props<A, B>>;

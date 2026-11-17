@@ -1,7 +1,7 @@
 declare function parse(input: string): number;
 declare function parse(input: ReadonlyArray<string>): ReadonlyArray<number>;
 
-declare function apply<A, R>(f: (A) => R, a: A): R;
+declare function apply<A, R>(f: (a: A) => R, a: A): R;
 
 // Overloads against one signature: the first overload that fits it with the markers open, as in
 // the speculative match of the flow-based solve.

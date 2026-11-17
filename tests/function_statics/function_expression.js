@@ -18,8 +18,8 @@ g.w = 1; // OK
 g.w as number; // OK
 
 declare function debounce<Args>(
-  func: (...Args) => unknown,
-): (...Args) => void;
+  func: (...args: Args) => unknown,
+): (...args: Args) => void;
 {
   const d = debounce((s: string, n: number): void => {});
   const f = function (s: string) {

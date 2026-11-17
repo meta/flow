@@ -2,7 +2,7 @@ import * as React from 'react';
 
 type Props = Readonly<{
   children: React.Node,
-  fallback?: null | (string => React.Node),
+  fallback?: null | ((error: string) => React.Node),
   resetCount?: number,
 }>;
 

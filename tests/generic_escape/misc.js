@@ -37,7 +37,7 @@ function f3<X>(x: X, escape: boolean, n: number): X | string {
 }
 
 function f4(escape: boolean, n: number): void {
-  function g<X>(x: X): X | ((boolean, number) => void) {
+  function g<X>(x: X): X | ((a: boolean, b: number) => void) {
     if (escape) {
       g = x;
     }

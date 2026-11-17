@@ -1888,7 +1888,7 @@ Cannot cast `key` to `number` because in at least one member of `"0.5" | "1.5"` 
 
 References:
    dictionaries.js:100:28
-   100|   declare const inferKey: <K, V>(o: {[K]: V}) => K;
+   100|   declare const inferKey: <K, V>(o: {[key: K]: V}) => K;
                                    ^ [1]
    dictionaries.js:99:13
     99|   const o = {0.5: true, 1.5: false}; // OK
@@ -1909,13 +1909,13 @@ incompatible with `number` [3]. [incompatible-type]
 
 References:
    dictionaries.js:104:30
-   104|   declare const numericKey: <K extends number, V>(o: {[K]: V}) => K;
+   104|   declare const numericKey: <K extends number, V>(o: {[key: K]: V}) => K;
                                      ^ [1]
    dictionaries.js:99:13
     99|   const o = {0.5: true, 1.5: false}; // OK
                     ^^^^^^^^^^^^^^^^^^^^^^^ [2]
    dictionaries.js:104:40
-   104|   declare const numericKey: <K extends number, V>(o: {[K]: V}) => K;
+   104|   declare const numericKey: <K extends number, V>(o: {[key: K]: V}) => K;
                                                ^^^^^^ [3]
 
 
@@ -2849,9 +2849,9 @@ Cannot cast `value` to `number` because `string` [1] is incompatible with `numbe
              ^^^^^
 
 References:
-   refinements.js:87:29
-   87|   const callbacks: {'0.5': (string) => string, '1.5': (number) => number} = {
-                                   ^^^^^^ [1]
+   refinements.js:87:36
+   87|   const callbacks: {'0.5': (value: string) => string, '1.5': (value: number) => number} = {
+                                          ^^^^^^ [1]
    refinements.js:90:16
    90|       value as number; // ERROR
                       ^^^^^^ [2]
@@ -2866,9 +2866,9 @@ Cannot cast `value` to `string` because `number` [1] is incompatible with `strin
              ^^^^^
 
 References:
-   refinements.js:87:56
-   87|   const callbacks: {'0.5': (string) => string, '1.5': (number) => number} = {
-                                                              ^^^^^^ [1]
+   refinements.js:87:70
+   87|   const callbacks: {'0.5': (value: string) => string, '1.5': (value: number) => number} = {
+                                                                            ^^^^^^ [1]
    refinements.js:95:16
    95|       value as string; // ERROR
                       ^^^^^^ [2]
@@ -2883,9 +2883,9 @@ Cannot cast `value` to `number` because `string` [1] is incompatible with `numbe
               ^^^^^
 
 References:
-   refinements.js:99:26
-    99|   const quoted: {'0.5': (string) => string} = {
-                                 ^^^^^^ [1]
+   refinements.js:99:33
+    99|   const quoted: {'0.5': (value: string) => string} = {
+                                        ^^^^^^ [1]
    refinements.js:102:16
    102|       value as number; // ERROR
                        ^^^^^^ [2]
@@ -2893,7 +2893,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- refinements.js:107:15
 
-Cannot call `quoted[0.5]` with `5` bound to the first parameter because `5` [1] is incompatible with `string` [2].
+Cannot call `quoted[0.5]` with `5` bound to `value` because `5` [1] is incompatible with `string` [2].
 [incompatible-type]
 
    refinements.js:107:15
@@ -2901,9 +2901,9 @@ Cannot call `quoted[0.5]` with `5` bound to the first parameter because `5` [1] 
                       ^ [1]
 
 References:
-   refinements.js:99:26
-    99|   const quoted: {'0.5': (string) => string} = {
-                                 ^^^^^^ [2]
+   refinements.js:99:33
+    99|   const quoted: {'0.5': (value: string) => string} = {
+                                        ^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------------- rounding.js:6:5

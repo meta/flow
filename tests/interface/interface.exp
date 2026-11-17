@@ -602,9 +602,9 @@ Cannot get `x['xxx']` because `"xxx"` [1] is incompatible with `Keys` [2]. [inco
          ^^^^^^^^ [1]
 
 References:
-   indexer.js:27:4
-   27|   [Keys]: number | string;
-          ^^^^ [2]
+   indexer.js:27:9
+   27|   [key: Keys]: number | string;
+               ^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------------- indexer.js:45:5
@@ -624,9 +624,9 @@ Cannot get `x['xxx']` because `"xxx"` [1] is incompatible with `Keys` [2]. [inco
          ^^^^^^^^ [1]
 
 References:
-   indexer.js:30:13
-   30|   readonly [Keys]: number | string;
-                   ^^^^ [2]
+   indexer.js:30:18
+   30|   readonly [key: Keys]: number | string;
+                        ^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------------- indexer.js:50:5
@@ -646,9 +646,9 @@ Cannot assign `1` to `x['xxx']` because `"xxx"` [1] is incompatible with `Keys` 
          ^^^^^^^^ [1]
 
 References:
-   indexer.js:33:14
-   33|   writeonly [Keys]: number;
-                    ^^^^ [2]
+   indexer.js:33:19
+   33|   writeonly [key: Keys]: number;
+                         ^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------------- indexer.js:58:5
@@ -669,9 +669,9 @@ Cannot get `x[true]` because `true` [1] is incompatible with `string` [2]. [inco
            ^^^^ [1]
 
 References:
-   indexer.js:55:41
-   55|   declare const x: interface {readonly [string]: number};
-                                               ^^^^^^ [2]
+   indexer.js:55:46
+   55|   declare const x: interface {readonly [key: string]: number};
+                                                    ^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------------- indexer.js:64:3
@@ -680,8 +680,8 @@ Cannot cast `x` to `Invariant` because in the indexer property: `number` [1] is 
 `number | string` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because the indexer is invariantly typed. To fix the error,
-- Either make `{[Keys]: number}` [3] and `{[Keys]: number | string}` [4] exactly the same
-- Or make the indexer in `{[Keys]: number | string}` [5] readonly. See
+- Either make `{[key: Keys]: number}` [3] and `{[key: Keys]: number | string}` [4] exactly the same
+- Or make the indexer in `{[key: Keys]: number | string}` [5] readonly. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
    indexer.js:64:3
@@ -689,15 +689,15 @@ https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-
          ^
 
 References:
-   indexer.js:63:29
-   63|   declare const x: {[Keys]: number};
-                                   ^^^^^^ [1]
-   indexer.js:27:11
-   27|   [Keys]: number | string;
-                 ^^^^^^^^^^^^^^^ [2]
+   indexer.js:63:34
+   63|   declare const x: {[key: Keys]: number};
+                                        ^^^^^^ [1]
+   indexer.js:27:16
+   27|   [key: Keys]: number | string;
+                      ^^^^^^^^^^^^^^^ [2]
    indexer.js:63:20
-   63|   declare const x: {[Keys]: number};
-                          ^^^^^^^^^^^^^^^^ [3]
+   63|   declare const x: {[key: Keys]: number};
+                          ^^^^^^^^^^^^^^^^^^^^^ [3]
    indexer.js:26:11
    26| interface Invariant {
                  ^^^^^^^^^ [4]
@@ -719,95 +719,95 @@ https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-
          ^
 
 References:
-   indexer.js:27:20
-   27|   [Keys]: number | string;
-                          ^^^^^^ [1]
-   indexer.js:69:39
-   69|   declare const x: interface {[Keys]: number};
-                                             ^^^^^^ [2]
+   indexer.js:27:25
+   27|   [key: Keys]: number | string;
+                               ^^^^^^ [1]
+   indexer.js:69:44
+   69|   declare const x: interface {[key: Keys]: number};
+                                                  ^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------------- indexer.js:77:3
 
-Cannot cast `x` to `interface {[Keys]: number}` because in the indexer property: `number | string` [1] is not exactly
-the same as `number` [2]. [incompatible-type]
+Cannot cast `x` to `interface {[key: Keys]: number}` because in the indexer property: `number | string` [1] is not
+exactly the same as `number` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because the indexer is invariantly typed. To fix the error,
-- Either make `{[Keys]: number | string}` [3] and `{[Keys]: number}` [4] exactly the same
-- Or make the indexer in `{[Keys]: number}` [4] readonly. See
+- Either make `{[key: Keys]: number | string}` [3] and `{[key: Keys]: number}` [4] exactly the same
+- Or make the indexer in `{[key: Keys]: number}` [4] readonly. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
    indexer.js:77:3
-   77|   x as interface {[Keys]: number}; // ERROR
+   77|   x as interface {[key: Keys]: number}; // ERROR
          ^
 
 References:
-   indexer.js:76:29
-   76|   declare const x: {[Keys]: number | string};
-                                   ^^^^^^^^^^^^^^^ [1]
-   indexer.js:77:27
-   77|   x as interface {[Keys]: number}; // ERROR
-                                 ^^^^^^ [2]
+   indexer.js:76:34
+   76|   declare const x: {[key: Keys]: number | string};
+                                        ^^^^^^^^^^^^^^^ [1]
+   indexer.js:77:32
+   77|   x as interface {[key: Keys]: number}; // ERROR
+                                      ^^^^^^ [2]
    indexer.js:76:20
-   76|   declare const x: {[Keys]: number | string};
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   76|   declare const x: {[key: Keys]: number | string};
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    indexer.js:77:8
-   77|   x as interface {[Keys]: number}; // ERROR
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   77|   x as interface {[key: Keys]: number}; // ERROR
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error -------------------------------------------------------------------------------------------------- indexer.js:78:3
 
-Cannot cast `x` to `interface {readonly [Keys]: number}` because in the indexer property: `string` [1] is incompatible
-with `number` [2]. [incompatible-type]
+Cannot cast `x` to `interface {readonly [key: Keys]: number}` because in the indexer property: `string` [1] is
+incompatible with `number` [2]. [incompatible-type]
 
    indexer.js:78:3
-   78|   x as interface {readonly [Keys]: number}; // ERROR
+   78|   x as interface {readonly [key: Keys]: number}; // ERROR
          ^
 
 References:
-   indexer.js:76:38
-   76|   declare const x: {[Keys]: number | string};
-                                            ^^^^^^ [1]
-   indexer.js:78:36
-   78|   x as interface {readonly [Keys]: number}; // ERROR
-                                          ^^^^^^ [2]
+   indexer.js:76:43
+   76|   declare const x: {[key: Keys]: number | string};
+                                                 ^^^^^^ [1]
+   indexer.js:78:41
+   78|   x as interface {readonly [key: Keys]: number}; // ERROR
+                                               ^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------------- indexer.js:83:3
 
-Cannot cast `x` to `interface {[Keys]: number}` because in the indexer property: `string` [1] is incompatible with
+Cannot cast `x` to `interface {[key: Keys]: number}` because in the indexer property: `string` [1] is incompatible with
 `number` [2]. [incompatible-type]
 
    indexer.js:83:3
-   83|   x as interface {[Keys]: number}; // ERROR
+   83|   x as interface {[key: Keys]: number}; // ERROR
          ^
 
 References:
-   indexer.js:82:48
-   82|   declare const x: interface {[Keys]: number | string};
-                                                      ^^^^^^ [1]
-   indexer.js:83:27
-   83|   x as interface {[Keys]: number}; // ERROR
-                                 ^^^^^^ [2]
+   indexer.js:82:53
+   82|   declare const x: interface {[key: Keys]: number | string};
+                                                           ^^^^^^ [1]
+   indexer.js:83:32
+   83|   x as interface {[key: Keys]: number}; // ERROR
+                                      ^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------------- indexer.js:84:3
 
-Cannot cast `x` to `interface {readonly [Keys]: number}` because in the indexer property: `string` [1] is incompatible
-with `number` [2]. [incompatible-type]
+Cannot cast `x` to `interface {readonly [key: Keys]: number}` because in the indexer property: `string` [1] is
+incompatible with `number` [2]. [incompatible-type]
 
    indexer.js:84:3
-   84|   x as interface {readonly [Keys]: number}; // ERROR
+   84|   x as interface {readonly [key: Keys]: number}; // ERROR
          ^
 
 References:
-   indexer.js:82:48
-   82|   declare const x: interface {[Keys]: number | string};
-                                                      ^^^^^^ [1]
-   indexer.js:84:36
-   84|   x as interface {readonly [Keys]: number}; // ERROR
-                                          ^^^^^^ [2]
+   indexer.js:82:53
+   82|   declare const x: interface {[key: Keys]: number | string};
+                                                           ^^^^^^ [1]
+   indexer.js:84:41
+   84|   x as interface {readonly [key: Keys]: number}; // ERROR
+                                               ^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------- indexer.js:117:3
@@ -819,9 +819,9 @@ Cannot cast `x[1]` to `string` because `ChildValue` [1] is incompatible with `st
           ^^^^
 
 References:
-   indexer.js:112:22
-   112|   readonly [number]: ChildValue;
-                             ^^^^^^^^^^ [1]
+   indexer.js:112:27
+   112|   readonly [key: number]: ChildValue;
+                                  ^^^^^^^^^^ [1]
    indexer.js:117:11
    117|   x[1] as string; // ERROR
                   ^^^^^^ [2]
@@ -842,9 +842,9 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
            ^^^^^^
 
 References:
-   indexer.js:122:22
-    122|   readonly [number]: string;
-                              ^^^^^^ [1]
+   indexer.js:122:27
+    122|   readonly [key: number]: string;
+                                   ^^^^^^ [1]
    indexer.js:129:19
     129|   values as Array<number>; // ERROR
                            ^^^^^^ [2]
@@ -899,9 +899,9 @@ Cannot cast `x['xxx']` to `empty` because `() => number` [1] is incompatible wit
           ^^^^^^^^
 
 References:
-   indexer.js:161:13
-   161|   [string]: () => number;
-                    ^^^^^^^^^^^^ [1]
+   indexer.js:161:18
+   161|   [key: string]: () => number;
+                         ^^^^^^^^^^^^ [1]
    indexer.js:178:15
    178|   x['xxx'] as empty; // ERROR
                       ^^^^^ [2]
@@ -924,9 +924,9 @@ Cannot get `x[true]` because `true` [1] is incompatible with `Keys` [2]. [incomp
             ^^^^ [1]
 
 References:
-   indexer.js:205:41
-   205|   declare const x: Readonly<interface {[Keys]: number}>;
-                                                ^^^^ [2]
+   indexer.js:205:46
+   205|   declare const x: Readonly<interface {[key: Keys]: number}>;
+                                                     ^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- inline.js:5:6
@@ -1197,9 +1197,9 @@ Cannot cast `o2["b"]` to `boolean` because `number` [1] is incompatible with `bo
        ^^^^^^^
 
 References:
-   interface.js:36:42
-   36| declare const o2 : interface {[string] : number};
-                                                ^^^^^^ [1]
+   interface.js:36:47
+   36| declare const o2 : interface {[key: string] : number};
+                                                     ^^^^^^ [1]
    interface.js:38:12
    38| o2["b"] as boolean; // error
                   ^^^^^^^ [2]
@@ -1207,123 +1207,123 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ interface.js:43:1
 
-Cannot cast `o3` to `interface {[string]: boolean}` because in the indexer property: `number` [1] is not exactly the
-same as `boolean` [2]. [incompatible-type]
+Cannot cast `o3` to `interface {[key: string]: boolean}` because in the indexer property: `number` [1] is not exactly
+the same as `boolean` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because the indexer is invariantly typed. To fix the error,
-- Either make `{[string]: number}` [3] and `{[string]: boolean}` [4] exactly the same
-- Or make the indexer in `{[string]: boolean}` [4] readonly. See
+- Either make `{[key: string]: number}` [3] and `{[key: string]: boolean}` [4] exactly the same
+- Or make the indexer in `{[key: string]: boolean}` [4] readonly. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
    interface.js:43:1
-   43| o3 as interface {[string] : boolean}; // error
+   43| o3 as interface {[key: string] : boolean}; // error
        ^^
 
 References:
-   interface.js:41:32
-   41| declare const o3 : {[string] : number};
-                                      ^^^^^^ [1]
-   interface.js:43:29
-   43| o3 as interface {[string] : boolean}; // error
-                                   ^^^^^^^ [2]
+   interface.js:41:37
+   41| declare const o3 : {[key: string] : number};
+                                           ^^^^^^ [1]
+   interface.js:43:34
+   43| o3 as interface {[key: string] : boolean}; // error
+                                        ^^^^^^^ [2]
    interface.js:41:20
-   41| declare const o3 : {[string] : number};
-                          ^^^^^^^^^^^^^^^^^^^ [3]
+   41| declare const o3 : {[key: string] : number};
+                          ^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    interface.js:43:7
-   43| o3 as interface {[string] : boolean}; // error
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   43| o3 as interface {[key: string] : boolean}; // error
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ------------------------------------------------------------------------------------------------ interface.js:44:7
 
-Cannot cast object literal to `interface {[string]: boolean}` because in property `x`: `3` [1] is incompatible with
+Cannot cast object literal to `interface {[key: string]: boolean}` because in property `x`: `3` [1] is incompatible with
 `boolean` [2]. [incompatible-type]
 
    interface.js:44:7
-   44| ({x : 3} as interface {[string] : boolean}); // error
+   44| ({x : 3} as interface {[key: string] : boolean}); // error
              ^ [1]
 
 References:
-   interface.js:44:35
-   44| ({x : 3} as interface {[string] : boolean}); // error
-                                         ^^^^^^^ [2]
+   interface.js:44:40
+   44| ({x : 3} as interface {[key: string] : boolean}); // error
+                                              ^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------ interface.js:46:1
 
-Cannot cast `o3` to `interface {[number]: number}` because in the indexer property's key: `string` [1] is not exactly
-the same as `number` [2]. [incompatible-type]
+Cannot cast `o3` to `interface {[key: number]: number}` because in the indexer property's key: `string` [1] is not
+exactly the same as `number` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because the indexer is invariantly typed. To fix the error,
-- Either make `{[string]: number}` [3] and `{[number]: number}` [4] exactly the same
-- Or make the indexer in `{[number]: number}` [4] readonly. See
+- Either make `{[key: string]: number}` [3] and `{[key: number]: number}` [4] exactly the same
+- Or make the indexer in `{[key: number]: number}` [4] readonly. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
    interface.js:46:1
-   46| o3 as interface {[number] : number}; // error
+   46| o3 as interface {[key: number] : number}; // error
        ^^
 
 References:
-   interface.js:41:22
-   41| declare const o3 : {[string] : number};
-                            ^^^^^^ [1]
-   interface.js:46:19
-   46| o3 as interface {[number] : number}; // error
-                         ^^^^^^ [2]
+   interface.js:41:27
+   41| declare const o3 : {[key: string] : number};
+                                 ^^^^^^ [1]
+   interface.js:46:24
+   46| o3 as interface {[key: number] : number}; // error
+                              ^^^^^^ [2]
    interface.js:41:20
-   41| declare const o3 : {[string] : number};
-                          ^^^^^^^^^^^^^^^^^^^ [3]
+   41| declare const o3 : {[key: string] : number};
+                          ^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    interface.js:46:7
-   46| o3 as interface {[number] : number}; // error
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   46| o3 as interface {[key: number] : number}; // error
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ------------------------------------------------------------------------------------------------ interface.js:47:2
 
-Cannot cast object literal to `interface {[number]: number}` because property `x` is missing in `{[number]: number}` [1]
-but exists in object literal [2]. Any property that does not exist in `{[number]: number}` [1] must be compatible with
-its indexer `number` [3]. [incompatible-type]
+Cannot cast object literal to `interface {[key: number]: number}` because property `x` is missing in
+`{[key: number]: number}` [1] but exists in object literal [2]. Any property that does not exist in
+`{[key: number]: number}` [1] must be compatible with its indexer `number` [3]. [incompatible-type]
 
    interface.js:47:2
-   47| ({x : 3} as interface {[number] : number}); // error
+   47| ({x : 3} as interface {[key: number] : number}); // error
         ^^^^^^^ [2]
 
 References:
    interface.js:47:13
-   47| ({x : 3} as interface {[number] : number}); // error
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   interface.js:47:25
-   47| ({x : 3} as interface {[number] : number}); // error
-                               ^^^^^^ [3]
+   47| ({x : 3} as interface {[key: number] : number}); // error
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   interface.js:47:30
+   47| ({x : 3} as interface {[key: number] : number}); // error
+                                    ^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------------ interface.js:51:1
 
-Cannot cast `o4` to `interface {[string]: number}` because in the indexer property's key: `"asdf"` [1] is not exactly
-the same as `string` [2]. [incompatible-type]
+Cannot cast `o4` to `interface {[key: string]: number}` because in the indexer property's key: `"asdf"` [1] is not
+exactly the same as `string` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because the indexer is invariantly typed. To fix the error,
-- Either make `{[key: "asdf"]: number}` [3] and `{[string]: number}` [4] exactly the same
-- Or make the indexer in `{[string]: number}` [4] readonly. See
+- Either make `{[key: "asdf"]: number}` [3] and `{[key: string]: number}` [4] exactly the same
+- Or make the indexer in `{[key: string]: number}` [4] readonly. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
    interface.js:51:1
-   51| o4 as interface {[string] : number}; // error
+   51| o4 as interface {[key: string] : number}; // error
        ^^
 
 References:
    interface.js:49:27
    49| declare const o4 : {[key: "asdf"] : number};
                                  ^^^^^^ [1]
-   interface.js:51:19
-   51| o4 as interface {[string] : number}; // error
-                         ^^^^^^ [2]
+   interface.js:51:24
+   51| o4 as interface {[key: string] : number}; // error
+                              ^^^^^^ [2]
    interface.js:49:20
    49| declare const o4 : {[key: "asdf"] : number};
                           ^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    interface.js:51:7
-   51| o4 as interface {[string] : number}; // error
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   51| o4 as interface {[key: string] : number}; // error
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ------------------------------------------------------------------------------------------------ interface.js:59:1
@@ -1332,7 +1332,7 @@ Cannot cast `o6` to `interface {[key: "asdf"]: number}` because in the indexer p
 exactly the same as `"asdf"` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because the indexer is invariantly typed. To fix the error,
-- Either make `{[string]: number}` [3] and `{[key: "asdf"]: number}` [4] exactly the same
+- Either make `{[key: string]: number}` [3] and `{[key: "asdf"]: number}` [4] exactly the same
 - Or make the indexer in `{[key: "asdf"]: number}` [4] readonly. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
@@ -1341,15 +1341,15 @@ https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-
        ^^
 
 References:
-   interface.js:57:22
-   57| declare const o6 : {[string] : number};
-                            ^^^^^^ [1]
+   interface.js:57:27
+   57| declare const o6 : {[key: string] : number};
+                                 ^^^^^^ [1]
    interface.js:59:24
    59| o6 as interface {[key: "asdf"] : number}; // error
                               ^^^^^^ [2]
    interface.js:57:20
-   57| declare const o6 : {[string] : number};
-                          ^^^^^^^^^^^^^^^^^^^ [3]
+   57| declare const o6 : {[key: string] : number};
+                          ^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    interface.js:59:7
    59| o6 as interface {[key: "asdf"] : number}; // error
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
@@ -1635,9 +1635,9 @@ https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-
        ^^^^^^
 
 References:
-   subtyping.js:15:13
-   15|   [string]: unknown;
-                   ^^^^^^^ [1]
+   subtyping.js:15:18
+   15|   [key: string]: unknown;
+                        ^^^^^^^ [1]
    subtyping.js:19:8
    19|   foo: string;
               ^^^^^^ [2]
@@ -1645,20 +1645,20 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ subtyping.js:32:1
 
-Cannot cast `new DerivedWithStringField()` to `interface {[string]: number}` because in property `foo`: `string` [1] is
-incompatible with `number` [2]. [incompatible-type]
+Cannot cast `new DerivedWithStringField()` to `interface {[key: string]: number}` because in property `foo`:
+`string` [1] is incompatible with `number` [2]. [incompatible-type]
 
    subtyping.js:32:1
-   32| new DerivedWithStringField() as interface {[string]: number}; // error, inherited `foo` is incompatible
+   32| new DerivedWithStringField() as interface {[key: string]: number}; // error, inherited `foo` is incompatible
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    subtyping.js:27:8
    27|   foo: string;
               ^^^^^^ [1]
-   subtyping.js:32:54
-   32| new DerivedWithStringField() as interface {[string]: number}; // error, inherited `foo` is incompatible
-                                                            ^^^^^^ [2]
+   subtyping.js:32:59
+   32| new DerivedWithStringField() as interface {[key: string]: number}; // error, inherited `foo` is incompatible
+                                                                 ^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------ subtyping.js:54:1
@@ -1736,20 +1736,20 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- subtyping.js:116:1
 
-Cannot cast `new NumericProperty()` to `interface {[number]: number}` because in property `0`: `string` [1] is
+Cannot cast `new NumericProperty()` to `interface {[key: number]: number}` because in property `0`: `string` [1] is
 incompatible with `number` [2]. [incompatible-type]
 
    subtyping.js:116:1
-   116| new NumericProperty() as interface {[number]: number}; // error
+   116| new NumericProperty() as interface {[key: number]: number}; // error
         ^^^^^^^^^^^^^^^^^^^^^
 
 References:
    subtyping.js:114:6
    114|   0: string;
              ^^^^^^ [1]
-   subtyping.js:116:47
-   116| new NumericProperty() as interface {[number]: number}; // error
-                                                      ^^^^^^ [2]
+   subtyping.js:116:52
+   116| new NumericProperty() as interface {[key: number]: number}; // error
+                                                           ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:6:17

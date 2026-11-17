@@ -540,7 +540,7 @@ Cannot reassign function binding `g` [1]. [cannot-reassign]
 
 References:
    misc.js:40:12
-   40|   function g<X>(x: X): X | ((boolean, number) => void) {
+   40|   function g<X>(x: X): X | ((a: boolean, b: number) => void) {
                   ^ [1]
 
 
@@ -558,17 +558,17 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
                   ^
 
 References:
-   misc.js:40:30
-   40|   function g<X>(x: X): X | ((boolean, number) => void) {
-                                    ^^^^^^^ [1]
-   misc.js:40:50
-   40|   function g<X>(x: X): X | ((boolean, number) => void) {
-                                                        ^^^^ [2]
+   misc.js:40:33
+   40|   function g<X>(x: X): X | ((a: boolean, b: number) => void) {
+                                       ^^^^^^^ [1]
+   misc.js:40:56
+   40|   function g<X>(x: X): X | ((a: boolean, b: number) => void) {
+                                                              ^^^^ [2]
    misc.js:40:3
-   40|   function g<X>(x: X): X | ((boolean, number) => void) {
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   40|   function g<X>(x: X): X | ((a: boolean, b: number) => void) {
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    misc.js:40:24
-   40|   function g<X>(x: X): X | ((boolean, number) => void) {
+   40|   function g<X>(x: X): X | ((a: boolean, b: number) => void) {
                               ^ [4]
 
 

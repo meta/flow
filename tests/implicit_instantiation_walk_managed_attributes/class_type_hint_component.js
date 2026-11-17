@@ -2,7 +2,7 @@ import * as React from 'react';
 
 type PlainObj = {__proto__: null, ...};
 type Selector<out Val, in Arg = unknown> = {
-  (Arg): Val,
+  (arg: Arg): Val,
   ...
 };
 

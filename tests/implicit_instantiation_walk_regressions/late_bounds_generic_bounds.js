@@ -4,10 +4,10 @@ function case1() {
   type Other<T> = Readonly<{onHide: () => void, ...$Exact<T>}>;
 
   declare function useModal<T extends {...}, R extends Readonly<{...$Exact<T>}>>(
-    c: (Other<T>) => void,
+    c: (props: Other<T>) => void,
     props: R,
   ): void;
-  declare const c: (Omit<Readonly<{onHide: () => void, s: string, r: string}>, 'r'>) => void;
+  declare const c: (props: Omit<Readonly<{onHide: () => void, s: string, r: string}>, 'r'>) => void;
 
   useModal(c, {s: 'x', onHide: () => {}});
 }
@@ -16,8 +16,8 @@ function case2() {
   declare function memoize<
     TArgs extends ReadonlyArray<unknown>,
     TReturn,
-    Fn extends (...TArgs) => TReturn,
-  >(f: Fn, hash: (...TArgs) => string): Fn;
+    Fn extends (...args: TArgs) => TReturn,
+  >(f: Fn, hash: (...args: TArgs) => string): Fn;
 
   type Obj = {kind?: ?string, ...};
 

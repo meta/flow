@@ -120,7 +120,7 @@ export type DocblockDirectives = Readonly<{
   format?: ReadonlyArray<string> | void,
   noflow?: ReadonlyArray<string> | void,
   noformat?: ReadonlyArray<string> | void,
-  [string]: ReadonlyArray<string> | void,
+  [tag: string]: ReadonlyArray<string> | void,
 }>;
 
 export type DocblockMetadata = Readonly<{

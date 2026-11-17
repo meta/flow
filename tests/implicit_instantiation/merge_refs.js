@@ -2,7 +2,7 @@
 
 export type TRefFor<in TElement> =
   | {writeonly current: TElement | null, ...}
-  | ((TElement | null) => unknown);
+  | ((x: TElement | null) => unknown);
 
 type RefType<TElement> = TRefFor<TElement>;
 

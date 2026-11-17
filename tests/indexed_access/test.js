@@ -56,7 +56,7 @@ type ArrNonexistant = Arr[boolean]; // Error
 type Bar = 'bar';
 
 type O = {
-  [number]: boolean;
+  [key: number]: boolean;
   bar: number;
 }
 1 as O['bar']; // OK
@@ -65,7 +65,7 @@ true as O[number]; // OK
 'xx' as O['bar']; // Error
 
 declare class C {
-  [number]: boolean;
+  [key: number]: boolean;
   bar: number;
 }
 1 as C['bar']; // OK
@@ -74,7 +74,7 @@ true as C[number]; // OK
 'xx' as C['bar']; // Error
 
 interface I {
-  [number]: boolean;
+  [key: number]: boolean;
   bar: number;
 }
 1 as I['bar']; // OK

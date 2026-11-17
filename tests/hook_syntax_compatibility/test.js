@@ -53,8 +53,8 @@ const [useXB, {w: useXC}] = 42 as any as [() => void, { w: () => void }]
 
 {
     component AC(
-        useNodeActionItems: number => Array<string>,
-        useValidator?: string => boolean,
+        useNodeActionItems: (n: number) => Array<string>,
+        useValidator?: (s: string) => boolean,
         w: { useXD: () => void}
       ) {
         const actionItems = useNodeActionItems(1); // error: params won't get `MakeHookLike` transform. Higher order hooks are not supported.

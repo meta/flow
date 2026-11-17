@@ -145,8 +145,8 @@ References:
    84| declare const inexactShared: {shared: string, other: number, ...};
                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    regressions.js:83:27
-   83| type ExactAndTypeScript = {|shared: string|} & ImportedTypeScriptMember;
-                                 ^^^^^^^^^^^^^^^^^^ [2]
+   83| type ExactAndTypeScript = {shared: string} & ImportedTypeScriptMember;
+                                 ^^^^^^^^^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------- regressions.js:85:1
@@ -164,8 +164,8 @@ References:
    84| declare const inexactShared: {shared: string, other: number, ...};
                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    regressions.js:83:27
-   83| type ExactAndTypeScript = {|shared: string|} & ImportedTypeScriptMember;
-                                 ^^^^^^^^^^^^^^^^^^ [2]
+   83| type ExactAndTypeScript = {shared: string} & ImportedTypeScriptMember;
+                                 ^^^^^^^^^^^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:13:1
@@ -315,19 +315,19 @@ Cannot normalize this intersection because property `exactLeft` is missing in ex
 [invalid-exact]
 
    test.js:202:33
-                                        v-------------------------
-   202| type InvalidExactIntersection = {|exactLeft: string|} & {|
+                                        v----------------------
+   202| type InvalidExactIntersection = {exactLeft: string} & {
    203|   exactRight: number,
-   204| |}; // ERROR: each exact object lacks the other's required property
-        -^
+   204| }; // ERROR: each exact object lacks the other's required property
+        ^
 
 References:
-   test.js:202:57
-                                                                v-
-   202| type InvalidExactIntersection = {|exactLeft: string|} & {|
+   test.js:202:55
+                                                              v
+   202| type InvalidExactIntersection = {exactLeft: string} & {
    203|   exactRight: number,
-   204| |}; // ERROR: each exact object lacks the other's required property
-        -^ [1]
+   204| }; // ERROR: each exact object lacks the other's required property
+        ^ [1]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:213:1
@@ -359,8 +359,8 @@ Cannot cast `exactAndInexact.exactShared` to `"other"` because `"shared"` [1] is
 
 References:
    test.js:215:24
-                               v---------------------------------------------
-   215| type ExactAndInexact = {|exactShared: string, exactOnly: number|} & {
+                               v-------------------------------------------
+   215| type ExactAndInexact = {exactShared: string, exactOnly: number} & {
    216|   exactShared: 'shared',
    217|   ...,
    218| };
@@ -376,8 +376,8 @@ Cannot normalize this intersection because property `inexactRequired` is missing
 `{exactKey: string}` [1]. [invalid-exact]
 
    test.js:235:36
-                                           v-----------------------
-   235| type ExactMissingInexactRequired = {|exactKey: string|} & {
+                                           v---------------------
+   235| type ExactMissingInexactRequired = {exactKey: string} & {
    236|   inexactRequired: number,
    237|   ...,
    238| }; // ERROR: the exact object lacks a required property
@@ -385,8 +385,8 @@ Cannot normalize this intersection because property `inexactRequired` is missing
 
 References:
    test.js:235:36
-   235| type ExactMissingInexactRequired = {|exactKey: string|} & {
-                                           ^^^^^^^^^^^^^^^^^^^^ [1]
+   235| type ExactMissingInexactRequired = {exactKey: string} & {
+                                           ^^^^^^^^^^^^^^^^^^ [1]
 
 
 

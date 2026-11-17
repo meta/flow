@@ -1,6 +1,6 @@
 //@flow
 type X = {
-  [string]: number,
+  [key: string]: number,
 };
 
 declare const x: {foo: number, ...};

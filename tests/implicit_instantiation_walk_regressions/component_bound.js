@@ -6,7 +6,7 @@ function case1() {
     Wrapped: TComponent,
   ): TComponent;
 
-  component Chip<TValue>(label: string, value: TValue, onPress?: (TValue) => void) {
+  component Chip<TValue>(label: string, value: TValue, onPress?: (value: TValue) => void) {
     return null;
   }
 

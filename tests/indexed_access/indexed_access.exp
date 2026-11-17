@@ -489,9 +489,9 @@ Cannot cast `f(...)` to `true` because `void` [1] is incompatible with `true` [2
        ^^^^^^^^^
 
 References:
-   optional.js:73:79
-   73| function f<K extends string, T extends ?{readonly [K]: unknown}>(t: T, k: K): T?.[K] {
-                                                                                     ^ [1]
+   optional.js:73:84
+   73| function f<K extends string, T extends ?{readonly [key: K]: unknown}>(t: T, k: K): T?.[K] {
+                                                                                          ^ [1]
    optional.js:79:14
    79| f(z, 'c') as true; // Error - wrong type
                     ^^^^ [2]
@@ -537,9 +537,9 @@ Cannot cast `f(...)` to `true` because `void` [1] is incompatible with `true` [2
        ^^^^^^^^^^
 
 References:
-   optional.js:73:79
-   73| function f<K extends string, T extends ?{readonly [K]: unknown}>(t: T, k: K): T?.[K] {
-                                                                                     ^ [1]
+   optional.js:73:84
+   73| function f<K extends string, T extends ?{readonly [key: K]: unknown}>(t: T, k: K): T?.[K] {
+                                                                                          ^ [1]
    optional.js:84:15
    84| f(mz, 'c') as true; // Error - wrong type
                      ^^^^ [2]

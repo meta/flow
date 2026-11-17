@@ -1,2 +1,2 @@
-declare const y: {[string]: boolean};
-y as {(number): string, ...};
+declare const y: {[key: string]: boolean};
+y as {(x: number): string, ...};

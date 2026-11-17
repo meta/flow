@@ -1,8 +1,8 @@
 /* @flow */
 declare const iterator: IteratorObject<number>;
-declare const numberReducer: (number,  number) => number;
-declare const stringReducer: (string,  number) => string;
-declare const flexibleReducer: (string | number,  number) => string;
+declare const numberReducer: (acc: number,  value: number) => number;
+declare const stringReducer: (acc: string,  value: number) => string;
+declare const flexibleReducer: (acc: string | number,  value: number) => string;
 
 // Basic usage
 iterator.reduce(numberReducer) as number; // OK

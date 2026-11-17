@@ -4,7 +4,7 @@ declare function id<T>(x: T): T;
 type Box<T> = {value: T};
 
 // The generic argument is instantiated against what the later argument infers.
-declare function apply<S>(fn: (S) => S, initial: S): S;
+declare function apply<S>(fn: (x: S) => S, initial: S): S;
 apply(id, 1) as number;
 apply(id, 1) as string; // ERROR
 
@@ -14,21 +14,21 @@ box.value as number;
 box.value as string; // ERROR
 
 // A generic argument does not see how another is instantiated: the second `wrap` gets its bound.
-declare function pipe<A, B, C>(a: A, f: (A) => B, g: (B) => C): C;
+declare function pipe<A, B, C>(a: A, f: (x: A) => B, g: (x: B) => C): C;
 declare function wrap<T>(x: T): Box<T>;
 const piped = pipe('a', wrap, wrap);
 piped.value as unknown;
 piped.value as string; // ERROR
 
 // The return hint is part of what the generic arguments are instantiated against.
-declare function lift<T>(f: (T) => T): (T) => T;
-const lifted: (string) => string = lift(id);
+declare function lift<T>(f: (x: T) => T): (x: T) => T;
+const lifted: (x: string) => string = lift(id);
 lifted('a') as string;
 const unhinted = lift(id);
 unhinted('a') as string; // ERROR
 
 // Like the hint of a call argument, a hint from an unobserved type parameter is its bound.
-declare function compose<A, B, C>(f: (B) => C, g: (A) => B): (A) => C;
+declare function compose<A, B, C>(f: (x: B) => C, g: (x: A) => B): (x: A) => C;
 const composed = compose(id, id);
 composed('a') as unknown;
 composed('a') as string; // ERROR
@@ -58,14 +58,14 @@ makeStore(Store, 1).value as string; // ERROR
 
 // Constructors.
 declare class Registry<F> {
-  constructor(initial: F, factory: (F) => F): void;
+  constructor(initial: F, factory: (x: F) => F): void;
   get(): F;
 }
 new Registry(1, id).get() as number;
 new Registry(1, id).get() as string; // ERROR
 
 // JSX props.
-declare component Mapper<T>(value: T, transform: (T) => T, onChange: (T) => void);
+declare component Mapper<T>(value: T, transform: (x: T) => T, onChange: (x: T) => void);
 <Mapper
   value="a"
   transform={id}
@@ -76,12 +76,12 @@ declare component Mapper<T>(value: T, transform: (T) => T, onChange: (T) => void
 />;
 
 // Overloaded callees.
-declare function overloaded(fn: (string) => string): 'string';
-declare function overloaded(fn: (number) => number): 'number';
+declare function overloaded(fn: (x: string) => string): 'string';
+declare function overloaded(fn: (x: number) => number): 'number';
 overloaded(id) as 'string';
 declare var genericOverloaded: {
-  <S>(fn: (S) => S, x: S, y: boolean): S,
-  <S>(fn: (S) => S, x: S): S,
+  <S>(fn: (a: S) => S, x: S, y: boolean): S,
+  <S>(fn: (a: S) => S, x: S): S,
 };
 genericOverloaded(id, 1) as number;
 genericOverloaded(id, 1) as string; // ERROR
@@ -102,19 +102,19 @@ make(NeedsN, notN); // ERROR
 // its bound.
 wrap.call(null, 'a').value as string;
 wrap.call(null, 'a').value as number; // ERROR
-declare function applyTo<T, U>(f: (T) => U, x: T): U;
+declare function applyTo<T, U>(f: (x: T) => U, x: T): U;
 const applied = applyTo.call(null, wrap, 'a');
 applied as unknown;
 applied as Box<string>; // ERROR
 
 // Arguments after a spread do not line up with parameters.
-declare function last<S>(x: S, fn: (S) => S): S;
+declare function last<S>(x: S, fn: (y: S) => S): S;
 declare const single: [number];
 last(...single, id) as number;
 last(...single, id) as string; // ERROR
 
 // A generic argument in an optional callback.
-declare function maybeApply<T>(initial: T, fn?: ?(T) => T): T;
+declare function maybeApply<T>(initial: T, fn?: ?(x: T) => T): T;
 maybeApply(1, id) as number;
 maybeApply(1, id) as string; // ERROR
 

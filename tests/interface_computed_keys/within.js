@@ -27,8 +27,8 @@ multi.a as number; // OK
 multi.b as string; // OK
 
 interface TwoIndexers {
-  [string]: number,
-  [number]: string, // ERROR: multiple indexers are still unsupported
+  [key: string]: number,
+  [key: number]: string, // ERROR: multiple indexers are still unsupported
 }
 
 // A safe-integer number literal is the named property "42".
@@ -46,7 +46,7 @@ num[99]; // ERROR: property `99` is missing (a named key, not a number indexer)
 interface Mixed {
   foo: string,
   ['bar']: boolean,
-  [string]: number,
+  [key: string]: number,
 }
 declare const mixed: Mixed;
 mixed.foo as string; // OK
@@ -66,7 +66,7 @@ opt.a as number | void; // OK
 opt.a as number; // ERROR: the property is optional, so `void` is not a number
 
 interface OptIndexer {
-  [string]?: number, // ERROR: an optional index signature is still rejected
+  [key: string]?: number, // ERROR: an optional index signature is still rejected
 }
 
 // A labeled key `[label: K]` is a TS-style index signature, so it stays one

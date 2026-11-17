@@ -3,10 +3,10 @@ declare const useCustom: hook <T>(x: T) => [T]
 const [v] = useCustom({a: 42}); // error, not in component or hook
 v.a = 100; // Error, x is not writable
 
-useCustom as <T>(T) => [T]; // error, hook and nonhook incompatible
-useCustom as hook <T>(T) => [T]; // ok
+useCustom as <T>(x: T) => [T]; // error, hook and nonhook incompatible
+useCustom as hook <T>(x: T) => [T]; // ok
 
-declare const nonhook: <T>(T) => [T];
+declare const nonhook: <T>(x: T) => [T];
 nonhook as typeof useCustom; // error, nonhook and hook incompatible
 
 declare const useCustom2: hook <T>(x: T) => [T];

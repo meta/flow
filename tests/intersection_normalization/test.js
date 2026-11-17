@@ -20,10 +20,10 @@ mergedReadonlyObject.left = 'changed'; // ERROR: normalization preserves propert
 declare const ComputedLeft: 'computedLeft';
 declare const ComputedRight: 'computedRight';
 type MergedComputedObject = {
-  readonly [typeof ComputedLeft]: string,
+  readonly [key: typeof ComputedLeft]: string,
   ...,
 } & {
-  readonly [typeof ComputedRight]: number,
+  readonly [key: typeof ComputedRight]: number,
   ...,
 };
 declare const mergedComputedObject: MergedComputedObject;
@@ -33,9 +33,9 @@ mergedComputedObject.computedRight as number;
 type ComputedUnionKeys = 'computedUnionLeft' | 'computedUnionRight';
 declare const ComputedExtra: 'computedExtra';
 type MergedComputedUnionObject = {
-  readonly [ComputedUnionKeys]: string,
+  readonly [key: ComputedUnionKeys]: string,
 } & {
-  readonly [typeof ComputedExtra]: number,
+  readonly [key: typeof ComputedExtra]: number,
   ...,
 };
 declare const mergedComputedUnionObject: MergedComputedUnionObject;
@@ -199,9 +199,9 @@ declare const mergedCyclicInterfaces: MergedCyclicInterfaces;
 mergedCyclicInterfaces.cycleLeft as string;
 mergedCyclicInterfaces.cycleRight as number;
 
-type InvalidExactIntersection = {|exactLeft: string|} & {|
+type InvalidExactIntersection = {exactLeft: string} & {
   exactRight: number,
-|}; // ERROR: each exact object lacks the other's required property
+}; // ERROR: each exact object lacks the other's required property
 
 declare const invalidExactIntersection: InvalidExactIntersection;
 invalidExactIntersection.exactLeft as string;
@@ -212,7 +212,7 @@ declare const sameExactObjects: SameExactObjects;
 sameExactObjects.foo as string;
 sameExactObjects.foo as number; // ERROR: identical exact objects normalize
 
-type ExactAndInexact = {|exactShared: string, exactOnly: number|} & {
+type ExactAndInexact = {exactShared: string, exactOnly: number} & {
   exactShared: 'shared',
   ...,
 };
@@ -221,18 +221,18 @@ exactAndInexact.exactShared as 'shared';
 exactAndInexact.exactShared as 'other'; // ERROR: the overlapping property was normalized
 exactAndInexact.exactOnly as number;
 
-type DisjointOptionalExact = {|optionalLeft?: string|} & {|
+type DisjointOptionalExact = {optionalLeft?: string} & {
   optionalRight?: number,
-|};
+};
 declare const disjointOptionalExact: DisjointOptionalExact;
 disjointOptionalExact.optionalLeft;
 
-type ExactWithDictionary = {|exactKey: number|} & {[key: string]: number, ...};
+type ExactWithDictionary = {exactKey: number} & {[key: string]: number, ...};
 declare const exactWithDictionary: ExactWithDictionary;
 exactWithDictionary.exactKey as number;
 exactWithDictionary.otherKey;
 
-type ExactMissingInexactRequired = {|exactKey: string|} & {
+type ExactMissingInexactRequired = {exactKey: string} & {
   inexactRequired: number,
   ...,
 }; // ERROR: the exact object lacks a required property

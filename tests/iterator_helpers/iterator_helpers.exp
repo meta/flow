@@ -12,9 +12,9 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
                ^^^^^^
 
 References:
-   reduce.js:5:62
-   5| declare const flexibleReducer: (string | number,  number) => string;
-                                                                   ^^^^^^ [1]
+   reduce.js:5:74
+   5| declare const flexibleReducer: (acc: string | number,  value: number) => string;
+                                                                               ^^^^^^ [1]
    reduce.js:2:40
    2| declare const iterator: IteratorObject<number>;
                                              ^^^^^^ [2]

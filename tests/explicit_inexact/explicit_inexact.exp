@@ -3,7 +3,7 @@ Error --------------------------------------------------------------------------
 Cannot cast `x` to `{}` because inexact `U` [1] is incompatible with exact `{}` [2]. [incompatible-exact]
 
    test.js:8:1
-   8| x as {||}; // Error, inexact vs. exact
+   8| x as {}; // Error, inexact vs. exact
       ^
 
 References:
@@ -11,8 +11,8 @@ References:
    5| declare const x: U;
                        ^ [1]
    test.js:8:6
-   8| x as {||}; // Error, inexact vs. exact
-           ^^^^ [2]
+   8| x as {}; // Error, inexact vs. exact
+           ^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------------ test.js:8:1
@@ -21,7 +21,7 @@ Cannot cast `x` to `{}` because property `foo` is extra in `U` [1] but missing i
 extra props. [incompatible-type]
 
    test.js:8:1
-   8| x as {||}; // Error, inexact vs. exact
+   8| x as {}; // Error, inexact vs. exact
       ^
 
 References:
@@ -29,8 +29,8 @@ References:
    5| declare const x: U;
                        ^ [1]
    test.js:8:6
-   8| x as {||}; // Error, inexact vs. exact
-           ^^^^ [2]
+   8| x as {}; // Error, inexact vs. exact
+           ^^ [2]
 
 
 

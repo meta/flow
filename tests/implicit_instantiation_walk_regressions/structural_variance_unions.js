@@ -58,7 +58,7 @@ function case4() {
 }
 
 function case5() {
-  declare function useState<S>(initialState: (() => S) | S): [S, (S) => void];
+  declare function useState<S>(initialState: (() => S) | S): [S, (value: S) => void];
 
   const [now] = useState(Date.now);
 

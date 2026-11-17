@@ -2,7 +2,7 @@
 export type Value = void | null | boolean | number | string | Aggregate;
 
 export type Aggregate = {
-  readonly [string]: Value,
+  readonly [key: string]: Value,
 };
 
 (() => {}) as Value;

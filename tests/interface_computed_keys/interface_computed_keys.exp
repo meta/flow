@@ -1271,8 +1271,8 @@ Error --------------------------------------------------------------------------
 
 Multiple indexers are not supported. [unsupported-syntax]
 
-   31|   [number]: string, // ERROR: multiple indexers are still unsupported
-         ^^^^^^^^^^^^^^^^
+   31|   [key: number]: string, // ERROR: multiple indexers are still unsupported
+         ^^^^^^^^^^^^^^^^^^^^^
 
 
 Error --------------------------------------------------------------------------------------------------- within.js:41:5
@@ -1341,8 +1341,8 @@ Error --------------------------------------------------------------------------
 
 Optional indexer (`?:`) is not enabled. [unsupported-syntax]
 
-   69|   [string]?: number, // ERROR: an optional index signature is still rejected
-         ^^^^^^^^^^^^^^^^^
+   69|   [key: string]?: number, // ERROR: an optional index signature is still rejected
+         ^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error --------------------------------------------------------------------------------------------------- within.js:79:1

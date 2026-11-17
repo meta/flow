@@ -10,10 +10,10 @@ function case1() {
 }
 
 function case2() {
-  type Debounced<Args extends ReadonlyArray<unknown>> = {(...Args): void, ...};
+  type Debounced<Args extends ReadonlyArray<unknown>> = {(...args: Args): void, ...};
 
   declare function debounce<Args extends ReadonlyArray<unknown>>(
-    func: (...Args) => unknown,
+    func: (...args: Args) => unknown,
   ): Debounced<Args>;
 
   interface Callback {

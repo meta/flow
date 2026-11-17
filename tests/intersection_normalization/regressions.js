@@ -80,6 +80,6 @@ function readNumericDictionary(v: NumericDictionary): empty {
 }
 
 import type {ImportedTypeScriptMember} from './typescript';
-type ExactAndTypeScript = {|shared: string|} & ImportedTypeScriptMember;
+type ExactAndTypeScript = {shared: string} & ImportedTypeScriptMember;
 declare const inexactShared: {shared: string, other: number, ...};
 inexactShared as ExactAndTypeScript; // ERROR

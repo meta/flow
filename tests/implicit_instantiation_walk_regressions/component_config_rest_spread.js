@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-type Context = Readonly<{logger: string, log: string => void}>;
+type Context = Readonly<{logger: string, log: (message: string) => void}>;
 type WithContext<TProps> = Readonly<{...TProps, ...Context, ...}>;
 
 declare function withContext<

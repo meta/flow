@@ -26,7 +26,7 @@ component Select<V>(...props: SelectProps<V>) {
   return null;
 }
 
-declare const setKey: ((('a' | 'b') => 'a' | 'b') | 'a' | 'b') => void;
+declare const setKey: (x: ((y: 'a' | 'b') => 'a' | 'b') | 'a' | 'b') => void;
 declare const key: 'a' | 'b';
 
 <Select onChange={setKey} value={key} />; // ok: V = 'a' | 'b'

@@ -9,7 +9,7 @@ function case1() {
 
 function case2() {
   declare function connect<OP, D>(mapState?: null): [OP, D];
-  declare function connect<S, D, OP, SP>(mapState: (S, OP) => SP): [S, D, OP, SP];
+  declare function connect<S, D, OP, SP>(mapState: (state: S, ownProps: OP) => SP): [S, D, OP, SP];
   declare var mapState: any;
 
   connect<_, unknown, {}, _>(mapState);

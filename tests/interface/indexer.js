@@ -10,7 +10,7 @@ interface Bad {
 
 // Access with string literal type
 interface PropAndIndexer {
-  [number]: string;
+  [key: number]: string;
   foo: boolean;
 }
 {
@@ -24,13 +24,13 @@ interface PropAndIndexer {
 type Keys = 'a' | 'b';
 
 interface Invariant {
-  [Keys]: number | string;
+  [key: Keys]: number | string;
 }
 interface Covariant {
-  readonly [Keys]: number | string;
+  readonly [key: Keys]: number | string;
 }
 interface Contravariant {
-  writeonly [Keys]: number;
+  writeonly [key: Keys]: number;
 }
 
 {
@@ -52,7 +52,7 @@ interface Contravariant {
   x['xxx'] = 1; // ERROR
 }
 {
-  declare const x: interface {readonly [string]: number};
+  declare const x: interface {readonly [key: string]: number};
   declare const s: string;
   x[s]; // OK
   x[s] = 1; // ERROR
@@ -60,34 +60,34 @@ interface Contravariant {
 }
 
 {
-  declare const x: {[Keys]: number};
+  declare const x: {[key: Keys]: number};
   x as Invariant; // ERROR
   x as Covariant; // OK
   x as Contravariant; // OK
 }
 {
-  declare const x: interface {[Keys]: number};
+  declare const x: interface {[key: Keys]: number};
   x as Invariant; // ERROR
   x as Covariant; // OK
   x as Contravariant; // OK
 }
 
 {
-  declare const x: {[Keys]: number | string};
-  x as interface {[Keys]: number}; // ERROR
-  x as interface {readonly [Keys]: number}; // ERROR
-  x as interface {writeonly [Keys]: number}; // OK
+  declare const x: {[key: Keys]: number | string};
+  x as interface {[key: Keys]: number}; // ERROR
+  x as interface {readonly [key: Keys]: number}; // ERROR
+  x as interface {writeonly [key: Keys]: number}; // OK
 }
 {
-  declare const x: interface {[Keys]: number | string};
-  x as interface {[Keys]: number}; // ERROR
-  x as interface {readonly [Keys]: number}; // ERROR
-  x as interface {writeonly [Keys]: number}; // OK
+  declare const x: interface {[key: Keys]: number | string};
+  x as interface {[key: Keys]: number}; // ERROR
+  x as interface {readonly [key: Keys]: number}; // ERROR
+  x as interface {writeonly [key: Keys]: number}; // OK
 }
 
 // Extends
 interface NumIndexer {
-  [number]: boolean;
+  [key: number]: boolean;
 }
 interface A extends NumIndexer {
   foo: string;
@@ -106,10 +106,10 @@ interface ChildValue extends ParentValue {
   child: string;
 }
 interface CovariantNumIndexer {
-  readonly [number]: ParentValue;
+  readonly [key: number]: ParentValue;
 }
 interface NarrowCovariantNumIndexer extends CovariantNumIndexer {
-  readonly [number]: ChildValue;
+  readonly [key: number]: ChildValue;
 }
 {
   declare const x: NarrowCovariantNumIndexer;
@@ -119,7 +119,7 @@ interface NarrowCovariantNumIndexer extends CovariantNumIndexer {
 
 interface ArrayLikeBase {
   readonly length: number;
-  readonly [number]: string;
+  readonly [key: number]: string;
 }
 interface InheritedArrayLike extends ArrayLikeBase {}
 {
@@ -130,7 +130,7 @@ interface InheritedArrayLike extends ArrayLikeBase {}
 }
 
 interface StrIndexer {
-  [string]: boolean;
+  [key: string]: boolean;
 }
 interface B extends StrIndexer {
   foo: string;
@@ -146,7 +146,7 @@ interface Super {
   bar: string;
 }
 interface C extends Super {
-  [string]: boolean;
+  [key: string]: boolean;
 }
 {
   declare const x: C;
@@ -158,7 +158,7 @@ interface SuperWithMethod {
   foo(): null;
 }
 interface D extends SuperWithMethod {
-  [string]: () => number;
+  [key: string]: () => number;
 }
 {
   declare const x: D;
@@ -181,7 +181,7 @@ interface D extends SuperWithMethod {
 // Methods
 interface M {
   foo(): number;
-  [string]: boolean;
+  [key: string]: boolean;
 }
 {
   declare const x: M;
@@ -202,12 +202,12 @@ interface M2 extends M {
 
 // $ReadOnly type util
 {
-  declare const x: Readonly<interface {[Keys]: number}>;
+  declare const x: Readonly<interface {[key: Keys]: number}>;
   declare const s: string;
   x['a']; // OK
   x['a'] = 1; // ERROR
   x[true]; // ERROR
 
   declare const y: {readonly a: number};
-  y as Readonly<interface {[string]: number}>; // OK
+  y as Readonly<interface {[key: string]: number}>; // OK
 }

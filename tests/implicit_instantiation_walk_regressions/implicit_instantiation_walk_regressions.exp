@@ -44,7 +44,7 @@ Error --------------------------------------------------------------------------
 
 Cannot create `Boundary` element because in type argument `TProps`: property `extra` is extra in
 `{children: React.MixedElement, extra: number, resetCount: number}` [1] but missing in
-`{readonly children: React.Node, readonly fallback?: null | ((string) => React.Node), readonly resetC...` [2]. Exact
+`{readonly children: React.Node, readonly fallback?: null | ((error: string) => React.Node), readonly...` [2]. Exact
 objects do not accept extra props. [incompatible-type]
 
    class_component_default_props.js:19:2
@@ -427,7 +427,7 @@ References:
 
 Error -------------------------------------------------------------------------------------- indexed_access_keys.js:12:1
 
-Cannot cast `send(...)` to `empty` because `(number) => string` [1] is incompatible with `empty` [2].
+Cannot cast `send(...)` to `empty` because `(x: number) => string` [1] is incompatible with `empty` [2].
 [incompatible-type]
 
    indexed_access_keys.js:12:1
@@ -466,9 +466,9 @@ Cannot call `e` with `'x'` bound to `v` because `"x"` [1] is incompatible with `
             ^^^ [1]
 
 References:
-   indexer_invariant.js:11:29
-   11| declare const p: {[string]: number};
-                                   ^^^^^^ [2]
+   indexer_invariant.js:11:34
+   11| declare const p: {[key: string]: number};
+                                        ^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------- indexer_key_literal.js:22:1

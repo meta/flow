@@ -70,7 +70,7 @@ undefined as void?.['c']; // OK
 undefined as empty?.['x']; // OK
 1 as empty?.['x']; // Error
 
-function f<K extends string, T extends ?{readonly [K]: unknown}>(t: T, k: K): T?.[K] {
+function f<K extends string, T extends ?{readonly [key: K]: unknown}>(t: T, k: K): T?.[K] {
   return t?.[k];
 }
 
@@ -91,7 +91,7 @@ undefined as Before; // OK
 type Later = ?{a: number};
 
 type O = ?{
-  [number]: boolean;
+  [key: number]: boolean;
   foo: string;
   bar: number;
   nested: {
@@ -104,7 +104,7 @@ true as O?.[number]; // OK
 1 as O?.['nested']['goop']; // OK
 
 declare class Cx {
-  [number]: boolean;
+  [key: number]: boolean;
   foo: string;
   bar: number;
   nested: {

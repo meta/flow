@@ -29,7 +29,7 @@ w as M['a']; // error
 
 declare export function useState<S>(
   initialState: (() => S) | S,
-): [S, ((S => S) | S) => void];
+): [S, (action: ((state: S) => S) | S) => void];
 declare export function useRef<T>(initialValue: T): {current: T};
 declare const NUM: number;
 const [state, setState] = useState(1);

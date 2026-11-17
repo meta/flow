@@ -2,7 +2,7 @@
 
 declare class Pr<out T> {}
 
-type Tr = <Return>(() => Pr<Return>) => Return;
+type Tr = <Return>(f: () => Pr<Return>) => Return;
 
 declare function aw<T>(p: Pr<T> | T): T;
 

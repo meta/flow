@@ -1,4 +1,4 @@
 //@flow
 
 function f() {}
-f as {[string]: string};
+f as {[key: string]: string};

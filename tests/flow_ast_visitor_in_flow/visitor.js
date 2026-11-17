@@ -4,7 +4,7 @@ import type { ESNode } from "./ast";
 import * as Ast from "./ast";
 
 export class Visitor {
-    optional<N extends ESNode>(method: N => void, node: ?N) {
+    optional<N extends ESNode>(method: (node: N) => void, node: ?N) {
       if (node != null) {
         method(node);
       }
@@ -1500,7 +1500,7 @@ export class Visitor {
       this.setAcc(f(this.getAcc()));
     }
 
-    eval(f: this => void): Acc {
+    eval(f: (visitor: this) => void): Acc {
       f(this);
       return this.getAcc();
     }

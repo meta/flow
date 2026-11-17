@@ -8,7 +8,7 @@ declare function wrap<T>(x: T): Box<T>;
 // Generic values are instantiated in context, in argument order, each seeing
 // the solution so far.
 {
-  declare function pipe<A, B, C>(a: A, f: (A) => B, g: (B) => C): C;
+  declare function pipe<A, B, C>(a: A, f: (a: A) => B, g: (b: B) => C): C;
   const piped = pipe('a', wrap, wrap);
   piped.value.value as string; // ok
   piped.value.value as number; // error
@@ -39,8 +39,8 @@ declare function wrap<T>(x: T): Box<T>;
 // The parameters of a callback become the tuple a rest parameter receives.
 {
   declare function debounce<Args extends ReadonlyArray<unknown>>(
-    f: (...Args) => unknown,
-  ): (...Args) => void;
+    f: (...args: Args) => unknown,
+  ): (...args: Args) => void;
   const d = debounce((s: string, n: number) => {});
   d('a', 1); // ok
   d(1, 'a'); // error

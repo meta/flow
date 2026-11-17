@@ -14,9 +14,9 @@ function f<A>(x: A, g: (v: A) => void) {
 }
 
 // A bound that applies the same alias is compared with it argument by argument.
-type Tree<T> = T | null | {[string]: Tree<T>, ...};
-declare function parse<T extends string | number, O extends Tree<T>>(q: string): {[string]: O};
-function parseWith<T extends string | number, O extends Tree<T>>(q: string): {[string]: O} {
+type Tree<T> = T | null | {[key: string]: Tree<T>, ...};
+declare function parse<T extends string | number, O extends Tree<T>>(q: string): {[key: string]: O};
+function parseWith<T extends string | number, O extends Tree<T>>(q: string): {[key: string]: O} {
   return parse(q);
 }
 

@@ -8,7 +8,7 @@ type CommonColumn = Readonly<{header: string}>;
 type ContentColumn<K, I> = Readonly<{
   ...CommonColumn,
   key: K,
-  cell?: (Readonly<{item: I}>) => unknown,
+  cell?: (props: Readonly<{item: I}>) => unknown,
 }>;
 type SpacerColumn<K> = Readonly<{...CommonColumn, key: K, spacer: true}>;
 type Column<K, I> = ContentColumn<K, I> | SpacerColumn<K>;

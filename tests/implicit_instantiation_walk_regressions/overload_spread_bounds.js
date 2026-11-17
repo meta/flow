@@ -14,14 +14,14 @@ type Source<K, V> = {
 };
 type SubscribableSource<K, V> = {
   ...Source<K, V>,
-  subscribe: (handler: (K, V) => void, range?: Range<K>) => () => void,
+  subscribe: (handler: (key: K, value: V) => void, range?: Range<K>) => () => void,
   ...
 };
 type QuerySource<out K, out V> = {
   ...Source<K, V>,
   filter: ((predicate: typeof Boolean) => QuerySource<K, NonNullable<V>>) &
     ((predicate: (value: V) => boolean) => QuerySource<K, V>),
-  map<V2>(projection: (V) => V2): QuerySource<K, V2>,
+  map<V2>(projection: (value: V) => V2): QuerySource<K, V2>,
   ...
 };
 

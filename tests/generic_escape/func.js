@@ -14,7 +14,7 @@ class ObjectUtils {
   }
 }
 
-function makeEqualFn<T>(customEqual?: (T, T) => boolean): (T, T) => boolean {
+function makeEqualFn<T>(customEqual?: (a: T, b: T) => boolean): (a: T, b: T) => boolean {
   return customEqual
     ? function (a, b) {
         return a === b || customEqual(a, b);
@@ -29,7 +29,7 @@ function o<X>(x: X) {
 
 var a = 42;
 
-function f2<X>(b: boolean): X => X {
+function f2<X>(b: boolean): (x: X) => X {
   if (b) {
     a = (x: X) => x;
   }

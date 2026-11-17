@@ -3,7 +3,7 @@
 function mergeWithDefaults<TArgs extends interface {}, TDefaults extends Partial<TArgs>, TResult>(
   defaults: TDefaults,
   create: (args: TArgs) => TResult,
-): (Omit<TArgs, keyof TDefaults>) => TResult {
+): (args: Omit<TArgs, keyof TDefaults>) => TResult {
   throw 'unimplemented';
 }
 

@@ -1,7 +1,7 @@
 //@flow
 
 interface I {
-  [string]: number;
+  [key: string]: number;
   constructor(): void;
 }
 
@@ -12,7 +12,7 @@ class C {
 new C() as I;
 
 interface UnknownIndexer {
-  [string]: unknown;
+  [key: string]: unknown;
 }
 
 declare class Window {
@@ -29,10 +29,10 @@ class BaseWithStringField {
 
 class DerivedWithStringField extends BaseWithStringField {}
 
-new DerivedWithStringField() as interface {[string]: number}; // error, inherited `foo` is incompatible
+new DerivedWithStringField() as interface {[key: string]: number}; // error, inherited `foo` is incompatible
 
 declare class C2 {
-  [string]: number;
+  [key: string]: number;
   x: number;
 }
 
@@ -100,7 +100,7 @@ class SelfIndexed extends SelfIndexer {
 
 declare const selfIndexed: SelfIndexed;
 
-selfIndexed as interface {[string]: number};
+selfIndexed as interface {[key: string]: number};
 
 declare const uint8Array: Uint8Array;
 uint8Array as $ArrayLike<number>;
@@ -108,9 +108,9 @@ uint8Array as $ArrayLike<number>;
 declare class NamedPropertyOnly {
   foo: string;
 }
-new NamedPropertyOnly() as interface {[number]: number};
+new NamedPropertyOnly() as interface {[key: number]: number};
 
 declare class NumericProperty {
   0: string;
 }
-new NumericProperty() as interface {[number]: number}; // error
+new NumericProperty() as interface {[key: number]: number}; // error

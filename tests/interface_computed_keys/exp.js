@@ -14,7 +14,7 @@ export interface Num {
 export interface Mixed {
   foo: string,
   ['bar']: boolean,
-  [string]: number,
+  [key: string]: number,
 }
 export interface Opt {
   ['a']?: number,
@@ -163,5 +163,5 @@ declare export class Holder {
   static ['b']: string,
   [dcKey]: number,
   static [dcKey]: string,
-  [string]: boolean,
+  [key: string]: boolean,
 }

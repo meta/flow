@@ -22,11 +22,11 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ test.js:4:1
 
-Cannot cast `f` to `{[string]: string}` because `() => void` [1] is incompatible with indexed `{[string]: string}` [2].
-[incompatible-function-indexer]
+Cannot cast `f` to `{[key: string]: string}` because `() => void` [1] is incompatible with indexed
+`{[key: string]: string}` [2]. [incompatible-function-indexer]
 
    test.js:4:1
-   4| f as {[string]: string};
+   4| f as {[key: string]: string};
       ^
 
 References:
@@ -34,8 +34,8 @@ References:
    3| function f() {}
       ^^^^^^^^^^^^ [1]
    test.js:4:6
-   4| f as {[string]: string};
-           ^^^^^^^^^^^^^^^^^^ [2]
+   4| f as {[key: string]: string};
+           ^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 

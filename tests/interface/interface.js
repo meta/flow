@@ -28,32 +28,32 @@ class D {
 
 (new D) as J; // error, x is invariant
 
-declare const o : {[string] : number};
+declare const o : {[key: string] : number};
 
-o as interface {[string] : number};
-({x : 3} as interface {[string] : number});
+o as interface {[key: string] : number};
+({x : 3} as interface {[key: string] : number});
 
-declare const o2 : interface {[string] : number};
+declare const o2 : interface {[key: string] : number};
 o2["a"] as number;
 o2["b"] as boolean; // error
 
 
-declare const o3 : {[string] : number};
+declare const o3 : {[key: string] : number};
 
-o3 as interface {[string] : boolean}; // error
-({x : 3} as interface {[string] : boolean}); // error
+o3 as interface {[key: string] : boolean}; // error
+({x : 3} as interface {[key: string] : boolean}); // error
 
-o3 as interface {[number] : number}; // error
-({x : 3} as interface {[number] : number}); // error
+o3 as interface {[key: number] : number}; // error
+({x : 3} as interface {[key: number] : number}); // error
 
 declare const o4 : {[key: "asdf"] : number};
 
-o4 as interface {[string] : number}; // error
+o4 as interface {[key: string] : number}; // error
 
 declare const o5 : {readonly [key: "asdf"] : number};
 
-o5 as interface {readonly [string] : number}; // OK
+o5 as interface {readonly [key: string] : number}; // OK
 
-declare const o6 : {[string] : number};
+declare const o6 : {[key: string] : number};
 
 o6 as interface {[key: "asdf"] : number}; // error

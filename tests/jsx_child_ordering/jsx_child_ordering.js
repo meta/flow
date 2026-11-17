@@ -9,7 +9,7 @@
 
 import * as React from 'react';
 
-component Chart<TPoint>(format: number => string, children: React.Node) {
+component Chart<TPoint>(format: (x: number) => string, children: React.Node) {
   return null;
 }
 

@@ -84,7 +84,7 @@ function hasFraction(o: {0.5: string} | {1.5: number}): void {
 
 // Contextual hints find callbacks by numeric, quoted and computed names.
 {
-  const callbacks: {'0.5': (string) => string, '1.5': (number) => number} = {
+  const callbacks: {'0.5': (value: string) => string, '1.5': (value: number) => number} = {
     0.5: value => {
       value as string; // OK
       value as number; // ERROR
@@ -96,7 +96,7 @@ function hasFraction(o: {0.5: string} | {1.5: number}): void {
       return value; // OK
     },
   }; // OK
-  const quoted: {'0.5': (string) => string} = {
+  const quoted: {'0.5': (value: string) => string} = {
     '0.5': value => {
       value as string; // OK
       value as number; // ERROR

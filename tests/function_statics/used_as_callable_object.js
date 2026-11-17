@@ -9,13 +9,13 @@ addWithBar.bar = "bar";
 
 
 type InexactCallableObj = {
-  (number, number): number,
+  (a: number, b: number): number,
   bar: string,
   ...
 };
 
 type ExactCallableObj = {
-  (number, number): number,
+  (a: number, b: number): number,
   bar: string,
 };
 

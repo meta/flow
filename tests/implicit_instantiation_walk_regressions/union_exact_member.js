@@ -6,7 +6,7 @@ declare class Cell<T> extends ReadOnlyCell<T> {}
 type CellValue<T> = ReadOnlyCell<T> | Cell<T>;
 type Settings<Stored> = Readonly<{
   kind: string,
-  validate: (unknown) => Stored,
+  validate: (value: unknown) => Stored,
 }>;
 type OptionsWithoutDefault<T> = Readonly<{
   key: string,

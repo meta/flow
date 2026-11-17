@@ -12,9 +12,9 @@ References:
    test.js:14:15
    14| const error1: Props = {foo: 3}; // One error
                      ^^^^^ [1]
-   test.js:11:4
-   11|   [StringPrefix<'data-'>]: string | void,
-          ^^^^^^^^^^^^^^^^^^^^^ [3]
+   test.js:11:9
+   11|   [key: StringPrefix<'data-'>]: string | void,
+               ^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 

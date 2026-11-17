@@ -449,7 +449,7 @@ Cannot assign `getKeys1(...)` to `err1_` because `"FOO" | "BAR"` [1] is incompat
 
 References:
    repos_use.js:6:27
-    6| declare function getKeys1<TKey>(x: {readonly [{foo: TKey}['foo']]: unknown}): TKey;
+    6| declare function getKeys1<TKey>(x: {readonly [key: {foo: TKey}['foo']]: unknown}): TKey;
                                  ^^^^ [1]
    repos_use.js:21:14
    21| const err1_: 'FOO' = getKeys1(dict); // ERR
@@ -484,7 +484,7 @@ Cannot assign `getKeys2(...)` to `err2_` because `"FOO" | "BAR"` [1] is incompat
 
 References:
    repos_use.js:7:27
-    7| declare function getKeys2<TKey>(x: {readonly [T<TKey>]: unknown}): TKey;
+    7| declare function getKeys2<TKey>(x: {readonly [key: T<TKey>]: unknown}): TKey;
                                  ^^^^ [1]
    repos_use.js:25:14
    25| const err2_: 'FOO' = getKeys2(dict); // ERR

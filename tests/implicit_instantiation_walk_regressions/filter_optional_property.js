@@ -14,7 +14,7 @@ component C(c: boolean, d: ?number) {
 }
 
 // An element whose maybe type wraps another one.
-type Dict<V> = {[string]: ?V, ...};
+type Dict<V> = {[key: string]: ?V, ...};
 function f(ids: Array<string>, map?: Dict<?{id: string}>) {
   ids.map(id => map?.[id]).filter(t => t != null) as Array<{id: string}>;
 }

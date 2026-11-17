@@ -1,4 +1,4 @@
-type Api = {ns: {readonly a: (number) => string, readonly b: (string) => number}};
+type Api = {ns: {readonly a: (x: number) => string, readonly b: (x: string) => number}};
 type Lookup<A extends {...}, N extends string, K extends string> = A[N][K];
 type ParamOf<F> = F extends (x: infer I) => unknown ? I : empty;
 
