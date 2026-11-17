@@ -1551,6 +1551,15 @@ impl<'e> Walker<'e> {
                     let ui = ui.dupe();
                     self.walk(cx, &empty, &ui)
                 }
+                // So are the members of the bound of a generic, which subtyping narrows: the inner
+                // type sees the generic with the rest of its bound.
+                TypeInner::GenericT(g)
+                    if let Some(narrowed) =
+                        self.narrowed_generic(cx, g, |h| matches!(h, Head::Null | Head::Void)) =>
+                {
+                    let ui = ui.dupe();
+                    self.walk(cx, &narrowed, &ui)
+                }
                 _ => {
                     let ui = ui.dupe();
                     self.walk(cx, &l, &ui)
@@ -1565,6 +1574,13 @@ impl<'e> Walker<'e> {
                     let empty = empty_t::why(type_util::reason_of_t(&l).dupe());
                     let ui = ui.dupe();
                     self.walk(cx, &empty, &ui)
+                }
+                TypeInner::GenericT(g)
+                    if let Some(narrowed) =
+                        self.narrowed_generic(cx, g, |h| matches!(h, Head::Void)) =>
+                {
+                    let ui = ui.dupe();
+                    self.walk(cx, &narrowed, &ui)
                 }
                 _ => {
                     let ui = ui.dupe();
@@ -5569,6 +5585,35 @@ impl<'e> Walker<'e> {
     ) -> bool {
         (slice.prop_map.values())
             .any(|p| property::read_t(p).is_some_and(|t| self.mentions(cx, &t)))
+    }
+
+    /// A generic narrowed by a maybe or optional type, as subtyping narrows it: the members of its
+    /// bound that the type absorbs are dropped, if there are any.
+    fn narrowed_generic<'cx>(
+        &self,
+        cx: &mut Context<'cx>,
+        g: &GenericTData,
+        absorbs: fn(Head) -> bool,
+    ) -> Option<Type> {
+        let bound = self.resolve(cx, &g.bound);
+        let members: Vec<Type> = match bound.deref() {
+            TypeInner::UnionT(_, rep) => rep.members_iter().duped().collect(),
+            _ => vec![bound.dupe()],
+        };
+        let (absorbed, kept): (Vec<Type>, Vec<Type>) =
+            (members.into_iter()).partition(|t| absorbs(self.head(cx, t)));
+        if absorbed.is_empty() {
+            return None;
+        }
+        let reason = type_util::reason_of_t(&g.bound).dupe();
+        let bound = match kept.len() {
+            0 => empty_t::why(reason),
+            _ => type_util::union_of_ts(reason, kept, None),
+        };
+        Some(Type::new(TypeInner::GenericT(Box::new(GenericTData {
+            bound,
+            ..g.clone()
+        }))))
     }
 
     fn has_evidence(&self, name: &SubstName) -> bool {
