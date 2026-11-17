@@ -39,6 +39,7 @@ use flow_aloc::ALoc;
 use flow_aloc::ALocId;
 use flow_common::reason::Name;
 use flow_common::reason::VirtualReasonDesc;
+use flow_common::subst_name::SubstNameInner;
 use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 use flow_typing_errors::intermediate_error_types::ExpectedModulePurpose;
 use flow_typing_type::type_::CanonicalRendersForm;
@@ -742,6 +743,17 @@ struct MarkerVisitor<'a> {
     mentions: bool,
 }
 
+impl MarkerVisitor<'_> {
+    /// Whether the type variable `id` may have been made after some marker. The comparison wraps,
+    /// as the ids do.
+    fn made_after_markers(&self, id: i32) -> bool {
+        self.names.keys().any(|name| match name.deref() {
+            SubstNameInner::Id(marker, _) => id.wrapping_sub(*marker) > 0,
+            _ => true,
+        })
+    }
+}
+
 impl TypeVisitor<()> for MarkerVisitor<'_> {
     fn type_<'cx>(&mut self, cx: &mut Context<'cx>, pole: Polarity, _acc: (), t: &Type) {
         if let Some(cache) = &self.cache {
@@ -776,8 +788,9 @@ impl TypeVisitor<()> for MarkerVisitor<'_> {
                 }
             }
             // A type variable resolved to an instance, such as the `this` of a fixed instance, has
-            // the markers of the instance's type arguments.
-            TypeInner::OpenT(tvar) => {
+            // the markers of the instance's type arguments. One made before the markers, whose ids
+            // come from the same counter, can't have them.
+            TypeInner::OpenT(tvar) if self.made_after_markers(tvar.id() as i32) => {
                 if let constraint::Constraints::FullyResolved(s) =
                     cx.find_constraints(tvar.id() as i32).1
                     && let resolved = cx.force_fully_resolved_tvar(&s)
