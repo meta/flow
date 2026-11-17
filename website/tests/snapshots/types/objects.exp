@@ -297,9 +297,9 @@ References:
    -:8:6
    8|   ...Dict,
            ^^^^ [2]
-   -:3:4
-   3|   [string]: number,
-         ^^^^^^ [3]
+   -:3:9
+   3|   [key: string]: number,
+              ^^^^^^ [3]
 
 
 Found 1 error

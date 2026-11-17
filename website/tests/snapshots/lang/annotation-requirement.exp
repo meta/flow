@@ -47,21 +47,21 @@ An annotation on this parameter is required because Flow cannot infer its type f
 Found 1 error
 
 === block 9 ===
-Error ---------------------------------------------------------------- -:2:48
+Error ---------------------------------------------------------------- -:2:51
 
 Cannot cast `x` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
 
-   -:2:48
-   2| const fn3: {f: (number) => void} = {f: (x) => {x as string}}; // Error
-                                                     ^
+   -:2:51
+   2| const fn3: {f: (x: number) => void} = {f: (x) => {x as string}}; // Error
+                                                        ^
 
 References:
-   -:2:17
-   2| const fn3: {f: (number) => void} = {f: (x) => {x as string}}; // Error
-                      ^^^^^^ [1]
-   -:2:53
-   2| const fn3: {f: (number) => void} = {f: (x) => {x as string}}; // Error
-                                                          ^^^^^^ [2]
+   -:2:20
+   2| const fn3: {f: (x: number) => void} = {f: (x) => {x as string}}; // Error
+                         ^^^^^^ [1]
+   -:2:56
+   2| const fn3: {f: (x: number) => void} = {f: (x) => {x as string}}; // Error
+                                                             ^^^^^^ [2]
 
 
 Found 1 error

@@ -122,11 +122,11 @@ Let's say we have a function type and a few functions. Which of the functions ca
 be used safely in code that expects the given function type?
 
 ```js flow-check
-type FuncType = (1 | 2) => "A" | "B";
+type FuncType = (x: 1 | 2) => "A" | "B";
 
-declare function f1(1 | 2): "A" | "B" | "C";
-declare function f2(1 | null): "A" | "B";
-declare function f3(1 | 2 | 3): "A";
+declare function f1(x: 1 | 2): "A" | "B" | "C";
+declare function f2(x: 1 | null): "A" | "B";
+declare function f3(x: 1 | 2 | 3): "A";
 
 f1 as FuncType; // Error
 f2 as FuncType; // Error

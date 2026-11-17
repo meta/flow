@@ -290,7 +290,7 @@ Inexact tuples allow you to require that a generic is a tuple, e.g.
 ```js flow-check
 function mapTupleArray<T extends [...], R>(
   tuples: Array<T>, // An array of tuples
-  f: (...T) => R, // Function args match the tuple's types
+  f: (...args: T) => R, // Function args match the tuple's types
 ): Array<R> {
   return tuples.map(args => f(...args));
 }

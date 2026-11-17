@@ -78,7 +78,7 @@ type CatValues = Cat[keyof Cat]; // type CatValues = string | number | boolean
 
 The index can also be a generic:
 ```js flow-check
-function getProp<O extends {readonly [string]: unknown}, K extends keyof O>(o: O, k: K): O[K] {
+function getProp<O extends {readonly [key: string]: unknown}, K extends keyof O>(o: O, k: K): O[K] {
   return o[k];
 }
 

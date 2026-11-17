@@ -97,7 +97,7 @@ let element = <Component {...props} />;
 /* Let's define a new component */
 
 type OtherProps = Readonly<{...Props, extra_prop: number}>;
-declare const OtherComponent: OtherProps => React.Node;
+declare const OtherComponent: (props: OtherProps) => React.Node;
 declare const other_props: OtherProps;
 
 /* Any subsequent assignments to `product`, `Component`, or `element` will be

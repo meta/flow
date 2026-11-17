@@ -13,7 +13,7 @@ const obj: {foo: number, bar: boolean} = {foo: 1, bar: true};
 Flow supports several variants:
 - **[Exact object types](#exact-and-inexact-object-types)** (default): exactly a set of properties, e.g. `{a: number}`.
 - **[Inexact object types](#exact-and-inexact-object-types)**: at least a set of properties, e.g. `{a: number, ...}`.
-- **[Indexed object types](#toc-objects-as-maps)**: used as a map, e.g. `{[string]: boolean}`.
+- **[Indexed object types](#toc-objects-as-maps)**: used as a map, e.g. `{[key: string]: boolean}`.
 
 :::info TypeScript comparison
 TypeScript's object types look identical but are open by default — `{x: number}` admits extra properties in TypeScript, while Flow's [exact-by-default](../flow-vs-typescript.md#toc-object-exactness) `{x: number}` rejects them. TypeScript's excess-property check only fires on direct literal assignment. The Flow spelling of TS's open shape is the inexact form `{x: number, ...}`. Two related divergences: Flow's [class/interface/object subtyping](../flow-vs-typescript.md#toc-classes-nominal) is asymmetric because classes are nominal, and combining object types uses Flow's [type-level spread](../flow-vs-typescript.md#toc-type-spread) `{...A, b: T}` rather than the TS intersection `A & {b: T}`.
@@ -230,7 +230,7 @@ obj.foo = "hi"; // Works!
 The empty object can be interpreted as a [dictionary](#toc-objects-as-maps), if you supply the appropriate type annotation:
 
 ```js flow-check
-const dict: {[string]: number} = {}; // Works!
+const dict: {[key: string]: number} = {}; // Works!
 ```
 
 You may need to add type annotations to an object literal, if it references itself recursively (beyond simple cases):
@@ -335,7 +335,7 @@ still can't be spread after other properties, because its keys may overwrite the
 
 ```js flow-check
 type Dict = {
-  [string]: number,
+  [key: string]: number,
 };
 
 type ObjB = { // Error!
@@ -431,7 +431,7 @@ at runtime. It is the programmer's responsibility to ensure the access is safe,
 as with arrays.
 
 ```js flow-check
-const obj: {[number]: string} = {};
+const obj: {[key: number]: string} = {};
 obj[42].length; // No type error, but will throw at runtime
 ```
 
@@ -454,8 +454,8 @@ function add(id: number, name: string) {
 You can mark an indexer property as read-only (or write-only) using [variance](../lang/variance.md) annotations:
 
 ```js flow-check
-type ReadOnly = {readonly [string]: number};
-type WriteOnly = {writeonly [string]: number};
+type ReadOnly = {readonly [key: string]: number};
+type WriteOnly = {writeonly [key: string]: number};
 ```
 
 ### Symbol indexers {#toc-symbol-indexers}
@@ -466,7 +466,7 @@ An indexer keyed by `symbol` accepts any symbol. Writing `typeof id` as the inde
 const id = Symbol('id');
 
 type Named = {[id]: number}; // a required property
-type Indexed = {[typeof id]: number}; // an indexer accepting only `id`
+type Indexed = {[key: typeof id]: number}; // an indexer accepting only `id`
 type Dictionary = {[key: symbol]: number}; // an indexer accepting any symbol
 
 const named: Named = {}; // Error! Missing property
@@ -562,7 +562,7 @@ However, you can't access any properties off of `{...}`.
 You can also try using a [dictionary](#toc-objects-as-maps) with [`unknown`](./unknown.md) values, which would allow you to access any property (with a resulting `unknown` type):
 
 ```js flow-check
-function func(obj: {readonly [string]: unknown}) {
+function func(obj: {readonly [key: string]: unknown}) {
   const x: unknown = obj['bar'];
 }
 
@@ -602,7 +602,7 @@ function getVal(key: keyof typeof obj): number {
 **Use an indexer type** when the object is meant to be used as a dictionary:
 
 ```js flow-check
-const obj: {[string]: number} = {a: 1, b: 2};
+const obj: {[key: string]: number} = {a: 1, b: 2};
 
 const key: string = "a";
 obj[key]; // Works!

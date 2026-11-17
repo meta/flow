@@ -291,18 +291,18 @@ References:
 Found 1 error
 
 === block 31 ===
-Error ----------------------------------------------------------------------------- -:2:37
+Error ----------------------------------------------------------------------------- -:2:40
 
 Cannot use `T` [1] in an input position because `T` [1] is expected to occur only in output positions.
 [incompatible-variance]
 
-   -:2:37
-   2| type NotActuallyCovariant<out T> = (T) => void; // Error
-                                          ^
+   -:2:40
+   2| type NotActuallyCovariant<out T> = (x: T) => void; // Error
+                                             ^
 
 References:
    -:2:31
-   2| type NotActuallyCovariant<out T> = (T) => void; // Error
+   2| type NotActuallyCovariant<out T> = (x: T) => void; // Error
                                     ^ [1]
 
 

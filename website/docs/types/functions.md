@@ -74,7 +74,7 @@ function f<T>(x: T): Array<T> {
 
 const g = <T>(x: T): Array<T> => [x];
 
-type H = <T>(T) => Array<T>;
+type H = <T>(x: T) => Array<T>;
 ```
 
 ## Function Parameters
@@ -347,7 +347,7 @@ You can type functions with static properties as callable objects:
 
 ```js flow-check
 type CallableObj = {
-  (number, number): number,
+  (x: number, y: number): number,
   bar: string,
   ...
 };
@@ -408,7 +408,7 @@ const n: number = fn('number');
 If you want to specify you want to allow any function, and do not care what it is, you can use this pattern:
 
 ```js flow-check
-function useCallback<T extends (...ReadonlyArray<empty>) => unknown>(
+function useCallback<T extends (...args: ReadonlyArray<empty>) => unknown>(
   callback: T,
   inputs: ?ReadonlyArray<unknown>,
 ): T {
@@ -422,8 +422,8 @@ You could use type arguments to capture the arguments and return type, to do mor
 
 ```js flow-check
 function func<TArgs extends ReadonlyArray<unknown>, TReturn>(
-  callback: (...TArgs) => TReturn,
-): (boolean, ...TArgs) => Array<TReturn> {
+  callback: (...args: TArgs) => TReturn,
+): (b: boolean, ...args: TArgs) => Array<TReturn> {
   return (b, ...args): Array<TReturn> => {
     if (b) {
       return [callback(...args)];
@@ -433,7 +433,7 @@ function func<TArgs extends ReadonlyArray<unknown>, TReturn>(
   };
 }
 
-const f: (boolean, string, number) => Array<string> =
+const f: (b: boolean, x: string, y: number) => Array<string> =
   func((x: string, y: number) => x.slice(y)); // OK
 ```
 

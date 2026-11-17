@@ -59,7 +59,7 @@ declare function experiment(name: string): boolean;
 declare hook useOnlineStatus(x: boolean): boolean;
 declare hook useAlwaysOnlineStatus(x: boolean): boolean;
 
-export const useGKOnlineStatus: hook (boolean) => boolean =
+export const useGKOnlineStatus: hook (x: boolean) => boolean =
   experiment('show_online_status')
   ? useOnlineStatus
   : useAlwaysOnlineStatus

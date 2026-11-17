@@ -13,7 +13,7 @@ functions, objects, and more.
 true as boolean;
 [1, 2] as Array<number>;
 ({prop: "value"}) as {prop: string};
-(function func(s: string) {}) as string => void;
+(function func(s: string) {}) as (s: string) => void;
 ```
 
 These values can be used in many different ways:

@@ -119,7 +119,7 @@ extract a candidate type for `x`.
 Flow can infer the types for unannotated parameters even when they are nested within
 other expressions like objects. For example in
 ```js flow-check
-const fn3: {f: (number) => void} = {f: (x) => {x as string}}; // Error
+const fn3: {f: (x: number) => void} = {f: (x) => {x as string}}; // Error
 ```
 Flow will infer `number` as the type of `x`, and so the cast fails.
 
@@ -170,7 +170,7 @@ explicitly provided.
 Consider for example the definition of `map`, together with a potential call with arguments `x => x + 1` and `[1, 2, 3]`:
 ```js flow-check
 declare function map<T, U>(
-  f: (T) => U,
+  f: (x: T) => U,
   array: ReadonlyArray<T>,
 ): Array<U>;
 
@@ -286,7 +286,7 @@ code later on.
 
 For example, if we had the following call to `map`:
 ```js flow-check
-declare function map<T, U>(f: (T) => U, array: ReadonlyArray<T>): Array<U>;
+declare function map<T, U>(f: (x: T) => U, array: ReadonlyArray<T>): Array<U>;
 map(x => x + 1, [{}]); // Error
 ```
 Flow will infer `T` as `{}`, and therefore type `x` as `{}`. This will cause an error when checking the arrow function

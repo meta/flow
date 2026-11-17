@@ -420,7 +420,7 @@ that variance keyword. For example, you cannot declare a generic type parameter
 to behave covariantly and use it in a contravariant position:
 
 ```js flow-check
-type NotActuallyCovariant<out T> = (T) => void; // Error
+type NotActuallyCovariant<out T> = (x: T) => void; // Error
 ```
 
 :::info Legacy sigil syntax

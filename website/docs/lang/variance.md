@@ -127,7 +127,7 @@ of variance, thus requiring no prepending keyword:
 type InvariantOf<X> = {
   prop: X;
   getter(): X;
-  setter(X): void;
+  setter(x: X): void;
 };
 ```
 Assuming a variable `invariantCity` of type `InvariantOf<City>`,
@@ -151,7 +151,7 @@ parameter, paired with the `writeonly` keyword to mark a contravariant property:
 ```js flow-check
 type ContravariantOf<in X> = {
   writeonly prop: X;
-  setter(X): void;
+  setter(x: X): void;
 };
 ```
 Common contravariant positions are write-only properties and "setter" functions.

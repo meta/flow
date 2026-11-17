@@ -315,7 +315,7 @@ const size: Size = {[width]: 1}; // Error! Missing the `height` property
 Note that `Record` is different than using an indexer:
 ```js flow-check
 type NumberRecord = Record<'foo' | 'bar', number>;
-type IndexedObject = {['foo' | 'bar']: number};
+type IndexedObject = {[key: 'foo' | 'bar']: number};
 
 // Record uses explicit fields, which means they are all required
 const rec: NumberRecord = {}; // error

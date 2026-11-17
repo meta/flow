@@ -46,14 +46,14 @@ type TypeOf<T> =
   T extends string ? 'string' :
   T extends number ? 'number' :
   T extends boolean ? 'boolean' :
-  T extends (...ReadonlyArray<empty>)=>unknown ? 'function' : 'object'
+  T extends (...args: ReadonlyArray<empty>)=>unknown ? 'function' : 'object'
 
 type T1 = TypeOf<null>; // evaluates to 'null'
 type T2 = TypeOf<void>; // evaluates to 'undefined'
 type T3 = TypeOf<string>; // evaluates to 'string'
 type T4 = TypeOf<number>; // evaluates to 'number'
 type T5 = TypeOf<boolean>; // evaluates to 'boolean'
-type T6 = TypeOf<(string)=>boolean>; // evaluates to 'function'
+type T6 = TypeOf<(x: string)=>boolean>; // evaluates to 'function'
 type T7 = TypeOf<{foo: string}>; // evaluates to 'object'
 ```
 
@@ -90,13 +90,13 @@ You can use the power of conditional types to extract parts of a type using `inf
 ```js flow-check
 type ReturnType<T> = T extends (...args: ReadonlyArray<empty>) => infer Return ? Return : empty;
 
-type N = ReturnType<(string) => number>; // evaluates to `number`
-type S = ReturnType<(number) => string>; // evaluates to `string`
+type N = ReturnType<(x: string) => number>; // evaluates to `number`
+type S = ReturnType<(x: number) => string>; // evaluates to `string`
 ```
 
 We used the infer type here to introduce a new generic type variable named `Return`, which can be used in the type branch of the conditional type. Infer types can only appear on the right hand side of the `extends` clause in conditional types. Flow will perform a subtyping check between the check type and the extends type to automatically figure out its type based on the input type `T`.
 
-In the example of `type N = ReturnType<(string) => number>`, Flow checks if `(string) => number` is a subtype of `(...args: ReadonlyArray<empty>) => infer Return`, and during this process `Return` is constrained to `number`.
+In the example of `type N = ReturnType<(x: string) => number>`, Flow checks if `(x: string) => number` is a subtype of `(...args: ReadonlyArray<empty>) => infer Return`, and during this process `Return` is constrained to `number`.
 
 When doing extractions like the above example, you usually want the conditional type to always choose the true branch where the type is successfully extracted. For example, silently choosing the false branch is not great:
 
@@ -113,7 +113,7 @@ Instead, you might want Flow to error when the input is not a function type. Thi
 type ReturnType<T extends (...args: ReadonlyArray<empty>) => unknown> =
   T extends (...args: ReadonlyArray<empty>) => infer Return ? Return : any;
 
-1 as ReturnType<(string) => number>;
+1 as ReturnType<(x: string) => number>;
 1 as ReturnType<string>; // Error
 ```
 

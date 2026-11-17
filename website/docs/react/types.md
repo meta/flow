@@ -247,7 +247,7 @@ The definition for `React.RefSetter<T>` is roughly:
 ```js flow-check
 type RefSetter<in T> =
   | { writeonly current: T | null, ... }
-  | ((T | null) => unknown)
+  | ((instance: T | null) => unknown)
   | null
   | void;
 ```

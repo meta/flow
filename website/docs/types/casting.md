@@ -168,7 +168,7 @@ To use `satisfies`, set `experimental.tslib_syntax=true` in `.flowconfig` and us
 Casting a lookup map to a dictionary lets subsequent code access general string keys. With `satisfies`, the result keeps exactly the keys you provided:
 
 ```js flow-check
-type Lookup = {readonly [string]: string};
+type Lookup = {readonly [key: string]: string};
 const source = {home: '/', settings: '/settings'};
 const widened = source as Lookup;
 const annotated: Lookup = source;
@@ -235,7 +235,7 @@ For example, the following function for cloning an object.
 
 ```js flow-check
 function cloneObject(obj: any) {
-  const clone: {[string]: unknown} = {};
+  const clone: {[key: string]: unknown} = {};
 
   Object.keys(obj).forEach(key => {
     clone[key] = obj[key];
@@ -252,7 +252,7 @@ If we cast through any, we can return a type which is more useful.
 
 ```js flow-check
 function cloneObject<T extends {readonly [key: string]: unknown }>(obj: T): T {
-  const clone: {[string]: unknown} = {};
+  const clone: {[key: string]: unknown} = {};
 
   Object.keys(obj).forEach(key => {
     clone[key] = obj[key];

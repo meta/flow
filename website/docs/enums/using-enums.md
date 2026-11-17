@@ -729,7 +729,7 @@ component Selector<
   TEnumValue extends EnumValue<string>,
 >(
   items: Enum<TEnumValue>,
-  callback: (TEnumValue) => void,
+  callback: (value: TEnumValue) => void,
 ) {
   // Typing the `useState` selector with the enum value generic
   const [value, setValue] = useState<?TEnumValue>(null);

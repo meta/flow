@@ -1103,7 +1103,7 @@ hook useToggle(
 }
 
 function callIt(
-  fn: (boolean) => [boolean, () => void],
+  fn: (initial: boolean) => [boolean, () => void],
 ): [boolean, () => void] {
   return fn(false);
 }

@@ -747,7 +747,7 @@ Found 2 errors
 Error ------------------------------------------------------------------------- -:18:8
 
 Cannot call `callIt` with `useToggle` bound to `fn` because `hook (initial: boolean) => [boolean, () => void]` [1] is a
-React hook but `(boolean) => [boolean, () => void]` [2] is not a hook. [react-rule-hook-incompatible]
+React hook but `(initial: boolean) => [boolean, () => void]` [2] is not a hook. [react-rule-hook-incompatible]
 
 React hooks and other functions are not compatible with each other, because hooks cannot be called conditionally.
 
@@ -763,8 +763,8 @@ References:
     7| ): [boolean, () => void] {
        -----------------------^ [1]
    -:13:7
-   13|   fn: (boolean) => [boolean, () => void],
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   13|   fn: (initial: boolean) => [boolean, () => void],
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Found 1 error
