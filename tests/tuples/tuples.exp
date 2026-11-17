@@ -677,9 +677,9 @@ References:
    inexact.js:139:5
    139|     f(0, ...args); // ERROR
             ^^^^^^^^^^^^^ [1]
-   inexact.js:137:47
-   137|   const a = <T extends [...]>(args: T, f: (...T) => void) => {
-                                                      ^ [2]
+   inexact.js:137:53
+   137|   const a = <T extends [...]>(args: T, f: (...rest: T) => void) => {
+                                                            ^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------- inexact.js:140:5
@@ -694,9 +694,9 @@ References:
    inexact.js:140:5
    140|     f(...args, 0); // ERROR
             ^^^^^^^^^^^^^ [1]
-   inexact.js:137:47
-   137|   const a = <T extends [...]>(args: T, f: (...T) => void) => {
-                                                      ^ [2]
+   inexact.js:137:53
+   137|   const a = <T extends [...]>(args: T, f: (...rest: T) => void) => {
+                                                            ^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------- inexact.js:158:6
@@ -710,7 +710,7 @@ Cannot call `c` because in type argument `T` > index `0`: `boolean` [1] is incom
 
 References:
    inexact.js:155:25
-   155|   const c = <T extends [number, ...]>(args: T, f: (...T) => void) => {
+   155|   const c = <T extends [number, ...]>(args: T, f: (...rest: T) => void) => {
                                 ^^^^^^ [2]
 
 
@@ -725,11 +725,11 @@ Cannot call `f` because an unknown element of an inexact tuple type [1] is incom
 
 References:
    inexact.js:164:24
-   164|   const d = <T extends [...]>(args: T, f: (string) => void) => {
+   164|   const d = <T extends [...]>(args: T, f: (s: string) => void) => {
                                ^^^^^ [1]
-   inexact.js:164:44
-   164|   const d = <T extends [...]>(args: T, f: (string) => void) => {
-                                                   ^^^^^^ [2]
+   inexact.js:164:47
+   164|   const d = <T extends [...]>(args: T, f: (s: string) => void) => {
+                                                      ^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------------------- labeled.js:5:2
@@ -1149,9 +1149,9 @@ Cannot cast `f11` to `(foo?: string) => number` because in index `0`: `string` [
          ^^^
 
 References:
-   optional.js:46:42
-   46|   declare const f11: (...[readonly foo?: string]) => number;
-                                                ^^^^^^ [1]
+   optional.js:46:48
+   46|   declare const f11: (...args: [readonly foo?: string]) => number;
+                                                      ^^^^^^ [1]
    optional.js:48:28
    48|   declare const f2: (foo?: string) => number;
                                   ^^^^^^ [2]
@@ -1159,20 +1159,20 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- optional.js:54:3
 
-Cannot cast `f11` to `(...Readonly<[foo: string | void]>) => number` because in index `0`: `string` [1] is incompatible
-with `void` [2]. [incompatible-type]
+Cannot cast `f11` to `(...args: Readonly<[foo: string | void]>) => number` because in index `0`: `string` [1] is
+incompatible with `void` [2]. [incompatible-type]
 
    optional.js:54:3
    54|   f11 as typeof f12; // error
          ^^^
 
 References:
-   optional.js:46:42
-   46|   declare const f11: (...[readonly foo?: string]) => number;
-                                                ^^^^^^ [1]
-   optional.js:47:50
-   47|   declare const f12: (...[readonly foo: string | void]) => number;
-                                                        ^^^^ [2]
+   optional.js:46:48
+   46|   declare const f11: (...args: [readonly foo?: string]) => number;
+                                                      ^^^^^^ [1]
+   optional.js:47:56
+   47|   declare const f12: (...args: [readonly foo: string | void]) => number;
+                                                              ^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------- optional.js:60:1

@@ -4,7 +4,7 @@
 // generic methods of a class with mapped-type generic constraints.
 
 type ItemDef = Readonly<{
-  [string]: Readonly<{
+  [key: string]: Readonly<{
     value: unknown,
     isAvailable?: (...args: ReadonlyArray<empty>) => boolean,
   }>,
@@ -25,7 +25,7 @@ class Registry<TItems extends ItemDef = {}> {
   getAll<TKey extends keyof TItems>(
     key: TKey,
     ...context: TItems[TKey] extends {
-      readonly isAvailable: (...infer TArg) => boolean,
+      readonly isAvailable: (...args: infer TArg) => boolean,
       ...
     }
       ? TArg

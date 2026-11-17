@@ -25,7 +25,7 @@ export interface FlowDerivedFromTs extends TsNarrowInterface {
 }
 
 export type SuperAccumulatedValue = Omit<
-  FlowDerivedFromTs & {||},
+  FlowDerivedFromTs & {},
   'marker',
 >;
 

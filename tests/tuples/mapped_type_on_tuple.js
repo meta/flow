@@ -11,7 +11,7 @@ function foo2(arr: [number, number]): MappedTypeOnTuple {
 }
 
 type F<T> = Readonly<{
-  log: (() => T) => void,
+  log: (f: () => T) => void,
   ...
 }>;
 

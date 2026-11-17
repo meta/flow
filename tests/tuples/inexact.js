@@ -134,7 +134,7 @@ declare function tail<T>(xs: [1, ...T, ...]): T;
 
 // Call rest args
 {
-  const a = <T extends [...]>(args: T, f: (...T) => void) => {
+  const a = <T extends [...]>(args: T, f: (...rest: T) => void) => {
     f(...args); // OK
     f(0, ...args); // ERROR
     f(...args, 0); // ERROR
@@ -144,7 +144,7 @@ declare function tail<T>(xs: [1, ...T, ...]): T;
     y as boolean; // OK
   });
 
-  const b = <T extends [...]>(args: T, f: (number, ...T) => void) => {
+  const b = <T extends [...]>(args: T, f: (n: number, ...rest: T) => void) => {
     f(1, ...args); // OK
   };
   b([true], (x, y) => {
@@ -152,7 +152,7 @@ declare function tail<T>(xs: [1, ...T, ...]): T;
     y as boolean; // OK
   });
 
-  const c = <T extends [number, ...]>(args: T, f: (...T) => void) => {
+  const c = <T extends [number, ...]>(args: T, f: (...rest: T) => void) => {
     f(...args); // OK
   };
   c([true], (x) => {}); // ERROR
@@ -161,7 +161,7 @@ declare function tail<T>(xs: [1, ...T, ...]): T;
     y as boolean; // OK
   });
 
-  const d = <T extends [...]>(args: T, f: (string) => void) => {
+  const d = <T extends [...]>(args: T, f: (s: string) => void) => {
     f(...args); // ERROR
   };
 }

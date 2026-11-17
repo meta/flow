@@ -8,5 +8,5 @@ export const palette = {
 } as const satisfies {readonly [K in "red" | "green" | "blue"]: string};
 
 export const keyedNumbers = {x: 1, y: 2, z: 3} satisfies {
-  readonly [string]: number,
+  readonly [key: string]: number,
 };

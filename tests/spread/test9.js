@@ -5,7 +5,7 @@ declare const o_call: I_call;
 ({...o_call}) as {'$call': any, ...}; // error: interfaces cannot be spread
 
 interface I_index {
-  [string]: number;
+  [key: string]: number;
 }
 declare const o_index: I_index;
 ({...o_index}) as {'$key': any, ...}; // error: interfaces cannot be spread

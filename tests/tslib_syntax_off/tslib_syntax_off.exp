@@ -273,8 +273,8 @@ Error --------------------------------------------------------------------------
 
 Optional indexer (`?:`) is not enabled. [unsupported-syntax]
 
-   87| type OptIdx = {[string]?: number}; // ERROR
-                      ^^^^^^^^^^^^^^^^^
+   87| type OptIdx = {[key: string]?: number}; // ERROR
+                      ^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ------------------------------------------------------------------------------------------------ test.js.flow:90:1

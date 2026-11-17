@@ -1,19 +1,19 @@
-type T = {[string]?: number};
+type T = {[key: string]?: number};
 declare const t: T;
 t["foo"] as number; // ERROR - undefined is not number
 
-type S = {readonly [string]?: number};
+type S = {readonly [key: string]?: number};
 declare const s: S;
 s["foo"] as number; // ERROR - undefined is not number
 
 declare class C {
-  [string]?: number;
+  [key: string]?: number;
 }
 declare const c: C;
 c["foo"] as number; // ERROR - undefined is not number
 
 interface I {
-  [string]?: number;
+  [key: string]?: number;
 }
 declare const i: I;
 i["foo"] as number; // ERROR - undefined is not number

@@ -5832,12 +5832,12 @@ Cannot find type guard parameter `x` [1] in the parameters of this function (typ
                                            ^ [1]
 
 
-Error ------------------------------------------------------------------------------------------------- unbound.js:13:34
+Error ------------------------------------------------------------------------------------------------- unbound.js:13:37
 
 Cannot find type guard parameter `x` [1] in the parameters of this function (type). [function-predicate]
 
-   13| type No_param_name = (number) => x is number; // error x unbound
-                                        ^ [1]
+   13| type No_param_name = (n: number) => x is number; // error x unbound
+                                           ^ [1]
 
 
 Error ----------------------------------------------------------------------------------------------- union_guard.js:9:5

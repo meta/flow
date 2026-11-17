@@ -1,11 +1,11 @@
 // @flow
 
-function fn1<T extends {p: any, ...}>(a: T, b: T => void): T['p'] {
+function fn1<T extends {p: any, ...}>(a: T, b: (t: T) => void): T['p'] {
   b(a);
   return a.p;
 }
 
-function fn2<T extends {p: any, ...}>(a: T, b: T => void): T['p'] => void {
+function fn2<T extends {p: any, ...}>(a: T, b: (t: T) => void): (p: T['p']) => void {
   return p => {
     a.p = p;
     return b(a);
@@ -24,7 +24,7 @@ function fn2<T extends {p: any, ...}>(a: T, b: T => void): T['p'] => void {
 fn1({p: 42}, (x: {...}) => {}); // over-restrictive in classic, not in LTI
 fn2({p: 42}, (x: {...}) => {})('foo');
 
-function fn3<T extends {p: any, ...}>(a: T => void): (Omit<T, 'p'>) => void {
+function fn3<T extends {p: any, ...}>(a: (t: T) => void): (t: Omit<T, 'p'>) => void {
   return x => a({...x, p: 42});
 }
 
@@ -34,7 +34,7 @@ fn3((x: {foo: string, p: number, ...}) => {})({foo: 42});
 
 fn3((x: {foo: number, ...}) => {})({foo: 42}); // intended as the paired OK case for `Omit<T, 'p'>` (T inferred to include p); currently ERROR — Flow does not widen T to satisfy `{p: any, ...}` from a callback whose param has no `p`
 
-function fn4<T extends {p: any}>(a: T => void): (T['p']) => void {
+function fn4<T extends {p: any}>(a: (t: T) => void): (p: T['p']) => void {
   // We error here because the implementation of {p: empty} ~> empty currently
   // errors, but it would be a sound subtyping rule to allow.
   return p => a({p});

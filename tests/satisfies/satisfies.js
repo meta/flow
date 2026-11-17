@@ -28,7 +28,7 @@
 // Unlike `as`, the inferred type keeps the specific known keys —
 // accessing an unknown key is still an error.
 {
-  const o = {x: 1, y: 2, z: 3} satisfies {readonly [string]: number};
+  const o = {x: 1, y: 2, z: 3} satisfies {readonly [key: string]: number};
   o.x as number; // OK — `x` is still accessible by name
   o.invalid; // ERROR: property `invalid` is missing — inferred type kept the known keys
 }
@@ -151,6 +151,6 @@
 // not the annotation, so callers see the specific shape.
 {
   declare function id<T>(x: T): T;
-  const r = id({a: 1} as const satisfies {readonly [string]: number});
+  const r = id({a: 1} as const satisfies {readonly [key: string]: number});
   r.a as 1; // OK — T inferred as {readonly a: 1}; if it were the indexer type, `a` would be `number`
 }

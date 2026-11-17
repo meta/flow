@@ -248,13 +248,13 @@ Cannot call `fn2` with function bound to `x` because in the first parameter: `A`
 [incompatible-type]
 
    tvar3.js:21:9
-   21| fn2((a: A) => {}) as (B) => void; // Error
+   21| fn2((a: A) => {}) as (b: B) => void; // Error
                ^ [1]
 
 References:
-   tvar3.js:21:23
-   21| fn2((a: A) => {}) as (B) => void; // Error
-                             ^ [2]
+   tvar3.js:21:26
+   21| fn2((a: A) => {}) as (b: B) => void; // Error
+                                ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- tvar3.js:22:1
@@ -295,7 +295,7 @@ Cannot call `fn4` with function bound to `y` because in the first parameter: `B`
 [incompatible-type]
 
    tvar3.js:23:12
-   23| fn4(a, (b: B) => {}) as (C) => void; // Error
+   23| fn4(a, (b: B) => {}) as (c: C) => void; // Error
                   ^ [1]
 
 References:
@@ -310,13 +310,13 @@ Cannot call `fn4` with function bound to `y` because in the first parameter: `B`
 [incompatible-type]
 
    tvar3.js:23:12
-   23| fn4(a, (b: B) => {}) as (C) => void; // Error
+   23| fn4(a, (b: B) => {}) as (c: C) => void; // Error
                   ^ [1]
 
 References:
-   tvar3.js:23:26
-   23| fn4(a, (b: B) => {}) as (C) => void; // Error
-                                ^ [2]
+   tvar3.js:23:29
+   23| fn4(a, (b: B) => {}) as (c: C) => void; // Error
+                                   ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- tvar3.js:25:1
@@ -338,20 +338,20 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- tvar3.js:26:1
 
-Cannot cast `fn6(...)` to `(B) => void` because in the first parameter: `A` [1] is incompatible with `B` [2].
+Cannot cast `fn6(...)` to `(b: B) => void` because in the first parameter: `A` [1] is incompatible with `B` [2].
 [incompatible-type]
 
    tvar3.js:26:1
-   26| fn6((a: A) => {}) as (B) => void; // Error
+   26| fn6((a: A) => {}) as (b: B) => void; // Error
        ^^^^^^^^^^^^^^^^^
 
 References:
    tvar3.js:26:9
-   26| fn6((a: A) => {}) as (B) => void; // Error
+   26| fn6((a: A) => {}) as (b: B) => void; // Error
                ^ [1]
-   tvar3.js:26:23
-   26| fn6((a: A) => {}) as (B) => void; // Error
-                             ^ [2]
+   tvar3.js:26:26
+   26| fn6((a: A) => {}) as (b: B) => void; // Error
+                                ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- tvar3.js:27:1
@@ -388,20 +388,20 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- tvar3.js:28:1
 
-Cannot cast `fn8(...)` to `(C) => void` because in the first parameter: `A` [1] is incompatible with `C` [2].
+Cannot cast `fn8(...)` to `(c: C) => void` because in the first parameter: `A` [1] is incompatible with `C` [2].
 [incompatible-type]
 
    tvar3.js:28:1
-   28| fn8(a, (b: B) => {}) as (C) => void; // Error
+   28| fn8(a, (b: B) => {}) as (c: C) => void; // Error
        ^^^^^^^^^^^^^^^^^^^^
 
 References:
    tvar3.js:6:18
     6| declare const a: A;
                         ^ [1]
-   tvar3.js:28:26
-   28| fn8(a, (b: B) => {}) as (C) => void; // Error
-                                ^ [2]
+   tvar3.js:28:29
+   28| fn8(a, (b: B) => {}) as (c: C) => void; // Error
+                                   ^ [2]
 
 
 Error --------------------------------------------------------------------------------------------------- tvar3.js:28:12
@@ -410,7 +410,7 @@ Cannot call `fn8` with function bound to `y` because in the first parameter: `B`
 [incompatible-type]
 
    tvar3.js:28:12
-   28| fn8(a, (b: B) => {}) as (C) => void; // Error
+   28| fn8(a, (b: B) => {}) as (c: C) => void; // Error
                   ^ [1]
 
 References:
@@ -421,7 +421,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- tvar4.js:25:32
 
-Cannot call `fn2(...)` with `'foo'` bound to the first parameter because `"foo"` [1] is incompatible with `number` [2].
+Cannot call `fn2(...)` with `'foo'` bound to `p` because `"foo"` [1] is incompatible with `number` [2].
 [incompatible-type]
 
    tvar4.js:25:32
@@ -436,8 +436,8 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- tvar4.js:33:53
 
-Cannot call `fn3(...)` with object literal bound to the first parameter because in property `foo`: `42` [1] is
-incompatible with `string` [2]. [incompatible-type]
+Cannot call `fn3(...)` with object literal bound to `t` because in property `foo`: `42` [1] is incompatible with
+`string` [2]. [incompatible-type]
 
    tvar4.js:33:53
    33| fn3((x: {foo: string, p: number, ...}) => {})({foo: 42});
@@ -460,29 +460,28 @@ Cannot call `fn3` because in type argument `T`: property `p` is missing in `{foo
 
 References:
    tvar4.js:27:24
-   27| function fn3<T extends {p: any, ...}>(a: T => void): (Omit<T, 'p'>) => void {
+   27| function fn3<T extends {p: any, ...}>(a: (t: T) => void): (t: Omit<T, 'p'>) => void {
                               ^^^^^^^^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------------------- tvar4.js:40:17
 
-Cannot call `a` with object literal bound to the first parameter because object literal [1] is incompatible with
-`empty` [2]. [incompatible-type]
+Cannot call `a` with object literal bound to `t` because object literal [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    tvar4.js:40:17
    40|   return p => a({p});
                        ^^^ [1]
 
 References:
-   tvar4.js:37:37
-   37| function fn4<T extends {p: any}>(a: T => void): (T['p']) => void {
-                                           ^ [2]
+   tvar4.js:37:41
+   37| function fn4<T extends {p: any}>(a: (t: T) => void): (p: T['p']) => void {
+                                               ^ [2]
 
 
 Error --------------------------------------------------------------------------------------------------- tvar4.js:44:29
 
-Cannot call `fn4(...)` with `42` bound to the first parameter because `42` [1] is incompatible with `string` [2].
-[incompatible-type]
+Cannot call `fn4(...)` with `42` bound to `p` because `42` [1] is incompatible with `string` [2]. [incompatible-type]
 
    tvar4.js:44:29
    44| fn4((x: {p: string}) => {})(42);
@@ -519,7 +518,7 @@ Cannot call `fn4` because in type argument `T`: property `p` is missing in `{}` 
 
 References:
    tvar4.js:37:24
-   37| function fn4<T extends {p: any}>(a: T => void): (T['p']) => void {
+   37| function fn4<T extends {p: any}>(a: (t: T) => void): (p: T['p']) => void {
                               ^^^^^^^^ [2]
 
 

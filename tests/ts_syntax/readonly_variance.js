@@ -4,11 +4,11 @@ type Obj = {
 type Valid = {
   readonly: string, // OK
   readonly?: string, // OK
-  readonly<T>(number): string, // OK
+  readonly<T>(x: number): string, // OK
 };
 
 type Indexer = {
-  readonly [string]: unknown; // OK
+  readonly [key: string]: unknown; // OK
 };
 
 class C {

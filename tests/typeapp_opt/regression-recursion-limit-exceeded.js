@@ -8,7 +8,7 @@ type ReturnValueType<T extends InputValueType> =
     ? ReturnValueArrayType<T>
     : ReturnValueObjectType<T>;
 
-type InputValueType = Readonly<{[string]: InputValueType}>;
+type InputValueType = Readonly<{[key: string]: InputValueType}>;
 type InputValueArrayType = ReadonlyArray<InputValueType>;
 
 type ReturnValueObjectType<T extends InputValueType> = Readonly<{

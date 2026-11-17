@@ -2559,9 +2559,9 @@ References:
    literal_precision.js:90:24
    90|     [`${prefix}_url`]: 42, // error number ~> string
                               ^^ [1]
-   literal_precision.js:87:15
-   87| ): {[string]: string} {
-                     ^^^^^^ [2]
+   literal_precision.js:87:20
+   87| ): {[key: string]: string} {
+                          ^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------- literal_precision.js:109:7

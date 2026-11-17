@@ -1,39 +1,39 @@
 //@flow
-const a: {[string]: unknown} = {};
-const b: {[string]: unknown} = {};
-const c: {[string]: unknown} = {...a, ...b}; // Ok
+const a: {[key: string]: unknown} = {};
+const b: {[key: string]: unknown} = {};
+const c: {[key: string]: unknown} = {...a, ...b}; // Ok
 
 const d: {} = {...null}; // {} ~> {} errors, so spreading null
-const e: {[string]: unknown} = {};
-const f: {[string]: unknown} = {...d, ...e}; // Ok
+const e: {[key: string]: unknown} = {};
+const f: {[key: string]: unknown} = {...d, ...e}; // Ok
 
-const g: {[string]: number} = {};
-const h: {[number]: string} = {};
+const g: {[key: string]: number} = {};
+const h: {[key: number]: string} = {};
 const i = {...g, ...h}; // Error. Keys and values of the indexers fail to subtype
 
 const j: {...} = {};
-const k: {[string]: number} = {};
+const k: {[key: string]: number} = {};
 const l = {...j, ...k}; // Error, there may be some properties in j that are not overwritten by the indexer
 
 const m: {foo: number} = {foo: 3};
-const n: {[string]: string} = {foo: 'string'};
+const n: {[key: string]: string} = {foo: 'string'};
 const o = {...m, ...n}; // Error, indexer may overwrite properties with explicit keys
 
 const p: {foo: number, ...} = {foo: 3};
-const q: {[string]: string} = {foo: 'string'};
+const q: {[key: string]: string} = {foo: 'string'};
 const r = {...p, ...q}; // Error, indexer may overwrite properties with explicit keys
 
-const v: {[string]: number} = {};
-const w: {[number]: string} = {};
-const x: {readonly [string | number]: string | number} = v;
-const y: {readonly [string | number]: string | number} = w;
-const z: {[string | number]: string | number} = {...x, ...y}; // ok
+const v: {[key: string]: number} = {};
+const w: {[key: number]: string} = {};
+const x: {readonly [key: string | number]: string | number} = v;
+const y: {readonly [key: string | number]: string | number} = w;
+const z: {[key: string | number]: string | number} = {...x, ...y}; // ok
 
 
-const a2: {[string]: unknown} = {};
-const b2: {['a' | 'b']: unknown} = {};
-const c2: {[string]: unknown} = {...a2, ...b2}; // Ok
+const a2: {[key: string]: unknown} = {};
+const b2: {[key: 'a' | 'b']: unknown} = {};
+const c2: {[key: string]: unknown} = {...a2, ...b2}; // Ok
 
-const d2: {[string]: number} = {};
-const e2: {[string]: 1} = {};
-const f2: {[string]: number} = {...d2, ...e2}; // ok.
+const d2: {[key: string]: number} = {};
+const e2: {[key: string]: 1} = {};
+const f2: {[key: string]: number} = {...d2, ...e2}; // ok.

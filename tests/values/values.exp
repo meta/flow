@@ -682,9 +682,9 @@ Cannot cast `'s'` to `Values<IfaceWithDict>` because `"s"` [1] is incompatible w
         ^^^ [1]
 
 References:
-   object_types.js:108:13
-   108|   [string]: 1;
-                    ^ [2]
+   object_types.js:108:18
+   108|   [key: string]: 1;
+                         ^ [2]
 
 
 Error -------------------------------------------------------------------------------------------- object_types.js:121:1

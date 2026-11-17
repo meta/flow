@@ -7,7 +7,7 @@
 
 import type {AllOptional, SomeRequired} from './indexer_optional_props_lib';
 
-declare const dict: {[string]: string | number};
+declare const dict: {[key: string]: string | number};
 
 // Optional `a` and `b` are not checked against the indexer.
 dict as AllOptional; // OK

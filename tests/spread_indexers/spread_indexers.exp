@@ -12,12 +12,12 @@ References:
    inexact_right.js:2:10
    2| const t: {foo: number, ...} = {foo: 3};
                ^^^^^^^^^^^^^^^^^^ [2]
-   inexact_right.js:1:12
-   1| const s: {[string]: number} = {};
-                 ^^^^^^ [3]
-   inexact_right.js:1:21
-   1| const s: {[string]: number} = {};
-                          ^^^^^^ [4]
+   inexact_right.js:1:17
+   1| const s: {[key: string]: number} = {};
+                      ^^^^^^ [3]
+   inexact_right.js:1:26
+   1| const s: {[key: string]: number} = {};
+                               ^^^^^^ [4]
 
 
 Error ------------------------------------------------------------------------------------------- inexact_right.js:10:11
@@ -34,12 +34,12 @@ References:
    inexact_right.js:9:22
     9| declare const child: Child;
                             ^^^^^ [2]
-   inexact_right.js:1:12
-    1| const s: {[string]: number} = {};
-                  ^^^^^^ [3]
-   inexact_right.js:1:21
-    1| const s: {[string]: number} = {};
-                           ^^^^^^ [4]
+   inexact_right.js:1:17
+    1| const s: {[key: string]: number} = {};
+                       ^^^^^^ [3]
+   inexact_right.js:1:26
+    1| const s: {[key: string]: number} = {};
+                                ^^^^^^ [4]
 
 
 Error ------------------------------------------------------------------------------------------- named_operands.js:2:11
@@ -56,9 +56,9 @@ References:
    named_operands.js:2:28
    2| type T1 = {foo: number, ...I}; // Error
                                  ^ [2]
-   named_operands.js:1:15
-   1| interface I {[string]: number}
-                    ^^^^^^ [3]
+   named_operands.js:1:20
+   1| interface I {[key: string]: number}
+                         ^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------- named_operands.js:6:11
@@ -75,9 +75,9 @@ References:
    named_operands.js:5:18
    5| declare const c: C;
                        ^ [2]
-   named_operands.js:4:19
-   4| declare class C {[string]: number}
-                        ^^^^^^ [3]
+   named_operands.js:4:24
+   4| declare class C {[key: string]: number}
+                             ^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------- named_operands.js:9:13
@@ -91,12 +91,12 @@ track. Try spreading `{[string]: number, ...T}` [2] first or remove the indexer.
                   ^^^^^^^^^^^^ [1]
 
 References:
-   named_operands.js:8:45
-   8| function f<T extends {[string]: number}>(x: T) {
-                                                  ^ [2]
-   named_operands.js:8:24
-   8| function f<T extends {[string]: number}>(x: T) {
-                             ^^^^^^ [3]
+   named_operands.js:8:50
+   8| function f<T extends {[key: string]: number}>(x: T) {
+                                                       ^ [2]
+   named_operands.js:8:29
+   8| function f<T extends {[key: string]: number}>(x: T) {
+                                  ^^^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:12:11
@@ -108,12 +108,12 @@ Cannot spread object literal because `number` [1] is incompatible with `string` 
                  ^^^^^^^^^^^^
 
 References:
-   test.js:11:12
-   11| const h: {[number]: string} = {};
-                  ^^^^^^ [1]
-   test.js:10:12
-   10| const g: {[string]: number} = {};
-                  ^^^^^^ [2]
+   test.js:11:17
+   11| const h: {[key: number]: string} = {};
+                       ^^^^^^ [1]
+   test.js:10:17
+   10| const g: {[key: string]: number} = {};
+                       ^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:12:11
@@ -125,12 +125,12 @@ Cannot spread object literal because `string` [1] is incompatible with `number` 
                  ^^^^^^^^^^^^
 
 References:
-   test.js:11:21
-   11| const h: {[number]: string} = {};
-                           ^^^^^^ [1]
-   test.js:10:21
-   10| const g: {[string]: number} = {};
-                           ^^^^^^ [2]
+   test.js:11:26
+   11| const h: {[key: number]: string} = {};
+                                ^^^^^^ [1]
+   test.js:10:26
+   10| const g: {[key: string]: number} = {};
+                                ^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:16:11
@@ -145,11 +145,11 @@ spreading `{[string]: number}` [2] first or remove the indexer. [cannot-spread-i
 
 References:
    test.js:15:10
-   15| const k: {[string]: number} = {};
-                ^^^^^^^^^^^^^^^^^^ [2]
-   test.js:15:12
-   15| const k: {[string]: number} = {};
-                  ^^^^^^ [3]
+   15| const k: {[key: string]: number} = {};
+                ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   test.js:15:17
+   15| const k: {[key: string]: number} = {};
+                       ^^^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:20:11
@@ -164,11 +164,11 @@ spreading `{[string]: string}` [2] first or remove the indexer. [cannot-spread-i
 
 References:
    test.js:19:10
-   19| const n: {[string]: string} = {foo: 'string'};
-                ^^^^^^^^^^^^^^^^^^ [2]
-   test.js:19:12
-   19| const n: {[string]: string} = {foo: 'string'};
-                  ^^^^^^ [3]
+   19| const n: {[key: string]: string} = {foo: 'string'};
+                ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   test.js:19:17
+   19| const n: {[key: string]: string} = {foo: 'string'};
+                       ^^^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:24:11
@@ -183,11 +183,11 @@ spreading `{[string]: string}` [2] first or remove the indexer. [cannot-spread-i
 
 References:
    test.js:23:10
-   23| const q: {[string]: string} = {foo: 'string'};
-                ^^^^^^^^^^^^^^^^^^ [2]
-   test.js:23:12
-   23| const q: {[string]: string} = {foo: 'string'};
-                  ^^^^^^ [3]
+   23| const q: {[key: string]: string} = {foo: 'string'};
+                ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   test.js:23:17
+   23| const q: {[key: string]: string} = {foo: 'string'};
+                       ^^^^^^ [3]
 
 
 

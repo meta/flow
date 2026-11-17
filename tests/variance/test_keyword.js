@@ -20,12 +20,12 @@ declare const woB: WOB;
 
 // dictionaries
 
-type dRWA = {[string]: A};
-type dROA = {readonly [string]: A};
-type dWOA = {writeonly [string]: A};
-type dRWB = {[string]: B};
-type dROB = {readonly [string]: B};
-type dWOB = {writeonly [string]: B};
+type dRWA = {[key: string]: A};
+type dROA = {readonly [key: string]: A};
+type dWOA = {writeonly [key: string]: A};
+type dRWB = {[key: string]: B};
+type dROB = {readonly [key: string]: B};
+type dWOB = {writeonly [key: string]: B};
 
 declare const drwA: dRWA;
 declare const droA: dROA;

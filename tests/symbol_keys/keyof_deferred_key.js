@@ -45,14 +45,14 @@ importedKey as string; // ERROR: the key is a `unique symbol`, not a string
 // The object type can arrive from a generic call, inferred from the argument.
 declare function keysOf<O>(o: O): keyof O;
 
-declare const symDict: {[typeof s]: number};
+declare const symDict: {[key: typeof s]: number};
 
 keysOf(symDict) as typeof s; // OK
 keysOf(symDict) as string; // ERROR: the key is a `unique symbol`, not a string
 keysOf(symDict) as typeof t; // ERROR: a distinct symbol is not a key
 
 // A string indexer through the same path still stringifies.
-declare const strDict: {[string]: number};
+declare const strDict: {[key: string]: number};
 
 keysOf(strDict) as string; // OK
 keysOf(strDict) as typeof s; // ERROR: the key is a string, not a symbol
@@ -65,8 +65,8 @@ keysOfDict(symDict) as typeof s; // OK
 keysOfDict(symDict) as string; // ERROR: the key is a `unique symbol`, not a string
 
 // The type argument can be given explicitly rather than inferred.
-keysOf<{[typeof s]: number}>(symDict) as typeof s; // OK
-keysOf<{[typeof s]: number}>(symDict) as string; // ERROR: the key is a `unique symbol`, not a string
+keysOf<{[key: typeof s]: number}>(symDict) as typeof s; // OK
+keysOf<{[key: typeof s]: number}>(symDict) as string; // ERROR: the key is a `unique symbol`, not a string
 
 // A generic key bounded by a `unique symbol` stays that symbol in the key set
 // rather than widening to `string`.

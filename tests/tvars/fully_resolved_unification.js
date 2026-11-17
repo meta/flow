@@ -5,7 +5,7 @@ type Foo = {readonly foo?: ReadonlyArray<{
 
 declare function useState<S>(
   initialState: (() => S) | S,
-): S => void;
+): (s: S) => void;
 
 declare const v: Foo;
 

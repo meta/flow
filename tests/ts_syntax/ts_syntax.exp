@@ -502,24 +502,24 @@ Error --------------------------------------------------------------------------
 
 Optional indexer (`?:`) is not enabled. [unsupported-syntax]
 
-   10| type OptionalIndex = {[string]?: number}; // ERROR
-                             ^^^^^^^^^^^^^^^^^
+   10| type OptionalIndex = {[key: string]?: number}; // ERROR
+                             ^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error -------------------------------------------------------------------------------------- ambient_syntax.js.flow:12:3
 
 Optional indexer (`?:`) is not enabled. [unsupported-syntax]
 
-   12|   [string]?: number; // ERROR
-         ^^^^^^^^^^^^^^^^^
+   12|   [key: string]?: number; // ERROR
+         ^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error -------------------------------------------------------------------------------------- ambient_syntax.js.flow:15:3
 
 Optional indexer (`?:`) is not enabled. [unsupported-syntax]
 
-   15|   [string]?: number; // ERROR
-         ^^^^^^^^^^^^^^^^^
+   15|   [key: string]?: number; // ERROR
+         ^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ------------------------------------------------------------------------------------- ambient_syntax.js.flow:17:26
@@ -875,18 +875,18 @@ Variance modifiers cannot appear on a type parameter of a function type. [unsupp
                          ^^^^^^
 
 
-Error ----------------------------------------------------------------------------------------- in_out_variance.js:15:23
+Error ----------------------------------------------------------------------------------------- in_out_variance.js:15:26
 
 Cannot use `A` [1] in an input position because `A` [1] is expected to occur only in output positions.
 [incompatible-variance]
 
-   in_out_variance.js:15:23
-   15| type BadOut<out A> = (A) => void; // ERROR: out in contravariant position
-                             ^
+   in_out_variance.js:15:26
+   15| type BadOut<out A> = (x: A) => void; // ERROR: out in contravariant position
+                                ^
 
 References:
    in_out_variance.js:15:17
-   15| type BadOut<out A> = (A) => void; // ERROR: out in contravariant position
+   15| type BadOut<out A> = (x: A) => void; // ERROR: out in contravariant position
                        ^ [1]
 
 
@@ -905,18 +905,18 @@ References:
                      ^ [1]
 
 
-Error ----------------------------------------------------------------------------------------- in_out_variance.js:17:43
+Error ----------------------------------------------------------------------------------------- in_out_variance.js:17:46
 
 Cannot use `A` [1] in an input position because `A` [1] is expected to occur only in output positions.
 [incompatible-variance]
 
-   in_out_variance.js:17:43
-   17| interface BadOutInterface<out A> { method(A): void } // ERROR: out in contravariant position
-                                                 ^
+   in_out_variance.js:17:46
+   17| interface BadOutInterface<out A> { method(x: A): void } // ERROR: out in contravariant position
+                                                    ^
 
 References:
    in_out_variance.js:17:31
-   17| interface BadOutInterface<out A> { method(A): void } // ERROR: out in contravariant position
+   17| interface BadOutInterface<out A> { method(x: A): void } // ERROR: out in contravariant position
                                      ^ [1]
 
 

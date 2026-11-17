@@ -24,8 +24,8 @@ Cannot assign `42` to `module.exports` because property `exports` is missing in 
 
 References:
    shadow_exports.js:3:23
-   3| declare const module: number => string;
-                            ^^^^^^^^^^^^^^^^ [1]
+   3| declare const module: (x: number) => string;
+                            ^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------ shadow_exports_lookup.js:4:17

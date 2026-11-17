@@ -6,15 +6,15 @@ declare function f<in>(x: in): void; // OK
 declare function f<out>(x: out): void; // OK
 const out = 1; // OK
 
-type Contravariant<in A> = (A) => void; // OK
+type Contravariant<in A> = (x: A) => void; // OK
 type Covariant<out A> = {readonly prop: A}; // OK
-interface ContravariantInterface<in A> { method(A): void } // OK
+interface ContravariantInterface<in A> { method(x: A): void } // OK
 interface CovariantInterface<out A> { readonly prop: A } // OK
 type ContravariantWriteonly<in A> = { writeonly prop: A }; // OK
 
-type BadOut<out A> = (A) => void; // ERROR: out in contravariant position
+type BadOut<out A> = (x: A) => void; // ERROR: out in contravariant position
 type BadIn<in A> = {readonly prop: A}; // ERROR: in in covariant position
-interface BadOutInterface<out A> { method(A): void } // ERROR: out in contravariant position
+interface BadOutInterface<out A> { method(x: A): void } // ERROR: out in contravariant position
 interface BadInInterface<in A> { readonly prop: A } // ERROR: in in covariant position
 type BadInWriteonly<out A> = { writeonly prop: A }; // ERROR: out in contravariant position
 

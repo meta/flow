@@ -1006,22 +1006,22 @@ References:
                           ^^^^ [1]
 
 
-Error ----------------------------------------------------------------------------------------- mapped_type_as.js:108:51
+Error ----------------------------------------------------------------------------------------- mapped_type_as.js:108:49
 
 Cannot assign `ii` to `_ii_exact_bad` because inexact `{a: InexactSrc["a"], b: InexactSrc["b"], ...}` [1] is
 incompatible with exact `{a: number, b: string}` [2]. [incompatible-exact]
 
-   mapped_type_as.js:108:51
-   108| const _ii_exact_bad: {| a: number, b: string |} = ii; // ERROR - source was inexact
-                                                          ^^
+   mapped_type_as.js:108:49
+   108| const _ii_exact_bad: { a: number, b: string } = ii; // ERROR - source was inexact
+                                                        ^^
 
 References:
    mapped_type_as.js:106:19
    106| declare const ii: IdentityInexact;
                           ^^^^^^^^^^^^^^^ [1]
    mapped_type_as.js:108:22
-   108| const _ii_exact_bad: {| a: number, b: string |} = ii; // ERROR - source was inexact
-                             ^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   108| const _ii_exact_bad: { a: number, b: string } = ii; // ERROR - source was inexact
+                             ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------ mapped_type_as.js:116:4
@@ -1545,9 +1545,9 @@ Cannot call `anonymous` because in index `0`: `"value"` [1] is incompatible with
                  ^^^^^^^ [1]
 
 References:
-   rest_destructuring_flow.js:16:31
-   16| declare const anonymous: (...[number, string]) => number;
-                                     ^^^^^^ [2]
+   rest_destructuring_flow.js:16:37
+   16| declare const anonymous: (...args: [number, string]) => number;
+                                           ^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------- rest_destructuring_flow.js:18:20
@@ -1559,9 +1559,9 @@ Cannot call `anonymous` because in index `1`: `1` [1] is incompatible with `stri
                           ^ [1]
 
 References:
-   rest_destructuring_flow.js:16:39
-   16| declare const anonymous: (...[number, string]) => number;
-                                             ^^^^^^ [2]
+   rest_destructuring_flow.js:16:45
+   16| declare const anonymous: (...args: [number, string]) => number;
+                                                   ^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------- shorthand_ambient_module_usage.js:3:10
@@ -2005,9 +2005,9 @@ Cannot cast `d[key1]` to `number` because `boolean` [1] is incompatible with `nu
        ^^^^^^^
 
 References:
-   unique_symbol_keys.js:27:29
-   27| type Dict = {[typeof key1]: boolean};
-                                   ^^^^^^^ [1]
+   unique_symbol_keys.js:27:34
+   27| type Dict = {[key: typeof key1]: boolean};
+                                        ^^^^^^^ [1]
    unique_symbol_keys.js:30:12
    30| d[key1] as number; // ERROR: boolean is incompatible with number
                   ^^^^^^ [2]

@@ -40,7 +40,7 @@ References:
                           v
    31|   const handlers = {
    32|     upper: (text) => text.toUpperCase(),
-   33|   } satisfies {readonly [string]: (text: string) => string};
+   33|   } satisfies {readonly [key: string]: (text: string) => string};
          ^ [1]
 
 
@@ -200,7 +200,7 @@ Cannot get `o.invalid` because property `invalid` is missing in object literal [
 
 References:
    satisfies.js:31:13
-   31|   const o = {x: 1, y: 2, z: 3} satisfies {readonly [string]: number};
+   31|   const o = {x: 1, y: 2, z: 3} satisfies {readonly [key: string]: number};
                    ^^^^^^^^^^^^^^^^^^ [1]
 
 

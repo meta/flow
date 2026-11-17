@@ -105,14 +105,14 @@ type InexactSrc = {a: number, b: string, ...};
 type IdentityInexact = {[K in keyof InexactSrc as K]: InexactSrc[K]};
 declare const ii: IdentityInexact;
 const _ii_inexact: {a: number, ...} = ii; // OK - identity preserves inexactness
-const _ii_exact_bad: {| a: number, b: string |} = ii; // ERROR - source was inexact
+const _ii_exact_bad: { a: number, b: string } = ii; // ERROR - source was inexact
 
 // Non-identity remap on an Inexact source: with no surviving destination indexer, the result
 // is exact (the only known properties are the explicitly-named destinations).
 type ConstInexact = {[K in keyof InexactSrc as 'X']: InexactSrc[K]};
 declare const ci: ConstInexact;
 ci.X as number | string; // OK
-const _ci_exact: {| X: number | string |} = ci; // OK - non-identity remap closes the shape
+const _ci_exact: { X: number | string } = ci; // OK - non-identity remap closes the shape
 ci.notThere; // ERROR - source's open shape did not propagate
 
 // Semi-homomorphic with non-literal selected indexer keys preserves the indexer

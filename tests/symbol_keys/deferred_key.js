@@ -14,4 +14,4 @@ declare export const definitions: {
 };
 
 export type DefinitionKey = keyof typeof definitions;
-export type DictKeyedByKeySet = {[DefinitionKey]: boolean};
+export type DictKeyedByKeySet = {[key: DefinitionKey]: boolean};

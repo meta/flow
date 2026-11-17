@@ -10,7 +10,7 @@ const d: Function = () => 0;
 
 const e: () => any = () => 0;
 
-const f: Object => Function = ({}) => function () {};
+const f: (o: Object) => Function = ({}) => function () {};
 
 type f2 = <T extends Object>(x: T) => T;
 

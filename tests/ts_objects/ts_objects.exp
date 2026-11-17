@@ -377,9 +377,9 @@ Cannot cast `dict` to `SomeRequired` because in property `a`: `number` [1] is in
        ^^^^
 
 References:
-   indexer_optional_props_usage.js:10:41
-   10| declare const dict: {[string]: string | number};
-                                               ^^^^^^ [1]
+   indexer_optional_props_usage.js:10:46
+   10| declare const dict: {[key: string]: string | number};
+                                                    ^^^^^^ [1]
    indexer_optional_props_lib.ts:6:32
     6| export type SomeRequired = {a: string; b?: string};
                                       ^^^^^^ [2]
@@ -395,9 +395,9 @@ incompatible with `string` [2]. [incompatible-type]
        ^^^^
 
 References:
-   indexer_optional_props_usage.js:10:41
-   10| declare const dict: {[string]: string | number};
-                                               ^^^^^^ [1]
+   indexer_optional_props_usage.js:10:46
+   10| declare const dict: {[key: string]: string | number};
+                                                    ^^^^^^ [1]
    indexer_optional_props_usage.js:19:23
    19| dict as {readonly a?: string, readonly b?: string, ...}; // ERROR: number vs string in `a` and `b`
                              ^^^^^^ [2]
@@ -413,9 +413,9 @@ incompatible with `string` [2]. [incompatible-type]
        ^^^^
 
 References:
-   indexer_optional_props_usage.js:10:41
-   10| declare const dict: {[string]: string | number};
-                                               ^^^^^^ [1]
+   indexer_optional_props_usage.js:10:46
+   10| declare const dict: {[key: string]: string | number};
+                                                    ^^^^^^ [1]
    indexer_optional_props_usage.js:19:44
    19| dict as {readonly a?: string, readonly b?: string, ...}; // ERROR: number vs string in `a` and `b`
                                                   ^^^^^^ [2]
@@ -615,12 +615,12 @@ References:
    object_slice_ts.ts:30:46
    30| export declare const tsNarrowInterfaceValue: TsNarrowInterface;
                                                     ^^^^^^^^^^^^^^^^^ [2]
-   object_slice_ts_interface.js:37:30
-   37| declare const indexedHead: {[string]: number};
-                                    ^^^^^^ [3]
-   object_slice_ts_interface.js:37:39
-   37| declare const indexedHead: {[string]: number};
-                                             ^^^^^^ [4]
+   object_slice_ts_interface.js:37:35
+   37| declare const indexedHead: {[key: string]: number};
+                                         ^^^^^^ [3]
+   object_slice_ts_interface.js:37:44
+   37| declare const indexedHead: {[key: string]: number};
+                                                  ^^^^^^ [4]
 
 
 Error ------------------------------------------------------------------------------- object_slice_ts_interface.js:48:33

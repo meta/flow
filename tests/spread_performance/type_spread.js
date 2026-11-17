@@ -9,7 +9,7 @@ type A = {foo: number} | {bar: number};
 declare const a: {...A, ...A, ...{baz: number}}; // Error
 a as null;
 
-var x: {a?: ?{[string]: number}} = {};
+var x: {a?: ?{[key: string]: number}} = {};
 // Wrapping the last type in something that isn't an explicit union
 // type is usually enough to trigger the error on just two spread
 // operands.

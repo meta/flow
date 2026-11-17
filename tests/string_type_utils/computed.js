@@ -4,7 +4,7 @@ declare const empty: empty;
 
 {
     const x = {def: 0, [keyStringPrefix]: 0}; // okay no overlap
-    x as {def: number, [typeof keyStringPrefix]: number}; // okay
+    x as {def: number, [key: typeof keyStringPrefix]: number}; // okay
     x.def as number; // okay
     x.abc as number; // okay
     x.xyz; // error property 'xyz' missing
@@ -26,11 +26,11 @@ declare const empty: empty;
 }
 {
     const x = {[keyStringPrefix]: 0, abc: 0}; // okay (overlaps but comes later)
-    x as {[typeof keyStringPrefix]: number, abc: number}; // okay [keyStringPrefix] is recorded
+    x as {[key: typeof keyStringPrefix]: number, abc: number}; // okay [keyStringPrefix] is recorded
 }
 {
     const x = {abc: 0, [keyStringSuffix]: 0}; // okay no overlap
-    x as {[typeof keyStringSuffix]: number, abc: number}; // okay [keyStringSuffix] is recorded
+    x as {[key: typeof keyStringSuffix]: number, abc: number}; // okay [keyStringSuffix] is recorded
 }
 {
     const x = {uvwxyz: 0, [keyStringSuffix]: 0}; // error overlap

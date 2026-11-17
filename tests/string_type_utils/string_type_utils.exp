@@ -468,11 +468,11 @@ Cannot assign `obj` to `noCopyReadWrite` because in the indexer property's key: 
 
 References:
    prefix.js:129:26
-   129|   const noCopyReadWrite: {[SpreadOverOptionalProperies]: number, bar?: number} =
-                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   prefix.js:121:16
-   121|   const obj: {[SpreadOverOptionalProperies]: number} = {foo: 1};
-                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   129|   const noCopyReadWrite: {[key: SpreadOverOptionalProperies]: number, bar?: number} =
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   prefix.js:121:21
+   121|   const obj: {[key: SpreadOverOptionalProperies]: number} = {foo: 1};
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------------- prefix.js:134:7
@@ -485,9 +485,9 @@ Cannot assign `obj` to `validKeyInvalidValue` because in property `foobar`: `num
               ^^^
 
 References:
-   prefix.js:121:46
-   121|   const obj: {[SpreadOverOptionalProperies]: number} = {foo: 1};
-                                                     ^^^^^^ [1]
+   prefix.js:121:51
+   121|   const obj: {[key: SpreadOverOptionalProperies]: number} = {foo: 1};
+                                                          ^^^^^^ [1]
    prefix.js:133:23
    133|     readonly foobar?: string,
                               ^^^^^^ [2]

@@ -102,7 +102,7 @@ function anonymous_functions_this_type() {
 }
 
 function non_assigning_member_assigns() {
-  declare const foo: {[string | number]: unknown};
+  declare const foo: {[key: string | number]: unknown};
   foo[1 + 2] = 1; // ok
   foo['1' + 2] = 3; // ok
   (1).toString = 3; // error: toString missing in number, but no missing env entry error
@@ -162,7 +162,7 @@ function non_assigning_member_assigns() {
 }
 
 {
-  declare function poly<T>(f: T=>T, val: T): T;
+  declare function poly<T>(f: (x: T)=>T, val: T): T;
   () => {
     poly(v => v, [foo1, foo2.bar, (v: number) => v, {foo: 3, bar: foo2.bar}, foo1 = '', 1 + 2]); // ok
     poly(v => v, foo3()); // ok
@@ -179,7 +179,7 @@ function non_assigning_member_assigns() {
 }
 
 {
-  type S = <W>(W) => W;
+  type S = <W>(w: W) => W;
 
   let s: ?S = null;
   if (s != null) {

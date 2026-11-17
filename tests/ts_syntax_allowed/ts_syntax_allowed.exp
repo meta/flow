@@ -243,9 +243,9 @@ Cannot cast `t["foo"]` to `number` because `void` [1] is incompatible with `numb
       ^^^^^^^^
 
 References:
-   optional_indexer.js:1:22
-   1| type T = {[string]?: number};
-                           ^^^^^^ [1]
+   optional_indexer.js:1:27
+   1| type T = {[key: string]?: number};
+                                ^^^^^^ [1]
    optional_indexer.js:3:13
    3| t["foo"] as number; // ERROR - undefined is not number
                   ^^^^^^ [2]
@@ -260,9 +260,9 @@ Cannot cast `s["foo"]` to `number` because `void` [1] is incompatible with `numb
       ^^^^^^^^
 
 References:
-   optional_indexer.js:5:31
-   5| type S = {readonly [string]?: number};
-                                    ^^^^^^ [1]
+   optional_indexer.js:5:36
+   5| type S = {readonly [key: string]?: number};
+                                         ^^^^^^ [1]
    optional_indexer.js:7:13
    7| s["foo"] as number; // ERROR - undefined is not number
                   ^^^^^^ [2]
@@ -277,9 +277,9 @@ Cannot cast `c["foo"]` to `number` because `void` [1] is incompatible with `numb
        ^^^^^^^^
 
 References:
-   optional_indexer.js:10:14
-   10|   [string]?: number;
-                    ^^^^^^ [1]
+   optional_indexer.js:10:19
+   10|   [key: string]?: number;
+                         ^^^^^^ [1]
    optional_indexer.js:13:13
    13| c["foo"] as number; // ERROR - undefined is not number
                    ^^^^^^ [2]
@@ -294,9 +294,9 @@ Cannot cast `i["foo"]` to `number` because `void` [1] is incompatible with `numb
        ^^^^^^^^
 
 References:
-   optional_indexer.js:16:14
-   16|   [string]?: number;
-                    ^^^^^^ [1]
+   optional_indexer.js:16:19
+   16|   [key: string]?: number;
+                         ^^^^^^ [1]
    optional_indexer.js:19:13
    19| i["foo"] as number; // ERROR - undefined is not number
                    ^^^^^^ [2]

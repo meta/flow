@@ -34,7 +34,7 @@ ai.init() as Promise<AsyncInit>; // OK — `this` rebound inside Promise<>
 
 // Generic interface with this
 interface Box<T> {
-  map<U>(f: (T) => U): Box<U>;
+  map<U>(f: (x: T) => U): Box<U>;
   clone(): this;
   value(): T;
 }

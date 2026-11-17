@@ -43,8 +43,8 @@ type WithReadOnlyOpt = [a: number, readonly b?: string];
   withWriteOnlyOpt as [a: number, writeonly b?: string]; // OK
 }
 {
-  declare const f11: (...[readonly foo?: string]) => number;
-  declare const f12: (...[readonly foo: string | void]) => number;
+  declare const f11: (...args: [readonly foo?: string]) => number;
+  declare const f12: (...args: [readonly foo: string | void]) => number;
   declare const f2: (foo?: string) => number;
 
   f11 as typeof f2; // error

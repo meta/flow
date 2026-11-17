@@ -1,7 +1,7 @@
 const React = require('react');
 
 type F<T extends React.ElementType> = {
-  apply: (React.ComponentProps<T> => void) => void,
+  apply: (cb: (props: React.ComponentProps<T>) => void) => void,
   component: T,
 };
 

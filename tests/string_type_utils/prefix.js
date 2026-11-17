@@ -21,7 +21,7 @@ type DataProp = StringPrefix<'data-'>;
 }
 
 // Use in a dictionary
-type Dict = {readonly [DataProp]: unknown};
+type Dict = {readonly [key: DataProp]: unknown};
 {
   const o = {
     'data-foo': 1,
@@ -118,18 +118,18 @@ type RemainderTypeErr = StringPrefix<'foo', 1>; // ERROR
 
 type SpreadOverOptionalProperies = StringPrefix<'foo'>;
 {
-  const obj: {[SpreadOverOptionalProperies]: number} = {foo: 1};
-  const objCopy: {[SpreadOverOptionalProperies]: number, bar?: number} = {
+  const obj: {[key: SpreadOverOptionalProperies]: number} = {foo: 1};
+  const objCopy: {[key: SpreadOverOptionalProperies]: number, bar?: number} = {
     ...obj,
   }; // OK
   const readonlyObj: Readonly<{
-    [SpreadOverOptionalProperies]: number,
+    [key: SpreadOverOptionalProperies]: number,
     bar?: number,
   }> = obj; // OK
-  const noCopyReadWrite: {[SpreadOverOptionalProperies]: number, bar?: number} =
+  const noCopyReadWrite: {[key: SpreadOverOptionalProperies]: number, bar?: number} =
     obj; // ERROR
   const validKeyInvalidValue: {
-    [SpreadOverOptionalProperies]: number,
+    [key: SpreadOverOptionalProperies]: number,
     readonly foobar?: string,
   } = obj; // ERROR
 }

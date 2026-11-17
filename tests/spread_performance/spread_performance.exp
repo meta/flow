@@ -72,11 +72,11 @@ Flow cannot determine a type for the spread [1]. `{[string]: number}` [2] cannot
 
 References:
    type_spread.js:12:14
-   12| var x: {a?: ?{[string]: number}} = {};
-                    ^^^^^^^^^^^^^^^^^^ [2]
-   type_spread.js:12:16
-   12| var x: {a?: ?{[string]: number}} = {};
-                      ^^^^^^ [3]
+   12| var x: {a?: ?{[key: string]: number}} = {};
+                    ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   type_spread.js:12:21
+   12| var x: {a?: ?{[key: string]: number}} = {};
+                           ^^^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------- type_spread.js:20:1

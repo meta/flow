@@ -8,7 +8,7 @@ type B = {bar: number, ...A, ...}; // OK
 var b: B = {foo: 3}; // Error: bar is missing
 
 // Cannot spread with indexer on right
-type D = {[string]: number};
+type D = {[key: string]: number};
 type E = {foo: number, ...D, ...}; // Error
 declare const z: {...};
 z as E;
@@ -82,10 +82,10 @@ X6 as C6;
 Y6 as D6;
 
 //--
-type A7 = {[string]: number};
+type A7 = {[key: string]: number};
 type B7 = {p?: string};
 type C7 = {...A7, ...B7, ...}; // OK
-type D7 = {[string]: number, p?: string | number};
+type D7 = {[key: string]: number, p?: string | number};
 
 declare const X7: D7;
 declare const Y7: C7;
@@ -172,10 +172,10 @@ X14 as C14;
 Y14 as D14;
 
 //--
-type A15 = {[string]: number};
+type A15 = {[key: string]: number};
 type B15 = {p?: string};
 type C15 = {...A15, ...B15, ...}; // OK
-type D15 = {[string]: number, p?: string | number};
+type D15 = {[key: string]: number, p?: string | number};
 
 declare const X15: D15;
 declare const Y15: C15;
@@ -186,7 +186,7 @@ Y15 as D15; // Error
 type A16 = {...};
 type B16 = {p?: string};
 type C16 = {...A16, ...B16, ...}; // OK
-type D16 = {[string]: number, p?: string | number};
+type D16 = {[key: string]: number, p?: string | number};
 
 declare const X16: D16;
 declare const Y16: C16;
@@ -262,10 +262,10 @@ X22 as C22;
 Y22 as D22;
 
 //--
-type A23 = {[string]: number};
+type A23 = {[key: string]: number};
 type B23 = {p?: string, ...};
 type C23 = {...A23, ...B23, ...}; // OK
-type D23 = {[string]: number, p?: string | number};
+type D23 = {[key: string]: number, p?: string | number};
 
 declare const X23: D23;
 declare const Y23: C23;
@@ -354,10 +354,10 @@ X30 as C30;
 Y30 as D30;
 
 //--
-type A31 = {[string]: number};
+type A31 = {[key: string]: number};
 type B31 = {p?: string, ...};
 type C31 = {...A31, ...B31, ...}; // OK
-type D31 = {[string]: number, p?: string | number};
+type D31 = {[key: string]: number, p?: string | number};
 
 declare const X31: D31;
 declare const Y31: C31;

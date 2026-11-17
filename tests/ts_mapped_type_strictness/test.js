@@ -12,7 +12,7 @@ import {
   type PartialNode,
 } from 'repro';
 
-declare const flowNodes: {[string]: Node};
+declare const flowNodes: {[key: string]: Node};
 declare const node: {type: string, version: number};
 declare const rows: Array<{name: string, count: number}>;
 declare const abc: {a: number, b: number, c: number};
@@ -22,7 +22,7 @@ declare const abc: {a: number, b: number, c: number};
 takeNodes(flowNodes); // OK
 takeUnknowns(node); // OK
 takeRows(rows); // OK
-tsNodes as {[string]: PartialNode | Node}; // OK
+tsNodes as {[key: string]: PartialNode | Node}; // OK
 takeAB(abc); // OK
 
 class MyNode extends BaseNode {
@@ -35,7 +35,7 @@ class MyNode extends BaseNode {
 }
 
 // Values that are incompatible with the mapped type are still errors.
-declare const strings: {[string]: string};
+declare const strings: {[key: string]: string};
 declare const a: {a: number};
 takeNumbers(strings); // ERROR: string vs number
 takeNumbers(node); // ERROR: `type` is a string
@@ -43,7 +43,7 @@ takeAB(a); // ERROR: `b` is missing
 
 // Mapped types declared in Flow keep Flow's checks.
 type FlowDict<K extends PropertyKey, T> = {[P in K]: T};
-flowNodes as {[string]: PartialNode | Node}; // ERROR: invariant
+flowNodes as {[key: string]: PartialNode | Node}; // ERROR: invariant
 flowNodes as FlowDict<string, PartialNode | Node>; // ERROR: invariant
 abc as FlowDict<'a' | 'b', number>; // ERROR: `c` is extra
 

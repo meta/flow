@@ -1,6 +1,6 @@
 //@flow
 type A1 = {p: number};
-type B1 = {...A1, [number]: string};
+type B1 = {...A1, [key: number]: string};
 ({p: 3}) as B1;
 
 type A2 = {p: string};
@@ -9,7 +9,7 @@ declare const x: {p?: string, ...};
 x as B2;
 
 type A3 = {p: number, ...};
-type B3 = {...A3, [number]: string, ...};
+type B3 = {...A3, [key: number]: string, ...};
 ({p: 3}) as B3; // Ok! even though A3 is inexact.
 // You can't specify an indexer inline at runtime, so this is sound!
 

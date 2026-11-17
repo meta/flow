@@ -6,7 +6,7 @@ import type {IndexedI, IndexedC, SKey} from './keys';
 import {s as importedS} from './keys';
 
 declare const s: unique symbol;
-declare const key: keyof {[typeof s]: number};
+declare const key: keyof {[key: typeof s]: number};
 
 key as typeof s; // OK: the symbol indexer key is included, not stringified
 key as string; // ERROR: the key is a `unique symbol`, not a string

@@ -84,7 +84,7 @@ type ACT = abstract new () => string; // ERROR
 type OTup = [string, string?]; // ERROR
 
 // Optional indexer
-type OptIdx = {[string]?: number}; // ERROR
+type OptIdx = {[key: string]?: number}; // ERROR
 
 // Export as namespace
 export as namespace Foo; // ERROR

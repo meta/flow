@@ -14,7 +14,7 @@ es as Array<['a' | 'b', unknown]>; // OK: no symbol key in the enumeration
 // must never be stringified into a bogus string key. A string indexer, by
 // contrast, does contribute string keys.
 declare const s2: unique symbol;
-declare const symIndexed: {[typeof s2]: boolean};
+declare const symIndexed: {[key: typeof s2]: boolean};
 const symKeys = Object.keys(symIndexed);
 symKeys as Array<empty>; // OK: symbol indexer contributes no runtime key
 

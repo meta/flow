@@ -526,9 +526,9 @@ Cannot cast `key` to `string` because unique symbol [1] is incompatible with `st
        ^^^
 
 References:
-   keyof_annotation.js:9:28
-    9| declare const key: keyof {[typeof s]: number};
-                                  ^^^^^^^^ [1]
+   keyof_annotation.js:9:33
+    9| declare const key: keyof {[key: typeof s]: number};
+                                       ^^^^^^^^ [1]
    keyof_annotation.js:12:8
    12| key as string; // ERROR: the key is a `unique symbol`, not a string
               ^^^^^^ [2]
@@ -663,9 +663,9 @@ Cannot cast `keysOf(...)` to `string` because unique symbol [1] is incompatible 
        ^^^^^^^^^^^^^^^
 
 References:
-   keyof_deferred_key.js:48:26
-   48| declare const symDict: {[typeof s]: number};
-                                ^^^^^^^^ [1]
+   keyof_deferred_key.js:48:31
+   48| declare const symDict: {[key: typeof s]: number};
+                                     ^^^^^^^^ [1]
    keyof_deferred_key.js:51:20
    51| keysOf(symDict) as string; // ERROR: the key is a `unique symbol`, not a string
                           ^^^^^^ [2]
@@ -681,9 +681,9 @@ Cannot cast `keysOf(...)` to `unique symbol` because unique symbol [1] is incomp
        ^^^^^^^^^^^^^^^
 
 References:
-   keyof_deferred_key.js:48:26
-   48| declare const symDict: {[typeof s]: number};
-                                ^^^^^^^^ [1]
+   keyof_deferred_key.js:48:31
+   48| declare const symDict: {[key: typeof s]: number};
+                                     ^^^^^^^^ [1]
    keyof_deferred_key.js:52:20
    52| keysOf(symDict) as typeof t; // ERROR: a distinct symbol is not a key
                           ^^^^^^^^ [2]
@@ -699,9 +699,9 @@ Cannot cast `keysOf(...)` to `unique symbol` because `string` [1] is incompatibl
        ^^^^^^^^^^^^^^^
 
 References:
-   keyof_deferred_key.js:55:26
-   55| declare const strDict: {[string]: number};
-                                ^^^^^^ [1]
+   keyof_deferred_key.js:55:31
+   55| declare const strDict: {[key: string]: number};
+                                     ^^^^^^ [1]
    keyof_deferred_key.js:58:20
    58| keysOf(strDict) as typeof s; // ERROR: the key is a string, not a symbol
                           ^^^^^^^^ [2]
@@ -717,9 +717,9 @@ Cannot cast `keysOfDict(...)` to `string` because unique symbol [1] is incompati
        ^^^^^^^^^^^^^^^^^^^
 
 References:
-   keyof_deferred_key.js:48:26
-   48| declare const symDict: {[typeof s]: number};
-                                ^^^^^^^^ [1]
+   keyof_deferred_key.js:48:31
+   48| declare const symDict: {[key: typeof s]: number};
+                                     ^^^^^^^^ [1]
    keyof_deferred_key.js:65:24
    65| keysOfDict(symDict) as string; // ERROR: the key is a `unique symbol`, not a string
                               ^^^^^^ [2]
@@ -731,16 +731,16 @@ Cannot cast `keysOf<...>(...)` to `string` because unique symbol [1] is incompat
 [incompatible-type]
 
    keyof_deferred_key.js:69:1
-   69| keysOf<{[typeof s]: number}>(symDict) as string; // ERROR: the key is a `unique symbol`, not a string
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   69| keysOf<{[key: typeof s]: number}>(symDict) as string; // ERROR: the key is a `unique symbol`, not a string
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   keyof_deferred_key.js:69:10
-   69| keysOf<{[typeof s]: number}>(symDict) as string; // ERROR: the key is a `unique symbol`, not a string
-                ^^^^^^^^ [1]
-   keyof_deferred_key.js:69:42
-   69| keysOf<{[typeof s]: number}>(symDict) as string; // ERROR: the key is a `unique symbol`, not a string
-                                                ^^^^^^ [2]
+   keyof_deferred_key.js:69:15
+   69| keysOf<{[key: typeof s]: number}>(symDict) as string; // ERROR: the key is a `unique symbol`, not a string
+                     ^^^^^^^^ [1]
+   keyof_deferred_key.js:69:47
+   69| keysOf<{[key: typeof s]: number}>(symDict) as string; // ERROR: the key is a `unique symbol`, not a string
+                                                     ^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------- keyof_deferred_key.js:78:1
@@ -753,9 +753,9 @@ Cannot cast `keysOfBounded(...)` to `string` because unique symbol [1] is incomp
        ^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   keyof_deferred_key.js:48:26
-   48| declare const symDict: {[typeof s]: number};
-                                ^^^^^^^^ [1]
+   keyof_deferred_key.js:48:31
+   48| declare const symDict: {[key: typeof s]: number};
+                                     ^^^^^^^^ [1]
    keyof_deferred_key.js:78:27
    78| keysOfBounded(symDict) as string; // ERROR: the key is a `unique symbol`, not a string
                                  ^^^^^^ [2]

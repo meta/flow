@@ -18,6 +18,6 @@ declare const te: TE;
 te[E.A] as number; // OK: index signature keyed by the enum type
 
 type K = string;
-type TK = {[K]: number};
+type TK = {[key: K]: number};
 declare const tk: TK;
 tk['x'] as number; // OK: string index signature

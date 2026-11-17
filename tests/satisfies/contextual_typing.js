@@ -30,7 +30,7 @@
 {
   const handlers = {
     upper: (text) => text.toUpperCase(),
-  } satisfies {readonly [string]: (text: string) => string};
+  } satisfies {readonly [key: string]: (text: string) => string};
   handlers.upper('hello') as string; // OK
   handlers.missing; // ERROR: the indexer target does not add unknown keys
 }

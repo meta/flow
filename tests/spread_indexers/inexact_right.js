@@ -1,4 +1,4 @@
-const s: {[string]: number} = {};
+const s: {[key: string]: number} = {};
 const t: {foo: number, ...} = {foo: 3};
 const u = {...s, ...t}; // Error
 

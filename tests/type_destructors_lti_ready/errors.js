@@ -5,9 +5,9 @@
 
 type P<O> = O['p'];
 declare function fn1<O>(l: O): O['p'];
-declare function fn2<O>(l: O): (O['p']) => void;
+declare function fn2<O>(l: O): (x: O['p']) => void;
 declare function fn3<O>(o: O): O['p'];
-declare function fn4<O>(o: O): (O['p']) => void;
+declare function fn4<O>(o: O): (x: O['p']) => void;
 
 type A = {}['p']; // We should get an error on this line.
 null as A;

@@ -16,7 +16,7 @@ function computed_keys() {
 }
 
 // Disjoint template keys under a string indexer annotation
-function computed_keys_annotated(index: number): {[string]: string} {
+function computed_keys_annotated(index: number): {[key: string]: string} {
   return {
     [`token_name_${index}`]: '',
     [`ios_font_family_${index}`]: '',
@@ -27,7 +27,7 @@ function computed_keys_annotated(index: number): {[string]: string} {
 // A template key next to widened keys in an object with an indexer
 function computed_keys_indexer() {
   const SHAPE = Object.freeze({LINK: 'link', NODE: 'node'});
-  const o: {[string]: {...}} = {
+  const o: {[key: string]: {...}} = {
     [SHAPE.LINK as string]: {},
     [`${SHAPE.LINK}:hover`]: {},
     [SHAPE.NODE as string]: {}, // TODO error indexer may overwrite explicit keys
@@ -66,7 +66,7 @@ function jsx_tag() {
 }
 
 // Folded union keys merge into a string dict instead of failing pairwise
-function folded_union_keys(prefix: 'original' | 'updated'): {[string]: string} {
+function folded_union_keys(prefix: 'original' | 'updated'): {[key: string]: string} {
   return {
     [`${prefix}_hash`]: 'x',
     [`${prefix}_url`]: 'y',
@@ -74,7 +74,7 @@ function folded_union_keys(prefix: 'original' | 'updated'): {[string]: string} {
 }
 
 // Plain literal-union keys merge the same way
-function literal_union_keys(k1: 'a' | 'b', k2: 'c' | 'd'): {[string]: string} {
+function literal_union_keys(k1: 'a' | 'b', k2: 'c' | 'd'): {[key: string]: string} {
   return {
     [k1]: 'x',
     [k2]: 'y',
@@ -84,7 +84,7 @@ function literal_union_keys(k1: 'a' | 'b', k2: 'c' | 'd'): {[string]: string} {
 // ...but conflicting values still error
 function union_keys_value_conflict(
   prefix: 'original' | 'updated',
-): {[string]: string} {
+): {[key: string]: string} {
   return {
     [`${prefix}_hash`]: 'x',
     [`${prefix}_url`]: 42, // error number ~> string

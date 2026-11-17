@@ -164,7 +164,7 @@ function test15() {
 function test16() {
   declare component Foo<TValue>(
     value: ReadonlyArray<TValue>,
-    onChange: (ReadonlyArray<TValue>) => unknown,
+    onChange: (value: ReadonlyArray<TValue>) => unknown,
   );
 
   declare const values: Array<string>;
@@ -174,7 +174,7 @@ function test16() {
 function test17() {
   declare function foo<TValue>(
     value: ReadonlyArray<TValue>,
-    onChange: (ReadonlyArray<TValue>) => unknown,
+    onChange: (value: ReadonlyArray<TValue>) => unknown,
   ): void;
 
   declare const values: Array<string>;

@@ -23,7 +23,7 @@ declare const o1: { m<T>(x: T): T };
 o1.m<string>(0) as void; // error: number ~> string, string ~> void
 
 // object ~> explicit instantiation of property expression call
-declare const o2: { [string]: <T>(x: T) => T };
+declare const o2: { [key: string]: <T>(x: T) => T };
 o2.m<string>(0) as void; // error: number ~> string, string ~> void
 
 // instance ~> explicit instantiation of property identifier call

@@ -27,9 +27,9 @@ References:
    all_cases.js:12:27
    12| type E = {foo: number, ...D, ...}; // Error
                                  ^ [2]
-   all_cases.js:11:12
-   11| type D = {[string]: number};
-                  ^^^^^^ [3]
+   all_cases.js:11:17
+   11| type D = {[key: string]: number};
+                       ^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------------ all_cases.js:93:1
@@ -47,15 +47,15 @@ https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-
        ^^
 
 References:
-   all_cases.js:88:34
-   88| type D7 = {[string]: number, p?: string | number};
-                                        ^^^^^^^^^^^^^^^ [1]
+   all_cases.js:88:39
+   88| type D7 = {[key: string]: number, p?: string | number};
+                                             ^^^^^^^^^^^^^^^ [1]
    all_cases.js:86:16
    86| type B7 = {p?: string};
                       ^^^^^^ [2]
    all_cases.js:88:11
-   88| type D7 = {[string]: number, p?: string | number};
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   88| type D7 = {[key: string]: number, p?: string | number};
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    all_cases.js:87:11
    87| type C7 = {...A7, ...B7, ...}; // OK
                  ^^^^^^^^^^^^^^^^^^^ [4]
@@ -82,15 +82,15 @@ References:
    all_cases.js:86:16
    86| type B7 = {p?: string};
                       ^^^^^^ [1]
-   all_cases.js:88:34
-   88| type D7 = {[string]: number, p?: string | number};
-                                        ^^^^^^^^^^^^^^^ [2]
+   all_cases.js:88:39
+   88| type D7 = {[key: string]: number, p?: string | number};
+                                             ^^^^^^^^^^^^^^^ [2]
    all_cases.js:87:11
    87| type C7 = {...A7, ...B7, ...}; // OK
                  ^^^^^^^^^^^^^^^^^^^ [3]
    all_cases.js:88:11
-   88| type D7 = {[string]: number, p?: string | number};
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   88| type D7 = {[key: string]: number, p?: string | number};
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
    all_cases.js:94:7
    94| Y7 as D7; // Error
              ^^ [5]
@@ -111,15 +111,15 @@ https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-
         ^^^
 
 References:
-   all_cases.js:178:35
-   178| type D15 = {[string]: number, p?: string | number};
-                                          ^^^^^^^^^^^^^^^ [1]
+   all_cases.js:178:40
+   178| type D15 = {[key: string]: number, p?: string | number};
+                                               ^^^^^^^^^^^^^^^ [1]
    all_cases.js:176:17
    176| type B15 = {p?: string};
                         ^^^^^^ [2]
    all_cases.js:178:12
-   178| type D15 = {[string]: number, p?: string | number};
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   178| type D15 = {[key: string]: number, p?: string | number};
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    all_cases.js:177:12
    177| type C15 = {...A15, ...B15, ...}; // OK
                    ^^^^^^^^^^^^^^^^^^^^^ [4]
@@ -146,15 +146,15 @@ References:
    all_cases.js:176:17
    176| type B15 = {p?: string};
                         ^^^^^^ [1]
-   all_cases.js:178:35
-   178| type D15 = {[string]: number, p?: string | number};
-                                          ^^^^^^^^^^^^^^^ [2]
+   all_cases.js:178:40
+   178| type D15 = {[key: string]: number, p?: string | number};
+                                               ^^^^^^^^^^^^^^^ [2]
    all_cases.js:177:12
    177| type C15 = {...A15, ...B15, ...}; // OK
                    ^^^^^^^^^^^^^^^^^^^^^ [3]
    all_cases.js:178:12
-   178| type D15 = {[string]: number, p?: string | number};
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   178| type D15 = {[key: string]: number, p?: string | number};
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
    all_cases.js:183:8
    183| Y15 as D15; // Error
                ^^^ [5]
@@ -175,15 +175,15 @@ https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-
         ^^^
 
 References:
-   all_cases.js:189:35
-   189| type D16 = {[string]: number, p?: string | number};
-                                          ^^^^^^^^^^^^^^^ [1]
+   all_cases.js:189:40
+   189| type D16 = {[key: string]: number, p?: string | number};
+                                               ^^^^^^^^^^^^^^^ [1]
    all_cases.js:187:17
    187| type B16 = {p?: string};
                         ^^^^^^ [2]
    all_cases.js:189:12
-   189| type D16 = {[string]: number, p?: string | number};
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   189| type D16 = {[key: string]: number, p?: string | number};
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    all_cases.js:188:12
    188| type C16 = {...A16, ...B16, ...}; // OK
                    ^^^^^^^^^^^^^^^^^^^^^ [4]
@@ -202,9 +202,9 @@ with `number` [2]. [incompatible-type]
         ^^^ [1]
 
 References:
-   all_cases.js:189:23
-   189| type D16 = {[string]: number, p?: string | number};
-                              ^^^^^^ [2]
+   all_cases.js:189:28
+   189| type D16 = {[key: string]: number, p?: string | number};
+                                   ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------- all_cases.js:194:1
@@ -225,15 +225,15 @@ References:
    all_cases.js:187:17
    187| type B16 = {p?: string};
                         ^^^^^^ [1]
-   all_cases.js:189:35
-   189| type D16 = {[string]: number, p?: string | number};
-                                          ^^^^^^^^^^^^^^^ [2]
+   all_cases.js:189:40
+   189| type D16 = {[key: string]: number, p?: string | number};
+                                               ^^^^^^^^^^^^^^^ [2]
    all_cases.js:188:12
    188| type C16 = {...A16, ...B16, ...}; // OK
                    ^^^^^^^^^^^^^^^^^^^^^ [3]
    all_cases.js:189:12
-   189| type D16 = {[string]: number, p?: string | number};
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   189| type D16 = {[key: string]: number, p?: string | number};
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
    all_cases.js:194:8
    194| Y16 as D16; // Error
                ^^^ [5]
@@ -254,15 +254,15 @@ https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-
         ^^^
 
 References:
-   all_cases.js:268:35
-   268| type D23 = {[string]: number, p?: string | number};
-                                          ^^^^^^^^^^^^^^^ [1]
+   all_cases.js:268:40
+   268| type D23 = {[key: string]: number, p?: string | number};
+                                               ^^^^^^^^^^^^^^^ [1]
    all_cases.js:266:17
    266| type B23 = {p?: string, ...};
                         ^^^^^^ [2]
    all_cases.js:268:12
-   268| type D23 = {[string]: number, p?: string | number};
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   268| type D23 = {[key: string]: number, p?: string | number};
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    all_cases.js:267:12
    267| type C23 = {...A23, ...B23, ...}; // OK
                    ^^^^^^^^^^^^^^^^^^^^^ [4]
@@ -289,15 +289,15 @@ References:
    all_cases.js:266:17
    266| type B23 = {p?: string, ...};
                         ^^^^^^ [1]
-   all_cases.js:268:35
-   268| type D23 = {[string]: number, p?: string | number};
-                                          ^^^^^^^^^^^^^^^ [2]
+   all_cases.js:268:40
+   268| type D23 = {[key: string]: number, p?: string | number};
+                                               ^^^^^^^^^^^^^^^ [2]
    all_cases.js:267:12
    267| type C23 = {...A23, ...B23, ...}; // OK
                    ^^^^^^^^^^^^^^^^^^^^^ [3]
    all_cases.js:268:12
-   268| type D23 = {[string]: number, p?: string | number};
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   268| type D23 = {[key: string]: number, p?: string | number};
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
    all_cases.js:274:8
    274| Y23 as D23; // Error
                ^^^ [5]
@@ -318,15 +318,15 @@ https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-
         ^^^
 
 References:
-   all_cases.js:360:35
-   360| type D31 = {[string]: number, p?: string | number};
-                                          ^^^^^^^^^^^^^^^ [1]
+   all_cases.js:360:40
+   360| type D31 = {[key: string]: number, p?: string | number};
+                                               ^^^^^^^^^^^^^^^ [1]
    all_cases.js:358:17
    358| type B31 = {p?: string, ...};
                         ^^^^^^ [2]
    all_cases.js:360:12
-   360| type D31 = {[string]: number, p?: string | number};
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   360| type D31 = {[key: string]: number, p?: string | number};
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    all_cases.js:359:12
    359| type C31 = {...A31, ...B31, ...}; // OK
                    ^^^^^^^^^^^^^^^^^^^^^ [4]
@@ -353,15 +353,15 @@ References:
    all_cases.js:358:17
    358| type B31 = {p?: string, ...};
                         ^^^^^^ [1]
-   all_cases.js:360:35
-   360| type D31 = {[string]: number, p?: string | number};
-                                          ^^^^^^^^^^^^^^^ [2]
+   all_cases.js:360:40
+   360| type D31 = {[key: string]: number, p?: string | number};
+                                               ^^^^^^^^^^^^^^^ [2]
    all_cases.js:359:12
    359| type C31 = {...A31, ...B31, ...}; // OK
                    ^^^^^^^^^^^^^^^^^^^^^ [3]
    all_cases.js:360:12
-   360| type D31 = {[string]: number, p?: string | number};
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   360| type D31 = {[key: string]: number, p?: string | number};
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
    all_cases.js:366:8
    366| Y31 as D31; // Error
                ^^^ [5]

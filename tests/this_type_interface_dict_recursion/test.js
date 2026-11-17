@@ -1,5 +1,5 @@
 export interface Zippable {
-  [string]: ZippableFile;
+  [key: string]: ZippableFile;
 }
 export type ZippableFile =
   | string

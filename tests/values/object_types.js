@@ -105,13 +105,13 @@ type NumbersEnum = Values<typeof Numbers>
 1 as NumbersEnum; // error, NumbersEnum = -1 | 2
 
 interface IfaceWithDict {
-  [string]: 1;
+  [key: string]: 1;
 }
 interface IfaceWithWriteOnlyDict {
-  writeonly [string]: 1;
+  writeonly [key: string]: 1;
 }
 interface IfaceWithDictAndProps {
-  [string]: 1;
+  [key: string]: 1;
   z: 2;
   method(): void;
 }

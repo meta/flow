@@ -1,3 +1,3 @@
 export class C<X> {
-  m(f: X => void) {}
+  m(f: (x: X) => void) {}
 }

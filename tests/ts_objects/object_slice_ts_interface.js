@@ -34,10 +34,10 @@ declare const optionalTail: {value?: number};
 const valueSpreadBeforeOptional = {...tsNarrowInterfaceValue, ...optionalTail}; // OK
 valueSpreadBeforeOptional.value as FlowDog | number;
 
-declare const indexedHead: {[string]: number};
+declare const indexedHead: {[key: string]: number};
 const valueSpreadAfterIndexer = {...indexedHead, ...tsNarrowInterfaceValue}; // ERROR
 
-declare const tsOrExact: TsNarrowInterface | {|kind: 'exact', flow: number|};
+declare const tsOrExact: TsNarrowInterface | {kind: 'exact', flow: number};
 const tsOrExactSpread = {...tsOrExact}; // OK
 
 interface FlowInterface {
@@ -47,7 +47,7 @@ interface FlowInterface {
 declare const tsOrFlowInterface: TsNarrowInterface | FlowInterface;
 const tsOrFlowInterfaceSpread = {...tsOrFlowInterface}; // ERROR
 
-declare const flowInterfaceOrExact: FlowInterface | {|kind: 'exact', exact: number|};
+declare const flowInterfaceOrExact: FlowInterface | {kind: 'exact', exact: number};
 const flowInterfaceOrExactSpread = {...flowInterfaceOrExact}; // ERROR
 
 type FlowInexact = {kind: 'flow-inexact', flow: number, ...};

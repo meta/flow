@@ -7,12 +7,12 @@ namespace N { // ERROR
 }
 
 type OptionalTuple = [string, number?]; // ERROR
-type OptionalIndex = {[string]?: number}; // ERROR
+type OptionalIndex = {[key: string]?: number}; // ERROR
 interface OptionalInterfaceIndex {
-  [string]?: number; // ERROR
+  [key: string]?: number; // ERROR
 }
 declare class OptionalClassIndex {
-  [string]?: number; // ERROR
+  [key: string]?: number; // ERROR
 }
 type ReadonlyArrayType = readonly string[]; // ERROR
 type ReadonlyTuple = readonly [string, number]; // ERROR

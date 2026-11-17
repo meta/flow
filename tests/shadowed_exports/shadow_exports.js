@@ -1,4 +1,4 @@
 //@flow
 
-declare const module: number => string;
+declare const module: (x: number) => string;
 module.exports = 42;

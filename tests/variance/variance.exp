@@ -116,18 +116,18 @@ https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-
          ^^^^
 
 References:
-   test.js:26:24
-   26| type dRWB = {[string]: B};
-                              ^ [1]
-   test.js:23:24
-   23| type dRWA = {[string]: A};
-                              ^ [2]
+   test.js:26:29
+   26| type dRWB = {[key: string]: B};
+                                   ^ [1]
+   test.js:23:29
+   23| type dRWA = {[key: string]: A};
+                                   ^ [2]
    test.js:26:13
-   26| type dRWB = {[string]: B};
-                   ^^^^^^^^^^^^^ [3]
+   26| type dRWB = {[key: string]: B};
+                   ^^^^^^^^^^^^^^^^^^ [3]
    test.js:23:13
-   23| type dRWA = {[string]: A};
-                   ^^^^^^^^^^^^^ [4]
+   23| type dRWA = {[key: string]: A};
+                   ^^^^^^^^^^^^^^^^^^ [4]
    test.js:62:11
    62|   drwB as dRWA; // error
                  ^^^^ [5]
@@ -231,12 +231,12 @@ Cannot cast `dwoB` to `dRWA` because in the indexer property: `A` [1] is incompa
          ^^^^
 
 References:
-   test.js:23:24
-   23| type dRWA = {[string]: A};
-                              ^ [1]
-   test.js:28:34
-   28| type dWOB = {writeonly [string]: B};
-                                        ^ [2]
+   test.js:23:29
+   23| type dRWA = {[key: string]: A};
+                                   ^ [1]
+   test.js:28:39
+   28| type dWOB = {writeonly [key: string]: B};
+                                             ^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:88:3
@@ -373,12 +373,12 @@ Cannot cast `drwB` to `dWOA` because in the indexer property: `A` [1] is incompa
           ^^^^
 
 References:
-   test.js:25:34
-    25| type dWOA = {writeonly [string]: A};
-                                         ^ [1]
-   test.js:26:24
-    26| type dRWB = {[string]: B};
-                               ^ [2]
+   test.js:25:39
+    25| type dWOA = {writeonly [key: string]: A};
+                                              ^ [1]
+   test.js:26:29
+    26| type dRWB = {[key: string]: B};
+                                    ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:135:3
@@ -443,12 +443,12 @@ Cannot cast `dwoB` to `dWOA` because in the indexer property: `A` [1] is incompa
           ^^^^
 
 References:
-   test.js:25:34
-    25| type dWOA = {writeonly [string]: A};
-                                         ^ [1]
-   test.js:28:34
-    28| type dWOB = {writeonly [string]: B};
-                                         ^ [2]
+   test.js:25:39
+    25| type dWOA = {writeonly [key: string]: A};
+                                              ^ [1]
+   test.js:28:39
+    28| type dWOB = {writeonly [key: string]: B};
+                                              ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:146:8
@@ -474,9 +474,9 @@ Cannot cast object literal to `dRWB` because in property `p`: `A` [1] is incompa
                ^^^^^ [1]
 
 References:
-   test.js:26:24
-    26| type dRWB = {[string]: B};
-                               ^ [2]
+   test.js:26:29
+    26| type dRWB = {[key: string]: B};
+                                    ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:150:3
@@ -525,18 +525,18 @@ https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-
           ^^^^
 
 References:
-   test.js:23:24
-    23| type dRWA = {[string]: A};
-                               ^ [1]
-   test.js:26:24
-    26| type dRWB = {[string]: B};
-                               ^ [2]
+   test.js:23:29
+    23| type dRWA = {[key: string]: A};
+                                    ^ [1]
+   test.js:26:29
+    26| type dRWB = {[key: string]: B};
+                                    ^ [2]
    test.js:23:13
-    23| type dRWA = {[string]: A};
-                    ^^^^^^^^^^^^^ [3]
+    23| type dRWA = {[key: string]: A};
+                    ^^^^^^^^^^^^^^^^^^ [3]
    test.js:26:13
-    26| type dRWB = {[string]: B};
-                    ^^^^^^^^^^^^^ [4]
+    26| type dRWB = {[key: string]: B};
+                    ^^^^^^^^^^^^^^^^^^ [4]
    test.js:151:11
    151|   drwA as dRWB; // error
                   ^^^^ [5]
@@ -604,12 +604,12 @@ Cannot cast `droA` to `dRWB` because in the indexer property: `A` [1] is incompa
           ^^^^
 
 References:
-   test.js:24:33
-    24| type dROA = {readonly [string]: A};
-                                        ^ [1]
-   test.js:26:24
-    26| type dRWB = {[string]: B};
-                               ^ [2]
+   test.js:24:38
+    24| type dROA = {readonly [key: string]: A};
+                                             ^ [1]
+   test.js:26:29
+    26| type dRWB = {[key: string]: B};
+                                    ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:158:3
@@ -671,9 +671,9 @@ Cannot cast object literal to `dROB` because in property `p`: `A` [1] is incompa
                ^^^^^ [1]
 
 References:
-   test.js:27:33
-    27| type dROB = {readonly [string]: B};
-                                        ^ [2]
+   test.js:27:38
+    27| type dROB = {readonly [key: string]: B};
+                                             ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:169:3
@@ -702,12 +702,12 @@ Cannot cast `drwA` to `dROB` because in the indexer property: `A` [1] is incompa
           ^^^^
 
 References:
-   test.js:23:24
-    23| type dRWA = {[string]: A};
-                               ^ [1]
-   test.js:27:33
-    27| type dROB = {readonly [string]: B};
-                                        ^ [2]
+   test.js:23:29
+    23| type dRWA = {[key: string]: A};
+                                    ^ [1]
+   test.js:27:38
+    27| type dROB = {readonly [key: string]: B};
+                                             ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:173:3
@@ -736,12 +736,12 @@ Cannot cast `droA` to `dROB` because in the indexer property: `A` [1] is incompa
           ^^^^
 
 References:
-   test.js:24:33
-    24| type dROA = {readonly [string]: A};
-                                        ^ [1]
-   test.js:27:33
-    27| type dROB = {readonly [string]: B};
-                                        ^ [2]
+   test.js:24:38
+    24| type dROA = {readonly [key: string]: A};
+                                             ^ [1]
+   test.js:27:38
+    27| type dROB = {readonly [key: string]: B};
+                                             ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:177:3
@@ -1143,18 +1143,18 @@ https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-
          ^^^^
 
 References:
-   test_keyword.js:26:24
-   26| type dRWB = {[string]: B};
-                              ^ [1]
-   test_keyword.js:23:24
-   23| type dRWA = {[string]: A};
-                              ^ [2]
+   test_keyword.js:26:29
+   26| type dRWB = {[key: string]: B};
+                                   ^ [1]
+   test_keyword.js:23:29
+   23| type dRWA = {[key: string]: A};
+                                   ^ [2]
    test_keyword.js:26:13
-   26| type dRWB = {[string]: B};
-                   ^^^^^^^^^^^^^ [3]
+   26| type dRWB = {[key: string]: B};
+                   ^^^^^^^^^^^^^^^^^^ [3]
    test_keyword.js:23:13
-   23| type dRWA = {[string]: A};
-                   ^^^^^^^^^^^^^ [4]
+   23| type dRWA = {[key: string]: A};
+                   ^^^^^^^^^^^^^^^^^^ [4]
    test_keyword.js:62:11
    62|   drwB as dRWA; // error
                  ^^^^ [5]
@@ -1258,12 +1258,12 @@ Cannot cast `dwoB` to `dRWA` because in the indexer property: `A` [1] is incompa
          ^^^^
 
 References:
-   test_keyword.js:23:24
-   23| type dRWA = {[string]: A};
-                              ^ [1]
-   test_keyword.js:28:34
-   28| type dWOB = {writeonly [string]: B};
-                                        ^ [2]
+   test_keyword.js:23:29
+   23| type dRWA = {[key: string]: A};
+                                   ^ [1]
+   test_keyword.js:28:39
+   28| type dWOB = {writeonly [key: string]: B};
+                                             ^ [2]
 
 
 Error --------------------------------------------------------------------------------------------- test_keyword.js:88:3
@@ -1400,12 +1400,12 @@ Cannot cast `drwB` to `dWOA` because in the indexer property: `A` [1] is incompa
           ^^^^
 
 References:
-   test_keyword.js:25:34
-    25| type dWOA = {writeonly [string]: A};
-                                         ^ [1]
-   test_keyword.js:26:24
-    26| type dRWB = {[string]: B};
-                               ^ [2]
+   test_keyword.js:25:39
+    25| type dWOA = {writeonly [key: string]: A};
+                                              ^ [1]
+   test_keyword.js:26:29
+    26| type dRWB = {[key: string]: B};
+                                    ^ [2]
 
 
 Error -------------------------------------------------------------------------------------------- test_keyword.js:135:3
@@ -1470,12 +1470,12 @@ Cannot cast `dwoB` to `dWOA` because in the indexer property: `A` [1] is incompa
           ^^^^
 
 References:
-   test_keyword.js:25:34
-    25| type dWOA = {writeonly [string]: A};
-                                         ^ [1]
-   test_keyword.js:28:34
-    28| type dWOB = {writeonly [string]: B};
-                                         ^ [2]
+   test_keyword.js:25:39
+    25| type dWOA = {writeonly [key: string]: A};
+                                              ^ [1]
+   test_keyword.js:28:39
+    28| type dWOB = {writeonly [key: string]: B};
+                                              ^ [2]
 
 
 Error -------------------------------------------------------------------------------------------- test_keyword.js:146:8
@@ -1501,9 +1501,9 @@ Cannot cast object literal to `dRWB` because in property `p`: `A` [1] is incompa
                ^^^^^ [1]
 
 References:
-   test_keyword.js:26:24
-    26| type dRWB = {[string]: B};
-                               ^ [2]
+   test_keyword.js:26:29
+    26| type dRWB = {[key: string]: B};
+                                    ^ [2]
 
 
 Error -------------------------------------------------------------------------------------------- test_keyword.js:150:3
@@ -1552,18 +1552,18 @@ https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-
           ^^^^
 
 References:
-   test_keyword.js:23:24
-    23| type dRWA = {[string]: A};
-                               ^ [1]
-   test_keyword.js:26:24
-    26| type dRWB = {[string]: B};
-                               ^ [2]
+   test_keyword.js:23:29
+    23| type dRWA = {[key: string]: A};
+                                    ^ [1]
+   test_keyword.js:26:29
+    26| type dRWB = {[key: string]: B};
+                                    ^ [2]
    test_keyword.js:23:13
-    23| type dRWA = {[string]: A};
-                    ^^^^^^^^^^^^^ [3]
+    23| type dRWA = {[key: string]: A};
+                    ^^^^^^^^^^^^^^^^^^ [3]
    test_keyword.js:26:13
-    26| type dRWB = {[string]: B};
-                    ^^^^^^^^^^^^^ [4]
+    26| type dRWB = {[key: string]: B};
+                    ^^^^^^^^^^^^^^^^^^ [4]
    test_keyword.js:151:11
    151|   drwA as dRWB; // error
                   ^^^^ [5]
@@ -1631,12 +1631,12 @@ Cannot cast `droA` to `dRWB` because in the indexer property: `A` [1] is incompa
           ^^^^
 
 References:
-   test_keyword.js:24:33
-    24| type dROA = {readonly [string]: A};
-                                        ^ [1]
-   test_keyword.js:26:24
-    26| type dRWB = {[string]: B};
-                               ^ [2]
+   test_keyword.js:24:38
+    24| type dROA = {readonly [key: string]: A};
+                                             ^ [1]
+   test_keyword.js:26:29
+    26| type dRWB = {[key: string]: B};
+                                    ^ [2]
 
 
 Error -------------------------------------------------------------------------------------------- test_keyword.js:158:3
@@ -1698,9 +1698,9 @@ Cannot cast object literal to `dROB` because in property `p`: `A` [1] is incompa
                ^^^^^ [1]
 
 References:
-   test_keyword.js:27:33
-    27| type dROB = {readonly [string]: B};
-                                        ^ [2]
+   test_keyword.js:27:38
+    27| type dROB = {readonly [key: string]: B};
+                                             ^ [2]
 
 
 Error -------------------------------------------------------------------------------------------- test_keyword.js:169:3
@@ -1729,12 +1729,12 @@ Cannot cast `drwA` to `dROB` because in the indexer property: `A` [1] is incompa
           ^^^^
 
 References:
-   test_keyword.js:23:24
-    23| type dRWA = {[string]: A};
-                               ^ [1]
-   test_keyword.js:27:33
-    27| type dROB = {readonly [string]: B};
-                                        ^ [2]
+   test_keyword.js:23:29
+    23| type dRWA = {[key: string]: A};
+                                    ^ [1]
+   test_keyword.js:27:38
+    27| type dROB = {readonly [key: string]: B};
+                                             ^ [2]
 
 
 Error -------------------------------------------------------------------------------------------- test_keyword.js:173:3
@@ -1763,12 +1763,12 @@ Cannot cast `droA` to `dROB` because in the indexer property: `A` [1] is incompa
           ^^^^
 
 References:
-   test_keyword.js:24:33
-    24| type dROA = {readonly [string]: A};
-                                        ^ [1]
-   test_keyword.js:27:33
-    27| type dROB = {readonly [string]: B};
-                                        ^ [2]
+   test_keyword.js:24:38
+    24| type dROA = {readonly [key: string]: A};
+                                             ^ [1]
+   test_keyword.js:27:38
+    27| type dROB = {readonly [key: string]: B};
+                                             ^ [2]
 
 
 Error -------------------------------------------------------------------------------------------- test_keyword.js:177:3

@@ -24,7 +24,7 @@ if (typeof z === "symbol") {
 }
 
 // unique symbol as object key
-type Obj = {[typeof x]: string};
+type Obj = {[key: typeof x]: string};
 declare const obj: Obj;
 obj[x] as string; // OK
 

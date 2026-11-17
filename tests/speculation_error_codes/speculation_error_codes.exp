@@ -56,11 +56,11 @@ References:
    test.js:10:3
    10| f(true); // incompatible-type
          ^^^^ [1]
-   test.js:9:26
-    9| declare const f: null & (number => void);
-                                ^^^^^^ [2]
+   test.js:9:30
+    9| declare const f: null & ((x: number) => void);
+                                    ^^^^^^ [2]
    test.js:9:18
-    9| declare const f: null & (number => void);
+    9| declare const f: null & ((x: number) => void);
                         ^^^^ [3]
 
 

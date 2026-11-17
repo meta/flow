@@ -24,7 +24,7 @@ type LocalDateInterval = {
 
 type Option = {
   readonly value: string,
-  readonly calculateInterval: LocalDate => LocalDateInterval,
+  readonly calculateInterval: (date: LocalDate) => LocalDateInterval,
 };
 
 const CUSTOM = {

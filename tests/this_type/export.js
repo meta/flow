@@ -28,7 +28,7 @@ export interface IBad {
 
 // Generic interface with this — exercises tparams + this through type-sig
 export interface IBox<T> {
-  map<U>(f: (T) => U): IBox<U>;
+  map<U>(f: (x: T) => U): IBox<U>;
   clone(): this;
   value(): T;
 }

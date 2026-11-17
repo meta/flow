@@ -1247,8 +1247,8 @@ class P58 {
 }
 
 class P59 {
-  isEven: number => boolean;
-  isOdd: number => boolean;
+  isEven: (n: number) => boolean;
+  isOdd: (n: number) => boolean;
   constructor() {
     this.isEven = x => (x === 0 ? true : this.isOdd(x - 1));
     this.isOdd = x => (x === 0 ? false : this.isEven(x - 1));

@@ -10,4 +10,4 @@ type No_param = () => x is number; // error x unbound
 
 type Unbound_param = (y: number) => x is number; // error x unbound
 
-type No_param_name = (number) => x is number; // error x unbound
+type No_param_name = (n: number) => x is number; // error x unbound

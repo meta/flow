@@ -24,7 +24,7 @@ o[key3]; // ERROR: property is missing
 
 // A unique symbol used as a key type is an indexer that a matching symbol
 // access resolves through.
-type Dict = {[typeof key1]: boolean};
+type Dict = {[key: typeof key1]: boolean};
 declare const d: Dict;
 d[key1] as boolean; // OK
 d[key1] as number; // ERROR: boolean is incompatible with number

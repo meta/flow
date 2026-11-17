@@ -13,6 +13,6 @@ pair(1, 'value') as number;
 pair('value', 1); // ERROR
 pair(1); // ERROR
 
-declare const anonymous: (...[number, string]) => number;
+declare const anonymous: (...args: [number, string]) => number;
 anonymous(1, 'value') as number;
 anonymous('value', 1); // ERROR

@@ -8,9 +8,9 @@ with `number` [2]. [incompatible-type]
                    ^^^^^^^
 
 References:
-   test.js:38:35
-   38| declare const strings: {[string]: string};
-                                         ^^^^^^ [1]
+   test.js:38:40
+   38| declare const strings: {[key: string]: string};
+                                              ^^^^^^ [1]
    node_modules/repro/index.d.ts:9:58
     9| export declare function takeNumbers(values: Dict<string, number>): void;
                                                                 ^^^^^^ [2]
@@ -54,31 +54,31 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:46:1
 
-Cannot cast `flowNodes` to `{[string]: PartialNode | Node}` because in the indexer property: `Node` [1] is not exactly
-the same as `PartialNode | Node` [2]. [incompatible-type]
+Cannot cast `flowNodes` to `{[key: string]: PartialNode | Node}` because in the indexer property: `Node` [1] is not
+exactly the same as `PartialNode | Node` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because the indexer is invariantly typed. To fix the error,
-- Either make `{[string]: Node}` [3] and `{[string]: PartialNode | Node}` [4] exactly the same
-- Or make the indexer in `{[string]: PartialNode | Node}` [4] readonly. See
+- Either make `{[key: string]: Node}` [3] and `{[key: string]: PartialNode | Node}` [4] exactly the same
+- Or make the indexer in `{[key: string]: PartialNode | Node}` [4] readonly. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
    test.js:46:1
-   46| flowNodes as {[string]: PartialNode | Node}; // ERROR: invariant
+   46| flowNodes as {[key: string]: PartialNode | Node}; // ERROR: invariant
        ^^^^^^^^^
 
 References:
-   test.js:15:37
-   15| declare const flowNodes: {[string]: Node};
-                                           ^^^^ [1]
-   test.js:46:25
-   46| flowNodes as {[string]: PartialNode | Node}; // ERROR: invariant
-                               ^^^^^^^^^^^^^^^^^^ [2]
+   test.js:15:42
+   15| declare const flowNodes: {[key: string]: Node};
+                                                ^^^^ [1]
+   test.js:46:30
+   46| flowNodes as {[key: string]: PartialNode | Node}; // ERROR: invariant
+                                    ^^^^^^^^^^^^^^^^^^ [2]
    test.js:15:26
-   15| declare const flowNodes: {[string]: Node};
-                                ^^^^^^^^^^^^^^^^ [3]
+   15| declare const flowNodes: {[key: string]: Node};
+                                ^^^^^^^^^^^^^^^^^^^^^ [3]
    test.js:46:14
-   46| flowNodes as {[string]: PartialNode | Node}; // ERROR: invariant
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   46| flowNodes as {[key: string]: PartialNode | Node}; // ERROR: invariant
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:47:1
@@ -87,7 +87,7 @@ Cannot cast `flowNodes` to `FlowDict<string, PartialNode | Node>` because in the
 exactly the same as `PartialNode | Node` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because the indexer is invariantly typed. To fix the error,
-- Either make `{[string]: Node}` [3] and `{[string]: PartialNode | Node}` [4] exactly the same
+- Either make `{[key: string]: Node}` [3] and `{[string]: PartialNode | Node}` [4] exactly the same
 - Or make the indexer in `{[string]: PartialNode | Node}` [5] readonly. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
@@ -96,15 +96,15 @@ https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-
        ^^^^^^^^^
 
 References:
-   test.js:15:37
-   15| declare const flowNodes: {[string]: Node};
-                                           ^^^^ [1]
+   test.js:15:42
+   15| declare const flowNodes: {[key: string]: Node};
+                                                ^^^^ [1]
    test.js:45:54
    45| type FlowDict<K extends PropertyKey, T> = {[P in K]: T};
                                                             ^ [2]
    test.js:15:26
-   15| declare const flowNodes: {[string]: Node};
-                                ^^^^^^^^^^^^^^^^ [3]
+   15| declare const flowNodes: {[key: string]: Node};
+                                ^^^^^^^^^^^^^^^^^^^^^ [3]
    test.js:45:43
    45| type FlowDict<K extends PropertyKey, T> = {[P in K]: T};
                                                  ^^^^^^^^^^^^^ [4]
