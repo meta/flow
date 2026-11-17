@@ -600,6 +600,7 @@ struct ContextInner {
     hint_map_jsx_cache: HashMap<(Reason, String, Vec<ALoc>, ALoc), LazyHintMapJsx>,
     hint_eval_cache: IntHashMap<i32, Option<Type>>,
     literal_cache: LiteralCache,
+    type_app_expansions: TypeAppExpansions,
     environment: LocEnv<Cx>,
     typing_mode: TypingMode,
     //  A subset of all transitive dependencies of the current file as determined by import/require.
@@ -622,6 +623,15 @@ pub type LazyHintMapJsx = Rc<flow_lazy::Lazy<Cx, Result<Type, JobError>>>;
 pub struct LiteralCache {
     pub tvars: HashMap<(u32, bool), bool>,
     pub types: HashMap<(usize, bool), (Type, bool)>,
+}
+
+/// The expansions by the implicit instantiation walk of the type applications without its markers:
+/// by the address of an application, the application and its expansion; by the address of an
+/// expansion, the application. The types are held, so that their addresses stay their own.
+#[derive(Default)]
+pub struct TypeAppExpansions {
+    pub expansions: HashMap<usize, (Type, Type)>,
+    pub expanded_from: HashMap<usize, Type>,
 }
 
 pub type ResolveRequire =
@@ -770,6 +780,7 @@ impl ContextArena {
             hint_map_jsx_cache: HashMap::new(),
             hint_eval_cache: IntHashMap::default(),
             literal_cache: LiteralCache::default(),
+            type_app_expansions: TypeAppExpansions::default(),
             environment: LocEnv::empty(ScopeKind::Global),
             typing_mode: TypingMode::CheckingMode,
             reachable_deps: BTreeSet::new(),
@@ -3191,6 +3202,10 @@ impl<'a> Context<'a> {
 
     pub fn literal_cache_mut(&mut self) -> &mut LiteralCache {
         &mut self.inner_mut().literal_cache
+    }
+
+    pub fn type_app_expansions_mut(&mut self) -> &mut TypeAppExpansions {
+        &mut self.inner_mut().type_app_expansions
     }
 
     // utils

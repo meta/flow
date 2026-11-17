@@ -1002,7 +1002,9 @@ impl<'e> Walker<'e> {
         // An expansion that reaches a marker is recorded as the type application it expanded, which
         // later checks compare by its type arguments rather than by expanding it again.
         let mut t = t.dupe();
-        while let Some(app) = self.expanded_from.borrow().get(&addr(&t)).map(Dupe::dupe) {
+        while let Some(app) = (self.expanded_from.borrow().get(&addr(&t)).map(Dupe::dupe))
+            .or_else(|| (cx.type_app_expansions_mut().expanded_from.get(&addr(&t))).map(Dupe::dupe))
+        {
             t = app;
         }
         let t = &self.normalize(cx, &t);
@@ -4828,7 +4830,17 @@ impl<'e> Walker<'e> {
         if let Some((_, expanded)) = self.expand_cache.borrow().get(&addr(t)) {
             return Some(expanded.dupe());
         }
+        if let Some((_, expanded)) = cx.type_app_expansions_mut().expansions.get(&addr(t)) {
+            return Some(expanded.dupe());
+        }
         let expanded = self.expand_typeapp_uncached(cx, t)?;
+        // An application without markers expands to the same type in each walk of the file.
+        if self.markers_in(cx, t).is_empty() {
+            let expansions = cx.type_app_expansions_mut();
+            (expansions.expansions).insert(addr(t), (t.dupe(), expanded.dupe()));
+            (expansions.expanded_from).insert(addr(&expanded), t.dupe());
+            return Some(expanded);
+        }
         self.expand_cache
             .borrow_mut()
             .insert(addr(t), (t.dupe(), expanded.dupe()));
