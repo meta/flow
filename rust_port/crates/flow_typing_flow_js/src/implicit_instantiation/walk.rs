@@ -5445,6 +5445,16 @@ impl<'e> Walker<'e> {
             && self.mentions(cx, &t)
     }
 
+    /// Whether the props of a slice of a spread mention a marker.
+    fn slice_mentions<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        slice: &object::spread::OperandSlice,
+    ) -> bool {
+        (slice.prop_map.values())
+            .any(|p| property::read_t(p).is_some_and(|t| self.mentions(cx, &t)))
+    }
+
     fn has_evidence(&self, name: &SubstName) -> bool {
         let bounds = &self.vars[name];
         !(bounds.lower.is_empty() && bounds.exact.is_empty())
@@ -5644,15 +5654,19 @@ impl<'e> Walker<'e> {
                     self.add_reversal(cx, &target, &reversed)?;
                     // Once the marker has a lower bound from the other arguments, the spread is
                     // also walked against `u`, so that the props of the other operands, such as
-                    // `onClose: C` in `{...T, ...{onClose: C}}`, meet those of `u`. That waits for
-                    // the end of the walk.
+                    // `onClose: C` in `{...T, ...{onClose: C}}` or in `{...T, onClose: C}`, meet
+                    // those of `u`. That waits for the end of the walk.
                     if matches!(target, ReversalTarget::Marker(_))
-                        && let Destructor::SpreadType(box DestructorSpreadTypeData(_, others, _)) =
-                            &d
-                        && others.iter().any(|operand| match operand {
-                            object::spread::Operand::Type(t) => self.mentions(cx, t),
-                            object::spread::Operand::Slice(_) => false,
-                        })
+                        && let Destructor::SpreadType(box DestructorSpreadTypeData(
+                            _,
+                            others,
+                            head_slice,
+                        )) = &d
+                        && (head_slice.iter().any(|s| self.slice_mentions(cx, s))
+                            || others.iter().any(|operand| match operand {
+                                object::spread::Operand::Type(t) => self.mentions(cx, t),
+                                object::spread::Operand::Slice(s) => self.slice_mentions(cx, s),
+                            }))
                     {
                         self.pending_spreads.push((l.dupe(), u.dupe()));
                     }

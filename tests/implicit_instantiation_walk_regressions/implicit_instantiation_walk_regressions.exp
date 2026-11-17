@@ -779,6 +779,23 @@ References:
                                  ^^^^^^ [2]
 
 
+Error -------------------------------------------------------------------------------------- spread_inline_props.js:26:3
+
+Cannot cast `result` to `?number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   spread_inline_props.js:26:3
+   26|   result as ?number; // error
+         ^^^^^^
+
+References:
+   spread_inline_props.js:20:20
+   20|   onComplete: (id: string) => unknown,
+                          ^^^^^^ [1]
+   spread_inline_props.js:26:14
+   26|   result as ?number; // error
+                    ^^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------ structural_variance_unions.js:42:10
 
 Cannot use `this` [1] in an input position because `this` [1] is expected to occur only in output positions.
@@ -943,4 +960,4 @@ References:
 
 
 
-Found 51 errors
+Found 52 errors
