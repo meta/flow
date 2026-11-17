@@ -20,10 +20,10 @@ export type FromWide = {[wide]: number}; // ERROR: `wide` names no one property
 
 // Type-name keys stay index signatures across the boundary too.
 type AliasA = 'a';
-export type OneAlias = {[AliasA]: number};
+export type OneAlias = {[key: AliasA]: number};
 type OneKey = {a: number};
-export type KeyofOne = {[keyof OneKey]: string};
-export type LiteralBound<T extends 'a'> = {[T]: number};
+export type KeyofOne = {[key: keyof OneKey]: string};
+export type LiteralBound<T extends 'a'> = {[key: T]: number};
 export type ValueParam<T> = {['a']: T};
 
 // A labeled key `[label: K]` is an index signature across the boundary too.
@@ -47,7 +47,7 @@ export type LiteralOverridesSpread = {...Base, ['a']: string};
 // and setter pair, must resolve the same way across the boundary.
 const K = 'a';
 type K = 'b';
-export type Dual = {[K]: number};
+export type Dual = {[key: K]: number};
 const acc = 'a';
 export type AccessorFirst = {get a(): number, set a(x: number): void, [acc]: boolean};
 export type AccessorLast = {[acc]: boolean, get a(): number, set a(x: number): void};

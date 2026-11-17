@@ -208,7 +208,7 @@ accessorMiddle.p as boolean; // ERROR: number is not boolean
 const K = 'a';
 type K = 'b';
 interface Dual {
-  [K]: number,
+  [key: K]: number,
 }
 declare const dual: Dual;
 dual['b'] as number; // OK via the indexer over 'b'

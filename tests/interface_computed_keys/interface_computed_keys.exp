@@ -453,9 +453,9 @@ Cannot get `dual['a']` because `"a"` [1] is incompatible with `K` [2]. [incompat
         ^^^^^^^^^ [1]
 
 References:
-   exp.js:139:4
-   139|   [K]: number,
-           ^ [2]
+   exp.js:139:9
+   139|   [key: K]: number,
+                ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- imp.js:143:19
@@ -535,9 +535,9 @@ Cannot cast `oneAlias['a']` to `string` because `number` [1] is incompatible wit
        ^^^^^^^^^^^^^
 
 References:
-   type_keys.js:8:13
-    8|   [AliasA]: number,
-                   ^^^^^^ [1]
+   type_keys.js:8:18
+    8|   [key: AliasA]: number,
+                        ^^^^^^ [1]
    type_keys.js:12:18
    12| oneAlias['a'] as string; // ERROR: number is not string
                         ^^^^^^ [2]
@@ -552,9 +552,9 @@ Cannot get `oneAlias['b']` because `"b"` [1] is incompatible with `AliasA` [2]. 
        ^^^^^^^^^^^^^ [1]
 
 References:
-   type_keys.js:8:4
-    8|   [AliasA]: number,
-          ^^^^^^ [2]
+   type_keys.js:8:9
+    8|   [key: AliasA]: number,
+               ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------- type_keys.js:15:10
@@ -580,9 +580,9 @@ Cannot cast `keyofOne['a']` to `number` because `string` [1] is incompatible wit
        ^^^^^^^^^^^^^
 
 References:
-   type_keys.js:21:19
-   21|   [keyof OneKey]: string,
-                         ^^^^^^ [1]
+   type_keys.js:21:24
+   21|   [key: keyof OneKey]: string,
+                              ^^^^^^ [1]
    type_keys.js:25:18
    25| keyofOne['a'] as number; // ERROR: string is not number
                         ^^^^^^ [2]
@@ -1176,9 +1176,9 @@ Cannot get `dual['a']` because `"a"` [1] is incompatible with `K` [2]. [incompat
         ^^^^^^^^^ [1]
 
 References:
-   value_keys.js:211:4
-   211|   [K]: number,
-           ^ [2]
+   value_keys.js:211:9
+   211|   [key: K]: number,
+                ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------- value_keys.js:223:1

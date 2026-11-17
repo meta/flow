@@ -92,7 +92,7 @@ type Cyclic = {x: 'k', [cyclicKey]: number}; // ERROR: the cyclic key names noth
 // keep one binding per name, so the read itself has to say which was meant.
 const K = 'a';
 type K = 'b';
-type Dual = {[K]: number};
+type Dual = {[key: K]: number};
 declare const dual: Dual;
 dual.b as number; // OK via the indexer over 'b'
 dual.a; // ERROR: 'a' is the value, and the type won
@@ -100,7 +100,7 @@ dual.a; // ERROR: 'a' is the value, and the type won
 // Declaring them the other way round reads the same.
 type K2 = 'b';
 const K2 = 'a';
-type DualRev = {[K2]: number};
+type DualRev = {[key: K2]: number};
 declare const dualRev: DualRev;
 dualRev.b as number; // OK via the indexer over 'b'
 

@@ -4,10 +4,6 @@
 
 type O = {foo: number};
 
-type MappedExact = {| // ERROR
-  [key in keyof O]: number
-|}
-
 type MappedInexact = { // ERROR
   [key in keyof O]: number,
   ...

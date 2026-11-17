@@ -215,9 +215,9 @@ Cannot cast `keyofOne.a` to `number` because `string` [1] is incompatible with `
        ^^^^^^^^^^
 
 References:
-   exp.js:25:41
-   25| export type KeyofOne = {[keyof OneKey]: string};
-                                               ^^^^^^ [1]
+   exp.js:25:46
+   25| export type KeyofOne = {[key: keyof OneKey]: string};
+                                                    ^^^^^^ [1]
    imp.js:93:15
    93| keyofOne.a as number; // ERROR: string is not number
                      ^^^^^^ [2]
@@ -232,9 +232,9 @@ Cannot cast `literalBound.a` to `string` because `number` [1] is incompatible wi
        ^^^^^^^^^^^^^^
 
 References:
-   exp.js:26:49
-   26| export type LiteralBound<T extends 'a'> = {[T]: number};
-                                                       ^^^^^^ [1]
+   exp.js:26:54
+   26| export type LiteralBound<T extends 'a'> = {[key: T]: number};
+                                                            ^^^^^^ [1]
    imp.js:98:19
    98| literalBound.a as string; // ERROR: number is not string
                          ^^^^^^ [2]
@@ -507,9 +507,9 @@ Cannot cast `oneAlias.a` to `string` because `number` [1] is incompatible with `
        ^^^^^^^^^^
 
 References:
-   type_keys.js:7:28
-    7| type OneAlias = {[AliasA]: number};
-                                  ^^^^^^ [1]
+   type_keys.js:7:33
+    7| type OneAlias = {[key: AliasA]: number};
+                                       ^^^^^^ [1]
    type_keys.js:10:15
    10| oneAlias.a as string; // ERROR: number is not string
                      ^^^^^^ [2]
@@ -552,9 +552,9 @@ Cannot cast `keyofOne.a` to `number` because `string` [1] is incompatible with `
        ^^^^^^^^^^
 
 References:
-   type_keys.js:26:34
-   26| type KeyofOne = {[keyof OneKey]: string};
-                                        ^^^^^^ [1]
+   type_keys.js:26:39
+   26| type KeyofOne = {[key: keyof OneKey]: string};
+                                             ^^^^^^ [1]
    type_keys.js:29:15
    29| keyofOne.a as number; // ERROR: string is not number
                      ^^^^^^ [2]
@@ -562,7 +562,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ type_keys.js:37:5
 
-Cannot get `x.anything` because property `anything` is missing in `{[keyof {a: number, b: number}]: string}` [1].
+Cannot get `x.anything` because property `anything` is missing in `{[key: keyof {a: number, b: number}]: string}` [1].
 [prop-missing]
 
    type_keys.js:37:5
@@ -584,9 +584,9 @@ Cannot cast `x.a` to `string` because `number` [1] is incompatible with `string`
          ^^^
 
 References:
-   type_keys.js:40:42
-   40| type LiteralBound<T extends 'a'> = {[T]: number};
-                                                ^^^^^^ [1]
+   type_keys.js:40:47
+   40| type LiteralBound<T extends 'a'> = {[key: T]: number};
+                                                     ^^^^^^ [1]
    type_keys.js:44:10
    44|   x.a as string; // ERROR: number is not string
                 ^^^^^^ [2]
@@ -726,13 +726,13 @@ References:
                            ^^^^^^ [1]
 
 
-Error ---------------------------------------------------------------------------------------------- type_keys.js:128:21
+Error ---------------------------------------------------------------------------------------------- type_keys.js:128:26
 
 Cannot use `NsKeys` as a type. A name can be used as a type only if it refers to a type, interface, class, or enum
 definition. To get the type of a non-class value, use `typeof`. [value-as-type]
 
-   128| type FromNsBare = {[NsKeys]: number}; // ERROR: a namespace is not a type
-                            ^^^^^^
+   128| type FromNsBare = {[key: NsKeys]: number}; // ERROR: a namespace is not a type
+                                 ^^^^^^
 
 
 Error ---------------------------------------------------------------------------------------------- type_keys.js:132:28

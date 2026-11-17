@@ -41,7 +41,7 @@ export interface FromWide {
 // A type-name key stays an index signature across the boundary too.
 type AliasA = 'a';
 export interface OneAlias {
-  [AliasA]: number,
+  [key: AliasA]: number,
 }
 
 // Same-name collisions must resolve by source order, last winning, so the
@@ -136,7 +136,7 @@ export interface AccessorSplit {
 const K = 'a';
 type K = 'b';
 export interface Dual {
-  [K]: number,
+  [key: K]: number,
 }
 
 // An imported constant and variance must survive the boundary as well.

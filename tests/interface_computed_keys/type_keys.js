@@ -5,7 +5,7 @@
 
 type AliasA = 'a';
 interface OneAlias {
-  [AliasA]: number,
+  [key: AliasA]: number,
 }
 declare const oneAlias: OneAlias;
 oneAlias['a'] as number; // OK via the indexer
@@ -18,7 +18,7 @@ oneAlias.a; // ERROR: an index signature answers no named read, as a key would
 // one key.
 type OneKey = {a: number};
 interface KeyofOne {
-  [keyof OneKey]: string,
+  [key: keyof OneKey]: string,
 }
 declare const keyofOne: KeyofOne;
 keyofOne['a'] as string; // OK via the indexer
@@ -27,7 +27,7 @@ keyofOne['a'] as number; // ERROR: string is not number
 // A type parameter is a type, and a literal key next to one is still a named
 // property, since a parameter in the *values* cannot change what the keys are.
 interface LiteralBound<T extends 'a'> {
-  [T]: number,
+  [key: T]: number,
 }
 interface ValueParam<T> {
   ['a']: T,
@@ -89,7 +89,7 @@ interface FromImportedEnum {
 
 // A `declare class` body classifies its keys the same way.
 declare class WithTypeKey {
-  [AliasA]: number,
+  [key: AliasA]: number,
   static [C]: string, // ERROR: a class object is not a key
 }
 const withTypeKey = new WithTypeKey();

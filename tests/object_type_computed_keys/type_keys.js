@@ -4,7 +4,7 @@
 // become a required property.
 
 type AliasA = 'a';
-type OneAlias = {[AliasA]: number};
+type OneAlias = {[key: AliasA]: number};
 declare const oneAlias: OneAlias;
 oneAlias.a as number; // OK via the indexer
 oneAlias.a as string; // ERROR: number is not string
@@ -14,7 +14,7 @@ oneAlias.b; // ERROR: `b` is not in the 'a' indexer key set
 // An indexed access resolving to a literal is a type, so also an index
 // signature.
 type Accessed = {foo: 'foo'};
-type FromAccess = {[Accessed['foo']]: number};
+type FromAccess = {[key: Accessed['foo']]: number};
 declare const fromAccess: FromAccess;
 fromAccess.foo as number; // OK via the indexer
 const emptyAccess: FromAccess = {}; // OK, an index signature requires nothing
@@ -23,21 +23,21 @@ fromAccess.bar; // ERROR: `bar` is not in the 'foo' indexer key set
 // `keyof X` is a type, so it is an index signature even when `X` has exactly
 // one key.
 type OneKey = {a: number};
-type KeyofOne = {[keyof OneKey]: string};
+type KeyofOne = {[key: keyof OneKey]: string};
 declare const keyofOne: KeyofOne;
 keyofOne.a as string; // OK via the indexer
 keyofOne.a as number; // ERROR: string is not number
 const emptyKeyofOne: KeyofOne = {}; // OK
 
 // A type parameter, and anything mentioning one, is a type.
-type Unbounded<T> = {[keyof T]: string, ...};
+type Unbounded<T> = {[key: keyof T]: string, ...};
 {
   declare const x: Unbounded<{a: number, b: number}>;
   x.a as string; // OK via the indexer
   x.anything as string; // ERROR: `anything` is not in the `keyof T` key set
 }
 
-type LiteralBound<T extends 'a'> = {[T]: number};
+type LiteralBound<T extends 'a'> = {[key: T]: number};
 {
   declare const x: LiteralBound<'a'>;
   x.a as number; // OK via the indexer
@@ -47,7 +47,7 @@ type LiteralBound<T extends 'a'> = {[T]: number};
 // A generic alias applied to a parameter is a type application, so an index
 // signature.
 type Filter<T extends string> = T;
-type Applied<T> = {[Filter<T>]: number};
+type Applied<T> = {[key: Filter<T>]: number};
 {
   declare const x: Applied<'a'>;
   x.a as number; // OK via the indexer
@@ -114,7 +114,7 @@ type ValueParam<T> = {['a']: T};
 // `import {a}` are the same kind of binding, so neither heads a computed key
 // when qualified.
 import * as NsKeys from './nskeys';
-type FromNs = {[NsKeys.K]: number};
+type FromNs = {[key: NsKeys.K]: number};
 {
   declare const x: FromNs;
   x.a as number; // OK via the indexer
@@ -125,7 +125,7 @@ type FromNs = {[NsKeys.K]: number};
 // The namespace is in the type namespace too, so a bare one is read as a type
 // and reports what it did before computed keys existed, rather than becoming a
 // computed key over the module object.
-type FromNsBare = {[NsKeys]: number}; // ERROR: a namespace is not a type
+type FromNsBare = {[key: NsKeys]: number}; // ERROR: a namespace is not a type
 
 // The imported spelling is rejected the same way as the local one above.
 import {C as ImportedC, E as ImportedE} from './clsenum';

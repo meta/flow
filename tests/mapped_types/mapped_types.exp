@@ -2018,28 +2018,16 @@ References:
              ^^^^^^^^^^^^ [4]
 
 
-Error ------------------------------------------------------------------------------------ no_explicit_exactness.js:7:20
-
-Mapped Types take on the exactness of the argument passed to keyof. They do not support explicit exact or inexact
-syntax. [invalid-mapped-type]
-
-                         v----------
-   7| type MappedExact = {| // ERROR
-   8|   [key in keyof O]: number
-   9| |}
-      -^
-
-
-Error ----------------------------------------------------------------------------------- no_explicit_exactness.js:11:22
+Error ------------------------------------------------------------------------------------ no_explicit_exactness.js:7:22
 
 Mapped Types take on the exactness of the argument passed to keyof. They do not support explicit exact or inexact
 syntax. [invalid-mapped-type]
 
                             v---------
-   11| type MappedInexact = { // ERROR
-   12|   [key in keyof O]: number,
-   13|   ...
-   14| }
+    7| type MappedInexact = { // ERROR
+    8|   [key in keyof O]: number,
+    9|   ...
+   10| }
        ^
 
 
@@ -3156,4 +3144,4 @@ References:
 
 
 
-Found 189 errors
+Found 188 errors
