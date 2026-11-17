@@ -123,7 +123,7 @@ Cannot cast `mixed.bar` to `number` because `boolean` [1] is incompatible with `
 
 References:
    exp.js:8:44
-    8| export type Mixed = {foo: string, ['bar']: boolean, [string]: number};
+    8| export type Mixed = {foo: string, ['bar']: boolean, [key: string]: number};
                                                   ^^^^^^^ [1]
    imp.js:64:14
    64| mixed.bar as number; // ERROR: boolean is not number, so this is not the indexer
@@ -1220,9 +1220,9 @@ Cannot cast `dict.anything` to `string` because `number` [1] is incompatible wit
        ^^^^^^^^^^^^^
 
 References:
-   within.js:30:24
-   30| type Dict = {[string]: number};
-                              ^^^^^^ [1]
+   within.js:30:29
+   30| type Dict = {[key: string]: number};
+                                   ^^^^^^ [1]
    within.js:33:18
    33| dict.anything as string; // ERROR: number is not string
                         ^^^^^^ [2]
@@ -1252,7 +1252,7 @@ Cannot cast `mixed.bar` to `number` because `boolean` [1] is incompatible with `
 
 References:
    within.js:44:37
-   44| type Mixed = {foo: string, ['bar']: boolean, [string]: number};
+   44| type Mixed = {foo: string, ['bar']: boolean, [key: string]: number};
                                            ^^^^^^^ [1]
    within.js:48:14
    48| mixed.bar as number; // ERROR: boolean is not number, so this is not the indexer
@@ -1310,12 +1310,12 @@ References:
                     ^^^^^^ [2]
 
 
-Error -------------------------------------------------------------------------------------------------- within.js:75:39
+Error -------------------------------------------------------------------------------------------------- within.js:75:44
 
 Multiple indexers are not supported. [unsupported-syntax]
 
-   75| type TwoIndexers = {[string]: number, [number]: string}; // ERROR: multiple indexers
-                                             ^^^^^^^^^^^^^^^^
+   75| type TwoIndexers = {[key: string]: number, [index: number]: string}; // ERROR: multiple indexers
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error --------------------------------------------------------------------------------------------------- within.js:82:1

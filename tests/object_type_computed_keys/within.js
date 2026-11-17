@@ -27,13 +27,13 @@ frac[1.5] as boolean; // OK, the named property
 frac[2.5]; // ERROR: property 2.5 is missing
 
 // A general string key is an index signature.
-type Dict = {[string]: number};
+type Dict = {[key: string]: number};
 declare const dict: Dict;
 dict.anything as number; // OK via the indexer
 dict.anything as string; // ERROR: number is not string
 
 // A union of literals is an index signature, not several named properties.
-type Union = {['a' | 'b']: number};
+type Union = {[key: 'a' | 'b']: number};
 declare const u: Union;
 u.a as number; // OK via the indexer
 u.c; // ERROR: `c` is not in the 'a' | 'b' indexer key set
@@ -41,7 +41,7 @@ u.c; // ERROR: `c` is not in the 'a' | 'b' indexer key set
 // A named property, a literal-key property, and an index signature coexist.
 // The literal key's own value type is what `bar` has, so the named property
 // wins over the indexer rather than being folded into it.
-type Mixed = {foo: string, ['bar']: boolean, [string]: number};
+type Mixed = {foo: string, ['bar']: boolean, [key: string]: number};
 declare const mixed: Mixed;
 mixed.foo as string; // OK
 mixed.bar as boolean; // OK, named from the literal key
@@ -72,7 +72,7 @@ labeled.a as string; // ERROR: number is not string
 const emptyLabeled: Labeled = {}; // OK, an index signature requires nothing
 
 // Two index signatures are still unsupported.
-type TwoIndexers = {[string]: number, [number]: string}; // ERROR: multiple indexers
+type TwoIndexers = {[key: string]: number, [index: number]: string}; // ERROR: multiple indexers
 
 // A literal key and a plain property of the same name resolve by source order,
 // last in source winning, as duplicate properties do.

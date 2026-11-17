@@ -6,7 +6,7 @@ declare const ThemeContext: React.Context<Theme>;
 declare const AnswerPromise: Promise<42>;
 
 declare const CustomThennable: {
-  then(onFulfil: (string) => void): void;
+  then(onFulfil: (value: string) => void): void;
  ...};
 
 function Test() {

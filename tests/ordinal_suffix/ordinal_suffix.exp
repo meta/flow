@@ -8,9 +8,9 @@ Cannot call `f` with `"eleven"` bound to the 11th parameter because `"eleven"` [
                                         ^^^^^^^^ [1]
 
 References:
-   test.js:9:3
-    9|   number, number, number,
-         ^^^^^^ [2]
+   test.js:9:7
+    9|   {}: number, {}: number, {}: number,
+             ^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:12:44
@@ -23,9 +23,9 @@ Cannot call `f` with `"twelve"` bound to the 12th parameter because `"twelve"` [
                                                   ^^^^^^^^ [1]
 
 References:
-   test.js:9:11
-    9|   number, number, number,
-                 ^^^^^^ [2]
+   test.js:9:19
+    9|   {}: number, {}: number, {}: number,
+                         ^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:12:54
@@ -38,9 +38,9 @@ Cannot call `f` with `"thirteen"` bound to the 13th parameter because `"thirteen
                                                             ^^^^^^^^^^ [1]
 
 References:
-   test.js:9:19
-    9|   number, number, number,
-                         ^^^^^^ [2]
+   test.js:9:31
+    9|   {}: number, {}: number, {}: number,
+                                     ^^^^^^ [2]
 
 
 

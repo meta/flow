@@ -20,14 +20,14 @@ class Baz<in T> {
 }
 
 class ContraBaz<in T> {
-  bad(x: (ReadonlyArray<T>) => number): number {
+  bad(x: (arr: ReadonlyArray<T>) => number): number {
     // Error: T used covariantly
     // x is used contravariantly, the ROArray is used contravariantly in x,
     // double negation makes covariant!
     return 0;
   }
 
-  good(x: (ContraBaz<T>) => number): number {
+  good(x: (baz: ContraBaz<T>) => number): number {
     return 0;
   }
 

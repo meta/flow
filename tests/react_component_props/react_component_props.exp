@@ -36,40 +36,40 @@ References:
 
 Error -------------------------------------------------------------------------------- polymorphic_instantiation.js:14:1
 
-Cannot cast `ContainerCP` to `TPopover<{f: (React.ComponentProps<TPopover<O>>) => void, z: {y: string}}>` because in
-property `f` > the first parameter: property `x` is missing in `{readonly y: string}` [1] but exists in
+Cannot cast `ContainerCP` to `TPopover<{f: (props: React.ComponentProps<TPopover<O>>) => void, z: {y: string}}>` because
+in property `f` > the first parameter: property `x` is missing in `{readonly y: string}` [1] but exists in
 `{readonly x: number}` [2]. [incompatible-type]
 
    polymorphic_instantiation.js:14:1
-   14| ContainerCP as TPopover<{f: (React.ComponentProps<TPopover<O>>) => void, z: {y: string}}>; // error: z conflicts with f
+   14| ContainerCP as TPopover<{f: (props: React.ComponentProps<TPopover<O>>) => void, z: {y: string}}>; // error: z conflicts with f
        ^^^^^^^^^^^
 
 References:
-   polymorphic_instantiation.js:6:7
-    6|   f: (React.ComponentProps<TPopover<T>>) => void,
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   polymorphic_instantiation.js:14:30
-   14| ContainerCP as TPopover<{f: (React.ComponentProps<TPopover<O>>) => void, z: {y: string}}>; // error: z conflicts with f
-                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   polymorphic_instantiation.js:6:14
+    6|   f: (props: React.ComponentProps<TPopover<T>>) => void,
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   polymorphic_instantiation.js:14:37
+   14| ContainerCP as TPopover<{f: (props: React.ComponentProps<TPopover<O>>) => void, z: {y: string}}>; // error: z conflicts with f
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------- polymorphic_instantiation.js:14:1
 
-Cannot cast `ContainerCP` to `TPopover<{f: (React.ComponentProps<TPopover<O>>) => void, z: {y: string}}>` because in
-property `f` > the first parameter: property `y` is extra in `{readonly y: string}` [1] but missing in
+Cannot cast `ContainerCP` to `TPopover<{f: (props: React.ComponentProps<TPopover<O>>) => void, z: {y: string}}>` because
+in property `f` > the first parameter: property `y` is extra in `{readonly y: string}` [1] but missing in
 `{readonly x: number}` [2]. Exact objects do not accept extra props. [incompatible-type]
 
    polymorphic_instantiation.js:14:1
-   14| ContainerCP as TPopover<{f: (React.ComponentProps<TPopover<O>>) => void, z: {y: string}}>; // error: z conflicts with f
+   14| ContainerCP as TPopover<{f: (props: React.ComponentProps<TPopover<O>>) => void, z: {y: string}}>; // error: z conflicts with f
        ^^^^^^^^^^^
 
 References:
-   polymorphic_instantiation.js:6:7
-    6|   f: (React.ComponentProps<TPopover<T>>) => void,
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   polymorphic_instantiation.js:14:30
-   14| ContainerCP as TPopover<{f: (React.ComponentProps<TPopover<O>>) => void, z: {y: string}}>; // error: z conflicts with f
-                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   polymorphic_instantiation.js:6:14
+    6|   f: (props: React.ComponentProps<TPopover<T>>) => void,
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   polymorphic_instantiation.js:14:37
+   14| ContainerCP as TPopover<{f: (props: React.ComponentProps<TPopover<O>>) => void, z: {y: string}}>; // error: z conflicts with f
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 

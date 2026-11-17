@@ -145,13 +145,13 @@ const optional2_spread = spread(optional2); // Ok {foo?: number}
 
 let indexer;
 if (true) {
-  indexer = {foo: 3} as {[string]: number};
+  indexer = {foo: 3} as {[key: string]: number};
 } else if (true) {
-  indexer = {bar: 3} as {[string]: number, bar: number};
+  indexer = {bar: 3} as {[key: string]: number, bar: number};
 } else if (true) {
-  indexer = {baz: 3} as {[string]: number, baz: number};
+  indexer = {baz: 3} as {[key: string]: number, baz: number};
 } else {
-  indexer = {qux: 3} as {[string]: number, qux: number};
+  indexer = {qux: 3} as {[key: string]: number, qux: number};
 }
 
 const indexer_spread = spread(indexer);
@@ -172,13 +172,13 @@ indexer_spread.qux as number;
 
 let indexer2;
 if (true) {
-  indexer2 = {foo: 3} as {[string]: number};
+  indexer2 = {foo: 3} as {[key: string]: number};
 } else if (true) {
-  indexer2 = {bar: ''} as {[string]: number, bar: string};
+  indexer2 = {bar: ''} as {[key: string]: number, bar: string};
 } else if (true) {
-  indexer2 = {baz: ''} as {[string]: number, baz: string};
+  indexer2 = {baz: ''} as {[key: string]: number, baz: string};
 } else {
-  indexer2 = {qux: ''} as {[string]: number, qux: string};
+  indexer2 = {qux: ''} as {[key: string]: number, qux: string};
 }
 const indexer_spread2 = spread(indexer2);
 // All ok because of the indexer
@@ -198,9 +198,9 @@ indexer_spread2.qux as string; // Error, Possibly number or undefined
 let indexer_err;
 
 if (true) {
-  indexer_err = {foo: 'string'} as {[string]: string};
+  indexer_err = {foo: 'string'} as {[key: string]: string};
 } else {
-  indexer_err = {foo: 3} as {[string]: number};
+  indexer_err = {foo: 3} as {[key: string]: number};
 }
 
 const indexer_err_spread = spread(indexer_err); // Error, string and number don't unify
@@ -209,7 +209,7 @@ let indexer_on_second;
 if (true) {
   indexer_on_second = {foo: 'string'};
 } else {
-  indexer_on_second = {bar: 3} as {[string]: number};
+  indexer_on_second = {bar: 3} as {[key: string]: number};
 }
 
 const indexer_on_second_spread = spread(indexer_on_second);

@@ -1,6 +1,6 @@
 declare const recordObj: {foo: string};
-declare const dictObj: {[string]: string};
-declare const protoDictObj: {__proto__: {[string]: string}};
+declare const dictObj: {[key: string]: string};
+declare const protoDictObj: {__proto__: {[key: string]: string}};
 declare const key: string;
 
 recordObj[key] as string; // error: bad key

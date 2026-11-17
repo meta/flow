@@ -559,9 +559,9 @@ Cannot cast `Object.keys(...)[0]` to `empty` because `string` [1] is incompatibl
          ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   object_keys.js:84:31
-   84|   declare const opaqueDict: {[OpaqueKeyWithSupertype1]: number};
-                                     ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   object_keys.js:84:36
+   84|   declare const opaqueDict: {[key: OpaqueKeyWithSupertype1]: number};
+                                          ^^^^^^^^^^^^^^^^^^^^^^^ [1]
    object_keys.js:86:33
    86|   Object.keys(opaqueDict)[0] as empty; // ERROR
                                        ^^^^^ [2]
@@ -1037,9 +1037,9 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
        ^^^^^^^^^^^^^^^^^^^ [3]
 
 References:
-   object_values.js:1:32
-    1| declare const dict: {[string]: number};
-                                      ^^^^^^ [1]
+   object_values.js:1:37
+    1| declare const dict: {[key: string]: number};
+                                           ^^^^^^ [1]
    object_values.js:27:30
    27| Object.values(dict) as Array<empty>; // ERROR
                                     ^^^^^ [2]

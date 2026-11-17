@@ -65,7 +65,7 @@ function reversed() {
 }
 
 declare class Set<out T> {
-  add<U>(U): Set<T | U>;
+  add<U>(value: U): Set<T | U>;
 }
 
 function set_replace() {

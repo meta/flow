@@ -52,7 +52,7 @@ intersectionObj.q = 42; // Should error!
 intersectionObj.p as number; // OK
 intersectionObj.q as number; // OK
 
-type IndexerKeyObj = {p: number, [string]: boolean};
+type IndexerKeyObj = {p: number, [key: string]: boolean};
 declare const indexerKeyObj: Readonly<IndexerKeyObj>;
 indexerKeyObj.p = 42; // Should error!
 indexerKeyObj.x = true; // Should error!

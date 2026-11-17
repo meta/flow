@@ -13,15 +13,15 @@ https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-
                                 ^^^^^^ [1]
 
 References:
-   required-positioning.js:8:34
-    8| type Props = Required<{[string]: RecursiveProp}>;
-                                        ^^^^^^^^^^^^^ [2]
+   required-positioning.js:8:39
+    8| type Props = Required<{[key: string]: RecursiveProp}>;
+                                             ^^^^^^^^^^^^^ [2]
    required-positioning.js:18:20
    18| register(() => (x: {foo: number}) => null); // ERROR!
                           ^^^^^^^^^^^^^ [3]
    required-positioning.js:8:23
-    8| type Props = Required<{[string]: RecursiveProp}>;
-                             ^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+    8| type Props = Required<{[key: string]: RecursiveProp}>;
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
    required-positioning.js:12:44
    12| declare export function register<T extends Props>(
                                                   ^^^^^ [5]

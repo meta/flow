@@ -4,7 +4,7 @@ interface TypeInfo<V, H> {
 }
 
 declare class EnumInfo<T> {
-  constructor(entries: {[string]: T}): void;
+  constructor(entries: {[key: string]: T}): void;
   coerce(value: unknown): string;
   serialize(value: string): T;
 }

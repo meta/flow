@@ -2,13 +2,13 @@
 
 declare let x: ?{
   a: number,
-  f: number => string,
+  f: (x: number) => string,
   i: Array<number>,
-  of?: number => string,
+  of?: (x: number) => string,
   oi?: Array<number>,
   i2: Array<Array<number>>,
   i3: Array<{a: ?number, ...}>,
-  f2: number => number => string,
+  f2: (x: number) => (y: number) => string,
  ...};
 
 x?.f(x.a);

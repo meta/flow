@@ -396,9 +396,9 @@ Cannot create `Fun` element because in property `children` > the return value: `
                   ^^^^ [1]
 
 References:
-   fun.js:14:19
-   14| type Fn = Data => number;
-                         ^^^^^^ [2]
+   fun.js:14:27
+   14| type Fn = (data: Data) => number;
+                                 ^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------------ fun.js:41:5
@@ -427,9 +427,9 @@ Cannot get `data.nope` because property `nope` is missing in `Data` [1]. [prop-m
                 ^^^^
 
 References:
-   fun.js:14:11
-   14| type Fn = Data => number;
-                 ^^^^ [1]
+   fun.js:14:18
+   14| type Fn = (data: Data) => number;
+                        ^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------------------ fun.js:47:2

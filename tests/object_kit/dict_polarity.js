@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-type InvariantDict = {[string]: number};
-type ReadonlyDict = {readonly [string]: number};
-type WriteonlyDict = {writeonly [string]: number};
+type InvariantDict = {[key: string]: number};
+type ReadonlyDict = {readonly [key: string]: number};
+type WriteonlyDict = {writeonly [key: string]: number};
 
 type ConstantMapped<T extends {...}> = {[K in keyof T]: number};
 
@@ -10,93 +10,93 @@ type ConstantMapped<T extends {...}> = {[K in keyof T]: number};
 // invariant indexers.
 {
   declare const exact: $Exact<InvariantDict>;
-  exact as {[string]: number}; // OK
+  exact as {[key: string]: number}; // OK
 
   declare const readonly: Readonly<InvariantDict>;
-  readonly as {readonly [string]: number}; // OK
+  readonly as {readonly [key: string]: number}; // OK
 
   declare const partial: Partial<InvariantDict>;
-  partial as {[string]: number}; // OK
+  partial as {[key: string]: number}; // OK
 
   declare const required: Required<InvariantDict>;
-  required as {[string]: number}; // OK
+  required as {[key: string]: number}; // OK
 
   declare const omit: Omit<InvariantDict, empty>;
-  omit as {[string]: number}; // OK
+  omit as {[key: string]: number}; // OK
 
   declare const mapped: ConstantMapped<InvariantDict>;
-  mapped as {[string]: number}; // OK
+  mapped as {[key: string]: number}; // OK
 }
 
 // The preserving variants keep readonly indexers readonly.
 {
   declare const exact: $Exact<ReadonlyDict>;
-  exact as {[string]: number}; // ERROR
+  exact as {[key: string]: number}; // ERROR
 
   declare const readonly: Readonly<ReadonlyDict>;
-  readonly as {[string]: number}; // ERROR
+  readonly as {[key: string]: number}; // ERROR
 
   declare const partial: Partial<ReadonlyDict>;
-  partial as {[string]: number}; // ERROR
+  partial as {[key: string]: number}; // ERROR
 
   declare const required: Required<ReadonlyDict>;
-  required as {[string]: number}; // ERROR
+  required as {[key: string]: number}; // ERROR
 
   declare const omit: Omit<ReadonlyDict, empty>;
-  omit as {[string]: number}; // ERROR
+  omit as {[key: string]: number}; // ERROR
 
   declare const mapped: ConstantMapped<ReadonlyDict>;
-  mapped as {[string]: number}; // ERROR
+  mapped as {[key: string]: number}; // ERROR
 }
 
 // The preserving variants keep writeonly indexers writeonly.
 {
   declare const exact: $Exact<WriteonlyDict>;
-  exact as {[string]: unknown}; // ERROR
+  exact as {[key: string]: unknown}; // ERROR
 
   declare const readonly: Readonly<WriteonlyDict>;
-  readonly as {readonly [string]: unknown}; // OK
+  readonly as {readonly [key: string]: unknown}; // OK
 
   declare const partial: Partial<WriteonlyDict>;
-  partial as {[string]: unknown}; // ERROR
+  partial as {[key: string]: unknown}; // ERROR
 
   declare const required: Required<WriteonlyDict>;
-  required as {[string]: unknown}; // ERROR
+  required as {[key: string]: unknown}; // ERROR
 
   declare const omit: Omit<WriteonlyDict, empty>;
-  omit as {[string]: unknown}; // ERROR
+  omit as {[key: string]: unknown}; // ERROR
 
   declare const mapped: ConstantMapped<WriteonlyDict>;
-  mapped as {[string]: number}; // ERROR
+  mapped as {[key: string]: number}; // ERROR
 }
 
 // Spread deliberately makes indexers invariant so its operands can be merged.
 {
   declare const invariant: {...InvariantDict};
-  invariant as {[string]: number}; // OK
+  invariant as {[key: string]: number}; // OK
 
   declare const readonly: {...ReadonlyDict};
-  readonly as {[string]: number}; // OK
+  readonly as {[key: string]: number}; // OK
 
   declare const writeonly: {...WriteonlyDict};
-  writeonly as {[string]: unknown}; // OK
+  writeonly as {[key: string]: unknown}; // OK
 }
 
 // Rest(SpreadReversal) uses the neutral override during implicit instantiation.
 {
   type FixedProps = {fixed: number};
   declare function reverseSpread<T extends {...}>(
-    component: ({...T, ...FixedProps}) => void,
+    component: (props: {...T, ...FixedProps}) => void,
   ): T;
 
   const invariant = reverseSpread((props: InvariantDict) => {});
-  invariant as {[string]: number}; // OK
+  invariant as {[key: string]: number}; // OK
 
   const readonly = reverseSpread((props: ReadonlyDict) => {});
-  readonly as {[string]: number}; // OK
+  readonly as {[key: string]: number}; // OK
 
   const writeonly = reverseSpread((props: WriteonlyDict) => {});
-  writeonly as {[string]: unknown}; // OK
+  writeonly as {[key: string]: unknown}; // OK
 }
 
 // Component rest parameters run ReactCheckComponentConfig with a neutral override.
@@ -147,7 +147,7 @@ class WriteonlyDefaultsComponent extends React.Component<WriteonlyDict> {
 
 // JSX config checking runs ReactConfig with a neutral override, followed by
 // ObjectRep, which preserves the indexer's polarity for key/ref lookup.
-declare component DictComponent(...props: {[string]: unknown});
+declare component DictComponent(...props: {[key: string]: unknown});
 
 {
   declare const invariant: InvariantDict;

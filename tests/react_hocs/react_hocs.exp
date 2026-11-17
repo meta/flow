@@ -17,20 +17,20 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ Bad.js:18:3
 
-Cannot call `compose(...)` with `Bad` bound to the first parameter because property `foo` is missing in
-`{bar: string, buz: string}` [1] but exists in `Props` [2]. [incompatible-type]
+Cannot call `compose(...)` with `Bad` bound to `b` because property `foo` is missing in `{bar: string, buz: string}` [1]
+but exists in `Props` [2]. [incompatible-type]
 
    Bad.js:18:3
    18| )(Bad) as React.ComponentType<any>);
          ^^^
 
 References:
-   hocs.js:16:13
-                   v----
-   16| ): component(...{
+   hocs.js:16:17
+                       v----
+   16| ): (c: component(...{
    17|   ...$Exact<Props>,
    18|   ...$Exact<ExtraProps>,
-   19| }) => component(...$Exact<Props>) {
+   19| })) => component(...$Exact<Props>) {
        -^ [1]
    Bad.js:9:21
     9| const Bad = (props: Props) => null;
@@ -39,8 +39,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ Bad.js:18:3
 
-Cannot call `compose(...)` with `Bad` bound to the first parameter because in property `bar`: `string` [1] is
-incompatible with `number` [2]. [incompatible-type]
+Cannot call `compose(...)` with `Bad` bound to `b` because in property `bar`: `string` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    Bad.js:18:3
    18| )(Bad) as React.ComponentType<any>);

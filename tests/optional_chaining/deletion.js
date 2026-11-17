@@ -1,7 +1,7 @@
 //@flow
 
 declare const x: ?{a: number, b?: {c: number, ...}, ...};
-declare const y: ?{[string]: number};
+declare const y: ?{[key: string]: number};
 declare const z: {d: ?{c: number, ...}, ...};
 declare const w: ?{g: {e: ?number, ...}, ...};
 declare const w2: {g: {e: ?number, ...}, ...};

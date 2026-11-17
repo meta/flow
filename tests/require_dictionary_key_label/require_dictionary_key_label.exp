@@ -54,12 +54,12 @@ Missing a label on this dictionary key. Write it as `[key: Type]`. [missing-dict
                                   ^^^^^^
 
 
-Error ---------------------------------------------------------------------------------------------- object_type.js:5:17
+Error ---------------------------------------------------------------------------------------------- object_type.js:5:16
 
 Missing a label on this dictionary key. Write it as `[key: Type]`. [missing-dictionary-key-label]
 
-   5| type Exact = {|[string]: number|}; // error
-                      ^^^^^^
+   5| type Exact = {[string]: number}; // error
+                     ^^^^^^
 
 
 Error ---------------------------------------------------------------------------------------------- object_type.js:6:33

@@ -8,8 +8,8 @@ Missing an annotation on return because generic functions must be fully annotate
 
 Error ----------------------------------------------------------------------------------------------------- error.js:8:8
 
-Cannot call `newFn1` with `'string'` bound to the first parameter because `"string"` [1] is incompatible with
-`number` [2]. [incompatible-type]
+Cannot call `newFn1` with `'string'` bound to `y` because `"string"` [1] is incompatible with `number` [2].
+[incompatible-type]
 
    error.js:8:8
    8| newFn1('string'); // The error should point here.
@@ -23,8 +23,8 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- error.js:12:12
 
-Cannot call `newFn2` with function bound to the first parameter because in the first parameter: `string` [1] is
-incompatible with `number` [2]. [incompatible-type]
+Cannot call `newFn2` with function bound to `cb` because in the first parameter: `string` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    error.js:12:12
    12| newFn2((x: string) => {});
@@ -243,191 +243,191 @@ References:
                                                 ^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- subtyping.js:21:50
+Error ----------------------------------------------------------------------------------------------- subtyping.js:21:56
 
 Cannot return `f` because in the first parameter: `empty` [1] is incompatible with `unknown` [2]. [incompatible-type]
 
-   subtyping.js:21:50
-   21|   (f: <T>(T) => unknown): (<S>(unknown) => S) => f; // should error
-                                                        ^
+   subtyping.js:21:56
+   21|   (f: <T>(x: T) => unknown): (<S>(x: unknown) => S) => f; // should error
+                                                              ^
 
 References:
-   subtyping.js:21:11
-   21|   (f: <T>(T) => unknown): (<S>(unknown) => S) => f; // should error
-                 ^ [1]
-   subtyping.js:21:32
-   21|   (f: <T>(T) => unknown): (<S>(unknown) => S) => f; // should error
-                                      ^^^^^^^ [2]
+   subtyping.js:21:14
+   21|   (f: <T>(x: T) => unknown): (<S>(x: unknown) => S) => f; // should error
+                    ^ [1]
+   subtyping.js:21:38
+   21|   (f: <T>(x: T) => unknown): (<S>(x: unknown) => S) => f; // should error
+                                            ^^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- subtyping.js:21:50
+Error ----------------------------------------------------------------------------------------------- subtyping.js:21:56
 
 Cannot return `f` because in the return value: `unknown` [1] is incompatible with `empty` [2]. [incompatible-type]
 
-   subtyping.js:21:50
-   21|   (f: <T>(T) => unknown): (<S>(unknown) => S) => f; // should error
-                                                        ^
+   subtyping.js:21:56
+   21|   (f: <T>(x: T) => unknown): (<S>(x: unknown) => S) => f; // should error
+                                                              ^
 
 References:
-   subtyping.js:21:17
-   21|   (f: <T>(T) => unknown): (<S>(unknown) => S) => f; // should error
-                       ^^^^^^^ [1]
-   subtyping.js:21:44
-   21|   (f: <T>(T) => unknown): (<S>(unknown) => S) => f; // should error
-                                                  ^ [2]
+   subtyping.js:21:20
+   21|   (f: <T>(x: T) => unknown): (<S>(x: unknown) => S) => f; // should error
+                          ^^^^^^^ [1]
+   subtyping.js:21:50
+   21|   (f: <T>(x: T) => unknown): (<S>(x: unknown) => S) => f; // should error
+                                                        ^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- subtyping.js:24:62
+Error ----------------------------------------------------------------------------------------------- subtyping.js:24:68
 
 Cannot return `f` because in the first parameter: `empty` [1] is incompatible with `unknown` [2]. [incompatible-type]
 
-   subtyping.js:24:62
-   24|     const g = (f: <T>(T) => unknown): (<S>(unknown) => S) => f; // should error
-                                                                    ^
+   subtyping.js:24:68
+   24|     const g = (f: <T>(x: T) => unknown): (<S>(x: unknown) => S) => f; // should error
+                                                                          ^
 
 References:
-   subtyping.js:24:23
-   24|     const g = (f: <T>(T) => unknown): (<S>(unknown) => S) => f; // should error
-                             ^ [1]
-   subtyping.js:24:44
-   24|     const g = (f: <T>(T) => unknown): (<S>(unknown) => S) => f; // should error
-                                                  ^^^^^^^ [2]
+   subtyping.js:24:26
+   24|     const g = (f: <T>(x: T) => unknown): (<S>(x: unknown) => S) => f; // should error
+                                ^ [1]
+   subtyping.js:24:50
+   24|     const g = (f: <T>(x: T) => unknown): (<S>(x: unknown) => S) => f; // should error
+                                                        ^^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- subtyping.js:24:62
+Error ----------------------------------------------------------------------------------------------- subtyping.js:24:68
 
 Cannot return `f` because in the return value: `unknown` [1] is incompatible with `empty` [2]. [incompatible-type]
 
-   subtyping.js:24:62
-   24|     const g = (f: <T>(T) => unknown): (<S>(unknown) => S) => f; // should error
-                                                                    ^
+   subtyping.js:24:68
+   24|     const g = (f: <T>(x: T) => unknown): (<S>(x: unknown) => S) => f; // should error
+                                                                          ^
 
 References:
-   subtyping.js:24:29
-   24|     const g = (f: <T>(T) => unknown): (<S>(unknown) => S) => f; // should error
-                                   ^^^^^^^ [1]
-   subtyping.js:24:56
-   24|     const g = (f: <T>(T) => unknown): (<S>(unknown) => S) => f; // should error
-                                                              ^ [2]
+   subtyping.js:24:32
+   24|     const g = (f: <T>(x: T) => unknown): (<S>(x: unknown) => S) => f; // should error
+                                      ^^^^^^^ [1]
+   subtyping.js:24:62
+   24|     const g = (f: <T>(x: T) => unknown): (<S>(x: unknown) => S) => f; // should error
+                                                                    ^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- subtyping.js:37:62
+Error ----------------------------------------------------------------------------------------------- subtyping.js:37:68
 
 Cannot return `f` because `unknown` [1] is incompatible with `empty` [2]. [incompatible-type]
 
-   subtyping.js:37:62
-   37|   const g = (f: <S, T extends S>(T) => T): <S, T>(T) => S => f; // should error
-                                                                    ^
+   subtyping.js:37:68
+   37|   const g = (f: <S, T extends S>(x: T) => T): <S, T>(x: T) => S => f; // should error
+                                                                          ^
 
 References:
-   subtyping.js:37:48
-   37|   const g = (f: <S, T extends S>(T) => T): <S, T>(T) => S => f; // should error
-                                                      ^ [1]
+   subtyping.js:37:51
+   37|   const g = (f: <S, T extends S>(x: T) => T): <S, T>(x: T) => S => f; // should error
+                                                         ^ [1]
    subtyping.js:37:31
-   37|   const g = (f: <S, T extends S>(T) => T): <S, T>(T) => S => f; // should error
+   37|   const g = (f: <S, T extends S>(x: T) => T): <S, T>(x: T) => S => f; // should error
                                      ^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- subtyping.js:49:48
+Error ----------------------------------------------------------------------------------------------- subtyping.js:49:54
 
 Cannot return `f` because in the first parameter: `empty` [1] is incompatible with `number` [2]. [incompatible-type]
 
-   subtyping.js:49:48
-   49|   (f: <T>(T) => T): (<S>(number) => number) => f; // should be ok, currently isn't
-                                                      ^
+   subtyping.js:49:54
+   49|   (f: <T>(x: T) => T): (<S>(x: number) => number) => f; // should be ok, currently isn't
+                                                            ^
 
 References:
-   subtyping.js:49:11
-   49|   (f: <T>(T) => T): (<S>(number) => number) => f; // should be ok, currently isn't
-                 ^ [1]
-   subtyping.js:49:26
-   49|   (f: <T>(T) => T): (<S>(number) => number) => f; // should be ok, currently isn't
-                                ^^^^^^ [2]
+   subtyping.js:49:14
+   49|   (f: <T>(x: T) => T): (<S>(x: number) => number) => f; // should be ok, currently isn't
+                    ^ [1]
+   subtyping.js:49:32
+   49|   (f: <T>(x: T) => T): (<S>(x: number) => number) => f; // should be ok, currently isn't
+                                      ^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- subtyping.js:49:48
+Error ----------------------------------------------------------------------------------------------- subtyping.js:49:54
 
 Cannot return `f` because in the return value: `unknown` [1] is incompatible with `number` [2]. [incompatible-type]
 
-   subtyping.js:49:48
-   49|   (f: <T>(T) => T): (<S>(number) => number) => f; // should be ok, currently isn't
-                                                      ^
+   subtyping.js:49:54
+   49|   (f: <T>(x: T) => T): (<S>(x: number) => number) => f; // should be ok, currently isn't
+                                                            ^
 
 References:
-   subtyping.js:49:17
-   49|   (f: <T>(T) => T): (<S>(number) => number) => f; // should be ok, currently isn't
-                       ^ [1]
-   subtyping.js:49:37
-   49|   (f: <T>(T) => T): (<S>(number) => number) => f; // should be ok, currently isn't
-                                           ^^^^^^ [2]
+   subtyping.js:49:20
+   49|   (f: <T>(x: T) => T): (<S>(x: number) => number) => f; // should be ok, currently isn't
+                          ^ [1]
+   subtyping.js:49:43
+   49|   (f: <T>(x: T) => T): (<S>(x: number) => number) => f; // should be ok, currently isn't
+                                                 ^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- subtyping.js:57:42
+Error ----------------------------------------------------------------------------------------------- subtyping.js:57:48
 
 Cannot return `f` because in the first parameter: `empty` [1] is incompatible with `Array<T>` [2]. [incompatible-type]
 
-   subtyping.js:57:42
-   57|   (f: <T>(T) => T): (<S>(S[]) => S[]) => f; // should be ok, currently isn't
-                                                ^
+   subtyping.js:57:48
+   57|   (f: <T>(x: T) => T): (<S>(x: S[]) => S[]) => f; // should be ok, currently isn't
+                                                      ^
 
 References:
-   subtyping.js:57:11
-   57|   (f: <T>(T) => T): (<S>(S[]) => S[]) => f; // should be ok, currently isn't
-                 ^ [1]
-   subtyping.js:57:26
-   57|   (f: <T>(T) => T): (<S>(S[]) => S[]) => f; // should be ok, currently isn't
-                                ^^^ [2]
+   subtyping.js:57:14
+   57|   (f: <T>(x: T) => T): (<S>(x: S[]) => S[]) => f; // should be ok, currently isn't
+                    ^ [1]
+   subtyping.js:57:32
+   57|   (f: <T>(x: T) => T): (<S>(x: S[]) => S[]) => f; // should be ok, currently isn't
+                                      ^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- subtyping.js:57:42
+Error ----------------------------------------------------------------------------------------------- subtyping.js:57:48
 
 Cannot return `f` because in the return value: `unknown` [1] is incompatible with `Array<T>` [2]. [incompatible-type]
 
-   subtyping.js:57:42
-   57|   (f: <T>(T) => T): (<S>(S[]) => S[]) => f; // should be ok, currently isn't
-                                                ^
+   subtyping.js:57:48
+   57|   (f: <T>(x: T) => T): (<S>(x: S[]) => S[]) => f; // should be ok, currently isn't
+                                                      ^
 
 References:
-   subtyping.js:57:17
-   57|   (f: <T>(T) => T): (<S>(S[]) => S[]) => f; // should be ok, currently isn't
-                       ^ [1]
-   subtyping.js:57:34
-   57|   (f: <T>(T) => T): (<S>(S[]) => S[]) => f; // should be ok, currently isn't
-                                        ^^^ [2]
+   subtyping.js:57:20
+   57|   (f: <T>(x: T) => T): (<S>(x: S[]) => S[]) => f; // should be ok, currently isn't
+                          ^ [1]
+   subtyping.js:57:40
+   57|   (f: <T>(x: T) => T): (<S>(x: S[]) => S[]) => f; // should be ok, currently isn't
+                                              ^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- subtyping.js:64:51
+Error ----------------------------------------------------------------------------------------------- subtyping.js:64:63
 
 Cannot return `f` because in the return value: `unknown` [1] is incompatible with `boolean` [2]. [incompatible-type]
 
-   subtyping.js:64:51
-   64| (f: <R, S>(R, S) => S): (<T>(T, T) => boolean) => f; // error
-                                                         ^
+   subtyping.js:64:63
+   64| (f: <R, S>(x: R, y: S) => S): (<T>(x: T, y: T) => boolean) => f; // error
+                                                                     ^
 
 References:
-   subtyping.js:64:33
-   64| (f: <R, S>(R, S) => S): (<T>(T, T) => boolean) => f; // error
-                                       ^ [1]
-   subtyping.js:64:39
-   64| (f: <R, S>(R, S) => S): (<T>(T, T) => boolean) => f; // error
-                                             ^^^^^^^ [2]
+   subtyping.js:64:45
+   64| (f: <R, S>(x: R, y: S) => S): (<T>(x: T, y: T) => boolean) => f; // error
+                                                   ^ [1]
+   subtyping.js:64:51
+   64| (f: <R, S>(x: R, y: S) => S): (<T>(x: T, y: T) => boolean) => f; // error
+                                                         ^^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- subtyping.js:66:51
+Error ----------------------------------------------------------------------------------------------- subtyping.js:66:63
 
 Cannot return `f` because in the return value: `unknown` [1] is incompatible with `empty` [2]. [incompatible-type]
 
-   subtyping.js:66:51
-   66| (f: <R>(R, unknown) => R): (<S, T>(S, T) => T) => f; // error
-                                                         ^
+   subtyping.js:66:63
+   66| (f: <R>(x: R, y: unknown) => R): (<S, T>(x: S, y: T) => T) => f; // error
+                                                                     ^
 
 References:
-   subtyping.js:66:36
-   66| (f: <R>(R, unknown) => R): (<S, T>(S, T) => T) => f; // error
-                                          ^ [1]
    subtyping.js:66:45
-   66| (f: <R>(R, unknown) => R): (<S, T>(S, T) => T) => f; // error
-                                                   ^ [2]
+   66| (f: <R>(x: R, y: unknown) => R): (<S, T>(x: S, y: T) => T) => f; // error
+                                                   ^ [1]
+   subtyping.js:66:57
+   66| (f: <R>(x: R, y: unknown) => R): (<S, T>(x: S, y: T) => T) => f; // error
+                                                               ^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------- subtyping.js:73:65
@@ -487,72 +487,72 @@ References:
                                                      ^^^^^^^^^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- subtyping.js:78:54
+Error ----------------------------------------------------------------------------------------------- subtyping.js:78:66
 
 Cannot return `f` because in the first parameter: `number` [1] is incompatible with `unknown` [2]. [incompatible-type]
 
-   subtyping.js:78:54
-   78| (f: (number, number) => number): (<T>(T, T) => T) => f; // error
-                                                            ^
+   subtyping.js:78:66
+   78| (f: (x: number, y: number) => number): (<T>(x: T, y: T) => T) => f; // error
+                                                                        ^
 
 References:
-   subtyping.js:78:6
-   78| (f: (number, number) => number): (<T>(T, T) => T) => f; // error
-            ^^^^^^ [1]
-   subtyping.js:78:39
-   78| (f: (number, number) => number): (<T>(T, T) => T) => f; // error
-                                             ^ [2]
-
-
-Error ----------------------------------------------------------------------------------------------- subtyping.js:78:54
-
-Cannot return `f` because in the second parameter: `number` [1] is incompatible with `unknown` [2]. [incompatible-type]
-
-   subtyping.js:78:54
-   78| (f: (number, number) => number): (<T>(T, T) => T) => f; // error
-                                                            ^
-
-References:
-   subtyping.js:78:14
-   78| (f: (number, number) => number): (<T>(T, T) => T) => f; // error
-                    ^^^^^^ [1]
-   subtyping.js:78:42
-   78| (f: (number, number) => number): (<T>(T, T) => T) => f; // error
-                                                ^ [2]
-
-
-Error ----------------------------------------------------------------------------------------------- subtyping.js:78:54
-
-Cannot return `f` because in the return value: `number` [1] is incompatible with `empty` [2]. [incompatible-type]
-
-   subtyping.js:78:54
-   78| (f: (number, number) => number): (<T>(T, T) => T) => f; // error
-                                                            ^
-
-References:
-   subtyping.js:78:25
-   78| (f: (number, number) => number): (<T>(T, T) => T) => f; // error
-                               ^^^^^^ [1]
+   subtyping.js:78:9
+   78| (f: (x: number, y: number) => number): (<T>(x: T, y: T) => T) => f; // error
+               ^^^^^^ [1]
    subtyping.js:78:48
-   78| (f: (number, number) => number): (<T>(T, T) => T) => f; // error
+   78| (f: (x: number, y: number) => number): (<T>(x: T, y: T) => T) => f; // error
                                                       ^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- subtyping.js:80:54
+Error ----------------------------------------------------------------------------------------------- subtyping.js:78:66
+
+Cannot return `f` because in the second parameter: `number` [1] is incompatible with `unknown` [2]. [incompatible-type]
+
+   subtyping.js:78:66
+   78| (f: (x: number, y: number) => number): (<T>(x: T, y: T) => T) => f; // error
+                                                                        ^
+
+References:
+   subtyping.js:78:20
+   78| (f: (x: number, y: number) => number): (<T>(x: T, y: T) => T) => f; // error
+                          ^^^^^^ [1]
+   subtyping.js:78:54
+   78| (f: (x: number, y: number) => number): (<T>(x: T, y: T) => T) => f; // error
+                                                            ^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- subtyping.js:78:66
+
+Cannot return `f` because in the return value: `number` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   subtyping.js:78:66
+   78| (f: (x: number, y: number) => number): (<T>(x: T, y: T) => T) => f; // error
+                                                                        ^
+
+References:
+   subtyping.js:78:31
+   78| (f: (x: number, y: number) => number): (<T>(x: T, y: T) => T) => f; // error
+                                     ^^^^^^ [1]
+   subtyping.js:78:60
+   78| (f: (x: number, y: number) => number): (<T>(x: T, y: T) => T) => f; // error
+                                                                  ^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- subtyping.js:80:66
 
 Cannot return `f` because in the return value: `string` [1] is incompatible with `number` [2]. [incompatible-type]
 
-   subtyping.js:80:54
-   80| (f: <T>(T, T) => T): ((number, string) => number) => f; // error
-                                                            ^
+   subtyping.js:80:66
+   80| (f: <T>(x: T, y: T) => T): ((x: number, y: string) => number) => f; // error
+                                                                        ^
 
 References:
-   subtyping.js:80:32
-   80| (f: <T>(T, T) => T): ((number, string) => number) => f; // error
-                                      ^^^^^^ [1]
-   subtyping.js:80:43
-   80| (f: <T>(T, T) => T): ((number, string) => number) => f; // error
-                                                 ^^^^^^ [2]
+   subtyping.js:80:44
+   80| (f: <T>(x: T, y: T) => T): ((x: number, y: string) => number) => f; // error
+                                                  ^^^^^^ [1]
+   subtyping.js:80:55
+   80| (f: <T>(x: T, y: T) => T): ((x: number, y: string) => number) => f; // error
+                                                             ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:8:10

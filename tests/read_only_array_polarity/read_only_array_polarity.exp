@@ -13,14 +13,14 @@ References:
                     ^ [1]
 
 
-Error ---------------------------------------------------------------------------------------------------- test.js:23:25
+Error ---------------------------------------------------------------------------------------------------- test.js:23:30
 
 Cannot use `T` [1] in an output position because `T` [1] is expected to occur only in input positions.
 [incompatible-variance]
 
-   test.js:23:25
-   23|   bad(x: (ReadonlyArray<T>) => number): number {
-                               ^
+   test.js:23:30
+   23|   bad(x: (arr: ReadonlyArray<T>) => number): number {
+                                    ^
 
 References:
    test.js:22:20

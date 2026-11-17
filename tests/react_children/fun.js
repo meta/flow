@@ -11,7 +11,7 @@ type Data = {
   bar: number,
  ...};
 
-type Fn = Data => number;
+type Fn = (data: Data) => number;
 
 class Fun extends React.Component<{children: Fn, ...}, void> {}
 class FunOptional extends React.Component<{children?: Fn, ...}, void> {}

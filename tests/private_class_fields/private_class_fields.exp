@@ -500,8 +500,8 @@ Cannot assign `this.#optionalFoo?.(...)` to `optionalFooInvalid1` because `void`
 
 References:
    test.js:200:17
-   200|   #optionalFoo: ?(string) => number;
-                        ^^^^^^^^^^^^^^^^^^^ [1]
+   200|   #optionalFoo: ?(x: string) => number;
+                        ^^^^^^^^^^^^^^^^^^^^^^ [1]
    test.js:211:32
    211|     const optionalFooInvalid1: number = this.#optionalFoo?.('');
                                        ^^^^^^ [2]
@@ -517,9 +517,9 @@ Cannot assign `this.#optionalFoo?.(...)` to `optionalFooInvalid2` because `numbe
                                                  ^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   test.js:200:30
-   200|   #optionalFoo: ?(string) => number;
-                                     ^^^^^^ [1]
+   test.js:200:33
+   200|   #optionalFoo: ?(x: string) => number;
+                                        ^^^^^^ [1]
    test.js:212:33
    212|     const optionalFooInvalid2: ?string = this.#optionalFoo?.('');
                                         ^^^^^^ [2]
@@ -527,17 +527,17 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- test.js:213:62
 
-Cannot call `this.#optionalFoo` with `42` bound to the first parameter because `42` [1] is incompatible with
-`string` [2]. [incompatible-type]
+Cannot call `this.#optionalFoo` with `42` bound to `x` because `42` [1] is incompatible with `string` [2].
+[incompatible-type]
 
    test.js:213:62
    213|     const optionalFooInvalid3: ?number = this.#optionalFoo?.(42);
                                                                      ^^ [1]
 
 References:
-   test.js:200:19
-   200|   #optionalFoo: ?(string) => number;
-                          ^^^^^^ [2]
+   test.js:200:22
+   200|   #optionalFoo: ?(x: string) => number;
+                             ^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------------------- test.js:216:41
@@ -551,8 +551,8 @@ Cannot assign `Calls.#optionalBar?.(...)` to `optionalBarInvalid1` because `void
 
 References:
    test.js:202:24
-   202|   static #optionalBar: ?(number) => string;
-                               ^^^^^^^^^^^^^^^^^^^ [1]
+   202|   static #optionalBar: ?(x: number) => string;
+                               ^^^^^^^^^^^^^^^^^^^^^^ [1]
    test.js:216:32
    216|     const optionalBarInvalid1: string = Calls.#optionalBar?.(0);
                                        ^^^^^^ [2]
@@ -568,9 +568,9 @@ Cannot assign `Calls.#optionalBar?.(...)` to `optionalBarInvalid2` because `stri
                                                  ^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   test.js:202:37
-   202|   static #optionalBar: ?(number) => string;
-                                            ^^^^^^ [1]
+   test.js:202:40
+   202|   static #optionalBar: ?(x: number) => string;
+                                               ^^^^^^ [1]
    test.js:217:33
    217|     const optionalBarInvalid2: ?number = Calls.#optionalBar?.(0);
                                         ^^^^^^ [2]
@@ -578,17 +578,17 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- test.js:218:63
 
-Cannot call `Calls.#optionalBar` with empty string bound to the first parameter because `""` [1] is incompatible with
-`number` [2]. [incompatible-type]
+Cannot call `Calls.#optionalBar` with empty string bound to `x` because `""` [1] is incompatible with `number` [2].
+[incompatible-type]
 
    test.js:218:63
    218|     const optionalBarInvalid3: ?string = Calls.#optionalBar?.('');
                                                                       ^^ [1]
 
 References:
-   test.js:202:26
-   202|   static #optionalBar: ?(number) => string;
-                                 ^^^^^^ [2]
+   test.js:202:29
+   202|   static #optionalBar: ?(x: number) => string;
+                                    ^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:226:5

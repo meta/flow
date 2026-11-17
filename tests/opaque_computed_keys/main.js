@@ -3,8 +3,8 @@ import { op } from './defs';
 
 const obj = {[op]: 'abc'};
 
-obj as Readonly<{[Op]: string}>;
-obj as {[Op]: string};
+obj as Readonly<{[key: Op]: string}>;
+obj as {[key: Op]: string};
 
-obj as {[string]: string}; // error invariant position
+obj as {[key: string]: string}; // error invariant position
 obj as {['special']: string}; // error Op is opaque - no knowledge of specific value

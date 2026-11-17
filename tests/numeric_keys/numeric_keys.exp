@@ -155,36 +155,36 @@ References:
 
 Error --------------------------------------------------------------------------------------- non_literal_number.js:22:3
 
-Cannot cast `o2` to `{readonly [number]: true}` because in the indexer property: `boolean` [1] is incompatible with
+Cannot cast `o2` to `{readonly [key: number]: true}` because in the indexer property: `boolean` [1] is incompatible with
 `true` [2]. [incompatible-type]
 
    non_literal_number.js:22:3
-   22|   o2 as {readonly [number]: true}; // OK
+   22|   o2 as {readonly [key: number]: true}; // OK
          ^^
 
 References:
-   non_literal_number.js:19:32
-   19|   declare const o1: {[number]: boolean};
-                                      ^^^^^^^ [1]
-   non_literal_number.js:22:29
-   22|   o2 as {readonly [number]: true}; // OK
-                                   ^^^^ [2]
+   non_literal_number.js:19:37
+   19|   declare const o1: {[key: number]: boolean};
+                                           ^^^^^^^ [1]
+   non_literal_number.js:22:34
+   22|   o2 as {readonly [key: number]: true}; // OK
+                                        ^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------------ test.js:8:3
 
-Cannot cast `o` to `{[symbol]: boolean}` because property `1` is missing in `{[symbol]: boolean}` [1] but exists in
-object literal [2]. Any property that does not exist in `{[symbol]: boolean}` [1] must be compatible with its indexer
-`symbol` [3]. [incompatible-type]
+Cannot cast `o` to `{[key: symbol]: boolean}` because property `1` is missing in `{[key: symbol]: boolean}` [1] but
+exists in object literal [2]. Any property that does not exist in `{[key: symbol]: boolean}` [1] must be compatible with
+its indexer `symbol` [3]. [incompatible-type]
 
    test.js:8:3
-   8|   o as {[symbol]: boolean}; // ERROR
+   8|   o as {[key: symbol]: boolean}; // ERROR
         ^
 
 References:
    test.js:8:8
-   8|   o as {[symbol]: boolean}; // ERROR
-             ^^^^^^^^^^^^^^^^^^^ [1]
+   8|   o as {[key: symbol]: boolean}; // ERROR
+             ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    test.js:2:13
                   v
    2|   const o = {
@@ -192,25 +192,25 @@ References:
    4|     '2': false,
    5|   };
         ^ [2]
-   test.js:8:10
-   8|   o as {[symbol]: boolean}; // ERROR
-               ^^^^^^ [3]
+   test.js:8:15
+   8|   o as {[key: symbol]: boolean}; // ERROR
+                    ^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------------------ test.js:8:3
 
-Cannot cast `o` to `{[symbol]: boolean}` because property `2` is missing in `{[symbol]: boolean}` [1] but exists in
-object literal [2]. Any property that does not exist in `{[symbol]: boolean}` [1] must be compatible with its indexer
-`symbol` [3]. [incompatible-type]
+Cannot cast `o` to `{[key: symbol]: boolean}` because property `2` is missing in `{[key: symbol]: boolean}` [1] but
+exists in object literal [2]. Any property that does not exist in `{[key: symbol]: boolean}` [1] must be compatible with
+its indexer `symbol` [3]. [incompatible-type]
 
    test.js:8:3
-   8|   o as {[symbol]: boolean}; // ERROR
+   8|   o as {[key: symbol]: boolean}; // ERROR
         ^
 
 References:
    test.js:8:8
-   8|   o as {[symbol]: boolean}; // ERROR
-             ^^^^^^^^^^^^^^^^^^^ [1]
+   8|   o as {[key: symbol]: boolean}; // ERROR
+             ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    test.js:2:13
                   v
    2|   const o = {
@@ -218,9 +218,9 @@ References:
    4|     '2': false,
    5|   };
         ^ [2]
-   test.js:8:10
-   8|   o as {[symbol]: boolean}; // ERROR
-               ^^^^^^ [3]
+   test.js:8:15
+   8|   o as {[key: symbol]: boolean}; // ERROR
+                    ^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:16:3
@@ -269,11 +269,11 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:20:3
 
-Cannot cast `o` to `{readonly [number]: false, readonly "1": true}` because in property `1`: `boolean` [1] is
+Cannot cast `o` to `{readonly [key: number]: false, readonly "1": true}` because in property `1`: `boolean` [1] is
 incompatible with `true` [2]. [incompatible-type]
 
    test.js:20:3
-   20|   o as {readonly '1': true, readonly [number]: false}; // OK
+   20|   o as {readonly '1': true, readonly [key: number]: false}; // OK
          ^
 
 References:
@@ -281,40 +281,40 @@ References:
     3|     '1': true,
                 ^^^^ [1]
    test.js:20:23
-   20|   o as {readonly '1': true, readonly [number]: false}; // OK
+   20|   o as {readonly '1': true, readonly [key: number]: false}; // OK
                              ^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:20:3
 
-Cannot cast `o` to `{readonly [number]: false, readonly "1": true}` because in property `2`: `boolean` [1] is
+Cannot cast `o` to `{readonly [key: number]: false, readonly "1": true}` because in property `2`: `boolean` [1] is
 incompatible with `false` [2]. [incompatible-type]
 
    test.js:20:3
-   20|   o as {readonly '1': true, readonly [number]: false}; // OK
+   20|   o as {readonly '1': true, readonly [key: number]: false}; // OK
          ^
 
 References:
    test.js:4:10
     4|     '2': false,
                 ^^^^^ [1]
-   test.js:20:48
-   20|   o as {readonly '1': true, readonly [number]: false}; // OK
-                                                      ^^^^^ [2]
+   test.js:20:53
+   20|   o as {readonly '1': true, readonly [key: number]: false}; // OK
+                                                           ^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:21:3
 
-Cannot cast `o` to `{[number]: true, "1": true}` because in property `1`: `boolean` [1] is not exactly the same as
+Cannot cast `o` to `{[key: number]: true, "1": true}` because in property `1`: `boolean` [1] is not exactly the same as
 `true` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `1` is invariantly typed. To fix the error,
-- Either annotate object literal [3] with `{[number]: true, "1": true}` [4]
-- Or make property `1` in `{[number]: true, "1": true}` [4] readonly. See
+- Either annotate object literal [3] with `{[key: number]: true, "1": true}` [4]
+- Or make property `1` in `{[key: number]: true, "1": true}` [4] readonly. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
    test.js:21:3
-   21|   o as {'1': true, [number]: true}; // ERROR
+   21|   o as {'1': true, [key: number]: true}; // ERROR
          ^
 
 References:
@@ -322,7 +322,7 @@ References:
     3|     '1': true,
                 ^^^^ [1]
    test.js:21:14
-   21|   o as {'1': true, [number]: true}; // ERROR
+   21|   o as {'1': true, [key: number]: true}; // ERROR
                     ^^^^ [2]
    test.js:2:13
                    v
@@ -332,31 +332,31 @@ References:
     5|   };
          ^ [3]
    test.js:21:8
-   21|   o as {'1': true, [number]: true}; // ERROR
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   21|   o as {'1': true, [key: number]: true}; // ERROR
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:21:3
 
-Cannot cast `o` to `{[number]: true, "1": true}` because in property `2`: `boolean` [1] is not exactly the same as
+Cannot cast `o` to `{[key: number]: true, "1": true}` because in property `2`: `boolean` [1] is not exactly the same as
 `true` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `2` is invariantly typed. To fix the error,
-- Either annotate object literal [3] with `{[number]: true, "1": true}` [4]
-- Or make property `2` in `{[number]: true, "1": true}` [4] readonly. See
+- Either annotate object literal [3] with `{[key: number]: true, "1": true}` [4]
+- Or make property `2` in `{[key: number]: true, "1": true}` [4] readonly. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
    test.js:21:3
-   21|   o as {'1': true, [number]: true}; // ERROR
+   21|   o as {'1': true, [key: number]: true}; // ERROR
          ^
 
 References:
    test.js:4:10
     4|     '2': false,
                 ^^^^^ [1]
-   test.js:21:30
-   21|   o as {'1': true, [number]: true}; // ERROR
-                                    ^^^^ [2]
+   test.js:21:35
+   21|   o as {'1': true, [key: number]: true}; // ERROR
+                                         ^^^^ [2]
    test.js:2:13
                    v
     2|   const o = {
@@ -365,8 +365,8 @@ References:
     5|   };
          ^ [3]
    test.js:21:8
-   21|   o as {'1': true, [number]: true}; // ERROR
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   21|   o as {'1': true, [key: number]: true}; // ERROR
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:25:3
@@ -433,11 +433,11 @@ Cannot cast `x` to `number` because in at least one member of `"1" | "2"` [1]: `
 
 References:
    test.js:39:23
-   39|     declare const f: <Key, Value>(o: {[Key]: Value}) => Key;
+   39|     declare const f: <Key, Value>(o: {[key: Key]: Value}) => Key;
                              ^^^ [1]
-   test.js:39:40
-   39|     declare const f: <Key, Value>(o: {[Key]: Value}) => Key;
-                                              ^^^ [2]
+   test.js:39:45
+   39|     declare const f: <Key, Value>(o: {[key: Key]: Value}) => Key;
+                                                   ^^^ [2]
    test.js:42:10
    42|     x as number; // ERROR
                 ^^^^^^ [3]
@@ -454,13 +454,13 @@ Cannot call `f` because in type argument `Key` > at least one member of `"1" | "
 
 References:
    test.js:46:23
-   46|     declare const f: <Key extends number, Value>(o: {[Key]: Value}) => Key;
+   46|     declare const f: <Key extends number, Value>(o: {[key: Key]: Value}) => Key;
                              ^^^ [1]
-   test.js:46:55
-   46|     declare const f: <Key extends number, Value>(o: {[Key]: Value}) => Key;
-                                                             ^^^ [2]
+   test.js:46:60
+   46|     declare const f: <Key extends number, Value>(o: {[key: Key]: Value}) => Key;
+                                                                  ^^^ [2]
    test.js:46:35
-   46|     declare const f: <Key extends number, Value>(o: {[Key]: Value}) => Key;
+   46|     declare const f: <Key extends number, Value>(o: {[key: Key]: Value}) => Key;
                                          ^^^^^^ [3]
 
 
@@ -484,38 +484,38 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:82:3
 
-Cannot cast `o` to `{readonly [string]: string}` because in the indexer property: `boolean` [1] is incompatible with
-`string` [2]. [incompatible-type]
+Cannot cast `o` to `{readonly [key: string]: string}` because in the indexer property: `boolean` [1] is incompatible
+with `string` [2]. [incompatible-type]
 
    test.js:82:3
-   82|   o as {readonly [string]: string}; // ERROR
+   82|   o as {readonly [key: string]: string}; // ERROR
          ^
 
 References:
-   test.js:76:15
-   76|     [number]: boolean,
-                     ^^^^^^^ [1]
-   test.js:82:28
-   82|   o as {readonly [string]: string}; // ERROR
-                                  ^^^^^^ [2]
+   test.js:76:20
+   76|     [key: number]: boolean,
+                          ^^^^^^^ [1]
+   test.js:82:33
+   82|   o as {readonly [key: string]: string}; // ERROR
+                                       ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:82:3
 
-Cannot cast `o` to `{readonly [string]: string}` because in the indexer property's key: `number` [1] is incompatible
-with `string` [2]. [incompatible-type]
+Cannot cast `o` to `{readonly [key: string]: string}` because in the indexer property's key: `number` [1] is
+incompatible with `string` [2]. [incompatible-type]
 
    test.js:82:3
-   82|   o as {readonly [string]: string}; // ERROR
+   82|   o as {readonly [key: string]: string}; // ERROR
          ^
 
 References:
-   test.js:76:6
-   76|     [number]: boolean,
-            ^^^^^^ [1]
-   test.js:82:19
-   82|   o as {readonly [string]: string}; // ERROR
-                         ^^^^^^ [2]
+   test.js:76:11
+   76|     [key: number]: boolean,
+                 ^^^^^^ [1]
+   test.js:82:24
+   82|   o as {readonly [key: string]: string}; // ERROR
+                              ^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:128:3
@@ -639,7 +639,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:169:5
 
-Cannot get `x['foo']` because property `foo` is missing in `{[number]: boolean}` [1]. [prop-missing]
+Cannot get `x['foo']` because property `foo` is missing in `{[key: number]: boolean}` [1]. [prop-missing]
 
    test.js:169:5
    169|   x['foo']; // ERROR
@@ -647,8 +647,8 @@ Cannot get `x['foo']` because property `foo` is missing in `{[number]: boolean}`
 
 References:
    test.js:165:20
-   165|   declare const x: {[number]: boolean};
-                           ^^^^^^^^^^^^^^^^^^^ [1]
+   165|   declare const x: {[key: number]: boolean};
+                           ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:181:5

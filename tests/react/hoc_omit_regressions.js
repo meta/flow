@@ -2,10 +2,10 @@ import * as React from 'react';
 
 declare function connect<AllProps extends {...}, ServiceProps extends {...}>(
   mapServicesToProps: (
-    number,
-    Omit<AllProps, keyof ServiceProps>,
+    n: number,
+    props: Omit<AllProps, keyof ServiceProps>,
   ) => ServiceProps,
-): (React.ComponentType<AllProps>) => React.ComponentType<
+): (component: React.ComponentType<AllProps>) => React.ComponentType<
   Omit<AllProps, keyof ServiceProps>,
 >;
 
@@ -20,7 +20,7 @@ function serviceToProps(
   _services: number,
   ownProps: {
     location?: string,
-    history?: {push(string): void, ...},
+    history?: {push(path: string): void, ...},
     ...
   },
 ): BannerProps {

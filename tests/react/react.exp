@@ -2474,9 +2474,9 @@ Cannot assign `use(...)` to `notAny3` because `string` [1] is incompatible with 
                             ^^^^^^^^^^^^^^^^^^^^
 
 References:
-   use_hook.js:9:19
-    9|   then(onFulfil: (string) => void): void;
-                         ^^^^^^ [1]
+   use_hook.js:9:26
+    9|   then(onFulfil: (value: string) => void): void;
+                                ^^^^^^ [1]
    use_hook.js:21:18
    21|   const notAny3: 0 = use(CustomThennable);
                         ^ [2]

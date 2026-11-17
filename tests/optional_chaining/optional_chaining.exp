@@ -1144,13 +1144,13 @@ References:
                       v-
     3| declare let x: ?{
     4|   a: number,
-    5|   f: number => string,
+    5|   f: (x: number) => string,
     6|   i: Array<number>,
-    7|   of?: number => string,
+    7|   of?: (x: number) => string,
     8|   oi?: Array<number>,
     9|   i2: Array<Array<number>>,
    10|   i3: Array<{a: ?number, ...}>,
-   11|   f2: number => number => string,
+   11|   f2: (x: number) => (y: number) => string,
    12|  ...};
         ---^ [1]
 
@@ -1168,13 +1168,13 @@ References:
                       v-
     3| declare let x: ?{
     4|   a: number,
-    5|   f: number => string,
+    5|   f: (x: number) => string,
     6|   i: Array<number>,
-    7|   of?: number => string,
+    7|   of?: (x: number) => string,
     8|   oi?: Array<number>,
     9|   i2: Array<Array<number>>,
    10|   i3: Array<{a: ?number, ...}>,
-   11|   f2: number => number => string,
+   11|   f2: (x: number) => (y: number) => string,
    12|  ...};
         ---^ [1]
 

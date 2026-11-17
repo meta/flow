@@ -197,9 +197,9 @@ class Calls {
 
   static #bar = (): string => 'baz';
 
-  #optionalFoo: ?(string) => number;
+  #optionalFoo: ?(x: string) => number;
 
-  static #optionalBar: ?(number) => string;
+  static #optionalBar: ?(x: number) => string;
 
   test(): void {
     const fooValid: number = this.#foo();

@@ -1,7 +1,7 @@
 Error ------------------------------------------------------------------------------------------ cross_module/app.js:4:9
 
-Cannot call `app` with object literal bound to the first parameter because in property `a`: `"foo"` [1] is incompatible
-with `number` [2]. [incompatible-type]
+Cannot call `app` with object literal bound to `x` because in property `a`: `"foo"` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    cross_module/app.js:4:9
    4| app({a: 'foo', b: 2});
@@ -15,17 +15,17 @@ References:
 
 Error ------------------------------------------------------------------------------------------ cross_module/use.js:3:9
 
-Cannot call `app` with object literal bound to the first parameter because in property `a`: `"foo"` [1] is incompatible
-with `number` [2]. [incompatible-type]
+Cannot call `app` with object literal bound to `x` because in property `a`: `"foo"` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    cross_module/use.js:3:9
    3| app({a: 'foo', b: 2});
               ^^^^^ [1]
 
 References:
-   cross_module/app.js:6:65
-   6| export default fn((o: {a: number, b: number, ...}) => {}) as {a:number, b:number} => void;
-                                                                      ^^^^^^ [2]
+   cross_module/app.js:6:69
+   6| export default fn((o: {a: number, b: number, ...}) => {}) as (x: {a:number, b:number}) => void;
+                                                                          ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- type.js:14:2
@@ -363,31 +363,31 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- type_contra.js:12:1
 
-Cannot cast `o2` to `{[string]: T}` because in the indexer property: `unknown` [1] is not exactly the same as `T` [2].
-[incompatible-type]
+Cannot cast `o2` to `{[key: string]: T}` because in the indexer property: `unknown` [1] is not exactly the same as
+`T` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because the indexer is invariantly typed. To fix the error,
-- Either make `{[string]: unknown}` [3] and `{[string]: T}` [4] exactly the same
-- Or make the indexer in `{[string]: T}` [4] readonly. See
+- Either make `{[string]: unknown}` [3] and `{[key: string]: T}` [4] exactly the same
+- Or make the indexer in `{[key: string]: T}` [4] readonly. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
    type_contra.js:12:1
-   12| o2 as {[string]:T}; // error: unknown ~> T
+   12| o2 as {[key: string]:T}; // error: unknown ~> T
        ^^
 
 References:
    type_contra.js:9:15
-    9| type O2 = {...{writeonly [string]:T}, ...};
-                     ^^^^^^^^^^^^^^^^^^^^^^ [1]
-   type_contra.js:12:17
-   12| o2 as {[string]:T}; // error: unknown ~> T
-                       ^ [2]
+    9| type O2 = {...{writeonly [key: string]:T}, ...};
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   type_contra.js:12:22
+   12| o2 as {[key: string]:T}; // error: unknown ~> T
+                            ^ [2]
    type_contra.js:9:11
-    9| type O2 = {...{writeonly [string]:T}, ...};
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+    9| type O2 = {...{writeonly [key: string]:T}, ...};
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    type_contra.js:12:7
-   12| o2 as {[string]:T}; // error: unknown ~> T
-             ^^^^^^^^^^^^ [4]
+   12| o2 as {[key: string]:T}; // error: unknown ~> T
+             ^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ---------------------------------------------------------------------------------------------- type_contra.js:13:1
@@ -400,8 +400,8 @@ Cannot cast `o2.p` to `T` because `unknown` [1] is incompatible with `T` [2]. [i
 
 References:
    type_contra.js:9:15
-    9| type O2 = {...{writeonly [string]:T}, ...};
-                     ^^^^^^^^^^^^^^^^^^^^^^ [1]
+    9| type O2 = {...{writeonly [key: string]:T}, ...};
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    type_contra.js:13:9
    13| o2.p as T; // errors: unknown ~> T
                ^ [2]
@@ -452,31 +452,31 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- type_dict.js:5:1
 
-Cannot cast `o1` to `{[string]: T, p?: T | U}` because in property `p`: `U` [1] is not exactly the same as
+Cannot cast `o1` to `{[key: string]: T, p?: T | U}` because in property `p`: `U` [1] is not exactly the same as
 `void | T | U` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
-- Either make `{[string]: T, p: U}` [3] and `{[string]: T, p?: T | U}` [4] exactly the same
-- Or make property `p` in `{[string]: T, p?: T | U}` [4] readonly. See
+- Either make `{[string]: T, p: U}` [3] and `{[key: string]: T, p?: T | U}` [4] exactly the same
+- Or make property `p` in `{[key: string]: T, p?: T | U}` [4] readonly. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
    type_dict.js:5:1
-   5| o1 as {p?:T|U,[string]:T}; // Error: p is invariant
+   5| o1 as {p?:T|U,[key: string]:T}; // Error: p is invariant
       ^^
 
 References:
-   type_dict.js:4:42
-   4| declare const o1: {...{[string]:T},...{p:U, ...}, ...}; // OK
-                                               ^ [1]
+   type_dict.js:4:47
+   4| declare const o1: {...{[key: string]:T},...{p:U, ...}, ...}; // OK
+                                                    ^ [1]
    type_dict.js:5:11
-   5| o1 as {p?:T|U,[string]:T}; // Error: p is invariant
+   5| o1 as {p?:T|U,[key: string]:T}; // Error: p is invariant
                 ^^^ [2]
    type_dict.js:4:19
-   4| declare const o1: {...{[string]:T},...{p:U, ...}, ...}; // OK
-                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   4| declare const o1: {...{[key: string]:T},...{p:U, ...}, ...}; // OK
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    type_dict.js:5:7
-   5| o1 as {p?:T|U,[string]:T}; // Error: p is invariant
-            ^^^^^^^^^^^^^^^^^^^ [4]
+   5| o1 as {p?:T|U,[key: string]:T}; // Error: p is invariant
+            ^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ------------------------------------------------------------------------------------------------ type_empty.js:3:1
@@ -512,17 +512,17 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- type_empty.js:12:6
 
-Cannot call `fn` with object literal bound to the first parameter because object literal [1] is incompatible with
-`empty` [2]. [incompatible-type]
+Cannot call `fn` with object literal bound to `x` because object literal [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    type_empty.js:12:6
    12|   fn({}); // Error: object ~> empty
             ^^ [1]
 
 References:
-   type_empty.js:11:22
-   11| function fn2<T>(fn: ({...T, ...}) => void) {
-                            ^^^^^^^^^^^ [2]
+   type_empty.js:11:25
+   11| function fn2<T>(fn: (x: {...T, ...}) => void) {
+                               ^^^^^^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------------- type_generic.js:3:11
@@ -741,9 +741,9 @@ References:
    type_union.js:14:34
    14| declare const x1: {...Union1, ...Union2, ...}; // Error, indexer on right
                                         ^^^^^^ [2]
-   type_union.js:12:33
-   12| type Union2 = {bar: number} | {[number]: string};
-                                       ^^^^^^ [3]
+   type_union.js:12:38
+   12| type Union2 = {bar: number} | {[key: number]: string};
+                                            ^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------- type_union.js:20:5

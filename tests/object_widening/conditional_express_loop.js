@@ -1,5 +1,5 @@
 //@flow
-declare function reduce<T>(fn: (T) => T): any;
+declare function reduce<T>(fn: (x: T) => T): any;
 
 reduce(
     (newItem) =>

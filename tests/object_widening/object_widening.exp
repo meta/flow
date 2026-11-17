@@ -28,11 +28,11 @@ spreading `{[string]: number}` [2] first or remove the indexer. [cannot-spread-i
 
 References:
    exact_indexer.js:2:23
-   2| declare const x: {x?: {[string]: number}, ...};
-                            ^^^^^^^^^^^^^^^^^^ [2]
-   exact_indexer.js:2:25
-   2| declare const x: {x?: {[string]: number}, ...};
-                              ^^^^^^ [3]
+   2| declare const x: {x?: {[key: string]: number}, ...};
+                            ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   exact_indexer.js:2:30
+   2| declare const x: {x?: {[key: string]: number}, ...};
+                                   ^^^^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------- intersection.js:5:24
@@ -490,9 +490,9 @@ Cannot cast `indexer_spread2.foo` to `string` because `number` [1] is incompatib
         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   type_widening.js:175:37
-   175|   indexer2 = {foo: 3} as {[string]: number};
-                                            ^^^^^^ [1]
+   type_widening.js:175:42
+   175|   indexer2 = {foo: 3} as {[key: string]: number};
+                                                 ^^^^^^ [1]
    type_widening.js:193:24
    193| indexer_spread2.foo as string; // Error, number ~> string
                                ^^^^^^ [2]
@@ -508,9 +508,9 @@ Cannot cast `indexer_spread2.foo` to `string` because `number` [1] is incompatib
         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   type_widening.js:177:38
-   177|   indexer2 = {bar: ''} as {[string]: number, bar: string};
-                                             ^^^^^^ [1]
+   type_widening.js:177:43
+   177|   indexer2 = {bar: ''} as {[key: string]: number, bar: string};
+                                                  ^^^^^^ [1]
    type_widening.js:193:24
    193| indexer_spread2.foo as string; // Error, number ~> string
                                ^^^^^^ [2]
@@ -526,9 +526,9 @@ Cannot cast `indexer_spread2.foo` to `string` because `number` [1] is incompatib
         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   type_widening.js:179:38
-   179|   indexer2 = {baz: ''} as {[string]: number, baz: string};
-                                             ^^^^^^ [1]
+   type_widening.js:179:43
+   179|   indexer2 = {baz: ''} as {[key: string]: number, baz: string};
+                                                  ^^^^^^ [1]
    type_widening.js:193:24
    193| indexer_spread2.foo as string; // Error, number ~> string
                                ^^^^^^ [2]
@@ -544,9 +544,9 @@ Cannot cast `indexer_spread2.foo` to `string` because `number` [1] is incompatib
         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   type_widening.js:181:38
-   181|   indexer2 = {qux: ''} as {[string]: number, qux: string};
-                                             ^^^^^^ [1]
+   type_widening.js:181:43
+   181|   indexer2 = {qux: ''} as {[key: string]: number, qux: string};
+                                                  ^^^^^^ [1]
    type_widening.js:193:24
    193| indexer_spread2.foo as string; // Error, number ~> string
                                ^^^^^^ [2]
@@ -562,9 +562,9 @@ Cannot cast `indexer_spread2.bar` to `string` because `number` [1] is incompatib
         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   type_widening.js:175:37
-   175|   indexer2 = {foo: 3} as {[string]: number};
-                                            ^^^^^^ [1]
+   type_widening.js:175:42
+   175|   indexer2 = {foo: 3} as {[key: string]: number};
+                                                 ^^^^^^ [1]
    type_widening.js:194:24
    194| indexer_spread2.bar as string; // Error, possibly number or undefined
                                ^^^^^^ [2]
@@ -580,9 +580,9 @@ Cannot cast `indexer_spread2.bar` to `string` because `number` [1] is incompatib
         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   type_widening.js:179:38
-   179|   indexer2 = {baz: ''} as {[string]: number, baz: string};
-                                             ^^^^^^ [1]
+   type_widening.js:179:43
+   179|   indexer2 = {baz: ''} as {[key: string]: number, baz: string};
+                                                  ^^^^^^ [1]
    type_widening.js:194:24
    194| indexer_spread2.bar as string; // Error, possibly number or undefined
                                ^^^^^^ [2]
@@ -598,9 +598,9 @@ Cannot cast `indexer_spread2.bar` to `string` because `number` [1] is incompatib
         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   type_widening.js:181:38
-   181|   indexer2 = {qux: ''} as {[string]: number, qux: string};
-                                             ^^^^^^ [1]
+   type_widening.js:181:43
+   181|   indexer2 = {qux: ''} as {[key: string]: number, qux: string};
+                                                  ^^^^^^ [1]
    type_widening.js:194:24
    194| indexer_spread2.bar as string; // Error, possibly number or undefined
                                ^^^^^^ [2]
@@ -616,9 +616,9 @@ Cannot cast `indexer_spread2.baz` to `string` because `number` [1] is incompatib
         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   type_widening.js:175:37
-   175|   indexer2 = {foo: 3} as {[string]: number};
-                                            ^^^^^^ [1]
+   type_widening.js:175:42
+   175|   indexer2 = {foo: 3} as {[key: string]: number};
+                                                 ^^^^^^ [1]
    type_widening.js:195:24
    195| indexer_spread2.baz as string; // Error, possibly number or undefined
                                ^^^^^^ [2]
@@ -634,9 +634,9 @@ Cannot cast `indexer_spread2.baz` to `string` because `number` [1] is incompatib
         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   type_widening.js:177:38
-   177|   indexer2 = {bar: ''} as {[string]: number, bar: string};
-                                             ^^^^^^ [1]
+   type_widening.js:177:43
+   177|   indexer2 = {bar: ''} as {[key: string]: number, bar: string};
+                                                  ^^^^^^ [1]
    type_widening.js:195:24
    195| indexer_spread2.baz as string; // Error, possibly number or undefined
                                ^^^^^^ [2]
@@ -652,9 +652,9 @@ Cannot cast `indexer_spread2.baz` to `string` because `number` [1] is incompatib
         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   type_widening.js:181:38
-   181|   indexer2 = {qux: ''} as {[string]: number, qux: string};
-                                             ^^^^^^ [1]
+   type_widening.js:181:43
+   181|   indexer2 = {qux: ''} as {[key: string]: number, qux: string};
+                                                  ^^^^^^ [1]
    type_widening.js:195:24
    195| indexer_spread2.baz as string; // Error, possibly number or undefined
                                ^^^^^^ [2]
@@ -670,9 +670,9 @@ Cannot cast `indexer_spread2.qux` to `string` because `number` [1] is incompatib
         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   type_widening.js:175:37
-   175|   indexer2 = {foo: 3} as {[string]: number};
-                                            ^^^^^^ [1]
+   type_widening.js:175:42
+   175|   indexer2 = {foo: 3} as {[key: string]: number};
+                                                 ^^^^^^ [1]
    type_widening.js:196:24
    196| indexer_spread2.qux as string; // Error, Possibly number or undefined
                                ^^^^^^ [2]
@@ -688,9 +688,9 @@ Cannot cast `indexer_spread2.qux` to `string` because `number` [1] is incompatib
         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   type_widening.js:177:38
-   177|   indexer2 = {bar: ''} as {[string]: number, bar: string};
-                                             ^^^^^^ [1]
+   type_widening.js:177:43
+   177|   indexer2 = {bar: ''} as {[key: string]: number, bar: string};
+                                                  ^^^^^^ [1]
    type_widening.js:196:24
    196| indexer_spread2.qux as string; // Error, Possibly number or undefined
                                ^^^^^^ [2]
@@ -706,9 +706,9 @@ Cannot cast `indexer_spread2.qux` to `string` because `number` [1] is incompatib
         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   type_widening.js:179:38
-   179|   indexer2 = {baz: ''} as {[string]: number, baz: string};
-                                             ^^^^^^ [1]
+   type_widening.js:179:43
+   179|   indexer2 = {baz: ''} as {[key: string]: number, baz: string};
+                                                  ^^^^^^ [1]
    type_widening.js:196:24
    196| indexer_spread2.qux as string; // Error, Possibly number or undefined
                                ^^^^^^ [2]

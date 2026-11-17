@@ -8,10 +8,10 @@ function fn1<T>(x: {...T, ...}) {
                // but only one error. empty ~> number is ok.
 }
 
-function fn2<T>(fn: ({...T, ...}) => void) {
+function fn2<T>(fn: (x: {...T, ...}) => void) {
   fn({}); // Error: object ~> empty
 }
 
-function fn3<T>(x: T, fn: ({...T, foo: number, ...}) => void) {
+function fn3<T>(x: T, fn: (y: {...T, foo: number, ...}) => void) {
   fn({...x, foo: 42}); // OK
 }

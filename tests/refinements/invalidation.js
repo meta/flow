@@ -292,11 +292,11 @@ declare const x: { b?: { ... }, ... };
   // continue, break, return, and labelled break and continue.
 }
 
-declare const f: unknown => boolean;
+declare const f: (x: unknown) => boolean;
 declare const p: boolean;
 
 declare const y: { ... } & IteratorObject<unknown>;
-declare const ff: unknown => { ... } & IteratorObject<unknown>;
+declare const ff: (x: unknown) => { ... } & IteratorObject<unknown>;
 
 () => {
   declare function f(x: unknown): boolean;

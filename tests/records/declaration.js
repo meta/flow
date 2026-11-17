@@ -173,7 +173,7 @@
 
 // Definitions for below
 interface Equatable<T> {
-  equals(T): boolean;
+  equals(other: T): boolean;
 }
 
 // Subtyping with interfaces

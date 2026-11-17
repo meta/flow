@@ -3,25 +3,25 @@
     '1': true,
     '2': false,
   };
-  o as {[number]: boolean}; // OK
-  o as {[string]: boolean}; // OK
-  o as {[symbol]: boolean}; // ERROR
+  o as {[key: number]: boolean}; // OK
+  o as {[key: string]: boolean}; // OK
+  o as {[key: symbol]: boolean}; // ERROR
 
-  o as {[1 | 2]: boolean}; // OK
-  o as {['1' | '2']: boolean}; // OK
+  o as {[key: 1 | 2]: boolean}; // OK
+  o as {[key: '1' | '2']: boolean}; // OK
 
-  o as {[1 | 2 | 3]: boolean}; // OK
-  o as {['1' | '2' | '3']: boolean}; // OK
+  o as {[key: 1 | 2 | 3]: boolean}; // OK
+  o as {[key: '1' | '2' | '3']: boolean}; // OK
 
   o as {[1]: boolean}; // ERROR
   o as {['1']: boolean}; // ERROR
 
   o as {'1': boolean, '2': boolean}; // OK
-  o as {readonly '1': true, readonly [number]: false}; // OK
-  o as {'1': true, [number]: true}; // ERROR
+  o as {readonly '1': true, readonly [key: number]: false}; // OK
+  o as {'1': true, [key: number]: true}; // ERROR
 
   '1' as keyof typeof o; // OK
-  o as {[keyof typeof o]: boolean}; // OK
+  o as {[key: keyof typeof o]: boolean}; // OK
   '3' as keyof typeof o; // ERROR
   const x: keyof typeof o = 1; // ERROR
 
@@ -36,28 +36,28 @@
 
   // Implicit instantiation
   {
-    declare const f: <Key, Value>(o: {[Key]: Value}) => Key;
+    declare const f: <Key, Value>(o: {[key: Key]: Value}) => Key;
     const x = f(o);
     x as string; // OK
     x as number; // ERROR
   }
   // `number` upper bound
   {
-    declare const f: <Key extends number, Value>(o: {[Key]: Value}) => Key;
+    declare const f: <Key extends number, Value>(o: {[key: Key]: Value}) => Key;
     const x = f(o); // ERROR
   }
   // Unrelated implicit instantiation
   {
-    declare const f: <T>({[number]: boolean}, T) => T;
+    declare const f: <T>(o: {[key: number]: boolean}, x: T) => T;
     const x = f(o, 's'); // OK
   }
   {
-    declare const f: <T>({[number]: T}) => T;
+    declare const f: <T>(o: {[key: number]: T}) => T;
     const x = f(o); // OK
   }
   // Conditional types
   {
-    type GetKeys<T> = T extends {readonly [infer K]: unknown} ? K : empty;
+    type GetKeys<T> = T extends {readonly [key: infer K]: unknown} ? K : empty;
     declare const x: GetKeys<{'1': boolean, '2': string}>;
     x as number; // ERROR
   }
@@ -65,7 +65,7 @@
 
 {
   declare class MyMap<out K, out V> {
-    static <K, V>({readonly [k: K]: V, ...}): MyMap<K, V>;
+    static <K, V>(o: {readonly [k: K]: V, ...}): MyMap<K, V>;
   }
   const map = MyMap({'1': true});
   map as MyMap<string, boolean>; // OK
@@ -73,18 +73,18 @@
 
 {
   declare const o: {
-    [number]: boolean,
+    [key: number]: boolean,
     '1': 'one',
     '2': 'two',
   };
 
-  o as {readonly [number]: boolean | string}; // OK
-  o as {readonly [string]: string}; // ERROR
+  o as {readonly [key: number]: boolean | string}; // OK
+  o as {readonly [key: string]: string}; // ERROR
 
-  o as {'1': 'one', '2': 'two', [number]: boolean}; // OK
-  o as {'1': 'one', readonly [number]: boolean | 'two'}; // OK
+  o as {'1': 'one', '2': 'two', [key: number]: boolean}; // OK
+  o as {'1': 'one', readonly [key: number]: boolean | 'two'}; // OK
 
-  o as {'1': 'one', '2': 'two', '3': boolean, [number]: boolean}; // OK
+  o as {'1': 'one', '2': 'two', '3': boolean, [key: number]: boolean}; // OK
 }
 
 // Negative numbers
@@ -93,8 +93,8 @@
     '-1': true,
     '-2': false,
   };
-  o as {[number]: boolean}; // OK
-  o as {[string]: boolean}; // OK
+  o as {[key: number]: boolean}; // OK
+  o as {[key: string]: boolean}; // OK
 }
 
 // Fractional keys
@@ -102,8 +102,8 @@
   const o = {
     '1.0234': true,
   };
-  o as {[number]: boolean}; // OK
-  o as {[string]: boolean}; // OK
+  o as {[key: number]: boolean}; // OK
+  o as {[key: string]: boolean}; // OK
 }
 
 // Larger than max safe int
@@ -111,8 +111,8 @@
   const o = {
     '9007199254740992': true,
   };
-  o as {[number]: boolean}; // OK
-  o as {[string]: boolean}; // OK
+  o as {[key: number]: boolean}; // OK
+  o as {[key: string]: boolean}; // OK
 }
 
 // Creation with computed prop
@@ -162,7 +162,7 @@
 
 // Access of dicts
 {
-  declare const x: {[number]: boolean};
+  declare const x: {[key: number]: boolean};
   x[1] as boolean; // OK
   x[1.1] as boolean; // OK
   x['1'] as boolean; // OK
@@ -170,7 +170,7 @@
 }
 
 {
-  declare const x: {[string]: boolean};
+  declare const x: {[key: string]: boolean};
   x[1] as boolean; // OK - same as below
   x['1'] as boolean; // OK
 }

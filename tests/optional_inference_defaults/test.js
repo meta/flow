@@ -1,6 +1,6 @@
 declare function find<T, NSV>(
   values: Array<T>,
-  predicate: T => boolean,
+  predicate: (value: T) => boolean,
   notSetValue?: NSV,
 ): T | NSV;
 const found = find([1, 2], value => value > 0);

@@ -29,11 +29,11 @@ References:
 
 Error --------------------------------------------------------------------------------------- useTransition_hook.js:12:1
 
-Cannot cast `isPending` to `(() => void) => void` because `boolean` [1] is incompatible with `(() => void) => void` [2].
-[incompatible-type]
+Cannot cast `isPending` to `(cb: () => void) => void` because `boolean` [1] is incompatible with
+`(cb: () => void) => void` [2]. [incompatible-type]
 
    useTransition_hook.js:12:1
-     12| isPending as (() => void) => void; // Error: boolean is incompatible with function type
+     12| isPending as (cb: () => void) => void; // Error: boolean is incompatible with function type
          ^^^^^^^^^
 
 References:
@@ -41,8 +41,8 @@ References:
    1561|     declare hook useTransition(): [boolean, (() => void | Promise<void>) => void];
                                             ^^^^^^^ [1]
    useTransition_hook.js:12:14
-     12| isPending as (() => void) => void; // Error: boolean is incompatible with function type
-                      ^^^^^^^^^^^^^^^^^^^^ [2]
+     12| isPending as (cb: () => void) => void; // Error: boolean is incompatible with function type
+                      ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------- useTransition_hook.js:13:1

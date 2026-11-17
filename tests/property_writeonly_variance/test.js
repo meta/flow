@@ -22,8 +22,8 @@ interface I {
 }
 
 // 4. Indexer
-type Idx = { writeonly [string]: number };
-type IdxMinus = { writeonly [string]: number };
+type Idx = { writeonly [key: string]: number };
+type IdxMinus = { writeonly [key: string]: number };
 declare const ix: Idx;
 ix as IdxMinus; // ok
 

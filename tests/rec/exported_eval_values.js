@@ -1,4 +1,4 @@
-declare export const options: {[string]: Value};
+declare export const options: {[key: string]: Value};
 
 export opaque type Value: number = Values<
   // error: cyclic

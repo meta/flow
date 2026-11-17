@@ -196,8 +196,8 @@ Cannot assign `Object.assign(...)` to `target[annotationTypeName]` because in at
 [incompatible-type]
 
 The above-mentioned two types must be the same because the indexer is invariantly typed. To fix the error,
-- Either make `{[string]: ?string}` [4] and `{[string]: ?number}` [5] exactly the same
-- Or make the indexer in `{[string]: ?number}` [5] readonly. See
+- Either make `{[key: string]: ?string}` [4] and `{[key: string]: ?number}` [5] exactly the same
+- Or make the indexer in `{[key: string]: ?number}` [5] readonly. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
    maybe.js:12:12
@@ -208,18 +208,18 @@ References:
    maybe.js:11:3
    11|   Object.keys(source).forEach(annotationTypeName => {
          ^^^^^^^^^^^^^^^^^^^ [1]
-   maybe.js:2:23
-    2|   string: ?{[string]: ?string, ...},
-                             ^^^^^^^ [2]
-   maybe.js:3:20
-    3|   int: ?{[string]: ?number, ...},
-                          ^^^^^^^ [3]
+   maybe.js:2:28
+    2|   string: ?{[key: string]: ?string, ...},
+                                  ^^^^^^^ [2]
+   maybe.js:3:25
+    3|   int: ?{[key: string]: ?number, ...},
+                               ^^^^^^^ [3]
    maybe.js:2:12
-    2|   string: ?{[string]: ?string, ...},
-                  ^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+    2|   string: ?{[key: string]: ?string, ...},
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
    maybe.js:3:9
-    3|   int: ?{[string]: ?number, ...},
-               ^^^^^^^^^^^^^^^^^^^^^^^^ [5]
+    3|   int: ?{[key: string]: ?number, ...},
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [5]
 
 
 Error ----------------------------------------------------------------------------------------------- non_objects.js:3:1

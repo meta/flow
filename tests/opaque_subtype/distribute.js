@@ -40,10 +40,10 @@ declare opaque type OtherStringID: StringAlias;
 
 type Result<out T> = {readonly value: T};
 declare function inferOptional<T>(
-  validators: ReadonlyArray<(string) => ?T>,
+  validators: ReadonlyArray<(s: string) => ?T>,
 ): Result<?T>;
-declare const parseStringID: (string) => ?StringID;
-declare const parseOtherStringID: (string) => ?OtherStringID;
+declare const parseStringID: (s: string) => ?StringID;
+declare const parseOtherStringID: (s: string) => ?OtherStringID;
 const inferredIDs: Result<?StringID | OtherStringID> = inferOptional([
   parseStringID,
   parseOtherStringID,

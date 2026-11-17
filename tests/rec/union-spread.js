@@ -1,6 +1,6 @@
 //@flow
 
-type X = {[string]: null | void | X};
+type X = {[key: string]: null | void | X};
 type Y = {...X, ...};
 
 // Trigger optimization for X

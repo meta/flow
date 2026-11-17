@@ -1,6 +1,6 @@
 type Annotations = Partial<{
-  string: ?{[string]: ?string, ...},
-  int: ?{[string]: ?number, ...},
+  string: ?{[key: string]: ?string, ...},
+  int: ?{[key: string]: ?number, ...},
 }>;
 
 

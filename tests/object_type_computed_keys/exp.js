@@ -3,9 +3,9 @@
 export type One = {['a']: number};
 export type Multi = {['a']: number, ['b']: string};
 export type Num = {[42]: boolean};
-export type Dict = {[string]: number};
-export type Union = {['a' | 'b']: number};
-export type Mixed = {foo: string, ['bar']: boolean, [string]: number};
+export type Dict = {[key: string]: number};
+export type Union = {[key: 'a' | 'b']: number};
+export type Mixed = {foo: string, ['bar']: boolean, [key: string]: number};
 export type Opt = {['a']?: number};
 export type Proto = {['__proto__']: number};
 

@@ -1,10 +1,10 @@
-declare const dict: {[string]: number};
+declare const dict: {[key: string]: number};
 
-declare const dictWithProps: {[string]: number, a: boolean};
+declare const dictWithProps: {[key: string]: number, a: boolean};
 
-declare const writeOnlyDict: {writeonly [string]: number};
+declare const writeOnlyDict: {writeonly [key: string]: number};
 
-declare const dictUnion: {[string]: number} | {[string]: boolean};
+declare const dictUnion: {[key: string]: number} | {[key: string]: boolean};
 
 declare const obj: {a: 1, b: 2};
 
@@ -14,7 +14,7 @@ declare class C {
 }
 declare const instance: C;
 
-declare const iface: interface {[string]: number};
+declare const iface: interface {[key: string]: number};
 
 Object.entries(dict) as Array<[string, number]>; // OK
 Object.entries(iface) as Array<[string, unknown]>; // OK

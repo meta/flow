@@ -8,8 +8,8 @@ type O1 = {...{p:T, ...}|{q:U, ...}, ...};
 declare const o1: O1;
 o1 as {readonly p?:T, ...}|{readonly q?:U, ...}; // ok
 
-type Union1 = {[string]: number} | {foo: number}
-type Union2 = {bar: number} | {[number]: string};
+type Union1 = {[key: string]: number} | {foo: number}
+type Union2 = {bar: number} | {[key: number]: string};
 
 declare const x1: {...Union1, ...Union2, ...}; // Error, indexer on right
 x1 as {...};

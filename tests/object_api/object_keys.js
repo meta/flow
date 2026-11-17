@@ -9,7 +9,7 @@ Object.keys(dict).forEach(k => {
 
 {
   // Union dict
-  declare const x: {[string | number]: unknown}
+  declare const x: {[key: string | number]: unknown}
   Object.keys(x) as Array<string>; // OK
 }
 
@@ -58,8 +58,8 @@ var tests = [
 
 // Interfaces
 declare const iface: interface {a: number, b: string};
-declare const ifaceDict: interface {['x' | 'y']: boolean};
-declare const ifaceBoth: interface {['x' | 'y']: boolean, z: number};
+declare const ifaceDict: interface {[key: 'x' | 'y']: boolean};
+declare const ifaceBoth: interface {[key: 'x' | 'y']: boolean, z: number};
 
 Object.keys(iface) as Array<'a' | 'b'>; // OK
 Object.keys(ifaceDict) as Array<'x' | 'y'>; // OK
@@ -75,13 +75,13 @@ Object.keys(true); // ERROR
 // Opaque types
 declare opaque type OpaqueKey;
 {
-  declare const opaqueDict: {[OpaqueKey]: number};
+  declare const opaqueDict: {[key: OpaqueKey]: number};
   Object.keys(opaqueDict)[0] as OpaqueKey; // ERROR
 }
 
 declare opaque type OpaqueKeyWithSupertype1: string;
 {
-  declare const opaqueDict: {[OpaqueKeyWithSupertype1]: number};
+  declare const opaqueDict: {[key: OpaqueKeyWithSupertype1]: number};
   Object.keys(opaqueDict)[0] as OpaqueKeyWithSupertype1; // OK
   Object.keys(opaqueDict)[0] as empty; // ERROR
 }
@@ -89,25 +89,25 @@ declare opaque type OpaqueKeyWithSupertype1: string;
 type A<T> = T;
 declare opaque type OpaqueKeyWithSupertype2: A<string>;
 {
-  declare const opaqueDict: {[OpaqueKeyWithSupertype2]: number};
+  declare const opaqueDict: {[key: OpaqueKeyWithSupertype2]: number};
   Object.keys(opaqueDict)[0] as OpaqueKeyWithSupertype2; // OK
 }
 
 declare opaque type OpaqueKeyWithSupertype3: string | boolean;
 {
-  declare const opaqueDict: {[OpaqueKeyWithSupertype3]: number};
+  declare const opaqueDict: {[key: OpaqueKeyWithSupertype3]: number};
   Object.keys(opaqueDict)[0] as OpaqueKeyWithSupertype3; // ERROR
 }
 
 declare opaque type OpaqueKeyWithSupertype4: string | A<string>;
 {
-  declare const opaqueDict: {[OpaqueKeyWithSupertype4]: number};
+  declare const opaqueDict: {[key: OpaqueKeyWithSupertype4]: number};
   Object.keys(opaqueDict)[0] as OpaqueKeyWithSupertype4; // OK
 }
 
 opaque type OpaqueKeyWithSupertypeAndLocal: keyof {a: number; b: number} = 'a';
 {
-  declare const opaqueDict: {[OpaqueKeyWithSupertypeAndLocal]: number};
+  declare const opaqueDict: {[key: OpaqueKeyWithSupertypeAndLocal]: number};
   const x = Object.keys(opaqueDict)[0];
   x as 'a'; // OK
 }

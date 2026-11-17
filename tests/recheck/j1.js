@@ -1,5 +1,5 @@
 // @flow
 
-const foo: { [string]: number } = {};
+const foo: { [key: string]: number } = {};
 
 module.exports = foo;

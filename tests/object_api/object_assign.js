@@ -1,7 +1,7 @@
 /* @flow */
 
 // $FlowExpectedError[unsafe-object-assign]
-var export_ = Object.assign({} as {foo?: unknown => unknown}, {
+var export_ = Object.assign({} as {foo?: (x: unknown) => unknown}, {
   foo: function (param: unknown) {
     return param;
   },
@@ -9,7 +9,7 @@ var export_ = Object.assign({} as {foo?: unknown => unknown}, {
 
 // $FlowExpectedError[unsafe-object-assign]
 var decl_export_: {foo: any, bar: any} = Object.assign(
-  {} as {foo?: unknown => unknown, bar?: any},
+  {} as {foo?: (x: unknown) => unknown, bar?: any},
   export_,
 );
 

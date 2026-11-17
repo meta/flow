@@ -1,5 +1,5 @@
 // @flow
 
-const foo: { readonly [string]: number } = {};
+const foo: { readonly [key: string]: number } = {};
 
 module.exports = foo;

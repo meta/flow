@@ -139,9 +139,9 @@ Cannot cast `require(...).typeTest` to `empty` because `string` [1] is incompati
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   obj_test.js:2:35
-   2| declare const dictObj: {[string]: string};
-                                        ^^^^^^ [1]
+   obj_test.js:2:40
+   2| declare const dictObj: {[key: string]: string};
+                                             ^^^^^^ [1]
    exported_test.js:4:35
    4| require('./obj_test').typeTest as empty; // error: sanity check
                                         ^^^^^ [2]
@@ -173,9 +173,9 @@ Cannot cast `dictObj[key]` to `string` because `void` [1] is incompatible with `
       ^^^^^^^^^^^^
 
 References:
-   obj_test.js:2:35
-   2| declare const dictObj: {[string]: string};
-                                        ^^^^^^ [1]
+   obj_test.js:2:40
+   2| declare const dictObj: {[key: string]: string};
+                                             ^^^^^^ [1]
    obj_test.js:7:17
    7| dictObj[key] as string; // error: void ~> string
                       ^^^^^^ [2]
@@ -190,9 +190,9 @@ Cannot cast `dictObj.hahaha` to `string` because `void` [1] is incompatible with
       ^^^^^^^^^^^^^^
 
 References:
-   obj_test.js:2:35
-   2| declare const dictObj: {[string]: string};
-                                        ^^^^^^ [1]
+   obj_test.js:2:40
+   2| declare const dictObj: {[key: string]: string};
+                                             ^^^^^^ [1]
    obj_test.js:8:19
    8| dictObj.hahaha as string; // error: void ~> string
                         ^^^^^^ [2]
@@ -207,9 +207,9 @@ Cannot assign `undefined` to `dictObj[key]` because `void` [1] is incompatible w
                      ^^^^^^^^^ [1]
 
 References:
-   obj_test.js:2:35
-   2| declare const dictObj: {[string]: string};
-                                        ^^^^^^ [2]
+   obj_test.js:2:40
+   2| declare const dictObj: {[key: string]: string};
+                                             ^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------ obj_test.js:10:18
@@ -221,9 +221,9 @@ Cannot assign `undefined` to `dictObj.hahaha` because `void` [1] is incompatible
                         ^^^^^^^^^ [1]
 
 References:
-   obj_test.js:2:35
-    2| declare const dictObj: {[string]: string};
-                                         ^^^^^^ [2]
+   obj_test.js:2:40
+    2| declare const dictObj: {[key: string]: string};
+                                              ^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------ obj_test.js:11:14
@@ -236,8 +236,8 @@ Cannot access `{}` [1] with computed property using `string` [2]. [invalid-compu
 
 References:
    obj_test.js:3:29
-    3| declare const protoDictObj: {__proto__: {[string]: string}};
-                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    3| declare const protoDictObj: {__proto__: {[key: string]: string}};
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    obj_test.js:4:20
     4| declare const key: string;
                           ^^^^^^ [2]
@@ -254,8 +254,8 @@ missing in `{}` [1]. [prop-missing]
 
 References:
    obj_test.js:3:29
-    3| declare const protoDictObj: {__proto__: {[string]: string}};
-                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    3| declare const protoDictObj: {__proto__: {[key: string]: string}};
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------------ obj_test.js:14:14
@@ -268,8 +268,8 @@ Cannot assign `undefined` to `protoDictObj.hahaha` because property `hahaha` is 
 
 References:
    obj_test.js:3:29
-    3| declare const protoDictObj: {__proto__: {[string]: string}};
-                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    3| declare const protoDictObj: {__proto__: {[key: string]: string}};
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
 

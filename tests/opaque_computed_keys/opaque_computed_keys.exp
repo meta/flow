@@ -36,31 +36,31 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ main.js:9:1
 
-Cannot cast `obj` to `{[string]: string}` because in the indexer property's key: `Op` [1] is not exactly the same as
-`string` [2]. [incompatible-type]
+Cannot cast `obj` to `{[key: string]: string}` because in the indexer property's key: `Op` [1] is not exactly the same
+as `string` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because the indexer is invariantly typed. To fix the error,
-- Either annotate object literal [3] with `{[string]: string}` [4]
-- Or make the indexer in `{[string]: string}` [4] readonly. See
+- Either annotate object literal [3] with `{[key: string]: string}` [4]
+- Or make the indexer in `{[key: string]: string}` [4] readonly. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
    main.js:9:1
-   9| obj as {[string]: string}; // error invariant position
+   9| obj as {[key: string]: string}; // error invariant position
       ^^^
 
 References:
    main.js:4:15
    4| const obj = {[op]: 'abc'};
                     ^^ [1]
-   main.js:9:10
-   9| obj as {[string]: string}; // error invariant position
-               ^^^^^^ [2]
+   main.js:9:15
+   9| obj as {[key: string]: string}; // error invariant position
+                    ^^^^^^ [2]
    main.js:4:13
    4| const obj = {[op]: 'abc'};
                   ^^^^^^^^^^^^^ [3]
    main.js:9:8
-   9| obj as {[string]: string}; // error invariant position
-             ^^^^^^^^^^^^^^^^^^ [4]
+   9| obj as {[key: string]: string}; // error invariant position
+             ^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- main.js:10:1

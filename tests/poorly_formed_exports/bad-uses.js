@@ -40,11 +40,11 @@ function g() {
 }
 
 function f() {
-  let module: {[string]: {[string]: unknown}} = {};
-  let exports: {[string]: unknown} = {};
+  let module: {[key: string]: {[key: string]: unknown}} = {};
+  let exports: {[key: string]: unknown} = {};
   // These should all be fine, since `module` and `exports` have been shadowed.
-  module.exports = {} as {[string]: unknown}; // OK
-  exports = {} as {[string]: unknown}; // OK
+  module.exports = {} as {[key: string]: unknown}; // OK
+  exports = {} as {[key: string]: unknown}; // OK
   exports.foo = 42; // OK
   module.exports.foo = 42; // OK
   addsAPropToExports(module); // OK

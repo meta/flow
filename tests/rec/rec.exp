@@ -15,9 +15,9 @@ Cannot cast `options.foo` to `empty` because `number` [1] is incompatible with `
        ^^^^^^^^^^^
 
 References:
-   exported_eval_values.js:1:42
-    1| declare export const options: {[string]: Value};
-                                                ^^^^^ [1]
+   exported_eval_values.js:1:47
+    1| declare export const options: {[key: string]: Value};
+                                                     ^^^^^ [1]
    eval_values.js:12:16
    12| options.foo as empty; // error
                       ^^^^^ [2]
@@ -94,12 +94,12 @@ Cannot call `cases[type.kind]` because in at least one member of `"a" | "b" | "c
                                   ^^^^^^^^^ [1]
 
 References:
-   issue6155.js:14:44
-   14| function matcher<R>(cases: TypeCases<R>): (Type) => R {
-                                                  ^^^^ [2]
-   issue6155.js:9:9
-    9|     a: (A) => R,
-               ^ [3]
+   issue6155.js:14:47
+   14| function matcher<R>(cases: TypeCases<R>): (t: Type) => R {
+                                                     ^^^^ [2]
+   issue6155.js:9:12
+    9|     a: (a: A) => R,
+                  ^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------- issue6155.js:15:28
@@ -112,12 +112,12 @@ Cannot call `cases[type.kind]` because in at least one member of `"a" | "b" | "c
                                   ^^^^^^^^^ [1]
 
 References:
-   issue6155.js:14:44
-   14| function matcher<R>(cases: TypeCases<R>): (Type) => R {
-                                                  ^^^^ [2]
-   issue6155.js:9:9
-    9|     a: (A) => R,
-               ^ [3]
+   issue6155.js:14:47
+   14| function matcher<R>(cases: TypeCases<R>): (t: Type) => R {
+                                                     ^^^^ [2]
+   issue6155.js:9:12
+    9|     a: (a: A) => R,
+                  ^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------- issue6155.js:15:28
@@ -139,9 +139,9 @@ References:
    issue6155.js:15:13
    15|     return (type) => cases[type.kind](type);
                    ^^^^ [2]
-   issue6155.js:9:9
-    9|     a: (A) => R,
-               ^ [3]
+   issue6155.js:9:12
+    9|     a: (a: A) => R,
+                  ^ [3]
    issue6155.js:4:17
     4| type B = {kind: 'b', k: Type, v: Type, ...};
                        ^^^ [4]
@@ -175,9 +175,9 @@ References:
    issue6155.js:15:13
    15|     return (type) => cases[type.kind](type);
                    ^^^^ [2]
-   issue6155.js:9:9
-    9|     a: (A) => R,
-               ^ [3]
+   issue6155.js:9:12
+    9|     a: (a: A) => R,
+                  ^ [3]
    issue6155.js:5:17
     5| type C = {kind: 'c', ...};
                        ^^^ [4]

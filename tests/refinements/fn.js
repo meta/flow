@@ -1,13 +1,13 @@
 /* @flow */
 
-function takesBotFunction (x : empty => empty) {}
-function takesTopFunction (x : unknown => unknown) {}
-function takesMidFunction (x : empty => unknown) {}
-function takesMidFunction2 (x : unknown => empty) {}
-function takesHigherOrderFn (x : empty => empty => unknown) {}
-function takesHigherOrderFn2 (x : (empty => unknown) => unknown) {}
-function takesMultiArgFn (x : (empty, empty) => unknown) {}
-function takesMultiArgFn2 (x : (unknown, unknown) => unknown) {}
+function takesBotFunction (x : (y: empty) => empty) {}
+function takesTopFunction (x : (y: unknown) => unknown) {}
+function takesMidFunction (x : (y: empty) => unknown) {}
+function takesMidFunction2 (x : (y: unknown) => empty) {}
+function takesHigherOrderFn (x : (y: empty) => (z: empty) => unknown) {}
+function takesHigherOrderFn2 (x : (f: (y: empty) => unknown) => unknown) {}
+function takesMultiArgFn (x : (a: empty, b: empty) => unknown) {}
+function takesMultiArgFn2 (x : (a: unknown, b: unknown) => unknown) {}
 
 function fun(x: unknown) {
   if (typeof x === "function") {

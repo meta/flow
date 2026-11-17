@@ -14,15 +14,15 @@ o2 as {readonly p?:B, ...}; // ok
 ({p: new B} as O2); // ok
 ({p: new A} as O2); // error: A ~> B
 
-type O3 = {...{p:A, ...}&{[string]:B}, ...};
+type O3 = {...{p:A, ...}&{[key: string]:B}, ...};
 declare const o3: O3;
-o3 as {p:B,[string]:B};// ok: A&B = B
+o3 as {p:B,[key: string]:B};// ok: A&B = B
 o3.q as B; // ok
 
-type O4 = {...{[string]:A}&{p:B, ...}, ...};
+type O4 = {...{[key: string]:A}&{p:B, ...}, ...};
 declare const o4: O4;
-o4 as {p:B,[string]:A}; // ok: A&B = B
+o4 as {p:B,[key: string]:A}; // ok: A&B = B
 
-type O5 = {...{[string]:A}&{[string]:B}, ...};
+type O5 = {...{[key: string]:A}&{[key: string]:B}, ...};
 declare const o5: O5;
-o5 as {[string]:B}; // ok: A&B = B
+o5 as {[key: string]:B}; // ok: A&B = B

@@ -11,13 +11,13 @@
   const o = {
     [n]: true, // OK
   };
-  o as {[number]: boolean}; // OK
+  o as {[key: number]: boolean}; // OK
   o[n] as boolean; // OK
 }
 {
   declare const n: number;
-  declare const o1: {[number]: boolean};
+  declare const o1: {[key: number]: boolean};
   // Creation with spread and `number` key
   const o2 = {...o1, [n]: true};
-  o2 as {readonly [number]: true}; // OK
+  o2 as {readonly [key: number]: true}; // OK
 }

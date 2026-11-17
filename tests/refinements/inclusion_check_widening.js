@@ -14,7 +14,7 @@
 
 // Example 1
 
-declare function useState<S>(state: (() => S) | S): [S, ((S => S) | S) => void];
+declare function useState<S>(state: (() => S) | S): [S, (action: ((x: S) => S) | S) => void];
 const [value, setter] = useState<string | null>(null);
 declare const Enum: {A: 'A', B: 'B', ...};
 

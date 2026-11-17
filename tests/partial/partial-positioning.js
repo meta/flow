@@ -2,12 +2,12 @@ export type BaseType = boolean | number;
 
 type RecursiveProp =
   | BaseType
-  | Partial<{[string]: RecursiveProp}>
+  | Partial<{[key: string]: RecursiveProp}>
   | ReadonlyArray<RecursiveProp>;
 
-type Props = Partial<{[string]: RecursiveProp}>;
+type Props = Partial<{[key: string]: RecursiveProp}>;
 
-type Provider<T> = () => T => null;
+type Provider<T> = () => (x: T) => null;
 
 declare export function register<T extends Props>(
  x: Provider<T>,

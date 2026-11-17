@@ -29,15 +29,15 @@ https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-
                                 ^^^^^^ [1]
 
 References:
-   partial-positioning.js:8:33
-    8| type Props = Partial<{[string]: RecursiveProp}>;
-                                       ^^^^^^^^^^^^^ [2]
+   partial-positioning.js:8:38
+    8| type Props = Partial<{[key: string]: RecursiveProp}>;
+                                            ^^^^^^^^^^^^^ [2]
    partial-positioning.js:18:20
    18| register(() => (x: {foo: number}) => null); // ERROR!
                           ^^^^^^^^^^^^^ [3]
    partial-positioning.js:8:22
-    8| type Props = Partial<{[string]: RecursiveProp}>;
-                            ^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+    8| type Props = Partial<{[key: string]: RecursiveProp}>;
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
    partial-positioning.js:12:44
    12| declare export function register<T extends Props>(
                                                   ^^^^^ [5]
