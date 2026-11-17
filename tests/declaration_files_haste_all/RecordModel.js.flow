@@ -5,11 +5,11 @@ declare class RecordModelBase {
   label: string;
   tags: Immutable.List<string>;
 
-  constructor(value: {|
+  constructor(value: {
     readonly count: number,
     readonly label: string,
     readonly tags: Immutable.List<string>,
-  |}): void;
+  }): void;
 
   get(key: 'count'): number;
   get(key: 'label'): string;
@@ -24,11 +24,11 @@ declare class RecordModelBase {
   update(key: 'tags', updater: (value: Immutable.List<string>) => Immutable.List<string>): this;
 
   merge(
-    value: {|
+    value: {
       readonly count?: number,
       readonly label?: string,
       readonly tags?: Immutable.List<string>,
-    |},
+    },
   ): this;
 
   withMutations(mutator: (mutableRecord: this) => void): this;

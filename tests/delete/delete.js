@@ -56,7 +56,7 @@ delete (() => 42);
 declare const f: Array<string>;
 delete f[0];
 
-declare const index: {[string]: number, a: boolean};
+declare const index: {[key: string]: number, a: boolean};
 delete index.a;
 delete index['a'];
 delete index.b;

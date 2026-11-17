@@ -14,7 +14,7 @@ export interface Neg {
 }
 export interface Mixed {
   ['run'](): number;
-  [string]: boolean;
+  [key: string]: boolean;
 }
 export interface Poly {
   ['id']<T>(x: T): T;

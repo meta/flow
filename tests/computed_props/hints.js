@@ -6,13 +6,13 @@ declare const v1: 1;
 declare const v2: 2;
 declare const v3: 3;
 
-const obj1: {[string]: 1|2} = {
+const obj1: {[key: string]: 1|2} = {
   [x]: v1,
   [y]: v2,
   [z]: v3, // error 3 ~> 1|2
 }
 
-const obj2: {[string]: empty} = {
+const obj2: {[key: string]: empty} = {
   [x]: v1, // error 1 ~> empty
   [y]: v2, // error 2 ~> 1
   [z]: v3, // error 3 ~> 1
@@ -58,8 +58,8 @@ function partial_hints() {
 
 function regression_todo() {
   type T =
-    | {[string]: boolean, ...}
-    | {[string]: number, ...}
+    | {[key: string]: boolean, ...}
+    | {[key: string]: number, ...}
 
   declare const x: string;
   declare const y: string;

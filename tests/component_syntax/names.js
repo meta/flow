@@ -8,11 +8,11 @@ type BarT = {a: string} | {b: string}
 component Bar(a: number, ...props: BarT) { return <div /> }; // Error
 <Bar a={false} /> // Error: first param wins, so a must be number
 
-component Baz(a: number, ...props: {[string]: boolean}) { return <div /> }; // Ok
+component Baz(a: number, ...props: {[key: string]: boolean}) { return <div /> }; // Ok
 <Baz a={false} />; // Error
 <Baz a={42} /> // Ok
 
-component Qux(a: number, ...props: {[string]: boolean, a: number}) { return <div /> }; // Error
+component Qux(a: number, ...props: {[key: string]: boolean, a: number}) { return <div /> }; // Error
 <Qux a={false} /> // Error: first param wins, so a must be number
 
 type ROMSVType = {a: boolean}

@@ -403,7 +403,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- internal_slot.js:28:16
 
-Cannot call `annot_callable` with `0` bound to the first parameter because `0` [1] is incompatible with `string` [2].
+Cannot call `annot_callable` with `0` bound to `x` because `0` [1] is incompatible with `string` [2].
 [incompatible-type]
 
    internal_slot.js:28:16
@@ -411,9 +411,9 @@ Cannot call `annot_callable` with `0` bound to the first parameter because `0` [
                       ^ [1]
 
 References:
-   internal_slot.js:26:11
-   26| type Fn = string => number;
-                 ^^^^^^ [2]
+   internal_slot.js:26:15
+   26| type Fn = (x: string) => number;
+                     ^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------- internal_slot.js:29:1
@@ -425,9 +425,9 @@ Cannot cast `annot_callable(...)` to `empty` because `number` [1] is incompatibl
        ^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   internal_slot.js:26:21
-   26| type Fn = string => number;
-                           ^^^^^^ [1]
+   internal_slot.js:26:26
+   26| type Fn = (x: string) => number;
+                                ^^^^^^ [1]
    internal_slot.js:29:26
    29| annot_callable("foo") as empty; // error: number ~> empty
                                 ^^^^^ [2]

@@ -35,13 +35,13 @@ ot.f() as string; // ERROR: number is not string
 // An unnamed indexer `[T]: V` (where the bracket holds a type, not a literal
 // key) still parses as an indexer: it is told apart from a computed method by
 // the token after `]`, with no backtracking.
-type OI = {[string]: number};
+type OI = {[key: string]: number};
 declare const oi: OI;
 oi['x'] as number; // OK: via the unnamed string indexer
 oi['x'] as string; // ERROR: number is not string
 
 // A computed method and an unnamed indexer coexist in one object type body.
-type Mixed = {['run'](): number, [string]: number};
+type Mixed = {['run'](): number, [key: string]: number};
 declare const mx: Mixed;
 mx.run() as number; // OK: literal key is a named method
 mx['other'] as number; // OK: via the unnamed indexer

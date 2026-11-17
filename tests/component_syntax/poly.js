@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-export component Poly<T>(foo: T, bar: [T], ...props: { baz?: (T) => void}) {
+export component Poly<T>(foo: T, bar: [T], ...props: { baz?: (x: T) => void}) {
     return null;
 }
 

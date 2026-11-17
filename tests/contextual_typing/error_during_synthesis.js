@@ -1,5 +1,5 @@
 function test1() {
-  declare function poly<T>(a: (string) => void, b: T): T;
+  declare function poly<T>(a: (x: string) => void, b: T): T;
   declare function expectString(x: string): string;
   poly((v) => {}, expectString(3)); // Error: incompatible-type, but v can still be contextually typed
 }

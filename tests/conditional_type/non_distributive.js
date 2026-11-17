@@ -1,5 +1,5 @@
 function avoid_unnecessary_type_app_loop_regression_test() {
-  type Obj = {readonly [string]: unknown};
+  type Obj = {readonly [key: string]: unknown};
   opaque type Opaque<out _V> = string;
 
   type Mapped<out O extends Obj> = {

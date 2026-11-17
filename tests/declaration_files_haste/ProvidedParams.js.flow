@@ -10,12 +10,12 @@ declare class ProvidedParamsBase {
   tags: Immutable.List<string>;
 
   constructor(
-    value: {|
+    value: {
       readonly description?: ?string,
       readonly id?: ?string,
       readonly ownerId: string,
       readonly tags: Immutable.List<string>,
-    |},
+    },
   ): void;
 
   get(key: 'description' | 'id'): ?string;
@@ -27,12 +27,12 @@ declare class ProvidedParamsBase {
   set(key: 'tags', value: Immutable.List<string>): this;
 
   merge(
-    value: {|
+    value: {
       readonly description?: ?string,
       readonly id?: ?string,
       readonly ownerId?: string,
       readonly tags?: Immutable.List<string>,
-    |},
+    },
   ): this;
 
   toJS(): Spec;

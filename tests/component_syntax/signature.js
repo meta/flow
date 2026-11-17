@@ -15,7 +15,7 @@ component InexactRest(foo: number, ...rest: {bar: string, ...}) {
 const inexactGood = <InexactRest foo={3} bar="str" baz={3} />; // OK!
 const inexactBad = <InexactRest foo="" bar={3} baz={3} />; // ERROR 2x for foo and bar
 
-component IndexedRest(foo: number, ...rest: {[string]: number, ...}) {
+component IndexedRest(foo: number, ...rest: {[key: string]: number, ...}) {
   return null;
 }
 

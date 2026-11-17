@@ -8,7 +8,7 @@ class Comp extends React.Component<{...}, {...}> {}
 
 function f<
   Comp extends React.ComponentType<{...}>,
->(): Comp => {
+>(): (c: Comp) => {
 ...} {
   return function() {
     return {}

@@ -1,1 +1,1 @@
-declare export function PolyComponent<T>(props: {v: T, f: (T) => void}): void;
+declare export function PolyComponent<T>(props: {v: T, f: (x: T) => void}): void;

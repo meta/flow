@@ -120,7 +120,7 @@
 }
 
 {
-  type AnyFunction = ({...}) => void;
+  type AnyFunction = (x: {...}) => void;
   type Modulish<T> = T | {readonly default: T};
   type ModuleDefault<T> = T['default'];
   declare function unwrapModule<
@@ -131,7 +131,7 @@
   ): TIsESModule extends true // $FlowFixMe[prop-missing]
     ? ModuleDefault<TModule>
     : TModule;
-  type ExactFunction = ({foo: string}) => void;
+  type ExactFunction = (x: {foo: string}) => void;
   unwrapModule(true) as ExactFunction;
 }
 

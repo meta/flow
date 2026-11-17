@@ -1,7 +1,7 @@
 //@flow
 
 declare const c: {
-    <T>(T, (T) => void): void,
+    <T>(x: T, f: (y: T) => void): void,
     (): void,
 }
 

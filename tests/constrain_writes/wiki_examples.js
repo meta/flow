@@ -15,7 +15,7 @@ function ex1() {
   // `element` has type renders Fragment
 
   type OtherProps = { other_prop: string };
-  declare const OtherComponent: (OtherProps) => React.Node;
+  declare const OtherComponent: (props: OtherProps) => React.Node;
   declare const other_props: OtherProps
 
   product = "Our new product is..."; // Error
@@ -39,7 +39,7 @@ function ex2() {
 
 
   type OtherProps = { other_prop: string };
-  declare const OtherComponent: (OtherProps) => React.Node;
+  declare const OtherComponent: (props: OtherProps) => React.Node;
   declare const other_props: OtherProps
 
   product = "Our new product is...";

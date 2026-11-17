@@ -122,9 +122,9 @@ Cannot cast `n` to `empty` because `number` [1] is incompatible with `empty` [2]
                 ^
 
 References:
-   destructuring_assignment.js:1:17
-   1| declare let a: (number) => unknown;
-                      ^^^^^^ [1]
+   destructuring_assignment.js:1:20
+   1| declare let a: (x: number) => unknown;
+                         ^^^^^^ [1]
    destructuring_assignment.js:7:16
    7|    (n) => n as empty, // error: num ~> empty
                      ^^^^^ [2]
@@ -139,9 +139,9 @@ Cannot cast `n` to `empty` because `number` [1] is incompatible with `empty` [2]
                    ^
 
 References:
-   destructuring_assignment.js:2:17
-   2| declare let b: (number) => unknown;
-                      ^^^^^^ [1]
+   destructuring_assignment.js:2:20
+   2| declare let b: (x: number) => unknown;
+                         ^^^^^^ [1]
    destructuring_assignment.js:9:19
    9|       (n) => n as empty, // error: num ~> empty
                         ^^^^^ [2]
@@ -156,9 +156,9 @@ Cannot cast `n` to `empty` because `number` [1] is incompatible with `empty` [2]
                       ^
 
 References:
-   destructuring_assignment.js:3:17
-    3| declare let c: (number) => unknown;
-                       ^^^^^^ [1]
+   destructuring_assignment.js:3:20
+    3| declare let c: (x: number) => unknown;
+                          ^^^^^^ [1]
    destructuring_assignment.js:11:21
    11|         (n) => n as empty, // error: num ~> empty
                            ^^^^^ [2]
@@ -173,9 +173,9 @@ Cannot cast `n` to `empty` because `number` [1] is incompatible with `empty` [2]
                           ^
 
 References:
-   destructuring_assignment.js:4:17
-    4| declare let d: (number) => unknown;
-                       ^^^^^^ [1]
+   destructuring_assignment.js:4:20
+    4| declare let d: (x: number) => unknown;
+                          ^^^^^^ [1]
    destructuring_assignment.js:12:25
    12|         {d: (n) => n as empty} // error: num ~> empty
                                ^^^^^ [2]
@@ -190,9 +190,9 @@ Cannot cast `n` to `empty` because `number` [1] is incompatible with `empty` [2]
                    ^
 
 References:
-   destructuring_assignment.js:1:17
-    1| declare let a: (number) => unknown;
-                       ^^^^^^ [1]
+   destructuring_assignment.js:1:20
+    1| declare let a: (x: number) => unknown;
+                          ^^^^^^ [1]
    destructuring_assignment.js:17:18
    17|   a: (n) => n as empty, // error: num ~> empty
                         ^^^^^ [2]
@@ -207,9 +207,9 @@ Cannot cast `n` to `empty` because `number` [1] is incompatible with `empty` [2]
                    ^
 
 References:
-   destructuring_assignment.js:2:17
-    2| declare let b: (number) => unknown;
-                       ^^^^^^ [1]
+   destructuring_assignment.js:2:20
+    2| declare let b: (x: number) => unknown;
+                          ^^^^^^ [1]
    destructuring_assignment.js:18:18
    18|   b: (n) => n as empty, // error: num ~> empty
                         ^^^^^ [2]
@@ -224,9 +224,9 @@ Cannot cast `n` to `empty` because `number` [1] is incompatible with `empty` [2]
                         ^
 
 References:
-   destructuring_assignment.js:21:31
-   21| declare let e: ReadonlyArray<(number) => unknown>;
-                                     ^^^^^^ [1]
+   destructuring_assignment.js:21:34
+   21| declare let e: ReadonlyArray<(x: number) => unknown>;
+                                        ^^^^^^ [1]
    destructuring_assignment.js:23:23
    23| [...e] = [(n) => n as empty]; // error: num ~> empty
                              ^^^^^ [2]
@@ -241,9 +241,9 @@ Cannot cast `n` to `empty` because `number` [1] is incompatible with `empty` [2]
                                 ^
 
 References:
-   destructuring_assignment.js:22:28
-   22| declare let f: {[string]: (number) => unknown};
-                                  ^^^^^^ [1]
+   destructuring_assignment.js:22:36
+   22| declare let f: {[key: string]: (x: number) => unknown};
+                                          ^^^^^^ [1]
    destructuring_assignment.js:24:31
    24| ({...f} = {hello: (n) => n as empty}); // error: num ~> empty
                                      ^^^^^ [2]
@@ -407,29 +407,29 @@ Cannot cast `x` to `string` because `number` [1] is incompatible with `string` [
               ^
 
 References:
-   immediate_call_expression.js:1:10
-   1| const x: number => void = (function () {
-               ^^^^^^ [1]
+   immediate_call_expression.js:1:14
+   1| const x: (x: number) => void = (function () {
+                   ^^^^^^ [1]
    immediate_call_expression.js:4:14
    4|         x as string; // error number ~> string
                    ^^^^^^ [2]
 
 
-Error ---------------------------------------------------------------------------------- implicit_instantiation.js:15:50
+Error ---------------------------------------------------------------------------------- implicit_instantiation.js:15:53
 
 Cannot cast `a` to `empty` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
 
-   implicit_instantiation.js:15:50
-   15|   const reasonTest: (string) => unknown = (a) => a as empty; // error: a is contextually typed as string, not empty
-                                                        ^
+   implicit_instantiation.js:15:53
+   15|   const reasonTest: (s: string) => unknown = (a) => a as empty; // error: a is contextually typed as string, not empty
+                                                           ^
 
 References:
-   implicit_instantiation.js:15:22
-   15|   const reasonTest: (string) => unknown = (a) => a as empty; // error: a is contextually typed as string, not empty
-                            ^^^^^^ [1]
-   implicit_instantiation.js:15:55
-   15|   const reasonTest: (string) => unknown = (a) => a as empty; // error: a is contextually typed as string, not empty
-                                                             ^^^^^ [2]
+   implicit_instantiation.js:15:25
+   15|   const reasonTest: (s: string) => unknown = (a) => a as empty; // error: a is contextually typed as string, not empty
+                               ^^^^^^ [1]
+   implicit_instantiation.js:15:58
+   15|   const reasonTest: (s: string) => unknown = (a) => a as empty; // error: a is contextually typed as string, not empty
+                                                                ^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------- implicit_instantiation.js:61:29
@@ -470,9 +470,9 @@ Cannot call `f` with empty string bound to `c` because `""` [1] is incompatible 
                           ^^ [1]
 
 References:
-   implicit_instantiation.js:104:46
-   104|   declare function f<A>(a: A, b: A=>void, c: number): void;
-                                                     ^^^^^^ [2]
+   implicit_instantiation.js:104:51
+   104|   declare function f<A>(a: A, b: (x: A)=>void, c: number): void;
+                                                          ^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------- implicit_instantiation.js:147:3
@@ -724,13 +724,13 @@ References:
    62|   overload(foo || 42, (s) => {}); // error because we can't resolve overload, and on 1st arg
                          ^^ [1]
    intersections.js:57:32
-   57|   declare function overload(a: string, b: (string) => void): void;
+   57|   declare function overload(a: string, b: (x: string) => void): void;
                                       ^^^^^^ [2]
    intersections.js:60:23
    60|   declare const foo: ?string;
                              ^^^^^^ [3]
    intersections.js:58:32
-   58|   declare function overload(a: number, b: (number) => void): void;
+   58|   declare function overload(a: number, b: (x: number) => void): void;
                                       ^^^^^^ [4]
 
 
@@ -928,9 +928,9 @@ Cannot cast `n` to `empty` because `number` [1] is incompatible with `empty` [2]
                              ^
 
 References:
-   react_tests.js:34:42
-   34|   declare function Parent(x: {children: (number) => React.Node}): React.Node;
-                                                ^^^^^^ [1]
+   react_tests.js:34:45
+   34|   declare function Parent(x: {children: (n: number) => React.Node}): React.Node;
+                                                   ^^^^^^ [1]
    react_tests.js:37:28
    37|     {n => <Child foo={n as empty} /> /* ERROR */}
                                   ^^^^^ [2]
@@ -1140,69 +1140,69 @@ An annotation on this parameter is required because Flow cannot infer its type f
           ^
 
 
-Error --------------------------------------------------------------------------------------------------- unions.js:4:48
+Error --------------------------------------------------------------------------------------------------- unions.js:4:56
 
-Cannot assign object literal to `x` because property `42` is missing in `{["A" | "B"]: (number) => number}` [1] but
-exists in object literal [2]. Any property that does not exist in `{["A" | "B"]: (number) => number}` [1] must be
-compatible with its indexer `"A" | "B"` [3]. [incompatible-type]
+Cannot assign object literal to `x` because property `42` is missing in `{[key: "A" | "B"]: (x: number) => number}` [1]
+but exists in object literal [2]. Any property that does not exist in `{[key: "A" | "B"]: (x: number) => number}` [1]
+must be compatible with its indexer `"A" | "B"` [3]. [incompatible-type]
 
-   unions.js:4:48
-   4|   const x: {['A' | 'B']: (number) => number} = {[42]: v => v}; // ERROR
-                                                     ^^^^^^^^^^^^^^ [2]
+   unions.js:4:56
+   4|   const x: {[key: 'A' | 'B']: (x: number) => number} = {[42]: v => v}; // ERROR
+                                                             ^^^^^^^^^^^^^^ [2]
 
 References:
    unions.js:4:12
-   4|   const x: {['A' | 'B']: (number) => number} = {[42]: v => v}; // ERROR
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   unions.js:4:14
-   4|   const x: {['A' | 'B']: (number) => number} = {[42]: v => v}; // ERROR
-                   ^^^^^^^^^ [3]
+   4|   const x: {[key: 'A' | 'B']: (x: number) => number} = {[42]: v => v}; // ERROR
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   unions.js:4:19
+   4|   const x: {[key: 'A' | 'B']: (x: number) => number} = {[42]: v => v}; // ERROR
+                        ^^^^^^^^^ [3]
 
 
-Error --------------------------------------------------------------------------------------------------- unions.js:4:55
+Error --------------------------------------------------------------------------------------------------- unions.js:4:63
 
 An annotation on this parameter is required because Flow cannot infer its type from local context. [missing-local-annot]
 
-   4|   const x: {['A' | 'B']: (number) => number} = {[42]: v => v}; // ERROR
-                                                            ^
+   4|   const x: {[key: 'A' | 'B']: (x: number) => number} = {[42]: v => v}; // ERROR
+                                                                    ^
 
 
-Error --------------------------------------------------------------------------------------------------- unions.js:7:42
+Error --------------------------------------------------------------------------------------------------- unions.js:7:45
 
 Cannot assign object literal to `x` because property `42` is extra in object literal [1] but missing in
-`{A: (number) => number}` [2]. Exact objects do not accept extra props. [incompatible-type]
+`{A: (x: number) => number}` [2]. Exact objects do not accept extra props. [incompatible-type]
 
-   unions.js:7:42
-   7|   const x: {['A']: (number) => number} = {[42]: v => v}; // ERROR
-                                               ^^^^^^^^^^^^^^ [1]
+   unions.js:7:45
+   7|   const x: {['A']: (x: number) => number} = {[42]: v => v}; // ERROR
+                                                  ^^^^^^^^^^^^^^ [1]
 
 References:
    unions.js:7:12
-   7|   const x: {['A']: (number) => number} = {[42]: v => v}; // ERROR
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   7|   const x: {['A']: (x: number) => number} = {[42]: v => v}; // ERROR
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
-Error --------------------------------------------------------------------------------------------------- unions.js:7:42
+Error --------------------------------------------------------------------------------------------------- unions.js:7:45
 
 Cannot assign object literal to `x` because property `A` is missing in object literal [1] but exists in
-`{A: (number) => number}` [2]. [incompatible-type]
+`{A: (x: number) => number}` [2]. [incompatible-type]
 
-   unions.js:7:42
-   7|   const x: {['A']: (number) => number} = {[42]: v => v}; // ERROR
-                                               ^^^^^^^^^^^^^^ [1]
+   unions.js:7:45
+   7|   const x: {['A']: (x: number) => number} = {[42]: v => v}; // ERROR
+                                                  ^^^^^^^^^^^^^^ [1]
 
 References:
    unions.js:7:12
-   7|   const x: {['A']: (number) => number} = {[42]: v => v}; // ERROR
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   7|   const x: {['A']: (x: number) => number} = {[42]: v => v}; // ERROR
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
-Error --------------------------------------------------------------------------------------------------- unions.js:7:49
+Error --------------------------------------------------------------------------------------------------- unions.js:7:52
 
 An annotation on this parameter is required because Flow cannot infer its type from local context. [missing-local-annot]
 
-   7|   const x: {['A']: (number) => number} = {[42]: v => v}; // ERROR
-                                                      ^
+   7|   const x: {['A']: (x: number) => number} = {[42]: v => v}; // ERROR
+                                                         ^
 
 
 Error -------------------------------------------------------------------------------------------------- unions.js:10:32
@@ -1222,9 +1222,9 @@ Cannot cast `x` to `string` because `number` [1] is incompatible with `string` [
              ^
 
 References:
-   unions.js:17:16
-   17|   type NumCb = number => void;
-                      ^^^^^^ [1]
+   unions.js:17:20
+   17|   type NumCb = (x: number) => void;
+                          ^^^^^^ [1]
    unions.js:27:12
    27|       x as string;
                   ^^^^^^ [2]

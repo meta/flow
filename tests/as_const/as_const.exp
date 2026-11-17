@@ -690,11 +690,11 @@ References:
 
 Error -------------------------------------------------------------------------------------------- import-object.js:65:3
 
-Cannot cast `obj6` to `{[string]: number}` because an index signature declaring the expected key / value type is
-read-only in `{readonly [string]: number}` [1] but writable in `{[string]: number}` [2]. [incompatible-variance]
+Cannot cast `obj6` to `{[key: string]: number}` because an index signature declaring the expected key / value type is
+read-only in `{readonly [string]: number}` [1] but writable in `{[key: string]: number}` [2]. [incompatible-variance]
 
    import-object.js:65:3
-   65|   obj6 as {[string]: number}; // error readonly ~> non-readonly
+   65|   obj6 as {[key: string]: number}; // error readonly ~> non-readonly
          ^^^^
 
 References:
@@ -702,8 +702,8 @@ References:
    12| export const obj6 = {...d} as const;      // {+[string]: number}
                            ^^^^^^ [1]
    import-object.js:65:11
-   65|   obj6 as {[string]: number}; // error readonly ~> non-readonly
-                 ^^^^^^^^^^^^^^^^^^ [2]
+   65|   obj6 as {[key: string]: number}; // error readonly ~> non-readonly
+                 ^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------- import-object.js:74:3
@@ -1300,11 +1300,11 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- object.js:78:3
 
-Cannot cast `obj6` to `{[string]: number}` because an index signature declaring the expected key / value type is
-read-only in `{readonly [string]: number}` [1] but writable in `{[string]: number}` [2]. [incompatible-variance]
+Cannot cast `obj6` to `{[key: string]: number}` because an index signature declaring the expected key / value type is
+read-only in `{readonly [string]: number}` [1] but writable in `{[key: string]: number}` [2]. [incompatible-variance]
 
    object.js:78:3
-   78|   obj6 as {[string]: number}; // error readonly ~> non-readonly
+   78|   obj6 as {[key: string]: number}; // error readonly ~> non-readonly
          ^^^^
 
 References:
@@ -1312,8 +1312,8 @@ References:
    12| export const obj6 = {...d} as const;      // {+[string]: number}
                            ^^^^^^ [1]
    object.js:78:11
-   78|   obj6 as {[string]: number}; // error readonly ~> non-readonly
-                 ^^^^^^^^^^^^^^^^^^ [2]
+   78|   obj6 as {[key: string]: number}; // error readonly ~> non-readonly
+                 ^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------------------- object.js:87:3

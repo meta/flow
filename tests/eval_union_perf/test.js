@@ -84,9 +84,9 @@ type BarUnion =
   | Values<{[K in keyof Elements]: Bar<Elements[K]>}>;
 
 type Config = {
-  f: (dispatch: (BarUnion) => void) => void,
-  g: (dispatch: (BarUnion) => void) => void,
-  h: (dispatch: (BarUnion) => void) => void,
+  f: (dispatch: (bar: BarUnion) => void) => void,
+  g: (dispatch: (bar: BarUnion) => void) => void,
+  h: (dispatch: (bar: BarUnion) => void) => void,
 };
 
 function test<X>(config: Config): Config {

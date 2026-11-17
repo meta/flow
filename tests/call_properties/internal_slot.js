@@ -23,7 +23,7 @@ declare const mixed_callable: { [[call]]: unknown, ... };
 mixed_callable();
 
 declare const annot_callable: { [[call]]: Fn, ... }
-type Fn = string => number;
+type Fn = (x: string) => number;
 annot_callable("foo") as number; // OK
 annot_callable(0); // error: number ~> string
 annot_callable("foo") as empty; // error: number ~> empty

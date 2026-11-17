@@ -2,7 +2,7 @@ component Reffed() { return null }
 
 component Foo(ref: {current: typeof Reffed}) { return null };
 
-component Bar(ref: ((typeof Reffed | null) => void)) { return null };
+component Bar(ref: ((instance: typeof Reffed | null) => void)) { return null };
 
 
 component Baz(ref: React.RefSetter<typeof Reffed>) { return null };
@@ -12,7 +12,7 @@ component Qux(ref: React.RefSetter<'div'>) { return null };
 Foo as component(ref: React.RefSetter<string>); // err: React.RefSetter<string> ~> {current: typeof Reffed}
 Foo as component(ref: React.RefSetter<typeof Reffed>); //err
 
-Bar as component(ref: ((string | null) => void)); // err
+Bar as component(ref: ((instance: string | null) => void)); // err
 
 Baz as component(ref: React.RefSetter<string>); // err
 

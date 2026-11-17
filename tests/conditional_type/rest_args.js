@@ -62,7 +62,7 @@ function bindGeneric<T>(callback: (label: string, ...values: Array<T>) => void):
 
 import {Emitter} from './rest_args_emitter';
 
-class Controller extends Emitter<{[string]: Array<unknown>}> {
+class Controller extends Emitter<{[key: string]: Array<unknown>}> {
   setup(): void {
     const proxy = (event: string) => this.emit.bind(this, event);
   }

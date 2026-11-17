@@ -3,10 +3,10 @@ declare class RecordWithDefaultsBase {
   note: ?string;
 
   constructor(
-    value?: {|
+    value?: {
       readonly label?: string,
       readonly note?: ?string,
-    |},
+    },
   ): void;
 
   get(key: 'label'): string;
@@ -16,10 +16,10 @@ declare class RecordWithDefaultsBase {
   set(key: 'note', value: ?string): this;
 
   merge(
-    value: {|
+    value: {
       readonly label?: string,
       readonly note?: ?string,
-    |},
+    },
   ): this;
 }
 

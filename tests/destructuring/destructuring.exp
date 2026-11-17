@@ -1734,8 +1734,8 @@ Property `0` is missing in `{...}` [1]. [prop-missing]
 
 References:
    tuple.js:15:20
-   15|   declare const f: number => boolean;
-                          ^^^^^^^^^^^^^^^^^ [1]
+   15|   declare const f: (x: number) => boolean;
+                          ^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error ----------------------------------------------------------------------------------------------- unannotated.js:6:5

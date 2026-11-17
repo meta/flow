@@ -33,8 +33,8 @@ function test2() {
 
 function test3() {
     declare function f<Args extends ReadonlyArray<unknown>, Return>(
-        fn: () => (...Args) => Return,
-    ): (...Args) => Return;
+        fn: () => (...args: Args) => Return,
+    ): (...args: Args) => Return;
 
     f(() => (a) => {}) as (a: string) => void; // ok
 }

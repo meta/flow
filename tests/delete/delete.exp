@@ -190,9 +190,9 @@ References:
    delete.js:60:1
    60| delete index.a;
        ^^^^^^^^^^^^^^ [1]
-   delete.js:59:44
-   59| declare const index: {[string]: number, a: boolean};
-                                                  ^^^^^^^ [2]
+   delete.js:59:49
+   59| declare const index: {[key: string]: number, a: boolean};
+                                                       ^^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------------------- delete.js:61:8
@@ -207,9 +207,9 @@ References:
    delete.js:61:1
    61| delete index['a'];
        ^^^^^^^^^^^^^^^^^ [1]
-   delete.js:59:44
-   59| declare const index: {[string]: number, a: boolean};
-                                                  ^^^^^^^ [2]
+   delete.js:59:49
+   59| declare const index: {[key: string]: number, a: boolean};
+                                                       ^^^^^^^ [2]
 
 
 

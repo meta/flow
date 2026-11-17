@@ -34,6 +34,6 @@ id(id((item) => 1)); // error
 //
 {
   // ResolvedAnySpreadArg
-  declare function debounce<TArgs extends ReadonlyArray<unknown>>(f: (...TArgs) => void): (...TArgs) => void;
+  declare function debounce<TArgs extends ReadonlyArray<unknown>>(f: (...args: TArgs) => void): (...args: TArgs) => void;
   debounce((foo) => {}); // error
 }

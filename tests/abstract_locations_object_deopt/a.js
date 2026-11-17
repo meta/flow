@@ -12,7 +12,7 @@ type Foo = {};
 
 export type Bar = {
   bar: () => {
-    foo?: Foo => Foo,
+    foo?: (foo: Foo) => Foo,
   },
 };
 

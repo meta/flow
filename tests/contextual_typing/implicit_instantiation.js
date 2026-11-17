@@ -2,22 +2,22 @@ import * as React from 'react';
 import { PolyComponent } from "./poly_react_component_export";
 
 function test1() {
-  declare function f<T>(f: (string) => T): T;
+  declare function f<T>(f: (s: string) => T): T;
   // We should be able to infer that c is string.
   const c = f((a) => a);
   c as string;
   const d = f(function (a) { return a });
   d as string;
 
-  let f2: (string) => string = (a) => a as string; // ok
+  let f2: (s: string) => string = (a) => a as string; // ok
   f2 = (b) => b as string; // ok
 
-  const reasonTest: (string) => unknown = (a) => a as empty; // error: a is contextually typed as string, not empty
+  const reasonTest: (s: string) => unknown = (a) => a as empty; // error: a is contextually typed as string, not empty
 }
 
 function test2() {
   declare class Foo {
-    bar<T>(f: (string) => T): T
+    bar<T>(f: (s: string) => T): T
   }
   declare const foo: Foo;
 
@@ -27,7 +27,7 @@ function test2() {
   d as string;
 
   class Bar {
-    #baz<T>(f: (string) => T): T {
+    #baz<T>(f: (s: string) => T): T {
       return f("");
     }
 
@@ -63,50 +63,50 @@ function test4() {
 
 function test5() {
   declare function id<T>(x: T): T;
-  const f1: (string) => string = id(s => s as string); // ok
+  const f1: (s: string) => string = id(s => s as string); // ok
 
   declare class A<T> {
-    constructor(T): void
+    constructor(x: T): void
   }
-  const a: A<string=>string> = new A(x => x); // OK
+  const a: A<(s: string)=>string> = new A(x => x); // OK
 
   declare class B<T> {
-    constructor<V>(T): void
+    constructor<V>(x: T): void
   }
-  const b: B<string=>string> = new B(x => x); // OK
+  const b: B<(s: string)=>string> = new B(x => x); // OK
 
   declare class C<T> {
-    constructor(T, number): void;
-    constructor(T): void;
+    constructor(x: T, n: number): void;
+    constructor(x: T): void;
   }
-  const c1: C<string=>string> = new C(x => x); // OK
-  const c2: C<string=>string> = new C(x => x, 1); // OK
+  const c1: C<(s: string)=>string> = new C(x => x); // OK
+  const c2: C<(s: string)=>string> = new C(x => x, 1); // OK
 
-  declare function Component<T>(x: {v: T, f: (T) => void}): void;
+  declare function Component<T>(x: {v: T, f: (x: T) => void}): void;
   <Component v="1" f={(v) => {v as string}} />; // OK
   <PolyComponent v="1" f={(v) => {v as string}} />; // OK
 }
 
 function test6() {
-  declare function call<A>(v: A, f: (A) => void): void
+  declare function call<A>(v: A, f: (x: A) => void): void
   call("ss", s => {}); // ok
 
-  declare function pipe<A, B, C>(a: A, f1: A=>B, f2: B=>C): C;
+  declare function pipe<A, B, C>(a: A, f1: (x: A)=>B, f2: (x: B)=>C): C;
   const _: string = pipe("s", s => 1, n => "");
 
   declare class Pipe<A, B> {
-    constructor(a: A, f1: A=>B, f2: B=>void): void
+    constructor(a: A, f1: (x: A)=>B, f2: (x: B)=>void): void
   }
   new Pipe("s", s => 1, n => {}); // OK
 }
 
 function test7() {
-  declare function f<A>(a: A, b: A=>void, c: number): void;
+  declare function f<A>(a: A, b: (x: A)=>void, c: number): void;
   f(3, (n) => {}, ""); // Error on third argument, but n can still be contextually typed.
 }
 
 function test8() {
-  declare function f<T=string>(x: T => string): T;
+  declare function f<T=string>(x: (y: T) => string): T;
   f(s => s as string); // ok
 }
 
@@ -123,7 +123,7 @@ function test9() {
 
 function test10() {
   type V = {};
-  type Variables = {readonly [string]: any};
+  type Variables = {readonly [key: string]: any};
   declare opaque type Query<in TVariables extends Variables>;
   declare const q: Query<V>;
   declare function poly<TVariables extends Variables>(q: Query<TVariables>): void;
@@ -149,7 +149,7 @@ function test12(foo: ?Array<string>) {
 }
 
 function test13() {
-  declare function foo<V>(v: V, f: (V) => void): void;
+  declare function foo<V>(v: V, f: (x: V) => void): void;
 
   foo(
     { elements: [] },
@@ -160,7 +160,7 @@ function test13() {
 function test14() {
   declare function magic<T>(): T;
   const m: unknown = { foo: magic() }; // ok
-  const interfaceVar: interface {[string]: unknown} = { foo: magic() }; // ok
+  const interfaceVar: interface {[key: string]: unknown} = { foo: magic() }; // ok
 }
 
 function test15() {
@@ -223,6 +223,6 @@ function test21() {
 
 // Iterable
 {
-  declare const f: (Iterable<string => unknown>) => void;
+  declare const f: (x: Iterable<(s: string) => unknown>) => void;
   f([x => 1]); // OK
 }

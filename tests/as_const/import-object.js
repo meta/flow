@@ -19,11 +19,11 @@ function test_obj1() {
 }
 
 function test_obj2() {
-  obj2 as {readonly p: {f: number}, readonly q: {f: number}, readonly d: {[string]: number}};
+  obj2 as {readonly p: {f: number}, readonly q: {f: number}, readonly d: {[key: string]: number}};
   _ as {
     readonly p: {f: number},
     readonly q: {f: number},
-    readonly d: {[string]: number},
+    readonly d: {[key: string]: number},
   } as typeof obj2;
 }
 
@@ -62,11 +62,11 @@ function test_obj5() {
 }
 
 function test_obj6() {
-  obj6 as {[string]: number}; // error readonly ~> non-readonly
-  obj6 as {readonly [string]: number}; // okay
+  obj6 as {[key: string]: number}; // error readonly ~> non-readonly
+  obj6 as {readonly [key: string]: number}; // okay
 
-  _ as {[string]: number} as typeof obj6; // okay
-  _ as {readonly [string]: number} as typeof obj6; // okay
+  _ as {[key: string]: number} as typeof obj6; // okay
+  _ as {readonly [key: string]: number} as typeof obj6; // okay
 }
 
 function test_obj7() {

@@ -25,6 +25,6 @@ const test3 = <T extends 'a' | 'b'>(
 
 const test4 = (
   key: 'a' | 'b',
-): {[string]: boolean, ...} => {
+): {[key: string]: boolean, ...} => {
   return {[key]: true}; // okay
 }

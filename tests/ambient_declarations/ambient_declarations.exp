@@ -122,9 +122,9 @@ Cannot create `Input` element because in property `onChange` > the first paramet
                                                           ^^^^^^ [1]
 
 References:
-   components.js.flow:6:43
-    6| component Input(value: string, onChange: (string) => void);
-                                                 ^^^^^^ [2]
+   components.js.flow:6:50
+    6| component Input(value: string, onChange: (value: string) => void);
+                                                        ^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------- use_declare_methods.js:13:17
@@ -407,9 +407,9 @@ References:
    use_generic_functions.js:14:56
    14| map<number, string>([1, 2], (x) => String(x)) as Array<number>; // ERROR - Array<string> not compatible with Array<number>
                                                               ^^^^^^ [2]
-   generic_functions.js.flow:4:57
-    4| export function map<T, U>(arr: Array<T>, fn: (T) => U): Array<U>;
-                                                               ^^^^^^^^ [3]
+   generic_functions.js.flow:4:60
+    4| export function map<T, U>(arr: Array<T>, fn: (x: T) => U): Array<U>;
+                                                                  ^^^^^^^^ [3]
    use_generic_functions.js:14:50
    14| map<number, string>([1, 2], (x) => String(x)) as Array<number>; // ERROR - Array<string> not compatible with Array<number>
                                                         ^^^^^^^^^^^^^ [4]

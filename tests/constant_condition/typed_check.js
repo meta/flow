@@ -82,7 +82,7 @@
   const a: Array<C> = [];
   if(a[0]) {} // ok because it could be `undefined`
 
-  const b: {[string]: C} = {};
+  const b: {[key: string]: C} = {};
   if(b['foo']) {} // ok because it coudl be `undefined`
 
   // Class members

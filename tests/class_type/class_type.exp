@@ -63,9 +63,9 @@ Error --------------------------------------------------------------------------
       ^^^
 
 References:
-   test3.js:1:28
-   1| type T = { [string]: Class<null> }
-                                 ^^^^ [1]
+   test3.js:1:33
+   1| type T = { [key: string]: Class<null> }
+                                      ^^^^ [1]
 
 
 

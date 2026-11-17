@@ -8,6 +8,6 @@ const bar = require('./b.js');
 // use to assign ids to evaluated types assigns Bar the same id in both
 // merge and check, rather than computing a new one unnecessarily each time.
 
-export type Bar = {p:string}['p'] => void;
+export type Bar = (p: {p:string}['p']) => void;
 
 bar as Bar;

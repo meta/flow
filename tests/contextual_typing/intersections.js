@@ -54,8 +54,8 @@ function test7() {
 }
 
 function test8() {
-  declare function overload(a: string, b: (string) => void): void;
-  declare function overload(a: number, b: (number) => void): void;
+  declare function overload(a: string, b: (x: string) => void): void;
+  declare function overload(a: number, b: (x: number) => void): void;
 
   declare const foo: ?string;
   overload(foo || "", (s) => {}); // okay
@@ -63,8 +63,8 @@ function test8() {
 }
 
 function test9() {
-  declare const f1: { <T>(({ cb: T }) => void): T } & ((empty) => unknown);
-  declare const f2: (<T>(({ cb: T }) => void) => T) & ((empty) => unknown);
+  declare const f1: { <T>(f: (x: { cb: T }) => void): T } & ((x: empty) => unknown);
+  declare const f2: (<T>(f: (x: { cb: T }) => void) => T) & ((x: empty) => unknown);
 
   f1(x => 0 as any) as {};
   f2(x => 0 as any) as {};

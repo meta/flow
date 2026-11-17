@@ -2,7 +2,7 @@
 
 const p = {f: 1};
 declare const q: {f: number};
-declare const d: {[string]: number};
+declare const d: {[key: string]: number};
 
 export const obj1 = {f: 1} as const;      // {+f: 1}
 export const obj2 = {p, q, d} as const;   // {+d: {[string]: number}, +p: {f: Num<1>}, +q: {f: number}}
@@ -32,11 +32,11 @@ function test_obj1() {
 }
 
 function test_obj2() {
-  obj2 as {readonly p: {f: number }, readonly q: {f: number}, readonly d: {[string]: number}};
+  obj2 as {readonly p: {f: number }, readonly q: {f: number}, readonly d: {[key: string]: number}};
   _ as {
     readonly p: {f: number},
     readonly q: {f: number},
-    readonly d: {[string]: number},
+    readonly d: {[key: string]: number},
   } as typeof obj2;
 }
 
@@ -75,11 +75,11 @@ function test_obj5() {
 }
 
 function test_obj6() {
-  obj6 as {[string]: number}; // error readonly ~> non-readonly
-  obj6 as {readonly [string]: number}; // okay
+  obj6 as {[key: string]: number}; // error readonly ~> non-readonly
+  obj6 as {readonly [key: string]: number}; // okay
 
-  _ as {[string]: number} as typeof obj6; // okay
-  _ as {readonly [string]: number} as typeof obj6; // okay
+  _ as {[key: string]: number} as typeof obj6; // okay
+  _ as {readonly [key: string]: number} as typeof obj6; // okay
 }
 
 function test_obj7() {

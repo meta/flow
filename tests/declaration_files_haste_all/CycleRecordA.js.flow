@@ -4,9 +4,9 @@ import type CycleRecordB from './CycleRecordB';
 declare export default class CycleRecordA {
   items: Immutable.List<CycleRecordB>;
 
-  constructor(value: {|
+  constructor(value: {
     readonly items: Immutable.List<CycleRecordB>,
-  |}): void;
+  }): void;
 
   get(key: 'items'): Immutable.List<CycleRecordB>;
 }

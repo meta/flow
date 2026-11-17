@@ -52,9 +52,9 @@ References:
    hints.js:7:19
     7| declare const v3: 3;
                          ^ [1]
-   hints.js:9:24
-    9| const obj1: {[string]: 1|2} = {
-                              ^^^ [2]
+   hints.js:9:29
+    9| const obj1: {[key: string]: 1|2} = {
+                                   ^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- hints.js:16:8
@@ -70,9 +70,9 @@ References:
    hints.js:5:19
     5| declare const v1: 1;
                          ^ [1]
-   hints.js:15:24
-   15| const obj2: {[string]: empty} = {
-                              ^^^^^ [2]
+   hints.js:15:29
+   15| const obj2: {[key: string]: empty} = {
+                                   ^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- hints.js:17:4
@@ -247,12 +247,12 @@ Cannot call `foo` with object literal bound to `o` because: [incompatible-type]
          ^
 
 References:
-   hints.js:62:18
-   62|     | {[string]: number, ...}
-                        ^^^^^^ [1]
-   hints.js:61:18
-   61|     | {[string]: boolean, ...}
-                        ^^^^^^^ [2]
+   hints.js:62:23
+   62|     | {[key: string]: number, ...}
+                             ^^^^^^ [1]
+   hints.js:61:23
+   61|     | {[key: string]: boolean, ...}
+                             ^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------ overwrite.js:2:29

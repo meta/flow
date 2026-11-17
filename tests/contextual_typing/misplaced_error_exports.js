@@ -1,7 +1,7 @@
 export type CommitTemplate<TCommitState> = {
-  title: string | (TCommitState => string),
-  summary: string | (TCommitState => string),
-  tags?: ?ReadonlyArray<string> | (TCommitState => ReadonlyArray<string>),
+  title: string | ((state: TCommitState) => string),
+  summary: string | ((state: TCommitState) => string),
+  tags?: ?ReadonlyArray<string> | ((state: TCommitState) => ReadonlyArray<string>),
 };
 
 export function wrapCommitTemplateWithState<

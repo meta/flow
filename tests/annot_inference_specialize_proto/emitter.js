@@ -11,7 +11,7 @@ class EventEmitter {
   constructor() {}
   addEventListener(
     eventType: string,
-    listener: (...ReadonlyArray<unknown>) => unknown,
+    listener: (...args: ReadonlyArray<unknown>) => unknown,
   ): EventSubscription {
     return {remove: () => {}};
   }

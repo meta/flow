@@ -393,9 +393,9 @@ Cannot cast `oi['x']` to `string` because `number` [1] is incompatible with `str
        ^^^^^^^
 
 References:
-   within.js:38:22
-   38| type OI = {[string]: number};
-                            ^^^^^^ [1]
+   within.js:38:27
+   38| type OI = {[key: string]: number};
+                                 ^^^^^^ [1]
    within.js:41:12
    41| oi['x'] as string; // ERROR: number is not string
                   ^^^^^^ [2]
@@ -411,7 +411,7 @@ Cannot cast `mx.run()` to `string` because `number` [1] is incompatible with `st
 
 References:
    within.js:44:26
-   44| type Mixed = {['run'](): number, [string]: number};
+   44| type Mixed = {['run'](): number, [key: string]: number};
                                 ^^^^^^ [1]
    within.js:48:13
    48| mx.run() as string; // ERROR: number is not string

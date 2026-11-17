@@ -343,32 +343,32 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- extraction.js:19:3
 
-Cannot cast `3` to `ReturnType<(number) => string>` because `3` [1] is incompatible with `string` [2].
+Cannot cast `3` to `ReturnType<(x: number) => string>` because `3` [1] is incompatible with `string` [2].
 [incompatible-type]
 
    extraction.js:19:3
-   19|   3 as ReturnType<(number) => string>; // error: number ~> string
+   19|   3 as ReturnType<(x: number) => string>; // error: number ~> string
          ^ [1]
 
 References:
    extraction.js:19:8
-   19|   3 as ReturnType<(number) => string>; // error: number ~> string
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   19|   3 as ReturnType<(x: number) => string>; // error: number ~> string
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------- extraction.js:21:3
 
-Cannot cast `3` to `ReturnType<(number, string, ...any) => string>` because `3` [1] is incompatible with `string` [2].
-[incompatible-type]
+Cannot cast `3` to `ReturnType<(a: number, b: string, ...rest: any) => string>` because `3` [1] is incompatible with
+`string` [2]. [incompatible-type]
 
    extraction.js:21:3
-   21|   3 as ReturnType<(number, string, ...any) => string>; // error: number ~> string
+   21|   3 as ReturnType<(a: number, b: string, ...rest: any) => string>; // error: number ~> string
          ^ [1]
 
 References:
    extraction.js:21:8
-   21|   3 as ReturnType<(number, string, ...any) => string>; // error: number ~> string
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   21|   3 as ReturnType<(a: number, b: string, ...rest: any) => string>; // error: number ~> string
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------- extraction.js:25:33
@@ -388,47 +388,47 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- extraction.js:27:3
 
-Cannot cast `3` to `Parameters<(string, number) => string>[0]` because `3` [1] is incompatible with `string` [2].
+Cannot cast `3` to `Parameters<(a: string, b: number) => string>[0]` because `3` [1] is incompatible with `string` [2].
 [incompatible-type]
 
    extraction.js:27:3
-   27|   3 as Parameters<(string, number) => string>[0]; // error: number ~> string
+   27|   3 as Parameters<(a: string, b: number) => string>[0]; // error: number ~> string
          ^ [1]
 
 References:
-   extraction.js:27:20
-   27|   3 as Parameters<(string, number) => string>[0]; // error: number ~> string
-                          ^^^^^^ [2]
+   extraction.js:27:23
+   27|   3 as Parameters<(a: string, b: number) => string>[0]; // error: number ~> string
+                             ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------- extraction.js:28:3
 
-Cannot cast empty string to `Parameters<(string, number) => string>[1]` because `""` [1] is incompatible with
+Cannot cast empty string to `Parameters<(a: string, b: number) => string>[1]` because `""` [1] is incompatible with
 `number` [2]. [incompatible-type]
 
    extraction.js:28:3
-   28|   '' as Parameters<(string, number) => string>[1]; // error: string ~> number
+   28|   '' as Parameters<(a: string, b: number) => string>[1]; // error: string ~> number
          ^^ [1]
 
 References:
-   extraction.js:28:29
-   28|   '' as Parameters<(string, number) => string>[1]; // error: string ~> number
-                                   ^^^^^^ [2]
+   extraction.js:28:35
+   28|   '' as Parameters<(a: string, b: number) => string>[1]; // error: string ~> number
+                                         ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------- extraction.js:34:3
 
-Cannot cast empty string to `ThisParameterType<(this: number, string) => void>` because `""` [1] is incompatible with
+Cannot cast empty string to `ThisParameterType<(this: number, x: string) => void>` because `""` [1] is incompatible with
 `number` [2]. [incompatible-type]
 
    extraction.js:34:3
-   34|   '' as ThisParameterType<(this: number, string) => void>; // error: string ~> number
+   34|   '' as ThisParameterType<(this: number, x: string) => void>; // error: string ~> number
          ^^ [1]
 
 References:
    extraction.js:34:9
-   34|   '' as ThisParameterType<(this: number, string) => void>; // error: string ~> number
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   34|   '' as ThisParameterType<(this: number, x: string) => void>; // error: string ~> number
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------- extraction.js:37:3
@@ -441,8 +441,8 @@ Cannot cast `implicitThis` to `number` because `unknown` [1] is incompatible wit
 
 References:
    extraction.js:36:31
-   36|   declare const implicitThis: ThisParameterType<(string, number) => string>;
-                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   36|   declare const implicitThis: ThisParameterType<(a: string, b: number) => string>;
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    extraction.js:37:19
    37|   implicitThis as number; // error: unknown ~> number
                          ^^^^^^ [2]

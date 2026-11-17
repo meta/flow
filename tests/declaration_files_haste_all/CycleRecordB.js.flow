@@ -3,9 +3,9 @@ import type CycleRecordA from './CycleRecordA';
 declare export default class CycleRecordB {
   parent: CycleRecordA;
 
-  constructor(value: {|
+  constructor(value: {
     readonly parent: CycleRecordA,
-  |}): void;
+  }): void;
 
   get(key: 'parent'): CycleRecordA;
 }

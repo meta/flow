@@ -1,20 +1,20 @@
 //@flow
 
 {
-  const x: {['A' | 'B']: (number) => number} = {[42]: v => v}; // ERROR
+  const x: {[key: 'A' | 'B']: (x: number) => number} = {[42]: v => v}; // ERROR
 }
 {
-  const x: {['A']: (number) => number} = {[42]: v => v}; // ERROR
+  const x: {['A']: (x: number) => number} = {[42]: v => v}; // ERROR
 }
 {
   const x: {...} | {...} = {a: v => v};
 }
 {
-  const x: {[number]: (number) => number} = {[42]: v => v};
+  const x: {[key: number]: (x: number) => number} = {[42]: v => v};
 }
 {
-  type StrCb = string => void;
-  type NumCb = number => void;
+  type StrCb = (x: string) => void;
+  type NumCb = (x: number) => void;
   type Cb = Readonly<{cb?: ?(NumCb | StrCb)}>;
   declare const fn: (config: Cb) => {};
   fn({
@@ -35,7 +35,7 @@
   j.mock(() => ({f: n => {}}));
 }
 {
-  type A<T> = T => void;
+  type A<T> = (x: T) => void;
   type B<T> = A<T> | A<number>;
   const x: B<string> = x => {
     x as string;

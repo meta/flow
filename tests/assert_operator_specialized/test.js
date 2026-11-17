@@ -9,7 +9,7 @@ declare const exact_obj: { a?: number }
 exact_obj.a!; // error
 exact_obj['a']!; // error
 
-declare const indexer: {[string]: number, foo: string};
+declare const indexer: {[key: string]: number, foo: string};
 indexer.a!; // ok
 indexer.foo!; // error
 indexer['a']; // ok

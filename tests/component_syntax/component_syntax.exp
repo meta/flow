@@ -101,9 +101,9 @@ Cannot create `IndexedRest` element because in property `bar`: `"str"` [1] is in
                                                   ^^^^^ [1]
 
 References:
-   annotation.js:25:23
-   25|   ...rest: {[string]: number, ...}
-                             ^^^^^^ [2]
+   annotation.js:25:28
+   25|   ...rest: {[key: string]: number, ...}
+                                  ^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------- annotation.js:36:39
@@ -965,9 +965,9 @@ Cannot create `IndexedRest` element because in property `bar`: `"str"` [1] is in
                                                   ^^^^^ [1]
 
 References:
-   declared.js:25:23
-   25|   ...rest: {[string]: number, ...}
-                             ^^^^^^ [2]
+   declared.js:25:28
+   25|   ...rest: {[key: string]: number, ...}
+                                  ^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------ declared.js:36:39
@@ -1440,7 +1440,7 @@ Cannot create `IndexedRest` element because in property `foo`: `""` [1] is incom
 
 References:
    signature.js:18:28
-   18| component IndexedRest(foo: number, ...rest: {[string]: number, ...}) {
+   18| component IndexedRest(foo: number, ...rest: {[key: string]: number, ...}) {
                                   ^^^^^^ [2]
 
 
@@ -1454,9 +1454,9 @@ Cannot create `IndexedRest` element because in property `bar`: `"str"` [1] is in
                                                   ^^^^^ [1]
 
 References:
-   signature.js:18:56
-   18| component IndexedRest(foo: number, ...rest: {[string]: number, ...}) {
-                                                              ^^^^^^ [2]
+   signature.js:18:61
+   18| component IndexedRest(foo: number, ...rest: {[key: string]: number, ...}) {
+                                                                   ^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------------- import.js:14:39
@@ -1905,7 +1905,7 @@ Cannot create `Baz` element because in property `a`: `false` [1] is incompatible
 
 References:
    names.js:11:18
-   11| component Baz(a: number, ...props: {[string]: boolean}) { return <div /> }; // Ok
+   11| component Baz(a: number, ...props: {[key: string]: boolean}) { return <div /> }; // Ok
                         ^^^^^^ [2]
 
 
@@ -1915,16 +1915,16 @@ Component property `a` [1] is re-declared [2] within a spread [3]. Property name
 a component. [invalid-component-prop]
 
    names.js:15:36
-   15| component Qux(a: number, ...props: {[string]: boolean, a: number}) { return <div /> }; // Error
-                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   15| component Qux(a: number, ...props: {[key: string]: boolean, a: number}) { return <div /> }; // Error
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 References:
    names.js:15:15
-   15| component Qux(a: number, ...props: {[string]: boolean, a: number}) { return <div /> }; // Error
+   15| component Qux(a: number, ...props: {[key: string]: boolean, a: number}) { return <div /> }; // Error
                      ^ [1]
-   names.js:15:56
-   15| component Qux(a: number, ...props: {[string]: boolean, a: number}) { return <div /> }; // Error
-                                                              ^ [2]
+   names.js:15:61
+   15| component Qux(a: number, ...props: {[key: string]: boolean, a: number}) { return <div /> }; // Error
+                                                                   ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- names.js:16:9
@@ -1937,7 +1937,7 @@ Cannot create `Qux` element because in property `a`: `false` [1] is incompatible
 
 References:
    names.js:15:18
-   15| component Qux(a: number, ...props: {[string]: boolean, a: number}) { return <div /> }; // Error
+   15| component Qux(a: number, ...props: {[key: string]: boolean, a: number}) { return <div /> }; // Error
                         ^^^^^^ [2]
 
 
@@ -2235,7 +2235,7 @@ Cannot cast `x` to `Poly<string>` because in type argument `T` [1]: `number` [2]
 
 References:
    poly.js:3:23
-    3| export component Poly<T>(foo: T, bar: [T], ...props: { baz?: (T) => void}) {
+    3| export component Poly<T>(foo: T, bar: [T], ...props: { baz?: (x: T) => void}) {
                              ^ [1]
    poly.js:12:23
    12| declare const x: Poly<number>;
@@ -2802,8 +2802,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- refs.js:15:1
 
-Cannot cast `Bar` to `component(ref: (string | null) => void)` because in the first parameter of property `ref`:
-[incompatible-type]
+Cannot cast `Bar` to `component(ref: (instance: string | null) => void)` because in the first parameter of property
+`ref`: [incompatible-type]
  - Either component Reffed [1] is incompatible with `string` [2].
  - Or component Reffed [1] is incompatible with `null` [3].
 
@@ -2811,19 +2811,19 @@ Flow is showing the union/intersection branches that got closest to passing. Oth
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    refs.js:15:1
-   15| Bar as component(ref: ((string | null) => void)); // err
+   15| Bar as component(ref: ((instance: string | null) => void)); // err
        ^^^
 
 References:
-   refs.js:5:22
-    5| component Bar(ref: ((typeof Reffed | null) => void)) { return null };
-                            ^^^^^^^^^^^^^ [1]
-   refs.js:15:25
-   15| Bar as component(ref: ((string | null) => void)); // err
-                               ^^^^^^ [2]
-   refs.js:15:34
-   15| Bar as component(ref: ((string | null) => void)); // err
-                                        ^^^^ [3]
+   refs.js:5:32
+    5| component Bar(ref: ((instance: typeof Reffed | null) => void)) { return null };
+                                      ^^^^^^^^^^^^^ [1]
+   refs.js:15:35
+   15| Bar as component(ref: ((instance: string | null) => void)); // err
+                                         ^^^^^^ [2]
+   refs.js:15:44
+   15| Bar as component(ref: ((instance: string | null) => void)); // err
+                                                  ^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- refs.js:17:1
@@ -3259,7 +3259,7 @@ Cannot create `IndexedRest` element because in property `foo`: `""` [1] is incom
 
 References:
    signature.js:18:28
-   18| component IndexedRest(foo: number, ...rest: {[string]: number, ...}) {
+   18| component IndexedRest(foo: number, ...rest: {[key: string]: number, ...}) {
                                   ^^^^^^ [2]
 
 
@@ -3273,9 +3273,9 @@ Cannot create `IndexedRest` element because in property `bar`: `"str"` [1] is in
                                                   ^^^^^ [1]
 
 References:
-   signature.js:18:56
-   18| component IndexedRest(foo: number, ...rest: {[string]: number, ...}) {
-                                                              ^^^^^^ [2]
+   signature.js:18:61
+   18| component IndexedRest(foo: number, ...rest: {[key: string]: number, ...}) {
+                                                                   ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------- signature.js:30:39

@@ -3,9 +3,9 @@ import type CycleNodeA from 'CycleNodeA';
 declare export default class CycleNodeB {
   parent: CycleNodeA;
 
-  constructor(value: {|
+  constructor(value: {
     readonly parent: CycleNodeA,
-  |}): void;
+  }): void;
 
   get(key: 'parent'): CycleNodeA;
 }

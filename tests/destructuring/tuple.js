@@ -12,6 +12,6 @@
 }
 
 {
-  declare const f: number => boolean;
+  declare const f: (x: number) => boolean;
   const [x] = f; // ERROR
 }

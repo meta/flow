@@ -11,7 +11,7 @@ class Foo {
 
 declare class Bar<T> {
     state : T,
-    setState(Partial<T>): void;
+    setState(state: Partial<T>): void;
 }
 
 class Baz extends Bar<any> {

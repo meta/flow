@@ -22,7 +22,7 @@ function react_abstract_component_subtyping() {
 
 function jsx_function_children_ok() {
   declare function Child(x: {foo: number}): React.Node;
-  declare function Parent(x: {children: (number) => React.Node}): React.Node;
+  declare function Parent(x: {children: (n: number) => React.Node}): React.Node;
 
   return <Parent>
     {n => <Child foo={n as number} /> /* OK */}
@@ -31,7 +31,7 @@ function jsx_function_children_ok() {
 
 function jsx_function_children_error() {
   declare function Child(x: {foo: number}): React.Node;
-  declare function Parent(x: {children: (number) => React.Node}): React.Node;
+  declare function Parent(x: {children: (n: number) => React.Node}): React.Node;
 
   return <Parent>
     {n => <Child foo={n as empty} /> /* ERROR */}

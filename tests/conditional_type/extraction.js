@@ -15,30 +15,30 @@ function extract_arr_element_with_bound() {
 function extract_return_type() {
   3 as ReturnType<() => number>; // ok
   3 as ReturnType<() => string>; // error: number ~> string
-  3 as ReturnType<(number) => number>; // ok
-  3 as ReturnType<(number) => string>; // error: number ~> string
-  3 as ReturnType<(number, string, ...any) => number>; // ok
-  3 as ReturnType<(number, string, ...any) => string>; // error: number ~> string
+  3 as ReturnType<(x: number) => number>; // ok
+  3 as ReturnType<(x: number) => string>; // error: number ~> string
+  3 as ReturnType<(a: number, b: string, ...rest: any) => number>; // ok
+  3 as ReturnType<(a: number, b: string, ...rest: any) => string>; // error: number ~> string
 }
 
 function extract_parameters_type() {
   3 as Parameters<() => number>[0]; // error: invalid-tuple-index
-  '' as Parameters<(string, number) => string>[0]; // ok
-  3 as Parameters<(string, number) => string>[0]; // error: number ~> string
-  '' as Parameters<(string, number) => string>[1]; // error: string ~> number
-  3 as Parameters<(string, number) => string>[1]; // ok
+  '' as Parameters<(a: string, b: number) => string>[0]; // ok
+  3 as Parameters<(a: string, b: number) => string>[0]; // error: number ~> string
+  '' as Parameters<(a: string, b: number) => string>[1]; // error: string ~> number
+  3 as Parameters<(a: string, b: number) => string>[1]; // ok
 }
 
 function extract_this_parameter_type() {
-  3 as ThisParameterType<(this: number, string) => void>; // ok
-  '' as ThisParameterType<(this: number, string) => void>; // error: string ~> number
+  3 as ThisParameterType<(this: number, x: string) => void>; // ok
+  '' as ThisParameterType<(this: number, x: string) => void>; // error: string ~> number
 
-  declare const implicitThis: ThisParameterType<(string, number) => string>;
+  declare const implicitThis: ThisParameterType<(a: string, b: number) => string>;
   implicitThis as number; // error: unknown ~> number
 
-  3 as OmitThisParameter<ThisParameterType<(this: number, string) => void>>; // ok: ThisParameterType extracts `number`; OmitThisParameter on a non-function falls through unchanged, so target is `number`
+  3 as OmitThisParameter<ThisParameterType<(this: number, x: string) => void>>; // ok: ThisParameterType extracts `number`; OmitThisParameter on a non-function falls through unchanged, so target is `number`
 
-  declare const noThisParam: OmitThisParameter<(this: number, string) => void>;
+  declare const noThisParam: OmitThisParameter<(this: number, x: string) => void>;
   noThisParam(''); // ok: the explicit `this` parameter was removed
 }
 

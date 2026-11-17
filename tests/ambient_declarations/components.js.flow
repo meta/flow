@@ -3,7 +3,7 @@
 // Ambient components without body - these should be allowed
 component Button(props: { label: string });
 
-component Input(value: string, onChange: (string) => void);
+component Input(value: string, onChange: (value: string) => void);
 
 // Export them
 declare export { Button, Input };

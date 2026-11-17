@@ -18,7 +18,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:17:1
 
-Cannot cast `indexed` to `ExactObjectType` because indexed `{[string]: number}` [1] is incompatible with exact
+Cannot cast `indexed` to `ExactObjectType` because indexed `{[key: string]: number}` [1] is incompatible with exact
 `ExactObjectType` [2]. [incompatible-indexer]
 
    test.js:17:1
@@ -27,8 +27,8 @@ Cannot cast `indexed` to `ExactObjectType` because indexed `{[string]: number}` 
 
 References:
    test.js:5:24
-    5| declare const indexed: {[string]: number};
-                              ^^^^^^^^^^^^^^^^^^ [1]
+    5| declare const indexed: {[key: string]: number};
+                              ^^^^^^^^^^^^^^^^^^^^^^^ [1]
    test.js:17:12
    17| indexed as ExactObjectType; // error
                   ^^^^^^^^^^^^^^^ [2]

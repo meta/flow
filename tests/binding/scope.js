@@ -132,7 +132,7 @@ function function_type_annotation_scope() {
   function annotations_in_default(
     x: number,
     y: typeof x,
-    f: (number) => void = (z: typeof x) => { z as number }
+    f: (n: number) => void = (z: typeof x) => { z as number }
   ) {
     y as string; // error number ~> string
   }

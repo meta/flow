@@ -1,8 +1,8 @@
-declare const exact: {|a: number|};
-declare const exactEmpty: {||};
+declare const exact: {a: number};
+declare const exactEmpty: {};
 declare const implicitExact: {a: number};
 declare const inexact: {a: number, ...};
-declare const indexed: {[string]: number};
+declare const indexed: {[key: string]: number};
 declare class C {
   a: number;
 }

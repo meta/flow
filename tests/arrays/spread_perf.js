@@ -2,7 +2,7 @@
 
 // this file should not time out
 
-declare function useState<S>(initialState: S): [S, (S) => void];
+declare function useState<S>(initialState: S): [S, (value: S) => void];
 
 const [array, update] = useState<Array<number>>([]);
 

@@ -26,4 +26,4 @@ describe('suite', () => {
 withDefaults(
   {a: 1},
   ({a, b}) => () => b,
-) as ({b: string}) => () => string; // ERROR
+) as (args: {b: string}) => () => string; // ERROR

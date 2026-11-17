@@ -1,4 +1,4 @@
-type T = { [string]: Class<null> }
+type T = { [key: string]: Class<null> }
 var o: T = {};
 
 // need use to force evaluation of ClassT type

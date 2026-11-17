@@ -22,7 +22,7 @@ const inexactBad = <InexactRest foo="" bar={3} baz={3} />; // ERROR 2x for foo a
 
 declare component IndexedRest(
   foo: number,
-  ...rest: {[string]: number, ...}
+  ...rest: {[key: string]: number, ...}
 );
 
 const indexedGood = <IndexedRest foo={3} bar={3} />; // OK!

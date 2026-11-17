@@ -1,3 +1,3 @@
-type C = <H>(H) => {[K in keyof H]: H[K]};
+type C = <H>(x: H) => {[K in keyof H]: H[K]};
 declare const c: C;
 c('string')(); // error: string is not an object

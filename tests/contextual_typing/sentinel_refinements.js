@@ -59,14 +59,14 @@ function numeric_sentinel() {
 
 function function_statics() {
   const f: {
-    (unknown): void,
+    (x: unknown): void,
     type?: void,
     ...
   } = x => {}; // okay `x` inferred as `mixed`
 }
 
 // Numeric literal key names
-type B = {0: 'a', f: (string) => string} | {0: 'b', f: number => number};
+type B = {0: 'a', f: (x: string) => string} | {0: 'b', f: (x: number) => number};
 {
   const b: B = {f: (v) => (v as string), 0: 'a'}; // OK
 }

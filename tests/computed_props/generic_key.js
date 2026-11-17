@@ -1,4 +1,4 @@
-type Map = Readonly<{[string]: string}>;
+type Map = Readonly<{[key: string]: string}>;
 
 function Component<TMap extends Map>() {
   declare const map: TMap;

@@ -1,5 +1,5 @@
 // Test implicit declare functions with type parameters in ambient context
 
 export function identity<T>(x: T): T;
-export function map<T, U>(arr: Array<T>, fn: (T) => U): Array<U>;
-export function combine<A, B, C>(a: A, b: B, fn: (A, B) => C): C;
+export function map<T, U>(arr: Array<T>, fn: (x: T) => U): Array<U>;
+export function combine<A, B, C>(a: A, b: B, fn: (a: A, b: B) => C): C;
