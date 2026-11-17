@@ -12,8 +12,10 @@
 //! the return hint, in the shape of subtyping. Each type parameter is replaced by a marker, a
 //! `GenericT` with a fresh name, and the walk records the types each marker must be a supertype
 //! of (lower bounds) or a subtype of (upper bounds). The walk adds no flows and reports no errors.
-//! A placeholder gives no lower or upper bound. Pinning then reads the recorded bounds as before,
-//! and the operation is checked with the solution by the usual flows, which report the errors.
+//! A placeholder gives no lower or upper bound, but a marker that only a type variable holding
+//! one meets in an invariant position is pinned to it. Pinning then reads the recorded bounds as
+//! before, and the operation is checked with the solution by the usual flows, which report the
+//! errors.
 //!
 //! A generic value is instantiated where the walk meets it, against the type it flows to with
 //! the solution so far in place of the markers. Generic values that are arguments, or props of an
@@ -127,6 +129,20 @@ struct Bounds {
     /// Types met in invariant positions. The flow-based solve unifies there, so the first one is
     /// the solution.
     exact: Vec<Type>,
+    /// The first type with placeholders met in an invariant position, such as a type variable
+    /// that holds one.
+    placeholder: Option<Type>,
+}
+
+impl Bounds {
+    /// What the marker stands for while the hint of an argument is computed, when a type with
+    /// placeholders is all the evidence it has besides its upper bounds: that type, so that the
+    /// hint says nothing at the marker.
+    fn placeholder(&self) -> Option<&Type> {
+        (self.lower.is_empty() && self.exact.is_empty())
+            .then_some(self.placeholder.as_ref())
+            .flatten()
+    }
 }
 
 fn types(bounds: &[(Type, Priority)]) -> impl Iterator<Item = &Type> {
@@ -1003,6 +1019,11 @@ impl<'e> Walker<'e> {
 
     fn add_exact<'cx>(&mut self, cx: &mut Context<'cx>, name: &SubstName, t: &Type) {
         if flow_js_utils::tvar_visitors::has_placeholders(cx, t) {
+            // A placeholder itself unifies with nothing.
+            if !self.soft_exact && !is_placeholder(t) {
+                let bounds = self.vars.get_mut(name).expect("marker should have bounds");
+                bounds.placeholder.get_or_insert_with(|| t.dupe());
+            }
             return;
         }
         if self.soft_exact {
@@ -2399,8 +2420,9 @@ impl<'e> Walker<'e> {
         kind: &flow_common::hint::HintKind,
     ) -> Result<(), FlowJsException> {
         // The flow-based solve drops a best-effort hint whose flow fails: keep its evidence
-        // only if it agrees with the evidence of the arguments, and if the return type fits
-        // the hint with the solution so far.
+        // only if it agrees with the evidence of the arguments, if the return type fits the
+        // hint with the solution so far, and if it leaves no marker standing for a type with
+        // placeholders, which it counts as placeholders leaked into the bounds.
         let snapshot =
             (*kind == flow_common::hint::HintKind::BestEffortHint).then(|| self.snapshot());
         self.in_hint = true;
@@ -2408,7 +2430,12 @@ impl<'e> Walker<'e> {
         self.in_hint = false;
         if let Some(snapshot) = snapshot
             && !(self.agrees_with(cx, &snapshot.vars)?
-                && self.fits_solution_so_far(cx, result, hint)?)
+                && self.fits_solution_so_far(cx, result, hint)?
+                && !(flow_js_utils::tvar_visitors::has_placeholders(cx, hint)
+                    && self
+                        .vars
+                        .values()
+                        .any(|bounds| bounds.placeholder().is_some())))
         {
             self.restore(snapshot);
         }
@@ -7567,6 +7594,14 @@ fn pin_bounds<'cx>(
         };
         (!flow_js_utils::tvar_visitors::has_placeholders(cx, &t)).then_some(t)
     };
+    // As a tvar resolved to a type with placeholders outside checking, whatever its upper bounds
+    // (`UpperPlaceholder`).
+    if !matches!(*cx.typing_mode(), TypingMode::CheckingMode)
+        && let Some(t) = bounds.placeholder()
+    {
+        cx.set_synthesis_produced_uncacheable_result();
+        return Ok(Some((t.dupe(), Source::Upper)));
+    }
     if let Some(t) = bounds.exact.first()
         && let Some(t) = with_solved(cx, t)
     {
