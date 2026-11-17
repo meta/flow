@@ -5202,12 +5202,16 @@ impl<'e> Walker<'e> {
             Destructor::ReactCheckComponentConfig { props } if props.is_empty() => {
                 self.walk(cx, l, type_)
             }
-            // Another destructor of a bare marker, such as a mapped type over the keys `K`, waits
-            // in the flow-based solve for the lower bounds of the tvar of the marker and is
-            // evaluated on them: what flows to it says nothing about the marker. It is evaluated
-            // with the solution so far in place of the marker, once the other arguments have
-            // given it evidence.
-            _ if let Some(name) = self.marker_of(type_) => {
+            // Another destructor of a bare marker, such as a mapped type over the keys `K`, or of a
+            // conditional type over one that takes no branch for every solution, such as
+            // `ComponentProps<T>['props']`, waits in the flow-based solve for the lower bounds of
+            // the tvar of the marker and is evaluated on them: what flows to it says nothing about
+            // the marker. It is evaluated with the solution so far in place of the marker, once
+            // the other arguments have given it evidence.
+            _ if let Some(name) = self
+                .marker_of(type_)
+                .or_else(|| self.undecided_check_marker(cx, type_)) =>
+            {
                 let reason = type_util::reason_of_t(type_).dupe();
                 let solution = match self.solution_so_far(cx, &name, &reason) {
                     Some(solution) if !is_placeholder(&solution) => solution,
@@ -5939,6 +5943,10 @@ impl<'e> Walker<'e> {
             Destructor::ReactCheckComponentConfig { props } if props.is_empty() => {
                 self.walk(cx, type_, u)
             }
+            // A destructor of a conditional type over a bare marker that takes no branch for every
+            // solution, such as `ComponentProps<T>['props']`, says nothing, as that conditional
+            // type below.
+            _ if self.undecided_check_marker(cx, type_).is_some() => Ok(()),
             // Other destructors of markers, such as a mapped type: the destructor evaluated with
             // the markers rigid, if that decides it. Otherwise it is stuck on a marker, and says
             // nothing about it.
@@ -5947,6 +5955,36 @@ impl<'e> Walker<'e> {
                 None => self.give_up(cx, "destructor", l, u),
             },
         }
+    }
+
+    /// The bare marker that is the check type of the conditional type `t`, or of the one that `t`
+    /// applies through at most `MAX_DEPTH` aliases, when its extends type is not `mixed` or `any`.
+    /// A bare marker is rigid with the bound `mixed`, so such a conditional type takes no branch
+    /// for every solution.
+    fn undecided_check_marker<'cx>(&self, cx: &mut Context<'cx>, t: &Type) -> Option<SubstName> {
+        let mut t = self.resolve(cx, t);
+        for _ in 0..=MAX_DEPTH {
+            if !matches!(t.deref(), TypeInner::TypeAppT(_)) {
+                break;
+            }
+            let body = self.expand_typeapp(cx, &t)?;
+            t = self.resolve(cx, &body);
+        }
+        let TypeInner::EvalT {
+            type_: check,
+            defer_use_t,
+            ..
+        } = t.deref()
+        else {
+            return None;
+        };
+        let Destructor::ConditionalType(c) = defer_use_t.2.deref() else {
+            return None;
+        };
+        if is_mixed_or_any(&self.resolve(cx, &c.extends_t)) {
+            return None;
+        }
+        self.marker_of(&self.resolve(cx, check))
     }
 
     /// The branch a conditional type takes, if it is known. First with the markers rigid, as for
@@ -5967,13 +6005,7 @@ impl<'e> Walker<'e> {
         else {
             return Ok(None);
         };
-        // A bare marker is rigid with the bound `mixed`, so the branch is known for every solution
-        // only if the extends type is `mixed` or `any`.
-        let rigid_undecided = self.marker_of(&self.resolve(cx, check)).is_some()
-            && matches!(defer_use_t.2.deref(), Destructor::ConditionalType(c)
-                if !matches!(self.resolve(cx, &c.extends_t).deref(),
-                    TypeInner::AnyT(..) | TypeInner::DefT(..)
-                        if is_mixed_or_any(&self.resolve(cx, &c.extends_t))));
+        let rigid_undecided = self.undecided_check_marker(cx, t).is_some();
         if !rigid_undecided && let Some(branch) = self.evaluate(cx, check, defer_use_t)? {
             return Ok(Some(branch));
         }
