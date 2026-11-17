@@ -1091,6 +1091,7 @@ pub fn make_next_files(
     let can_prune = can_prune_dir(&options);
     let mut chunk = Vec::new();
     let mut symlink_ancestor_cache = HashMap::new();
+    let mut reported_real_paths = HashSet::new();
     for starting_point_path in starting_point_paths {
         let duped_options = options.dupe();
         for entry in jwalk::WalkDir::new(starting_point_path)
@@ -1158,8 +1159,10 @@ pub fn make_next_files(
                 // Note: try_exists() check removed because canonicalize() already
                 // verifies the path exists (returns Err for non-existent paths).
                 if let Ok(real_path) = cached_canonicalize(&path) {
-                    if path == real_path
-                        || realpath_filter(&options, &real_path, all, include_libdef)
+                    if (path == real_path
+                        || realpath_filter(&options, &real_path, all, include_libdef))
+                        // The crawl can reach a file through several symlinks.
+                        && reported_real_paths.insert(real_path.clone())
                     {
                         chunk.push(real_path);
                         if chunk.len() == MAX_FILES {
