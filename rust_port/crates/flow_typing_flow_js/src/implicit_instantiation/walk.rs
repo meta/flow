@@ -5138,14 +5138,52 @@ impl<'e> Walker<'e> {
                         renders_structural_type: a,
                     },
                     _,
-                )
-                | (
+                ) => self.walk(cx, a, u),
+                // `renders* A` sends `ReadonlyArray<renders* A>` to `renders T` and `renders? T`,
+                // and `renders? A` and `renders* A` send what renders nothing (`null`, `void` and
+                // `false`) to `renders T`, before `A` goes to the other render type.
+                (
                     CanonicalRendersForm::StructuralRenders {
+                        renders_variant:
+                            lvariant @ (RendersVariant::RendersMaybe | RendersVariant::RendersStar),
                         renders_structural_type: a,
+                    },
+                    CanonicalRendersForm::StructuralRenders {
+                        renders_variant: uvariant,
                         ..
                     },
-                    CanonicalRendersForm::StructuralRenders { .. },
-                ) => self.walk(cx, a, u),
+                ) => {
+                    let reason = type_util::reason_of_t(l).dupe();
+                    if matches!(lvariant, RendersVariant::RendersStar)
+                        && !matches!(uvariant, RendersVariant::RendersStar)
+                    {
+                        let array = FlowJs::get_builtin_typeapp_with_env(
+                            cx,
+                            self.env,
+                            &reason,
+                            None,
+                            "ReadonlyArray",
+                            vec![l.dupe()],
+                        );
+                        self.walk(cx, &array, u)?;
+                    }
+                    if matches!(uvariant, RendersVariant::RendersNormal) {
+                        let reason = reason.replace_desc(VirtualReasonDesc::RRendersNothing);
+                        for nothing in [
+                            DefTInner::NullT,
+                            DefTInner::VoidT,
+                            DefTInner::SingletonBoolT {
+                                value: false,
+                                from_annot: false,
+                            },
+                        ] {
+                            let nothing =
+                                Type::new(TypeInner::DefT(reason.dupe(), DefT::new(nothing)));
+                            self.walk(cx, &nothing, u)?;
+                        }
+                    }
+                    self.walk(cx, a, u)
+                }
                 (
                     CanonicalRendersForm::NominalRenders { renders_super, .. },
                     CanonicalRendersForm::StructuralRenders {

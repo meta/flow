@@ -761,6 +761,24 @@ References:
       ^^^^ [2]
 
 
+Error ----------------------------------------------------------------------------------- renders_maybe_and_star.js:20:1
+
+Cannot cast `f(...)` to `renders Content` because a value that renders nothing [1] does not render `Content` [2].
+[incompatible-type]
+
+   renders_maybe_and_star.js:20:1
+   20| f(MaybeContent) as renders Content; // error
+       ^^^^^^^^^^^^^^^
+
+References:
+   renders_maybe_and_star.js:13:41
+   13| declare const MaybeContent: component() renders? Content;
+                                               ^^^^^^^^^^^^^^^^ [1]
+   renders_maybe_and_star.js:20:20
+   20| f(MaybeContent) as renders Content; // error
+                          ^^^^^^^^^^^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------------------ rest_past_params.js:9:1
 
 Cannot cast `afterSecond(...)` to `[number]` because in index `0`: `boolean` [1] is incompatible with `number` [2].
@@ -960,4 +978,4 @@ References:
 
 
 
-Found 52 errors
+Found 53 errors
