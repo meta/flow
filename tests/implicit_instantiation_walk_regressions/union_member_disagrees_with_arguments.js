@@ -37,6 +37,16 @@ declare function rejected<T = empty>(): Task<T>;
 const recovered = voids.then(() => recoverable.recover(() => rejected()));
 recovered as Task<number>; // ok
 
+// Nor when both members may match, as with a default that is an interface: the hint of the call to
+// `recover` is `Bytes | Thenable<Bytes>`, of which `Task<number | R>` fits neither.
+declare interface Bytes {
+  byteLength: number;
+}
+declare const bytes: Task<Bytes>;
+
+const recoveredBytes = bytes.then(() => recoverable.recover(() => rejected()));
+recoveredBytes as Task<number>; // ok
+
 // A member that fits with the evidence it gives keeps it: through the hint `?Mock<[string], void>`,
 // `TArguments` is `[string]`, not its default.
 type Mock<TArguments extends ReadonlyArray<unknown>, TReturn> = {

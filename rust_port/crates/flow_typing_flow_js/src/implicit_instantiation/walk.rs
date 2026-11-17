@@ -4056,7 +4056,8 @@ impl<'e> Walker<'e> {
                 }
                 // Of several members that may match, as the speculative match of the flow-based
                 // solve, the first that gives evidence that agrees with the evidence so far, and
-                // none if no member does.
+                // none if no member does. A class or interface that `l` does not fit even with the
+                // markers open does not match, as subtyping compares `l` with it directly.
                 [] => {
                     let l_mentions = self.mentions(cx, l);
                     let candidates: Vec<Type> = others
@@ -4083,6 +4084,9 @@ impl<'e> Walker<'e> {
                         return Ok(());
                     }
                     for m in &candidates {
+                        if matches!(self.head(cx, m), Head::Inst(_)) && !self.fits_open(cx, l, m)? {
+                            continue;
+                        }
                         let snapshot = self.snapshot();
                         let before = self.evidence_count();
                         self.walk(cx, l, m)?;
