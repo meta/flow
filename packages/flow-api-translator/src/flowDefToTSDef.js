@@ -3838,7 +3838,12 @@ const getTransforms = (
             prop.varianceOp ??
             (prop.variance?.kind === 'plus' ||
               prop.variance?.kind === 'readonly'),
-          optional: prop.optional === 'Optional',
+          optional:
+            prop.optional === 'PlusOptional'
+              ? '+'
+              : prop.optional === 'MinusOptional'
+                ? '-'
+                : prop.optional === 'Optional',
           typeAnnotation: transformTypeAnnotationType(prop.propType),
           nameType:
             prop.nameType == null
