@@ -3485,6 +3485,304 @@ References:
                   ^^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------ short_circuit_writes.js:24:10
+
+Cannot return `value` because possibly uninitialized variable [1] is incompatible with `number` [2]. [incompatible-type]
+
+   short_circuit_writes.js:24:10
+   24|   return value; // error: the call is skipped when `maybeCallback` is null or undefined
+                ^^^^^
+
+References:
+   short_circuit_writes.js:22:7
+   22|   let value: number;
+             ^^^^^ [1]
+   short_circuit_writes.js:21:26
+   21| function optionalCall(): number {
+                                ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------ short_circuit_writes.js:30:10
+
+Cannot return `value` because possibly uninitialized variable [1] is incompatible with `number` [2]. [incompatible-type]
+
+   short_circuit_writes.js:30:10
+   30|   return value; // error: the chain stops before the call when `maybeObject` is nullish
+                ^^^^^
+
+References:
+   short_circuit_writes.js:28:7
+   28|   let value: number;
+             ^^^^^ [1]
+   short_circuit_writes.js:27:32
+   27| function optionalMethodCall(): number {
+                                      ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------ short_circuit_writes.js:36:10
+
+Cannot return `value` because possibly uninitialized variable [1] is incompatible with `number` [2]. [incompatible-type]
+
+   short_circuit_writes.js:36:10
+   36|   return value; // error
+                ^^^^^
+
+References:
+   short_circuit_writes.js:34:7
+   34|   let value: number;
+             ^^^^^ [1]
+   short_circuit_writes.js:33:31
+   33| function laterOptionalLink(): number {
+                                     ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------ short_circuit_writes.js:42:10
+
+Cannot return `value` because possibly uninitialized variable [1] is incompatible with `number` [2]. [incompatible-type]
+
+   short_circuit_writes.js:42:10
+   42|   return value; // error: the key is skipped when `maybeMap` is nullish
+                ^^^^^
+
+References:
+   short_circuit_writes.js:40:7
+   40|   let value: number;
+             ^^^^^ [1]
+   short_circuit_writes.js:39:33
+   39| function optionalComputedKey(): number {
+                                       ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------ short_circuit_writes.js:48:10
+
+Cannot return `value` because possibly uninitialized variable [1] is incompatible with `number` [2]. [incompatible-type]
+
+   short_circuit_writes.js:48:10
+   48|   return value; // error
+                ^^^^^
+
+References:
+   short_circuit_writes.js:46:7
+   46|   let value: number;
+             ^^^^^ [1]
+   short_circuit_writes.js:45:36
+   45| function optionalCallOfProperty(): number {
+                                          ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------ short_circuit_writes.js:54:10
+
+Cannot return `value` because possibly uninitialized variable [1] is incompatible with `number` [2]. [incompatible-type]
+
+   short_circuit_writes.js:54:10
+   54|   return value; // error
+                ^^^^^
+
+References:
+   short_circuit_writes.js:52:7
+   52|   let value: number;
+             ^^^^^ [1]
+   short_circuit_writes.js:51:35
+   51| function deleteWithOptionalKey(): number {
+                                         ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------ short_circuit_writes.js:60:10
+
+Cannot return `value` because possibly uninitialized variable [1] is incompatible with `number` [2]. [incompatible-type]
+
+   short_circuit_writes.js:60:10
+   60|   return value; // error: the chain stops before `run` when `maybeFactory` is nullish
+                ^^^^^
+
+References:
+   short_circuit_writes.js:58:7
+   58|   let value: number;
+             ^^^^^ [1]
+   short_circuit_writes.js:57:30
+   57| function laterCallInChain(): number {
+                                    ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------ short_circuit_writes.js:66:10
+
+Cannot return `value` because possibly uninitialized variable [1] is incompatible with `number` [2]. [incompatible-type]
+
+   short_circuit_writes.js:66:10
+   66|   return value; // error
+                ^^^^^
+
+References:
+   short_circuit_writes.js:64:7
+   64|   let value: number;
+             ^^^^^ [1]
+   short_circuit_writes.js:63:29
+   63| function laterKeyInChain(): number {
+                                   ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------ short_circuit_writes.js:96:10
+
+Cannot return `value` because possibly uninitialized variable [1] is incompatible with `number` [2]. [incompatible-type]
+
+   short_circuit_writes.js:96:10
+   96|   return value; // error
+                ^^^^^
+
+References:
+   short_circuit_writes.js:94:7
+   94|   let value: number;
+             ^^^^^ [1]
+   short_circuit_writes.js:93:36
+   93| function laterArgumentSeesWrite(): number {
+                                          ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------- short_circuit_writes.js:102:10
+
+Cannot return `value` because possibly uninitialized variable [1] is incompatible with `number` [2]. [incompatible-type]
+
+   short_circuit_writes.js:102:10
+   102|   return value; // error
+                 ^^^^^
+
+References:
+   short_circuit_writes.js:100:7
+   100|   let value: number;
+              ^^^^^ [1]
+   short_circuit_writes.js:99:32
+    99| function laterLinkSeesWrite(): number {
+                                       ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------- short_circuit_writes.js:108:10
+
+Cannot return `value` because possibly uninitialized variable [1] is incompatible with `number` [2]. [incompatible-type]
+
+   short_circuit_writes.js:108:10
+   108|   return value; // error
+                 ^^^^^
+
+References:
+   short_circuit_writes.js:106:7
+   106|   let value: number;
+              ^^^^^ [1]
+   short_circuit_writes.js:105:31
+   105| function laterKeySeesWrite(): number {
+                                      ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------- short_circuit_writes.js:113:48
+
+Cannot call `maybePair` with `value` bound to `second` because possibly uninitialized variable [1] is incompatible with
+`number` [2]. [incompatible-type]
+
+   short_circuit_writes.js:113:48
+   113|   maybePair?.(maybeDouble?.((value = 1)) ?? 0, value); // error: the inner call may be skipped
+                                                       ^^^^^
+
+References:
+   short_circuit_writes.js:112:7
+   112|   let value: number;
+              ^^^^^ [1]
+   short_circuit_writes.js:11:51
+    11| declare const maybePair: ?(first: number, second: number) => void;
+                                                          ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------- short_circuit_writes.js:114:10
+
+Cannot return `value` because possibly uninitialized variable [1] is incompatible with `number` [2]. [incompatible-type]
+
+   short_circuit_writes.js:114:10
+   114|   return value; // error
+                 ^^^^^
+
+References:
+   short_circuit_writes.js:112:7
+   112|   let value: number;
+              ^^^^^ [1]
+   short_circuit_writes.js:111:33
+   111| function nestedOptionalChain(): number {
+                                        ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------- short_circuit_writes.js:119:16
+
+Cannot get `getMap?.()[String(...)]` because `void` [1] does not have properties. [incompatible-use]
+
+   short_circuit_writes.js:119:16
+   119|   (getMap?.())[String((value = 1))]; // error: `getMap?.()` may be undefined
+                       ^^^^^^^^^^^^^^^^^^^
+
+References:
+   short_circuit_writes.js:19:23
+    19| declare const getMap: ?() => {[key: string]: number};
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------- short_circuit_writes.js:126:10
+
+Cannot return `value` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   short_circuit_writes.js:126:10
+   126|   return value; // error: `value` is still a string when the call is skipped
+                 ^^^^^
+
+References:
+   short_circuit_writes.js:124:23
+   124|   let value: number | string = 'before';
+                              ^^^^^^ [1]
+   short_circuit_writes.js:123:34
+   123| function skippedPathKeepsType(): number {
+                                         ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------- short_circuit_writes.js:132:12
+
+Cannot return `box.value` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   short_circuit_writes.js:132:12
+   132|     return box.value; // error: `box.value` is still a string when the key is skipped
+                   ^^^^^^^^^
+
+References:
+   short_circuit_writes.js:129:58
+   129| function skippedPathKeepsNarrowing(box: {value: number | string}): number {
+                                                                 ^^^^^^ [1]
+   short_circuit_writes.js:129:68
+   129| function skippedPathKeepsNarrowing(box: {value: number | string}): number {
+                                                                           ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------- short_circuit_writes.js:140:18
+
+Cannot get `current['key']` because `null` [1] does not have properties. [incompatible-use]
+
+   short_circuit_writes.js:140:18
+   140|   return current['key']; // error: `current` is still null or undefined when the key is skipped
+                         ^^^^^
+
+References:
+   short_circuit_writes.js:7:25
+     7| declare const maybeMap: ?{[key: string]: number};
+                                ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------- short_circuit_writes.js:140:18
+
+Cannot get `current['key']` because `void` [1] does not have properties. [incompatible-use]
+
+   short_circuit_writes.js:140:18
+   140|   return current['key']; // error: `current` is still null or undefined when the key is skipped
+                         ^^^^^
+
+References:
+   short_circuit_writes.js:7:25
+     7| declare const maybeMap: ?{[key: string]: number};
+                                ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
 Error ------------------------------------------------------------------------------------------- static_members.js:12:1
 
 Cannot cast `x1?.foo` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
@@ -4388,4 +4686,4 @@ References:
 
 
 
-Found 277 errors
+Found 295 errors

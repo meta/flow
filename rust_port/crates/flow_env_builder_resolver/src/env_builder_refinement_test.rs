@@ -9368,12 +9368,6 @@ x?.y.z?.w(x.y.z);
   };
   (5, 9) to (5, 10) => {
     (2, 12) to (2, 13): (`x`)
-  };
-  (4, 0) to (4, 4) => invalidated refinement by {
-    function call at (3, 0) to (3, 9)
-  };
-  (5, 1) to (5, 5) => invalidated refinement by {
-    function call at (4, 0) to (4, 16)
   }]"#
     );
 }

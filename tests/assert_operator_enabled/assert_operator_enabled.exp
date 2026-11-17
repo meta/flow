@@ -1,3 +1,20 @@
+Error ----------------------------------------------------------------------------- optional_chain_short_circuit.js:6:10
+
+Cannot return `value` because possibly uninitialized variable [1] is incompatible with `number` [2]. [incompatible-type]
+
+   optional_chain_short_circuit.js:6:10
+   6|   return value; // error: the key is skipped when `maybeMap` is null or undefined
+               ^^^^^
+
+References:
+   optional_chain_short_circuit.js:4:7
+   4|   let value: number;
+            ^^^^^ [1]
+   optional_chain_short_circuit.js:3:33
+   3| function writeAfterAssertion(): number {
+                                      ^^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------------------------------ test.js:4:3
 
 Cannot cast `a!` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
@@ -783,4 +800,4 @@ References:
 
 
 
-Found 49 errors
+Found 50 errors

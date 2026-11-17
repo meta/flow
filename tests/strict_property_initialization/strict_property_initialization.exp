@@ -367,6 +367,102 @@ Property `0.5` is used before being assigned. [uninitialized-property]
            ^^^^^^^^^
 
 
+Error ------------------------------------------------------------------------------------------ optional_chains.js:12:3
+
+Property `value` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   12|   value: number; // error
+         ^^^^^
+
+
+Error ------------------------------------------------------------------------------------------ optional_chains.js:19:3
+
+Property `value` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   19|   value: number; // error
+         ^^^^^
+
+
+Error ------------------------------------------------------------------------------------------ optional_chains.js:22:5
+
+Property `value` is used before being assigned. [uninitialized-property]
+
+   22|     this.value; // error: unassigned when `maybeNotify` is null or undefined
+           ^^^^^^^^^^
+
+
+Error ------------------------------------------------------------------------------------------ optional_chains.js:27:3
+
+Property `value` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   27|   value: number; // error
+         ^^^^^
+
+
+Error ------------------------------------------------------------------------------------------ optional_chains.js:34:3
+
+Property `value` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   34|   value: number; // error
+         ^^^^^
+
+
+Error ------------------------------------------------------------------------------------------ optional_chains.js:41:3
+
+Property `value` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   41|   value: number; // error
+         ^^^^^
+
+
+Error ------------------------------------------------------------------------------------------ optional_chains.js:48:3
+
+Property `value` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   48|   value: number; // error
+         ^^^^^
+
+
+Error ------------------------------------------------------------------------------------------ optional_chains.js:56:3
+
+Property `value` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   56|   value: number; // error
+         ^^^^^
+
+
+Error ------------------------------------------------------------------------------------------ optional_chains.js:63:3
+
+Property `value` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   63|   value: number; // error
+         ^^^^^
+
+
+Error ------------------------------------------------------------------------------------------ optional_chains.js:70:3
+
+Property `value` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   70|   value: number; // error
+         ^^^^^
+
+
+Error ----------------------------------------------------------------------------------------- optional_chains.js:72:55
+
+Property `value` is used before being assigned. [uninitialized-property]
+
+   72|     maybePair?.(maybeDouble?.((this.value = 1)) ?? 0, this.value); // error: the inner call may be skipped
+                                                             ^^^^^^^^^^
+
+
+Error ------------------------------------------------------------------------------------------ optional_chains.js:84:3
+
+Property `value` has no initializer and is not definitely assigned in the constructor. [uninitialized-property]
+
+   84|   value: number; // error
+         ^^^^^
+
+
 Error ----------------------------------------------------------------------------------------------------- reads.js:4:5
 
 Property `value` is used before being assigned. [uninitialized-property]
@@ -512,4 +608,4 @@ Property `value` has no initializer and is not definitely assigned in the constr
 
 
 
-Found 64 errors
+Found 76 errors

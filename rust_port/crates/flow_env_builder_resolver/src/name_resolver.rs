@@ -1710,6 +1710,66 @@ fn initial_env<Cx: Context>(
     (full_env::FullEnv::init(globals), jsx_base_name)
 }
 
+/// The states at the `?.` of an optional chain from which the code after the chain may start
+/// (see `with_optional_chain_short_circuits`).
+struct ShortCircuits {
+    saved: Vec<PartialEnvSnapshot>,
+    /// The links of the chain whose `?.` needs its state saved.
+    points: BTreeSet<ALoc>,
+}
+
+/// The links of the optional chain `chain` whose `?.` needs its state saved for the code after
+/// the chain. Only a call, which can also change what closures assign, or a computed key that is
+/// more than a literal or a name can change a variable in a chain: reading a property changes
+/// nothing. So the states at the `?.`s between two such links are the same, and the state at a
+/// `?.` that no such link follows is the state at the end of the chain. Of the `?.`s between two
+/// such links, the first is kept: the later ones only add refinements, which the saved states
+/// leave out.
+fn optional_chain_short_circuit_points(chain: &Expression<ALoc, ALoc>) -> BTreeSet<ALoc> {
+    use flow_parser::ast::expression::OptionalCallKind;
+    use flow_parser::ast::expression::OptionalMemberKind;
+    use flow_parser::ast::expression::member::Property;
+
+    // Walks from the end of the chain to its start. In a link, the `?.` comes before the call or
+    // the key.
+    let mut points = BTreeSet::new();
+    let mut written_after = false;
+    let mut first_since_write: Option<ALoc> = None;
+    let mut link = chain;
+    loop {
+        let (writes, optional, next) = match link.deref() {
+            ExpressionInner::OptionalMember { inner, .. } => {
+                let writes = match &inner.member.property {
+                    Property::PropertyExpression(key) => !matches!(
+                        key.deref(),
+                        ExpressionInner::StringLiteral { .. }
+                            | ExpressionInner::NumberLiteral { .. }
+                            | ExpressionInner::Identifier { .. }
+                    ),
+                    Property::PropertyIdentifier(_) | Property::PropertyPrivateName(_) => false,
+                };
+                let optional = matches!(inner.optional, OptionalMemberKind::Optional);
+                (writes, optional, &inner.member.object)
+            }
+            ExpressionInner::OptionalCall { inner, .. } => {
+                let optional = matches!(inner.optional, OptionalCallKind::Optional);
+                (true, optional, &inner.call.callee)
+            }
+            _ => break,
+        };
+        if writes {
+            points.extend(first_since_write.take());
+            written_after = true;
+        }
+        if optional && written_after {
+            first_since_write = Some(link.loc().dupe());
+        }
+        link = next;
+    }
+    points.extend(first_since_write);
+    points
+}
+
 fn conj_total(t1: Option<RefinementProp>, t2: Option<RefinementProp>) -> Option<RefinementProp> {
     match (t1, t2) {
         (Some(t1), Some(t2)) => Some(RefinementProp::and(t1, t2)),
@@ -8420,17 +8480,71 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         can_refine_obj_prop: OptionalChainingRefinement,
         expr: &flow_parser::ast::expression::Expression<ALoc, ALoc>,
     ) -> Result<(), AbruptCompletion> {
+        self.with_optional_chain_short_circuits(expr, |this, short_circuits| {
+            this.visit_optional_chain(can_refine_obj_prop, expr, short_circuits)
+        })
+    }
+
+    /// Visits a whole optional chain, `chain`. A `?.` that finds `null` or `undefined` skips the
+    /// rest of the chain, so the code after the chain also starts from the state at each `?.`, as
+    /// the code after `&&` and `||` also starts from the state before their right side. `visit`
+    /// saves those states in `short_circuits`, only where they can differ (see
+    /// `optional_chain_short_circuit_points`).
+    fn with_optional_chain_short_circuits(
+        &mut self,
+        chain: &flow_parser::ast::expression::Expression<ALoc, ALoc>,
+        visit: impl FnOnce(&mut Self, &mut ShortCircuits) -> Result<(), AbruptCompletion>,
+    ) -> Result<(), AbruptCompletion> {
+        let mut short_circuits = ShortCircuits {
+            saved: Vec::new(),
+            points: optional_chain_short_circuit_points(chain),
+        };
+        let completion_state = self.run_to_completion(|this| visit(this, &mut short_circuits));
+        if short_circuits.saved.is_empty() || completion_state.is_some() {
+            return Self::from_completion(completion_state);
+        }
+        let refinements = self.peek_new_refinements();
+        self.pop_refinement_scope();
+        for env in &short_circuits.saved {
+            self.merge_self_env(env);
+        }
+        self.push_refinement_scope(refinements);
+        Ok(())
+    }
+
+    /// Saves the state at the `?.` of the link `link` of an optional chain, for the code after
+    /// the chain.
+    fn save_short_circuit(
+        &self,
+        link: &flow_parser::ast::expression::Expression<ALoc, ALoc>,
+        short_circuits: &mut ShortCircuits,
+    ) {
+        if short_circuits.points.contains(link.loc()) {
+            short_circuits
+                .saved
+                .push(self.env_snapshot_without_latest_refinements());
+        }
+    }
+
+    fn visit_optional_chain(
+        &mut self,
+        can_refine_obj_prop: OptionalChainingRefinement,
+        expr: &flow_parser::ast::expression::Expression<ALoc, ALoc>,
+        short_circuits: &mut ShortCircuits,
+    ) -> Result<(), AbruptCompletion> {
         use flow_parser::ast::expression::ExpressionInner;
+        use flow_parser::ast::expression::OptionalCallKind;
 
         let loc = expr.loc().dupe();
         self.record_member_read(expr);
         match expr.deref() {
             ExpressionInner::OptionalMember { .. } => {
-                self.member_expression_refinement_must_be_able_to_refine_base_object_to_non_maybe(
+                self.visit_optional_member(
                     can_refine_obj_prop,
                     loc,
                     expr,
                     BTreeMap::new(),
+                    short_circuits,
                 )?;
             }
             ExpressionInner::OptionalCall { inner, .. } => {
@@ -8444,20 +8558,31 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                 let refi: BTreeMap<Lookup, (ALoc, Refinement<ALoc>)> = BTreeMap::new();
 
                 self.push_refinement_scope(empty_refinements());
-                // The refinement made here is local to the call expression and won't escape.
-                // We do need to refine. Consider x?.(x), the x in the args position should read
-                // a refined value, because otherwise the function won't be called and the
-                // arguments won't be evaluated.
-                self.optional_chain_must_be_able_to_refine_base_object_to_non_maybe(
-                    OptionalChainingRefinement::CanApplyPropNonNullishRefi,
-                    callee,
+                self.run(
+                    |this| {
+                        // The refinement made here is local to the call expression and won't
+                        // escape. We do need to refine. Consider x?.(x), the x in the args position
+                        // should read a refined value, because otherwise the function won't be
+                        // called and the arguments won't be evaluated.
+                        this.visit_optional_chain(
+                            OptionalChainingRefinement::CanApplyPropNonNullishRefi,
+                            callee,
+                            short_circuits,
+                        )?;
+                        if matches!(inner.optional, OptionalCallKind::Optional) {
+                            this.save_short_circuit(expr, short_circuits);
+                        }
+                        this.commit_refinement(refi);
+                        if let Some(targs) = targs {
+                            this.call_type_args(targs)?;
+                        }
+                        this.arg_list(arguments)
+                    },
+                    |this| {
+                        this.pop_refinement_scope();
+                        Ok(())
+                    },
                 )?;
-                self.commit_refinement(refi);
-                if let Some(targs) = targs {
-                    self.call_type_args(targs)?;
-                }
-                self.arg_list(arguments)?;
-                self.pop_refinement_scope();
                 if let Some(assertion) = self.assertion_calls.get(callee.loc()).copied() {
                     if bare_assertion_call_always_throws(assertion, &arguments.arguments) {
                         self.raise_abrupt_completion(AbruptCompletion::Throw)?;
@@ -8497,6 +8622,19 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         expr: &flow_parser::ast::expression::Expression<ALoc, ALoc>,
         refis: BTreeMap<Lookup, (ALoc, Refinement<ALoc>)>,
     ) -> Result<(), AbruptCompletion> {
+        self.with_optional_chain_short_circuits(expr, |this, short_circuits| {
+            this.visit_optional_member(can_refine_obj_prop, loc, expr, refis, short_circuits)
+        })
+    }
+
+    fn visit_optional_member(
+        &mut self,
+        can_refine_obj_prop: OptionalChainingRefinement,
+        loc: ALoc,
+        expr: &flow_parser::ast::expression::Expression<ALoc, ALoc>,
+        refis: BTreeMap<Lookup, (ALoc, Refinement<ALoc>)>,
+        short_circuits: &mut ShortCircuits,
+    ) -> Result<(), AbruptCompletion> {
         use env_api::RefinementKind;
         use flow_parser::ast::expression::ExpressionInner;
         use flow_parser::ast::expression::OptionalMemberKind;
@@ -8522,10 +8660,26 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
             }
         };
 
-        self.optional_chain_must_be_able_to_refine_base_object_to_non_maybe(
-            OptionalChainingRefinement::CanApplyPropNonNullishRefi,
-            object,
-        )?;
+        match expr.deref() {
+            ExpressionInner::OptionalMember { inner, .. } => {
+                self.visit_optional_chain(
+                    OptionalChainingRefinement::CanApplyPropNonNullishRefi,
+                    object,
+                    short_circuits,
+                )?;
+                if matches!(inner.optional, OptionalMemberKind::Optional) {
+                    self.save_short_circuit(expr, short_circuits);
+                }
+            }
+            // A plain member ends the chain of its object: in `(a?.b).c`, `.c` runs even when
+            // `a?.b` stops.
+            _ => {
+                self.optional_chain_must_be_able_to_refine_base_object_to_non_maybe(
+                    OptionalChainingRefinement::CanApplyPropNonNullishRefi,
+                    object,
+                )?;
+            }
+        }
 
         let propname: Option<FlowSmolStr> = match property {
             MemberProperty::PropertyIdentifier(id) => Some(id.name.dupe()),
