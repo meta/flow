@@ -5155,6 +5155,30 @@ impl<'e> Walker<'e> {
             Destructor::ReactCheckComponentConfig { props } if props.is_empty() => {
                 self.walk(cx, l, type_)
             }
+            // Another destructor of a bare marker, such as a mapped type over the keys `K`, waits
+            // in the flow-based solve for the lower bounds of the tvar of the marker and is
+            // evaluated on them: what flows to it says nothing about the marker. It is evaluated
+            // with the solution so far in place of the marker, once the other arguments have
+            // given it evidence.
+            _ if let Some(name) = self.marker_of(type_) => {
+                let reason = type_util::reason_of_t(type_).dupe();
+                let solution = match self.solution_so_far(cx, &name, &reason) {
+                    Some(solution) if !is_placeholder(&solution) => solution,
+                    Some(_) => return self.give_up(cx, "destructor", l, u),
+                    None if !self.second_pass => {
+                        self.deferred.push((l.dupe(), u.dupe()));
+                        return Ok(());
+                    }
+                    None => return self.give_up(cx, "destructor", l, u),
+                };
+                let mut fixed = FlowOrdMap::new();
+                fixed.insert(name, solution);
+                let solved = subst(cx, &fixed, type_);
+                match self.evaluate(cx, &solved, defer_use_t)? {
+                    Some(result) => self.walk(cx, l, &result),
+                    None => self.give_up(cx, "destructor", l, u),
+                }
+            }
             // Other destructors of markers, such as `T[K]` or a mapped type: the destructor
             // evaluated with the markers rigid, if that decides it (`ComponentProps<X<T>>['a']`).
             // Otherwise it is stuck on a marker, and says nothing about it.

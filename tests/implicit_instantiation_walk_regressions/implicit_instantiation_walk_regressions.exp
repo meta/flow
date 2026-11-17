@@ -568,6 +568,23 @@ References:
                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------ mapped_type_of_marker.js:20:1
+
+Cannot cast `lookup(...)` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   mapped_type_of_marker.js:20:1
+   20| lookup('a', table) as string; // error
+       ^^^^^^^^^^^^^^^^^^
+
+References:
+   mapped_type_of_marker.js:16:35
+   16| declare const table: {readonly a: number};
+                                         ^^^^^^ [1]
+   mapped_type_of_marker.js:20:23
+   20| lookup('a', table) as string; // error
+                             ^^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------------------- nested_iterable.js:8:1
 
 Cannot cast `flat` to `Array<string>` because in array element: `number` [1] is not exactly the same as `string` [2].
@@ -995,4 +1012,4 @@ References:
 
 
 
-Found 54 errors
+Found 55 errors
