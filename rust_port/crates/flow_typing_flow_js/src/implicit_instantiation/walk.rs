@@ -3148,7 +3148,7 @@ impl<'e> Walker<'e> {
         let call = match d.deref() {
             DefTInner::PolyT(_) => return true,
             DefTInner::ObjT(o) => o.call_t,
-            DefTInner::InstanceT(i) => {
+            DefTInner::InstanceT(i) if self.declares_call(cx, i) => {
                 (self.ancestors(cx, i).into_iter()).find_map(|a| a.inst.inst_call_t)
             }
             _ => None,
@@ -3577,6 +3577,92 @@ impl<'e> Walker<'e> {
             }
         }
         result
+    }
+
+    /// Whether `inst` or one of its ancestors may declare a call signature. A class or interface
+    /// declares one whatever its type arguments, so the ancestors are read without them, unlike in
+    /// `ancestors`, which substitutes them into each member.
+    fn declares_call<'cx>(&self, cx: &mut Context<'cx>, inst: &InstanceT) -> bool {
+        let mut seen: Vec<InstanceT> = Vec::new();
+        let mut classes: Vec<usize> = Vec::new();
+        let mut work = vec![inst.dupe()];
+        while let Some(i) = work.pop() {
+            if i.inst.inst_call_t.is_some() {
+                return true;
+            }
+            if seen.iter().any(|s| s.ptr_eq(&i)) {
+                continue;
+            }
+            let mut supers = vec![i.super_.dupe()];
+            supers.extend(i.implements.iter().duped());
+            seen.push(i);
+            while let Some(sup) = supers.pop() {
+                let sup = self.resolve(cx, &sup);
+                match sup.deref() {
+                    TypeInner::IntersectionT(_, rep) => supers.extend(rep.members_iter().duped()),
+                    TypeInner::ThisInstanceT(d) => work.push(d.instance.dupe()),
+                    TypeInner::DefT(_, d) if let DefTInner::InstanceT(s) = d.deref() => {
+                        work.push((**s).dupe())
+                    }
+                    TypeInner::TypeAppT(_) | TypeInner::ThisTypeAppT(_) => {
+                        match self.class_of_app(cx, &sup) {
+                            Some((class, _)) if classes.contains(&addr(&class)) => {}
+                            Some((class, instance)) => {
+                                classes.push(addr(&class));
+                                supers.push(instance);
+                            }
+                            // A superclass that is a value with a construct signature, or another
+                            // type that the expansion gets.
+                            None => return true,
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+        false
+    }
+
+    /// The class or interface that the application `t` applies, if it applies one, and what it
+    /// stands for without the type arguments.
+    fn class_of_app<'cx>(&self, cx: &mut Context<'cx>, t: &Type) -> Option<(Type, Type)> {
+        let type_ = match t.deref() {
+            TypeInner::TypeAppT(a) => a.type_.dupe(),
+            TypeInner::ThisTypeAppT(a) => a.type_.dupe(),
+            _ => return None,
+        };
+        let class = self.resolve(cx, &type_);
+        // A class imported as a type.
+        let class = match class.deref() {
+            TypeInner::DefT(_, d) if let DefTInner::TypeT(_, inner) = d.deref() => {
+                self.resolve(cx, inner)
+            }
+            _ => class,
+        };
+        let class = match class.deref() {
+            TypeInner::DefT(_, d) if let DefTInner::PolyT(p) = d.deref() => {
+                self.resolve(cx, &p.t_out)
+            }
+            _ => class,
+        };
+        let TypeInner::DefT(_, d) = class.deref() else {
+            return None;
+        };
+        match d.deref() {
+            // The instance type of a class, or the application of an imported class.
+            DefTInner::ClassT(instance) => {
+                let instance = instance.dupe();
+                Some((class, instance))
+            }
+            // An interface.
+            DefTInner::TypeT(_, instance) => {
+                let instance = self.resolve(cx, instance);
+                matches!(instance.deref(), TypeInner::DefT(_, d)
+                    if matches!(d.deref(), DefTInner::InstanceT(_)))
+                .then(|| (class.dupe(), instance))
+            }
+            _ => None,
+        }
     }
 
     /// What a class extends when its superclass is a value with a construct signature (`class B
