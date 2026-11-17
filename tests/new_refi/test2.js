@@ -1,4 +1,4 @@
-const x: boolean => (() => number) = b => {
+const x: (b: boolean) => (() => number) = b => {
   var val = b ? 0: null;
   if (val == null) {
     return () => 42;

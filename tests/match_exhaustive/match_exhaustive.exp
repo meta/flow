@@ -434,9 +434,9 @@ Error --------------------------------------------------------------------------
           ^^^^^
 
 References:
-   basic.js:272:6
-   272|     [string]: boolean,
-             ^^^^^^ [1]
+   basic.js:272:11
+   272|     [key: string]: boolean,
+                  ^^^^^^ [1]
 
 
 Error --------------------------------------------------------------------------------------------------- basic.js:303:3
@@ -1665,9 +1665,9 @@ This object pattern hasn't considered all possible properties of the input. Ther
           ^^^^^^^^
 
 References:
-   object-pattern-rest.js:5:22
-   5|   declare const x: {[string]: number};
-                           ^^^^^^ [1]
+   object-pattern-rest.js:5:27
+   5|   declare const x: {[key: string]: number};
+                                ^^^^^^ [1]
 
 
 Error -------------------------------------------------------------------------------------- object-pattern-rest.js:18:5
@@ -2007,7 +2007,7 @@ not part of the input type. To fix, either remove this pattern or restructure pr
 Error ------------------------------------------------------------------------------------------------- objects.js:357:3
 
 `match` hasn't checked all possible cases of the input type. To fix, add the missing pattern: `{...}` to match
-`{[string]: boolean}` [1]. [match-not-exhaustive]
+`{[key: string]: boolean}` [1]. [match-not-exhaustive]
 
    objects.js:357:3
    357|   match (x) { // ERROR
@@ -2015,14 +2015,14 @@ Error --------------------------------------------------------------------------
 
 References:
    objects.js:351:20
-   351|   declare const x: {[string]: boolean};
-                           ^^^^^^^^^^^^^^^^^^^ [1]
+   351|   declare const x: {[key: string]: boolean};
+                           ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------------- objects.js:362:3
 
 `match` hasn't checked all possible cases of the input type. To fix, add the missing pattern: `{...}` to match
-`{[string]: boolean}` [1]. [match-not-exhaustive]
+`{[key: string]: boolean}` [1]. [match-not-exhaustive]
 
    objects.js:362:3
    362|   match (x) { // ERROR
@@ -2030,8 +2030,8 @@ Error --------------------------------------------------------------------------
 
 References:
    objects.js:351:20
-   351|   declare const x: {[string]: boolean};
-                           ^^^^^^^^^^^^^^^^^^^ [1]
+   351|   declare const x: {[key: string]: boolean};
+                           ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------------- objects.js:364:5
@@ -2055,7 +2055,7 @@ of the input type. To fix, either remove this pattern or restructure previous pa
 Error ------------------------------------------------------------------------------------------------- objects.js:379:3
 
 `match` hasn't checked all possible cases of the input type. To fix, add the missing pattern: `{...}` to match
-`{[number]: boolean}` [1]. [match-not-exhaustive]
+`{[key: number]: boolean}` [1]. [match-not-exhaustive]
 
    objects.js:379:3
    379|   match (x) { // ERROR
@@ -2063,8 +2063,8 @@ Error --------------------------------------------------------------------------
 
 References:
    objects.js:373:20
-   373|   declare const x: {[number]: boolean};
-                           ^^^^^^^^^^^^^^^^^^^ [1]
+   373|   declare const x: {[key: number]: boolean};
+                           ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------------- objects.js:384:5

@@ -198,7 +198,7 @@ import * as React from 'react';
 
   type S = H; // not included in error message
 
-  type H = {((number) => number): void, m: typeof m, s: S};
+  type H = {(f: (x: number) => number): void, m: typeof m, s: S};
 }
 
 {

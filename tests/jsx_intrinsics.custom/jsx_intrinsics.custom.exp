@@ -26,9 +26,9 @@ References:
    lib/jsx.js:4:16
    4|       testdiv: {id: string, [StringPrefix<'data-'>]: string};
                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   main.js:6:20
-   6| const dataProps: {[StringPrefix<'data-'>]: string} = {};
-                         ^^^^^^^^^^^^^^^^^^^^^ [2]
+   main.js:6:25
+   6| const dataProps: {[key: StringPrefix<'data-'>]: string} = {};
+                              ^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- main.js:10:2

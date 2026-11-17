@@ -14,5 +14,5 @@ x3 = { f: [] };
 var x4 = null;
 ({ x4 } = { x4: [] }); // TODO should error due to provider position
 
-const x5: { [string]: Array<number> } = {};
+const x5: { [key: string]: Array<number> } = {};
 x5[str] = [];

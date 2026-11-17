@@ -1,7 +1,7 @@
 // @flow
 
 declare class C {
-  [string]: boolean;
+  [key: string]: boolean;
   s: number;
 }
 

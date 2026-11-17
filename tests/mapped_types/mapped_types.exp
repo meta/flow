@@ -1717,13 +1717,13 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ instancet.js:21:3
 
-Cannot cast `i` to `interface {readonly foo: number; [string]: boolean}` because an index signature declaring the
+Cannot cast `i` to `interface {readonly foo: number; [key: string]: boolean}` because an index signature declaring the
 expected key / value type is read-only in
 `interface {readonly foo: WithIndexer["foo"]; readonly [string]: WithIndexer[string]}` [1] but writable in
-`interface {readonly foo: number; [string]: boolean}` [2]. [incompatible-variance]
+`interface {readonly foo: number; [key: string]: boolean}` [2]. [incompatible-variance]
 
    instancet.js:21:3
-   21|   i as interface {readonly foo: number, [string]: boolean}; // ERROR
+   21|   i as interface {readonly foo: number, [key: string]: boolean}; // ERROR
          ^
 
 References:
@@ -1731,8 +1731,8 @@ References:
    19|   declare const i: MappedInterfaceWithIndexer;
                           ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    instancet.js:21:8
-   21|   i as interface {readonly foo: number, [string]: boolean}; // ERROR
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   21|   i as interface {readonly foo: number, [key: string]: boolean}; // ERROR
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------ instancet.js:33:3
@@ -2151,60 +2151,60 @@ References:
 
 Error ------------------------------------------------------------------------------------------ non_homomorphic.js:21:3
 
-Cannot cast `withLeftovers` to `{[number]: string, foo: string}` because in property `foo`: `number` [1] is not exactly
-the same as `string` [2]. [incompatible-type]
+Cannot cast `withLeftovers` to `{[key: number]: string, foo: string}` because in property `foo`: `number` [1] is not
+exactly the same as `string` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `foo` is invariantly typed. To fix the error,
-- Either make `{[number]: number, foo: number}` [3] and `{[number]: string, foo: string}` [4] exactly the same
-- Or make property `foo` in `{[number]: string, foo: string}` [4] readonly. See
+- Either make `{[number]: number, foo: number}` [3] and `{[key: number]: string, foo: string}` [4] exactly the same
+- Or make property `foo` in `{[key: number]: string, foo: string}` [4] readonly. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
    non_homomorphic.js:21:3
-   21|   withLeftovers as {[number]: string, foo: string}; // ERROR 2x
+   21|   withLeftovers as {[key: number]: string, foo: string}; // ERROR 2x
          ^^^^^^^^^^^^^
 
 References:
    non_homomorphic.js:18:50
    18|   type WithLeftovers = {[key in 'foo' | number]: number};
                                                         ^^^^^^ [1]
-   non_homomorphic.js:21:44
-   21|   withLeftovers as {[number]: string, foo: string}; // ERROR 2x
-                                                  ^^^^^^ [2]
+   non_homomorphic.js:21:49
+   21|   withLeftovers as {[key: number]: string, foo: string}; // ERROR 2x
+                                                       ^^^^^^ [2]
    non_homomorphic.js:18:24
    18|   type WithLeftovers = {[key in 'foo' | number]: number};
                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    non_homomorphic.js:21:20
-   21|   withLeftovers as {[number]: string, foo: string}; // ERROR 2x
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   21|   withLeftovers as {[key: number]: string, foo: string}; // ERROR 2x
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ------------------------------------------------------------------------------------------ non_homomorphic.js:21:3
 
-Cannot cast `withLeftovers` to `{[number]: string, foo: string}` because in the indexer property: `number` [1] is not
-exactly the same as `string` [2]. [incompatible-type]
+Cannot cast `withLeftovers` to `{[key: number]: string, foo: string}` because in the indexer property: `number` [1] is
+not exactly the same as `string` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because the indexer is invariantly typed. To fix the error,
-- Either make `{[number]: number, foo: number}` [3] and `{[number]: string, foo: string}` [4] exactly the same
-- Or make the indexer in `{[number]: string, foo: string}` [4] readonly. See
+- Either make `{[number]: number, foo: number}` [3] and `{[key: number]: string, foo: string}` [4] exactly the same
+- Or make the indexer in `{[key: number]: string, foo: string}` [4] readonly. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
    non_homomorphic.js:21:3
-   21|   withLeftovers as {[number]: string, foo: string}; // ERROR 2x
+   21|   withLeftovers as {[key: number]: string, foo: string}; // ERROR 2x
          ^^^^^^^^^^^^^
 
 References:
    non_homomorphic.js:18:50
    18|   type WithLeftovers = {[key in 'foo' | number]: number};
                                                         ^^^^^^ [1]
-   non_homomorphic.js:21:31
-   21|   withLeftovers as {[number]: string, foo: string}; // ERROR 2x
-                                     ^^^^^^ [2]
+   non_homomorphic.js:21:36
+   21|   withLeftovers as {[key: number]: string, foo: string}; // ERROR 2x
+                                          ^^^^^^ [2]
    non_homomorphic.js:18:24
    18|   type WithLeftovers = {[key in 'foo' | number]: number};
                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    non_homomorphic.js:21:20
-   21|   withLeftovers as {[number]: string, foo: string}; // ERROR 2x
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   21|   withLeftovers as {[key: number]: string, foo: string}; // ERROR 2x
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------- non_homomorphic.js:28:27
@@ -2612,9 +2612,9 @@ Cannot instantiate `Semi` because in type argument `Keys`: `number` [1] is incom
                                    ^^^^^^ [1]
 
 References:
-   semi_homomorphic.js:20:40
-   20|   type P = {foo: number, bar: string, [string]: boolean};
-                                              ^^^^^^ [2]
+   semi_homomorphic.js:20:45
+   20|   type P = {foo: number, bar: string, [key: string]: boolean};
+                                                   ^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------- semi_homomorphic.js:44:32

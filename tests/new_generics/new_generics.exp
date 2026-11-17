@@ -10,9 +10,9 @@ References:
    arr_spread.js:7:3
    7|   fn(...arr) as R; // nope
         ^^^^^^^^^^ [1]
-   arr_spread.js:5:48
-   5| function f<X extends Array<number>, R>(fn: (...X) => R, x: X, arr: Array<number>) {
-                                                     ^ [2]
+   arr_spread.js:5:54
+   5| function f<X extends Array<number>, R>(fn: (...args: X) => R, x: X, arr: Array<number>) {
+                                                           ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------- arr_spread.js:17:12
@@ -55,9 +55,9 @@ References:
    arr_spread.js:27:3
    27|   f(...x); // nope
          ^^^^^^^ [1]
-   arr_spread.js:26:61
-   26| function w<A extends [number, number]>(x: A, f: (number, ...A) => void) {
-                                                                   ^ [2]
+   arr_spread.js:26:70
+   26| function w<A extends [number, number]>(x: A, f: (n: number, ...rest: A) => void) {
+                                                                            ^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------- arr_spread.js:28:3
@@ -72,9 +72,9 @@ References:
    arr_spread.js:28:3
    28|   f(42, 42, 42); // nope
          ^^^^^^^^^^^^^ [1]
-   arr_spread.js:26:61
-   26| function w<A extends [number, number]>(x: A, f: (number, ...A) => void) {
-                                                                   ^ [2]
+   arr_spread.js:26:70
+   26| function w<A extends [number, number]>(x: A, f: (n: number, ...rest: A) => void) {
+                                                                            ^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------- arr_spread.js:30:3
@@ -90,9 +90,9 @@ References:
    arr_spread.js:30:3
    30|   f(42, ...x, ...x); // nope
          ^^^^^^^^^^^^^^^^^ [1]
-   arr_spread.js:26:61
-   26| function w<A extends [number, number]>(x: A, f: (number, ...A) => void) {
-                                                                   ^ [2]
+   arr_spread.js:26:70
+   26| function w<A extends [number, number]>(x: A, f: (n: number, ...rest: A) => void) {
+                                                                            ^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------- arr_spread.js:34:3
@@ -107,9 +107,9 @@ References:
    arr_spread.js:34:3
    34|   f(42, 42, 42); // nope
          ^^^^^^^^^^^^^ [1]
-   arr_spread.js:32:59
-   32| function w2<A extends Array<number>>(x: A, f: (number, ...A) => void) {
-                                                                 ^ [2]
+   arr_spread.js:32:68
+   32| function w2<A extends Array<number>>(x: A, f: (n: number, ...rest: A) => void) {
+                                                                          ^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------- arr_spread.js:35:3
@@ -124,39 +124,39 @@ References:
    arr_spread.js:35:3
    35|   f(42, 42, 42, ...x); // should be nope
          ^^^^^^^^^^^^^^^^^^^ [1]
-   arr_spread.js:32:59
-   32| function w2<A extends Array<number>>(x: A, f: (number, ...A) => void) {
-                                                                 ^ [2]
+   arr_spread.js:32:68
+   32| function w2<A extends Array<number>>(x: A, f: (n: number, ...rest: A) => void) {
+                                                                          ^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------- arr_spread.js:40:5
 
-Cannot call `f` with array literal bound to the first parameter because array literal [1] is incompatible with
-`empty` [2]. [incompatible-type]
+Cannot call `f` with array literal bound to `a` because array literal [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    arr_spread.js:40:5
    40|   f([42, 42, 42]); // nope
            ^^^^^^^^^^^^ [1]
 
 References:
-   arr_spread.js:39:47
-   39| function w3<A extends Array<number>>(x: A, f: A => void) {
-                                                     ^ [2]
+   arr_spread.js:39:51
+   39| function w3<A extends Array<number>>(x: A, f: (a: A) => void) {
+                                                         ^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------- arr_spread.js:41:5
 
-Cannot call `f` with array literal bound to the first parameter because array literal [1] is incompatible with
-`empty` [2]. [incompatible-type]
+Cannot call `f` with array literal bound to `a` because array literal [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    arr_spread.js:41:5
    41|   f([42, ...x]); // should be nope
            ^^^^^^^^^^ [1]
 
 References:
-   arr_spread.js:39:47
-   39| function w3<A extends Array<number>>(x: A, f: A => void) {
-                                                     ^ [2]
+   arr_spread.js:39:51
+   39| function w3<A extends Array<number>>(x: A, f: (a: A) => void) {
+                                                         ^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------- arr_spread.js:47:3
@@ -359,7 +359,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- computed_keys.js:10:5
 
-Cannot assign `'hi'` to `a['foo']` because property `foo` is missing in `{[X]: string}` [1]. [prop-missing]
+Cannot assign `'hi'` to `a['foo']` because property `foo` is missing in `{[key: X]: string}` [1]. [prop-missing]
 
    computed_keys.js:10:5
    10|   a['foo'] = 'hi'; // nope
@@ -367,8 +367,8 @@ Cannot assign `'hi'` to `a['foo']` because property `foo` is missing in `{[X]: s
 
 References:
    computed_keys.js:6:6
-    6|   a: {[X]: string},
-            ^^^^^^^^^^^^^ [1]
+    6|   a: {[key: X]: string},
+            ^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error -------------------------------------------------------------------------------------------- computed_keys.js:13:5

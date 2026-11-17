@@ -22,7 +22,7 @@ function b<X extends number, Y extends string>(x: X, y: Y) {
   (x < y) as boolean; // nope
 }
 
-function c<S extends string, X extends {[string]: unknown}, Y extends Array<number>>(
+function c<S extends string, X extends {[key: string]: unknown}, Y extends Array<number>>(
   s: S,
   x: X,
   y: Y,
@@ -53,7 +53,7 @@ function h<X extends [number]>(x: X): {[_K in keyof X]: string} {
 }
 
 // ToStringT
-function gn<TType>(jsEnum: {[TType]: string, ...}) {
+function gn<TType>(jsEnum: {[key: TType]: string, ...}) {
   Object.keys(jsEnum) as ReadonlyArray<TType>;
 }
 
@@ -90,7 +90,7 @@ function oc<
   }>,
 >(
   conversations: ReadonlyArray<T>,
-  lookup: {[string]: L, ...},
+  lookup: {[key: string]: L, ...},
 ): ReadonlyArray<T> {
   return conversations.filter(conversation => {
     const {id} = conversation;
@@ -112,8 +112,8 @@ type ObjectType<TK, TV> = {[key: TK]: TV, ...};
 function ObjectFlip<TK extends ObjectKey, TV extends ?ObjectKey>(
   obj: ObjectType<TK, TV>,
   key: TK,
-): {[string | number]: TK} {
-  const flipped: {[string | number]: TK} = {};
+): {[key: string | number]: TK} {
+  const flipped: {[key: string | number]: TK} = {};
   const value: ?TV = obj[key];
   if (value !== null && value !== undefined) {
     flipped[value] = key;
@@ -144,7 +144,7 @@ class C<TConfig extends t> {
 
 // Keys
 function gejses<TMapKey extends string>(
-  key: keyof {[TMapKey]: $FlowFixMe, ...},
+  key: keyof {[key: TMapKey]: $FlowFixMe, ...},
 ): null {
   if (key) {
   }

@@ -1,5 +1,5 @@
 function apply<Args extends ReadonlyArray<unknown>, Ret>(
-  fn: (...Args) => Ret,
+  fn: (...args: Args) => Ret,
   args: Args,
 ): Ret {
   return fn(...args);
@@ -20,7 +20,7 @@ apply(withRest1, ['hi', 123, false]); // Error - too many args
 
 // Same thing, but with types instead of functions
 declare const applyType: <Args extends ReadonlyArray<unknown>, Ret>(
-  fn: (...Args) => Ret,
+  fn: (...args: Args) => Ret,
   args: Args,
 ) => Ret;
 

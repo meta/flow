@@ -1,3 +1,3 @@
 // @flow
 
-function foo(f: (string) => void = (s) => {}) {} // OK
+function foo(f: (s: string) => void = (s) => {}) {} // OK

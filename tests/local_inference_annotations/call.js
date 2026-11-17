@@ -1,7 +1,7 @@
 //@flow
 
 
-function f(x: number => number, y: any) {}
+function f(x: (n: number) => number, y: any) {}
 
 f((x) => 3, (x: number) => 3);
 
@@ -17,11 +17,11 @@ g(3); // Ok
 
 f((x) => 3, (x: number) => 3) || []; // no annot, constant-condition error
 
-const h: ?(number => number) = null;
+const h: ?((x: number) => number) = null;
 h ?? ((x) => 3); // no annot
 
 class Base {
-  constructor(f: (number) => number) {}
+  constructor(f: (x: number) => number) {}
 }
 
 new Base(x => 3); // no annot

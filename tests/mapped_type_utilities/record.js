@@ -6,19 +6,19 @@ exact as {foo: number}; // ERROR, mising bar
 
 type Indexed = Record<'foo' | string, number>;
 declare const indexed: Indexed;
-indexed as {foo: number, [string]: number}; // OK
+indexed as {foo: number, [key: string]: number}; // OK
 indexed as {foo: number}; // ERROR, missing indexer
 
 // Record with number key type
 type NumIndexed = Record<number, string>;
 declare const numIndexed: NumIndexed;
-numIndexed as {[number]: string}; // OK
+numIndexed as {[key: number]: string}; // OK
 numIndexed as {1: string}; // ERROR, missing indexer
 
 // Record with symbol key type
 type SymIndexed = Record<symbol, boolean>;
 declare const symIndexed: SymIndexed;
-symIndexed as {[symbol]: boolean}; // OK
+symIndexed as {[key: symbol]: boolean}; // OK
 symIndexed as {foo: boolean}; // ERROR, missing indexer
 
 // Record with PropertyKey

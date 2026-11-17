@@ -48,8 +48,8 @@ function WrapInDivWithExtraProp<Props extends {...}>(
 }
 
 function mapProps<InputProps extends {...}, SubInputProps extends InputProps, OutputProps extends {...}>(
-  mapperFn: InputProps => OutputProps,
-): (component(...OutputProps)) => component(...SubInputProps) {
+  mapperFn: (props: InputProps) => OutputProps,
+): (c: component(...OutputProps)) => component(...SubInputProps) {
   return Component => props => <Component {...mapperFn(props)} />;
 }
 

@@ -18,8 +18,8 @@ function test2() {
 
 function test3() {
   const test3 = true ? [x => {}] : [(x: number) => {}];
-  test3 as ReadonlyArray<(number) => void>;
-  test3 as ReadonlyArray<(string) => void>; // error should be number => void
+  test3 as ReadonlyArray<(x: number) => void>;
+  test3 as ReadonlyArray<(x: string) => void>; // error should be number => void
 }
 
 function test4() {

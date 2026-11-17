@@ -11,7 +11,7 @@ declare function useCallback<T extends (...args: ReadonlyArray<empty>) => unknow
 ): T;
 
 type Props = Readonly<{
-  fn: (...ReadonlyArray<empty>) => void,
+  fn: (...args: ReadonlyArray<empty>) => void,
  ...}>;
 
 function Component({

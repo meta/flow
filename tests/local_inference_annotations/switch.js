@@ -14,4 +14,4 @@ let a = ((x => {
     default:
       return y => 3 // default cases are covered, too!
   };
-}) as number => number => number);
+}) as (x: number) => (y: number) => number);

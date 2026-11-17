@@ -17,8 +17,8 @@
   // Leftover types are converted to indexers
   type WithLeftovers = {[key in 'foo' | number]: number};
   declare const withLeftovers: WithLeftovers;
-  withLeftovers as {[number]: number, foo: number}; // OK!
-  withLeftovers as {[number]: string, foo: string}; // ERROR 2x
+  withLeftovers as {[key: number]: number, foo: number}; // OK!
+  withLeftovers as {[key: number]: string, foo: string}; // ERROR 2x
 }
 
 {

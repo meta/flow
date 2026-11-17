@@ -2,7 +2,7 @@
 
 // Indexer: the key type
 {
-  declare const x: {[string]: number};
+  declare const x: {[key: string]: number};
 
   match (x) {
     {foo: _} => {} // ERROR

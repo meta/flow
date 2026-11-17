@@ -12,10 +12,10 @@ let a = ((x => {
   } else {
     return y => 3;
   }
-}) as number => number => number);
+}) as (x: number) => (y: number) => number);
 
 let b = ((x => {
   // Blocks are not necessary
   if (true) return (y) => 3
   else return (y) => 3
-}) as number => number => number);
+}) as (x: number) => (y: number) => number);

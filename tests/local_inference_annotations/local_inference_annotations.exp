@@ -89,9 +89,9 @@ out-of-bounds array accesses, etc.). If the check is valid, you might want to ma
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   call.js:4:40
-    4| function f(x: number => number, y: any) {}
-                                              ^ [1]
+   call.js:4:45
+    4| function f(x: (n: number) => number, y: any) {}
+                                                   ^ [1]
 
 
 Error ----------------------------------------------------------------------------------------------------- cast.js:6:15
@@ -345,20 +345,20 @@ Missing an annotation on return. [missing-local-annot]
 
 Error ---------------------------------------------------------------------------------------------- conditional.js:22:3
 
-Cannot cast `test3` to `ReadonlyArray<(string) => void>` because in array element > the first parameter: `number` [1] is
-incompatible with `string` [2]. [incompatible-type]
+Cannot cast `test3` to `ReadonlyArray<(x: string) => void>` because in array element > the first parameter: `number` [1]
+is incompatible with `string` [2]. [incompatible-type]
 
    conditional.js:22:3
-   22|   test3 as ReadonlyArray<(string) => void>; // error should be number => void
+   22|   test3 as ReadonlyArray<(x: string) => void>; // error should be number => void
          ^^^^^
 
 References:
    conditional.js:20:41
    20|   const test3 = true ? [x => {}] : [(x: number) => {}];
                                                ^^^^^^ [1]
-   conditional.js:22:27
-   22|   test3 as ReadonlyArray<(string) => void>; // error should be number => void
-                                 ^^^^^^ [2]
+   conditional.js:22:30
+   22|   test3 as ReadonlyArray<(x: string) => void>; // error should be number => void
+                                    ^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------- conditional.js:39:5
@@ -383,13 +383,13 @@ Error --------------------------------------------------------------------------
 Property `0` is missing in `{...}` [1]. [prop-missing]
 
    destructuring_init.js:3:6
-   3| let [a]: number => number = (x) => { // ERROR
+   3| let [a]: (x: number) => number = (x) => { // ERROR
            ^
 
 References:
    destructuring_init.js:3:10
-   3| let [a]: number => number = (x) => { // ERROR
-               ^^^^^^^^^^^^^^^^ [1]
+   3| let [a]: (x: number) => number = (x) => { // ERROR
+               ^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error --------------------------------------------------------------------------------------- destructuring_init.js:4:14
@@ -405,13 +405,13 @@ Error --------------------------------------------------------------------------
 Property `x` is missing in `{...}` [1]. [prop-missing]
 
    destructuring_init.js:9:8
-   9| const {x: b, y: c}: number => void = (x) => { // This x has an annot available
+   9| const {x: b, y: c}: (x: number) => void = (x) => { // This x has an annot available
              ^
 
 References:
    destructuring_init.js:9:21
-   9| const {x: b, y: c}: number => void = (x) => { // This x has an annot available
-                          ^^^^^^^^^^^^^^ [1]
+   9| const {x: b, y: c}: (x: number) => void = (x) => { // This x has an annot available
+                          ^^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error --------------------------------------------------------------------------------------- destructuring_init.js:9:14
@@ -419,13 +419,13 @@ Error --------------------------------------------------------------------------
 Property `y` is missing in `{...}` [1]. [prop-missing]
 
    destructuring_init.js:9:14
-   9| const {x: b, y: c}: number => void = (x) => { // This x has an annot available
+   9| const {x: b, y: c}: (x: number) => void = (x) => { // This x has an annot available
                    ^
 
 References:
    destructuring_init.js:9:21
-   9| const {x: b, y: c}: number => void = (x) => { // This x has an annot available
-                          ^^^^^^^^^^^^^^ [1]
+   9| const {x: b, y: c}: (x: number) => void = (x) => { // This x has an annot available
+                          ^^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error -------------------------------------------------------------------------------------- destructuring_init.js:10:15
@@ -919,7 +919,7 @@ Error --------------------------------------------------------------------------
 
 Missing an annotation on this parameter. [missing-local-annot]
 
-   7| let b = ((x => y => (z => 3)(3)) as number => number => number); // annot missing on z
+   7| let b = ((x => y => (z => 3)(3)) as (x: number) => (y: number) => number); // annot missing on z
                            ^
 
 
@@ -927,7 +927,7 @@ Error --------------------------------------------------------------------------
 
 Missing an annotation on this parameter. [missing-local-annot]
 
-   11| let d = ((x => { return y => { return (z => 3)(3) }}) as number => number => number); // annot missing on z
+   11| let d = ((x => { return y => { return (z => 3)(3) }}) as (x: number) => (y: number) => number); // annot missing on z
                                               ^
 
 

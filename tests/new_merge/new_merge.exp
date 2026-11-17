@@ -517,9 +517,9 @@ Cannot cast `baz02` to `empty` because `number` [1] is incompatible with `empty`
        ^^^^^
 
 References:
-   eval_indexed_access.js:7:46
-    7| type Foo2 = {[string]: {[string]: {[string]: number}}};
-                                                    ^^^^^^ [1]
+   eval_indexed_access.js:7:61
+    7| type Foo2 = {[key: string]: {[key: string]: {[key: string]: number}}};
+                                                                   ^^^^^^ [1]
    main.js:88:10
    88| baz02 as empty; // error number ~> empty
                 ^^^^^ [2]

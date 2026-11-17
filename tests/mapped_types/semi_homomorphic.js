@@ -17,12 +17,12 @@ type Semi<O extends {...}, Keys extends keyof O> = {
 
 {
   // Indexers work
-  type P = {foo: number, bar: string, [string]: boolean};
+  type P = {foo: number, bar: string, [key: string]: boolean};
 
   type MappedWithIndexer = Semi<P, 'foo' | string>;
 
   declare const withIndexer: MappedWithIndexer;
-  withIndexer as {foo: number, [string]: boolean}; // OK
+  withIndexer as {foo: number, [key: string]: boolean}; // OK
   withIndexer as {foo: number}; // ERROR, missing indexer
 
   type MappedWithoutIndexer = Semi<P, 'foo' | 'bar'>;
@@ -37,11 +37,11 @@ type Semi<O extends {...}, Keys extends keyof O> = {
   // but persist the indexer type.
   type IndexedBad = Semi<P, number>; // ERROR
   declare const bad: IndexedBad;
-  bad as {[number]: boolean}; // NO ERROR
+  bad as {[key: number]: boolean}; // NO ERROR
 
   // Indexers when the original type has none cause an error at the instantiation
   // site and an any-typed indexer
   type NoIndexerBad = Semi<{}, number>; // ERROR
   declare const noIndexerBad: NoIndexerBad;
-  noIndexerBad as {[number]: empty}; // NO ERROR
+  noIndexerBad as {[key: number]: empty}; // NO ERROR
 }

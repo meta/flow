@@ -1,7 +1,7 @@
 declare opaque type Box<out T>;
 
 declare const render: ((overrides?: number) => void) &
-  (<R>((props: {readonly s: string}) => R) => R);
+  (<R>(cb: (props: {readonly s: string}) => R) => R);
 
 type Unbox<B> = B extends Box<infer C> ? (C extends {readonly s: unknown} ? C : empty) : empty;
 declare function renderUnbox<S>(props: Unbox<Box<{readonly s: S}>>): S;

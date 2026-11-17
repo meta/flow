@@ -1,5 +1,5 @@
 type F<T> = Readonly<{
-    log: (() => T) => void,
+    log: (f: () => T) => void,
     ...
   }>;
 

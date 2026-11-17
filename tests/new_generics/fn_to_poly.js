@@ -5,7 +5,7 @@ function foo<T>(x: T): T {
 }
 foo.bar = 'foo';
 type Foo = {
-  <T>(T): T,
+  <T>(x: T): T,
   bar: string,
  ...};
 
@@ -15,10 +15,10 @@ function f(x: unknown): empty {
   return f(x);
 }
 
-f as <T>(T) => T;
+f as <T>(x: T) => T;
 
 function g<T>(x: T): T {
   return x;
 }
 
-g as (empty) => unknown;
+g as (x: empty) => unknown;

@@ -269,7 +269,7 @@
   declare const obj: {
     foo: 0,
     bar: 0,
-    [string]: boolean,
+    [key: string]: boolean,
   };
 
   declare const x: keyof typeof obj;
@@ -387,7 +387,7 @@ type Mapped = {[K in keyof O]: [O[K]]};
 
 // `undefined` is always marked as used
 {
-  const obj: {[string]: 0} = {};
+  const obj: {[key: string]: 0} = {};
 
   match (obj['foo']) { // OK
     0 => {}

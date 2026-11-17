@@ -480,8 +480,8 @@ function test_destructure_computed() {
 function test_computed_prop_hint_1() {
   type Name = 'a'| 'b' | 'c';
   const KeyName = 'a';
-  ({[KeyName]: KeyName} as Readonly<{[Name]: 'a'}>); // okay
-  ({[KeyName]: KeyName} as Readonly<{[Name]: 'b'}>); // error 'a' ~> 'b'
+  ({[KeyName]: KeyName} as Readonly<{[key: Name]: 'a'}>); // okay
+  ({[KeyName]: KeyName} as Readonly<{[key: Name]: 'b'}>); // error 'a' ~> 'b'
 }
 
 function test_synthesis_produced_uncacheable_result() {

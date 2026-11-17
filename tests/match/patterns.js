@@ -75,7 +75,7 @@
 // Guards
 {
   declare const x: {foo: number};
-  declare const f: number => boolean;
+  declare const f: (x: number) => boolean;
 
   const out = match (x) {
     {foo: const n} if (n === 0) => n, // OK
@@ -198,7 +198,7 @@
 // BigInt member pattern
 {
   declare const x: string;
-  declare const O: {[bigint]: 'foo'};
+  declare const O: {[key: bigint]: 'foo'};
 
   const out = match (x) {
     O[1n] => 0, // OK

@@ -2483,20 +2483,20 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- local.js:484:16
 
-Cannot cast object literal to `Readonly<{[Name]: "b"}>` because in property `a`: `"a"` [1] is incompatible with
+Cannot cast object literal to `Readonly<{[key: Name]: "b"}>` because in property `a`: `"a"` [1] is incompatible with
 `"b"` [2]. [incompatible-type]
 
    local.js:484:16
-   484|   ({[KeyName]: KeyName} as Readonly<{[Name]: 'b'}>); // error 'a' ~> 'b'
+   484|   ({[KeyName]: KeyName} as Readonly<{[key: Name]: 'b'}>); // error 'a' ~> 'b'
                        ^^^^^^^
 
 References:
    local.js:482:19
    482|   const KeyName = 'a';
                           ^^^ [1]
-   local.js:484:46
-   484|   ({[KeyName]: KeyName} as Readonly<{[Name]: 'b'}>); // error 'a' ~> 'b'
-                                                     ^^^ [2]
+   local.js:484:51
+   484|   ({[KeyName]: KeyName} as Readonly<{[key: Name]: 'b'}>); // error 'a' ~> 'b'
+                                                          ^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------------------- local.js:493:5

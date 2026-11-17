@@ -1,7 +1,7 @@
 // @jsx createElement
 
 declare export function createElement<TProps extends {...}>(
-  Component: TProps => void,
+  Component: (props: TProps) => void,
   props: NoInfer<?TProps>,
 ): Readonly<{
   props: {[propName: string]: unknown, ...},

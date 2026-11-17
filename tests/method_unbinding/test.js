@@ -99,7 +99,7 @@ if (i.n) {} // ok
 
 
 type T = {
-  f: string => void,
+  f: (x: string) => void,
 };
 
 import X from './lib.js';

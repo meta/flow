@@ -36,7 +36,7 @@ function test3() {
 
   declare function spreadIt<P2 extends {...}>(
     Component: Opaque<P2>,
-    spec: P2 => unknown
+    spec: (props: P2) => unknown
   ): Opaque<{...P2, ...}>;
 
   // The HOCs above are basically convoluted identity functions...

@@ -9,7 +9,7 @@ let a = ((x => {
     return y => 3; // Covered by the annot
   }
   return (y) => 3;
-}) as number => number => number);
+}) as (x: number) => (y: number) => number);
 
 let b = ((x => {
   // Blocks are not necessary
@@ -17,4 +17,4 @@ let b = ((x => {
   return (y) => 3;
 
   return (y) => 3;
-}) as number => number => number);
+}) as (x: number) => (y: number) => number);

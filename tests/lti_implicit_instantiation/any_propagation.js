@@ -8,7 +8,7 @@ class C<T> {
   foo: T;
 }
 
-declare function instToAny<T>(x: (y: C<T>) => unknown): (C<T>) => unknown;
+declare function instToAny<T>(x: (y: C<T>) => unknown): (y: C<T>) => unknown;
 
 instToAny(null as any);
 
@@ -25,7 +25,7 @@ g(null as any);
 declare function h<T>(x: {foo: PolyObj<T>, ...}): T;
 h(null as any);
 
-declare function i<T>(x: (y: PolyObj<T>) => unknown): (PolyObj<T>) => unknown;
+declare function i<T>(x: (y: PolyObj<T>) => unknown): (y: PolyObj<T>) => unknown;
 i(null as any);
 
 type Foo = number;

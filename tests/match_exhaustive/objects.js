@@ -348,7 +348,7 @@
 
 // Indexer
 {
-  declare const x: {[string]: boolean};
+  declare const x: {[key: string]: boolean};
 
   match (x) { // OK
     {...} => {} // OK
@@ -370,7 +370,7 @@
   }
 }
 {
-  declare const x: {[number]: boolean};
+  declare const x: {[key: number]: boolean};
 
   match (x) { // OK
     {...} => {} // OK

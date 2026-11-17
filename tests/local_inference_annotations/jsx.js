@@ -2,7 +2,7 @@
 
 const React = require('react');
 
-function Component(props: { foo: number => number }) { return null }
+function Component(props: { foo: (x: number) => number }) { return null }
 
 <Component foo={(x) => 3} />;
 <Component foo={(x) => {
@@ -10,7 +10,7 @@ function Component(props: { foo: number => number }) { return null }
   return 3;
 }} />;
 
-function Component2(props: { children: number => React.Node }) {
+function Component2(props: { children: (x: number) => React.Node }) {
   return null
 }
   <Component2>{(x) => <div />}</Component2> // no annot

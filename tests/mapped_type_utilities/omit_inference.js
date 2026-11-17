@@ -11,14 +11,14 @@ function actionWithDefaults<
 >(
   defaults: TDefaults,
   create: (args: TArgs) => TResult,
-): (Omit<TArgs, keyof TDefaults>) => TResult {
+): (args: Omit<TArgs, keyof TDefaults>) => TResult {
   throw 'unimplemented';
 }
 
 actionWithDefaults(
   {a: 1},
   ({a, b}) => b,
-) as ({b: string}) => string; // ERROR
+) as (x: {b: string}) => string; // ERROR
 
 function selectProvidedKey<
   TArgs extends any,
@@ -37,13 +37,13 @@ function actionWithoutLiteralKey<
   TResult,
 >(
   create: (args: TArgs) => TResult,
-): (Omit<TArgs, 'a'>) => TResult {
+): (args: Omit<TArgs, 'a'>) => TResult {
   throw 'unimplemented';
 }
 
 actionWithoutLiteralKey(
   ({a, b}) => b,
-) as ({b: string}) => string;
+) as (x: {b: string}) => string;
 
 type HasB = {
   a: string,

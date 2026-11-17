@@ -34,7 +34,7 @@ function test_poly_types_1() {
 }
 
 function test_poly_types_2() {
-  declare function f<T>(literalValue: T, callback: (T) => void): {f: <V>(x: V) => {f: T}};
+  declare function f<T>(literalValue: T, callback: (value: T) => void): {f: <V>(x: V) => {f: T}};
   declare function g<T>(literalValue: T): {f: T};
 
   const x1 = g(f(42, (x: 42) => { x as number; })); // okay
@@ -138,7 +138,7 @@ function test_callback_return() {
 // precisions would break the callback's internal coherence. Routing is
 // skipped entirely for such calls.
 function test_generic_callback() {
-  declare function compactMap<T, K>(array: ReadonlyArray<T>, mapFn: (T, number) => ?K): Array<K>;
+  declare function compactMap<T, K>(array: ReadonlyArray<T>, mapFn: (item: T, index: number) => ?K): Array<K>;
   declare function ident<V>(x: V): V;
 
   const r1 = compactMap(['lit'], ident); // okay

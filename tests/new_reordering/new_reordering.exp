@@ -225,11 +225,11 @@ References:
    195|       return x(x => 42);
                        ^^^^^^^ [6]
    a.js:201:8
-   201|   type H = {((number) => number): void, m: typeof m, s: S};
+   201|   type H = {(f: (x: number) => number): void, m: typeof m, s: S};
                ^ [7]
-   a.js:201:51
-   201|   type H = {((number) => number): void, m: typeof m, s: S};
-                                                          ^ [8]
+   a.js:201:57
+   201|   type H = {(f: (x: number) => number): void, m: typeof m, s: S};
+                                                                ^ [8]
    a.js:194:12
    194|     f(x: H) {
                     [9]

@@ -4,9 +4,9 @@ const any: any = null;
 
 type State = {foo: number, bar: number};
 
-type StateUpdater1 = {(State): Partial<State>, ...};
-type StateUpdater2 = {(State): Partial<State>, foo: number, bar: number, ...};
-type StateUpdater3 = {(number): number, foo: number, bar: number, ...};
+type StateUpdater1 = {(state: State): Partial<State>, ...};
+type StateUpdater2 = {(state: State): Partial<State>, foo: number, bar: number, ...};
+type StateUpdater3 = {(n: number): number, foo: number, bar: number, ...};
 
 class MyComponent extends React.Component<{prop: number, ...}, State> {
   state: State = {foo: 1, bar: 2};

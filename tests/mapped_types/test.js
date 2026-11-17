@@ -6,7 +6,7 @@ type Box<T> = {contents: T};
 
 type WithIndexer = {
   foo: number,
-  [string]: string,
+  [key: string]: string,
 };
 
 
@@ -78,9 +78,9 @@ type Mapped<O extends {...} | ReadonlyArray<unknown>> = {
 
   mappedIndexer.foo as number; // ERROR
   mappedIndexer.bar as string; // ERROR
-  mappedIndexer as {foo: Box<number>, [string]: Box<string>}; // OK
+  mappedIndexer as {foo: Box<number>, [key: string]: Box<string>}; // OK
 
-  declare const indexer: {foo: Box<number>, [string]: Box<string>};
+  declare const indexer: {foo: Box<number>, [key: string]: Box<string>};
   indexer as MappedIndexer; // OK
 }
 

@@ -3,7 +3,7 @@ function f<X extends string, Y extends 'lit', Z extends 'prop'>(
   x: X,
   y: Y,
   z: Z,
-  a: {[X]: string},
+  a: {[key: X]: string},
   b: {prop: number, ...},
 ) {
   a[x] = 'hi';

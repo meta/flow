@@ -21,21 +21,21 @@ component ComponentSyntaxNoRenders() {
   return <Component />; // ok
 }
 
-declare component NeedsExplicitTargs<T>(f: (T) => void);
+declare component NeedsExplicitTargs<T>(f: (x: T) => void);
 
 <NeedsExplicitTargs<string> f={(v) => { v as string;}} />; // ok
 
 declare const PolyObjectComponent: {
-  <T>(props: {foo: T, fn: (T) => void, ...}): React.Node,
+  <T>(props: {foo: T, fn: (x: T) => void, ...}): React.Node,
  ...};
-declare const PolyFnComponent: <T>(props: {foo: T, fn: (T) => void, ...}) => React.Node;
+declare const PolyFnComponent: <T>(props: {foo: T, fn: (x: T) => void, ...}) => React.Node;
 
 <PolyObjectComponent foo={3} fn={(v) => {v as string; /* should error on cast */ }} />;
 <PolyFnComponent foo={3} fn={(v) => {v as string; /* should error on cast */ }} />;
 
 declare opaque type DataSource<T>;
 declare function makeDataSource<T>(items: ReadonlyArray<T>): DataSource<T>;
-component Table<T>(dataSource: DataSource<T>, render: (T) => void) {
+component Table<T>(dataSource: DataSource<T>, render: (row: T) => void) {
   return null;
 }
 

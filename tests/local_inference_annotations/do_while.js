@@ -10,4 +10,4 @@ let a = ((x => {
   }
   while ((x) => 3); // guard is not covered!
   return (y) => 3;
-}) as number => number => number);
+}) as (x: number) => (y: number) => number);

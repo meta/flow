@@ -1,6 +1,6 @@
 Error ----------------------------------------------------------------------------------- imported_omit_inference.js:3:1
 
-Cannot cast `action(...)` to `({b: string}) => string` because in the first parameter: property `b` is extra in
+Cannot cast `action(...)` to `(x: {b: string}) => string` because in the first parameter: property `b` is extra in
 `{b: string}` [1] but missing in `{}` [2]. Exact objects do not accept extra props. [incompatible-type]
 
    imported_omit_inference.js:3:1
@@ -8,21 +8,21 @@ Cannot cast `action(...)` to `({b: string}) => string` because in the first para
    3| action(
    4|   {a: 1},
    5|   ({a, b}) => b,
-   6| ) as ({b: string}) => string; // ERROR
+   6| ) as (x: {b: string}) => string; // ERROR
       ^
 
 References:
-   imported_omit_inference.js:6:7
-   6| ) as ({b: string}) => string; // ERROR
-            ^^^^^^^^^^^ [1]
-   action_helper.js:8:5
-   8| ): (Omit<TArgs, keyof TDefaults>) => TResult {
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   imported_omit_inference.js:6:10
+   6| ) as (x: {b: string}) => string; // ERROR
+               ^^^^^^^^^^^ [1]
+   action_helper.js:8:11
+   8| ): (args: Omit<TArgs, keyof TDefaults>) => TResult {
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------- imported_omit_inference.js:5:15
 
-Cannot cast `action(...)` to `({b: string}) => string` because in the return value: `void` [1] is incompatible with
+Cannot cast `action(...)` to `(x: {b: string}) => string` because in the return value: `void` [1] is incompatible with
 `string` [2]. [incompatible-type]
 
    imported_omit_inference.js:5:15
@@ -33,9 +33,9 @@ References:
    imported_omit_inference.js:5:8
    5|   ({a, b}) => b,
              ^ [1]
-   imported_omit_inference.js:6:23
-   6| ) as ({b: string}) => string; // ERROR
-                            ^^^^^^ [2]
+   imported_omit_inference.js:6:26
+   6| ) as (x: {b: string}) => string; // ERROR
+                               ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------- imported_omit_inference.js:5:8
@@ -54,7 +54,7 @@ References:
 
 Error ---------------------------------------------------------------------------------- namespace_omit_inference.js:3:1
 
-Cannot cast `actionNamespace.tools.action(...)` to `({b: string}) => string` because in the first parameter: property
+Cannot cast `actionNamespace.tools.action(...)` to `(x: {b: string}) => string` because in the first parameter: property
 `b` is extra in `{b: string}` [1] but missing in `{}` [2]. Exact objects do not accept extra props. [incompatible-type]
 
    namespace_omit_inference.js:3:1
@@ -62,22 +62,22 @@ Cannot cast `actionNamespace.tools.action(...)` to `({b: string}) => string` bec
    3| actionNamespace.tools.action(
    4|   {a: 1},
    5|   ({a, b}) => b,
-   6| ) as ({b: string}) => string; // ERROR
+   6| ) as (x: {b: string}) => string; // ERROR
       ^
 
 References:
-   namespace_omit_inference.js:6:7
-   6| ) as ({b: string}) => string; // ERROR
-            ^^^^^^^^^^^ [1]
-   action_helper.js:8:5
-   8| ): (Omit<TArgs, keyof TDefaults>) => TResult {
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   namespace_omit_inference.js:6:10
+   6| ) as (x: {b: string}) => string; // ERROR
+               ^^^^^^^^^^^ [1]
+   action_helper.js:8:11
+   8| ): (args: Omit<TArgs, keyof TDefaults>) => TResult {
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------- namespace_omit_inference.js:5:15
 
-Cannot cast `actionNamespace.tools.action(...)` to `({b: string}) => string` because in the return value: `void` [1] is
-incompatible with `string` [2]. [incompatible-type]
+Cannot cast `actionNamespace.tools.action(...)` to `(x: {b: string}) => string` because in the return value: `void` [1]
+is incompatible with `string` [2]. [incompatible-type]
 
    namespace_omit_inference.js:5:15
    5|   ({a, b}) => b,
@@ -87,9 +87,9 @@ References:
    namespace_omit_inference.js:5:8
    5|   ({a, b}) => b,
              ^ [1]
-   namespace_omit_inference.js:6:23
-   6| ) as ({b: string}) => string; // ERROR
-                            ^^^^^^ [2]
+   namespace_omit_inference.js:6:26
+   6| ) as (x: {b: string}) => string; // ERROR
+                               ^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------- namespace_omit_inference.js:5:8
@@ -248,9 +248,9 @@ spread because interfaces do not track the own-ness of their properties. Try usi
              ^ [1]
 
 References:
-   omit_alias_return_fn.js:8:5
-    8| ): (Omit<TArgs, keyof TDefaults>) => TResult {
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   omit_alias_return_fn.js:8:11
+    8| ): (args: Omit<TArgs, keyof TDefaults>) => TResult {
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------- omit_alias_return_fn.js:19:3
@@ -327,29 +327,29 @@ References:
 
 Error ------------------------------------------------------------------------------------------- omit_inference.js:18:1
 
-Cannot cast `actionWithDefaults(...)` to `({b: string}) => string` because in the first parameter: property `b` is extra
-in `{b: string}` [1] but missing in `{}` [2]. Exact objects do not accept extra props. [incompatible-type]
+Cannot cast `actionWithDefaults(...)` to `(x: {b: string}) => string` because in the first parameter: property `b` is
+extra in `{b: string}` [1] but missing in `{}` [2]. Exact objects do not accept extra props. [incompatible-type]
 
    omit_inference.js:18:1
        v------------------
    18| actionWithDefaults(
    19|   {a: 1},
    20|   ({a, b}) => b,
-   21| ) as ({b: string}) => string; // ERROR
+   21| ) as (x: {b: string}) => string; // ERROR
        ^
 
 References:
-   omit_inference.js:21:7
-   21| ) as ({b: string}) => string; // ERROR
-             ^^^^^^^^^^^ [1]
-   omit_inference.js:14:5
-   14| ): (Omit<TArgs, keyof TDefaults>) => TResult {
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   omit_inference.js:21:10
+   21| ) as (x: {b: string}) => string; // ERROR
+                ^^^^^^^^^^^ [1]
+   omit_inference.js:14:11
+   14| ): (args: Omit<TArgs, keyof TDefaults>) => TResult {
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------ omit_inference.js:20:15
 
-Cannot cast `actionWithDefaults(...)` to `({b: string}) => string` because in the return value: `void` [1] is
+Cannot cast `actionWithDefaults(...)` to `(x: {b: string}) => string` because in the return value: `void` [1] is
 incompatible with `string` [2]. [incompatible-type]
 
    omit_inference.js:20:15
@@ -360,9 +360,9 @@ References:
    omit_inference.js:20:8
    20|   ({a, b}) => b,
               ^ [1]
-   omit_inference.js:21:23
-   21| ) as ({b: string}) => string; // ERROR
-                             ^^^^^^ [2]
+   omit_inference.js:21:26
+   21| ) as (x: {b: string}) => string; // ERROR
+                                ^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------- omit_inference.js:20:8

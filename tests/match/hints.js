@@ -1,5 +1,5 @@
 // Annotation hint
-type F = string => boolean;
+type F = (x: string) => boolean;
 {
   declare const x: 'a';
 

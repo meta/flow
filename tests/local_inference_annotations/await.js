@@ -1,5 +1,5 @@
 // @flow
 
 async function test() {
-    const f: (string) => void = await ((s) => {}); // ok
+    const f: (s: string) => void = await ((s) => {}); // ok
 }

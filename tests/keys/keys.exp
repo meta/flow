@@ -129,9 +129,9 @@ Cannot cast `'xxx'` to `keyof WithDict` because `"xxx"` [1] is incompatible with
        ^^^^^ [1]
 
 References:
-   interface.js:2:4
-    2|   ['x' | 'y']: number;
-          ^^^^^^^^^ [2]
+   interface.js:2:9
+    2|   [key: 'x' | 'y']: number;
+               ^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------ interface.js:22:1
@@ -157,9 +157,9 @@ Cannot cast `'xxx'` to `keyof WithBoth` because `"xxx"` [1] is incompatible with
        ^^^^^ [1]
 
 References:
-   interface.js:11:4
-   11|   ['x' | 'y']: number;
-          ^^^^^^^^^ [2]
+   interface.js:11:9
+   11|   [key: 'x' | 'y']: number;
+               ^^^^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------------- intersection.js:11:1

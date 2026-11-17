@@ -2,8 +2,8 @@
 type OtherProps = {foo: number};
 
 declare function HOC<OwnProps extends {...}>(
-  Component: ({...OwnProps, ...OtherProps}) => unknown,
-): OwnProps => unknown;
+  Component: (props: {...OwnProps, ...OtherProps}) => unknown,
+): (props: OwnProps) => unknown;
 
 const x = HOC((x: {foo: number, bar: number}) => null); // ok
 
@@ -106,10 +106,10 @@ function rests() {
 
 function ResolveSpreadsToMultiflowSubtypeFull() {
   declare function f<TArguments extends ReadonlyArray<unknown>>(
-    fn: (...TArguments) => unknown,
-  ): (...TArguments) => unknown;
+    fn: (...args: TArguments) => unknown,
+  ): (...args: TArguments) => unknown;
   declare function params<TArguments extends ReadonlyArray<unknown>>(
-    fn: (...TArguments) => unknown,
+    fn: (...args: TArguments) => unknown,
   ): TArguments;
 
   function g(x: number): void {}

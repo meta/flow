@@ -123,7 +123,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- expression.js:141:10
 
-Cannot get `dict[match]` because property `xxx` is missing in `{["a" | "b"]: number}` [1]. [prop-missing]
+Cannot get `dict[match]` because property `xxx` is missing in `{[key: "a" | "b"]: number}` [1]. [prop-missing]
 
    expression.js:141:10
    141|     2 => 'xxx', // ERROR: 'xxx' is not a subtype of 'a' | 'b'
@@ -131,8 +131,8 @@ Cannot get `dict[match]` because property `xxx` is missing in `{["a" | "b"]: num
 
 References:
    expression.js:138:23
-   138|   declare const dict: {['a' | 'b']: number};
-                              ^^^^^^^^^^^^^^^^^^^^^ [1]
+   138|   declare const dict: {[key: 'a' | 'b']: number};
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------- instance-pattern-interface.js:26:5
@@ -753,9 +753,9 @@ Error --------------------------------------------------------------------------
                      ^^^^^
 
 References:
-   matching.js:124:36
-   124|   declare const f: (number) => 1 | 2;
-                                           ^ [1]
+   matching.js:124:39
+   124|   declare const f: (x: number) => 1 | 2;
+                                              ^ [1]
 
 
 Error ----------------------------------------------------------------------------------------------- matching.js:144:14

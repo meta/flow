@@ -1,5 +1,5 @@
 interface WithDict {
-  ['x' | 'y']: number;
+  [key: 'x' | 'y']: number;
 }
 
 interface WithProps {
@@ -8,7 +8,7 @@ interface WithProps {
 }
 
 interface WithBoth {
-  ['x' | 'y']: number;
+  [key: 'x' | 'y']: number;
   a: number;
   method(): void; // non-own and ignored
 }

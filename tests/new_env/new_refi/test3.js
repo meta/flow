@@ -1,4 +1,4 @@
-const x: (?number) => (() => number) = val => {
+const x: (val: ?number) => (() => number) = val => {
   if (val == null) {
     return () => 42;
   }

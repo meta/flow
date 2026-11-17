@@ -108,7 +108,7 @@ bound(); // ok
 
 
 type T = {
-  f: string => void,
+  f: (s: string) => void,
 };
 
 import X from './lib.js';

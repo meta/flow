@@ -510,9 +510,9 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
                                 ^^^^^^^^^^^^^ [3]
 
 References:
-   state6.js:9:24
-    9| type StateUpdater3 = {(number): number, foo: number, bar: number, ...};
-                              ^^^^^^ [1]
+   state6.js:9:27
+    9| type StateUpdater3 = {(n: number): number, foo: number, bar: number, ...};
+                                 ^^^^^^ [1]
    state6.js:11:64
    11| class MyComponent extends React.Component<{prop: number, ...}, State> {
                                                                       ^^^^^ [2]

@@ -135,7 +135,7 @@ function f1() {
   };
 }
 {
-  declare const dict: {['a' | 'b']: number};
+  declare const dict: {[key: 'a' | 'b']: number};
   dict[match (x) {
     1 => 'b', // OK
     2 => 'xxx', // ERROR: 'xxx' is not a subtype of 'a' | 'b'

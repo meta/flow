@@ -29,7 +29,7 @@ Cannot cast `s` to `string` because `unknown` [1] is incompatible with `string` 
 
 References:
    reason_of_inferred_targs.js:4:29
-   4| declare function magicCall1<T>(x: T => unknown): void;
+   4| declare function magicCall1<T>(x: (y: T) => unknown): void;
                                   ^ [1]
    reason_of_inferred_targs.js:7:22
    7| magicCall1(s => s as string); // error
@@ -46,7 +46,7 @@ Cannot cast `s` to `string` because `number` [1] is incompatible with `string` [
 
 References:
    reason_of_inferred_targs.js:5:33
-   5| declare function magicCall2<T = number>(x: T => unknown): T;
+   5| declare function magicCall2<T = number>(x: (y: T) => unknown): T;
                                       ^^^^^^ [1]
    reason_of_inferred_targs.js:8:22
    8| magicCall2(s => s as string); // error
@@ -63,7 +63,7 @@ Cannot get `s.abcd` because property `abcd` is missing in `unknown` [1]. [incomp
 
 References:
    reason_of_inferred_targs.js:4:29
-   4| declare function magicCall1<T>(x: T => unknown): void;
+   4| declare function magicCall1<T>(x: (y: T) => unknown): void;
                                   ^ [1]
 
 
@@ -77,7 +77,7 @@ Cannot get `s.abcd` because property `abcd` is missing in `number` [1]. [prop-mi
 
 References:
    reason_of_inferred_targs.js:5:33
-    5| declare function magicCall2<T = number>(x: T => unknown): T;
+    5| declare function magicCall2<T = number>(x: (y: T) => unknown): T;
                                        ^^^^^^ [1]
 
 

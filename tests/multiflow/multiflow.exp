@@ -30,8 +30,8 @@ References:
     8| function noRest1(x: 'hi', y: 123): true { return true; }
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    apply.js:2:7
-    2|   fn: (...Args) => Ret,
-             ^^^^^^^^^^^^^^^^ [2]
+    2|   fn: (...args: Args) => Ret,
+             ^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- apply.js:17:7
@@ -63,8 +63,8 @@ elements. [invalid-tuple-arity]
 
 References:
    apply.js:2:7
-    2|   fn: (...Args) => Ret,
-             ^^^^^^^^^^^^^^^^ [1]
+    2|   fn: (...args: Args) => Ret,
+             ^^^^^^^^^^^^^^^^^^^^^^ [1]
    apply.js:15:29
    15| function withRest1(...rest: ['hi', 123]): true { return true; }
                                    ^^^^^^^^^^^ [2]
@@ -81,8 +81,8 @@ Cannot call `apply` with `withRest1` bound to `fn` because `["hi", 123, boolean]
 
 References:
    apply.js:2:7
-    2|   fn: (...Args) => Ret,
-             ^^^^^^^^^^^^^^^^ [1]
+    2|   fn: (...args: Args) => Ret,
+             ^^^^^^^^^^^^^^^^^^^^^^ [1]
    apply.js:15:29
    15| function withRest1(...rest: ['hi', 123]): true { return true; }
                                    ^^^^^^^^^^^ [2]
@@ -120,8 +120,8 @@ References:
    27| function noRest2(x: 'hi', y: 123): true { return true; }
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    apply.js:23:7
-   23|   fn: (...Args) => Ret,
-             ^^^^^^^^^^^^^^^^ [2]
+   23|   fn: (...args: Args) => Ret,
+             ^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------------------- apply.js:36:11
@@ -153,8 +153,8 @@ elements. [invalid-tuple-arity]
 
 References:
    apply.js:23:7
-   23|   fn: (...Args) => Ret,
-             ^^^^^^^^^^^^^^^^ [1]
+   23|   fn: (...args: Args) => Ret,
+             ^^^^^^^^^^^^^^^^^^^^^^ [1]
    apply.js:34:29
    34| function withRest2(...rest: ['hi', 123]): true { return true; }
                                    ^^^^^^^^^^^ [2]
@@ -171,8 +171,8 @@ Cannot call `applyType` with `withRest2` bound to `fn` because `["hi", 123, bool
 
 References:
    apply.js:23:7
-   23|   fn: (...Args) => Ret,
-             ^^^^^^^^^^^^^^^^ [1]
+   23|   fn: (...args: Args) => Ret,
+             ^^^^^^^^^^^^^^^^^^^^^^ [1]
    apply.js:34:29
    34| function withRest2(...rest: ['hi', 123]): true { return true; }
                                    ^^^^^^^^^^^ [2]

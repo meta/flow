@@ -121,7 +121,7 @@
 
 // Non-ident/member argument still works
 {
-  declare const f: (number) => 1 | 2;
+  declare const f: (x: number) => 1 | 2;
 
   const e1 = match (f(0)) {
     1 => 0,

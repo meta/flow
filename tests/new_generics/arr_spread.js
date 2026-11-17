@@ -2,7 +2,7 @@
 
 declare function takes_num_arr(n: number, ...x: Array<number>): void;
 
-function f<X extends Array<number>, R>(fn: (...X) => R, x: X, arr: Array<number>) {
+function f<X extends Array<number>, R>(fn: (...args: X) => R, x: X, arr: Array<number>) {
   fn(...x) as R;
   fn(...arr) as R; // nope
 
@@ -23,20 +23,20 @@ function h<X extends Array<string>>(x: X) {
   var z: X = ['3', ...x]; // nope
 }
 
-function w<A extends [number, number]>(x: A, f: (number, ...A) => void) {
+function w<A extends [number, number]>(x: A, f: (n: number, ...rest: A) => void) {
   f(...x); // nope
   f(42, 42, 42); // nope
   f(42, ...x);
   f(42, ...x, ...x); // nope
 }
-function w2<A extends Array<number>>(x: A, f: (number, ...A) => void) {
+function w2<A extends Array<number>>(x: A, f: (n: number, ...rest: A) => void) {
   f(...x);
   f(42, 42, 42); // nope
   f(42, 42, 42, ...x); // should be nope
   f(42, ...x);
   f(42, ...x, ...x);
 }
-function w3<A extends Array<number>>(x: A, f: A => void) {
+function w3<A extends Array<number>>(x: A, f: (a: A) => void) {
   f([42, 42, 42]); // nope
   f([42, ...x]); // should be nope
   f([...x]);

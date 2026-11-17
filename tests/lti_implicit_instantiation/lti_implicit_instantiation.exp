@@ -67,9 +67,9 @@ References:
    conditional_type_placeholder.js:3:37
    3| declare const render: ((overrides?: number) => void) &
                                           ^^^^^^ [2]
-   conditional_type_placeholder.js:4:29
-   4|   (<R>((props: {readonly s: string}) => R) => R);
-                                  ^^^^^^ [3]
+   conditional_type_placeholder.js:4:33
+   4|   (<R>(cb: (props: {readonly s: string}) => R) => R);
+                                      ^^^^^^ [3]
    conditional_type_placeholder.js:9:24
    9| render(renderUnbox) as number; // error: string ~> number
                              ^^^^^^ [4]
@@ -95,9 +95,9 @@ References:
    conditional_type_placeholder.js:3:37
     3| declare const render: ((overrides?: number) => void) &
                                            ^^^^^^ [2]
-   conditional_type_placeholder.js:4:29
-    4|   (<R>((props: {readonly s: string}) => R) => R);
-                                   ^^^^^^ [3]
+   conditional_type_placeholder.js:4:33
+    4|   (<R>(cb: (props: {readonly s: string}) => R) => R);
+                                       ^^^^^^ [3]
    conditional_type_placeholder.js:15:24
    15| render(renderParam) as number; // error: string ~> number
                               ^^^^^^ [4]
@@ -462,7 +462,7 @@ References:
    25| pipe('a', wrapNum()); // ERROR: string is incompatible with number
             ^^^ [1]
    partial_return_hint.js:24:33
-   24| declare var wrapNum: <T extends number>() => (T) => T;
+   24| declare var wrapNum: <T extends number>() => (x: T) => T;
                                        ^^^^^^ [2]
 
 
@@ -477,7 +477,7 @@ the expression to your expected type. [underconstrained-implicit-instantiation]
 
 References:
    partial_return_hint.js:1:20
-    1| declare var wrap: <T>() => (T) => T;
+    1| declare var wrap: <T>() => (x: T) => T;
                           ^ [1]
    partial_return_hint.js:28:12
    28| pipe2('a', wrap()); // ERROR: T is underconstrained
@@ -495,7 +495,7 @@ the expression to your expected type. [underconstrained-implicit-instantiation]
 
 References:
    partial_return_hint.js:1:20
-    1| declare var wrap: <T>() => (T) => T;
+    1| declare var wrap: <T>() => (x: T) => T;
                           ^ [1]
    partial_return_hint.js:31:20
    31| pipe3('a', wrap(), wrap()); // ERROR: T is underconstrained in the second call

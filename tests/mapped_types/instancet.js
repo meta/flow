@@ -12,13 +12,13 @@ type MappedInterface = {readonly [key in keyof I]: I[key]};
 
 interface WithIndexer {
   foo: number;
-  [string]: boolean;
+  [key: string]: boolean;
 }
 type MappedInterfaceWithIndexer = {readonly [key in keyof WithIndexer]: WithIndexer[key]};
 {
   declare const i: MappedInterfaceWithIndexer;
-  i as interface {readonly foo: number, readonly [string]: boolean}; // OK
-  i as interface {readonly foo: number, [string]: boolean}; // ERROR
+  i as interface {readonly foo: number, readonly [key: string]: boolean}; // OK
+  i as interface {readonly foo: number, [key: string]: boolean}; // ERROR
 }
 
 class A {
