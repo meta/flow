@@ -181,11 +181,6 @@ fn config_options(config: Option<&Value>) -> Result<Options, String> {
             AssertOperator::Disabled
         },
         babel_loose_array_spread: bool_config(config, "babel_loose_array_spread", false),
-        ban_explicit_exact_object_types: bool_config(
-            config,
-            "experimental.ban_explicit_exact_object_types",
-            false,
-        ),
         component_syntax: true,
         definite_assignment_assertions: bool_config(
             config,
@@ -213,16 +208,6 @@ fn config_options(config: Option<&Value>) -> Result<Options, String> {
         ]),
         react_runtime,
         recursion_limit: 10000,
-        require_dictionary_key_label: bool_config(
-            config,
-            "experimental.require_dictionary_key_label",
-            false,
-        ),
-        require_function_type_param_name: bool_config(
-            config,
-            "experimental.require_function_type_param_name",
-            false,
-        ),
         root: Arc::new(PathBuf::new()),
         strict_property_initialization: bool_config(
             config,

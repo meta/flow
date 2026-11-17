@@ -1,3 +1,2 @@
 [options]
 all=true
-experimental.ban_explicit_exact_object_types=true

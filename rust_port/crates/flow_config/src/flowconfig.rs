@@ -150,7 +150,6 @@ pub mod opts {
         pub autoimports_ranked_by_usage_boost_exact_match_min_length: u32,
         pub automatic_require_default: Option<bool>,
         pub babel_loose_array_spread: Option<bool>,
-        pub ban_explicit_exact_object_types: bool,
         pub ban_spread_key_props: Option<bool>,
         pub component_syntax: bool,
         pub async_component_syntax: bool,
@@ -243,8 +242,6 @@ pub mod opts {
         pub relay_integration_excludes: Vec<String>,
         pub relay_integration_module_prefix: Option<String>,
         pub relay_integration_module_prefix_includes: Vec<String>,
-        pub require_dictionary_key_label: bool,
-        pub require_function_type_param_name: bool,
         pub root_name: Option<String>,
         pub saved_state_parallel_decompress: bool,
         pub saved_state_fetcher: SavedStateFetcher,
@@ -295,7 +292,6 @@ pub mod opts {
             autoimports_ranked_by_usage_boost_exact_match_min_length: 5,
             automatic_require_default: None,
             babel_loose_array_spread: None,
-            ban_explicit_exact_object_types: false,
             ban_spread_key_props: None,
             component_syntax: true,
             async_component_syntax: false,
@@ -402,8 +398,6 @@ pub mod opts {
             relay_integration_module_prefix_includes: vec![ocaml_str_to_rust_regex(
                 "<PROJECT_ROOT>/.*",
             )],
-            require_dictionary_key_label: false,
-            require_function_type_param_name: false,
             root_name: None,
             saved_state_parallel_decompress: false,
             saved_state_fetcher: SavedStateFetcher::DummyFetcher,
@@ -2245,42 +2239,15 @@ pub mod opts {
             }),
             (
                 "experimental.ban_explicit_exact_object_types",
-                |values, config| {
-                    parse_boolean(
-                        |opts, v| {
-                            opts.ban_explicit_exact_object_types = v;
-                            Ok(())
-                        },
-                        values,
-                        config,
-                    )
-                },
+                |values, config| enum_parser(&[("true", ())], |_opts, ()| Ok(()), values, config),
             ),
             (
                 "experimental.require_dictionary_key_label",
-                |values, config| {
-                    parse_boolean(
-                        |opts, v| {
-                            opts.require_dictionary_key_label = v;
-                            Ok(())
-                        },
-                        values,
-                        config,
-                    )
-                },
+                |values, config| enum_parser(&[("true", ())], |_opts, ()| Ok(()), values, config),
             ),
             (
                 "experimental.require_function_type_param_name",
-                |values, config| {
-                    parse_boolean(
-                        |opts, v| {
-                            opts.require_function_type_param_name = v;
-                            Ok(())
-                        },
-                        values,
-                        config,
-                    )
-                },
+                |values, config| enum_parser(&[("true", ())], |_opts, ()| Ok(()), values, config),
             ),
             ("experimental.strict_es6_import_export", |values, config| {
                 strict_es6_import_export_parser(values, config)

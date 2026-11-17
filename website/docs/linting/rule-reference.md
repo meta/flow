@@ -19,7 +19,6 @@ Triggers when you use object type syntax without explicitly specifying exactness
 
 type A = {x: number}; // Error
 type B = {x: number, ...} // Ok
-type C = {| x: number |} // Ok
 ```
 
 ### `deprecated-type` {#toc-deprecated-type}

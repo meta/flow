@@ -49,10 +49,11 @@ let func = (str: string, bool?: boolean, ...nums: Array<number>): void => {
 type T = (str: string, bool?: boolean, ...nums: Array<number>) => void;
 ```
 
-You may also optionally leave out the parameter names.
+Every parameter must be named. The names are only for documentation and don't have to match the names in the implementation:
 
 ```js flow-check
-type T = (string, boolean | void, Array<number>) => void;
+type T = (str: string, bool?: boolean, ...nums: Array<number>) => void;
+const f: T = (s, b, ...n) => {};
 ```
 
 You might use these functions types for something like a callback.

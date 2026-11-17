@@ -409,13 +409,13 @@ For objects like these, Flow provides a special kind of property, called an
 that matches the indexer key type.
 
 ```js flow-check
-const o: {[string]: number} = {};
+const o: {[key: string]: number} = {};
 o["foo"] = 0;
 o["bar"] = 1;
 const foo: number = o["foo"];
 ```
 
-An indexer can be optionally named, for documentation purposes:
+The indexer key must be named. The name is for documentation purposes only:
 
 ```js flow-check
 const obj: {[user_id: number]: string} = {};

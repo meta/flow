@@ -954,7 +954,6 @@ Objects are exact by default, which is now the only supported behavior:
 
 ```js flow-check
 type O1 = {foo: number}; // exact
-type O2 = {| foo: number |}; // exact (explicit syntax)
 type O3 = {foo: number, ...}; // inexact (explicit `...`)
 ```
 

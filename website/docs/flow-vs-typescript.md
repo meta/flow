@@ -1496,16 +1496,12 @@ A handful of Flow type-annotation forms have no TypeScript spelling - `tsc` reje
 
 - **Inline `interface` type annotation** - `type T = interface { foo: number }`. Lets an interface appear inside a type expression instead of as a top-level declaration. TypeScript requires a separate `interface I { ... }` statement.
 - **Optional indexed access type** - `Obj?.['prop']` mirrors the runtime `?.` operator at the type level: if `Obj` is nullish, the result is `void`; otherwise it is `Obj['prop']`. TypeScript has no type-level `?.`.
-- **Anonymous function-type parameters** - `type F = string => void`. Flow lets you omit the parameter name when it carries no information; TypeScript requires `(x: string) => void`.
-- **Anonymous indexer parameters** - `type O = {[string]: number}`. Same shape: Flow omits the index-key name when it isn't referenced; TypeScript requires `{[k: string]: number}`.
 
 ```js flow-check
 // Flow:
 type Inline = interface { foo: number };
 type Opt = ?{foo: number};
 type Pulled = Opt?.['foo']; // number | void
-type Fn = string => void;
-type Dict = {[string]: number};
 ```
 
 ### Relay / GraphQL integration {#toc-relay-integration}

@@ -177,7 +177,6 @@ pub struct FrozenMetadata {
     pub assert_operator: AssertOperator,
     pub automatic_require_default: bool,
     pub babel_loose_array_spread: bool,
-    pub ban_explicit_exact_object_types: bool,
     pub ban_spread_key_props: bool,
     pub component_syntax: bool,
     pub async_component_syntax: bool,
@@ -216,8 +215,6 @@ pub struct FrozenMetadata {
     pub relay_integration_excludes: Arc<[Regex]>,
     pub relay_integration_module_prefix: Option<FlowSmolStr>,
     pub relay_integration_module_prefix_includes: Arc<[Regex]>,
-    pub require_dictionary_key_label: bool,
-    pub require_function_type_param_name: bool,
     pub root: Arc<PathBuf>,
     pub strict_es6_import_export: bool,
     pub strict_property_initialization: bool,
@@ -242,7 +239,6 @@ impl Default for FrozenMetadata {
             assert_operator: AssertOperator::Disabled,
             automatic_require_default: false,
             babel_loose_array_spread: false,
-            ban_explicit_exact_object_types: false,
             ban_spread_key_props: false,
             component_syntax: true,
             async_component_syntax: false,
@@ -281,8 +277,6 @@ impl Default for FrozenMetadata {
             relay_integration_excludes: Arc::from([]),
             relay_integration_module_prefix: None,
             relay_integration_module_prefix_includes: Arc::from([]),
-            require_dictionary_key_label: false,
-            require_function_type_param_name: false,
             root: Arc::new(PathBuf::new()),
             strict_es6_import_export: false,
             strict_property_initialization: false,
@@ -976,8 +970,6 @@ pub fn mk_context_metadata(options: &Options, global_libdefs: Arc<BTreeSet<FileK
             relay_integration_module_prefix_includes: options
                 .relay_integration_module_prefix_includes
                 .dupe(),
-            require_dictionary_key_label: options.require_dictionary_key_label,
-            require_function_type_param_name: options.require_function_type_param_name,
             root: options.root.dupe(),
             strict_es6_import_export: options.strict_es6_import_export,
             strict_property_initialization: options.strict_property_initialization,
@@ -992,7 +984,6 @@ pub fn mk_context_metadata(options: &Options, global_libdefs: Arc<BTreeSet<FileK
             assert_operator: options.assert_operator,
             type_expansion_recursion_limit: options.type_expansion_recursion_limit,
             use_unknown_in_catch_variables: options.use_unknown_in_catch_variables,
-            ban_explicit_exact_object_types: options.ban_explicit_exact_object_types,
             ban_spread_key_props: options.ban_spread_key_props,
         }),
     }
@@ -1447,21 +1438,6 @@ impl<'a> Context<'a> {
 
     pub fn strict_property_initialization(&self) -> bool {
         self.inner().metadata.frozen.strict_property_initialization
-    }
-
-    pub fn ban_explicit_exact_object_types(&self) -> bool {
-        self.inner().metadata.frozen.ban_explicit_exact_object_types
-    }
-
-    pub fn require_dictionary_key_label(&self) -> bool {
-        self.inner().metadata.frozen.require_dictionary_key_label
-    }
-
-    pub fn require_function_type_param_name(&self) -> bool {
-        self.inner()
-            .metadata
-            .frozen
-            .require_function_type_param_name
     }
 
     pub fn enable_custom_error(&self) -> bool {
