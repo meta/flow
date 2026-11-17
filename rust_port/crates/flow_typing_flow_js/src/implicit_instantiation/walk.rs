@@ -3384,9 +3384,12 @@ impl<'e> Walker<'e> {
         for (name, uprop) in others.into_iter().chain(generic_values) {
             match lp.get(name) {
                 Some(lprop) => self.walk_prop(cx, lprop, uprop, lower_is_literal)?,
-                // The indexer of `l` against the property, as two fields, as in subtyping.
+                // The indexer of `l` against the property, as two fields, as in subtyping, if the
+                // name of the property fits its key: otherwise the key check of subtyping fails.
                 None => {
-                    if let Some(ld) = ld {
+                    if let Some(ld) = ld
+                        && self.key_fits(cx, name, ld)?
+                    {
                         let lfield = PropertyType::OrdinaryField {
                             type_: ld.value.dupe(),
                             polarity: ld.dict_polarity,
@@ -4169,6 +4172,26 @@ impl<'e> Walker<'e> {
             flat.push(m);
         }
         flat
+    }
+
+    /// Whether the name of a property fits the key of an indexer, as subtyping checks before it
+    /// compares the property with the indexer. A key with markers is taken to fit.
+    fn key_fits<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        name: &Name,
+        dict: &DictType,
+    ) -> Result<bool, FlowJsException> {
+        if self.mentions(cx, &dict.key) {
+            return Ok(true);
+        }
+        let env = self.env;
+        let reason = type_util::reason_of_t(&dict.key).dupe();
+        let key_t = flow_js_utils::type_of_key_name_with_env(env, name.dupe(), &reason);
+        let ok = sandbox(cx, env, self.preserve, |cx| {
+            FlowJs::speculative_subtyping_succeeds_with_flow_errors(cx, env, &key_t, &dict.key)
+        })?;
+        Ok(ok != Some(false))
     }
 
     /// Whether `l` is a subtype of the union of `members` that mention no marker.
