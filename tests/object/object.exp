@@ -1,80 +1,91 @@
-Error ------------------------------------------------------------------------------------------------------ obj.js:8:39
+Error ------------------------------------------------------------------------------------------------------ obj.js:9:31
 
-Cannot call method `defineProperty` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot call method `defineProperty` with `y` bound to `o` because `{a: number, b: number}` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
-   obj.js:8:39
-   8| Object.defineProperty(y, 'a', {value: "a"});
-                                            ^^^ [1]
+   obj.js:9:31
+   9| Object.defineProperty<number>(y, 'a', {writable: false});
+                                    ^
 
 References:
-   obj.js:5:22
+   obj.js:5:18
    5| declare const y: {a: number, b: number};
-                           ^^^^^^ [2]
+                       ^^^^^^^^^^^^^^^^^^^^^^ [1]
+   obj.js:9:23
+   9| Object.defineProperty<number>(y, 'a', {writable: false});
+                            ^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------------- obj.js:11:47
+Error ----------------------------------------------------------------------------------------------------- obj.js:10:31
 
-Cannot call method `defineProperty` because in property `value`: `string` [1] is incompatible with `number` [2].
-[incompatible-type]
+Cannot call method `defineProperty` with `y` bound to `o` because `{a: number, b: number}` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
-   obj.js:11:47
-   11| Object.defineProperty<number>(y, 'b', {value: "a"})
-                                                     ^^^ [1]
+   obj.js:10:31
+   10| Object.defineProperty<number>(y, 'b', {value: 42})
+                                     ^
 
 References:
+   obj.js:5:18
+    5| declare const y: {a: number, b: number};
+                        ^^^^^^^^^^^^^^^^^^^^^^ [1]
+   obj.js:10:23
+   10| Object.defineProperty<number>(y, 'b', {value: 42})
+                             ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- obj.js:11:31
+
+Cannot call method `defineProperty` with `y` bound to `o` because `{a: number, b: number}` [1] is incompatible with
+`number` [2]. [incompatible-type]
+
+   obj.js:11:31
+   11| Object.defineProperty<number>(y, 'b', {value: "a"})
+                                     ^
+
+References:
+   obj.js:5:18
+    5| declare const y: {a: number, b: number};
+                        ^^^^^^^^^^^^^^^^^^^^^^ [1]
    obj.js:11:23
    11| Object.defineProperty<number>(y, 'b', {value: "a"})
                              ^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------------- obj.js:12:23
+Error ----------------------------------------------------------------------------------------------------- obj.js:12:31
 
-Cannot call method `defineProperty` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot call method `defineProperty` with `y` bound to `o` because `{a: number, b: number}` [1] is incompatible with
+`string` [2]. [incompatible-type]
 
+   obj.js:12:31
+   12| Object.defineProperty<string>(y, 'b', {value: "a"})
+                                     ^
+
+References:
+   obj.js:5:18
+    5| declare const y: {a: number, b: number};
+                        ^^^^^^^^^^^^^^^^^^^^^^ [1]
    obj.js:12:23
    12| Object.defineProperty<string>(y, 'b', {value: "a"})
-                             ^^^^^^ [1]
-
-References:
-   obj.js:5:33
-    5| declare const y: {a: number, b: number};
-                                       ^^^^^^ [2]
+                             ^^^^^^ [2]
 
 
-Error ------------------------------------------------------------------------------------------------------ obj.js:13:1
+Error ----------------------------------------------------------------------------------------------------- obj.js:13:39
 
-Cannot call function without exactly 1 type argument. [nonpolymorphic-type-arg]
+Cannot call method `defineProperty` with `y` bound to `o` because `{a: number, b: number}` [1] is incompatible with
+`string` [2]. [incompatible-type]
 
+   obj.js:13:39
    13| Object.defineProperty<string, string>(y, 'b', {value: "a"}) //targ arity mismatch
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
-Error ----------------------------------------------------------------------------------------------------- obj.js:14:26
-
-Cannot call method `defineProperty` because property `c` is missing in `{a: number, b: number}` [1]. [prop-missing]
-
-   obj.js:14:26
-   14| Object.defineProperty(y, 'c', {value: 42});
-                                ^^^
+                                             ^
 
 References:
    obj.js:5:18
     5| declare const y: {a: number, b: number};
                         ^^^^^^^^^^^^^^^^^^^^^^ [1]
-
-
-Error ----------------------------------------------------------------------------------------------------- obj.js:15:26
-
-Cannot call method `defineProperty` because property `c` is missing in `{a: number, b: number}` [1]. [prop-missing]
-
-   obj.js:15:26
-   15| Object.defineProperty(y, 'c', {writable:false});
-                                ^^^
-
-References:
-   obj.js:5:18
-    5| declare const y: {a: number, b: number};
-                        ^^^^^^^^^^^^^^^^^^^^^^ [1]
+   obj.js:13:23
+   13| Object.defineProperty<string, string>(y, 'b', {value: "a"}) //targ arity mismatch
+                             ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- obj.js:17:25
@@ -173,4 +184,4 @@ Cannot call function without exactly 1 type argument. [nonpolymorphic-type-arg]
 
 
 
-Found 13 errors
+Found 12 errors

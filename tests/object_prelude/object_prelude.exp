@@ -1,1 +1,32 @@
-Found 0 errors
+Error ------------------------------------------------------------------------------------------------------ obj.js:10:8
+
+Cannot call method `defineProperty` because property `defineProperty` is missing in `{name: string, ...}` [1].
+[prop-missing]
+
+   obj.js:10:8
+   10| Object.defineProperty(x, 'a', {get: () => 42});
+              ^^^^^^^^^^^^^^
+
+References:
+   <BUILTINS>/prelude.js:12:15
+   12| declare class Object {}
+                     ^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------------ obj.js:11:8
+
+Cannot call method `defineProperty` because property `defineProperty` is missing in `{name: string, ...}` [1].
+[prop-missing]
+
+   obj.js:11:8
+   11| Object.defineProperty(x, 'b', {value: "a"})
+              ^^^^^^^^^^^^^^
+
+References:
+   <BUILTINS>/prelude.js:12:15
+   12| declare class Object {}
+                     ^^^^^^ [1]
+
+
+
+Found 2 errors

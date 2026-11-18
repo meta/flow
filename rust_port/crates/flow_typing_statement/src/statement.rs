@@ -14901,91 +14901,6 @@ fn static_method_call_object<'a>(
             )
         }
         (
-            "defineProperty",
-            targs_val,
-            [
-                ExpressionOrSpread::Expression(e),
-                ExpressionOrSpread::Expression(key_expr),
-                ExpressionOrSpread::Expression(config),
-            ],
-        ) if let expression::ExpressionInner::StringLiteral { loc, inner } = &**key_expr
-            && (targs_val.is_none()
-                || matches!(
-                    targs_val.unwrap().arguments.as_ref(),
-                    [ast::expression::CallTypeArg::Explicit(_)]
-                )) =>
-        {
-            let (ploc, x) = (loc.dupe(), &inner.value);
-            let (ty, typed_targs): (Type, Option<expression::CallTypeArgs<ALoc, (ALoc, Type)>>) =
-                match targs_val {
-                    None => (flow_typing_tvar::mk(cx, reason.dupe()), None),
-                    Some(call_targs) => {
-                        let [expression::CallTypeArg::Explicit(targ)] = &*call_targs.arguments
-                        else {
-                            panic!(
-                                "unexpected type argument to Object.defineProperty, match guard failed"
-                            )
-                        };
-                        let targ_typed = type_annotation::convert(cx, FlowOrdMap::new(), targ)?;
-                        let ty = targ_typed.loc().1.dupe();
-                        (
-                            ty.dupe(),
-                            Some(expression::CallTypeArgs {
-                                loc: (call_targs.loc.dupe(), ty.dupe()),
-                                arguments: vec![ast::expression::CallTypeArg::Explicit(targ_typed)]
-                                    .into(),
-                                comments: call_targs.comments.dupe(),
-                            }),
-                        )
-                    }
-                };
-            let reason_loc = reason.loc().dupe();
-            let propdesc_type =
-                flow_js_utils::lookup_builtin_type(cx, "TypedPropertyDescriptor", reason.dupe());
-            let propdesc =
-                readonly_property_descriptor(propdesc_type, ty.dupe(), &reason, reason_loc);
-            let e_ast = expression(None, None, None, cx, e)?;
-            let o = e_ast.loc().1.dupe();
-            let key_ast = expression(None, None, None, cx, key_expr)?;
-            let config_ast = expression(None, None, None, cx, config)?;
-            let spec = config_ast.loc().1.dupe();
-            let prop_name = Name::new(x.dupe());
-            let prop_reason = mk_reason(RProperty(Some(prop_name.dupe())), ploc.dupe());
-            flow_js::flow_non_speculating(
-                cx,
-                (&spec, &UseT::new(UseTInner::UseT(use_op.dupe(), propdesc))),
-            )?;
-            flow_js::flow_non_speculating(
-                cx,
-                (
-                    &o,
-                    &UseT::new(UseTInner::SetPropT(
-                        use_op.dupe(),
-                        reason,
-                        Box::new(mk_named_prop(prop_reason, false, prop_name)),
-                        SetMode::Assign,
-                        WriteCtx::Normal,
-                        ty,
-                        None,
-                    )),
-                ),
-            )?;
-            (
-                o,
-                typed_targs,
-                expression::ArgList {
-                    loc: args_loc,
-                    arguments: vec![
-                        ExpressionOrSpread::Expression(e_ast),
-                        ExpressionOrSpread::Expression(key_ast),
-                        ExpressionOrSpread::Expression(config_ast),
-                    ]
-                    .into(),
-                    comments: args_comments.clone(),
-                },
-            )
-        }
-        (
             "defineProperties",
             None,
             [
@@ -15135,7 +15050,6 @@ fn static_method_call_object<'a>(
             | "getOwnPropertyNames"
             | "getPrototypeOf"
             | "keys"
-            | "defineProperty"
             | "defineProperties"
             | "freeze",
             Some(call_targs),
@@ -15143,11 +15057,7 @@ fn static_method_call_object<'a>(
         ) => {
             let (_, targs_ast) = convert_call_targs(cx, &FlowOrdMap::new(), call_targs)?;
             let (_argts, typed_args) = arg_list(cx, args)?;
-            let arity = if m == "freeze" || m == "defineProperty" {
-                1
-            } else {
-                0
-            };
+            let arity = if m == "freeze" { 1 } else { 0 };
             flow_js_utils::add_output_non_speculating(
                 cx,
                 ErrorMessage::ECallTypeArity(Box::new(ECallTypeArityData {

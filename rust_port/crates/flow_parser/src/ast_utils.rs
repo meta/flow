@@ -528,7 +528,6 @@ pub fn is_specially_typed_object_call<M: Dupe, T: Dupe>(
             | "getOwnPropertyNames"
             | "getPrototypeOf"
             | "keys"
-            | "defineProperty"
             | "defineProperties"
             | "freeze",
             _,
@@ -541,9 +540,6 @@ pub fn is_specially_typed_object_call<M: Dupe, T: Dupe>(
         ) => true,
         ("create" | "defineProperties", [Expression(_), Expression(props)]) => {
             is_object_literal(props)
-        }
-        ("defineProperty", [Expression(_), Expression(key), Expression(_)]) => {
-            matches!(key.deref(), ExpressionInner::StringLiteral { .. })
         }
         ("freeze", [Expression(o)]) => is_object_literal(o),
         _ => false,
