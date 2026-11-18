@@ -96,40 +96,19 @@ Cannot resolve name `x`. [cannot-resolve-name]
                                ^
 
 
-Error ------------------------------------------------------------------------------------------------------ obj.js:18:8
+Error ----------------------------------------------------------------------------------------------------- obj.js:19:33
 
-Cannot call method `defineProperties` because property `d` is missing in `{a: number, b: number}` [1]. [prop-missing]
+Cannot call method `defineProperties` with object literal bound to `o` because object literal [1] is incompatible with
+`number` [2]. [incompatible-type]
 
-   obj.js:18:8
-   18| Object.defineProperties(y, {d: {value: 42}, a: {writable:false}, b:{get: () => "a"}});
-              ^^^^^^^^^^^^^^^^
-
-References:
-   obj.js:5:18
-    5| declare const y: {a: number, b: number};
-                        ^^^^^^^^^^^^^^^^^^^^^^ [1]
-
-
-Error ----------------------------------------------------------------------------------------------------- obj.js:18:80
-
-Cannot call method `defineProperties` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
-
-   obj.js:18:80
-   18| Object.defineProperties(y, {d: {value: 42}, a: {writable:false}, b:{get: () => "a"}});
-                                                                                      ^^^ [1]
-
-References:
-   obj.js:5:33
-    5| declare const y: {a: number, b: number};
-                                       ^^^^^^ [2]
-
-
-Error ------------------------------------------------------------------------------------------------------ obj.js:19:1
-
-Cannot call non-polymorphic function with type arguments. [nonpolymorphic-type-arg]
-
+   obj.js:19:33
    19| Object.defineProperties<number>({}, {}); // targ arity mismatch
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                       ^^ [1]
+
+References:
+   obj.js:19:25
+   19| Object.defineProperties<number>({}, {}); // targ arity mismatch
+                               ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- obj.js:26:58
@@ -184,4 +163,4 @@ Cannot call function without exactly 1 type argument. [nonpolymorphic-type-arg]
 
 
 
-Found 12 errors
+Found 10 errors

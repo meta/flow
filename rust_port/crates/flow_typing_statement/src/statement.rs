@@ -14900,91 +14900,6 @@ fn static_method_call_object<'a>(
                 },
             )
         }
-        (
-            "defineProperties",
-            None,
-            [
-                ExpressionOrSpread::Expression(e),
-                ExpressionOrSpread::Expression(obj_expr),
-            ],
-        ) if let expression::ExpressionInner::Object { loc, inner } = &**obj_expr => {
-            let (obj_loc, obj_properties, obj_comments) =
-                (loc.dupe(), &inner.properties, &inner.comments);
-            error_on_this_uses_in_object_methods(cx, obj_properties);
-            let e_ast = expression(None, None, None, cx, e)?;
-            let o = e_ast.loc().1.dupe();
-            let (pmap, properties_typed) = prop_map_of_object(cx, obj_properties)?;
-            let propdesc_type =
-                flow_js_utils::lookup_builtin_type(cx, "TypedPropertyDescriptor", reason.dupe());
-            for (x, p) in pmap.iter() {
-                match property::read_t(p) {
-                    None => {
-                        // Since the properties object must be a literal, and literal objects
-                        // can only ever contain neutral fields, this should not happen.
-                        flow_js_utils::add_output_non_speculating(
-                            cx,
-                            ErrorMessage::EInternal(Box::new((
-                                prop_loc.dupe(),
-                                InternalError::PropertyDescriptorPropertyCannotBeRead,
-                            ))),
-                        );
-                    }
-                    Some(spec) => {
-                        let prop_reason = reason.dupe().replace_desc_new(None);
-                        let tvar = flow_typing_tvar::mk(cx, prop_reason.dupe());
-                        let annot_loc = prop_reason.loc().dupe();
-                        let propdesc = readonly_property_descriptor(
-                            propdesc_type.dupe(),
-                            tvar.dupe(),
-                            &prop_reason,
-                            annot_loc,
-                        );
-                        flow_js::flow_non_speculating(
-                            cx,
-                            (&spec, &UseT::new(UseTInner::UseT(use_op.dupe(), propdesc))),
-                        )?;
-                        flow_js::flow_non_speculating(
-                            cx,
-                            (
-                                &o,
-                                &UseT::new(UseTInner::SetPropT(
-                                    use_op.dupe(),
-                                    prop_reason.dupe(),
-                                    Box::new(mk_named_prop(prop_reason, false, x.dupe())),
-                                    SetMode::Assign,
-                                    WriteCtx::Normal,
-                                    tvar,
-                                    None,
-                                )),
-                            ),
-                        )?;
-                    }
-                }
-            }
-            (
-                o,
-                None,
-                expression::ArgList {
-                    loc: args_loc,
-                    arguments: vec![
-                        ExpressionOrSpread::Expression(e_ast),
-                        // TODO(vijayramamurthy) construct object type
-                        ExpressionOrSpread::Expression(ast::expression::Expression::new(
-                            ast::expression::ExpressionInner::Object {
-                                loc: (obj_loc.dupe(), any_t::at(AnySource::Untyped, obj_loc)),
-                                inner: (ast::expression::Object {
-                                    properties: properties_typed.into(),
-                                    comments: obj_comments.clone(),
-                                })
-                                .into(),
-                            },
-                        )),
-                    ]
-                    .into(),
-                    comments: args_comments.clone(),
-                },
-            )
-        }
         // Freezing an object literal is supported since there's no way it could
         // have been mutated elsewhere
         ("freeze", targs_val, [ExpressionOrSpread::Expression(arg_expr)])
@@ -15045,13 +14960,7 @@ fn static_method_call_object<'a>(
             )
         }
         (
-            "assign"
-            | "create"
-            | "getOwnPropertyNames"
-            | "getPrototypeOf"
-            | "keys"
-            | "defineProperties"
-            | "freeze",
+            "assign" | "create" | "getOwnPropertyNames" | "getPrototypeOf" | "keys" | "freeze",
             Some(call_targs),
             _,
         ) => {

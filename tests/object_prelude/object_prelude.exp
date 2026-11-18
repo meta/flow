@@ -28,5 +28,20 @@ References:
                      ^^^^^^ [1]
 
 
+Error ------------------------------------------------------------------------------------------------------ obj.js:12:8
 
-Found 2 errors
+Cannot call method `defineProperties` because property `defineProperties` is missing in `{name: string, ...}` [1].
+[prop-missing]
+
+   obj.js:12:8
+   12| Object.defineProperties(x, {d: {value: 42}, e: {writable:false}, f:{get: () => 42}});
+              ^^^^^^^^^^^^^^^^
+
+References:
+   <BUILTINS>/prelude.js:12:15
+   12| declare class Object {}
+                     ^^^^^^ [1]
+
+
+
+Found 3 errors

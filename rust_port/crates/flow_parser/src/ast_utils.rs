@@ -522,25 +522,18 @@ pub fn is_specially_typed_object_call<M: Dupe, T: Dupe>(
     let is_object_literal =
         |e: &expression::Expression<M, T>| matches!(e.deref(), ExpressionInner::Object { .. });
     match (id.name.as_str(), arguments) {
-        (
-            "assign"
-            | "create"
-            | "getOwnPropertyNames"
-            | "getPrototypeOf"
-            | "keys"
-            | "defineProperties"
-            | "freeze",
-            _,
-        ) if has_targs => true,
+        ("assign" | "create" | "getOwnPropertyNames" | "getPrototypeOf" | "keys" | "freeze", _)
+            if has_targs =>
+        {
+            true
+        }
         (_, _) if has_targs => false,
         ("assign", _) => true,
         (
             "getPrototypeOf" | "create" | "getOwnPropertyNames" | "keys" | "values" | "entries",
             [Expression(_)],
         ) => true,
-        ("create" | "defineProperties", [Expression(_), Expression(props)]) => {
-            is_object_literal(props)
-        }
+        ("create", [Expression(_), Expression(props)]) => is_object_literal(props),
         ("freeze", [Expression(o)]) => is_object_literal(o),
         _ => false,
     }
