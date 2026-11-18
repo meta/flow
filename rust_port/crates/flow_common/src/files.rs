@@ -1087,27 +1087,6 @@ fn crawl_prunes_dir(
     can_prune && !wanted_filter(options, path, all, include_libdef)
 }
 
-/// Whether the crawl reads the directory at the real path `path` and reports each file under it
-/// that it reports through a symlink to it: everything under it is in the crawl's scope, and it
-/// isn't pruned.
-fn crawl_reaches_dir(
-    options: &FileOptions,
-    root: &Path,
-    subdir: Option<&Path>,
-    path: &Path,
-    can_prune: bool,
-    all: bool,
-    include_libdef: bool,
-) -> bool {
-    let in_scope =
-        |dir: &Path| path_is_in_crawl_scope(options, root, subdir, dir, include_libdef, true);
-    in_scope(path)
-        && !path
-            .ancestors()
-            .take_while(|dir| in_scope(dir))
-            .any(|dir| crawl_prunes_dir(options, can_prune, dir, all, include_libdef))
-}
-
 /// Whether the initial full crawl covers a path, making an absent alias mapping conclusive.
 pub fn initial_crawl_covers_path(options: &FileOptions, root: &Path, path: &Path) -> bool {
     path_is_in_crawl_scope(options, root, None, path, true, false)
@@ -1188,12 +1167,18 @@ pub fn make_next_files(
                     if entry.read_children.is_some()
                         && entry.path_is_symlink()
                         && let Ok(target) = cached_canonicalize(&entry.path())
-                        && crawl_reaches_dir(
+                        && path_is_in_crawl_scope(
                             &duped_options,
                             &root_buf,
                             subdir_buf.as_deref(),
                             &target,
+                            include_libdef,
+                            true,
+                        )
+                        && !crawl_prunes_dir(
+                            &duped_options,
                             can_prune,
+                            &target,
                             all,
                             include_libdef,
                         )
