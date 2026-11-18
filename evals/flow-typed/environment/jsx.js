@@ -177,7 +177,7 @@ declare class SyntheticTransitionEvent<out T extends EventTarget = EventTarget>
 // prettier-ignore
 declare type $JSXIntrinsics = {
   // Catch-all for custom elements.
-  [string]: ReactDOM$HTMLElementJSXIntrinsic,
+  [key: string]: ReactDOM$HTMLElementJSXIntrinsic,
   // HTML
   a: ReactDOM$HTMLElementJSXIntrinsicTyped<ReactDOM$aProps, ReactDOM$aInstance>,
   abbr: ReactDOM$HTMLElementJSXIntrinsicTyped<ReactDOM$abbrProps, ReactDOM$abbrInstance>,
@@ -376,18 +376,18 @@ type ReactDOM$SVGElementJSXIntrinsic = {
   ...
 };
 
-type ReactDOM$SVGElementJSXIntrinsicTyped<Props extends {...}, Instance extends Element> = {|
+type ReactDOM$SVGElementJSXIntrinsicTyped<Props extends {...}, Instance extends Element> = {
   instance: Instance,
   props: {
     ...Props,
     ...ReactDOM$EventHandlers<Instance>,
     // We add data props here to avoid spreading errors
-    [StringPrefix<'data-'>]: ReactDOM$DataPropValues,
+    [key: StringPrefix<'data-'>]: ReactDOM$DataPropValues,
   },
-|};
+};
 
 // Override this if you want to add custom props to all HTML elements
-type ReactDOM$CustomHTMLElementProps = Readonly<{||}>;
+type ReactDOM$CustomHTMLElementProps = Readonly<{}>;
 
 // Override this if you want to change the types accepted by data-prefixed props
 type ReactDOM$DataPropValues = ?(string | boolean | number);
@@ -396,7 +396,7 @@ type ReactDOM$DataPropValues = ?(string | boolean | number);
 type ReactDOM$UserVisibleString = string;
 
 // Override this if you want to add custom events to all HTML elements
-type ReactDOM$CustomEvents<in E> = Readonly<{||}>;
+type ReactDOM$CustomEvents<in E> = Readonly<{}>;
 
 type ReactDOM$BooleanishString = boolean | 'true' | 'false';
 
@@ -410,7 +410,7 @@ type ReactDOM$CrossOrigin = ?('anonymous' | 'use-credentials' | '');
 
 // Adapted from https://github.com/DefinitelyTyped/DefinitelyTyped/blob/ffe46d9382e765fc0f54530b4653e57e6ef0921c/types/react/index.d.ts#L2377
 // All the WAI-ARIA 1.1 attributes from https://www.w3.org/TR/wai-aria-1.1/
-type ReactDOM$AriaAttributes = {|
+type ReactDOM$AriaAttributes = {
   /** Identifies the currently active element when DOM focus is on a composite widget, textbox, group, or application. */
   'aria-activedescendant'?: ?string,
   /** Indicates whether assistive technologies will present all, or only parts of, the changed region based on the change notifications defined by the aria-relevant attribute. */
@@ -652,225 +652,225 @@ type ReactDOM$AriaAttributes = {|
   'aria-valuenow'?: ?number,
   /** Defines the human readable text alternative of aria-valuenow for a range widget. */
   'aria-valuetext'?: ?ReactDOM$UserVisibleString,
-|};
+};
 
-type ReactDOM$EventHandlers<in E> = Readonly<{|
+type ReactDOM$EventHandlers<in E> = Readonly<{
   // Animation Events
-  onAnimationEnd?: ?(SyntheticAnimationEvent<E>) => unknown,
-  onAnimationEndCapture?: ?(SyntheticAnimationEvent<E>) => unknown,
-  onAnimationIteration?: ?(SyntheticAnimationEvent<E>) => unknown,
-  onAnimationIterationCapture?: ?(SyntheticAnimationEvent<E>) => unknown,
-  onAnimationStart?: ?(SyntheticAnimationEvent<E>) => unknown,
-  onAnimationStartCapture?: ?(SyntheticAnimationEvent<E>) => unknown,
+  onAnimationEnd?: ?(event: SyntheticAnimationEvent<E>) => unknown,
+  onAnimationEndCapture?: ?(event: SyntheticAnimationEvent<E>) => unknown,
+  onAnimationIteration?: ?(event: SyntheticAnimationEvent<E>) => unknown,
+  onAnimationIterationCapture?: ?(event: SyntheticAnimationEvent<E>) => unknown,
+  onAnimationStart?: ?(event: SyntheticAnimationEvent<E>) => unknown,
+  onAnimationStartCapture?: ?(event: SyntheticAnimationEvent<E>) => unknown,
 
   // Clipboard Events
-  onCopy?: ?(SyntheticEvent<E>) => unknown,
-  onCopyCapture?: ?(SyntheticEvent<E>) => unknown,
-  onCut?: ?(SyntheticEvent<E>) => unknown,
-  onCutCapture?: ?(SyntheticEvent<E>) => unknown,
-  onPaste?: ?(SyntheticEvent<E>) => unknown,
-  onPasteCapture?: ?(SyntheticEvent<E>) => unknown,
+  onCopy?: ?(event: SyntheticEvent<E>) => unknown,
+  onCopyCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onCut?: ?(event: SyntheticEvent<E>) => unknown,
+  onCutCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onPaste?: ?(event: SyntheticEvent<E>) => unknown,
+  onPasteCapture?: ?(event: SyntheticEvent<E>) => unknown,
 
   // Composition Events
-  onCompositionEnd?: ?(SyntheticCompositionEvent<E>) => unknown,
-  onCompositionEndCapture?: ?(SyntheticCompositionEvent<E>) => unknown,
-  onCompositionStart?: ?(SyntheticCompositionEvent<E>) => unknown,
-  onCompositionStartCapture?: ?(SyntheticCompositionEvent<E>) => unknown,
-  onCompositionUpdate?: ?(SyntheticCompositionEvent<E>) => unknown,
-  onCompositionUpdateCapture?: ?(SyntheticCompositionEvent<E>) => unknown,
+  onCompositionEnd?: ?(event: SyntheticCompositionEvent<E>) => unknown,
+  onCompositionEndCapture?: ?(event: SyntheticCompositionEvent<E>) => unknown,
+  onCompositionStart?: ?(event: SyntheticCompositionEvent<E>) => unknown,
+  onCompositionStartCapture?: ?(event: SyntheticCompositionEvent<E>) => unknown,
+  onCompositionUpdate?: ?(event: SyntheticCompositionEvent<E>) => unknown,
+  onCompositionUpdateCapture?: ?(event: SyntheticCompositionEvent<E>) => unknown,
 
   // Focus Events
-  onFocus?: ?(SyntheticFocusEvent<E>) => unknown,
-  onFocusCapture?: ?(SyntheticFocusEvent<E>) => unknown,
-  onBlur?: ?(SyntheticFocusEvent<E>) => unknown,
-  onBlurCapture?: ?(SyntheticFocusEvent<E>) => unknown,
+  onFocus?: ?(event: SyntheticFocusEvent<E>) => unknown,
+  onFocusCapture?: ?(event: SyntheticFocusEvent<E>) => unknown,
+  onBlur?: ?(event: SyntheticFocusEvent<E>) => unknown,
+  onBlurCapture?: ?(event: SyntheticFocusEvent<E>) => unknown,
 
   // Form Events
-  onBeforeInput?: ?(SyntheticInputEvent<E>) => unknown,
-  onBeforeInputCapture?: ?(SyntheticInputEvent<E>) => unknown,
-  onChange?: ?(SyntheticEvent<E>) => unknown,
-  onChangeCapture?: ?(SyntheticEvent<E>) => unknown,
-  onInput?: ?(SyntheticEvent<E>) => unknown,
-  onInputCapture?: ?(SyntheticEvent<E>) => unknown,
-  onInvalid?: ?(SyntheticEvent<E>) => unknown,
-  onInvalidCapture?: ?(SyntheticEvent<E>) => unknown,
-  onReset?: ?(SyntheticEvent<E>) => unknown,
-  onResetCapture?: ?(SyntheticEvent<E>) => unknown,
-  onSubmit?: ?(SyntheticEvent<E>) => unknown,
-  onSubmitCapture?: ?(SyntheticEvent<E>) => unknown,
+  onBeforeInput?: ?(event: SyntheticInputEvent<E>) => unknown,
+  onBeforeInputCapture?: ?(event: SyntheticInputEvent<E>) => unknown,
+  onChange?: ?(event: SyntheticEvent<E>) => unknown,
+  onChangeCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onInput?: ?(event: SyntheticEvent<E>) => unknown,
+  onInputCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onInvalid?: ?(event: SyntheticEvent<E>) => unknown,
+  onInvalidCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onReset?: ?(event: SyntheticEvent<E>) => unknown,
+  onResetCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onSubmit?: ?(event: SyntheticEvent<E>) => unknown,
+  onSubmitCapture?: ?(event: SyntheticEvent<E>) => unknown,
 
   // Image Events
-  onError?: ?(SyntheticEvent<E>) => unknown,
-  onErrorCapture?: ?(SyntheticEvent<E>) => unknown,
-  onLoad?: ?(SyntheticEvent<E>) => unknown,
-  onLoadCapture?: ?(SyntheticEvent<E>) => unknown,
+  onError?: ?(event: SyntheticEvent<E>) => unknown,
+  onErrorCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onLoad?: ?(event: SyntheticEvent<E>) => unknown,
+  onLoadCapture?: ?(event: SyntheticEvent<E>) => unknown,
 
   // Keyboard Events
-  onKeyDown?: ?(SyntheticKeyboardEvent<E>) => unknown,
-  onKeyDownCapture?: ?(SyntheticKeyboardEvent<E>) => unknown,
-  onKeyPress?: ?(SyntheticKeyboardEvent<E>) => unknown,
-  onKeyPressCapture?: ?(SyntheticKeyboardEvent<E>) => unknown,
-  onKeyUp?: ?(SyntheticKeyboardEvent<E>) => unknown,
-  onKeyUpCapture?: ?(SyntheticKeyboardEvent<E>) => unknown,
+  onKeyDown?: ?(event: SyntheticKeyboardEvent<E>) => unknown,
+  onKeyDownCapture?: ?(event: SyntheticKeyboardEvent<E>) => unknown,
+  onKeyPress?: ?(event: SyntheticKeyboardEvent<E>) => unknown,
+  onKeyPressCapture?: ?(event: SyntheticKeyboardEvent<E>) => unknown,
+  onKeyUp?: ?(event: SyntheticKeyboardEvent<E>) => unknown,
+  onKeyUpCapture?: ?(event: SyntheticKeyboardEvent<E>) => unknown,
 
   // Media Events
-  onAbort?: ?(SyntheticEvent<E>) => unknown,
-  onAbortCapture?: ?(SyntheticEvent<E>) => unknown,
-  onCanPlay?: ?(SyntheticEvent<E>) => unknown,
-  onCanPlayCapture?: ?(SyntheticEvent<E>) => unknown,
-  onCanPlayThrough?: ?(SyntheticEvent<E>) => unknown,
-  onCanPlayThroughCapture?: ?(SyntheticEvent<E>) => unknown,
-  onDurationChange?: ?(SyntheticEvent<E>) => unknown,
-  onDurationChangeCapture?: ?(SyntheticEvent<E>) => unknown,
-  onEmptied?: ?(SyntheticEvent<E>) => unknown,
-  onEmptiedCapture?: ?(SyntheticEvent<E>) => unknown,
-  onEncrypted?: ?(SyntheticEvent<E>) => unknown,
-  onEncryptedCapture?: ?(SyntheticEvent<E>) => unknown,
-  onEnded?: ?(SyntheticEvent<E>) => unknown,
-  onEndedCapture?: ?(SyntheticEvent<E>) => unknown,
-  onLoadedData?: ?(SyntheticEvent<E>) => unknown,
-  onLoadedDataCapture?: ?(SyntheticEvent<E>) => unknown,
-  onLoadedMetadata?: ?(SyntheticEvent<E>) => unknown,
-  onLoadedMetadataCapture?: ?(SyntheticEvent<E>) => unknown,
-  onLoadStart?: ?(SyntheticEvent<E>) => unknown,
-  onLoadStartCapture?: ?(SyntheticEvent<E>) => unknown,
-  onPause?: ?(SyntheticEvent<E>) => unknown,
-  onPauseCapture?: ?(SyntheticEvent<E>) => unknown,
-  onPlay?: ?(SyntheticEvent<E>) => unknown,
-  onPlayCapture?: ?(SyntheticEvent<E>) => unknown,
-  onPlaying?: ?(SyntheticEvent<E>) => unknown,
-  onPlayingCapture?: ?(SyntheticEvent<E>) => unknown,
-  onProgress?: ?(SyntheticEvent<E>) => unknown,
-  onProgressCapture?: ?(SyntheticEvent<E>) => unknown,
-  onRateChange?: ?(SyntheticEvent<E>) => unknown,
-  onRateChangeCapture?: ?(SyntheticEvent<E>) => unknown,
-  onResize?: ?(SyntheticEvent<E>) => unknown,
-  onResizeCapture?: ?(SyntheticEvent<E>) => unknown,
-  onSeeked?: ?(SyntheticEvent<E>) => unknown,
-  onSeekedCapture?: ?(SyntheticEvent<E>) => unknown,
-  onSeeking?: ?(SyntheticEvent<E>) => unknown,
-  onSeekingCapture?: ?(SyntheticEvent<E>) => unknown,
-  onStalled?: ?(SyntheticEvent<E>) => unknown,
-  onStalledCapture?: ?(SyntheticEvent<E>) => unknown,
-  onSuspend?: ?(SyntheticEvent<E>) => unknown,
-  onSuspendCapture?: ?(SyntheticEvent<E>) => unknown,
-  onTimeUpdate?: ?(SyntheticEvent<E>) => unknown,
-  onTimeUpdateCapture?: ?(SyntheticEvent<E>) => unknown,
-  onVolumeChange?: ?(SyntheticEvent<E>) => unknown,
-  onVolumeChangeCapture?: ?(SyntheticEvent<E>) => unknown,
-  onWaiting?: ?(SyntheticEvent<E>) => unknown,
-  onWaitingCapture?: ?(SyntheticEvent<E>) => unknown,
+  onAbort?: ?(event: SyntheticEvent<E>) => unknown,
+  onAbortCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onCanPlay?: ?(event: SyntheticEvent<E>) => unknown,
+  onCanPlayCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onCanPlayThrough?: ?(event: SyntheticEvent<E>) => unknown,
+  onCanPlayThroughCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onDurationChange?: ?(event: SyntheticEvent<E>) => unknown,
+  onDurationChangeCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onEmptied?: ?(event: SyntheticEvent<E>) => unknown,
+  onEmptiedCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onEncrypted?: ?(event: SyntheticEvent<E>) => unknown,
+  onEncryptedCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onEnded?: ?(event: SyntheticEvent<E>) => unknown,
+  onEndedCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onLoadedData?: ?(event: SyntheticEvent<E>) => unknown,
+  onLoadedDataCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onLoadedMetadata?: ?(event: SyntheticEvent<E>) => unknown,
+  onLoadedMetadataCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onLoadStart?: ?(event: SyntheticEvent<E>) => unknown,
+  onLoadStartCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onPause?: ?(event: SyntheticEvent<E>) => unknown,
+  onPauseCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onPlay?: ?(event: SyntheticEvent<E>) => unknown,
+  onPlayCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onPlaying?: ?(event: SyntheticEvent<E>) => unknown,
+  onPlayingCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onProgress?: ?(event: SyntheticEvent<E>) => unknown,
+  onProgressCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onRateChange?: ?(event: SyntheticEvent<E>) => unknown,
+  onRateChangeCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onResize?: ?(event: SyntheticEvent<E>) => unknown,
+  onResizeCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onSeeked?: ?(event: SyntheticEvent<E>) => unknown,
+  onSeekedCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onSeeking?: ?(event: SyntheticEvent<E>) => unknown,
+  onSeekingCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onStalled?: ?(event: SyntheticEvent<E>) => unknown,
+  onStalledCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onSuspend?: ?(event: SyntheticEvent<E>) => unknown,
+  onSuspendCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onTimeUpdate?: ?(event: SyntheticEvent<E>) => unknown,
+  onTimeUpdateCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onVolumeChange?: ?(event: SyntheticEvent<E>) => unknown,
+  onVolumeChangeCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onWaiting?: ?(event: SyntheticEvent<E>) => unknown,
+  onWaitingCapture?: ?(event: SyntheticEvent<E>) => unknown,
 
   // Mouse Events
-  onAuxClick?: ?(SyntheticMouseEvent<E>) => unknown,
-  onAuxClickCapture?: ?(SyntheticMouseEvent<E>) => unknown,
-  onClick?: ?(SyntheticMouseEvent<E>) => unknown,
-  onClickCapture?: ?(SyntheticMouseEvent<E>) => unknown,
-  onContextMenu?: ?(SyntheticMouseEvent<E>) => unknown,
-  onContextMenuCapture?: ?(SyntheticMouseEvent<E>) => unknown,
-  onDoubleClick?: ?(SyntheticMouseEvent<E>) => unknown,
-  onDoubleClickCapture?: ?(SyntheticMouseEvent<E>) => unknown,
-  onDrag?: ?(SyntheticDragEvent<E>) => unknown,
-  onDragCapture?: ?(SyntheticDragEvent<E>) => unknown,
-  onDragEnd?: ?(SyntheticDragEvent<E>) => unknown,
-  onDragEndCapture?: ?(SyntheticDragEvent<E>) => unknown,
-  onDragEnter?: ?(SyntheticDragEvent<E>) => unknown,
-  onDragEnterCapture?: ?(SyntheticDragEvent<E>) => unknown,
-  onDragExit?: ?(SyntheticDragEvent<E>) => unknown,
-  onDragExitCapture?: ?(SyntheticDragEvent<E>) => unknown,
-  onDragLeave?: ?(SyntheticDragEvent<E>) => unknown,
-  onDragLeaveCapture?: ?(SyntheticDragEvent<E>) => unknown,
-  onDragOver?: ?(SyntheticDragEvent<E>) => unknown,
-  onDragOverCapture?: ?(SyntheticDragEvent<E>) => unknown,
-  onDragStart?: ?(SyntheticDragEvent<E>) => unknown,
-  onDragStartCapture?: ?(SyntheticDragEvent<E>) => unknown,
-  onDrop?: ?(SyntheticDragEvent<E>) => unknown,
-  onDropCapture?: ?(SyntheticDragEvent<E>) => unknown,
-  onMouseDown?: ?(SyntheticMouseEvent<E>) => unknown,
-  onMouseDownCapture?: ?(SyntheticMouseEvent<E>) => unknown,
-  onMouseEnter?: ?(SyntheticMouseEvent<E>) => unknown,
-  onMouseLeave?: ?(SyntheticMouseEvent<E>) => unknown,
-  onMouseMove?: ?(SyntheticMouseEvent<E>) => unknown,
-  onMouseMoveCapture?: ?(SyntheticMouseEvent<E>) => unknown,
-  onMouseOut?: ?(SyntheticMouseEvent<E>) => unknown,
-  onMouseOutCapture?: ?(SyntheticMouseEvent<E>) => unknown,
-  onMouseOver?: ?(SyntheticMouseEvent<E>) => unknown,
-  onMouseOverCapture?: ?(SyntheticMouseEvent<E>) => unknown,
-  onMouseUp?: ?(SyntheticMouseEvent<E>) => unknown,
-  onMouseUpCapture?: ?(SyntheticMouseEvent<E>) => unknown,
+  onAuxClick?: ?(event: SyntheticMouseEvent<E>) => unknown,
+  onAuxClickCapture?: ?(event: SyntheticMouseEvent<E>) => unknown,
+  onClick?: ?(event: SyntheticMouseEvent<E>) => unknown,
+  onClickCapture?: ?(event: SyntheticMouseEvent<E>) => unknown,
+  onContextMenu?: ?(event: SyntheticMouseEvent<E>) => unknown,
+  onContextMenuCapture?: ?(event: SyntheticMouseEvent<E>) => unknown,
+  onDoubleClick?: ?(event: SyntheticMouseEvent<E>) => unknown,
+  onDoubleClickCapture?: ?(event: SyntheticMouseEvent<E>) => unknown,
+  onDrag?: ?(event: SyntheticDragEvent<E>) => unknown,
+  onDragCapture?: ?(event: SyntheticDragEvent<E>) => unknown,
+  onDragEnd?: ?(event: SyntheticDragEvent<E>) => unknown,
+  onDragEndCapture?: ?(event: SyntheticDragEvent<E>) => unknown,
+  onDragEnter?: ?(event: SyntheticDragEvent<E>) => unknown,
+  onDragEnterCapture?: ?(event: SyntheticDragEvent<E>) => unknown,
+  onDragExit?: ?(event: SyntheticDragEvent<E>) => unknown,
+  onDragExitCapture?: ?(event: SyntheticDragEvent<E>) => unknown,
+  onDragLeave?: ?(event: SyntheticDragEvent<E>) => unknown,
+  onDragLeaveCapture?: ?(event: SyntheticDragEvent<E>) => unknown,
+  onDragOver?: ?(event: SyntheticDragEvent<E>) => unknown,
+  onDragOverCapture?: ?(event: SyntheticDragEvent<E>) => unknown,
+  onDragStart?: ?(event: SyntheticDragEvent<E>) => unknown,
+  onDragStartCapture?: ?(event: SyntheticDragEvent<E>) => unknown,
+  onDrop?: ?(event: SyntheticDragEvent<E>) => unknown,
+  onDropCapture?: ?(event: SyntheticDragEvent<E>) => unknown,
+  onMouseDown?: ?(event: SyntheticMouseEvent<E>) => unknown,
+  onMouseDownCapture?: ?(event: SyntheticMouseEvent<E>) => unknown,
+  onMouseEnter?: ?(event: SyntheticMouseEvent<E>) => unknown,
+  onMouseLeave?: ?(event: SyntheticMouseEvent<E>) => unknown,
+  onMouseMove?: ?(event: SyntheticMouseEvent<E>) => unknown,
+  onMouseMoveCapture?: ?(event: SyntheticMouseEvent<E>) => unknown,
+  onMouseOut?: ?(event: SyntheticMouseEvent<E>) => unknown,
+  onMouseOutCapture?: ?(event: SyntheticMouseEvent<E>) => unknown,
+  onMouseOver?: ?(event: SyntheticMouseEvent<E>) => unknown,
+  onMouseOverCapture?: ?(event: SyntheticMouseEvent<E>) => unknown,
+  onMouseUp?: ?(event: SyntheticMouseEvent<E>) => unknown,
+  onMouseUpCapture?: ?(event: SyntheticMouseEvent<E>) => unknown,
 
   // Pointer Events
-  onGotPointerCapture?: ?(SyntheticPointerEvent<E>) => unknown,
-  onGotPointerCaptureCapture?: ?(SyntheticPointerEvent<E>) => unknown,
-  onLostPointerCapture?: ?(SyntheticPointerEvent<E>) => unknown,
-  onLostPointerCaptureCapture?: ?(SyntheticPointerEvent<E>) => unknown,
-  onPointerCancel?: ?(SyntheticPointerEvent<E>) => unknown,
-  onPointerCancelCapture?: ?(SyntheticPointerEvent<E>) => unknown,
-  onPointerDown?: ?(SyntheticPointerEvent<E>) => unknown,
-  onPointerDownCapture?: ?(SyntheticPointerEvent<E>) => unknown,
-  onPointerEnter?: ?(SyntheticPointerEvent<E>) => unknown,
-  onPointerLeave?: ?(SyntheticPointerEvent<E>) => unknown,
-  onPointerMove?: ?(SyntheticPointerEvent<E>) => unknown,
-  onPointerMoveCapture?: ?(SyntheticPointerEvent<E>) => unknown,
-  onPointerOut?: ?(SyntheticPointerEvent<E>) => unknown,
-  onPointerOutCapture?: ?(SyntheticPointerEvent<E>) => unknown,
-  onPointerOver?: ?(SyntheticPointerEvent<E>) => unknown,
-  onPointerOverCapture?: ?(SyntheticPointerEvent<E>) => unknown,
-  onPointerUp?: ?(SyntheticPointerEvent<E>) => unknown,
-  onPointerUpCapture?: ?(SyntheticPointerEvent<E>) => unknown,
+  onGotPointerCapture?: ?(event: SyntheticPointerEvent<E>) => unknown,
+  onGotPointerCaptureCapture?: ?(event: SyntheticPointerEvent<E>) => unknown,
+  onLostPointerCapture?: ?(event: SyntheticPointerEvent<E>) => unknown,
+  onLostPointerCaptureCapture?: ?(event: SyntheticPointerEvent<E>) => unknown,
+  onPointerCancel?: ?(event: SyntheticPointerEvent<E>) => unknown,
+  onPointerCancelCapture?: ?(event: SyntheticPointerEvent<E>) => unknown,
+  onPointerDown?: ?(event: SyntheticPointerEvent<E>) => unknown,
+  onPointerDownCapture?: ?(event: SyntheticPointerEvent<E>) => unknown,
+  onPointerEnter?: ?(event: SyntheticPointerEvent<E>) => unknown,
+  onPointerLeave?: ?(event: SyntheticPointerEvent<E>) => unknown,
+  onPointerMove?: ?(event: SyntheticPointerEvent<E>) => unknown,
+  onPointerMoveCapture?: ?(event: SyntheticPointerEvent<E>) => unknown,
+  onPointerOut?: ?(event: SyntheticPointerEvent<E>) => unknown,
+  onPointerOutCapture?: ?(event: SyntheticPointerEvent<E>) => unknown,
+  onPointerOver?: ?(event: SyntheticPointerEvent<E>) => unknown,
+  onPointerOverCapture?: ?(event: SyntheticPointerEvent<E>) => unknown,
+  onPointerUp?: ?(event: SyntheticPointerEvent<E>) => unknown,
+  onPointerUpCapture?: ?(event: SyntheticPointerEvent<E>) => unknown,
 
   // Selection Events
-  onSelect?: ?(SyntheticEvent<E>) => unknown,
-  onSelectCapture?: ?(SyntheticEvent<E>) => unknown,
+  onSelect?: ?(event: SyntheticEvent<E>) => unknown,
+  onSelectCapture?: ?(event: SyntheticEvent<E>) => unknown,
 
   // Toggle Events
-  onToggle?: ?(SyntheticEvent<E>) => unknown,
-  onToggleCapture?: ?(SyntheticEvent<E>) => unknown,
+  onToggle?: ?(event: SyntheticEvent<E>) => unknown,
+  onToggleCapture?: ?(event: SyntheticEvent<E>) => unknown,
 
   // Touch Events
-  onTouchCancel?: ?(SyntheticTouchEvent<E>) => unknown,
-  onTouchCancelCapture?: ?(SyntheticTouchEvent<E>) => unknown,
-  onTouchEnd?: ?(SyntheticTouchEvent<E>) => unknown,
-  onTouchEndCapture?: ?(SyntheticTouchEvent<E>) => unknown,
-  onTouchMove?: ?(SyntheticEvent<E>) => unknown,
-  onTouchMoveCapture?: ?(SyntheticEvent<E>) => unknown,
-  onTouchStart?: ?(SyntheticTouchEvent<E>) => unknown,
-  onTouchStartCapture?: ?(SyntheticTouchEvent<E>) => unknown,
+  onTouchCancel?: ?(event: SyntheticTouchEvent<E>) => unknown,
+  onTouchCancelCapture?: ?(event: SyntheticTouchEvent<E>) => unknown,
+  onTouchEnd?: ?(event: SyntheticTouchEvent<E>) => unknown,
+  onTouchEndCapture?: ?(event: SyntheticTouchEvent<E>) => unknown,
+  onTouchMove?: ?(event: SyntheticEvent<E>) => unknown,
+  onTouchMoveCapture?: ?(event: SyntheticEvent<E>) => unknown,
+  onTouchStart?: ?(event: SyntheticTouchEvent<E>) => unknown,
+  onTouchStartCapture?: ?(event: SyntheticTouchEvent<E>) => unknown,
 
   // Transition Events
-  onTransitionCancel?: ?(SyntheticTransitionEvent<E>) => unknown,
-  onTransitionCancelCapture?: ?(SyntheticTransitionEvent<E>) => unknown,
-  onTransitionEnd?: ?(SyntheticTransitionEvent<E>) => unknown,
-  onTransitionEndCapture?: ?(SyntheticTransitionEvent<E>) => unknown,
-  onTransitionRun?: ?(SyntheticTransitionEvent<E>) => unknown,
-  onTransitionRunCapture?: ?(SyntheticTransitionEvent<E>) => unknown,
-  onTransitionStart?: ?(SyntheticTransitionEvent<E>) => unknown,
-  onTransitionStartCapture?: ?(SyntheticTransitionEvent<E>) => unknown,
+  onTransitionCancel?: ?(event: SyntheticTransitionEvent<E>) => unknown,
+  onTransitionCancelCapture?: ?(event: SyntheticTransitionEvent<E>) => unknown,
+  onTransitionEnd?: ?(event: SyntheticTransitionEvent<E>) => unknown,
+  onTransitionEndCapture?: ?(event: SyntheticTransitionEvent<E>) => unknown,
+  onTransitionRun?: ?(event: SyntheticTransitionEvent<E>) => unknown,
+  onTransitionRunCapture?: ?(event: SyntheticTransitionEvent<E>) => unknown,
+  onTransitionStart?: ?(event: SyntheticTransitionEvent<E>) => unknown,
+  onTransitionStartCapture?: ?(event: SyntheticTransitionEvent<E>) => unknown,
 
   // UI Events
-  onScroll?: ?(SyntheticUIEvent<E>) => unknown,
-  onScrollCapture?: ?(SyntheticUIEvent<E>) => unknown,
+  onScroll?: ?(event: SyntheticUIEvent<E>) => unknown,
+  onScrollCapture?: ?(event: SyntheticUIEvent<E>) => unknown,
 
   // Wheel Events
-  onWheel?: ?(SyntheticWheelEvent<E>) => unknown,
-  onWheelCapture?: ?(SyntheticWheelEvent<E>) => unknown,
+  onWheel?: ?(event: SyntheticWheelEvent<E>) => unknown,
+  onWheelCapture?: ?(event: SyntheticWheelEvent<E>) => unknown,
 
   ...ReactDOM$CustomEvents<E>,
-|}>;
+}>;
 
 // Special props provided by React
-type ReactDOM$ReactSpecificProps = {|
+type ReactDOM$ReactSpecificProps = {
   children?: React$Node,
-  dangerouslySetInnerHTML?: {|
+  dangerouslySetInnerHTML?: {
     __html: ReactDOM$UserVisibleString,
-  |},
+  },
   defaultChecked?: ?boolean,
   defaultValue?: ?(string | number | ReadonlyArray<string>),
   suppressContentEditableWarning?: ?boolean,
   suppressHydrationWarning?: ?boolean,
-|};
+};
 
-type ReactDOM$HTMLElementProps = {|
+type ReactDOM$HTMLElementProps = {
   ...ReactDOM$ReactSpecificProps,
   ...ReactDOM$AriaAttributes,
   accessKey?: ?string,
@@ -929,7 +929,7 @@ type ReactDOM$HTMLElementProps = {|
   title?: ?ReactDOM$UserVisibleString,
   translate?: ?('yes' | 'no'),
   ...ReactDOM$CustomHTMLElementProps,
-|};
+};
 
 // Self closing tags, like br, do not allow children
 type ReactDOM$SelfClosingHTMLElementProps = Omit<
@@ -937,15 +937,15 @@ type ReactDOM$SelfClosingHTMLElementProps = Omit<
   'children' | 'dangerouslySetInnerHTML',
 >;
 
-type ReactDOM$HTMLElementJSXIntrinsicTyped<Props, Instance = HTMLElement> = {|
+type ReactDOM$HTMLElementJSXIntrinsicTyped<Props, Instance = HTMLElement> = {
   instance: Instance,
   props: {
     ...Props,
     ...ReactDOM$EventHandlers<Instance>,
     // We add data props here to avoid spreading errors
-    [StringPrefix<'data-'>]: ReactDOM$DataPropValues,
+    [key: StringPrefix<'data-'>]: ReactDOM$DataPropValues,
   },
-|};
+};
 
 type ReactDOM$HTMLAttributeReferrerPolicy =
   | ''
@@ -964,7 +964,7 @@ type ReactDOM$HTMLAttributeAnchorTarget =
   | '_parent'
   | '_top';
 
-type ReactDOM$aProps = {|
+type ReactDOM$aProps = {
   ...ReactDOM$HTMLElementProps,
   download?: any,
   href?: ?string,
@@ -975,7 +975,7 @@ type ReactDOM$aProps = {|
   rel?: ?string,
   target?: ?ReactDOM$HTMLAttributeAnchorTarget,
   type?: ?string,
-|};
+};
 type ReactDOM$aInstance = HTMLAnchorElement;
 
 type ReactDOM$abbrProps = ReactDOM$HTMLElementProps;
@@ -984,7 +984,7 @@ type ReactDOM$abbrInstance = HTMLElement;
 type ReactDOM$addressProps = ReactDOM$HTMLElementProps;
 type ReactDOM$addressInstance = HTMLElement;
 
-type ReactDOM$areaProps = {|
+type ReactDOM$areaProps = {
   ...ReactDOM$SelfClosingHTMLElementProps,
   alt?: ?ReactDOM$UserVisibleString,
   coords?: ?string,
@@ -995,7 +995,7 @@ type ReactDOM$areaProps = {|
   referrerPolicy?: ?ReactDOM$HTMLAttributeReferrerPolicy,
   shape?: ?string,
   target?: ?string,
-|};
+};
 type ReactDOM$areaInstance = HTMLAreaElement;
 
 type ReactDOM$articleProps = ReactDOM$HTMLElementProps;
@@ -1004,7 +1004,7 @@ type ReactDOM$articleInstance = HTMLElement;
 type ReactDOM$asideProps = ReactDOM$HTMLElementProps;
 type ReactDOM$asideInstance = HTMLElement;
 
-type ReactDOM$audioProps = {|
+type ReactDOM$audioProps = {
   ...ReactDOM$HTMLElementProps,
   autoPlay?: ?boolean,
   controls?: ?boolean,
@@ -1015,17 +1015,17 @@ type ReactDOM$audioProps = {|
   muted?: ?boolean,
   preload?: ?string,
   src?: ?string,
-|};
+};
 type ReactDOM$audioInstance = HTMLAudioElement;
 
 type ReactDOM$bProps = ReactDOM$HTMLElementProps;
 type ReactDOM$bInstance = HTMLElement;
 
-type ReactDOM$baseProps = {|
+type ReactDOM$baseProps = {
   ...ReactDOM$SelfClosingHTMLElementProps,
   href?: ?string,
   target?: ?string,
-|};
+};
 type ReactDOM$baseInstance = HTMLBaseElement;
 
 type ReactDOM$bdiProps = ReactDOM$HTMLElementProps;
@@ -1046,7 +1046,7 @@ type ReactDOM$bodyInstance = HTMLBodyElement;
 type ReactDOM$brProps = ReactDOM$SelfClosingHTMLElementProps;
 type ReactDOM$brInstance = HTMLBRElement;
 
-type ReactDOM$buttonProps = {|
+type ReactDOM$buttonProps = {
   ...ReactDOM$HTMLElementProps,
   disabled?: ?boolean,
   form?: ?string,
@@ -1058,14 +1058,14 @@ type ReactDOM$buttonProps = {|
   name?: ?string,
   type?: ?('submit' | 'reset' | 'button'),
   value?: ?(string | ReadonlyArray<string> | number),
-|};
+};
 type ReactDOM$buttonInstance = HTMLButtonElement;
 
-type ReactDOM$canvasProps = {|
+type ReactDOM$canvasProps = {
   ...ReactDOM$HTMLElementProps,
   height?: ?(number | string),
   width?: ?(number | string),
-|};
+};
 type ReactDOM$canvasInstance = HTMLCanvasElement;
 
 type ReactDOM$captionProps = ReactDOM$HTMLElementProps;
@@ -1080,16 +1080,16 @@ type ReactDOM$codeInstance = HTMLElement;
 type ReactDOM$colProps = ReactDOM$SelfClosingHTMLElementProps;
 type ReactDOM$colInstance = HTMLTableColElement;
 
-type ReactDOM$colgroupProps = {|
+type ReactDOM$colgroupProps = {
   ...ReactDOM$HTMLElementProps,
   span?: ?number,
-|};
+};
 type ReactDOM$colgroupInstance = HTMLTableColElement;
 
-type ReactDOM$dataProps = {|
+type ReactDOM$dataProps = {
   ...ReactDOM$HTMLElementProps,
   value?: ?(string | ReadonlyArray<string> | number),
-|};
+};
 
 type ReactDOM$dataInstance = HTMLDataElement;
 
@@ -1099,29 +1099,29 @@ type ReactDOM$datalistInstance = HTMLDataListElement;
 type ReactDOM$ddProps = ReactDOM$HTMLElementProps;
 type ReactDOM$ddInstance = HTMLElement;
 
-type ReactDOM$delProps = {|
+type ReactDOM$delProps = {
   ...ReactDOM$HTMLElementProps,
   cite?: ?string,
   dateTime?: ?string,
-|};
+};
 type ReactDOM$delInstance = HTMLModElement;
 
-type ReactDOM$detailsProps = {|
+type ReactDOM$detailsProps = {
   ...ReactDOM$HTMLElementProps,
   name?: ?string,
   open?: ?boolean,
-|};
+};
 type ReactDOM$detailsInstance = HTMLDetailsElement;
 
 type ReactDOM$dfnProps = ReactDOM$HTMLElementProps;
 type ReactDOM$dfnInstance = HTMLElement;
 
-type ReactDOM$dialogProps = {|
+type ReactDOM$dialogProps = {
   ...ReactDOM$HTMLElementProps,
-  onCancel?: ?(SyntheticEvent<HTMLDialogElement>) => unknown,
-  onClose?: ?(SyntheticEvent<HTMLDialogElement>) => unknown,
+  onCancel?: ?(event: SyntheticEvent<HTMLDialogElement>) => unknown,
+  onClose?: ?(event: SyntheticEvent<HTMLDialogElement>) => unknown,
   open?: ?boolean,
-|};
+};
 type ReactDOM$dialogInstance = HTMLDialogElement;
 
 type ReactDOM$divProps = ReactDOM$HTMLElementProps;
@@ -1139,12 +1139,12 @@ type ReactDOM$emInstance = HTMLElement;
 type ReactDOM$embedProps = ReactDOM$SelfClosingHTMLElementProps;
 type ReactDOM$embedInstance = HTMLEmbedElement;
 
-type ReactDOM$fieldsetProps = {|
+type ReactDOM$fieldsetProps = {
   ...ReactDOM$HTMLElementProps,
   disabled?: ?boolean,
   form?: ?string,
   name?: ?string,
-|};
+};
 type ReactDOM$fieldsetInstance = HTMLFieldSetElement;
 
 type ReactDOM$figcaptionProps = ReactDOM$HTMLElementProps;
@@ -1156,7 +1156,7 @@ type ReactDOM$figureInstance = HTMLElement;
 type ReactDOM$footerProps = ReactDOM$HTMLElementProps;
 type ReactDOM$footerInstance = HTMLFormElement;
 
-type ReactDOM$formProps = {|
+type ReactDOM$formProps = {
   ...ReactDOM$HTMLElementProps,
   acceptCharset?: ?string,
   action?: ?(string | ((formData: FormData) => void | Promise<void>)),
@@ -1167,7 +1167,7 @@ type ReactDOM$formProps = {|
   noValidate?: ?boolean,
   rel?: string,
   target?: ?string,
-|};
+};
 type ReactDOM$formInstance = HTMLFormElement;
 
 type ReactDOM$h1Props = ReactDOM$HTMLElementProps;
@@ -1200,16 +1200,16 @@ type ReactDOM$hgroupInstance = HTMLElement;
 type ReactDOM$hrProps = ReactDOM$SelfClosingHTMLElementProps;
 type ReactDOM$hrInstance = HTMLHRElement;
 
-type ReactDOM$htmlProps = {|
+type ReactDOM$htmlProps = {
   ...ReactDOM$HTMLElementProps,
   manifest?: ?string,
-|};
+};
 type ReactDOM$htmlInstance = HTMLHtmlElement;
 
 type ReactDOM$iProps = ReactDOM$HTMLElementProps;
 type ReactDOM$iInstance = HTMLElement;
 
-type ReactDOM$iframeProps = {|
+type ReactDOM$iframeProps = {
   ...ReactDOM$HTMLElementProps,
   allow?: ?string,
   allowFullScreen?: ?boolean,
@@ -1231,10 +1231,10 @@ type ReactDOM$iframeProps = {|
   src?: ?string,
   srcDoc?: ?string,
   width?: ?(number | string),
-|};
+};
 type ReactDOM$iframeInstance = HTMLIFrameElement;
 
-type ReactDOM$imgProps = {|
+type ReactDOM$imgProps = {
   ...ReactDOM$SelfClosingHTMLElementProps,
   alt?: ?ReactDOM$UserVisibleString,
   crossOrigin?: ?ReactDOM$CrossOrigin,
@@ -1248,10 +1248,10 @@ type ReactDOM$imgProps = {|
   srcSet?: ?string,
   useMap?: ?string,
   width?: ?(number | string),
-|};
+};
 type ReactDOM$imgInstance = HTMLImageElement;
 
-type ReactDOM$inputProps = {|
+type ReactDOM$inputProps = {
   ...ReactDOM$HTMLElementProps,
   accept?: ?string,
   alt?: ?ReactDOM$UserVisibleString,
@@ -1273,7 +1273,7 @@ type ReactDOM$inputProps = {|
   minLength?: ?number,
   multiple?: ?boolean,
   name?: ?string,
-  onChange?: ?(SyntheticInputEvent<HTMLInputElement>) => unknown,
+  onChange?: ?(event: SyntheticInputEvent<HTMLInputElement>) => unknown,
   pattern?: ?string,
   placeholder?: ?ReactDOM$UserVisibleString,
   readOnly?: ?boolean,
@@ -1284,20 +1284,20 @@ type ReactDOM$inputProps = {|
   type?: ?string,
   value?: ?(string | ReadonlyArray<string> | number),
   width?: ?(number | string),
-|};
+};
 type ReactDOM$inputInstance = HTMLInputElement;
 
-type ReactDOM$insProps = {|
+type ReactDOM$insProps = {
   ...ReactDOM$HTMLElementProps,
   cite?: ?string,
   dateTime?: ?string,
-|};
+};
 type ReactDOM$insInstance = HTMLModElement;
 
 type ReactDOM$kbdProps = ReactDOM$HTMLElementProps;
 type ReactDOM$kbdInstance = HTMLElement;
 
-type ReactDOM$keygenProps = {|
+type ReactDOM$keygenProps = {
   ...ReactDOM$SelfClosingHTMLElementProps,
   challenge?: ?string,
   disabled?: ?boolean,
@@ -1305,27 +1305,27 @@ type ReactDOM$keygenProps = {|
   keyParams?: ?string,
   keyType?: ?string,
   name?: ?string,
-|};
+};
 type ReactDOM$keygenInstance = HTMLElement;
 
-type ReactDOM$labelProps = {|
+type ReactDOM$labelProps = {
   ...ReactDOM$HTMLElementProps,
   form?: ?string,
   htmlFor?: ?string,
-|};
+};
 type ReactDOM$labelInstance = HTMLLabelElement;
 
 type ReactDOM$legendProps = ReactDOM$HTMLElementProps;
 type ReactDOM$legendInstance = HTMLLegendElement;
 
-type ReactDOM$liProps = {|
+type ReactDOM$liProps = {
   ...ReactDOM$HTMLElementProps,
   value?: ?(string | ReadonlyArray<string> | number),
-|};
+};
 
 type ReactDOM$liInstance = HTMLLIElement;
 
-type ReactDOM$linkProps = {|
+type ReactDOM$linkProps = {
   ...ReactDOM$SelfClosingHTMLElementProps,
   as?: ?string,
   crossOrigin?: ?ReactDOM$CrossOrigin,
@@ -1344,22 +1344,22 @@ type ReactDOM$linkProps = {|
 
   // React props
   precedence?: ?string,
-|};
+};
 type ReactDOM$linkInstance = HTMLLinkElement;
 
 type ReactDOM$mainProps = ReactDOM$HTMLElementProps;
 type ReactDOM$mainInstance = HTMLElement;
 
-type ReactDOM$mapProps = {|
+type ReactDOM$mapProps = {
   ...ReactDOM$HTMLElementProps,
   name?: ?string,
-|};
+};
 type ReactDOM$mapInstance = HTMLMapElement;
 
 type ReactDOM$markProps = ReactDOM$HTMLElementProps;
 type ReactDOM$markInstance = HTMLElement;
 
-type ReactDOM$mediaProps = {|
+type ReactDOM$mediaProps = {
   ...ReactDOM$HTMLElementProps,
   autoPlay?: ?boolean,
   controls?: ?boolean,
@@ -1371,7 +1371,7 @@ type ReactDOM$mediaProps = {|
   playsInline?: ?boolean,
   preload?: ?string,
   src?: ?string,
-|};
+};
 type ReactDOM$mediaInstance = HTMLElement;
 
 type ReactDOM$menuProps = ReactDOM$HTMLElementProps;
@@ -1380,17 +1380,17 @@ type ReactDOM$menuInstance = HTMLMenuElement;
 type ReactDOM$menuitemProps = ReactDOM$HTMLElementProps;
 type ReactDOM$menuitemInstance = HTMLElement;
 
-type ReactDOM$metaProps = {|
+type ReactDOM$metaProps = {
   ...ReactDOM$SelfClosingHTMLElementProps,
   charSet?: ?string,
   content?: ?string,
   httpEquiv?: ?string,
   media?: ?string,
   name?: ?string,
-|};
+};
 type ReactDOM$metaInstance = HTMLMetaElement;
 
-type ReactDOM$meterProps = {|
+type ReactDOM$meterProps = {
   ...ReactDOM$HTMLElementProps,
   form?: ?string,
   high?: ?number,
@@ -1399,7 +1399,7 @@ type ReactDOM$meterProps = {|
   min?: ?(number | string),
   optimum?: ?number,
   value?: ?(string | ReadonlyArray<string> | number),
-|};
+};
 type ReactDOM$meterInstance = HTMLMeterElement;
 
 type ReactDOM$navProps = ReactDOM$HTMLElementProps;
@@ -1408,7 +1408,7 @@ type ReactDOM$navInstance = HTMLElement;
 type ReactDOM$noscriptProps = ReactDOM$HTMLElementProps;
 type ReactDOM$noscriptInstance = HTMLElement;
 
-type ReactDOM$objectProps = {|
+type ReactDOM$objectProps = {
   ...ReactDOM$HTMLElementProps,
   classID?: ?string,
   data?: ?string,
@@ -1419,50 +1419,50 @@ type ReactDOM$objectProps = {|
   useMap?: ?string,
   width?: ?(number | string),
   wmode?: ?string,
-|};
+};
 type ReactDOM$objectInstance = HTMLObjectElement;
 
-type ReactDOM$olProps = {|
+type ReactDOM$olProps = {
   ...ReactDOM$HTMLElementProps,
   reversed?: ?boolean,
   start?: ?number,
   type?: ?('1' | 'a' | 'A' | 'i' | 'I'),
-|};
+};
 type ReactDOM$olInstance = HTMLOListElement;
 
-type ReactDOM$optgroupProps = {|
+type ReactDOM$optgroupProps = {
   ...ReactDOM$HTMLElementProps,
   disabled?: ?boolean,
   label?: ?ReactDOM$UserVisibleString,
-|};
+};
 
 type ReactDOM$optgroupInstance = HTMLOptGroupElement;
 
-type ReactDOM$optionProps = {|
+type ReactDOM$optionProps = {
   ...ReactDOM$HTMLElementProps,
   disabled?: ?boolean,
   label?: ?ReactDOM$UserVisibleString,
   selected?: ?boolean,
   value?: ?(string | ReadonlyArray<string> | number),
-|};
+};
 type ReactDOM$optionInstance = HTMLOptionElement;
 
-type ReactDOM$outputProps = {|
+type ReactDOM$outputProps = {
   ...ReactDOM$HTMLElementProps,
   form?: ?string,
   htmlFor?: ?string,
   name?: ?string,
-|};
+};
 type ReactDOM$outputInstance = HTMLElement;
 
 type ReactDOM$pProps = ReactDOM$HTMLElementProps;
 type ReactDOM$pInstance = HTMLParagraphElement;
 
-type ReactDOM$paramProps = {|
+type ReactDOM$paramProps = {
   ...ReactDOM$SelfClosingHTMLElementProps,
   name?: ?string,
   value?: ?(string | ReadonlyArray<string> | number),
-|};
+};
 type ReactDOM$paramInstance = HTMLParamElement;
 
 type ReactDOM$pictureProps = ReactDOM$HTMLElementProps;
@@ -1471,11 +1471,11 @@ type ReactDOM$pictureInstance = HTMLPictureElement;
 type ReactDOM$preProps = ReactDOM$HTMLElementProps;
 type ReactDOM$preInstance = HTMLPreElement;
 
-type ReactDOM$progressProps = {|
+type ReactDOM$progressProps = {
   ...ReactDOM$HTMLElementProps,
   max?: ?(number | string),
   value?: ?(string | ReadonlyArray<string> | number),
-|};
+};
 type ReactDOM$progressInstance = HTMLProgressElement;
 
 type ReactDOM$qProps = ReactDOM$HTMLElementProps;
@@ -1496,7 +1496,7 @@ type ReactDOM$sInstance = HTMLElement;
 type ReactDOM$sampProps = ReactDOM$HTMLElementProps;
 type ReactDOM$sampInstance = HTMLElement;
 
-type ReactDOM$scriptProps = {|
+type ReactDOM$scriptProps = {
   ...ReactDOM$HTMLElementProps,
   async?: ?boolean,
   /** @deprecated */
@@ -1508,36 +1508,36 @@ type ReactDOM$scriptProps = {|
   referrerPolicy?: ?ReactDOM$HTMLAttributeReferrerPolicy,
   src?: ?string,
   type?: ?string,
-|};
+};
 type ReactDOM$scriptInstance = HTMLScriptElement;
 
 type ReactDOM$sectionProps = ReactDOM$HTMLElementProps;
 type ReactDOM$sectionInstance = HTMLElement;
 
-type ReactDOM$selectProps = {|
+type ReactDOM$selectProps = {
   ...ReactDOM$HTMLElementProps,
   autoComplete?: ?string,
   disabled?: ?boolean,
   form?: ?string,
   multiple?: ?boolean,
   name?: ?string,
-  onChange?: ?(SyntheticEvent<HTMLSelectElement>) => unknown,
+  onChange?: ?(event: SyntheticEvent<HTMLSelectElement>) => unknown,
   required?: ?boolean,
   size?: ?number,
   value?: ?(string | ReadonlyArray<string> | number),
-|};
+};
 type ReactDOM$selectInstance = HTMLSelectElement;
 
-type ReactDOM$slotProps = {|
+type ReactDOM$slotProps = {
   ...ReactDOM$HTMLElementProps,
   name?: ?string,
-|};
+};
 type ReactDOM$slotInstance = HTMLSlotElement;
 
 type ReactDOM$smallProps = ReactDOM$HTMLElementProps;
 type ReactDOM$smallInstance = HTMLElement;
 
-type ReactDOM$sourceProps = {|
+type ReactDOM$sourceProps = {
   ...ReactDOM$SelfClosingHTMLElementProps,
   height?: ?(number | string),
   media?: ?string,
@@ -1546,7 +1546,7 @@ type ReactDOM$sourceProps = {|
   srcSet?: ?string,
   type?: ?string,
   width?: ?(number | string),
-|};
+};
 type ReactDOM$sourceInstance = HTMLSourceElement;
 
 type ReactDOM$spanProps = ReactDOM$HTMLElementProps;
@@ -1555,14 +1555,14 @@ type ReactDOM$spanInstance = HTMLSpanElement;
 type ReactDOM$strongProps = ReactDOM$HTMLElementProps;
 type ReactDOM$strongInstance = HTMLElement;
 
-type ReactDOM$styleProps = {|
+type ReactDOM$styleProps = {
   ...ReactDOM$HTMLElementProps,
   href?: ?string,
   media?: ?string,
   precedence?: ?string,
   scoped?: ?boolean,
   type?: ?string,
-|};
+};
 type ReactDOM$styleInstance = HTMLStyleElement;
 
 type ReactDOM$subProps = ReactDOM$HTMLElementProps;
@@ -1574,7 +1574,7 @@ type ReactDOM$summaryInstance = HTMLElement;
 type ReactDOM$supProps = ReactDOM$HTMLElementProps;
 type ReactDOM$supInstance = HTMLElement;
 
-type ReactDOM$tableProps = {|
+type ReactDOM$tableProps = {
   ...ReactDOM$HTMLElementProps,
   align?: ?('left' | 'center' | 'right'),
   bgcolor?: ?string,
@@ -1585,13 +1585,13 @@ type ReactDOM$tableProps = {|
   rules?: ?('none' | 'groups' | 'rows' | 'columns' | 'all'),
   summary?: ?string,
   width?: ?(number | string),
-|};
+};
 type ReactDOM$tableInstance = HTMLTableElement;
 
 type ReactDOM$tbodyProps = ReactDOM$HTMLElementProps;
 type ReactDOM$tbodyInstance = HTMLTableSectionElement;
 
-type ReactDOM$tdProps = {|
+type ReactDOM$tdProps = {
   ...ReactDOM$HTMLElementProps,
   abbr?: ?string,
   align?: ?('left' | 'center' | 'right' | 'justify' | 'char'),
@@ -1602,10 +1602,10 @@ type ReactDOM$tdProps = {|
   scope?: ?string,
   valign?: ?('top' | 'middle' | 'bottom' | 'baseline'),
   width?: ?(number | string),
-|};
+};
 type ReactDOM$tdInstance = HTMLTableCellElement;
 
-type ReactDOM$textareaProps = {|
+type ReactDOM$textareaProps = {
   ...ReactDOM$HTMLElementProps,
   autoComplete?: ?string,
   cols?: ?number,
@@ -1615,20 +1615,20 @@ type ReactDOM$textareaProps = {|
   maxLength?: ?number,
   minLength?: ?number,
   name?: ?string,
-  onChange?: ?(SyntheticEvent<HTMLTextAreaElement>) => unknown,
+  onChange?: ?(event: SyntheticEvent<HTMLTextAreaElement>) => unknown,
   placeholder?: ?ReactDOM$UserVisibleString,
   readOnly?: ?boolean,
   required?: ?boolean,
   rows?: ?number,
   value?: ?(string | ReadonlyArray<string> | number),
   wrap?: ?string,
-|};
+};
 type ReactDOM$textareaInstance = HTMLTextAreaElement;
 
 type ReactDOM$tfootProps = ReactDOM$HTMLElementProps;
 type ReactDOM$tfootInstance = HTMLTableSectionElement;
 
-type ReactDOM$thProps = {|
+type ReactDOM$thProps = {
   ...ReactDOM$HTMLElementProps,
   abbr?: ?string,
   align?: ?('left' | 'center' | 'right' | 'justify' | 'char'),
@@ -1637,16 +1637,16 @@ type ReactDOM$thProps = {|
   rowSpan?: ?number,
   scope?: ?string,
   width?: ?(number | string),
-|};
+};
 type ReactDOM$thInstance = HTMLTableCellElement;
 
 type ReactDOM$theadProps = ReactDOM$HTMLElementProps;
 type ReactDOM$theadInstance = HTMLTableSectionElement;
 
-type ReactDOM$timeProps = {|
+type ReactDOM$timeProps = {
   ...ReactDOM$HTMLElementProps,
   dateTime?: ?string,
-|};
+};
 type ReactDOM$timeInstance = HTMLTimeElement;
 
 type ReactDOM$titleProps = ReactDOM$HTMLElementProps;
@@ -1655,14 +1655,14 @@ type ReactDOM$titleInstance = HTMLTitleElement;
 type ReactDOM$trProps = ReactDOM$HTMLElementProps;
 type ReactDOM$trInstance = HTMLTableRowElement;
 
-type ReactDOM$trackProps = {|
+type ReactDOM$trackProps = {
   ...ReactDOM$SelfClosingHTMLElementProps,
   default?: ?boolean,
   kind?: ?string,
   label?: ?ReactDOM$UserVisibleString,
   src?: ?string,
   srcLang?: ?string,
-|};
+};
 type ReactDOM$trackInstance = HTMLTrackElement;
 
 type ReactDOM$uProps = ReactDOM$HTMLElementProps;
@@ -1674,7 +1674,7 @@ type ReactDOM$ulInstance = HTMLUListElement;
 type ReactDOM$varProps = ReactDOM$HTMLElementProps;
 type ReactDOM$varInstance = HTMLElement;
 
-type ReactDOM$videoProps = {|
+type ReactDOM$videoProps = {
   ...ReactDOM$HTMLElementProps,
   autoPlay?: ?boolean,
   controls?: ?boolean,
@@ -1690,13 +1690,13 @@ type ReactDOM$videoProps = {|
   preload?: ?string,
   src?: ?string,
   width?: ?(number | string),
-|};
+};
 type ReactDOM$videoInstance = HTMLVideoElement;
 
 type ReactDOM$wbrProps = ReactDOM$SelfClosingHTMLElementProps;
 type ReactDOM$wbrInstance = HTMLElement;
 
-type ReactDOM$SVGElementProps = {|
+type ReactDOM$SVGElementProps = {
   ...ReactDOM$ReactSpecificProps,
   ...ReactDOM$AriaAttributes,
 
@@ -1979,13 +1979,13 @@ type ReactDOM$SVGElementProps = {|
   z?: ?(number | string),
   zoomAndPan?: ?string,
   ...ReactDOM$CustomSVGProps,
-|};
+};
 
 // SVG Elements
 
-type ReactDOM$CustomSVGProps = {|
+type ReactDOM$CustomSVGProps = {
   line_height?: ?(number | string),
-|};
+};
 
 type ReactDOM$svgProps = ReactDOM$SVGElementProps;
 type ReactDOM$svgInstance = Element;
