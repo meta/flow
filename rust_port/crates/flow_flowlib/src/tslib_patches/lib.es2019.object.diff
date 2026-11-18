@@ -4,7 +4,7 @@
       * Returns an object created by key-value entries for properties and methods
       * @param entries An iterable object that contains key-value entries for properties and methods.
       */
-+    fromEntries<K, V>(entries: Iterable<[K, V] | {'0': K, '1': V, ...}>): {[K]: V, ...};
++    fromEntries<K, V>(entries: Iterable<[K, V] | {'0': K, '1': V, ...}>): {[key: K]: V, ...};
 +
 +    /**
 +     * Returns an object created by key-value entries for properties and methods

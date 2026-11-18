@@ -55,9 +55,9 @@ References:
    class_to_component_type.js:11:26
     11|     ref: React.RefSetter<string>
                                  ^^^^^^ [2]
-   <BUILTINS>/react.js:108:13
-   108|     | ((T | null) => void | (() => void))
-                    ^^^^ [3]
+   <BUILTINS>/react.js:108:23
+   108|     | ((instance: T | null) => void | (() => void))
+                              ^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------- class_to_component_type.js:9:1
@@ -89,7 +89,7 @@ References:
 Error ---------------------------------------------------------------------------------- class_to_component_type.js:13:1
 
 Cannot cast `Foo` to `component(bar: string, ref: ImNotARefSetter)` because in property `ref`: [incompatible-type]
- - Either `ImNotARefSetter` [1] is incompatible with `(Foo | null) => void | (() => void)` [2].
+ - Either `ImNotARefSetter` [1] is incompatible with `(instance: Foo | null) => void | (() => void)` [2].
  - Or `ImNotARefSetter` [1] is incompatible with `null` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
@@ -104,8 +104,8 @@ References:
     15|     ref: ImNotARefSetter // ok: ref prop in component type can be arbitrary
                  ^^^^^^^^^^^^^^^ [1]
    <BUILTINS>/react.js:108:8
-   108|     | ((T | null) => void | (() => void))
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   108|     | ((instance: T | null) => void | (() => void))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/react.js:109:7
    109|     | null
               ^^^^ [3]
@@ -192,9 +192,9 @@ References:
    classes_lower.js:19:53
     19| ComponentNarrower as component(ref: React.RefSetter<Component>, ...{...}); // Error instance type is wrong
                                                             ^^^^^^^^^ [2]
-   <BUILTINS>/react.js:108:13
-   108|     | ((T | null) => void | (() => void))
-                    ^^^^ [3]
+   <BUILTINS>/react.js:108:23
+   108|     | ((instance: T | null) => void | (() => void))
+                              ^^^^ [3]
 
 
 Error -------------------------------------------------------------------------------------------- classes_lower.js:19:1
@@ -986,8 +986,8 @@ References:
 
 Error -------------------------------------------------------------------------- ref_prop_implicit_instantiation.js:11:1
 
-Cannot cast `refSetter` to `empty` because `(Promise<string> | null) => void | (() => void)` [1] is incompatible with
-`empty` [2]. [incompatible-type]
+Cannot cast `refSetter` to `empty` because `(instance: Promise<string> | null) => void | (() => void)` [1] is
+incompatible with `empty` [2]. [incompatible-type]
 
    ref_prop_implicit_instantiation.js:11:1
    11| refSetter as empty; // error

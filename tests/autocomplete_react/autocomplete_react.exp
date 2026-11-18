@@ -338,7 +338,7 @@ Flags: --pretty
       "name":"DialogHTMLAttributes",
       "type":"type DialogHTMLAttributes<T> = HTMLAttributes<T>"
     },
-    {"name":"Dispatch","type":"type Dispatch<in A> = (A) => void"},
+    {"name":"Dispatch","type":"type Dispatch<in A> = (action: A) => void"},
     {"name":"DragEvent","type":"type DragEvent<T = Element> = MouseEvent<T>"},
     {
       "name":"DragEventHandler",
@@ -619,7 +619,7 @@ Flags: --pretty
     {"name":"ReactPortal","type":"type ReactPortal = React$Portal"},
     {
       "name":"ReactSetStateFunction",
-      "type":"type ReactSetStateFunction<S> = (((S) => S) | S) => void"
+      "type":"type ReactSetStateFunction<S> = (value: ((prevState: S) => S) | S) => void"
     },
     {"name":"ReactText","type":"type ReactText = string | number"},
     {"name":"Ref","type":"type Ref<in T> = RefSetter<T>"},
@@ -629,7 +629,7 @@ Flags: --pretty
     },
     {
       "name":"RefCallback",
-      "type":"type RefCallback<in T> = (T | null) => void | (() => void)"
+      "type":"type RefCallback<in T> = (instance: T | null) => void | (() => void)"
     },
     {"name":"RefObject","type":"type RefObject<T> = React$RefObject<T>"},
     {
@@ -638,7 +638,7 @@ Flags: --pretty
     },
     {
       "name":"RefSetter",
-      "type":"type RefSetter<in T> = ?{writeonly current: T | null, ...} | ((T | null) => void | (() => void))"
+      "type":"type RefSetter<in T> = ?{writeonly current: T | null, ...} | ((instance: T | null) => void | (() => void))"
     },
     {
       "name":"SVGAttributes",
@@ -662,7 +662,10 @@ Flags: --pretty
       "name":"SelectHTMLAttributes",
       "type":"type SelectHTMLAttributes<T> = HTMLAttributes<T>"
     },
-    {"name":"SetStateAction","type":"type SetStateAction<S> = S | ((S) => S)"},
+    {
+      "name":"SetStateAction",
+      "type":"type SetStateAction<S> = S | ((prevState: S) => S)"
+    },
     {
       "name":"SlotHTMLAttributes",
       "type":"type SlotHTMLAttributes<T> = HTMLAttributes<T>"

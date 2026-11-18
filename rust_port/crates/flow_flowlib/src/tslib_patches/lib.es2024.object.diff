@@ -5,5 +5,5 @@
          items: Iterable<T>,
          keySelector: (item: T, index: number) => K,
 -    ): Partial<Record<K, T[]>>;
-+    ): {[K]: Array<T> | void};
++    ): {[key: K]: Array<T> | void};
  }

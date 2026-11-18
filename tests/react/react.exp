@@ -1273,7 +1273,7 @@ Error --------------------------------------------------------------------------
 
 Cannot create `Foo` element because in property `ref`: [incompatible-type]
  - Either `"foo"` [1] is incompatible with `{writeonly current: Foo | null, ...}` [2].
- - Or `"foo"` [1] is incompatible with `(Foo | null) => void | (() => void)` [3].
+ - Or `"foo"` [1] is incompatible with `(instance: Foo | null) => void | (() => void)` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -1287,8 +1287,8 @@ References:
    107|     | { writeonly current: T | null, ... }
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/react.js:108:8
-   108|     | ((T | null) => void | (() => void))
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   108|     | ((instance: T | null) => void | (() => void))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- ref.js:10:11
@@ -1326,9 +1326,9 @@ Cannot cast `foo` to `Foo` because `null` [1] is incompatible with `Foo` [2]. [i
                            ^^^
 
 References:
-   <BUILTINS>/react.js:108:13
-   108|     | ((T | null) => void | (() => void))
-                    ^^^^ [1]
+   <BUILTINS>/react.js:108:23
+   108|     | ((instance: T | null) => void | (() => void))
+                              ^^^^ [1]
    ref.js:11:27
     11| <Foo ref={foo => { foo as Foo }} />; // Error: `Foo` may be null.
                                   ^^^ [2]
@@ -1376,12 +1376,12 @@ References:
    ref.js:15:18
     15| <Foo ref={foo => 42} />; // Error: ref callbacks may only return cleanup functions.
                          ^^ [1]
-   <BUILTINS>/react.js:108:30
-   108|     | ((T | null) => void | (() => void))
-                                     ^^^^^^^^^^ [2]
-   <BUILTINS>/react.js:108:22
-   108|     | ((T | null) => void | (() => void))
-                             ^^^^ [3]
+   <BUILTINS>/react.js:108:40
+   108|     | ((instance: T | null) => void | (() => void))
+                                               ^^^^^^^^^^ [2]
+   <BUILTINS>/react.js:108:32
+   108|     | ((instance: T | null) => void | (() => void))
+                                       ^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- ref.js:16:11
@@ -1401,22 +1401,22 @@ References:
    ref.js:16:38
     16| <Foo ref={(foo: Foo | null) => () => 42} />; // Error: cleanup functions may not return values.
                                              ^^ [1]
-   <BUILTINS>/react.js:108:36
-   108|     | ((T | null) => void | (() => void))
-                                           ^^^^ [2]
+   <BUILTINS>/react.js:108:46
+   108|     | ((instance: T | null) => void | (() => void))
+                                                     ^^^^ [2]
    ref.js:16:32
     16| <Foo ref={(foo: Foo | null) => () => 42} />; // Error: cleanup functions may not return values.
                                        ^^^^^^^^ [3]
-   <BUILTINS>/react.js:108:22
-   108|     | ((T | null) => void | (() => void))
-                             ^^^^ [4]
+   <BUILTINS>/react.js:108:32
+   108|     | ((instance: T | null) => void | (() => void))
+                                       ^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- ref.js:21:15
 
 Cannot create `FooExact` element because in property `ref`: [incompatible-type]
  - Either `"foo"` [1] is incompatible with `{writeonly current: FooExact | null, ...}` [2].
- - Or `"foo"` [1] is incompatible with `(FooExact | null) => void | (() => void)` [3].
+ - Or `"foo"` [1] is incompatible with `(instance: FooExact | null) => void | (() => void)` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -1430,8 +1430,8 @@ References:
    107|     | { writeonly current: T | null, ... }
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/react.js:108:8
-   108|     | ((T | null) => void | (() => void))
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   108|     | ((instance: T | null) => void | (() => void))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- ref.js:24:16
@@ -1478,9 +1478,9 @@ References:
    ref.js:25:22
     25| <FooExact ref={(foo: FooExact) => {}} />; // Error: `FooExact` may be null.
                              ^^^^^^^^ [1]
-   <BUILTINS>/react.js:108:13
-   108|     | ((T | null) => void | (() => void))
-                    ^^^^ [2]
+   <BUILTINS>/react.js:108:23
+   108|     | ((instance: T | null) => void | (() => void))
+                              ^^^^ [2]
    <BUILTINS>/react.js:107:7
    107|     | { writeonly current: T | null, ... }
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
@@ -2164,11 +2164,11 @@ References:
 Error ------------------------------------------------------------------------------------------- useReducer_hook.js:4:9
 
 Cannot call `React.useReducer` because: [incompatible-type]
- - Either `(reducer: (empty, empty) => empty, initialState: empty) => [empty, Dispatch<empty>]` [1] requires another
-   argument from call of method `useReducer` [2].
- - Or `(reducer: (empty, empty) => empty, initialState: empty, init: void) => [empty, Dispatch<empty>]` [3] requires
-   another argument from call of method `useReducer` [2].
- - Or `(reducer: (empty, empty) => empty, initialArg: empty, init: (empty) => empty) => [empty, Dispatch<em...` [4]
+ - Either `(reducer: (state: empty, action: empty) => empty, initialState: empty) => [empty, Dispatch<empty>]` [1]
+   requires another argument from call of method `useReducer` [2].
+ - Or `(reducer: (state: empty, action: empty) => empty, initialState: empty, init: void) => [empty, Dispat...` [3]
+   requires another argument from call of method `useReducer` [2].
+ - Or `(reducer: (state: empty, action: empty) => empty, initialArg: empty, init: (initialArg: empty) => em...` [4]
    requires another argument from call of method `useReducer` [2].
 
    useReducer_hook.js:4:9
@@ -2179,7 +2179,7 @@ References:
    <BUILTINS>/react.js:1456:28
                                     v------
    1456|     declare hook useReducer<S, A>(
-   1457|       reducer: (S, A) => S,
+   1457|       reducer: (state: S, action: A) => S,
    1458|       initialState: S,
    1459|     ): [S, Dispatch<A>];
              ------------------^ [1]
@@ -2189,7 +2189,7 @@ References:
    <BUILTINS>/react.js:1461:28
                                     v------
    1461|     declare hook useReducer<S, A>(
-   1462|       reducer: (S, A) => S,
+   1462|       reducer: (state: S, action: A) => S,
    1463|       initialState: S,
    1464|       init: undefined,
    1465|     ): [S, Dispatch<A>];
@@ -2197,9 +2197,9 @@ References:
    <BUILTINS>/react.js:1467:28
                                     v---------
    1467|     declare hook useReducer<S, A, I>(
-   1468|       reducer: (S, A) => S,
+   1468|       reducer: (state: S, action: A) => S,
    1469|       initialArg: I,
-   1470|       init: (I) => S,
+   1470|       init: (initialArg: I) => S,
    1471|     ): [S, Dispatch<A>];
              ------------------^ [4]
 
@@ -2411,9 +2411,9 @@ References:
 
 Error ------------------------------------------------------------------------------------------- useState_hook.js:11:10
 
-Cannot call `setCount` with `true` bound to the first parameter because: [incompatible-type]
+Cannot call `setCount` with `true` bound to `value` because: [incompatible-type]
  - Either `true` [1] is incompatible with `number` [2].
- - Or `true` [1] is incompatible with `(number) => number` [3].
+ - Or `true` [1] is incompatible with `(prevState: number) => number` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -2426,9 +2426,9 @@ References:
    useState_hook.js:5:42
       5| const [count, setCount] = React.useState<number>(1);
                                                   ^^^^^^ [2]
-   <BUILTINS>/react.js:1655:39
-   1655|     type ReactSetStateFunction<S> = ((S => S) | S) => void;
-                                               ^^^^^^ [3]
+   <BUILTINS>/react.js:1655:46
+   1655|     type ReactSetStateFunction<S> = (value: ((prevState: S) => S) | S) => void;
+                                                      ^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------------ use_hook.js:19:21

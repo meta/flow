@@ -141,7 +141,7 @@ References:
      36| }
          ^ [2]
    <BUILTINS>/react.js:1264:23
-   1264|         partialState: ?Readonly<Partial<State>> | ((State, Props) => ?Readonly<Partial<State>>),
+   1264|         partialState: ?Readonly<Partial<State>> | ((prevState: State, props: Props) => ?Readonly<Partial<State>>),
                                ^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
@@ -192,14 +192,15 @@ References:
      36| }
          ^ [2]
    <BUILTINS>/react.js:1264:23
-   1264|         partialState: ?Readonly<Partial<State>> | ((State, Props) => ?Readonly<Partial<State>>),
+   1264|         partialState: ?Readonly<Partial<State>> | ((prevState: State, props: Props) => ?Readonly<Partial<State>>),
                                ^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ------------------------------------------------------------------------------------------------- classes.js:23:15
 
 Cannot extend `Component<Props, State>` [1] with `Foo` [2] because in property `setState` > the first parameter:
-`{y_: string, ...}` [3] is incompatible with `(State, Props) => ?Readonly<Partial<State>>` [4]. [incompatible-type]
+`{y_: string, ...}` [3] is incompatible with `(prevState: State, props: Props) => ?Readonly<Partial<State>>` [4].
+[incompatible-type]
 
 Functions without statics are not compatible with objects.
 
@@ -245,8 +246,8 @@ References:
      36| }
          ^ [2]
    <BUILTINS>/react.js:1264:52
-   1264|         partialState: ?Readonly<Partial<State>> | ((State, Props) => ?Readonly<Partial<State>>),
-                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   1264|         partialState: ?Readonly<Partial<State>> | ((prevState: State, props: Props) => ?Readonly<Partial<State>>),
+                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ------------------------------------------------------------------------------------------------- classes.js:15:21

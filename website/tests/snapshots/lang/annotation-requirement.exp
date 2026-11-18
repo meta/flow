@@ -158,8 +158,8 @@ Found 1 error
 === block 16 ===
 Error ---------------------------------------------------------------- -:8:10
 
-Cannot call `setStr` with `maybeString` bound to the first parameter because: [incompatible-type]
- - Either `null` [1] is incompatible with `(string) => string` [2].
+Cannot call `setStr` with `maybeString` bound to `value` because: [incompatible-type]
+ - Either `null` [1] is incompatible with `(prevState: string) => string` [2].
  - Or `null` [1] is incompatible with `string` [3].
 
    -:8:10
@@ -170,17 +170,17 @@ References:
    -:7:30
       7|   declare const maybeString: ?string;
                                       ^^^^^^^ [1]
-   <BUILTINS>/react.js:1655:39
-   1655|     type ReactSetStateFunction<S> = ((S => S) | S) => void;
-                                               ^^^^^^ [2]
+   <BUILTINS>/react.js:1655:46
+   1655|     type ReactSetStateFunction<S> = (value: ((prevState: S) => S) | S) => void;
+                                                      ^^^^^^^^^^^^^^^^^^^ [2]
    -:5:34
       5|   const [str, setStr] = useState("");
                                           ^^ [3]
 
 Error ---------------------------------------------------------------- -:8:10
 
-Cannot call `setStr` with `maybeString` bound to the first parameter because: [incompatible-type]
- - Either `void` [1] is incompatible with `(string) => string` [2].
+Cannot call `setStr` with `maybeString` bound to `value` because: [incompatible-type]
+ - Either `void` [1] is incompatible with `(prevState: string) => string` [2].
  - Or `void` [1] is incompatible with `string` [3].
 
    -:8:10
@@ -191,9 +191,9 @@ References:
    -:7:30
       7|   declare const maybeString: ?string;
                                       ^^^^^^^ [1]
-   <BUILTINS>/react.js:1655:39
-   1655|     type ReactSetStateFunction<S> = ((S => S) | S) => void;
-                                               ^^^^^^ [2]
+   <BUILTINS>/react.js:1655:46
+   1655|     type ReactSetStateFunction<S> = (value: ((prevState: S) => S) | S) => void;
+                                                      ^^^^^^^^^^^^^^^^^^^ [2]
    -:5:34
       5|   const [str, setStr] = useState("");
                                           ^^ [3]
