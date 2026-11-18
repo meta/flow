@@ -698,14 +698,11 @@ pub fn error_on_unsupported_variance_annotation<'a>(
 }
 
 /// Every parameter of a function type, including its rest parameter, must be
-/// named. Library definitions are exempt, as they are from `unclear-type`.
+/// named.
 pub fn error_on_unnamed_function_type_params<'a>(
     cx: &mut Context<'a>,
     params: &ast::types::function::Params<ALoc, ALoc>,
 ) {
-    if cx.is_global_lib_context() {
-        return;
-    }
     params
         .params
         .iter()
@@ -721,13 +718,12 @@ pub fn error_on_unnamed_function_type_params<'a>(
 
 /// An index signature must label its key, as in `{[key: string]: V}`. Only
 /// called on bracketed members read as index signatures: an unlabeled computed
-/// key such as `{['a']: V}` is a property, not a dictionary. Library
-/// definitions are exempt, as they are from `unclear-type`.
+/// key such as `{['a']: V}` is a property, not a dictionary.
 fn error_on_unlabeled_dictionary_key<'a>(
     cx: &mut Context<'a>,
     indexer: &ast::types::object::Indexer<ALoc, ALoc>,
 ) {
-    if cx.is_global_lib_context() || indexer.id.is_some() {
+    if indexer.id.is_some() {
         return;
     }
     flow_js_utils::add_output_non_speculating(
@@ -1252,7 +1248,6 @@ fn convert_inner<'a>(
 
     if let TypeInner::Object { loc, inner } = t.deref()
         && inner.exact
-        && !cx.is_global_lib_context()
     {
         flow_js_utils::add_output_non_speculating(
             cx,
