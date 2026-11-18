@@ -43,5 +43,19 @@ References:
                      ^^^^^^ [1]
 
 
+Error ------------------------------------------------------------------------------------------------------ obj.js:15:8
 
-Found 3 errors
+Cannot call method `create` because property `create` is missing in `{name: string, ...}` [1]. [prop-missing]
+
+   obj.js:15:8
+   15| Object.create(z, {a: {get: () => 42},  b: {writable:true}});
+              ^^^^^^
+
+References:
+   <BUILTINS>/prelude.js:12:15
+   12| declare class Object {}
+                     ^^^^^^ [1]
+
+
+
+Found 4 errors

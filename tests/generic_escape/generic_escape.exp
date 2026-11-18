@@ -496,23 +496,6 @@ References:
                                                 ^^^^ [3]
 
 
-Error ---------------------------------------------------------------------------------------------------- misc.js:25:11
-
-Cannot assign `x` to `a.x` because `unknown` [1] is incompatible with `number` [2]. [incompatible-type]
-
-   misc.js:25:11
-   25|     a.x = x;
-                 ^
-
-References:
-   misc.js:23:19
-   23| function f2<X>(x: X, escape: boolean): X | number {
-                         ^ [1]
-   misc.js:21:41
-   21| var a = Object.create(null, {x: {value: 42}});
-                                               ^^ [2]
-
-
 Error ---------------------------------------------------------------------------------------------------- misc.js:34:13
 
 Cannot assign `x` to `a2[n]` because `unknown` [1] is incompatible with `"x"` [2]. [incompatible-type]
@@ -791,4 +774,4 @@ References:
 
 
 
-Found 44 errors
+Found 43 errors

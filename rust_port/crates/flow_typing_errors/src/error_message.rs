@@ -4129,7 +4129,6 @@ pub enum BindingError {
 pub enum InternalError {
     MethodNotAFunction,
     OptionalMethod,
-    PropertyDescriptorPropertyCannotBeRead,
     ForInLHS,
     ForOfLHS,
     PropRefComputedOpen,
@@ -9599,9 +9598,6 @@ pub fn string_of_internal_error(error: &InternalError) -> FlowSmolStr {
         .into(),
         InternalError::MethodNotAFunction => "expected function type".into(),
         InternalError::OptionalMethod => "optional methods are not supported".into(),
-        InternalError::PropertyDescriptorPropertyCannotBeRead => {
-            "unexpected property in properties object".into()
-        }
         InternalError::ForInLHS => "unexpected LHS in for...in".into(),
         InternalError::ForOfLHS => "unexpected LHS in for...of".into(),
         InternalError::PropRefComputedOpen => {

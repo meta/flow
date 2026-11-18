@@ -1970,9 +1970,6 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             InternalError::ForcedReadOfUnderResolutionTvar(_) => "ForcedReadOfUnderResolutionTvar",
             InternalError::MethodNotAFunction => "MethodNotAFunction",
             InternalError::OptionalMethod => "OptionalMethod",
-            InternalError::PropertyDescriptorPropertyCannotBeRead => {
-                "PropertyDescriptorPropertyCannotBeRead"
-            }
             InternalError::ForInLHS => "ForInLHS",
             InternalError::ForOfLHS => "ForOfLHS",
             InternalError::PropRefComputedOpen => "PropRefComputedOpen",

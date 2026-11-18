@@ -533,7 +533,6 @@ pub fn is_specially_typed_object_call<M: Dupe, T: Dupe>(
             "getPrototypeOf" | "create" | "getOwnPropertyNames" | "keys" | "values" | "entries",
             [Expression(_)],
         ) => true,
-        ("create", [Expression(_), Expression(props)]) => is_object_literal(props),
         ("freeze", [Expression(o)]) => is_object_literal(o),
         _ => false,
     }
