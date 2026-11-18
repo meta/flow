@@ -2660,7 +2660,7 @@ pub fn push_type_alias_reason(r: &Reason, t: Type) -> Type {
 pub fn type_t_of_annotated_or_inferred(x: &crate::type_::AnnotatedOrInferred) -> &Type {
     use crate::type_::AnnotatedOrInferred::*;
     match x {
-        Inferred(t) | Annotated(t) => t,
+        Inferred(t) | Hinted(t) | Annotated(t) => t,
     }
 }
 
@@ -2674,6 +2674,7 @@ where
     use crate::type_::AnnotatedOrInferred::*;
     match x {
         Inferred(t) => Inferred(f(t)),
+        Hinted(t) => Hinted(f(t)),
         Annotated(t) => Annotated(f(t)),
     }
 }

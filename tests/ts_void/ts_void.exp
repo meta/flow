@@ -415,6 +415,95 @@ References:
                                   ^^^^^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------------ missing_return.js:14:15
+
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+[incompatible-type]
+
+   14| function n(): number {} // ERROR
+                     ^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------ missing_return.js:15:17
+
+Cannot expect `unknown` as the return type of function because `unknown` [1] is incompatible with `void` [1].
+[incompatible-type]
+
+   15| function unk(): unknown {} // ERROR
+                       ^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------ missing_return.js:16:16
+
+Cannot expect `number | undefined` as the return type of function because `number | undefined` [1] is incompatible with
+`void` [1]. [incompatible-type]
+
+   16| function nu(): number | undefined {} // ERROR
+                      ^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------ missing_return.js:17:15
+
+Cannot expect `?string` as the return type of function because `?string` [1] is incompatible with `void` [1].
+[incompatible-type]
+
+   17| function m(): ?string {} // ERROR
+                     ^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------ missing_return.js:18:20
+
+Cannot expect `T` as the return type of function because `T` [1] is incompatible with `void` [1]. [incompatible-type]
+
+   18| function gen<T>(): T {} // ERROR
+                          ^ [1]
+
+
+Error ------------------------------------------------------------------------------------------ missing_return.js:19:21
+
+Cannot expect `number | undefined` as the return type of function because `number | undefined` [1] is incompatible with
+`void` [1]. [incompatible-type]
+
+   19| const arrowNu = (): number | undefined => {}; // ERROR
+                           ^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------- missing_return.js:21:8
+
+Cannot expect `unknown` as the return type of function because `unknown` [1] is incompatible with `void` [1].
+[incompatible-type]
+
+   21|   m(): unknown {} // ERROR
+              ^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------ missing_return.js:31:31
+
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
+[incompatible-type]
+
+   31| function someReturnsNumber(): number {
+                                     ^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------ missing_return.js:51:23
+
+Cannot expect `Promise<number | undefined>` as the return type of async function because
+`Promise<number | undefined>` [1] is incompatible with `void` [1]. [incompatible-type]
+
+   51| async function anu(): Promise<number | undefined> {} // ERROR
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------ missing_return.js:58:18
+
+Cannot expect `Generator<number, number | undefined, void>` as the return type of generator function because
+`Generator<number, number | undefined, void>` [1] is incompatible with `void` [1]. [incompatible-type]
+
+   58| function* gnu(): Generator<number, number | undefined, void> {
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
 Error ---------------------------------------------------------------------------------------------- refinements.js:15:3
 
 Cannot cast `sv` to `undefined` because `void` [1] is incompatible with `undefined` [2]. [incompatible-type]
@@ -546,4 +635,4 @@ References:
 
 
 
-Found 33 errors
+Found 43 errors

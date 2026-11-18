@@ -1098,9 +1098,9 @@ fn mk_inference_target_with_annots(
 ) -> AnnotatedOrInferred {
     match (&annot_or_inferred, has_hint) {
         (AnnotatedOrInferred::Annotated(_), _) => annot_or_inferred,
-        (_, true) => AnnotatedOrInferred::Annotated(
-            type_t_of_annotated_or_inferred(&annot_or_inferred).dupe(),
-        ),
+        (_, true) => {
+            AnnotatedOrInferred::Hinted(type_t_of_annotated_or_inferred(&annot_or_inferred).dupe())
+        }
         _ => annot_or_inferred,
     }
 }
@@ -15373,6 +15373,9 @@ fn optional_field(
             init.return_t = match init.return_t {
                 AnnotatedOrInferred::Annotated(t) => {
                     AnnotatedOrInferred::Annotated(optional(t, None, false))
+                }
+                AnnotatedOrInferred::Hinted(t) => {
+                    AnnotatedOrInferred::Hinted(optional(t, None, false))
                 }
                 AnnotatedOrInferred::Inferred(t) => {
                     AnnotatedOrInferred::Inferred(optional(t, None, false))

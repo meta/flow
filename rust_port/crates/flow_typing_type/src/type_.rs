@@ -13302,6 +13302,8 @@ pub mod type_params {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum AnnotatedOrInferred {
     Annotated(Type),
+    /// Inferred, with a hint standing in for the annotation.
+    Hinted(Type),
     Inferred(Type),
 }
 

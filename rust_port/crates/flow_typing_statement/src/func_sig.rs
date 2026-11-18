@@ -25,7 +25,6 @@ use flow_parser::ast_visitor::AstVisitor;
 use flow_parser::loc_sig::LocSig;
 use flow_parser::polymorphic_ast_mapper;
 use flow_typing_context::Context;
-use flow_typing_context::Cx;
 use flow_typing_errors::error_message;
 use flow_typing_flow_common::flow_js_utils;
 use flow_typing_flow_common::flow_js_utils::FlowJsException;
@@ -59,7 +58,7 @@ struct FuncScopeVisitor<'a, 'cx, 'b> {
     next_t: &'b Type,
     body_loc: ALoc,
     kind: &'b Kind,
-    exhaust: &'b Option<(RefCell<Vec<Type>>, Vec<ALoc>, (Type, type_::UseT<Cx>))>,
+    exhaust: &'b Option<(RefCell<Vec<Type>>, Vec<ALoc>, (Type, UseOp))>,
     no_return: bool,
     has_throw: bool,
     no_yield: bool,
@@ -526,11 +525,12 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
         &*fparams.reconstruct,
     )?;
 
-    let (yield_t, next_t) = match kind {
+    // What the function returns at its end: its generator's return type, or its return type.
+    let (yield_t, next_t, end_t) = match kind {
         Kind::Generator { .. } | Kind::AsyncGenerator { .. } => {
             let yield_t = flow_typing_tvar::mk(cx, reason.dupe().replace_desc(None));
             let next_t = match return_t {
-                AnnotatedOrInferred::Annotated(_) => {
+                AnnotatedOrInferred::Annotated(_) | AnnotatedOrInferred::Hinted(_) => {
                     flow_typing_tvar::mk(cx, reason.dupe().replace_desc(None))
                 }
                 AnnotatedOrInferred::Inferred(_) => {
@@ -575,7 +575,7 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
                     &reason,
                     None,
                     generator,
-                    vec![yield_t.dupe(), return_targ, next_t.dupe()],
+                    vec![yield_t.dupe(), return_targ.dupe(), next_t.dupe()],
                 );
                 let t = flow_js::reposition_non_speculating(
                     cx,
@@ -589,7 +589,7 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
                     (&t, type_util::type_t_of_annotated_or_inferred(return_t)),
                 )?;
             }
-            (yield_t, next_t)
+            (yield_t, next_t, return_targ)
         }
         _ => (
             Type::new(type_::TypeInner::DefT(
@@ -604,6 +604,7 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
                     type_::MixedFlavor::MixedEverything,
                 )),
             )),
+            type_util::type_t_of_annotated_or_inferred(return_t).dupe(),
         ),
     };
 
@@ -639,7 +640,7 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
 
     let (has_return_annot, return_t) = match return_t {
         AnnotatedOrInferred::Inferred(t) => (false, t.dupe()),
-        AnnotatedOrInferred::Annotated(t) => (true, t.dupe()),
+        AnnotatedOrInferred::Annotated(t) | AnnotatedOrInferred::Hinted(t) => (true, t.dupe()),
     };
 
     // statement visit pass
@@ -850,10 +851,7 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
                         vec![]
                     }),
                     exhaustive,
-                    (
-                        void_t,
-                        type_::UseT::new(type_::UseTInner::<Cx>::UseT(use_op, return_t.dupe())),
-                    ),
+                    (void_t, use_op),
                 ))
             }
         };
@@ -862,7 +860,7 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
         (None, None)
     };
 
-    FuncScopeVisitor {
+    let mut visitor = FuncScopeVisitor {
         cx,
         has_return_annot,
         ret_annot_loc: ret_annot_loc.dupe(),
@@ -875,21 +873,45 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
         no_return: true,
         has_throw: false,
         no_yield: true,
-    }
-    .visit(&statements_ast)?;
+    };
+    visitor.visit(&statements_ast)?;
+    let no_return = visitor.no_return;
 
-    if let Some((maybe_exhaustively_checked_ts, _, flow_on_non_exhaustive)) = &exhaust {
+    if let Some((maybe_exhaustively_checked_ts, _, (void_t, use_op))) = &exhaust {
         let ts = maybe_exhaustively_checked_ts.borrow();
         if type_operation_utils::type_assertions::non_exhaustive(cx, &ts)? {
-            match flow_js::flow(cx, (&flow_on_non_exhaustive.0, &flow_on_non_exhaustive.1)) {
-                Ok(()) => {}
-                Err(FlowJsException::WorkerCanceled(c)) => {
-                    return Err(c.into());
+            // Under `experimental.ts_void`, as in TypeScript, a function with a return annotation
+            // and no `return` statement is checked by what it returns rather than its end's
+            // `undefined`.
+            if cx.ts_void()
+                && no_return
+                && let AnnotatedOrInferred::Annotated(_) = x.return_t
+            {
+                if !may_end_without_return(cx, &reason, kind, &end_t)? {
+                    let void_t = type_::ts_void::at(type_util::loc_of_t(&return_t).dupe());
+                    flow_js_utils::add_output_non_speculating(
+                        cx,
+                        flow_js_utils::incompatible_types_error(
+                            &void_t,
+                            &return_t,
+                            use_op.dupe(),
+                            None,
+                        ),
+                    );
                 }
-                Err(FlowJsException::TimedOut(c)) => {
-                    return Err(c.into());
+            } else {
+                let use_t =
+                    type_::UseT::new(type_::UseTInner::UseT(use_op.dupe(), return_t.dupe()));
+                match flow_js::flow(cx, (void_t, &use_t)) {
+                    Ok(()) => {}
+                    Err(FlowJsException::WorkerCanceled(c)) => {
+                        return Err(c.into());
+                    }
+                    Err(FlowJsException::TimedOut(c)) => {
+                        return Err(c.into());
+                    }
+                    Err(err) => panic!("Should not be under speculation: {:?}", err),
                 }
-                Err(err) => panic!("Should not be under speculation: {:?}", err),
             }
         }
     }
@@ -897,6 +919,36 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
     type_env::set_scope_kind(cx, prev_scope_kind);
 
     Ok((params_ast, body_ast, init_ast))
+}
+
+/// As in TypeScript, a function may end without a `return` statement when what it returns at its
+/// end, awaited if it is async, includes `void`, or is `any` or `undefined`.
+fn may_end_without_return(
+    cx: &mut Context,
+    reason: &Reason,
+    kind: &Kind,
+    end_t: &Type,
+) -> Result<bool, JobError> {
+    use type_::DefTInner;
+    use type_::TypeInner;
+    let end_t = match kind {
+        Kind::Async | Kind::AsyncGenerator { .. } => {
+            type_operation_utils::promise::await_(cx, reason, end_t)?
+        }
+        _ => end_t.dupe(),
+    };
+    let ts = flow_js_utils::flow_js_result_to_job_error(
+        flow_js::FlowJs::possible_concrete_types_for_inspection(cx, reason, &end_t),
+    )?;
+    Ok(ts.iter().any(|t| match &**t {
+        TypeInner::AnyT(..) => true,
+        TypeInner::DefT(_, d) => match &**d {
+            DefTInner::TsVoidT => true,
+            DefTInner::VoidT => ts.len() == 1,
+            _ => false,
+        },
+        _ => false,
+    }))
 }
 
 pub fn to_ctor_sig<C: ConfigTypes>(mut f: Func<C>) -> Func<C> {
