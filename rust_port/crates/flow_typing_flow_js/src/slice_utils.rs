@@ -207,6 +207,7 @@ fn wrap_generics(
         | flow_common::subst_name::OpKind::MakeExact
         | flow_common::subst_name::OpKind::ReadOnly
         | flow_common::subst_name::OpKind::ReactConfig
+        | flow_common::subst_name::OpKind::Keys
         | flow_common::subst_name::OpKind::Spread => {
             Type::new(TypeInner::GenericT(Box::new(GenericTData {
                 bound: t,

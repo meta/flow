@@ -396,16 +396,53 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- keys.js:69:10
 
-Cannot return `k` because `unknown` [1] is not an object. [not-an-object]
+Cannot return `k` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    keys.js:69:10
    69|   return k; // Error
                 ^
 
 References:
-   keys.js:68:50
+   keys.js:68:44
    68| function testKeysOfOtherTypeParam<T, S>(k: keyof T): keyof S {
-                                                        ^ [1]
+                                                  ^^^^^^^ [1]
+   keys.js:68:54
+   68| function testKeysOfOtherTypeParam<T, S>(k: keyof T): keyof S {
+                                                            ^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- keys.js:69:10
+
+Cannot return `k` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   keys.js:69:10
+   69|   return k; // Error
+                ^
+
+References:
+   keys.js:68:44
+   68| function testKeysOfOtherTypeParam<T, S>(k: keyof T): keyof S {
+                                                  ^^^^^^^ [1]
+   keys.js:68:54
+   68| function testKeysOfOtherTypeParam<T, S>(k: keyof T): keyof S {
+                                                            ^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- keys.js:69:10
+
+Cannot return `k` because `symbol` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   keys.js:69:10
+   69|   return k; // Error
+                ^
+
+References:
+   keys.js:68:44
+   68| function testKeysOfOtherTypeParam<T, S>(k: keyof T): keyof S {
+                                                  ^^^^^^^ [1]
+   keys.js:68:54
+   68| function testKeysOfOtherTypeParam<T, S>(k: keyof T): keyof S {
+                                                            ^^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------------- suppressions.js:29:1
@@ -499,4 +536,4 @@ References:
 
 
 
-Found 34 errors
+Found 36 errors

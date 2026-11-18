@@ -82,3 +82,45 @@ type UpperOfTuple<T> = [T] extends [string] ? Uppercase<T> : empty; // ok
 type UpperOfFalseBranch<T> = T extends string ? empty : Uppercase<T>; // error
 type UpperOfAny<T> = T extends any ? Uppercase<T> : empty; // error
 type UpperOfOptional<T> = [a?: T] extends [b?: string] ? Uppercase<T> : empty; // error
+
+// A conditional type decides `keyof T` key by key over the keys of the bound of `T`, and as a
+// whole when the bound is not an object.
+type Excl<T, U> = T extends U ? empty : T;
+type Pck<T, K extends keyof T> = {[P in K]: T[P]};
+type TSOmit<T, K extends string> = Pck<T, Excl<keyof T, K>>; // ok
+({b: ''}) as TSOmit<{a: number, b: string}, 'a'>; // ok
+({a: 1, b: ''}) as TSOmit<{a: number, b: string}, 'a'>; // error: a is extra
+function keysOfUnboundedTypeParam<T, K>(
+  x: Excl<keyof T, K>,
+  y: keyof T extends K ? empty : keyof T,
+): Array<string | number | symbol> {
+  return [x, y]; // ok
+}
+function keysOfUnboundedTypeParamNotDecided<T>(): keyof T extends string ? 1 : 2 {
+  return 1; // error: `keyof T` may be a number or a symbol
+}
+function keysOfBoundedTypeParam<T extends {a: number, b: string}>(
+  x: Excl<keyof T, 'a'>,
+  o: TSOmit<T, 'a'>,
+): 'b' {
+  o.b as string; // ok
+  return x; // ok
+}
+function keysOfUnboundedTypeParamInfer<T>(): keyof T extends infer U ? U : empty {
+  return 'zzz'; // error: `U` is `keyof T`
+}
+function keysOfUnboundedTypeParamInUnion<T>(k: keyof T): keyof T | 'c' {
+  return k; // ok
+}
+function keysOfUnboundedTypeParamInMaybe<T>(k: keyof T): ?keyof T {
+  return k; // ok
+}
+function keysOfUnboundedTypeParamOrKey<T>(k: keyof T | 'c'): 'a' {
+  return k; // error x4: neither the string, number or symbol of `keyof T` nor 'c' is 'a'
+}
+function keysOfUnboundedTypeParamInferUnderMaybe<T>(): keyof T extends ?infer U ? U : empty {
+  return 'zzz'; // error: `U` is `keyof T`
+}
+function omitOfUnboundedTypeParam<T>(o: TSOmit<T, 'a'>): {...} {
+  return o; // ok
+}

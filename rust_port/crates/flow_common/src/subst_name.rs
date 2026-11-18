@@ -36,6 +36,7 @@ pub enum OpKind {
     CheckConfig,
     CreateElement,
     ReactConfig,
+    Keys,
 }
 
 impl fmt::Display for OpKind {
@@ -51,6 +52,7 @@ impl fmt::Display for OpKind {
             OpKind::CheckConfig => write!(f, "CheckConfig"),
             OpKind::CreateElement => write!(f, "CreateElement"),
             OpKind::ReactConfig => write!(f, "ReactConfig"),
+            OpKind::Keys => write!(f, "Keys"),
         }
     }
 }

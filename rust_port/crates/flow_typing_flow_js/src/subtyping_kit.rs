@@ -4575,6 +4575,19 @@ pub fn rec_sub_t<'cx>(
             )?;
             match ts.as_slice() {
                 [] | [_] => {
+                    // An opaque type whose upper bound is a type parameter, such as a conditional
+                    // type left undecided over `keyof` of a type parameter, is a subtype of a union
+                    // that the type parameter is a subtype of as a whole. This is tried first only
+                    // where it adds nothing to inference.
+                    if let [t @ deref!(GenericT(_))] = ts.as_slice()
+                        && !flow_js_utils::tvar_visitors::has_unresolved_tvars(cx, upper_t)
+                        && !flow_js_utils::tvar_visitors::has_placeholders(cx, upper_t)
+                        && !flow_js_utils::tvar_visitors::has_unresolved_tvars(cx, u)
+                        && !flow_js_utils::tvar_visitors::has_placeholders(cx, u)
+                        && FlowJs::speculative_subtyping_succeeds_with_flow_errors(cx, env, t, u)?
+                    {
+                        return Ok(());
+                    }
                     // Same as `_ ~> UnionT` case below
                     speculation_kit::try_union(cx, env, None, trace, use_op, l.dupe(), r.dupe(), rep)
                 }

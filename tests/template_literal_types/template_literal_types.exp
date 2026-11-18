@@ -1488,34 +1488,43 @@ Template literal type placeholder must be a subtype of `string | number | bigint
                                                       ^^^^^^
 
 
-Error --------------------------------------------------------------------------------------------------- basic.js:479:1
+Error -------------------------------------------------------------------------------------------------- basic.js:472:28
+
+Template literal type placeholder must be a subtype of `string | number | bigint | boolean | null | undefined`.
+[invalid-template-literal-type]
+
+   472| type BadKeysOfGeneric<T> = `${keyof T}`; // ERROR: a key of `T` may be a symbol
+                                   ^^^^^^^^^^^^
+
+
+Error --------------------------------------------------------------------------------------------------- basic.js:481:1
 
 Cannot cast `'abcpx'` to `NumPx` because `"abcpx"` [1] is incompatible with `NumPx` [2]. [incompatible-type]
 
-   basic.js:479:1
-   479| 'abcpx' as NumPx; // ERROR (not numeric body)
+   basic.js:481:1
+   481| 'abcpx' as NumPx; // ERROR (not numeric body)
         ^^^^^^^ [1]
 
 References:
-   basic.js:479:12
-   479| 'abcpx' as NumPx; // ERROR (not numeric body)
+   basic.js:481:12
+   481| 'abcpx' as NumPx; // ERROR (not numeric body)
                    ^^^^^ [2]
 
 
-Error -------------------------------------------------------------------------------------------------- basic.js:498:29
+Error -------------------------------------------------------------------------------------------------- basic.js:500:29
 
 Cannot assign `c` to `d` because `string` [1] is incompatible with `` `data-${string}` `` [2]. [incompatible-type]
 
-   basic.js:498:29
-   498| const d: `data-${string}` = c; // ERROR
+   basic.js:500:29
+   500| const d: `data-${string}` = c; // ERROR
                                     ^
 
 References:
-   basic.js:497:18
-   497| declare const c: `${'other-'}${string}`;
+   basic.js:499:18
+   499| declare const c: `${'other-'}${string}`;
                          ^^^^^^^^^^^^^^^^^^^^^^ [1]
-   basic.js:498:10
-   498| const d: `data-${string}` = c; // ERROR
+   basic.js:500:10
+   500| const d: `data-${string}` = c; // ERROR
                  ^^^^^^^^^^^^^^^^ [2]
 
 
@@ -2745,4 +2754,4 @@ References:
 
 
 
-Found 176 errors
+Found 177 errors

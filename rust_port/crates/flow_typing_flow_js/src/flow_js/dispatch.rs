@@ -434,7 +434,7 @@ fn dict_key_at_key_set(keys_reason: &Reason, key: &Type) -> Type {
 /// Whether the concrete type `t` is not an object to `keyof`: a primitive, `mixed`, an array, an
 /// enum, a component, or a type parameter bounded by one. A bound that is not resolved yet is not
 /// known to be one.
-fn is_not_object<'cx>(
+pub(super) fn is_not_object<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     reason: &Reason,

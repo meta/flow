@@ -469,6 +469,8 @@ type OkNested = `${`${number}px`}`;
 // indistinguishable from `infer P`, which TS implicitly accepts.
 type BadGenericObj<T extends {a: 1}> = `${T}`; // ERROR: object-bounded generic
 type BadGenericArr<T extends Array<string>> = `${T}`; // ERROR: array-bounded generic
+type BadKeysOfGeneric<T> = `${keyof T}`; // ERROR: a key of `T` may be a symbol
+type OkStringKeysOfGeneric<T> = `${keyof T & string}`;
 
 // --- Number body accepts JS whitespace, including multi-byte codepoints ---
 // `Number(' 42')` returns 42 (NBSP is JS WhiteSpace), so these are accepted.

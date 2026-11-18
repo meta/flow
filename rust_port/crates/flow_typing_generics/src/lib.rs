@@ -149,8 +149,9 @@ impl GenericId {
     pub fn equal(&self, other: &GenericId) -> bool {
         match (self, other) {
             (GenericId::Bound(b1), GenericId::Bound(b2)) => b1.equal(b2),
-            (GenericId::Op(_, bs1), GenericId::Op(_, bs2)) => {
-                equal_spreads(bs1.as_slice(), bs2.as_slice())
+            (GenericId::Op(k1, bs1), GenericId::Op(k2, bs2)) => {
+                (*k1 == OpKind::Keys) == (*k2 == OpKind::Keys)
+                    && equal_spreads(bs1.as_slice(), bs2.as_slice())
             }
             _ => false,
         }
@@ -334,6 +335,20 @@ impl GenericId {
             self, other
         )]);
         match (self, other) {
+            // `keyof` of a generic is not interchangeable with the generic, only with itself.
+            (GenericId::Op(OpKind::Keys, s1), GenericId::Op(OpKind::Keys, s2))
+                if equal_spreads(s1.as_slice(), s2.as_slice()) =>
+            {
+                printer(&["Generics satisfied".to_string()]);
+                GenericSatResult::Satisfied
+            }
+            (GenericId::Op(OpKind::Keys, _), _) | (_, GenericId::Op(OpKind::Keys, _)) => {
+                printer(&[format!(
+                    "Generics unsatisfied, with {} unmatched on upper bound",
+                    other
+                )]);
+                GenericSatResult::Upper(other.clone())
+            }
             (GenericId::Bound(bound1), GenericId::Bound(bound2)) => {
                 bound_satisfies(printer, bound1, bound2)
             }

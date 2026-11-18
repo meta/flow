@@ -49,6 +49,7 @@ use flow_typing_type::type_::TypeArgCompatibilityData;
 use flow_typing_type::type_::ValueToTypeReferenceTData;
 use flow_typing_type::type_::WriteElemData;
 use flow_typing_type::type_::WritePropData;
+use flow_typing_type::type_::symbol_t;
 
 use super::any_helpers::any_propagated;
 use super::constraint_helpers::constraint_node_constraints;
@@ -476,6 +477,60 @@ fn is_concrete(t: &Type) -> bool {
         | TypeInner::ThisTypeAppT(..) => false,
         _ => true,
     }
+}
+
+/// `keyof t` when `t` is a type parameter whose bound is not an object: as in TypeScript, a
+/// generic of its own, bounded by `string | number | symbol`.
+fn keys_of_type_param<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    keys_reason: &Reason,
+    t: &Type,
+) -> Result<Option<Type>, FlowJsException> {
+    let t = match t.deref() {
+        TypeInner::GenericT(_) => t.dupe(),
+        // Concretizing would add an upper bound to the placeholders of the type arguments being
+        // inferred.
+        _ if env.in_implicit_instantiation() => return Ok(None),
+        _ => match &possible_concrete_types_for_inspection(cx, env, keys_reason, t)?[..] {
+            [t] => t.dupe(),
+            _ => return Ok(None),
+        },
+    };
+    let TypeInner::GenericT(box GenericTData {
+        id: GenericId::Bound(param),
+        name,
+        no_infer,
+        ..
+    }) = t.deref()
+    else {
+        return Ok(None);
+    };
+    let Some(id) = GenericId::make_op_id(subst_name::OpKind::Keys, vec![param.clone()]) else {
+        return Ok(None);
+    };
+    if !dispatch::is_not_object(cx, env, keys_reason, &t)? {
+        return Ok(None);
+    }
+    let name = SubstName::name(format!("keyof {}", name.string_of_subst_name()).into());
+    let bound = type_util::union_of_ts(
+        keys_reason.dupe(),
+        vec![
+            str_module_t::why(keys_reason.dupe()),
+            num_module_t::why(keys_reason.dupe()),
+            symbol_t::why(keys_reason.dupe()),
+        ],
+        None,
+    );
+    Ok(Some(Type::new(TypeInner::GenericT(Box::new(
+        GenericTData {
+            reason: keys_reason.dupe(),
+            id,
+            name,
+            bound,
+            no_infer: *no_infer,
+        },
+    )))))
 }
 
 pub(super) fn handle_generic<'cx>(
@@ -1088,6 +1143,24 @@ pub(super) fn handle_generic<'cx>(
             } else {
                 wait_for_concrete_bound(cx, None)
             }
+        }
+        UseTInner::GetKeysT {
+            reason: keys_reason,
+            t_out,
+            include_symbols: true,
+        } if let Some(keys) =
+            keys_of_type_param(cx, env, keys_reason, &make_generic(bound.dupe()))? =>
+        {
+            rec_flow(cx, env, trace, (&keys, t_out))?;
+            Ok(true)
+        }
+        UseTInner::UseT(use_op, t)
+            if let TypeInner::KeysT(keys_reason, o) = t.deref()
+                && let Some(keys) = keys_of_type_param(cx, env, keys_reason, o)? =>
+        {
+            let l = make_generic(bound.dupe());
+            rec_flow_t(cx, env, trace, use_op.dupe(), (&l, &keys))?;
+            Ok(true)
         }
         UseTInner::UseT(_, t) if matches!(t.deref(), TypeInner::KeysT(..)) => {
             if is_concrete(bound) {
