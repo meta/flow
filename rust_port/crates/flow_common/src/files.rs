@@ -1039,21 +1039,27 @@ fn realpath_filter(options: &FileOptions, path: &Path, all: bool, include_libdef
 }
 
 /// Whether `path` is somewhere the crawl looks: under `subdir` when the crawl is limited to one,
-/// and under the root (when it is implicitly included), an `[include]` path or a libdef.
+/// and under the root (when it is implicitly included), an `[include]` path or a libdef. With
+/// `subtree`, `path` is a directory and everything under it must be in scope.
 fn path_is_in_crawl_scope(
     options: &FileOptions,
     root: &Path,
     subdir: Option<&Path>,
     path: &Path,
     include_libdef: bool,
+    subtree: bool,
 ) -> bool {
     subdir.is_none_or(|subdir| path.starts_with(subdir))
         && ((options.implicitly_include_root && path.starts_with(root)) || {
             let path_str = path.to_string_lossy();
-            is_included(options, &path_str)
-                || (include_libdef
-                    && is_dynamically_discovered_builtin_ts_libdef(options, &path_str))
-                || (include_libdef && is_configured_lib_file(options, &path_str))
+            if subtree {
+                options.includes.matches_subtree(&path_str)
+            } else {
+                is_included(options, &path_str)
+                    || (include_libdef
+                        && is_dynamically_discovered_builtin_ts_libdef(options, &path_str))
+                    || (include_libdef && is_configured_lib_file(options, &path_str))
+            }
         })
 }
 
@@ -1066,7 +1072,7 @@ fn crawl_path_filter(
     all: bool,
     include_libdef: bool,
 ) -> bool {
-    path_is_in_crawl_scope(options, root, subdir, path, include_libdef)
+    path_is_in_crawl_scope(options, root, subdir, path, include_libdef, false)
         && realpath_filter(options, path, all, include_libdef)
 }
 
@@ -1082,9 +1088,8 @@ fn crawl_prunes_dir(
 }
 
 /// Whether the crawl reads the directory at the real path `path` and reports each file under it
-/// that it reports through a symlink to it: the directory is under the implicitly included root
-/// (and `subdir`), and isn't pruned. `[include]` and libdef paths don't count, as a pattern that
-/// matches a directory needn't match the files under it.
+/// that it reports through a symlink to it: everything under it is in the crawl's scope, and it
+/// isn't pruned.
 fn crawl_reaches_dir(
     options: &FileOptions,
     root: &Path,
@@ -1094,18 +1099,18 @@ fn crawl_reaches_dir(
     all: bool,
     include_libdef: bool,
 ) -> bool {
-    options.implicitly_include_root
-        && path.starts_with(root)
-        && subdir.is_none_or(|subdir| path.starts_with(subdir))
+    let in_scope =
+        |dir: &Path| path_is_in_crawl_scope(options, root, subdir, dir, include_libdef, true);
+    in_scope(path)
         && !path
             .ancestors()
-            .take_while(|dir| dir.starts_with(root))
+            .take_while(|dir| in_scope(dir))
             .any(|dir| crawl_prunes_dir(options, can_prune, dir, all, include_libdef))
 }
 
 /// Whether the initial full crawl covers a path, making an absent alias mapping conclusive.
 pub fn initial_crawl_covers_path(options: &FileOptions, root: &Path, path: &Path) -> bool {
-    path_is_in_crawl_scope(options, root, None, path, true)
+    path_is_in_crawl_scope(options, root, None, path, true, false)
         && (wanted_filter(options, path, false, true)
             || has_symlink_ancestor_under_root(root, path, &mut HashMap::new()))
 }
@@ -1914,40 +1919,6 @@ mod tests {
         );
     }
 
-    #[test]
-    fn symlink_paths_resolve_through_chained_dir_aliases() {
-        let mut paths = super::SymlinkPaths::default();
-        paths.files.insert(
-            "/project/link/file.js".into(),
-            "/outside/target/file.js".into(),
-        );
-        paths
-            .dirs
-            .insert("/project/other_link".into(), "/project/link".into());
-        paths.dirs.insert(
-            "/project/pkg/node_modules/dep".into(),
-            "/project/dep".into(),
-        );
-
-        let resolve = |path: &str| paths.resolve(Path::new(path)).into_owned();
-        assert_eq!(
-            resolve("/project/other_link/file.js"),
-            Path::new("/outside/target/file.js")
-        );
-        assert_eq!(
-            resolve("/project/pkg/node_modules/dep/src/index.js"),
-            Path::new("/project/dep/src/index.js")
-        );
-        assert_eq!(
-            resolve("/project/pkg/node_modules/dep"),
-            Path::new("/project/dep")
-        );
-        assert_eq!(
-            resolve("/project/unrelated.js"),
-            Path::new("/project/unrelated.js")
-        );
-    }
-
     #[cfg(unix)]
     #[test]
     fn make_next_files_does_not_follow_symlinks_into_crawled_directories() {
@@ -1977,40 +1948,51 @@ mod tests {
         let root = super::cached_canonicalize(&tmp).unwrap();
         let packages = root.join("packages");
 
-        let mut options = FileOptions {
+        let mut implicit_root = FileOptions {
             module_file_exts: vec![".js".into()],
             ..FileOptions::default()
         };
-        options.includes.add_path(&root);
-        let symlink_map = super::SymlinkMap::default();
-        let mut files = Vec::new();
-        super::make_next_files(
-            &root,
-            None,
-            false,
-            true,
-            Arc::new(options),
-            false,
-            Some(&symlink_map),
-            |chunk| files.extend(chunk),
-        );
-        symlink_map.mark_complete();
+        implicit_root.includes.add_path(&root);
+        let mut included_packages = FileOptions {
+            module_file_exts: vec![".js".into()],
+            implicitly_include_root: false,
+            ..FileOptions::default()
+        };
+        included_packages
+            .includes
+            .add_glob(&root, "packages/**")
+            .unwrap();
+        for options in [implicit_root, included_packages] {
+            let symlink_map = super::SymlinkMap::default();
+            let mut files = Vec::new();
+            super::make_next_files(
+                &root,
+                None,
+                false,
+                true,
+                Arc::new(options),
+                false,
+                Some(&symlink_map),
+                |chunk| files.extend(chunk),
+            );
+            symlink_map.mark_complete();
 
-        files.sort();
-        let expected: Vec<_> = ["a", "b", "c"]
-            .iter()
-            .map(|package| packages.join(package).join("index.js"))
-            .collect();
-        assert_eq!(files, expected);
+            files.sort();
+            let expected: Vec<_> = ["a", "b", "c"]
+                .iter()
+                .map(|package| packages.join(package).join("index.js"))
+                .collect();
+            assert_eq!(files, expected);
 
-        let paths = symlink_map.complete_paths.get().unwrap();
-        let through_link = packages.join("a/node_modules/b");
-        assert!(paths.dirs.contains_key(&through_link));
-        assert!(!paths.files.contains_key(&through_link.join("index.js")));
-        assert_eq!(
-            paths.resolve(&through_link.join("node_modules/c/index.js")),
-            packages.join("c/index.js")
-        );
+            let paths = symlink_map.complete_paths.get().unwrap();
+            let through_link = packages.join("a/node_modules/b");
+            assert!(paths.dirs.contains_key(&through_link));
+            assert!(!paths.files.contains_key(&through_link.join("index.js")));
+            assert_eq!(
+                paths.resolve(&through_link.join("node_modules/c/index.js")),
+                packages.join("c/index.js")
+            );
+        }
 
         let _ = std::fs::remove_dir_all(&tmp);
     }

@@ -262,6 +262,16 @@ impl PathMatcher {
 
     /// Check if a file path matches any pattern in the matcher
     pub fn matches(&self, f: &str) -> bool {
+        self.matches_with_globs(f, |_| true)
+    }
+
+    /// Check if every path under the directory `dir` matches: `dir` matches a path, or a glob
+    /// whose match on a directory carries to everything under it.
+    pub fn matches_subtree(&self, dir: &str) -> bool {
+        self.matches_with_globs(dir, RootedGlob::supports_directory_pruning)
+    }
+
+    fn matches_with_globs(&self, f: &str, glob_filter: impl Fn(&RootedGlob) -> bool) -> bool {
         let matching_stems = find_prefixes(&self.stems, f);
         let normalized_f = normalize_filename_dir_sep(f);
 
@@ -271,7 +281,10 @@ impl PathMatcher {
             } else {
                 false
             }
-        }) || self.glob_patterns.iter().any(|glob| glob.is_match(f))
+        }) || self
+            .glob_patterns
+            .iter()
+            .any(|glob| glob_filter(glob) && glob.is_match(f))
     }
 }
 
