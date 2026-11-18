@@ -8,7 +8,7 @@
  */
 
 declare module '@docusaurus/BrowserOnly' {
-  declare export default function BrowserOnly({
+  declare export default function BrowserOnly(props: {
     children: () => React$Node,
   }): React$Node;
 }

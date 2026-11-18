@@ -34,7 +34,7 @@ declare module 'react-json-view' {
      *
      * Default: "rjv-default"
      */
-    style?: {readonly [string]: unknown},
+    style?: {readonly [key: string]: unknown},
     /**
      * Style of expand/collapse icons. Accepted values are "circle", triangle" or "square".
      *
@@ -233,7 +233,7 @@ declare module 'react-json-view' {
   }
 
   declare export type TypeDefaultValue =
-    string | number | boolean | {readonly [string]: unknown};
+    string | number | boolean | {readonly [key: string]: unknown};
 
   declare export interface ThemeObject {
     base00: string;
