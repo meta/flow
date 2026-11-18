@@ -5673,37 +5673,6 @@ fn object_prop<'a>(
     })
 }
 
-fn prop_map_of_object<'a>(
-    cx: &mut Context<'a>,
-    props: &[expression::object::Property<ALoc, ALoc>],
-) -> Result<
-    (
-        properties::PropertiesMap,
-        Vec<expression::object::Property<ALoc, (ALoc, Type)>>,
-    ),
-    CheckExprError,
-> {
-    let (acc, prop_asts) = props.iter().try_fold::<_, _, Result<_, CheckExprError>>(
-        (
-            ObjectExpressionAcc::empty(),
-            Vec::with_capacity(props.len()),
-        ),
-        |(map, mut prop_asts), prop| {
-            let (map, typed_prop) = object_prop(
-                cx,
-                false,
-                false,
-                Rc::new(flow_lazy::Lazy::new_forced(false)),
-                map,
-                prop,
-            )?;
-            prop_asts.push(typed_prop);
-            Ok((map, prop_asts))
-        },
-    )?;
-    Ok((acc.obj_pmap, prop_asts))
-}
-
 fn create_computed_prop<'a>(
     cx: &mut Context<'a>,
     key_loc: ALoc,
