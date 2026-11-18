@@ -1,5 +1,6 @@
 [include]
 ../shared/*
+../other/**
 
 [options]
 all=false

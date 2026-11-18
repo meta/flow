@@ -1,4 +1,7 @@
+../other/sub/nested/y.js
+../other/to_root/z.js
 ../root-lib/index.js
 ../shared/sub/deep.js
-../shared/top.js
+../third/y.js
 .flowconfig
+pkg/z.js

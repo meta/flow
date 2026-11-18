@@ -186,81 +186,29 @@ impl Default for FileOptions {
 pub static node_modules_containers: LazyLock<RwLock<BTreeMap<FlowSmolStr, BTreeSet<FlowSmolStr>>>> =
     LazyLock::new(|| RwLock::new(BTreeMap::new()));
 
-/// Logical-to-real path mappings recorded by the initial crawl.
-#[derive(Debug, Default)]
-struct SymlinkMappings {
-    /// Files reached through a symlink, keyed by the path the crawl reached them by.
-    files: HashMap<PathBuf, PathBuf>,
-    /// Directory symlinks the crawl didn't follow, mapped to their real paths. Kept apart from
-    /// `files` so that resolution only looks up a path's ancestors when there are any.
-    dirs: HashMap<PathBuf, PathBuf>,
-}
-
-impl SymlinkMappings {
-    fn resolve<'a>(&self, path: &'a Path) -> Cow<'a, Path> {
-        let mut path = Cow::Borrowed(path);
-        loop {
-            if let Some(real_path) = self.files.get(path.as_ref()) {
-                return Cow::Owned(real_path.clone());
-            }
-            if self.dirs.is_empty() {
-                return path;
-            }
-            // Each target is a real path, so no unfollowed symlink is at or above it, and each step
-            // resolves part of the rest of the path.
-            let Some((link, target)) = path
-                .ancestors()
-                .find_map(|dir| self.dirs.get_key_value(dir))
-            else {
-                return path;
-            };
-            let rest = path
-                .strip_prefix(link)
-                .expect("a path should start with its ancestor");
-            path = Cow::Owned(if rest.as_os_str().is_empty() {
-                target.clone()
-            } else {
-                target.join(rest)
-            });
-        }
-    }
-}
-
 #[derive(Debug)]
 pub struct SymlinkMap {
-    building_paths: Mutex<Option<SymlinkMappings>>,
-    complete_paths: OnceLock<SymlinkMappings>,
+    building_paths: Mutex<Option<HashMap<PathBuf, PathBuf>>>,
+    complete_paths: OnceLock<HashMap<PathBuf, PathBuf>>,
 }
 
 impl Default for SymlinkMap {
     fn default() -> Self {
         Self {
-            building_paths: Mutex::new(Some(SymlinkMappings::default())),
+            building_paths: Mutex::new(Some(HashMap::new())),
             complete_paths: OnceLock::new(),
         }
     }
 }
 
 impl SymlinkMap {
-    fn with_building_paths(&self, f: impl FnOnce(&mut SymlinkMappings)) {
-        f(self
-            .building_paths
+    fn insert(&self, path: PathBuf, real_path: PathBuf) {
+        self.building_paths
             .lock()
             .expect("symlink map lock should not be poisoned")
             .as_mut()
-            .expect("paths cannot be inserted after the map is complete"))
-    }
-
-    fn insert(&self, path: PathBuf, real_path: PathBuf) {
-        self.with_building_paths(|paths| {
-            paths.files.insert(path, real_path);
-        });
-    }
-
-    fn insert_dir(&self, path: PathBuf, real_path: PathBuf) {
-        self.with_building_paths(|paths| {
-            paths.dirs.insert(path, real_path);
-        });
+            .expect("paths cannot be inserted after the map is complete")
+            .insert(path, real_path);
     }
 
     pub fn mark_complete(&self) {
@@ -282,8 +230,22 @@ impl SymlinkMap {
     /// Returns `None` when the map is not complete (e.g. not a full init run).
     pub fn try_resolve<'a>(&self, normalized_path: &'a str) -> Option<Cow<'a, str>> {
         let paths = self.complete_paths.get()?;
-        let resolved = paths.resolve(Path::new(normalized_path));
-        Some(resolved_path(normalized_path, &resolved))
+        let mut path = Cow::Borrowed(Path::new(normalized_path));
+        // A path can be under a directory symlink the crawl didn't follow. Each real path has no
+        // symlink at or above it, so each step resolves part of the rest of the path.
+        while let Some((link, real_path)) =
+            path.ancestors().find_map(|dir| paths.get_key_value(dir))
+        {
+            let rest = path
+                .strip_prefix(link)
+                .expect("a path should start with its ancestor");
+            path = Cow::Owned(if rest.as_os_str().is_empty() {
+                real_path.clone()
+            } else {
+                real_path.join(rest)
+            });
+        }
+        Some(resolved_path(normalized_path, &path))
     }
 }
 
@@ -1041,7 +1003,8 @@ fn realpath_filter(options: &FileOptions, path: &Path, all: bool, include_libdef
 
 /// Whether `path` is somewhere the crawl looks: under `subdir` when the crawl is limited to one,
 /// and under the root (when it is implicitly included), an `[include]` path or a libdef. With
-/// `subtree`, `path` is a directory, and an `[include]` glob must cover everything under it.
+/// `subtree`, `path` is a directory, an `[include]` glob must cover everything under it, and
+/// libdefs don't count.
 fn path_is_in_crawl_scope(
     options: &FileOptions,
     root: &Path,
@@ -1151,15 +1114,17 @@ pub fn make_next_files(
                 if prunes(path) {
                     children.clear();
                 }
-                // Files reached through a symlink under the root are reported by their real path, so
-                // following one to a directory the crawl reads anyway reports nothing new. It would
-                // also never end for a cycle, e.g. between packages linked into each other's
-                // node_modules.
+                // Files reached through a symlink under the root are reported by their real path,
+                // so following one to a directory under the root that the crawl reads anyway
+                // reports nothing new. It would also never end for a cycle, e.g. between packages
+                // linked into each other's node_modules. A pruned target is still followed, so that
+                // the symlinks inside it can be resolved.
                 for entry in children.iter_mut().flatten() {
                     if entry.read_children.is_some()
                         && entry.path_is_symlink()
                         && entry.parent_path().starts_with(&root_buf)
                         && let Ok(target) = cached_canonicalize(&entry.path())
+                        && target.starts_with(&root_buf)
                         && path_is_in_crawl_scope(
                             &duped_options,
                             &root_buf,
@@ -1200,9 +1165,10 @@ pub fn make_next_files(
                 if let Some(symlink_map) = symlink_map
                     && entry.path_is_symlink()
                     && entry.read_children.is_none()
-                    && let Ok(target) = cached_canonicalize(&path)
+                    && let Ok(real_path) = cached_canonicalize(&path)
+                    && real_path != path
                 {
-                    symlink_map.insert_dir(path, target);
+                    symlink_map.insert(path, real_path);
                 }
                 continue;
             }
