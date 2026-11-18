@@ -13,4 +13,4 @@ declare class C {
 }
 const f = (cb: (x: string) => void): void => {};
 
-libUnnamed('');
+libNamed('');

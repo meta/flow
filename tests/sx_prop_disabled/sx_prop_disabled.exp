@@ -1,7 +1,7 @@
 Error ----------------------------------------------------------------------------------------------------- test.js:10:2
 
 Cannot create `div` element because property `sx` is extra in `{sx: Array<{color: string}>}` [1] but missing in
-`{readonly className?: string, readonly ref?: React.RefSetter<any>, readonly style?: {[string]: strin...` [2]. Exact
+`{readonly className?: string, readonly ref?: React.RefSetter<any>, readonly style?: {[key: string]: ...` [2]. Exact
 objects do not accept extra props. [incompatible-type]
 
    test.js:10:2
@@ -13,8 +13,8 @@ References:
    10| <div sx={[styles.foo]} />; // ERROR — sx is not a known prop on div
        ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    flow-typed/jsx.js:3:8
-    3|   div: { className?: string, style?: {[string]: string | number}, ref?: React.RefSetter<any> },
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+    3|   div: { className?: string, style?: {[key: string]: string | number}, ref?: React.RefSetter<any> },
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 

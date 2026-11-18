@@ -4,7 +4,7 @@ declare opaque type SpanInstance: CommonInstance;
 declare opaque type ImgInstance: CommonInstance;
 
 type React$JSXIntrinsicElements = {
-  [string]: {[string]: any, ref?: React.RefSetter<CommonInstance>},
+  [name: string]: {[prop: string]: any, ref?: React.RefSetter<CommonInstance>},
   canvas: {ref?: React.RefSetter<CommonInstance>, ...},
   div: {ref?: React.RefSetter<DivInstance>, ...},
   span: {ref?: React.RefSetter<SpanInstance>, ...},

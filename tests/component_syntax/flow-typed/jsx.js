@@ -4,7 +4,7 @@ declare opaque type MetaInstance: CommonInstance;
 declare opaque type InputInstance: CommonInstance;
 
 type React$JSXIntrinsicElements = {
-  [string]: {[string]: any, ref?: React.RefSetter<CommonInstance>},
+  [name: string]: {[prop: string]: any, ref?: React.RefSetter<CommonInstance>},
   a: {children?: React.Node, ref?: React.RefSetter<AInstance>, ...},
   div: {children?: React.Node, ref?: React.RefSetter<CommonInstance>, ...},
   span: {children?: React.Node, ref?: React.RefSetter<CommonInstance>, ...},
@@ -12,6 +12,6 @@ type React$JSXIntrinsicElements = {
   meta: {
     children?: React.Node,
     ref?: React.RefSetter<MetaInstance>,
-    [StringPrefix<'data-'>]: string | number,
+    [key: StringPrefix<'data-'>]: string | number,
   },
 }

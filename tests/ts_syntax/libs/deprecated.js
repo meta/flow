@@ -13,4 +13,4 @@ type DeprecatedShape = $Shape<{value: number}>;
 type DeprecatedBool = bool;
 type DeprecatedColon<T: string> = T;
 type DeprecatedCovariant<+T> = () => T;
-type DeprecatedContravariant<-T> = (T) => void;
+type DeprecatedContravariant<-T> = (x: T) => void;

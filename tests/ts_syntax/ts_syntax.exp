@@ -124,7 +124,7 @@ Error --------------------------------------------------------------------------
 
 The `-` variance sigil is deprecated. Use `in` instead. [unsupported-syntax]
 
-   16| type DeprecatedContravariant<-T> = (T) => void;
+   16| type DeprecatedContravariant<-T> = (x: T) => void;
                                     ^
 
 

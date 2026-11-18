@@ -9,7 +9,7 @@ Cannot create `testdiv` element because in property `id`: `42` [1] is incompatib
 
 References:
    lib/jsx.js:4:21
-   4|       testdiv: {id: string, [StringPrefix<'data-'>]: string};
+   4|       testdiv: {id: string, [key: StringPrefix<'data-'>]: string};
                           ^^^^^^ [2]
 
 
@@ -24,8 +24,8 @@ Cannot create `testdiv` element because in the indexer property's key: `"id"` [1
 
 References:
    lib/jsx.js:4:16
-   4|       testdiv: {id: string, [StringPrefix<'data-'>]: string};
-                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   4|       testdiv: {id: string, [key: StringPrefix<'data-'>]: string};
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    main.js:6:25
    6| const dataProps: {[key: StringPrefix<'data-'>]: string} = {};
                               ^^^^^^^^^^^^^^^^^^^^^ [2]
@@ -63,8 +63,8 @@ References:
    13| <testdiv />; // ERROR
        ^^^^^^^^^^^ [1]
    lib/jsx.js:4:16
-    4|       testdiv: {id: string, [StringPrefix<'data-'>]: string};
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+    4|       testdiv: {id: string, [key: StringPrefix<'data-'>]: string};
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------- strings.js:17:10
@@ -77,7 +77,7 @@ Cannot create `Div` element because in property `id`: `42` [1] is incompatible w
 
 References:
    lib/jsx.js:4:21
-    4|       testdiv: {id: string, [StringPrefix<'data-'>]: string};
+    4|       testdiv: {id: string, [key: StringPrefix<'data-'>]: string};
                            ^^^^^^ [2]
 
 

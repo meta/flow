@@ -4,7 +4,7 @@ declare class Event {}
 
 type ReactDOM$HTMLElementProps = {
   id?: ?string,
-  onClick?: ?(Event) => unknown,
+  onClick?: ?(event: Event) => unknown,
 };
 
 type ReactDOM$divProps = ReactDOM$HTMLElementProps;
@@ -28,6 +28,6 @@ type ReactDOM$HTMLElementJSXIntrinsic = {
 };
 
 declare type React$JSXIntrinsicElements = {
-  [string]: ReactDOM$HTMLElementJSXIntrinsic,
+  [name: string]: ReactDOM$HTMLElementJSXIntrinsic,
   div: ReactDOM$HTMLElementJSXIntrinsicTyped<ReactDOM$divProps, ReactDOM$divInstance>,
 }

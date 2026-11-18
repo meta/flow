@@ -3,7 +3,7 @@ declare class HTMLElement extends Element {}
 
 type ReactDOM$HTMLElementProps = {
   className?: string,
-  style?: {[string]: string | number},
+  style?: {[key: string]: string | number},
 };
 
 type ReactDOM$divProps = ReactDOM$HTMLElementProps;

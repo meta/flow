@@ -2854,9 +2854,9 @@ Cannot cast `e` to `empty` because `Event` [1] is incompatible with `empty` [2].
             ^
 
 References:
-   jsx-intrinsics-mini.js:7:15
-   7|   onClick?: ?(Event) => unknown,
-                    ^^^^^ [1]
+   jsx-intrinsics-mini.js:7:22
+   7|   onClick?: ?(event: Event) => unknown,
+                           ^^^^^ [1]
    react.js:9:12
    9|       e as empty; // error empty ~> Event
                  ^^^^^ [2]

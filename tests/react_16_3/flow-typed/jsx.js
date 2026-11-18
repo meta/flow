@@ -4,7 +4,7 @@ declare opaque type ButtonInstance: CommonInstance;
 declare opaque type AInstance: CommonInstance;
 
 type React$JSXIntrinsicElements = {
-  [string]: {[string]: any, ref?: React.RefSetter<CommonInstance>},
+  [name: string]: {[prop: string]: any, ref?: React.RefSetter<CommonInstance>},
   div: {ref?: React.RefSetter<DivInstance>, ...},
   button: {ref?: React.RefSetter<ButtonInstance>, ...},
   a: {ref?: React.RefSetter<AInstance>, ...},

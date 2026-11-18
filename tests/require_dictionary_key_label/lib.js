@@ -1,9 +1,9 @@
-// Library definitions are exempt, as they are from `unclear-type`.
-declare type LibDict = {[string]: number}; // ok
+// Library definitions label their dictionary keys too.
+declare type LibDict = {[key: string]: number}; // ok
 declare class LibClass {
-  [string]: number; // ok
+  [key: string]: number; // ok
 }
 
 declare module 'm' {
-  declare export type D = {[string]: number}; // ok
+  declare export type D = {[key: string]: number}; // ok
 }
