@@ -3413,8 +3413,8 @@ pub fn rec_sub_t<'cx>(
         //    opaque types
         // *********************
 
-        // If the ids are equal, we use flow_type_args to make sure that the type arguments of each
-        // are compatible with each other. If there are no type args, this doesn't do anything
+        // Two occurrences of the same nominal type are compared like two occurrences of the same
+        // generic: their type arguments, and their upper bounds, which refinements narrow.
         (
             NominalT {
                 reason: lreason,
@@ -3456,23 +3456,17 @@ pub fn rec_sub_t<'cx>(
                         Err(FlowJsException::SpeculationSingletonError) => {
                             flow_js_utils::add_output_with_env(
                                 cx,env,
-                                flow_js_utils::incompatible_types_error(l, u, use_op, None),
+                                flow_js_utils::incompatible_types_error(l, u, use_op.dupe(), None),
                             )?;
                         }
                         Err(other) => return Err(other),
                     }
                 }
-                // An `ExactObjectType` carries the props it is known to have in its upper bound.
-                nominal::Id::ExactObjectType
-                    if let (Some(lupper), Some(uupper)) = (&lnom.upper_t, &unom.upper_t) =>
-                {
-                    FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, lupper, uupper)?;
-                }
                 _ => {
                     FlowJs::flow_type_args_with_env(
                         cx, env,
                         trace,
-                        use_op,
+                        use_op.dupe(),
                         lreason,
                         ureason,
                         lnom.nominal_type_args.dupe(),
@@ -3480,6 +3474,13 @@ pub fn rec_sub_t<'cx>(
                         TypeStrictnessKind::Flow,
                     )?;
                 }
+            }
+            // A stuck evaluation is identified by its type arguments alone: its upper bound only
+            // approximates what it evaluates to.
+            if !matches!(lnom.nominal_id, nominal::Id::StuckEval(_))
+                && let (Some(lupper), Some(uupper)) = (&lnom.upper_t, &unom.upper_t)
+            {
+                FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, lupper, uupper)?;
             }
             Ok(())
         }

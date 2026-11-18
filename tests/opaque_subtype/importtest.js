@@ -1,4 +1,4 @@
-import type {Counter, OtherCounter, SuperOpaque, PolyFoo, PolyBar, PolyGood, ID} from './test';
+import type {Counter, OtherCounter, SuperOpaque, PolyFoo, PolyBar, PolyGood, ID, MaybeObj} from './test';
 import type {SuperType} from './super';
 
 function test1 (y: SuperType) : SuperOpaque { // Error: number ~> SuperOpaque
@@ -63,4 +63,12 @@ function id<T>(x: T): T { return x; } // Ok
 function test14(x: ID): string { // Ok
     var y: string = x;
     return id(y) + id(x);
+}
+
+function test15(x: MaybeObj, y: MaybeObj) {
+    if (x != null) {
+        let z = x;
+        z = x; // Ok
+        z = y; // Error: y may be null
+    }
 }

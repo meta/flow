@@ -1884,7 +1884,13 @@ impl<'e> Walker<'e> {
                 for (l, u, p) in pairs {
                     self.walk_by_polarity(cx, &l, &u, p)?;
                 }
-                Ok(())
+                match (&a.upper_t, &b.upper_t) {
+                    (Some(la), Some(ub)) if !matches!(a.nominal_id, nominal::Id::StuckEval(_)) => {
+                        let (la, ub) = (la.dupe(), ub.dupe());
+                        self.walk(cx, &la, &ub)
+                    }
+                    _ => Ok(()),
+                }
             }
             // An opaque type, such as a React element, against a renders type, and back.
             (TypeInner::NominalT { .. }, TypeInner::DefT(_, ud))

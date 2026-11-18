@@ -25,3 +25,5 @@ export opaque type OContra: Contra<number> = EContra<number | string>;
 export opaque type BadContra: Contra<number | string> = EContra<string>; // Error: string ~> number
 
 export opaque type ID: string = string;
+
+export opaque type MaybeObj: ?{readonly foo: string} = ?{readonly foo: string};

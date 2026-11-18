@@ -374,6 +374,52 @@ References:
                                       ^^^^^^ [2]
 
 
+Error ---------------------------------------------------------------------------------------------- importtest.js:72:13
+
+Cannot assign `y` to `z` because `null` [1] is incompatible with `{readonly foo: string}` [2]. [incompatible-type]
+
+All writes to `z` must be compatible with the type of its initializer [3]. Add an annotation to `z` [3] if a different
+type is desired.
+
+   importtest.js:72:13
+   72|         z = y; // Error: y may be null
+                   ^
+
+References:
+   importtest.js:68:33
+   68| function test15(x: MaybeObj, y: MaybeObj) {
+                                       ^^^^^^^^ [1]
+   importtest.js:68:20
+   68| function test15(x: MaybeObj, y: MaybeObj) {
+                          ^^^^^^^^ [2]
+   importtest.js:70:13
+   70|         let z = x;
+                   ^ [3]
+
+
+Error ---------------------------------------------------------------------------------------------- importtest.js:72:13
+
+Cannot assign `y` to `z` because `void` [1] is incompatible with `{readonly foo: string}` [2]. [incompatible-type]
+
+All writes to `z` must be compatible with the type of its initializer [3]. Add an annotation to `z` [3] if a different
+type is desired.
+
+   importtest.js:72:13
+   72|         z = y; // Error: y may be null
+                   ^
+
+References:
+   importtest.js:68:33
+   68| function test15(x: MaybeObj, y: MaybeObj) {
+                                       ^^^^^^^^ [1]
+   importtest.js:68:20
+   68| function test15(x: MaybeObj, y: MaybeObj) {
+                          ^^^^^^^^ [2]
+   importtest.js:70:13
+   70|         let z = x;
+                   ^ [3]
+
+
 Error ----------------------------------------------------------------------------------------------------- test.js:5:48
 
 `number` [1] is incompatible with `SuperType` [2]. [incompatible-type]
@@ -473,4 +519,4 @@ Cannot assign `null` to `foo2.p` because property `p` is not writable. [cannot-w
 
 
 
-Found 30 errors
+Found 32 errors

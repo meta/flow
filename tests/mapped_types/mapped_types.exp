@@ -1060,9 +1060,9 @@ Cannot cast `a` to `empty` because `string` [1] is incompatible with `empty` [2]
          ^
 
 References:
-   idx_replacement.js:85:48
-   85|   declare const props: { data: { readonly id: ?string } };
-                                                      ^^^^^^ [1]
+   idx_replacement.js:24:5
+   24| ): ?UnboxDeepRequired<T2>;
+           ^^^^^^^^^^^^^^^^^^^^^ [1]
    idx_replacement.js:89:8
    89|   a as empty; // error
               ^^^^^ [2]
@@ -1077,9 +1077,9 @@ Cannot cast `a` to `empty` because `string` [1] is incompatible with `empty` [2]
            ^
 
 References:
-   idx_replacement.js:85:48
-   85|   declare const props: { data: { readonly id: ?string } };
-                                                      ^^^^^^ [1]
+   idx_replacement.js:24:5
+   24| ): ?UnboxDeepRequired<T2>;
+           ^^^^^^^^^^^^^^^^^^^^^ [1]
    idx_replacement.js:91:10
    91|     a as empty; // error
                 ^^^^^ [2]
