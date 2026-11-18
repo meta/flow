@@ -1759,7 +1759,27 @@ pub(crate) mod scope {
             return None;
         };
         match node.0.data().deref() {
-            LocalBinding::NamespaceBinding { values, types, .. } => types
+            LocalBinding::NamespaceBinding { values, types, .. }
+            | LocalBinding::FunBinding {
+                statics: values,
+                namespace_types: types,
+                ..
+            }
+            | LocalBinding::DeclareFunBinding {
+                statics: values,
+                namespace_types: types,
+                ..
+            }
+            | LocalBinding::ClassBinding {
+                namespace_values: values,
+                namespace_types: types,
+                ..
+            }
+            | LocalBinding::DeclareClassBinding {
+                namespace_values: values,
+                namespace_types: types,
+                ..
+            } => types
                 .get(name)
                 .and_then(|entry| local_binding_node_of_namespace_entry(scopes, true, name, entry))
                 .or_else(|| {
@@ -1781,7 +1801,21 @@ pub(crate) mod scope {
             return None;
         };
         match node.0.data().deref() {
-            LocalBinding::NamespaceBinding { values, .. } => values
+            LocalBinding::NamespaceBinding { values, .. }
+            | LocalBinding::FunBinding {
+                statics: values, ..
+            }
+            | LocalBinding::DeclareFunBinding {
+                statics: values, ..
+            }
+            | LocalBinding::ClassBinding {
+                namespace_values: values,
+                ..
+            }
+            | LocalBinding::DeclareClassBinding {
+                namespace_values: values,
+                ..
+            } => values
                 .get(name)
                 .and_then(|entry| local_value_binding_node_of_namespace_entry(scopes, name, entry))
                 .map(BindingNode::LocalBinding),
