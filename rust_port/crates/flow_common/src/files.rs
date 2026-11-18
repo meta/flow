@@ -191,7 +191,8 @@ pub static node_modules_containers: LazyLock<RwLock<BTreeMap<FlowSmolStr, BTreeS
 struct SymlinkMappings {
     /// Files reached through a symlink, keyed by the path the crawl reached them by.
     files: HashMap<PathBuf, PathBuf>,
-    /// Directory symlinks the crawl didn't follow, mapped to a directory it read instead.
+    /// Directory symlinks the crawl didn't follow, mapped to their real paths. Kept apart from
+    /// `files` so that resolution only looks up a path's ancestors when there are any.
     dirs: HashMap<PathBuf, PathBuf>,
 }
 
@@ -205,8 +206,8 @@ impl SymlinkMappings {
             if self.dirs.is_empty() {
                 return path;
             }
-            // Each target is a directory the crawl read, so no skipped symlink is at or above it,
-            // and each step resolves part of the rest of the path.
+            // Each target is a real path, so no unfollowed symlink is at or above it, and each step
+            // resolves part of the rest of the path.
             let Some((link, target)) = path
                 .ancestors()
                 .find_map(|dir| self.dirs.get_key_value(dir))
@@ -256,9 +257,9 @@ impl SymlinkMap {
         });
     }
 
-    fn insert_dir(&self, link: PathBuf, target: PathBuf) {
+    fn insert_dir(&self, path: PathBuf, real_path: PathBuf) {
         self.with_building_paths(|paths| {
-            paths.dirs.insert(link, target);
+            paths.dirs.insert(path, real_path);
         });
     }
 
@@ -1040,7 +1041,7 @@ fn realpath_filter(options: &FileOptions, path: &Path, all: bool, include_libdef
 
 /// Whether `path` is somewhere the crawl looks: under `subdir` when the crawl is limited to one,
 /// and under the root (when it is implicitly included), an `[include]` path or a libdef. With
-/// `subtree`, `path` is a directory and everything under it must be in scope.
+/// `subtree`, `path` is a directory, and an `[include]` glob must cover everything under it.
 fn path_is_in_crawl_scope(
     options: &FileOptions,
     root: &Path,
@@ -1150,12 +1151,14 @@ pub fn make_next_files(
                 if prunes(path) {
                     children.clear();
                 }
-                // Files reached through a symlink are reported by their real path, so following a
-                // symlink to a directory the crawl reads anyway reports nothing new. It would also
-                // never end for a cycle, e.g. between packages linked into each other's node_modules.
+                // Files reached through a symlink under the root are reported by their real path, so
+                // following one to a directory the crawl reads anyway reports nothing new. It would
+                // also never end for a cycle, e.g. between packages linked into each other's
+                // node_modules.
                 for entry in children.iter_mut().flatten() {
                     if entry.read_children.is_some()
                         && entry.path_is_symlink()
+                        && entry.parent_path().starts_with(&root_buf)
                         && let Ok(target) = cached_canonicalize(&entry.path())
                         && path_is_in_crawl_scope(
                             &duped_options,
@@ -1195,6 +1198,7 @@ pub fn make_next_files(
                 }
                 // A directory symlink that `process_read_dir` didn't follow.
                 if let Some(symlink_map) = symlink_map
+                    && entry.path_is_symlink()
                     && entry.read_children.is_none()
                     && let Ok(target) = cached_canonicalize(&path)
                 {

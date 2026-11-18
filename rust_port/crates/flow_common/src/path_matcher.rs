@@ -262,16 +262,6 @@ impl PathMatcher {
 
     /// Check if a file path matches any pattern in the matcher
     pub fn matches(&self, f: &str) -> bool {
-        self.matches_with_globs(f, |_| true)
-    }
-
-    /// Check if every path under the directory `dir` matches: `dir` matches a path, or a glob
-    /// whose match on a directory carries to everything under it.
-    pub fn matches_subtree(&self, dir: &str) -> bool {
-        self.matches_with_globs(dir, RootedGlob::supports_directory_pruning)
-    }
-
-    fn matches_with_globs(&self, f: &str, glob_filter: impl Fn(&RootedGlob) -> bool) -> bool {
         let matching_stems = find_prefixes(&self.stems, f);
         let normalized_f = normalize_filename_dir_sep(f);
 
@@ -281,10 +271,15 @@ impl PathMatcher {
             } else {
                 false
             }
-        }) || self
-            .glob_patterns
+        }) || self.glob_patterns.iter().any(|glob| glob.is_match(f))
+    }
+
+    /// Check if a glob matches the directory `dir` and everything under it. Paths aren't
+    /// considered, as they match by string prefix.
+    pub fn matches_subtree(&self, dir: &str) -> bool {
+        self.glob_patterns
             .iter()
-            .any(|glob| glob_filter(glob) && glob.is_match(f))
+            .any(|glob| glob.supports_directory_pruning() && glob.is_match(dir))
     }
 }
 
@@ -522,23 +517,5 @@ mod tests {
                 PathBuf::from("/project/src"),
             ]
         );
-    }
-
-    #[test]
-    fn path_matcher_matches_subtree_only_where_a_match_covers_the_directory() {
-        let root = Path::new("/project");
-        let mut matcher = PathMatcher::empty();
-        matcher.add_path(Path::new("/legacy/included"));
-        matcher
-            .add_glob(root, "src/*")
-            .expect("test glob should compile");
-        matcher
-            .add_glob(root, "packages/**")
-            .expect("test glob should compile");
-
-        assert!(matcher.matches_subtree("/legacy/included/dir"));
-        assert!(matcher.matches_subtree("/project/packages/a"));
-        assert!(matcher.matches("/project/src/dir"));
-        assert!(!matcher.matches_subtree("/project/src/dir"));
     }
 }

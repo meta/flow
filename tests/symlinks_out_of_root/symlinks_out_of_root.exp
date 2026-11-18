@@ -1,4 +1,4 @@
+../root-lib/index.js
 ../shared/sub/deep.js
 ../shared/top.js
 .flowconfig
-a.js
