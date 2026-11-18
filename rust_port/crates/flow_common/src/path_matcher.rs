@@ -523,4 +523,22 @@ mod tests {
             ]
         );
     }
+
+    #[test]
+    fn path_matcher_matches_subtree_only_where_a_match_covers_the_directory() {
+        let root = Path::new("/project");
+        let mut matcher = PathMatcher::empty();
+        matcher.add_path(Path::new("/legacy/included"));
+        matcher
+            .add_glob(root, "src/*")
+            .expect("test glob should compile");
+        matcher
+            .add_glob(root, "packages/**")
+            .expect("test glob should compile");
+
+        assert!(matcher.matches_subtree("/legacy/included/dir"));
+        assert!(matcher.matches_subtree("/project/packages/a"));
+        assert!(matcher.matches("/project/src/dir"));
+        assert!(!matcher.matches_subtree("/project/src/dir"));
+    }
 }

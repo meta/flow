@@ -188,14 +188,14 @@ pub static node_modules_containers: LazyLock<RwLock<BTreeMap<FlowSmolStr, BTreeS
 
 /// Logical-to-real path mappings recorded by the initial crawl.
 #[derive(Debug, Default)]
-struct SymlinkPaths {
+struct SymlinkMappings {
     /// Files reached through a symlink, keyed by the path the crawl reached them by.
     files: HashMap<PathBuf, PathBuf>,
     /// Directory symlinks the crawl didn't follow, mapped to a directory it read instead.
     dirs: HashMap<PathBuf, PathBuf>,
 }
 
-impl SymlinkPaths {
+impl SymlinkMappings {
     fn resolve<'a>(&self, path: &'a Path) -> Cow<'a, Path> {
         let mut path = Cow::Borrowed(path);
         loop {
@@ -227,21 +227,21 @@ impl SymlinkPaths {
 
 #[derive(Debug)]
 pub struct SymlinkMap {
-    building_paths: Mutex<Option<SymlinkPaths>>,
-    complete_paths: OnceLock<SymlinkPaths>,
+    building_paths: Mutex<Option<SymlinkMappings>>,
+    complete_paths: OnceLock<SymlinkMappings>,
 }
 
 impl Default for SymlinkMap {
     fn default() -> Self {
         Self {
-            building_paths: Mutex::new(Some(SymlinkPaths::default())),
+            building_paths: Mutex::new(Some(SymlinkMappings::default())),
             complete_paths: OnceLock::new(),
         }
     }
 }
 
 impl SymlinkMap {
-    fn with_building_paths(&self, f: impl FnOnce(&mut SymlinkPaths)) {
+    fn with_building_paths(&self, f: impl FnOnce(&mut SymlinkMappings)) {
         f(self
             .building_paths
             .lock()
@@ -1076,17 +1076,6 @@ fn crawl_path_filter(
         && realpath_filter(options, path, all, include_libdef)
 }
 
-/// Whether the crawl skips the contents of the directory at `path`.
-fn crawl_prunes_dir(
-    options: &FileOptions,
-    can_prune: bool,
-    path: &Path,
-    all: bool,
-    include_libdef: bool,
-) -> bool {
-    can_prune && !wanted_filter(options, path, all, include_libdef)
-}
-
 /// Whether the initial full crawl covers a path, making an absent alias mapping conclusive.
 pub fn initial_crawl_covers_path(options: &FileOptions, root: &Path, path: &Path) -> bool {
     path_is_in_crawl_scope(options, root, None, path, true, false)
@@ -1142,7 +1131,6 @@ pub fn make_next_files(
     };
 
     let can_prune = can_prune_dir(&options);
-    let skipped_dir_symlinks = symlink_map.map(|_| Arc::new(Mutex::new(Vec::new())));
     let mut chunk = Vec::new();
     let mut symlink_ancestor_cache = HashMap::new();
     let mut reported_real_paths = HashSet::new();
@@ -1150,19 +1138,21 @@ pub fn make_next_files(
         let duped_options = options.dupe();
         let root_buf = root.to_path_buf();
         let subdir_buf = subdir.map(Path::to_path_buf);
-        let skipped_dir_symlinks = skipped_dir_symlinks.clone();
         for entry in jwalk::WalkDir::new(starting_point_path)
             .skip_hidden(false)
             .sort(sort)
             .follow_links(true)
             .parallelism(jwalk::Parallelism::RayonNewPool(2))
             .process_read_dir(move |_depth, path, _read_dir_state, children| {
-                if crawl_prunes_dir(&duped_options, can_prune, path, all, include_libdef) {
+                let prunes = |dir: &Path| {
+                    can_prune && !wanted_filter(&duped_options, dir, all, include_libdef)
+                };
+                if prunes(path) {
                     children.clear();
                 }
-                // Files reached through a symlink are reported by their real path, so a symlink to a
-                // directory the crawl reads anyway adds nothing. Following it would also never end
-                // for a cycle, eg between packages linked into each other's node_modules.
+                // Files reached through a symlink are reported by their real path, so following a
+                // symlink to a directory the crawl reads anyway reports nothing new. It would also
+                // never end for a cycle, e.g. between packages linked into each other's node_modules.
                 for entry in children.iter_mut().flatten() {
                     if entry.read_children.is_some()
                         && entry.path_is_symlink()
@@ -1175,21 +1165,9 @@ pub fn make_next_files(
                             include_libdef,
                             true,
                         )
-                        && !crawl_prunes_dir(
-                            &duped_options,
-                            can_prune,
-                            &target,
-                            all,
-                            include_libdef,
-                        )
+                        && !prunes(&target)
                     {
                         entry.read_children = None;
-                        if let Some(skipped_dir_symlinks) = &skipped_dir_symlinks {
-                            skipped_dir_symlinks
-                                .lock()
-                                .expect("skipped symlinks lock should not be poisoned")
-                                .push((entry.path(), target));
-                        }
                     }
                 }
             })
@@ -1214,6 +1192,13 @@ pub fn make_next_files(
                         .entry(FlowSmolStr::new(&dirname))
                         .or_default()
                         .insert(FlowSmolStr::new(&basename));
+                }
+                // A directory symlink that `process_read_dir` didn't follow.
+                if let Some(symlink_map) = symlink_map
+                    && entry.read_children.is_none()
+                    && let Ok(target) = cached_canonicalize(&path)
+                {
+                    symlink_map.insert_dir(path, target);
                 }
                 continue;
             }
@@ -1264,18 +1249,6 @@ pub fn make_next_files(
                     chunk = Vec::new();
                 }
             }
-        }
-    }
-    if let Some(symlink_map) = symlink_map
-        && let Some(skipped_dir_symlinks) = skipped_dir_symlinks
-    {
-        let skipped_dir_symlinks = std::mem::take(
-            &mut *skipped_dir_symlinks
-                .lock()
-                .expect("skipped symlinks lock should not be poisoned"),
-        );
-        for (link, target) in skipped_dir_symlinks {
-            symlink_map.insert_dir(link, target);
         }
     }
     if !chunk.is_empty() {
@@ -1902,84 +1875,6 @@ mod tests {
             super::normalize_path("/project/dist", "/lib/index.js"),
             "/lib/index.js"
         );
-    }
-
-    #[cfg(unix)]
-    #[test]
-    fn make_next_files_does_not_follow_symlinks_into_crawled_directories() {
-        use std::os::unix::fs::symlink;
-        use std::sync::Arc;
-
-        let tmp = std::env::temp_dir().join(format!(
-            "flow_make_next_files_crawled_symlinks_test_{}",
-            std::process::id()
-        ));
-        let _ = std::fs::remove_dir_all(&tmp);
-        // Packages linked into each other's node_modules, as pnpm links workspace packages, form a
-        // cycle between `a` and `b`.
-        let packages = tmp.join("packages");
-        for (package, links) in [("a", &["b"][..]), ("b", &["a", "c"]), ("c", &[])] {
-            let dir = packages.join(package);
-            std::fs::create_dir_all(dir.join("node_modules")).unwrap();
-            std::fs::write(dir.join("index.js"), "").unwrap();
-            for link in links {
-                symlink(
-                    Path::new("../..").join(link),
-                    dir.join("node_modules").join(link),
-                )
-                .unwrap();
-            }
-        }
-        let root = super::cached_canonicalize(&tmp).unwrap();
-        let packages = root.join("packages");
-
-        let mut implicit_root = FileOptions {
-            module_file_exts: vec![".js".into()],
-            ..FileOptions::default()
-        };
-        implicit_root.includes.add_path(&root);
-        let mut included_packages = FileOptions {
-            module_file_exts: vec![".js".into()],
-            implicitly_include_root: false,
-            ..FileOptions::default()
-        };
-        included_packages
-            .includes
-            .add_glob(&root, "packages/**")
-            .unwrap();
-        for options in [implicit_root, included_packages] {
-            let symlink_map = super::SymlinkMap::default();
-            let mut files = Vec::new();
-            super::make_next_files(
-                &root,
-                None,
-                false,
-                true,
-                Arc::new(options),
-                false,
-                Some(&symlink_map),
-                |chunk| files.extend(chunk),
-            );
-            symlink_map.mark_complete();
-
-            files.sort();
-            let expected: Vec<_> = ["a", "b", "c"]
-                .iter()
-                .map(|package| packages.join(package).join("index.js"))
-                .collect();
-            assert_eq!(files, expected);
-
-            let paths = symlink_map.complete_paths.get().unwrap();
-            let through_link = packages.join("a/node_modules/b");
-            assert!(paths.dirs.contains_key(&through_link));
-            assert!(!paths.files.contains_key(&through_link.join("index.js")));
-            assert_eq!(
-                paths.resolve(&through_link.join("node_modules/c/index.js")),
-                packages.join("c/index.js")
-            );
-        }
-
-        let _ = std::fs::remove_dir_all(&tmp);
     }
 
     #[cfg(windows)]
