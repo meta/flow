@@ -903,9 +903,18 @@ pub struct Binder {
     /// overloaded function prints the signature the call selected, so without a
     /// count nothing says the other signatures exist.
     pub overloads: u32,
-    /// The type arguments a call instantiated the signature with: the `<number>`
-    /// in `function f<number>(x: number): number`.
-    pub targs: Option<Arc<[ALocTy]>>,
+    /// How a call instantiated the signature, when the binder names the callee of
+    /// a call to a polymorphic function.
+    pub instantiation: Option<Arc<Instantiation>>,
+}
+
+/// A generic signature as a call instantiated it. Hover prints the signature as
+/// declared, and the type arguments in a section of their own.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Instantiation {
+    pub signature: ALocTy,
+    /// Each type parameter, by name, with the type argument the call chose for it.
+    pub targs: Arc<[(FlowSmolStr, ALocTy)]>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

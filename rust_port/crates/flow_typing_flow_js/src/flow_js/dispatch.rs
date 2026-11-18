@@ -36,6 +36,7 @@ use flow_typing_type::type_::ArrType::*;
 use flow_typing_type::type_::CallElemTData;
 use flow_typing_type::type_::CallMData;
 use flow_typing_type::type_::CallTData;
+use flow_typing_type::type_::CalleeInstantiation;
 use flow_typing_type::type_::ClassExtendsCheckData;
 use flow_typing_type::type_::ClassImplementsCheckData;
 use flow_typing_type::type_::ConcretizeTData;
@@ -5318,7 +5319,10 @@ fn __flow_impl<'cx>(
                 call_targs: None,
                 call_specialized_callee: calltype.call_specialized_callee.as_ref().map(|c| {
                     SpecializedCallee {
-                        targs: Some(targs.iter().map(|(t, _)| t.dupe()).collect()),
+                        instantiation: Some(CalleeInstantiation {
+                            poly: l.dupe(),
+                            targs: targs.into(),
+                        }),
                         ..c.clone()
                     }
                 }),
@@ -5383,7 +5387,10 @@ fn __flow_impl<'cx>(
                 tout: ctor_data.tout.dupe(),
                 return_hint: ctor_data.return_hint.clone(),
                 specialized_ctor: ctor_data.specialized_ctor.as_ref().map(|c| SpecializedCallee {
-                    targs: Some(targs.iter().map(|(t, _)| t.dupe()).collect()),
+                    instantiation: Some(CalleeInstantiation {
+                        poly: l.dupe(),
+                        targs: targs.into(),
+                    }),
                     ..c.clone()
                 }),
             })));

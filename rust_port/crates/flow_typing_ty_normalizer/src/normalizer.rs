@@ -83,6 +83,7 @@ use flow_typing_type::type_::TypeMap;
 use flow_typing_type::type_::UnresolvedArgData;
 use flow_typing_type::type_::eval as type_eval;
 use flow_typing_type::type_::nominal;
+use flow_typing_type::type_::poly;
 use flow_typing_type::type_util;
 use flow_utils_concurrency::job_error::JobError;
 
@@ -925,6 +926,46 @@ fn should_evaluate_destructor<'cx>(
         }
 }
 
+/// The computed type with the type arguments of the environment's instantiation
+/// substituted, when it mentions the type parameters they instantiate.
+fn instantiate_eval_t(
+    env: &mut Env<'_, '_>,
+    targs: &FlowOrdMap<SubstName, Type>,
+    (t, defer_use_t, id): (
+        &Type,
+        &flow_typing_type::type_::TypeDestructorT,
+        &type_eval::Id,
+    ),
+) -> Option<(
+    Type,
+    flow_typing_type::type_::TypeDestructorT,
+    type_eval::Id,
+)> {
+    let declared = Type::new(TypeInner::EvalT {
+        type_: t.dupe(),
+        defer_use_t: defer_use_t.dupe(),
+        id: id.dupe(),
+    });
+    let instantiated = type_subst::subst(
+        env.cx,
+        None,
+        true,
+        false,
+        type_subst::Purpose::Normal,
+        targs,
+        declared.dupe(),
+    );
+    match instantiated.deref() {
+        _ if instantiated.ptr_eq(&declared) => None,
+        TypeInner::EvalT {
+            type_,
+            defer_use_t,
+            id,
+        } => Some((type_.dupe(), defer_use_t.dupe(), id.dupe())),
+        _ => None,
+    }
+}
+
 fn eval_t<'cx, I: NormalizerInput>(
     env: &mut Env<'_, 'cx>,
     state: &mut State,
@@ -943,12 +984,27 @@ fn eval_t<'cx, I: NormalizerInput>(
         &type_eval::Id,
     ),
 ) -> Result<ALocTy, Error> {
+    state.found_computed_type = true;
+    // The type arguments are substituted into a computed type as a whole, its
+    // nested computed types and the type parameters they bind included, or not at
+    // all.
+    let instantiation = env.genv.instantiation.take();
+    let instantiated = instantiation
+        .as_ref()
+        .and_then(|(_, targs)| instantiate_eval_t(env, targs, x));
+    let x = match &instantiated {
+        Some((t, defer_use_t, id))
+            if should_evaluate_destructor(env, force_eval, t, &defer_use_t.2) =>
+        {
+            (t, defer_use_t, id)
+        }
+        _ => x,
+    };
     let (t, defer_use_t, id) = x;
     let flow_typing_type::type_::TypeDestructorTInner(_, _, d) = defer_use_t.deref();
-    state.found_computed_type = true;
     let should_eval = should_evaluate_destructor(env, force_eval, t, d);
     let eval_id = id.dupe();
-    I::eval(
+    let result = I::eval(
         env,
         state,
         should_eval,
@@ -956,7 +1012,9 @@ fn eval_t<'cx, I: NormalizerInput>(
         |env, state, t| default(env, state, None, t),
         non_eval,
         x,
-    )
+    );
+    env.genv.instantiation = instantiation;
+    result
 }
 
 fn type_variable<'cx>(
@@ -1505,9 +1563,12 @@ mod type_converter {
                     Ok(Arc::new(ty::Ty::Obj(Box::new(obj))))
                 }
                 DefTInner::ArrT(a) => arr_ty::<I>(env, state, a),
-                DefTInner::PolyT(box PolyTData { tparams, t_out, .. }) => {
-                    poly_ty::<I>(env, state, t_out, tparams)
-                }
+                DefTInner::PolyT(box PolyTData {
+                    tparams,
+                    t_out,
+                    id: poly,
+                    ..
+                }) => poly_ty::<I>(env, state, poly, t_out, tparams),
                 DefTInner::InstanceT(instance_t_val) => instance_t::<I>(
                     env,
                     state,
@@ -2589,10 +2650,21 @@ mod type_converter {
     fn poly_ty<'cx, I: NormalizerInput>(
         env: &mut Env<'_, 'cx>,
         state: &mut State,
+        poly: &poly::Id,
         t_out: &Type,
         tparams: &[flow_typing_type::type_::TypeParam],
     ) -> Result<ALocTy, Error> {
-        match t_out.deref() {
+        // The type parameters of a polymorphic type nested in the instantiated one
+        // shadow the instantiated type parameters of the same names.
+        let instantiation = env.genv.instantiation.dupe();
+        if let Some((instantiated, targs)) = &mut env.genv.instantiation
+            && instantiated != poly
+        {
+            for tp in tparams {
+                targs.remove(&tp.name);
+            }
+        }
+        let result = match t_out.deref() {
             TypeInner::DefT(_, def_t) => match def_t.deref() {
                 DefTInner::ClassT(class_t) => match class_t.deref() {
                     TypeInner::ThisInstanceT(box ThisInstanceTData {
@@ -2611,7 +2683,9 @@ mod type_converter {
                 _ => Err(terr(ErrorKind::BadPoly, None, Some(t_out))),
             },
             _ => Err(terr(ErrorKind::BadPoly, None, Some(t_out))),
-        }
+        };
+        env.genv.instantiation = instantiation;
+        result
     }
 
     fn type_app<'cx, I: NormalizerInput>(
@@ -6201,6 +6275,7 @@ impl<I: NormalizerInput> Normalizer<I> {
             imported_names: ImportedNames::new(|_| Ok(ImportedNamesMap::new())),
             options,
             ref_type_bodies: None,
+            instantiation: None,
         };
 
         let mut state = State::empty();

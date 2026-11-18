@@ -20,8 +20,10 @@ use flow_common_ty::ty::BinderKind;
 use flow_common_ty::ty::Decl;
 use flow_common_ty::ty::DeclModuleDeclData;
 use flow_common_ty::ty::Elt;
+use flow_common_ty::ty::FunT;
 use flow_common_ty::ty::ImportProvenance;
 use flow_common_ty::ty::ImportSpecifier;
+use flow_common_ty::ty::Instantiation;
 use flow_common_ty::ty::NamedProp;
 use flow_common_ty::ty::ObjKind;
 use flow_common_ty::ty::Prop;
@@ -45,8 +47,13 @@ use flow_typing_flow_js::flow_js::FlowJs;
 use flow_typing_ty_normalizer::env::EvaluateTypeDestructorsMode;
 use flow_typing_ty_normalizer::env::Options;
 use flow_typing_ty_normalizer::normalizer::Error;
+use flow_typing_type::type_::DefT;
+use flow_typing_type::type_::DefTInner;
+use flow_typing_type::type_::PolyTData;
+use flow_typing_type::type_::PropertyInner;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeInner;
+use flow_typing_type::type_::poly;
 use flow_typing_type::type_util;
 use flow_typing_utils::convert_types;
 use flow_typing_utils::type_env;
@@ -234,7 +241,7 @@ fn framed_of_identifier_reference(cx: &mut Context<'_>, file_sig: &FileSig, loc:
         owner: None,
         type_parameter_context: None,
         overloads: overloads_of_def(kind, def),
-        targs: None,
+        instantiation: None,
     });
     let alias = is_imported_binding_kind(def.kind).then(|| Alias {
         kind: AliasKind::Import,
@@ -431,7 +438,7 @@ fn binder_of_member_reference(
             owner: None,
             type_parameter_context: None,
             overloads: 0,
-            targs: None,
+            instantiation: None,
         });
     }
     let named_prop = named_prop?;
@@ -457,9 +464,48 @@ fn binder_of_member_reference(
         // been looked up an overloaded method is indistinguishable from a plain
         // one and there is nothing left to count.
         overloads: 0,
-        targs: None,
+        instantiation: None,
     })
 }
+
+/// The constructor of a polymorphic class as declared, generalized over the
+/// class's type parameters: `constructor Box<T>(x: T): void`. None for a class
+/// that inherits its constructor, and for a polymorphic type that is not a class.
+fn generic_constructor(cx: &mut Context<'_>, poly: &Type) -> Option<Type> {
+    let TypeInner::DefT(_, def) = &**poly else {
+        return None;
+    };
+    let DefTInner::PolyT(box poly_data) = &**def else {
+        return None;
+    };
+    let TypeInner::DefT(_, class) = &*poly_data.t_out else {
+        return None;
+    };
+    let DefTInner::ClassT(this) = &**class else {
+        return None;
+    };
+    let inst = match &**this {
+        TypeInner::DefT(_, def) => match &**def {
+            DefTInner::InstanceT(instance) => &instance.inst,
+            _ => return None,
+        },
+        TypeInner::ThisInstanceT(this_instance) => &this_instance.instance.inst,
+        _ => return None,
+    };
+    let constructor = cx.get_prop(inst.proto_props.dupe(), &Name::new("constructor"))?;
+    let PropertyInner::Method { type_, .. } = &*constructor else {
+        return None;
+    };
+    Some(Type::new(TypeInner::DefT(
+        type_util::reason_of_t(type_).dupe(),
+        DefT::new(DefTInner::PolyT(Box::new(PolyTData {
+            t_out: type_.dupe(),
+            id: poly::Id::generate_id(),
+            ..poly_data.clone()
+        }))),
+    )))
+}
+
 pub fn dump_type_at_pos(
     cx: &mut Context<'_>,
     typed_ast: &ast::Program<ALoc, (ALoc, Type)>,
@@ -554,7 +600,7 @@ pub fn type_at_pos_type<'a>(
                                 owner: None,
                                 type_parameter_context: None,
                                 overloads: 0,
-                                targs: None,
+                                instantiation: None,
                             }),
                         alias: None,
                     },
@@ -628,13 +674,13 @@ pub fn type_at_pos_type<'a>(
                     let genv = ty_normalizer_flow::mk_genv(options, typed_ast_opt, file_sig.dupe());
                     ty_normalizer_flow::from_type_with_found_computed_type(cx, &genv, t)
                 };
-                let callee_targs = cx.get_callee_targs(&ALoc::of_loc(loc.dupe()));
+                let callee_instantiation = cx.get_callee_instantiation(&ALoc::of_loc(loc.dupe()));
                 // This pass evaluates the destructors it judges worth evaluating, so
                 // it has to leave the server's caches and error set as it found them:
                 // that state outlives the request, and a hover must not change how the
                 // next one behaves. Its result is kept whatever the errors say -- there
                 // is no second form to fall back on.
-                let (ty, type_parameter_context, targs) = cx.run_and_rolled_back_cache(|cx| {
+                let (ty, type_parameter_context, inst) = cx.run_and_rolled_back_cache(|cx| {
                     let errors = cx.errors();
                     let (ty, _) = from_type(cx, &t, EvaluateTypeDestructorsMode::EvaluateForHover);
                     let type_parameter_context = match type_parameter_context.as_ref() {
@@ -653,23 +699,81 @@ pub fn type_at_pos_type<'a>(
                             })
                         }
                     };
-                    // Type arguments are shown all or none: one that does not
-                    // normalize to a type drops them all.
-                    let targs = callee_targs.and_then(|targs| {
-                        targs
+                    // An instantiation is shown whole or not at all: a type
+                    // argument that does not normalize to a type drops it.
+                    let inst = callee_instantiation.and_then(|callee| {
+                        let constructor = generic_constructor(cx, &callee.poly);
+                        let generic = constructor.as_ref().unwrap_or(&callee.poly).dupe();
+                        let TypeInner::DefT(_, def) = &*generic else {
+                            return None;
+                        };
+                        let DefTInner::PolyT(box PolyTData { id: poly, .. }) = &**def else {
+                            return None;
+                        };
+                        let mut normalize = |t: &Type, instantiation| {
+                            let mut genv = ty_normalizer_flow::mk_genv(
+                                options(EvaluateTypeDestructorsMode::EvaluateForHover),
+                                typed_ast_opt,
+                                file_sig.dupe(),
+                            );
+                            genv.instantiation = instantiation;
+                            match ty_normalizer_flow::from_type(cx, &genv, t) {
+                                Ok(Elt::Type(t)) => Some(t),
+                                Ok(Elt::Decl(_)) | Err(_) => None,
+                            }
+                        };
+                        let targs = callee
+                            .targs
                             .iter()
-                            .map(|t| {
-                                let (ty, _) =
-                                    from_type(cx, t, EvaluateTypeDestructorsMode::EvaluateForHover);
-                                match ty {
-                                    Ok(Elt::Type(t)) => Some(t),
-                                    Ok(Elt::Decl(_)) | Err(_) => None,
-                                }
+                            .map(|(t, name)| {
+                                Some((name.string_of_subst_name().dupe(), normalize(t, None)?))
                             })
-                            .collect::<Option<Arc<[_]>>>()
+                            .collect::<Option<Vec<_>>>()?;
+                        let targs = targs
+                            .into_iter()
+                            // A type parameter instantiated with itself, as in
+                            // a recursive call, says nothing and is left out.
+                            .filter(|(name, t)| match &**t {
+                                Ty::Bound(box (_, bound)) => bound != name.as_str(),
+                                _ => true,
+                            })
+                            .collect();
+                        let signature = normalize(
+                            &generic,
+                            Some((
+                                poly.dupe(),
+                                callee
+                                    .targs
+                                    .iter()
+                                    .map(|(t, name)| (name.dupe(), t.dupe()))
+                                    .collect(),
+                            )),
+                        );
+                        let signature = match signature.as_deref() {
+                            // A constructor's receiver is the instance it
+                            // builds, which the call supplies.
+                            Some(Ty::Fun(fun)) if constructor.is_some() => {
+                                Some(Arc::new(Ty::Fun(Box::new(FunT {
+                                    fun_this_param: None,
+                                    ..(**fun).clone()
+                                }))))
+                            }
+                            Some(Ty::Fun(_)) => signature,
+                            _ => None,
+                        };
+                        // When the generic signature does not print as a function,
+                        // the instantiated one stands in for it.
+                        let signature = match signature {
+                            Some(signature) => signature,
+                            None => match &ty {
+                                Ok(Elt::Type(t)) => t.dupe(),
+                                Ok(Elt::Decl(_)) | Err(_) => return None,
+                            },
+                        };
+                        Some(Arc::new(Instantiation { signature, targs }))
                     });
                     cx.reset_errors(errors);
-                    (ty, type_parameter_context, targs)
+                    (ty, type_parameter_context, inst)
                 });
                 match ty.and_then(|ty| {
                     type_parameter_context
@@ -682,6 +786,12 @@ pub fn type_at_pos_type<'a>(
                             binder.type_parameter_context = type_parameter_context;
                         }
                         let refs = include_refs.map(|loc_of_aloc| {
+                            if let Some(inst) = &inst {
+                                return std::iter::once(&inst.signature)
+                                    .chain(inst.targs.iter().map(|(_, t)| t))
+                                    .flat_map(|t| symbols_of_elt(loc_of_aloc, &Elt::Type(t.dupe())))
+                                    .collect();
+                            }
                             let head_name = match &ty {
                                 Elt::Decl(d) => head_symbol_of_decl(d).and_then(name_of_symbol),
                                 Elt::Type(_) => None,
@@ -716,10 +826,13 @@ pub fn type_at_pos_type<'a>(
                                 // overloaded import is an intersection anyway, and
                                 // `Ty::Fun` only matches a lone signature.
                                 overloads: 0,
-                                targs: None,
+                                instantiation: None,
                             })
                         });
-                        let binder = binder.map(|binder| Binder { targs, ..binder });
+                        let binder = binder.map(|binder| Binder {
+                            instantiation: inst,
+                            ..binder
+                        });
                         QueryResult::Success(
                             loc,
                             TypeAtPosResult {

@@ -524,7 +524,7 @@ pub struct ComponentT {
     signature_help_callee: ALocMap<Type>,
     // Hover type
     ctor_callee: ALocMap<Type>,
-    callee_targs: ALocMap<Rc<[Type]>>,
+    callee_instantiations: ALocMap<type_::CalleeInstantiation>,
     // Union optimization checks
     union_opt: ALocMap<Type>,
     // Natural inference (records checks on primitive literal types during
@@ -1144,7 +1144,7 @@ fn make_ccx() -> ComponentT {
         exhaustive_checks: ALocMap::new(),
         signature_help_callee: ALocMap::new(),
         ctor_callee: ALocMap::new(),
-        callee_targs: ALocMap::new(),
+        callee_instantiations: ALocMap::new(),
         union_opt: ALocMap::new(),
         primitive_literal_checks: ALocSet::new(),
         fun_proto_method_lookups: ALocSet::new(),
@@ -2649,14 +2649,14 @@ impl<'a> Context<'a> {
         self.ccx().ctor_callee.get(loc).duped()
     }
 
-    /// Records the type arguments a call instantiated its callee with, keyed by
-    /// the identifier that names the callee.
-    pub fn set_callee_targs(&mut self, loc: ALoc, targs: Rc<[Type]>) {
-        self.ccx_mut().callee_targs.insert(loc, targs);
+    /// Records how a call instantiated its polymorphic callee, keyed by the
+    /// identifier that names the callee.
+    pub fn set_callee_instantiation(&mut self, loc: ALoc, inst: type_::CalleeInstantiation) {
+        self.ccx_mut().callee_instantiations.insert(loc, inst);
     }
 
-    pub fn get_callee_targs(&self, loc: &ALoc) -> Option<Rc<[Type]>> {
-        self.ccx().callee_targs.get(loc).duped()
+    pub fn get_callee_instantiation(&self, loc: &ALoc) -> Option<type_::CalleeInstantiation> {
+        self.ccx().callee_instantiations.get(loc).duped()
     }
 
     pub fn record_primitive_literal_check(&mut self, loc: ALoc) {
@@ -3665,7 +3665,7 @@ impl<'a> Context<'a> {
                 std::collections::VecDeque::new(),
             )),
             sig_help: std::rc::Rc::new(std::cell::RefCell::new(std::collections::VecDeque::new())),
-            targs: None,
+            instantiation: None,
         }
     }
 }

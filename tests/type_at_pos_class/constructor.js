@@ -34,8 +34,8 @@ class Box<T> {
   constructor(x: T) {}
 }
 
-// Constructing a polymorphic class prints the type arguments it was
-// instantiated with.
+// Constructing a polymorphic class prints its constructor as declared, and the
+// type arguments it was instantiated with.
 const box = new Box(1);
 //              ^
 //          ^
@@ -44,3 +44,10 @@ const ns2 = { Box };
 
 const box2 = new ns2.Box<string>("a");
 //                   ^
+
+class SubBox<T> extends Box<T> {}
+
+// A class that inherits its constructor has none of its own to print as
+// declared, so the instantiated one stands in for it.
+const subBox = new SubBox(true);
+//                 ^

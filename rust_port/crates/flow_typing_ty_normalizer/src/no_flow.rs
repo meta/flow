@@ -163,6 +163,7 @@ pub fn mk_genv<'a, 'cx: 'a>(
         file_sig,
         imported_names,
         ref_type_bodies: None,
+        instantiation: None,
     }
 }
 

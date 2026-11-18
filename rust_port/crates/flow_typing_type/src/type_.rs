@@ -5387,17 +5387,25 @@ pub struct SpecializedCallee {
         Rc<RefCell<std::collections::VecDeque<(RecordedCallee, SpecState)>>>,
     pub init_speculation_state: Option<SpecState>,
     pub sig_help: Rc<RefCell<std::collections::VecDeque<Type>>>,
-    /// The type arguments of the instantiation that produced the callee reaching
-    /// this call. The `PolyT ~> CallT` rule sets them on the copy it passes on.
-    pub targs: Option<Rc<[Type]>>,
+    /// The instantiation that produced the callee reaching this call. The
+    /// `PolyT ~> CallT` rule sets it on the copy it passes on.
+    pub instantiation: Option<CalleeInstantiation>,
 }
 
-/// A specialized callee type, with the type arguments it was instantiated with
-/// when it comes from a polymorphic definition.
+/// A polymorphic callee as a call instantiated it: the polymorphic type, and the
+/// type argument chosen for each of its type parameters.
+#[derive(Debug, Clone, Dupe, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct CalleeInstantiation {
+    pub poly: Type,
+    pub targs: Rc<[(Type, SubstName)]>,
+}
+
+/// A specialized callee type, with the instantiation that produced it when it
+/// comes from a polymorphic definition.
 #[derive(Debug, Clone, Dupe, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RecordedCallee {
     pub t: Type,
-    pub targs: Option<Rc<[Type]>>,
+    pub instantiation: Option<CalleeInstantiation>,
 }
 
 impl PartialEq for SpecializedCallee {
@@ -5428,7 +5436,7 @@ impl Ord for SpecializedCallee {
                     .cmp(&other.init_speculation_state)
             })
             .then_with(|| self.sig_help.borrow().cmp(&*other.sig_help.borrow()))
-            .then_with(|| self.targs.cmp(&other.targs))
+            .then_with(|| self.instantiation.cmp(&other.instantiation))
     }
 }
 
@@ -5438,7 +5446,7 @@ impl std::hash::Hash for SpecializedCallee {
         self.speculative_candidates.borrow().hash(state);
         self.init_speculation_state.hash(state);
         self.sig_help.borrow().hash(state);
-        self.targs.hash(state);
+        self.instantiation.hash(state);
     }
 }
 

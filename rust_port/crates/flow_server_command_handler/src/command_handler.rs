@@ -1643,17 +1643,22 @@ fn infer_type_to_response(
         server_prot::response::infer_type::Payload::Json(json_string)
     } else {
         server_prot::response::infer_type::Payload::Friendly(tys.map(|r| {
-            let (type_str, refs) = flow_common_ty::ty_printer::string_of_type_at_pos_result(
-                flow_common_ty::ty_printer::TypeAtPosPrint {
-                    ty: &r.ty,
-                    refs: r.refs.as_ref(),
-                    binder: r.binder.as_ref(),
-                    alias: r.alias.as_ref(),
-                },
-                loc_of_aloc,
-                &printer_opts,
-            );
-            server_prot::response::infer_type::FriendlyResponse { type_str, refs }
+            let (type_str, instantiation, refs) =
+                flow_common_ty::ty_printer::string_of_type_at_pos_result(
+                    flow_common_ty::ty_printer::TypeAtPosPrint {
+                        ty: &r.ty,
+                        refs: r.refs.as_ref(),
+                        binder: r.binder.as_ref(),
+                        alias: r.alias.as_ref(),
+                    },
+                    loc_of_aloc,
+                    &printer_opts,
+                );
+            server_prot::response::infer_type::FriendlyResponse {
+                type_str,
+                instantiation,
+                refs,
+            }
         }))
     };
     server_prot::response::infer_type::T {
@@ -2068,7 +2073,7 @@ fn inlay_hint(
                             &parse_artifacts.ast,
                         );
                         let tys = tys.map(|r| {
-                            let (type_str, refs) =
+                            let (type_str, instantiation, refs) =
                                 flow_common_ty::ty_printer::string_of_type_at_pos_result(
                                     flow_common_ty::ty_printer::TypeAtPosPrint {
                                         ty: &r.ty,
@@ -2085,7 +2090,11 @@ fn inlay_hint(
                                         ..Default::default()
                                     },
                                 );
-                            server_prot::response::infer_type::FriendlyResponse { type_str, refs }
+                            server_prot::response::infer_type::FriendlyResponse {
+                                type_str,
+                                instantiation,
+                                refs,
+                            }
                         });
                         result_with_docs.push(server_prot::response::inlay_hint::Item {
                             cursor_loc,
@@ -2182,7 +2191,7 @@ fn inspect_types(
         .map(
             |(cursor_loc, type_loc, tys, refining_locs, refinement_invalidated)| {
                 let type_str = tys.map(|r| {
-                    let (type_str, _refs) =
+                    let (type_str, _instantiation, _refs) =
                         flow_common_ty::ty_printer::string_of_type_at_pos_result(
                             flow_common_ty::ty_printer::TypeAtPosPrint {
                                 ty: &r.ty,
@@ -5095,6 +5104,15 @@ fn handle_persistent_infer_type(
                             value: friendly.type_str.clone(),
                         },
                     )];
+                    let instantiation = friendly
+                        .instantiation
+                        .iter()
+                        .map(|targs| {
+                            lsp_types::MarkedString::String(format!(
+                                "Instantiation:\n```flow\n{targs}\n```"
+                            ))
+                        })
+                        .collect::<Vec<_>>();
                     // Clients draw a horizontal rule between `HoverContents::Array` entries,
                     // so keep all definition links together in one Rust-style navigation row.
                     let ref_links: Vec<String> = friendly
@@ -5131,6 +5149,7 @@ fn handle_persistent_infer_type(
                     let mut contents = Vec::new();
                     contents.extend(invalidation_info);
                     contents.extend(types);
+                    contents.extend(instantiation);
                     contents.extend(docs);
                     contents.extend(refs);
                     contents.extend(refinement_info);

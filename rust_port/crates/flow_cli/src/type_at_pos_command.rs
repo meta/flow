@@ -81,12 +81,17 @@ pub(crate) fn handle_friendly_result(
     refining_locs: &[flow_parser::loc::Loc],
     documentation: Option<&str>,
 ) {
-    let (ty, refs) = match tys {
-        Some(server_prot::response::infer_type::FriendlyResponse { type_str, refs }) => {
-            (type_str.as_str(), refs.as_ref())
-        }
-        None => ("(unknown)", None),
+    let (ty, instantiation, refs) = match tys {
+        Some(server_prot::response::infer_type::FriendlyResponse {
+            type_str,
+            instantiation,
+            refs,
+        }) => (type_str.as_str(), instantiation.as_ref(), refs.as_ref()),
+        None => ("(unknown)", None, None),
     };
+    let instantiation = instantiation
+        .map(|targs| format!("\n\nInstantiation:\n{targs}"))
+        .unwrap_or_default();
     let doc = documentation
         .map(|documentation| format!("{documentation}\n"))
         .unwrap_or_default();
@@ -136,7 +141,7 @@ pub(crate) fn handle_friendly_result(
             _ => format!("\n\nRefined at {}\n", refining_locs.join(", ")),
         }
     };
-    println!("{doc}{ty}{refs}{refinement_info}{range}");
+    println!("{doc}{ty}{instantiation}{refs}{refinement_info}{range}");
 }
 
 fn handle_response(

@@ -296,6 +296,7 @@ pub fn mk_genv<'a, 'cx: 'a>(
         file_sig,
         imported_names,
         ref_type_bodies: None,
+        instantiation: None,
     }
 }
 
@@ -311,6 +312,7 @@ pub fn mk_genv_with_imported_names<'a, 'cx>(
         file_sig,
         imported_names,
         ref_type_bodies: None,
+        instantiation: None,
     }
 }
 

@@ -1203,7 +1203,7 @@ fn type_at_pos(params: &Value) -> Result<Value, String> {
             size: 100,
             ..Default::default()
         };
-        let (type_str, _refs) = ty_printer::string_of_type_at_pos_result(
+        let (type_str, instantiation, _refs) = ty_printer::string_of_type_at_pos_result(
             ty_printer::TypeAtPosPrint {
                 ty: &result.ty,
                 refs: result.refs.as_ref(),
@@ -1213,7 +1213,14 @@ fn type_at_pos(params: &Value) -> Result<Value, String> {
             &loc_of_aloc,
             &printer_opts,
         );
-        return Ok(json!([{ "type": "flow", "value": type_str }]));
+        let mut contents = vec![json!({ "type": "flow", "value": type_str })];
+        contents.extend(instantiation.map(|targs| {
+            json!({
+                "type": "markdown",
+                "value": format!("Instantiation:\n```flow\n{targs}\n```"),
+            })
+        }));
+        return Ok(Value::Array(contents));
     }
     let data = Value::Object(json_data.into_iter().collect());
     match data.get("type").and_then(Value::as_str) {

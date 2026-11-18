@@ -424,18 +424,35 @@ constructor.js:29:3,29:13
 
 constructor.js:39:17
 Flags:
-constructor Box<number>(x: number): void
+constructor Box<T>(x: T): void
+
+Instantiation:
+T = number
 constructor.js:39:17,39:19
 
 constructor.js:39:13
 Flags:
-constructor Box<number>(x: number): void
+constructor Box<T>(x: T): void
+
+Instantiation:
+T = number
 constructor.js:39:17,39:19
 
 constructor.js:45:22
 Flags:
-constructor Box<string>(x: string): void
+constructor Box<T>(x: T): void
+
+Instantiation:
+T = string
 constructor.js:45:22,45:24
+
+constructor.js:52:20
+Flags:
+constructor SubBox(x: boolean): void
+
+Instantiation:
+T = boolean
+constructor.js:52:20,52:25
 
 this.js:5:13
 Flags:

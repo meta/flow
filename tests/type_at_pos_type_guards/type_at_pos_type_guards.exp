@@ -12,15 +12,19 @@ decls.js:9:15
 Flags:
 
  Returns the elements of an array that meet the condition specified in a callback function.
-(method) filter<void, 0>(
+(method) filter<This, S extends 0 | 1>(
   predicate: (
-    this: void,
+    this: This,
     value: 0 | 1,
     index: number,
     array: ReadonlyArray<0 | 1>
-  ) => implies value is 0,
-  thisArg: void
-): Array<0>
+  ) => implies value is S,
+  thisArg: This
+): Array<S>
+
+Instantiation:
+This = void
+S = 0
 decls.js:9:15,9:20
 
 decls.js:13:18

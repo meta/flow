@@ -555,6 +555,8 @@ pub mod response {
         #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
         pub struct FriendlyResponse {
             pub type_str: String,
+            /// The type arguments of a callee's instantiation, a line each.
+            pub instantiation: Option<String>,
             pub refs: Option<Vec<(String, Loc)>>,
         }
 

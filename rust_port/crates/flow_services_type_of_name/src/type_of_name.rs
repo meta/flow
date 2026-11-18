@@ -322,6 +322,7 @@ fn compute_ref_summary<'cx>(
         imported_names: genv.imported_names.dupe(),
         options: compact_options,
         ref_type_bodies: None,
+        instantiation: None,
     };
     match ty_normalizer_flow::from_type(cx, &compact_genv, &stripped) {
         Err(_) => None,
@@ -378,6 +379,7 @@ fn mk_normalizer_genv<'a, 'cx: 'a>(
     let base_genv = ty_normalizer_flow::mk_genv(options, Some(typed_ast), file_sig.dupe());
     let genv = Genv {
         ref_type_bodies: Some(ref_type_bodies_tbl.dupe()),
+        instantiation: None,
         ..base_genv
     };
     (genv, ref_type_bodies_tbl)
@@ -397,7 +399,7 @@ fn format_ty_elt_response<'cx>(
 ) -> response::infer_type_of_name::T {
     let refs = ty::symbols_of_elt_without_decl_head(|aloc| reader.loc_of_aloc(aloc), &ty_elt);
     let opts = PrinterOptions::default();
-    let (type_str, refs) = ty_printer::string_of_type_at_pos_result(
+    let (type_str, _instantiation, refs) = ty_printer::string_of_type_at_pos_result(
         ty_printer::TypeAtPosPrint {
             ty: &ty_elt,
             refs: Some(&refs),

@@ -20,8 +20,10 @@ use dupe::Dupe;
 use flow_aloc::ALoc;
 use flow_aloc::ALocFuzzyMap;
 use flow_aloc::ALocId;
+use flow_common::subst_name::SubstName;
 use flow_common_ty::ty_symbol::ALocImportedIdent;
 use flow_common_ty::ty_symbol::ALocSymbol;
+use flow_data_structure_wrapper::ord_map::FlowOrdMap;
 use flow_data_structure_wrapper::ord_set::FlowOrdSet;
 use flow_parser::ast;
 use flow_parser_utils::file_sig::FileSig;
@@ -29,6 +31,7 @@ use flow_typing_context::Context;
 use flow_typing_type::type_::Destructor;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::eval;
+use flow_typing_type::type_::poly;
 use flow_utils_concurrency::job_error::JobError;
 
 #[derive(Clone, Dupe, Default)]
@@ -143,6 +146,11 @@ pub struct Genv<'a, 'cx> {
     /// When set, the normalizer collects the body Type.t for each type alias it encounters.
     /// This is keyed by the type alias name string. Used by type-of-name to expand refs.
     pub ref_type_bodies: Option<Rc<RefCell<BTreeMap<String, Type>>>>,
+    /// The polymorphic type a call instantiates and the call's type arguments, when
+    /// the type being normalized is that polymorphic type. A computed type in its
+    /// signature is evaluated with the type arguments substituted, as it is in the
+    /// instantiated signature.
+    pub instantiation: Option<(poly::Id, FlowOrdMap<SubstName, Type>)>,
 }
 
 pub type ImportedNamesMap = ALocFuzzyMap<ALocImportedIdent>;

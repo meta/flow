@@ -1144,10 +1144,10 @@ fn new_call<'a>(
     })?;
     let ctor_t = flow_js_utils::callee_recorder::type_for_tast_opt(reason, &specialized_ctor)
         .unwrap_or_else(|| class_.dupe());
-    if let Some(targs) = flow_js_utils::callee_recorder::targs_for_tast(&specialized_ctor)
+    if let Some(inst) = flow_js_utils::callee_recorder::instantiation_for_tast(&specialized_ctor)
         && let Some(name_loc) = callee_name_loc
     {
-        cx.set_callee_targs(name_loc, targs);
+        cx.set_callee_instantiation(name_loc, inst);
     }
     Ok((t, ctor_t))
 }
@@ -9754,10 +9754,11 @@ pub fn optional_chain<'a>(
         if is_single_assertion_function(&finalized) {
             cx.add_assertion_call_candidate(callee.loc().0.dupe());
         }
-        if let Some(targs) = flow_js_utils::callee_recorder::targs_for_tast(specialized_callee)
+        if let Some(inst) =
+            flow_js_utils::callee_recorder::instantiation_for_tast(specialized_callee)
             && let Some(name_loc) = callee_name_loc(&callee)
         {
-            cx.set_callee_targs(name_loc, targs);
+            cx.set_callee_instantiation(name_loc, inst);
         }
         if finalized.is_empty() {
             callee

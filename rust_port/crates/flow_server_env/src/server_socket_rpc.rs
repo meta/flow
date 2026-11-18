@@ -1118,6 +1118,7 @@ pub mod infer_type {
     #[derive(Debug, Clone, Serialize, Deserialize)]
     pub struct FriendlyResponse {
         pub type_str: String,
+        pub instantiation: Option<String>,
         pub refs: Option<Vec<(String, Loc)>>,
     }
 
@@ -1125,6 +1126,7 @@ pub mod infer_type {
         fn from(response: server_prot::response::infer_type::FriendlyResponse) -> Self {
             Self {
                 type_str: response.type_str,
+                instantiation: response.instantiation,
                 refs: response.refs.map(|refs| {
                     refs.into_iter()
                         .map(|(name, loc)| (name, loc.into()))
@@ -1138,6 +1140,7 @@ pub mod infer_type {
         pub fn into_server_response(self) -> server_prot::response::infer_type::FriendlyResponse {
             server_prot::response::infer_type::FriendlyResponse {
                 type_str: self.type_str,
+                instantiation: self.instantiation,
                 refs: self.refs.map(|refs| {
                     refs.into_iter()
                         .map(|(name, loc)| (name, loc.into_flow_loc()))

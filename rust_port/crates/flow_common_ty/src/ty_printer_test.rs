@@ -286,10 +286,10 @@ mod tests {
             owner: None,
             type_parameter_context: None,
             overloads: 0,
-            targs: None,
+            instantiation: None,
         };
 
-        let (type_str, _) = string_of_type_at_pos_result::<Loc>(
+        let (type_str, _, _) = string_of_type_at_pos_result::<Loc>(
             TypeAtPosPrint {
                 ty: &hook,
                 refs: None,
@@ -377,7 +377,7 @@ mod tests {
             opaque: None,
         })));
 
-        let (type_str, _) = string_of_type_at_pos_result(
+        let (type_str, _, _) = string_of_type_at_pos_result(
             TypeAtPosPrint {
                 ty: &type_alias,
                 refs: None,
@@ -437,7 +437,7 @@ mod tests {
             ..test_options()
         };
 
-        let (type_str, refs) = string_of_type_at_pos_result(
+        let (type_str, _, refs) = string_of_type_at_pos_result(
             TypeAtPosPrint {
                 ty: &obj,
                 refs: Some(&refs),
