@@ -275,7 +275,7 @@ impl PathMatcher {
     }
 
     /// Check if a glob matches the directory `dir` and everything under it. Paths are left out, as
-    /// they match by string prefix, e.g. the root `/x/root` matches `/x/root-lib`.
+    /// they match by string prefix, e.g. `/x/lib` matches `/x/lib-other`.
     pub fn matches_subtree(&self, dir: &str) -> bool {
         self.glob_patterns
             .iter()

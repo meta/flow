@@ -231,11 +231,14 @@ impl SymlinkMap {
     pub fn try_resolve<'a>(&self, normalized_path: &'a str) -> Option<Cow<'a, str>> {
         let paths = self.complete_paths.get()?;
         let mut path = Cow::Borrowed(Path::new(normalized_path));
-        // A path can be under a directory symlink the crawl didn't follow. Each real path has no
-        // symlink at or above it, so each step resolves part of the rest of the path.
-        while let Some((link, real_path)) =
-            path.ancestors().find_map(|dir| paths.get_key_value(dir))
-        {
+        // A path can be under a directory symlink the crawl didn't follow. Each step resolves part
+        // of the rest of the path, so there's at most one per component, even if a stale
+        // canonicalization made the map cycle.
+        for _ in Path::new(normalized_path).components() {
+            let Some((link, real_path)) = path.ancestors().find_map(|dir| paths.get_key_value(dir))
+            else {
+                break;
+            };
             let rest = path
                 .strip_prefix(link)
                 .expect("a path should start with its ancestor");
@@ -1002,28 +1005,21 @@ fn realpath_filter(options: &FileOptions, path: &Path, all: bool, include_libdef
 }
 
 /// Whether `path` is somewhere the crawl looks: under `subdir` when the crawl is limited to one,
-/// and under the root (when it is implicitly included), an `[include]` path or a libdef. With
-/// `subtree`, `path` is a directory, an `[include]` glob must cover everything under it, and
-/// libdefs don't count.
+/// and under the root (when it is implicitly included), an `[include]` path or a libdef.
 fn path_is_in_crawl_scope(
     options: &FileOptions,
     root: &Path,
     subdir: Option<&Path>,
     path: &Path,
     include_libdef: bool,
-    subtree: bool,
 ) -> bool {
     subdir.is_none_or(|subdir| path.starts_with(subdir))
         && ((options.implicitly_include_root && path.starts_with(root)) || {
             let path_str = path.to_string_lossy();
-            if subtree {
-                options.includes.matches_subtree(&path_str)
-            } else {
-                is_included(options, &path_str)
-                    || (include_libdef
-                        && is_dynamically_discovered_builtin_ts_libdef(options, &path_str))
-                    || (include_libdef && is_configured_lib_file(options, &path_str))
-            }
+            is_included(options, &path_str)
+                || (include_libdef
+                    && is_dynamically_discovered_builtin_ts_libdef(options, &path_str))
+                || (include_libdef && is_configured_lib_file(options, &path_str))
         })
 }
 
@@ -1036,13 +1032,13 @@ fn crawl_path_filter(
     all: bool,
     include_libdef: bool,
 ) -> bool {
-    path_is_in_crawl_scope(options, root, subdir, path, include_libdef, false)
+    path_is_in_crawl_scope(options, root, subdir, path, include_libdef)
         && realpath_filter(options, path, all, include_libdef)
 }
 
 /// Whether the initial full crawl covers a path, making an absent alias mapping conclusive.
 pub fn initial_crawl_covers_path(options: &FileOptions, root: &Path, path: &Path) -> bool {
-    path_is_in_crawl_scope(options, root, None, path, true, false)
+    path_is_in_crawl_scope(options, root, None, path, true)
         && (wanted_filter(options, path, false, true)
             || has_symlink_ancestor_under_root(root, path, &mut HashMap::new()))
 }
@@ -1101,7 +1097,7 @@ pub fn make_next_files(
     for starting_point_path in starting_point_paths {
         let duped_options = options.dupe();
         let root_buf = root.to_path_buf();
-        let subdir_buf = subdir.map(Path::to_path_buf);
+        let crawl_root = subdir.unwrap_or(root).to_path_buf();
         for entry in jwalk::WalkDir::new(starting_point_path)
             .skip_hidden(false)
             .sort(sort)
@@ -1114,25 +1110,20 @@ pub fn make_next_files(
                 if prunes(path) {
                     children.clear();
                 }
-                // Files reached through a symlink under the root are reported by their real path,
-                // so following one to a directory under the root that the crawl reads anyway
-                // reports nothing new. It would also never end for a cycle, e.g. between packages
-                // linked into each other's node_modules. A pruned target is still followed, so that
-                // the symlinks inside it can be resolved.
+                // Don't follow a symlink to a directory the crawl reads anyway, which also ends
+                // cycles, e.g. between packages linked into each other's node_modules.
                 for entry in children.iter_mut().flatten() {
                     if entry.read_children.is_some()
                         && entry.path_is_symlink()
+                        // Only under the root does the crawl report what's under a symlink by its
+                        // real path.
                         && entry.parent_path().starts_with(&root_buf)
                         && let Ok(target) = cached_canonicalize(&entry.path())
-                        && target.starts_with(&root_buf)
-                        && path_is_in_crawl_scope(
-                            &duped_options,
-                            &root_buf,
-                            subdir_buf.as_deref(),
-                            &target,
-                            include_libdef,
-                            true,
-                        )
+                        && target.starts_with(&crawl_root)
+                        // The crawl reports everything under the target itself.
+                        && (duped_options.implicitly_include_root
+                            || duped_options.includes.matches_subtree(&target.to_string_lossy()))
+                        // A pruned target is still followed, so the symlinks inside it resolve.
                         && !prunes(&target)
                     {
                         entry.read_children = None;
@@ -1166,7 +1157,6 @@ pub fn make_next_files(
                     && entry.path_is_symlink()
                     && entry.read_children.is_none()
                     && let Ok(real_path) = cached_canonicalize(&path)
-                    && real_path != path
                 {
                     symlink_map.insert(path, real_path);
                 }
@@ -1845,6 +1835,16 @@ mod tests {
             super::normalize_path("/project/dist", "/lib/index.js"),
             "/lib/index.js"
         );
+    }
+
+    #[test]
+    fn symlink_map_resolves_a_cycle_from_a_stale_canonicalization() {
+        // The canonicalize cache outlives a re-init, so links can map into each other.
+        let map = super::SymlinkMap::default();
+        map.insert("/root/a".into(), "/root/b/sub".into());
+        map.insert("/root/b".into(), "/root/a/sub".into());
+        map.mark_complete();
+        assert!(map.try_resolve("/root/a/x.js").is_some());
     }
 
     #[cfg(windows)]
