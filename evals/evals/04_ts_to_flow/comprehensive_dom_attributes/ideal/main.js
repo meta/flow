@@ -13,7 +13,7 @@ component SearchField(
   value: string,
   placeholder?: string,
   disabled?: boolean,
-  containerStyle?: {[string]: string | number},
+  containerStyle?: {[key: string]: string | number},
   onChange: (value: string) => void,
   onSubmit: (value: string) => void,
 ) {

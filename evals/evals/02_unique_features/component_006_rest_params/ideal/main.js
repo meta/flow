@@ -11,7 +11,7 @@ import * as React from 'react';
 
 export component BaseInput(
   value: string,
-  onChange: (string) => void,
+  onChange: (value: string) => void,
   placeholder: string,
 ) {
   return (
@@ -24,7 +24,7 @@ export component BaseInput(
 }
 
 export component SearchInput(
-  onSearch: (string) => void,
+  onSearch: (query: string) => void,
   ...baseProps: React.PropsOf<BaseInput>,
 ) {
   return (

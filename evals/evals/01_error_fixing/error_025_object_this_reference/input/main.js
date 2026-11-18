@@ -8,7 +8,7 @@
  */
 
 const tally: {
-  counts: {[string]: number},
+  counts: {[key: string]: number},
   total: number,
   record(key: string, n: number): number,
   topKey(): string | null,

@@ -11,7 +11,7 @@ import * as React from 'react';
 
 export default component SearchField(
   value: string,
-  onChange: (string) => void,
+  onChange: (value: string) => void,
   placeholder?: string,
   ref: React.RefSetter<HTMLInputElement>,
 ) {

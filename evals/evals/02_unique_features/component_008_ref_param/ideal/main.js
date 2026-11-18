@@ -12,7 +12,7 @@ import {useRef, useState} from 'react';
 
 export component TextInput(
   value: string,
-  onChange: (string) => void,
+  onChange: (value: string) => void,
   placeholder: string,
   ref: React.RefSetter<HTMLInputElement>,
 ) {
@@ -28,7 +28,7 @@ export component TextInput(
 
 export component TextArea(
   value: string,
-  onChange: (string) => void,
+  onChange: (value: string) => void,
   rows: number,
   ref: React.RefSetter<HTMLTextAreaElement>,
 ) {

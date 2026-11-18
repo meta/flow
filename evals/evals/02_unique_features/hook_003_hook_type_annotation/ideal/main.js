@@ -24,7 +24,7 @@ hook useAlwaysZero(initial: number): [number, () => void] {
   return [0, () => {}];
 }
 
-const useActiveCounter: hook (number) => [number, () => void] =
+const useActiveCounter: hook (initial: number) => [number, () => void] =
   __DEV__ ? useLocalCounter : useAlwaysZero;
 
 export default component Counter() {

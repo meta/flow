@@ -7,6 +7,6 @@
  * @flow
  */
 
-export function pick(config: {[string]: string}, key: string): string {
+export function pick(config: {[key: string]: string}, key: string): string {
   return config[key];
 }
