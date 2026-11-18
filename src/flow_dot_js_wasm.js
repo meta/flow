@@ -381,6 +381,13 @@ flowDotJsExports.configSchema = `[
     "desc": "Distinguish void from undefined and allow ignored callback returns."
   },
   {
+    "key": "experimental.undefined_type",
+    "kind": "option",
+    "type": "bool",
+    "default": false,
+    "desc": "Allow the undefined type annotation."
+  },
+  {
     "key": "react.runtime",
     "kind": "option",
     "type": "enum",

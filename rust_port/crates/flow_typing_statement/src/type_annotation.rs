@@ -1370,7 +1370,7 @@ fn convert_inner<'a>(
             })
         }
         TypeInner::Undefined { loc, comments } => {
-            if !cx.ts_syntax() && !cx.ts_void() {
+            if !cx.ts_syntax() && !cx.ts_void() && !cx.undefined_type() {
                 flow_js_utils::add_output_non_speculating(
                     cx,
                     ErrorMessage::ETSSyntax(Box::new(ETSSyntaxData {

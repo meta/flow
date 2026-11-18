@@ -260,6 +260,7 @@ pub mod opts {
         pub enable_custom_error: bool,
         pub assert_operator: AssertOperator,
         pub type_expansion_recursion_limit: u32,
+        pub undefined_type: bool,
         pub unsuppressable_error_codes: HashSet<String>,
         pub use_unknown_in_catch_variables: Option<bool>,
         pub vpn_less: bool,
@@ -416,6 +417,7 @@ pub mod opts {
             enable_custom_error: false,
             assert_operator: AssertOperator::Disabled,
             type_expansion_recursion_limit: 3,
+            undefined_type: false,
             unsuppressable_error_codes: HashSet::new(),
             use_unknown_in_catch_variables: None,
             vpn_less: false,
@@ -2369,6 +2371,16 @@ pub mod opts {
                     )
                 },
             ),
+            ("experimental.undefined_type", |values, config| {
+                parse_boolean(
+                    |opts, v| {
+                        opts.undefined_type = v;
+                        Ok(())
+                    },
+                    values,
+                    config,
+                )
+            }),
             ("facebook.fbs", |values, config| {
                 parse_string(
                     |opts, v| {

@@ -1,0 +1,24 @@
+Error ----------------------------------------------------------------------------------------------------- test.js:4:26
+
+Cannot assign `1` to `wrong` because `1` [1] is incompatible with `void` [2]. [incompatible-type]
+
+   test.js:4:26
+   4| const wrong: undefined = 1; // ERROR
+                               ^ [1]
+
+References:
+   test.js:4:14
+   4| const wrong: undefined = 1; // ERROR
+                   ^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:6:10
+
+The closest equivalent of TypeScript's `never` type in Flow is `empty`. [unsupported-syntax]
+
+   6| type N = never; // ERROR: the flag does not enable other TS syntax
+               ^^^^^
+
+
+
+Found 2 errors
