@@ -3794,7 +3794,14 @@ pub fn handle_ephemeral_command_for_standalone(
         }
         #[cfg(fbcode_build)]
         server_prot::request::Command::FOX(command) => {
-            match flow_facebook_fox_server::handle(orchestrator, command, genv, env, transaction) {
+            match flow_facebook_fox_server::handle(
+                orchestrator,
+                cache,
+                command,
+                genv,
+                env,
+                transaction,
+            ) {
                 flow_facebook_fox_server::FoxOutcome::Done(response) => {
                     Ok((server_prot::response::Response::FOX(response), None))
                 }
