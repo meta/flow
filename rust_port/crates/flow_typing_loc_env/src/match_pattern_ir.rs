@@ -23,6 +23,7 @@ use flow_parser::ast::match_pattern::MatchPattern;
 use flow_parser::loc::Loc;
 use flow_parser_utils_output::js_layout_generator;
 use flow_typing_type::type_::BigIntLiteral;
+use flow_typing_type::type_::BoundedId;
 use flow_typing_type::type_::EnumConcreteInfo;
 use flow_typing_type::type_::NumberLiteral;
 use flow_typing_type::type_::Type;
@@ -1064,6 +1065,9 @@ pub mod value_union {
         /// The enum's reason, its name, and its known members.
         pub enum_unknown_members: FlowVector<(Reason, FlowSmolStr, LeafSet)>,
         pub inexhaustible: FlowVector<Type>,
+        /// The values of types known only through their bound, such as type parameters: the
+        /// type's reason, its identity, and the values of its bound, which are never empty.
+        pub bounded: FlowVector<(Reason, BoundedId, ValueUnion<CX>)>,
     }
 
     impl<CX: ContextFamily + Clone> ValueUnion<CX> {
@@ -1075,6 +1079,7 @@ pub mod value_union {
                 objects: FlowVector::default(),
                 enum_unknown_members: FlowVector::default(),
                 inexhaustible: FlowVector::default(),
+                bounded: FlowVector::default(),
             }
         }
 
@@ -1086,6 +1091,7 @@ pub mod value_union {
                 objects,
                 enum_unknown_members,
                 inexhaustible,
+                bounded,
             } = self;
             leafs.is_empty()
                 && tuples.is_empty()
@@ -1093,6 +1099,7 @@ pub mod value_union {
                 && objects.is_empty()
                 && enum_unknown_members.is_empty()
                 && inexhaustible.is_empty()
+                && bounded.is_empty()
         }
 
         // Returns true if the ValueUnion only contains inexhaustible types.
@@ -1106,13 +1113,17 @@ pub mod value_union {
                 objects,
                 enum_unknown_members,
                 inexhaustible,
+                bounded,
             } = self;
             leafs.is_empty()
                 && tuples.is_empty()
                 && arrays.is_empty()
                 && objects.is_empty()
                 && enum_unknown_members.is_empty()
-                && !inexhaustible.is_empty()
+                && (!inexhaustible.is_empty() || !bounded.is_empty())
+                && bounded
+                    .iter()
+                    .all(|(_, _, values)| values.is_only_inexhaustible())
         }
 
         fn union(vu1: Self, vu2: Self) -> Self {
@@ -1123,6 +1134,7 @@ pub mod value_union {
                 mut objects,
                 mut enum_unknown_members,
                 mut inexhaustible,
+                mut bounded,
             } = vu1;
             let Self {
                 leafs: leafs2,
@@ -1131,6 +1143,7 @@ pub mod value_union {
                 objects: objects2,
                 enum_unknown_members: enum_unknown_members2,
                 inexhaustible: inexhaustible2,
+                bounded: bounded2,
             } = vu2;
 
             leafs.extend(leafs2);
@@ -1139,6 +1152,7 @@ pub mod value_union {
             objects.append(objects2.into());
             enum_unknown_members.append(enum_unknown_members2.into());
             inexhaustible.append(inexhaustible2.into());
+            bounded.append(bounded2.into());
             Self {
                 leafs,
                 tuples,
@@ -1146,7 +1160,19 @@ pub mod value_union {
                 objects,
                 enum_unknown_members,
                 inexhaustible,
+                bounded,
             }
+        }
+
+        /// The values, with the values of the bound of each bounded type in place of the type.
+        pub fn flatten_bounded(&self) -> Self {
+            self.bounded.iter().fold(
+                Self {
+                    bounded: FlowVector::default(),
+                    ..self.clone()
+                },
+                |acc, (_, _, values)| Self::union(acc, values.flatten_bounded()),
+            )
         }
 
         pub fn to_pattern(
@@ -1160,7 +1186,8 @@ pub mod value_union {
                 objects,
                 enum_unknown_members,
                 inexhaustible,
-            } = self;
+                bounded: _,
+            } = &self.flatten_bounded();
 
             let mut tuple_patterns: Vec<pattern_object::PatternObject> = tuples
                 .iter()
@@ -1238,6 +1265,7 @@ pub mod value_union {
                 objects,
                 enum_unknown_members,
                 inexhaustible,
+                bounded,
             } = self;
 
             let all_possible_types: Vec<Type> = [
@@ -1259,6 +1287,12 @@ pub mod value_union {
                     .flat_map(|(_, _, leaf_set)| leaf_set.iter().map(|l| l.to_type()))
                     .collect::<Vec<_>>(),
                 inexhaustible.iter().duped().collect::<Vec<_>>(),
+                bounded
+                    .iter()
+                    .map(|(reason, bounded_id, values)| {
+                        bounded_id.with_bound(reason.dupe(), values.to_type(reason.dupe()))
+                    })
+                    .collect::<Vec<_>>(),
             ]
             .concat();
 
@@ -1280,7 +1314,7 @@ pub mod value_union {
                 arrays,
                 objects,
                 ..
-            } = self;
+            } = &self.flatten_bounded();
 
             fn conservative_find<CX: ContextFamily + Clone>(
                 cx: &mut CX::Context<'_>,

@@ -943,20 +943,36 @@ impl FlowJs {
         cx: &mut Context<'cx>,
         env: &FlowJsEnv,
         keep_unions: bool,
+        keep_bounded: bool,
         reason: &Reason,
         t: &Type,
     ) -> Result<Type, FlowJsException> {
-        helpers::singleton_concrete_type_for_match_arg(cx, env, keep_unions, reason, t)
+        helpers::singleton_concrete_type_for_match_arg(
+            cx,
+            env,
+            keep_unions,
+            keep_bounded,
+            reason,
+            t,
+        )
     }
 
     fn possible_concrete_types_for_match_arg_with_env<'cx>(
         cx: &mut Context<'cx>,
         env: &FlowJsEnv,
         keep_unions: bool,
+        keep_bounded: bool,
         reason: &Reason,
         t: &Type,
     ) -> Result<Vec<Type>, FlowJsException> {
-        helpers::possible_concrete_types_for_match_arg(cx, env, keep_unions, reason, t)
+        helpers::possible_concrete_types_for_match_arg(
+            cx,
+            env,
+            keep_unions,
+            keep_bounded,
+            reason,
+            t,
+        )
     }
 }
 
@@ -1399,6 +1415,7 @@ impl FlowJs {
     pub fn singleton_concrete_type_for_match_arg<'cx>(
         cx: &mut Context<'cx>,
         keep_unions: bool,
+        keep_bounded: bool,
         reason: &Reason,
         t: &Type,
     ) -> Result<Type, FlowJsException> {
@@ -1406,6 +1423,7 @@ impl FlowJs {
             cx,
             &FlowJsEnv::entry(),
             keep_unions,
+            keep_bounded,
             reason,
             t,
         )
@@ -1414,6 +1432,7 @@ impl FlowJs {
     pub fn possible_concrete_types_for_match_arg<'cx>(
         cx: &mut Context<'cx>,
         keep_unions: bool,
+        keep_bounded: bool,
         reason: &Reason,
         t: &Type,
     ) -> Result<Vec<Type>, FlowJsException> {
@@ -1421,6 +1440,7 @@ impl FlowJs {
             cx,
             &FlowJsEnv::entry(),
             keep_unions,
+            keep_bounded,
             reason,
             t,
         )

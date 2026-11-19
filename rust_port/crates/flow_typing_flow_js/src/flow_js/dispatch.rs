@@ -1018,7 +1018,10 @@ fn __flow_impl<'cx>(
         (
             UnionT(_, _),
             ConcretizeT(box ConcretizeTData {
-                kind: ConcretizationKind::ConcretizeForMatchArg { keep_unions: true },
+                kind:
+                    ConcretizationKind::ConcretizeForMatchArg {
+                        keep_unions: true, ..
+                    },
                 collector,
                 ..
             }),

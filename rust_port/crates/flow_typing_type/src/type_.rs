@@ -6941,6 +6941,9 @@ pub enum ConcretizationKind {
     ConcretizeForSentinelPropTest,
     ConcretizeForMatchArg {
         keep_unions: bool,
+        /// Keep a type known only through its bound, such as a type parameter, instead of
+        /// concretizing its bound.
+        keep_bounded: bool,
     },
     ConcretizeForUnusedPromiseCheck,
     ConcretizeForConstructorReturn,
@@ -12602,10 +12605,13 @@ pub fn string_of_use_ctor<CX: ContextFamily>(use_t: &UseT<CX>) -> String {
             ConcretizationKind::ConcretizeForDestructuring => {
                 "ConcretizeT ConcretizeForDestructuring".to_string()
             }
-            ConcretizationKind::ConcretizeForMatchArg { keep_unions } => {
+            ConcretizationKind::ConcretizeForMatchArg {
+                keep_unions,
+                keep_bounded,
+            } => {
                 format!(
-                    "ConcretizeT ConcretizeForMatchArg {{keep_unions={}}}",
-                    keep_unions
+                    "ConcretizeT ConcretizeForMatchArg {{keep_unions={}, keep_bounded={}}}",
+                    keep_unions, keep_bounded
                 )
             }
         },

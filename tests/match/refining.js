@@ -213,3 +213,45 @@
     const d => d as empty, // ERROR: `Array<string>`
   };
 }
+
+// Type parameters keep their identity
+{
+  function f<T extends {readonly a: 1} | {readonly b: 2}>(x: T): T {
+    return match (x) {
+      const y => y, // OK
+    };
+  }
+
+  function g<T extends 'a' | 'b'>(x: T): T {
+    match (x) {
+      'a' => {
+        return x;
+      }
+      const y => {
+        y as 'b'; // OK
+        return y; // OK
+      }
+    }
+  }
+}
+
+// Opaque types keep their identity
+{
+  declare opaque type URI: Readonly<{}> | Readonly<{uri: string}>;
+  declare function byURI(uri: URI): void;
+
+  declare const u: URI;
+  match (u) {
+    const x => {
+      byURI(x); // OK
+    }
+  }
+
+  declare const s: {readonly e: URI} | {readonly b: null};
+  match (s) {
+    {e: const e} => {
+      byURI(e); // OK
+    }
+    _ => {}
+  }
+}

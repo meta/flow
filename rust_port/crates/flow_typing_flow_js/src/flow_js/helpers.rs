@@ -790,6 +790,19 @@ pub(super) fn handle_bounded<'cx>(
                 wait_for_concrete_bound(cx, None)
             }
         }
+        // A match argument keeps its identity. The exhaustiveness check takes its bound apart and
+        // puts the identity back on what the patterns leave of it.
+        UseTInner::ConcretizeT(box ConcretizeTData {
+            kind:
+                ConcretizationKind::ConcretizeForMatchArg {
+                    keep_bounded: true, ..
+                },
+            collector,
+            ..
+        }) => {
+            collector.add(make_generic(bound.dupe()));
+            Ok(true)
+        }
         UseTInner::UseT(use_op, t)
             if matches!(
                 use_op,
@@ -3344,11 +3357,15 @@ pub(super) fn singleton_concrete_type_for_match_arg<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     keep_unions: bool,
+    keep_bounded: bool,
     reason: &Reason,
     t: &Type,
 ) -> Result<Type, FlowJsException> {
     singleton_concrete_type(
-        ConcretizationKind::ConcretizeForMatchArg { keep_unions },
+        ConcretizationKind::ConcretizeForMatchArg {
+            keep_unions,
+            keep_bounded,
+        },
         cx,
         env,
         reason,
@@ -3360,11 +3377,15 @@ pub(super) fn possible_concrete_types_for_match_arg<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     keep_unions: bool,
+    keep_bounded: bool,
     reason: &Reason,
     t: &Type,
 ) -> Result<Vec<Type>, FlowJsException> {
     possible_concrete_types(
-        ConcretizationKind::ConcretizeForMatchArg { keep_unions },
+        ConcretizationKind::ConcretizeForMatchArg {
+            keep_unions,
+            keep_bounded,
+        },
         cx,
         env,
         reason,

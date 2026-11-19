@@ -44,6 +44,7 @@ use flow_typing_errors::intermediate_error_types::MatchPatternReferenceKind;
 use flow_typing_flow_common::concrete_type_eq;
 use flow_typing_flow_common::flow_js_utils;
 use flow_typing_flow_common::flow_js_utils::FlowJsException;
+use flow_typing_flow_common::instantiation_utils;
 use flow_typing_flow_js::flow_js;
 use flow_typing_flow_js::flow_js::FlowJs;
 use flow_typing_flow_js_env::FlowJsEnv;
@@ -79,6 +80,7 @@ fn singleton_concrete_type<'cx>(cx: &mut Context<'cx>, t: &Type) -> Result<Type,
     flow_js_utils::flow_js_result_to_job_error(FlowJs::singleton_concrete_type_for_match_arg(
         cx,
         false,
+        false,
         reason_of_t(t),
         t,
     ))
@@ -92,6 +94,7 @@ fn possible_concrete_types<'cx>(
     flow_js_utils::flow_js_result_to_job_error(FlowJs::possible_concrete_types_for_match_arg(
         cx,
         keep_unions,
+        true,
         reason_of_t(t),
         t,
     ))
@@ -975,7 +978,7 @@ mod value_object_property_builder {
                 let t = t.dupe();
                 let lazy_value: value_object::LazyValueUnion<Cx> =
                     std::rc::Rc::new(flow_lazy::Lazy::new(move |cx: &mut Context<'_>| {
-                        value_union_builder::of_type(cx, &t)
+                        value_union_builder::of_type(cx, &FlowJsEnv::entry(), &t)
                     }));
                 Some(value_object::Property {
                     loc,
@@ -993,6 +996,7 @@ mod value_union_builder {
 
     fn of_type_inner<'cx>(
         cx: &mut Context<'cx>,
+        env: &FlowJsEnv,
         value_union: value_union::ValueUnion<Cx>,
         t: &Type,
     ) -> Result<value_union::ValueUnion<Cx>, JobError> {
@@ -1142,7 +1146,9 @@ mod value_union_builder {
                                     let elem_t = elem_t.dupe();
                                     let lazy_value: value_object::LazyValueUnion<Cx> =
                                         std::rc::Rc::new(flow_lazy::Lazy::new(
-                                            move |cx: &mut Context<'_>| of_type(cx, &elem_t),
+                                            move |cx: &mut Context<'_>| {
+                                                of_type(cx, &FlowJsEnv::entry(), &elem_t)
+                                            },
                                         ));
                                     let elem_loc = elem.reason.loc();
                                     value_object::Property {
@@ -1280,6 +1286,28 @@ mod value_union_builder {
                         value_union.inexhaustible.push(t.dupe());
                     }
                 },
+                _ if let Some((reason, bound, bounded_id)) = flow_js_utils::as_bounded(cx, t) => {
+                    // An opaque type that is a member of its own upper bound, reached again
+                    // inside its bound, stays as it is.
+                    match instantiation_utils::type_app_expansion::push_bound_unless_loop(
+                        cx,
+                        env,
+                        &bounded_id,
+                    ) {
+                        Some(bound_env) => {
+                            let bound = flow_js_utils::flow_js_result_to_job_error(
+                                FlowJs::reposition_reason(cx, env, None, reason, None, bound),
+                            )?;
+                            let values = of_type(cx, &bound_env, &bound)?;
+                            if !values.is_empty() {
+                                value_union
+                                    .bounded
+                                    .push((reason.dupe(), bounded_id, values));
+                            }
+                        }
+                        None => value_union.inexhaustible.push(t.dupe()),
+                    }
+                }
                 _ => {
                     value_union.inexhaustible.push(t.dupe());
                 }
@@ -1356,7 +1384,7 @@ mod value_union_builder {
             let dict_value = dict.value.dupe();
             let lazy_value: value_object::LazyValueUnion<Cx> =
                 std::rc::Rc::new(flow_lazy::Lazy::new(move |cx: &mut Context<'_>| {
-                    of_type(cx, &dict_value)
+                    of_type(cx, &FlowJsEnv::entry(), &dict_value)
                 }));
             Ok(PropertyLookup::Indexed(value_object::Property {
                 loc: loc.dupe(),
@@ -1507,16 +1535,18 @@ mod value_union_builder {
 
     pub(super) fn of_type<'cx>(
         cx: &mut Context<'cx>,
+        env: &FlowJsEnv,
         t: &Type,
     ) -> Result<value_union::ValueUnion<Cx>, JobError> {
         // The list members of the `ValueUnion` are accumulated in reverse order,
         // put them back in their original order.
-        let mut vu = of_type_inner(cx, value_union::ValueUnion::empty(), t)?;
+        let mut vu = of_type_inner(cx, env, value_union::ValueUnion::empty(), t)?;
         vu.tuples = vu.tuples.into_iter().rev().collect();
         vu.arrays = vu.arrays.into_iter().rev().collect();
         vu.objects = vu.objects.into_iter().rev().collect();
         vu.enum_unknown_members = vu.enum_unknown_members.into_iter().rev().collect();
         vu.inexhaustible = vu.inexhaustible.into_iter().rev().collect();
+        vu.bounded = vu.bounded.into_iter().rev().collect();
         Ok(vu)
     }
 }
@@ -1591,6 +1621,7 @@ fn filter_values_by_patterns<'cx>(
         objects: value_objects,
         enum_unknown_members,
         inexhaustible,
+        bounded,
     } = value_union;
     let pattern_union::PatternUnion {
         leafs: pattern_leafs,
@@ -1728,6 +1759,24 @@ fn filter_values_by_patterns<'cx>(
     objects_left.reverse();
     objects_matched.reverse();
     used_pattern_locs.extend(obj_used_pattern_locs);
+    // Bounded types: filter the values of each bound, keeping the type's identity on the values
+    // left and on the values matched.
+    let mut bounded_left = FlowVector::default();
+    let mut bounded_matched = FlowVector::default();
+    for (reason, bounded_id, values) in bounded.iter() {
+        let FilterUnionResult {
+            value_left,
+            value_matched,
+            used_pattern_locs: bounded_used_pattern_locs,
+        } = filter_values_by_patterns(cx, raise_errors, values, pattern_union)?;
+        used_pattern_locs.extend(bounded_used_pattern_locs);
+        if !value_left.is_empty() {
+            bounded_left.push((reason.dupe(), bounded_id.clone(), value_left));
+        }
+        if !value_matched.is_empty() {
+            bounded_matched.push((reason.dupe(), bounded_id.clone(), value_matched));
+        }
+    }
     let value_left = value_union::ValueUnion {
         leafs: leafs_left,
         tuples: tuples_left.into_iter().collect(),
@@ -1735,6 +1784,7 @@ fn filter_values_by_patterns<'cx>(
         objects: objects_left.into_iter().collect(),
         enum_unknown_members: enum_unknown_members.dupe(),
         inexhaustible: inexhaustible.dupe(),
+        bounded: bounded_left,
     };
     // Mixed/any
     let mixed_used_pattern_locs = match is_object_subtype_of_inexhaustible(inexhaustible) {
@@ -1763,6 +1813,7 @@ fn filter_values_by_patterns<'cx>(
                 objects: objects_matched.into_iter().collect(),
                 enum_unknown_members: FlowVector::default(),
                 inexhaustible: FlowVector::default(),
+                bounded: bounded_matched,
             };
             Ok(FilterUnionResult {
                 value_left,
@@ -1961,7 +2012,11 @@ fn filter_object_by_pattern<'cx>(
                     } else {
                         // Validate the object part of the pattern by matching it against a value
                         // of the pattern's own class, reusing the normal filtering path.
-                        let value_union = value_union_builder::of_type(cx, pattern_instance_t)?;
+                        let value_union = value_union_builder::of_type(
+                            cx,
+                            &FlowJsEnv::entry(),
+                            pattern_instance_t,
+                        )?;
                         let pattern_union = pattern_union::PatternUnion {
                             objects: vec![(0, pattern_object.dupe())],
                             ..pattern_union::empty()
@@ -2445,14 +2500,14 @@ pub fn analyze<'cx>(
     arg_t: &Type,
 ) -> Result<(), JobError> {
     let pattern_union = pattern_union_builder::of_patterns_ast(cx, is_global_var, true, patterns)?;
-    let value_union = value_union_builder::of_type(cx, arg_t)?;
+    let value_union = value_union_builder::of_type(cx, &FlowJsEnv::entry(), arg_t)?;
     let FilterUnionResult {
         value_left,
         value_matched,
         used_pattern_locs,
     } = filter_values_by_patterns(cx, true, &value_union, &pattern_union)?;
     if value_left.is_empty() {
-        let enum_unknown_members = &value_matched.enum_unknown_members;
+        let enum_unknown_members = &value_matched.flatten_bounded().enum_unknown_members;
         let pattern_leafs = &pattern_union.leafs;
         let wildcard = &pattern_union.wildcard;
         if let Some(wildcard_reason) = wildcard {
@@ -2484,7 +2539,8 @@ pub fn analyze<'cx>(
             objects,
             enum_unknown_members,
             inexhaustible,
-        } = &value_left;
+            bounded: _,
+        } = &value_left.flatten_bounded();
         let mut examples: Vec<(
             FlowSmolStr,
             Vec<MatchExampleReference<ALoc, ErrorTypeReferenceWithLocData<ALoc>>>,
@@ -2708,7 +2764,7 @@ pub fn filter_by_pattern_union<'cx>(
     root_t: &Type,
     pattern_union: &pattern_union::PatternUnion,
 ) -> Result<value_union::ValueUnion<Cx>, JobError> {
-    let value_union = value_union_builder::of_type(cx, root_t)?;
+    let value_union = value_union_builder::of_type(cx, &FlowJsEnv::entry(), root_t)?;
     let FilterUnionResult {
         value_left,
         value_matched: _,
