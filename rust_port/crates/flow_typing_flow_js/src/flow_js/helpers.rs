@@ -1126,8 +1126,10 @@ pub(super) fn handle_bounded<'cx>(
                     eprintln!("UnionT ~> UnionT fast path (via a generic)");
                 }
                 Ok(true)
-            } else if is_concrete(bound) {
+            } else if matches!(bound.deref(), TypeInner::UnionT(..)) {
                 distribute_union_intersection(cx, None)
+            } else if is_concrete(bound) {
+                Ok(false)
             } else {
                 wait_for_concrete_bound(cx, None)
             }

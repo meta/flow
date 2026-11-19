@@ -747,9 +747,7 @@ References:
 
 Error ----------------------------------------------------------------------------------- optional_generic_bound.js:17:3
 
-Cannot call `inner` because in type argument `T`: [incompatible-type]
- - Either `null` [1] is incompatible with `"blue"` [2].
- - Or `null` [1] is incompatible with `"red"` [3].
+Cannot call `inner` because in type argument `T`: `null` [1] is incompatible with `Color` [2]. [incompatible-type]
 
    optional_generic_bound.js:17:3
    17|   inner(props); // error
@@ -759,12 +757,9 @@ References:
    optional_generic_bound.js:16:74
    16| function outerNull<TColor extends Color | null>(props: Readonly<{color?: TColor}>) {
                                                                                 ^^^^^^ [1]
-   optional_generic_bound.js:3:14
-    3| type Color = 'blue' | 'red';
-                    ^^^^^^ [2]
-   optional_generic_bound.js:3:23
-    3| type Color = 'blue' | 'red';
-                             ^^^^^ [3]
+   optional_generic_bound.js:4:34
+    4| declare function inner<T extends Color>(props: Readonly<{color?: T}>): void;
+                                        ^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------ overloads_against_signature.js:8:17

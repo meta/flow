@@ -4626,6 +4626,34 @@ pub fn rec_sub_t<'cx>(
                 cx, env, trace, use_op, l, u, quasis, types,
             )
         }
+        // As in TypeScript (`structuredTypeRelatedToWorker`), a type parameter that is not a
+        // subtype of any member of a union goes on to the rule for type parameters below: its bound
+        // against the union as a whole.
+        (GenericT(box GenericTData { reason, bound, .. }), UnionT(r, rep)) => {
+            let members_use_op = use_op.dupe();
+            match speculation_kit::try_singleton_custom_throw_on_failure(
+                cx,
+                env,
+                Box::new(|cx: &mut Context<'cx>, env: &FlowJsEnv| {
+                    speculation_kit::try_union(
+                        cx,
+                        env,
+                        None,
+                        trace,
+                        members_use_op,
+                        l.dupe(),
+                        r.dupe(),
+                        rep,
+                    )
+                }),
+            ) {
+                Err(FlowJsException::SpeculationSingletonError) => {
+                    let t = FlowJs::reposition_reason(cx, env, Some(trace), reason, None, bound)?;
+                    FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &t, u)
+                }
+                result => result,
+            }
+        }
         (_, UnionT(r, rep)) => {
             // Try the branches of the union in turn, with the goal of selecting the
             // correct branch. This process is reused for intersections as well. See

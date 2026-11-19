@@ -22,3 +22,9 @@ type MediaColor = 'default' | NonSemanticColor;
   x as MediaColor; // OK
   x as IconColor;  // OK
 }
+function typeParamBoundedByIntersection<T extends IconColor & {...}>(x: T): IconColor {
+  return x; // OK: T <: (IconColor & {...}) <: IconColor
+}
+function typeParamBoundedByIntersectionInUnion<T extends {a: 1} & {b: 2}>(x: T): T | null {
+  return x; // OK
+}
