@@ -155,3 +155,9 @@ function gejses<TMapKey extends string>(
 function partial_test<T>(p: Partial<T>): T {
   return p; // error
 }
+
+// A polymorphic bound is not instantiated when a hook makes its argument read-only
+type PolyFn = <C>(value: Array<C>) => void;
+hook useNarrowedPolyBound<T extends PolyFn>(f: T): T {
+  return f; // ok
+}

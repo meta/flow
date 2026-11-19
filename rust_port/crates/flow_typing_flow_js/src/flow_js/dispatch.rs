@@ -1883,6 +1883,17 @@ fn __flow_impl<'cx>(
             let tout_t = Type::new(OpenT((**tout).dupe()));
             rec_flow_t(cx, env, trace, unknown_use(), (l, &tout_t))?;
         }
+        // A polymorphic type becomes the bound of a generic or opaque type as it is, without
+        // being instantiated.
+        (
+            DefT(_, deref!(PolyT(box _))),
+            SealGenericT(box SealGenericTData {
+                bounded_id, cont, ..
+            }),
+        ) => {
+            let sealed = bounded_id.with_bound(reason_of_t(l).dupe(), l.dupe());
+            continue_(cx, env, trace, &sealed, cont)?;
+        }
         (
             DefT(r, deref!(InstanceT(instance))),
             GetKeysT { .. }
