@@ -50,6 +50,7 @@ use flow_typing_type::type_::ImplicitInstantiationTvarData;
 use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::InstanceKind;
 use flow_typing_type::type_::InstanceT;
+use flow_typing_type::type_::MappedTypeHomomorphicFlag;
 use flow_typing_type::type_::MixedFlavor;
 use flow_typing_type::type_::ObjKind;
 use flow_typing_type::type_::ObjType;
@@ -5296,26 +5297,32 @@ impl<'e> Walker<'e> {
             // conditional type over one that takes no branch for every solution, such as
             // `ComponentProps<T>['props']`, waits in the flow-based solve for the lower bounds of
             // the tvar of the marker and is evaluated on them: what flows to it says nothing about
-            // the marker. It is evaluated with the solution so far in place of the marker, once
-            // the other arguments have given it evidence.
-            _ if let Some(name) = self
-                .marker_of(type_)
-                .or_else(|| self.undecided_check_marker(cx, type_)) =>
-            {
+            // the marker. So does a mapped type for the bare marker of the keys it selects, such
+            // as `Pick<O, K>`. It is evaluated with the solution so far in place of the markers,
+            // once the other arguments have given them evidence.
+            _ if let Some(names) = self.waited_markers(cx, type_, d) => {
                 let reason = type_util::reason_of_t(type_).dupe();
-                let solution = match self.solution_so_far(cx, &name, &reason) {
-                    Some(solution) if !is_placeholder(&solution) => solution,
-                    Some(_) => return self.give_up(cx, "destructor", l, u),
-                    None if !self.second_pass => {
-                        self.deferred.push((l.dupe(), u.dupe()));
-                        return Ok(());
-                    }
-                    None => return self.give_up(cx, "destructor", l, u),
-                };
                 let mut fixed = FlowOrdMap::new();
-                fixed.insert(name, solution);
-                let solved = subst(cx, &fixed, type_);
-                match self.evaluate(cx, &solved, defer_use_t)? {
+                for name in names {
+                    let solution = match self.solution_so_far(cx, &name, &reason) {
+                        Some(solution) if !is_placeholder(&solution) => solution,
+                        Some(_) => return self.give_up(cx, "destructor", l, u),
+                        None if !self.second_pass => {
+                            self.deferred.push((l.dupe(), u.dupe()));
+                            return Ok(());
+                        }
+                        None => return self.give_up(cx, "destructor", l, u),
+                    };
+                    fixed.insert(name, solution);
+                }
+                let solved = subst(cx, &fixed, u);
+                let TypeInner::EvalT {
+                    type_, defer_use_t, ..
+                } = solved.deref()
+                else {
+                    return self.give_up(cx, "destructor", l, u);
+                };
+                match self.evaluate(cx, type_, defer_use_t)? {
                     Some(result) => self.walk(cx, l, &result),
                     None => self.give_up(cx, "destructor", l, u),
                 }
@@ -6070,6 +6077,31 @@ impl<'e> Walker<'e> {
     /// applies through at most `MAX_DEPTH` aliases, when its extends type is not `mixed` or `any`.
     /// A bare marker is rigid with the bound `mixed`, so such a conditional type takes no branch
     /// for every solution.
+    /// The bare markers whose lower bounds a destructor of `type_` waits for in the flow-based
+    /// solve: `type_` itself, or the marker of a conditional type it stands for, and the keys a
+    /// mapped type selects, which are concretized when it is evaluated.
+    fn waited_markers<'cx>(
+        &self,
+        cx: &mut Context<'cx>,
+        type_: &Type,
+        d: &Destructor,
+    ) -> Option<Vec<SubstName>> {
+        let keys = match d {
+            Destructor::MappedType(box DestructorMappedTypeData {
+                homomorphic: MappedTypeHomomorphicFlag::SemiHomomorphic(keys),
+                ..
+            }) => self.marker_of(keys),
+            _ => None,
+        };
+        let names: Vec<SubstName> = self
+            .marker_of(type_)
+            .or_else(|| self.undecided_check_marker(cx, type_))
+            .into_iter()
+            .chain(keys)
+            .collect();
+        if names.is_empty() { None } else { Some(names) }
+    }
+
     fn undecided_check_marker<'cx>(&self, cx: &mut Context<'cx>, t: &Type) -> Option<SubstName> {
         let mut t = self.resolve(cx, t);
         for _ in 0..=MAX_DEPTH {

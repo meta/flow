@@ -739,6 +739,66 @@ References:
                              ^^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------- mapped_type_selected_keys.js:10:29
+
+Cannot call `pickInput` with object literal bound to `x` because property `bar` is extra in object literal [1] but
+missing in `{foo: {bar: number, foo: number}["foo"]}` [2]. Exact objects do not accept extra props. [incompatible-type]
+
+   mapped_type_selected_keys.js:10:29
+   10| pickInput({foo: 3, bar: 3}, {bar: 3}, 'foo'); // ERROR 2x: `Keys` is `'foo'`, not `'bar' | 'foo'`
+                                   ^^^^^^^^ [1]
+
+References:
+   mapped_type_selected_keys.js:5:6
+    5|   x: Pick<O, Keys>,
+            ^^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------- mapped_type_selected_keys.js:10:29
+
+Cannot call `pickInput` with object literal bound to `x` because property `foo` is missing in object literal [1] but
+exists in `{foo: {bar: number, foo: number}["foo"]}` [2]. [incompatible-type]
+
+   mapped_type_selected_keys.js:10:29
+   10| pickInput({foo: 3, bar: 3}, {bar: 3}, 'foo'); // ERROR 2x: `Keys` is `'foo'`, not `'bar' | 'foo'`
+                                   ^^^^^^^^ [1]
+
+References:
+   mapped_type_selected_keys.js:5:6
+    5|   x: Pick<O, Keys>,
+            ^^^^^^^^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------- mapped_type_selected_keys.js:17:8
+
+Cannot call `pickOf` with object literal bound to `x` because property `bar` is extra in object literal [1] but missing
+in `{foo: {bar: number, foo: number}["foo"]}` [2]. Exact objects do not accept extra props. [incompatible-type]
+
+   mapped_type_selected_keys.js:17:8
+   17| pickOf({bar: 3}, 'foo'); // ERROR 2x
+              ^^^^^^^^ [1]
+
+References:
+   mapped_type_selected_keys.js:13:6
+   13|   x: Pick<{foo: number, bar: number}, Keys>,
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------- mapped_type_selected_keys.js:17:8
+
+Cannot call `pickOf` with object literal bound to `x` because property `foo` is missing in object literal [1] but exists
+in `{foo: {bar: number, foo: number}["foo"]}` [2]. [incompatible-type]
+
+   mapped_type_selected_keys.js:17:8
+   17| pickOf({bar: 3}, 'foo'); // ERROR 2x
+              ^^^^^^^^ [1]
+
+References:
+   mapped_type_selected_keys.js:13:6
+   13|   x: Pick<{foo: number, bar: number}, Keys>,
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------------------- nested_iterable.js:8:1
 
 Cannot cast `flat` to `Array<string>` because in array element: `number` [1] is not exactly the same as `string` [2].
@@ -1268,4 +1328,4 @@ References:
 
 
 
-Found 68 errors
+Found 72 errors
