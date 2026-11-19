@@ -4229,7 +4229,7 @@ impl<'e> Walker<'e> {
                     let mut fits = false;
                     for m in &others {
                         if self.mentions(cx, m)
-                            && matches!(self.head(cx, m), Head::Inst(_) | Head::Obj)
+                            && self.is_object_or_interface(cx, m)
                             && self.fits_open(cx, l, m)?
                         {
                             fits = true;
@@ -4604,6 +4604,21 @@ impl<'e> Walker<'e> {
 
     fn head<'cx>(&self, cx: &mut Context<'cx>, t: &Type) -> Head {
         self.head_at(cx, t, 0)
+    }
+
+    /// Whether `t` is an object or interface type, or an intersection of them and bare markers,
+    /// such as `A & S`.
+    fn is_object_or_interface<'cx>(&self, cx: &mut Context<'cx>, t: &Type) -> bool {
+        match self.resolve(cx, t).deref() {
+            TypeInner::IntersectionT(_, rep) => {
+                let mut members = (rep.members_iter()).filter(|m| self.marker_of(m).is_none());
+                members
+                    .next()
+                    .is_some_and(|m| self.is_object_or_interface(cx, m))
+                    && members.all(|m| self.is_object_or_interface(cx, m))
+            }
+            _ => matches!(self.head(cx, t), Head::Inst(_) | Head::Obj),
+        }
     }
 
     /// The instance that `t` is, or that an application in `t` stands for.
