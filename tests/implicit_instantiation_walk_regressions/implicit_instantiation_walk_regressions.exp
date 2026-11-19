@@ -682,6 +682,28 @@ References:
                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
+Error --------------------------------------------------------------------------- literal_precision_upper_bounds.js:18:5
+
+Cannot call `sel` with `onChange` bound to `onChange` because in the first parameter: [incompatible-type]
+ - Either `string` [1] is incompatible with `"POST"` [2].
+ - Or `string` [1] is incompatible with `"CONSIDERATION"` [3].
+
+   literal_precision_upper_bounds.js:18:5
+   18| sel(onChange, 'OTHER'); // error
+           ^^^^^^^^
+
+References:
+   literal_precision_upper_bounds.js:18:15
+   18| sel(onChange, 'OTHER'); // error
+                     ^^^^^^^ [1]
+   literal_precision_upper_bounds.js:16:29
+   16| declare const onChange: (v: 'POST' | typeof C) => void;
+                                   ^^^^^^ [2]
+   literal_precision_upper_bounds.js:16:38
+   16| declare const onChange: (v: 'POST' | typeof C) => void;
+                                            ^^^^^^^^ [3]
+
+
 Error ------------------------------------------------------------------------------------ mapped_type_of_marker.js:20:1
 
 Cannot cast `lookup(...)` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -1228,4 +1250,4 @@ References:
 
 
 
-Found 66 errors
+Found 67 errors

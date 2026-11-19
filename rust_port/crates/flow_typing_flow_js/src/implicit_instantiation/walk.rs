@@ -7384,11 +7384,12 @@ fn solve_targs_in_snapshot<'cx>(
     // The flow-based solve flows each lower bound of a type parameter to its upper bounds. That
     // records the literals an annotation needs precise (`'hi'` against `'hi'`), which pinning
     // then keeps instead of generalizing. Do the same for bounds without markers, dropping the
-    // errors. An upper bound with a literal of a value (an invariant position met by a literal)
-    // asks for no precision.
-    // Only a lower bound with a literal of a value has a literal to keep precise, and only an
-    // upper bound without one asks for it. Each bound is checked once, not once per pair, and the
-    // lower bounds, which can be large, only when an upper bound asks.
+    // errors. The type variable is unified with the types met in invariant positions, which flow
+    // to its upper bounds too. As in subtyping, an upper bound with a literal of a value asks for
+    // precision as well.
+    // Only a lower bound with a literal of a value has a literal to keep precise. Each bound is
+    // checked once, not once per pair, and the lower bounds, which can be large, only when an
+    // upper bound asks.
     // The flow-based solve also flows each type parameter to its bound, so the bound is one of
     // those upper bounds, with the solution so far for the type parameters it mentions, which that
     // solve pins first, its literals still precise.
@@ -7419,7 +7420,7 @@ fn solve_targs_in_snapshot<'cx>(
         let upper: Vec<Type> = types(&bounds.upper).duped().collect();
         let as_upper = |walker: &mut Walker<'_>, cx: &mut Context<'cx>, ts: &[Type]| {
             ts.iter()
-                .map(|t| !walker.mentions(cx, t) && !has_value_literal(cx, t))
+                .map(|t| !walker.mentions(cx, t))
                 .collect::<Vec<bool>>()
         };
         let as_lower = |walker: &mut Walker<'_>, cx: &mut Context<'cx>, ts: &[Type]| {
@@ -7427,11 +7428,12 @@ fn solve_targs_in_snapshot<'cx>(
                 .map(|t| !walker.mentions(cx, t) && has_inferred_literal(cx, t))
                 .collect::<Vec<bool>>()
         };
-        if !lower.is_empty() {
+        let from: Vec<Type> = lower.iter().chain(&bounds.exact).duped().collect();
+        if !from.is_empty() {
             let upper_ok = as_upper(&mut walker, cx, &upper);
             if upper_ok.iter().any(|ok| *ok) {
-                let lower_ok = as_lower(&mut walker, cx, &lower);
-                for (l, _) in lower.iter().zip(&lower_ok).filter(|(_, ok)| **ok) {
+                let from_ok = as_lower(&mut walker, cx, &from);
+                for (l, _) in from.iter().zip(&from_ok).filter(|(_, ok)| **ok) {
                     for (u, _) in upper.iter().zip(&upper_ok).filter(|(_, ok)| **ok) {
                         pairs.push((l.dupe(), u.dupe()));
                     }
@@ -7824,8 +7826,10 @@ fn pin<'cx>(
     // The flow-based solve flows each tvar to its bound once the tvars that the bound mentions are
     // pinned. That records the literals the bound needs precise, also those it needs through a
     // type parameter pinned after this one, which the solution so far that the solve checks bounds
-    // with before pinning does not know. Do the same with the solutions, dropping the errors. As
-    // there, a bound with a literal of a value asks for no precision.
+    // with before pinning does not know. Do the same with the solutions, dropping the errors. A
+    // bound with a literal of a value asks for no precision: it has that literal from the solution
+    // of a type parameter it mentions (`U extends T`, with `T` solved to `4`), whose literal the
+    // flow would keep precise too.
     let solved: FlowOrdMap<SubstName, Type> = (pinning.markers.iter())
         .zip(solutions.iter())
         .filter_map(|(m, t)| Some((m.as_ref()?.dupe(), t.dupe())))
