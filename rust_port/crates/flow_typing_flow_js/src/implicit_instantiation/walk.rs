@@ -3076,10 +3076,12 @@ impl<'e> Walker<'e> {
         ))
     }
 
-    /// Whether `t` is an object, instance or array type, or a union of them.
+    /// Whether `t` is an object, instance or array type, or a union of them, which may nest.
     fn is_structure_or_union_of<'cx>(&self, cx: &mut Context<'cx>, t: &Type) -> bool {
         match self.resolve(cx, t).deref() {
-            TypeInner::UnionT(_, rep) => rep.members_iter().all(|m| self.is_structure(cx, m)),
+            TypeInner::UnionT(_, rep) => rep
+                .members_iter()
+                .all(|m| self.is_structure_or_union_of(cx, m)),
             _ => self.is_structure(cx, t),
         }
     }
@@ -4145,9 +4147,18 @@ impl<'e> Walker<'e> {
             }
         }
         // Of objects, drop the members whose literal property, a discriminant, differs from that of
-        // `l`.
+        // `l`. A member that only the exactness of the others leaves is not one that the flow-based
+        // solve tries alone: it tries it speculatively with them, and if `l` does not fit it even with
+        // the markers open, and there is no bare marker to go on to, the match fails.
         if matching.len() > 1 && lhead == Head::Obj {
-            let narrowed = self.discriminated(cx, l, &matching);
+            let narrowed = self.discriminated(cx, l, &matching, true);
+            if naked.is_empty()
+                && let [only] = narrowed.as_slice()
+                && self.discriminated(cx, l, &matching, false).len() > 1
+                && !self.fits_open(cx, l, only)?
+            {
+                return Ok(());
+            }
             if !narrowed.is_empty() {
                 matching = narrowed;
             }
@@ -4816,9 +4827,15 @@ impl<'e> Walker<'e> {
         union_rep::canon(&self.resolve(cx, &t))
     }
 
-    /// The members whose literal properties agree with those of `l`, and that have every
-    /// property of `l` if they are exact.
-    fn discriminated<'cx>(&self, cx: &mut Context<'cx>, l: &Type, members: &[Type]) -> Vec<Type> {
+    /// The members whose literal properties agree with those of `l`, and, with `exact`, that have
+    /// every property of `l` if they are exact.
+    fn discriminated<'cx>(
+        &self,
+        cx: &mut Context<'cx>,
+        l: &Type,
+        members: &[Type],
+        exact: bool,
+    ) -> Vec<Type> {
         let Some((lp, _)) = self.object_shape(cx, l) else {
             return members.to_vec();
         };
@@ -4829,10 +4846,10 @@ impl<'e> Walker<'e> {
         members
             .iter()
             .filter(|m| {
-                let Some((mp, exact)) = self.object_shape(cx, m) else {
+                let Some((mp, mexact)) = self.object_shape(cx, m) else {
                     return true;
                 };
-                (!exact || lp.iter().all(|(name, _)| mp.get(name).is_some()))
+                (!exact || !mexact || lp.iter().all(|(name, _)| mp.get(name).is_some()))
                     && literals.iter().all(|(name, lit)| match mp.get(name) {
                         Some(prop) => self.literal_prop(cx, prop).is_none_or(|ml| &ml == lit),
                         None => true,

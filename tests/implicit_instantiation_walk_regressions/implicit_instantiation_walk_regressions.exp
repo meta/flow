@@ -944,6 +944,52 @@ References:
                     ^^^^^^ [2]
 
 
+Error ---------------------------------------------------------------------------------------- spread_maybe_union.js:7:1
+
+Cannot cast `select(...)` to `"1"` because `"2"` [1] is incompatible with `"1"` [2]. [incompatible-type]
+
+   spread_maybe_union.js:7:1
+   7| select([{id: '1', title: 'a'}, {id: '2', title: 'b'}], '1') as '1'; // error
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   spread_maybe_union.js:7:37
+   7| select([{id: '1', title: 'a'}, {id: '2', title: 'b'}], '1') as '1'; // error
+                                          ^^^ [1]
+   spread_maybe_union.js:7:64
+   7| select([{id: '1', title: 'a'}, {id: '2', title: 'b'}], '1') as '1'; // error
+                                                                     ^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------- spread_maybe_union.js:28:6
+
+Cannot call `pick` with `withStringIcons` bound to `items` because in array element: [incompatible-type]
+ - Either in property `icon`: `string` [1] is incompatible with `{uri: string}` [2].
+ - Or property `title` is extra in `{icon: string, id: string, title: string}` [3] but missing in
+   `{icon?: {uri: string}, id: "1" | "2", node: number}` [4]. Exact objects do not accept extra props.
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   spread_maybe_union.js:28:6
+   28| pick(withStringIcons, picked, onPick); // error
+            ^^^^^^^^^^^^^^^
+
+References:
+   spread_maybe_union.js:24:80
+   24| declare const withStringIcons: ReadonlyArray<{id: string, title: string, icon: string}>;
+                                                                                      ^^^^^^ [1]
+   spread_maybe_union.js:18:76
+   18| type WithIcon<T> = {...(?{title: string} | ?{node: number}), id: T, icon?: {uri: string}};
+                                                                                  ^^^^^^^^^^^^^ [2]
+   spread_maybe_union.js:24:46
+   24| declare const withStringIcons: ReadonlyArray<{id: string, title: string, icon: string}>;
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   spread_maybe_union.js:18:20
+   18| type WithIcon<T> = {...(?{title: string} | ?{node: number}), id: T, icon?: {uri: string}};
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
 Error ------------------------------------------------------------------------------ structural_variance_unions.js:42:10
 
 Cannot use `this` [1] in an input position because `this` [1] is expected to occur only in output positions.
@@ -1108,4 +1154,4 @@ References:
 
 
 
-Found 60 errors
+Found 62 errors
