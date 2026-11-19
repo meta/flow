@@ -154,6 +154,7 @@ pub mod opts {
         pub component_syntax: bool,
         pub async_component_syntax: bool,
         pub async_component_syntax_includes: Vec<String>,
+        pub declare_module_merging: bool,
         pub definite_assignment_assertions: bool,
         pub dev_only_refinement_info_as_errors: bool,
         pub emoji: Option<bool>,
@@ -297,6 +298,7 @@ pub mod opts {
             component_syntax: true,
             async_component_syntax: false,
             async_component_syntax_includes: Vec::new(),
+            declare_module_merging: false,
             definite_assignment_assertions: false,
             dev_only_refinement_info_as_errors: false,
             emoji: None,
@@ -2084,6 +2086,16 @@ pub mod opts {
                 parse_boolean(
                     |opts, v| {
                         opts.enable_const_params = Some(v);
+                        Ok(())
+                    },
+                    values,
+                    config,
+                )
+            }),
+            ("experimental.declare_module_merging", |values, config| {
+                parse_boolean(
+                    |opts, v| {
+                        opts.declare_module_merging = v;
                         Ok(())
                     },
                     values,

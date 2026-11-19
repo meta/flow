@@ -1048,6 +1048,9 @@ pub(crate) mod scope {
             types: BTreeMap<FlowSmolStr, BindingNode<'arena, 'ast>>,
             parent: ScopeId,
             exports: Rc<RefCell<Exports<'arena, 'ast>>>,
+            /// With `declare_module_merging`, the exports of every library block of the module.
+            /// A name that the block doesn't declare resolves to one of them.
+            module_exports: Option<Rc<RefCell<Exports<'arena, 'ast>>>>,
         },
         DeclareNamespace {
             name: FlowSmolStr,
@@ -1266,11 +1269,16 @@ pub(crate) mod scope {
         parent: ScopeId,
         loc: LocNode<'arena>,
         name: FlowSmolStr,
+        merging: bool,
     ) -> ScopeId {
         let exports = Exports::create(true, None, tbls.strictness_kind);
+        let mut module_exports = None;
         match scopes.get_mut(parent) {
             Scope::Global { modules, .. } => {
-                if let Some((override_binding_loc, _)) = modules.get(&name) {
+                if merging {
+                    let (_, exports) = modules.entry(name).or_insert_with(|| (loc, exports.dupe()));
+                    module_exports = Some(exports.dupe());
+                } else if let Some((override_binding_loc, _)) = modules.get(&name) {
                     tbls.additional_errors.push(
                         signature_error::BindingValidation::ModuleOverride {
                             name: name.clone(),
@@ -1289,7 +1297,535 @@ pub(crate) mod scope {
             types: BTreeMap::new(),
             exports,
             parent,
+            module_exports,
         })
+    }
+
+    /// The declaration that `exports` exports under `name`. TypeScript puts these exports of a
+    /// module in scope in all of its `declare module` blocks, but not export specifiers.
+    fn declared_export<'arena, 'ast>(
+        exports: &Exports<'arena, 'ast>,
+        type_only: bool,
+        name: &FlowSmolStr,
+    ) -> Option<LocalDefNode<'arena, 'ast>> {
+        let value = || match &exports.kind {
+            ModuleKind::ESModule { names, .. } => match names.get(name) {
+                Some(Export::ExportBinding(node)) => Some(node.dupe()),
+                _ => None,
+            },
+            ModuleKind::CJSDeclareModule { props, .. } => props.get(name).map(|node| node.dupe()),
+            ModuleKind::UnknownModule
+            | ModuleKind::CJSModule(_)
+            | ModuleKind::CJSModuleProps { .. } => None,
+        };
+        let type_ = || match exports.types.get(name) {
+            Some(ExportType::ExportTypeBinding(node)) => Some(node.dupe()),
+            _ => None,
+        };
+        if type_only {
+            type_().or_else(value)
+        } else {
+            value()
+        }
+    }
+
+    /// With `declare_module_merging`, a name in a `declare module` block resolves to the
+    /// module's export, which merges the declarations of all of its blocks, unless the block
+    /// declares the name without exporting it.
+    fn lookup_declare_module_export<'arena, 'ast>(
+        exports: &Rc<RefCell<Exports<'arena, 'ast>>>,
+        module_exports: Option<&Rc<RefCell<Exports<'arena, 'ast>>>>,
+        local: Option<&BindingNode<'arena, 'ast>>,
+        type_only: bool,
+        name: &FlowSmolStr,
+    ) -> Option<BindingNode<'arena, 'ast>> {
+        module_exports
+            .filter(|_| {
+                local.is_none() || declared_export(&exports.borrow(), type_only, name).is_some()
+            })
+            .and_then(|module_exports| declared_export(&module_exports.borrow(), type_only, name))
+            .map(BindingNode::LocalBinding)
+            .or_else(|| local.map(|binding| binding.dupe()))
+    }
+
+    /// The namespace entry under which a library block of the module declares the export
+    /// `node`, as the namespace merging helpers expect it. A namespace with only types is
+    /// exported as a value, but declared as a type.
+    fn module_export_entry<'arena, 'ast>(
+        scopes: &Scopes<'arena, 'ast>,
+        module_exports: &Rc<RefCell<Exports<'arena, 'ast>>>,
+        type_only: bool,
+        name: &FlowSmolStr,
+        node: &LocalDefNode<'arena, 'ast>,
+    ) -> Option<(LocNode<'arena>, Parsed<'arena, 'ast>)> {
+        scopes
+            .scopes
+            .iter()
+            .enumerate()
+            .find_map(|(i, scope)| match scope {
+                Scope::DeclareModule {
+                    values,
+                    types,
+                    module_exports: Some(block_module_exports),
+                    ..
+                } if Rc::ptr_eq(block_module_exports, module_exports) => {
+                    let declares = |bindings: &BTreeMap<FlowSmolStr, BindingNode<'arena, 'ast>>| {
+                        matches!(
+                            bindings.get(name),
+                            Some(BindingNode::LocalBinding(local)) if local.0.ptr_eq(&node.0)
+                        )
+                    };
+                    let (preferred, other) = if type_only {
+                        (types, values)
+                    } else {
+                        (values, types)
+                    };
+                    let type_only = if declares(preferred) {
+                        type_only
+                    } else if declares(other) {
+                        !type_only
+                    } else {
+                        return None;
+                    };
+                    let loc = loc_of_binding(&BindingNode::LocalBinding(node.dupe()));
+                    Some((loc.dupe(), val_ref(type_only, ScopeId(i), loc, name.dupe())))
+                }
+                _ => None,
+            })
+    }
+
+    fn export_entry<'arena, 'ast>(
+        scopes: &Scopes<'arena, 'ast>,
+        module_exports: &Rc<RefCell<Exports<'arena, 'ast>>>,
+        name: &FlowSmolStr,
+        export: &Export<'arena, 'ast>,
+    ) -> (
+        LocNode<'arena>,
+        Option<(LocNode<'arena>, Parsed<'arena, 'ast>)>,
+    ) {
+        let node = match export {
+            Export::ExportBinding(node) => node.dupe(),
+            Export::ExportRef(ref_) => return (ref_.ref_loc.dupe(), None),
+            Export::ExportDefault { default_loc, .. }
+            | Export::ExportDefaultBinding { default_loc, .. } => {
+                return (default_loc.dupe(), None);
+            }
+            Export::ExportFrom(node) => {
+                return (
+                    loc_of_binding(&BindingNode::RemoteBinding(node.dupe())),
+                    None,
+                );
+            }
+        };
+        (
+            loc_of_binding(&BindingNode::LocalBinding(node.dupe())),
+            module_export_entry(scopes, module_exports, false, name, &node),
+        )
+    }
+
+    fn prop_entry<'arena, 'ast>(
+        scopes: &Scopes<'arena, 'ast>,
+        module_exports: &Rc<RefCell<Exports<'arena, 'ast>>>,
+        name: &FlowSmolStr,
+        node: &LocalDefNode<'arena, 'ast>,
+    ) -> (
+        LocNode<'arena>,
+        Option<(LocNode<'arena>, Parsed<'arena, 'ast>)>,
+    ) {
+        (
+            loc_of_binding(&BindingNode::LocalBinding(node.dupe())),
+            module_export_entry(scopes, module_exports, false, name, node),
+        )
+    }
+
+    fn export_type_entry<'arena, 'ast>(
+        scopes: &Scopes<'arena, 'ast>,
+        module_exports: &Rc<RefCell<Exports<'arena, 'ast>>>,
+        name: &FlowSmolStr,
+        export: &ExportType<'arena, 'ast>,
+    ) -> (
+        LocNode<'arena>,
+        Option<(LocNode<'arena>, Parsed<'arena, 'ast>)>,
+    ) {
+        match export {
+            ExportType::ExportTypeBinding(node) => (
+                loc_of_binding(&BindingNode::LocalBinding(node.dupe())),
+                module_export_entry(scopes, module_exports, true, name, node),
+            ),
+            ExportType::ExportTypeRef(ref_) => (ref_.ref_loc.dupe(), None),
+            ExportType::ExportTypeFrom(node) => (
+                loc_of_binding(&BindingNode::RemoteBinding(node.dupe())),
+                None,
+            ),
+        }
+    }
+
+    /// Merges the value exports of a later block of the module into the module's, following
+    /// `merge_namespace_entries`. A name that both export and that doesn't merge keeps the
+    /// module's export and is an override, like a redeclared global in a library.
+    fn merge_module_values<'arena: 'ast, 'ast, V>(
+        scopes: &Scopes<'arena, 'ast>,
+        tbls: &mut Tables<'arena, 'ast>,
+        module_exports: &Rc<RefCell<Exports<'arena, 'ast>>>,
+        existing_values: &mut BTreeMap<FlowSmolStr, V>,
+        existing_types: &mut BTreeMap<FlowSmolStr, ExportType<'arena, 'ast>>,
+        values: BTreeMap<FlowSmolStr, V>,
+        value_entry: fn(
+            &Scopes<'arena, 'ast>,
+            &Rc<RefCell<Exports<'arena, 'ast>>>,
+            &FlowSmolStr,
+            &V,
+        ) -> (
+            LocNode<'arena>,
+            Option<(LocNode<'arena>, Parsed<'arena, 'ast>)>,
+        ),
+    ) {
+        let is_type_entry = |(_, parsed): &(LocNode<'arena>, Parsed<'arena, 'ast>)| {
+            matches!(
+                parsed,
+                Parsed::ValRef {
+                    lookup: ValRefLookup::TypeRefLookup,
+                    ..
+                }
+            )
+        };
+        for (n, v) in values {
+            if let Some(existing) = existing_values.get(&n) {
+                let (existing_loc, existing_entry) =
+                    value_entry(scopes, module_exports, &n, existing);
+                let (loc, entry) = value_entry(scopes, module_exports, &n, &v);
+                let merged = match (existing_entry, entry) {
+                    (Some(existing_entry), Some(entry)) => {
+                        match (is_type_entry(&existing_entry), is_type_entry(&entry)) {
+                            (false, false) => merge_namespace_value_value_entry(
+                                scopes,
+                                tbls,
+                                &n,
+                                &existing_entry,
+                                &entry,
+                            ),
+                            (true, true) => merge_namespace_type_type_entry(
+                                scopes,
+                                tbls,
+                                &n,
+                                &existing_entry,
+                                &entry,
+                            ),
+                            (false, true) => merge_namespace_type_value_entry(
+                                scopes,
+                                tbls,
+                                &n,
+                                &existing_entry,
+                                &entry,
+                            ),
+                            // The incoming namespace takes in the existing one and replaces it.
+                            (true, false) => {
+                                let merged = merge_namespace_value_type_entry(
+                                    scopes,
+                                    tbls,
+                                    &n,
+                                    &existing_entry,
+                                    &entry,
+                                )
+                                .is_some();
+                                if merged {
+                                    existing_values.insert(n.dupe(), v);
+                                }
+                                merged
+                            }
+                        }
+                    }
+                    _ => false,
+                };
+                if !merged {
+                    tbls.additional_errors
+                        .push(BindingValidation::NameOverride {
+                            name: n,
+                            override_binding_loc: existing_loc,
+                            existing_binding_loc: loc,
+                        });
+                }
+            } else if let Some(existing) = existing_types.get(&n) {
+                let (_, existing_entry) = export_type_entry(scopes, module_exports, &n, existing);
+                let (_, entry) = value_entry(scopes, module_exports, &n, &v);
+                let merged = match (existing_entry, entry) {
+                    (Some(existing_entry), Some(entry)) => {
+                        merge_namespace_value_type_entry(scopes, tbls, &n, &existing_entry, &entry)
+                            .is_some()
+                    }
+                    _ => false,
+                };
+                if merged {
+                    existing_types.remove(&n);
+                }
+                existing_values.insert(n, v);
+            } else {
+                existing_values.insert(n, v);
+            }
+        }
+    }
+
+    fn merge_module_types<'arena: 'ast, 'ast>(
+        scopes: &Scopes<'arena, 'ast>,
+        tbls: &mut Tables<'arena, 'ast>,
+        module_exports: &Rc<RefCell<Exports<'arena, 'ast>>>,
+        existing_value_entry: impl Fn(
+            &FlowSmolStr,
+        ) -> Option<(
+            LocNode<'arena>,
+            Option<(LocNode<'arena>, Parsed<'arena, 'ast>)>,
+        )>,
+        existing_types: &mut BTreeMap<FlowSmolStr, ExportType<'arena, 'ast>>,
+        types: BTreeMap<FlowSmolStr, ExportType<'arena, 'ast>>,
+    ) {
+        for (n, t) in types {
+            if let Some(existing) = existing_types.get(&n) {
+                let (existing_loc, existing_entry) =
+                    export_type_entry(scopes, module_exports, &n, existing);
+                let (loc, entry) = export_type_entry(scopes, module_exports, &n, &t);
+                let merged = match (existing_entry, entry) {
+                    (Some(existing_entry), Some(entry)) => {
+                        merge_namespace_type_type_entry(scopes, tbls, &n, &existing_entry, &entry)
+                    }
+                    _ => false,
+                };
+                if !merged {
+                    tbls.additional_errors
+                        .push(BindingValidation::NameOverride {
+                            name: n,
+                            override_binding_loc: existing_loc,
+                            existing_binding_loc: loc,
+                        });
+                }
+            } else if let Some((_, existing_entry)) = existing_value_entry(&n) {
+                let (_, entry) = export_type_entry(scopes, module_exports, &n, &t);
+                let merged = match (existing_entry, entry) {
+                    (Some(existing_entry), Some(entry)) => {
+                        merge_namespace_type_value_entry(scopes, tbls, &n, &existing_entry, &entry)
+                    }
+                    _ => false,
+                };
+                if !merged {
+                    existing_types.insert(n, t);
+                }
+            } else {
+                existing_types.insert(n, t);
+            }
+        }
+    }
+
+    /// With `declare_module_merging`, library `declare module` blocks with the same name declare
+    /// one module, like TypeScript's ambient module declarations. Each block keeps its own scope,
+    /// and its exports join the module's under declaration merging.
+    pub(super) fn merge_declare_module<'arena: 'ast, 'ast>(
+        scopes: &Scopes<'arena, 'ast>,
+        tbls: &mut Tables<'arena, 'ast>,
+        block: ScopeId,
+        loc: LocNode<'arena>,
+        name: FlowSmolStr,
+    ) {
+        let Scope::DeclareModule {
+            exports,
+            parent,
+            module_exports: Some(module_exports),
+            ..
+        } = scopes.get(block)
+        else {
+            return;
+        };
+        if Rc::ptr_eq(module_exports, exports) {
+            return;
+        }
+        let Scope::Global { modules, .. } = scopes.get(*parent) else {
+            return;
+        };
+        let (module_loc, _) = &modules[&name];
+        let Exports {
+            kind,
+            types,
+            type_stars,
+            ts_pending,
+            strict: _,
+            platform_availability_set: _,
+            strictness_kind,
+        } = exports.borrow().clone();
+        let mut module = module_exports.borrow_mut();
+        let Exports {
+            kind: module_kind,
+            types: module_types,
+            type_stars: module_type_stars,
+            ts_pending: module_ts_pending,
+            strictness_kind: module_strictness_kind,
+            ..
+        } = &mut *module;
+        let props_as_names = |props: BTreeMap<FlowSmolStr, LocalDefNode<'arena, 'ast>>| {
+            props
+                .into_iter()
+                .map(|(n, node)| (n, Export::ExportBinding(node)))
+                .collect::<BTreeMap<_, _>>()
+        };
+        match (&mut *module_kind, kind) {
+            (_, ModuleKind::UnknownModule) => {}
+            (
+                ModuleKind::CJSDeclareModule {
+                    props,
+                    strictness_kind,
+                },
+                ModuleKind::CJSDeclareModule {
+                    props: block_props,
+                    strictness_kind: block_strictness_kind,
+                },
+            ) => {
+                *strictness_kind = strictness_kind.join(block_strictness_kind);
+                merge_module_values(
+                    scopes,
+                    tbls,
+                    module_exports,
+                    props,
+                    module_types,
+                    block_props,
+                    prop_entry,
+                );
+            }
+            (
+                module_kind @ ModuleKind::UnknownModule,
+                ModuleKind::CJSDeclareModule {
+                    props: block_props,
+                    strictness_kind,
+                },
+            ) => {
+                let mut props = BTreeMap::new();
+                merge_module_values(
+                    scopes,
+                    tbls,
+                    module_exports,
+                    &mut props,
+                    module_types,
+                    block_props,
+                    prop_entry,
+                );
+                *module_kind = ModuleKind::CJSDeclareModule {
+                    props,
+                    strictness_kind,
+                };
+            }
+            (
+                ModuleKind::ESModule { names, stars },
+                ModuleKind::ESModule {
+                    names: block_names,
+                    stars: block_stars,
+                },
+            ) => {
+                stars.extend(block_stars);
+                merge_module_values(
+                    scopes,
+                    tbls,
+                    module_exports,
+                    names,
+                    module_types,
+                    block_names,
+                    export_entry,
+                );
+            }
+            (
+                ModuleKind::ESModule { names, .. },
+                ModuleKind::CJSDeclareModule {
+                    props: block_props, ..
+                },
+            ) => {
+                merge_module_values(
+                    scopes,
+                    tbls,
+                    module_exports,
+                    names,
+                    module_types,
+                    props_as_names(block_props),
+                    export_entry,
+                );
+            }
+            (
+                module_kind @ (ModuleKind::UnknownModule | ModuleKind::CJSDeclareModule { .. }),
+                ModuleKind::ESModule {
+                    names: block_names,
+                    stars,
+                },
+            ) => {
+                let mut names = match std::mem::replace(module_kind, ModuleKind::UnknownModule) {
+                    ModuleKind::CJSDeclareModule { props, .. } => props_as_names(props),
+                    _ => BTreeMap::new(),
+                };
+                merge_module_values(
+                    scopes,
+                    tbls,
+                    module_exports,
+                    &mut names,
+                    module_types,
+                    block_names,
+                    export_entry,
+                );
+                *module_kind = ModuleKind::ESModule { names, stars };
+            }
+            (module_kind @ ModuleKind::UnknownModule, kind) => {
+                *module_kind = kind;
+            }
+            // Like TypeScript's `export =`, `module.exports` can't merge with other exports.
+            _ => {
+                tbls.additional_errors
+                    .push(BindingValidation::ModuleOverride {
+                        name,
+                        override_binding_loc: module_loc.dupe(),
+                        existing_binding_loc: loc,
+                    });
+                return;
+            }
+        }
+        *module_strictness_kind = module_strictness_kind.join(strictness_kind);
+        module_type_stars.extend(type_stars);
+        for (n, export) in ts_pending {
+            match module_ts_pending.get(&n) {
+                Some(
+                    TsPendingExport::TsExportRef {
+                        export_loc: existing_loc,
+                        ..
+                    }
+                    | TsPendingExport::TsExportFrom {
+                        export_loc: existing_loc,
+                        ..
+                    },
+                ) => {
+                    let (TsPendingExport::TsExportRef { export_loc, .. }
+                    | TsPendingExport::TsExportFrom { export_loc, .. }) = export;
+                    tbls.additional_errors
+                        .push(BindingValidation::NameOverride {
+                            name: n,
+                            override_binding_loc: existing_loc.dupe(),
+                            existing_binding_loc: export_loc,
+                        });
+                }
+                None => {
+                    module_ts_pending.insert(n, export);
+                }
+            }
+        }
+        let module_kind = &*module_kind;
+        merge_module_types(
+            scopes,
+            tbls,
+            module_exports,
+            |n| match module_kind {
+                ModuleKind::ESModule { names, .. } => names
+                    .get(n)
+                    .map(|export| export_entry(scopes, module_exports, n, export)),
+                ModuleKind::CJSDeclareModule { props, .. } => props
+                    .get(n)
+                    .map(|node| prop_entry(scopes, module_exports, n, node)),
+                ModuleKind::UnknownModule
+                | ModuleKind::CJSModule(_)
+                | ModuleKind::CJSModuleProps { .. } => None,
+            },
+            module_types,
+            types,
+        );
     }
 
     pub(crate) fn bind_umd_global<'arena, 'ast>(
@@ -1691,8 +2227,25 @@ pub(crate) mod scope {
                 Scope::ConditionalTypeExtends(ConditionalTypeExtends { parent, .. }) => {
                     id = *parent;
                 }
-                Scope::DeclareModule { parent, values, .. }
-                | Scope::Lexical { parent, values, .. } => match values.get(name) {
+                Scope::DeclareModule {
+                    parent,
+                    values,
+                    exports,
+                    module_exports,
+                    ..
+                } => match lookup_declare_module_export(
+                    exports,
+                    module_exports.as_ref(),
+                    values.get(name),
+                    false,
+                    name,
+                ) {
+                    Some(binding) => return Some((binding, id)),
+                    None => {
+                        id = *parent;
+                    }
+                },
+                Scope::Lexical { parent, values, .. } => match values.get(name) {
                     Some(binding) => return Some((binding.dupe(), id)),
                     None => {
                         id = *parent;
@@ -1879,7 +2432,22 @@ pub(crate) mod scope {
         let (host, path) = namespace_path_and_host(scopes, id)?;
         let mut path = path.iter();
         let first = path.next()?;
-        let mut binding = lookup_type_in_scope(scopes, host, first)?;
+        let mut binding = match scopes.get(host) {
+            Scope::DeclareModule {
+                values,
+                types,
+                exports,
+                module_exports,
+                ..
+            } => lookup_declare_module_export(
+                exports,
+                module_exports.as_ref(),
+                lookup_scope(first, values, types).as_ref(),
+                true,
+                first,
+            ),
+            _ => lookup_type_in_scope(scopes, host, first),
+        }?;
         for namespace_name in path {
             binding = namespace_member_type(scopes, binding, namespace_name)?;
         }
@@ -1894,7 +2462,21 @@ pub(crate) mod scope {
         let (host, path) = namespace_path_and_host(scopes, id)?;
         let mut path = path.iter();
         let first = path.next()?;
-        let mut binding = lookup_value_in_scope(scopes, host, first)?;
+        let mut binding = match scopes.get(host) {
+            Scope::DeclareModule {
+                values,
+                exports,
+                module_exports,
+                ..
+            } => lookup_declare_module_export(
+                exports,
+                module_exports.as_ref(),
+                values.get(first),
+                false,
+                first,
+            ),
+            _ => lookup_value_in_scope(scopes, host, first),
+        }?;
         for namespace_name in path {
             binding = namespace_member_value(scopes, binding, namespace_name)?;
         }
@@ -1950,8 +2532,15 @@ pub(crate) mod scope {
                     parent,
                     values,
                     types,
-                    ..
-                } => match lookup_scope(name, values, types) {
+                    exports,
+                    module_exports,
+                } => match lookup_declare_module_export(
+                    exports,
+                    module_exports.as_ref(),
+                    lookup_scope(name, values, types).as_ref(),
+                    true,
+                    name,
+                ) {
                     Some(binding) => return Some((binding, id)),
                     None => {
                         id = *parent;
@@ -15284,7 +15873,14 @@ pub(super) fn statement<'arena: 'ast, 'ast>(
                 }
                 Id::Literal((loc, lit)) => (tbls.push_loc(loc.dupe()), lit.value.dupe()),
             };
-            let scope = scope::push_declare_module(scopes, tbls, scope, loc, name);
+            let scope = scope::push_declare_module(
+                scopes,
+                tbls,
+                scope,
+                loc.dupe(),
+                name.dupe(),
+                opts.declare_module_merging,
+            );
             let (_, block) = body;
             let ast::statement::Block { body: stmts, .. } = block;
             for stmt in stmts.iter() {
@@ -15299,6 +15895,7 @@ pub(super) fn statement<'arena: 'ast, 'ast>(
                 }
             }
             scope::finalize_declare_module_exports_exn(scopes, scope, tbls.strictness_kind);
+            scope::merge_declare_module(scopes, tbls, scope, loc, name);
         }
         S::DeclareNamespace {
             loc: _,

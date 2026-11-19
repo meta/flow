@@ -125,6 +125,55 @@ pub fn with_class_stack<'cx, A>(
     res
 }
 
+/// With `declare_module_merging`, the module of the library `declare module` block that contains
+/// the read at `loc`.
+fn declare_module_of_read<'cx>(cx: &mut Context<'cx>, loc: &ALoc) -> Option<FlowSmolStr> {
+    if !cx.declare_module_merging() {
+        return None;
+    }
+    cx.environment()
+        .var_info
+        .declare_module_reads
+        .get(loc)
+        .duped()
+}
+
+/// Like TypeScript, a `declare module` block sees the exports of the other blocks of the module.
+/// The installed module already merges them.
+fn declare_module_export_opt<'cx>(
+    lookup_mode: LookupMode,
+    cx: &mut Context<'cx>,
+    module: FlowSmolStr,
+    name: &FlowSmolStr,
+    loc: ALoc,
+) -> Option<Type> {
+    use flow_common::flow_import_specifier::Userland;
+    use flow_common::reason::Name;
+    use flow_typing_type::type_util;
+
+    let (_, module_t) = cx.builtin_module_opt(&Userland::from_smol_str(module))?;
+    let module_t = module_t.get_forced(cx).dupe();
+    let exports = &module_t.module_export_types;
+    let key = Name::new(name.dupe());
+    let value_export = |cx: &Context<'cx>| {
+        cx.find_exports(exports.value_exports_tmap)
+            .get(&key)
+            .map(|symbol| symbol.type_.dupe())
+    };
+    let t = match lookup_mode {
+        LookupMode::ForType => cx
+            .find_exports(exports.type_exports_tmap)
+            .get(&key)
+            .map(|symbol| symbol.type_.dupe())
+            .or_else(|| value_export(cx)),
+        LookupMode::ForValue | LookupMode::ForTypeof => value_export(cx),
+    }?;
+    Some(type_util::mod_reason_of_t(
+        &|r: Reason| r.reposition(loc.dupe()),
+        &t,
+    ))
+}
+
 fn recorded_declare_namespace_member_opt<'cx>(
     lookup_mode: LookupMode,
     cx: &mut Context<'cx>,
@@ -339,7 +388,13 @@ fn recorded_declare_namespace_member_opt<'cx>(
         let Some(root) = path.next() else {
             return Vec::new();
         };
-        let mut namespace_types = namespace_types_for_root_path_element(cx, root);
+        // A namespace in a library `declare module` block merges into the module's export.
+        let mut namespace_types = match declare_module_of_read(cx, &loc).and_then(|module| {
+            declare_module_export_opt(LookupMode::ForType, cx, module, &root.name, loc.dupe())
+        }) {
+            Some(namespace_t) => vec![namespace_t],
+            None => namespace_types_for_root_path_element(cx, root),
+        };
         for namespace in path {
             namespace_types =
                 namespace_types_for_child_path_element(cx, &namespace_types, namespace, loc.dupe());
@@ -2078,11 +2133,8 @@ pub fn lookup_type_identifier<'cx>(
     name: &FlowSmolStr,
     loc: ALoc,
 ) -> Result<Type, JobError> {
-    fn is_unresolved_read_in_declare_namespace<'cx>(cx: &mut Context<'cx>, loc: &ALoc) -> bool {
+    fn is_unresolved_read<'cx>(cx: &mut Context<'cx>, loc: &ALoc) -> bool {
         let env = cx.environment();
-        if env.var_info.declare_namespace_read_paths.get(loc).is_none() {
-            return false;
-        }
         match find_var_opt(&env.var_info, loc) {
             Err(_) => true,
             Ok(read) => {
@@ -2095,13 +2147,31 @@ pub fn lookup_type_identifier<'cx>(
         }
     }
 
+    fn is_unresolved_read_in_declare_namespace<'cx>(cx: &mut Context<'cx>, loc: &ALoc) -> bool {
+        let env = cx.environment();
+        if env.var_info.declare_namespace_read_paths.get(loc).is_none() {
+            return false;
+        }
+        is_unresolved_read(cx, loc)
+    }
+
+    fn unresolved_read_declare_module<'cx>(
+        cx: &mut Context<'cx>,
+        loc: &ALoc,
+    ) -> Option<FlowSmolStr> {
+        let module = declare_module_of_read(cx, loc)?;
+        is_unresolved_read(cx, loc).then_some(module)
+    }
+
     fn query_var_opt<'cx>(
         lookup_mode: LookupMode,
         cx: &mut Context<'cx>,
         name: &FlowSmolStr,
         loc: ALoc,
     ) -> Result<Option<Type>, JobError> {
-        if is_unresolved_read_in_declare_namespace(cx, &loc) {
+        if is_unresolved_read_in_declare_namespace(cx, &loc)
+            || unresolved_read_declare_module(cx, &loc).is_some()
+        {
             return Ok(None);
         }
         let reason =
@@ -2151,6 +2221,11 @@ pub fn lookup_type_identifier<'cx>(
         return Ok(t);
     }
     if let Some(t) = recorded_declare_namespace_member_opt(lookup_mode, cx, name, loc.dupe()) {
+        return Ok(t);
+    }
+    if let Some(module) = unresolved_read_declare_module(cx, &loc)
+        && let Some(t) = declare_module_export_opt(lookup_mode, cx, module, name, loc.dupe())
+    {
         return Ok(t);
     }
     if let Some(t) = flowlib_namespace_member_global_lookup(lookup_mode, cx, name, loc.dupe()) {

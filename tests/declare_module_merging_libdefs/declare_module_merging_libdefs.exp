@@ -1,0 +1,240 @@
+Error ----------------------------------------------------------------------------------------------- lib/first.js:39:43
+
+Cannot get `Inner.second` because property `second` is missing in `{readonly first: number}` [1]. [prop-missing]
+
+   lib/first.js:39:43
+   39|     declare const fromInner: typeof Inner.second; // error: like for global namespaces, the library check sees this block's `Inner`
+                                                 ^^^^^^
+
+References:
+   lib/first.js:33:23
+   33|     declare namespace Inner {
+                             ^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------- lib/second.js:17:24
+
+This name declaration overrides an existing binding `duplicate` [1]. Overriding in library definitions can lead to
+surprising behaviors. [libdef-override]
+
+   lib/second.js:17:24
+   17|   declare export const duplicate: string; // error: duplicate export
+                              ^^^^^^^^^
+
+References:
+   lib/first.js:17:24
+   17|   declare export const duplicate: number;
+                              ^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------- lib/second.js:24:16
+
+This module declaration overrides an existing module `cjs` [1]. Overriding in library definitions can lead to surprising
+behaviors. [libdef-override]
+
+   lib/second.js:24:16
+   24| declare module 'cjs' {
+                      ^^^^^
+
+References:
+   lib/first.js:24:16
+   24| declare module 'cjs' {
+                      ^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------------ test.js:9:1
+
+Cannot cast `first` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:9:1
+   9| first as string; // error: number ~> string
+      ^^^^^
+
+References:
+   lib/first.js:4:31
+   4|   declare export const first: number;
+                                    ^^^^^^ [1]
+   test.js:9:10
+   9| first as string; // error: number ~> string
+               ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:10:1
+
+Cannot cast `second` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   test.js:10:1
+   10| second as number; // error: string ~> number
+       ^^^^^^
+
+References:
+   lib/second.js:4:32
+    4|   declare export const second: string;
+                                      ^^^^^^ [1]
+   test.js:10:11
+   10| second as number; // error: string ~> number
+                 ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:19:1
+
+Cannot cast `1` to `FromSecond` because `1` [1] is incompatible with `Second` [2]. [incompatible-type]
+
+   test.js:19:1
+   19| 1 as FromSecond; // error: number ~> string
+       ^ [1]
+
+References:
+   test.js:19:6
+   19| 1 as FromSecond; // error: number ~> string
+            ^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:24:1
+
+Cannot call `overloaded` because: [incompatible-type]
+ - Either `true` [1] is incompatible with `string` [2].
+ - Or `true` [1] is incompatible with `number` [3].
+
+   test.js:24:1
+   24| overloaded(true); // error: no overload
+       ^^^^^^^^^^
+
+References:
+   test.js:24:12
+   24| overloaded(true); // error: no overload
+                  ^^^^ [1]
+   lib/second.js:7:41
+    7|   declare export function overloaded(x: string): string;
+                                               ^^^^^^ [2]
+   lib/first.js:7:41
+    7|   declare export function overloaded(x: number): number;
+                                               ^^^^^^ [3]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:38:1
+
+Cannot cast `duplicate` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   test.js:38:1
+   38| duplicate as number; // error: string ~> number
+       ^^^^^^^^^
+
+References:
+   lib/second.js:17:35
+   17|   declare export const duplicate: string; // error: duplicate export
+                                         ^^^^^^ [1]
+   test.js:38:14
+   38| duplicate as number; // error: string ~> number
+                    ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:44:1
+
+Cannot cast `require(...)` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   test.js:44:1
+   44| require('cjs') as number; // error: string ~> number
+       ^^^^^^^^^^^^^^
+
+References:
+   lib/second.js:25:27
+   25|   declare module.exports: string; // error: module.exports doesn't merge
+                                 ^^^^^^ [1]
+   test.js:44:19
+   44| require('cjs') as number; // error: string ~> number
+                         ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:52:1
+
+Cannot cast `1` to `SecondType` because `1` [1] is incompatible with `SecondType` [2]. [incompatible-type]
+
+   test.js:52:1
+   52| 1 as TypesThenValues.SecondType; // error: number ~> string
+       ^ [1]
+
+References:
+   test.js:52:6
+   52| 1 as TypesThenValues.SecondType; // error: number ~> string
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:54:1
+
+Cannot cast empty string to `FirstType` because `""` [1] is incompatible with `FirstType` [2]. [incompatible-type]
+
+   test.js:54:1
+   54| '' as ValuesThenTypes.FirstType; // error: string ~> number
+       ^^ [1]
+
+References:
+   test.js:54:7
+   54| '' as ValuesThenTypes.FirstType; // error: string ~> number
+             ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:59:1
+
+Cannot cast `1` to `FromSecond` because `1` [1] is incompatible with `SecondType` [2]. [incompatible-type]
+
+   test.js:59:1
+   59| 1 as Nested.FromSecond; // error: number ~> string
+       ^ [1]
+
+References:
+   test.js:59:6
+   59| 1 as Nested.FromSecond; // error: number ~> string
+            ^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:60:1
+
+Cannot cast empty string to `FromFirst` because `""` [1] is incompatible with `FirstType` [2]. [incompatible-type]
+
+   test.js:60:1
+   60| '' as Nested.FromFirst; // error: string ~> number
+       ^^ [1]
+
+References:
+   test.js:60:7
+   60| '' as Nested.FromFirst; // error: string ~> number
+             ^^^^^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:61:1
+
+Cannot cast `Nested.fromSecond` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   test.js:61:1
+   61| Nested.fromSecond as number; // error: string ~> number
+       ^^^^^^^^^^^^^^^^^
+
+References:
+   lib/first.js:38:31
+   38|     declare const fromSecond: typeof secondValue;
+                                     ^^^^^^^^^^^^^^^^^^ [1]
+   test.js:61:22
+   61| Nested.fromSecond as number; // error: string ~> number
+                            ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:64:1
+
+Cannot cast `Nested.fromInner` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   test.js:64:1
+   64| Nested.fromInner as number; // error: string ~> number
+       ^^^^^^^^^^^^^^^^
+
+References:
+   lib/first.js:39:30
+   39|     declare const fromInner: typeof Inner.second; // error: like for global namespaces, the library check sees this block's `Inner`
+                                    ^^^^^^^^^^^^^^^^^^^ [1]
+   test.js:64:21
+   64| Nested.fromInner as number; // error: string ~> number
+                           ^^^^^^ [2]
+
+
+
+Found 15 errors

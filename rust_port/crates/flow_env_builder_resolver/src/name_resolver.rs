@@ -1128,6 +1128,10 @@ struct NameResolverState {
     interface_merge_conflicts: BTreeMap<ALoc, Vec<ALoc>>,
     declare_class_interface_merge_conflicts: BTreeMap<ALoc, Vec<ALoc>>,
     declare_namespace_read_recorder: DeclareNamespaceReadRecorder,
+    /// The module of the `declare module` block being visited.
+    current_declare_module: Option<FlowSmolStr>,
+    /// For each identifier read inside a `declare module` block, the module.
+    declare_module_reads: FlowOrdMap<ALoc, FlowSmolStr>,
     jsx_base_name: Option<FlowSmolStr>,
     pred_func_map: FlowRedBlackTreeMap<ALoc, env_api::PredFuncInfo<ALoc>>,
     /// Track parameter binding def_locs currently being processed, so that we can
@@ -1201,6 +1205,8 @@ impl NameResolverState {
             interface_merge_conflicts: BTreeMap::new(),
             declare_class_interface_merge_conflicts: BTreeMap::new(),
             declare_namespace_read_recorder: DeclareNamespaceReadRecorder::new(),
+            current_declare_module: None,
+            declare_module_reads: FlowOrdMap::new(),
             jsx_base_name: None,
             pred_func_map: CACHED_PRED.with(|c| c.clone()),
             current_bindings: CACHED_BINDINGS.with(|c| c.clone()),
@@ -3800,11 +3806,20 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         self.record_read(loc, env_val, Some(name.dupe()));
     }
 
+    fn record_declare_module_read(&mut self, loc: &ALoc) {
+        if let Some(module) = &self.env_state.current_declare_module {
+            self.env_state
+                .declare_module_reads
+                .insert(loc.dupe(), module.dupe());
+        }
+    }
+
     /// Records in the read table that `env_val` is read at `loc`.
     fn record_read(&mut self, loc: ALoc, env_val: EnvVal, name: Option<FlowSmolStr>) {
         self.env_state
             .declare_namespace_read_recorder
             .record_identifier_read(loc.dupe());
+        self.record_declare_module_read(&loc);
         let v = if self.env_state.visiting_hoisted_type
             && !(self.env_state.in_param_default && env_val.kind == BindingsKind::TypeParam)
         {
@@ -3859,6 +3874,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         self.env_state
             .declare_namespace_read_recorder
             .record_identifier_read(loc.dupe());
+        self.record_declare_module_read(&loc);
         let env_val = match self.type_env_read_opt(name) {
             None => return,
             Some(v) => v,
@@ -12080,8 +12096,14 @@ impl<'ast, 'a, Cx: Context, Fl: Flow<Cx = Cx>>
             let Ok(()) = hoister.statement(stmt);
         }
         let bindings = hoister.into_bindings();
+        let module = match &m.id {
+            flow_parser::ast::statement::declare_module::Id::Identifier(id) => id.name.dupe(),
+            flow_parser::ast::statement::declare_module::Id::Literal((_, lit)) => lit.value.dupe(),
+        };
         let saved_exclude_syms = std::mem::take(&mut self.env_state.exclude_syms);
+        let saved_declare_module = self.env_state.current_declare_module.replace(module);
         self.statements_with_bindings(block_loc.dupe(), bindings, statements);
+        self.env_state.current_declare_module = saved_declare_module;
         self.env_state.exclude_syms = saved_exclude_syms;
         Ok(())
     }
@@ -13045,6 +13067,7 @@ pub struct NameResolverResult {
     pub invalid_static_type_param_locs: FlowOrdSet<ALoc>,
     pub declare_namespace_read_paths:
         FlowOrdMap<ALoc, FlowVector<env_api::DeclareNamespaceReadPathElement<ALoc>>>,
+    pub declare_module_reads: FlowOrdMap<ALoc, FlowSmolStr>,
     pub assertion_calls: BTreeMap<ALoc, AssertionInfo>,
 }
 
@@ -13068,6 +13091,7 @@ impl NameResolverResult {
             cyclic_type_param_locs: Rc::new(self.cyclic_type_param_locs),
             invalid_static_type_param_locs: Rc::new(self.invalid_static_type_param_locs),
             declare_namespace_read_paths: self.declare_namespace_read_paths,
+            declare_module_reads: self.declare_module_reads,
             assertion_calls: self.assertion_calls,
         }
     }
@@ -13203,6 +13227,7 @@ pub fn walk_with_prepass<Cx: Context, Fl: Flow<Cx = Cx>>(
         .env_state
         .declare_namespace_read_recorder
         .paths_by_read_loc();
+    let declare_module_reads = env_walk.env_state.declare_module_reads.dupe();
     let assertion_calls = env_walk.take_assertion_calls();
     (
         completion_state,
@@ -13223,6 +13248,7 @@ pub fn walk_with_prepass<Cx: Context, Fl: Flow<Cx = Cx>>(
             cyclic_type_param_locs,
             invalid_static_type_param_locs,
             declare_namespace_read_paths,
+            declare_module_reads,
             assertion_calls,
         },
     )

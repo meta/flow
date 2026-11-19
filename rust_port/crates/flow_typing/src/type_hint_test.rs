@@ -303,6 +303,7 @@ mod tests {
                 relay_integration_module_prefix: None,
                 facebook_fbt: None,
                 enable_custom_error: false,
+                declare_module_merging: false,
                 enable_enums: true,
                 enable_component_syntax: true,
                 component_syntax_enabled_in_config: true,

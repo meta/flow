@@ -1,0 +1,7 @@
+[libs]
+lib/first.js
+lib/second.js
+
+[options]
+all=true
+experimental.declare_module_merging=true

@@ -635,6 +635,10 @@ where
     /// values and types are available later during checking. This persisted map
     /// lets checking recover that namespace context after resolver traversal ends.
     pub declare_namespace_read_paths: FlowOrdMap<L, FlowVector<DeclareNamespaceReadPathElement<L>>>,
+    /// For each identifier read inside a library `declare module` block, the
+    /// module. With `experimental.declare_module_merging`, a name that the block
+    /// doesn't bind reads the export of the module, which merges all of its blocks.
+    pub declare_module_reads: FlowOrdMap<L, FlowSmolStr>,
     /// Calls proven to be assertions by the targeted callee analysis, keyed
     /// by callee loc. This persisted map lets checking apply assertion
     /// behavior after resolver traversal ends.
@@ -696,6 +700,7 @@ where
             cyclic_type_param_locs: Rc::new(FlowOrdSet::new()),
             invalid_static_type_param_locs: Rc::new(FlowOrdSet::new()),
             declare_namespace_read_paths: FlowOrdMap::new(),
+            declare_module_reads: FlowOrdMap::new(),
             assertion_calls: BTreeMap::new(),
         }
     }

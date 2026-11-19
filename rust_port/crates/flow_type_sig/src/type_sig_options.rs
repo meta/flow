@@ -19,6 +19,7 @@ pub struct TypeSigOptions {
     pub facebook_key_mirror: bool,
     pub facebook_fbt: Option<FlowSmolStr>,
     pub enable_custom_error: bool,
+    pub declare_module_merging: bool,
     pub enable_enums: bool,
     pub enable_component_syntax: bool,
     pub component_syntax_enabled_in_config: bool,
@@ -72,6 +73,7 @@ impl TypeSigOptions {
             hook_compatibility: options.hook_compatibility_in_file(file),
             facebook_fbt: options.facebook_fbt.dupe(),
             enable_custom_error: options.enable_custom_error,
+            declare_module_merging: options.declare_module_merging,
             // TS enums (.ts/.d.ts) are a distinct feature from Flow Enums and are always
             // available, independent of the `enums` option which gates Flow Enums.
             enable_enums: options.enums || flow_common::files::has_ts_ext(file),
@@ -99,6 +101,7 @@ impl TypeSigOptions {
             relay_integration_module_prefix: None,
             facebook_fbt: options.facebook_fbt.dupe(),
             enable_custom_error: options.enable_custom_error,
+            declare_module_merging: options.declare_module_merging,
             enable_enums: options.enums,
             enable_component_syntax: true,
             component_syntax_enabled_in_config: options.component_syntax,
