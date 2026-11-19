@@ -1110,21 +1110,30 @@ pub fn make_next_files(
                 if prunes(path) {
                     children.clear();
                 }
-                // Don't follow a symlink to a directory the crawl reads anyway, which also ends
-                // cycles, e.g. between packages linked into each other's node_modules.
+                // Don't follow a symlink to a directory the crawl reads anyway, or to one the walk
+                // is already in. Either can close a cycle, e.g. between packages linked into each
+                // other's node_modules.
                 for entry in children.iter_mut().flatten() {
-                    if entry.read_children.is_some()
-                        && entry.path_is_symlink()
-                        // Only under the root does the crawl report what's under a symlink by its
-                        // real path.
-                        && entry.parent_path().starts_with(&root_buf)
-                        && let Ok(target) = cached_canonicalize(&entry.path())
+                    if entry.read_children.is_none() || !entry.path_is_symlink() {
+                        continue;
+                    }
+                    let Ok(target) = cached_canonicalize(&entry.path()) else {
+                        continue;
+                    };
+                    // Only under the root does the crawl report what's under a symlink by its real
+                    // path.
+                    let crawled_directly = entry.parent_path().starts_with(&root_buf)
                         && target.starts_with(&crawl_root)
                         // The crawl reports everything under the target itself.
                         && (duped_options.implicitly_include_root
                             || duped_options.includes.matches_subtree(&target.to_string_lossy()))
                         // A pruned target is still followed, so the symlinks inside it resolve.
-                        && !prunes(&target)
+                        && !prunes(&target);
+                    if crawled_directly
+                        || path
+                            .ancestors()
+                            .take(entry.depth)
+                            .any(|dir| cached_canonicalize(dir).is_ok_and(|dir| dir == target))
                     {
                         entry.read_children = None;
                     }
