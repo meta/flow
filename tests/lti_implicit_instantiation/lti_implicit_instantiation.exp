@@ -846,11 +846,11 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
                                                            ^ [1]
 
 References:
-   <BUILTINS>/react.js:127:38
-   127|   type ElementRef<C extends string | component(...empty)> =
+   <BUILTINS>/react.js:132:38
+   132|   type ElementRef<C extends string | component(...empty)> =
                                              ^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/react.js:127:29
-   127|   type ElementRef<C extends string | component(...empty)> =
+   <BUILTINS>/react.js:132:29
+   132|   type ElementRef<C extends string | component(...empty)> =
                                     ^^^^^^ [3]
 
 

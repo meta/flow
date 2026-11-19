@@ -396,6 +396,7 @@ Flags: --pretty
       "name":"ForwardRefRenderFunction",
       "type":"type ForwardRefRenderFunction<out T, in P = {...}> = (props: P, ref: RefSetter<T>) => React$Node"
     },
+    {"name":"FragmentInstance","type":"interface FragmentInstance"},
     {
       "name":"FunctionComponent",
       "type":"type FunctionComponent<in P extends {...} = {...}> = component(...P)"

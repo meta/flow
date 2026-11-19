@@ -649,8 +649,8 @@ Cannot get `React.MISSING` because property `MISSING` is missing in `...` [1]. [
                                     ^^^^^^^
 
 References:
-   <BUILTINS>/react.js:377:16
-   377| declare module "react" {
+   <BUILTINS>/react.js:382:16
+   382| declare module "react" {
                        ^^^^^^^ [1]
 
 
@@ -663,8 +663,8 @@ Cannot get `React.MISSING` because property `MISSING` is missing in `...` [1]. [
                                     ^^^^^^^
 
 References:
-   <BUILTINS>/react.js:377:16
-   377| declare module "react" {
+   <BUILTINS>/react.js:382:16
+   382| declare module "react" {
                        ^^^^^^^ [1]
 
 
@@ -677,8 +677,8 @@ Cannot get `React.MISSING` because property `MISSING` is missing in `...` [1]. [
                   ^^^^^^^
 
 References:
-   <BUILTINS>/react.js:377:16
-   377| declare module "react" {
+   <BUILTINS>/react.js:382:16
+   382| declare module "react" {
                        ^^^^^^^ [1]
 
 
@@ -691,8 +691,8 @@ Cannot get `React.MISSING` because property `MISSING` is missing in `...` [1]. [
                      ^^^^^^^
 
 References:
-   <BUILTINS>/react.js:377:16
-   377| declare module "react" {
+   <BUILTINS>/react.js:382:16
+   382| declare module "react" {
                        ^^^^^^^ [1]
 
 

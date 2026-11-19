@@ -31,8 +31,8 @@ Cannot instantiate `React.ComponentType` because in type argument `P`: `unknown`
                                                                                                       ^ [1]
 
 References:
-   <BUILTINS>/react.js:583:50
-   583|   declare export type ComponentType<in P extends {...}> = component(...P);
+   <BUILTINS>/react.js:588:50
+   588|   declare export type ComponentType<in P extends {...}> = component(...P);
                                                          ^^^^^ [2]
 
 

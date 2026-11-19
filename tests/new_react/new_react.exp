@@ -43,8 +43,8 @@ Cannot use `React.Component` [1] with fewer than 1 type argument. [missing-type-
                           ^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:1255:28
-   1255|     declare class Component<Props, State = void> {
+   <BUILTINS>/react.js:1261:28
+   1261|     declare class Component<Props, State = void> {
                                     ^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
@@ -57,8 +57,8 @@ Cannot use `React.Component` [1] with fewer than 1 type argument. [missing-type-
                           ^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:1255:28
-   1255|     declare class Component<Props, State = void> {
+   <BUILTINS>/react.js:1261:28
+   1261|     declare class Component<Props, State = void> {
                                     ^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
@@ -162,8 +162,8 @@ References:
      35|
      36| }
          ^ [2]
-   <BUILTINS>/react.js:1264:23
-   1264|         partialState: ?Readonly<Partial<State>> | ((prevState: State, props: Props) => ?Readonly<Partial<State>>),
+   <BUILTINS>/react.js:1270:23
+   1270|         partialState: ?Readonly<Partial<State>> | ((prevState: State, props: Props) => ?Readonly<Partial<State>>),
                                ^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
@@ -213,8 +213,8 @@ References:
      35|
      36| }
          ^ [2]
-   <BUILTINS>/react.js:1264:23
-   1264|         partialState: ?Readonly<Partial<State>> | ((prevState: State, props: Props) => ?Readonly<Partial<State>>),
+   <BUILTINS>/react.js:1270:23
+   1270|         partialState: ?Readonly<Partial<State>> | ((prevState: State, props: Props) => ?Readonly<Partial<State>>),
                                ^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
@@ -267,8 +267,8 @@ References:
      35|
      36| }
          ^ [2]
-   <BUILTINS>/react.js:1264:52
-   1264|         partialState: ?Readonly<Partial<State>> | ((prevState: State, props: Props) => ?Readonly<Partial<State>>),
+   <BUILTINS>/react.js:1270:52
+   1270|         partialState: ?Readonly<Partial<State>> | ((prevState: State, props: Props) => ?Readonly<Partial<State>>),
                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
@@ -458,8 +458,8 @@ Cannot get `this.state.x` because property `x` is missing in `void` [1]. [incomp
                                ^
 
 References:
-   <BUILTINS>/react.js:1255:44
-   1255|     declare class Component<Props, State = void> {
+   <BUILTINS>/react.js:1261:44
+   1261|     declare class Component<Props, State = void> {
                                                     ^^^^ [1]
 
 
