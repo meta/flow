@@ -750,23 +750,11 @@ fn json_of_insttype<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, inst: &InstTy
     );
     let call_t_json = match inst.inst_call_t {
         None => Json::Null,
-        Some(id) => {
-            let call = cx.find_call(id);
-            json!({
-                "id": id,
-                "call": type_to_json(cx, depth - 1, &call),
-            })
-        }
+        Some(id) => json_of_inst_call_prop(cx, depth, id, "call"),
     };
     let construct_t_json = match inst.inst_construct_t {
         None => Json::Null,
-        Some(id) => {
-            let construct = cx.find_call(id);
-            json!({
-                "id": id,
-                "construct": type_to_json(cx, depth - 1, &construct),
-            })
-        }
+        Some(id) => json_of_inst_call_prop(cx, depth, id, "construct"),
     };
     json!({
         "class_name": class_name_json,
@@ -777,6 +765,16 @@ fn json_of_insttype<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, inst: &InstTy
         "call_t": call_t_json,
         "construct_t": construct_t_json,
     })
+}
+
+fn json_of_inst_call_prop<'cx>(
+    cx: &mut TypeJsonCx<'_, 'cx>,
+    depth: i32,
+    id: i32,
+    key: &str,
+) -> Json {
+    let t = cx.find_call(id);
+    json!({"id": id, key: type_to_json(cx, depth - 1, &t)})
 }
 
 // Convert def_t to JSON
