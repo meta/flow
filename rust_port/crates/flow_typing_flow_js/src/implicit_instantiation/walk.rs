@@ -5335,7 +5335,8 @@ impl<'e> Walker<'e> {
                 Ok(())
             }
             // Operands with markers inside: the destructor evaluated with the markers rigid, if
-            // it makes a structure. Otherwise, no evidence.
+            // it makes a structure, or a union of them (from a union among the operands), which
+            // the flow-based solve matches by speculation. Otherwise, no evidence.
             Destructor::SpreadType(_)
             | Destructor::RestType(..)
             | Destructor::ReactCheckComponentConfig { .. }
@@ -5351,7 +5352,9 @@ impl<'e> Walker<'e> {
                     return self.walk(cx, l, type_);
                 }
                 match self.evaluate(cx, type_, defer_use_t)? {
-                    Some(result) if self.is_structure(cx, &result) => self.walk(cx, l, &result),
+                    Some(result) if self.is_structure_or_union_of(cx, &result) => {
+                        self.walk(cx, l, &result)
+                    }
                     _ => self.give_up(cx, "destructor", l, u),
                 }
             }
