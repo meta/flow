@@ -11,7 +11,7 @@ https://flow.org/en/docs/types/literals/ for more information on literal types. 
 Error --------------------------------------------------------------------------------------------- boolean_key.js:15:23
 
 Cannot use `key` [1] to assign a computed property. Computed properties may only be numeric or string literal values,
-but this one is a `boolean` [2]. Can you add an appropriate type annotation to `key` [1]? See
+but this one is a `T` [2]. Can you add an appropriate type annotation to `key` [1]? See
 https://flow.org/en/docs/types/literals/ for more information on literal types. [invalid-computed-prop]
 
    boolean_key.js:15:23
@@ -27,7 +27,7 @@ References:
 Error --------------------------------------------------------------------------------------------- boolean_key.js:21:23
 
 Cannot use `key` [1] to assign a computed property. Computed properties may only be numeric or string literal values,
-but this one is a `true` [2]. Can you add an appropriate type annotation to `key` [1]? See
+but this one is a `T` [2]. Can you add an appropriate type annotation to `key` [1]? See
 https://flow.org/en/docs/types/literals/ for more information on literal types. [invalid-computed-prop]
 
    boolean_key.js:21:23
@@ -307,7 +307,7 @@ Error --------------------------------------------------------------------------
 
 Missing an annotation on return because generic functions must be fully annotated. [missing-local-annot]
 
-   3| function f1<T extends string>(x: T) { return {[x]: x} } // intended as the paired OK case (bounded T extends string should allow computed-prop keys); currently ERROR — Flow requires a return annotation on poly functions, and even with one (`: {[T]: T}`) it widens the computed key from T to string and emits [incompatible-type]
+   3| function f1<T extends string>(x: T) { return {[x]: x} } // error: Flow requires a return annotation on poly functions; f3 is the annotated case
                                          
 
 
@@ -322,7 +322,7 @@ Missing an annotation on return because generic functions must be fully annotate
 Error ----------------------------------------------------------------------------------------------------- poly.js:4:33
 
 Cannot use `x` [1] to assign a computed property. Computed properties may only be numeric or string literal values, but
-this one is a `unknown` [2]. Can you add an appropriate type annotation to `x` [1]? See
+this one is a `T` [2]. Can you add an appropriate type annotation to `x` [1]? See
 https://flow.org/en/docs/types/literals/ for more information on literal types. [invalid-computed-prop]
 
    poly.js:4:33

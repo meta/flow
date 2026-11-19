@@ -2474,6 +2474,26 @@ pub fn exact_obj_error<'cx>(
 
 // Unions
 
+/// The underlying type of the nominal type `nominal_type` where it is visible: in the file that
+/// defines the opaque type, or for an opaque type with a custom error.
+pub fn visible_underlying_t<'a>(
+    cx: &Context<'_>,
+    nominal_type: &'a flow_typing_type::type_::NominalType,
+) -> Option<&'a Type> {
+    use flow_typing_type::type_::nominal;
+    match (&nominal_type.nominal_id, &nominal_type.underlying_t) {
+        (
+            nominal::Id::UserDefinedOpaqueTypeId(box nominal::UserDefinedOpaqueTypeIdData(id, _)),
+            nominal::UnderlyingT::OpaqueWithLocal { t },
+        ) if id.0.source() == Some(cx.file()) => Some(t),
+        (
+            nominal::Id::UserDefinedOpaqueTypeId(_),
+            nominal::UnderlyingT::CustomError(box nominal::CustomErrorData { t, .. }),
+        ) => Some(t),
+        _ => None,
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum UnionOptimizationGuardResult {
     True,

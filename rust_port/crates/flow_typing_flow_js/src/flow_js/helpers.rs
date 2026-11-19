@@ -755,10 +755,6 @@ pub(super) fn handle_bounded<'cx>(
             ..
         })
         | UseTInner::ConcretizeT(box ConcretizeTData {
-            kind: ConcretizationKind::ConcretizeForComputedObjectKeys,
-            ..
-        })
-        | UseTInner::ConcretizeT(box ConcretizeTData {
             kind: ConcretizationKind::ConcretizeForOptionalChain,
             ..
         })
@@ -767,6 +763,19 @@ pub(super) fn handle_bounded<'cx>(
             let repos_bound = reposition_reason(cx, env, Some(trace), reason, false, bound)?;
             rec_flow(cx, env, trace, (&repos_bound, u))?;
             Ok(true)
+        }
+        // A computed object key keeps its identity, over each member of a union bound.
+        UseTInner::ConcretizeT(box ConcretizeTData {
+            kind: ConcretizationKind::ConcretizeForComputedObjectKeys,
+            ..
+        }) => {
+            if matches!(bound.deref(), TypeInner::UnionT(..)) {
+                distribute_union_intersection(cx, None)
+            } else if is_concrete(bound) {
+                Ok(false)
+            } else {
+                wait_for_concrete_bound(cx, None)
+            }
         }
         UseTInner::UseT(use_op, t)
             if matches!(

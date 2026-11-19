@@ -5673,6 +5673,35 @@ fn object_prop<'a>(
     })
 }
 
+/// Whether `key` can key the index signature of an object literal. A type known only through its
+/// bound, a type parameter or an opaque type, can when its bound can.
+fn valid_computed_key(cx: &Context<'_>, key: &Type) -> bool {
+    match key.deref() {
+        TypeInner::DefT(_, def) => matches!(
+            def.deref(),
+            DefTInner::StrGeneralT(_) | DefTInner::NumGeneralT(_) | DefTInner::EnumValueT(_)
+        ),
+        TypeInner::TemplateLiteralT { .. } => true,
+        TypeInner::AnyT(_, _)
+        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            kind: ImplicitInstantiationTvarKind::Placeholder,
+            ..
+        }) => true,
+        TypeInner::GenericT(box GenericTData { bound, .. }) => valid_computed_key(cx, bound),
+        TypeInner::NominalT { nominal_type, .. }
+            if matches!(
+                &nominal_type.nominal_id,
+                nominal::Id::UserDefinedOpaqueTypeId(_)
+            ) =>
+        {
+            flow_js_utils::visible_underlying_t(cx, nominal_type)
+                .or(nominal_type.upper_t.as_ref())
+                .is_some_and(|t| valid_computed_key(cx, t))
+        }
+        _ => false,
+    }
+}
+
 fn create_computed_prop<'a>(
     cx: &mut Context<'a>,
     key_loc: ALoc,
@@ -5685,21 +5714,6 @@ fn create_computed_prop<'a>(
     frozen: bool,
     value: (ALoc, Type),
 ) -> object_expression_acc::ComputedProp {
-    let valid_computed_key = |key: &Type| -> bool {
-        match key.deref() {
-            TypeInner::DefT(_, def) => matches!(
-                def.deref(),
-                DefTInner::StrGeneralT(_) | DefTInner::NumGeneralT(_) | DefTInner::EnumValueT(_)
-            ),
-            TypeInner::TemplateLiteralT { .. } => true,
-            TypeInner::AnyT(_, _)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }) => true,
-            _ => false,
-        }
-    };
     let has_null = concretized_keys.iter().any(|key| {
         matches!(
             key.deref(),
@@ -5731,7 +5745,7 @@ fn create_computed_prop<'a>(
     let mut single_key = |key: Type| -> object_expression_acc::ComputedProp {
         match flow_js_utils::propref_for_elem_t(cx, &key) {
             PropRef::Computed(key) => {
-                if valid_computed_key(&key) {
+                if valid_computed_key(cx, &key) {
                     object_expression_acc::ComputedProp::NonLiteralKey {
                         key_loc: key_loc.dupe(),
                         key,
@@ -5740,80 +5754,6 @@ fn create_computed_prop<'a>(
                     }
                 } else {
                     match key.deref() {
-                        TypeInner::NominalT {
-                            reason: nom_reason,
-                            nominal_type,
-                        } if let nominal::UnderlyingT::OpaqueWithLocal { t: inner_key, .. } =
-                            &nominal_type.underlying_t
-                            && matches!(
-                                &nominal_type.nominal_id,
-                                nominal::Id::UserDefinedOpaqueTypeId(_)
-                            )
-                            && nom_reason.loc().source() == nom_reason.def_loc().source() =>
-                        {
-                            if valid_computed_key(inner_key) {
-                                return object_expression_acc::ComputedProp::NonLiteralKey {
-                                    key_loc: key_loc.dupe(),
-                                    key,
-                                    value: value.clone(),
-                                    named_set_opt: None,
-                                };
-                            }
-                            // Fallthrough to error case
-                            let r = reason_of_t(&key).dupe();
-                            flow_js::add_output_non_speculating(
-                                cx,
-                                ErrorMessage::EObjectComputedPropertyAssign(Box::new((
-                                    flow_js_utils::type_reference_with_reason_for_error(&key, r),
-                                    Some(key_expression.dupe()),
-                                    intermediate_error_types::InvalidObjKey::Other,
-                                ))),
-                            );
-                            object_expression_acc::ComputedProp::IgnoredInvalidNonLiteralKey
-                        }
-                        TypeInner::NominalT { nominal_type, .. }
-                            if let nominal::UnderlyingT::CustomError(
-                                box nominal::CustomErrorData { t: inner_key, .. },
-                            ) = &nominal_type.underlying_t
-                                && matches!(
-                                    &nominal_type.nominal_id,
-                                    nominal::Id::UserDefinedOpaqueTypeId(_)
-                                ) =>
-                        {
-                            if valid_computed_key(inner_key) {
-                                return object_expression_acc::ComputedProp::NonLiteralKey {
-                                    key_loc: key_loc.dupe(),
-                                    key,
-                                    value: value.clone(),
-                                    named_set_opt: None,
-                                };
-                            }
-                            let r = reason_of_t(&key).dupe();
-                            flow_js::add_output_non_speculating(
-                                cx,
-                                ErrorMessage::EObjectComputedPropertyAssign(Box::new((
-                                    flow_js_utils::type_reference_with_reason_for_error(&key, r),
-                                    Some(key_expression.dupe()),
-                                    intermediate_error_types::InvalidObjKey::Other,
-                                ))),
-                            );
-                            object_expression_acc::ComputedProp::IgnoredInvalidNonLiteralKey
-                        }
-                        TypeInner::NominalT { nominal_type, .. }
-                            if let Some(upper_t) = &nominal_type.upper_t
-                                && matches!(
-                                    &nominal_type.nominal_id,
-                                    nominal::Id::UserDefinedOpaqueTypeId(_)
-                                )
-                                && valid_computed_key(upper_t) =>
-                        {
-                            object_expression_acc::ComputedProp::NonLiteralKey {
-                                key_loc: key_loc.dupe(),
-                                key,
-                                value: value.clone(),
-                                named_set_opt: None,
-                            }
-                        }
                         TypeInner::DefT(_, def)
                             if matches!(def.deref(), DefTInner::SingletonNumT { .. }) =>
                         {
