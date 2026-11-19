@@ -12,6 +12,7 @@ pub mod bitset;
 pub mod build_id;
 pub mod cli_overrides;
 pub mod docblock;
+pub mod dump_types_document;
 pub mod enclosing_context;
 pub mod error_ref;
 pub mod files;

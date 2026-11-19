@@ -6,6 +6,7 @@
  */
 
 use flow_command_spec::arg_spec;
+use flow_common::dump_types_document::DocumentOptions;
 use flow_common_errors::error_utils;
 use flow_server_env::server_prot;
 
@@ -46,7 +47,19 @@ fn spec() -> flow_command_spec::Spec {
     .flag(
         "--dedup",
         &arg_spec::optional_value_with_default(256, arg_spec::int()),
-        "Print each repeated type larger than N bytes (default 256) once, in a shared $defs table, and refer to it elsewhere. Requires --for-tool and --json",
+        "Print each repeated type larger than N bytes (default 256) once, in a shared $defs table, and refer to it elsewhere. Types stay strings of JSON unless --json-direct is given. Requires --for-tool and --json",
+        None,
+    )
+    .flag(
+        "--json-direct",
+        &arg_spec::truthy(),
+        "Print each type as a JSON value rather than as a string of JSON, in an object whose \"schema\" field says so. Requires --for-tool and --json",
+        None,
+    )
+    .flag(
+        "--force-schema",
+        &arg_spec::truthy(),
+        "Always print an object whose \"schema\" field lists every option that shapes the output, even where the output would otherwise be a plain array. Readers that expect the plain array cannot read it. Requires --for-tool and --json",
         None,
     )
     .anon("file", &arg_spec::optional(arg_spec::string()))
@@ -55,56 +68,55 @@ fn spec() -> flow_command_spec::Spec {
 fn types_to_json(
     file_content: Option<&String>,
     strip_root: Option<&str>,
+    document: DocumentOptions,
     types: &[(flow_parser::loc::Loc, String)],
-) -> serde_json::Value {
+) -> Result<serde_json::Value, serde_json::Error> {
     let offset_table =
         file_content.map(|s| flow_parser::offset_utils::OffsetTable::make(s.as_str()));
-    serde_json::Value::Array(
-        types
-            .iter()
-            .map(|(loc, t)| {
-                let mut json = serde_json::Map::new();
-                json.insert("type".to_string(), serde_json::Value::String(t.clone()));
-                json.insert("reasons".to_string(), serde_json::Value::Array(vec![]));
-                json.insert(
-                    "loc".to_string(),
-                    flow_common::reason::json_of_loc(strip_root, false, offset_table.as_ref(), loc),
-                );
-                json.extend(error_utils::deprecated_json_props_of_loc(strip_root, loc));
-                serde_json::Value::Object(json)
-            })
-            .collect(),
-    )
+    let entries = types
+        .iter()
+        .map(|(loc, t)| {
+            let mut json = serde_json::Map::new();
+            json.insert("type".to_string(), document.type_value(t)?);
+            json.insert("reasons".to_string(), serde_json::Value::Array(vec![]));
+            json.insert(
+                "loc".to_string(),
+                flow_common::reason::json_of_loc(strip_root, false, offset_table.as_ref(), loc),
+            );
+            json.extend(error_utils::deprecated_json_props_of_loc(strip_root, loc));
+            Ok(serde_json::Value::Object(json))
+        })
+        .collect::<Result<_, _>>()?;
+    Ok(serde_json::Value::Array(entries))
 }
 
 fn handle_response(
     types: Vec<(flow_parser::loc::Loc, String)>,
     defs: Option<String>,
     json: bool,
+    document: DocumentOptions,
     file_content: Option<&String>,
     pretty: bool,
     strip_root: Option<&str>,
 ) {
     if json {
-        let types_json = types_to_json(file_content, strip_root, &types);
-        // Only `--dedup` changes the top-level shape, from the historical bare
-        // array to `{"types": [...], "$defs": {...}}`.
-        let payload = match defs {
-            None => types_json,
-            Some(defs) => match serde_json::from_str::<serde_json::Value>(&defs) {
-                Ok(defs_json) => serde_json::json!({
-                    "types": types_json,
-                    "$defs": defs_json,
-                }),
-                Err(err) => {
-                    // We produced this string ourselves, so this is unreachable
-                    // in practice; report it rather than emit a wrong shape.
-                    eprintln!("dump-types: could not re-parse $defs: {err}");
-                    return;
-                }
-            },
+        // The server produced both the types and `$defs`, so a parse failure is unreachable in
+        // practice; report it rather than emit a wrong shape.
+        let types_json = match types_to_json(file_content, strip_root, document, &types) {
+            Ok(types_json) => types_json,
+            Err(err) => {
+                eprintln!("dump-types: could not parse a type as JSON: {err}");
+                return;
+            }
         };
-        flow_hh_json::print_json_endline(pretty, &payload);
+        let defs_json = match defs.map(|defs| serde_json::from_str(&defs)).transpose() {
+            Ok(defs_json) => defs_json,
+            Err(err) => {
+                eprintln!("dump-types: could not re-parse $defs: {err}");
+                return;
+            }
+        };
+        flow_hh_json::print_json_endline(pretty, &document.document(types_json, defs_json));
     } else {
         let out = types
             .into_iter()
@@ -125,6 +137,7 @@ fn handle_error(
     err: String,
     file_content: Option<&String>,
     json: bool,
+    document: DocumentOptions,
     pretty: bool,
     strip_root: Option<&str>,
     dedup_threshold: Option<usize>,
@@ -139,7 +152,15 @@ fn handle_error(
         // Also output an empty payload on stdout, for JSON parsers. It has to keep the shape the
         // caller asked for, so a `--dedup` consumer is not handed a bare array on the error path.
         let empty_defs = dedup_threshold.map(|_| "{}".to_owned());
-        handle_response(vec![], empty_defs, json, file_content, pretty, strip_root);
+        handle_response(
+            vec![],
+            empty_defs,
+            json,
+            document,
+            file_content,
+            pretty,
+            strip_root,
+        );
     } else {
         eprintln!("{}", err);
     }
@@ -150,20 +171,28 @@ struct Modifiers {
     for_tool: bool,
     json: bool,
     dedup: bool,
+    document: DocumentOptions,
     path: bool,
     file: bool,
 }
 
 /// Exits with a usage error naming the first modifier that would be ignored.
 fn reject_inapplicable_modifiers(m: &Modifiers) {
-    // `$defs` has a place only in the `--for-tool --json` payload.
-    if m.dedup && !(m.for_tool && m.json) {
+    // Each shapes the `--for-tool --json` payload, and only that.
+    let for_tool_json_modifiers = [
+        ("--dedup", m.dedup),
+        ("--json-direct", m.document.json_direct),
+        ("--force-schema", m.document.force_schema),
+    ];
+    if !(m.for_tool && m.json)
+        && let Some((flag, _)) = for_tool_json_modifiers.iter().find(|(_, used)| *used)
+    {
         let missing = [("--for-tool", m.for_tool), ("--json", m.json)]
             .into_iter()
             .filter(|(_, present)| !present)
             .map(|(flag, _)| flag)
             .collect::<Vec<_>>();
-        usage_error(&format!("--dedup requires {}", missing.join(" and ")));
+        usage_error(&format!("{flag} requires {}", missing.join(" and ")));
     }
     if m.path && m.file {
         usage_error("--path applies only to a file read from stdin, not to a FILE argument");
@@ -212,12 +241,18 @@ fn main(args: &arg_spec::Values) {
     let filename =
         flow_command_spec::get(args, "file", &arg_spec::optional(arg_spec::string())).unwrap();
 
+    let document = DocumentOptions {
+        json_direct: flow_command_spec::get(args, "--json-direct", &arg_spec::truthy()).unwrap(),
+        force_schema: flow_command_spec::get(args, "--force-schema", &arg_spec::truthy()).unwrap(),
+    };
+
     let json = json_flags.json || json_flags.pretty;
 
     reject_inapplicable_modifiers(&Modifiers {
         for_tool: for_tool.is_some(),
         json,
         dedup: dedup_threshold.is_some(),
+        document,
         path: path.is_some(),
         file: filename.is_some(),
     });
@@ -258,6 +293,7 @@ fn main(args: &arg_spec::Values) {
                 err,
                 file_content.as_ref(),
                 json,
+                document,
                 json_flags.pretty,
                 strip_root.as_deref(),
                 dedup_threshold,
@@ -268,6 +304,7 @@ fn main(args: &arg_spec::Values) {
                 response,
                 defs,
                 json,
+                document,
                 file_content.as_ref(),
                 json_flags.pretty,
                 strip_root.as_deref(),
