@@ -3446,6 +3446,13 @@ impl<'e> Walker<'e> {
         } else {
             generic_values
         };
+        // The key and the value of indexers are compared as fields, before the properties, as
+        // subtyping does.
+        if let (Some(ld), Some(ud)) = (ld, ud) {
+            let (lpole, upole) = (ld.dict_polarity, ud.dict_polarity);
+            self.walk_field(cx, &ld.key, lpole, &ud.key, upole, lower_is_literal)?;
+            self.walk_field(cx, &ld.value, lpole, &ud.value, upole, lower_is_literal)?;
+        }
         for (name, uprop) in others.into_iter().chain(generic_values) {
             match lp.get(name) {
                 Some(lprop) => self.walk_prop(cx, lprop, uprop, lower_is_literal)?,
@@ -3480,12 +3487,6 @@ impl<'e> Walker<'e> {
                         flow_js_utils::type_of_key_name_with_env(self.env, name.dupe(), &reason);
                     self.walk(cx, &key_t, &ud.key)?;
                 }
-            }
-            // The key and the value of indexers are compared as fields, as subtyping does.
-            if let Some(ld) = ld {
-                let (lpole, upole) = (ld.dict_polarity, ud.dict_polarity);
-                self.walk_field(cx, &ld.key, lpole, &ud.key, upole, lower_is_literal)?;
-                self.walk_field(cx, &ld.value, lpole, &ud.value, upole, lower_is_literal)?;
             }
         }
         Ok(())
