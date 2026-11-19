@@ -13,6 +13,6 @@ newState = {
     ...MOCK_UI_STATE.b,
     fetching: true,
   },
-}; // ok
+}; // error
 
 newState = MOCK_UI_STATE; // error

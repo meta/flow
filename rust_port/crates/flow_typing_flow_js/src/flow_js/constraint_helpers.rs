@@ -1053,33 +1053,11 @@ pub(super) fn goto<'cx>(
             Ok(())
         }
         (constraint::Constraints::Resolved(t1), constraint::Constraints::Resolved(t2)) => {
-            // replace node first, in case rec_unify recurses back to these tvars
-            set_constraint_node_goto(cx, node1, node2);
-            rec_unify(
-                cx,
-                env,
-                trace,
-                use_op,
-                UnifyCause::Uncategorized,
-                None,
-                &t1,
-                &t2,
-            )
+            unify_resolved_constraint_nodes(cx, env, trace, use_op, (node1, node2), None, &t1, &t2)
         }
         (constraint::Constraints::Resolved(t1), constraint::Constraints::FullyResolved(s2)) => {
             let t2 = cx.force_fully_resolved_tvar(&s2);
-            // replace node first, in case rec_unify recurses back to these tvars
-            set_constraint_node_goto(cx, node1, node2);
-            rec_unify(
-                cx,
-                env,
-                trace,
-                use_op,
-                UnifyCause::Uncategorized,
-                None,
-                &t1,
-                &t2,
-            )
+            unify_resolved_constraint_nodes(cx, env, trace, use_op, (node1, node2), None, &t1, &t2)
         }
         (
             constraint::Constraints::FullyResolved(s1),
@@ -1087,37 +1065,75 @@ pub(super) fn goto<'cx>(
         ) => {
             let t1 = cx.force_fully_resolved_tvar(&s1);
             let t2 = cx.force_fully_resolved_tvar(&s2);
-            // replace node first, in case rec_unify recurses back to these tvars
-            set_constraint_node_goto(cx, node1, node2);
-            rec_unify(
-                cx,
-                env,
-                trace,
-                use_op,
-                UnifyCause::Uncategorized,
-                None,
-                &t1,
-                &t2,
-            )
+            unify_resolved_constraint_nodes(cx, env, trace, use_op, (node1, node2), None, &t1, &t2)
         }
         (constraint::Constraints::FullyResolved(s1), constraint::Constraints::Resolved(t2)) => {
             let t1 = cx.force_fully_resolved_tvar(&s1);
             // prefer fully resolved roots to resolved roots
-            set_constraint_node_constraints(cx, node2, constraint::Constraints::FullyResolved(s1));
-            // replace node first, in case rec_unify recurses back to these tvars
-            set_constraint_node_goto(cx, node1, node2);
-            rec_unify(
+            unify_resolved_constraint_nodes(
                 cx,
                 env,
                 trace,
                 use_op,
-                UnifyCause::Uncategorized,
-                None,
+                (node1, node2),
+                Some(constraint::Constraints::FullyResolved(s1)),
                 &t1,
                 &t2,
             )
         }
     }
+}
+
+/// Unify the types of two resolved constraint nodes and point the first to the second, whose
+/// constraints become `root2_constraints` if given. The node is replaced first, in case
+/// `rec_unify` recurses back to these tvars. In speculation, a trial that fails must leave the
+/// nodes as it found them, so they are linked only once their types unify.
+fn unify_resolved_constraint_nodes<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    trace: DepthTrace,
+    use_op: UseOp,
+    (node1, node2): (ConstraintNodeId, ConstraintNodeId),
+    root2_constraints: Option<constraint::Constraints<Cx>>,
+    t1: &Type,
+    t2: &Type,
+) -> Result<(), FlowJsException> {
+    if env.speculation_id().is_none() {
+        if let Some(constraints) = root2_constraints {
+            set_constraint_node_constraints(cx, node2, constraints);
+        }
+        set_constraint_node_goto(cx, node1, node2);
+        return rec_unify(
+            cx,
+            env,
+            trace,
+            use_op,
+            UnifyCause::Uncategorized,
+            None,
+            t1,
+            t2,
+        );
+    }
+    rec_unify(
+        cx,
+        env,
+        trace,
+        use_op,
+        UnifyCause::Uncategorized,
+        None,
+        t1,
+        t2,
+    )?;
+    let (node1, _) = constraint_node_root(cx, node1);
+    let (node2, _) = constraint_node_root(cx, node2);
+    if node1 == node2 {
+        return Ok(());
+    }
+    if let Some(constraints) = root2_constraints {
+        set_constraint_node_constraints(cx, node2, constraints);
+    }
+    set_constraint_node_goto(cx, node1, node2);
+    Ok(())
 }
 
 /// Unify two constraint nodes. This involves finding their roots, and making one

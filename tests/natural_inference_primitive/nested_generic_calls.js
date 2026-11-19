@@ -130,7 +130,7 @@ function test_callback_return() {
 
   // A generic call passed directly as an argument is not a callback return
   declare function id<T>(x: T): T;
-  id(xs[0].map(_ => 'a')); // TODO error 'a' and string are not exactly the same
+  id(xs[0].map(_ => 'a')); // error 'a' and string are not exactly the same
 }
 
 // A generic function passed as a callback pins its own tparams from both the
