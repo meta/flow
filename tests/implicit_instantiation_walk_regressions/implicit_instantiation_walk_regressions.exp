@@ -1194,5 +1194,23 @@ References:
               ^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------ union_to_intersection.js:13:1
 
-Found 64 errors
+Cannot cast `loaded.data` to `Array<empty>` because `ReadonlyArray<unknown>` [1] is incompatible with
+`Array<empty>` [2]. [incompatible-type]
+
+   union_to_intersection.js:13:1
+   13| loaded.data as Array<empty>; // error: the second object's `data` is read-only
+       ^^^^^^^^^^^
+
+References:
+   union_to_intersection.js:9:12
+    9|   | {data: ReadonlyArray<unknown>, loadState: LoadState};
+                  ^^^^^^^^^^^^^^^^^^^^^^ [1]
+   union_to_intersection.js:13:16
+   13| loaded.data as Array<empty>; // error: the second object's `data` is read-only
+                      ^^^^^^^^^^^^ [2]
+
+
+
+Found 65 errors

@@ -1387,7 +1387,11 @@ impl<'e> Walker<'e> {
                     self.walk(cx, &l, &inner)
                 }
             }
-            (TypeInner::UnionT(_, rep), _) => {
+            // As in subtyping, a union meets each member of an intersection whole, before it is
+            // split.
+            (TypeInner::UnionT(_, rep), _)
+                if !matches!(u.deref(), TypeInner::IntersectionT(..)) =>
+            {
                 let members: Vec<Type> = rep.members_iter().duped().collect();
                 for m in members {
                     self.walk(cx, &m, &u)?;
