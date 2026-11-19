@@ -25,6 +25,7 @@ Module.prototype._compile = function (code, filename) {
   return originalCompile.call(this, code, filename);
 };
 
+const {applyLabelOp, isLabelOp, labels} = require('../test/assertions/label');
 const {exec} = require('../utils/async');
 const {splitIntoChunks} = require('../utils/string');
 const {
@@ -264,6 +265,83 @@ test('isServerLogName picks Flow logs and not the harness log', () => {
   expect(isServerLogName('zStmpzSfoozS5.log.old')).toBe(true);
   expect(isServerLogName('zStmpzSfoozS5.sock')).toBe(false);
   expect(isServerLogName('zStmpzSfoozS5.pids')).toBe(false);
+});
+
+function expectThrow(fn, message) {
+  try {
+    fn();
+  } catch (e) {
+    expect(e.message).toBe(message);
+    return;
+  }
+  throw new Error(`Expected an error: ${message}`);
+}
+
+const suggestion = {method: 'stdout', args: []};
+
+function apply(recorded, op, actual, what = 'stdout') {
+  return applyLabelOp({
+    op,
+    recorded,
+    actual,
+    what,
+    assertLoc: null,
+    reason: null,
+    suggestion,
+  });
+}
+
+test('only labels.write and labels.read make label ops', () => {
+  expect(isLabelOp(labels.write('x'))).toBe(true);
+  expect(isLabelOp(labels.read('x'))).toBe(true);
+  expect(isLabelOp('x')).toBe(false);
+  expect(isLabelOp({name: 'x'})).toBe(false);
+});
+
+test('a write records the output and passes', () => {
+  const recorded = new Map();
+  expect(apply(recorded, labels.write('x'), 'a\n').type).toBe('pass');
+  expect(recorded.get('x')).toBe('a\n');
+});
+
+test('a read passes exactly when the bytes are the recorded ones', () => {
+  for (const [written, actual] of [
+    ['a\nb\n', 'a\nb\n'],
+    ['a\nb\n', 'a\nb\n\n'],
+    ['a\nb\n', '\na\nb\n'],
+    ['a b\n', 'a  b\n'],
+    ['a\n', 'b\n'],
+  ]) {
+    const recorded = new Map([['x', written]]);
+    expect(apply(recorded, labels.read('x'), actual).type).toBe(
+      written === actual ? 'pass' : 'fail',
+    );
+  }
+});
+
+test('a read names the label when the bytes differ', () => {
+  const recorded = new Map([['before', 'a\n']]);
+  const blank = apply(recorded, labels.read('before'), 'a\n\n', 'out.json');
+  expect(blank.messages[0]).toBe('Expected out.json to equal label "before"');
+  expect(blank.messages[1]).toBe(
+    'They differ only in leading or trailing blank lines',
+  );
+  expect(apply(recorded, labels.read('before'), 'b\n').messages[0]).toBe(
+    'Expected stdout to equal label "before"',
+  );
+});
+
+test('a label is written once and read only after it is written', () => {
+  const recorded = new Map();
+  expectThrow(
+    () => apply(recorded, labels.read('x'), 'a'),
+    'Label "x" is read before it is written',
+  );
+  apply(recorded, labels.write('x'), 'a');
+  expectThrow(
+    () => apply(recorded, labels.write('x'), 'a'),
+    'Label "x" is written twice',
+  );
 });
 
 (async () => {

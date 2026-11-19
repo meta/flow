@@ -10,6 +10,7 @@
 
 const {default: simpleDiffAssertion} = require('./simpleDiffAssertion');
 const {normalizeOutput} = require('./normalize');
+const {applyLabelOp, isLabelOp} = require('./label');
 
 import type {
   AssertionLocation,
@@ -17,6 +18,7 @@ import type {
   NormalizeTag,
   Suggestion,
 } from './assertionTypes';
+import type {LabelOpRead, LabelOpWrite} from './label';
 
 function formatIfJSON(actual: string) {
   try {
@@ -27,24 +29,38 @@ function formatIfJSON(actual: string) {
 }
 
 function stdout(
-  expected: string,
+  expected: string | LabelOpWrite | LabelOpRead,
   assertLoc: ?AssertionLocation,
   normalize?: ReadonlyArray<NormalizeTag>,
 ): ErrorAssertion {
   return (reason: ?string, env) => {
-    let actual = formatIfJSON(env.getStdout());
     // The recorded golden `expected` is already normalized, so only the actual output needs it here.
-    if (normalize != null) {
-      actual = normalizeOutput(normalize, actual, env.getProjectDir());
+    const actual =
+      normalize == null
+        ? env.getStdout()
+        : normalizeOutput(normalize, env.getStdout(), env.getProjectDir());
+    if (isLabelOp(expected)) {
+      return applyLabelOp({
+        op: expected,
+        recorded: env.getLabels(),
+        actual,
+        what: 'stdout',
+        assertLoc,
+        reason,
+        suggestion:
+          normalize == null
+            ? {method: 'stdout', args: [expected]}
+            : {method: 'stdout', args: [expected, {normalize}]},
+      });
     }
-    expected = formatIfJSON(expected);
+    const formattedActual = formatIfJSON(actual);
     const suggestion: Suggestion =
       normalize == null
-        ? {method: 'stdout', args: [actual]}
-        : {method: 'stdout', args: [actual, {normalize}]};
+        ? {method: 'stdout', args: [formattedActual]}
+        : {method: 'stdout', args: [formattedActual, {normalize}]};
     return simpleDiffAssertion(
-      expected,
-      actual,
+      formatIfJSON(expected),
+      formattedActual,
       assertLoc,
       reason,
       'stdout',

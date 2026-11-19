@@ -19,6 +19,7 @@ const parser = require('flow-parser');
 const {loadSuite} = require('../test/findTests');
 const {default: RunQueue} = require('../test/RunQueue');
 const {getTestsDir} = require('../constants');
+const {isLabelOp} = require('../test/assertions/label');
 
 import type {Suite} from '../test/Suite';
 import type {Args} from './recordCommand';
@@ -42,10 +43,15 @@ function indent(str: string, size: number) {
     .join('\n');
 }
 
+// `null` for a comparison with a label op, which names an earlier output that a recorded literal
+// would lose.
 function suggestionToString(
   suggestion: CallSuggestion,
   indentSize: number,
-): string {
+): ?string {
+  if (suggestion.args.some(isLabelOp)) {
+    return null;
+  }
   const args = suggestion.args
     .map(arg => {
       switch (typeof arg) {
@@ -232,12 +238,19 @@ async function runner(args: Args): Promise<void> {
                     dfsForRange(ast, assertLoc.line, assertLoc.column);
                   if (range) {
                     const [start, end] = range;
-                    const out =
-                      code.slice(0, start) +
+                    const replacement =
                       // $FlowFixMe[incompatible-type]
-                      suggestionToString(suggestion, assertLoc.column) +
-                      code.slice(end);
-                    await writeFile(filename, out);
+                      suggestionToString(suggestion, assertLoc.column);
+                    if (replacement == null) {
+                      process.stderr.write(
+                        'Not recording a comparison with a label op\n',
+                      );
+                    } else {
+                      await writeFile(
+                        filename,
+                        code.slice(0, start) + replacement + code.slice(end),
+                      );
+                    }
                   } else {
                     process.stderr.write(
                       'Could not find the assertion in the code\n',

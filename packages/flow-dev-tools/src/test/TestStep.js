@@ -35,6 +35,7 @@ const {
 } = require('./assertions/simpleDiffAssertion');
 const {default: lspMessagesMatch} = require('./assertions/lspMessagesMatch');
 const {normalizeOutput} = require('./assertions/normalize');
+const {applyLabelOp, isLabelOp, labels} = require('./assertions/label');
 
 const {sleep} = require('../utils/async');
 
@@ -45,6 +46,7 @@ import type {
   NormalizeOptions,
   Suggestion,
 } from './assertions/assertionTypes';
+import type {LabelOpRead, LabelOpWrite} from './assertions/label';
 import type {TestBuilder} from './builder';
 import type {FlowResult} from '../flowResult';
 import type {StepEnvReadable, StepEnvWriteable} from './stepEnv';
@@ -170,12 +172,15 @@ class TestStepFirstOrSecondStage extends TestStep {
     return ret;
   }
 
-  stderr(expected: string): TestStepSecondStage {
+  stderr(expected: string | LabelOpWrite | LabelOpRead): TestStepSecondStage {
     const assertLoc = searchStackForTestAssertion();
     return this._cloneWithAssertion(stderr(expected, assertLoc));
   }
 
-  stdout(expected: string, options?: NormalizeOptions): TestStepSecondStage {
+  stdout(
+    expected: string | LabelOpWrite | LabelOpRead,
+    options?: NormalizeOptions,
+  ): TestStepSecondStage {
     const assertLoc = searchStackForTestAssertion();
     return this._cloneWithAssertion(
       stdout(expected, assertLoc, options?.normalize),
@@ -790,7 +795,7 @@ class TestStepFirstStage extends TestStepFirstOrSecondStage {
   // this must precede any stage-2 assertions (stdout/exitCodes) in the chain.
   verifyFileContents: (
     relPath: string,
-    expected: string,
+    expected: string | LabelOpWrite | LabelOpRead,
     options?: NormalizeOptions,
   ) => TestStepSecondStage = (relPath, expected, options) => {
     const assertLoc = searchStackForTestAssertion();
@@ -809,6 +814,23 @@ class TestStepFirstStage extends TestStepFirstOrSecondStage {
         normalize == null
           ? actual
           : normalizeOutput(normalize, actual, env.getProjectDir());
+      if (isLabelOp(expected)) {
+        return applyLabelOp({
+          op: expected,
+          recorded: env.getLabels(),
+          actual: normalized,
+          what: relPath,
+          assertLoc,
+          reason,
+          suggestion: {
+            method: 'verifyFileContents',
+            args:
+              normalize == null
+                ? [relPath, expected]
+                : [relPath, expected, {normalize}],
+          },
+        });
+      }
       const suggestion: Suggestion = {
         method: 'verifyFileContents',
         args:
@@ -848,6 +870,11 @@ class TestStepFirstStage extends TestStepFirstOrSecondStage {
       );
     });
   };
+
+  // Expected values for `stdout`, `stderr` and `verifyFileContents` that name an output rather than
+  // spell it out: `labels.write(name)` records the output, and `labels.read(name)` asserts that an
+  // output is byte for byte the one recorded earlier in the same test.
+  labels: typeof labels = labels;
 
   dontMindServerDeath: () => TestStepFirstStage = () => {
     const ret = this._cloneWithAction(async (builder, env) => {});

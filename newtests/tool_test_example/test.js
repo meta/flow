@@ -8,7 +8,7 @@ const {suite, test} = require('../Tester');
 // A suite is a function. It takes an empty step and returns a list of tests.
 // For convenience, it's nice to destructure the empty test, since you almost
 // always want to perform some action first.
-module.exports = (suite(({addFile, addFiles, addCode}) => [
+module.exports = (suite(({addFile, addFiles, addCode, flowCmd, labels, modifyFile}) => [
   // A test is a list of steps.
   //
   // Each test starts off with an empty tmp directory with a .flowconfig and a
@@ -230,5 +230,17 @@ module.exports = (suite(({addFile, addFiles, addCode}) => [
           }
         `,
       ),
+  ]),
+  test('label', [
+    addFile('A.js')
+      .flowCmd(['ast'], 'A.js')
+      .verifyFileContents('A.js', labels.write('A'))
+      .stdout(labels.write('ast')),
+    flowCmd(['ast', '--no-such-flag']).stderr(labels.write('usage')),
+    modifyFile('A.js', '123', '456').modifyFile('A.js', '456', '123'),
+    flowCmd(['ast'], 'A.js')
+      .verifyFileContents('A.js', labels.read('A'))
+      .stdout(labels.read('ast')),
+    flowCmd(['ast', '--no-such-flag']).stderr(labels.read('usage')),
   ]),
 ]) as SuiteType);

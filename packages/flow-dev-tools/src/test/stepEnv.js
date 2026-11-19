@@ -38,10 +38,15 @@ export interface StepEnvReadable {
   getServerRunning(): 'stopped' | 'running';
   getLSPRunning(): 'stopped' | 'running';
   getProjectDir(): string;
+  // What `labels.write` ops have recorded so far in the current test.
+  getLabels(): Map<string, string>;
   shouldRunFlow(): boolean;
 }
 
-function newEnv(oldErrors: FlowResult): {
+function newEnv(
+  oldErrors: FlowResult,
+  labels: Map<string, string>,
+): {
   envWrite: StepEnvWriteable,
   envRead: StepEnvReadable,
   ...
@@ -147,6 +152,10 @@ function newEnv(oldErrors: FlowResult): {
 
     getProjectDir() {
       return projectDir;
+    },
+
+    getLabels() {
+      return labels;
     },
 
     shouldRunFlow() {

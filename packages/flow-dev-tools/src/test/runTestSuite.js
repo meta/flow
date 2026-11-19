@@ -119,6 +119,7 @@ async function runTestSuite(
         test.shouldWaitForRecheck,
         test.noRestart,
       );
+      const labels: Map<string, string> = new Map();
 
       let firstIdeStartStep = null;
       let lastIdeAssertionStep = null;
@@ -175,7 +176,7 @@ async function runTestSuite(
         if (flowErrors == null && step.needsFlowCheck()) {
           flowErrors = await testBuilder.getFlowErrors();
         }
-        let {envRead, envWrite} = newEnv(flowErrors || noErrors);
+        let {envRead, envWrite} = newEnv(flowErrors || noErrors, labels);
 
         testBuilder.setAllowFlowServerToDie(step.allowFlowServerToDie());
 

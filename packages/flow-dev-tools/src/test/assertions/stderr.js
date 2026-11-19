@@ -9,12 +9,14 @@
  */
 
 const {default: simpleDiffAssertion} = require('./simpleDiffAssertion');
+const {applyLabelOp, isLabelOp} = require('./label');
 
 import type {
   AssertionLocation,
   ErrorAssertion,
   Suggestion,
 } from './assertionTypes';
+import type {LabelOpRead, LabelOpWrite} from './label';
 
 function formatIfJSON(actual: string) {
   try {
@@ -25,19 +27,27 @@ function formatIfJSON(actual: string) {
 }
 
 function stderr(
-  expected: string,
+  expected: string | LabelOpWrite | LabelOpRead,
   assertLoc: ?AssertionLocation,
 ): ErrorAssertion {
   return (reason: ?string, env) => {
-    const actual = formatIfJSON(env.getStderr());
-    expected = formatIfJSON(expected);
-    const suggestion: Suggestion = {
-      method: 'stderr',
-      args: [formatIfJSON(actual)],
-    };
+    const actual = env.getStderr();
+    if (isLabelOp(expected)) {
+      return applyLabelOp({
+        op: expected,
+        recorded: env.getLabels(),
+        actual,
+        what: 'stderr',
+        assertLoc,
+        reason,
+        suggestion: {method: 'stderr', args: [expected]},
+      });
+    }
+    const formattedActual = formatIfJSON(actual);
+    const suggestion: Suggestion = {method: 'stderr', args: [formattedActual]};
     return simpleDiffAssertion(
-      expected,
-      actual,
+      formatIfJSON(expected),
+      formattedActual,
       assertLoc,
       reason,
       'stderr',
