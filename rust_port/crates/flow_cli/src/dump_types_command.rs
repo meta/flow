@@ -40,13 +40,13 @@ fn spec() -> flow_command_spec::Spec {
     .flag(
         "--for-tool",
         &arg_spec::optional_value_with_default(10, arg_spec::int()),
-        "",
+        "Print each type as JSON for programs to read: the type as Flow's checker represents it, cut off below DEPTH levels of nesting (default 10)",
         None,
     )
     .flag(
         "--dedup",
         &arg_spec::optional_value_with_default(256, arg_spec::int()),
-        "",
+        "Print each repeated type larger than N bytes (default 256) once, in a shared $defs table, and refer to it elsewhere. Requires --for-tool and --json",
         None,
     )
     .anon("file", &arg_spec::optional(arg_spec::string()))
@@ -145,6 +145,38 @@ fn handle_error(
     }
 }
 
+/// Which of `dump-types`' modifiers an invocation passed, and what they modify.
+struct Modifiers {
+    for_tool: bool,
+    json: bool,
+    dedup: bool,
+    path: bool,
+    file: bool,
+}
+
+/// Exits with a usage error naming the first modifier that would be ignored.
+fn reject_inapplicable_modifiers(m: &Modifiers) {
+    // `$defs` has a place only in the `--for-tool --json` payload.
+    if m.dedup && !(m.for_tool && m.json) {
+        let missing = [("--for-tool", m.for_tool), ("--json", m.json)]
+            .into_iter()
+            .filter(|(_, present)| !present)
+            .map(|(flag, _)| flag)
+            .collect::<Vec<_>>();
+        usage_error(&format!("--dedup requires {}", missing.join(" and ")));
+    }
+    if m.path && m.file {
+        usage_error("--path applies only to a file read from stdin, not to a FILE argument");
+    }
+}
+
+fn usage_error(msg: &str) -> ! {
+    flow_common_exit_status::exit_with_msg(
+        flow_common_exit_status::FlowExitStatus::CommandlineUsageError,
+        &format!("dump-types: {msg}"),
+    )
+}
+
 fn main(args: &arg_spec::Values) {
     let base_flags = flow_command_utils::get_base_flags(args);
     let flowconfig_name = base_flags.flowconfig_name;
@@ -182,31 +214,13 @@ fn main(args: &arg_spec::Values) {
 
     let json = json_flags.json || json_flags.pretty;
 
-    // `--dedup` replaces repeated subtrees with `{"$ref": id}` and puts the definitions in a
-    // `$defs` table that only the `--for-tool --json` payload has anywhere to carry. Anywhere else
-    // it would print refs with nothing to resolve them against, so it is dropped rather than
-    // half-applied. Dropping it here rather than at each point of use is also what keeps the
-    // success and error payloads the same shape for a given invocation.
-    let dedup_threshold = match dedup_threshold {
-        None => None,
-        Some(threshold) if for_tool.is_some() && json => Some(threshold),
-        Some(_) => {
-            // Name every flag that is missing, not just the first: reporting one at a time makes
-            // the user re-invoke to discover the next.
-            let mut missing = Vec::new();
-            if for_tool.is_none() {
-                missing.push("--for-tool");
-            }
-            if !json {
-                missing.push("--json");
-            }
-            eprintln!(
-                "dump-types: --dedup has no effect without {}; ignoring it",
-                missing.join(" ")
-            );
-            None
-        }
-    };
+    reject_inapplicable_modifiers(&Modifiers {
+        for_tool: for_tool.is_some(),
+        json,
+        dedup: dedup_threshold.is_some(),
+        path: path.is_some(),
+        file: filename.is_some(),
+    });
     let file = flow_command_utils::get_file_from_filename_or_stdin(
         "dump-types",
         filename.as_deref(),
