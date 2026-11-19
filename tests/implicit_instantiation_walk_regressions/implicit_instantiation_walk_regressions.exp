@@ -95,6 +95,35 @@ References:
                                    ^^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------ class_typeapp_statics.js:11:1
+
+Cannot cast `parsed` to `Array<string>` because in array element: `number` [1] is not exactly the same as `string` [2].
+[incompatible-type]
+
+The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
+- Either make `Array<number>` [3] and `Array<string>` [4] exactly the same
+- Or make `Array<string>` [4] a `ReadonlyArray`.
+See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
+
+   class_typeapp_statics.js:11:1
+     11| parsed as Array<string>; // error
+         ^^^^^^
+
+References:
+   class_typeapp_statics.js:4:27
+      4|   static (input: string): number;
+                                   ^^^^^^ [1]
+   class_typeapp_statics.js:11:17
+     11| parsed as Array<string>; // error
+                         ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:1423:102
+   1423|     map<U, This>(callbackfn: (this: This, value: T, index: number, array: T[]) => U, thisArg: This): U[];
+                                                                                                              ^^^ [3]
+   class_typeapp_statics.js:11:11
+     11| parsed as Array<string>; // error
+                   ^^^^^^^^^^^^^ [4]
+
+
 Error ----------------------------------------------------------------------------------------- component_bound.js:31:11
 
 Cannot call `withTheme` because in type argument `TProps`: property `theme` is missing in
@@ -1171,4 +1200,4 @@ References:
 
 
 
-Found 63 errors
+Found 64 errors

@@ -2314,6 +2314,8 @@ impl<'e> Walker<'e> {
             }
             (DefTInner::ClassT(instance), DefTInner::FunT(..) | DefTInner::InstanceT(_)) => {
                 let instance = self.normalize(cx, instance);
+                // The statics of `Class<C<T>>` are those of `C`.
+                let instance = self.expand_typeapp(cx, &instance).unwrap_or(instance);
                 let TypeInner::DefT(_, d) = instance.deref() else {
                     return Ok(());
                 };
