@@ -102,7 +102,6 @@ pub(super) fn instantiate_with_targs_with_soln<'cx>(
         reason_op,
         reason_tapp,
         None,
-        None,
         (tparams_loc, xs, t),
         ts,
     )
@@ -233,7 +232,6 @@ pub(super) fn instantiate_poly_default_args<'cx>(
         use_op,
         reason_op,
         reason_tapp,
-        None,
         None,
         (tparams_loc, xs, t),
         ts,

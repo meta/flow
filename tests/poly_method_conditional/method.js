@@ -16,7 +16,7 @@ declare class NullableInfo<V, H, T extends TypeInfo<V, H>> {
 }
 
 type Args<T> = T extends TypeInfo<infer V, infer H> ? [V, H] : [];
-type Nullable<T> = NullableInfo<Args<T>[0], Args<T>[1], T>;
+type Nullable<T> = NullableInfo<Args<T>[0], Args<T>[1], T>; // error: T is not known to be a TypeInfo
 
 interface Field<out T> {
   readonly info: T;

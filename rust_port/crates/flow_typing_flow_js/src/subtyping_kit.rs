@@ -5177,7 +5177,6 @@ pub fn rec_sub_t<'cx>(
                     reason_op,
                     reason_tapp,
                     None,
-                    None,
                     (tparams_loc.dupe(), ids, t.dupe()),
                     targs,
                 )?

@@ -9738,6 +9738,15 @@ fn infer_tparam<'arena, 'ast>(
     let tp = tparam(opts, scope, scopes, tbls, xs, param, true);
     match implied_bound {
         ImpliedBound::Mixed => tp,
+        ImpliedBound::Positions => {
+            let loc = tbls.push_loc(param.loc.dupe());
+            TParam {
+                bound: Some(Parsed::Annot(Box::new(ParsedAnnot::InferTypeImpliedBound(
+                    Box::new(loc),
+                )))),
+                ..tp
+            }
+        }
         ImpliedBound::ReadonlyArray => {
             let loc = tbls.push_loc(param.loc.dupe());
             let mixed = Parsed::Annot(Box::new(ParsedAnnot::Mixed(Box::new(loc.dupe()))));

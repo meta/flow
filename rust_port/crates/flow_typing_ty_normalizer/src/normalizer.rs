@@ -3267,7 +3267,15 @@ mod type_converter {
             .is_some_and(|id| env.infer_tparam_ids.contains(id))
         {
             let symbol = symbol_from_reason(env, reason, name.string_of_subst_name().dupe())?;
-            let bound = param_bound::<I>(env, state, bound)?;
+            // As in TypeScript, the bound that the positions of an `infer` type imply is not
+            // printed. It is a type variable with the reason of the `infer` type (see
+            // `FlowJs::mk_infer_type_implied_bound`).
+            let bound = if matches!(bound.deref(), TypeInner::OpenT(tvar) if tvar.reason() == reason)
+            {
+                None
+            } else {
+                param_bound::<I>(env, state, bound)?
+            };
             Ok(Arc::new(ty::Ty::Infer(Box::new((symbol, bound)))))
         } else {
             let loc = id

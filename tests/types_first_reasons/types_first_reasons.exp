@@ -84,19 +84,5 @@ References:
              ^^^ [1]
 
 
-Error ------------------------------------------------------------------------------------- qualified_typeapp_dep.js:2:1
 
-Cannot use `A.B` [1] with fewer than 1 type argument. [missing-type-arg]
-
-   qualified_typeapp_dep.js:2:1
-   2| b.x; // Error: missing-type-arg
-      ^
-
-References:
-   qualified_typeapp.js:1:8
-   1| class B<T> { x: T }
-             ^^^ [1]
-
-
-
-Found 7 errors
+Found 6 errors

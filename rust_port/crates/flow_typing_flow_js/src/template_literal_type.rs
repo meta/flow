@@ -29,10 +29,14 @@ use flow_typing_type::type_::DefTInner;
 use flow_typing_type::type_::DepthTrace;
 use flow_typing_type::type_::GenericTData;
 use flow_typing_type::type_::Literal;
+use flow_typing_type::type_::NumberLiteral;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeInner;
 use flow_typing_type::type_::UseOp;
+use flow_typing_type::type_::constraint::Constraints;
+use flow_typing_type::type_::null;
 use flow_typing_type::type_::union_rep;
+use flow_typing_type::type_::void;
 use flow_typing_type::type_util;
 use flow_utils_concurrency::job_error::JobError;
 
@@ -545,6 +549,23 @@ pub fn fold_concrete_placeholders(
             Some(ref ss) if ss.len() == 1 => {
                 pending_q.push_str(q);
                 pending_q.push_str(ss[0].as_str());
+            }
+            // As in TypeScript, a template literal type in a placeholder joins the outer one.
+            _ if let TypeInner::TemplateLiteralT {
+                quasis: inner_q,
+                types: inner_t,
+                ..
+            } = t.deref() =>
+            {
+                let (inner_q, inner_t) = fold_concrete_placeholders(inner_q, inner_t);
+                pending_q.push_str(q);
+                pending_q.push_str(inner_q[0].as_str());
+                for (inner_t, inner_q) in inner_t.iter().zip(inner_q[1..].iter()) {
+                    acc_q.push(pending_q.clone().into());
+                    acc_t.push(inner_t.dupe());
+                    pending_q.clear();
+                    pending_q.push_str(inner_q.as_str());
+                }
             }
             _ => {
                 pending_q.push_str(q);
@@ -1161,23 +1182,19 @@ pub fn subtype_str_lit_into_template<'cx>(
                 // into a non-string type (NullT/VoidT/etc.) would emit a
                 // spurious error.
                 if lexical_validator_of(&t).is_none() && extract_strings(&t).is_none() {
-                    let part_str: FlowSmolStr = part.as_str().into();
-                    let r = type_util::reason_of_t(lower)
-                        .dupe()
-                        .replace_desc(VirtualReasonDesc::RStringLit(part_str.dupe()));
-                    let str_t = Type::new(TypeInner::DefT(
-                        r,
-                        DefT::new(DefTInner::SingletonStrT {
-                            from_annot: true,
-                            value: part_str,
-                        }),
-                    ));
+                    let part_t = matched_string_part(
+                        cx,
+                        env,
+                        type_util::reason_of_t(lower),
+                        part.as_str().into(),
+                        &t,
+                    )?;
                     crate::flow_js::FlowJs::rec_flow_t_with_env(
                         cx,
                         env,
                         trace,
                         use_op.dupe(),
-                        &str_t,
+                        &part_t,
                         &t,
                     )?;
                 }
@@ -1185,6 +1202,89 @@ pub fn subtype_str_lit_into_template<'cx>(
             Ok(())
         }
     }
+}
+
+/// What the part `part` of a string literal gives the placeholder `t` that it matches. As in
+/// TypeScript, a type argument being inferred whose type parameter has a bound gets the string
+/// literal if that fits the bound, and otherwise the number, bigint, boolean, `undefined` or
+/// `null` that the part spells, if one fits. Anything else gets the string literal.
+fn matched_string_part<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    lower_reason: &reason::Reason,
+    part: FlowSmolStr,
+    t: &Type,
+) -> Result<Type, FlowJsException> {
+    let reason = |desc| lower_reason.dupe().replace_desc(desc);
+    let str_t = Type::new(TypeInner::DefT(
+        reason(VirtualReasonDesc::RStringLit(part.dupe())),
+        DefT::new(DefTInner::SingletonStrT {
+            from_annot: true,
+            value: part.dupe(),
+        }),
+    ));
+    let PlaceholderBound::Bound(bound) = placeholder_bound(cx, env, t) else {
+        return Ok(str_t);
+    };
+    if crate::flow_js::FlowJs::speculative_subtyping_succeeds_with_flow_errors(
+        cx, env, &str_t, bound,
+    )? {
+        return Ok(str_t);
+    }
+    let s = part.as_str();
+    let number = s
+        .parse::<f64>()
+        .ok()
+        .filter(|n| n.is_finite() && js_number::ecma_string_of_float(*n) == s)
+        .map(|n| {
+            Type::new(TypeInner::DefT(
+                reason(VirtualReasonDesc::RNumberLit(part.dupe())),
+                DefT::new(DefTInner::SingletonNumT {
+                    from_annot: true,
+                    value: NumberLiteral(n, part.dupe()),
+                }),
+            ))
+        });
+    let digits = s.strip_prefix('-').unwrap_or(s);
+    let is_canonical_integer = !digits.is_empty()
+        && digits.bytes().all(|c| c.is_ascii_digit())
+        && (digits == "0" || !digits.starts_with('0'))
+        && s != "-0";
+    let bigint = is_canonical_integer.then(|| {
+        Type::new(TypeInner::DefT(
+            reason(VirtualReasonDesc::RBigIntLit(part.dupe())),
+            DefT::new(DefTInner::SingletonBigIntT {
+                from_annot: true,
+                value: BigIntLiteral(s.parse::<i64>().ok(), format!("{s}n").into()),
+            }),
+        ))
+    });
+    let boolean = match s {
+        "true" | "false" => {
+            let value = s == "true";
+            Some(Type::new(TypeInner::DefT(
+                reason(VirtualReasonDesc::RBooleanLit(value)),
+                DefT::new(DefTInner::SingletonBoolT {
+                    from_annot: true,
+                    value,
+                }),
+            )))
+        }
+        _ => None,
+    };
+    let null = (s == "null").then(|| null::why(reason(VirtualReasonDesc::RNull)));
+    let undefined = (s == "undefined").then(|| void::why(reason(VirtualReasonDesc::RVoid)));
+    for candidate in [number, bigint, boolean, undefined, null]
+        .into_iter()
+        .flatten()
+    {
+        if crate::flow_js::FlowJs::speculative_subtyping_succeeds_with_flow_errors(
+            cx, env, &candidate, bound,
+        )? {
+            return Ok(candidate);
+        }
+    }
+    Ok(str_t)
 }
 
 /// TemplateLiteralT <: UnionT: enumerate the strings the LHS could produce
@@ -1244,6 +1344,190 @@ fn is_wide_string_template_match(
         && lq_raw.last().is_some_and(|last| last.ends_with(rs))
 }
 
+/// The concrete types of the placeholder `t`, or `t` itself if it is a tvar that is not resolved
+/// yet: concretizing it would add a use of it that is not a type, which implicit instantiation
+/// cannot pin.
+fn concrete_types_of_placeholder<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    reason: &reason::Reason,
+    t: &Type,
+) -> Result<Vec<Type>, FlowJsException> {
+    let unresolved = match t.deref() {
+        TypeInner::OpenT(tvar) => matches!(
+            cx.find_constraints(tvar.id() as i32).1,
+            Constraints::Unresolved(_)
+        ),
+        TypeInner::ImplicitInstantiationTvar(_) => true,
+        _ => false,
+    };
+    if unresolved {
+        Ok(vec![t.dupe()])
+    } else {
+        crate::flow_js::FlowJs::possible_concrete_types_for_inspection_with_env(cx, env, reason, t)
+    }
+}
+
+/// The template literal type `${l}`, normalized as in TypeScript: over each member of a union,
+/// literals and booleans as the strings they print as, and strings and template literal types as
+/// themselves.
+fn template_of_placeholder<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    l_reason: &reason::Reason,
+    l_from_annot: bool,
+    l: &Type,
+) -> Result<Type, FlowJsException> {
+    let string_literal = |s: &FlowSmolStr| {
+        Type::new(TypeInner::DefT(
+            l_reason
+                .dupe()
+                .replace_desc(VirtualReasonDesc::RStringLit(s.dupe())),
+            DefT::new(DefTInner::SingletonStrT {
+                from_annot: l_from_annot,
+                value: s.dupe(),
+            }),
+        ))
+    };
+    let mut members = Vec::new();
+    for t in concrete_types_of_placeholder(cx, env, l_reason, l)? {
+        match t.deref() {
+            TypeInner::TemplateLiteralT { .. } => members.push(t),
+            TypeInner::DefT(_, def)
+                if matches!(
+                    def.deref(),
+                    DefTInner::StrGeneralT(_) | DefTInner::SingletonStrT { .. }
+                ) =>
+            {
+                members.push(t)
+            }
+            TypeInner::DefT(_, def) if matches!(def.deref(), DefTInner::BoolGeneralT) => {
+                members.push(string_literal(&FlowSmolStr::new_inline("false")));
+                members.push(string_literal(&FlowSmolStr::new_inline("true")));
+            }
+            _ => match extract_strings(&t) {
+                Some(strings) => members.extend(strings.iter().map(string_literal)),
+                None => members.push(Type::new(TypeInner::TemplateLiteralT {
+                    reason: l_reason.dupe(),
+                    from_annot: l_from_annot,
+                    quasis: vec![FlowSmolStr::new_inline(""), FlowSmolStr::new_inline("")],
+                    types: vec![t.dupe()],
+                })),
+            },
+        }
+    }
+    let mut members = members.into_iter();
+    Ok(match (members.next(), members.next()) {
+        (Some(t0), Some(t1)) => Type::new(TypeInner::UnionT(
+            l_reason.dupe(),
+            union_rep::make(
+                None,
+                union_rep::UnionKind::UnknownKind,
+                t0,
+                t1,
+                members.collect(),
+            ),
+        )),
+        (Some(t), None) => t,
+        (None, _) => l.dupe(),
+    })
+}
+
+/// Relates the placeholder `l` of the lower template literal type to the placeholder `r` it is
+/// matched with. As in TypeScript, `r` gets `l` itself if `l` fits what `r` accepts (see
+/// [`PlaceholderBound`]), and otherwise the part of the string that `l` matches, the template
+/// literal type `${l}`.
+fn flow_matched_placeholder<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    trace: DepthTrace,
+    use_op: UseOp,
+    l_reason: &reason::Reason,
+    l_from_annot: bool,
+    l: &Type,
+    r: &Type,
+) -> Result<(), FlowJsException> {
+    let fits =
+        |cx: &mut Context<'cx>, t: &Type, bound: PlaceholderBound<'_>, itself: &Type| match bound {
+            PlaceholderBound::Unconstrained => Ok(false),
+            PlaceholderBound::Bound(bound) => {
+                crate::flow_js::FlowJs::speculative_subtyping_succeeds_with_flow_errors(
+                    cx, env, t, bound,
+                )
+            }
+            PlaceholderBound::Itself => {
+                crate::flow_js::FlowJs::speculative_subtyping_succeeds_with_flow_errors(
+                    cx, env, t, itself,
+                )
+            }
+            PlaceholderBound::Tvar => Ok(true),
+        };
+    match placeholder_bound(cx, env, r) {
+        // A type argument being inferred in the lower type, as in a parameter of a callback,
+        // gets the upper placeholder by the same rule.
+        PlaceholderBound::Itself
+            if let bound @ (PlaceholderBound::Unconstrained | PlaceholderBound::Bound(_)) =
+                placeholder_bound(cx, env, l) =>
+        {
+            let r = if fits(cx, r, bound, l)? {
+                r.dupe()
+            } else {
+                template_of_placeholder(cx, env, type_util::reason_of_t(r), true, r)?
+            };
+            crate::flow_js::FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, l, &r)
+        }
+        bound => {
+            let l = if fits(cx, l, bound, r)? {
+                l.dupe()
+            } else {
+                template_of_placeholder(cx, env, l_reason, l_from_annot, l)?
+            };
+            crate::flow_js::FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &l, r)
+        }
+    }
+}
+
+/// What a placeholder of an upper template literal type accepts in its place, as TypeScript sees
+/// it when it matches a lower template literal type or a string literal against it.
+enum PlaceholderBound<'a> {
+    /// A type argument being inferred whose type parameter has no bound.
+    Unconstrained,
+    /// The bound of the type parameter of a type argument being inferred.
+    Bound(&'a Type),
+    /// The placeholder itself.
+    Itself,
+    /// An unresolved tvar that is not inferred here, which is not inspected.
+    Tvar,
+}
+
+fn placeholder_bound<'a, 'cx>(
+    cx: &mut Context<'cx>,
+    env: &'a FlowJsEnv,
+    r: &'a Type,
+) -> PlaceholderBound<'a> {
+    let bound = match r.deref() {
+        TypeInner::ImplicitInstantiationTvar(tvar) => &tvar.bound,
+        TypeInner::OpenT(tvar) => match env.infer_type_bound(tvar.id()) {
+            Some(bound) => bound,
+            None => {
+                return match cx.find_constraints(tvar.id() as i32).1 {
+                    Constraints::Unresolved(_) => PlaceholderBound::Tvar,
+                    Constraints::Resolved(_) | Constraints::FullyResolved(_) => {
+                        PlaceholderBound::Itself
+                    }
+                };
+            }
+        },
+        _ => return PlaceholderBound::Itself,
+    };
+    match bound.deref() {
+        TypeInner::DefT(_, def) if matches!(def.deref(), DefTInner::MixedT(_)) => {
+            PlaceholderBound::Unconstrained
+        }
+        _ => PlaceholderBound::Bound(bound),
+    }
+}
+
 /// Result of [`try_subtype_template_to_template`]. [`NotApplicable`] means
 /// no structural rule fired — the caller should fall through to the
 /// cross-product enumeration path ([`subtype_template_to_other`]).
@@ -1275,6 +1559,31 @@ pub fn try_subtype_template_to_template<'cx>(
     rq_raw: &[FlowSmolStr],
     rt_raw: &[Type],
 ) -> Result<TlToTlResult, FlowJsException> {
+    // As in TypeScript, a placeholder of the lower type that is a literal or a template literal
+    // type joins the texts around it, even behind a tvar.
+    let mut lt_concrete = Vec::with_capacity(lt_raw.len());
+    for t in lt_raw {
+        let reason = type_util::reason_of_t(t);
+        let ts = concrete_types_of_placeholder(cx, env, reason, t)?;
+        match &ts[..] {
+            [concrete] if matches!(concrete.deref(), TypeInner::TemplateLiteralT { .. }) => {
+                lt_concrete.push(concrete.dupe())
+            }
+            [concrete] if let Some([s]) = extract_strings(concrete).as_deref() => {
+                lt_concrete.push(Type::new(TypeInner::DefT(
+                    reason
+                        .dupe()
+                        .replace_desc(VirtualReasonDesc::RStringLit(s.dupe())),
+                    DefT::new(DefTInner::SingletonStrT {
+                        from_annot: true,
+                        value: s.dupe(),
+                    }),
+                )))
+            }
+            _ => lt_concrete.push(t.dupe()),
+        }
+    }
+    let lt_raw = &lt_concrete[..];
     let (lq, lt) = fold_concrete_placeholders(lq_raw, lt_raw);
     let (rq, rt) = fold_concrete_placeholders(rq_raw, rt_raw);
     // If LHS folds to a single concrete string (no remaining placeholders), it
@@ -1317,7 +1626,16 @@ pub fn try_subtype_template_to_template<'cx>(
                 TypeInner::DefT(_, def) if matches!(def.deref(), DefTInner::StrGeneralT(_))
             ) && placeholder_coerces_to_string(l);
             if !skip {
-                crate::flow_js::FlowJs::rec_flow_t_with_env(cx, env, trace, use_op.dupe(), l, r)?;
+                flow_matched_placeholder(
+                    cx,
+                    env,
+                    trace,
+                    use_op.dupe(),
+                    l_reason,
+                    l_from_annot,
+                    l,
+                    r,
+                )?;
             }
         }
         return Ok(TlToTlResult::Handled);
@@ -1333,7 +1651,16 @@ pub fn try_subtype_template_to_template<'cx>(
     {
         let chopped = &lp.as_str()[rp.len()..];
         if chopped.is_empty() {
-            crate::flow_js::FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &lt[0], &rt[0])?;
+            flow_matched_placeholder(
+                cx,
+                env,
+                trace,
+                use_op,
+                l_reason,
+                l_from_annot,
+                &lt[0],
+                &rt[0],
+            )?;
         } else {
             let lower = Type::new(TypeInner::TemplateLiteralT {
                 reason: l_reason.dupe(),
@@ -1356,7 +1683,16 @@ pub fn try_subtype_template_to_template<'cx>(
     {
         let chopped = &ls.as_str()[..ls.len() - rs.len()];
         if chopped.is_empty() {
-            crate::flow_js::FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &lt[0], &rt[0])?;
+            flow_matched_placeholder(
+                cx,
+                env,
+                trace,
+                use_op,
+                l_reason,
+                l_from_annot,
+                &lt[0],
+                &rt[0],
+            )?;
         } else {
             let lower = Type::new(TypeInner::TemplateLiteralT {
                 reason: l_reason.dupe(),

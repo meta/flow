@@ -272,6 +272,20 @@ References:
                       ^^ [2]
 
 
+Error ----------------------------------------------------------------------------------------------------- test.js:8:23
+
+Cannot instantiate `Foo` because in type argument `X`: `unknown` [1] is incompatible with `C` [2]. [incompatible-type]
+
+   test.js:8:23
+   8| function foo<X>(x:Foo<X>) {} // error: X is not known to be a ?C
+                            ^ [1]
+
+References:
+   test.js:5:21
+   5| type Foo<X extends ?C> = Array<X>; // workaround
+                          ^ [2]
+
+
 Error ----------------------------------------------------------------------------------------------------- union.js:2:5
 
 Cannot call `bar` with `0` bound to `x` because: [incompatible-type]
@@ -318,4 +332,4 @@ definition. To get the type of a non-class value, use `typeof`. [value-as-type]
 
 
 
-Found 18 errors
+Found 19 errors

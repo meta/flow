@@ -277,10 +277,10 @@ s1n as string; // OK (never <: string)
 type Foo<T> = T extends `*${infer S}*` ? S : never;
 
 type TF1 = Foo<any>;      // TS: any (any short-circuits conditional types).
-                          // Flow LIMITATION: returns `unknown` here.
+                          // Flow LIMITATION: returns `string`, the bound of `S`, here.
 declare const tf1: TF1;
-tf1 as string; // ERROR (limitation: should be OK since `any` should short-circuit)
-tf1 as number; // ERROR (limitation: same)
+tf1 as string; // OK
+tf1 as number; // ERROR (limitation: should be OK since `any` should short-circuit)
 
 type TF2 = Foo<string>;   // never (string is not a literal `*..*`)
 declare const tf2: TF2;
@@ -295,6 +295,40 @@ tf3 as string; // OK
 type TF4 = Foo<'*abc*'>;  // 'abc'
 'abc' as TF4; // OK
 'xyz' as TF4; // ERROR
+
+type TF5 = Foo<`*${number}*`>; // `${number}`: the part of the string that `${number}` matches
+'1' as TF5; // OK
+'x' as TF5; // ERROR
+
+type TF6 = Foo<`*${'a' | `b${number}`}*`>; // 'a' | `b${number}`
+'a' as TF6; // OK
+'c' as TF6; // ERROR
+
+type ToNum<T> = T extends `${infer N extends number}` ? N : 0;
+declare const toNum: ToNum<`${number}`>;
+toNum as number; // OK: `${number}` doesn't fit the bound of `N`, which replaces it
+
+declare function numOf<T extends number>(x: `n${T}`): T;
+declare const nn: `n${number}`;
+numOf(nn) as number; // OK
+
+declare function stripOn<K extends string>(k: `on${K}`): K;
+function rewrap<K extends string>(k: `on${K}`): K { return stripOn(k); } // OK: `K` fits the bound
+
+type ToLit<T> = T extends `${infer N extends number}` ? N : never;
+declare const toLit: ToLit<'1'>;
+toLit as 1; // OK: the string is read as the number its bound asks for
+
+declare function inArray<T>(x: Array<`x${T}`>): T;
+declare const xs: Array<`x${number}`>;
+inArray(xs) as `${number}`; // OK: `x${`${number}`}` is `x${number}`
+
+declare function inCallback<T>(f: (x: `a${T}`) => void): T;
+inCallback((x: `a${number}`) => {}); // OK
+
+type FromParam<S> = S extends (x: `x${infer N}`) => void ? N : 0;
+declare const fromParam: FromParam<(x: `x${number}`) => void>;
+fromParam as `${number}`; // OK
 
 // --- Distributive conditional with template literal (Wrap) ---
 

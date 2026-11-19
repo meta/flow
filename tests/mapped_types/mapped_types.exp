@@ -2514,22 +2514,19 @@ References:
                  ^^^^^^ [2]
 
 
-Error ------------------------------------------------------------------------------------------------- reasons.js:10:26
+Error ------------------------------------------------------------------------------------------------- reasons.js:10:62
 
-Cannot instantiate `{[key in keyof FooBarObj]: TakesFoo<key>}` [1] because in type argument `T`: `"bar"` [2] is
-incompatible with `"foo"` [3]. [incompatible-type]
+Cannot instantiate `TakesFoo` because in type argument `T` > at least one member of `"bar" | "foo"` [1]: `"bar"` [1] is
+incompatible with `"foo"` [2]. [incompatible-type]
 
-   reasons.js:10:26
+   reasons.js:10:62
    10|   type MappedFooBarObj = {[key in keyof FooBarObj]: TakesFoo<key>}; // ERROR
-                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+                                                                    ^^^ [1]
 
 References:
-   reasons.js:9:34
-    9|   type FooBarObj = {foo: number, bar: number};
-                                        ^^^ [2]
    reasons.js:7:27
     7|   type TakesFoo<T extends 'foo'> = T;
-                                 ^^^^^ [3]
+                                 ^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------- semi_homomorphic.js:11:5
@@ -3004,38 +3001,6 @@ References:
                              ^^^^^^ [2]
 
 
-Error ---------------------------------------------------------------------------------------------------- test.js:132:3
-
-Cannot cast `constrained` to `{foo: {contents: number}}` because in property `foo`: `ConstrainedBox<O["foo"]>` [1] is
-not exactly the same as `{contents: number}` [2]. [incompatible-type]
-
-The above-mentioned two types must be the same because property `foo` is invariantly typed. To fix the error,
-- Either make `{foo: ConstrainedBox<O["foo"]>}` [3] and `{foo: {contents: number}}` [4] exactly the same
-- Or make property `foo` in `{foo: {contents: number}}` [4] readonly. See
-https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
-
-   test.js:132:3
-   132|   constrained as {foo: {contents: number}}; // intended OK; currently ERROR — Flow surfaces the constraint violation here instead of at the type instantiation above
-          ^^^^^^^^^^^
-
-References:
-   test.js:128:23
-   128|     [key in keyof O]: ConstrainedBox<O[key]>,
-                              ^^^^^^^^^^^^^^^^^^^^^^ [1]
-   test.js:132:24
-   132|   constrained as {foo: {contents: number}}; // intended OK; currently ERROR — Flow surfaces the constraint violation here instead of at the type instantiation above
-                               ^^^^^^^^^^^^^^^^^^ [2]
-   test.js:127:45
-                                                    v
-   127|   type MappedConstrained<O extends {...}> = {
-   128|     [key in keyof O]: ConstrainedBox<O[key]>,
-   129|   };
-          ^ [3]
-   test.js:132:18
-   132|   constrained as {foo: {contents: number}}; // intended OK; currently ERROR — Flow surfaces the constraint violation here instead of at the type instantiation above
-                         ^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
-
-
 Error --------------------------------------------------------------------------------------------------- test.js:138:35
 
 Cannot instantiate `UnconstrainedKey` because `boolean` [1] is incompatible with `string | number | symbol`, so it
@@ -3144,4 +3109,4 @@ References:
 
 
 
-Found 188 errors
+Found 187 errors

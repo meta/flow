@@ -1,1 +1,17 @@
-Found 0 errors
+Error ---------------------------------------------------------------------------------------------------- test1.js:5:24
+
+Cannot instantiate `React.ComponentType` because in type argument `P`: `unknown` [1] is incompatible with `{...}` [2].
+[incompatible-type]
+
+   test1.js:5:24
+     5| ): React.ComponentType<P>; // error: P is not known to be an object
+                               ^ [1]
+
+References:
+   <BUILTINS>/react.js:583:50
+   583|   declare export type ComponentType<in P extends {...}> = component(...P);
+                                                         ^^^^^ [2]
+
+
+
+Found 1 error

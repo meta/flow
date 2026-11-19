@@ -385,20 +385,20 @@ References:
                                              ^ [2]
 
 
-Error ----------------------------------------------------------------------------- generic_value_call_signature.js:22:1
+Error ----------------------------------------------------------------------------- generic_value_call_signature.js:28:1
 
 Cannot cast `s` to `empty` because `{x: number}` [1] is incompatible with `empty` [2]. [incompatible-type]
 
-   generic_value_call_signature.js:22:1
-   22| s as empty; // error
+   generic_value_call_signature.js:28:1
+   28| s as empty; // error
        ^
 
 References:
-   generic_value_call_signature.js:16:15
-   16|   getState(): {x: number},
+   generic_value_call_signature.js:22:15
+   22|   getState(): {x: number},
                      ^^^^^^^^^^^ [1]
-   generic_value_call_signature.js:22:6
-   22| s as empty; // error
+   generic_value_call_signature.js:28:6
+   28| s as empty; // error
             ^^^^^ [2]
 
 

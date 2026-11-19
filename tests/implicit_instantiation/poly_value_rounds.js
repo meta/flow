@@ -94,7 +94,7 @@ apply(needsN, notN); // ERROR
 declare class NeedsN<T extends N> {
   constructor(x: T): void;
 }
-declare function make<S>(c: Class<NeedsN<S>>, x: S): NeedsN<S>;
+declare function make<S>(c: Class<NeedsN<S>>, x: S): NeedsN<S>; // error x2: S is not known to be an N
 make(NeedsN, notN); // ERROR
 
 // Generic values as `this`. A generic value met while checking another one is not instantiated:

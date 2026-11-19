@@ -38,7 +38,6 @@ use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 use flow_lazy::ContextFamily;
 use flow_typing_context::Context;
 use flow_typing_context::Cx;
-use flow_typing_context::SubstCacheErr;
 use flow_typing_errors::error_message::EInvariantSubtypingWithUseOpData;
 use flow_typing_errors::error_message::EnumErrorKind;
 use flow_typing_errors::error_message::ErrorMessage;
@@ -53,6 +52,7 @@ use flow_typing_flow_common::flow_js_utils::FlowJsException;
 use flow_typing_flow_common::flow_js_utils::UnionOptimizationGuardResult;
 use flow_typing_flow_common::flow_js_utils::callee_recorder;
 use flow_typing_flow_common::flow_js_utils::enum_proto;
+use flow_typing_flow_common::flow_js_utils::instantiation_kit::TypeArgCheck;
 use flow_typing_flow_common::flow_js_utils::tvar_visitors;
 use flow_typing_flow_common::flow_js_utils::use_op_of_lookup_action;
 use flow_typing_flow_common::instantiation_utils;
@@ -125,6 +125,7 @@ use flow_typing_type::type_::Property;
 use flow_typing_type::type_::PropertyInner;
 use flow_typing_type::type_::PropertySource;
 use flow_typing_type::type_::PropertyType;
+use flow_typing_type::type_::ROArrayATData;
 use flow_typing_type::type_::ReactAbstractComponentTData;
 use flow_typing_type::type_::ReactDro;
 use flow_typing_type::type_::ReactEffectType;
@@ -204,6 +205,7 @@ use flow_typing_type::type_util::reason_of_t;
 use flow_typing_type::type_util::this_for_unification;
 use flow_typing_type::type_util::tuple_ts_of_elements;
 use flow_typing_type::type_util::use_op_of_use_t;
+use flow_typing_visitors::type_visitor::TypeVisitor;
 use flow_utils_concurrency::job_error::JobError;
 use flow_utils_union_find::Node;
 use flow_utils_union_find::Root;
@@ -643,32 +645,29 @@ impl FlowJs {
         use_op: UseOp,
         reason_op: &Reason,
         reason_tapp: &Reason,
-        mut errs_ref: Option<&mut Vec<SubstCacheErr>>,
         unify_bounds: Option<bool>,
         poly_t: (ALoc, Vec1<TypeParam>, Type),
         targs: Vec<Type>,
     ) -> Result<(Type, Vec<(Type, SubstName)>), FlowJsException> {
-        let unify_bounds = unify_bounds.unwrap_or(false);
+        let check = if unify_bounds.unwrap_or(false) {
+            TypeArgCheck::Unify
+        } else {
+            TypeArgCheck::Subtype
+        };
         let (tparams_loc, xs, t) = poly_t;
-        let mut errs_opt = errs_ref.as_deref_mut().map(std::mem::take);
-        let result = flow_js_utils::instantiation_kit::instantiate_poly_with_targs::<FlowJs>(
+        flow_js_utils::instantiation_kit::instantiate_poly_with_targs::<FlowJs>(
             cx,
             env,
             trace,
             use_op,
             reason_op,
             reason_tapp,
-            &mut errs_opt,
-            unify_bounds,
+            check,
             tparams_loc,
             &xs,
             t,
             targs,
-        );
-        if let (Some(errs), Some(v)) = (errs_opt, errs_ref) {
-            *v = errs;
-        }
-        result
+        )
     }
 
     pub(super) fn instantiate_poly_with_env<'cx>(
@@ -961,6 +960,68 @@ impl FlowJs {
     }
 }
 
+/// The positions of an `infer` type in the extends type of its conditional type that imply a
+/// bound for it: the type arguments it is (with each type constructor, its type arguments and the
+/// index), whether it is a placeholder of a template literal type, and whether it is the type of
+/// a rest element or a rest parameter. Named definitions are not entered, since an `infer` type
+/// can only be written in the extends type itself.
+struct InferTypePositions<'a> {
+    name: &'a SubstName,
+    type_args: Vec<(Type, Rc<[Type]>, usize)>,
+    in_template_literal: bool,
+    in_rest: bool,
+}
+
+impl InferTypePositions<'_> {
+    fn is_infer_type(&self, t: &Type) -> bool {
+        matches!(t.deref(), TypeInner::GenericT(g) if &g.name == self.name)
+    }
+}
+
+impl TypeVisitor<()> for InferTypePositions<'_> {
+    fn type_<'cx>(&mut self, cx: &mut Context<'cx>, pole: Polarity, acc: (), t: &Type) {
+        match t.deref() {
+            TypeInner::OpenT(_) => return acc,
+            TypeInner::TypeAppT(app) => {
+                for (index, targ) in app.targs.iter().enumerate() {
+                    if self.is_infer_type(targ) {
+                        self.type_args
+                            .push((app.type_.dupe(), app.targs.dupe(), index));
+                    }
+                }
+            }
+            TypeInner::TemplateLiteralT { types, .. } => {
+                if types.iter().any(|t| self.is_infer_type(t)) {
+                    self.in_template_literal = true;
+                }
+            }
+            TypeInner::EvalT {
+                type_, defer_use_t, ..
+            } => {
+                // The first spread of a tuple type is the type the destructor applies to.
+                if let Destructor::SpreadTupleType(spread) = defer_use_t.2.deref()
+                    && (self.is_infer_type(type_)
+                        || spread.unresolved.iter().any(|param| {
+                            matches!(param, UnresolvedParam::UnresolvedSpreadArg(t) if self.is_infer_type(t))
+                        }))
+                {
+                    self.in_rest = true;
+                }
+            }
+            TypeInner::DefT(_, def_t) => {
+                if let DefTInner::FunT(_, fun) = def_t.deref()
+                    && let Some(FunRestParam(_, _, t)) = &fun.rest_param
+                    && self.is_infer_type(t)
+                {
+                    self.in_rest = true;
+                }
+            }
+            _ => {}
+        }
+        flow_typing_visitors::type_visitor::type_default(self, cx, pole, acc, t)
+    }
+}
+
 impl FlowJs {
     pub fn flow_p<'cx>(
         cx: &mut Context<'cx>,
@@ -1024,6 +1085,160 @@ impl FlowJs {
         t: &Type,
     ) -> Result<Vec<Type>, FlowJsException> {
         Self::possible_concrete_types_for_inspection_with_env(cx, &FlowJsEnv::entry(), reason, t)
+    }
+
+    /// The bound of the type parameter `name`, named at `name_loc`, of an `infer` type whose bound
+    /// is implied by its positions in the extends type of its conditional type (see
+    /// `infer_type_implied_bound`). The extends type is converted after its `infer` types, so the
+    /// bound is computed when it is first needed.
+    pub fn mk_infer_type_implied_bound<'cx>(
+        cx: &mut Context<'cx>,
+        reason: Reason,
+        name_loc: ALoc,
+        name: SubstName,
+    ) -> Type {
+        let extends_t = cx.infer_extends_type_cell(name_loc);
+        flow_typing_tvar::mk_fully_resolved_lazy(cx, reason.dupe(), false, move |cx| {
+            let Some(extends_t) = extends_t.borrow().clone() else {
+                return Ok(mixed_t::why(reason));
+            };
+            flow_js_utils::flow_js_result_to_job_error(Self::infer_type_implied_bound(
+                cx, &reason, &name, &extends_t,
+            ))
+        })
+    }
+
+    /// Whether the bound of the type parameter of an `infer` type is the one made by
+    /// `mk_infer_type_implied_bound`: a type variable with the reason of the type parameter, which
+    /// no written bound has. That bound is computed from the extends type the `infer` type was
+    /// written in, so a conditional type whose extends type is substituted computes it again from
+    /// the substituted one.
+    pub fn is_infer_type_implied_bound(tparam: &TypeParam) -> bool {
+        matches!(tparam.bound.deref(), TypeInner::OpenT(tvar) if tvar.reason() == &tparam.reason)
+    }
+
+    /// The bound that the type parameter `name` of an `infer` type without a bound of its own has
+    /// from its positions in the extends type `extends_t` of its conditional type, as in
+    /// TypeScript: the intersection of the bound of each type parameter it is passed to as a type
+    /// argument, with the other type arguments (or their defaults) in place of their type
+    /// parameters; `string` if it is a placeholder of a template literal type; and
+    /// `ReadonlyArray<mixed>` if it is the type of a rest element or a rest parameter. `mixed` if
+    /// it has none.
+    pub fn infer_type_implied_bound<'cx>(
+        cx: &mut Context<'cx>,
+        reason: &Reason,
+        name: &SubstName,
+        extends_t: &Type,
+    ) -> Result<Type, FlowJsException> {
+        let mut positions = InferTypePositions {
+            name,
+            type_args: Vec::new(),
+            in_template_literal: false,
+            in_rest: false,
+        };
+        positions.type_(cx, Polarity::Positive, (), extends_t);
+        let InferTypePositions {
+            type_args,
+            in_template_literal,
+            in_rest,
+            ..
+        } = positions;
+        let mut bounds = Vec::new();
+        if in_template_literal {
+            bounds.push(str_module_t::why(reason.dupe()));
+        }
+        if in_rest {
+            bounds.push(Type::new(TypeInner::DefT(
+                reason.dupe().replace_desc(VirtualReasonDesc::RROArrayType),
+                DefT::new(DefTInner::ArrT(Rc::new(ArrType::ROArrayAT(Box::new(
+                    ROArrayATData {
+                        elem_t: mixed_t::why(reason.dupe()),
+                        react_dro: None,
+                        literal: ArrLiteral::NonLiteral,
+                    },
+                ))))),
+            )));
+        }
+        for (c, targs, index) in type_args {
+            let ts = Self::possible_concrete_types_for_inspection(cx, reason, &c)?;
+            let [t] = &ts[..] else { continue };
+            let TypeInner::DefT(_, def_t) = t.deref() else {
+                continue;
+            };
+            let DefTInner::PolyT(poly) = def_t.deref() else {
+                continue;
+            };
+            let Some(tparam) = poly.tparams.get(index) else {
+                continue;
+            };
+            let mut subst_map: FlowOrdMap<SubstName, Type> = FlowOrdMap::new();
+            for (i, tp) in poly.tparams.iter().enumerate() {
+                let targ = match (targs.get(i), &tp.default) {
+                    (Some(targ), _) => targ.dupe(),
+                    (None, Some(default)) => type_subst::subst(
+                        cx,
+                        None,
+                        true,
+                        false,
+                        type_subst::Purpose::Normal,
+                        &subst_map,
+                        default.dupe(),
+                    ),
+                    (None, None) => break,
+                };
+                subst_map.insert(tp.name.dupe(), targ);
+            }
+            let bound = type_subst::subst(
+                cx,
+                None,
+                true,
+                false,
+                type_subst::Purpose::Normal,
+                &subst_map,
+                tparam.bound.dupe(),
+            );
+            // A bound that is the `infer` type itself says nothing about it.
+            if matches!(bound.deref(), TypeInner::GenericT(g) if &g.name == name)
+                || matches!(bound.deref(), TypeInner::DefT(_, def_t)
+                    if matches!(def_t.deref(), DefTInner::MixedT(MixedFlavor::MixedEverything)))
+            {
+                continue;
+            }
+            bounds.push(bound);
+        }
+        // As TypeScript reduces the intersection (`string & ("a" | "b")` is `"a" | "b"`), a bound
+        // that another one is a subtype of is left out.
+        let mut narrowest: Vec<Type> = Vec::new();
+        for bound in bounds {
+            let mut is_wider = false;
+            for kept in &narrowest {
+                if helpers::speculative_subtyping_succeeds(cx, &FlowJsEnv::entry(), kept, &bound)? {
+                    is_wider = true;
+                    break;
+                }
+            }
+            if is_wider {
+                continue;
+            }
+            let mut still_narrowest = Vec::with_capacity(narrowest.len() + 1);
+            for kept in narrowest {
+                if !helpers::speculative_subtyping_succeeds(cx, &FlowJsEnv::entry(), &bound, &kept)?
+                {
+                    still_narrowest.push(kept);
+                }
+            }
+            still_narrowest.push(bound);
+            narrowest = still_narrowest;
+        }
+        let mut bounds = narrowest.into_iter();
+        Ok(match (bounds.next(), bounds.next()) {
+            (None, _) => mixed_t::why(reason.dupe()),
+            (Some(bound), None) => bound,
+            (Some(t0), Some(t1)) => Type::new(TypeInner::IntersectionT(
+                reason.dupe(),
+                inter_rep::make(t0, t1, bounds.collect()),
+            )),
+        })
     }
 
     pub fn possible_concrete_types_for_enum_exhaustive_check<'cx>(

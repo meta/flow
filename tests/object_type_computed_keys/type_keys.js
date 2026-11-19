@@ -47,7 +47,7 @@ type LiteralBound<T extends 'a'> = {[key: T]: number};
 // A generic alias applied to a parameter is a type application, so an index
 // signature.
 type Filter<T extends string> = T;
-type Applied<T> = {[key: Filter<T>]: number};
+type Applied<T> = {[key: Filter<T>]: number}; // error: T is not known to be a string
 {
   declare const x: Applied<'a'>;
   x.a as number; // OK via the indexer

@@ -5,7 +5,7 @@ var C = require('./test-lib');
 type Foo<X extends ?C> = Array<X>; // workaround
 var x:Array<C> = [];
 var y:Array<?C> = [];
-function foo<X>(x:Foo<X>) {}
+function foo<X>(x:Foo<X>) {} // error: X is not known to be a ?C
 foo(x);
 foo(y);
 

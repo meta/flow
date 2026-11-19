@@ -3861,6 +3861,19 @@ pub mod instantiation_kit {
     use crate::type_subst::Purpose;
     use crate::type_subst::subst;
 
+    /// How instantiating a polymorphic definition checks its type arguments: their number, and
+    /// each one against the bound of its type parameter.
+    #[derive(Clone, Copy)]
+    pub enum TypeArgCheck {
+        /// Not at all. The arguments of a type application are checked where it is written,
+        /// with `validate_type_args`, so expanding it does not check them again.
+        Skip,
+        /// Bounds are checked by subtyping.
+        Subtype,
+        /// Bounds are checked by unification.
+        Unify,
+    }
+
     // Instantiate a polymorphic definition given type arguments.
     pub fn instantiate_poly_with_targs<'cx, H: InstantiationHelper>(
         cx: &mut Context<'cx>,
@@ -3869,23 +3882,93 @@ pub mod instantiation_kit {
         use_op: UseOp,
         reason_op: &Reason,
         reason_tapp: &Reason,
-        errs_ref: &mut Option<Vec<flow_typing_context::SubstCacheErr>>,
-        unify_bounds: bool,
+        check: TypeArgCheck,
         tparams_loc: ALoc,
         xs: &Vec1<TypeParam>,
         t: Type,
         ts: Vec<Type>,
     ) -> Result<(Type, Vec<(Type, SubstName)>), FlowJsException> {
-        use flow_typing_context::SubstCacheErr;
+        let (map, all_ts) = type_arg_map(
+            cx,
+            env,
+            &use_op,
+            reason_op,
+            reason_tapp,
+            check,
+            tparams_loc,
+            xs,
+            ts,
+        )?;
+        check_bounds::<H>(cx, env, trace, &use_op, check, xs, &map)?;
+
+        let substituted_t = subst(
+            cx,
+            Some(use_op),
+            true,
+            env.in_implicit_instantiation(),
+            Purpose::Normal,
+            &map,
+            t,
+        );
+        let repositioned = H::reposition(
+            cx,
+            env,
+            Some(trace),
+            reason_tapp.loc().dupe(),
+            substituted_t,
+        )?;
+        Ok((repositioned, all_ts))
+    }
+
+    /// Checks the type arguments of a type application where it is written: their number, and
+    /// each one against the bound of its type parameter.
+    pub fn validate_type_args<'cx, H: InstantiationHelper>(
+        cx: &mut Context<'cx>,
+        env: &FlowJsEnv,
+        trace: DepthTrace,
+        use_op: UseOp,
+        reason_op: &Reason,
+        reason_tapp: &Reason,
+        tparams_loc: ALoc,
+        xs: &Vec1<TypeParam>,
+        ts: Vec<Type>,
+    ) -> Result<(), FlowJsException> {
+        let (map, _) = type_arg_map(
+            cx,
+            env,
+            &use_op,
+            reason_op,
+            reason_tapp,
+            TypeArgCheck::Subtype,
+            tparams_loc,
+            xs,
+            ts,
+        )?;
+        check_bounds::<H>(cx, env, trace, &use_op, TypeArgCheck::Subtype, xs, &map)
+    }
+
+    /// Maps each type parameter to its type argument, or to its default when the argument is
+    /// missing, and reports a wrong number of type arguments unless `check` skips it.
+    fn type_arg_map<'cx>(
+        cx: &mut Context<'cx>,
+        env: &FlowJsEnv,
+        use_op: &UseOp,
+        reason_op: &Reason,
+        reason_tapp: &Reason,
+        check: TypeArgCheck,
+        tparams_loc: ALoc,
+        xs: &Vec1<TypeParam>,
+        ts: Vec<Type>,
+    ) -> Result<(FlowOrdMap<SubstName, Type>, Vec<(Type, SubstName)>), FlowJsException> {
         use flow_typing_errors::error_message::ErrorMessage;
         use flow_typing_type::type_::AnySource;
-        use flow_typing_type::type_::VirtualFrameUseOp;
 
+        let report_arity = !matches!(check, TypeArgCheck::Skip);
         let minimum_arity = poly_minimum_arity(xs) as i32;
         let maximum_arity = xs.len() as i32;
         let arity_loc = tparams_loc;
 
-        if (ts.len() as i32) > maximum_arity {
+        if report_arity && (ts.len() as i32) > maximum_arity {
             add_output_with_env(
                 cx,
                 env,
@@ -3895,12 +3978,6 @@ pub mod instantiation_kit {
                     maximum_arity,
                 })),
             )?;
-            if let Some(errs) = errs_ref.as_mut() {
-                errs.push(SubstCacheErr::ETooManyTypeArgs(
-                    arity_loc.dupe(),
-                    maximum_arity,
-                ));
-            }
         }
 
         let mut map: FlowOrdMap<SubstName, Type> = FlowOrdMap::default();
@@ -3925,20 +4002,16 @@ pub mod instantiation_kit {
                     }
                     (None, None) => {
                         // fewer arguments than params but no default
-                        add_output_with_env(
-                            cx,
-                            env,
-                            ErrorMessage::ETooFewTypeArgs(Box::new(ETooFewTypeArgsData {
-                                reason_tapp: reason_tapp.to_error_reference(),
-                                arity_loc: arity_loc.dupe(),
-                                minimum_arity,
-                            })),
-                        )?;
-                        if let Some(errs) = errs_ref.as_mut() {
-                            errs.push(SubstCacheErr::ETooFewTypeArgs(
-                                arity_loc.dupe(),
-                                minimum_arity,
-                            ));
+                        if report_arity {
+                            add_output_with_env(
+                                cx,
+                                env,
+                                ErrorMessage::ETooFewTypeArgs(Box::new(ETooFewTypeArgsData {
+                                    reason_tapp: reason_tapp.to_error_reference(),
+                                    arity_loc: arity_loc.dupe(),
+                                    minimum_arity,
+                                })),
+                            )?;
                         }
                         let any_t =
                             Type::new(TypeInner::AnyT(reason_op.dupe(), AnySource::AnyError(None)));
@@ -3954,53 +4027,56 @@ pub mod instantiation_kit {
             map.insert(typeparam.name.dupe(), t_val);
         }
 
-        if !env.in_implicit_instantiation() {
-            for typeparam in xs.iter() {
-                let t_val = map
-                    .get(&typeparam.name)
-                    .expect("every type parameter should have a type argument")
-                    .dupe();
-                let frame = UseOp::Frame(
-                    Arc::new(VirtualFrameUseOp::TypeParamBound {
-                        name: typeparam.name.dupe(),
-                    }),
-                    Arc::new(use_op.dupe()),
-                );
-                let bound_subst = subst(
-                    cx,
-                    Some(use_op.dupe()),
-                    true,
-                    false,
-                    Purpose::Normal,
-                    &map,
-                    typeparam.bound.dupe(),
-                );
+        Ok((map, all_ts))
+    }
 
-                if unify_bounds {
-                    H::unify(cx, env, trace, frame, t_val, bound_subst)?;
-                } else {
-                    H::is_subtype(cx, env, trace, frame, t_val, bound_subst)?;
-                }
+    fn check_bounds<'cx, H: InstantiationHelper>(
+        cx: &mut Context<'cx>,
+        env: &FlowJsEnv,
+        trace: DepthTrace,
+        use_op: &UseOp,
+        check: TypeArgCheck,
+        xs: &Vec1<TypeParam>,
+        map: &FlowOrdMap<SubstName, Type>,
+    ) -> Result<(), FlowJsException> {
+        use flow_typing_type::type_::VirtualFrameUseOp;
+
+        let unify = match check {
+            TypeArgCheck::Skip => return Ok(()),
+            TypeArgCheck::Subtype => false,
+            TypeArgCheck::Unify => true,
+        };
+        if env.in_implicit_instantiation() {
+            return Ok(());
+        }
+        for typeparam in xs.iter() {
+            let t_val = map
+                .get(&typeparam.name)
+                .expect("every type parameter should have a type argument")
+                .dupe();
+            let frame = UseOp::Frame(
+                Arc::new(VirtualFrameUseOp::TypeParamBound {
+                    name: typeparam.name.dupe(),
+                }),
+                Arc::new(use_op.dupe()),
+            );
+            let bound_subst = subst(
+                cx,
+                Some(use_op.dupe()),
+                true,
+                false,
+                Purpose::Normal,
+                map,
+                typeparam.bound.dupe(),
+            );
+
+            if unify {
+                H::unify(cx, env, trace, frame, t_val, bound_subst)?;
+            } else {
+                H::is_subtype(cx, env, trace, frame, t_val, bound_subst)?;
             }
         }
-
-        let substituted_t = subst(
-            cx,
-            Some(use_op),
-            true,
-            env.in_implicit_instantiation(),
-            Purpose::Normal,
-            &map,
-            t,
-        );
-        let repositioned = H::reposition(
-            cx,
-            env,
-            Some(trace),
-            reason_tapp.loc().dupe(),
-            substituted_t,
-        )?;
-        Ok((repositioned, all_ts))
+        Ok(())
     }
 
     pub fn mk_typeapp_of_poly<'cx, H: InstantiationHelper>(
@@ -4043,41 +4119,11 @@ pub mod instantiation_kit {
         t: Type,
         ts: Rc<[Type]>,
     ) -> Result<Type, FlowJsException> {
-        use flow_typing_context::SubstCacheErr;
-        use flow_typing_errors::error_message::ErrorMessage;
-
         let key = (id.dupe(), ts.dupe());
-        if let Some((errs, cached_t)) = cx.subst_cache().get(&key).cloned() {
-            for err in errs.iter() {
-                match err {
-                    SubstCacheErr::ETooManyTypeArgs(arity_loc, maximum_arity) => {
-                        add_output_with_env(
-                            cx,
-                            env,
-                            ErrorMessage::ETooManyTypeArgs(Box::new(ETooManyTypeArgsData {
-                                reason_tapp: reason_tapp.to_error_reference(),
-                                arity_loc: arity_loc.dupe(),
-                                maximum_arity: *maximum_arity,
-                            })),
-                        )?;
-                    }
-                    SubstCacheErr::ETooFewTypeArgs(arity_loc, minimum_arity) => {
-                        add_output_with_env(
-                            cx,
-                            env,
-                            ErrorMessage::ETooFewTypeArgs(Box::new(ETooFewTypeArgsData {
-                                reason_tapp: reason_tapp.to_error_reference(),
-                                arity_loc: arity_loc.dupe(),
-                                minimum_arity: *minimum_arity,
-                            })),
-                        )?;
-                    }
-                }
-            }
+        if let Some(cached_t) = cx.subst_cache().get(&key).cloned() {
             return Ok(cached_t);
         }
 
-        let mut errs_ref = Some(Vec::new());
         let (result_t, _) = instantiate_poly_with_targs::<H>(
             cx,
             env,
@@ -4085,16 +4131,14 @@ pub mod instantiation_kit {
             use_op,
             reason_op,
             reason_tapp,
-            &mut errs_ref,
-            false,
+            TypeArgCheck::Skip,
             tparams_loc.dupe(),
             xs,
             t,
             ts.to_vec(),
         )?;
 
-        cx.subst_cache_mut()
-            .insert(key, (errs_ref.unwrap(), result_t.dupe()));
+        cx.subst_cache_mut().insert(key, result_t.dupe());
 
         Ok(result_t)
     }
@@ -4149,8 +4193,11 @@ pub mod instantiation_kit {
             use_op,
             reason_op,
             reason_tapp,
-            &mut None,
-            unify_bounds,
+            if unify_bounds {
+                TypeArgCheck::Unify
+            } else {
+                TypeArgCheck::Subtype
+            },
             tparams_loc,
             xs,
             t,

@@ -314,6 +314,21 @@ References:
                         ^^^^^^^^^ [1]
 
 
+Error -------------------------------------------------------------------------------------------- declaration.js:420:35
+
+Cannot instantiate `Omit` because in type argument `T`: `unknown` [1] is incompatible with `interface {}` [2].
+[incompatible-type]
+
+   declaration.js:420:35
+    420|   declare function fun<T>(x: Omit<T, 'a'>): T; // error: T is not known to be an object
+                                           ^ [1]
+
+References:
+   <BUILTINS>/lib.es5.js:1586:21
+   1586| type Omit<T extends interface {}, K> = $Omit<T, K>;
+                             ^^^^^^^^^^^^ [2]
+
+
 Error --------------------------------------------------------------------------------------------- declaration.js:421:7
 
 Cannot call `fun` with `x` bound to `x` because `R` [1] is not a subtype of `{}` [2]. Records are not subtypes of object
@@ -328,7 +343,7 @@ References:
    409|   declare const x: R;
                            ^ [1]
    declaration.js:420:30
-   420|   declare function fun<T>(x: Omit<T, 'a'>): T;
+   420|   declare function fun<T>(x: Omit<T, 'a'>): T; // error: T is not known to be an object
                                      ^^^^^^^^^^^^ [2]
 
 
@@ -1091,4 +1106,4 @@ or interface methods. [function-predicate]
 
 
 
-Found 75 errors
+Found 76 errors

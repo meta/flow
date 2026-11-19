@@ -380,22 +380,6 @@ Cannot call `Proxy` because in type argument `T`: `number` [1], a primitive, can
 of an interface. [incompatible-type]
 
    proxy.js:26:11
-   26| new Proxy(1, {}); // ERROR: targets must be objects
-                 ^ [1]
-
-References:
-   <BUILTINS>/lib.es2015.proxy.js:20:34
-   20| interface ProxyHandler<T extends object> {
-                                        ^^^^^^ [2]
-
-
-Error --------------------------------------------------------------------------------------------------- proxy.js:26:11
-
-Cannot call `Proxy` because in type argument `T`: `number` [1], a primitive, cannot be used as a subtype of
-`interface {}` [2]. You can wrap it in `new Number(...))` to turn it into an object and attempt to use it as a subtype
-of an interface. [incompatible-type]
-
-   proxy.js:26:11
     26| new Proxy(1, {}); // ERROR: targets must be objects
                   ^ [1]
 
@@ -758,4 +742,4 @@ References:
 
 
 
-Found 40 errors
+Found 39 errors

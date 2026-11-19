@@ -1,3 +1,25 @@
+Error ------------------------------------------------------------------------------------- fakelib/type_aliases.js:1:45
+
+Cannot instantiate `ExactReactElement_DEPRECATED` because in type argument `ElementType`: [incompatible-type]
+ - Either `unknown` [1] is incompatible with `component(...empty)` [2].
+ - Or `unknown` [1] is incompatible with `string` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   fakelib/type_aliases.js:1:45
+    1| type $jsx<C> = ExactReactElement_DEPRECATED<C>; // error: C is not known to be an element type
+                                                   ^ [1]
+
+References:
+   <BUILTINS>/react.js:44:5
+   44|   | component(...empty);
+           ^^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/react.js:43:5
+   43|   | string
+           ^^^^^^ [3]
+
+
 Error ----------------------------------------------------------------------------------------- argless_function.js:10:3
 
 Cannot assign `3` to `x.foo` because property `foo` is missing in `{}` [1]. [prop-missing]
@@ -535,4 +557,4 @@ References:
 
 
 
-Found 24 errors
+Found 25 errors

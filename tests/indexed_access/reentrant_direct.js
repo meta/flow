@@ -1,4 +1,4 @@
-type Args = [C['x'], null]; // ERROR
+type Args = [C['x'], null]; // OK
 
 class B<T extends ReadonlyArray<unknown>> {
   x: number = 0;

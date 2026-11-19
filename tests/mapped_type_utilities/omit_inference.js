@@ -50,6 +50,6 @@ type HasB = {
   b: number,
 };
 
-declare function acceptsOmit<T>(value: Omit<T, 'b'>): void;
+declare function acceptsOmit<T>(value: Omit<T, 'b'>): void; // error: T is not known to be an object
 
 acceptsOmit<HasB>({a: 'x'});

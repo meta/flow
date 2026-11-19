@@ -21,6 +21,21 @@ References:
                                 ^^^^^^ [3]
 
 
+Error ----------------------------------------------------------------------------------------- error_positions.js:10:95
+
+Cannot instantiate `React.ComponentType` because in type argument `P`: `unknown` [1] is incompatible with `{...}` [2].
+[incompatible-type]
+
+   error_positions.js:10:95
+    10| declare function bar<P>(x: React.ComponentType<{ m: number, ...P, ...}>): React.ComponentType<P>; // error: P is not known to be an object
+                                                                                                      ^ [1]
+
+References:
+   <BUILTINS>/react.js:583:50
+   583|   declare export type ComponentType<in P extends {...}> = component(...P);
+                                                         ^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------------------ error_positions.js:14:5
 
 Cannot call `foo` with `bar(...)` bound to `x` because `component(ref?: React.RefSetter<C>)` [1] is incompatible with
@@ -32,7 +47,7 @@ class `C` [2]. [incompatible-type]
 
 References:
    error_positions.js:10:75
-   10| declare function bar<P>(x: React.ComponentType<{ m: number, ...P, ...}>): React.ComponentType<P>;
+   10| declare function bar<P>(x: React.ComponentType<{ m: number, ...P, ...}>): React.ComponentType<P>; // error: P is not known to be an object
                                                                                  ^^^^^^^^^^^^^^^^^^^^^^ [1]
    error_positions.js:14:18
    14| foo(bar(C)) as F<typeof C>; // error on call
@@ -411,4 +426,4 @@ References:
 
 
 
-Found 23 errors
+Found 24 errors

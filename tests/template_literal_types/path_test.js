@@ -1,7 +1,7 @@
 type PathImpl<T, K extends keyof T> =
   K extends string
   ? T[K] extends Record<string, any>
-    ? K | `${K}.${PathImpl<T[K], keyof T[K]>}`
+    ? K | `${K}.${PathImpl<T[K], keyof T[K]>}` // error: Flow does not relate `keyof T[K]` to itself (TypeScript accepts)
     : K
   : never;
 
@@ -11,14 +11,14 @@ type PathValue<T, P extends Path<T>> =
   P extends `${infer K}.${infer Rest}`
   ? K extends keyof T
     ? Rest extends Path<T[K]>
-      ? PathValue<T[K], Rest>
+      ? PathValue<T[K], Rest> // error: same (TypeScript accepts)
       : never
     : never
   : P extends keyof T
     ? T[P]
     : never;
 
-declare function get<T, P extends Path<T>>(obj: T, path: P): PathValue<T, P>;
+declare function get<T, P extends Path<T>>(obj: T, path: P): PathValue<T, P>; // error: same (TypeScript accepts)
 
 type Obj = {
   firstName: string;

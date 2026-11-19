@@ -2055,6 +2055,8 @@ fn merge_annot<'cx>(
         Annot::String(box loc) => type_::str_module_t::at(loc.dupe()),
         Annot::Boolean(box loc) => type_::bool_module_t::at(loc.dupe()),
         Annot::Exists(box loc) => type_::any_t::at(type_::AnySource::AnnotatedAny, loc.dupe()),
+        // Only a bound of an `infer` type, which `merge_tparam_bound` merges.
+        Annot::InferTypeImpliedBound(box loc) => type_::mixed_t::at(loc.dupe()),
         Annot::ExactObjectType(box (loc, strictness_kind)) => {
             let reason = reason::mk_annot_reason(
                 RType(FlowSmolStr::new_inline("ExactObjectType")),
@@ -2742,6 +2744,15 @@ fn merge_annot<'cx>(
                     ..env.dupe()
                 };
                 let extends_t = merge_impl(&extends_env, cx, file, extends_type, false, false);
+                if let TParams::Poly(poly) = &inner.infer_tparams {
+                    for tp in poly.tparams.iter() {
+                        if let Some(Pack::Packed::Annot(annot)) = &tp.bound
+                            && matches!(annot.as_ref(), Annot::InferTypeImpliedBound(_))
+                        {
+                            cx.set_infer_extends_type(tp.name_loc.dupe(), extends_t.dupe());
+                        }
+                    }
+                }
                 let true_env = MergeEnv {
                     tps: tps_for_true_type,
                     ..env.dupe()
@@ -4141,6 +4152,13 @@ fn merge_tparam_bound<'cx>(
     } = tp;
     let polarity = *polarity;
     let reason = reason::mk_reason(RType(name.dupe()), name_loc.dupe());
+    let subst_name = if from_infer && env.tps.contains_key(name) {
+        let fvs: flow_data_structure_wrapper::ord_set::FlowOrdSet<SubstName> =
+            env.tps.keys().map(|n| SubstName::name(n.dupe())).collect();
+        alpha_rename::subst_name(&SubstName::name(name.dupe()), &fvs)
+    } else {
+        SubstName::name(name.dupe())
+    };
     let bound = match bound {
         None => {
             let bound_reason = reason.dupe().replace_desc(RMixed);
@@ -4151,14 +4169,21 @@ fn merge_tparam_bound<'cx>(
                 )),
             ))
         }
+        Some(Pack::Packed::Annot(annot))
+            if from_infer
+                && matches!(
+                    annot.as_ref(),
+                    flow_type_sig::type_sig::Annot::InferTypeImpliedBound(_)
+                ) =>
+        {
+            flow_typing_flow_js::flow_js::FlowJs::mk_infer_type_implied_bound(
+                cx,
+                reason.dupe(),
+                name_loc.dupe(),
+                subst_name.dupe(),
+            )
+        }
         Some(t) => merge_impl(env, cx, file, t, false, false),
-    };
-    let subst_name = if from_infer && env.tps.contains_key(name) {
-        let fvs: flow_data_structure_wrapper::ord_set::FlowOrdSet<SubstName> =
-            env.tps.keys().map(|n| SubstName::name(n.dupe())).collect();
-        alpha_rename::subst_name(&SubstName::name(name.dupe()), &fvs)
-    } else {
-        SubstName::name(name.dupe())
     };
     let tp = type_::TypeParam::new(type_::TypeParamInner {
         reason: reason.dupe(),

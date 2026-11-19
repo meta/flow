@@ -7,7 +7,7 @@ type F<T extends React.ElementType> = {
 
 declare function foo<T extends React.ElementType>(x: T): F<T>;
 
-declare function bar<P>(x: React.ComponentType<{ m: number, ...P, ...}>): React.ComponentType<P>;
+declare function bar<P>(x: React.ComponentType<{ m: number, ...P, ...}>): React.ComponentType<P>; // error: P is not known to be an object
 
 class C extends React.Component<{...}> {}
 

@@ -2694,7 +2694,16 @@ pub mod instantiation_solver {
         for tp in tparams {
             let targ = instantiation_utils::implicit_type_argument::mk_targ(cx, tp, reason, reason);
             subst_map.insert(tp.name.dupe(), targ.dupe());
-            inferred_targ_list.push((tp.name.dupe(), targ, tp.bound.dupe()));
+            // The bound that the positions of an `infer` type imply comes from the extends type
+            // as it is now, with the type arguments of the conditional type in place.
+            let bound = if crate::flow_js::FlowJs::is_infer_type_implied_bound(tp) {
+                crate::flow_js::FlowJs::infer_type_implied_bound(
+                    cx, &tp.reason, &tp.name, extends_t,
+                )?
+            } else {
+                tp.bound.dupe()
+            };
+            inferred_targ_list.push((tp.name.dupe(), targ, bound));
         }
         // OCaml builds this list with `::` (prepend) inside a left fold and does
         // not reverse it afterwards, so the list ends up in reverse tparam order
@@ -2705,6 +2714,23 @@ pub mod instantiation_solver {
         // reverse-solves its spread to `[]`, which unblocks the multiflow so the
         // regular param `F` gets its real bound.
         inferred_targ_list.reverse();
+        // Template literal types match what is inferred for an `infer` type against its bound (see
+        // `template_literal_type::flow_matched_placeholder`).
+        let mut infer_type_bounds = BTreeMap::new();
+        for (_, targ, bound) in &inferred_targ_list {
+            if let TypeInner::OpenT(tvar) = targ.deref() {
+                let bound = type_subst::subst(
+                    cx,
+                    Some(unknown_use()),
+                    true,
+                    false,
+                    type_subst::Purpose::Normal,
+                    &subst_map,
+                    bound.dupe(),
+                );
+                infer_type_bounds.insert(tvar.id(), bound);
+            }
+        }
 
         let extends_subst = type_subst::subst(
             cx,
@@ -2719,7 +2745,8 @@ pub mod instantiation_solver {
             env.with_restrictive_frozen_tvars()
         } else {
             env.dupe()
-        };
+        }
+        .with_infer_type_bounds(infer_type_bounds);
         if speculative_subtyping_succeeds(
             cx,
             &check_env,
@@ -2748,12 +2775,44 @@ pub mod instantiation_solver {
             // params `(a: infer A, ...rest: infer B)` once `B` is pinned. If that fails, so does
             // the check.
             let mut solution = None;
+            let mut replaced_by_bound = false;
             let pinning = speculation_kit::try_singleton_custom_throw_on_failure(
                 cx,
                 env,
                 Box::new(|cx, env| {
                     let mut result_map = FlowOrdMap::new();
-                    for (name, targ, bound) in &inferred_targ_list {
+                    let mut pending: Vec<&(SubstName, Type, Type)> =
+                        inferred_targ_list.iter().collect();
+                    while !pending.is_empty() {
+                        // A bound that mentions other `infer` types, as an implied one can, is
+                        // checked with their inferred types, as TypeScript instantiates it with the
+                        // current inferences, so they are pinned first.
+                        let next = pending
+                            .iter()
+                            .position(|(name, _, bound)| {
+                                type_subst::free_var_finder(cx, None, bound)
+                                    .iter()
+                                    .all(|other| {
+                                        other == name
+                                            || result_map.contains_key(other)
+                                            || !tparams_map.contains_key(other)
+                                    })
+                            })
+                            .unwrap_or(0);
+                        let (name, targ, bound) = pending.remove(next);
+                        let bound = &if result_map.is_empty() {
+                            bound.dupe()
+                        } else {
+                            type_subst::subst(
+                                cx,
+                                Some(unknown_use()),
+                                true,
+                                false,
+                                type_subst::Purpose::Normal,
+                                &result_map,
+                                bound.dupe(),
+                            )
+                        };
                         let tparam = match tparams_map.get(name) {
                             Some(tp) => tp,
                             None => return Ok(()),
@@ -2789,7 +2848,10 @@ pub mod instantiation_solver {
                         )? {
                             result_map.insert(name.dupe(), inferred);
                         } else {
-                            return Ok(());
+                            // As in TypeScript, an inferred type that doesn't fit its bound is
+                            // replaced by the bound, and the extends type is checked again.
+                            result_map.insert(name.dupe(), bound.dupe());
+                            replaced_by_bound = true;
                         }
                     }
                     solution = Some(result_map);
@@ -2805,9 +2867,11 @@ pub mod instantiation_solver {
                 // Pinning skips placeholders, as TypeScript's inference skips `NoInfer`, so it
                 // doesn't finish a check that waits on what a placeholder flows into. As in
                 // TypeScript, the extends type with the pinned type arguments is checked instead.
+                // So it is when a bound replaced an inferred type.
                 Some(solution)
-                    if restrictive_frozen_tvars
-                        && flow_js_utils::tvar_visitors::has_placeholders(cx, check_t) =>
+                    if replaced_by_bound
+                        || (restrictive_frozen_tvars
+                            && flow_js_utils::tvar_visitors::has_placeholders(cx, check_t)) =>
                 {
                     let pinned_extends_t = type_subst::subst(
                         cx,

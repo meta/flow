@@ -28,5 +28,27 @@ expression. [signature-verification-failure]
                      ^^^^^^^^^^^^^^^
 
 
+Error ----------------------------------------------------------------------------------------- testPolyTOfEvalT.js:4:33
 
-Found 3 errors
+Cannot instantiate `Config` because in type argument `T`: [incompatible-type]
+ - Either `unknown` [1] is incompatible with `component(...empty)` [2].
+ - Or `unknown` [1] is incompatible with `string` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   testPolyTOfEvalT.js:4:33
+    4| declare function f<T>(): Config<T>; // error: T is not known to be an element type
+                                       ^ [1]
+
+References:
+   <BUILTINS>/react.js:44:5
+   44|   | component(...empty);
+           ^^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/react.js:43:5
+   43|   | string
+           ^^^^^^ [3]
+
+
+
+Found 4 errors

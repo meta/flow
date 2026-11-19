@@ -654,7 +654,7 @@ type ReactDOM$AriaAttributes = {
   'aria-valuetext'?: ?ReactDOM$UserVisibleString,
 };
 
-type ReactDOM$EventHandlers<in E> = Readonly<{
+type ReactDOM$EventHandlers<in E extends EventTarget> = Readonly<{
   // Animation Events
   onAnimationEnd?: ?(event: SyntheticAnimationEvent<E>) => unknown,
   onAnimationEndCapture?: ?(event: SyntheticAnimationEvent<E>) => unknown,
@@ -937,7 +937,7 @@ type ReactDOM$SelfClosingHTMLElementProps = Omit<
   'children' | 'dangerouslySetInnerHTML',
 >;
 
-type ReactDOM$HTMLElementJSXIntrinsicTyped<Props, Instance = HTMLElement> = {
+type ReactDOM$HTMLElementJSXIntrinsicTyped<Props, Instance extends Element = HTMLElement> = {
   instance: Instance,
   props: {
     ...Props,

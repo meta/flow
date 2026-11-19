@@ -1,3 +1,18 @@
+Error -------------------------------------------------------------------------------------------------- method.js:19:57
+
+Cannot instantiate `NullableInfo` because in type argument `T`: `unknown` [1] is incompatible with
+`TypeInfo<Args<T>[0], Args<T>[1]>` [2]. [incompatible-type]
+
+   method.js:19:57
+   19| type Nullable<T> = NullableInfo<Args<T>[0], Args<T>[1], T>; // error: T is not known to be a TypeInfo
+                                                               ^ [1]
+
+References:
+   method.js:12:44
+   12| declare class NullableInfo<V, H, T extends TypeInfo<V, H>> {
+                                                  ^^^^^^^^^^^^^^ [2]
+
+
 Error -------------------------------------------------------------------------------------------------- method.js:31:22
 
 Static members cannot reference class type parameter `T`. [cannot-resolve-name]
@@ -251,4 +266,4 @@ References:
 
 
 
-Found 13 errors
+Found 14 errors

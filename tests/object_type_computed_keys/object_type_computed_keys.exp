@@ -592,6 +592,21 @@ References:
                 ^^^^^^ [2]
 
 
+Error ----------------------------------------------------------------------------------------------- type_keys.js:50:33
+
+Cannot instantiate `Filter` because in type argument `T`: `unknown` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   type_keys.js:50:33
+   50| type Applied<T> = {[key: Filter<T>]: number}; // error: T is not known to be a string
+                                       ^ [1]
+
+References:
+   type_keys.js:49:23
+   49| type Filter<T extends string> = T;
+                             ^^^^^^ [2]
+
+
 Error ----------------------------------------------------------------------------------------------- type_keys.js:66:20
 
 Unsupported key in object type. This name refers to a type, but an unlabeled key is read as a value. To declare an index
@@ -1387,4 +1402,4 @@ References:
 
 
 
-Found 100 errors
+Found 101 errors

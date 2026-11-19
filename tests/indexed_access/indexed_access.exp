@@ -709,14 +709,6 @@ References:
               ^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------- reentrant_direct.js:1:14
-
-Invalid trivially recursive definition of this type.  [recursive-definition]
-
-   1| type Args = [C['x'], null]; // ERROR
-                   ^^^^^^
-
-
 Error ------------------------------------------------------------------------------------------------------ test.js:5:1
 
 Cannot cast `'hello world'` to `ArrElem` because `"hello world"` [1] is incompatible with `number` [2].
@@ -1001,4 +993,4 @@ References:
 
 
 
-Found 59 errors
+Found 58 errors

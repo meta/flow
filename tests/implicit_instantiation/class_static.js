@@ -7,7 +7,7 @@ const x1: Map<unknown, unknown> = Map<unknown, unknown>();
 const x2: Map<unknown, unknown> = Map();
 
 declare class OneTarg<T> {
-  static <K, V>(): OneTarg<K, V>;
+  static <K, V>(): OneTarg<K, V>; // error: too many type arguments
 }
 
 const y = OneTarg<string>(); // error, incorrect amount of args

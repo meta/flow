@@ -832,6 +832,28 @@ References:
        ^^^^^^^^^^^ [2]
 
 
+Error --------------------------------------------------------------------------------------------- upper_non_t.js:30:52
+
+Cannot instantiate `React.ElementRef` because in type argument `C`: [incompatible-type]
+ - Either `unknown` [1] is incompatible with `component(...empty)` [2].
+ - Or `unknown` [1] is incompatible with `string` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   upper_non_t.js:30:52
+    30| declare function ElementRef<T>(x: React.ElementRef<T>): T; // error: T is not known to be an element type
+                                                           ^ [1]
+
+References:
+   <BUILTINS>/react.js:127:38
+   127|   type ElementRef<C extends string | component(...empty)> =
+                                             ^^^^^^^^^^^^^^^^^^^ [2]
+   <BUILTINS>/react.js:127:29
+   127|   type ElementRef<C extends string | component(...empty)> =
+                                    ^^^^^^ [3]
+
+
 Error ---------------------------------------------------------------------------------------------- upper_non_t.js:31:1
 
 Cannot call `ElementRef` because `T` [1] is underconstrained by call of `ElementRef` [2]. Either add explicit type
@@ -843,7 +865,7 @@ arguments or cast the expression to your expected type. [underconstrained-implic
 
 References:
    upper_non_t.js:30:29
-   30| declare function ElementRef<T>(x: React.ElementRef<T>): T;
+   30| declare function ElementRef<T>(x: React.ElementRef<T>): T; // error: T is not known to be an element type
                                    ^ [1]
    upper_non_t.js:31:1
    31| ElementRef(1); // Error: T under constrained.
@@ -1256,4 +1278,4 @@ References:
 
 
 
-Found 77 errors
+Found 78 errors

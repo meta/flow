@@ -2275,6 +2275,10 @@ pub enum Annot<Loc, T> {
     String(Box<Loc>),
     Boolean(Box<Loc>),
     Exists(Box<Loc>),
+    /// The bound of the type parameter of an `infer` type that is a type argument and has no bound
+    /// of its own: the bound of the type parameter it is passed to, known once the extends type
+    /// of its conditional type is merged.
+    InferTypeImpliedBound(Box<Loc>),
     // TS-only `object` builtin: a structurally-empty interface that rejects
     // primitives. See type_annotation.rs / subtyping_kit.rs.
     ObjectBuiltin(Box<(Loc, TypeStrictnessKind)>),
@@ -2343,7 +2347,8 @@ impl<Loc: std::hash::Hash, T: std::hash::Hash> std::hash::Hash for Annot<Loc, T>
             | Annot::BigInt(l)
             | Annot::String(l)
             | Annot::Boolean(l)
-            | Annot::Exists(l) => l.hash(state),
+            | Annot::Exists(l)
+            | Annot::InferTypeImpliedBound(l) => l.hash(state),
             Annot::ExactObjectType(inner) => inner.0.hash(state),
             Annot::ObjectBuiltin(inner) => inner.hash(state),
             Annot::Optional(t) => t.hash(state),
@@ -2553,6 +2558,7 @@ impl<Loc, T> Annot<Loc, T> {
             | Annot::String(box loc)
             | Annot::Boolean(box loc)
             | Annot::Exists(box loc)
+            | Annot::InferTypeImpliedBound(box loc)
             | Annot::ExactObjectType(box (loc, _)) => f_loc(cx, loc),
             Annot::ObjectBuiltin(box (loc, _)) => f_loc(cx, loc),
             Annot::Optional(box t) => f_t(cx, t),
@@ -2880,6 +2886,9 @@ impl<Loc, T> Annot<Loc, T> {
             Annot::String(loc) => Annot::String(Box::new(f_loc(cx, loc))),
             Annot::Boolean(loc) => Annot::Boolean(Box::new(f_loc(cx, loc))),
             Annot::Exists(loc) => Annot::Exists(Box::new(f_loc(cx, loc))),
+            Annot::InferTypeImpliedBound(loc) => {
+                Annot::InferTypeImpliedBound(Box::new(f_loc(cx, loc)))
+            }
             Annot::ObjectBuiltin(box (loc, strictness_kind)) => {
                 Annot::ObjectBuiltin(Box::new((f_loc(cx, loc), *strictness_kind)))
             }

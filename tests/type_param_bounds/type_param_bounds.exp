@@ -12,5 +12,93 @@ References:
                        ^^^^^^ [2]
 
 
+Error ---------------------------------------------------------------------------------------- type_param_bounds.js:6:15
 
-Found 1 error
+Cannot instantiate `X` because in type argument `T`: `unknown` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   type_param_bounds.js:6:15
+   6| type Y<T> = X<T>; // error: T is unknown
+                    ^ [1]
+
+References:
+   type_param_bounds.js:1:18
+   1| type X<T extends number> = boolean;
+                       ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------- type_param_bounds.js:8:28
+
+Cannot instantiate `X` because in type argument `T`: `unknown` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   type_param_bounds.js:8:28
+   8| declare function f<T>(x: X<T>): void; // error
+                                 ^ [1]
+
+References:
+   type_param_bounds.js:1:18
+   1| type X<T extends number> = boolean;
+                       ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------- type_param_bounds.js:10:31
+
+In type argument `T`: `unknown` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   type_param_bounds.js:10:31
+   10| class Derived<T> extends Base<T> {} // error
+                                     ^ [1]
+
+References:
+   type_param_bounds.js:9:22
+    9| class Base<T extends number> {}
+                            ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------- type_param_bounds.js:11:15
+
+Cannot instantiate `X` because in type argument `T`: `unknown` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   type_param_bounds.js:11:15
+   11| type Z<T> = X<T, T>; // error: too many type arguments
+                     ^ [1]
+
+References:
+   type_param_bounds.js:1:18
+    1| type X<T extends number> = boolean;
+                        ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------- type_param_bounds.js:11:13
+
+Cannot use `X` [1] with more than 1 type argument. [extra-type-arg]
+
+   type_param_bounds.js:11:13
+   11| type Z<T> = X<T, T>; // error: too many type arguments
+                   ^^^^^^^
+
+References:
+   type_param_bounds.js:1:7
+    1| type X<T extends number> = boolean;
+             ^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------- type_param_bounds.js:23:54
+
+Cannot instantiate `NeedsNum` because in type argument `N`: `unknown` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   type_param_bounds.js:23:54
+   23| type BoxedNum<B> = B extends {v: infer X} ? NeedsNum<X> : empty; // error: X is unknown
+                                                            ^ [1]
+
+References:
+   type_param_bounds.js:22:25
+   22| type NeedsNum<N extends number> = N;
+                               ^^^^^^ [2]
+
+
+
+Found 7 errors

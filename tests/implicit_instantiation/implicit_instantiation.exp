@@ -1,3 +1,17 @@
+Error -------------------------------------------------------------------------------------------- class_static.js:10:20
+
+Cannot use `OneTarg` [1] with more than 1 type argument. [extra-type-arg]
+
+   class_static.js:10:20
+   10|   static <K, V>(): OneTarg<K, V>; // error: too many type arguments
+                          ^^^^^^^^^^^^^
+
+References:
+   class_static.js:9:22
+    9| declare class OneTarg<T> {
+                            ^^^ [1]
+
+
 Error -------------------------------------------------------------------------------------------- class_static.js:13:11
 
 Cannot use function type [1] with fewer than 2 type arguments. [missing-type-arg]
@@ -8,7 +22,7 @@ Cannot use function type [1] with fewer than 2 type arguments. [missing-type-arg
 
 References:
    class_static.js:10:10
-   10|   static <K, V>(): OneTarg<K, V>;
+   10|   static <K, V>(): OneTarg<K, V>; // error: too many type arguments
                 ^^^^^^ [1]
 
 
@@ -276,6 +290,36 @@ References:
    poly_value_rounds.js:91:35
    91| declare function needsN<T extends N>(x: T): T;
                                          ^ [2]
+
+
+Error --------------------------------------------------------------------------------------- poly_value_rounds.js:97:42
+
+Cannot instantiate `NeedsN` because in type argument `T`: `unknown` [1] is incompatible with `N` [2].
+[incompatible-type]
+
+   poly_value_rounds.js:97:42
+   97| declare function make<S>(c: Class<NeedsN<S>>, x: S): NeedsN<S>; // error x2: S is not known to be an N
+                                                ^ [1]
+
+References:
+   poly_value_rounds.js:94:32
+   94| declare class NeedsN<T extends N> {
+                                      ^ [2]
+
+
+Error --------------------------------------------------------------------------------------- poly_value_rounds.js:97:61
+
+Cannot instantiate `NeedsN` because in type argument `T`: `unknown` [1] is incompatible with `N` [2].
+[incompatible-type]
+
+   poly_value_rounds.js:97:61
+   97| declare function make<S>(c: Class<NeedsN<S>>, x: S): NeedsN<S>; // error x2: S is not known to be an N
+                                                                   ^ [1]
+
+References:
+   poly_value_rounds.js:94:32
+   94| declare class NeedsN<T extends N> {
+                                      ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------- poly_value_rounds.js:98:6
@@ -811,4 +855,4 @@ References:
 
 
 
-Found 48 errors
+Found 51 errors

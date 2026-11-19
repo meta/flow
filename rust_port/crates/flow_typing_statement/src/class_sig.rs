@@ -1550,6 +1550,38 @@ fn check_methods<'a, C: crate::func_params_intf::Config>(
     );
 }
 
+/// Checks the type arguments written in an `extends`, `mixins` or `implements` clause.
+fn validate_heritage_type_args<'a>(cx: &mut Context<'a>, t: &Type) {
+    match t.deref() {
+        TypeInner::TypeAppT(box TypeAppTData {
+            reason,
+            use_op,
+            type_,
+            targs,
+            ..
+        }) => type_annotation_cons_gen::validate_type_args(
+            cx,
+            use_op.dupe(),
+            reason.dupe(),
+            type_.dupe(),
+            Some(targs.dupe()),
+        ),
+        TypeInner::ThisTypeAppT(box ThisTypeAppTData {
+            reason,
+            type_,
+            targs: Some(targs),
+            ..
+        }) => type_annotation_cons_gen::validate_type_args(
+            cx,
+            unknown_use(),
+            reason.dupe(),
+            type_.dupe(),
+            Some(targs.dupe()),
+        ),
+        _ => {}
+    }
+}
+
 fn check_implements<'a, C: crate::func_params_intf::Config>(
     cx: &mut Context<'a>,
     def_reason: Reason,
@@ -1643,6 +1675,7 @@ fn check_implements<'a, C: crate::func_params_intf::Config>(
                         implements: TypeOrTypeDescT::Type(i.dupe()),
                     },
                 ))));
+                validate_heritage_type_args(cx, &i);
                 cx.add_post_inference_validation_flow(
                     i,
                     UseT::new(UseTInner::ImplementsT(use_op, this.dupe())),
@@ -1723,6 +1756,39 @@ fn check_super<'a, C: crate::func_params_intf::Config>(
         }
     }
     let (super_, _) = supertype(cx, x);
+    // `supertype` intersects the types of several `extends` and `mixins` clauses.
+    match super_.deref() {
+        TypeInner::IntersectionT(_, rep) => {
+            for t in rep.members_iter() {
+                validate_heritage_type_args(cx, t);
+            }
+        }
+        _ => validate_heritage_type_args(cx, &super_),
+    }
+    // A clause without type arguments is specialized when the class signature is built, so the
+    // type above no longer has the class that the clause names.
+    if let class_types::Super::Class(class_super) = &x.super_ {
+        let extends = match &class_super.extends {
+            class_types::Extends::Explicit(extends) => Some(extends),
+            class_types::Extends::Implicit { .. } => None,
+        };
+        for (annot_loc, c, _) in class_super
+            .mixins
+            .iter()
+            .chain(extends)
+            .filter(|(_, _, targs)| targs.is_none())
+        {
+            type_annotation_cons_gen::validate_type_args(
+                cx,
+                unknown_use(),
+                type_util::reason_of_t(c)
+                    .dupe()
+                    .reposition_and_annotate(annot_loc.dupe()),
+                c.dupe(),
+                None,
+            );
+        }
+    }
     let use_op = UseOp::Op(Arc::new(RootUseOp::ClassExtendsCheck(Box::new(
         ClassExtendsCheckData {
             def_loc: def_reason.loc().dupe(),

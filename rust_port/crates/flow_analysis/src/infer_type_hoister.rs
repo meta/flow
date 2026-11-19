@@ -20,12 +20,21 @@ pub enum ImpliedBound {
     /// `ReadonlyArray<mixed>`. As in TypeScript, an `infer` type that is the type of a rest element
     /// or a rest parameter is an array, unless an `infer` type of the same name has a bound.
     ReadonlyArray,
+    /// As in TypeScript, an `infer` type that is a type argument has the bound of the type
+    /// parameter it is passed to, and one that is a placeholder of a template literal type is a
+    /// string. The intersection of the bounds of its positions is known once the extends type is
+    /// converted.
+    Positions,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Position {
     /// The type of a rest element or a rest parameter.
     Rest,
+    /// A placeholder of a template literal type.
+    TemplatePlaceholder,
+    /// A type argument of a type application.
+    TypeArgument,
     Other,
 }
 
@@ -45,7 +54,7 @@ impl<Loc: Dupe> InferTypeHoister<Loc> {
             .infer_types
             .iter()
             .map(|(_, infer, _)| {
-                let mut same_name = self
+                let same_name = self
                     .infer_types
                     .iter()
                     .filter(|(_, other, _)| other.tparam.name.name == infer.tparam.name.name);
@@ -55,11 +64,17 @@ impl<Loc: Dupe> InferTypeHoister<Loc> {
                         ast::types::AnnotationOrHint::Available(_)
                     )
                 }) {
-                    ImpliedBound::Mixed
-                } else if same_name.any(|(_, _, position)| *position == Position::Rest) {
-                    ImpliedBound::ReadonlyArray
-                } else {
-                    ImpliedBound::Mixed
+                    return ImpliedBound::Mixed;
+                }
+                let at = |position| same_name.clone().any(|(_, _, p)| *p == position);
+                match (
+                    at(Position::TypeArgument),
+                    at(Position::TemplatePlaceholder),
+                    at(Position::Rest),
+                ) {
+                    (false, false, false) => ImpliedBound::Mixed,
+                    (false, false, true) => ImpliedBound::ReadonlyArray,
+                    _ => ImpliedBound::Positions,
                 }
             })
             .collect();
@@ -71,10 +86,14 @@ impl<Loc: Dupe> InferTypeHoister<Loc> {
     }
 
     fn rest_type(&mut self, t: &ast::types::Type<Loc, Loc>) -> Result<(), !> {
+        self.type_at(t, Position::Rest)
+    }
+
+    fn type_at(&mut self, t: &ast::types::Type<Loc, Loc>, position: Position) -> Result<(), !> {
         match t.deref() {
             TypeInner::Infer { loc, inner } => {
                 self.infer_types
-                    .push((loc.dupe(), inner.as_ref().clone(), Position::Rest));
+                    .push((loc.dupe(), inner.as_ref().clone(), position));
                 ast_visitor::type_default(self, t)
             }
             _ => self.type_(t),
@@ -115,6 +134,29 @@ impl<Loc: Dupe> AstVisitor<'_, Loc> for InferTypeHoister<Loc> {
     ) -> Result<(), !> {
         let ast::types::tuple::SpreadElement { annot, name: _ } = spread;
         self.rest_type(annot)
+    }
+
+    fn generic_type(&mut self, gt: &ast::types::Generic<Loc, Loc>) -> Result<(), !> {
+        let ast::types::Generic {
+            id,
+            targs,
+            comments: _,
+        } = gt;
+        let Ok(()) = self.generic_identifier_type(id);
+        for targ in targs.iter().flat_map(|targs| targs.arguments.iter()) {
+            let Ok(()) = self.type_at(targ, Position::TypeArgument);
+        }
+        Ok(())
+    }
+
+    fn template_literal_type(
+        &mut self,
+        t: &ast::types::TypeTemplateLiteral<Loc, Loc>,
+    ) -> Result<(), !> {
+        for ty in t.types.iter() {
+            let Ok(()) = self.type_at(ty, Position::TemplatePlaceholder);
+        }
+        Ok(())
     }
 
     fn function_rest_param_type(

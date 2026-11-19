@@ -379,6 +379,21 @@ References:
          ^^^^^^ [1]
 
 
+Error ------------------------------------------------------------------------------------------ omit_inference.js:53:45
+
+Cannot instantiate `Omit` because in type argument `T`: `unknown` [1] is incompatible with `interface {}` [2].
+[incompatible-type]
+
+   omit_inference.js:53:45
+     53| declare function acceptsOmit<T>(value: Omit<T, 'b'>): void; // error: T is not known to be an object
+                                                     ^ [1]
+
+References:
+   <BUILTINS>/lib.es5.js:1586:21
+   1586| type Omit<T extends interface {}, K> = $Omit<T, K>;
+                             ^^^^^^^^^^^^ [2]
+
+
 Error ----------------------------------------------------------------------------------------------------- pick.js:8:10
 
 Cannot assign `3` to `pickedO1.foo` because property `foo` is not writable. [cannot-write]
@@ -540,4 +555,4 @@ References:
 
 
 
-Found 31 errors
+Found 32 errors

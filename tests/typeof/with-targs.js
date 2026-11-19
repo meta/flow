@@ -15,16 +15,16 @@ type Invalid1 = typeof barF<string>; // error
 type Invalid2 = typeof FooClass<string>; // error
 type Invalid3 = typeof barFExported<string>; // error
 type Invalid4 = typeof FooClassStringExported<string>; // error
-type Invalid5 = typeof bar<string, string>;
-type Invalid6 = typeof Foo<string, string>;
+type Invalid5 = typeof bar<string, string>; // error: too many type arguments
+type Invalid6 = typeof Foo<string, string>; // error: too many type arguments
 
 declare const emptyValue: empty;
 emptyValue as Invalid1;
 emptyValue as Invalid2;
 emptyValue as Invalid3;
 emptyValue as Invalid4;
-emptyValue as Invalid5; // error
-emptyValue as Invalid6; // error
+emptyValue as Invalid5;
+emptyValue as Invalid6;
 
 declare function barGeneric<X>(cb: typeof bar<X>): X;
 

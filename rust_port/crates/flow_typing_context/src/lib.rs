@@ -8,6 +8,7 @@
 #![feature(never_type)]
 
 use std::cell::LazyCell;
+use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::collections::HashMap;
@@ -331,12 +332,6 @@ pub struct VoidableCheck {
     pub errors: PropertyAssignmentErrors<ALoc>,
 }
 
-#[derive(Debug, Clone, Dupe)]
-pub enum SubstCacheErr {
-    ETooFewTypeArgs(ALoc, i32),
-    ETooManyTypeArgs(ALoc, i32),
-}
-
 #[derive(Debug, Clone)]
 pub struct PossiblyRefinedWriteState {
     pub t: Type,
@@ -443,7 +438,7 @@ pub struct ComponentT {
     inference_nodes: IntHashMap<i32, Node<type_::constraint::Constraints<Cx>>>,
 
     constraint_cache: type_::FlowSet<Cx>,
-    subst_cache: type_::SubstCacheMap<(Vec<SubstCacheErr>, Type)>,
+    subst_cache: type_::SubstCacheMap<Type>,
     eval_id_cache: EvalIdCacheMap,
     id_cache: IdCacheMap,
     eval_repos_cache: EvalReposCacheMap,
@@ -502,6 +497,10 @@ pub struct ComponentT {
     /// not only the merging ones, since at registration time we don't gate on
     /// participation.
     interface_prop_ids: BTreeMap<ALoc, (type_::properties::Id, type_::properties::Id)>,
+    /// The cell for the extends type of the conditional type of each `infer` type whose bound is
+    /// implied by its positions there, keyed by the location of its name. The cell is filled once
+    /// the extends type is converted, which is after the `infer` type's bound is made.
+    infer_extends_types: BTreeMap<ALoc, Rc<RefCell<Option<Type>>>>,
     env_value_cache: IntHashMap<i32, PossiblyRefinedWriteState>,
     env_type_cache: IntHashMap<i32, PossiblyRefinedWriteState>,
     // map from annot tvar ids to nodes used during annotation processing
@@ -1115,6 +1114,7 @@ fn make_ccx() -> ComponentT {
         merging_interface_field_types: HashMap::new(),
         merging_interface_typeparams: HashMap::new(),
         interface_prop_ids: BTreeMap::new(),
+        infer_extends_types: BTreeMap::new(),
         env_value_cache: IntHashMap::default(),
         env_type_cache: IntHashMap::default(),
         missing_local_annot_lower_bounds: BTreeMap::new(),
@@ -2149,6 +2149,18 @@ impl<'a> Context<'a> {
             .insert(loc, (own_props, proto_props));
     }
 
+    pub fn infer_extends_type_cell(&mut self, name_loc: ALoc) -> Rc<RefCell<Option<Type>>> {
+        self.ccx_mut()
+            .infer_extends_types
+            .entry(name_loc)
+            .or_default()
+            .dupe()
+    }
+
+    pub fn set_infer_extends_type(&mut self, name_loc: ALoc, extends_t: Type) {
+        *self.infer_extends_type_cell(name_loc).borrow_mut() = Some(extends_t);
+    }
+
     pub fn env_cache_find_opt(
         &self,
         for_value: bool,
@@ -2728,7 +2740,7 @@ pub struct CacheSnapshot {
     // eval_id_cache, id_cache, eval_repos_cache, fix_cache, this_specialize_cache,
     // const_fold_cache use MultiLevelMap — their state is tracked internally
     // via push_level/pop_level, not stored here.
-    snapshot_subst_cache: type_::SubstCacheMap<(Vec<SubstCacheErr>, Type)>,
+    snapshot_subst_cache: type_::SubstCacheMap<Type>,
     snapshot_spread_cache: SpreadCache,
     snapshot_evaluated: type_::eval::Map<Type>,
 }
@@ -3554,11 +3566,11 @@ impl<'a> Context<'a> {
         &mut self.ccx_mut().constraint_cache
     }
 
-    pub fn subst_cache(&self) -> &type_::SubstCacheMap<(Vec<SubstCacheErr>, Type)> {
+    pub fn subst_cache(&self) -> &type_::SubstCacheMap<Type> {
         &self.ccx().subst_cache
     }
 
-    pub fn subst_cache_mut(&mut self) -> &mut type_::SubstCacheMap<(Vec<SubstCacheErr>, Type)> {
+    pub fn subst_cache_mut(&mut self) -> &mut type_::SubstCacheMap<Type> {
         &mut self.ccx_mut().subst_cache
     }
 

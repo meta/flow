@@ -809,13 +809,13 @@ References:
                     ^^^^^^^^^^^^^^^^ [1]
 
 
-Error ---------------------------------------------------------------------------------------------- with-targs.js:26:15
+Error ---------------------------------------------------------------------------------------------- with-targs.js:18:17
 
-Cannot use `Invalid5` [1] with more than 1 type argument. [extra-type-arg]
+Cannot use `bar` [1] with more than 1 type argument. [extra-type-arg]
 
-   with-targs.js:26:15
-   26| emptyValue as Invalid5; // error
-                     ^^^^^^^^
+   with-targs.js:18:17
+   18| type Invalid5 = typeof bar<string, string>; // error: too many type arguments
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    with-targs.js:6:21
@@ -823,13 +823,13 @@ References:
                            ^^^ [1]
 
 
-Error ---------------------------------------------------------------------------------------------- with-targs.js:27:15
+Error ---------------------------------------------------------------------------------------------- with-targs.js:19:17
 
-Cannot use `Invalid6` [1] with more than 1 type argument. [extra-type-arg]
+Cannot use `Foo` [1] with more than 1 type argument. [extra-type-arg]
 
-   with-targs.js:27:15
-   27| emptyValue as Invalid6; // error
-                     ^^^^^^^^
+   with-targs.js:19:17
+   19| type Invalid6 = typeof Foo<string, string>; // error: too many type arguments
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    with-targs.js:3:10

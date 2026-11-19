@@ -417,7 +417,7 @@ interface Equatable<T> {
   x as OmitR;
   type ExactR = $Exact<R>; // ERROR
 
-  declare function fun<T>(x: Omit<T, 'a'>): T;
+  declare function fun<T>(x: Omit<T, 'a'>): T; // error: T is not known to be an object
   fun(x); // ERROR
 }
 

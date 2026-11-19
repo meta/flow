@@ -2127,29 +2127,12 @@ References:
                       ^^^^^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- inference.js:282:1
-
-Cannot cast `tf1` to `string` because `unknown` [1] is incompatible with `string` [2]. [incompatible-type]
-
-   inference.js:282:1
-   282| tf1 as string; // ERROR (limitation: should be OK since `any` should short-circuit)
-        ^^^
-
-References:
-   inference.js:281:20
-   281| declare const tf1: TF1;
-                           ^^^ [1]
-   inference.js:282:8
-   282| tf1 as string; // ERROR (limitation: should be OK since `any` should short-circuit)
-               ^^^^^^ [2]
-
-
 Error ----------------------------------------------------------------------------------------------- inference.js:283:1
 
-Cannot cast `tf1` to `number` because `unknown` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `tf1` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
 
    inference.js:283:1
-   283| tf1 as number; // ERROR (limitation: same)
+   283| tf1 as number; // ERROR (limitation: should be OK since `any` should short-circuit)
         ^^^
 
 References:
@@ -2157,7 +2140,7 @@ References:
    281| declare const tf1: TF1;
                            ^^^ [1]
    inference.js:283:8
-   283| tf1 as number; // ERROR (limitation: same)
+   283| tf1 as number; // ERROR (limitation: should be OK since `any` should short-circuit)
                ^^^^^^ [2]
 
 
@@ -2203,221 +2186,257 @@ References:
                  ^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- inference.js:306:1
+Error ----------------------------------------------------------------------------------------------- inference.js:301:1
+
+Cannot cast `'x'` to `TF5` because `"x"` [1] is incompatible with `` `${number}` `` [2]. [incompatible-type]
+
+   inference.js:301:1
+   301| 'x' as TF5; // ERROR
+        ^^^ [1]
+
+References:
+   inference.js:301:8
+   301| 'x' as TF5; // ERROR
+               ^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- inference.js:305:1
+
+Cannot cast `'c'` to `TF6` because: [incompatible-type]
+ - Either `"c"` [1] is incompatible with `"a"` [2].
+ - Or `"c"` [1] is incompatible with `` `b${number}` `` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   inference.js:305:1
+   305| 'c' as TF6; // ERROR
+        ^^^ [1]
+
+References:
+   inference.js:303:20
+   303| type TF6 = Foo<`*${'a' | `b${number}`}*`>; // 'a' | `b${number}`
+                           ^^^ [2]
+   inference.js:303:26
+   303| type TF6 = Foo<`*${'a' | `b${number}`}*`>; // 'a' | `b${number}`
+                                 ^^^^^^^^^^^^ [3]
+
+
+Error ----------------------------------------------------------------------------------------------- inference.js:340:1
 
 Cannot cast `'[d]'` to `W1` because: [incompatible-type]
  - Either `"[d]"` [1] is incompatible with `` `[${"a"}]` `` [2].
  - Or `"[d]"` [1] is incompatible with `` `[${"b"}]` `` [2].
  - Or `"[d]"` [1] is incompatible with `` `[${"c"}]` `` [2].
 
-   inference.js:306:1
-   306| '[d]' as W1; // ERROR
+   inference.js:340:1
+   340| '[d]' as W1; // ERROR
         ^^^^^ [1]
 
 References:
-   inference.js:301:50
-   301| type Wrap<T extends string> = T extends string ? `[${T}]` : never;
+   inference.js:335:50
+   335| type Wrap<T extends string> = T extends string ? `[${T}]` : never;
                                                          ^^^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- inference.js:317:1
+Error ----------------------------------------------------------------------------------------------- inference.js:351:1
 
 Cannot cast `p4_1[0]` to `"x"` because `"a"` [1] is incompatible with `"x"` [2]. [incompatible-type]
 
-   inference.js:317:1
-   317| p4_1[0] as 'x'; // ERROR
+   inference.js:351:1
+   351| p4_1[0] as 'x'; // ERROR
         ^^^^^^^
 
 References:
-   inference.js:311:20
-   311| type P4_1 = Parse4<'a-b-c-d'>;
+   inference.js:345:20
+   345| type P4_1 = Parse4<'a-b-c-d'>;
                            ^^^^^^^^^ [1]
-   inference.js:317:12
-   317| p4_1[0] as 'x'; // ERROR
-                   ^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------------- inference.js:324:1
-
-Cannot cast `p5_1[4]` to `"x"` because `"e"` [1] is incompatible with `"x"` [2]. [incompatible-type]
-
-   inference.js:324:1
-   324| p5_1[4] as 'x'; // ERROR
-        ^^^^^^^
-
-References:
-   inference.js:320:20
-   320| type P5_1 = Parse5<'a/b/c/d/e'>;
-                           ^^^^^^^^^^^ [1]
-   inference.js:324:12
-   324| p5_1[4] as 'x'; // ERROR
-                   ^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------------- inference.js:338:1
-
-Cannot cast `' hello'` to `TR1` because `" hello"` [1] is incompatible with `"hello"` [2]. [incompatible-type]
-
-   inference.js:338:1
-   338| ' hello' as TR1; // ERROR
-        ^^^^^^^^ [1]
-
-References:
-   inference.js:338:13
-   338| ' hello' as TR1; // ERROR
-                    ^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------------- inference.js:342:1
-
-Cannot cast `'other'` to `TR2` because `"other"` [1] is incompatible with `"no_spaces"` [2]. [incompatible-type]
-
-   inference.js:342:1
-   342| 'other' as TR2; // ERROR
-        ^^^^^^^ [1]
-
-References:
-   inference.js:342:12
-   342| 'other' as TR2; // ERROR
+   inference.js:351:12
+   351| p4_1[0] as 'x'; // ERROR
                    ^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------- inference.js:358:1
 
-Cannot cast `sp1[0]` to `"x"` because `"a"` [1] is incompatible with `"x"` [2]. [incompatible-type]
+Cannot cast `p5_1[4]` to `"x"` because `"e"` [1] is incompatible with `"x"` [2]. [incompatible-type]
 
    inference.js:358:1
-   358| sp1[0] as 'x'; // ERROR
-        ^^^^^^
+   358| p5_1[4] as 'x'; // ERROR
+        ^^^^^^^
 
 References:
-   inference.js:352:18
-   352| type SP1 = Split<'a.b.c', '.'>;
-                         ^^^^^^^ [1]
-   inference.js:358:11
-   358| sp1[0] as 'x'; // ERROR
-                  ^^^ [2]
+   inference.js:354:20
+   354| type P5_1 = Parse5<'a/b/c/d/e'>;
+                           ^^^^^^^^^^^ [1]
+   inference.js:358:12
+   358| p5_1[4] as 'x'; // ERROR
+                   ^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- inference.js:366:1
+Error ----------------------------------------------------------------------------------------------- inference.js:372:1
 
-Cannot cast `sp2[0]` to `"x"` because `"h"` [1] is incompatible with `"x"` [2]. [incompatible-type]
+Cannot cast `' hello'` to `TR1` because `" hello"` [1] is incompatible with `"hello"` [2]. [incompatible-type]
 
-   inference.js:366:1
-   366| sp2[0] as 'x'; // ERROR
-        ^^^^^^
+   inference.js:372:1
+   372| ' hello' as TR1; // ERROR
+        ^^^^^^^^ [1]
 
 References:
-   inference.js:360:18
-   360| type SP2 = Split<'hello', ''>;
-                         ^^^^^^^ [1]
-   inference.js:366:11
-   366| sp2[0] as 'x'; // ERROR
-                  ^^^ [2]
+   inference.js:372:13
+   372| ' hello' as TR1; // ERROR
+                    ^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- inference.js:383:1
+Error ----------------------------------------------------------------------------------------------- inference.js:376:1
 
-Cannot cast `'a.b.d'` to `J1` because `"d"` [1] is incompatible with `` `${["c"][0]}` `` [2]. [incompatible-type]
+Cannot cast `'other'` to `TR2` because `"other"` [1] is incompatible with `"no_spaces"` [2]. [incompatible-type]
 
-   inference.js:383:1
-   383| 'a.b.d' as J1; // ERROR
+   inference.js:376:1
+   376| 'other' as TR2; // ERROR
         ^^^^^^^ [1]
 
 References:
-   inference.js:378:148
-   378|     T extends Readonly<[string | number | boolean | bigint, ...infer U extends ReadonlyArray<string | number | boolean | bigint>]> ? `${T[0]}${D}${Join<U, D>}` :
+   inference.js:376:12
+   376| 'other' as TR2; // ERROR
+                   ^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- inference.js:392:1
+
+Cannot cast `sp1[0]` to `"x"` because `"a"` [1] is incompatible with `"x"` [2]. [incompatible-type]
+
+   inference.js:392:1
+   392| sp1[0] as 'x'; // ERROR
+        ^^^^^^
+
+References:
+   inference.js:386:18
+   386| type SP1 = Split<'a.b.c', '.'>;
+                         ^^^^^^^ [1]
+   inference.js:392:11
+   392| sp1[0] as 'x'; // ERROR
+                  ^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- inference.js:400:1
+
+Cannot cast `sp2[0]` to `"x"` because `"h"` [1] is incompatible with `"x"` [2]. [incompatible-type]
+
+   inference.js:400:1
+   400| sp2[0] as 'x'; // ERROR
+        ^^^^^^
+
+References:
+   inference.js:394:18
+   394| type SP2 = Split<'hello', ''>;
+                         ^^^^^^^ [1]
+   inference.js:400:11
+   400| sp2[0] as 'x'; // ERROR
+                  ^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- inference.js:417:1
+
+Cannot cast `'a.b.d'` to `J1` because `"d"` [1] is incompatible with `` `${["c"][0]}` `` [2]. [incompatible-type]
+
+   inference.js:417:1
+   417| 'a.b.d' as J1; // ERROR
+        ^^^^^^^ [1]
+
+References:
+   inference.js:412:148
+   412|     T extends Readonly<[string | number | boolean | bigint, ...infer U extends ReadonlyArray<string | number | boolean | bigint>]> ? `${T[0]}${D}${Join<U, D>}` :
                                                                                                                                                            ^^^^^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- inference.js:387:1
+Error ----------------------------------------------------------------------------------------------- inference.js:421:1
 
 Cannot cast `'wrong'` to `J2` because `"wrong"` [1] is incompatible with
 `` `${[1, 2, 3][0]}${"-"}${Join<[2, 3], "-">}` `` [2]. [incompatible-type]
 
-   inference.js:387:1
-   387| 'wrong' as J2; // ERROR
+   inference.js:421:1
+   421| 'wrong' as J2; // ERROR
         ^^^^^^^ [1]
 
 References:
-   inference.js:387:12
-   387| 'wrong' as J2; // ERROR
+   inference.js:421:12
+   421| 'wrong' as J2; // ERROR
                    ^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- inference.js:406:1
+Error ----------------------------------------------------------------------------------------------- inference.js:440:1
 
 Cannot cast `'wrong'` to `RA1` because `"wrong"` [1] is incompatible with `` `${"a/b/c"}${"/"}${"d"}` `` [2].
 [incompatible-type]
 
-   inference.js:406:1
-   406| 'wrong' as RA1; // ERROR
+   inference.js:440:1
+   440| 'wrong' as RA1; // ERROR
         ^^^^^^^ [1]
 
 References:
-   inference.js:406:12
-   406| 'wrong' as RA1; // ERROR
+   inference.js:440:12
+   440| 'wrong' as RA1; // ERROR
                    ^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- inference.js:410:1
+Error ----------------------------------------------------------------------------------------------- inference.js:444:1
 
 Cannot cast `'hello'` to `RA2` because `"hello"` [1] is incompatible with `` `${"her"}${"r"}${"o"}` `` [2].
 [incompatible-type]
 
-   inference.js:410:1
-   410| 'hello' as RA2; // ERROR
+   inference.js:444:1
+   444| 'hello' as RA2; // ERROR
         ^^^^^^^ [1]
 
 References:
-   inference.js:410:12
-   410| 'hello' as RA2; // ERROR
+   inference.js:444:12
+   444| 'hello' as RA2; // ERROR
                    ^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- inference.js:415:1
+Error ----------------------------------------------------------------------------------------------- inference.js:449:1
 
 Cannot cast `'helloX'` to `RA3` because `"helloX"` [1] is incompatible with `"hello"` [2]. [incompatible-type]
 
-   inference.js:415:1
-   415| 'helloX' as RA3; // ERROR
+   inference.js:449:1
+   449| 'helloX' as RA3; // ERROR
         ^^^^^^^^ [1]
 
 References:
-   inference.js:415:13
-   415| 'helloX' as RA3; // ERROR
+   inference.js:449:13
+   449| 'helloX' as RA3; // ERROR
                     ^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- inference.js:422:1
+Error ----------------------------------------------------------------------------------------------- inference.js:456:1
 
 Cannot cast `'ade'` to `Backtrack<"c">` because `"ade"` [1] is incompatible with `` `${"a" | "ab"}${"c"}` `` [2].
 [incompatible-type]
 
-   inference.js:422:1
-   422| 'ade' as Backtrack<'c'>; // ERROR
+   inference.js:456:1
+   456| 'ade' as Backtrack<'c'>; // ERROR
         ^^^^^ [1]
 
 References:
-   inference.js:422:10
-   422| 'ade' as Backtrack<'c'>; // ERROR
+   inference.js:456:10
+   456| 'ade' as Backtrack<'c'>; // ERROR
                  ^^^^^^^^^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------- inference.js:429:1
+Error ----------------------------------------------------------------------------------------------- inference.js:463:1
 
 Cannot cast `pick(...)` to `"bar"` because `"foo"` [1] is incompatible with `"bar"` [2]. [incompatible-type]
 
-   inference.js:429:1
-   429| pick('getfoo') as 'bar'; // ERROR
+   inference.js:463:1
+   463| pick('getfoo') as 'bar'; // ERROR
         ^^^^^^^^^^^^^^
 
 References:
-   inference.js:429:6
-   429| pick('getfoo') as 'bar'; // ERROR
+   inference.js:463:6
+   463| pick('getfoo') as 'bar'; // ERROR
              ^^^^^^^^ [1]
-   inference.js:429:19
-   429| pick('getfoo') as 'bar'; // ERROR
+   inference.js:463:19
+   463| pick('getfoo') as 'bar'; // ERROR
                           ^^^^^ [2]
 
 
@@ -2610,6 +2629,20 @@ References:
                           ^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------------------ path_test.js:4:34
+
+Cannot instantiate `PathImpl` because in type argument `K`: `T[K]` [1] is not an object. [not-an-object]
+
+   path_test.js:4:34
+   4|     ? K | `${K}.${PathImpl<T[K], keyof T[K]>}` // error: Flow does not relate `keyof T[K]` to itself (TypeScript accepts)
+                                       ^^^^^^^^^^
+
+References:
+   path_test.js:4:40
+   4|     ? K | `${K}.${PathImpl<T[K], keyof T[K]>}` // error: Flow does not relate `keyof T[K]` to itself (TypeScript accepts)
+                                             ^^^^ [1]
+
+
 Error ----------------------------------------------------------------------------------------------- path_test.js:44:13
 
 Cannot call `get` because in type argument `P`: [incompatible-type]
@@ -2658,7 +2691,7 @@ References:
     8| type Path<T> = PathImpl<T, keyof T> | keyof T;
                                   ^^^^^^^ [2]
    path_test.js:4:34
-    4|     ? K | `${K}.${PathImpl<T[K], keyof T[K]>}`
+    4|     ? K | `${K}.${PathImpl<T[K], keyof T[K]>}` // error: Flow does not relate `keyof T[K]` to itself (TypeScript accepts)
                                         ^^^^^^^^^^ [3]
    path_test.js:36:23
    36| declare const object: Obj;
@@ -2754,4 +2787,4 @@ References:
 
 
 
-Found 177 errors
+Found 179 errors

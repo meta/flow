@@ -4758,7 +4758,9 @@ fn __flow_impl<'cx>(
         // Instantiate a polymorphic definition using the supplied type
         // arguments. Use the instantiation cache if directed to do so by the
         // operation. (SpecializeT operations are created when processing TypeAppT
-        // types, so the decision to cache or not originates there.)
+        // types, so the decision to cache or not originates there.) A
+        // specialization without an upper bound only checks the type arguments
+        // of a type application where it is written.
         #[rustfmt::skip]
         (
             DefT(_, deref!(PolyT(box PolyTData {
@@ -4776,23 +4778,47 @@ fn __flow_impl<'cx>(
                 .as_ref()
                 .map(|rc| rc.dupe())
                 .unwrap_or_else(|| Rc::from([]));
-            let t_ = FlowJs::mk_typeapp_of_poly_with_env(
-                cx,
-                env,
-                trace,
-                use_op.dupe(),
-                reason_op,
-                reason_tapp,
-                id.dupe(),
-                tparams_loc.dupe(),
-                Vec1::try_from_vec(xs.to_vec()).unwrap(),
-                t,
-                ts_val,
-            )?;
-            if let Some(upper) = upper {
-                continue_(cx, env, trace, &t_, upper)?;
+            let xs = Vec1::try_from_vec(xs.to_vec()).unwrap();
+            match upper {
+                Some(upper) => {
+                    let t_ = FlowJs::mk_typeapp_of_poly_with_env(
+                        cx,
+                        env,
+                        trace,
+                        use_op.dupe(),
+                        reason_op,
+                        reason_tapp,
+                        id.dupe(),
+                        tparams_loc.dupe(),
+                        xs,
+                        t,
+                        ts_val,
+                    )?;
+                    continue_(cx, env, trace, &t_, upper)?;
+                }
+                None => flow_js_utils::instantiation_kit::validate_type_args::<FlowJs>(
+                    cx,
+                    env,
+                    trace,
+                    use_op.dupe(),
+                    reason_op,
+                    reason_tapp,
+                    tparams_loc.dupe(),
+                    &xs,
+                    ts_val.to_vec(),
+                )?,
             }
         }
+        // A reference without type arguments to a definition that is not polymorphic has
+        // nothing to check where it is written.
+        (
+            DefT(..),
+            SpecializeT(box SpecializeTData {
+                targs: None,
+                upper: None,
+                ..
+            }),
+        ) => {}
         // empty targs specialization of non-polymorphic classes is a no-op
         (
             DefT(_, deref!(ClassT(_))),
@@ -5214,7 +5240,6 @@ fn __flow_impl<'cx>(
                 use_op,
                 &reason_op,
                 reason_tapp,
-                None,
                 None,
                 (tparams_loc.dupe(), ids, t.dupe()),
                 targs,

@@ -1,29 +1,5 @@
 Error --------------------------------------------------------------------- error_positioning/error_positioning.js:30:36
 
-Cannot call `HOC` because in type argument `T`: [incompatible-type]
- - Either `{(...args: [{user: unknown}]): React.MixedElement, mock: {calls: Array<[{user: unknown}]>}}` [1] is
-   incompatible with `string` [2].
- - Or `{(...args: [{user: unknown}]): React.MixedElement, mock: {calls: Array<[{user: unknown}]>}}` [1] is not a React
-   component.
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
-
-   error_positioning/error_positioning.js:30:36
-   30| let RefetchContainer = HOC<any, _>(Component); // Error, mock is not a Component
-                                          ^^^^^^^^^
-
-References:
-   error_positioning/error_positioning.js:23:4
-   23| ): MockFn<TArguments, TReturn>
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/react.js:43:5
-   43|   | string
-           ^^^^^^ [2]
-
-
-Error --------------------------------------------------------------------- error_positioning/error_positioning.js:30:36
-
 `{(...args: [{user: unknown}]): React.MixedElement, mock: {calls: Array<[{user: unknown}]>}}` [1] is not a React
 component. [not-a-component]
 
@@ -105,4 +81,4 @@ References:
 
 
 
-Found 6 errors
+Found 5 errors

@@ -186,6 +186,10 @@ pub struct FlowJsEnv {
     /// bounds, as TypeScript's restrictive instantiation sees type parameters
     /// when it decides that a conditional type definitely holds.
     restrictive_frozen_tvars: bool,
+    /// The bounds of the `infer` types of the conditional type being checked, by the id of the
+    /// tvar that stands for each, as template literal types consult them (see
+    /// `template_literal_type::flow_matched_placeholder`).
+    infer_type_bounds: Option<Rc<BTreeMap<u32, Type>>>,
 }
 
 impl FlowJsEnv {
@@ -271,6 +275,7 @@ impl FlowJsEnv {
             polymorphic_lower_stack: self.polymorphic_lower_stack.dupe(),
             implicit_instantiation: self.implicit_instantiation.dupe(),
             restrictive_frozen_tvars: self.restrictive_frozen_tvars,
+            infer_type_bounds: self.infer_type_bounds.dupe(),
         }
     }
 
@@ -350,6 +355,19 @@ impl FlowJsEnv {
 
     pub fn restrictive_frozen_tvars(&self) -> bool {
         self.restrictive_frozen_tvars
+    }
+
+    pub fn with_infer_type_bounds(&self, bounds: BTreeMap<u32, Type>) -> Self {
+        Self {
+            infer_type_bounds: Some(Rc::new(bounds)),
+            ..self.dupe()
+        }
+    }
+
+    /// The bound of the `infer` type that the tvar `id` stands for, if it is one of the conditional
+    /// type being checked.
+    pub fn infer_type_bound(&self, id: u32) -> Option<&Type> {
+        self.infer_type_bounds.as_ref()?.get(&id)
     }
 
     /// What a use sees a frozen tvar as.
@@ -544,6 +562,7 @@ impl FlowJsEnv {
             polymorphic_lower_stack: self.polymorphic_lower_stack.dupe(),
             implicit_instantiation: self.implicit_instantiation.dupe(),
             restrictive_frozen_tvars: self.restrictive_frozen_tvars,
+            infer_type_bounds: self.infer_type_bounds.dupe(),
         })
     }
 
@@ -616,6 +635,7 @@ impl FlowJsEnv {
             polymorphic_lower_stack: None,
             implicit_instantiation: self.implicit_instantiation.dupe(),
             restrictive_frozen_tvars: false,
+            infer_type_bounds: None,
         }
     }
 }

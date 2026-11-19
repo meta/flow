@@ -37,7 +37,7 @@ function case3() {
     return makeNode({items});
   }
 
-  declare function makeNode2<T>(node: Omit<T, 'id'>): T;
+  declare function makeNode2<T extends {...}>(node: Omit<T, 'id'>): T;
 
   function getC(items: Array<number>): {id: string, items: Array<number>} {
     return makeNode2({items});

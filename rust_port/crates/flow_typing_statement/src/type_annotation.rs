@@ -623,6 +623,17 @@ fn implied_constraint(
     }
 }
 
+/// Whether `t` is an array or tuple type, or a type parameter whose bound is one.
+fn is_array_or_constrained_to_array(t: &Type) -> bool {
+    match t.deref() {
+        type_::TypeInner::DefT(_, d) => matches!(d.deref(), type_::DefTInner::ArrT(_)),
+        type_::TypeInner::GenericT(box type_::GenericTData { bound, .. }) => {
+            is_array_or_constrained_to_array(bound)
+        }
+        _ => false,
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MethodKind {
     FunctionKind,
@@ -1494,7 +1505,24 @@ fn convert_inner<'a>(
                     )
                 }
             };
+            let reason_tapp =
+                reason::mk_annot_reason(type_util::desc_of_t(&valtype).cloned(), loc.dupe());
             let rt = type_util::typeof_annotation(reason, valtype, targs);
+            if let type_::TypeInner::TypeAppT(box TypeAppTData {
+                use_op,
+                type_: type_t,
+                targs: app_targs,
+                ..
+            }) = rt.deref()
+            {
+                crate::type_annotation_cons_gen::validate_type_args(
+                    cx,
+                    use_op.dupe(),
+                    reason_tapp,
+                    type_t.dupe(),
+                    Some(app_targs.dupe()),
+                );
+            }
             ast::types::Type::new(TypeInner::Typeof {
                 loc: (loc.dupe(), rt),
                 inner: (ast::types::Typeof {
@@ -1765,6 +1793,15 @@ fn convert_inner<'a>(
                 )?;
                 env.infer_tparams_map = old_infer_tparams_map;
                 match infer_bounds_map.get(&subst_name) {
+                    // The bounds of `infer` types of the same name are only implied when none of
+                    // them is written, and they are implied by the same positions.
+                    Some(_) if *implied_bound != ImpliedBound::Mixed => {
+                        let t = additional_true_type_tparams_map
+                            .get(&subst_name)
+                            .expect("subst_name should exist in additional_true_type_tparams_map")
+                            .dupe();
+                        extends_infer_tparams_map.insert(tparam_tast.loc.dupe(), (tparam_tast, t));
+                    }
                     Some(existing_bound) => {
                         let use_op = type_::UseOp::Op(Arc::new(
                             type_::RootUseOp::InferBoundCompatibilityCheck {
@@ -1800,6 +1837,11 @@ fn convert_inner<'a>(
             let extends_type_ast = convert_inner(cx, &mut *env, &inner.extends_type)?;
             let extends_t = extends_type_ast.loc().1.dupe();
             env.infer_tparams_map = old_infer_tparams_map;
+            for (_, infer, implied_bound) in hoisted_infer_types.iter() {
+                if *implied_bound == ImpliedBound::Positions {
+                    cx.set_infer_extends_type(infer.tparam.name.loc.dupe(), extends_t.dupe());
+                }
+            }
             // An `infer` type parameter of the same name shadows the check type in the true branch.
             if let Some((subst_name, constraint)) =
                 implied_constraint(&inner.check_type, &extends_type_ast)
@@ -3582,13 +3624,44 @@ fn convert_inner<'a>(
                         }
                     }
                 };
-                let (tparam_ast, tparam, tparam_t) = mk_type_param_inner(
+                let (tparam_ast, tparam, _) = mk_type_param_inner(
                     cx,
                     env,
                     flow_parser::ast_visitor::TypeParamsContext::ObjectMappedType,
                     ImpliedBound::Mixed,
                     key_tparam,
                 )?;
+                // As in TypeScript, the key ranges over the keys that the type maps, which are the
+                // indices when it maps an array.
+                let key_bound = match &homomorphic {
+                    type_::MappedTypeHomomorphicFlag::Homomorphic
+                        if is_array_or_constrained_to_array(&source_type_t) =>
+                    {
+                        type_::num_module_t::at(source_type.loc().dupe())
+                    }
+                    type_::MappedTypeHomomorphicFlag::Homomorphic => {
+                        // In the property type, a type parameter that the mapped type distributes
+                        // over refers to the distributive type parameter.
+                        let source = distributive_tparam_name
+                            .as_ref()
+                            .and_then(|name| env.tparams_map.get(name))
+                            .unwrap_or(&source_type_t);
+                        Type::new(type_::TypeInner::KeysT(
+                            reason::mk_reason(None, source_type.loc().dupe()),
+                            source.dupe(),
+                        ))
+                    }
+                    type_::MappedTypeHomomorphicFlag::SemiHomomorphic(selected_keys) => {
+                        selected_keys.dupe()
+                    }
+                    type_::MappedTypeHomomorphicFlag::Unspecialized => source_type_t.dupe(),
+                };
+                let tparam = TypeParam::new(type_::TypeParamInner {
+                    bound: key_bound,
+                    ..(*tparam).clone()
+                });
+                let tparam_t =
+                    flow_js_utils::generic_of_tparam(cx, |_, x: &Type| x.dupe(), &tparam);
                 let tparam_name = tparam.name.dupe();
                 env.tparams_map.insert(tparam_name.dupe(), tparam_t);
                 let prop_type_ast = convert_inner(cx, env, prop_type)?;
@@ -6489,30 +6562,21 @@ fn mk_nominal_type_inner<'a>(
         Some(targs_node) => {
             let (targs_ts, targs_ast) = convert_list_inner(cx, env, &targs_node.arguments)?;
             let t = type_util::typeapp_annot(false, false, annot_loc, c, targs_ts);
-            if type_subst::free_var_finder(cx, None, &t).is_empty() {
-                match t.deref() {
-                    type_::TypeInner::TypeAppT(box TypeAppTData {
-                        reason: app_reason,
-                        use_op,
-                        type_: type_t,
-                        targs: app_targs,
-                        ..
-                    }) => {
-                        cx.add_post_inference_validation_flow(
-                            type_t.dupe(),
-                            type_::UseT::new(type_::UseTInner::SpecializeT(Box::new(
-                                type_::SpecializeTData {
-                                    use_op: use_op.dupe(),
-                                    reason: app_reason.dupe(),
-                                    reason2: app_reason.dupe(),
-                                    targs: Some(app_targs.clone()),
-                                    upper: None,
-                                },
-                            ))),
-                        );
-                    }
-                    _ => panic!("typeapp_annot should create a TypeAppT"),
-                }
+            match t.deref() {
+                type_::TypeInner::TypeAppT(box TypeAppTData {
+                    reason: app_reason,
+                    use_op,
+                    type_: type_t,
+                    targs: app_targs,
+                    ..
+                }) => crate::type_annotation_cons_gen::validate_type_args(
+                    cx,
+                    use_op.dupe(),
+                    app_reason.dupe(),
+                    type_t.dupe(),
+                    Some(app_targs.dupe()),
+                ),
+                _ => panic!("typeapp_annot should create a TypeAppT"),
             }
             (
                 t,
@@ -6595,6 +6659,14 @@ fn mk_type_param_inner<'a>(
             })),
         );
     }
+    let subst_name = if matches!(kind, TypeParamsContext::Infer)
+        && env.tparams_map.contains_key(&SubstName::name(name.dupe()))
+    {
+        let keys: FlowOrdSet<SubstName> = env.tparams_map.keys().cloned().collect();
+        alpha_rename::subst_name(&SubstName::name(name.dupe()), &keys)
+    } else {
+        SubstName::name(name.dupe())
+    };
     let (bound_t, bound_ast) = match bound {
         ast::types::AnnotationOrHint::Missing(missing_loc) => {
             let mixed = type_::Type::new(type_::TypeInner::DefT(
@@ -6619,6 +6691,12 @@ fn mk_type_param_inner<'a>(
                         }),
                     )))),
                 )),
+                ImpliedBound::Positions => FlowJs::mk_infer_type_implied_bound(
+                    cx,
+                    reason.dupe(),
+                    name_loc.dupe(),
+                    subst_name.dupe(),
+                ),
             };
             (
                 t.dupe(),
@@ -6647,14 +6725,6 @@ fn mk_type_param_inner<'a>(
             cx.add_post_inference_subtyping_check(t.dupe(), type_::unknown_use(), bound_t.dupe());
             (Some(t), Some(annot_ast))
         }
-    };
-    let subst_name = if matches!(kind, TypeParamsContext::Infer)
-        && env.tparams_map.contains_key(&SubstName::name(name.dupe()))
-    {
-        let keys: FlowOrdSet<SubstName> = env.tparams_map.keys().cloned().collect();
-        alpha_rename::subst_name(&SubstName::name(name.dupe()), &keys)
-    } else {
-        SubstName::name(name.dupe())
     };
     let tparam = TypeParam::new(type_::TypeParamInner {
         reason: reason.dupe(),

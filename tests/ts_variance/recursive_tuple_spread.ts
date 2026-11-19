@@ -1,7 +1,7 @@
 // Recursive tuple decomposition accumulates the required prefix.
 type Parts<T extends readonly unknown[], Prefix extends unknown[] = []> =
   T extends readonly [infer Head, ...infer Tail]
-    ? Parts<Tail, [...Prefix, Head]>
+    ? Parts<Tail, [...Prefix, Head]> // error: Flow does not spread a type parameter bounded by an array (TypeScript accepts)
     : {required: Prefix}; // OK
 
 // Recursive spreads reached through a type argument terminate during variance checking.

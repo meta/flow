@@ -1,3 +1,18 @@
+Error ----------------------------------------------------------------------------------------------- concretize.js:7:47
+
+Cannot instantiate `SyntheticKeyboardEvent` because in type argument `T`: `C1` [1] is incompatible with `B` [2].
+[incompatible-type]
+
+   concretize.js:7:47
+   7| function _onKeyDown(e: SyntheticKeyboardEvent<C1>): void {}; // error: C1 is not an event target
+                                                    ^^ [1]
+
+References:
+   flow-typed/libdefs.js:2:52
+   2| declare class SyntheticKeyboardEvent<out T extends B = B> {}
+                                                         ^ [2]
+
+
 Error ----------------------------------------------------------------------------------------------- concretize.js:8:16
 
 Cannot create `C1` element because in property `onKeyDown` > the first parameter > type argument `T` [1]: `C1` [2] is
@@ -12,29 +27,26 @@ References:
    2| declare class SyntheticKeyboardEvent<out T extends B = B> {}
                                                ^ [1]
    concretize.js:7:47
-   7| function _onKeyDown(e: SyntheticKeyboardEvent<C1>): void {};
+   7| function _onKeyDown(e: SyntheticKeyboardEvent<C1>): void {}; // error: C1 is not an event target
                                                     ^^ [2]
    flow-typed/libdefs.js:2:56
    2| declare class SyntheticKeyboardEvent<out T extends B = B> {}
                                                              ^ [3]
 
 
-Error ----------------------------------------------------------------------------------------------- concretize.js:8:16
+Error ------------------------------------------------------------------------------------------------------ test.js:8:3
 
-Cannot create `C1` element because in property `onKeyDown` > the first parameter > type argument `T`: `B` [1] is
-incompatible with `C1` [2]. [incompatible-type]
+Cannot instantiate `Omit` because in type argument `T`: `unknown` [1] is incompatible with `interface {}` [2].
+[incompatible-type]
 
-   concretize.js:8:16
-   8| <C1 onKeyDown={_onKeyDown} />;
-                     ^^^^^^^^^^
+   test.js:8:3
+      8|   Props, // error: Props is not known to be an object
+           ^^^^^ [1]
 
 References:
-   flow-typed/libdefs.js:2:52
-   2| declare class SyntheticKeyboardEvent<out T extends B = B> {}
-                                                         ^ [1]
-   concretize.js:7:47
-   7| function _onKeyDown(e: SyntheticKeyboardEvent<C1>): void {};
-                                                    ^^ [2]
+   <BUILTINS>/lib.es5.js:1586:21
+   1586| type Omit<T extends interface {}, K> = $Omit<T, K>;
+                             ^^^^^^^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:21:2
@@ -53,6 +65,36 @@ References:
    test.js:21:1
    21| <Foo x={props.t} />;
        ^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:24:11
+
+Cannot instantiate `Omit` because in type argument `T`: `unknown` [1] is incompatible with `interface {}` [2].
+[incompatible-type]
+
+   test.js:24:11
+     24|   y: Omit<Props, 'context'>; // error: Props is not known to be an object
+                   ^^^^^ [1]
+
+References:
+   <BUILTINS>/lib.es5.js:1586:21
+   1586| type Omit<T extends interface {}, K> = $Omit<T, K>;
+                             ^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:30:5
+
+Cannot instantiate `Y` because in type argument `Context`: property `context` is missing in `{}` [1] but exists in
+`{readonly context: unknown, ...}` [2]. [incompatible-type]
+
+   test.js:30:5
+   30|   Y<Context, Props> // error: Context is not known to have a `context` property
+           ^^^^^^^ [1]
+
+References:
+   test.js:23:24
+   23| type Y<Context extends {readonly context: unknown, ...}, Props> = {
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:33:2
@@ -74,4 +116,4 @@ References:
 
 
 
-Found 4 errors
+Found 7 errors
