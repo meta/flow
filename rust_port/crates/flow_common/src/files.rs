@@ -1122,14 +1122,14 @@ pub fn make_next_files(
                     };
                     // Only under the root does the crawl report what's under a symlink by its real
                     // path.
-                    let read_anyway = entry.parent_path().starts_with(&root_buf)
+                    let crawled_directly = entry.parent_path().starts_with(&root_buf)
                         && target.starts_with(&crawl_root)
                         // The crawl reports everything under the target itself.
                         && (duped_options.implicitly_include_root
                             || duped_options.includes.matches_subtree(&target.to_string_lossy()))
                         // A pruned target is still followed, so the symlinks inside it resolve.
                         && !prunes(&target);
-                    if read_anyway
+                    if crawled_directly
                         || path
                             .ancestors()
                             .take(entry.depth)
