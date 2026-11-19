@@ -332,7 +332,7 @@ function applyDefaultExportDocPlacement(
 
 function convertArray<TIn, TOut>(
   items: ReadonlyArray<TIn>,
-  convert: TIn => TranslatedResultOrNull<TOut>,
+  convert: (v: TIn) => TranslatedResultOrNull<TOut>,
 ): TranslatedResultArray<TOut> {
   const resultItems: Array<DetachedNode<TOut>> = [];
   const deps: Array<Dep> = [];

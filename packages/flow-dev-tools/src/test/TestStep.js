@@ -308,10 +308,10 @@ class TestStepFirstStage extends TestStepFirstOrSecondStage {
     });
 
   modifyFile: (
-    string,
-    string | RegExp,
-    string,
-    ?{triggerFlowCheck: boolean, ...},
+    v0: string,
+    v1: string | RegExp,
+    v2: string,
+    v3: ?{triggerFlowCheck: boolean, ...},
   ) => TestStepFirstStage = (filename, searchValue, replaceValue, options) => {
     const ret = this._cloneWithAction(async (builder, env) => {
       await builder.modifyFile(filename, searchValue, replaceValue);
@@ -322,21 +322,21 @@ class TestStepFirstStage extends TestStepFirstOrSecondStage {
     return ret;
   };
 
-  mockShellCommand: string => TestStepFirstStage = name => {
+  mockShellCommand: (v: string) => TestStepFirstStage = name => {
     const ret = this._cloneWithAction(async (builder, env) => {
       await builder.mockShellCommand(name);
     });
     return ret;
   };
 
-  waitUntilMockInvocation: number => TestStepFirstStage = timeout => {
+  waitUntilMockInvocation: (v: number) => TestStepFirstStage = timeout => {
     const ret = this._cloneWithAction(async (builder, env) => {
       await builder.waitUntilMockInvocation(timeout);
     });
     return ret;
   };
 
-  waitUntilMocksSettle: number => TestStepFirstStage = timeout => {
+  waitUntilMocksSettle: (v: number) => TestStepFirstStage = timeout => {
     const ret = this._cloneWithAction(async (builder, env) => {
       while (await builder.waitUntilMockInvocation(timeout));
     });
@@ -344,9 +344,9 @@ class TestStepFirstStage extends TestStepFirstOrSecondStage {
   };
 
   verifyMockInvocationsSinceStartOfStepContaining: (
-    string,
-    string,
-    number,
+    v0: string,
+    v1: string,
+    v2: number,
     maxDist?: number,
   ) => TestStepSecondStage = (
     name,
@@ -385,17 +385,17 @@ class TestStepFirstStage extends TestStepFirstOrSecondStage {
     return ret;
   };
 
-  waitUntilLSPStatus: (number, 'stopped' | 'running') => TestStepFirstStage = (
-    timeoutMs,
-    expected,
-  ) => {
+  waitUntilLSPStatus: (
+    v0: number,
+    v1: 'stopped' | 'running',
+  ) => TestStepFirstStage = (timeoutMs, expected) => {
     const ret = this._cloneWithAction(async (builder, env) => {
       await builder.waitUntilLSPStatus(timeoutMs, expected);
     });
     return ret;
   };
 
-  verifyLSPStatus: ('stopped' | 'running') => TestStepSecondStage =
+  verifyLSPStatus: (v: 'stopped' | 'running') => TestStepSecondStage =
     expected => {
       const assertLoc = searchStackForTestAssertion();
       const ret = this._cloneWithAssertion((reason, env) => {
@@ -416,14 +416,16 @@ class TestStepFirstStage extends TestStepFirstOrSecondStage {
       return ret;
     };
 
-  waitUntilServerStatus: (number, 'stopped' | 'running') => TestStepFirstStage =
-    (timeoutMs, expected) => {
-      const ret = this._cloneWithAction(async (builder, env) => {
-        await builder.waitUntilServerStatus(timeoutMs, expected);
-      });
-      ret._allowServerToDie = expected === 'stopped';
-      return ret;
-    };
+  waitUntilServerStatus: (
+    v0: number,
+    v1: 'stopped' | 'running',
+  ) => TestStepFirstStage = (timeoutMs, expected) => {
+    const ret = this._cloneWithAction(async (builder, env) => {
+      await builder.waitUntilServerStatus(timeoutMs, expected);
+    });
+    ret._allowServerToDie = expected === 'stopped';
+    return ret;
+  };
 
   lspIgnoreStatusAndCancellation: Array<string> = [
     'window/showStatus',
@@ -473,7 +475,7 @@ class TestStepFirstStage extends TestStepFirstOrSecondStage {
     return ret;
   };
 
-  lspStart: ({needsFlowServer: boolean}) => TestStepFirstStage = arg => {
+  lspStart: (v: {needsFlowServer: boolean}) => TestStepFirstStage = arg => {
     const needsFlowServer = arg.needsFlowServer;
 
     const ret = this._cloneWithAction(async (builder, env) => {
@@ -484,7 +486,7 @@ class TestStepFirstStage extends TestStepFirstOrSecondStage {
     return ret;
   };
 
-  lspStartAndConnect: (?number, ?{...}) => TestStepSecondStage = (
+  lspStartAndConnect: (v0: ?number, v1: ?{...}) => TestStepSecondStage = (
     timeoutMsOpt,
     initParamsOpt,
   ) => {
@@ -539,10 +541,10 @@ class TestStepFirstStage extends TestStepFirstOrSecondStage {
     return ret;
   };
 
-  lspNotification: (string, ...params: Array<unknown>) => TestStepFirstStage = (
-    method,
-    ...params
-  ) => {
+  lspNotification: (
+    v: string,
+    ...params: Array<unknown>
+  ) => TestStepFirstStage = (method, ...params) => {
     const ret = this._cloneWithAction(async (builder, env) =>
       builder.sendLSPNotification(method, params),
     );
@@ -550,7 +552,7 @@ class TestStepFirstStage extends TestStepFirstOrSecondStage {
   };
 
   lspResponse: (
-    number | 'mostRecent',
+    v: number | 'mostRecent',
     ...params: Array<unknown>
   ) => TestStepFirstStage = (id, ...params) => {
     const ret = this._cloneWithAction(async (builder, env) => {
@@ -559,7 +561,7 @@ class TestStepFirstStage extends TestStepFirstOrSecondStage {
     return ret;
   };
 
-  lspRequest: (string, ...params: Array<unknown>) => TestStepFirstStage = (
+  lspRequest: (v: string, ...params: Array<unknown>) => TestStepFirstStage = (
     method,
     ...params
   ) => {
@@ -572,7 +574,7 @@ class TestStepFirstStage extends TestStepFirstOrSecondStage {
   };
 
   lspRequestAndWaitUntilResponse: (
-    string,
+    v: string,
     ...params: Array<unknown>
   ) => TestStepFirstStage = (method, ...params) => {
     const ret = this._cloneWithAction(async (builder, env) => {
@@ -614,8 +616,8 @@ class TestStepFirstStage extends TestStepFirstOrSecondStage {
   // ignore any "E". But if there are unexpected messages not in the ignore
   // list, then we fail.
   verifyAllLSPMessagesInStep: (
-    ReadonlyArray<string | [string, string] | LSPMessage>,
-    ReadonlyArray<string | [string, string] | LSPMessage>,
+    v0: ReadonlyArray<string | [string, string] | LSPMessage>,
+    v1: ReadonlyArray<string | [string, string] | LSPMessage>,
   ) => TestStepSecondStage = (expects, ignores) => {
     const assertLoc = searchStackForTestAssertion();
     const ret = this._cloneWithAssertion((reason, env) => {
@@ -633,8 +635,8 @@ class TestStepFirstStage extends TestStepFirstOrSecondStage {
   };
 
   verifyLSPMessageSnapshot: (
-    string,
-    ReadonlyArray<string | [string, string] | LSPMessage>,
+    v0: string,
+    v1: ReadonlyArray<string | [string, string] | LSPMessage>,
   ) => TestStepSecondStage = (snapshot, ignores) => {
     const assertLoc = searchStackForTestAssertion();
     const ret = this._cloneWithAssertion((reason, env) => {
@@ -699,18 +701,19 @@ class TestStepFirstStage extends TestStepFirstOrSecondStage {
 
   // waitAndVerifyNoLSPMessagesSinceStartOfStep: if any messages arrive since the start
   // of this step until the timeout then it fails; otherwise it succeeds
-  waitAndVerifyNoLSPMessagesSinceStartOfStep: number => TestStepSecondStage =
-    timeoutMs => {
-      const assertLoc = searchStackForTestAssertion();
+  waitAndVerifyNoLSPMessagesSinceStartOfStep: (
+    v: number,
+  ) => TestStepSecondStage = timeoutMs => {
+    const assertLoc = searchStackForTestAssertion();
 
-      const ret = this._cloneWithAction(async (builder, env) => {
-        await sleep(timeoutMs);
-      })._cloneWithAssertion(lspNoNewMessagesAfterSleep(timeoutMs, assertLoc));
-      ret._readsIdeMessages = true;
-      return ret;
-    };
+    const ret = this._cloneWithAction(async (builder, env) => {
+      await sleep(timeoutMs);
+    })._cloneWithAssertion(lspNoNewMessagesAfterSleep(timeoutMs, assertLoc));
+    ret._readsIdeMessages = true;
+    return ret;
+  };
 
-  sleep: number => TestStepFirstStage = timeoutMs =>
+  sleep: (v: number) => TestStepFirstStage = timeoutMs =>
     this._cloneWithAction(async (builder, env) => {
       await sleep(timeoutMs);
     });
@@ -722,8 +725,8 @@ class TestStepFirstStage extends TestStepFirstOrSecondStage {
   // size, or smaller than the expected count). If the messages to consider
   // are identical to the expected messages, then it succeeds.
   waitAndVerifyAllLSPMessagesContentSinceStartOfStep: (
-    number,
-    ReadonlyArray<LSPMessage>,
+    v0: number,
+    v1: ReadonlyArray<LSPMessage>,
   ) => TestStepSecondStage = (timeoutMs, expected) => {
     const assertLoc = searchStackForTestAssertion();
 

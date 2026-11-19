@@ -16,7 +16,7 @@ import {parse} from '../../../src/transform/parse';
 // Module-compatible statements exercise mutations across their allowed parents.
 export type StatementTypes =
   Exclude<Statement['type'], 'WithStatement'> | ModuleDeclaration['type'];
-export const CODE_SAMPLES: Readonly<{[StatementTypes]: string}> = {
+export const CODE_SAMPLES: Readonly<{[key: StatementTypes]: string}> = {
   ExpressionStatement: 'foo;',
   BlockStatement: '{}',
   EmptyStatement: ';',

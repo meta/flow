@@ -20,7 +20,7 @@ export type SourceMapperParams = {
 };
 
 export type MapperOptions = Readonly<{
-  sourceMapper: SourceMapperParams => string,
+  sourceMapper: (v: SourceMapperParams) => string,
 }>;
 
 export function flowImportTo(

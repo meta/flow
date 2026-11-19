@@ -66,7 +66,7 @@ function normalizePaths(value: unknown, projectDir: string): unknown {
     return value.map((item: unknown) => normalizePaths(item, projectDir));
   }
   if (typeof value === 'object' && value != null) {
-    const out: {[string]: unknown} = {};
+    const out: {[key: string]: unknown} = {};
     for (const key of Object.keys(value)) {
       // Keys too: a manifest keyed by absolute path is otherwise unsnapshottable.
       out[normalizePathsInString(key, projectDir)] = normalizePaths(

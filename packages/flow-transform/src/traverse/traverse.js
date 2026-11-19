@@ -84,7 +84,7 @@ export function traverseWithContext<T = TraversalContextBase>(
   code: string,
   ast: Program,
   scopeManager: ScopeManager,
-  additionalContext: TraversalContextBase => T,
+  additionalContext: (v: TraversalContextBase) => T,
   visitor: Visitor<T>,
 ): void {
   const emitter = new SafeEmitter();

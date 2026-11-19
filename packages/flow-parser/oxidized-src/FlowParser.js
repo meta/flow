@@ -21,38 +21,38 @@ import FlowParserWASMModule from './FlowParserWASM';
 import {getModuleDocblock} from './getModuleDocblock';
 
 type FlowParse = (
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
+  v0: number,
+  v1: number,
+  v2: number,
+  v3: number,
+  v4: number,
+  v5: number,
+  v6: number,
+  v7: number,
+  v8: number,
+  v9: number,
+  v10: number,
+  v11: number,
+  v12: number,
+  v13: number,
+  v14: number,
+  v15: number,
+  v16: number,
+  v17: number,
+  v18: number,
+  v19: number,
 ) => number;
 
 let FlowParserWASM: FlowParserWASMType;
 let flowParse: FlowParse;
-let flowParseResult_free: number => void;
-let flowParseResult_getError: number => string;
-let flowParseResult_getErrorLine: number => number;
-let flowParseResult_getErrorColumn: number => number;
-let flowParseResult_getProgramBuffer: number => number;
-let flowParseResult_getPositionBuffer: number => number;
-let flowParseResult_getPositionBufferSize: number => number;
-let flowParseResult_getStringBuffer: number => number;
+let flowParseResult_free: (v: number) => void;
+let flowParseResult_getError: (v: number) => string;
+let flowParseResult_getErrorLine: (v: number) => number;
+let flowParseResult_getErrorColumn: (v: number) => number;
+let flowParseResult_getProgramBuffer: (v: number) => number;
+let flowParseResult_getPositionBuffer: (v: number) => number;
+let flowParseResult_getPositionBufferSize: (v: number) => number;
+let flowParseResult_getStringBuffer: (v: number) => number;
 
 const BABEL_LOWERING_ERROR_PREFIX = '$FlowBabelLoweringError$';
 

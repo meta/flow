@@ -171,7 +171,7 @@ describe('NodeEventGenerator', () => {
       sourceText: string,
       possibleQueries: ReadonlyArray<string>,
       // these tests do simple access into the AST, so it's much easier to just have the access untyped
-      expectedEmissions: $FlowFixMe => Emissions,
+      expectedEmissions: (v: $FlowFixMe) => Emissions,
     ): void {
       it(`${sourceText} - ${possibleQueries.join('; ')}`, () => {
         const {ast} = parseForESLint(sourceText);

@@ -23,7 +23,7 @@ export type HermesSourceLocation = {
 };
 export type HermesNode = {
   type: string,
-  [string]: any,
+  [key: string]: any,
 };
 export type HermesToken = {
   type:

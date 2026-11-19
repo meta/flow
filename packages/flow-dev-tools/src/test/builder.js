@@ -51,7 +51,7 @@ import type {ServerExit, ServerLog} from './serverCrash';
 import type {FlowResult} from '../flowResult';
 
 type JsonValue = null | boolean | number | string | JsonObject;
-type JsonObject = {[string]: JsonValue};
+type JsonObject = {[key: string]: JsonValue};
 
 type CancellationToken = {
   readonly isCancellationRequested: boolean,
@@ -71,7 +71,7 @@ class TestBuilder {
     process: child_process$ChildProcess,
     outstandingRequestsFromServer: Map<
       number,
-      {resolve: any => void, reject: Error => void},
+      {resolve: (v: any) => void, reject: (v: Error) => void},
     >,
     outstandingRequestsInfo: {nextId: number, mostRecent: ?number, ...},
     stderr: Array<string>,
@@ -492,7 +492,7 @@ class TestBuilder {
     };
     const outstandingRequestsFromServer: Map<
       number,
-      {resolve: any => void, reject: Error => void},
+      {resolve: (v: any) => void, reject: (v: Error) => void},
     > = new Map();
 
     connection.onRequest(
@@ -518,7 +518,7 @@ class TestBuilder {
         });
 
         const promise = new Promise(
-          (resolve: any => void, reject: Error => void) => {
+          (resolve: (v: any) => void, reject: (v: Error) => void) => {
             outstandingRequestsFromServer.set(id, {resolve, reject});
           },
         );

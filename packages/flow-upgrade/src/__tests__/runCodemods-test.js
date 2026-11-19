@@ -22,7 +22,7 @@ describe('runCodemods', () => {
       path.join(os.tmpdir(), 'flow-upgrade-run-codemods-'),
     );
 
-    const fileContents: {[string]: string} = {
+    const fileContents: {[key: string]: string} = {
       'A.js': `// @flow
 // This is file A.js.
 type A1 = $ReadOnlyArray<mixed>;
@@ -36,7 +36,7 @@ type B2 = $ReadOnly<B1>;
 const b = (null: $NonMaybeType<B1>);
 `,
     };
-    const expected: {[string]: string} = {
+    const expected: {[key: string]: string} = {
       'A.js': `// @flow
 // This is file A.js.
 type A1 = ReadonlyArray<unknown>;

@@ -146,7 +146,7 @@ type SubjectSelector =
 type Literal = StringLiteralAtom | NumericLiteralAtom;
 
 export type ESQueryOptions = Readonly<{
-  visitorKeys?: Readonly<{[string]: ReadonlyArray<string>}>,
+  visitorKeys?: Readonly<{[key: string]: ReadonlyArray<string>}>,
   fallback?: (node: ESNode) => ReadonlyArray<string>,
 }>;
 

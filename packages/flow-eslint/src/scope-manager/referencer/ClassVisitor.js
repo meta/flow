@@ -140,7 +140,7 @@ class ClassVisitor extends Visitor {
     this._referencer.close(node);
   }
 
-  visitType: (?ESNode) => void = (node): void => {
+  visitType: (v: ?ESNode) => void = (node): void => {
     if (!node) {
       return;
     }

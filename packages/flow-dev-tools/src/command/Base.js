@@ -122,8 +122,8 @@ class Base<T extends interface {}, Input extends interface {} = interface {}> {
   static parse(): any {
     const boolean = [];
     const string = [];
-    const defaults: {[string]: unknown} = {};
-    const alias: {[string]: string | Array<string>} = {};
+    const defaults: {[key: string]: unknown} = {};
+    const alias: {[key: string]: string | Array<string>} = {};
 
     const flags = this.getAllFlags();
     for (const flag of flags) {

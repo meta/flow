@@ -52,11 +52,11 @@ function constructFlowNode<T extends FlowESTree.BaseNode>(
 
 const cloneJSDocCommentsToNewNode =
   // $FlowExpectedError[incompatible-type] - trust me this re-type is 100% safe
-  cloneJSDocCommentsToNewNodeOriginal as (unknown, unknown) => void;
+  cloneJSDocCommentsToNewNodeOriginal as (v0: unknown, v1: unknown) => void;
 
 const makeCommentOwnLine =
   // $FlowExpectedError[incompatible-type] - trust me this re-type is 100% safe
-  makeCommentOwnLineOriginal as (string, unknown) => string;
+  makeCommentOwnLineOriginal as (v0: string, v1: unknown) => string;
 
 /**
  * `DeclareComponent` reaches us in one of two shapes: parsed nodes carry

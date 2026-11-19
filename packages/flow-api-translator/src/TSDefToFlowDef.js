@@ -47,7 +47,7 @@ function constructFlowNode<T extends FlowESTree.BaseNode>(
 
 const makeCommentOwnLine =
   // $FlowExpectedError[incompatible-type] - trust me this re-type is 100% safe
-  makeCommentOwnLineOriginal as (string, unknown) => string;
+  makeCommentOwnLineOriginal as (v0: string, v1: unknown) => string;
 
 export function TSDefToFlowDef(
   originalCode: string,

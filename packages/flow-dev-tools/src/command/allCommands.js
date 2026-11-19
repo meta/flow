@@ -28,11 +28,11 @@ module.exports = {
   // prettier-ignore
   // @fb-only: 'windtunnel-recheck-prof': () => require('../facebook/windtunnel-recheck-prof/windtunnel-recheck-profCommand'),
 } as {
-  [string]: () => {
+  [key: string]: () => {
     readonly default: interface {
       description(): string,
       go(): Promise<void>,
-      showUsage(number): void,
+      showUsage(v: number): void,
     },
     ...
   },

@@ -713,7 +713,7 @@ function mapComponentDeclarationIntoList(
   node: ComponentDeclaration,
   newBody: Array<Statement | ModuleDeclaration>,
   options: ParserOptions,
-  insertExport?: (Identifier | FunctionDeclaration) => ModuleDeclaration,
+  insertExport?: (v: Identifier | FunctionDeclaration) => ModuleDeclaration,
 ) {
   const {comp, forwardRefDetails} = mapComponentDeclaration(node, options);
   if (forwardRefDetails != null) {

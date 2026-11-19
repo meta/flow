@@ -64,7 +64,9 @@ declare module 'prettier' {
     | 'typescript'
     | 'vue'
     | 'yaml';
-  declare export type BuiltInParsers = {[BuiltInParserName]: BuiltInParser};
+  declare export type BuiltInParsers = {
+    [key: BuiltInParserName]: BuiltInParser,
+  };
 
   declare export type CustomParser = (
     text: string,
@@ -501,7 +503,7 @@ declare module 'prettier' {
     | PathArraySupportOption;
 
   declare export type SupportOptions = {
-    [string]: SupportOption,
+    [key: string]: SupportOption,
   };
 
   declare export type SupportInfo = {
@@ -862,7 +864,7 @@ declare module 'prettier/plugins/flow' {
 }
 
 declare module 'prettier/plugins/estree' {
-  declare export var printers: {[string]: any};
+  declare export var printers: {[key: string]: any};
 }
 
 declare module 'prettier/plugins/typescript' {

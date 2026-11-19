@@ -22,7 +22,7 @@ function expectTransformToEqual({
 }: Readonly<{
   code: string,
   result: string,
-  transform: ESNode => ESNode | null,
+  transform: (v: ESNode) => ESNode | null,
 }>): void {
   const codeAST = parse(code);
   const resultAST = parse(result);

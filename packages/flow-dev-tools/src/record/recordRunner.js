@@ -123,7 +123,7 @@ async function runner(args: Args): Promise<void> {
     suites = await findTestsByName(args.testsDir, args.suites);
   }
 
-  const loadedSuites: {[string]: Suite} = {};
+  const loadedSuites: {[key: string]: Suite} = {};
   for (const suiteName of suites) {
     loadedSuites[suiteName] = loadSuite(args.testsDir, suiteName);
   }

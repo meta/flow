@@ -24,7 +24,7 @@ export function parseDocblockString(docblock: string): DocblockDirectives {
     .filter(line => line.startsWith('@'));
 
   const directives: {
-    [string]: Array<string>,
+    [key: string]: Array<string>,
   } =
     // $FlowExpectedError[incompatible-type] - flow types  this return as {...}
     Object.create(null);

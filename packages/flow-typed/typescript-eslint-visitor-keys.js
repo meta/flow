@@ -11,5 +11,7 @@
 'use strict';
 
 declare module '@typescript-eslint/visitor-keys' {
-  declare export var visitorKeys: $ReadOnly<{[string]: $ReadOnlyArray<string>}>;
+  declare export var visitorKeys: $ReadOnly<{
+    [key: string]: $ReadOnlyArray<string>,
+  }>;
 }

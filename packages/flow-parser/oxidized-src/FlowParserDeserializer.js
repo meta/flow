@@ -53,7 +53,7 @@ export type FlowParserProgram = {
   errors?: Array<ParserError>,
   sourceType?: 'script' | 'module',
   docblock?: unknown,
-  [string]: unknown,
+  [key: string]: unknown,
 };
 
 /**
@@ -68,7 +68,7 @@ export default class FlowParserDeserializer {
   positionBufferIdx: number;
   readonly positionBufferSize: number;
   readonly stringBufferBase: number;
-  readonly locMap: {[number]: HermesSourceLocation};
+  readonly locMap: {[key: number]: HermesSourceLocation};
   // ESTree mode: the `range` of each loc's owner, indexed by loc ID.
   readonly locRanges: Array<?Range>;
   readonly sourceFilename: ?string;

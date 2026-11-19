@@ -85,7 +85,7 @@ class ShellMocker {
   }
 
   async getAll(): Promise<AllInvocations> {
-    const ret: {[string]: Invocations} = {};
+    const ret: {[key: string]: Invocations} = {};
     for (const [name] of this.names.entries()) {
       ret[name] = await this.get(name);
     }

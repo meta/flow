@@ -13,11 +13,11 @@
 import * as util from 'util';
 
 type OldConsole = $ReadOnly<{
-  [$Keys<typeof console>]: (...Array<$FlowFixMe>) => void,
+  [key: $Keys<typeof console>]: (...rest: Array<$FlowFixMe>) => void,
 }>;
 interface Reporter {
-  onStdout(string): void;
-  onStderr(string | Error): void;
+  onStdout(v: string): void;
+  onStderr(v: string | Error): void;
 }
 
 const oldConsole: OldConsole = {
@@ -28,7 +28,7 @@ const oldConsole: OldConsole = {
 };
 
 export function redirectConsole(
-  reporter_: Reporter | (OldConsole => Reporter),
+  reporter_: Reporter | ((v: OldConsole) => Reporter),
 ): void {
   const reporter =
     typeof reporter_ === 'function' ? reporter_(oldConsole) : reporter_;
