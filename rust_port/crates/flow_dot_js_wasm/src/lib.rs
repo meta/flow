@@ -24,6 +24,7 @@ use dupe::Dupe;
 use flow_aloc::ALoc;
 use flow_aloc::ALocTable;
 use flow_common::flow_import_specifier::FlowImportSpecifier;
+use flow_common::for_tool_options::ForToolLayout;
 use flow_common::options::AssertOperator;
 use flow_common::options::Options;
 use flow_common::options::ReactRule;
@@ -1025,15 +1026,18 @@ fn dump_types(params: &Value, for_tool: bool) -> Result<Value, String> {
         config,
         STATE.with(|state| state.borrow().master_cx.dupe()),
     )?;
-    // No `--dedup` on the wasm surface, so there is never a `$defs` table to emit.
-    let (types, _) = type_info_service::dump_types(
+    // No `--dedup` or graph layout on the wasm surface, so there is never a `$defs` table to emit.
+    let types = type_info_service::dump_types(
         EvaluateTypeDestructorsMode::EvaluateNone,
-        for_tool.then_some(5),
-        None,
+        for_tool.then_some(ForToolLayout::Tree {
+            depth: 5,
+            dedup_threshold: None,
+        }),
         &mut checked.prepared.cx,
         checked.prepared.parsed.file_sig.dupe(),
         &checked.typed_ast,
-    );
+    )
+    .types;
     Ok(types_to_json(types))
 }
 

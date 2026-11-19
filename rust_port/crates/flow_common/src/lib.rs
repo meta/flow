@@ -20,6 +20,7 @@ pub mod flow_import_specifier;
 pub mod flow_projects;
 pub mod flow_symbol;
 pub mod flow_version;
+pub mod for_tool_options;
 pub mod hint;
 pub mod js_number;
 pub mod lock;

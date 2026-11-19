@@ -15,6 +15,7 @@ use std::sync::Mutex;
 use dupe::Dupe;
 use flow_check_cache::CheckContentsCache;
 use flow_common::files;
+use flow_common::for_tool_options::ForToolLayout;
 use flow_common::options::Options;
 use flow_common::sys_utils::normalize_filename_dir_sep;
 use flow_common_errors::error_utils::ConcreteLocPrintableErrorSet;
@@ -2555,8 +2556,7 @@ fn dump_types(
     env: &server_env::Env,
     transaction: Arc<flow_heap::parsing_heaps::Transaction>,
     evaluate_type_destructors: flow_typing_ty_normalizer::env::EvaluateTypeDestructorsMode,
-    for_tool: Option<i32>,
-    dedup_threshold: Option<usize>,
+    for_tool: Option<ForToolLayout>,
     file_input: &FileInput,
 ) -> Result<Result<(Vec<(flow_parser::loc::Loc, String)>, Option<String>), String>, WorkloadCanceled>
 {
@@ -2585,16 +2585,17 @@ fn dump_types(
             )?));
         }
     };
-    Ok(Ok(typecheck_artifacts.cx.with_cx(cache, |cx| {
-        flow_services_type_info::type_info_service::dump_types(
+    Ok(typecheck_artifacts.cx.with_cx(cache, |cx| {
+        let dumped = flow_services_type_info::type_info_service::dump_types(
             evaluate_type_destructors,
             for_tool,
-            dedup_threshold,
             cx,
             parse_artifacts.file_sig.clone(),
             &typecheck_artifacts.typed_ast,
-        )
-    })))
+        );
+        flow_services_type_info::type_info_service::check_dump_budget(cx, for_tool, &dumped)
+            .map(|()| (dumped.types, dumped.defs))
+    }))
 }
 
 fn coverage(
@@ -3320,8 +3321,7 @@ fn handle_dump_types(
     env: &server_env::Env,
     transaction: Arc<flow_heap::parsing_heaps::Transaction>,
     evaluate_type_destructors: flow_typing_ty_normalizer::env::EvaluateTypeDestructorsMode,
-    for_tool: Option<i32>,
-    dedup_threshold: Option<usize>,
+    for_tool: Option<ForToolLayout>,
     input: &FileInput,
 ) -> EphemeralParallelizableResult {
     let response = dump_types(
@@ -3332,7 +3332,6 @@ fn handle_dump_types(
         transaction,
         evaluate_type_destructors,
         for_tool,
-        dedup_threshold,
         input,
     )?;
     Ok((server_prot::response::Response::DUMP_TYPES(response), None))
@@ -3678,7 +3677,6 @@ pub fn handle_ephemeral_command_for_standalone(
             input,
             evaluate_type_destructors,
             for_tool,
-            dedup_threshold,
             wait_for_recheck: _,
         } => handle_dump_types(
             orchestrator,
@@ -3692,7 +3690,6 @@ pub fn handle_ephemeral_command_for_standalone(
                 flow_typing_ty_normalizer::env::EvaluateTypeDestructorsMode::EvaluateNone
             },
             for_tool,
-            dedup_threshold,
             &input,
         ),
         server_prot::request::Command::FIND_MODULE {
@@ -4101,8 +4098,18 @@ fn get_ephemeral_handler(
         server_prot::request::Command::CYCLE { .. } => CommandHandler::HandleNonparallelizable,
         server_prot::request::Command::QUERY { .. } => CommandHandler::HandleNonparallelizable,
         server_prot::request::Command::DUMP_TYPES {
-            wait_for_recheck, ..
-        } => mk_parallelizable(*wait_for_recheck, options),
+            wait_for_recheck,
+            for_tool,
+            ..
+        } => {
+            // A recheck running beside the dump can cancel, and the checker takes a cancellation in
+            // as `any`, which stays in the contents cache until the recheck commits.
+            let wait_for_recheck = match for_tool {
+                Some(ForToolLayout::Graph { .. }) => Some(true),
+                Some(ForToolLayout::Tree { .. }) | None => *wait_for_recheck,
+            };
+            mk_parallelizable(wait_for_recheck, options)
+        }
         server_prot::request::Command::FIND_MODULE {
             wait_for_recheck, ..
         } => mk_parallelizable(*wait_for_recheck, options),

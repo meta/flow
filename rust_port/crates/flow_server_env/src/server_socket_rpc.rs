@@ -8,6 +8,7 @@
 use std::io::Read;
 use std::io::Write;
 
+use flow_common::for_tool_options::ForToolLayout;
 use flow_common::refinement_invalidation;
 use flow_common::verbose::Verbose;
 use flow_common_errors::error_utils::cli_output;
@@ -482,8 +483,7 @@ pub enum CliCommand {
     DUMP_TYPES {
         input: FileInput,
         evaluate_type_destructors: bool,
-        for_tool: Option<i32>,
-        dedup_threshold: Option<usize>,
+        for_tool: Option<ForToolLayout>,
         wait_for_recheck: Option<bool>,
     },
     FIND_MODULE {
@@ -611,13 +611,11 @@ impl From<server_prot::request::Command> for CliCommand {
                 input,
                 evaluate_type_destructors,
                 for_tool,
-                dedup_threshold,
                 wait_for_recheck,
             } => Self::DUMP_TYPES {
                 input: input.into(),
                 evaluate_type_destructors,
                 for_tool,
-                dedup_threshold,
                 wait_for_recheck,
             },
             server_prot::request::Command::FIND_MODULE {
@@ -777,13 +775,11 @@ impl CliCommand {
                 input,
                 evaluate_type_destructors,
                 for_tool,
-                dedup_threshold,
                 wait_for_recheck,
             } => server_prot::request::Command::DUMP_TYPES {
                 input: input.into_server_file_input(),
                 evaluate_type_destructors,
                 for_tool,
-                dedup_threshold,
                 wait_for_recheck,
             },
             CliCommand::FIND_MODULE {

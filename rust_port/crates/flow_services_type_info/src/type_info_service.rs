@@ -10,6 +10,7 @@ use std::sync::LazyLock;
 
 use dupe::Dupe;
 use flow_aloc::ALoc;
+use flow_common::for_tool_options::ForToolLayout;
 use flow_common::refinement_invalidation;
 use flow_common::refinement_invalidation::RefinementInvalidation;
 use flow_common_ty::ty::BinderKind;
@@ -25,6 +26,7 @@ use flow_parsing::docblock_parser;
 use flow_services_coverage;
 use flow_typing::query_types;
 use flow_typing::query_types::QueryResult;
+pub use flow_typing::query_types::TypeDump;
 use flow_typing_context::Context;
 use flow_typing_ty_normalizer::env::EvaluateTypeDestructorsMode;
 use flow_typing_type::type_::Type;
@@ -285,36 +287,57 @@ pub fn batched_type_at_pos_from_special_comments<'a>(
     Ok((friendly_results, serde_json::Value::Array(json_data_list)))
 }
 
-/// The second element is the `$defs` table, present only when `for_tool` is on
-/// and `dedup_threshold` asked for `$ref` output.
+/// The `$defs` table is present only when `for_tool` is on and its layout asked for `$ref` output.
 pub fn dump_types<'a>(
     evaluate_type_destructors: EvaluateTypeDestructorsMode,
-    for_tool: Option<i32>,
-    dedup_threshold: Option<usize>,
+    for_tool: Option<ForToolLayout>,
     cx: &mut Context<'a>,
     file_sig: Arc<FileSig>,
     typed_ast: &ast::Program<ALoc, (ALoc, Type)>,
-) -> (Vec<(Loc, String)>, Option<String>) {
+) -> TypeDump {
     // Print type using Flow type syntax
     match for_tool {
-        Some(depth) => query_types::dump_types_for_tool(cx, typed_ast, depth, dedup_threshold),
+        Some(layout) => query_types::dump_types_for_tool(cx, typed_ast, layout),
         None => {
             let opts = PrinterOptions::default();
             let printer = |elt: &flow_common_ty::ty::ALocElt| -> String {
                 ty_printer::string_of_elt_single_line(elt, &opts)
             };
-            (
-                query_types::dump_types(
+            TypeDump {
+                types: query_types::dump_types(
                     &printer,
                     evaluate_type_destructors,
                     cx,
                     file_sig,
                     typed_ast,
                 ),
-                None,
-            )
+                defs: None,
+                capped: false,
+            }
         }
     }
+}
+
+/// A graph must depend only on the source tree, so it is refused where it would not: a type the
+/// check budget ran out on is rendered as itself, down to `<recursion>`, so the dump depends on how
+/// fast the check ran; and a graph cut short at its node cap is missing the rest.
+pub fn check_dump_budget(
+    cx: &Context<'_>,
+    for_tool: Option<ForToolLayout>,
+    dump: &TypeDump,
+) -> Result<(), String> {
+    let Some(ForToolLayout::Graph { node_cap }) = for_tool else {
+        return Ok(());
+    };
+    cx.check_budget()
+        .map_err(|e| format!("ran out of check budget while rendering: {:?}", e))?;
+    if dump.capped {
+        return Err(format!(
+            "the type graph has more than {} types, the --graph limit",
+            node_cap
+        ));
+    }
+    Ok(())
 }
 
 pub fn coverage(

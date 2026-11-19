@@ -59,6 +59,7 @@ module.exports = (suite(({addFile, flowCmd, labels}) => [
         `
           {
             "schema": {
+              "graph": false,
               "json_direct": true
             },
             "types": [
@@ -114,6 +115,7 @@ module.exports = (suite(({addFile, flowCmd, labels}) => [
         `
           {
             "schema": {
+              "graph": false,
               "json_direct": false
             },
             "types": [
@@ -196,6 +198,7 @@ module.exports = (suite(({addFile, flowCmd, labels}) => [
               }
             },
             "schema": {
+              "graph": false,
               "json_direct": true
             },
             "types": [

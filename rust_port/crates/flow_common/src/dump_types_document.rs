@@ -18,13 +18,19 @@ pub struct DocumentOptions {
     pub json_direct: bool,
     /// Print the `schema` object even when no modifier needs it.
     pub force_schema: bool,
+    /// See `dump-types --graph`.
+    pub graph: bool,
 }
 
 impl DocumentOptions {
     /// Every field at its value, defaults included. `None` keeps the shape older readers expect.
     fn schema(self) -> Option<Value> {
-        (self.json_direct || self.force_schema)
-            .then(|| serde_json::json!({ "json_direct": self.json_direct }))
+        (self.json_direct || self.force_schema || self.graph).then(|| {
+            serde_json::json!({
+                "graph": self.graph,
+                "json_direct": self.json_direct,
+            })
+        })
     }
 
     /// An entry's `type`, from the JSON the checker printed for it.

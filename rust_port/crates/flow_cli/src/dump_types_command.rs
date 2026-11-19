@@ -7,6 +7,7 @@
 
 use flow_command_spec::arg_spec;
 use flow_common::dump_types_document::DocumentOptions;
+use flow_common::for_tool_options::ForToolLayout;
 use flow_common_errors::error_utils;
 use flow_server_env::server_prot;
 
@@ -47,7 +48,19 @@ fn spec() -> flow_command_spec::Spec {
     .flag(
         "--dedup",
         &arg_spec::optional_value_with_default(256, arg_spec::int()),
-        "Print each repeated type larger than N bytes (default 256) once, in a shared $defs table, and refer to it elsewhere. Types stay strings of JSON unless --json-direct is given. Requires --for-tool and --json",
+        "Print each repeated type larger than N bytes (default 256) once, in a shared $defs table, and refer to it elsewhere. Types stay strings of JSON unless --json-direct is given. With --graph, N is ignored. Requires --for-tool and --json",
+        None,
+    )
+    .flag(
+        "--graph",
+        &arg_spec::truthy(),
+        "Print the same $defs/$ref format as --dedup, but with every type printed once and no depth limit, so refs can form cycles. The same source tree prints the same bytes: the dump waits for a running recheck to finish, and fails a file whose check runs out of time. Requires --for-tool and --json, and cannot be combined with a --for-tool DEPTH or --wait-for-recheck false",
+        None,
+    )
+    .flag(
+        "--graph-node-cap",
+        &arg_spec::optional(arg_spec::int()),
+        "With --graph, how many types a file may have (default 1000000); a file that has more fails. Requires --graph",
         None,
     )
     .flag(
@@ -140,7 +153,7 @@ fn handle_error(
     document: DocumentOptions,
     pretty: bool,
     strip_root: Option<&str>,
-    dedup_threshold: Option<usize>,
+    for_tool: Option<ForToolLayout>,
 ) {
     if json {
         flow_hh_json::prerr_json_endline(
@@ -150,8 +163,20 @@ fn handle_error(
             }),
         );
         // Also output an empty payload on stdout, for JSON parsers. It has to keep the shape the
-        // caller asked for, so a `--dedup` consumer is not handed a bare array on the error path.
-        let empty_defs = dedup_threshold.map(|_| "{}".to_owned());
+        // caller asked for, so a `--dedup` or `--graph` consumer is not handed a bare array on the
+        // error path.
+        let empty_defs = match for_tool {
+            Some(ForToolLayout::Tree {
+                dedup_threshold: Some(_),
+                ..
+            })
+            | Some(ForToolLayout::Graph { .. }) => Some("{}".to_owned()),
+            Some(ForToolLayout::Tree {
+                dedup_threshold: None,
+                ..
+            })
+            | None => None,
+        };
         handle_response(
             vec![],
             empty_defs,
@@ -169,9 +194,13 @@ fn handle_error(
 /// Which of `dump-types`' modifiers an invocation passed, and what they modify.
 struct Modifiers {
     for_tool: bool,
+    /// `--for-tool` was given a DEPTH rather than taking the default.
+    for_tool_depth: bool,
     json: bool,
     dedup: bool,
+    graph_node_cap: bool,
     document: DocumentOptions,
+    wait_for_recheck: Option<bool>,
     path: bool,
     file: bool,
 }
@@ -181,6 +210,7 @@ fn reject_inapplicable_modifiers(m: &Modifiers) {
     // Each shapes the `--for-tool --json` payload, and only that.
     let for_tool_json_modifiers = [
         ("--dedup", m.dedup),
+        ("--graph", m.document.graph),
         ("--json-direct", m.document.json_direct),
         ("--force-schema", m.document.force_schema),
     ];
@@ -193,6 +223,17 @@ fn reject_inapplicable_modifiers(m: &Modifiers) {
             .map(|(flag, _)| flag)
             .collect::<Vec<_>>();
         usage_error(&format!("{flag} requires {}", missing.join(" and ")));
+    }
+    if m.document.graph && m.for_tool_depth {
+        usage_error("--graph has no depth limit, so it cannot be combined with a --for-tool DEPTH");
+    }
+    if m.graph_node_cap && !m.document.graph {
+        usage_error("--graph-node-cap requires --graph");
+    }
+    if m.document.graph && m.wait_for_recheck == Some(false) {
+        usage_error(
+            "--graph waits for a running recheck, so it cannot be combined with --wait-for-recheck false",
+        );
     }
     if m.path && m.file {
         usage_error("--path applies only to a file read from stdin, not to a FILE argument");
@@ -230,6 +271,22 @@ fn main(args: &arg_spec::Values) {
         &arg_spec::optional_value_with_default(10, arg_spec::int()),
     )
     .unwrap();
+    // The same flag read with a default no DEPTH can take, to tell a bare `--for-tool` apart.
+    let for_tool_depth = flow_command_spec::get(
+        args,
+        "--for-tool",
+        &arg_spec::optional_value_with_default(-1, arg_spec::int()),
+    )
+    .unwrap()
+    .is_some_and(|depth| depth != -1);
+    let graph = flow_command_spec::get(args, "--graph", &arg_spec::truthy()).unwrap();
+    let graph_node_cap: Option<usize> = flow_command_spec::get(
+        args,
+        "--graph-node-cap",
+        &arg_spec::optional(arg_spec::int()),
+    )
+    .unwrap_or_else(|e| flow_command_utils::die_bad_args(&flow_command_spec::error_message(&e)))
+    .map(|n: i32| n.max(0) as usize);
     // Opt-in: without it the output shape is exactly what it has always been.
     let dedup_threshold: Option<usize> = flow_command_spec::get(
         args,
@@ -244,17 +301,33 @@ fn main(args: &arg_spec::Values) {
     let document = DocumentOptions {
         json_direct: flow_command_spec::get(args, "--json-direct", &arg_spec::truthy()).unwrap(),
         force_schema: flow_command_spec::get(args, "--force-schema", &arg_spec::truthy()).unwrap(),
+        graph,
     };
 
     let json = json_flags.json || json_flags.pretty;
 
     reject_inapplicable_modifiers(&Modifiers {
         for_tool: for_tool.is_some(),
+        for_tool_depth,
         json,
         dedup: dedup_threshold.is_some(),
+        graph_node_cap: graph_node_cap.is_some(),
         document,
+        wait_for_recheck,
         path: path.is_some(),
         file: filename.is_some(),
+    });
+    let for_tool = for_tool.map(|depth| {
+        if graph {
+            ForToolLayout::Graph {
+                node_cap: graph_node_cap.unwrap_or(ForToolLayout::DEFAULT_GRAPH_NODE_CAP),
+            }
+        } else {
+            ForToolLayout::Tree {
+                depth,
+                dedup_threshold,
+            }
+        }
     });
     let file = flow_command_utils::get_file_from_filename_or_stdin(
         "dump-types",
@@ -278,7 +351,6 @@ fn main(args: &arg_spec::Values) {
         input: file,
         evaluate_type_destructors,
         for_tool,
-        dedup_threshold,
         wait_for_recheck,
     };
     let response = flow_command_utils::connect_and_make_request(
@@ -296,7 +368,7 @@ fn main(args: &arg_spec::Values) {
                 document,
                 json_flags.pretty,
                 strip_root.as_deref(),
-                dedup_threshold,
+                for_tool,
             );
         }
         server_prot::response::Response::DUMP_TYPES(Ok((response, defs))) => {

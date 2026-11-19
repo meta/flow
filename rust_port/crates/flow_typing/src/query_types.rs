@@ -11,6 +11,7 @@ use dupe::Dupe;
 use flow_aloc::ALoc;
 use flow_analysis::bindings;
 use flow_analysis::scope_api;
+use flow_common::for_tool_options::ForToolLayout;
 use flow_common::reason::Name;
 use flow_common_ty::ty::ALocElt;
 use flow_common_ty::ty::Alias;
@@ -59,6 +60,7 @@ use flow_typing_utils::convert_types;
 use flow_typing_utils::type_env;
 use flow_typing_utils::typed_ast_utils;
 use serde_json::Value as Json;
+use serde_json::json;
 
 use crate::ty_normalizer_flow;
 use crate::typed_ast_finder;
@@ -878,28 +880,46 @@ pub fn dump_types<'a>(
     sort_loc_pairs(concretize_loc_pairs(filtered))
 }
 
-/// Returns the per-location types and, when `dedup_threshold` is set, the
+/// What [`dump_types_for_tool`] printed.
+pub struct TypeDump {
+    /// Each location's type JSON.
+    pub types: Vec<(Loc, String)>,
+    /// The `$defs` table the types refer to by `{"$ref": id}`, with `--dedup` or the graph layout.
+    pub defs: Option<String>,
+    /// The graph layout reached its node cap, and printed `"<cap>"` in place of the rest.
+    pub capped: bool,
+}
+
+/// Returns the per-location types and, for `--dedup` or the graph layout, the
 /// shared `$defs` table those locations refer to via `{"$ref": id}`.
 pub fn dump_types_for_tool(
     cx: &mut Context<'_>,
     typed_ast: &ast::Program<ALoc, (ALoc, Type)>,
-    depth: i32,
-    dedup_threshold: Option<usize>,
-) -> (Vec<(Loc, String)>, Option<String>) {
+    layout: ForToolLayout,
+) -> TypeDump {
     let types = typed_ast_utils::typed_ast_to_list(typed_ast);
     let var_info = cx.environment().var_info.dupe();
     let env_values = &var_info.env_values;
     // That is also why `$defs` has to be a file-level table rather than being
     // folded into each location's string — cross-location sharing is where
     // almost all of the size win is.
-    let mut json_cx = convert_types::TypeJsonCx::with_dedup(cx, dedup_threshold);
+    let (depth, mut json_cx) = match layout {
+        ForToolLayout::Tree {
+            depth,
+            dedup_threshold,
+        } => (
+            depth,
+            convert_types::TypeJsonCx::with_dedup(cx, dedup_threshold),
+        ),
+        ForToolLayout::Graph { node_cap } => (0, convert_types::TypeJsonCx::graph(cx, node_cap)),
+    };
     let type_to_json = |json_cx: &mut convert_types::TypeJsonCx<'_, '_>, t: &Type| -> Json {
         let concrete =
             FlowJs::singleton_concrete_type_for_inspection(json_cx, type_util::reason_of_t(t), t)
                 .unwrap_or_else(|_| t.dupe());
         convert_types::type_to_json(json_cx, depth, &concrete)
     };
-    let print_type_json = |(loc, t): (ALoc, Type)| -> (ALoc, String) {
+    let print_type_json = |(loc, t): (ALoc, Type)| -> (ALoc, Json) {
         let expression_type = type_to_json(&mut json_cx, &t);
         let mut fields: Vec<(String, Json)> =
             vec![("expression_type".to_string(), expression_type)];
@@ -912,13 +932,48 @@ pub fn dump_types_for_tool(
             }
             _ => {}
         }
-        let obj = Json::Object(fields.into_iter().collect());
-        (loc, obj.to_string())
+        (loc, Json::Object(fields.into_iter().collect()))
     };
-    let mapped: Vec<_> = types.into_iter().map(print_type_json).collect();
-    let sorted = sort_loc_pairs(concretize_loc_pairs(mapped));
-    let defs = dedup_threshold.map(|_| json_cx.take_defs().to_string());
-    (sorted, defs)
+    let mut mapped: Vec<_> = types.into_iter().map(print_type_json).collect();
+    let (defs, capped) = match layout {
+        ForToolLayout::Tree {
+            dedup_threshold: Some(_),
+            ..
+        } => (Some(json_cx.take_defs().to_string()), false),
+        ForToolLayout::Tree {
+            dedup_threshold: None,
+            ..
+        } => (None, false),
+        ForToolLayout::Graph { .. } => {
+            let roots: Vec<u32> = mapped
+                .iter()
+                .flat_map(|(_, entry)| entry.as_object().into_iter().flat_map(|o| o.values()))
+                .filter_map(|r| r.get("$ref").and_then(Json::as_u64).map(|id| id as u32))
+                .collect();
+            let (defs, renumbered, capped) = json_cx.take_graph(&roots);
+            for (_, entry) in &mut mapped {
+                for value in entry
+                    .as_object_mut()
+                    .into_iter()
+                    .flat_map(|o| o.values_mut())
+                {
+                    if let Some(id) = value.get("$ref").and_then(Json::as_u64) {
+                        *value = json!({ "$ref": renumbered[id as usize] });
+                    }
+                }
+            }
+            (Some(defs), capped)
+        }
+    };
+    let mapped = mapped
+        .into_iter()
+        .map(|(loc, entry)| (loc, entry.to_string()))
+        .collect();
+    TypeDump {
+        types: sort_loc_pairs(concretize_loc_pairs(mapped)),
+        defs,
+        capped,
+    }
 }
 
 pub fn insert_type_normalize<'cx>(

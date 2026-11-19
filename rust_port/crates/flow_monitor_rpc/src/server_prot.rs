@@ -106,6 +106,7 @@ pub mod code_action {
 }
 
 pub mod request {
+    use flow_common::for_tool_options::ForToolLayout;
     use flow_parser::loc::Loc;
     use flow_server_utils::file_input::FileInput;
 
@@ -213,11 +214,7 @@ pub mod request {
         DUMP_TYPES {
             input: FileInput,
             evaluate_type_destructors: bool,
-            for_tool: Option<i32>,
-            /// When set, `for_tool` output replaces repeated subtrees larger
-            /// than this many bytes with `{"$ref": id}` and returns a shared
-            /// `$defs` table alongside the per-location types.
-            dedup_threshold: Option<usize>,
+            for_tool: Option<ForToolLayout>,
             wait_for_recheck: Option<bool>,
         },
         FIND_MODULE {
@@ -331,7 +328,6 @@ pub mod request {
                 evaluate_type_destructors: _,
                 wait_for_recheck: _,
                 for_tool: _,
-                dedup_threshold: _,
             } => format!("dump-types {}", input.filename_of_file_input()),
             Command::FIND_MODULE {
                 moduleref,

@@ -1,0 +1,1 @@
+type Node = {next: ?Node};

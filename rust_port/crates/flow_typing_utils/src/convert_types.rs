@@ -9,6 +9,7 @@ use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
+use std::collections::VecDeque;
 use std::ops::Deref;
 use std::ops::DerefMut;
 
@@ -95,6 +96,49 @@ pub struct TypeJsonCx<'a, 'cx> {
     dedup_threshold: Option<usize>,
     defs: RefCell<BTreeMap<u32, Json>>,
     next_def_id: Cell<u32>,
+    /// `Some` prints the graph layout instead of trees.
+    graph: Option<GraphState>,
+}
+
+/// The graph layout: one `$defs` entry per type value, numbered in order of first reference, with
+/// every type a value contains printed as `{"$ref": id}`.
+struct GraphState {
+    /// Keyed on the address of the `Rc<TypeInner>` allocation, kept alive by `keepalive`.
+    ids: HashMap<usize, u32>,
+    /// A tvar's resolution, keyed on the tvar's allocation. Resolving can build a new type on every
+    /// call, so without this one tvar could print as several entries.
+    resolutions: HashMap<usize, Type>,
+    /// Values that have an id but whose entry is not printed yet, in id order.
+    pending: VecDeque<(u32, Type)>,
+    entries: Vec<GraphEntry>,
+    node_cap: usize,
+    capped: bool,
+}
+
+/// A printed entry, kept as text rather than as JSON values, which take about ten times the
+/// memory: its JSON with every ref replaced by [`REF_PLACEHOLDER`], and the refs' targets in the
+/// order they appear.
+struct GraphEntry {
+    shape: String,
+    refs: Vec<u32>,
+}
+
+/// No printed ref has a null target, and a string in the JSON escapes its quotes, so this text
+/// occurs in a shape only where a ref was.
+const REF_PLACEHOLDER: &str = r#"{"$ref":null}"#;
+
+impl GraphEntry {
+    fn of_json(mut entry: Json) -> Self {
+        let mut refs = Vec::new();
+        for_each_ref(&mut entry, &mut |r| {
+            refs.push(ref_target(r));
+            *r = json!({ "$ref": null });
+        });
+        GraphEntry {
+            shape: entry.to_string(),
+            refs,
+        }
+    }
 }
 
 /// What the memo holds for one (allocation, depth) pair.
@@ -120,7 +164,46 @@ impl<'a, 'cx> TypeJsonCx<'a, 'cx> {
             dedup_threshold,
             defs: RefCell::new(BTreeMap::new()),
             next_def_id: Cell::new(0),
+            graph: None,
         }
+    }
+
+    /// The graph layout: callers print their roots with [`type_to_json`], which returns refs, and
+    /// then take the entries with [`Self::take_graph`].
+    pub fn graph(cx: &'a mut Context<'cx>, node_cap: usize) -> Self {
+        let mut json_cx = Self::with_dedup(cx, None);
+        json_cx.graph = Some(GraphState {
+            ids: HashMap::new(),
+            resolutions: HashMap::new(),
+            pending: VecDeque::new(),
+            entries: Vec::new(),
+            node_cap,
+            capped: false,
+        });
+        json_cx
+    }
+
+    /// Prints the entry of every value referred to so far, which can refer to more. Returns the
+    /// `$defs` table as JSON text, the id each ref handed out so far now stands for, and whether
+    /// `node_cap` cut the table short. `roots` are the refs the caller printed, in the order it
+    /// printed them.
+    pub fn take_graph(&mut self, roots: &[u32]) -> (String, Vec<u32>, bool) {
+        while let Some((id, t)) = self.graph_state().pending.pop_front() {
+            let entry = GraphEntry::of_json(graph_entry(self, &t));
+            let graph = self.graph_state();
+            // Ids are handed out in the order the values are queued, so each is the next index.
+            debug_assert_eq!(graph.entries.len(), id as usize);
+            graph.entries.push(entry);
+        }
+        let GraphState {
+            entries, capped, ..
+        } = self.graph.take().expect("graph layout");
+        let (defs, renumbered) = canonical_graph(&entries, roots);
+        (defs, renumbered, capped)
+    }
+
+    fn graph_state(&mut self) -> &mut GraphState {
+        self.graph.as_mut().expect("graph layout")
     }
 
     /// Drain the `$defs` table, as a JSON object keyed by ref id. Empty (and meaningless) unless
@@ -305,6 +388,9 @@ fn funtype_to_json<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, funtype: &FunT
 
 // Forward declarations for recursive types
 pub fn type_to_json<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, t: &Type) -> Json {
+    if cx.graph.is_some() {
+        return graph_ref(cx, t);
+    }
     if depth < 0 {
         return Json::String("<recursion>".to_string());
     }
@@ -343,6 +429,179 @@ pub fn type_to_json<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, t: &Type) -> 
 
 fn ref_json(id: u32) -> Json {
     json!({ "$ref": id })
+}
+
+fn is_tvar(t: &Type) -> bool {
+    matches!(
+        t.deref(),
+        TypeInner::OpenT(_)
+            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                kind: ImplicitInstantiationTvarKind::Inferred,
+                ..
+            })
+    )
+}
+
+/// The ref to `t`'s entry, giving it the next id on first sight. A tvar has no entry of its own: it
+/// refers to its resolution's.
+fn graph_ref<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, t: &Type) -> Json {
+    let t = graph_resolution(cx, t);
+    // `t.deref()` is the `Rc` payload, so this address identifies the allocation; `keepalive` stops
+    // it being recycled for another type while the dump runs.
+    let key = t.deref() as *const TypeInner as usize;
+    let graph = cx.graph_state();
+    if let Some(id) = graph.ids.get(&key) {
+        return ref_json(*id);
+    }
+    if graph.ids.len() >= graph.node_cap {
+        graph.capped = true;
+        return Json::String("<cap>".to_string());
+    }
+    let id = graph.ids.len() as u32;
+    graph.ids.insert(key, id);
+    graph.pending.push_back((id, t.dupe()));
+    cx.keepalive.borrow_mut().push(t);
+    ref_json(id)
+}
+
+/// `t` itself, or for a tvar what it resolves to. A tvar that resolves to no concrete type stays
+/// itself, and its entry says so.
+fn graph_resolution<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, t: &Type) -> Type {
+    if !is_tvar(t) {
+        return t.dupe();
+    }
+    let key = t.deref() as *const TypeInner as usize;
+    if let Some(resolved) = cx.graph_state().resolutions.get(&key) {
+        return resolved.dupe();
+    }
+    let resolved =
+        match FlowJs::singleton_concrete_type_for_inspection(cx, type_util::reason_of_t(t), t) {
+            Ok(resolved) if !is_tvar(&resolved) => resolved,
+            _ => t.dupe(),
+        };
+    cx.keepalive.borrow_mut().push(t.dupe());
+    cx.graph_state().resolutions.insert(key, resolved.dupe());
+    resolved
+}
+
+/// Calls `f` on every ref in `json`, in document order.
+fn for_each_ref(json: &mut Json, f: &mut impl FnMut(&mut Json)) {
+    match json {
+        Json::Object(map) if map.len() == 1 && map.contains_key("$ref") => f(json),
+        Json::Object(map) => map.values_mut().for_each(|v| for_each_ref(v, f)),
+        Json::Array(items) => items.iter_mut().for_each(|v| for_each_ref(v, f)),
+        Json::Null | Json::Bool(_) | Json::Number(_) | Json::String(_) => {}
+    }
+}
+
+fn ref_target(json: &Json) -> u32 {
+    json["$ref"].as_u64().expect("a ref printed by `ref_json`") as u32
+}
+
+/// Two allocations can hold the same type, and whether the checker built one or two depends on
+/// what it computed before, such as which dependency contexts were cached. So entries are merged
+/// when their JSON is the same once each ref is replaced by the class of its target (the coarsest
+/// such partition, found by refining from equal JSON), and the classes are numbered in order of
+/// first reference from `roots`. Returns the entries, as the text of a JSON object keyed by id, and
+/// each old id's new id.
+fn canonical_graph(entries: &[GraphEntry], roots: &[u32]) -> (String, Vec<u32>) {
+    let mut classes: Vec<u32> = {
+        let mut shapes: HashMap<&str, u32> = HashMap::new();
+        entries
+            .iter()
+            .map(|entry| {
+                let next = shapes.len() as u32;
+                *shapes.entry(entry.shape.as_str()).or_insert(next)
+            })
+            .collect()
+    };
+    let mut count = classes.iter().copied().max().map_or(0, |c| c as usize + 1);
+    loop {
+        let mut signatures: HashMap<(u32, Vec<u32>), u32> = HashMap::new();
+        let refined: Vec<u32> = (0..entries.len())
+            .map(|i| {
+                let signature = (
+                    classes[i],
+                    entries[i]
+                        .refs
+                        .iter()
+                        .map(|&t| classes[t as usize])
+                        .collect(),
+                );
+                let next = signatures.len() as u32;
+                *signatures.entry(signature).or_insert(next)
+            })
+            .collect();
+        classes = refined;
+        if signatures.len() == count {
+            break;
+        }
+        count = signatures.len();
+    }
+    // Any member of a class stands for it: members' refs lead to the same classes.
+    let mut member = vec![u32::MAX; count];
+    for (i, &c) in classes.iter().enumerate().rev() {
+        member[c as usize] = i as u32;
+    }
+    let mut new_id = vec![u32::MAX; count];
+    let mut order: Vec<u32> = Vec::with_capacity(count);
+    let visit = |c: u32, order: &mut Vec<u32>, new_id: &mut Vec<u32>| {
+        if new_id[c as usize] == u32::MAX {
+            new_id[c as usize] = order.len() as u32;
+            order.push(c);
+        }
+    };
+    for &root in roots {
+        visit(classes[root as usize], &mut order, &mut new_id);
+    }
+    let mut next = 0;
+    while next < order.len() {
+        let c = order[next];
+        for &t in &entries[member[c as usize] as usize].refs {
+            visit(classes[t as usize], &mut order, &mut new_id);
+        }
+        next += 1;
+    }
+    let renumbered: Vec<u32> = classes.iter().map(|&c| new_id[c as usize]).collect();
+    // The order `serde_json` prints an object's keys in, so the text is what printing its own
+    // parse gives back, and a caller can write it as it is.
+    let mut ids: Vec<usize> = (0..order.len()).collect();
+    ids.sort_by_cached_key(|id| id.to_string());
+    let mut defs = String::from("{");
+    for (i, &id) in ids.iter().enumerate() {
+        let entry = &entries[member[order[id] as usize] as usize];
+        if i > 0 {
+            defs.push(',');
+        }
+        defs.push_str(&format!("\"{}\":", id));
+        let mut pieces = entry.shape.split(REF_PLACEHOLDER);
+        defs.push_str(pieces.next().unwrap_or_default());
+        for (piece, &target) in pieces.zip(&entry.refs) {
+            defs.push_str(&ref_json(renumbered[target as usize]).to_string());
+            defs.push_str(piece);
+        }
+    }
+    defs.push('}');
+    (defs, renumbered)
+}
+
+/// The JSON of `t` one level deep: every type it contains is a ref.
+fn graph_entry<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, t: &Type) -> Json {
+    if is_tvar(t) {
+        let reason = type_util::reason_of_t(t);
+        return json_with_type(
+            "Open",
+            vec![(
+                "reason",
+                Json::String(string_of_reason(
+                    Some(cx.root().to_str().unwrap_or("")),
+                    reason,
+                )),
+            )],
+        );
+    }
+    // The depth only matters to the tree layout: every child goes through `graph_ref`.
+    type_to_json_uncached(cx, 0, t)
 }
 
 fn type_to_json_uncached<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, t: &Type) -> Json {
@@ -774,6 +1033,10 @@ fn json_of_inst_call_prop<'cx>(
     key: &str,
 ) -> Json {
     let t = cx.find_call(id);
+    // The ref names the signature, so it carries everything the id did.
+    if cx.graph.is_some() {
+        return type_to_json(cx, depth - 1, &t);
+    }
     json!({"id": id, key: type_to_json(cx, depth - 1, &t)})
 }
 
@@ -869,14 +1132,18 @@ fn def_t_to_json<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, def_t: &DefT) ->
             t_out,
             id,
             strictness_kind: _,
-        }) => json_with_type(
-            "Poly",
-            vec![
+        }) => {
+            let mut fields = vec![
                 ("tparams", json_of_typeparams(cx, depth, tparams)),
                 ("t_out", type_to_json(cx, depth - 1, t_out)),
-                ("id", Json::String(id.stable_string())),
-            ],
-        ),
+            ];
+            // In the graph layout the entry is the identity: a counter id would make the bytes
+            // depend on the server's history, and a location id collides across files.
+            if cx.graph.is_none() {
+                fields.push(("id", Json::String(id.stable_string())));
+            }
+            json_with_type("Poly", fields)
+        }
         DefTInner::ReactAbstractComponentT(box ReactAbstractComponentTData {
             config,
             renders,
@@ -1089,6 +1356,11 @@ fn json_of_property_map_value<'cx>(
 fn objtype_to_json<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, objtype: &ObjType) -> Json {
     let call_t_json = match objtype.call_t {
         None => Json::Null,
+        // The ref names the signature, so it carries everything the id did.
+        Some(id) if cx.graph.is_some() => {
+            let t = cx.find_call(id);
+            type_to_json(cx, depth - 1, &t)
+        }
         Some(id) => json!(id),
     };
     json!({
@@ -1380,4 +1652,109 @@ fn polarity_to_string(polarity: &Polarity) -> Json {
         }
         .to_string(),
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use serde_json::Value as Json;
+    use serde_json::json;
+
+    use super::GraphEntry;
+    use super::canonical_graph;
+
+    fn link(kind: &str, next: u32) -> Json {
+        json!({"kind": kind, "next": {"$ref": next}})
+    }
+
+    fn merge(entries: Vec<Json>, roots: &[u32]) -> (Json, Vec<u32>) {
+        let entries: Vec<GraphEntry> = entries.into_iter().map(GraphEntry::of_json).collect();
+        let (defs, ids) = canonical_graph(&entries, roots);
+        let parsed: Json = serde_json::from_str(&defs).expect("the table is JSON");
+        assert_eq!(
+            parsed.to_string(),
+            defs,
+            "the table prints as its own parse does"
+        );
+        (parsed, ids)
+    }
+
+    #[test]
+    fn copies_of_a_cycle_print_as_the_cycle() {
+        // A root over two copies of one 2-cycle: A1 <-> B1 and A2 <-> B2.
+        let (two, two_ids) = merge(
+            vec![
+                json!({"kind": "Root", "a": {"$ref": 1}, "b": {"$ref": 3}}),
+                link("A", 2),
+                link("B", 1),
+                link("A", 4),
+                link("B", 3),
+            ],
+            &[0],
+        );
+        // The same root over one shared copy.
+        let (one, one_ids) = merge(
+            vec![
+                json!({"kind": "Root", "a": {"$ref": 1}, "b": {"$ref": 1}}),
+                link("A", 2),
+                link("B", 1),
+            ],
+            &[0],
+        );
+        assert_eq!(two, one, "how many copies the checker made must not show");
+        assert_eq!(
+            two_ids,
+            vec![0, 1, 2, 1, 2],
+            "each copy takes the ids of the cycle"
+        );
+        assert_eq!(one_ids, vec![0, 1, 2]);
+    }
+
+    #[test]
+    fn cycles_through_different_nodes_stay_apart() {
+        // A <-> B and A <-> C: the two A's print alike but their partners do not.
+        let (defs, ids) = merge(
+            vec![
+                json!({"kind": "Root", "a": {"$ref": 1}, "b": {"$ref": 3}}),
+                link("A", 2),
+                link("B", 1),
+                link("A", 4),
+                link("C", 3),
+            ],
+            &[0],
+        );
+        assert_eq!(
+            defs.as_object().map(|o| o.len()),
+            Some(5),
+            "no node is merged"
+        );
+        // The root reaches both A's before either partner.
+        assert_eq!(ids, vec![0, 1, 3, 2, 4]);
+    }
+
+    #[test]
+    fn prints_keys_in_the_order_their_parse_prints_them() {
+        // Twelve entries, so "10" and "11" sort between "1" and "2".
+        let mut chain: Vec<Json> = (0..11).map(|i| link(&format!("L{}", i), i + 1)).collect();
+        chain.push(json!({"kind": "End"}));
+        let (defs, _) = merge(chain, &[0]);
+        assert_eq!(defs.as_object().map(|o| o.len()), Some(12));
+    }
+
+    #[test]
+    fn numbers_by_first_reference_from_the_roots() {
+        // Entries in reverse of the order the roots reach them.
+        let (defs, ids) = merge(
+            vec![
+                link("Leaf", 2),
+                json!({"kind": "Root", "a": {"$ref": 0}}),
+                json!({"kind": "End"}),
+            ],
+            &[1],
+        );
+        assert_eq!(ids, vec![1, 0, 2], "the root is 0, then what it refers to");
+        assert_eq!(
+            defs,
+            json!({"0": {"kind": "Root", "a": {"$ref": 1}}, "1": link("Leaf", 2), "2": {"kind": "End"}}),
+        );
+    }
 }
