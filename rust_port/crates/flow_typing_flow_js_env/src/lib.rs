@@ -31,6 +31,7 @@ use dupe::Dupe;
 use flow_aloc::ALoc;
 use flow_common::subst_name::SubstName;
 use flow_typing_errors::error_message::ErrorMessage;
+use flow_typing_type::type_::BoundedId;
 use flow_typing_type::type_::ImplicitInstantiationTvarData;
 use flow_typing_type::type_::SpecState;
 use flow_typing_type::type_::SpeculationHintState;
@@ -121,6 +122,9 @@ enum StackEntry {
     TypeApp(Entry),
     /// Where the union or object spread with this id started resolving its parts.
     Parts(i32),
+    /// Where the bound of a type with this identity, whose type arguments have these roots,
+    /// started flowing in its place.
+    Bound(BoundedId, Vec<RootSet>),
 }
 
 /// One check of a generic value against a type (`PolyT ~> u`), holding the checks it is nested in.
@@ -588,6 +592,41 @@ impl FlowJsEnv {
             instantiation_stack: stack.dupe(),
             ..self.dupe()
         }
+    }
+
+    /// Detect whether flowing the bound of the type with identity `bounded_id` in its place would
+    /// loop, given the roots `tss` of its type arguments: an opaque type can be a member of its
+    /// own upper bound (`D<X>: D<X> | null`). An occurrence counts, like a type application, when
+    /// its type arguments are the same or possibly expanding. Returns the env to flow the bound
+    /// under, or [`None`] if `limit` such occurrences are already flowing their bounds.
+    pub fn push_bound_unless_loop(
+        &self,
+        limit: i32,
+        bounded_id: &BoundedId,
+        tss: Vec<RootSet>,
+    ) -> Option<Self> {
+        let expanding = std::iter::successors(self.instantiation_stack.as_deref(), |frame| {
+            frame.enclosing.as_deref()
+        });
+        let mut count = 0;
+        for frame in expanding {
+            if let StackEntry::Bound(prev, prev_tss) = &frame.entry
+                && prev.same_identity(bounded_id)
+                && (prev.same_type_args(bounded_id) || possibly_expanding_targs(prev_tss, &tss))
+            {
+                count += 1;
+                if count >= limit {
+                    return None;
+                }
+            }
+        }
+        Some(Self {
+            instantiation_stack: Some(Rc::new(TypeAppFrame {
+                entry: StackEntry::Bound(bounded_id.clone(), tss),
+                enclosing: self.instantiation_stack.dupe(),
+            })),
+            ..self.dupe()
+        })
     }
 
     /// Detect whether checking the generic value declared at `tparams_loc` against a type would

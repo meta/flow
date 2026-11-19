@@ -548,16 +548,29 @@ pub(super) fn handle_bounded<'cx>(
     bounded_id: &BoundedId,
     u: &UseT<Cx>,
 ) -> Result<bool, FlowJsException> {
+    // A bound that is a type argument being inferred (the upper bound of an opaque type applied to
+    // it) is not narrowed: that would flow the operation into the type argument and constrain it
+    // by the operation instead of by the use. The type goes on as it is.
+    if let TypeInner::ImplicitInstantiationTvar(_) = bound.deref() {
+        return Ok(false);
+    }
     let make_generic = |t: Type| -> Type { bounded_id.with_bound(reason.dupe(), t) };
     let narrow_generic_with_continuation = |cx: &mut Context<'cx>,
                                             mk_use_t: &dyn Fn(Tvar) -> UseT<Cx>,
                                             cont: Cont<Cx>|
      -> Result<(), FlowJsException> {
+        // An opaque type that is a member of its own upper bound, reached again inside its own
+        // narrowing, goes on unnarrowed.
+        let Some(bound_env) =
+            instantiation_utils::type_app_expansion::push_bound_unless_loop(cx, env, bounded_id)
+        else {
+            return continue_(cx, env, trace, &make_generic(bound.dupe()), &cont);
+        };
         let tvar_id = flow_typing_tvar::mk_no_wrap(cx, reason);
         let t_out_prime = Tvar::new(reason.dupe(), tvar_id as u32);
         let use_t = mk_use_t(t_out_prime.dupe());
         let repos_bound = reposition_reason(cx, env, Some(trace), reason, false, bound)?;
-        rec_flow(cx, env, trace, (&repos_bound, &use_t))?;
+        rec_flow(cx, &bound_env, trace, (&repos_bound, &use_t))?;
         let open_t = Type::new(TypeInner::OpenT(t_out_prime));
         let seal = UseT::new(UseTInner::SealGenericT(Box::new(SealGenericTData {
             loc: reason.loc().dupe(),

@@ -1663,9 +1663,10 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
         UseTInner::SealGenericT(box SealGenericTData {
             bounded_id, cont, ..
         }) => {
-            let name = bounded_id
-                .as_generic()
-                .map_or_else(String::new, |(_, name)| name.to_string());
+            let name = match bounded_id {
+                type_::BoundedId::Generic { name, .. } => name.to_string(),
+                type_::BoundedId::Nominal(nominal_type) => format!("{:?}", nominal_type.nominal_id),
+            };
             let extra = match cont {
                 type_::Cont::Lower(_, l) => {
                     format!("{} <~ {}", name, kid(tvars, l))

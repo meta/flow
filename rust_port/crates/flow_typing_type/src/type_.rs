@@ -3013,8 +3013,8 @@ impl<CX: ContextFamily> std::fmt::Debug for ReactKitTData<CX> {
 }
 
 /// The identity of a type that is known only through its upper bound and keeps that identity when
-/// an operation narrows the bound: a type parameter. `with_bound` gives the type with this
-/// identity and another bound.
+/// an operation narrows the bound: a type parameter, or a nominal type whose underlying type is
+/// not visible. `with_bound` gives the type with this identity and another bound.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum BoundedId {
     Generic {
@@ -3022,6 +3022,7 @@ pub enum BoundedId {
         name: SubstName,
         no_infer: bool,
     },
+    Nominal(Rc<NominalType>),
 }
 
 impl BoundedId {
@@ -3036,6 +3037,15 @@ impl BoundedId {
                     no_infer: *no_infer,
                 })))
             }
+            BoundedId::Nominal(nominal_type) => Type::new(TypeInner::NominalT {
+                reason,
+                nominal_type: Rc::new(NominalType::new(NominalTypeInner {
+                    upper_t: Some(bound),
+                    // A narrowed bound may no longer admit the lower bound's values.
+                    lower_t: None,
+                    ..NominalTypeInner::clone(nominal_type)
+                })),
+            }),
         }
     }
 
@@ -3043,7 +3053,37 @@ impl BoundedId {
     pub fn as_generic(&self) -> Option<(&flow_typing_generics::GenericId, &SubstName)> {
         match self {
             BoundedId::Generic { id, name, .. } => Some((id, name)),
+            BoundedId::Nominal(_) => None,
         }
+    }
+
+    /// Whether `self` and `other` are the same type parameter, or the same nominal type whatever
+    /// its type arguments.
+    pub fn same_identity(&self, other: &BoundedId) -> bool {
+        match (self, other) {
+            (BoundedId::Generic { id: a, .. }, BoundedId::Generic { id: b, .. }) => a == b,
+            (BoundedId::Nominal(a), BoundedId::Nominal(b)) => a.nominal_id == b.nominal_id,
+            _ => false,
+        }
+    }
+
+    /// Whether `self` and `other` have the same type arguments. A type parameter has none.
+    pub fn same_type_args(&self, other: &BoundedId) -> bool {
+        match (self, other) {
+            (BoundedId::Nominal(a), BoundedId::Nominal(b)) => (a.nominal_type_args.iter())
+                .map(|(_, _, t, _)| t)
+                .eq(b.nominal_type_args.iter().map(|(_, _, t, _)| t)),
+            _ => true,
+        }
+    }
+
+    /// The type arguments of a nominal type. A type parameter has none.
+    pub fn type_args(&self) -> impl Iterator<Item = &Type> {
+        let targs: &[(SubstName, Reason, Type, Option<Polarity>)] = match self {
+            BoundedId::Nominal(nominal_type) => &nominal_type.nominal_type_args,
+            BoundedId::Generic { .. } => &[],
+        };
+        targs.iter().map(|(_, _, t, _)| t)
     }
 }
 

@@ -33,7 +33,6 @@ use flow_typing_implicit_instantiation_check::MethodOptionalChain;
 use flow_typing_implicit_instantiation_check::Operation;
 use flow_typing_type::type_::ArrRestTData;
 use flow_typing_type::type_::ArrType::*;
-use flow_typing_type::type_::BoundedId;
 use flow_typing_type::type_::CallElemTData;
 use flow_typing_type::type_::CallMData;
 use flow_typing_type::type_::CallTData;
@@ -673,25 +672,9 @@ fn __flow_impl<'cx>(
             // Either propagate AnyT through the use type, or short-circuit
             any_propagated(cx, env, trace, l, u)?
         }
-        GenericT(box GenericTData {
-            bound,
-            name,
-            reason,
-            id,
-            no_infer,
-        }) => handle_bounded(
-            cx,
-            env,
-            trace,
-            reason,
-            bound,
-            &BoundedId::Generic {
-                id: id.clone(),
-                name: name.dupe(),
-                no_infer: *no_infer,
-            },
-            u,
-        )?,
+        _ if let Some((reason, bound, bounded_id)) = flow_js_utils::as_bounded(cx, l) => {
+            handle_bounded(cx, env, trace, reason, bound, &bounded_id, u)?
+        }
         // No solve infers a placeholder.
         ImplicitInstantiationTvar(
             data @ box ImplicitInstantiationTvarData {

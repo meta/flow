@@ -2494,6 +2494,46 @@ pub fn visible_underlying_t<'a>(
     }
 }
 
+/// A type that is known only through its upper bound and keeps its identity when an operation
+/// narrows that bound: a type parameter, or an opaque type outside the file that defines it.
+/// Gives its reason, its bound and its identity. A stuck evaluation is identified by its type
+/// arguments instead: its upper bound only approximates what it evaluates to.
+pub fn as_bounded<'a>(
+    cx: &Context<'_>,
+    t: &'a Type,
+) -> Option<(&'a Reason, &'a Type, flow_typing_type::type_::BoundedId)> {
+    use flow_typing_type::type_::BoundedId;
+    use flow_typing_type::type_::GenericTData;
+    use flow_typing_type::type_::nominal;
+    match t.deref() {
+        TypeInner::GenericT(box GenericTData {
+            reason,
+            name,
+            bound,
+            id,
+            no_infer,
+        }) => Some((
+            reason,
+            bound,
+            BoundedId::Generic {
+                id: id.clone(),
+                name: name.dupe(),
+                no_infer: *no_infer,
+            },
+        )),
+        TypeInner::NominalT {
+            reason,
+            nominal_type,
+        } if let Some(upper_t) = &nominal_type.upper_t
+            && !matches!(nominal_type.nominal_id, nominal::Id::StuckEval(_))
+            && visible_underlying_t(cx, nominal_type).is_none() =>
+        {
+            Some((reason, upper_t, BoundedId::Nominal(nominal_type.dupe())))
+        }
+        _ => None,
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum UnionOptimizationGuardResult {
     True,

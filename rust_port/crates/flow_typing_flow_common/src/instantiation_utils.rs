@@ -100,6 +100,7 @@ pub mod type_app_expansion {
     use flow_typing_flow_js_env::type_app_expansion::Bound;
     use flow_typing_flow_js_env::type_app_expansion::Root;
     use flow_typing_flow_js_env::type_app_expansion::RootSet;
+    use flow_typing_type::type_::BoundedId;
     use flow_typing_type::type_::properties;
 
     use super::*;
@@ -204,5 +205,19 @@ pub mod type_app_expansion {
                 Some(env)
             }
         }
+    }
+
+    /// Detect whether flowing the bound of the type with identity `bounded_id` in its place would
+    /// loop. Returns the env to flow the bound under, or [`None`] if the expansion limit has been
+    /// reached.
+    pub fn push_bound_unless_loop<'cx>(
+        cx: &mut Context<'cx>,
+        env: &FlowJsEnv,
+        bounded_id: &BoundedId,
+    ) -> Option<FlowJsEnv> {
+        let tss: Vec<RootSet> = (bounded_id.type_args())
+            .map(|t| collect_roots(cx, t))
+            .collect();
+        env.push_bound_unless_loop(cx.type_expansion_recursion_limit(), bounded_id, tss)
     }
 }

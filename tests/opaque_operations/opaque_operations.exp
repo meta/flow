@@ -46,5 +46,57 @@ References:
                      ^^^^^ [2]
 
 
+Error ----------------------------------------------------------------------------------------------------- test.js:30:3
 
-Found 3 errors
+Cannot cast `o` to `NonNullable<T4>` because: [incompatible-type]
+ - Either `null` [1] is incompatible with `empty` [2].
+ - Or `null` [1] is incompatible with `{readonly foo: string}` [2].
+
+   test.js:30:3
+   30|   o as NonNullable<T4>; // error
+         ^
+
+References:
+   test.js:25:20
+   25|   declare const o: T4;
+                          ^^ [1]
+   test.js:30:20
+   30|   o as NonNullable<T4>; // error
+                          ^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:30:3
+
+Cannot cast `o` to `NonNullable<T4>` because: [incompatible-type]
+ - Either `void` [1] is incompatible with `empty` [2].
+ - Or `void` [1] is incompatible with `{readonly foo: string}` [2].
+
+   test.js:30:3
+   30|   o as NonNullable<T4>; // error
+         ^
+
+References:
+   test.js:25:20
+   25|   declare const o: T4;
+                          ^^ [1]
+   test.js:30:20
+   30|   o as NonNullable<T4>; // error
+                          ^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:50:5
+
+Cannot call `f` with `null` bound to `u` because `null` [1] is incompatible with `U` [2]. [incompatible-type]
+
+   test.js:50:5
+   50|   f(null); // error
+           ^^^^ [1]
+
+References:
+   test.js:49:37
+   49|   declare function f(u: NonNullable<U>): void;
+                                           ^ [2]
+
+
+
+Found 6 errors

@@ -51,8 +51,6 @@ use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::InstanceKind;
 use flow_typing_type::type_::InstanceT;
 use flow_typing_type::type_::MixedFlavor;
-use flow_typing_type::type_::NominalType;
-use flow_typing_type::type_::NominalTypeInner;
 use flow_typing_type::type_::ObjKind;
 use flow_typing_type::type_::ObjType;
 use flow_typing_type::type_::OptionalIndexedAccessIndex;
@@ -647,17 +645,6 @@ struct Tail {
     elems: Vec<Type>,
     /// The spread array, when it is all there is.
     array: Option<Type>,
-}
-
-/// Whether a type is written with a nullish member, as subtyping tells for the supertype of an
-/// opaque type against a maybe or optional type.
-fn has_syntactic_nullish_member(t: &Type) -> bool {
-    match t.deref() {
-        TypeInner::MaybeT(..) | TypeInner::OptionalT { .. } => true,
-        TypeInner::UnionT(_, rep) => rep.members_iter().any(has_syntactic_nullish_member),
-        TypeInner::DefT(_, d) => matches!(d.deref(), DefTInner::NullT | DefTInner::VoidT),
-        _ => false,
-    }
 }
 
 /// The type of the arguments a rest parameter receives when a spread of unknown length is among
@@ -1494,60 +1481,6 @@ impl<'e> Walker<'e> {
             {
                 self.walk(cx, &expanded, &u)
             }
-            // As subtyping: an opaque type with a supertype without a nullish member flows to a
-            // maybe or optional type through its inner type, and one with a union supertype to a
-            // union as the union of the opaque type over each member of its supertype.
-            (
-                TypeInner::NominalT {
-                    nominal_type: a, ..
-                },
-                TypeInner::MaybeT(_, inner) | TypeInner::OptionalT { type_: inner, .. },
-            ) if let Some(sup) = &a.upper_t
-                && !has_syntactic_nullish_member(sup) =>
-            {
-                let inner = inner.dupe();
-                self.walk(cx, &l, &inner)
-            }
-            (
-                TypeInner::NominalT {
-                    reason,
-                    nominal_type: a,
-                },
-                TypeInner::UnionT(..),
-            ) if let Some(sup) = &a.upper_t
-                && let members = self.flatten_aliases(cx, vec![sup.dupe()])
-                && members.len() > 1 =>
-            {
-                for m in members {
-                    let opaque = Type::new(TypeInner::NominalT {
-                        reason: reason.dupe(),
-                        nominal_type: Rc::new(NominalType::new(NominalTypeInner {
-                            nominal_id: a.nominal_id.clone(),
-                            underlying_t: a.underlying_t.clone(),
-                            lower_t: a.lower_t.clone(),
-                            upper_t: Some(m),
-                            nominal_type_args: a.nominal_type_args.dupe(),
-                        })),
-                    });
-                    self.walk(cx, &opaque, &u)?;
-                }
-                Ok(())
-            }
-            // An opaque type with a supertype flows to a union-like type through it.
-            (
-                TypeInner::NominalT {
-                    nominal_type: a, ..
-                },
-                TypeInner::MaybeT(..) | TypeInner::OptionalT { .. } | TypeInner::UnionT(..),
-            ) if let Some(sup) = &a.upper_t
-                && matches!(
-                    self.resolve(cx, sup).deref(),
-                    TypeInner::MaybeT(..) | TypeInner::OptionalT { .. } | TypeInner::UnionT(..)
-                ) =>
-            {
-                let sup = sup.dupe();
-                self.walk(cx, &sup, &u)
-            }
             (_, TypeInner::MaybeT(r, ui)) => match l.deref() {
                 TypeInner::OptionalT { type_: li, .. } => self.walk(cx, li, &u),
                 // A tvar without lower bounds yet: what it will hold, minus null and void.
@@ -1570,11 +1503,10 @@ impl<'e> Walker<'e> {
                     let ui = ui.dupe();
                     self.walk(cx, &empty, &ui)
                 }
-                // So are the members of the bound of a generic, which subtyping narrows: the inner
-                // type sees the generic with the rest of its bound.
-                TypeInner::GenericT(g)
-                    if let Some(narrowed) =
-                        self.narrowed_generic(cx, g, |h| matches!(h, Head::Null | Head::Void)) =>
+                // So are the members of the bound of a generic or opaque type, which subtyping
+                // narrows: the inner type sees the type with the rest of its bound.
+                _ if let Some(narrowed) =
+                    self.narrowed_bounded(cx, &l, |h| matches!(h, Head::Null | Head::Void)) =>
                 {
                     let ui = ui.dupe();
                     self.walk(cx, &narrowed, &ui)
@@ -1594,9 +1526,8 @@ impl<'e> Walker<'e> {
                     let ui = ui.dupe();
                     self.walk(cx, &empty, &ui)
                 }
-                TypeInner::GenericT(g)
-                    if let Some(narrowed) =
-                        self.narrowed_generic(cx, g, |h| matches!(h, Head::Void)) =>
+                _ if let Some(narrowed) =
+                    self.narrowed_bounded(cx, &l, |h| matches!(h, Head::Void)) =>
                 {
                     let ui = ui.dupe();
                     self.walk(cx, &narrowed, &ui)
@@ -5781,33 +5712,52 @@ impl<'e> Walker<'e> {
             .any(|p| property::read_t(p).is_some_and(|t| self.mentions(cx, &t)))
     }
 
-    /// A generic narrowed by a maybe or optional type, as subtyping narrows it: the members of its
-    /// bound that the type absorbs are dropped, if there are any.
-    fn narrowed_generic<'cx>(
+    /// The members of the bound of a generic or opaque type that narrowing by a maybe or optional
+    /// type sees: the members of a union, and null and void of a maybe or optional type, at any
+    /// depth, as subtyping distributes them.
+    fn bound_members<'cx>(&self, cx: &mut Context<'cx>, t: &Type, members: &mut Vec<Type>) {
+        let resolved = self.resolve(cx, t);
+        match resolved.deref() {
+            TypeInner::UnionT(_, rep) => {
+                for m in rep.members_iter() {
+                    self.bound_members(cx, m, members);
+                }
+            }
+            TypeInner::MaybeT(r, inner) => {
+                members.push(null::make(r.dupe()));
+                members.push(void::why(r.dupe()));
+                self.bound_members(cx, inner, members);
+            }
+            TypeInner::OptionalT { reason, type_, .. } => {
+                members.push(void::why(reason.dupe()));
+                self.bound_members(cx, type_, members);
+            }
+            _ => members.push(resolved.dupe()),
+        }
+    }
+
+    /// A generic or opaque type narrowed by a maybe or optional type, as subtyping narrows it: the
+    /// members of its bound that the type absorbs are dropped, if there are any.
+    fn narrowed_bounded<'cx>(
         &self,
         cx: &mut Context<'cx>,
-        g: &GenericTData,
+        t: &Type,
         absorbs: fn(Head) -> bool,
     ) -> Option<Type> {
-        let bound = self.resolve(cx, &g.bound);
-        let members: Vec<Type> = match bound.deref() {
-            TypeInner::UnionT(_, rep) => rep.members_iter().duped().collect(),
-            _ => vec![bound.dupe()],
-        };
+        let (reason, bound, bounded_id) = flow_js_utils::as_bounded(cx, t)?;
+        let mut members = vec![];
+        self.bound_members(cx, bound, &mut members);
         let (absorbed, kept): (Vec<Type>, Vec<Type>) =
             (members.into_iter()).partition(|t| absorbs(self.head(cx, t)));
         if absorbed.is_empty() {
             return None;
         }
-        let reason = type_util::reason_of_t(&g.bound).dupe();
+        let bound_reason = type_util::reason_of_t(bound).dupe();
         let bound = match kept.len() {
-            0 => empty_t::why(reason),
-            _ => type_util::union_of_ts(reason, kept, None),
+            0 => empty_t::why(bound_reason),
+            _ => type_util::union_of_ts(bound_reason, kept, None),
         };
-        Some(Type::new(TypeInner::GenericT(Box::new(GenericTData {
-            bound,
-            ..g.clone()
-        }))))
+        Some(bounded_id.with_bound(reason.dupe(), bound))
     }
 
     fn has_evidence(&self, name: &SubstName) -> bool {

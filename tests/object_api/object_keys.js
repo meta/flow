@@ -96,7 +96,7 @@ declare opaque type OpaqueKeyWithSupertype2: A<string>;
 declare opaque type OpaqueKeyWithSupertype3: string | boolean;
 {
   declare const opaqueDict: {[key: OpaqueKeyWithSupertype3]: number};
-  Object.keys(opaqueDict)[0] as OpaqueKeyWithSupertype3; // ERROR
+  Object.keys(opaqueDict)[0] as OpaqueKeyWithSupertype3; // OK: the key stays opaque, as a generic key does
 }
 
 declare opaque type OpaqueKeyWithSupertype4: string | A<string>;

@@ -567,24 +567,6 @@ References:
                                        ^^^^^ [2]
 
 
-Error ---------------------------------------------------------------------------------------------- object_keys.js:99:3
-
-Cannot cast `Object.keys(...)[0]` to `OpaqueKeyWithSupertype3` because `string` [1] is incompatible with
-`OpaqueKeyWithSupertype3` [2]. [incompatible-type]
-
-   object_keys.js:99:3
-   99|   Object.keys(opaqueDict)[0] as OpaqueKeyWithSupertype3; // ERROR
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-References:
-   object_keys.js:99:3
-   99|   Object.keys(opaqueDict)[0] as OpaqueKeyWithSupertype3; // ERROR
-         ^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   object_keys.js:99:33
-   99|   Object.keys(opaqueDict)[0] as OpaqueKeyWithSupertype3; // ERROR
-                                       ^^^^^^^^^^^^^^^^^^^^^^^ [2]
-
-
 Error ------------------------------------------------------------------------------------------- object_missing.js:3:12
 
 Cannot call method `doesNotExist` because property `doesNotExist` is missing in `ObjectConstructor` [1]. [prop-missing]
@@ -1329,4 +1311,4 @@ References:
 
 
 
-Found 73 errors
+Found 72 errors
