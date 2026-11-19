@@ -21,6 +21,7 @@ use flow_typing_errors::intermediate_error_types::NamedReferenceData;
 use flow_typing_errors::intermediate_error_types::PropPolarityMismatchObject;
 use flow_typing_flow_common::flow_js_utils::FlowJsException;
 use flow_typing_flow_js_env::FlowJsEnv;
+use flow_typing_type::type_::BoundedId;
 use flow_typing_type::type_::CallMData;
 use flow_typing_type::type_::CallTData;
 use flow_typing_type::type_::ChainMData;
@@ -533,26 +534,21 @@ fn keys_of_type_param<'cx>(
     )))))
 }
 
-pub(super) fn handle_generic<'cx>(
+/// A type that is known only through its bound `bound` and has the identity `bounded_id`, such
+/// as a type parameter, flows into `u`. Uses that can narrow the bound give the type with the same
+/// identity and the narrowed bound; uses that distribute over a union or intersection see the
+/// type distributed over its bound. Returns whether `u` was handled here; every other use sees
+/// the bound.
+pub(super) fn handle_bounded<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     trace: DepthTrace,
-    no_infer: bool,
-    bound: &Type,
     reason: &Reason,
-    id: &GenericId,
-    name: &SubstName,
+    bound: &Type,
+    bounded_id: &BoundedId,
     u: &UseT<Cx>,
 ) -> Result<bool, FlowJsException> {
-    let make_generic = |t: Type| -> Type {
-        Type::new(TypeInner::GenericT(Box::new(GenericTData {
-            reason: reason.dupe(),
-            id: id.clone(),
-            name: name.dupe(),
-            bound: t,
-            no_infer,
-        })))
-    };
+    let make_generic = |t: Type| -> Type { bounded_id.with_bound(reason.dupe(), t) };
     let narrow_generic_with_continuation = |cx: &mut Context<'cx>,
                                             mk_use_t: &dyn Fn(Tvar) -> UseT<Cx>,
                                             cont: Cont<Cx>|
@@ -565,10 +561,8 @@ pub(super) fn handle_generic<'cx>(
         let open_t = Type::new(TypeInner::OpenT(t_out_prime));
         let seal = UseT::new(UseTInner::SealGenericT(Box::new(SealGenericTData {
             loc: reason.loc().dupe(),
-            id: id.clone(),
-            name: name.dupe(),
+            bounded_id: bounded_id.clone(),
             cont,
-            no_infer,
         })));
         rec_flow(cx, env, trace, (&open_t, &seal))
     };
@@ -612,10 +606,8 @@ pub(super) fn handle_generic<'cx>(
             let repos_bound = reposition_reason(cx, env, Some(trace), reason, false, bound)?;
             let seal = UseT::new(UseTInner::SealGenericT(Box::new(SealGenericTData {
                 loc: reason.loc().dupe(),
-                id: id.clone(),
-                name: name.dupe(),
+                bounded_id: bounded_id.clone(),
                 cont: Cont::Upper(Box::new(upper.dupe())),
-                no_infer,
             })));
             rec_flow(cx, env, trace, (&repos_bound, &seal))?;
             Ok(true)
@@ -704,7 +696,7 @@ pub(super) fn handle_generic<'cx>(
             id: id_prime,
             no_infer: inner_no_infer,
             ..
-        }) => match id.collapse(id_prime) {
+        }) if let Some((id, name)) = bounded_id.as_generic() => match id.collapse(id_prime) {
             Some(collapsed_id) => {
                 let generic_t = Type::new(TypeInner::GenericT(Box::new(GenericTData {
                     reason: reason.dupe(),
@@ -720,14 +712,12 @@ pub(super) fn handle_generic<'cx>(
         },
         // The ClassT operation should commute with GenericT;
         // that is, GenericT(ClassT(x)) = ClassT(GenericT(x))
-        TypeInner::DefT(r, def_t) if let DefTInner::ClassT(class_bound) = def_t.deref() => {
-            let inner_generic = Type::new(TypeInner::GenericT(Box::new(GenericTData {
-                reason: reason_of_t(class_bound).dupe(),
-                name: name.dupe(),
-                bound: class_bound.dupe(),
-                id: id.clone(),
-                no_infer,
-            })));
+        TypeInner::DefT(r, def_t)
+            if let DefTInner::ClassT(class_bound) = def_t.deref()
+                && bounded_id.as_generic().is_some() =>
+        {
+            let inner_generic =
+                bounded_id.with_bound(reason_of_t(class_bound).dupe(), class_bound.dupe());
             let class_t = Type::new(TypeInner::DefT(
                 r.dupe(),
                 DefT::new(DefTInner::ClassT(inner_generic)),
@@ -745,9 +735,7 @@ pub(super) fn handle_generic<'cx>(
             let repos_bound = reposition_reason(cx, env, Some(trace), reason, false, bound)?;
             let seal = UseT::new(UseTInner::SealGenericT(Box::new(SealGenericTData {
                 loc: reason.loc().dupe(),
-                id: id.clone(),
-                name: name.dupe(),
-                no_infer,
+                bounded_id: bounded_id.clone(),
                 cont: Cont::Upper(Box::new(u.dupe())),
             })));
             rec_flow(cx, env, trace, (&repos_bound, &seal))?;
@@ -1372,7 +1360,7 @@ pub(super) fn handle_frozen_tvar<'cx>(
             | UseTInner::ExtendsUseT(..),
         )
         // These would otherwise be caught by wildcard cases in __flow. A generic
-        // is seen through its bound here too, either by `handle_generic` or by
+        // is seen through its bound here too, either by `handle_bounded` or by
         // the react kit itself.
         | (
             _,

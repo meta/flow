@@ -3012,11 +3012,46 @@ impl<CX: ContextFamily> std::fmt::Debug for ReactKitTData<CX> {
     }
 }
 
+/// The identity of a type that is known only through its upper bound and keeps that identity when
+/// an operation narrows the bound: a type parameter. `with_bound` gives the type with this
+/// identity and another bound.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum BoundedId {
+    Generic {
+        id: flow_typing_generics::GenericId,
+        name: SubstName,
+        no_infer: bool,
+    },
+}
+
+impl BoundedId {
+    pub fn with_bound(&self, reason: Reason, bound: Type) -> Type {
+        match self {
+            BoundedId::Generic { id, name, no_infer } => {
+                Type::new(TypeInner::GenericT(Box::new(GenericTData {
+                    reason,
+                    id: id.clone(),
+                    name: name.dupe(),
+                    bound,
+                    no_infer: *no_infer,
+                })))
+            }
+        }
+    }
+
+    /// The id and name of the type parameter this is the identity of.
+    pub fn as_generic(&self) -> Option<(&flow_typing_generics::GenericId, &SubstName)> {
+        match self {
+            BoundedId::Generic { id, name, .. } => Some((id, name)),
+        }
+    }
+}
+
+/// Gives the type flowing into it the identity `bounded_id`, with that type as its bound, and
+/// continues with the result.
 pub struct SealGenericTData<CX: ContextFamily = ()> {
     pub loc: ALoc,
-    pub id: flow_typing_generics::GenericId,
-    pub name: SubstName,
-    pub no_infer: bool,
+    pub bounded_id: BoundedId,
     pub cont: Cont<CX>,
 }
 
@@ -3024,9 +3059,7 @@ impl<CX: ContextFamily> Clone for SealGenericTData<CX> {
     fn clone(&self) -> Self {
         SealGenericTData {
             loc: self.loc.clone(),
-            id: self.id.clone(),
-            name: self.name.clone(),
-            no_infer: self.no_infer,
+            bounded_id: self.bounded_id.clone(),
             cont: self.cont.clone(),
         }
     }
@@ -3034,11 +3067,7 @@ impl<CX: ContextFamily> Clone for SealGenericTData<CX> {
 
 impl<CX: ContextFamily> PartialEq for SealGenericTData<CX> {
     fn eq(&self, other: &Self) -> bool {
-        self.loc == other.loc
-            && self.id == other.id
-            && self.name == other.name
-            && self.no_infer == other.no_infer
-            && self.cont == other.cont
+        self.loc == other.loc && self.bounded_id == other.bounded_id && self.cont == other.cont
     }
 }
 
@@ -3047,9 +3076,7 @@ impl<CX: ContextFamily> Eq for SealGenericTData<CX> {}
 impl<CX: ContextFamily> std::hash::Hash for SealGenericTData<CX> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.loc.hash(state);
-        self.id.hash(state);
-        self.name.hash(state);
-        self.no_infer.hash(state);
+        self.bounded_id.hash(state);
         self.cont.hash(state);
     }
 }
@@ -3064,9 +3091,7 @@ impl<CX: ContextFamily> Ord for SealGenericTData<CX> {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.loc
             .cmp(&other.loc)
-            .then_with(|| self.id.cmp(&other.id))
-            .then_with(|| self.name.cmp(&other.name))
-            .then_with(|| self.no_infer.cmp(&other.no_infer))
+            .then_with(|| self.bounded_id.cmp(&other.bounded_id))
             .then_with(|| self.cont.cmp(&other.cont))
     }
 }
@@ -3075,9 +3100,7 @@ impl<CX: ContextFamily> std::fmt::Debug for SealGenericTData<CX> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("SealGenericTData")
             .field("loc", &self.loc)
-            .field("id", &self.id)
-            .field("name", &self.name)
-            .field("no_infer", &self.no_infer)
+            .field("bounded_id", &self.bounded_id)
             .field("cont", &self.cont)
             .finish()
     }

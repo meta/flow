@@ -1660,7 +1660,12 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             let extra = tvar(tvars, tv.id() as i32);
             p(cx, use_t, true, &extra)
         }
-        UseTInner::SealGenericT(box SealGenericTData { name, cont, .. }) => {
+        UseTInner::SealGenericT(box SealGenericTData {
+            bounded_id, cont, ..
+        }) => {
+            let name = bounded_id
+                .as_generic()
+                .map_or_else(String::new, |(_, name)| name.to_string());
             let extra = match cont {
                 type_::Cont::Lower(_, l) => {
                     format!("{} <~ {}", name, kid(tvars, l))

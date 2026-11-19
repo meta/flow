@@ -33,6 +33,7 @@ use flow_typing_implicit_instantiation_check::MethodOptionalChain;
 use flow_typing_implicit_instantiation_check::Operation;
 use flow_typing_type::type_::ArrRestTData;
 use flow_typing_type::type_::ArrType::*;
+use flow_typing_type::type_::BoundedId;
 use flow_typing_type::type_::CallElemTData;
 use flow_typing_type::type_::CallMData;
 use flow_typing_type::type_::CallTData;
@@ -678,7 +679,19 @@ fn __flow_impl<'cx>(
             reason,
             id,
             no_infer,
-        }) => handle_generic(cx, env, trace, *no_infer, bound, reason, id, name, u)?,
+        }) => handle_bounded(
+            cx,
+            env,
+            trace,
+            reason,
+            bound,
+            &BoundedId::Generic {
+                id: id.clone(),
+                name: name.dupe(),
+                no_infer: *no_infer,
+            },
+            u,
+        )?,
         // No solve infers a placeholder.
         ImplicitInstantiationTvar(
             data @ box ImplicitInstantiationTvarData {
@@ -3370,22 +3383,11 @@ fn __flow_impl<'cx>(
         (
             UnionT(_, _),
             SealGenericT(box SealGenericTData {
-                loc: _,
-                id,
-                name,
-                cont,
-                no_infer,
+                bounded_id, cont, ..
             }),
         ) => {
-            let reason = reason_of_t(l);
-            let generic = Type::new(GenericT(Box::new(GenericTData {
-                reason: reason.dupe(),
-                id: id.clone(),
-                name: name.dupe(),
-                bound: l.dupe(),
-                no_infer: *no_infer,
-            })));
-            continue_(cx, env, trace, &generic, cont)?;
+            let sealed = bounded_id.with_bound(reason_of_t(l).dupe(), l.dupe());
+            continue_(cx, env, trace, &sealed, cont)?;
         }
         (UnionT(_, _), ObjKitT(use_op, reason, resolve_tool, tool, tout)) => {
             object_kit::run_with_env(
@@ -4002,22 +4004,11 @@ fn __flow_impl<'cx>(
         (
             IntersectionT(_, _),
             SealGenericT(box SealGenericTData {
-                loc: _,
-                id,
-                name,
-                cont,
-                no_infer,
+                bounded_id, cont, ..
             }),
         ) => {
-            let reason = reason_of_t(l);
-            let generic = Type::new(GenericT(Box::new(GenericTData {
-                reason: reason.dupe(),
-                id: id.clone(),
-                name: name.dupe(),
-                bound: l.dupe(),
-                no_infer: *no_infer,
-            })));
-            continue_(cx, env, trace, &generic, cont)?;
+            let sealed = bounded_id.with_bound(reason_of_t(l).dupe(), l.dupe());
+            continue_(cx, env, trace, &sealed, cont)?;
         }
         (
             IntersectionT(_, _),
@@ -9213,22 +9204,11 @@ fn __flow_impl<'cx>(
         (
             NominalT { .. },
             SealGenericT(box SealGenericTData {
-                loc: _,
-                id,
-                name,
-                cont,
-                no_infer,
+                bounded_id, cont, ..
             }),
         ) => {
-            let reason = reason_of_t(l);
-            let generic = Type::new(GenericT(Box::new(GenericTData {
-                reason: reason.dupe(),
-                id: id.clone(),
-                name: name.dupe(),
-                bound: l.dupe(),
-                no_infer: *no_infer,
-            })));
-            continue_(cx, env, trace, &generic, cont)?;
+            let sealed = bounded_id.with_bound(reason_of_t(l).dupe(), l.dupe());
+            continue_(cx, env, trace, &sealed, cont)?;
         }
         // Preserve NominalT as consequent, but branch based on the bound
         (
@@ -10077,22 +10057,11 @@ fn __flow_impl<'cx>(
         (
             _,
             SealGenericT(box SealGenericTData {
-                loc: _,
-                id,
-                name,
-                cont,
-                no_infer,
+                bounded_id, cont, ..
             }),
         ) => {
-            let reason = reason_of_t(l);
-            let generic = Type::new(GenericT(Box::new(GenericTData {
-                reason: reason.dupe(),
-                id: id.clone(),
-                name: name.dupe(),
-                bound: l.dupe(),
-                no_infer: *no_infer,
-            })));
-            continue_(cx, env, trace, &generic, cont)?;
+            let sealed = bounded_id.with_bound(reason_of_t(l).dupe(), l.dupe());
+            continue_(cx, env, trace, &sealed, cont)?;
         }
         (GenericT(box GenericTData { reason, bound, .. }), _) => {
             let repos = helpers::reposition_reason(cx, env, None, reason, false, bound)?;
