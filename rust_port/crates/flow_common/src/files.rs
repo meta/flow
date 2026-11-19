@@ -230,11 +230,25 @@ impl SymlinkMap {
     /// Returns `None` when the map is not complete (e.g. not a full init run).
     pub fn try_resolve<'a>(&self, normalized_path: &'a str) -> Option<Cow<'a, str>> {
         let paths = self.complete_paths.get()?;
-        let normalized_path_buf = Path::new(normalized_path);
-        let resolved = paths
-            .get(normalized_path_buf)
-            .map_or(normalized_path_buf, PathBuf::as_path);
-        Some(resolved_path(normalized_path, resolved))
+        let mut path = Cow::Borrowed(Path::new(normalized_path));
+        // A path can be under a directory symlink the crawl didn't follow. Each step resolves part
+        // of the rest of the path, so there's at most one per component, even if a stale
+        // canonicalization made the map cycle.
+        for _ in Path::new(normalized_path).components() {
+            let Some((link, real_path)) = path.ancestors().find_map(|dir| paths.get_key_value(dir))
+            else {
+                break;
+            };
+            let rest = path
+                .strip_prefix(link)
+                .expect("a path should start with its ancestor");
+            path = Cow::Owned(if rest.as_os_str().is_empty() {
+                real_path.clone()
+            } else {
+                real_path.join(rest)
+            });
+        }
+        Some(resolved_path(normalized_path, &path))
     }
 }
 
@@ -1082,14 +1096,38 @@ pub fn make_next_files(
     let mut reported_real_paths = HashSet::new();
     for starting_point_path in starting_point_paths {
         let duped_options = options.dupe();
+        let root_buf = root.to_path_buf();
+        let crawl_root = subdir.unwrap_or(root).to_path_buf();
         for entry in jwalk::WalkDir::new(starting_point_path)
             .skip_hidden(false)
             .sort(sort)
             .follow_links(true)
             .parallelism(jwalk::Parallelism::RayonNewPool(2))
             .process_read_dir(move |_depth, path, _read_dir_state, children| {
-                if can_prune && !wanted_filter(&duped_options, path, all, include_libdef) {
+                let prunes = |dir: &Path| {
+                    can_prune && !wanted_filter(&duped_options, dir, all, include_libdef)
+                };
+                if prunes(path) {
                     children.clear();
+                }
+                // Don't follow a symlink to a directory the crawl reads anyway, which also ends
+                // cycles, e.g. between packages linked into each other's node_modules.
+                for entry in children.iter_mut().flatten() {
+                    if entry.read_children.is_some()
+                        && entry.path_is_symlink()
+                        // Only under the root does the crawl report what's under a symlink by its
+                        // real path.
+                        && entry.parent_path().starts_with(&root_buf)
+                        && let Ok(target) = cached_canonicalize(&entry.path())
+                        && target.starts_with(&crawl_root)
+                        // The crawl reports everything under the target itself.
+                        && (duped_options.implicitly_include_root
+                            || duped_options.includes.matches_subtree(&target.to_string_lossy()))
+                        // A pruned target is still followed, so the symlinks inside it resolve.
+                        && !prunes(&target)
+                    {
+                        entry.read_children = None;
+                    }
                 }
             })
         {
@@ -1113,6 +1151,14 @@ pub fn make_next_files(
                         .entry(FlowSmolStr::new(&dirname))
                         .or_default()
                         .insert(FlowSmolStr::new(&basename));
+                }
+                // A directory symlink that `process_read_dir` didn't follow.
+                if let Some(symlink_map) = symlink_map
+                    && entry.path_is_symlink()
+                    && entry.read_children.is_none()
+                    && let Ok(real_path) = cached_canonicalize(&path)
+                {
+                    symlink_map.insert(path, real_path);
                 }
                 continue;
             }
@@ -1789,6 +1835,16 @@ mod tests {
             super::normalize_path("/project/dist", "/lib/index.js"),
             "/lib/index.js"
         );
+    }
+
+    #[test]
+    fn symlink_map_resolves_a_cycle_from_a_stale_canonicalization() {
+        // The canonicalize cache outlives a re-init, so links can map into each other.
+        let map = super::SymlinkMap::default();
+        map.insert("/root/a".into(), "/root/b/sub".into());
+        map.insert("/root/b".into(), "/root/a/sub".into());
+        map.mark_complete();
+        assert!(map.try_resolve("/root/a/x.js").is_some());
     }
 
     #[cfg(windows)]

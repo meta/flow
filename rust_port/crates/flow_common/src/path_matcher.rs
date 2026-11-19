@@ -273,6 +273,14 @@ impl PathMatcher {
             }
         }) || self.glob_patterns.iter().any(|glob| glob.is_match(f))
     }
+
+    /// Check if a glob matches the directory `dir` and everything under it. Paths are left out, as
+    /// they match by string prefix, e.g. `/x/lib` matches `/x/lib-other`.
+    pub fn matches_subtree(&self, dir: &str) -> bool {
+        self.glob_patterns
+            .iter()
+            .any(|glob| glob.supports_directory_pruning() && glob.is_match(dir))
+    }
 }
 
 #[cfg(test)]

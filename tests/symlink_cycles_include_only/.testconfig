@@ -1,0 +1,2 @@
+shell: test.sh
+auto_start: false

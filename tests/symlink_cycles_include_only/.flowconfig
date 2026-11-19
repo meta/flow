@@ -1,0 +1,6 @@
+[include]
+packages/**
+
+[options]
+all=false
+files.implicitly_include_root=false
