@@ -1,3 +1,49 @@
+### 0.341.0
+
+Likely to cause new Flow errors:
+* `keyof` of a union now evaluates to the keys that every member has, matching TypeScript
+* `import type` binds every meaning of the export, as in TypeScript: `typeof` and `declare class` heritage can read the imported value, and importing a value that is not a type is no longer an error (using it as a type is)
+* Unnamed function type parameters, unlabeled dictionary keys and the explicit exact object type syntax `{| |}` are always errors. `flow-upgrade` package provides codemod to migrate the codebase.
+* Assignments in the part of an optional chain that `?.` can skip no longer count as definitely run after the chain.
+* `Object.defineProperty` calls with a string-literal key are checked against the library signature, as in TypeScript: the descriptor must be a `PropertyDescriptor`, a type argument is the type of the object, and the object no longer has to declare the property
+* `Object.defineProperties` calls with an object literal are checked against the library signature, as in TypeScript: the descriptors must be a `PropertyDescriptorMap`, and the object no longer has to declare the properties
+* A value of an opaque type is now checked against the narrowed upper bound of the same opaque type.
+* Type arguments are checked where the type application is written, including in generic definitions, instead of where a type is instantiated
+
+Notable bug fixes:
+* `keyof` of an intersection now includes the keys of every member that is an object
+* `keyof` of an interface declared in a `.d.ts` file now includes its methods.
+* Unions and object spreads whose parts each apply the same type alias no longer evaluate to `empty` from four members or five operands on.
+* Fixed slow checks of types that nest mapped types, such as `Omit` of `Omit`.
+* In the true branch of `T extends U ? X : Y`, `T` is known to satisfy `U`
+* `keyof T` is a subtype of `keyof T` for a type parameter `T` without a bound
+* Preserve signed mapped optionality when translating Flow declarations to TypeScript.
+* Names in a `declare namespace` block that merges into a declared function or class now resolve to the exports of the earlier blocks instead of `any`.
+* A conditional type, such as `Exclude<keyof T, K>`, accepts `keyof T` of a type parameter `T` that has no object bound
+* A type parameter is now a subtype of a union that its bound is a subtype of, and a type parameter bounded by an intersection is now a subtype of a union that contains it.
+* A generic whose bound is an intersection now fits an intersection that contains that generic.
+* An object literal whose computed key is a type parameter now has that type parameter as its key type instead of the parameter's bound.
+* A type parameter whose bound is a polymorphic function type keeps matching itself after being passed to a hook or used as a React prop.
+* Optional chaining, `NonNullable` and optional indexed access now see through an opaque type's upper bound and keep the opaque type, as they do for a type parameter.
+* `match` bindings now keep a type parameter or opaque type, with its bound narrowed by earlier patterns, instead of the members of its bound.
+* The file crawl no longer hangs on directory symlinks that link packages into each other's `node_modules`, as pnpm does for workspace packages.
+
+Misc:
+* Document abstract classes, class member overrides and `no_implicit_override`, template literal types, constructor types, unique symbols, mapped key remapping and signed modifiers, `satisfies` expressions, and inline import type annotations.
+
+Parser:
+* The location of an abstract class method now includes its trailing semicolon.
+
+IDE:
+* Go-to-definition on the property of a qualified `typeof` type (e.g. `foo` in `typeof obj.foo`) now jumps to the property's definition
+* Hover on a call to a polymorphic function prints the declared signature, with the types it computes evaluated for the call, and the instantiation's type arguments in a section of their own
+
+Library Definitions:
+* `React.ReactElement`, `React.ElementRef`, `React.PropsWithoutRef`, `React.ReactManagedAttributes` and `DistributiveOmit` now declare the bounds of their type parameters
+* The `get` and `set` members of `PropertyDescriptor` are declared as optional methods, as in TypeScript
+* `Object.getOwnPropertyDescriptors` returns a descriptor typed per property, as in TypeScript
+* `Object.create(proto, properties)` returns `any`, as in TypeScript
+
 ### 0.340.0
 
 Likely to cause new Flow errors:
