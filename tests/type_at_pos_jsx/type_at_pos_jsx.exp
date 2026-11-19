@@ -297,7 +297,7 @@ jsx_instantiation.js:3:19,3:22
 
 jsx_instantiation.js:10:6
 Flags:
-component Foo1<string | number>(x: string | number, y: string | number)
+component Foo1<number | string>(x: number | string, y: number | string)
 
 'Foo1' defined at jsx_instantiation.js:3:0
 
@@ -422,7 +422,7 @@ jsx_instantiation.js:97:6,97:8
 
 jsx_instantiation.js:105:6
 Flags:
-function Foo(props: Props<string | number>): React.Node
+function Foo(props: Props<number | string>): React.Node
 
 'Props' defined at jsx_instantiation.js:102:9
 'React.Node' defined at (lib) react.js:600:22
@@ -431,7 +431,7 @@ jsx_instantiation.js:105:6,105:8
 
 jsx_instantiation.js:109:6
 Flags:
-const Indirection: (props: Props<string | number>) => React.Node
+const Indirection: (props: Props<number | string>) => React.Node
 
 'Props' defined at jsx_instantiation.js:102:9
 'React.Node' defined at (lib) react.js:600:22

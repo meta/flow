@@ -633,7 +633,10 @@ recursive.js:61:17,61:18
 
 subst.js
 At subst.js:13:7
-{f: number, ...}
+Poly<number>
+
+'Poly' defined at subst.js:7:5
+
 subst.js:13:7,13:8
 
 At subst.js:15:7

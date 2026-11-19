@@ -53,7 +53,7 @@ conditional-types.js:29:6,29:7
 
 conditional-types.js:34:5
 Flags:
-let x: string | number
+let x: number | string
 conditional-types.js:34:5,34:5
 
 conditional-types.js:39:6

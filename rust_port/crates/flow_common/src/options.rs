@@ -206,7 +206,6 @@ pub struct Options {
     pub stylex_shorthand_prop: Option<String>,
     pub temp_dir: FlowSmolStr,
     pub export_star_excludes_default: bool,
-    pub implicit_instantiation_walk: bool,
     pub ts_syntax: bool,
     pub ts_void: bool,
     pub tslib_syntax: bool,

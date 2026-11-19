@@ -76,8 +76,6 @@ use flow_typing_type::type_::GetEnumKind;
 use flow_typing_type::type_::GetEnumTData;
 use flow_typing_type::type_::HintEvalResult;
 use flow_typing_type::type_::ImplicitInstantiationReferenceKind;
-use flow_typing_type::type_::ImplicitInstantiationTvarData;
-use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::LazyHintT;
 use flow_typing_type::type_::MethodAction;
 use flow_typing_type::type_::MethodCallType;
@@ -208,13 +206,6 @@ impl GeneralizedTarg {
     pub fn to_type(&self) -> Type {
         self.generalized.dupe()
     }
-}
-
-/// A type argument of a solve: an explicit one, or the tvar the solve infers it with.
-struct SolveTarg {
-    tparam: TypeParam,
-    t: Type,
-    inferred: bool,
 }
 
 fn get_t<'cx>(cx: &mut Context<'cx>, t: &Type) -> Type {
@@ -1531,140 +1522,43 @@ fn merge_lower_bounds<'cx>(
     })
 }
 
-// Flowing into a return hint that contains placeholders can leak them into the
-// bounds of a type parameter, e.g. by unification in an invariant position or by
-// any-propagation into the type arguments of an existing bound. Pinning discards
-// bounds that contain placeholders, so the type parameter could be reported as
-// underconstrained even though it had other bounds. Bounds that are themselves
-// placeholders are harmless, since pinning just ignores them.
-fn placeholders_leaked_into_bounds<'cx>(
-    cx: &mut Context<'cx>,
-    env: &FlowJsEnv,
-    targs: &[SolveTarg],
-) -> bool {
-    for SolveTarg { t, inferred, .. } in targs {
-        if !*inferred {
-            continue;
-        }
-        let bounds = match pinning_source(cx, env, t) {
-            PinningSource::Constraints {
-                id,
-                constraints: constraint::Constraints::Unresolved(bounds),
-            } => {
-                let (lower_types, upper_types): (Vec<Type>, Vec<Type>) = {
-                    let bounds = bounds.borrow();
-                    (
-                        bounds.lower.keys().duped().collect(),
-                        bounds
-                            .upper
-                            .keys()
-                            .filter_map(|k| match k.use_t.deref() {
-                                UseTInner::UseT(_, t) => Some(t.dupe()),
-                                _ => None,
-                            })
-                            .collect(),
-                    )
-                };
-                let mut seen = BTreeSet::from([id]);
-                let mut collected = Vec::new();
-                collect_pinning_lowers(cx, env, &mut seen, &mut collected, lower_types);
-                let mut bounds = union_flatten_list(collected);
-                bounds.extend(upper_types);
-                bounds
-            }
-            PinningSource::Constraints {
-                constraints: constraint::Constraints::Resolved(t),
-                ..
-            } => {
-                if flow_js_utils::tvar_visitors::has_placeholders(cx, &t) {
-                    return true;
-                }
-                continue;
-            }
-            PinningSource::Constraints {
-                constraints: constraint::Constraints::FullyResolved(_),
-                ..
-            }
-            | PinningSource::Concrete(_) => continue,
-        };
-        for t in bounds {
-            if !matches!(
-                t.deref(),
-                TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                    kind: ImplicitInstantiationTvarKind::Placeholder,
-                    ..
-                })
-            ) && flow_js_utils::tvar_visitors::has_placeholders(cx, &t)
-            {
-                return true;
-            }
-        }
-    }
-    false
-}
-
-/// What a solve pins an unmarked type parameter to when it has neither usable bounds nor a
-/// default.
+/// The solution for a type parameter without usable bounds: its default, or else its bound if it
+/// is unmarked.
 ///
 /// A type parameter is *marked* with its polarity when the result of the operation mentions it,
 /// and the solve does not allow underconstrained type parameters. Nothing observes the solution
 /// of an unmarked one. A marked type parameter without usable bounds or a default is always
 /// underconstrained (see `underconstrained`).
-#[derive(Clone, Copy)]
-enum UnmarkedFallback {
-    /// Its bound.
-    Bound,
-    /// Underconstrained, like a marked one. This is what the hint round of `solve_targs` uses,
-    /// which runs in hint evaluation mode, so it gives a placeholder.
-    ///
-    /// The hint round's solution is the type that a generic value is checked against. In
-    ///
-    ///   declare function on<T>(make: () => T): void;
-    ///   declare function create<U>(): Array<U>;
-    ///   on(create);
-    ///
-    /// `create` still has placeholder type arguments in the hint round, so `T` only gets
-    /// `Array<placeholder>`, which pinning ignores. Pinned to its bound, `T` would make `create`
-    /// get checked against `() => mixed`, even though nothing said `mixed`. As a placeholder, `T`
-    /// makes it get checked against `() => <placeholder>`, which says nothing about what it
-    /// returns.
-    Underconstrained,
-}
-
-impl UnmarkedFallback {
-    /// The solution for a type parameter without usable bounds.
-    fn without_bounds<'cx>(
-        self,
-        cx: &mut Context<'cx>,
-        env: &FlowJsEnv,
-        use_op: &UseOp,
-        tparam: &TypeParam,
-        marked: bool,
-        tparam_binder_reason: &Reason,
-        instantiation_reason: &Reason,
-    ) -> Result<Type, FlowJsException> {
-        match (self, marked, &tparam.default) {
-            (UnmarkedFallback::Bound, false, default) => {
-                let inferred = default.as_ref().unwrap_or(&tparam.bound).dupe();
-                flow_typing_debug::verbose::print_if_verbose_lazy(cx, None, None, None, || {
-                    vec![format!(
-                        "Constant type parameter {} is pinned to {}",
-                        tparam.name.string_of_subst_name(),
-                        flow_typing_debug::dump_t(Some(3), cx, &inferred),
-                    )]
-                });
-                Ok(inferred)
-            }
-            (_, _, Some(default)) => Ok(default.dupe()),
-            (_, _, None) => underconstrained(
-                cx,
-                env,
-                use_op,
-                tparam,
-                tparam_binder_reason,
-                instantiation_reason,
-            ),
+fn pin_without_bounds<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    use_op: &UseOp,
+    tparam: &TypeParam,
+    marked: bool,
+    tparam_binder_reason: &Reason,
+    instantiation_reason: &Reason,
+) -> Result<Type, FlowJsException> {
+    match (marked, &tparam.default) {
+        (false, default) => {
+            let inferred = default.as_ref().unwrap_or(&tparam.bound).dupe();
+            flow_typing_debug::verbose::print_if_verbose_lazy(cx, None, None, None, || {
+                vec![format!(
+                    "Constant type parameter {} is pinned to {}",
+                    tparam.name.string_of_subst_name(),
+                    flow_typing_debug::dump_t(Some(3), cx, &inferred),
+                )]
+            });
+            Ok(inferred)
         }
+        (true, Some(default)) => Ok(default.dupe()),
+        (true, None) => underconstrained(
+            cx,
+            env,
+            use_op,
+            tparam,
+            tparam_binder_reason,
+            instantiation_reason,
+        ),
     }
 }
 
@@ -1719,16 +1613,14 @@ fn log_pinned(cx: &mut Context<'_>, tparam: &TypeParam, inferred: &Type) {
 
 /// Pins `t`, the tvar a solve instantiated `tparam` with, to the merge of its bounds.
 ///
-/// `polarity` is the mark of `tparam` (see `UnmarkedFallback`). A negatively marked type parameter
-/// prefers its upper bounds, any other its lower bounds. Without usable bounds, a marked one is
-/// pinned to `error_fallback` if there is one, then to its default, and otherwise it is
-/// underconstrained. An unmarked one is pinned to its default, and otherwise as
-/// `unmarked_fallback` says. An upper bound that can't be merged makes a marked type parameter
-/// underconstrained.
+/// `polarity` is the mark of `tparam` (see `pin_without_bounds`). A negatively marked type
+/// parameter prefers its upper bounds, any other its lower bounds. Without usable bounds, a marked
+/// one is pinned to `error_fallback` if there is one, then to its default, and otherwise it is
+/// underconstrained. An unmarked one is pinned to its default, and otherwise to its bound. An
+/// upper bound that can't be merged makes a marked type parameter underconstrained.
 fn pin_type<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
-    unmarked_fallback: UnmarkedFallback,
     use_op: &UseOp,
     tparam: &TypeParam,
     polarity: Option<Polarity>,
@@ -1789,7 +1681,7 @@ fn pin_type<'cx>(
                 instantiation_reason,
             )
         }
-        UseTResult::UpperEmpty | UseTResult::UpperNonT(_) => unmarked_fallback.without_bounds(
+        UseTResult::UpperEmpty | UseTResult::UpperNonT(_) => pin_without_bounds(
             cx,
             env,
             use_op,
@@ -1799,33 +1691,6 @@ fn pin_type<'cx>(
             instantiation_reason,
         ),
     }
-}
-
-fn mk_inference_targ<'cx>(
-    cx: &mut Context<'cx>,
-    env: &FlowJsEnv,
-    typeparam: &TypeParam,
-    reason_op: &Reason,
-    reason_tapp: &Reason,
-) -> Type {
-    let reason = instantiation_utils::implicit_type_argument::mk_targ_reason(
-        typeparam,
-        reason_op,
-        reason_tapp,
-    );
-    let inference_id = mk_id() as i32;
-    cx.add_inference_node(inference_id);
-    let tvar = Type::new(TypeInner::ImplicitInstantiationTvar(Box::new(
-        ImplicitInstantiationTvarData {
-            reason,
-            name: typeparam.name.dupe(),
-            bound: typeparam.bound.dupe(),
-            id: inference_id,
-            kind: ImplicitInstantiationTvarKind::Inferred,
-        },
-    )));
-    env.add_implicit_instantiation_tvar(inference_id, tvar.dupe(), typeparam.default.is_some());
-    tvar
 }
 
 fn force_type_arguments(cx: &mut Context<'_>, targs: &[Targ]) {
@@ -1882,21 +1747,21 @@ fn force_type_arguments(cx: &mut Context<'_>, targs: &[Targ]) {
 }
 
 // Checks the operation of `check` with the poly type instantiated with its explicit type
-// arguments, and for the others, with `inferred` if given, and otherwise with new tvars. Returns
-// its type arguments and the result of the operation, if it has one.
+// arguments, and for the others, with `inferred`. Returns the result of the operation, if it has
+// one.
 fn check_instantiation<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     check: &ImplicitInstantiationCheck,
-    inferred: Option<&[Type]>,
-) -> Result<(Vec<SolveTarg>, Option<Type>), FlowJsException> {
+    inferred: &[Type],
+) -> Result<Option<Type>, FlowJsException> {
     let (ref use_op, ref reason_op, ref op) = check.operation;
     let reason_tapp = type_util::reason_of_t(&check.lhs);
     let (ref tparams_loc, ref tparams, _) = check.poly_t;
 
     let merge_targs = |cx: &mut Context<'cx>,
                        explicit_targs: Option<&[Targ]>|
-     -> Result<Vec<SolveTarg>, FlowJsException> {
+     -> Result<Vec<Type>, FlowJsException> {
         if let Some(explicit_targs) = explicit_targs
             && explicit_targs.len() > tparams.len()
         {
@@ -1912,18 +1777,8 @@ fn check_instantiation<'cx>(
         }
         let mut targs = Vec::with_capacity(tparams.len());
         for (i, tparam) in tparams.iter().enumerate() {
-            let inferred_targ = |cx: &mut Context<'cx>, reason_op: &Reason| match inferred {
-                Some(ts) => ts[i].dupe(),
-                None => mk_inference_targ(cx, env, tparam, reason_op, reason_tapp),
-            };
             let targ = match explicit_targs.map(|explicit_targs| explicit_targs.get(i)) {
-                None => SolveTarg {
-                    tparam: tparam.dupe(),
-                    t: inferred_targ(cx, reason_op),
-                    inferred: true,
-                },
                 Some(None) => {
-                    let t = inferred_targ(cx, reason_op);
                     if tparam.default.is_none() {
                         flow_js_utils::add_output_with_env(
                             cx,
@@ -1935,55 +1790,19 @@ fn check_instantiation<'cx>(
                             })),
                         )?;
                     }
-                    SolveTarg {
-                        tparam: tparam.dupe(),
-                        t,
-                        inferred: true,
-                    }
+                    inferred[i].dupe()
                 }
-                Some(Some(Targ::ExplicitArg(t))) => SolveTarg {
-                    tparam: tparam.dupe(),
-                    t: t.dupe(),
-                    inferred: false,
-                },
-                // With `inferred`, the solve flows its solution into the tvar of `_`.
-                Some(Some(Targ::ImplicitArg(_))) if inferred.is_some() => SolveTarg {
-                    tparam: tparam.dupe(),
-                    t: inferred_targ(cx, reason_op),
-                    inferred: true,
-                },
-                Some(Some(Targ::ImplicitArg(tvar))) => {
-                    let reason = flow_common::reason::mk_reason(None, tvar.reason().loc().dupe());
-                    let t = mk_inference_targ(cx, env, tparam, &reason, reason_tapp);
-                    FlowJs::flow_with_env(
-                        cx,
-                        env,
-                        &t,
-                        &UseT::new(UseTInner::UseT(
-                            use_op.dupe(),
-                            Type::new(TypeInner::OpenT(tvar.dupe())),
-                        )),
-                    )?;
-                    // It is important to convert implicit args to explicit args so there won't be
-                    // infinite loops between this module and flow_js.
-                    SolveTarg {
-                        tparam: tparam.dupe(),
-                        t,
-                        inferred: true,
-                    }
-                }
+                Some(Some(Targ::ExplicitArg(t))) => t.dupe(),
+                // The solve flows its solution into the tvar of `_`.
+                None | Some(Some(Targ::ImplicitArg(_))) => inferred[i].dupe(),
             };
             targs.push(targ);
         }
         Ok(targs)
     };
-    let explicit_targs = |targs: &[SolveTarg]| -> Rc<[Targ]> {
-        targs
-            .iter()
-            .map(|targ| Targ::ExplicitArg(targ.t.dupe()))
-            .collect()
-    };
-    let instance = |cx: &mut Context<'cx>, targs: &[SolveTarg]| {
+    let explicit_targs =
+        |targs: &[Type]| -> Rc<[Targ]> { targs.iter().duped().map(Targ::ExplicitArg).collect() };
+    let instance = |cx: &mut Context<'cx>, targs: &[Type]| {
         FlowJs::mk_typeapp_instance_annot_with_env(
             cx,
             env,
@@ -1994,11 +1813,11 @@ fn check_instantiation<'cx>(
             true,
             None,
             &check.lhs,
-            targs.iter().map(|targ| targ.t.dupe()).collect(),
+            targs.iter().duped().collect(),
         )
     };
 
-    let (targs, lower_t, use_t, tout) = match op {
+    let (lower_t, use_t, tout) = match op {
         Operation::Call(calltype) => {
             let new_tout = flow_typing_tvar::mk_no_wrap(cx, reason_op);
             let targs = merge_targs(cx, calltype.call_targs.as_deref())?;
@@ -2020,13 +1839,13 @@ fn check_instantiation<'cx>(
                 reason_op.dupe(),
                 new_tout as u32,
             )));
-            (targs, check.lhs.dupe(), call_t, Some(tout))
+            (check.lhs.dupe(), call_t, Some(tout))
         }
         Operation::SubtypeLowerPoly(u) => {
             let targs = merge_targs(cx, None)?;
             let lower_t = instance(cx, &targs)?;
             let use_t = UseT::new(UseTInner::UseT(use_op.dupe(), u.dupe()));
-            (targs, lower_t, use_t, None)
+            (lower_t, use_t, None)
         }
         Operation::Method {
             prop_reason,
@@ -2064,7 +1883,7 @@ fn check_instantiation<'cx>(
                 propref: Box::new(propref.clone()),
                 method_action: Box::new(method_action),
             })));
-            (targs, lower_t, method_t, Some(new_tout))
+            (lower_t, method_t, Some(new_tout))
         }
         Operation::Constructor(explicit, call_args) => {
             let new_tout = flow_typing_tvar::mk(cx, reason_op.dupe());
@@ -2078,7 +1897,7 @@ fn check_instantiation<'cx>(
                 return_hint: hint_unavailable(),
                 specialized_ctor: None,
             })));
-            (targs, check.lhs.dupe(), constructor_t, Some(new_tout))
+            (check.lhs.dupe(), constructor_t, Some(new_tout))
         }
         Operation::ReactJSX {
             jsx_props,
@@ -2103,11 +1922,11 @@ fn check_instantiation<'cx>(
                     },
                 ))),
             })));
-            (targs, lower, react_kit_t, Some(new_tout))
+            (lower, react_kit_t, Some(new_tout))
         }
     };
     FlowJs::flow_with_env(cx, env, &lower_t, &use_t)?;
-    Ok((targs, tout))
+    Ok(tout)
 }
 
 fn type_param_pin_order<'cx>(cx: &mut Context<'cx>, tparams: &[TypeParam]) -> Vec<usize> {
@@ -2154,143 +1973,6 @@ fn type_param_pin_order<'cx>(cx: &mut Context<'cx>, tparams: &[TypeParam]) -> Ve
     // old reverse-source order for unrelated parameters.
     order.reverse();
     order
-}
-
-fn pin_types<'cx>(
-    cx: &mut Context<'cx>,
-    env: &FlowJsEnv,
-    unmarked_fallback: UnmarkedFallback,
-    use_op: &UseOp,
-    has_new_errors: bool,
-    has_syntactic_hint: bool,
-    targs: &[SolveTarg],
-    marked_tparams: &Marked<SubstName>,
-    check: &ImplicitInstantiationCheck,
-) -> Result<(BTreeMap<SubstName, GeneralizedTarg>, Vec<(Type, SubstName)>), FlowJsException> {
-    let (_, ref instantiation_reason, ref op) = check.operation;
-
-    // Implicit instantiation can bail out early (e.g. a non-`DefT` lower bound or a static call
-    // through a `this` instance) without any type arguments, even though the poly type still
-    // declares tparams.
-    if targs.is_empty() {
-        return Ok((BTreeMap::new(), Vec::new()));
-    }
-
-    let subst_map: FlowOrdMap<SubstName, Type> = targs
-        .iter()
-        .map(|targ| (targ.tparam.name.dupe(), targ.t.dupe()))
-        .collect();
-
-    let mut result_map = BTreeMap::new();
-    let mut result_list = vec![None; targs.len()];
-    for index in type_param_pin_order(cx, &check.poly_t.1) {
-        let SolveTarg {
-            tparam,
-            t,
-            inferred,
-        } = &targs[index];
-        let inferred = if *inferred {
-            // If the operation failed, a type parameter without usable bounds is not reported as
-            // underconstrained.
-            let error_fallback = has_new_errors.then(|| {
-                let reason = type_util::reason_of_t(t).dupe();
-                match *cx.typing_mode() {
-                    TypingMode::CheckingMode => any_t::error(reason),
-                    TypingMode::SynthesisMode { .. } | TypingMode::HintEvaluationMode => {
-                        placeholder_t::why(reason.dupe(), mixed_t::why(reason))
-                    }
-                }
-            });
-            pin_type(
-                cx,
-                env,
-                unmarked_fallback,
-                use_op,
-                tparam,
-                marked_tparams.get(&tparam.name),
-                error_fallback,
-                instantiation_reason,
-                t,
-            )?
-        } else {
-            log_pinned(cx, tparam, t);
-            t.dupe()
-        };
-
-        let bound_t = type_subst::subst(
-            cx,
-            Some(use_op.dupe()),
-            true,
-            false,
-            type_subst::Purpose::Normal,
-            &subst_map,
-            tparam.bound.dupe(),
-        );
-        // What flowed into `t` flows into the bound, which is what the type parameters that the
-        // bound mentions learn from `tparam`. `t` itself doesn't: an evaluation in the bound that
-        // waits on them would keep it as a pending lower bound, and pinning them would return it.
-        let bound_use = UseT::new(UseTInner::UseT(
-            UseOp::Frame(
-                std::sync::Arc::new(VirtualFrameUseOp::TypeParamBound {
-                    name: tparam.name.dupe(),
-                }),
-                std::sync::Arc::new(use_op.dupe()),
-            ),
-            bound_t.dupe(),
-        ));
-        let mut lowers = Vec::new();
-        collect_pinning_lowers(cx, env, &mut BTreeSet::new(), &mut lowers, vec![t.dupe()]);
-        for lower in &lowers {
-            FlowJs::flow_with_env(cx, env, lower, &bound_use)?;
-        }
-
-        let call_loc = instantiation_reason.loc().dupe();
-        let generalized = match op {
-            Operation::Call(_) | Operation::Constructor(_, _) | Operation::Method { .. }
-                if tparam.is_const =>
-            {
-                // Adjust 'const' type parameters. Keeping container reasons for
-                // compatibility with existing code.
-                natural_inference::convert_literal_type_to_const(call_loc, cx, inferred.dupe())
-            }
-            _ if let deref!(TypeInner::DefT(_, deref!(DefTInner::NumGeneralT(_)))) = &bound_t => {
-                inferred.dupe()
-            }
-            _ => {
-                // Prevent leaking of precise singleton types
-                generalize_singletons(cx, &call_loc, has_syntactic_hint, inferred.dupe())
-            }
-        };
-        result_map.insert(
-            tparam.name.dupe(),
-            GeneralizedTarg {
-                tparam: tparam.dupe(),
-                inferred,
-                generalized: generalized.dupe(),
-            },
-        );
-        result_list[index] = Some((generalized, tparam.name.dupe()));
-    }
-
-    let result_list = result_list.into_iter().flatten().collect();
-    Ok((result_map, result_list))
-}
-
-// The type arguments of `check`'s operation and its result, as `check_instantiation` gives them,
-// and the polarity of each type parameter that the result mentions.
-fn implicitly_instantiate<'cx>(
-    cx: &mut Context<'cx>,
-    env: &FlowJsEnv,
-    check: &ImplicitInstantiationCheck,
-) -> Result<(Vec<SolveTarg>, Marked<SubstName>, Option<Type>), FlowJsException> {
-    // There are no other valid cases of implicit instantiation, but it is still possible
-    // reach them via non-sensical cases that usually are downstream of some other error.
-    // Since there's no reasonable thing to do in these cases we just ignore them.
-    let Some(marked_tparams) = marks_of_check(cx, check) else {
-        return Ok((Vec::new(), Marked::new(), None));
-    };
-    let (targs, tout) = check_instantiation(cx, env, check, None)?;
-    Ok((targs, marked_tparams, tout))
 }
 
 /// The polarity of each type parameter that the result of `check`'s operation mentions, or `None`
@@ -2385,57 +2067,7 @@ pub mod instantiation_solver {
 
     use super::*;
 
-    // Solves the type arguments of `check`'s operation, including how to instantiate the generic
-    // values that the solve meets ("polymorphic lowers" in the names below).
-    //
-    // A generic value can't be instantiated until the solve knows the type it flows to, and that
-    // type can depend on the rest of the operation:
-    //
-    //   declare function id<T>(x: T): T;
-    //   declare function apply<S>(fn: (S) => S, initial: S): S;
-    //   apply(id, 1);
-    //
-    // `id` flows to `(S) => S` and needs `S`, which comes from `1`. So the solve runs up to three
-    // times:
-    //
-    // 1. Solve once, giving placeholder type arguments to each generic value that flows to a type
-    //    mentioning the solve's tvars (see `kit::polymorphic_lower_targs`). If no generic value
-    //    needed placeholders, this solve is the answer. That is the common case.
-    // 2. Solve as a hint, with those generic values still placeholders. Pinning ignores the bounds
-    //    that `id<placeholder>` gives `S`, so `1` decides: `S = number`.
-    // 3. Solve for real. Each of those generic values is checked where this run meets it, against
-    //    the type it flows to with the hint solution in place of the solve's tvars. `id` is
-    //    checked against `(number) => number`, so it is instantiated as `id<number>`.
-    //
-    // A run doesn't look for the generic values: it meets them. It checks the operation as usual:
-    // `apply` is instantiated with new tvars for its type parameters,
-    // `(fn: (S') => S', initial: S') => S'`, and each argument flows to its parameter. So the type
-    // a generic value flows to is known when the run meets it: `id ~> (S') => S'` reaches the
-    // `PolyT` lower case in `subtyping_kit` with both. Every run does the same flows, so it meets
-    // the same generic values at the same places, each time with its own tvars. Only the hint
-    // solution is kept from one run to the next, by type parameter name.
-    //
-    // This applies to any generic value the solve meets, whether it is an argument like `id` or,
-    // say, the generic `then` method of a `Promise` argument checked against an interface.
-    //
-    // A generic value does not see how the others are instantiated. With
-    //
-    //   declare function pipe<A, B, C>(a: A, f: (A) => B, g: (B) => C): C;
-    //   declare function wrap<T>(x: T): Array<T>;
-    //   pipe('a', wrap, wrap);
-    //
-    // the second `wrap` needs `B`, which only the first `wrap`'s instantiation provides. The hint
-    // solve knows neither `B` nor `C`, so in step 3 the second `wrap` is checked against
-    // `(<placeholder>) => <placeholder>`, its `T` is its bound, and the call returns
-    // `Array<unknown>`.
-    //
-    // The hint solve uses the return hint too. With
-    //
-    //   declare function lift<T>(f: (T) => T): (T) => T;
-    //   const lifted: (string) => string = lift(id);
-    //
-    // `id` is checked against `(string) => string`. The errors of step 1, including the ones
-    // deferred to an enclosing speculation branch, are dropped, because step 3 redoes it.
+    /// Solves the type arguments of `check`'s operation by the walk.
     pub fn solve_targs<'cx>(
         cx: &mut Context<'cx>,
         env: &FlowJsEnv,
@@ -2451,80 +2083,13 @@ pub mod instantiation_solver {
         ),
         FlowJsException,
     > {
-        if cx.implicit_instantiation_walk() {
-            return super::walk::solve_targs(
-                cx,
-                env,
-                &use_op,
-                allow_underconstrained,
-                has_syntactic_hint,
-                &return_hint,
-                check,
-            );
-        }
-        let init_errors = cx.errors();
-        let init_deferred_errors = env.deferred_error_count();
-        let solution = solve_targs_once(
+        super::walk::solve_targs(
             cx,
             env,
-            UnmarkedFallback::Bound,
-            use_op.dupe(),
+            &use_op,
             allow_underconstrained,
             has_syntactic_hint,
-            return_hint.clone(),
-            check,
-        )?;
-        if !env.gave_polymorphic_lower_placeholders() {
-            return Ok(solution);
-        }
-        cx.reset_errors(init_errors);
-        env.truncate_deferred_errors(init_deferred_errors);
-
-        // The first solve's solution can't be the hint. It is pinned in checking mode, as the
-        // answer: there, a type parameter without evidence or a default is an error `any`, and its
-        // literals stay precise under a syntactic hint. A hint is what the generic values are
-        // checked against, so a type parameter the solve knows nothing about has to stay a
-        // placeholder, which tells the check nothing. Nor can the first solve run in hint
-        // evaluation mode, because it is the answer when no generic value needed placeholders.
-        //
-        // The hint solve is sandboxed. Hint evaluation mode makes a type parameter without
-        // evidence or a default a placeholder, and the caches are restored after it. It runs
-        // without speculation, so that its errors can't fail an enclosing speculation branch or be
-        // deferred to it, and they are dropped. Underconstrained type parameters aren't allowed,
-        // so pinning follows the polarity of each one in the return type. There is no syntactic
-        // hint, so literals are widened: `apply(id, 1)` hints `S = number`, not `S = 1`.
-        let original_errors = cx.errors();
-        let hint_solution = cx.run_in_hint_eval_mode(|cx| {
-            solve_targs_once(
-                cx,
-                &env.without_speculation(),
-                UnmarkedFallback::Underconstrained,
-                unknown_use(),
-                false,
-                false,
-                return_hint.clone(),
-                check,
-            )
-        });
-        cx.reset_errors(original_errors);
-        let hints = sandboxed(hint_solution)?
-            .map(|(solution, _)| {
-                solution
-                    .into_iter()
-                    .map(|(name, targ)| (name, targ.to_type()))
-                    .collect()
-            })
-            .unwrap_or_default();
-
-        env.set_polymorphic_lower_hints(hints);
-        solve_targs_once(
-            cx,
-            env,
-            UnmarkedFallback::Bound,
-            use_op,
-            allow_underconstrained,
-            has_syntactic_hint,
-            return_hint,
+            &return_hint,
             check,
         )
     }
@@ -2548,133 +2113,6 @@ pub mod instantiation_solver {
                 | FlowJsException::DebugThrow { .. }),
             ) => Err(e),
         }
-    }
-
-    fn solve_targs_once<'cx>(
-        cx: &mut Context<'cx>,
-        env: &FlowJsEnv,
-        unmarked_fallback: UnmarkedFallback,
-        use_op: UseOp,
-        allow_underconstrained: bool,
-        has_syntactic_hint: bool,
-        return_hint: Option<(Type, flow_common::hint::HintKind)>,
-        check: &ImplicitInstantiationCheck,
-    ) -> Result<
-        (
-            BTreeMap<subst_name::SubstName, GeneralizedTarg>,
-            Vec<(Type, subst_name::SubstName)>,
-        ),
-        FlowJsException,
-    > {
-        let targs = match &check.operation.2 {
-            Operation::Call(call) => call.call_targs.as_deref(),
-            Operation::Constructor(targs, _) | Operation::ReactJSX { targs, .. } => {
-                targs.as_deref()
-            }
-            Operation::SubtypeLowerPoly(_) => None,
-            Operation::Method { call, .. } => call.meth_targs.as_deref(),
-        };
-        if let Some(targs) = targs {
-            force_type_arguments(cx, targs);
-        }
-        // Push a preservation level OUTSIDE run_and_rolled_back_cache so it
-        // sits below the rollback truncation line and survives the restore.
-        // Entries moved here remain visible to add() (which checks all levels),
-        // so subsequent operations still get cache hits — exactly matching the
-        // original behavior where the captured snapshot stayed in the live cache.
-        let preserve_level = cx.constraint_cache().level_count();
-        cx.constraint_cache_mut().push_level();
-        let mut preserved = false;
-        let result = cx.run_and_rolled_back_cache(|cx| {
-            let init_errors = cx.errors();
-            let mut cache_snapshot = match &return_hint {
-                Some((_, flow_common::hint::HintKind::BestEffortHint)) => {
-                    Some(cx.take_cache_snapshot())
-                }
-                _ => None,
-            };
-            // Instantiates the poly type and checks the operation. If that raises no errors, the
-            // constraint cache entries it added are preserved, before the return hint or pinning
-            // add entries that may be associated with error-producing checks.
-            let instantiate = |cx: &mut Context<'cx>| {
-                let (targs, marked_tparams, tout) = implicitly_instantiate(cx, env, check)?;
-                let has_new_errors = !init_errors.ptr_eq(&cx.errors());
-                if !has_new_errors {
-                    cx.constraint_cache_mut()
-                        .move_top_entries_to_level(preserve_level);
-                }
-                Ok::<_, FlowJsException>((targs, marked_tparams, tout, has_new_errors))
-            };
-            let (mut targs, mut marked_tparams, tout, mut has_new_errors) = instantiate(cx)?;
-            preserved = !has_new_errors;
-
-            if let (Some((hint, kind)), Some(tout)) = (&return_hint, &tout) {
-                let errors_before_using_return_hint = cx.errors();
-                let hint_exn = match FlowJs::flow_t_with_env(cx, env, tout, hint) {
-                    Ok(()) => None,
-                    Err(
-                        e @ (FlowJsException::WorkerCanceled(_)
-                        | FlowJsException::TimedOut(_)
-                        | FlowJsException::DebugThrow { .. }),
-                    ) => return Err(e),
-                    Err(e) => Some(e),
-                };
-                let hint_failed = hint_exn.is_some()
-                    || !errors_before_using_return_hint.ptr_eq(&cx.errors())
-                    || (flow_js_utils::tvar_visitors::has_placeholders(cx, hint)
-                        && placeholders_leaked_into_bounds(cx, env, &targs));
-                if hint_failed && *kind == flow_common::hint::HintKind::BestEffortHint {
-                    // Solve again without the hint, from the same state as before it.
-                    cx.restore_cache_snapshot(cache_snapshot.take().expect(
-                        "best-effort return hints should have captured a cache snapshot",
-                    ));
-                    cx.reset_errors(init_errors.dupe());
-                    cx.constraint_cache_mut().clear_level(preserve_level);
-                    (targs, marked_tparams, _, has_new_errors) = instantiate(cx)?;
-                    preserved = !has_new_errors;
-                } else if let Some(e) = hint_exn {
-                    return Err(e);
-                }
-            }
-
-            cx.reset_errors(Default::default());
-
-            // A solve that allows underconstrained type parameters pins them all as unmarked.
-            if allow_underconstrained {
-                marked_tparams = Marked::new();
-            }
-            let result = pin_types(
-                cx,
-                env,
-                unmarked_fallback,
-                &use_op,
-                has_new_errors,
-                has_syntactic_hint,
-                &targs,
-                &marked_tparams,
-                check,
-            );
-            let implicit_instantiation_errors = cx.errors().filter(|error| {
-                // Since we will be performing the same check again using the solution
-                // of the implicit instantiation, we only need to keep errors related
-                // to pinning types, eg. [underconstrained-implicit-instantiation].
-                matches!(
-                    error.msg,
-                    ErrorMessage::EImplicitInstantiationUnderconstrainedError(box EImplicitInstantiationUnderconstrainedErrorData { .. })
-                        | ErrorMessage::EInternal(box (_, _))
-                )
-            });
-            cx.reset_errors(init_errors.union(&implicit_instantiation_errors));
-            result
-        });
-        // After run_and_rolled_back_cache truncates above the preserve level,
-        // the preserve level survives with the entries from implicitly_instantiate.
-        // If preserved, leave the level as-is — entries are visible to add()/fold().
-        // If not preserved, discard the empty preserve level.
-        if !preserved {
-            cx.constraint_cache_mut().truncate_to(preserve_level);
-        }
-        result
     }
 
     pub(crate) fn solve_conditional_type_targs<'cx>(
@@ -2829,7 +2267,6 @@ pub mod instantiation_solver {
                             pin_type(
                                 cx,
                                 env,
-                                UnmarkedFallback::Bound,
                                 use_op,
                                 tparam,
                                 marked_tparams.get(name),
@@ -3830,17 +3267,7 @@ pub mod kit {
                 reason_op,
                 reason_tapp,
             );
-            let inferred = pin_type(
-                cx,
-                env,
-                UnmarkedFallback::Bound,
-                &use_op,
-                tparam,
-                None,
-                None,
-                reason_op,
-                &targ,
-            )?;
+            let inferred = pin_type(cx, env, &use_op, tparam, None, None, reason_op, &targ)?;
             let gt = GeneralizedTarg {
                 tparam: tparam.dupe(),
                 inferred: inferred.dupe(),

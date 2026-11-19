@@ -1,5 +1,4 @@
 [options]
-experimental.implicit_instantiation_walk=true
 all=true
 munge_underscores=true
 builtin_lib=core-only

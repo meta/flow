@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-//! Implicit instantiation by a walk (`experimental.implicit_instantiation_walk`).
+//! Implicit instantiation by a walk.
 //!
 //! Instead of running the operation's flows against fresh tvars and pinning what reaches them,
 //! the solve walks the argument types against the parameter types, and the return type against
@@ -28,10 +28,10 @@
 //! A destructor whose result the flow-based solve's pinning reverses (a spread, a rest, the config
 //! of a component) gives the marker under it the reversal of the other side, computed directly. A
 //! pair that the walk has no rule for, such as a destructor stuck on a marker (`T[K]` with `T` a
-//! marker), says nothing about the markers: the walk makes no type variables for it. With the flag
-//! on, the walk solves every implicit instantiation: there is no fallback to the flow-based solve.
-//! Only whether the operation fails anyway, which keeps a type parameter without evidence from
-//! being underconstrained, is found by flowing its arguments (`check_instantiation`).
+//! marker), says nothing about the markers: the walk makes no type variables for it. The walk
+//! solves every implicit instantiation. Only whether the operation fails anyway, which keeps a type
+//! parameter without evidence from being underconstrained, is found by flowing its arguments
+//! (`check_instantiation`).
 
 use std::sync::Arc;
 
@@ -1897,6 +1897,47 @@ impl<'e> Walker<'e> {
                         }),
                     ));
                     self.walk(cx, &part_t, &t)?;
+                }
+                Ok(())
+            }
+            // Two template literal types with the same texts around their placeholders: each
+            // placeholder of the lower type goes to the one it is matched with, as in subtyping.
+            (
+                TypeInner::TemplateLiteralT {
+                    quasis: lq,
+                    types: lt,
+                    ..
+                },
+                TypeInner::TemplateLiteralT {
+                    quasis: uq,
+                    types: ut,
+                    ..
+                },
+            ) => {
+                let (lq, lt) = crate::template_literal_type::fold_concrete_placeholders(lq, lt);
+                let (uq, ut) = crate::template_literal_type::fold_concrete_placeholders(uq, ut);
+                if lq != uq {
+                    return self.give_up(cx, "unhandled pair", &l, &u);
+                }
+                for (lp, up) in lt.iter().zip(ut.iter()) {
+                    let skip = matches!(
+                        up.deref(),
+                        TypeInner::DefT(_, ud) if matches!(ud.deref(), DefTInner::StrGeneralT(_))
+                    ) && crate::template_literal_type::placeholder_coerces_to_string(lp);
+                    if skip {
+                        continue;
+                    }
+                    match (self.marker_of(lp), self.marker_of(up)) {
+                        (None, Some(name)) => {
+                            let lp = self.matched_placeholder(cx, lp, &name)?;
+                            self.walk(cx, &lp, up)?;
+                        }
+                        (Some(name), None) => {
+                            let up = self.matched_placeholder(cx, up, &name)?;
+                            self.walk(cx, lp, &up)?;
+                        }
+                        _ => self.walk(cx, lp, up)?,
+                    }
                 }
                 Ok(())
             }
@@ -4287,6 +4328,37 @@ impl<'e> Walker<'e> {
             FlowJs::speculative_subtyping_succeeds_with_flow_errors(cx, env, &key_t, &dict.key)
         })?;
         Ok(ok != Some(false))
+    }
+
+    /// What the placeholder `t` of a template literal type gives the placeholder of the type
+    /// argument `name` that it is matched with, as in `flow_matched_placeholder`: `t` itself if it
+    /// fits the bound of the type parameter, and otherwise the template literal type `${t}`.
+    fn matched_placeholder<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        t: &Type,
+        name: &SubstName,
+    ) -> Result<Type, FlowJsException> {
+        let env = self.env;
+        let fits = match self.tparams.get(name) {
+            Some(tparam) if !is_mixed_or_any(&tparam.bound) => {
+                let bound = tparam.bound.dupe();
+                sandbox(cx, env, self.preserve, |cx| {
+                    FlowJs::speculative_subtyping_succeeds_with_flow_errors(cx, env, t, &bound)
+                })? == Some(true)
+            }
+            _ => false,
+        };
+        if fits {
+            return Ok(t.dupe());
+        }
+        crate::template_literal_type::template_of_placeholder(
+            cx,
+            env,
+            type_util::reason_of_t(t),
+            true,
+            t,
+        )
     }
 
     /// Whether `l` is a subtype of the union of `members` that mention no marker.
@@ -7569,7 +7641,7 @@ fn solve_targs_in_snapshot<'cx>(
             .map(|tparam| solution[&tparam.name].generalized.dupe())
             .collect();
         let failed = run_keeping_clean_flows(cx, env, preserve, |cx| {
-            let (_, tout) = check_instantiation(cx, env, check, Some(&solution))?;
+            let tout = check_instantiation(cx, env, check, &solution)?;
             if let Some(tout) = tout {
                 resolve_result(cx, &tout);
             }
@@ -7753,7 +7825,7 @@ fn pin<'cx>(
                             (t, None)
                         }
                         None => {
-                            let t = UnmarkedFallback::Bound.without_bounds(
+                            let t = pin_without_bounds(
                                 cx,
                                 env,
                                 pinning.use_op,

@@ -1890,30 +1890,30 @@ References:
    dictionaries.js:100:28
    100|   declare const inferKey: <K, V>(o: {[key: K]: V}) => K;
                                    ^ [1]
-   dictionaries.js:99:13
-    99|   const o = {0.5: true, 1.5: false}; // OK
-                    ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   dictionaries.js:100:44
+   100|   declare const inferKey: <K, V>(o: {[key: K]: V}) => K;
+                                                   ^ [2]
    dictionaries.js:103:10
    103|   key as number; // ERROR
                  ^^^^^^ [3]
 
 
-Error ------------------------------------------------------------------------------------------- dictionaries.js:105:14
+Error -------------------------------------------------------------------------------------------- dictionaries.js:105:3
 
 Cannot call `numericKey` because in type argument `K` > at least one member of `"0.5" | "1.5"` [1]: `"0.5"` [2] is
 incompatible with `number` [3]. [incompatible-type]
 
-   dictionaries.js:105:14
+   dictionaries.js:105:3
    105|   numericKey(o); // ERROR
-                     ^
+          ^^^^^^^^^^
 
 References:
    dictionaries.js:104:30
    104|   declare const numericKey: <K extends number, V>(o: {[key: K]: V}) => K;
                                      ^ [1]
-   dictionaries.js:99:13
-    99|   const o = {0.5: true, 1.5: false}; // OK
-                    ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   dictionaries.js:104:61
+   104|   declare const numericKey: <K extends number, V>(o: {[key: K]: V}) => K;
+                                                                    ^ [2]
    dictionaries.js:104:40
    104|   declare const numericKey: <K extends number, V>(o: {[key: K]: V}) => K;
                                                ^^^^^^ [3]

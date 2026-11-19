@@ -183,14 +183,14 @@ References:
                        ^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------- readonly_component_inference.js:21:2
+Error ---------------------------------------------------------------------------- readonly_component_inference.js:21:49
 
-Cannot create `Wrapper` element because in property `render.values` > array element > type argument `T` [1]:
-`string` [2] is incompatible with `number` [3]. [incompatible-type]
+Cannot create `Wrapper` element because in property `values` > array element > type argument `T` [1]: `string` [2] is
+incompatible with `number` [3]. [incompatible-type]
 
-   readonly_component_inference.js:21:2
+   readonly_component_inference.js:21:49
    21| <Wrapper render={flag ? Wide : Generic} values={values} />; // Error: `string` in `render.values` is incompatible with `number` from `values`.
-        ^^^^^^^
+                                                       ^^^^^^
 
 References:
    readonly_component_inference.js:3:10
@@ -204,14 +204,14 @@ References:
                                      ^^^^^^ [3]
 
 
-Error ------------------------------------------------------------------------------- spread_component_inference.js:21:2
+Error ------------------------------------------------------------------------------ spread_component_inference.js:21:49
 
-Cannot create `Wrapper` element because in property `render.values` > array element > type argument `T` [1]:
-`string` [2] is incompatible with `number` [3]. [incompatible-type]
+Cannot create `Wrapper` element because in property `values` > array element > type argument `T` [1]: `string` [2] is
+incompatible with `number` [3]. [incompatible-type]
 
-   spread_component_inference.js:21:2
+   spread_component_inference.js:21:49
    21| <Wrapper render={flag ? Wide : Generic} values={values} />; // Error: `string` in `render.values` is incompatible with `number` from `values`.
-        ^^^^^^^
+                                                       ^^^^^^
 
 References:
    spread_component_inference.js:3:10
@@ -522,22 +522,22 @@ References:
                               ^^^^^^^^ [2]
 
 
-Error ---------------------------------------------------------------------------------------------------- tvar5.js:5:12
+Error ----------------------------------------------------------------------------------------------------- tvar5.js:5:1
 
-Cannot call `unReadOnly` with `foo` bound to `thing` because `{readonly foo: string, ...}` [1] is incompatible with
-`empty` [2]. [incompatible-type]
+Cannot cast `unReadOnly(...)` to `empty` because `{readonly foo: string, ...}` [1] is incompatible with `empty` [2].
+[incompatible-type]
 
-   tvar5.js:5:12
+   tvar5.js:5:1
    5| unReadOnly(foo) as empty; // error
-                 ^^^
+      ^^^^^^^^^^^^^^^
 
 References:
    tvar5.js:4:29
    4| declare const foo: Readonly<{foo: string, ...}>;
                                   ^^^^^^^^^^^^^^^^^^ [1]
-   tvar5.js:3:39
-   3| declare function unReadOnly<T>(thing: Readonly<T>): T;
-                                            ^^^^^^^^^^^ [2]
+   tvar5.js:5:20
+   5| unReadOnly(foo) as empty; // error
+                         ^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- union.js:2:38

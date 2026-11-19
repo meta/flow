@@ -2,6 +2,5 @@
 receiver_lib.js
 
 [options]
-experimental.implicit_instantiation_walk=true
 all=true
 builtin_lib=core-only

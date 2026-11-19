@@ -1,4 +1,3 @@
 [options]
-experimental.implicit_instantiation_walk=true
 builtin_lib=core-only
 all=true

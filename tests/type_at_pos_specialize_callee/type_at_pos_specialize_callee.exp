@@ -300,7 +300,7 @@ At file.js:231:18
 file.js:231:18,231:18
 
 At file.js:241:13
-(x: string | number, y: string | number) => void
+(x: number | string, y: number | string) => void
 file.js:241:17,241:17
 
 At file.js:250:13

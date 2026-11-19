@@ -1371,7 +1371,7 @@ fn concrete_types_of_placeholder<'cx>(
 /// The template literal type `${l}`, normalized as in TypeScript: over each member of a union,
 /// literals and booleans as the strings they print as, and strings and template literal types as
 /// themselves.
-fn template_of_placeholder<'cx>(
+pub(crate) fn template_of_placeholder<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     l_reason: &reason::Reason,

@@ -919,30 +919,46 @@ References:
 
 Error ------------------------------------------------------------------------------------- hoc_omit_regressions.js:78:2
 
-Cannot create `Resize` element because `unknown` [1] is not a polymorphic type. [incompatible-use]
+Cannot create `Resize` element because in property `component`: property `foo` is missing in
+`{height?: number, width?: number, ...}` [1] but exists in `{foo: string, height?: ?number, width?: ?number, ...}` [2].
+[incompatible-type]
 
    hoc_omit_regressions.js:78:2
-     78| <Resize component={ComponentWithSize} foo="ok" />; // ERROR
-          ^^^^^^
+    78| <Resize component={ComponentWithSize} foo="ok" />; // ERROR
+         ^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1586:40
-   1586| type Omit<T extends interface {}, K> = $Omit<T, K>;
-                                                ^^^^^^^^^^^ [1]
+   <BUILTINS>/react.js:583:68
+   583|   declare export type ComponentType<in P extends {...}> = component(...P);
+                                                                           ^^^^^^ [1]
+   hoc_omit_regressions.js:72:43
+                                                  v
+    72| declare function ComponentWithSize(props: {
+    73|   foo: string,
+    74|   height?: ?number,
+    75|   width?: ?number,
+    76|  ...}): React.Node;
+         ---^ [2]
 
 
-Error ------------------------------------------------------------------------------------ hoc_omit_regressions.js:104:1
+Error ----------------------------------------------------------------------------------- hoc_omit_regressions.js:104:13
 
-Cannot call `takesConfig` because `unknown` [1] is not a polymorphic type. [incompatible-use]
+Cannot call `takesConfig` with object literal bound to `props` because in property `component`: properties `foo` and
+`ref` are missing in `{readonly height?: number, readonly width?: number, ...}` [1] but exist in
+`{readonly foo: string, readonly height?: ?number, readonly ref?: React.RefSetter<SizedComponent>, re...` [2].
+[incompatible-type]
 
-   hoc_omit_regressions.js:104:1
-    104| takesConfig({component: SizedComponent, foo: 'ok'}); // ERROR
-         ^^^^^^^^^^^
+   hoc_omit_regressions.js:104:13
+   104| takesConfig({component: SizedComponent, foo: 'ok'}); // ERROR
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:1586:40
-   1586| type Omit<T extends interface {}, K> = $Omit<T, K>;
-                                                ^^^^^^^^^^^ [1]
+   hoc_omit_regressions.js:89:26
+    89|   Props extends Readonly<{height?: number, width?: number, ...}>,
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   hoc_omit_regressions.js:98:7
+    98| class SizedComponent extends React.Component<ComponentProps> {
+              ^^^^^^^^^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------------- import_react.js:7:17
@@ -2164,11 +2180,11 @@ References:
 Error ------------------------------------------------------------------------------------------- useReducer_hook.js:4:9
 
 Cannot call `React.useReducer` because: [incompatible-type]
- - Either `(reducer: (state: empty, action: empty) => empty, initialState: empty) => [empty, Dispatch<empty>]` [1]
+ - Either `(reducer: (state: void, action: any) => void, initialState: void) => [void, Dispatch<any>]` [1] requires
+   another argument from call of method `useReducer` [2].
+ - Or `(reducer: (state: void, action: any) => void, initialState: void, init: void) => [void, Dispatch<any...` [3]
    requires another argument from call of method `useReducer` [2].
- - Or `(reducer: (state: empty, action: empty) => empty, initialState: empty, init: void) => [empty, Dispat...` [3]
-   requires another argument from call of method `useReducer` [2].
- - Or `(reducer: (state: empty, action: empty) => empty, initialArg: empty, init: (initialArg: empty) => em...` [4]
+ - Or `(reducer: (state: any, action: any) => any, initialArg: void, init: (initialArg: void) => any) => [a...` [4]
    requires another argument from call of method `useReducer` [2].
 
    useReducer_hook.js:4:9
