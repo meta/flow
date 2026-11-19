@@ -38,7 +38,6 @@ use flow_typing_type::type_::DestructorSpreadTypeData;
 use flow_typing_type::type_::FieldData;
 use flow_typing_type::type_::HasOwnPropTData;
 use flow_typing_type::type_::ImplicitInstantiationTvarData;
-use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::LookupAction;
 use flow_typing_type::type_::LookupDefaultResult;
 use flow_typing_type::type_::LookupKind;
@@ -495,9 +494,7 @@ fn props_to_tout<'cx>(
         // Any and any specializations
         TypeInner::AnyT(reason, _)
         | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-            reason,
-            kind: ImplicitInstantiationTvarKind::Placeholder,
-            ..
+            reason, ..
         }) => {
             FlowJs::rec_flow_t_with_env(
                 cx,
@@ -891,7 +888,6 @@ pub(super) fn run_with_env<'cx>(
             TypeInner::AnyT(reason, _)
             | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
                 reason,
-                kind: ImplicitInstantiationTvarKind::Placeholder,
                 ..
             }) => {
                 let any = flow_js_utils::any_result(&dropped, reason.dupe());
@@ -1205,11 +1201,7 @@ pub(super) fn run_with_env<'cx>(
         )?;
         let synthesized_render = if !concrete_renders.is_empty()
             && concrete_renders.iter().all(|t| match t.deref() {
-                TypeInner::AnyT(..)
-                | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                    kind: ImplicitInstantiationTvarKind::Placeholder,
-                    ..
-                }) => true,
+                TypeInner::AnyT(..) | TypeInner::ImplicitInstantiationTvar(_) => true,
                 TypeInner::DefT(_, def_t) => matches!(def_t.deref(), DefTInner::RendersT(_)),
                 _ => false,
             }) {

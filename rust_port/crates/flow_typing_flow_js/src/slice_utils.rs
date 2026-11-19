@@ -52,8 +52,6 @@ use flow_typing_type::type_::DictType;
 use flow_typing_type::type_::FieldData;
 use flow_typing_type::type_::Flags;
 use flow_typing_type::type_::GenericTData;
-use flow_typing_type::type_::ImplicitInstantiationTvarData;
-use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::InstType;
 use flow_typing_type::type_::InstTypeInner;
 use flow_typing_type::type_::InstanceKind;
@@ -2986,11 +2984,7 @@ fn resolve_with_env<'cx, A>(
             return recurse(cx, env, use_op, reason, resolve_tool_new, tool, t_first);
         }
         // Propagate any.
-        TypeInner::AnyT(_, _)
-        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-            kind: ImplicitInstantiationTvarKind::Placeholder,
-            ..
-        }) => {
+        TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => {
             return return_(cx, use_op, flow_js_utils::any_result(&t, reason.dupe()));
         }
         _ => {}
@@ -3181,10 +3175,9 @@ pub fn super_<'cx, A>(
         TypeInner::AnyT(_, src) => {
             return_(cx, use_op, Type::new(TypeInner::AnyT(reason.dupe(), *src)))
         }
-        TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-            kind: ImplicitInstantiationTvarKind::Placeholder,
-            ..
-        }) => return_(cx, use_op, flow_js_utils::any_result(t, reason.dupe())),
+        TypeInner::ImplicitInstantiationTvar(_) => {
+            return_(cx, use_op, flow_js_utils::any_result(t, reason.dupe()))
+        }
         _ => finish(cx, use_op, acc, pending),
     }
 }

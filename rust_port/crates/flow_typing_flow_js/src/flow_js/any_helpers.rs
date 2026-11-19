@@ -571,11 +571,7 @@ pub(super) fn any_propagated_use<'cx>(
 
     match l.deref() {
         TypeInner::OpenT(tvar) => Ok(any_prop_tvar(cx, tvar.id() as i32)),
-        TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-            kind: ImplicitInstantiationTvarKind::Placeholder,
-            ..
-        }) => Ok(true),
-        TypeInner::ImplicitInstantiationTvar(data) => Ok(any_prop_tvar(cx, data.id)),
+        TypeInner::ImplicitInstantiationTvar(_) => Ok(true),
         TypeInner::DefT(_, def_t) => match def_t.deref() {
             DefTInner::FunT(_, funtype) => {
                 // function types are contravariant in the arguments

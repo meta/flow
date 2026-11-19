@@ -60,7 +60,6 @@ use crate::type_::GetPrivatePropTData;
 use crate::type_::GetPropTData;
 use crate::type_::HasOwnPropTData;
 use crate::type_::ImplicitInstantiationTvarData;
-use crate::type_::ImplicitInstantiationTvarKind;
 use crate::type_::IndexedTypeAccessData;
 use crate::type_::IndexerKeyCompatibilityData;
 use crate::type_::InitFieldData;
@@ -146,30 +145,19 @@ pub fn reason_of_t(t: &Type) -> &Reason {
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ConstraintNodeId {
     OpenT(i32),
-    Inference(i32),
 }
 
 impl ConstraintNodeId {
     pub fn id(self) -> i32 {
         match self {
-            Self::OpenT(id) | Self::Inference(id) => id,
+            Self::OpenT(id) => id,
         }
-    }
-
-    pub fn is_open_t(self) -> bool {
-        matches!(self, Self::OpenT(_))
     }
 }
 
 pub fn constraint_node_id(t: &Type) -> Option<ConstraintNodeId> {
     match t.deref() {
         TypeInner::OpenT(tvar) => Some(ConstraintNodeId::OpenT(tvar.id() as i32)),
-        TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-            id,
-            kind: ImplicitInstantiationTvarKind::Inferred,
-            ..
-        }) => Some(ConstraintNodeId::Inference(*id)),
-        // No solve infers a placeholder, so it never takes bounds and has no node.
         _ => None,
     }
 }
@@ -297,14 +285,12 @@ pub fn mod_reason_of_t(f: &dyn Fn(Reason) -> Reason, t: &Type) -> Type {
             name,
             bound,
             id,
-            kind,
         }) => Type::new(TypeInner::ImplicitInstantiationTvar(Box::new(
             ImplicitInstantiationTvarData {
                 reason: f(reason.dupe()),
                 name: name.dupe(),
                 bound: bound.dupe(),
                 id: *id,
-                kind: *kind,
             },
         ))),
         TypeInner::FunProtoT(reason) => Type::new(TypeInner::FunProtoT(f(reason.dupe()))),
@@ -1948,10 +1934,6 @@ pub fn is_falsy(t: &Type) -> bool {
 pub fn is_concrete(t: &Type) -> bool {
     match t.deref() {
         TypeInner::OpenT(_)
-        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-            kind: ImplicitInstantiationTvarKind::Inferred,
-            ..
-        })
         | TypeInner::EvalT { .. }
         | TypeInner::TypeAppT(box TypeAppTData { .. })
         | TypeInner::KeysT(_, _)

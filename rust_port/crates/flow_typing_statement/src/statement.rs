@@ -5682,11 +5682,7 @@ fn valid_computed_key(cx: &Context<'_>, key: &Type) -> bool {
             DefTInner::StrGeneralT(_) | DefTInner::NumGeneralT(_) | DefTInner::EnumValueT(_)
         ),
         TypeInner::TemplateLiteralT { .. } => true,
-        TypeInner::AnyT(_, _)
-        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-            kind: ImplicitInstantiationTvarKind::Placeholder,
-            ..
-        }) => true,
+        TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => true,
         TypeInner::GenericT(box GenericTData { bound, .. }) => valid_computed_key(cx, bound),
         TypeInner::NominalT { nominal_type, .. }
             if matches!(
@@ -8423,11 +8419,7 @@ fn check_unnecessary_assertion(
         // code below tries to report.
         TypeInner::DefT(_, def_t) if matches!(def_t.deref(), DefTInner::EmptyT) => {}
         // any will fail the test below, but it's not always truthy.
-        TypeInner::AnyT(_, _)
-        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-            kind: ImplicitInstantiationTvarKind::Placeholder,
-            ..
-        }) => {}
+        TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => {}
         _ => {
             let filter_result =
                 flow_typing_utils::type_filter::not_truthy(cx, concretized_cond_t.dupe());

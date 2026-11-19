@@ -95,7 +95,6 @@ use flow_typing_type::type_::GetEnumKind;
 use flow_typing_type::type_::GetPrivatePropTData;
 use flow_typing_type::type_::GetPropTData;
 use flow_typing_type::type_::ImplicitInstantiationTvarData;
-use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::InstType;
 use flow_typing_type::type_::InstTypeInner;
 use flow_typing_type::type_::InstanceKind;

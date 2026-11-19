@@ -45,8 +45,6 @@ use flow_typing_type::type_::ArrayATData;
 use flow_typing_type::type_::DepthTrace;
 use flow_typing_type::type_::Destructor;
 use flow_typing_type::type_::DestructorSpreadTypeData;
-use flow_typing_type::type_::ImplicitInstantiationTvarData;
-use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::ROArrayATData;
 use flow_typing_type::type_::ThisInstanceTData;
 use flow_typing_type::type_::ThisTypeAppTData;
@@ -1400,11 +1398,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             any_t::error(reason.dupe())
         }
         (
-            TypeInner::AnyT(_, _)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }),
+            TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_),
             OpInner::AnnotUseTTypeT { reason, .. },
         ) => {
             let reason_use = reason.dupe();
@@ -1657,11 +1651,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         }
         // keyof any -> any: any in any out.
         (
-            TypeInner::AnyT(_, _)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }),
+            TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_),
             OpInner::AnnotGetKeysT(reason_op),
         ) => flow_js_utils::any_result(&t, reason_op.dupe()),
         // **********
@@ -1689,11 +1679,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             type_util::mod_reason_of_t(&|_| reason.dupe(), &elem_t)
         }
         (
-            TypeInner::AnyT(_, _)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }),
+            TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_),
             OpInner::AnnotGetValuesT(reason),
         ) => flow_js_utils::any_result(&t, reason.dupe()),
         // ******************************
@@ -1751,11 +1737,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         (_, OpInner::AnnotNotT(reason)) => {
             match t.deref() {
                 // any propagation
-                TypeInner::AnyT(_, _)
-                | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                    kind: ImplicitInstantiationTvarKind::Placeholder,
-                    ..
-                }) => return t,
+                TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => return t,
                 TypeInner::DefT(_, def_t) => {
                     match def_t.deref() {
                         DefTInner::BoolGeneralT
@@ -1824,11 +1806,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         //  Mixins
         // ********
         (
-            TypeInner::AnyT(_, _)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }),
+            TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_),
             OpInner::AnnotMixinT(r),
         ) => flow_js_utils::any_result(&t, r.dupe()),
         (_, OpInner::AnnotMixinT(r)) => {
@@ -1957,11 +1935,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             t
         }
         (
-            TypeInner::AnyT(_, _)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }),
+            TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_),
             OpInner::AnnotSpecializeT(_),
         ) => t,
         // Mirrors the [SpecializeT] rule for a value with a construct
@@ -2110,11 +2084,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             }
         }
         (
-            TypeInner::AnyT(_, _)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }),
+            TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_),
             OpInner::AnnotThisSpecializeT { reason, .. },
         ) => reposition(cx, reason.loc().dupe(), t),
 
@@ -2183,11 +2153,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         //  ObjTestProtoT
         // ***************
         (
-            TypeInner::AnyT(_, _)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }),
+            TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_),
             OpInner::AnnotObjTestProtoT(reason_op),
         ) => flow_js_utils::any_result(&t, reason_op.dupe()),
         (TypeInner::DefT(_, def_t), OpInner::AnnotObjTestProtoT(reason_op))
@@ -2215,11 +2181,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             reposition(cx, reason_op.loc().dupe(), inst.static_.dupe())
         }
         (
-            TypeInner::AnyT(_, _)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }),
+            TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_),
             OpInner::AnnotGetStaticsT(reason_op),
         ) => flow_js_utils::any_result(&t, reason_op.dupe()),
         (TypeInner::ObjProtoT(_), OpInner::AnnotGetStaticsT(reason_op)) => {
@@ -2232,11 +2194,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         //  LookupT pt1
         // *************
         (
-            TypeInner::AnyT(_, _)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }),
+            TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_),
             OpInner::AnnotLookupT(data),
         ) => any_t::untyped(data.reason.dupe()),
         (_, OpInner::AnnotLookupT(data)) => {
@@ -2513,11 +2471,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         //  ObjRestT
         // **********
         (
-            TypeInner::AnyT(_, _)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }),
+            TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_),
             OpInner::AnnotObjRestT { reason, .. },
         ) => flow_js_utils::any_result(&t, reason.dupe()),
         (
@@ -2668,11 +2622,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         //  GetPropT
         // **********
         (
-            TypeInner::AnyT(_, _)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }),
+            TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_),
             OpInner::AnnotGetPropT(data),
         ) => Type::new(TypeInner::AnyT(
             data.reason.dupe(),
@@ -2868,11 +2818,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             type_::str_module_t::why(reason.dupe())
         }
         (
-            TypeInner::AnyT(_, _)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }),
+            TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_),
             OpInner::AnnotGetElemT {
                 reason,
                 use_op,
@@ -2953,23 +2899,12 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                         }))),
                     )
                 }
-                (
-                    _,
-                    TypeInner::AnyT(_, _)
-                    | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                        kind: ImplicitInstantiationTvarKind::Placeholder,
-                        ..
-                    }),
-                ) => {
+                (_, TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_)) => {
                     let value = type_::any_t::untyped(reason_op.dupe());
                     reposition(cx, reason_op.loc().dupe(), value)
                 }
                 (
-                    TypeInner::AnyT(_, _)
-                    | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                        kind: ImplicitInstantiationTvarKind::Placeholder,
-                        ..
-                    }),
+                    TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_),
                     TypeInner::DefT(_, source_def_t),
                 ) if let DefTInner::ArrT(arrtype) = source_def_t.deref() => {
                     let value = type_::elemt_of_arrtype(arrtype.as_ref());
@@ -4335,11 +4270,7 @@ fn partition_mapped_type_keys<'cx>(
                 | DefTInner::SingletonNumT { .. }
                 | DefTInner::SymbolT
         ),
-        TypeInner::AnyT(..)
-        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-            kind: ImplicitInstantiationTvarKind::Placeholder,
-            ..
-        }) => true,
+        TypeInner::AnyT(..) | TypeInner::ImplicitInstantiationTvar(_) => true,
         _ => false,
     });
     all_valid.then(|| split_mapped_type_keys(keys))

@@ -36,8 +36,6 @@ use flow_typing_type::type_::EnumInfoInner;
 use flow_typing_type::type_::Flags;
 use flow_typing_type::type_::FunType;
 use flow_typing_type::type_::GenericTData;
-use flow_typing_type::type_::ImplicitInstantiationTvarData;
-use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::InstType;
 use flow_typing_type::type_::InstanceT;
 use flow_typing_type::type_::MappedTypeHomomorphicFlag;
@@ -432,14 +430,7 @@ fn ref_json(id: u32) -> Json {
 }
 
 fn is_tvar(t: &Type) -> bool {
-    matches!(
-        t.deref(),
-        TypeInner::OpenT(_)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Inferred,
-                ..
-            })
-    )
+    matches!(t.deref(), TypeInner::OpenT(_))
 }
 
 /// The ref to `t`'s entry, giving it the next id on first sight. A tvar has no entry of its own: it
@@ -606,11 +597,7 @@ fn graph_entry<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, t: &Type) -> Json {
 
 fn type_to_json_uncached<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, t: &Type) -> Json {
     match t.deref() {
-        TypeInner::OpenT(_)
-        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-            kind: ImplicitInstantiationTvarKind::Inferred,
-            ..
-        }) => {
+        TypeInner::OpenT(_) => {
             let reason = type_util::reason_of_t(t);
             let resolved = FlowJs::singleton_concrete_type_for_inspection(cx, reason, t)
                 .unwrap_or_else(|_| t.dupe());
@@ -825,11 +812,9 @@ fn type_to_json_uncached<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, t: &Type
                 ),
             ],
         ),
-        TypeInner::AnyT(_, _)
-        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-            kind: ImplicitInstantiationTvarKind::Placeholder,
-            ..
-        }) => json_with_type("Any", vec![]),
+        TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => {
+            json_with_type("Any", vec![])
+        }
         TypeInner::TemplateLiteralT {
             reason: _,
             from_annot: _,

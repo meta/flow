@@ -59,7 +59,6 @@ use flow_typing_type::type_::EnumInfo;
 use flow_typing_type::type_::EnumInfoInner;
 use flow_typing_type::type_::GenericTData;
 use flow_typing_type::type_::ImplicitInstantiationTvarData;
-use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::MixedFlavor;
 use flow_typing_type::type_::ObjKind;
 use flow_typing_type::type_::ObjLiteral;
@@ -409,22 +408,8 @@ pub mod operators {
                 (_, TypeInner::DefT(_, def_r)) if matches!(def_r.deref(), DefTInner::EmptyT) => {
                     Ok(())
                 }
-                (
-                    TypeInner::AnyT(_, _)
-                    | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                        kind: ImplicitInstantiationTvarKind::Placeholder,
-                        ..
-                    }),
-                    _,
-                ) => Ok(()),
-                (
-                    _,
-                    TypeInner::AnyT(_, _)
-                    | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                        kind: ImplicitInstantiationTvarKind::Placeholder,
-                        ..
-                    }),
-                ) => Ok(()),
+                (TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_), _) => Ok(()),
+                (_, TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_)) => Ok(()),
                 _ if flow_js_utils::is_date(l) && flow_js_utils::is_date(r) => Ok(()),
                 _ => {
                     let (r1, r2) = flow_js_utils::ordered_reasons(
@@ -510,11 +495,7 @@ pub mod operators {
 
         fn is_always_allowed_one_side_t(t: &Type) -> bool {
             match t.deref() {
-                TypeInner::AnyT(_, _)
-                | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                    kind: ImplicitInstantiationTvarKind::Placeholder,
-                    ..
-                }) => true,
+                TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => true,
                 TypeInner::DefT(_, def_t) => matches!(
                     def_t.deref(),
                     DefTInner::EmptyT
@@ -879,22 +860,8 @@ pub mod operators {
                 (_, TypeInner::DefT(_, def_r)) if matches!(def_r.deref(), DefTInner::EmptyT) => {
                     Ok(())
                 }
-                (
-                    TypeInner::AnyT(_, _)
-                    | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                        kind: ImplicitInstantiationTvarKind::Placeholder,
-                        ..
-                    }),
-                    _,
-                )
-                | (
-                    _,
-                    TypeInner::AnyT(_, _)
-                    | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                        kind: ImplicitInstantiationTvarKind::Placeholder,
-                        ..
-                    }),
-                ) => Ok(()),
+                (TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_), _)
+                | (_, TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_)) => Ok(()),
                 (TypeInner::IntersectionT(r1, rep1), _) => {
                     let t2_clone = t2.dupe();
                     let cases: Vec<_> = rep1
@@ -1237,13 +1204,7 @@ pub mod operators {
                     type_filter::FilterResult { type_: t, .. }
                         if matches!(
                             t.deref(),
-                            TypeInner::AnyT(_, _)
-                                | TypeInner::ImplicitInstantiationTvar(
-                                    box ImplicitInstantiationTvarData {
-                                        kind: ImplicitInstantiationTvarKind::Placeholder,
-                                        ..
-                                    }
-                                )
+                            TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_)
                         ) =>
                     {
                         // not-nullish
@@ -1292,11 +1253,9 @@ pub mod operators {
         let env = &FlowJsEnv::entry();
         fn f(reason: &Reason, t: &Type) -> Type {
             match t.deref() {
-                TypeInner::AnyT(_, _)
-                | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                    kind: ImplicitInstantiationTvarKind::Placeholder,
-                    ..
-                }) => flow_js_utils::any_result(t, reason.dupe()),
+                TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => {
+                    flow_js_utils::any_result(t, reason.dupe())
+                }
                 TypeInner::DefT(_, def_t)
                     if matches!(
                         def_t.deref(),
@@ -1601,11 +1560,7 @@ pub mod special_cased_functions {
             match to_obj.deref() {
                 // Special case any. Otherwise this will lead to confusing errors when
                 // any tranforms to an object type.
-                TypeInner::AnyT(_, _)
-                | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                    kind: ImplicitInstantiationTvarKind::Placeholder,
-                    ..
-                }) => {
+                TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => {
                     flow_js::flow_t_with_env(cx, env, (to_obj, t))?;
                     Ok(())
                 }
@@ -1791,14 +1746,7 @@ pub mod special_cased_functions {
                     flow_js::flow_t_with_env(cx, env, (&any, t))?;
                     Ok(())
                 }
-                (
-                    TypeInner::AnyT(_, _)
-                    | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                        kind: ImplicitInstantiationTvarKind::Placeholder,
-                        ..
-                    }),
-                    _,
-                ) => {
+                (TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_), _) => {
                     flow_js::flow_t_with_env(cx, env, (l, t))?;
                     Ok(())
                 }
@@ -2447,11 +2395,7 @@ pub mod type_assertions {
             &|_, r| r.loc().dupe(),
             &|cx, env, t| {
                 match t.deref() {
-                    TypeInner::AnyT(_, _)
-                    | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                        kind: ImplicitInstantiationTvarKind::Placeholder,
-                        ..
-                    }) => Ok(()),
+                    TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => Ok(()),
                     // the left-hand side of a `(x in y)` expression is a string,
                     // number, or symbol
                     TypeInner::DefT(_, def_t)
@@ -2494,11 +2438,7 @@ pub mod type_assertions {
             &|_, r| r.loc().dupe(),
             &|cx, env, t| {
                 match t.deref() {
-                    TypeInner::AnyT(_, _)
-                    | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                        kind: ImplicitInstantiationTvarKind::Placeholder,
-                        ..
-                    }) => Ok(()),
+                    TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => Ok(()),
                     // the right-hand side of a `(x in y)` expression must be object-like
                     TypeInner::DefT(_, def_t) if matches!(def_t.deref(), DefTInner::ArrT(_)) => {
                         Ok(())
@@ -2551,11 +2491,7 @@ pub mod type_assertions {
             &|cx, env, t| {
                 match t.deref() {
                     _ if flow_js_utils::object_like(t) => Ok(()),
-                    TypeInner::AnyT(_, _)
-                    | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                        kind: ImplicitInstantiationTvarKind::Placeholder,
-                        ..
-                    }) => Ok(()),
+                    TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => Ok(()),
                     TypeInner::ObjProtoT(_) => Ok(()),
                     // null/undefined are allowed
                     TypeInner::DefT(_, def_t)
@@ -2690,11 +2626,7 @@ pub mod type_assertions {
                     TypeInner::DefT(_, def_t) if matches!(def_t.deref(), DefTInner::ArrT(_)) => {
                         Ok(())
                     }
-                    TypeInner::AnyT(_, _)
-                    | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                        kind: ImplicitInstantiationTvarKind::Placeholder,
-                        ..
-                    }) => Ok(()),
+                    TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => Ok(()),
                     _ => flow_js_utils::add_output_with_env(
                         cx,
                         env,
@@ -2773,7 +2705,6 @@ pub mod type_assertions {
                 TypeInner::AnyT(reason, _)
                 | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
                     reason,
-                    kind: ImplicitInstantiationTvarKind::Placeholder,
                     ..
                 }) => {
                     for targ in targs_to_infer {
@@ -2863,14 +2794,7 @@ pub mod type_assertions {
         prop: Option<Name>,
     ) -> Result<(), FlowJsException> {
         match (obj.deref(), &prop) {
-            (
-                TypeInner::AnyT(_, _)
-                | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                    kind: ImplicitInstantiationTvarKind::Placeholder,
-                    ..
-                }),
-                _,
-            ) => Ok(()),
+            (TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_), _) => Ok(()),
             (TypeInner::DefT(_, def_t), _)
                 if matches!(
                     def_t.deref(),
@@ -3020,11 +2944,7 @@ pub mod type_assertions {
         let env = &FlowJsEnv::entry();
         fn valid_target(t: &Type) -> bool {
             match t.deref() {
-                TypeInner::AnyT(_, _)
-                | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                    kind: ImplicitInstantiationTvarKind::Placeholder,
-                    ..
-                }) => true,
+                TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => true,
                 TypeInner::DefT(_, def_t) => match def_t.deref() {
                     DefTInner::ObjT(obj_t) => matches!(obj_t.flags.obj_kind, ObjKind::Indexed(_)),
                     DefTInner::ArrT(arr) => {
@@ -3057,11 +2977,7 @@ pub mod type_assertions {
         let env = &FlowJsEnv::entry();
         fn valid_target(t: &Type) -> bool {
             match t.deref() {
-                TypeInner::AnyT(_, _)
-                | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                    kind: ImplicitInstantiationTvarKind::Placeholder,
-                    ..
-                }) => true,
+                TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => true,
                 TypeInner::DefT(_, def_t) => matches!(
                     def_t.deref(),
                     DefTInner::NullT

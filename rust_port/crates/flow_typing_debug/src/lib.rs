@@ -215,8 +215,6 @@ use flow_typing_type::type_::GenericTData;
 use flow_typing_type::type_::GetElemTData;
 use flow_typing_type::type_::GetEnumTData;
 use flow_typing_type::type_::HasOwnPropTData;
-use flow_typing_type::type_::ImplicitInstantiationTvarData;
-use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::InstanceT;
 use flow_typing_type::type_::Literal;
 use flow_typing_type::type_::LookupTData;
@@ -526,14 +524,7 @@ fn dump_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, t: &Type) -> Str
             let extra = tvar(tvars, tv.id() as i32);
             p(cx, t, true, &extra)
         }
-        TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-            kind: ImplicitInstantiationTvarKind::Placeholder,
-            ..
-        }) => p(cx, t, true, "Placeholder"),
-        TypeInner::ImplicitInstantiationTvar(data) => {
-            let extra = tvar(tvars, data.id);
-            p(cx, t, true, &extra)
-        }
+        TypeInner::ImplicitInstantiationTvar(_) => p(cx, t, true, "Placeholder"),
         TypeInner::DefT(_, def) => match def.deref() {
             DefTInner::NumGeneralT(lit) => {
                 let extra = match lit {
@@ -1748,12 +1739,7 @@ fn dump_tvar_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, id: i32) -> S
     }
     tvars.insert(id);
 
-    let node = if cx.is_inference_node(id) {
-        Node::create_root(cx.constraints_of(id).1)
-    } else {
-        cx.find_tvar(id)
-    };
-    match node {
+    match cx.find_tvar(id) {
         Node::Goto { parent } => {
             format!("{}, Goto {}", id, parent)
         }

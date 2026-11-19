@@ -15,51 +15,6 @@ pub(super) use flow_typing_type::type_util::constraint_node_id;
 use super::helpers::*;
 use super::*;
 
-pub(super) fn frozen_implicit_instantiation_tvar(
-    cx: &mut Context<'_>,
-    env: &FlowJsEnv,
-    t: &Type,
-) -> Option<Type> {
-    let node = constraint_node_id(t)?;
-    frozen_constraint_node(cx, env, node).map(|frozen| frozen.tvar)
-}
-
-struct FrozenConstraintNode {
-    root_id: i32,
-    tvar: Type,
-}
-
-struct ActiveConstraintNode {
-    root_id: i32,
-    constraints: constraint::Constraints<Cx>,
-}
-
-enum ConstraintNodeState {
-    Active(ActiveConstraintNode),
-    Frozen(FrozenConstraintNode),
-}
-
-fn frozen_constraint_node(
-    cx: &mut Context<'_>,
-    env: &FlowJsEnv,
-    node: ConstraintNodeId,
-) -> Option<FrozenConstraintNode> {
-    let root_id = cx.find_constraints(node.id()).0;
-    let tvar = env.frozen_implicit_instantiation_tvar(|id| cx.find_constraints(id).0 == root_id)?;
-    Some(FrozenConstraintNode { root_id, tvar })
-}
-
-pub(super) fn active_constraint_node(
-    cx: &mut Context<'_>,
-    env: &FlowJsEnv,
-    t: &Type,
-) -> Option<ConstraintNodeId> {
-    let node = constraint_node_id(t)?;
-    frozen_constraint_node(cx, env, node)
-        .is_none()
-        .then_some(node)
-}
-
 pub(super) fn constraint_node_constraints<'cx>(
     cx: &mut Context<'cx>,
     node: ConstraintNodeId,
@@ -67,35 +22,12 @@ pub(super) fn constraint_node_constraints<'cx>(
     cx.find_constraints(node.id())
 }
 
-fn constraint_node_state<'cx>(
-    cx: &mut Context<'cx>,
-    env: &FlowJsEnv,
-    node: ConstraintNodeId,
-) -> ConstraintNodeState {
-    let (root_id, constraints) = cx.find_constraints(node.id());
-    match frozen_constraint_node(cx, env, node) {
-        Some(frozen) => ConstraintNodeState::Frozen(frozen),
-        None => ConstraintNodeState::Active(ActiveConstraintNode {
-            root_id,
-            constraints,
-        }),
-    }
-}
-
 fn constraint_node_root<'cx>(
     cx: &mut Context<'cx>,
     node: ConstraintNodeId,
 ) -> (ConstraintNodeId, Root<constraint::Constraints<Cx>>) {
-    let (root_id, root) = match node {
-        ConstraintNodeId::OpenT(id) => cx.find_root(id),
-        ConstraintNodeId::Inference(id) => cx.find_inference_root(id),
-    };
-    let root_node = if cx.is_inference_node(root_id) {
-        ConstraintNodeId::Inference(root_id)
-    } else {
-        ConstraintNodeId::OpenT(root_id)
-    };
-    (root_node, root)
+    let (root_id, root) = cx.find_root(node.id());
+    (ConstraintNodeId::OpenT(root_id), root)
 }
 
 fn set_constraint_node_constraints<'cx>(
@@ -103,17 +35,11 @@ fn set_constraint_node_constraints<'cx>(
     node: ConstraintNodeId,
     constraints: constraint::Constraints<Cx>,
 ) {
-    match node {
-        ConstraintNodeId::OpenT(id) => cx.set_root_constraints(id, constraints),
-        ConstraintNodeId::Inference(id) => cx.set_inference_root_constraints(id, constraints),
-    }
+    cx.set_root_constraints(node.id(), constraints);
 }
 
 fn set_constraint_node_rank(cx: &mut Context<'_>, node: ConstraintNodeId, rank: i32) {
-    match node {
-        ConstraintNodeId::OpenT(id) => cx.set_root_rank(id, rank),
-        ConstraintNodeId::Inference(id) => cx.set_inference_root_rank(id, rank),
-    }
+    cx.set_root_rank(node.id(), rank);
 }
 
 fn set_constraint_node_goto(
@@ -121,21 +47,7 @@ fn set_constraint_node_goto(
     node: ConstraintNodeId,
     parent: ConstraintNodeId,
 ) {
-    match node {
-        ConstraintNodeId::OpenT(id) => match parent {
-            ConstraintNodeId::OpenT(parent_id) => {
-                cx.add_tvar(id, Node::create_goto(parent_id));
-            }
-            ConstraintNodeId::Inference(parent_id) => {
-                // Preserve the chosen root while keeping production nodes out of the side store.
-                let (parent_id, parent_root) = cx.find_inference_root(parent_id);
-                cx.set_root_constraints(id, parent_root.constraints);
-                cx.set_root_rank(id, parent_root.rank);
-                cx.set_inference_goto(parent_id, id);
-            }
-        },
-        ConstraintNodeId::Inference(id) => cx.set_inference_goto(id, parent.id()),
-    }
+    cx.add_tvar(node.id(), Node::create_goto(parent.id()));
 }
 
 // Bounds Manipulation
@@ -220,14 +132,16 @@ pub(super) fn flows_across<'cx>(
     Ok(())
 }
 
-fn flow_active_constraint_nodes<'cx>(
+pub(super) fn flow_constraint_nodes<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     trace: DepthTrace,
     use_op: UseOp,
-    (id1, constraints1): (i32, constraint::Constraints<Cx>),
-    (id2, constraints2): (i32, constraint::Constraints<Cx>),
+    node1: ConstraintNodeId,
+    node2: ConstraintNodeId,
 ) -> Result<(), FlowJsException> {
+    let (id1, constraints1) = constraint_node_constraints(cx, node1);
+    let (id2, constraints2) = constraint_node_constraints(cx, node2);
     match (constraints1, constraints2) {
         (
             constraint::Constraints::Unresolved(bounds1),
@@ -330,7 +244,7 @@ fn flow_active_constraint_nodes<'cx>(
     Ok(())
 }
 
-pub(super) fn flow_active_constraint_node_to_use<'cx>(
+pub(super) fn flow_constraint_node_to_use<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     trace: DepthTrace,
@@ -349,14 +263,15 @@ pub(super) fn flow_active_constraint_node_to_use<'cx>(
     }
 }
 
-fn flow_type_to_active_constraint_node<'cx>(
+pub(super) fn flow_type_to_constraint_node<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     trace: DepthTrace,
     use_op: UseOp,
     l: &Type,
-    (id, constraints): (i32, constraint::Constraints<Cx>),
+    node: ConstraintNodeId,
 ) -> Result<Option<(Type, UseT<Cx>)>, FlowJsException> {
+    let (id, constraints) = constraint_node_constraints(cx, node);
     match constraints {
         constraint::Constraints::Unresolved(bounds) => {
             edges_and_flows_from_t(cx, env, trace, use_op, false, l, (id, &bounds))?;
@@ -369,129 +284,6 @@ fn flow_type_to_active_constraint_node<'cx>(
             l.dupe(),
             UseT::new(UseTInner::UseT(use_op, cx.force_fully_resolved_tvar(&s))),
         ))),
-    }
-}
-
-fn flow_type_to_frozen_constraint_node<'cx>(
-    cx: &mut Context<'cx>,
-    env: &FlowJsEnv,
-    use_op: UseOp,
-    l: &Type,
-    frozen: &FrozenConstraintNode,
-) -> Result<(), FlowJsException> {
-    // A restrictive check sees a placeholder as a frozen tvar, which doesn't flow into another.
-    if matches!(l.deref(), TypeInner::AnyT(..))
-        || matches!(
-            l.deref(),
-            TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }) if !env.restrictive_frozen_tvars()
-        )
-        || matches!(l.deref(), TypeInner::DefT(_, def_t) if matches!(def_t.deref(), DefTInner::EmptyT))
-    {
-        return Ok(());
-    }
-
-    flow_js_utils::add_output_with_env(
-        cx,
-        env,
-        flow_js_utils::incompatible_types_error(l, &frozen.tvar, use_op, None),
-    )
-}
-
-pub(super) fn flow_constraint_nodes<'cx>(
-    cx: &mut Context<'cx>,
-    env: &FlowJsEnv,
-    trace: DepthTrace,
-    use_op: UseOp,
-    node1: ConstraintNodeId,
-    node2: ConstraintNodeId,
-) -> Result<(), FlowJsException> {
-    let state1 = constraint_node_state(cx, env, node1);
-    let state2 = constraint_node_state(cx, env, node2);
-    match (state1, state2) {
-        (
-            ConstraintNodeState::Active(ActiveConstraintNode {
-                root_id: id1,
-                constraints: constraints1,
-            }),
-            ConstraintNodeState::Active(ActiveConstraintNode {
-                root_id: id2,
-                constraints: constraints2,
-            }),
-        ) => flow_active_constraint_nodes(
-            cx,
-            env,
-            trace,
-            use_op,
-            (id1, constraints1),
-            (id2, constraints2),
-        ),
-        (ConstraintNodeState::Frozen(frozen1), ConstraintNodeState::Frozen(frozen2))
-            if frozen1.root_id == frozen2.root_id =>
-        {
-            Ok(())
-        }
-        (ConstraintNodeState::Frozen(frozen1), ConstraintNodeState::Frozen(frozen2)) => {
-            flow_type_to_frozen_constraint_node(cx, env, use_op, &frozen1.tvar, &frozen2)
-        }
-        (
-            ConstraintNodeState::Frozen(frozen),
-            ConstraintNodeState::Active(ActiveConstraintNode {
-                root_id,
-                constraints,
-            }),
-        ) => {
-            if let Some((l, u)) = flow_type_to_active_constraint_node(
-                cx,
-                env,
-                trace,
-                use_op,
-                &frozen.tvar,
-                (root_id, constraints),
-            )? {
-                rec_flow(cx, env, trace, (&l, &u))?;
-            }
-            Ok(())
-        }
-        (
-            ConstraintNodeState::Active(ActiveConstraintNode {
-                root_id,
-                constraints,
-            }),
-            ConstraintNodeState::Frozen(frozen),
-        ) => {
-            let u = UseT::new(UseTInner::UseT(use_op, frozen.tvar));
-            if let Some((l, u)) =
-                flow_active_constraint_node_to_use(cx, env, trace, (root_id, constraints), &u)?
-            {
-                rec_flow(cx, env, trace, (&l, &u))?;
-            }
-            Ok(())
-        }
-    }
-}
-
-pub(super) fn flow_type_to_constraint_node<'cx>(
-    cx: &mut Context<'cx>,
-    env: &FlowJsEnv,
-    trace: DepthTrace,
-    use_op: UseOp,
-    l: &Type,
-    node: ConstraintNodeId,
-) -> Result<Option<(Type, UseT<Cx>)>, FlowJsException> {
-    match constraint_node_state(cx, env, node) {
-        ConstraintNodeState::Active(ActiveConstraintNode {
-            root_id,
-            constraints,
-        }) => {
-            flow_type_to_active_constraint_node(cx, env, trace, use_op, l, (root_id, constraints))
-        }
-        ConstraintNodeState::Frozen(frozen) => {
-            flow_type_to_frozen_constraint_node(cx, env, use_op, l, &frozen)?;
-            Ok(None)
-        }
     }
 }
 
@@ -1137,8 +929,7 @@ fn unify_resolved_constraint_nodes<'cx>(
 }
 
 /// Unify two constraint nodes. This involves finding their roots, and making one
-/// point to the other. Ranks are used to keep chains short. A side root always
-/// points to a production root when the stores differ.
+/// point to the other. Ranks are used to keep chains short.
 pub(super) fn merge_constraint_nodes<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
@@ -1147,29 +938,6 @@ pub(super) fn merge_constraint_nodes<'cx>(
     node1: ConstraintNodeId,
     node2: ConstraintNodeId,
 ) -> Result<(), FlowJsException> {
-    let frozen1 = frozen_constraint_node(cx, env, node1);
-    let frozen2 = frozen_constraint_node(cx, env, node2);
-    match (frozen1.as_ref(), frozen2.as_ref()) {
-        (Some(frozen1), Some(frozen2)) if frozen1.root_id == frozen2.root_id => return Ok(()),
-        (Some(frozen1), Some(frozen2)) => {
-            return flow_type_to_frozen_constraint_node(cx, env, use_op, &frozen1.tvar, frozen2);
-        }
-        (Some(frozen), None) => {
-            return resolve_constraint_node(
-                cx,
-                env,
-                trace,
-                unify_flip(use_op),
-                node2,
-                &frozen.tvar,
-            );
-        }
-        (None, Some(frozen)) => {
-            return resolve_constraint_node(cx, env, trace, use_op, node1, &frozen.tvar);
-        }
-        (None, None) => {}
-    }
-
     let (node1, root1) = constraint_node_root(cx, node1);
     let (node2, root2) = constraint_node_root(cx, node2);
     if node1 == node2 {
@@ -1205,10 +973,6 @@ pub(super) fn resolve_constraint_node<'cx>(
     node: ConstraintNodeId,
     t: &Type,
 ) -> Result<(), FlowJsException> {
-    if let Some(frozen) = frozen_constraint_node(cx, env, node) {
-        return flow_type_to_frozen_constraint_node(cx, env, use_op, t, &frozen);
-    }
-
     let (node, root) = constraint_node_root(cx, node);
     let id = node.id();
     match root.constraints {
@@ -1244,7 +1008,7 @@ pub(super) fn resolve_constraint_node<'cx>(
     }
 }
 
-/// Resolve a production type variable to a type.
+/// Resolve a type variable to a type.
 pub(super) fn resolve_id<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,

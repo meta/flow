@@ -32,7 +32,6 @@ use flow_typing_type::type_::object::ObjectToolObjectMapData;
 use flow_typing_type::type_::type_collector::TypeCollector;
 
 // Disambiguate helpers vs mod re-exports
-use super::constraint_helpers::frozen_implicit_instantiation_tvar;
 use super::helpers::mk_typeapp_instance_annot;
 use super::helpers::*;
 use super::*;
@@ -209,16 +208,9 @@ fn evaluate_type_destructor_<'cx>(
     d: &Destructor,
     tvar: &Tvar,
 ) -> Result<(), FlowJsException> {
-    if matches!(d, Destructor::ConditionalType(_)) {
-        let nested_env = env.solving_implicit_instantiation();
-        if frozen_implicit_instantiation_tvar(cx, &nested_env, t).is_some() {
-            return eval_destructor(cx, &nested_env, trace, use_op, reason, t, d, tvar);
-        }
-    }
-
     // As an optimization, unwrap resolved tvars so that they are only evaluated
     // once to an annotation instead of a tvar that gets a bound on both sides.
-    let t = super::helpers::drop_resolved(cx, env, t);
+    let t = super::helpers::drop_resolved(cx, t);
     match t.deref() {
         _ if type_util::constraint_node_id(&t).is_some() => {
             let x = UseT::new(UseTInner::EvalTypeDestructorT(Box::new(
@@ -318,14 +310,10 @@ pub(super) fn mk_type_destructor<'cx>(
     id: eval::Id,
 ) -> Result<Type, FlowJsException> {
     let evaluated = cx.evaluated();
-    let conditional_has_implicit_instantiation_tvar = matches!(d, Destructor::ConditionalType(_))
-        && frozen_implicit_instantiation_tvar(cx, &env.solving_implicit_instantiation(), t)
-            .is_some();
-    if !conditional_has_implicit_instantiation_tvar && let Some(cached_t) = evaluated.get(&id) {
+    if let Some(cached_t) = evaluated.get(&id) {
         return Ok(cached_t.dupe());
     }
     if id.from_type_sig()
-        && !conditional_has_implicit_instantiation_tvar
         && type_subst::free_var_finder(
             cx,
             None,

@@ -29,7 +29,6 @@ use std::rc::Rc;
 
 use dupe::Dupe;
 use flow_aloc::ALoc;
-use flow_common::subst_name::SubstName;
 use flow_typing_errors::error_message::ErrorMessage;
 use flow_typing_type::type_::BoundedId;
 use flow_typing_type::type_::ImplicitInstantiationTvarData;
@@ -134,36 +133,6 @@ struct PolymorphicLowerFrame {
     enclosing: Option<Rc<PolymorphicLowerFrame>>,
 }
 
-/// How a solve instantiates a generic value that flows to a type mentioning the solve's tvars.
-/// The examples use
-///
-///   declare function id<T>(x: T): T;
-///   declare function apply<S>(fn: (S) => S, initial: S): S;
-///   apply(id, 1);
-#[derive(Debug)]
-enum PolymorphicLowers {
-    /// The first two runs of `solve_targs`: with placeholder type arguments. The flag records
-    /// whether a run did so. In `apply(id, 1)`, the first run gives `id` placeholders. If the
-    /// first run never does, it is the answer.
-    Placeholders(bool),
-    /// The final run of `solve_targs`: checked against the type it flows to, with what the hint
-    /// solve pinned the solve's type parameters to, by name. In `apply(id, 1)`, that is
-    /// `{S: number}`, and `id` is checked against `(S) => S` read as `(number) => number`.
-    Hinted(Rc<BTreeMap<SubstName, Type>>),
-    /// A check of a generic value against a type: not at all. The check is only there to infer
-    /// the checked value's own type arguments, and the flow of the instantiated value after it
-    /// checks the generic values it meets.
-    Skipped,
-}
-
-/// One implicit-instantiation solve, holding the solves it is nested in.
-#[derive(Debug)]
-struct ImplicitInstantiationFrame {
-    inference_tvars: RefCell<BTreeMap<i32, (Type, bool)>>,
-    polymorphic_lowers: RefCell<PolymorphicLowers>,
-    enclosing: Option<Rc<ImplicitInstantiationFrame>>,
-}
-
 /// The environment for `flow_js` related functions. Callers outside the
 /// `flow_js` system use [`FlowJsEnv::entry`]; any non-default env out there
 /// must be carefully audited (see the module docs for the two ways one can
@@ -184,11 +153,11 @@ pub struct FlowJsEnv {
     /// The innermost check of a generic value against a type, used to cut off checks that would
     /// otherwise recur through the generic value's own type.
     polymorphic_lower_stack: Option<Rc<PolymorphicLowerFrame>>,
-    /// The innermost implicit-instantiation solve.
-    implicit_instantiation: Option<Rc<ImplicitInstantiationFrame>>,
-    /// Whether frozen tvars, placeholders included, are seen without their
-    /// bounds, as TypeScript's restrictive instantiation sees type parameters
-    /// when it decides that a conditional type definitely holds.
+    /// Whether an implicit-instantiation solve is ongoing.
+    implicit_instantiation: bool,
+    /// Whether placeholders are seen without their bounds, as TypeScript's
+    /// restrictive instantiation sees type parameters when it decides that a
+    /// conditional type definitely holds.
     restrictive_frozen_tvars: bool,
     /// The bounds of the `infer` types of the conditional type being checked, by the id of the
     /// tvar that stands for each, as template literal types consult them (see
@@ -277,7 +246,7 @@ impl FlowJsEnv {
             })),
             instantiation_stack: self.instantiation_stack.dupe(),
             polymorphic_lower_stack: self.polymorphic_lower_stack.dupe(),
-            implicit_instantiation: self.implicit_instantiation.dupe(),
+            implicit_instantiation: self.implicit_instantiation,
             restrictive_frozen_tvars: self.restrictive_frozen_tvars,
             infer_type_bounds: self.infer_type_bounds.dupe(),
         }
@@ -296,48 +265,14 @@ impl FlowJsEnv {
     // ---- implicit instantiation ----
 
     pub fn in_implicit_instantiation(&self) -> bool {
-        self.implicit_instantiation.is_some()
+        self.implicit_instantiation
     }
 
     pub fn solving_implicit_instantiation(&self) -> Self {
-        self.push_implicit_instantiation_frame(PolymorphicLowers::Placeholders(false))
-    }
-
-    /// Enter a solve that checks a generic value against a type, like `id` against
-    /// `(string) => string`, to infer the generic value's own type arguments.
-    pub fn checking_polymorphic_lower(&self) -> Self {
-        self.push_implicit_instantiation_frame(PolymorphicLowers::Skipped)
-    }
-
-    fn push_implicit_instantiation_frame(&self, polymorphic_lowers: PolymorphicLowers) -> Self {
         Self {
-            implicit_instantiation: Some(Rc::new(ImplicitInstantiationFrame {
-                inference_tvars: RefCell::new(BTreeMap::new()),
-                polymorphic_lowers: RefCell::new(polymorphic_lowers),
-                enclosing: self.implicit_instantiation.dupe(),
-            })),
+            implicit_instantiation: true,
             ..self.dupe()
         }
-    }
-
-    /// The innermost solve that has tvars of its own. A frame without any is an evaluation inside
-    /// a solve, like a conditional type without `infer`, and it belongs to the solve around it.
-    fn innermost_solve(&self) -> Option<&Rc<ImplicitInstantiationFrame>> {
-        std::iter::successors(self.implicit_instantiation.as_ref(), |frame| {
-            frame.enclosing.as_ref()
-        })
-        .find(|frame| !frame.inference_tvars.borrow().is_empty())
-    }
-
-    /// Whether the innermost solve checks a generic value against a type (see
-    /// `checking_polymorphic_lower`).
-    pub fn in_polymorphic_lower_check(&self) -> bool {
-        self.innermost_solve().is_some_and(|frame| {
-            matches!(
-                *frame.polymorphic_lowers.borrow(),
-                PolymorphicLowers::Skipped
-            )
-        })
     }
 
     pub fn with_restrictive_frozen_tvars(&self) -> Self {
@@ -347,9 +282,9 @@ impl FlowJsEnv {
         }
     }
 
-    /// The same env, but seeing frozen tvars with their bounds and placeholders as `any`, as the
-    /// check that a conditional type definitely fails does, even when that conditional type is
-    /// evaluated inside a restrictive check.
+    /// The same env, but seeing placeholders as `any`, as the check that a conditional type
+    /// definitely fails does, even when that conditional type is evaluated inside a restrictive
+    /// check.
     pub fn without_restrictive_frozen_tvars(&self) -> Self {
         Self {
             restrictive_frozen_tvars: false,
@@ -381,152 +316,6 @@ impl FlowJsEnv {
         } else {
             tvar.bound.dupe()
         }
-    }
-
-    pub fn add_implicit_instantiation_tvar(&self, id: i32, tvar: Type, has_default: bool) {
-        if let Some(frame) = &self.implicit_instantiation {
-            frame
-                .inference_tvars
-                .borrow_mut()
-                .insert(id, (tvar, has_default));
-        }
-    }
-
-    /// The tvars of the innermost solve, like `T` and `U` while solving a call of
-    /// `applyTo<T, U>(f: (T) => U, x: T): U`.
-    pub fn implicit_instantiation_tvars(&self) -> Vec<Type> {
-        self.implicit_instantiation
-            .as_ref()
-            .map(|frame| {
-                frame
-                    .inference_tvars
-                    .borrow()
-                    .values()
-                    .map(|(tvar, _)| tvar.dupe())
-                    .collect()
-            })
-            .unwrap_or_default()
-    }
-
-    /// Set what the hint solve of the innermost solve pinned its type parameters to, for its final
-    /// run.
-    pub fn set_polymorphic_lower_hints(&self, hints: BTreeMap<SubstName, Type>) {
-        if let Some(frame) = &self.implicit_instantiation {
-            *frame.polymorphic_lowers.borrow_mut() = PolymorphicLowers::Hinted(Rc::new(hints));
-        }
-    }
-
-    /// Whether a run of the innermost solve gave a generic value placeholder type arguments.
-    pub fn gave_polymorphic_lower_placeholders(&self) -> bool {
-        self.implicit_instantiation.as_ref().is_some_and(|frame| {
-            matches!(
-                *frame.polymorphic_lowers.borrow(),
-                PolymorphicLowers::Placeholders(true)
-            )
-        })
-    }
-
-    /// Called when a solve meets a generic value flowing to a type. `mentioned` says which tvars
-    /// the generic value or the type mention. Returns the env of the solve that decides how to
-    /// instantiate the generic value, with that solve's hints to check it against, or `None` if
-    /// the generic value gets placeholders instead.
-    ///
-    /// Only the innermost solve decides, and only if one of its own tvars is mentioned. With
-    ///
-    ///   declare function id<T>(x: T): T;
-    ///   declare function apply<S>(fn: (S) => S, initial: S): S;
-    ///   apply(id, 1);
-    ///
-    /// `id` flows to `(S) => S`, which mentions `apply`'s `S`, so the solve of `apply` decides how
-    /// to instantiate `id`. If only tvars of outer solves are mentioned, this returns `None`: the
-    /// innermost solve can't decide, and the outer solve meets the generic value again when it
-    /// re-runs.
-    ///
-    /// The deciding solve has no hints in its first two runs. Then this returns `None` and records
-    /// that the solve gave placeholders.
-    pub fn polymorphic_lower_hints(
-        &self,
-        mut mentioned: impl FnMut(i32) -> bool,
-    ) -> Option<(Self, Rc<BTreeMap<SubstName, Type>>)> {
-        let frame = self.innermost_solve()?;
-        if !frame
-            .inference_tvars
-            .borrow()
-            .keys()
-            .any(|id| mentioned(*id))
-        {
-            return None;
-        }
-        let mut polymorphic_lowers = frame.polymorphic_lowers.borrow_mut();
-        match &*polymorphic_lowers {
-            PolymorphicLowers::Hinted(hints) => Some((
-                Self {
-                    implicit_instantiation: Some(frame.dupe()),
-                    ..self.dupe()
-                },
-                hints.dupe(),
-            )),
-            PolymorphicLowers::Placeholders(_) => {
-                *polymorphic_lowers = PolymorphicLowers::Placeholders(true);
-                None
-            }
-            PolymorphicLowers::Skipped => None,
-        }
-    }
-
-    /// The tvar owned by a lower frame that satisfies `predicate`, if any.
-    pub fn frozen_implicit_instantiation_tvar(
-        &self,
-        predicate: impl FnMut(i32) -> bool,
-    ) -> Option<Type> {
-        self.frozen_implicit_instantiation_tvar_with_default(predicate)
-            .map(|(tvar, _)| tvar)
-    }
-
-    pub fn frozen_implicit_instantiation_tvar_with_default(
-        &self,
-        mut predicate: impl FnMut(i32) -> bool,
-    ) -> Option<(Type, bool)> {
-        std::iter::successors(
-            self.implicit_instantiation
-                .as_deref()
-                .and_then(|frame| frame.enclosing.as_deref()),
-            |frame| frame.enclosing.as_deref(),
-        )
-        .find_map(|frame| {
-            frame
-                .inference_tvars
-                .borrow()
-                .iter()
-                .find_map(|(id, (tvar, has_default))| {
-                    predicate(*id).then(|| (tvar.dupe(), *has_default))
-                })
-        })
-    }
-
-    /// The env of the enclosing solve that owns the tvar satisfying
-    /// `predicate`, where that tvar is active.
-    pub fn implicit_instantiation_owner(
-        &self,
-        mut predicate: impl FnMut(i32) -> bool,
-    ) -> Option<Self> {
-        let owner = std::iter::successors(
-            self.implicit_instantiation
-                .as_ref()
-                .and_then(|frame| frame.enclosing.as_ref()),
-            |frame| frame.enclosing.as_ref(),
-        )
-        .find(|frame| {
-            frame
-                .inference_tvars
-                .borrow()
-                .keys()
-                .any(|id| predicate(*id))
-        })?;
-        Some(Self {
-            implicit_instantiation: Some(owner.dupe()),
-            ..self.dupe()
-        })
     }
 
     // ---- type application expansion ----
@@ -564,7 +353,7 @@ impl FlowJsEnv {
                 enclosing: self.instantiation_stack.dupe(),
             })),
             polymorphic_lower_stack: self.polymorphic_lower_stack.dupe(),
-            implicit_instantiation: self.implicit_instantiation.dupe(),
+            implicit_instantiation: self.implicit_instantiation,
             restrictive_frozen_tvars: self.restrictive_frozen_tvars,
             infer_type_bounds: self.infer_type_bounds.dupe(),
         })
@@ -672,7 +461,7 @@ impl FlowJsEnv {
             speculation: None,
             instantiation_stack: None,
             polymorphic_lower_stack: None,
-            implicit_instantiation: self.implicit_instantiation.dupe(),
+            implicit_instantiation: self.implicit_instantiation,
             restrictive_frozen_tvars: false,
             infer_type_bounds: None,
         }

@@ -46,8 +46,6 @@ use flow_typing_type::type_::CanonicalRendersForm;
 use flow_typing_type::type_::DestructorSpreadTupleTypeData;
 use flow_typing_type::type_::DictType;
 use flow_typing_type::type_::EnumInfoInner;
-use flow_typing_type::type_::ImplicitInstantiationTvarData;
-use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::InstanceKind;
 use flow_typing_type::type_::InstanceT;
 use flow_typing_type::type_::MappedTypeHomomorphicFlag;
@@ -484,13 +482,7 @@ fn is_value_literal(t: &Type) -> bool {
 }
 
 fn is_placeholder(t: &Type) -> bool {
-    matches!(
-        t.deref(),
-        TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-            kind: ImplicitInstantiationTvarKind::Placeholder,
-            ..
-        })
-    )
+    matches!(t.deref(), TypeInner::ImplicitInstantiationTvar(_))
 }
 
 /// Whether `l` and `u` are the same opaque type, which subtyping compares by its type arguments.
@@ -8004,7 +7996,6 @@ fn pin_bounds<'cx>(
         let mut collected = Vec::new();
         collect_pinning_lowers(
             cx,
-            env,
             &mut BTreeSet::new(),
             &mut collected,
             lowers.iter().duped().collect(),

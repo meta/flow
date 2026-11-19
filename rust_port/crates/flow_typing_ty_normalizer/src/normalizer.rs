@@ -62,8 +62,6 @@ use flow_typing_type::type_::DestructorSpreadTupleTypeData;
 use flow_typing_type::type_::DestructorSpreadTypeData;
 use flow_typing_type::type_::EnumInfoInner;
 use flow_typing_type::type_::GenericTData;
-use flow_typing_type::type_::ImplicitInstantiationTvarData;
-use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::ModuleType;
 use flow_typing_type::type_::NominalType;
 use flow_typing_type::type_::OptionalIndexedAccessIndex;
@@ -1480,12 +1478,8 @@ mod type_converter {
     ) -> Result<ALocTy, Error> {
         match t.deref() {
             TypeInner::OpenT(tvar) => constraint_node::<I>(env, state, id, tvar.id() as i32),
-            TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }) => Ok(Arc::new(ty::Ty::Any(ty::AnyKind::Placeholder))),
-            TypeInner::ImplicitInstantiationTvar(data) => {
-                constraint_node::<I>(env, state, id, data.id)
+            TypeInner::ImplicitInstantiationTvar(_) => {
+                Ok(Arc::new(ty::Ty::Any(ty::AnyKind::Placeholder)))
             }
             TypeInner::GenericT(generic) => generic_t::<I>(env, state, generic, t),
             TypeInner::AnnotT(_, inner_t, _) => type__::<I>(env, state, id, inner_t),
@@ -2943,11 +2937,9 @@ mod type_converter {
                 );
             }
             match t.deref() {
-                TypeInner::AnyT(_, _)
-                | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                    kind: ImplicitInstantiationTvarKind::Placeholder,
-                    ..
-                }) => type__::<I>(env, state, None, t),
+                TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => {
+                    type__::<I>(env, state, None, t)
+                }
                 TypeInner::DefT(_, def_t) => match def_t.deref() {
                     DefTInner::PolyT(box PolyTData { tparams, t_out, .. }) => {
                         singleton_poly::<I>(env, state, targs, tparams, t_out)

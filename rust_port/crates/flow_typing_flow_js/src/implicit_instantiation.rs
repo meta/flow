@@ -450,7 +450,6 @@ fn t_of_use_t<'cx>(
                         let mut collected = Vec::new();
                         collect_pinning_lowers(
                             cx,
-                            env,
                             &mut BTreeSet::new(),
                             &mut collected,
                             collector.collect_to_vec(),
@@ -1283,21 +1282,12 @@ enum PinningSource {
     Concrete(Type),
 }
 
-fn pinning_source<'cx>(cx: &mut Context<'cx>, env: &FlowJsEnv, t: &Type) -> PinningSource {
+fn pinning_source<'cx>(cx: &mut Context<'cx>, t: &Type) -> PinningSource {
     match type_util::constraint_node_id(t) {
         Some(node) => {
             let id = node.id();
-            let (root_id, constraints) = cx.find_constraints(id);
-            if env
-                .frozen_implicit_instantiation_tvar(|frozen_id| {
-                    cx.find_constraints(frozen_id).0 == root_id
-                })
-                .is_some()
-            {
-                PinningSource::Concrete(t.dupe())
-            } else {
-                PinningSource::Constraints { id, constraints }
-            }
+            let (_, constraints) = cx.find_constraints(id);
+            PinningSource::Constraints { id, constraints }
         }
         None => PinningSource::Concrete(t.dupe()),
     }
@@ -1305,14 +1295,13 @@ fn pinning_source<'cx>(cx: &mut Context<'cx>, env: &FlowJsEnv, t: &Type) -> Pinn
 
 fn collect_pinning_lowers<'cx>(
     cx: &mut Context<'cx>,
-    env: &FlowJsEnv,
     seen: &mut BTreeSet<i32>,
     acc: &mut Vec<Type>,
     ts: Vec<Type>,
 ) {
     let mut work_list = VecDeque::from(ts);
     while let Some(t) = work_list.pop_front() {
-        match pinning_source(cx, env, &t) {
+        match pinning_source(cx, &t) {
             PinningSource::Constraints { id, .. } if seen.insert(id) => {
                 for t in flow_js_utils::possible_types(cx, id).into_iter().rev() {
                     work_list.push_front(t);
@@ -1343,7 +1332,7 @@ fn merge_upper_bounds<'cx>(
         concrete_type_eq::eq_with_env(cx, env, t1, t2)
     };
 
-    match pinning_source(cx, env, tvar) {
+    match pinning_source(cx, tvar) {
         PinningSource::Constraints { id, constraints } => {
             if seen.contains(&id) {
                 return Ok(UseTResult::UpperEmpty);
@@ -1433,8 +1422,8 @@ fn merge_upper_bounds<'cx>(
 }
 
 /// Whether types have flowed into `t` and each of them mentions a placeholder.
-fn lowers_only_mention_placeholders<'cx>(cx: &mut Context<'cx>, env: &FlowJsEnv, t: &Type) -> bool {
-    let lowers: Vec<Type> = match pinning_source(cx, env, t) {
+fn lowers_only_mention_placeholders<'cx>(cx: &mut Context<'cx>, t: &Type) -> bool {
+    let lowers: Vec<Type> = match pinning_source(cx, t) {
         PinningSource::Constraints { constraints, .. } => match constraints {
             constraint::Constraints::FullyResolved(s) => vec![cx.force_fully_resolved_tvar(&s)],
             constraint::Constraints::Resolved(t) => vec![t],
@@ -1463,7 +1452,7 @@ fn merge_lower_bounds<'cx>(
     if let PinningSource::Constraints {
         constraints: constraint::Constraints::Unresolved(bounds),
         ..
-    } = pinning_source(cx, env, t)
+    } = pinning_source(cx, t)
     {
         let upper = bounds.borrow().upper.clone();
         for key in upper.keys() {
@@ -1473,7 +1462,7 @@ fn merge_lower_bounds<'cx>(
         }
     }
 
-    Ok(match pinning_source(cx, env, t) {
+    Ok(match pinning_source(cx, t) {
         PinningSource::Constraints { id, constraints } => match constraints {
             constraint::Constraints::FullyResolved(s) => {
                 let t = cx.force_fully_resolved_tvar(&s);
@@ -1498,7 +1487,7 @@ fn merge_lower_bounds<'cx>(
                     let mut seen = BTreeSet::new();
                     seen.insert(id);
                     let mut collected = Vec::new();
-                    collect_pinning_lowers(cx, env, &mut seen, &mut collected, lower_types);
+                    collect_pinning_lowers(cx, &mut seen, &mut collected, lower_types);
                     let flattened = union_flatten_list(collected);
                     let filtered: Vec<Type> = flattened
                         .into_iter()
@@ -2258,7 +2247,7 @@ pub mod instantiation_solver {
                         // Pinning ignores the types that mention a placeholder. When they are all
                         // that flowed in, the inferred type isn't known yet: it is a placeholder,
                         // not what pinning falls back to without evidence.
-                        let inferred = if lowers_only_mention_placeholders(cx, env, targ) {
+                        let inferred = if lowers_only_mention_placeholders(cx, targ) {
                             cx.mk_placeholder(
                                 tparam.reason.dupe(),
                                 mixed_t::why(tparam.reason.dupe()),
@@ -2342,48 +2331,19 @@ pub mod kit {
     use super::instantiation_solver::solve_targs;
     use super::*;
 
-    #[derive(Clone, Copy)]
-    struct FrozenTvarInfo {
-        has_default: bool,
-    }
-
-    fn frozen_tvar<'cx>(
-        env: &FlowJsEnv,
-        cx: &mut Context<'cx>,
-        t: &Type,
-    ) -> Option<(i32, FrozenTvarInfo)> {
-        let node = type_util::constraint_node_id(t)?;
-        let root_id = cx.find_constraints(node.id()).0;
-        let (tvar, has_default) = env.frozen_implicit_instantiation_tvar_with_default(|id| {
-            cx.find_constraints(id).0 == root_id
-        })?;
-        let TypeInner::ImplicitInstantiationTvar(data) = tvar.deref() else {
-            return None;
-        };
-        Some((data.id, FrozenTvarInfo { has_default }))
-    }
-
-    fn frozen_tvar_id<'cx>(env: &FlowJsEnv, cx: &mut Context<'cx>, t: &Type) -> Option<i32> {
-        frozen_tvar(env, cx, t).map(|(id, _)| id)
-    }
-
-    struct FrozenTvarSubstituter<'a> {
-        env: &'a FlowJsEnv,
-        // What to replace a frozen tvar with, by id. `None` leaves it to `unresolved`.
-        substitution: &'a dyn Fn(i32) -> Option<Type>,
-        // If set, every other unresolved tvar is replaced too: by the union of what has flowed
-        // into it so far, or by this when nothing has. `expanding` holds the tvars whose lower
-        // bounds are being replaced, so that a tvar that flows into itself stops there.
-        unresolved: Option<Type>,
+    /// Replaces every unresolved tvar by the union of what has flowed into it so far, or by
+    /// `unresolved` when nothing has. `expanding` holds the tvars whose lower bounds are being
+    /// replaced, so that a tvar that flows into itself stops there.
+    struct UnresolvedTvarSubstituter {
+        unresolved: Type,
         expanding: BTreeSet<i32>,
-        replaced_frozen_tvar_ids: BTreeSet<i32>,
         /// The property maps already substituted outside of any expansion, and what they became.
         /// Many properties can reach the same map, such as the source object of a mapped type,
         /// which each property's type refers to.
         substituted_props: BTreeMap<properties::Id, properties::Id>,
     }
 
-    impl<'cx> TypeMapper<'cx, ()> for FrozenTvarSubstituter<'_> {
+    impl<'cx> TypeMapper<'cx, ()> for UnresolvedTvarSubstituter {
         fn tvar(&mut self, _cx: &mut Context<'cx>, _map_cx: &(), _r: &Reason, id: u32) -> u32 {
             id
         }
@@ -2419,21 +2379,12 @@ pub mod kit {
         }
 
         fn type_(&mut self, cx: &mut Context<'cx>, map_cx: &(), t: Type) -> Type {
-            if let Some(id) = frozen_tvar_id(self.env, cx, &t)
-                && let Some(replacement) = (self.substitution)(id)
-            {
-                self.replaced_frozen_tvar_ids.insert(id);
-                return replacement;
-            }
-            if let Some(replacement) = self.unresolved.clone()
-                && let Some(node) = type_util::constraint_node_id(&t)
+            if let Some(node) = type_util::constraint_node_id(&t)
                 && let (root_id, constraint::Constraints::Unresolved(_)) =
                     cx.find_constraints(node.id())
             {
-                // A frozen tvar that `substitution` left alone belongs to an enclosing solve that
-                // is still inferring it, so what has flowed into it so far is not its answer.
-                if frozen_tvar_id(self.env, cx, &t).is_some() || !self.expanding.insert(root_id) {
-                    return replacement;
+                if !self.expanding.insert(root_id) {
+                    return self.unresolved.dupe();
                 }
                 let lowers = flow_js_utils::possible_types(cx, root_id)
                     .into_iter()
@@ -2441,7 +2392,7 @@ pub mod kit {
                     .collect::<Vec<_>>();
                 self.expanding.remove(&root_id);
                 return if lowers.is_empty() {
-                    replacement
+                    self.unresolved.dupe()
                 } else {
                     type_util::union_of_ts(type_util::reason_of_t(&t).dupe(), lowers, None)
                 };
@@ -2469,111 +2420,26 @@ pub mod kit {
         }
     }
 
-    struct FrozenTvarCollector<'a> {
-        env: &'a FlowJsEnv,
-        frozen_tvars: BTreeMap<i32, FrozenTvarInfo>,
-        /// The property maps already visited. Many properties can reach the same map, such as
-        /// the source object of a mapped type, which each property's type refers to.
-        seen_props: BTreeSet<properties::Id>,
-    }
-
-    impl TypeVisitor<()> for FrozenTvarCollector<'_> {
-        fn type_<'cx>(&mut self, cx: &mut Context<'cx>, pole: Polarity, _acc: (), t: &Type) {
-            if let Some((id, info)) = frozen_tvar(self.env, cx, t) {
-                self.frozen_tvars.insert(id, info);
-            } else {
-                type_visitor::type_default(self, cx, pole, (), t);
-            }
-        }
-
-        fn props<'cx>(
-            &mut self,
-            cx: &mut Context<'cx>,
-            pole: Polarity,
-            acc: (),
-            props_id: properties::Id,
-        ) {
-            if self.seen_props.insert(props_id.dupe()) {
-                type_visitor::props_default(self, cx, pole, acc, props_id);
-            }
-        }
-    }
-
     /// The type arguments to instantiate the generic value `l` with when it flows to `u` during a
-    /// solve, or `None` if `l` doesn't flow to `u` at all.
-    ///
-    /// The examples use
-    ///
-    ///   declare function id<T>(x: T): T;
-    ///   declare function apply<S>(fn: (S) => S, initial: S): S;
-    ///   declare function f<T>(x: T, g: (string) => number): T;
-    ///
-    /// If the innermost solve (the innermost one that has tvars) checks a generic value against a
-    /// type, `l` doesn't flow. That check only infers the type arguments of the value it checks,
-    /// and the flow of that value, instantiated, meets `l` again outside the check. In
-    /// `apply(id, 1)`, `id` is checked against `(number) => number`. Any generic value met while
-    /// solving `id`'s `T` doesn't flow.
-    ///
-    /// Otherwise, which case applies depends on the tvars of ongoing solves that `l` or `u`
-    /// mention.
-    ///
-    /// - Tvars of the innermost solve. That solve decides the type arguments (see
-    ///   `instantiation_solver::solve_targs`). In its first two runs they are placeholders. In its
-    ///   final run, `l` is checked against `u` with the solve's hints in place of its tvars. In
-    ///   `apply(id, 1)`, `id` flows to `(S) => S`. It gets placeholders in the first two runs, and
-    ///   in the final run it is checked against `(number) => number`, which gives `[number]`.
-    /// - Only tvars of outer solves. The type arguments are placeholders. The outer solve meets
-    ///   `l` again when it redoes its solve with what this solve computes, and decides then.
-    /// - No tvars. `l` is checked against `u` right away. In `f(1, id)`, `id` flows to
-    ///   `(string) => number`, so it is instantiated as `id<string>`, and the flow then reports
-    ///   that `string` is not a `number`.
+    /// solve: the ones `check_polymorphic_lower` finds, or placeholders if it finds none.
     pub(crate) fn polymorphic_lower_targs<'cx>(
         cx: &mut Context<'cx>,
         env: &FlowJsEnv,
         l: &Type,
         tparams: &Vec1<TypeParam>,
         u: &Type,
-    ) -> Result<Option<Vec<Type>>, FlowJsException> {
-        // The tvars of all ongoing solves that `ts` mention. While solving a call of
-        // `applyTo<T, U>(f: (T) => U, x: T): U`, the type `(T) => U` mentions `T` and `U`, and
-        // `(string) => number` mentions none. A solve nested in the current one would see all of
-        // them as frozen, which is how they are found.
-        fn implicit_instantiation_tvars_in<'cx>(
-            cx: &mut Context<'cx>,
-            env: &FlowJsEnv,
-            ts: &[&Type],
-        ) -> BTreeSet<i32> {
-            let mut collector = FrozenTvarCollector {
-                env: &env.solving_implicit_instantiation(),
-                frozen_tvars: BTreeMap::new(),
-                seen_props: BTreeSet::new(),
-            };
-            for t in ts {
-                collector.type_(cx, Polarity::Positive, (), t);
-            }
-            collector.frozen_tvars.into_keys().collect()
-        }
-
-        if env.in_polymorphic_lower_check() {
-            return Ok(None);
-        }
-        let mentioned = implicit_instantiation_tvars_in(cx, env, &[l, u]);
-        let checked = if mentioned.is_empty() {
-            Some(check_polymorphic_lower(cx, env, &BTreeMap::new(), l, u)?)
+    ) -> Result<Vec<Type>, FlowJsException> {
+        let targs = check_polymorphic_lower(cx, env, l, u)?;
+        Ok(if targs.len() == tparams.len() {
+            targs.to_vec()
         } else {
-            env.polymorphic_lower_hints(|id| mentioned.contains(&id))
-                .map(|(owner, hints)| check_polymorphic_lower(cx, &owner, &hints, l, u))
-                .transpose()?
-        };
-        Ok(Some(match checked {
-            Some(targs) if targs.len() == tparams.len() => targs.to_vec(),
-            _ => tparams
+            tparams
                 .iter()
                 .map(|tparam| {
                     cx.mk_placeholder(tparam.reason.dupe(), mixed_t::why(tparam.reason.dupe()))
                 })
-                .collect(),
-        }))
+                .collect()
+        })
     }
 
     /// Checks the generic value `l` against `u`, the type it flows to, and returns the type
@@ -2582,30 +2448,17 @@ pub mod kit {
     /// The examples use
     ///
     ///   declare function id<T>(x: T): T;
-    ///   declare function pipe<A, B, C>(a: A, f: (A) => B, g: (B) => C): C;
     ///   declare function compose<A, B, C>(f: (B) => C, g: (A) => B): (A) => C;
     ///
-    /// The tvars of the innermost solve in `u` are replaced, as in a hint, by what `solution`
-    /// maps their names to, or by placeholders where it has nothing. In `pipe('a', id, id)`, the
-    /// first `id` flows to `(A) => B`. With `A = string` and nothing for `B`, it is checked against
-    /// `(string) => <placeholder>`, which gives `[string]`. They are looked up by name because
-    /// every run of the solve has new tvars for the same type parameters, and all of them stay in
-    /// its frame.
-    ///
-    /// The other tvars in `l` and `u` are replaced too: a tvar of an outer solve, which is still
-    /// inferring it, by a placeholder, and any other unresolved tvar by what has flowed into it so
-    /// far. This is what is known when the solve meets `l`, and `l` is checked only then. Bounds
-    /// that reach those tvars later in the solve are not seen.
+    /// The unresolved tvars in `l` and `u` are replaced by what has flowed into them so far.
+    /// This is what is known when the solve meets `l`, and `l` is checked only then. Bounds that
+    /// reach those tvars later in the solve are not seen.
     ///
     /// A type argument that the check does not decide is its bound. In `compose(id, id)`,
     /// nothing decides either `id`'s `T`, so `compose(id, id)('a')` is `unknown`.
-    ///
-    /// The check is a single solve, and the generic values it meets don't flow (see
-    /// `polymorphic_lower_targs`), so it never starts another check.
     pub(super) fn check_polymorphic_lower<'cx>(
         cx: &mut Context<'cx>,
         env: &FlowJsEnv,
-        solution: &BTreeMap<SubstName, Type>,
         l: &Type,
         u: &Type,
     ) -> Result<Rc<[Type]>, FlowJsException> {
@@ -2623,36 +2476,15 @@ pub mod kit {
                 })
                 .collect()
         };
-        let nested_env = env.without_speculation().checking_polymorphic_lower();
-        let hints: BTreeMap<i32, Type> = env
-            .implicit_instantiation_tvars()
-            .iter()
-            .filter_map(|tvar| match tvar.deref() {
-                TypeInner::ImplicitInstantiationTvar(data) => Some((
-                    data.id,
-                    solution
-                        .get(&data.name)
-                        .map(|t| t.dupe())
-                        .unwrap_or_else(|| {
-                            placeholder_t::why(data.reason.dupe(), mixed_t::why(data.reason.dupe()))
-                        }),
-                )),
-                _ => None,
-            })
-            .collect();
-        let substitution = |id| hints.get(&id).cloned();
-        // Every other unresolved tvar is replaced too, by what has flowed into it so far, or by a
-        // placeholder. Otherwise the check's own tvars, like `id`'s `T`, would flow into those
-        // tvars and leave bounds on them that outlive the check.
-        let mut substituter = FrozenTvarSubstituter {
-            env: &nested_env,
-            substitution: &substitution,
-            unresolved: Some(placeholder_t::why(
+        let nested_env = env.without_speculation().solving_implicit_instantiation();
+        // Otherwise the check's own tvars, like `id`'s `T`, would flow into the unresolved tvars
+        // and leave bounds on them that outlive the check.
+        let mut substituter = UnresolvedTvarSubstituter {
+            unresolved: placeholder_t::why(
                 type_util::reason_of_t(u).dupe(),
                 mixed_t::why(type_util::reason_of_t(u).dupe()),
-            )),
+            ),
             expanding: BTreeSet::new(),
-            replaced_frozen_tvar_ids: BTreeSet::new(),
             substituted_props: BTreeMap::new(),
         };
         let hinted_l = substituter.type_(cx, &(), l.dupe());
@@ -3105,10 +2937,7 @@ pub mod kit {
                 .unwrap_or(false)
         };
 
-        let env = &match check.operation.2 {
-            Operation::SubtypeLowerPoly(_) => env.checking_polymorphic_lower(),
-            _ => env.solving_implicit_instantiation(),
-        };
+        let env = &env.solving_implicit_instantiation();
         let (_, _, ref t) = check.poly_t;
         let (soln, inferred_targs) = solve_targs(
             cx,
@@ -3326,34 +3155,7 @@ pub mod kit {
                 ))),
             );
         }
-        let (can_run_nested_solve, infer_through_frozen_tvar) =
-            if env.in_implicit_instantiation() && has_unresolved_tvars {
-                let mut condition_collector = FrozenTvarCollector {
-                    env: &nested_env,
-                    frozen_tvars: BTreeMap::new(),
-                    seen_props: BTreeSet::new(),
-                };
-                condition_collector.type_(cx, Polarity::Positive, (), check_t);
-                condition_collector.type_(cx, Polarity::Positive, (), extends_t);
-
-                let mut branch_collector = FrozenTvarCollector {
-                    env: &nested_env,
-                    frozen_tvars: BTreeMap::new(),
-                    seen_props: BTreeSet::new(),
-                };
-                branch_collector.type_(cx, Polarity::Positive, (), true_t);
-                branch_collector.type_(cx, Polarity::Positive, (), false_t);
-                let infer_through_frozen_tvar =
-                    branch_collector.frozen_tvars.iter().any(|(id, info)| {
-                        info.has_default && !condition_collector.frozen_tvars.contains_key(id)
-                    });
-                let can_run_nested_solve = !condition_collector.frozen_tvars.is_empty()
-                    || !branch_collector.frozen_tvars.is_empty();
-                (can_run_nested_solve, infer_through_frozen_tvar)
-            } else {
-                (false, false)
-            };
-        if has_unresolved_tvars && env.in_implicit_instantiation() && !can_run_nested_solve {
+        if has_unresolved_tvars && env.in_implicit_instantiation() {
             return Ok(deferred(cx));
         }
 
@@ -3399,26 +3201,11 @@ pub mod kit {
                         let fv2 = type_subst::free_var_finder(cx, Some(bound), extends_t);
                         fv1.union(fv2)
                     };
-                    let any_t = placeholder_t::why(reason.dupe(), mixed_t::why(reason.dupe()));
-                    let mut frozen_tvar_substituter = FrozenTvarSubstituter {
-                        env: &nested_env,
-                        substitution: &|_| Some(any_t.dupe()),
-                        unresolved: None,
-                        expanding: BTreeSet::new(),
-                        replaced_frozen_tvar_ids: BTreeSet::new(),
-                        substituted_props: BTreeMap::new(),
-                    };
-                    let any_check = frozen_tvar_substituter.type_(cx, &(), check_t.dupe());
-                    let any_extends = frozen_tvar_substituter.type_(cx, &(), extends_t.dupe());
-                    let condition_frozen_tvar_ids =
-                        frozen_tvar_substituter.replaced_frozen_tvar_ids;
-                    let replaced_frozen_tvar = !condition_frozen_tvar_ids.is_empty();
-                    // A placeholder in the condition is decided like a frozen tvar. The check
-                    // below already sees it as `any`.
+                    // The check below sees a placeholder in the condition as `any`.
                     let condition_has_placeholder =
                         flow_js_utils::tvar_visitors::has_placeholders(cx, check_t)
                             || flow_js_utils::tvar_visitors::has_placeholders(cx, extends_t);
-                    if free_vars.is_empty() && !replaced_frozen_tvar && !condition_has_placeholder {
+                    if free_vars.is_empty() && !condition_has_placeholder {
                         flow_typing_debug::verbose::print_if_verbose(
                             cx,
                             None,
@@ -3450,7 +3237,7 @@ pub mod kit {
                             false,
                             type_subst::Purpose::ConditionalTypeAnySubst,
                             &any_subst_map,
-                            any_check,
+                            check_t.dupe(),
                         );
                         let any_extends = type_subst::subst(
                             cx,
@@ -3459,7 +3246,7 @@ pub mod kit {
                             false,
                             type_subst::Purpose::ConditionalTypeAnySubst,
                             &any_subst_map,
-                            any_extends,
+                            extends_t.dupe(),
                         );
 
                         match speculation_kit::try_singleton_throw_on_failure(
@@ -3483,9 +3270,7 @@ pub mod kit {
                                 false_t.dupe()
                             }
                             Ok(()) => {
-                                if (replaced_frozen_tvar || condition_has_placeholder)
-                                    && !infer_through_frozen_tvar
-                                {
+                                if condition_has_placeholder {
                                     deferred(cx)
                                 } else {
                                     flow_typing_debug::verbose::print_if_verbose(
@@ -3508,7 +3293,6 @@ pub mod kit {
                                             Rc::from([]),
                                         ),
                                     ));
-                                    let lower_t = infer_through_frozen_tvar.then(|| bound.dupe());
                                     let nominal_type_args: Rc<[_]> =
                                         [check_t, extends_t, true_t, false_t]
                                             .iter()
@@ -3536,7 +3320,7 @@ pub mod kit {
                                                     },
                                                 ),
                                                 underlying_t: nominal::UnderlyingT::FullyOpaque,
-                                                lower_t,
+                                                lower_t: None,
                                                 upper_t: Some(bound),
                                                 nominal_type_args,
                                             },

@@ -44,8 +44,6 @@ use flow_typing_type::type_::DepthTrace;
 use flow_typing_type::type_::ExtendsUseTData;
 use flow_typing_type::type_::FunParam;
 use flow_typing_type::type_::GenericTData;
-use flow_typing_type::type_::ImplicitInstantiationTvarData;
-use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::InstanceKind;
 use flow_typing_type::type_::InstanceT;
 use flow_typing_type::type_::NominalType;
@@ -1572,11 +1570,7 @@ fn is_any<'cx>(cx: &mut Context<'cx>, env: &FlowJsEnv, t: &Type) -> Result<bool,
     Ok(ts.iter().any(|t| {
         matches!(
             t.deref(),
-            TypeInner::AnyT(..)
-                | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                    kind: ImplicitInstantiationTvarKind::Placeholder,
-                    ..
-                })
+            TypeInner::AnyT(..) | TypeInner::ImplicitInstantiationTvar(_)
         )
     }))
 }
@@ -2114,11 +2108,7 @@ fn intersect_type_guard<'cx>(
 fn is_any_t(t: &Type) -> bool {
     matches!(
         t.deref(),
-        TypeInner::AnyT(..)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            })
+        TypeInner::AnyT(..) | TypeInner::ImplicitInstantiationTvar(_)
     )
 }
 
@@ -3106,11 +3096,7 @@ fn instanceof_test<'cx>(
         }
         (
             true,
-            TypeInner::AnyT(..)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }),
+            TypeInner::AnyT(..) | TypeInner::ImplicitInstantiationTvar(_),
             InstanceofRhs::TypeOperand(right_t),
         ) if let TypeInner::DefT(class_reason, right_def) = right_t.deref()
             && let DefTInner::ClassT(a) = right_def.deref() =>

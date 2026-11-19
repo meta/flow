@@ -91,8 +91,6 @@ use flow_typing_type::type_::DefTInner;
 use flow_typing_type::type_::EnumInfo;
 use flow_typing_type::type_::EnumInfoInner;
 use flow_typing_type::type_::GenericTData;
-use flow_typing_type::type_::ImplicitInstantiationTvarData;
-use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::Literal;
 use flow_typing_type::type_::MixedFlavor;
 use flow_typing_type::type_::ModuleType;
@@ -239,11 +237,7 @@ fn detect_sketchy_null_checks<'cx>(cx: &mut Context<'cx>, tast: &ast::Program<AL
                         }
                     }
                     // Ignore AnyTs for sketchy null checks; otherwise they'd always trigger the lint.
-                    TypeInner::AnyT(_, _)
-                    | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                        kind: ImplicitInstantiationTvarKind::Placeholder,
-                        ..
-                    }) => cur_checks,
+                    TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => cur_checks,
                     TypeInner::GenericT(box GenericTData { bound, .. }) => {
                         make_checks(cx, seen, cur_checks, loc, bound)
                     }
@@ -494,10 +488,6 @@ enum TruthynessResult {
 fn try_eval_concrete_type_truthyness<'cx>(cx: &mut Context<'cx>, t: &Type) -> TruthynessResult {
     match t.deref() {
         TypeInner::OpenT(_)
-        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-            kind: ImplicitInstantiationTvarKind::Inferred,
-            ..
-        })
         | TypeInner::EvalT { .. }
         | TypeInner::TypeAppT(..)
         | TypeInner::GenericT(..)
@@ -627,11 +617,9 @@ fn try_eval_concrete_type_truthyness<'cx>(cx: &mut Context<'cx>, t: &Type) -> Tr
         TypeInner::StringMappingT { .. } => TruthynessResult::ConstCondUnknown,
         TypeInner::NominalT { .. } => TruthynessResult::ConstCondUnknown,
         TypeInner::NamespaceT(_) => TruthynessResult::ConstCondUnknown,
-        TypeInner::AnyT(_, _)
-        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-            kind: ImplicitInstantiationTvarKind::Placeholder,
-            ..
-        }) => TruthynessResult::ConstCondUnknown,
+        TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => {
+            TruthynessResult::ConstCondUnknown
+        }
     }
 }
 
@@ -1112,22 +1100,8 @@ fn check_strict_comparison<'cx>(
                 info,
             };
             Ok(match (left_conc_t.deref(), right_conc_t.deref()) {
-                (
-                    TypeInner::AnyT(_, _)
-                    | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                        kind: ImplicitInstantiationTvarKind::Placeholder,
-                        ..
-                    }),
-                    _,
-                )
-                | (
-                    _,
-                    TypeInner::AnyT(_, _)
-                    | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                        kind: ImplicitInstantiationTvarKind::Placeholder,
-                        ..
-                    }),
-                ) => None,
+                (TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_), _)
+                | (_, TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_)) => None,
                 (TypeInner::DefT(_, d), _)
                     if matches!(d.deref(), DefTInner::VoidT | DefTInner::TsVoidT) =>
                 {
@@ -1402,10 +1376,7 @@ fn detect_non_voidable_properties<'cx>(cx: &mut Context<'cx>) {
             TypeInner::MaybeT(_, _)
             | TypeInner::OptionalT { .. }
             | TypeInner::AnyT(_, _)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }) => true,
+            | TypeInner::ImplicitInstantiationTvar(_) => true,
             TypeInner::DefT(_, def_t) => matches!(
                 def_t.deref(),
                 DefTInner::VoidT

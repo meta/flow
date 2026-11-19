@@ -28,8 +28,6 @@ use flow_typing_type::type_::ComponentKind;
 use flow_typing_type::type_::DefT;
 use flow_typing_type::type_::DefTInner;
 use flow_typing_type::type_::DepthTrace;
-use flow_typing_type::type_::ImplicitInstantiationTvarData;
-use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::NominalType;
 use flow_typing_type::type_::ROArrayATData;
 use flow_typing_type::type_::ReactAbstractComponentTData;
@@ -390,11 +388,7 @@ fn possibly_promoted_render_types_of_react_element_type<'cx>(
         let mut has_failed = false;
         for t in ts {
             match t.deref() {
-                TypeInner::AnyT(..)
-                | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                    kind: ImplicitInstantiationTvarKind::Placeholder,
-                    ..
-                }) => {
+                TypeInner::AnyT(..) | TypeInner::ImplicitInstantiationTvar(_) => {
                     result_ts.push(t);
                 }
                 TypeInner::DefT(_, def_t) if matches!(&**def_t, DefTInner::RendersT(_)) => {
@@ -679,14 +673,7 @@ pub fn non_renders_to_renders<'cx>(
             )?;
             return Ok(());
         }
-        (
-            TypeInner::AnyT(..)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }),
-            _,
-        ) => return Ok(()),
+        (TypeInner::AnyT(..) | TypeInner::ImplicitInstantiationTvar(_), _) => return Ok(()),
         (_, _) => {}
     }
     flow_js_utils::add_output_with_env(
@@ -773,11 +760,7 @@ pub(super) fn try_synthesize_render_type_with_env<'cx>(
                 TypeInner::GenericT(_) => {
                     normalized_render_type_collector.add(t.dupe());
                 }
-                TypeInner::AnyT(..)
-                | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                    kind: ImplicitInstantiationTvarKind::Placeholder,
-                    ..
-                }) => {
+                TypeInner::AnyT(..) | TypeInner::ImplicitInstantiationTvar(_) => {
                     if !drop_renders_any {
                         normalized_render_type_collector.add(t.dupe());
                     }

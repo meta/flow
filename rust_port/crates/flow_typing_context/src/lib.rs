@@ -116,8 +116,6 @@ use flow_typing_type::type_::type_or_type_desc::ErrorTypeDesc;
 use flow_typing_type::type_::type_or_type_desc::TypeOrTypeDescT;
 use flow_utils_concurrency::check_budget::CheckBudget;
 use flow_utils_concurrency::job_error::JobError;
-use flow_utils_union_find::Node;
-use flow_utils_union_find::Root;
 use flow_utils_union_find::TvarNotFound;
 use regex::Regex;
 use vec1::Vec1;
@@ -434,8 +432,6 @@ pub struct ComponentT {
         ),
     )>,
     maybe_unused_promises: FlowVector<(ALoc, Type, bool)>,
-
-    inference_nodes: IntHashMap<i32, Node<type_::constraint::Constraints<Cx>>>,
 
     constraint_cache: type_::FlowSet<Cx>,
     subst_cache: type_::SubstCacheMap<Type>,
@@ -1132,7 +1128,6 @@ fn make_ccx() -> ComponentT {
         conditions: FlowVector::new(),
         strict_comparisons: FlowVector::new(),
         maybe_unused_promises: FlowVector::new(),
-        inference_nodes: IntHashMap::default(),
         constraint_cache: type_::FlowSet::default(),
         subst_cache: Default::default(),
         eval_id_cache: Default::default(),
@@ -2412,85 +2407,6 @@ impl<'a> Context<'a> {
         self.graph_mut().insert_fresh(id, bounds);
     }
 
-    pub fn add_inference_node(&mut self, id: i32) {
-        assert!(
-            self.graph().get(&id).is_none(),
-            "inference node id collides with a production node"
-        );
-        let previous = self.ccx_mut().inference_nodes.insert(
-            id,
-            Node::create_root(type_::constraint::Constraints::default()),
-        );
-        assert!(previous.is_none(), "inference node id registered twice");
-    }
-
-    pub fn is_inference_node(&self, id: i32) -> bool {
-        self.ccx().inference_nodes.contains_key(&id)
-    }
-
-    pub fn find_inference_root(
-        &mut self,
-        id: i32,
-    ) -> (i32, Root<type_::constraint::Constraints<Cx>>) {
-        assert!(self.is_inference_node(id), "inference node not found");
-        let mut current = id;
-        let mut path = Vec::new();
-        let mut seen = BTreeSet::new();
-        let (root_id, root) = loop {
-            assert!(seen.insert(current), "cyclic inference node aliases");
-            let node = self.ccx().inference_nodes.get(&current).cloned();
-            match node {
-                Some(Node::Root(root)) => break (current, root),
-                Some(Node::Goto { parent }) => {
-                    path.push(current);
-                    current = parent;
-                }
-                None => break self.find_root(current),
-            }
-        };
-        let inference_nodes = &mut self.ccx_mut().inference_nodes;
-        for id in path {
-            inference_nodes.insert(id, Node::create_goto(root_id));
-        }
-        (root_id, root)
-    }
-
-    pub fn set_inference_root_constraints(
-        &mut self,
-        id: i32,
-        constraints: type_::constraint::Constraints<Cx>,
-    ) {
-        let node = self
-            .ccx_mut()
-            .inference_nodes
-            .get_mut(&id)
-            .expect("inference root not found");
-        let Node::Root(root) = node else {
-            panic!("inference node is not a root");
-        };
-        root.constraints = constraints;
-    }
-
-    pub fn set_inference_root_rank(&mut self, id: i32, rank: i32) {
-        let node = self
-            .ccx_mut()
-            .inference_nodes
-            .get_mut(&id)
-            .expect("inference root not found");
-        let Node::Root(root) = node else {
-            panic!("inference node is not a root");
-        };
-        root.rank = rank;
-    }
-
-    pub fn set_inference_goto(&mut self, id: i32, parent: i32) {
-        let previous = self
-            .ccx_mut()
-            .inference_nodes
-            .insert(id, Node::create_goto(parent));
-        assert!(previous.is_some(), "inference node not found");
-    }
-
     pub fn set_synthesis_produced_uncacheable_result(&mut self) {
         match self.inner().typing_mode {
             TypingMode::SynthesisMode { .. } => {
@@ -3350,11 +3266,6 @@ impl<'a> Context<'a> {
     }
 
     pub fn find_constraints(&mut self, id: i32) -> (i32, type_::constraint::Constraints<Cx>) {
-        if self.is_inference_node(id) {
-            let (root_id, root) = self.find_inference_root(id);
-            return (root_id, root.constraints);
-        }
-
         let file = self.file().dupe();
         let (id, c) = self.graph_mut().find_constraints(id).unwrap_or_else(|e| {
             panic!("find_constraints: TvarNotFound({}) in file {:?}", e.0, file,)
@@ -3362,35 +3273,9 @@ impl<'a> Context<'a> {
         (id, c.clone())
     }
 
-    /// The root of `id` and its constraints, like [Context::find_constraints] but without the
-    /// path compression that needs a mutable context.
-    pub fn constraints_of(&self, id: i32) -> (i32, type_::constraint::Constraints<Cx>) {
-        let mut current = id;
-        loop {
-            let node = match self.ccx().inference_nodes.get(&current) {
-                Some(node) => node,
-                None => self.graph().get(&current).unwrap_or_else(|| {
-                    panic!(
-                        "constraints_of: TvarNotFound({}) in file {:?}",
-                        current,
-                        self.file()
-                    )
-                }),
-            };
-            match node {
-                Node::Root(root) => return (current, root.constraints.clone()),
-                Node::Goto { parent } => current = *parent,
-            }
-        }
-    }
-
     pub fn set_constraints(&mut self, id: i32, constraints: type_::constraint::Constraints<Cx>) {
         let (root_id, _) = self.find_constraints(id);
-        if self.is_inference_node(root_id) {
-            self.set_inference_root_constraints(root_id, constraints);
-        } else {
-            self.set_root_constraints(root_id, constraints);
-        }
+        self.set_root_constraints(root_id, constraints);
     }
 
     pub fn find_constraints_pair(
@@ -3401,10 +3286,6 @@ impl<'a> Context<'a> {
         (i32, type_::constraint::Constraints<Cx>),
         (i32, type_::constraint::Constraints<Cx>),
     ) {
-        if self.is_inference_node(id1) || self.is_inference_node(id2) {
-            return (self.find_constraints(id1), self.find_constraints(id2));
-        }
-
         let file = self.file().dupe();
         let graph = self.graph_mut();
         let (root_id1, c1) = graph.find_constraints(id1).unwrap_or_else(|e| {
@@ -3697,6 +3578,7 @@ mod tests {
     use flow_common::reason::VirtualReasonDesc;
     use flow_common::reason::locationless_reason;
     use flow_typing_type::type_::constraint::Constraints;
+    use flow_utils_union_find::Node;
 
     use super::*;
 

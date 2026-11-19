@@ -200,26 +200,17 @@ pub struct GenericTData {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-/// Metadata for the future implicit-instantiation constraint system.
+/// A placeholder: a type that implicit instantiation or synthesis doesn't know, such as
+/// `NoInfer<T>` while `T` is being solved, or the return type of a function whose body isn't
+/// synthesized. No solve infers it, so it never takes bounds, and pinning never takes it as
+/// evidence. Every other use sees it as its permissive instantiation, and what a use computes
+/// from it is a placeholder too.
 /// Type visitors and mappers intentionally treat this node as atomic and do not traverse `bound`.
 pub struct ImplicitInstantiationTvarData {
     pub reason: Reason,
     pub name: SubstName,
     pub bound: Type,
     pub id: i32,
-    pub kind: ImplicitInstantiationTvarKind,
-}
-
-#[derive(Debug, Clone, Copy, Dupe, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum ImplicitInstantiationTvarKind {
-    /// A type argument, which the solve that made it infers.
-    Inferred,
-    /// A type that implicit instantiation or synthesis doesn't know, such as `NoInfer<T>` while
-    /// `T` is being solved, or the return type of a function whose body isn't synthesized. No
-    /// solve infers it, so it never takes bounds, and pinning never takes it as evidence. Every
-    /// other use sees it as its permissive instantiation, and what a use computes from it is a
-    /// placeholder too.
-    Placeholder,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -9016,10 +9007,6 @@ pub mod union_rep {
         for t in ts {
             match &**t {
                 TypeInner::OpenT(_)
-                | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                    kind: ImplicitInstantiationTvarKind::Inferred,
-                    ..
-                })
                 | TypeInner::EvalT { .. }
                 | TypeInner::TypeAppT(..)
                 | TypeInner::KeysT(_, _)
@@ -10846,12 +10833,6 @@ pub mod constraint {
         FullyResolved(forcing_state::ForcingState<CX>),
     }
 
-    impl<CX: ContextFamily> Default for Constraints<CX> {
-        fn default() -> Self {
-            Constraints::Unresolved(Rc::new(std::cell::RefCell::new(Bounds::default())))
-        }
-    }
-
     pub type BoundsRef<CX = ()> = Rc<std::cell::RefCell<Bounds<CX>>>;
 
     #[derive(Debug)]
@@ -11894,7 +11875,6 @@ pub mod placeholder_t {
                 name: SubstName::name("placeholder".into()),
                 bound,
                 id: flow_common::reason::mk_id() as i32,
-                kind: ImplicitInstantiationTvarKind::Placeholder,
             },
         )))
     }
@@ -12822,12 +12802,7 @@ pub fn ro_of_arrtype(arrtype: &ArrType) -> flow_typing_generics::array_spread::R
 pub fn annot(in_implicit_instantiation: bool, use_desc: bool, t: &Type) -> Type {
     match &**t {
         TypeInner::ImplicitInstantiationTvar(_) if in_implicit_instantiation => t.dupe(),
-        TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-            reason,
-            kind: ImplicitInstantiationTvarKind::Inferred,
-            ..
-        })
-        | TypeInner::OpenT(Tvar(reason, _)) => Type(Rc::new(TypeInner::AnnotT(
+        TypeInner::OpenT(Tvar(reason, _)) => Type(Rc::new(TypeInner::AnnotT(
             reason.dupe(),
             t.dupe(),
             use_desc,

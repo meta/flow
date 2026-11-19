@@ -445,11 +445,7 @@ pub(super) fn write_computed_obj_prop<'cx>(
                 )?;
                 Ok(())
             }
-            TypeInner::AnyT(_, _)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }) => {
+            TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => {
                 let any = flow_js_utils::untyped_any_result(elem_t, reason.dupe());
                 rec_flow_t(cx, env, trace, unknown_use(), (tin, &any))
             }

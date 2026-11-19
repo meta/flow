@@ -27,8 +27,6 @@ use flow_typing_type::type_::Destructor;
 use flow_typing_type::type_::DestructorConditionalTypeData;
 use flow_typing_type::type_::DestructorMappedTypeData;
 use flow_typing_type::type_::GenericTData;
-use flow_typing_type::type_::ImplicitInstantiationTvarData;
-use flow_typing_type::type_::ImplicitInstantiationTvarKind;
 use flow_typing_type::type_::InstanceT;
 use flow_typing_type::type_::MappedTypeHomomorphicFlag;
 use flow_typing_type::type_::NamedSymbol;
@@ -762,20 +760,6 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
                                 cx.mk_placeholder(reason.dupe(), mixed_t::why(reason.dupe()))
                             }
                             _ => match (&mut self.obj_reachable_targs, &**param_t) {
-                                (
-                                    obj_reachable_targs,
-                                    TypeInner::ImplicitInstantiationTvar(
-                                        box ImplicitInstantiationTvarData {
-                                            kind: ImplicitInstantiationTvarKind::Inferred,
-                                            ..
-                                        },
-                                    ),
-                                ) => {
-                                    if let Some(targs) = obj_reachable_targs {
-                                        targs.push((param_t.dupe(), Polarity::Neutral));
-                                    }
-                                    param_t.dupe()
-                                }
                                 (_, TypeInner::GenericT(..)) => mod_reason_of_t(
                                     &|param_reason| {
                                         param_reason

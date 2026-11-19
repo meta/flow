@@ -927,8 +927,6 @@ fn maybe_predicate_function<'cx>(
 
     use flow_typing_flow_common::flow_js_utils::FlowJsException;
     use flow_typing_type::type_::DefTInner;
-    use flow_typing_type::type_::ImplicitInstantiationTvarData;
-    use flow_typing_type::type_::ImplicitInstantiationTvarKind;
     use flow_typing_type::type_::PolyTData;
     use flow_typing_type::type_::TypeInner;
 
@@ -971,11 +969,7 @@ fn maybe_predicate_function<'cx>(
 
     fn on_ground(t: &Type, assertion: bool) -> bool {
         match t.deref() {
-            TypeInner::AnyT(_, _)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-                kind: ImplicitInstantiationTvarKind::Placeholder,
-                ..
-            }) => false,
+            TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => false,
             TypeInner::DefT(_, def_t) => match def_t.deref() {
                 DefTInner::FunT(_, fun_t) => matches_position(fun_t, assertion),
                 DefTInner::PolyT(box PolyTData { t_out, .. }) => match t_out.deref() {
