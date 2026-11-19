@@ -82,12 +82,12 @@
               },
               "end": {
                 "line": 2,
-                "column": 38
+                "column": 39
               }
             },
             "range": [
               23,
-              59
+              60
             ],
             "key": {
               "type": "Identifier",

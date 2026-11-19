@@ -28,8 +28,8 @@
         "body":[
           {
             "type":"AbstractMethodDefinition",
-            "loc":{"source":null,"start":{"line":2,"column":2},"end":{"line":2,"column":27}},
-            "range":[23,48],
+            "loc":{"source":null,"start":{"line":2,"column":2},"end":{"line":2,"column":28}},
+            "range":[23,49],
             "key":{
               "type":"Identifier",
               "loc":{"source":null,"start":{"line":2,"column":18},"end":{"line":2,"column":19}},

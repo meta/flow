@@ -19,7 +19,7 @@ Error --------------------------------------------------------------------------
 Abstract methods can only appear within an abstract class. [ParseError]
 
    8|   abstract m(): void; // ERROR
-        ^^^^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^^^
 
 
 Error ---------------------------------------------------------------------------------------------------- basic.js:14:1
@@ -247,7 +247,7 @@ Error --------------------------------------------------------------------------
 The `abstract` modifier cannot be used with `private` member `priv`. [invalid-abstract]
 
    8|   private abstract priv(): number; // ERROR: private+abstract method
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ------------------------------------------------------------------------------------------ private_abstract.js:9:3

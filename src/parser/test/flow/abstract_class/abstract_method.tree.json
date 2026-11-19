@@ -22,8 +22,8 @@
         "body":[
           {
             "type":"AbstractMethodDefinition",
-            "loc":{"source":null,"start":{"line":2,"column":2},"end":{"line":2,"column":28}},
-            "range":[23,49],
+            "loc":{"source":null,"start":{"line":2,"column":2},"end":{"line":2,"column":29}},
+            "range":[23,50],
             "key":{
               "type":"Identifier",
               "loc":{"source":null,"start":{"line":2,"column":11},"end":{"line":2,"column":18}},

@@ -1969,9 +1969,10 @@ fn class_element(env: &mut ParserEnv) -> Result<class::BodyElement<Loc, Loc>, Ro
                             }
                             _ => {}
                         }
-                        eat::maybe(env, TokenKind::TSemicolon)?;
+                        let (loc, _) = with_loc(Some(start_loc.dupe()), env, |env| {
+                            eat::maybe(env, TokenKind::TSemicolon)
+                        })?;
                         let (annot_loc, func) = make_method_func_type(type_params);
-                        let loc = Loc::between(&start_loc, &sig_loc);
                         Ok(class::BodyElement::AbstractMethod(class::AbstractMethod {
                             loc,
                             key,

@@ -1,7 +1,7 @@
 {
   "errors":[
     {
-      "loc":{"source":null,"start":{"line":2,"column":2},"end":{"line":2,"column":28}},
+      "loc":{"source":null,"start":{"line":2,"column":2},"end":{"line":2,"column":29}},
       "message":"Abstract methods can only appear within an abstract class."
     }
   ],
@@ -28,8 +28,8 @@
         "body":[
           {
             "type":"AbstractMethodDefinition",
-            "loc":{"source":null,"start":{"line":2,"column":2},"end":{"line":2,"column":28}},
-            "range":[14,40],
+            "loc":{"source":null,"start":{"line":2,"column":2},"end":{"line":2,"column":29}},
+            "range":[14,41],
             "key":{
               "type":"Identifier",
               "loc":{"source":null,"start":{"line":2,"column":11},"end":{"line":2,"column":18}},

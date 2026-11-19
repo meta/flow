@@ -254,7 +254,7 @@
             },
             "loc": {
               "end": {
-                "column": 25,
+                "column": 26,
                 "line": 7
               },
               "source": null,
@@ -265,7 +265,7 @@
             },
             "range": [
               126,
-              149
+              150
             ],
             "type": "AbstractMethodDefinition",
             "value": {
@@ -479,7 +479,7 @@
             },
             "loc": {
               "end": {
-                "column": 25,
+                "column": 26,
                 "line": 12
               },
               "source": null,
@@ -490,7 +490,7 @@
             },
             "range": [
               227,
-              250
+              251
             ],
             "type": "AbstractMethodDefinition",
             "value": {
