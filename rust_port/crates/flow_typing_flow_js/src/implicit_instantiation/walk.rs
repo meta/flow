@@ -6812,8 +6812,9 @@ fn has_inferred_literal<'cx>(cx: &mut Context<'cx>, t: &Type) -> bool {
 }
 
 /// The search for a literal of a value skips what only annotations define: the body of a type
-/// alias or class, and the parts of a type destructor other than its argument. It also skips
-/// function types, whose literals a bound does not need precise. The answer for a resolved type
+/// alias or class, and the parts of a type destructor other than its argument. Of a function type
+/// it searches only the return, which a flow of the function to another one flows to the other's
+/// return: the literals that flow can need precise. The answer for a resolved type
 /// variable, and for a type whose visit met no unresolved one, does not change: it is kept for the
 /// check of the file, whose solves meet the same types again and again.
 fn find_value_literal<'cx>(cx: &mut Context<'cx>, t: &Type, templates: bool) -> bool {
@@ -6919,13 +6920,13 @@ fn find_value_literal<'cx>(cx: &mut Context<'cx>, t: &Type, templates: bool) -> 
                         self.type_(cx, pole, (), targ);
                     }
                 }
+                TypeInner::DefT(_, d) if let DefTInner::FunT(_, f) = d.deref() => {
+                    self.type_(cx, pole, (), &f.return_t);
+                }
                 TypeInner::DefT(_, d)
                     if matches!(
                         d.deref(),
-                        DefTInner::ClassT(_)
-                            | DefTInner::PolyT(_)
-                            | DefTInner::TypeT(..)
-                            | DefTInner::FunT(..)
+                        DefTInner::ClassT(_) | DefTInner::PolyT(_) | DefTInner::TypeT(..)
                     ) => {}
                 TypeInner::TypeAppT(a) => {
                     for targ in a.targs.iter() {
