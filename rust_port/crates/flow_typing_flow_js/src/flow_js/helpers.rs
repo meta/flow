@@ -1105,9 +1105,13 @@ pub(super) fn handle_bounded<'cx>(
                 wait_for_concrete_bound(cx, None)
             }
         }
+        // A generic whose bound is not a union is compared as a whole against an intersection: no
+        // member of an intersection bound is the generic's whole bound.
         UseTInner::UseT(_, t) if matches!(t.deref(), TypeInner::IntersectionT(..)) => {
-            if is_concrete(bound) {
+            if matches!(bound.deref(), TypeInner::UnionT(..)) {
                 distribute_union_intersection(cx, None)
+            } else if is_concrete(bound) {
+                Ok(false)
             } else {
                 wait_for_concrete_bound(cx, None)
             }

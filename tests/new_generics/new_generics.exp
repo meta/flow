@@ -602,19 +602,46 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `x` to `number & string & boolean` because: [incompatible-type]
  - Either `number` [1] is incompatible with `boolean` [2].
- - Or `string` [1] is incompatible with `boolean` [2].
+ - Or `string` [3] is incompatible with `boolean` [2].
 
    intersection.js:8:3
    8|   x as number & string & boolean; // nope
         ^
 
 References:
-   intersection.js:3:66
+   intersection.js:3:23
    3| function f1<X extends number & string, Y extends X & boolean>(x: X, y: Y) {
-                                                                       ^ [1]
+                            ^^^^^^ [1]
    intersection.js:8:26
    8|   x as number & string & boolean; // nope
                                ^^^^^^^ [2]
+   intersection.js:3:32
+   3| function f1<X extends number & string, Y extends X & boolean>(x: X, y: Y) {
+                                     ^^^^^^ [3]
+
+
+Error --------------------------------------------------------------------------------------------- intersection.js:13:3
+
+Cannot cast `x` to `X & {readonly c: number}` because: [incompatible-type]
+ - Either property `a` is extra in `{readonly a: number}` [1] but missing in `{readonly c: number}` [2]. Exact objects
+   do not accept extra props.
+ - Or property `b` is extra in `{readonly b: string}` [3] but missing in `{readonly c: number}` [2]. Exact objects do
+   not accept extra props.
+
+   intersection.js:13:3
+   13|   x as X & {readonly c: number}; // nope
+         ^
+
+References:
+   intersection.js:11:23
+   11| function f2<X extends {readonly a: number} & {readonly b: string}>(x: X) {
+                             ^^^^^^^^^^^^^^^^^^^^ [1]
+   intersection.js:13:12
+   13|   x as X & {readonly c: number}; // nope
+                  ^^^^^^^^^^^^^^^^^^^^ [2]
+   intersection.js:11:46
+   11| function f2<X extends {readonly a: number} & {readonly b: string}>(x: X) {
+                                                    ^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- maybe.js:15:3
@@ -1666,4 +1693,4 @@ References:
 
 
 
-Found 96 errors
+Found 97 errors
