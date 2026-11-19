@@ -593,7 +593,7 @@ struct Walker<'e> {
     seen: BTreeMap<(usize, usize), (Type, Type)>,
     /// The changes to `seen` in order, so that a snapshot is restored by undoing those made since.
     seen_log: Vec<SeenChange>,
-    mentions_cache: BTreeMap<usize, (Type, bool)>,
+    mentions_cache: std::cell::RefCell<BTreeMap<usize, (Type, bool)>>,
     /// The pairs walked so far, including those of walks that were undone.
     steps: usize,
     /// Whether an invariant position records a lower and an upper bound rather than an exact one.
@@ -841,7 +841,7 @@ impl<'e> Walker<'e> {
             depth: 0,
             seen: BTreeMap::new(),
             seen_log: Vec::new(),
-            mentions_cache: BTreeMap::new(),
+            mentions_cache: std::cell::RefCell::new(BTreeMap::new()),
             steps: 0,
             soft_exact: false,
             expand_cache: std::cell::RefCell::new(BTreeMap::new()),
@@ -936,13 +936,14 @@ impl<'e> Walker<'e> {
 
     /// Whether `t` mentions a marker. Each type the check visits is remembered, so that the walk,
     /// which asks again at every level, visits each type once.
-    fn mentions<'cx>(&mut self, cx: &mut Context<'cx>, t: &Type) -> bool {
-        if let Some((_, found)) = self.mentions_cache.get(&addr(t)) {
+    fn mentions<'cx>(&self, cx: &mut Context<'cx>, t: &Type) -> bool {
+        if let Some((_, found)) = self.mentions_cache.borrow().get(&addr(t)) {
             return *found;
         }
+        let mut cache = self.mentions_cache.borrow_mut();
         let mut visitor = MarkerVisitor {
             names: &self.vars,
-            cache: Some(&mut self.mentions_cache),
+            cache: Some(&mut cache),
             found: BTreeSet::new(),
             mentions: false,
         };
@@ -4975,7 +4976,7 @@ impl<'e> Walker<'e> {
         }
         let expanded = self.expand_typeapp_uncached(cx, t)?;
         // An application without markers expands to the same type in each walk of the file.
-        if self.markers_in(cx, t).is_empty() {
+        if !self.mentions(cx, t) {
             let expansions = cx.type_app_expansions_mut();
             (expansions.expansions).insert(addr(t), (t.dupe(), expanded.dupe()));
             (expansions.expanded_from).insert(addr(&expanded), t.dupe());
