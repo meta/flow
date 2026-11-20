@@ -9506,9 +9506,6 @@ impl<L: Dupe + PartialOrd + Ord + PartialEq + Eq> ErrorMessage<L> {
             ErrorMessage::EBadDefaultImportAccess(box (_, _)) => LintError(DefaultImportAccess),
             ErrorMessage::EBadDefaultImportDestructuring(_) => LintError(DefaultImportAccess),
             ErrorMessage::EInvalidImportStarUse(box (_, _)) => LintError(InvalidImportStarUse),
-            ErrorMessage::EInvalidThisArg(box EInvalidThisArgData { .. }) => {
-                LintError(InvalidThisArg)
-            }
             ErrorMessage::ENonConstVarExport(box (_, _)) => LintError(NonConstVarExport),
             ErrorMessage::EThisInExportedFunction(_) => LintError(ThisInExportedFunction),
             ErrorMessage::EMixedImportAndRequire(box (_, _)) => LintError(MixedImportAndRequire),
@@ -13574,6 +13571,7 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             ErrorMessage::EDeprecatedBool { .. } => Some(DeprecatedType),
             ErrorMessage::EUntypedTypeImport { .. } => Some(UntypedTypeImport),
             ErrorMessage::EInternalType { .. } => Some(InternalType),
+            ErrorMessage::EInvalidThisArg(box EInvalidThisArgData { .. }) => Some(InvalidThisArg),
             ErrorMessage::EUntypedImport { .. }
             | ErrorMessage::ENonstrictImport { .. }
             | ErrorMessage::EUnclearType { .. }
@@ -13588,7 +13586,6 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             | ErrorMessage::EUninitializedInstanceProperty { .. }
             | ErrorMessage::ENestedComponent { .. }
             | ErrorMessage::ENestedHook { .. }
-            | ErrorMessage::EInvalidThisArg(box EInvalidThisArgData { .. })
             | ErrorMessage::EUnusedPromise { .. } => match self.kind_of_msg() {
                 ErrorKind::LintError(kind) => {
                     Some(flow_common_errors::error_codes::code_of_lint(&kind))

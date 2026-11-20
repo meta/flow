@@ -10,7 +10,6 @@ Default .flowconfig looks like this:
 
 [lints]
 unsafe-object-assign=error
-invalid-this-arg=error
 nested-component=error
 nested-hook=error
 libdef-override=error

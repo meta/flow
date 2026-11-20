@@ -32,7 +32,6 @@ const IGNORED_BY_ALL: &[LintKind] = &[
 impl<T: Copy> LintSettings<T> {
     fn default_explicit_values() -> BTreeMap<LintKind, (Severity, Option<Loc>)> {
         let mut map = BTreeMap::new();
-        map.insert(LintKind::InvalidThisArg, (Severity::Err, None));
         map.insert(LintKind::LibdefOverride, (Severity::Err, None));
         map.insert(LintKind::NestedComponent, (Severity::Err, None));
         map.insert(LintKind::NestedHook, (Severity::Err, None));
