@@ -16040,6 +16040,7 @@ pub fn mk_class_sig<'a>(
                             ret_annot_loc: name_loc,
                             statics: None,
                             literal: false,
+                            ts_void_end: false,
                         })
                     };
 
@@ -16693,6 +16694,7 @@ pub fn mk_class_sig<'a>(
                         statics: None,
                         effect_: type_::ReactEffectType::ArbitraryEffect,
                         literal: false,
+                        ts_void_end: false,
                     };
                     let typed_func = ast::types::Function {
                         tparams: tparams_ast,
@@ -18939,6 +18941,7 @@ pub fn mk_record_sig<'a>(
                             ret_annot_loc: name_loc,
                             statics: None,
                             literal: false,
+                            ts_void_end: false,
                         })
                     };
 
@@ -20466,6 +20469,20 @@ pub fn mk_func_sig<'a>(
         ast::function::Effect::Hook => type_::ReactEffectType::HookDecl(cx.make_aloc_id(&loc)),
         ast::function::Effect::Arbitrary => type_::ReactEffectType::ArbitraryEffect,
     };
+    // Under `ts_void`, as in TypeScript, a function whose `return` statements have no argument
+    // returns `void` even when it can throw, unless its contextual return type admits `undefined`.
+    let ts_void_end = cx.ts_void()
+        && has_nonvoid_return
+        && matches!(kind, func::Kind::Ordinary | func::Kind::Async)
+        && flow_parser_utils::signature_utils::procedure_decider::is_procedure(body)
+        && match return_ {
+            ast::function::ReturnAnnot::Missing(loc) => {
+                !contextual_return_admits_undefined(cx, loc, &ret_reason)?
+            }
+            ast::function::ReturnAnnot::Available(_) | ast::function::ReturnAnnot::TypeGuard(_) => {
+                false
+            }
+        };
     let func_stmt_sig = func::Func {
         reason: reason.dupe(),
         function_reference_kind: if constructor {
@@ -20482,6 +20499,7 @@ pub fn mk_func_sig<'a>(
         statics: Some(statics_t),
         effect_: effect,
         literal,
+        ts_void_end,
     };
     let id_clone = id.clone();
     let predicate_clone = predicate.clone();

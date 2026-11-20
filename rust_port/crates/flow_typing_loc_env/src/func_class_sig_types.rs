@@ -161,6 +161,9 @@ pub mod func {
         pub ret_annot_loc: ALoc,
         pub statics: Option<Type>,
         pub literal: bool,
+        /// Under `experimental.ts_void`, whether the function returns `void` rather than
+        /// `undefined` at its end and from its `return` statements without an argument.
+        pub ts_void_end: bool,
     }
 
     impl<C: ConfigTypes> Clone for Func<C> {
@@ -177,6 +180,7 @@ pub mod func {
                 ret_annot_loc: self.ret_annot_loc.clone(),
                 statics: self.statics.clone(),
                 literal: self.literal,
+                ts_void_end: self.ts_void_end,
             }
         }
     }

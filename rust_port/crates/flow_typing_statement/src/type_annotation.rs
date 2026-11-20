@@ -6396,6 +6396,7 @@ fn mk_method_func_sig<'a>(
         statics: None,
         effect_: effect_flag,
         literal: false,
+        ts_void_end: false,
     };
     let func_ast = ast::types::Function {
         tparams: tparams_ast,

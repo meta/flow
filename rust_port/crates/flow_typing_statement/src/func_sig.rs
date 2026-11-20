@@ -59,6 +59,7 @@ struct FuncScopeVisitor<'a, 'cx, 'b> {
     body_loc: ALoc,
     kind: &'b Kind,
     exhaust: &'b Option<(RefCell<Vec<Type>>, Vec<ALoc>, (Type, UseOp))>,
+    returns_ts_void: bool,
     no_return: bool,
     has_throw: bool,
     no_yield: bool,
@@ -197,7 +198,14 @@ impl FuncScopeVisitor<'_, '_, '_> {
         loc: ALoc,
         return_stmt: &ast::statement::Return<ALoc, (ALoc, Type)>,
     ) -> Result<(), JobError> {
-        let (_, ref t) = return_stmt.return_out;
+        let (_, ref argument_t) = return_stmt.return_out;
+        let bare_return_t;
+        let t = if self.returns_ts_void && return_stmt.argument.is_none() {
+            bare_return_t = type_::ts_void::at(loc.dupe());
+            &bare_return_t
+        } else {
+            argument_t
+        };
         let t = match self.kind {
             Kind::Async => {
                 // Convert the return expression's type T to Promise<T>. If the
@@ -284,6 +292,7 @@ pub fn default_constructor<C: ConfigTypes>(reason: Reason) -> Func<C> {
         ret_annot_loc: reason.loc().dupe(),
         statics: None,
         literal: false,
+        ts_void_end: false,
     }
 }
 
@@ -311,6 +320,7 @@ pub fn field_initializer<C: ConfigTypes>(
         ret_annot_loc: annot_loc,
         statics: None,
         literal: false,
+        ts_void_end: false,
     }
 }
 
@@ -491,6 +501,7 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
         body,
         ret_annot_loc,
         return_t,
+        ts_void_end,
         ..
     } = x;
     let ret_annot_loc = ret_annot_loc.dupe();
@@ -642,6 +653,7 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
         AnnotatedOrInferred::Inferred(t) => (false, t.dupe()),
         AnnotatedOrInferred::Annotated(t) | AnnotatedOrInferred::Hinted(t) => (true, t.dupe()),
     };
+    let returns_ts_void = *ts_void_end;
 
     // statement visit pass
     let statements_ast = statement::statement_list(cx, &statements)?;
@@ -680,7 +692,11 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
             Option<ast::expression::Expression<ALoc, (ALoc, Type)>>,
         ) = match kind {
             Kind::Ordinary | Kind::Ctor => {
-                let t = type_::void::at(loc.dupe());
+                let t = if returns_ts_void {
+                    type_::ts_void::at(loc.dupe())
+                } else {
+                    type_::void::at(loc.dupe())
+                };
                 let use_op = UseOp::Op(Arc::new(type_::RootUseOp::FunImplicitReturn(Box::new(
                     type_::FunImplicitReturnData {
                         fn_: reason_fn.dupe(),
@@ -696,7 +712,11 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
                     reason::VirtualReasonDesc::RType("Promise".into()),
                     loc.dupe(),
                 );
-                let void_t_val = type_::void::at(loc.dupe());
+                let void_t_val = if returns_ts_void {
+                    type_::ts_void::at(loc.dupe())
+                } else {
+                    type_::void::at(loc.dupe())
+                };
                 let t = flow_js::FlowJs::get_builtin_typeapp(
                     cx,
                     &reason,
@@ -870,6 +890,7 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
         body_loc: body_loc.dupe(),
         kind,
         exhaust: &exhaust,
+        returns_ts_void,
         no_return: true,
         has_throw: false,
         no_yield: true,

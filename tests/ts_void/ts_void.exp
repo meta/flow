@@ -315,7 +315,45 @@ An expression of type `void` cannot be tested for truthiness. [constant-conditio
            ^^^^^^^^^^
 
 
-Error ----------------------------------------------------------------------------------------- inferred_return.js:28:38
+Error ------------------------------------------------------------------------------------------ inferred_return.js:20:1
+
+Cannot cast `mayThrow()` to `undefined` because `void` [1] is incompatible with `undefined` [2]. [incompatible-type]
+
+   inferred_return.js:20:1
+   20| mayThrow() as undefined; // ERROR
+       ^^^^^^^^^^
+
+References:
+   inferred_return.js:17:20
+   17| function mayThrow() {
+                          ^ [1]
+   inferred_return.js:20:15
+   20| mayThrow() as undefined; // ERROR
+                     ^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------ inferred_return.js:27:1
+
+Cannot cast `asyncMayThrow()` to `Promise<undefined>` because in type argument `R` [1]: `void` [2] is incompatible with
+`undefined` [3]. [incompatible-type]
+
+   inferred_return.js:27:1
+   27| asyncMayThrow() as Promise<undefined>; // ERROR
+       ^^^^^^^^^^^^^^^
+
+References:
+   <BUILTINS>/prelude.js:48:23
+   48| interface Promise<out R> {}
+                             ^ [1]
+   inferred_return.js:23:5
+   23|     return;
+           ^^^^^^^ [2]
+   inferred_return.js:27:28
+   27| asyncMayThrow() as Promise<undefined>; // ERROR
+                                  ^^^^^^^^^ [3]
+
+
+Error ----------------------------------------------------------------------------------------- inferred_return.js:44:38
 
 Cannot assign `noReturn` to `f5` because in the return value: [incompatible-type]
  - Either `void` [1] is incompatible with `undefined` [2].
@@ -324,19 +362,19 @@ Cannot assign `noReturn` to `f5` because in the return value: [incompatible-type
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
-   inferred_return.js:28:38
-   28| const f5: () => number | undefined = noReturn; // ERROR
+   inferred_return.js:44:38
+   44| const f5: () => number | undefined = noReturn; // ERROR
                                             ^^^^^^^^
 
 References:
    inferred_return.js:2:20
     2| function noReturn() {}
                           ^ [1]
-   inferred_return.js:28:26
-   28| const f5: () => number | undefined = noReturn; // ERROR
+   inferred_return.js:44:26
+   44| const f5: () => number | undefined = noReturn; // ERROR
                                 ^^^^^^^^^ [2]
-   inferred_return.js:28:17
-   28| const f5: () => number | undefined = noReturn; // ERROR
+   inferred_return.js:44:17
+   44| const f5: () => number | undefined = noReturn; // ERROR
                        ^^^^^^ [3]
 
 
@@ -350,8 +388,8 @@ Cannot cast `exportedNoReturn()` to `undefined` because `void` [1] is incompatib
        ^^^^^^^^^^^^^^^^^^
 
 References:
-   inferred_return.js:30:35
-   30| export function exportedNoReturn() {}
+   inferred_return.js:49:35
+   49| export function exportedNoReturn() {}
                                           [1]
    inferred_return_import.js:5:23
     5| exportedNoReturn() as undefined; // ERROR
@@ -368,8 +406,8 @@ Cannot cast `exportedArrow()` to `undefined` because `void` [1] is incompatible 
        ^^^^^^^^^^^^^^^
 
 References:
-   inferred_return.js:31:32
-   31| export const exportedArrow = () => {};
+   inferred_return.js:50:32
+   50| export const exportedArrow = () => {};
                                        [1]
    inferred_return_import.js:6:20
     6| exportedArrow() as undefined; // ERROR
@@ -389,8 +427,8 @@ References:
    <BUILTINS>/prelude.js:48:23
    48| interface Promise<out R> {}
                              ^ [1]
-   inferred_return.js:32:38
-   32| export async function exportedAsync() {}
+   inferred_return.js:51:38
+   51| export async function exportedAsync() {}
                                              [2]
    inferred_return_import.js:7:28
     7| exportedAsync() as Promise<undefined>; // ERROR
@@ -635,4 +673,4 @@ References:
 
 
 
-Found 43 errors
+Found 45 errors
