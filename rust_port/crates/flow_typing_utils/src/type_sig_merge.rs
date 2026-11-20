@@ -4386,14 +4386,7 @@ fn merge_interface_extends<'cx>(
                 let kind = leaf_binding_kind(cx, name);
                 match kind {
                     Some(LocalDefBindingKind::DefBindingOther) => {
-                        let raw = merge_impl(
-                            env,
-                            cx,
-                            file,
-                            &Pack::Packed::TyRef(Box::new(name.clone())),
-                            false,
-                            false,
-                        );
+                        let raw = resolve_raw(cx, name);
                         let t = type_util::typeapp_annot(false, false, loc.dupe(), raw, targs_t);
                         (t, false, None)
                     }

@@ -400,6 +400,23 @@ Unexpected use of `this` type. [illegal-this]
                                                     ^^^^
 
 
+Error ------------------------------------------------------------------------------------- extends_default_alias.js:5:1
+
+Cannot cast `j.v` to `boolean` because `string` [1] is incompatible with `boolean` [2]. [incompatible-type]
+
+   extends_default_alias.js:5:1
+   5| j.v as boolean; // ERROR
+      ^^^
+
+References:
+   extends_default_alias_export.js:5:30
+   5| export interface J extends X<string> {}
+                                   ^^^^^^ [1]
+   extends_default_alias.js:5:8
+   5| j.v as boolean; // ERROR
+             ^^^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------------------------- generics.js:6:30
 
 Cannot use `Implicit` [1] with fewer than 1 type argument. [missing-type-arg]
@@ -987,4 +1004,4 @@ Unexpected use of `this` type. [illegal-this]
 
 
 
-Found 67 errors
+Found 68 errors
