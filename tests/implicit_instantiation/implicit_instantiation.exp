@@ -18,7 +18,7 @@ Cannot use function type [1] with fewer than 2 type arguments. [missing-type-arg
 
    class_static.js:13:11
    13| const y = OneTarg<string>(); // error, incorrect amount of args
-                 ^^^^^^^
+                 ^^^^^^^^^^^^^^^^^
 
 References:
    class_static.js:10:10

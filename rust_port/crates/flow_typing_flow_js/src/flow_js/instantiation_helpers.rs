@@ -81,19 +81,17 @@ pub(super) fn instantiate_with_targs_with_soln<'cx>(
     targs: Vec<Targ>,
 ) -> Result<(Type, Vec<(Type, SubstName)>), FlowJsException> {
     let (tparams_loc, xs, t) = poly_t;
-    let mut targs_iter = targs.into_iter();
-    let mut ts: Vec<Type> = Vec::new();
-    for _ in xs.iter() {
-        match targs_iter.next() {
-            None => break,
-            Some(Targ::ExplicitArg(t)) => ts.push(t),
-            Some(Targ::ImplicitArg(_)) => {
+    let ts: Vec<Type> = targs
+        .into_iter()
+        .map(|targ| match targ {
+            Targ::ExplicitArg(t) => t,
+            Targ::ImplicitArg(_) => {
                 panic!(
                     "targs containing ImplicitArg should be handled by ImplicitInstantiationKit instead."
                 );
             }
-        }
-    }
+        })
+        .collect();
     FlowJs::instantiate_poly_with_targs_with_env(
         cx,
         env,

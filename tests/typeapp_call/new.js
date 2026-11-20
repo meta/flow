@@ -16,3 +16,5 @@ c2.x as void; // error: string ~> void
 
 class NonPoly {}
 new NonPoly<string>; // error: expected polymorphic type
+
+new C<string, number>; // error: more than 1 type argument

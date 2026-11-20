@@ -43,13 +43,13 @@ References:
                                               ^^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------------- test.js:23:2
+Error ----------------------------------------------------------------------------------------------------- test.js:23:1
 
 Cannot use function type [1] with fewer than 3 type arguments. [missing-type-arg]
 
-   test.js:23:2
+   test.js:23:1
    23| <ComponentMultipleArgs<string> r="foo" s={1} t="s" />; // error: arity
-        ^^^^^^^^^^^^^^^^^^^^^
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    test.js:12:39

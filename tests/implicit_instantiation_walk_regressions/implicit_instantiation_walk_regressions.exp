@@ -189,6 +189,20 @@ References:
                    ^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------ failed_operations_any.js:6:13
+
+Cannot use function type [1] with more than 1 type argument. [extra-type-arg]
+
+   failed_operations_any.js:6:13
+   6|   const g = f<_, {path: string}>('x'); // error: more than 1 type argument
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   failed_operations_any.js:2:21
+   2|   declare function f<EJ>(
+                          ^^^^ [1]
+
+
 Error ----------------------------------------------------------------------------------- failed_operations_any.js:22:15
 
 Cannot call `f` with `o` bound to `g` because `{a: string}` [1] is incompatible with `() => any` [2].
@@ -1592,4 +1606,4 @@ References:
 
 
 
-Found 86 errors
+Found 87 errors

@@ -4,7 +4,7 @@ Cannot use function type [1] with fewer than 2 type arguments. [missing-type-arg
 
    callable.js:8:1
    8| o<number>(); // Error should be here
-      ^
+      ^^^^^^^^^^^
 
 References:
    callable.js:3:5
@@ -18,7 +18,7 @@ Cannot use function type [1] with fewer than 2 type arguments. [missing-type-arg
 
    callable.js:16:1
    16| i<number>(); // Error should be here
-       ^
+       ^^^^^^^^^^^
 
 References:
    callable.js:11:5

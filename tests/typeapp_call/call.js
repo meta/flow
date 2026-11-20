@@ -49,3 +49,7 @@ class B extends A {
 // predicated calls
 function pred<T>(x: T): T { return x };
 if (pred<string>(0)) {} // number ~> string
+
+// too many type arguments
+cond<number, string>(test, 0, 0); // error: more than 1 type argument
+cond<_, string>(test, 0, 0); // error: more than 1 type argument

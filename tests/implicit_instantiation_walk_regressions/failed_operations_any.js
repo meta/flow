@@ -3,7 +3,7 @@ function case1() {
     name: string,
   ): () => NonNullable<EJ | {canonical: string, path: string, ...}>;
 
-  const g = f<_, {path: string}>('x');
+  const g = f<_, {path: string}>('x'); // error: more than 1 type argument
   const {canonical, path} = g();
 }
 

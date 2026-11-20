@@ -353,13 +353,13 @@ References:
                          ^^^^^^^^^^^^^^^^ [1]
 
 
-Error ----------------------------------------------------------------------------------------- new_on_interface.js:39:5
+Error ----------------------------------------------------------------------------------------- new_on_interface.js:39:1
 
 Cannot use function type [1] with fewer than 2 type arguments. [missing-type-arg]
 
-   new_on_interface.js:39:5
+   new_on_interface.js:39:1
    39| new G<string>("a"); // ERROR: fewer than 2 type arguments
-           ^
+       ^^^^^^^^^^^^^^^^^^
 
 References:
    new_on_interface.js:36:9

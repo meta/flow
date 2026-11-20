@@ -3877,8 +3877,9 @@ pub mod instantiation_kit {
     use crate::type_subst::Purpose;
     use crate::type_subst::subst;
 
-    /// How instantiating a polymorphic definition checks its type arguments: their number, and
-    /// each one against the bound of its type parameter.
+    /// How instantiating a polymorphic definition checks its type arguments: their number,
+    /// reported at the operation that instantiates it with them, where they are written, and each
+    /// one against the bound of its type parameter.
     #[derive(Clone, Copy)]
     pub enum TypeArgCheck {
         /// Not at all. The arguments of a type application are checked where it is written,
@@ -3904,17 +3905,18 @@ pub mod instantiation_kit {
         t: Type,
         ts: Vec<Type>,
     ) -> Result<(Type, Vec<(Type, SubstName)>), FlowJsException> {
-        let (map, all_ts) = type_arg_map(
-            cx,
-            env,
-            &use_op,
-            reason_op,
-            reason_tapp,
-            check,
-            tparams_loc,
-            xs,
-            ts,
-        )?;
+        if !matches!(check, TypeArgCheck::Skip) {
+            check_type_arg_count(
+                cx,
+                env,
+                &reason_tapp.dupe().reposition(reason_op.loc().dupe()),
+                tparams_loc,
+                xs,
+                ts.len(),
+                false,
+            )?;
+        }
+        let (map, all_ts) = type_arg_map(cx, &use_op, reason_op, xs, ts);
         check_bounds::<H>(cx, env, trace, &use_op, check, xs, &map)?;
 
         let substituted_t = subst(
@@ -3949,52 +3951,64 @@ pub mod instantiation_kit {
         xs: &Vec1<TypeParam>,
         ts: Vec<Type>,
     ) -> Result<(), FlowJsException> {
-        let (map, _) = type_arg_map(
-            cx,
-            env,
-            &use_op,
-            reason_op,
-            reason_tapp,
-            TypeArgCheck::Subtype,
-            tparams_loc,
-            xs,
-            ts,
-        )?;
+        check_type_arg_count(cx, env, reason_tapp, tparams_loc, xs, ts.len(), false)?;
+        let (map, _) = type_arg_map(cx, &use_op, reason_op, xs, ts);
         check_bounds::<H>(cx, env, trace, &use_op, TypeArgCheck::Subtype, xs, &map)
     }
 
-    /// Maps each type parameter to its type argument, or to its default when the argument is
-    /// missing, and reports a wrong number of type arguments unless `check` skips it.
-    fn type_arg_map<'cx>(
+    /// Reports a wrong number of type arguments where they are written, at `reason_tapp`. With
+    /// `missing_inferred`, the missing ones are inferred, so only extra ones are reported.
+    pub fn check_type_arg_count<'cx>(
         cx: &mut Context<'cx>,
         env: &FlowJsEnv,
-        use_op: &UseOp,
-        reason_op: &Reason,
         reason_tapp: &Reason,
-        check: TypeArgCheck,
         tparams_loc: ALoc,
         xs: &Vec1<TypeParam>,
-        ts: Vec<Type>,
-    ) -> Result<(FlowOrdMap<SubstName, Type>, Vec<(Type, SubstName)>), FlowJsException> {
+        num_targs: usize,
+        missing_inferred: bool,
+    ) -> Result<(), FlowJsException> {
         use flow_typing_errors::error_message::ErrorMessage;
-        use flow_typing_type::type_::AnySource;
 
-        let report_arity = !matches!(check, TypeArgCheck::Skip);
-        let minimum_arity = poly_minimum_arity(xs) as i32;
-        let maximum_arity = xs.len() as i32;
-        let arity_loc = tparams_loc;
-
-        if report_arity && (ts.len() as i32) > maximum_arity {
+        if num_targs > xs.len() {
             add_output_with_env(
                 cx,
                 env,
                 ErrorMessage::ETooManyTypeArgs(Box::new(ETooManyTypeArgsData {
                     reason_tapp: reason_tapp.to_error_reference(),
-                    arity_loc: arity_loc.dupe(),
-                    maximum_arity,
+                    arity_loc: tparams_loc,
+                    maximum_arity: xs.len() as i32,
                 })),
-            )?;
+            )
+        } else if !missing_inferred
+            && xs
+                .iter()
+                .skip(num_targs)
+                .any(|typeparam| typeparam.default.is_none())
+        {
+            add_output_with_env(
+                cx,
+                env,
+                ErrorMessage::ETooFewTypeArgs(Box::new(ETooFewTypeArgsData {
+                    reason_tapp: reason_tapp.to_error_reference(),
+                    arity_loc: tparams_loc,
+                    minimum_arity: poly_minimum_arity(xs) as i32,
+                })),
+            )
+        } else {
+            Ok(())
         }
+    }
+
+    /// Maps each type parameter to its type argument, or to its default when the argument is
+    /// missing.
+    fn type_arg_map<'cx>(
+        cx: &mut Context<'cx>,
+        use_op: &UseOp,
+        reason_op: &Reason,
+        xs: &Vec1<TypeParam>,
+        ts: Vec<Type>,
+    ) -> (FlowOrdMap<SubstName, Type>, Vec<(Type, SubstName)>) {
+        use flow_typing_type::type_::AnySource;
 
         let mut map: FlowOrdMap<SubstName, Type> = FlowOrdMap::default();
         let mut remaining_ts = VecDeque::from(ts);
@@ -4018,17 +4032,6 @@ pub mod instantiation_kit {
                     }
                     (None, None) => {
                         // fewer arguments than params but no default
-                        if report_arity {
-                            add_output_with_env(
-                                cx,
-                                env,
-                                ErrorMessage::ETooFewTypeArgs(Box::new(ETooFewTypeArgsData {
-                                    reason_tapp: reason_tapp.to_error_reference(),
-                                    arity_loc: arity_loc.dupe(),
-                                    minimum_arity,
-                                })),
-                            )?;
-                        }
                         let any_t =
                             Type::new(TypeInner::AnyT(reason_op.dupe(), AnySource::AnyError(None)));
                         (any_t, None)
@@ -4043,7 +4046,7 @@ pub mod instantiation_kit {
             map.insert(typeparam.name.dupe(), t_val);
         }
 
-        Ok((map, all_ts))
+        (map, all_ts)
     }
 
     fn check_bounds<'cx, H: InstantiationHelper>(

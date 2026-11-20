@@ -2901,6 +2901,28 @@ pub mod kit {
         reason_op: &Reason,
         reason_tapp: &Reason,
     ) -> Result<(Type, Vec<(Type, subst_name::SubstName)>), FlowJsException> {
+        // Explicit type arguments are written at the operation, so a wrong number of them is
+        // reported there. Missing ones are inferred, like `_`, and the solve ignores extra ones.
+        let (ref tparams_loc, ref tparams, _) = check.poly_t;
+        let explicit_targs = match &check.operation.2 {
+            Operation::Call(call) => call.call_targs.as_deref(),
+            Operation::Constructor(targs, _) | Operation::ReactJSX { targs, .. } => {
+                targs.as_deref()
+            }
+            Operation::SubtypeLowerPoly(_) | Operation::Method { .. } => None,
+        };
+        if let Some(targs) = explicit_targs {
+            flow_js_utils::instantiation_kit::check_type_arg_count(
+                cx,
+                env,
+                &reason_tapp.dupe().reposition(reason_op.loc().dupe()),
+                tparams_loc.dupe(),
+                tparams,
+                targs.len(),
+                true,
+            )?;
+        }
+
         // A type parameter that nothing constrains can take its bound when the result is checked
         // against a full return hint, which then reports a conflict with that bound. Without one,
         // the bound would reach the caller silently, so it is underconstrained instead. A partial

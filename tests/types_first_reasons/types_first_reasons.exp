@@ -4,7 +4,35 @@ Cannot use function type [1] with fewer than 2 type arguments. [missing-type-arg
 
    call_targs_arity_dep.js:2:1
    2| f<number>(1); // Err: too few type arguments, reported at the call
-      ^
+      ^^^^^^^^^^^^
+
+References:
+   call_targs_arity.js:1:26
+   1| declare export function f<A, B>(x: A): B;
+                               ^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------- call_targs_arity_dep.js:4:3
+
+Cannot use function type [1] with fewer than 2 type arguments. [missing-type-arg]
+
+   call_targs_arity_dep.js:4:3
+   4|   (await getF())<number>(1); // Err: too few type arguments, reported at the call
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   call_targs_arity.js:1:26
+   1| declare export function f<A, B>(x: A): B;
+                               ^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------- call_targs_arity_dep.js:5:3
+
+Cannot use function type [1] with more than 2 type arguments. [extra-type-arg]
+
+   call_targs_arity_dep.js:5:3
+   5|   (await getF())<number, string, boolean>(1); // Err: too many type arguments, reported at the call
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    call_targs_arity.js:1:26
@@ -98,4 +126,4 @@ References:
 
 
 
-Found 7 errors
+Found 9 errors

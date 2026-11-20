@@ -36,7 +36,7 @@ function f<
   e.A; // ERROR
   switch (val) {} // ERROR
 }
-f<string, E, typeof E>(E); // OK
+f<string, E>(E); // OK
 f(E); // OK
 
 f(true); // ERROR

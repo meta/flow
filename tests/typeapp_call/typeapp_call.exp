@@ -233,6 +233,34 @@ References:
                 ^^^^^^ [2]
 
 
+Error ----------------------------------------------------------------------------------------------------- call.js:54:1
+
+Cannot use function [1] with more than 1 type argument. [extra-type-arg]
+
+   call.js:54:1
+   54| cond<number, string>(test, 0, 0); // error: more than 1 type argument
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   call.js:1:14
+    1| function cond<T>(test: boolean, a: T, b: T): T {
+                    ^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------------- call.js:55:1
+
+Cannot use function [1] with more than 1 type argument. [extra-type-arg]
+
+   call.js:55:1
+   55| cond<_, string>(test, 0, 0); // error: more than 1 type argument
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   call.js:1:14
+    1| function cond<T>(test: boolean, a: T, b: T): T {
+                    ^^^ [1]
+
+
 Error ------------------------------------------------------------------------------------------------------ new.js:10:1
 
 Cannot cast `c1.x` to `void` because `number` [1] is incompatible with `void` [2]. [incompatible-type]
@@ -312,6 +340,20 @@ References:
              ^^^^^^^ [1]
 
 
+Error ------------------------------------------------------------------------------------------------------ new.js:20:1
+
+Cannot use `C` [1] with more than 1 type argument. [extra-type-arg]
+
+   new.js:20:1
+   20| new C<string, number>; // error: more than 1 type argument
+       ^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   new.js:1:8
+    1| class C<T> {
+              ^^^ [1]
+
+
 Error --------------------------------------------------------------------------------------------------- require.js:1:1
 
 Cannot call non-polymorphic function with type arguments. [nonpolymorphic-type-arg]
@@ -321,4 +363,4 @@ Cannot call non-polymorphic function with type arguments. [nonpolymorphic-type-a
 
 
 
-Found 21 errors
+Found 24 errors
