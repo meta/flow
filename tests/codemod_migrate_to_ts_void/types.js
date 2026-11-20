@@ -13,3 +13,5 @@ export function onRequest(handler: (request: string) => ?boolean): void {} // re
 export type Callback = () => boolean | undefined; // rejects the returned `void` of `callback` in uses.js: made to admit `void`
 export type Form = {getError: () => ?string}; // rejects the returned `void` of `form.getError` in uses.js, made to admit `void`, which is read as `?string`: dropped again
 export function stub(): ?string {} // no `return` statement: returns `undefined`
+declare export function mapMaybe<T, K>(items: Array<T>, f: (item: T) => ?K): Array<K>; // rejects the returned `void` of `skip` in uses.js, but `K` is inferred from it: kept
+export type Confirm = () => void; // its result is read into `undefined` in uses.js, but the functions it types return `void`: kept

@@ -1,21 +1,37 @@
 flow codemod migrate-to-ts-void --write
 >>> Launching report...
 
-Found 11 rejected `void`s in 2 files, and 4 function types' return types rejecting returned `void`s
+Found 12 rejected `void`s in 2 files, and 5 function types' return types rejecting returned `void`s
 
 >>> Launching report...
 
 Changed `void` to `undefined`: 6
 Added `: undefined` return annotations: 2
 Changed function types' return types to admit `void`: 4
-Return types that cannot admit `void`, whose `void`s are changed next: 0
+Return types that cannot admit `void`, whose `void`s are changed next: 1
 Added `return undefined;` to functions without a `return` statement: 3
+Kept in the return types of function types: 1
 Left in generated files and TypeScript declaration files: 0
 Left because they are neither an annotation nor a return: 0
 
 >>> Launching report...
 
-Found 3 rejected `void`s in 2 files, and 0 function types' return types rejecting returned `void`s
+Found 4 rejected `void`s in 2 files, and 1 function types' return types rejecting returned `void`s
+
+>>> Launching report...
+
+Changed `void` to `undefined`: 2
+Added `: undefined` return annotations: 0
+Changed function types' return types to admit `void`: 0
+Return types that cannot admit `void`, whose `void`s are changed next: 1
+Added `return undefined;` to functions without a `return` statement: 1
+Kept in the return types of function types: 1
+Left in generated files and TypeScript declaration files: 0
+Left because they are neither an annotation nor a return: 0
+
+>>> Launching report...
+
+Found 1 rejected `void`s in 1 files, and 2 function types' return types rejecting returned `void`s
 
 >>> Launching report...
 
@@ -23,29 +39,16 @@ Changed `void` to `undefined`: 2
 Added `: undefined` return annotations: 0
 Changed function types' return types to admit `void`: 0
 Return types that cannot admit `void`, whose `void`s are changed next: 0
-Added `return undefined;` to functions without a `return` statement: 1
-Left in generated files and TypeScript declaration files: 0
-Left because they are neither an annotation nor a return: 0
-
->>> Launching report...
-
-Found 0 rejected `void`s in 0 files, and 1 function types' return types rejecting returned `void`s
-
->>> Launching report...
-
-Changed `void` to `undefined`: 1
-Added `: undefined` return annotations: 0
-Changed function types' return types to admit `void`: 0
-Return types that cannot admit `void`, whose `void`s are changed next: 0
 Added `return undefined;` to functions without a `return` statement: 0
+Kept in the return types of function types: 0
 Left in generated files and TypeScript declaration files: 0
 Left because they are neither an annotation nor a return: 0
 
 >>> Launching report...
 
-Found 0 rejected `void`s in 0 files, and 0 function types' return types rejecting returned `void`s
+Found 1 rejected `void`s in 1 files, and 0 function types' return types rejecting returned `void`s
 
-`void` annotations: 16 before, 11 after. `void` return types: 10 before, 7 after
+`void` annotations: 18 before, 12 after. `void` return types: 12 before, 8 after
 
 types.js
 export type Props = {
@@ -66,6 +69,8 @@ export function stub(): ?string {
   return undefined;
 } // no `return` statement: returns `undefined`
 
+declare export function mapMaybe<T, K>(items: Array<T>, f: (item: T) => ?K): Array<K>; // rejects the returned `void` of `skip` in uses.js, but `K` is inferred from it: kept
+export type Confirm = () => void; // its result is read into `undefined` in uses.js, but the functions it types return `void`: kept
 
 uses.js
 import type {Props} from './types';
@@ -130,5 +135,33 @@ function noValue(): string | undefined {
 
 const value: ?string = noValue();
 
+import {mapMaybe} from './types';
+
+const skip = (item: number): undefined => {}; // changed, since `mapMaybe` keeps its return type
+const kept: Array<string> = mapMaybe([1], skip);
+
+import type {Confirm} from './types';
+
+declare const confirm: Confirm;
+const confirmed: undefined = confirm(); // still an error
+
 flow check under experimental.ts_void
-No errors!
+Error ---------------------------------------------------------------------------------------------------- uses.js:71:30
+
+Cannot assign `confirm()` to `confirmed` because `void` [1] is incompatible with `undefined` [2]. [incompatible-type]
+
+   uses.js:71:30
+   71| const confirmed: undefined = confirm(); // still an error
+                                    ^^^^^^^^^
+
+References:
+   types.js:20:29
+   20| export type Confirm = () => void; // its result is read into `undefined` in uses.js, but the functions it types return `void`: kept
+                                   ^^^^ [1]
+   uses.js:71:18
+   71| const confirmed: undefined = confirm(); // still an error
+                        ^^^^^^^^^ [2]
+
+
+
+Found 1 error

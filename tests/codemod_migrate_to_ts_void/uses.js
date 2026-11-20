@@ -50,3 +50,13 @@ function nothing(): undefined {} // kept
 async function load(): Promise<?string> {} // returns `undefined`
 function noValue(): string | void {} // read into `?string` below: changed, then returns `undefined`
 const value: ?string = noValue();
+
+import {mapMaybe} from './types';
+
+const skip = (item: number): void => {}; // changed, since `mapMaybe` keeps its return type
+const kept: Array<string> = mapMaybe([1], skip);
+
+import type {Confirm} from './types';
+
+declare const confirm: Confirm;
+const confirmed: undefined = confirm(); // still an error

@@ -536,6 +536,9 @@ pub mod stats {
         pub kept_return_types: Vec<Loc>,
         /// `return undefined;` added to functions without a `return` statement.
         pub added_returns: usize,
+        /// Rejected `void`s returned by function types, kept: changed to `undefined`, they would
+        /// reject every function they type that returns no value.
+        pub kept_function_type_returns: usize,
         /// Rejected `void`s in generated files and TypeScript declaration files.
         pub unchangeable: usize,
         /// Rejected `void`s that are neither a `void` annotation nor a function's return.
@@ -553,6 +556,7 @@ pub mod stats {
             a.widened_return_types += b.widened_return_types;
             a.kept_return_types.extend(b.kept_return_types);
             a.added_returns += b.added_returns;
+            a.kept_function_type_returns += b.kept_function_type_returns;
             a.unchangeable += b.unchangeable;
             a.unmatched.extend(b.unmatched);
             a.annotations_delta += b.annotations_delta;
@@ -583,6 +587,10 @@ pub mod stats {
                     self.added_returns
                 ),
                 format!(
+                    "Kept in the return types of function types: {}",
+                    self.kept_function_type_returns
+                ),
+                format!(
                     "Left in generated files and TypeScript declaration files: {}",
                     self.unchangeable
                 ),
@@ -608,6 +616,9 @@ pub mod stats {
 pub struct Mapper {
     targets: BTreeSet<Loc>,
     return_types: BTreeSet<Loc>,
+    type_params: BTreeSet<FlowSmolStr>,
+    declared_signatures: BTreeSet<Loc>,
+    function_types: Vec<bool>,
     matched: BTreeSet<Loc>,
     pub stats: stats::Stats,
 }
@@ -617,12 +628,16 @@ impl Mapper {
         Self {
             targets,
             return_types,
+            type_params: BTreeSet::new(),
+            declared_signatures: BTreeSet::new(),
+            function_types: vec![],
             matched: BTreeSet::new(),
             stats: stats::Stats::default(),
         }
     }
 
     pub fn program(&mut self, program: &ast::Program<Loc, Loc>) -> ast::Program<Loc, Loc> {
+        self.type_params = TypeParamNames::of_program(program);
         let program_ = self.map_program(program);
         let before = void_counts(program);
         let after = void_counts(&program_);
@@ -643,6 +658,90 @@ fn undefined_type() -> ast::types::Type<Loc, Loc> {
         loc: Loc::none(),
         comments: None,
     })
+}
+
+/// The names of the type parameters a file declares.
+#[derive(Default)]
+struct TypeParamNames(BTreeSet<FlowSmolStr>);
+
+impl TypeParamNames {
+    fn of_program(program: &ast::Program<Loc, Loc>) -> BTreeSet<FlowSmolStr> {
+        let mut names = Self::default();
+        let Ok(()) = names.program(program);
+        names.0
+    }
+}
+
+impl<'ast> AstVisitor<'ast, Loc, Loc, &'ast Loc, !> for TypeParamNames {
+    fn normalize_loc(loc: &'ast Loc) -> &'ast Loc {
+        loc
+    }
+
+    fn normalize_type(type_: &'ast Loc) -> &'ast Loc {
+        type_
+    }
+
+    fn type_param(
+        &mut self,
+        kind: &ast_visitor::TypeParamsContext,
+        tparam: &'ast ast::types::TypeParam<Loc, Loc>,
+    ) -> Result<(), !> {
+        self.0.insert(tparam.name.name.dupe());
+        ast_visitor::type_param_default(self, kind, tparam)
+    }
+}
+
+/// Whether a type refers to one of the given type parameters.
+struct MentionsTypeParam<'a> {
+    names: &'a BTreeSet<FlowSmolStr>,
+    found: bool,
+}
+
+impl MentionsTypeParam<'_> {
+    fn check(names: &BTreeSet<FlowSmolStr>, t: &ast::types::Type<Loc, Loc>) -> bool {
+        let mut visitor = MentionsTypeParam {
+            names,
+            found: false,
+        };
+        let Ok(()) = visitor.type_(t);
+        visitor.found
+    }
+}
+
+impl<'ast> AstVisitor<'ast, Loc, Loc, &'ast Loc, !> for MentionsTypeParam<'_> {
+    fn normalize_loc(loc: &'ast Loc) -> &'ast Loc {
+        loc
+    }
+
+    fn normalize_type(type_: &'ast Loc) -> &'ast Loc {
+        type_
+    }
+
+    fn generic_type(&mut self, gt: &'ast ast::types::Generic<Loc, Loc>) -> Result<(), !> {
+        if let ast::types::generic::Identifier::Unqualified(id) = &gt.id
+            && self.names.contains(&id.name)
+        {
+            self.found = true;
+        }
+        ast_visitor::generic_type_default(self, gt)
+    }
+}
+
+/// The `void` a return type is, or that it is a `Promise` of.
+fn returned_void(t: &ast::types::Type<Loc, Loc>) -> Option<&Loc> {
+    match t.deref() {
+        ast::types::TypeInner::Void { loc, .. } => Some(loc),
+        ast::types::TypeInner::Generic { inner, .. }
+            if let ast::types::generic::Identifier::Unqualified(id) = &inner.id
+                && id.name == "Promise"
+                && let Some(targs) = &inner.targs
+                && let [targ] = &*targs.arguments
+                && let ast::types::TypeInner::Void { loc, .. } = targ.deref() =>
+        {
+            Some(loc)
+        }
+        _ => None,
+    }
 }
 
 fn void_type() -> ast::types::Type<Loc, Loc> {
@@ -707,7 +806,10 @@ impl<'ast> AstVisitor<'ast, Loc> for Mapper {
     }
 
     fn map_type_(&mut self, t: &'ast ast::types::Type<Loc, Loc>) -> ast::types::Type<Loc, Loc> {
+        // A return type that refers to a type parameter is inferred from the functions passed as
+        // it: admitting `void` there changes what the type parameter is inferred as.
         if self.return_types.contains(t.loc())
+            && !MentionsTypeParam::check(&self.type_params, t)
             && let Some(t_) = admitting_void(t)
         {
             self.matched.insert(t.loc().dupe());
@@ -785,6 +887,48 @@ impl<'ast> AstVisitor<'ast, Loc> for Mapper {
             }
             _ => ast_visitor::map_type_default(self, t),
         }
+    }
+
+    // A `void` a function type returns stays `void`: as in TypeScript, the functions it types
+    // return `void`, and as `undefined` it would reject every one of them that returns no value.
+    // A declared function's signature types no other function.
+    fn map_declare_function(
+        &mut self,
+        loc: &'ast Loc,
+        decl: &'ast ast::statement::DeclareFunction<Loc, Loc>,
+    ) -> ast::statement::DeclareFunction<Loc, Loc> {
+        if let ast::types::TypeInner::Function { loc, .. } = decl.annot.annotation.deref() {
+            self.declared_signatures.insert(loc.dupe());
+        }
+        ast_visitor::map_declare_function_default(self, loc, decl)
+    }
+
+    fn map_function_type(
+        &mut self,
+        loc: &'ast Loc,
+        func: &'ast ast::types::Function<Loc, Loc>,
+    ) -> ast::types::Function<Loc, Loc> {
+        self.function_types
+            .push(self.declared_signatures.contains(loc));
+        let func_ = ast_visitor::map_function_type_default(self, loc, func);
+        self.function_types.pop();
+        func_
+    }
+
+    fn map_function_type_return_annotation(
+        &mut self,
+        return_: &'ast ast::types::function::ReturnAnnotation<Loc, Loc>,
+    ) -> ast::types::function::ReturnAnnotation<Loc, Loc> {
+        if !self.function_types.last().copied().unwrap_or(false)
+            && let ast::types::function::ReturnAnnotation::Available(annot) = return_
+            && let Some(void) = returned_void(&annot.annotation)
+            && self.targets.contains(void)
+        {
+            self.matched.insert(void.dupe());
+            self.stats.kept_function_type_returns += 1;
+            return return_.clone();
+        }
+        ast_visitor::map_function_type_return_annotation_default(self, return_)
     }
 
     fn map_function_(
