@@ -4325,11 +4325,13 @@ pub mod value_to_type_reference_transform {
     use std::ops::Deref;
 
     use dupe::Dupe;
+    use flow_aloc::ALoc;
     use flow_common::reason::Reason;
     use flow_typing_context::Context;
     use flow_typing_errors::error_message::EMissingTypeArgsData;
     use flow_typing_errors::error_message::EnumMemberUsedAsTypeData;
     use flow_typing_errors::error_message::EnumReferenceData;
+    use flow_typing_errors::error_message::ErrorMessage;
     use flow_typing_flow_js_env::FlowJsEnv;
     use flow_typing_type::type_::AnyErrorKind;
     use flow_typing_type::type_::DefTInner;
@@ -4354,6 +4356,21 @@ pub mod value_to_type_reference_transform {
     use super::value_as_type_reference_for_error;
     use crate::type_subst::Purpose;
     use crate::type_subst::subst;
+
+    // A value that cannot be used as a type is reported where the reference is written, not
+    // when a type application of it is expanded.
+    fn add_annot_output<'cx>(
+        cx: &mut Context<'cx>,
+        env: &FlowJsEnv,
+        from_typeapp: bool,
+        msg: ErrorMessage<ALoc>,
+    ) -> Result<(), FlowJsException> {
+        if from_typeapp {
+            Ok(())
+        } else {
+            add_output_with_env(cx, env, msg)
+        }
+    }
 
     // a component syntax value annotation becomes React$RendersExactly of that component
     fn run_on_abstract_component<'cx>(
@@ -4384,7 +4401,7 @@ pub mod value_to_type_reference_transform {
         kind: TypeTKind,
         t: Type,
     ) -> Result<Type, FlowJsException> {
-        run_on_concrete_type_with_env(cx, &FlowJsEnv::entry(), use_op, reason_op, kind, t)
+        run_on_concrete_type_with_env(cx, &FlowJsEnv::entry(), use_op, reason_op, kind, false, t)
     }
 
     pub fn run_on_concrete_type_with_env<'cx>(
@@ -4393,11 +4410,11 @@ pub mod value_to_type_reference_transform {
         use_op: UseOp,
         reason_op: &Reason,
         kind: TypeTKind,
+        from_typeapp: bool,
         t: Type,
     ) -> Result<Type, FlowJsException> {
         use flow_data_structure_wrapper::ord_map::FlowOrdMap;
         use flow_typing_errors::error_message::EnumErrorKind;
-        use flow_typing_errors::error_message::ErrorMessage;
         use flow_typing_type::type_::AnySource;
 
         match t.deref() {
@@ -4465,7 +4482,15 @@ pub mod value_to_type_reference_transform {
                         *strictness_kind,
                         *poly_kind,
                     );
-                    run_on_concrete_type_with_env(cx, env, use_op, reason_op, kind, poly)
+                    run_on_concrete_type_with_env(
+                        cx,
+                        env,
+                        use_op,
+                        reason_op,
+                        kind,
+                        from_typeapp,
+                        poly,
+                    )
                 }
 
                 DefTInner::PolyT(box PolyTData {
@@ -4504,9 +4529,10 @@ pub mod value_to_type_reference_transform {
                     let tparams_loc = tparams_loc.dupe();
 
                     let min_arity = ids.iter().filter(|tp| tp.default.is_none()).count() as i32;
-                    add_output_with_env(
+                    add_annot_output(
                         cx,
                         env,
+                        from_typeapp,
                         ErrorMessage::EMissingTypeArgs(Box::new(EMissingTypeArgsData {
                             loc: reason_op.loc().dupe(),
                             type_: type_reference_with_reason_for_error(&t, reason.dupe()),
@@ -4548,9 +4574,10 @@ pub mod value_to_type_reference_transform {
                 // an enum object value annotation becomes the enum type
                 DefTInner::EnumObjectT { enum_value_t, .. } => Ok(enum_value_t.dupe()),
                 DefTInner::EnumValueT(enum_info) => {
-                    add_output_with_env(
+                    add_annot_output(
                         cx,
                         env,
+                        from_typeapp,
                         ErrorMessage::EEnumError(EnumErrorKind::EnumMemberUsedAsType(Box::new(
                             EnumMemberUsedAsTypeData {
                                 loc: reason_op.loc().dupe(),
@@ -4574,9 +4601,10 @@ pub mod value_to_type_reference_transform {
                 )),
 
                 DefTInner::EmptyT => {
-                    add_output_with_env(
+                    add_annot_output(
                         cx,
                         env,
+                        from_typeapp,
                         ErrorMessage::EValueUsedAsType {
                             reference: value_as_type_reference_for_error(reason_op),
                             value: type_reference_at_loc_for_error(&t, reason_op.loc().dupe()),
@@ -4586,9 +4614,10 @@ pub mod value_to_type_reference_transform {
                 }
 
                 _ => {
-                    add_output_with_env(
+                    add_annot_output(
                         cx,
                         env,
+                        from_typeapp,
                         ErrorMessage::EValueUsedAsType {
                             reference: value_as_type_reference_for_error(reason_op),
                             value: type_reference_at_loc_for_error(&t, reason_op.loc().dupe()),
@@ -4606,9 +4635,10 @@ pub mod value_to_type_reference_transform {
             ),
 
             TypeInner::AnyT(r, AnySource::AnyError(Some(AnyErrorKind::MissingAnnotation))) => {
-                add_output_with_env(
+                add_annot_output(
                     cx,
                     env,
+                    from_typeapp,
                     ErrorMessage::EValueUsedAsType {
                         reference: value_as_type_reference_for_error(reason_op),
                         value: type_reference_at_loc_for_error(&t, reason_op.loc().dupe()),
@@ -4624,9 +4654,10 @@ pub mod value_to_type_reference_transform {
                 reason: r,
                 ..
             }) => {
-                add_output_with_env(
+                add_annot_output(
                     cx,
                     env,
+                    from_typeapp,
                     ErrorMessage::EAnyValueUsedAsType {
                         reference: value_as_type_reference_for_error(reason_op),
                         value: type_reference_at_loc_for_error(&t, reason_op.loc().dupe()),
@@ -4636,9 +4667,10 @@ pub mod value_to_type_reference_transform {
             }
 
             _ => {
-                add_output_with_env(
+                add_annot_output(
                     cx,
                     env,
+                    from_typeapp,
                     ErrorMessage::EValueUsedAsType {
                         reference: value_as_type_reference_for_error(reason_op),
                         value: type_reference_at_loc_for_error(&t, reason_op.loc().dupe()),

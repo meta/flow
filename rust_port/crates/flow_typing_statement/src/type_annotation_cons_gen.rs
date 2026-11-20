@@ -59,6 +59,7 @@ pub fn specialize<'a>(
             reason2: reason_tapp,
             targs: targs.map(Rc::from),
             upper: Some(Box::new(Cont::Collect(collector.dupe()))),
+            from_value: true,
         })));
         flow_js::flow_non_speculating(cx, (&c, &use_t))?;
         Ok(collector
@@ -70,22 +71,27 @@ pub fn specialize<'a>(
 
 /// Checks the type arguments of `c<targs>`, a type application written in the source, once
 /// inference is done. Expanding a type application does not check them again. `targs` is
-/// `None` for a reference to a class without type arguments, as in an `extends` clause.
+/// `None` for a reference to a class without type arguments, as in an `extends` clause. Unless
+/// the application stays a value (`from_value`), this also checks that `c` can be used as a type,
+/// as turning the expanded application into a type does.
 pub fn validate_type_args<'a>(
     cx: &mut Context<'a>,
     use_op: UseOp,
     reason_tapp: Reason,
     c: Type,
     targs: Option<Rc<[Type]>>,
+    from_value: bool,
 ) {
+    let reason_op = reason_of_t(&c).dupe();
     cx.add_post_inference_validation_flow(
         c,
         UseT::new(UseTInner::SpecializeT(Box::new(SpecializeTData {
             use_op,
-            reason: reason_tapp.dupe(),
+            reason: reason_op,
             reason2: reason_tapp,
             targs,
             upper: None,
+            from_value,
         }))),
     );
 }
@@ -267,6 +273,7 @@ pub fn mk_instance<'a>(
                                 use_op: unknown_use(),
                                 reason: instance_reason_clone.dupe(),
                                 kind: type_t_kind,
+                                from_typeapp: false,
                                 tout: Box::new(tvar),
                             },
                         )));

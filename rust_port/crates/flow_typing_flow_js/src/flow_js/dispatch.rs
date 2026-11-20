@@ -2646,6 +2646,7 @@ fn __flow_impl<'cx>(
                 use_op,
                 reason: reason_op,
                 kind: type_t_kind,
+                from_typeapp,
                 tout,
             }),
         ) => {
@@ -2656,6 +2657,7 @@ fn __flow_impl<'cx>(
                     use_op.dupe(),
                     reason_op,
                     *type_t_kind,
+                    *from_typeapp,
                     l.dupe(),
                 )?;
             let tout_t = Type::new(OpenT((**tout).dupe()));
@@ -4710,6 +4712,7 @@ fn __flow_impl<'cx>(
                 reason2: reason_tapp,
                 targs: ts,
                 upper,
+                from_value,
             }),
         ) => {
             let ts_val = ts
@@ -4734,17 +4737,33 @@ fn __flow_impl<'cx>(
                     )?;
                     continue_(cx, env, trace, &t_, upper)?;
                 }
-                None => flow_js_utils::instantiation_kit::validate_type_args::<FlowJs>(
-                    cx,
-                    env,
-                    trace,
-                    use_op.dupe(),
-                    reason_op,
-                    reason_tapp,
-                    tparams_loc.dupe(),
-                    &xs,
-                    ts_val.to_vec(),
-                )?,
+                None => {
+                    flow_js_utils::instantiation_kit::validate_type_args::<FlowJs>(
+                        cx,
+                        env,
+                        trace,
+                        use_op.dupe(),
+                        reason_op,
+                        reason_tapp,
+                        tparams_loc.dupe(),
+                        &xs,
+                        ts_val.to_vec(),
+                    )?;
+                    // Whether the definition can be used as a type does not depend on the type
+                    // arguments, so it is checked without instantiating it.
+                    if !from_value {
+                        mk_instance_source(
+                            cx,
+                            env,
+                            TypeTKind::InstanceKind,
+                            Some(trace),
+                            reason_tapp,
+                            reason_op,
+                            false,
+                            t,
+                        )?;
+                    }
+                }
             }
         }
         // A reference without type arguments to a definition that is not polymorphic has
@@ -4766,6 +4785,7 @@ fn __flow_impl<'cx>(
                 reason2: _,
                 targs: None,
                 upper,
+                from_value: _,
             }),
         ) => {
             if let Some(upper) = upper {
@@ -4782,6 +4802,7 @@ fn __flow_impl<'cx>(
                 reason2: reason_tapp,
                 targs: Some(ts),
                 upper,
+                from_value,
             }),
         ) => {
             let concretize =
@@ -4820,6 +4841,7 @@ fn __flow_impl<'cx>(
                                             reason2: reason_tapp.dupe(),
                                             targs: Some(ts.dupe()),
                                             upper: Some(Box::new(Cont::Collect(collector.dupe()))),
+                                            from_value: true,
                                         }))),
                                     ),
                                 )?;
@@ -4856,29 +4878,44 @@ fn __flow_impl<'cx>(
                                     reason2: reason_tapp.dupe(),
                                     targs: Some(ts.dupe()),
                                     upper: None,
+                                    from_value: true,
                                 }))),
                             ),
                         )?;
+                        if !from_value {
+                            mk_instance_source(
+                                cx,
+                                env,
+                                TypeTKind::InstanceKind,
+                                Some(trace),
+                                reason_tapp,
+                                reason_op,
+                                false,
+                                l,
+                            )?;
+                        }
                     }
                 }
-                [] => {
-                    flow_js_utils::add_output_with_env(
-                        cx,
-                        env,
-                        flow_js_utils::incompatible_type_error(
-                            l,
-                            IncompatibleUpperData {
-                                loc: flow_js_utils::error_message_loc_of_upper(u),
-                                kind: flow_js_utils::error_message_kind_of_upper(u),
-                            },
-                            Some(use_op.dupe()),
-                        ),
-                    )?;
-                    let any = any_t::make(AnySource::AnyError(None), reason_l.dupe());
-                    if let Some(upper) = upper {
+                [] => match upper {
+                    Some(upper) => {
+                        let any = any_t::make(AnySource::AnyError(None), reason_l.dupe());
                         continue_(cx, env, trace, &any, upper)?;
                     }
-                }
+                    None => {
+                        flow_js_utils::add_output_with_env(
+                            cx,
+                            env,
+                            flow_js_utils::incompatible_type_error(
+                                l,
+                                IncompatibleUpperData {
+                                    loc: flow_js_utils::error_message_loc_of_upper(u),
+                                    kind: flow_js_utils::error_message_kind_of_upper(u),
+                                },
+                                Some(use_op.dupe()),
+                            ),
+                        )?;
+                    }
+                },
             }
         }
         // A value with a construct signature (or failing that, a `prototype`)
@@ -4896,6 +4933,7 @@ fn __flow_impl<'cx>(
                 reason2: _,
                 targs: None,
                 upper,
+                from_value: _,
             }),
         ) => {
             let concretize =
@@ -4928,16 +4966,28 @@ fn __flow_impl<'cx>(
             AnyT(_, _) | ImplicitInstantiationTvar(_),
             SpecializeT(box SpecializeTData {
                 use_op: _,
-                reason: _,
-                reason2: _,
+                reason: reason_op,
+                reason2: reason_tapp,
                 targs: _,
                 upper,
+                from_value,
             }),
-        ) => {
-            if let Some(upper) = upper {
-                continue_(cx, env, trace, l, upper)?;
+        ) => match upper {
+            Some(upper) => continue_(cx, env, trace, l, upper)?,
+            None if !from_value => {
+                mk_instance_source(
+                    cx,
+                    env,
+                    TypeTKind::InstanceKind,
+                    Some(trace),
+                    reason_tapp,
+                    reason_op,
+                    false,
+                    l,
+                )?;
             }
-        }
+            None => {}
+        },
         // this-specialize a this-abstracted class by substituting This
         #[rustfmt::skip]
         (
@@ -11273,6 +11323,29 @@ fn __flow_impl<'cx>(
             }),
         ) => {
             collector.add(l.dupe());
+        }
+        // Applying a type that is not polymorphic is reported where the type application is
+        // written, so expanding the application, or comparing it with another one, does not
+        // report it again.
+        (
+            _,
+            SpecializeT(box SpecializeTData {
+                targs: Some(_),
+                upper: Some(_),
+                ..
+            })
+            | ConcretizeTypeAppsT(..),
+        ) => {
+            default_resolve::default_resolve_touts(
+                cx,
+                &|cx: &mut Context<'cx>, l_inner, u_inner| {
+                    rec_flow(cx, env, trace, (l_inner, u_inner))
+                },
+                None,
+                env,
+                reason_of_t(l).loc().dupe(),
+                u,
+            )?;
         }
         _ => {
             let use_op = use_op_of_use_t(u);

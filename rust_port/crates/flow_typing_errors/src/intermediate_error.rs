@@ -3936,14 +3936,12 @@ where
                 mk_use_op_error(use_loc, use_op, None, lower_is_not(LowerRequirement::Class))
             }
 
-            UpperKind::IncompatibleSpecializeT | UpperKind::IncompatibleVarianceCheckT => {
-                mk_use_op_error(
-                    use_loc,
-                    use_op,
-                    None,
-                    lower_is_not(LowerRequirement::PolymorphicType),
-                )
-            }
+            UpperKind::IncompatibleSpecializeT => mk_use_op_error(
+                use_loc,
+                use_op,
+                None,
+                lower_is_not(LowerRequirement::PolymorphicType),
+            ),
 
             UpperKind::IncompatibleSuperT => mk_use_op_error(
                 use_loc,

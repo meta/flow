@@ -2007,7 +2007,6 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             UpperKind::IncompatibleMixinT => "IncompatibleMixinT".to_string(),
             UpperKind::IncompatibleSpecializeT => "IncompatibleSpecializeT".to_string(),
             UpperKind::IncompatibleThisSpecializeT => "IncompatibleThisSpecializeT".to_string(),
-            UpperKind::IncompatibleVarianceCheckT => "IncompatibleVarianceCheckT".to_string(),
             UpperKind::IncompatibleGetKeysT => "IncompatibleGetKeysT".to_string(),
             UpperKind::IncompatibleHasOwnPropT(_, _) => "IncompatibleHasOwnPropT".to_string(),
             UpperKind::IncompatibleGetValuesT => "IncompatibleGetValuesT".to_string(),

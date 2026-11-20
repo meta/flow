@@ -1,3 +1,17 @@
+Error -------------------------------------------------------------------------------------- call_targs_arity_dep.js:2:1
+
+Cannot use function type [1] with fewer than 2 type arguments. [missing-type-arg]
+
+   call_targs_arity_dep.js:2:1
+   2| f<number>(1); // Err: too few type arguments, reported at the call
+      ^
+
+References:
+   call_targs_arity.js:1:26
+   1| declare export function f<A, B>(x: A): B;
+                               ^^^^^^ [1]
+
+
 Error ---------------------------------------------------------------------------- destructured_param_default_dep.js:2:3
 
 Cannot call `f` with `0` bound to the first parameter because `0` [1] is incompatible with `{}` [2]. [incompatible-type]
@@ -12,24 +26,23 @@ References:
                                     ^^ [2]
 
 
+Error -------------------------------------------------------------------------------- instantiation_compare_err.js:4:38
+
+Cannot instantiate `S` because `S` [1] is not a polymorphic type. [incompatible-use]
+
+   instantiation_compare_err.js:4:38
+   4| export class Stacks extends Provider<S<string>> {} // Err: cannot instantiate
+                                           ^^^^^^^^^
+
+References:
+   instantiation_compare_err.js:3:6
+   3| type S = Conf<number> | Conf<string>;
+           ^ [1]
+
+
 Error ---------------------------------------------------------------------------------------- instantiation_err.js:2:17
 
 Cannot instantiate `T` because `T` [1] is not a polymorphic type. [incompatible-use]
-
-   instantiation_err.js:2:17
-   2| export type U = T<string>; // Err: cannot instantiate
-                      ^^^^^^^^^
-
-References:
-   type_exports.js:1:13
-   1| export type T = string;
-                  ^ [1]
-
-
-Error ---------------------------------------------------------------------------------------- instantiation_err.js:2:17
-
-Cannot instantiate `T` because `T` [1] is not a polymorphic type. (FLOW BUG: This is a misplaced error. The original
-error was raised in file `instantiation_err_dep.js`). [incompatible-use]
 
    instantiation_err.js:2:17
    2| export type U = T<string>; // Err: cannot instantiate
@@ -85,4 +98,4 @@ References:
 
 
 
-Found 6 errors
+Found 7 errors

@@ -1512,6 +1512,7 @@ fn convert_inner<'a>(
                 use_op,
                 type_: type_t,
                 targs: app_targs,
+                from_value,
                 ..
             }) = rt.deref()
             {
@@ -1521,6 +1522,7 @@ fn convert_inner<'a>(
                     reason_tapp,
                     type_t.dupe(),
                     Some(app_targs.dupe()),
+                    *from_value,
                 );
             }
             ast::types::Type::new(TypeInner::Typeof {
@@ -6585,6 +6587,7 @@ fn mk_nominal_type_inner<'a>(
                     use_op,
                     type_: type_t,
                     targs: app_targs,
+                    from_value,
                     ..
                 }) => crate::type_annotation_cons_gen::validate_type_args(
                     cx,
@@ -6592,6 +6595,7 @@ fn mk_nominal_type_inner<'a>(
                     app_reason.dupe(),
                     type_t.dupe(),
                     Some(app_targs.dupe()),
+                    *from_value,
                 ),
                 _ => panic!("typeapp_annot should create a TypeAppT"),
             }

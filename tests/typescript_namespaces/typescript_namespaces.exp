@@ -27,21 +27,6 @@ References:
                              ^^^^^^^^ [1]
 
 
-Error ---------------------------------------------------------------------------------- lib/merged_member_value.js:3:20
-
-Cannot instantiate function type because `() => void` [1] is not a polymorphic type. (FLOW BUG: This is a misplaced
-error. The original error was raised in file `merged_member_value_references.js`). [incompatible-use]
-
-   lib/merged_member_value.js:3:20
-   3|   type UsesValue = make<string>; // ERROR: `make` is the function declared in the other block
-                         ^^^^^^^^^^^^
-
-References:
-   lib/merged_member_value.js:9:24
-   9|   declare function make(): void;
-                             ^^^^^^^^ [1]
-
-
 Error -------------------------------------------------------------------------------- class_then_namespace_local.js:8:1
 
 Cannot cast `1` to `T` because `1` [1] is incompatible with `T` [2]. [incompatible-type]
@@ -565,4 +550,4 @@ References:
 
 
 
-Found 37 errors
+Found 36 errors

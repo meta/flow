@@ -1558,6 +1558,7 @@ fn validate_heritage_type_args<'a>(cx: &mut Context<'a>, t: &Type) {
             use_op,
             type_,
             targs,
+            from_value,
             ..
         }) => type_annotation_cons_gen::validate_type_args(
             cx,
@@ -1565,6 +1566,7 @@ fn validate_heritage_type_args<'a>(cx: &mut Context<'a>, t: &Type) {
             reason.dupe(),
             type_.dupe(),
             Some(targs.dupe()),
+            *from_value,
         ),
         TypeInner::ThisTypeAppT(box ThisTypeAppTData {
             reason,
@@ -1577,6 +1579,7 @@ fn validate_heritage_type_args<'a>(cx: &mut Context<'a>, t: &Type) {
             reason.dupe(),
             type_.dupe(),
             Some(targs.dupe()),
+            true,
         ),
         _ => {}
     }
@@ -1786,6 +1789,7 @@ fn check_super<'a, C: crate::func_params_intf::Config>(
                     .reposition_and_annotate(annot_loc.dupe()),
                 c.dupe(),
                 None,
+                true,
             );
         }
     }

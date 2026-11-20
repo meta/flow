@@ -763,6 +763,7 @@ pub fn util_use_op_of_use_t<T, CX: ContextFamily>(
             let r2 = data.reason2.dupe();
             let ts = data.targs.clone();
             let upper = data.upper.clone();
+            let from_value = data.from_value;
             call_util(&data.use_op, &move |op| {
                 UseT::new(UseTInner::SpecializeT(Box::new(SpecializeTData {
                     use_op: op,
@@ -770,6 +771,7 @@ pub fn util_use_op_of_use_t<T, CX: ContextFamily>(
                     reason2: r2.dupe(),
                     targs: ts.clone(),
                     upper: upper.clone(),
+                    from_value,
                 })))
             })
         }
@@ -968,6 +970,7 @@ pub fn util_use_op_of_use_t<T, CX: ContextFamily>(
         UseTInner::ValueToTypeReferenceT(data) => {
             let reason = data.reason.dupe();
             let kind = data.kind.clone();
+            let from_typeapp = data.from_typeapp;
             let t = data.tout.clone();
             call_util(&data.use_op, &move |use_op| {
                 UseT::new(UseTInner::ValueToTypeReferenceT(Box::new(
@@ -975,6 +978,7 @@ pub fn util_use_op_of_use_t<T, CX: ContextFamily>(
                         use_op,
                         reason: reason.dupe(),
                         kind: kind.clone(),
+                        from_typeapp,
                         tout: t.clone(),
                     },
                 )))

@@ -2423,6 +2423,8 @@ pub struct SpecializeTData<CX: ContextFamily> {
     pub reason2: Reason,
     pub targs: Option<Rc<[Type]>>,
     pub upper: Option<Box<Cont<CX>>>,
+    /// As in `TypeAppT`: the application stays a value instead of being turned into a type.
+    pub from_value: bool,
 }
 
 impl<CX: ContextFamily> Clone for SpecializeTData<CX> {
@@ -2433,6 +2435,7 @@ impl<CX: ContextFamily> Clone for SpecializeTData<CX> {
             reason2: self.reason2.dupe(),
             targs: self.targs.dupe(),
             upper: self.upper.clone(),
+            from_value: self.from_value,
         }
     }
 }
@@ -2444,6 +2447,7 @@ impl<CX: ContextFamily> PartialEq for SpecializeTData<CX> {
             && self.reason2 == other.reason2
             && self.targs == other.targs
             && self.upper == other.upper
+            && self.from_value == other.from_value
     }
 }
 
@@ -2456,6 +2460,7 @@ impl<CX: ContextFamily> Hash for SpecializeTData<CX> {
         self.reason2.hash(state);
         self.targs.hash(state);
         self.upper.hash(state);
+        self.from_value.hash(state);
     }
 }
 
@@ -2473,6 +2478,7 @@ impl<CX: ContextFamily> Ord for SpecializeTData<CX> {
             .then_with(|| self.reason2.cmp(&other.reason2))
             .then_with(|| self.targs.cmp(&other.targs))
             .then_with(|| self.upper.cmp(&other.upper))
+            .then_with(|| self.from_value.cmp(&other.from_value))
     }
 }
 
@@ -2484,6 +2490,7 @@ impl<CX: ContextFamily> std::fmt::Debug for SpecializeTData<CX> {
             .field("reason2", &self.reason2)
             .field("targs", &self.targs)
             .field("upper", &self.upper)
+            .field("from_value", &self.from_value)
             .finish()
     }
 }
@@ -2493,6 +2500,9 @@ pub struct ValueToTypeReferenceTData {
     pub use_op: UseOp,
     pub reason: Reason,
     pub kind: TypeTKind,
+    /// The value is an expanded type application. Whether its definition can be used as a type
+    /// is checked where the application is written, so it is not reported again.
+    pub from_typeapp: bool,
     pub tout: Box<Tvar>,
 }
 

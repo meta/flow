@@ -1797,6 +1797,7 @@ pub(super) fn mk_typeapp_instance_annot<'cx>(
                 reason2: reason_tapp.dupe(),
                 targs: Some(ts),
                 upper: Some(Box::new(Cont::Collect(collector.dupe()))),
+                from_value,
             }))),
         ),
     )?;
@@ -1807,7 +1808,17 @@ pub(super) fn mk_typeapp_instance_annot<'cx>(
         Ok(t)
     } else {
         let reason_type = type_util::reason_of_t(c);
-        mk_instance_raw(cx, env, None, trace, reason_tapp, use_desc, reason_type, &t)
+        mk_instance_raw(
+            cx,
+            env,
+            None,
+            trace,
+            reason_tapp,
+            use_desc,
+            reason_type,
+            true,
+            &t,
+        )
     }
 }
 
@@ -1835,6 +1846,7 @@ pub(super) fn mk_typeapp_instance<'cx>(
                 reason2: reason_tapp.dupe(),
                 targs: Some(ts),
                 upper: Some(Box::new(Cont::Collect(collector.dupe()))),
+                from_value,
             }))),
         ),
     )?;
@@ -1852,6 +1864,7 @@ pub(super) fn mk_typeapp_instance<'cx>(
             trace,
             reason_tapp,
             reason_type,
+            true,
             &t,
         )
     }
@@ -1887,7 +1900,17 @@ pub(super) fn mk_typeapp_instance_of_poly<'cx>(
     if from_value {
         Ok(t)
     } else {
-        mk_instance(cx, env, None, Some(trace), reason_tapp, false, &t)
+        mk_instance_raw(
+            cx,
+            env,
+            None,
+            Some(trace),
+            reason_tapp,
+            false,
+            reason_tapp,
+            true,
+            &t,
+        )
     }
 }
 
@@ -1908,6 +1931,7 @@ pub(super) fn mk_instance<'cx>(
         instance_reason,
         use_desc,
         instance_reason,
+        false,
         c,
     )
 }
@@ -1919,6 +1943,7 @@ pub(super) fn mk_instance_source<'cx>(
     trace: Option<DepthTrace>,
     instance_reason: &Reason,
     reason_type: &Reason,
+    from_typeapp: bool,
     c: &Type,
 ) -> Result<Type, FlowJsException> {
     let tvar_id = flow_typing_tvar::mk_no_wrap(cx, instance_reason);
@@ -1935,6 +1960,7 @@ pub(super) fn mk_instance_source<'cx>(
                     use_op: unknown_use(),
                     reason: reason_type.dupe(),
                     kind: type_t_kind,
+                    from_typeapp,
                     tout: Box::new(tvar.dupe()),
                 },
             ))),
@@ -1951,11 +1977,21 @@ pub(super) fn mk_instance_raw<'cx>(
     instance_reason: &Reason,
     use_desc: bool,
     reason_type: &Reason,
+    from_typeapp: bool,
     c: &Type,
 ) -> Result<Type, FlowJsException> {
     // Make an annotation
     let type_t_kind = type_t_kind.unwrap_or(TypeTKind::InstanceKind);
-    let source = mk_instance_source(cx, env, type_t_kind, trace, instance_reason, reason_type, c)?;
+    let source = mk_instance_source(
+        cx,
+        env,
+        type_t_kind,
+        trace,
+        instance_reason,
+        reason_type,
+        from_typeapp,
+        c,
+    )?;
     Ok(Type::new(TypeInner::AnnotT(
         instance_reason.dupe(),
         source,

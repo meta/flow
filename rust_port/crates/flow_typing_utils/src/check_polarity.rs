@@ -16,8 +16,6 @@ use flow_common::subst_name::SubstName;
 use flow_typing_context::Context;
 use flow_typing_errors::error_message::EPolarityMismatchData;
 use flow_typing_errors::error_message::ErrorMessage;
-use flow_typing_errors::error_message::IncompatibleUpperData;
-use flow_typing_errors::error_message::UpperKind;
 use flow_typing_flow_common::flow_js_utils;
 use flow_typing_flow_common::flow_js_utils::FlowJsException;
 use flow_typing_flow_js_env::FlowJsEnv;
@@ -31,7 +29,6 @@ use flow_typing_type::type_::DestructorSpreadTupleTypeData;
 use flow_typing_type::type_::DictType;
 use flow_typing_type::type_::FunType;
 use flow_typing_type::type_::GenericTData;
-use flow_typing_type::type_::ImplicitInstantiationTvarData;
 use flow_typing_type::type_::InstTypeInner;
 use flow_typing_type::type_::NamespaceType;
 use flow_typing_type::type_::ObjKind;
@@ -198,10 +195,6 @@ fn check_polarity_impl<'cx>(
                 &|_, reason| reason.loc().dupe(),
                 &|cx, env, l| {
                     match l.deref() {
-                        TypeInner::AnyT(..)
-                        | TypeInner::ImplicitInstantiationTvar(
-                            box ImplicitInstantiationTvarData { .. },
-                        ) => return Ok(()),
                         TypeInner::DefT(_, d) => {
                             if let DefTInner::PolyT(box PolyTData {
                                 tparams: tps,
@@ -260,26 +253,12 @@ fn check_polarity_impl<'cx>(
                                 }
                             }
                         }
-                        // We will encounter this when walking an extends clause which does
-                        // not have explicit type arguments. The class has an implicit this type
-                        // parameter which needs to be specialized to the inheriting class, but
-                        // that is uninteresting for the variance check machinery.
-                        TypeInner::ThisInstanceT(..) if targs.is_empty() => return Ok(()),
                         _ => {}
                     }
-                    flow_js_utils::add_output_with_env(
-                        cx,
-                        env,
-                        flow_js_utils::incompatible_type_error_with_lower_kind(
-                            l,
-                            flow_js_utils::error_message_kind_of_lower(t),
-                            IncompatibleUpperData {
-                                loc: reason_of_t(type_).loc().dupe(),
-                                kind: UpperKind::IncompatibleVarianceCheckT,
-                            },
-                            None,
-                        ),
-                    )
+                    // A root that is not polymorphic has no type parameters to check the type
+                    // arguments against. Applying it is reported where the application is
+                    // written.
+                    Ok(())
                 },
                 type_,
             )?;

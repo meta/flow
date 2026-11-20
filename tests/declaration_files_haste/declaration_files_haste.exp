@@ -19,14 +19,6 @@ Error --------------------------------------------------------------------------
 
 `Class<any>` [1] is not a polymorphic type. [incompatible-use]
 
-   13| class GenericRecord<T> extends GenericRecordBase<T> {} // ERROR
-                                      ^^^^^^^^^^^^^^^^^ [1]
-
-
-Error ------------------------------------------------------------------------------------------- GenericRecord.js:13:32
-
-`Class<any>` [1] is not a polymorphic type. [incompatible-use]
-
    GenericRecord.js:13:32
    13| class GenericRecord<T> extends GenericRecordBase<T> {} // ERROR
                                       ^^^^^^^^^^^^^^^^^^^^
@@ -195,14 +187,6 @@ Error --------------------------------------------------------------------------
 
 class `C` [1] is not a polymorphic type. [incompatible-use]
 
-   2| class D<T> extends C<T> {} // ERROR
-                         ^ [1]
-
-
-Error ------------------------------------------------------------------------------------ non_polymorphic_super.js:2:20
-
-class `C` [1] is not a polymorphic type. [incompatible-use]
-
    non_polymorphic_super.js:2:20
    2| class D<T> extends C<T> {} // ERROR
                          ^^^^
@@ -210,14 +194,6 @@ class `C` [1] is not a polymorphic type. [incompatible-use]
 References:
    non_polymorphic_super.js:2:20
    2| class D<T> extends C<T> {} // ERROR
-                         ^ [1]
-
-
-Error ------------------------------------------------------------------------------------ non_polymorphic_super.js:6:20
-
-`Class<Foo>` [1] is not a polymorphic type. [incompatible-use]
-
-   6| class E<T> extends B<T> {} // ERROR
                          ^ [1]
 
 
@@ -287,4 +263,4 @@ References:
 
 
 
-Found 18 errors
+Found 15 errors
