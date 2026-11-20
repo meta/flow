@@ -264,7 +264,8 @@ fn recorded_declare_namespace_member_opt<'cx>(
         use_loc: ALoc,
     ) -> Option<Type> {
         match lookup_mode {
-            LookupMode::ForType => namespace_type_member_opt(cx, namespace_t, name, use_loc),
+            LookupMode::ForType => namespace_type_member_opt(cx, namespace_t, name, use_loc.dupe())
+                .or_else(|| namespace_value_member_opt(cx, namespace_t, name, use_loc)),
             LookupMode::ForValue | LookupMode::ForTypeof => {
                 namespace_value_member_opt(cx, namespace_t, name, use_loc)
             }
