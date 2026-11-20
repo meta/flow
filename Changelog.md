@@ -1,3 +1,35 @@
+### 0.342.0
+
+Likely to cause new Flow errors:
+* A failed attempt to match a member of a union no longer changes the types that later attempts see, which can find errors that were missed. (e.g. [try-Flow](https://flow.org/try/#1N4Igxg9gdgZglgcxALlAIwIZoKYBsD6uEEAztvhgE6UYCe+JADpdhgCYowa5kA0I2KAFcAtiRQAXSkOz9sAD0bZKcEYIncAdJCgkJ+RlQxjO3PgMXLV6rRJINaUDfMnTZIFhjATN0p9ZQQDCEJCBEMCTgwEH4hMnwhKABrKAgAdyh8OEywCLAAC3wANyo4LFxscWQuHnc2bCL8aFxaTQlaJXwWZlNa-nrmbFyJbDYAWnalXvMSJOwJAtox4VxcafdZ+cXl0RxKddioMAqqCY7sA5BEqCHKkioljBIySkjoS+vb54exiEY3qDcMYFDDZD66DAwbBjBDzEaUEhjMgSeFVGrmRJxUZjZhhOBkS4KJQqNROLRPF76P7KCIQfbVMzYAC+-Eg9UC9WOVGwAAIdHoefISMgeQBBah0AA8whEewAfDyAD5iiW0SV6FRQBBygDcAB0oAaKhIebQSDyALyCkiacKMAAU8ktCvtwAwIoAjEyAJTe-VHaACgBe5qtZttGAdtGdPNdaBFAHISAmfX6DWbLTyQzqeQB6XM85SUOm8HlpJ48rxgbD-UYxEBFZQkODvZANgAMmgAzAAWTvtkBMoA))
+* Flow now infers the type arguments of a generic call by matching its arguments and its expected type against the signature directly, rather than by solving temporary type variables through subtyping. Some inferred types change, and some errors move from an argument to the place where the call's result is used.
+* Errors about a type application (a type that is not polymorphic, a value used as a type) are now reported once, where the application is written, including for applications of generic type parameters and of `any`-typed values
+* `untyped-type-import` errors are now always on (the lint was on by default already). Delete references to the lint in your `.flowconfig` and `flowlint` comments — the setting is a no-op for this release and will be removed in a future release.
+* `internal-type` errors are now always on (the lint was on by default already). Delete references to the lint in your `.flowconfig` and `flowlint` comments — the setting is a no-op for this release and will be removed in a future release.
+* `invalid-this-arg` errors are now always on (the lint was on by default already). Delete references to the lint in your `.flowconfig` and `flowlint` comments — the setting is a no-op for this release and will be removed in a future release.
+* `libdef-override` errors are now always on (the lint was on by default already). Delete references to the lint in your `.flowconfig` and `flowlint` comments — the setting is a no-op for this release and will be removed in a future release.
+* `nested-component` errors are now always on (the lint was on by default already, but `all=warn`, `all=off` or an explicit setting could weaken it). Delete references to the lint in your `.flowconfig` and `flowlint` comments — the setting is a no-op for this release and will be removed in a future release.
+* `nested-hook` errors are now always on (the lint was on by default already, but `all=warn`, `all=off` or an explicit setting could weaken it). Delete references to the lint in your `.flowconfig` and `flowlint` comments — the setting is a no-op for this release and will be removed in a future release.
+* `unsafe-object-assign` errors are now always on (the lint was on by default already, but `all=warn`, `all=off` or an explicit setting could weaken it). Delete references to the lint in your `.flowconfig` and `flowlint` comments — the setting is a no-op for this release and will be removed in a future release.
+* `react-intrinsic-overlap` errors are now always on and can no longer be turned off with lint settings. Suppress them with `$FlowFixMe[react-intrinsic-overlap]`. Delete references to the lint in your `.flowconfig` and `flowlint` comments — the setting is a no-op for this release and will be removed in a future release.
+* `T[K]` of an optional property now includes `void`; some errors involving optional properties are reported at different locations or with different codes.
+
+New Features:
+* `undefined` is always accepted as a type annotation. `experimental.undefined_type` only accepts `true`.
+
+Notable bug fixes:
+* An interface that extends a type alias whose type parameters all have defaults no longer loses the members it inherits when imported
+* Type references inside a `declare namespace` block now resolve classes, enums and values declared in the namespace's other blocks, as they already did when the declaration was imported
+* A callback parameter's hint no longer includes `void` from members of a union hint that do not take the parameter.
+* Arguments of `yield`, `yield*` and `return` in annotated generators are now checked with the annotation as a hint, as in TypeScript, and `AsyncGenerator` is covariant in its yield and return types like `Generator`.
+* Testing a property against a union of literals that includes `null` or `undefined` no longer drops members whose property is `null` or `void`. Under `experimental.ts_void`, testing a property against `undefined` or a literal narrows away members whose property is `void`.
+* Under `experimental.ts_void`, fixed a spurious `missing-local-annot` on a callback whose call has another callback that returns no value.
+* Type-argument errors on `new` of a value with a construct signature are reported at the `new` expression instead of the signature's declaration.
+* `Promise.resolve()` returns `Promise<void>`, and a return hint no longer makes an overloaded call fail when an overload accepts its arguments.
+
+Misc:
+* Document the `flow-upgrade` package on flow.org.
+
 ### 0.341.0
 
 Likely to cause new Flow errors:
