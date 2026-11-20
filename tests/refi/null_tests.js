@@ -170,3 +170,10 @@ class D extends C {
     return "";
   }
 }
+
+// obj.p === a union holding null (sentinel)
+function sentinel_union(o: {value: string, err: null} | {err: 'b'}, e: 'b' | null) {
+  if (o.err === e) {
+    o.value as string | void; // ok
+  }
+}

@@ -1723,8 +1723,12 @@ pub fn sentinel_refinement(
                     _ => false,
                 }
             }
-            (TypeInner::DefT(_, d), UnionEnum::Null) if matches!(&**d, DefTInner::NullT) => true,
-            (TypeInner::DefT(_, d), UnionEnum::Void) if matches!(&**d, DefTInner::VoidT) => true,
+            (TypeInner::DefT(_, d), UnionEnum::Null) if matches!(&**d, DefTInner::NullT) => !sense,
+            (TypeInner::DefT(_, d), UnionEnum::Void)
+                if matches!(&**d, DefTInner::VoidT | DefTInner::TsVoidT) =>
+            {
+                !sense
+            }
             _ => false,
         }
     }
@@ -1743,6 +1747,7 @@ pub fn sentinel_refinement(
                     | DefTInner::SingletonBigIntT { .. }
                     | DefTInner::NullT
                     | DefTInner::VoidT
+                    | DefTInner::TsVoidT
             ),
             _ => false,
         }
@@ -1832,7 +1837,7 @@ pub fn sentinel_refinement(
                 false
             }
             (TypeInner::DefT(_, d), UnionEnumStar::One(UnionEnum::Void))
-                if matches!(d.deref(), DefTInner::VoidT) =>
+                if matches!(d.deref(), DefTInner::VoidT | DefTInner::TsVoidT) =>
             {
                 false
             }
