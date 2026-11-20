@@ -1,0 +1,19 @@
+Error ---------------------------------------------------------------------------------- optional_export.android.js:1:28
+
+Cannot conform to common interface module because in property `b`: `string` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+Read the docs on Flow's multi-platform support for more information: https://flow.org/en/docs/react/multiplatform.
+
+   optional_export.android.js:1:28
+   1| module.exports = {a: 1, b: 'b'}; // error
+                                 ^^^ [1]
+
+References:
+   optional_export.js.flow:1:59
+   1| declare module.exports: {readonly a: number, readonly b?: number};
+                                                                ^^^^^^ [2]
+
+
+
+Found 1 error

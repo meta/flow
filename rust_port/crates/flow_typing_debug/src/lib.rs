@@ -508,7 +508,10 @@ fn dump_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, t: &Type) -> Str
      -> String {
         let mut elems: Vec<String> = elements
             .iter()
-            .map(|TupleElement { t, .. }| kid(tvars, t))
+            .map(|TupleElement { t, optional, .. }| {
+                let t = kid(tvars, t);
+                if *optional { format!("{}?", t) } else { t }
+            })
             .collect();
         if let Some(TupleElement { t, .. }) = rest {
             elems.push(format!("...{}", kid(tvars, t)));
@@ -550,8 +553,14 @@ fn dump_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, t: &Type) -> Str
             }
             DefTInner::FunT(_, fun) => {
                 let this_str = kid(tvars, &fun.this_t.0);
-                let params_str: Vec<String> =
-                    fun.params.iter().map(|fp| kid(tvars, &fp.1)).collect();
+                let params_str: Vec<String> = fun
+                    .params
+                    .iter()
+                    .map(|fp| {
+                        let opt = if fp.optional { "?" } else { "" };
+                        format!("{}{}", opt, kid(tvars, &fp.t))
+                    })
+                    .collect();
                 let rest_str = fun
                     .rest_param
                     .as_ref()
@@ -801,10 +810,6 @@ fn dump_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, t: &Type) -> Str
             let extra = format!("{}: {}", name, kid(tvars, bound));
             p(cx, t, true, &extra)
         }
-        TypeInner::OptionalT { type_, .. } => {
-            let extra = kid(tvars, type_);
-            p(cx, t, true, &extra)
-        }
         TypeInner::EvalT {
             type_,
             defer_use_t,
@@ -856,6 +861,7 @@ fn dump_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, t: &Type) -> Str
                 }
                 type_::union_rep::UnionKind::ResolvedKind => "ResolvedKind",
                 type_::union_rep::UnionKind::LogicalKind => "LogicalKind",
+                type_::union_rep::UnionKind::OptionalKind => "OptionalKind",
                 type_::union_rep::UnionKind::UnknownKind => "UnknownKind",
             };
             let members: Vec<String> = rep.members_iter().map(|t| kid(tvars, t)).collect();
@@ -1061,10 +1067,7 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             ObjKind::Exact | ObjKind::Inexact => {}
         }
         for (k, prop) in &s.props {
-            let opt = if matches!(
-                type_::property::type_(prop).deref(),
-                TypeInner::OptionalT { .. }
-            ) {
+            let opt = if type_::property::is_optional(prop) {
                 "?"
             } else {
                 ""
@@ -1092,6 +1095,7 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
                         key_loc: first_loc(p),
                         type_: t,
                         polarity: Polarity::Neutral,
+                        optional: false,
                     }))),
                 )),
                 _ => None,
@@ -1827,10 +1831,15 @@ fn dump_normalized_prop_(
     };
 
     match p {
-        PropertyType::OrdinaryField { type_, polarity } => {
+        PropertyType::OrdinaryField {
+            type_,
+            polarity,
+            optional,
+        } => {
             format!(
-                "OrdinaryField ({}) {}",
+                "OrdinaryField ({}{}) {}",
                 polarity.string(),
+                if *optional { ", optional" } else { "" },
                 dump_t_(depth, tvars, cx, type_)
             )
         }

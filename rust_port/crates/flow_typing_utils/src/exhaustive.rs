@@ -951,10 +951,7 @@ mod value_object_property_builder {
         match property::read_loc(p) {
             Some(loc) => {
                 let (t, optional) = match property::read_t(p) {
-                    Some(t) => {
-                        let optional = matches!(t.deref(), TypeInner::OptionalT { .. });
-                        (t, optional)
-                    }
+                    Some(t) => (t, property::is_optional(p)),
                     None => {
                         let t = type_::mixed_t::make(flow_common::reason::mk_reason(
                             flow_common::reason::VirtualReasonDesc::RProperty(Some(
@@ -962,10 +959,7 @@ mod value_object_property_builder {
                             )),
                             loc.dupe(),
                         ));
-                        let optional = match property::write_t(p) {
-                            Some(wt) => matches!(wt.deref(), TypeInner::OptionalT { .. }),
-                            None => true,
-                        };
+                        let optional = property::write_t(p).is_none() || property::is_optional(p);
                         (t, optional)
                     }
                 };
@@ -1121,14 +1115,7 @@ mod value_union_builder {
                             let props_list: Vec<_> = elements
                                 .iter()
                                 .map(|elem| {
-                                    let elem_t = if elem.optional {
-                                        match elem.t.deref() {
-                                            TypeInner::OptionalT { type_, .. } => type_.dupe(),
-                                            _ => elem.t.dupe(),
-                                        }
-                                    } else {
-                                        elem.t.dupe()
-                                    };
+                                    let elem_t = elem.t.dupe();
                                     let elem_t = if flow_common::polarity::Polarity::compat(
                                         elem.polarity,
                                         flow_common::polarity::Polarity::Positive,

@@ -138,7 +138,6 @@ pub fn reason_of_t(t: &Type) -> &Reason {
         TypeInner::UnionT(reason, _) => reason,
         TypeInner::IntersectionT(reason, _) => reason,
         TypeInner::MaybeT(reason, _) => reason,
-        TypeInner::OptionalT { reason, .. } => reason,
     }
 }
 
@@ -249,15 +248,6 @@ pub fn mod_reason_of_t(f: &dyn Fn(Reason) -> Reason, t: &Type) -> Type {
         TypeInner::MaybeT(reason, inner_t) => {
             Type::new(TypeInner::MaybeT(f(reason.dupe()), inner_t.dupe()))
         }
-        TypeInner::OptionalT {
-            reason,
-            type_,
-            use_desc,
-        } => Type::new(TypeInner::OptionalT {
-            reason: f(reason.dupe()),
-            type_: type_.dupe(),
-            use_desc: *use_desc,
-        }),
         TypeInner::EvalT {
             type_,
             defer_use_t,
@@ -1672,7 +1662,7 @@ where
 ///
 /// Returns `None` for variants whose nested data also carries reasons
 /// that some `swap_reason` implementations recursively swap (`MaybeT`,
-/// `OptionalT`, `NominalT`); callers handle those with their own
+/// `NominalT`); callers handle those with their own
 /// `swap_reason`-specific recursion.
 ///
 /// Caller must have already verified that `inner1` and `inner2` have the
@@ -1749,7 +1739,7 @@ fn reasonless_compare(t1: &Type, t2: &Type) -> std::cmp::Ordering {
         return ord;
     }
 
-    // The local `swap_reason` below recurses through `MaybeT`/`OptionalT`
+    // The local `swap_reason` below recurses through `MaybeT`
     // but treats `NominalT` as opaque (top-level reason swap), so derived
     // `Ord` on `NominalType` gives the right answer for that case without
     // allocating either.
@@ -1765,8 +1755,8 @@ fn reasonless_compare(t1: &Type, t2: &Type) -> std::cmp::Ordering {
         return n1.cmp(n2);
     }
 
-    // Fallback (rare): mirrors the OCaml local `swap_reason` for `MaybeT`/
-    // `OptionalT` (which need a recursive swap) and for variants whose
+    // Fallback (rare): mirrors the OCaml local `swap_reason` for `MaybeT`
+    // (which needs a recursive swap) and for variants whose
     // nested data carries reasons we'd otherwise have to walk by hand.
     fn swap_reason(t2: &Type, t1: &Type) -> Type {
         match (t2.deref(), t1.deref()) {
@@ -1776,22 +1766,6 @@ fn reasonless_compare(t1: &Type, t2: &Type) -> std::cmp::Ordering {
             (TypeInner::MaybeT(_, inner_t2), TypeInner::MaybeT(r, inner_t1)) => {
                 Type::new(TypeInner::MaybeT(r.dupe(), swap_reason(inner_t2, inner_t1)))
             }
-            (
-                TypeInner::OptionalT {
-                    reason: _,
-                    type_: inner_t2,
-                    use_desc: _,
-                },
-                TypeInner::OptionalT {
-                    reason,
-                    type_: inner_t1,
-                    use_desc,
-                },
-            ) => Type::new(TypeInner::OptionalT {
-                reason: reason.dupe(),
-                type_: swap_reason(inner_t2, inner_t1),
-                use_desc: *use_desc,
-            }),
             _ => mod_reason_of_t(&|_| reason_of_t(t1).dupe(), t2),
         }
     }
@@ -1967,9 +1941,6 @@ pub fn is_mixed_subtype(l: &Type, mixed_flavor: MixedFlavor) -> bool {
     match l.deref() {
         TypeInner::DefT(_, def_t) if matches!(&**def_t, D::MixedT(flavor) if *flavor == mixed_flavor) => {
             true
-        }
-        TypeInner::OptionalT { .. } if matches!(mixed_flavor, MixedNonMaybe | MixedNonVoid) => {
-            false
         }
         TypeInner::MaybeT(_, _)
             if matches!(mixed_flavor, MixedNonMaybe | MixedNonVoid | MixedNonNull) =>
@@ -2330,17 +2301,44 @@ pub fn mk_named_prop(
     }
 }
 
-pub fn optional(t: Type, annot_loc: Option<ALoc>, use_desc: bool) -> Type {
-    let reason = reason_of_t(&t).dupe();
-    let reason = match annot_loc {
-        Some(loc) => reason.reposition_and_annotate(loc),
-        None => reason,
+/// The values held by a slot (a parameter, property or tuple element) declared with type `t`: an
+/// optional slot holds `undefined` when it is left out. Its values are the union of `void` and `t`
+/// that [optional_slot_type] recognizes, and a value flows into it as into the slot.
+pub fn slot_value_t(t: &Type, optional: bool) -> Type {
+    if !optional {
+        return t.dupe();
+    }
+    let reason = reason_of_t(t);
+    Type::new(TypeInner::UnionT(
+        reason.dupe(),
+        crate::type_::union_rep::make(
+            None,
+            crate::type_::union_rep::UnionKind::OptionalKind,
+            crate::type_::void::why(reason.dupe()),
+            t.dupe(),
+            Rc::from([]),
+        ),
+    ))
+}
+
+/// The use that checks a value flowing into a slot declared with type `t`: an optional slot also
+/// accepts `undefined`.
+pub fn slot_use_t<CX: ContextFamily>(use_op: UseOp, t: Type, optional: bool) -> UseT<CX> {
+    UseT::new(UseTInner::UseT(use_op, slot_value_t(&t, optional)))
+}
+
+/// The declared type of the optional slot that `t`, a union of `void` and that type built by
+/// [slot_value_t], takes the values of.
+pub fn optional_slot_type(t: &Type) -> Option<Type> {
+    use crate::type_::union_rep::UnionKind;
+
+    let TypeInner::UnionT(_, rep) = t.deref() else {
+        return None;
     };
-    Type::new(TypeInner::OptionalT {
-        reason,
-        type_: t,
-        use_desc,
-    })
+    if rep.union_kind() != UnionKind::OptionalKind {
+        return None;
+    }
+    rep.members_iter().nth(1).map(|t| t.dupe())
 }
 
 pub fn maybe(t: Type) -> Type {
@@ -2796,7 +2794,10 @@ pub fn tuple_length(reason: Reason, inexact: bool, num_req: i32, num_total: i32)
 }
 
 pub fn tuple_ts_of_elements(elements: &[crate::type_::TupleElement]) -> Vec<Type> {
-    elements.iter().map(|elem| elem.t.dupe()).collect()
+    elements
+        .iter()
+        .map(|elem| slot_value_t(&elem.t, elem.optional))
+        .collect()
 }
 
 pub fn mk_tuple_element(
@@ -2935,9 +2936,14 @@ where
     use crate::type_::PropertyType;
 
     match prop {
-        PropertyType::OrdinaryField { type_, polarity } => PropertyType::OrdinaryField {
+        PropertyType::OrdinaryField {
+            type_,
+            polarity,
+            optional,
+        } => PropertyType::OrdinaryField {
             type_: f(type_),
             polarity,
+            optional,
         },
         PropertyType::SyntheticField { get_type, set_type } => PropertyType::SyntheticField {
             get_type: get_type.map(&f),

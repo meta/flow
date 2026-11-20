@@ -5417,6 +5417,7 @@ fn object_prop<'a>(
                                             key_loc: Some(loc.dupe()),
                                             type_: t_clone,
                                             polarity,
+                                            optional: false,
                                         },
                                     ))),
                                 );
@@ -5479,6 +5480,7 @@ fn object_prop<'a>(
                             type_::Property::new(type_::PropertyInner::Method {
                                 key_loc: Some(loc.dupe()),
                                 type_: t_clone,
+                                optional: false,
                             }),
                         );
                     });
@@ -5788,6 +5790,7 @@ fn create_computed_prop<'a>(
                     key_loc: Some(key_loc.dupe()),
                     type_: value.1.clone(),
                     polarity: Polarity::object_literal_polarity(as_const || frozen),
+                    optional: false,
                 })));
                 object_expression_acc::ComputedProp::Named { name, prop }
             }
@@ -7335,7 +7338,6 @@ fn expression_<'a>(
                                 None,
                                 reason.dupe(),
                                 flow_common::error_ref::FunctionReferenceKind::FunctionType,
-                                Some(vec![]),
                                 None,
                                 proto,
                             )),
@@ -12751,6 +12753,7 @@ fn jsx_fragment<'a>(
                         key_loc: None,
                         type_: fragment_children_prop,
                         polarity: Polarity::Neutral,
+                        optional: false,
                     }))),
                 )]));
                 let proto = type_::obj_proto::make(reason_props.dupe());
@@ -13513,6 +13516,7 @@ pub fn jsx_mk_props<'a>(
                                         key_loc: Some(id_loc_clone),
                                         type_: atype_clone,
                                         polarity: Polarity::Neutral,
+                                        optional: false,
                                     },
                                 ))),
                             );
@@ -13577,6 +13581,7 @@ pub fn jsx_mk_props<'a>(
                             key_loc: None,
                             type_: children_prop,
                             polarity: Polarity::Neutral,
+                            optional: false,
                         }))),
                     );
                 }),
@@ -14872,7 +14877,10 @@ fn check_property_initialization<'a>(
         if !unassigned_at_end && reads.is_empty() {
             continue;
         }
-        if let Some((_, _, Field::Annot(field_t))) = field {
+        if let Some((_, _, Field::Annot(field_t), optional)) = field {
+            if *optional {
+                continue;
+            }
             let field_t = flow_js::subst(cx, None, None, None, &smallest_type_args, field_t.dupe());
             if declared_type_includes_void(cx, &field_t)? {
                 continue;
@@ -14907,9 +14915,6 @@ fn declared_type_includes_void(cx: &mut Context<'_>, field_t: &Type) -> Result<b
     })
 }
 
-/// The field of an optional class property (`x?: T`), which may hold `undefined`: `T | void`, as
-/// for an optional method. For a field with an initializer, the initializer's function returns
-/// the field's type.
 /// The key of a class method declared without a body, kept to build its typed AST node.
 #[derive(Clone)]
 enum DeclareMethodKey {
@@ -14937,31 +14942,6 @@ impl DeclareMethodKey {
                     comments: computed_key.comments,
                 })
             }
-        }
-    }
-}
-
-fn optional_field(
-    field: func_class_sig_types::class::Field<func_class_sig_types::StmtConfigTypes>,
-) -> func_class_sig_types::class::Field<func_class_sig_types::StmtConfigTypes> {
-    use flow_typing_type::type_util::optional;
-    use func_class_sig_types::class::Field;
-
-    match field {
-        Field::Annot(t) => Field::Annot(optional(t, None, false)),
-        Field::Infer(mut init, set_asts) => {
-            init.return_t = match init.return_t {
-                AnnotatedOrInferred::Annotated(t) => {
-                    AnnotatedOrInferred::Annotated(optional(t, None, false))
-                }
-                AnnotatedOrInferred::Hinted(t) => {
-                    AnnotatedOrInferred::Hinted(optional(t, None, false))
-                }
-                AnnotatedOrInferred::Inferred(t) => {
-                    AnnotatedOrInferred::Inferred(optional(t, None, false))
-                }
-            };
-            Field::Infer(init, set_asts)
         }
     }
 }
@@ -15957,29 +15937,15 @@ pub fn mk_class_sig<'a>(
                                                 }
                                             };
                                             // Create an optional property if it has an initializer (i.e. has a default value).
-                                            let prop_t = if defaulted_props.contains(name) {
-                                                let field_reason = mk_reason(
-                                                    VirtualReasonDesc::RProperty(Some(Name::new(
-                                                        name.dupe(),
-                                                    ))),
-                                                    id_loc.dupe(),
-                                                );
-                                                Type::new(TypeInner::OptionalT {
-                                                    reason: field_reason,
-                                                    type_: field_t,
-                                                    use_desc: false,
-                                                })
-                                            } else {
-                                                field_t
-                                            };
                                             Some((
                                                 Name::new(name.dupe()),
                                                 type_::Property::new(type_::PropertyInner::Field(
                                                     Box::new(FieldData {
                                                         preferred_def_locs: None,
                                                         key_loc: Some(id_loc.dupe()),
-                                                        type_: prop_t,
+                                                        type_: field_t,
                                                         polarity: Polarity::Positive,
+                                                        optional: defaulted_props.contains(name),
                                                     }),
                                                 )),
                                             ))
@@ -16576,12 +16542,11 @@ pub fn mk_class_sig<'a>(
                             convert_param(param_loc.dupe(), p)?;
                         let stmt_param =
                             make_stmt_param(param_loc, name_id, annot_or_hint, optional, t.dupe());
-                        let t_prime = if optional {
-                            flow_typing_type::type_util::optional(t, None, false)
-                        } else {
-                            t
+                        let fun_param = type_::FunParam {
+                            name: name_str,
+                            t,
+                            optional,
                         };
-                        let fun_param = type_::FunParam(name_str, t_prime);
                         rev_params.push(typed_ast);
                         rev_fun_params.push(fun_param);
                         crate::func_params::add_param::<StmtConfigTypes>(stmt_param, &mut fparams);
@@ -17114,11 +17079,6 @@ pub fn mk_class_sig<'a>(
                                     annot,
                                     value,
                                 )?;
-                                let field = if optional {
-                                    optional_field(field)
-                                } else {
-                                    field
-                                };
                                 let loc_c = loc.dupe();
                                 let annot_t_c = annot_t.dupe();
                                 let id_loc_c = id_loc.dupe();
@@ -17172,6 +17132,7 @@ pub fn mk_class_sig<'a>(
                                     id_loc.dupe(),
                                     polarity,
                                     field,
+                                    optional,
                                     &mut class_sig,
                                 );
                                 rev_elements.push(get_element);
@@ -17333,11 +17294,6 @@ pub fn mk_class_sig<'a>(
                                     annot,
                                     value,
                                 )?;
-                                let field = if optional {
-                                    optional_field(field)
-                                } else {
-                                    field
-                                };
                                 let loc_c = loc.dupe();
                                 let annot_t_c = annot_t.dupe();
                                 let computed_loc_c = computed_key.loc.dupe();
@@ -17391,6 +17347,7 @@ pub fn mk_class_sig<'a>(
                                     id_loc.dupe(),
                                     polarity,
                                     field,
+                                    optional,
                                     &mut class_sig,
                                 );
                                 rev_elements.push(get_element);
@@ -17477,11 +17434,6 @@ pub fn mk_class_sig<'a>(
                                 annot,
                                 value,
                             )?;
-                            let field = if optional {
-                                optional_field(field)
-                            } else {
-                                field
-                            };
                             let loc_c = loc.dupe();
                             let annot_t_c = annot_t.dupe();
                             let key_c = pf.key.clone();
@@ -17532,6 +17484,7 @@ pub fn mk_class_sig<'a>(
                                 id_loc.dupe(),
                                 polarity,
                                 field,
+                                optional,
                                 static_,
                                 &mut class_sig,
                             );
@@ -17693,10 +17646,8 @@ pub fn mk_class_sig<'a>(
                                             mixed_t::make(func_sig.reason.dupe()),
                                             &func_sig,
                                         );
-                                        let optional_t = flow_typing_type::type_util::optional(
-                                            func_t.dupe(),
-                                            None,
-                                            false,
+                                        let optional_t = flow_typing_type::type_util::slot_value_t(
+                                            &func_t, true,
                                         );
                                         class_sig::add_field(
                                             static_,
@@ -17705,7 +17656,8 @@ pub fn mk_class_sig<'a>(
                                             name.dupe(),
                                             id_loc.dupe(),
                                             flow_common::polarity::Polarity::Neutral,
-                                            class_types::Field::Annot(optional_t.dupe()),
+                                            class_types::Field::Annot(func_t.dupe()),
+                                            true,
                                             &mut class_sig,
                                         );
                                         check_duplicate_name(
@@ -18242,6 +18194,7 @@ pub fn mk_class_sig<'a>(
                                             id_loc.dupe(),
                                             polarity,
                                             class_types::Field::Annot(annot_t.dupe()),
+                                            false,
                                             &mut class_sig,
                                         );
                                         check_duplicate_name(
@@ -18858,29 +18811,16 @@ pub fn mk_record_sig<'a>(
                                         let (key_loc, name) =
                                             flow_parser_utils::record_utils::loc_and_string_of_property_key(key)
                                                 .expect("Record property must have a valid key");
-                                        let prop_t = if defaulted_props.contains(&name) {
-                                            let field_reason = mk_reason(
-                                                VirtualReasonDesc::RProperty(Some(Name::new(
-                                                    name.dupe(),
-                                                ))),
-                                                key_loc.dupe(),
-                                            );
-                                            Type::new(TypeInner::OptionalT {
-                                                reason: field_reason,
-                                                type_: annot_t,
-                                                use_desc: false,
-                                            })
-                                        } else {
-                                            annot_t
-                                        };
+                                        let optional = defaulted_props.contains(&name);
                                         Some((
                                             Name::new(name),
                                             type_::Property::new(type_::PropertyInner::Field(
                                                 Box::new(FieldData {
                                                     preferred_def_locs: None,
                                                     key_loc: Some(key_loc),
-                                                    type_: prop_t,
+                                                    type_: annot_t,
                                                     polarity: Polarity::Positive,
+                                                    optional,
                                                 }),
                                             )),
                                         ))
@@ -19223,6 +19163,7 @@ pub fn mk_record_sig<'a>(
                                 key_loc,
                                 Polarity::Positive,
                                 field,
+                                false,
                                 &mut class_sig,
                             );
                             rev_elements.push(Box::new(get_element));
@@ -19287,6 +19228,7 @@ pub fn mk_record_sig<'a>(
                                 key_loc,
                                 Polarity::Positive,
                                 field,
+                                false,
                                 &mut class_sig,
                             );
                             rev_elements.push(Box::new(get_element));
@@ -20449,6 +20391,7 @@ pub fn mk_func_sig<'a>(
                         key_loc: Some(env_key.loc.dupe()),
                         type_: expr_t,
                         polarity: Polarity::Neutral,
+                        optional: false,
                     })));
                 (Name::new(name.dupe()), field)
             })

@@ -268,11 +268,6 @@ fn detect_sketchy_null_checks<'cx>(cx: &mut Context<'cx>, tast: &ast::Program<AL
                         let void_t = void::why(r.dupe());
                         make_checks(cx, seen, acc, loc, &void_t)
                     }
-                    TypeInner::OptionalT { reason, type_, .. } => {
-                        let acc = make_checks(cx, seen, cur_checks, loc, type_);
-                        let void_t = void::why(reason.dupe());
-                        make_checks(cx, seen, acc, loc, &void_t)
-                    }
                     TypeInner::UnionT(_, rep) => {
                         let mut acc = cur_checks;
                         for t in rep.members_iter() {
@@ -493,7 +488,6 @@ fn try_eval_concrete_type_truthyness<'cx>(cx: &mut Context<'cx>, t: &Type) -> Tr
         | TypeInner::GenericT(..)
         | TypeInner::AnnotT(_, _, _)
         | TypeInner::MaybeT(_, _)
-        | TypeInner::OptionalT { .. }
         | TypeInner::UnionT(_, _) => TruthynessResult::ConstCondUnconcretized,
         TypeInner::DefT(reason, def_t) => match def_t.deref() {
             DefTInner::NumGeneralT(literal) => match literal {
@@ -1374,7 +1368,6 @@ fn detect_non_voidable_properties<'cx>(cx: &mut Context<'cx>) {
             }
             // trivially voidable
             TypeInner::MaybeT(_, _)
-            | TypeInner::OptionalT { .. }
             | TypeInner::AnyT(_, _)
             | TypeInner::ImplicitInstantiationTvar(_) => true,
             TypeInner::DefT(_, def_t) => matches!(
@@ -1398,7 +1391,7 @@ fn detect_non_voidable_properties<'cx>(cx: &mut Context<'cx>) {
             let should_error = match pmap.get(&Name::new(name.dupe())) {
                 Some(prop) => match &**prop {
                     PropertyInner::Field(fd) => {
-                        !is_voidable(cx, &mut TvarSeenSet::new(), &fd.type_)
+                        !fd.optional && !is_voidable(cx, &mut TvarSeenSet::new(), &fd.type_)
                     }
                     _ => true,
                 },
@@ -1674,7 +1667,6 @@ fn check_spread_prop_keys<'cx>(cx: &mut Context<'cx>, tast: &ast::Program<ALoc, 
                     find_key_prop(cx, seen, spread, t);
                 }
             }
-            TypeInner::OptionalT { type_, .. } => find_key_prop(cx, seen, spread, type_),
             TypeInner::MaybeT(_, ty) => find_key_prop(cx, seen, spread, ty),
             TypeInner::DefT(r, def_t) => {
                 if let DefTInner::ObjT(obj_t) = def_t.deref() {

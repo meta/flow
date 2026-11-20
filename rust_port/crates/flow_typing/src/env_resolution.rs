@@ -700,6 +700,7 @@ fn resolve_hint<'cx>(
                                                 key_loc: Some(l),
                                                 type_: t,
                                                 polarity: flow_common::polarity::Polarity::Neutral,
+                                                optional: false,
                                             }),
                                         )),
                                     );
@@ -1028,6 +1029,7 @@ fn resolve_function_statics<'cx>(
                     key_loc: Some(env_key.loc.dupe()),
                     type_: expr_t,
                     polarity: namespace_member_polarity(cx, env_key),
+                    optional: false,
                 })));
             (reason::Name::new(name.dupe()), field)
         })
@@ -1069,6 +1071,7 @@ fn extend_class_statics(
                         key_loc: Some(key.loc.dupe()),
                         type_: t,
                         polarity: namespace_member_polarity(cx, key),
+                        optional: false,
                     }))),
                 );
             }
@@ -1350,11 +1353,10 @@ fn resolve_binding<'cx>(
             if let Some(param_loc) = param_loc {
                 type_env::bind_function_param(cx, t.dupe(), param_loc.dupe());
             }
-            if *optional && !*has_default_expression {
-                Ok(type_util::optional(t, None, false))
-            } else {
-                Ok(t)
-            }
+            Ok(type_util::slot_value_t(
+                &t,
+                *optional && !*has_default_expression,
+            ))
         }
         Binding::Root(Root::Value(box name_def_types::Value {
             hints: _,
@@ -1645,6 +1647,7 @@ fn resolve_binding<'cx>(
                                                     type_::PropertyInner::Method {
                                                         key_loc: Some(name_loc.dupe()),
                                                         type_: t,
+                                                        optional: false,
                                                     },
                                                 ),
                                             );
@@ -1659,6 +1662,7 @@ fn resolve_binding<'cx>(
                                                     type_::PropertyInner::Method {
                                                         key_loc: Some(name_loc.dupe()),
                                                         type_: t,
+                                                        optional: false,
                                                     },
                                                 ),
                                             );
@@ -1685,6 +1689,7 @@ fn resolve_binding<'cx>(
                                                     type_: t,
                                                     polarity:
                                                         flow_common::polarity::Polarity::Neutral,
+                                                    optional: false,
                                                 }))),
                                             );
                                         })
@@ -1700,6 +1705,7 @@ fn resolve_binding<'cx>(
                                                     type_: t,
                                                     polarity:
                                                         flow_common::polarity::Polarity::Neutral,
+                                                    optional: false,
                                                 }))),
                                             );
                                         })
@@ -1982,11 +1988,10 @@ fn resolve_binding<'cx>(
                 );
             }
             type_env::bind_function_param(cx, t.dupe(), param_loc);
-            if *optional && default_expression.is_none() {
-                Ok(type_util::optional(t, None, false))
-            } else {
-                Ok(t)
-            }
+            Ok(type_util::slot_value_t(
+                &t,
+                *optional && default_expression.is_none(),
+            ))
         }
         Binding::Root(Root::UnannotatedParameter(unannotated_reason)) => {
             let t = any_t::make(
@@ -2582,7 +2587,11 @@ fn merge_props_by_id<'cx>(
         match merged_proto.get(name).cloned() {
             Some(target_prop) => {
                 if let (
-                    PropertyInner::Method { key_loc, type_: t1 },
+                    PropertyInner::Method {
+                        key_loc,
+                        type_: t1,
+                        optional,
+                    },
                     PropertyInner::Method { type_: t2, .. },
                 ) = (&*target_prop, &**source_prop)
                 {
@@ -2596,6 +2605,7 @@ fn merge_props_by_id<'cx>(
                         Property::new(PropertyInner::Method {
                             key_loc: key_loc.dupe(),
                             type_: combined,
+                            optional: *optional,
                         }),
                     );
                 }

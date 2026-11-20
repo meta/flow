@@ -155,12 +155,11 @@ impl crate::func_params_intf::Config for FuncTypeParamsConfig {
                 (None, flow_parser::ast_utils::pattern_optional(pattern))
             }
         };
-        let t = if optional {
-            type_util::optional(t.dupe(), None, false)
-        } else {
-            t.dupe()
-        };
-        type_::FunParam(name, t)
+        type_::FunParam {
+            name,
+            t: t.dupe(),
+            optional,
+        }
     }
 
     fn rest_type(rest: &Self::Rest) -> type_::FunRestParam {
@@ -245,21 +244,17 @@ impl crate::component_params_intf::Config for TypeAnnotationConfig {
     type ParamAst = ast::types::component_params::Param<ALoc, (ALoc, Type)>;
     type RestAst = ast::types::component_params::RestParam<ALoc, (ALoc, Type)>;
 
-    fn param_type_with_name(param: &Self::Param) -> (ALoc, FlowSmolStr, Type) {
+    fn param_type_with_name(param: &Self::Param) -> (ALoc, FlowSmolStr, Type, bool) {
         let (t, param_ast) = param;
-        let param_t = if param_ast.optional {
-            type_util::optional(t.dupe(), None, false)
-        } else {
-            t.dupe()
-        };
+        let optional = param_ast.optional;
         use flow_parser::ast::statement::component_params::ParamName;
         match &param_ast.name {
             ParamName::Identifier(id) => {
                 let (ref loc, _) = id.loc;
-                (loc.dupe(), id.name.dupe(), param_t)
+                (loc.dupe(), id.name.dupe(), t.dupe(), optional)
             }
             ParamName::StringLiteral((loc, lit)) => {
-                (loc.dupe(), FlowSmolStr::new(&lit.value), param_t)
+                (loc.dupe(), FlowSmolStr::new(&lit.value), t.dupe(), optional)
             }
         }
     }
@@ -3296,14 +3291,17 @@ fn convert_inner<'a>(
                 let annot_ast = convert_inner(cx, env, annot)?;
                 let (_, t) = annot_ast.loc();
                 let t = t.dupe();
-                let t = if optional {
-                    type_util::optional(t, None, false)
-                } else {
-                    t
-                };
                 let fun_param_name = name.map(ident_name);
-                params.push(type_::FunParam(fun_param_name, t.dupe()));
-                let param_ast = typed_function_param_ast(&param.param, t, annot_ast);
+                params.push(type_::FunParam {
+                    name: fun_param_name,
+                    t: t.dupe(),
+                    optional,
+                });
+                let param_ast = typed_function_param_ast(
+                    &param.param,
+                    type_util::slot_value_t(&t, optional),
+                    annot_ast,
+                );
                 param_asts.push(ast::types::function::Param {
                     loc: param_loc.dupe(),
                     param: param_ast,
@@ -4916,11 +4914,6 @@ fn convert_object<'a>(
                         }
                         Ok(make_prop_ast(proto))
                     } else {
-                        let t = if optional {
-                            type_util::optional(t, None, false)
-                        } else {
-                            t
-                        };
                         let prop_name = Name::new(name.dupe());
                         if method {
                             let key_loc_clone = key_loc.dupe();
@@ -4931,6 +4924,7 @@ fn convert_object<'a>(
                                     type_::Property::new(type_::PropertyInner::Method {
                                         key_loc: Some(key_loc_clone),
                                         type_: t_clone,
+                                        optional,
                                     }),
                                 );
                             });
@@ -4951,12 +4945,13 @@ fn convert_object<'a>(
                                             key_loc: Some(key_loc_clone),
                                             type_: t_clone,
                                             polarity: pol,
+                                            optional,
                                         },
                                     ))),
                                 );
                             });
                         }
-                        Ok(make_prop_ast(t))
+                        Ok(make_prop_ast(type_util::slot_value_t(&t, optional)))
                     }
                 };
                 match key {
@@ -5064,11 +5059,6 @@ fn convert_object<'a>(
                                     name.as_smol_str_opt(),
                                 )?;
                                 let t = value_ast.loc().1.dupe();
-                                let t = if optional {
-                                    type_util::optional(t, None, false)
-                                } else {
-                                    t
-                                };
                                 let id_loc = comp.expression.loc().dupe();
                                 if method {
                                     let id_loc_clone = id_loc.dupe();
@@ -5079,6 +5069,7 @@ fn convert_object<'a>(
                                             type_::Property::new(type_::PropertyInner::Method {
                                                 key_loc: Some(id_loc_clone),
                                                 type_: t_clone,
+                                                optional,
                                             }),
                                         );
                                     });
@@ -5099,6 +5090,7 @@ fn convert_object<'a>(
                                                     key_loc: Some(id_loc_clone),
                                                     type_: t_clone,
                                                     polarity: pol,
+                                                    optional,
                                                 }),
                                             )),
                                         );
@@ -5463,13 +5455,7 @@ fn convert_object<'a>(
                     }
                     None => convert_inner(cx, env, &indexer.value)?,
                 };
-                let annot_loc = value_ast.loc().0.dupe();
                 let value_t = value_ast.loc().1.dupe();
-                let value_t = if indexer.optional {
-                    type_util::optional(value_t, Some(annot_loc), false)
-                } else {
-                    value_t
-                };
                 let dict_polarity = polarity(
                     cx,
                     flow_typing_errors::intermediate_error_types::VarianceSigilParent::Property,
@@ -5478,6 +5464,7 @@ fn convert_object<'a>(
                 match named {
                     Some(name) => {
                         let key_loc = indexer.key.loc().dupe();
+                        let optional = indexer.optional;
                         acc.add_prop(move |pmap| {
                             pmap.insert(
                                 name,
@@ -5487,6 +5474,7 @@ fn convert_object<'a>(
                                         key_loc: Some(key_loc),
                                         type_: value_t,
                                         polarity: dict_polarity,
+                                        optional,
                                     },
                                 ))),
                             );
@@ -5496,7 +5484,7 @@ fn convert_object<'a>(
                         let d = DictType {
                             dict_name: indexer.id.as_ref().map(ident_name),
                             key: key_ast.loc().1.dupe(),
-                            value: value_t,
+                            value: type_util::slot_value_t(&value_t, indexer.optional),
                             dict_polarity,
                         };
                         if let Err(err) = acc.add_dict(d) {
@@ -5535,10 +5523,7 @@ fn convert_object<'a>(
                 let slot_name = &slot.id.name;
                 if slot_name.as_str() == "call" {
                     let value_ast = convert_inner(cx, env, &slot.value)?;
-                    let mut t = value_ast.loc().1.dupe();
-                    if slot.optional {
-                        t = type_util::optional(t, None, false);
-                    }
+                    let t = type_util::slot_value_t(&value_ast.loc().1, slot.optional);
                     if let Err(err) = acc.add_call(t) {
                         flow_js_utils::add_output_non_speculating(
                             cx,
@@ -5763,12 +5748,7 @@ fn convert_tuple_element<'a>(
             } else {
                 let annot_ast = convert_inner(cx, env, annot)?;
                 let (_, annot_t) = annot_ast.loc();
-                let annot_t = annot_t.dupe();
-                let t = if *optional {
-                    type_util::optional(annot_t, None, false)
-                } else {
-                    annot_t
-                };
+                let t = annot_t.dupe();
                 let element_ast = Element::UnlabeledElement {
                     loc: loc.dupe(),
                     annot: annot_ast,
@@ -5802,16 +5782,11 @@ fn convert_tuple_element<'a>(
         } => {
             let annot_ast = convert_inner(cx, env, annot)?;
             let (_, annot_t) = annot_ast.loc();
-            let annot_t = annot_t.dupe();
-            let t = if *optional {
-                type_util::optional(annot_t.dupe(), None, false)
-            } else {
-                annot_t.dupe()
-            };
+            let t = annot_t.dupe();
             let name_loc = label_name.loc.dupe();
             let str_name = &label_name.name;
             let id_name = ast::Identifier::new(ast::IdentifierInner {
-                loc: (name_loc, t.dupe()),
+                loc: (name_loc, type_util::slot_value_t(&t, *optional)),
                 name: str_name.dupe(),
                 comments: label_name.comments.dupe(),
             });
@@ -5878,12 +5853,10 @@ fn check_guard_type<'a>(
     guard_name: &FlowSmolStr,
     guard_t: &Type,
 ) {
-    let param_t = fparams
-        .iter()
-        .find_map(|type_::FunParam(name, t)| match name {
-            Some(n) if n == guard_name => Some(t),
-            _ => None,
-        });
+    let param_t = fparams.iter().find_map(|param| match &param.name {
+        Some(n) if n == guard_name => Some(type_util::slot_value_t(&param.t, param.optional)),
+        _ => None,
+    });
     if let Some(param_t) = param_t {
         let use_op = type_::UseOp::Op(Arc::new(type_::RootUseOp::TypeGuardIncompatibility(
             Box::new(type_::TypeGuardIncompatibilityData {
@@ -7189,7 +7162,7 @@ fn mk_inline_interface_type<'a>(
     Ok((class_sig::thistype(cx, &iface_sig), property_asts))
 }
 
-/// The value type of a bracketed member of an interface or a `declare class`
+/// The declared value type of a bracketed member of an interface or a `declare class`
 /// body, and its typed node, whichever way its key is read. The key is taken
 /// already converted, since a computed key is converted as a value while an
 /// index signature key is converted as a type.
@@ -7213,19 +7186,13 @@ fn convert_indexer_value(
         }
         None => convert_inner(cx, env, &indexer.value)?,
     };
-    let (annot_loc, v) = value_ast.loc();
-    let annot_loc = annot_loc.dupe();
+    let (_, v) = value_ast.loc();
     let v = v.dupe();
-    let v = if indexer.optional {
-        type_util::optional(v, Some(annot_loc), false)
-    } else {
-        v
-    };
     let indexer_ast = ast::types::object::Indexer {
         loc: indexer.loc.dupe(),
         id: indexer.id.as_ref().map(|id| {
             ast::Identifier::new(ast::IdentifierInner {
-                loc: (id.loc.dupe(), v.dupe()),
+                loc: (id.loc.dupe(), type_util::slot_value_t(&v, indexer.optional)),
                 name: id.name.dupe(),
                 comments: id.comments.dupe(),
             })
@@ -7264,7 +7231,7 @@ fn convert_indexer_internal(
     let dict = type_::DictType {
         dict_name: indexer.id.as_ref().map(|id| id.name.dupe()),
         key: k,
-        value: v,
+        value: type_util::slot_value_t(&v, indexer.optional),
         dict_polarity: p,
     };
     Ok((dict, indexer_ast))
@@ -7625,7 +7592,7 @@ fn add_interface_properties<'a>(
                         // Keep the full `Name` so a `unique symbol` indexer key
                         // retains its nominal identity in the (now `Name`-keyed)
                         // class Signature, matching the computed-key path.
-                        record_field(cx, &name, &value_t);
+                        record_field(cx, &name, &type_util::slot_value_t(&value_t, idx.optional));
                         class_sig::add_field(
                             idx.static_,
                             false,
@@ -7634,6 +7601,7 @@ fn add_interface_properties<'a>(
                             idx.key.loc().dupe(),
                             prop_polarity,
                             func_class_sig_types::class::Field::Annot(value_t),
+                            idx.optional,
                             &mut s,
                         );
                     }
@@ -7641,7 +7609,7 @@ fn add_interface_properties<'a>(
                         let dict = type_::DictType {
                             dict_name: idx.id.as_ref().map(|id| id.name.dupe()),
                             key: key_t,
-                            value: value_t,
+                            value: type_util::slot_value_t(&value_t, idx.optional),
                             dict_polarity: prop_polarity,
                         };
                         class_sig::add_indexer(idx.static_, dict, &mut s);
@@ -7859,6 +7827,7 @@ fn add_interface_properties<'a>(
                                               name: Name,
                                               id_loc: ALoc,
                                               t: Type,
+                                              optional: bool,
                                               s: &mut func_class_sig_types::class::Class<
                         FuncTypeParamsConfig,
                     >| {
@@ -7870,10 +7839,11 @@ fn add_interface_properties<'a>(
                                 id_loc,
                                 polarity,
                                 func_class_sig_types::class::Field::Annot(t),
+                                optional,
                                 s,
                             );
                         } else {
-                            record_field(cx, &name, &t);
+                            record_field(cx, &name, &type_util::slot_value_t(&t, optional));
                             class_sig::add_field(
                                 np.static_,
                                 abstract_on,
@@ -7882,6 +7852,7 @@ fn add_interface_properties<'a>(
                                 id_loc,
                                 polarity,
                                 func_class_sig_types::class::Field::Annot(t),
+                                optional,
                                 s,
                             );
                         }
@@ -7905,22 +7876,21 @@ fn add_interface_properties<'a>(
                                     )
                                     .unwrap();
                                     let t = init_ast.loc().1.dupe();
-                                    let t = if np.optional {
-                                        type_util::optional(t, None, false)
-                                    } else {
-                                        t
-                                    };
                                     add_field_or_proto(
                                         cx,
                                         name.dupe(),
                                         id_loc.dupe(),
                                         t.dupe(),
+                                        np.optional,
                                         &mut s,
                                     );
                                     Some(Property::NormalProperty(
                                         ast::types::object::NormalProperty {
                                             loc: np.loc.dupe(),
-                                            key: rebuild_key(t),
+                                            key: rebuild_key(type_util::slot_value_t(
+                                                &t,
+                                                np.optional,
+                                            )),
                                             value: ast::types::object::PropertyValue::Init(None),
                                             optional: np.optional,
                                             static_: np.static_,
@@ -8015,7 +7985,8 @@ fn add_interface_properties<'a>(
                                                         cx,
                                                         name.dupe(),
                                                         id_loc.dupe(),
-                                                        type_util::optional(ft.dupe(), None, false),
+                                                        ft.dupe(),
+                                                        true,
                                                         &mut s,
                                                     );
                                                 } else {
@@ -8113,16 +8084,12 @@ fn add_interface_properties<'a>(
                                                 )?;
                                                 let (_, t) = value_ast.loc();
                                                 let t = t.dupe();
-                                                let t_with_optional = if np.optional {
-                                                    type_util::optional(t.dupe(), None, false)
-                                                } else {
-                                                    t.dupe()
-                                                };
                                                 add_field_or_proto(
                                                     cx,
                                                     name.dupe(),
                                                     id_loc.dupe(),
-                                                    t_with_optional.dupe(),
+                                                    t.dupe(),
+                                                    np.optional,
                                                     &mut s,
                                                 );
                                                 let init_ast = init_.as_ref().map(|init_expr| {
@@ -8370,7 +8337,8 @@ fn add_interface_properties<'a>(
                                                 cx,
                                                 Name::new(name.dupe()),
                                                 key_loc.dupe(),
-                                                type_util::optional(ft.dupe(), None, false),
+                                                ft.dupe(),
+                                                true,
                                                 &mut s,
                                             );
                                         } else if is_construct_sig {
@@ -8483,16 +8451,12 @@ fn add_interface_properties<'a>(
                                         )?;
                                         let (_, t) = value_ast.loc();
                                         let t = t.dupe();
-                                        let t_with_optional = if np.optional {
-                                            type_util::optional(t.dupe(), None, false)
-                                        } else {
-                                            t.dupe()
-                                        };
                                         add_field_or_proto(
                                             cx,
                                             Name::new(name.dupe()),
                                             key_loc.dupe(),
-                                            t_with_optional.dupe(),
+                                            t.dupe(),
+                                            np.optional,
                                             &mut s,
                                         );
                                         let init_ast = init_.as_ref().map(|init_expr| {
@@ -8508,7 +8472,10 @@ fn add_interface_properties<'a>(
                                         prop_asts.push(Property::NormalProperty(
                                             ast::types::object::NormalProperty {
                                                 loc: np.loc.dupe(),
-                                                key: rebuild_key(t_with_optional),
+                                                key: rebuild_key(type_util::slot_value_t(
+                                                    &t,
+                                                    np.optional,
+                                                )),
                                                 value: ast::types::object::PropertyValue::Init(
                                                     Some(value_ast),
                                                 ),
@@ -8648,7 +8615,8 @@ fn add_interface_properties<'a>(
                                                     &fsig.fparams.params,
                                                 );
                                             if params.len() == 1 {
-                                                params.into_iter().next().unwrap().1
+                                                let param = params.into_iter().next().unwrap();
+                                                type_util::slot_value_t(&param.t, param.optional)
                                             } else {
                                                 type_::any_t::at(
                                                     type_::AnySource::AnyError(None),
@@ -8704,13 +8672,7 @@ fn add_interface_properties<'a>(
                 let name = &is.id.name;
                 if name.as_str() == "call" {
                     let value_ast = convert_inner(cx, env, &is.value)?;
-                    let (_, t) = value_ast.loc();
-                    let t = t.dupe();
-                    let t = if is.optional {
-                        type_util::optional(t, None, false)
-                    } else {
-                        t
-                    };
+                    let t = type_util::slot_value_t(&value_ast.loc().1, is.optional);
                     class_sig::append_call(is.static_, t, &mut s);
                     prop_asts.push(Property::InternalSlot(ast::types::object::InternalSlot {
                         loc: is.loc.dupe(),

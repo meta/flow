@@ -60,6 +60,7 @@ use flow_typing_type::type_::string_of_ctor;
 use flow_typing_type::type_::union_rep;
 use flow_typing_type::type_util::desc_of_t;
 use flow_typing_type::type_util::reason_of_t;
+use flow_typing_type::type_util::slot_value_t;
 use vec1::Vec1;
 
 pub enum GenericT<Success, SuccessNamespace> {
@@ -100,24 +101,32 @@ fn merge_type<'cx>(cx: &mut Context<'cx>, pair: (Type, Type)) -> Type {
                 let params = if ft1.params.len() != ft2.params.len() {
                     None
                 } else {
-                    let mut params_names = Vec::with_capacity(ft1.params.len());
-                    let mut tins = Vec::with_capacity(ft1.params.len());
-                    for (FunParam(name1, p_t1), FunParam(name2, p_t2)) in
-                        ft1.params.iter().zip(ft2.params.iter())
-                    {
-                        // TODO: How to merge param names?
-                        params_names.push(match (name1, name2) {
-                            (None, None) => None,
-                            (Some(name), _) | (_, Some(name)) => Some(Name::new(name.clone())),
-                        });
-                        tins.push(merge_type(cx, (p_t1.dupe(), p_t2.dupe())));
-                    }
+                    let params: Vec<FunParam> = ft1
+                        .params
+                        .iter()
+                        .zip(ft2.params.iter())
+                        .map(|(p1, p2)| {
+                            let optional = p1.optional && p2.optional;
+                            let (t1, t2) = if optional {
+                                (p1.t.dupe(), p2.t.dupe())
+                            } else {
+                                (
+                                    slot_value_t(&p1.t, p1.optional),
+                                    slot_value_t(&p2.t, p2.optional),
+                                )
+                            };
+                            FunParam {
+                                // TODO: How to merge param names?
+                                name: p1.name.dupe().or_else(|| p2.name.dupe()),
+                                t: merge_type(cx, (t1, t2)),
+                                optional,
+                            }
+                        })
+                        .collect();
                     match (&ft1.rest_param, &ft2.rest_param) {
                         (None, Some(_)) | (Some(_), None) => None,
-                        (None, None) => Some((params_names, tins, None)),
-                        (Some(r1), Some(r2)) => {
-                            Some((params_names, tins, Some((r1.clone(), r2.clone()))))
-                        }
+                        (None, None) => Some((params, None)),
+                        (Some(r1), Some(r2)) => Some((params, Some((r1.clone(), r2.clone())))),
                     }
                 };
                 match params {
@@ -128,7 +137,7 @@ fn merge_type<'cx>(cx: &mut Context<'cx>, pair: (Type, Type)) -> Type {
                         t2,
                         Rc::from([]),
                     )),
-                    Some((params_names, tins, rest_params)) => {
+                    Some((params, rest_params)) => {
                         let rest_param = match rest_params {
                             None => None,
                             Some((
@@ -152,11 +161,10 @@ fn merge_type<'cx>(cx: &mut Context<'cx>, pair: (Type, Type)) -> Type {
                             reason.dupe(),
                             None,
                             None,
-                            tins,
+                            params,
                             rest_param,
                             reason.dupe(),
                             flow_common::error_ref::FunctionReferenceKind::FunctionType,
-                            Some(params_names),
                             type_guard,
                             tout,
                         );
@@ -823,7 +831,6 @@ pub fn extract_type<'cx>(cx: &mut Context<'cx>, this_t: Type) -> GenericT<Type, 
             let resolved = resolve_type(cx, this_t);
             extract_type(cx, resolved)
         }
-        TypeInner::OptionalT { type_, .. } => extract_type(cx, type_.dupe()),
         TypeInner::MaybeT(_, ty) => extract_type(cx, ty.dupe()),
         TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => GenericT::FailureAnyType,
         TypeInner::ThisInstanceT(box ThisInstanceTData {
@@ -1033,7 +1040,10 @@ pub fn extract_members<'cx>(
                     // TODO: It isn't currently possible to return two types for a given
                     // property in autocomplete, so for now we just return the getter
                     // type.
-                    let t = flow_typing_type::type_::property::type_(p).dupe();
+                    let t = slot_value_t(
+                        flow_typing_type::type_::property::type_(p),
+                        flow_typing_type::type_::property::is_optional(p),
+                    );
                     let locs = flow_typing_type::type_::property::def_locs(p);
                     members.insert(x.clone(), (locs, t));
                 }

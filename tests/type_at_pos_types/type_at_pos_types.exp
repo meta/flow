@@ -803,7 +803,7 @@ type T = [1, b: 2, c?: 3]
 tuple.js:3:6,3:6
 
 At tuple.js:6:6
-type S = [0, ...T, d?: void | 4]
+type S = [0, ...T, d?: 4]
 
 'T' defined at tuple.js:3:5
 

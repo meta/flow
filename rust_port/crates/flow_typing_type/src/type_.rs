@@ -279,12 +279,6 @@ pub enum TypeInner {
     UnionT(Reason, union_rep::UnionRep),
     /// ? types
     MaybeT(Reason, Type),
-    /// type of an optional parameter
-    OptionalT {
-        reason: Reason,
-        type_: Type,
-        use_desc: bool,
-    },
     /// collects the keys of an object
     KeysT(Reason, Type),
     /// template literal types, e.g. `hello ${string}`
@@ -5309,8 +5303,14 @@ pub enum UnsoundnessKind {
     NonBindingPattern,
 }
 
+/// `t` is the declared type. An optional parameter also accepts `undefined`, and a call may omit
+/// its argument.
 #[derive(Debug, Clone, Dupe, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct FunParam(pub Option<FlowSmolStr>, pub Type);
+pub struct FunParam {
+    pub name: Option<FlowSmolStr>,
+    pub t: Type,
+    pub optional: bool,
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FunRestParam(pub Option<FlowSmolStr>, pub ALoc, pub Type);
@@ -6472,8 +6472,10 @@ impl Property {
 pub struct FieldData {
     pub preferred_def_locs: Option<Vec1<ALoc>>,
     pub key_loc: Option<ALoc>,
+    /// The declared type. An optional field may be missing, and holds `undefined` then.
     pub type_: Type,
     pub polarity: Polarity,
+    pub optional: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -6487,16 +6489,31 @@ pub struct GetSetData {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum PropertyInner {
     Field(Box<FieldData>),
-    Get { key_loc: Option<ALoc>, type_: Type },
-    Set { key_loc: Option<ALoc>, type_: Type },
+    Get {
+        key_loc: Option<ALoc>,
+        type_: Type,
+    },
+    Set {
+        key_loc: Option<ALoc>,
+        type_: Type,
+    },
     GetSet(Box<GetSetData>),
-    Method { key_loc: Option<ALoc>, type_: Type },
+    /// An optional method may be missing, and holds `undefined` then.
+    Method {
+        key_loc: Option<ALoc>,
+        type_: Type,
+        optional: bool,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum PropertyType {
     /// A field that is defined in the source file as a field.
-    OrdinaryField { type_: Type, polarity: Polarity },
+    OrdinaryField {
+        type_: Type,
+        polarity: Polarity,
+        optional: bool,
+    },
     /// Some properties that are normalized to a field.
     SyntheticField {
         get_type: Option<Type>,
@@ -6518,6 +6535,10 @@ pub struct NamedSymbolInner {
     /// [None], consumers fall back to [type_]. The regular import path always
     /// reads [type_]; only the [_for_extends] read paths consult this field.
     pub type_for_extends: Option<Type>,
+    /// Whether the export may be missing: a named export taken from an optional property of
+    /// a CommonJS `module.exports` object. [type_] is then the declared type of the property, and
+    /// the value of the export is [value_t].
+    pub optional: bool,
 }
 
 /// Rc-wrapped NamedSymbol for smaller B-tree entries (8 bytes vs 64 bytes).
@@ -6537,7 +6558,24 @@ impl NamedSymbol {
             preferred_def_locs,
             type_,
             type_for_extends,
+            optional: false,
         }))
+    }
+
+    /// The same symbol, which may be missing when `optional`.
+    pub fn with_optional(&self, optional: bool) -> Self {
+        if self.optional == optional {
+            return self.dupe();
+        }
+        NamedSymbol(Rc::new(NamedSymbolInner {
+            optional,
+            ..(*self.0).clone()
+        }))
+    }
+
+    /// The type of the export's value: `undefined` or the declared type when it may be missing.
+    pub fn value_t(&self) -> Type {
+        crate::type_util::slot_value_t(&self.type_, self.optional)
     }
 
     pub fn ptr_eq(&self, other: &Self) -> bool {
@@ -7250,6 +7288,16 @@ pub mod property {
             PropertyInner::Field(f) => PropertyType::OrdinaryField {
                 type_: f.type_.dupe(),
                 polarity: f.polarity,
+                optional: f.optional,
+            },
+            PropertyInner::Method {
+                type_,
+                optional: true,
+                ..
+            } => PropertyType::OrdinaryField {
+                type_: type_.dupe(),
+                polarity: Polarity::Positive,
+                optional: true,
             },
             PropertyInner::Get { type_, .. } | PropertyInner::Method { type_, .. } => {
                 PropertyType::SyntheticField {
@@ -7302,37 +7350,66 @@ pub mod property {
         }
     }
 
-    pub fn read_t_of_property_type(pt: &PropertyType) -> Option<Type> {
+    /// The declared type of a readable property, and whether it is optional.
+    pub fn read_slot_of_property_type(pt: &PropertyType) -> Option<(Type, bool)> {
         match pt {
-            PropertyType::OrdinaryField { type_, polarity } => {
+            PropertyType::OrdinaryField {
+                type_,
+                polarity,
+                optional,
+            } => {
                 if Polarity::compat(*polarity, Polarity::Positive) {
-                    Some(type_.dupe())
+                    Some((type_.dupe(), *optional))
                 } else {
                     None
                 }
             }
-            PropertyType::SyntheticField { get_type, .. } => get_type.as_ref().map(|t| t.dupe()),
+            PropertyType::SyntheticField { get_type, .. } => {
+                get_type.as_ref().map(|t| (t.dupe(), false))
+            }
         }
+    }
+
+    /// The type of the value read from the property: an optional field may hold `undefined`.
+    pub fn read_t_of_property_type(pt: &PropertyType) -> Option<Type> {
+        read_slot_of_property_type(pt)
+            .map(|(t, optional)| crate::type_util::slot_value_t(&t, optional))
     }
 
     pub fn read_t(p: &Property) -> Option<Type> {
         read_t_of_property_type(&property_type(p))
     }
 
-    pub fn write_t_of_property_type(pt: &PropertyType, ctx: Option<WriteCtx>) -> Option<Type> {
+    /// The declared type of a writable property, and whether it is optional.
+    pub fn write_slot_of_property_type(
+        pt: &PropertyType,
+        ctx: Option<WriteCtx>,
+    ) -> Option<(Type, bool)> {
         let ctx = ctx.unwrap_or(WriteCtx::Normal);
         match pt {
-            PropertyType::OrdinaryField { type_, polarity } => {
+            PropertyType::OrdinaryField {
+                type_,
+                polarity,
+                optional,
+            } => {
                 if matches!(ctx, WriteCtx::ThisInCtor)
                     || Polarity::compat(*polarity, Polarity::Negative)
                 {
-                    Some(type_.dupe())
+                    Some((type_.dupe(), *optional))
                 } else {
                     None
                 }
             }
-            PropertyType::SyntheticField { set_type, .. } => set_type.as_ref().map(|t| t.dupe()),
+            PropertyType::SyntheticField { set_type, .. } => {
+                set_type.as_ref().map(|t| (t.dupe(), false))
+            }
         }
+    }
+
+    /// The type of the values the property accepts: an optional field also accepts `undefined`.
+    pub fn write_t_of_property_type(pt: &PropertyType, ctx: Option<WriteCtx>) -> Option<Type> {
+        write_slot_of_property_type(pt, ctx)
+            .map(|(t, optional)| crate::type_util::slot_value_t(&t, optional))
     }
 
     pub fn write_t(p: &Property) -> Option<Type> {
@@ -7446,6 +7523,7 @@ pub mod property {
                         key_loc: fd.key_loc.dupe(),
                         type_: type_prime,
                         polarity: fd.polarity,
+                        optional: fd.optional,
                     })))
                 }
             }
@@ -7485,7 +7563,11 @@ pub mod property {
                     })))
                 }
             }
-            PropertyInner::Method { key_loc, type_ } => {
+            PropertyInner::Method {
+                key_loc,
+                type_,
+                optional,
+            } => {
                 let type_prime = f(type_);
                 if type_.ptr_eq(&type_prime) {
                     p.dupe()
@@ -7493,6 +7575,7 @@ pub mod property {
                     Property::new(PropertyInner::Method {
                         key_loc: key_loc.dupe(),
                         type_: type_prime,
+                        optional: *optional,
                     })
                 }
             }
@@ -7514,6 +7597,7 @@ pub mod property {
                         key_loc: fd.key_loc.dupe(),
                         type_: type_prime,
                         polarity: fd.polarity,
+                        optional: fd.optional,
                     }))))
                 }
             }
@@ -7555,7 +7639,11 @@ pub mod property {
                     }))))
                 }
             }
-            PropertyInner::Method { key_loc, type_ } => {
+            PropertyInner::Method {
+                key_loc,
+                type_,
+                optional,
+            } => {
                 let type_prime = f(type_);
                 if Rc::ptr_eq(&type_prime.0, &type_.0) {
                     Cow::Borrowed(p)
@@ -7563,6 +7651,7 @@ pub mod property {
                     Cow::Owned(Property::new(PropertyInner::Method {
                         key_loc: key_loc.dupe(),
                         type_: type_prime,
+                        optional: *optional,
                     }))
                 }
             }
@@ -7585,6 +7674,14 @@ pub mod property {
 
     pub fn is_method(p: &Property) -> bool {
         matches!(p.deref(), PropertyInner::Method { .. })
+    }
+
+    pub fn is_optional(p: &Property) -> bool {
+        match p.deref() {
+            PropertyInner::Field(fd) => fd.optional,
+            PropertyInner::Method { optional, .. } => *optional,
+            _ => false,
+        }
     }
 
     /// Underlying type field of a Property, regardless of polarity (unlike `read_t`,
@@ -7651,6 +7748,7 @@ pub mod property {
                         key_loc: fd.key_loc.dupe(),
                         type_: type_prime,
                         polarity,
+                        optional: fd.optional,
                     })))
                 }
             }
@@ -7690,7 +7788,11 @@ pub mod property {
                     })))
                 }
             }
-            PropertyInner::Method { key_loc, type_ } => {
+            PropertyInner::Method {
+                key_loc,
+                type_,
+                optional,
+            } => {
                 let type_prime = f(type_);
                 if type_.ptr_eq(&type_prime) {
                     p.dupe()
@@ -7698,33 +7800,10 @@ pub mod property {
                     Property::new(PropertyInner::Method {
                         key_loc: key_loc.dupe(),
                         type_: type_prime,
+                        optional: *optional,
                     })
                 }
             }
-        }
-    }
-
-    /// Map the underlying type of a Field and override its polarity in one pass.
-    /// Method/Get/Set/GetSet are returned unchanged.
-    pub fn map_field_t_with_polarity<F>(p: &Property, polarity: Polarity, f: F) -> Property
-    where
-        F: FnOnce(&Type) -> Type,
-    {
-        match p.deref() {
-            PropertyInner::Field(fd) => {
-                let type_prime = f(&fd.type_);
-                if fd.type_.ptr_eq(&type_prime) && fd.polarity == polarity {
-                    p.dupe()
-                } else {
-                    Property::new(PropertyInner::Field(Box::new(FieldData {
-                        preferred_def_locs: fd.preferred_def_locs.clone(),
-                        key_loc: fd.key_loc.dupe(),
-                        type_: type_prime,
-                        polarity,
-                    })))
-                }
-            }
-            _ => p.dupe(),
         }
     }
 }
@@ -7936,7 +8015,9 @@ pub mod properties {
         pub fn extract_named_exports(&self) -> BTreeMap<Name, NamedSymbol> {
             let mut tmap = BTreeMap::new();
             for (name, prop) in self.iter() {
-                if let Some(mut type_) = property::read_t(prop) {
+                if let Some((mut type_, optional)) =
+                    property::read_slot_of_property_type(&property::property_type(prop))
+                {
                     let preferred_def_locs = match prop.deref() {
                         PropertyInner::Field(fd) => fd.preferred_def_locs.clone(),
                         _ => None,
@@ -7948,7 +8029,8 @@ pub mod properties {
 
                     tmap.insert(
                         name.dupe(),
-                        NamedSymbol::new(property::read_loc(prop), preferred_def_locs, type_, None),
+                        NamedSymbol::new(property::read_loc(prop), preferred_def_locs, type_, None)
+                            .with_optional(optional),
                     );
                 }
             }
@@ -8519,6 +8601,10 @@ pub mod union_rep {
         ImplicitInstantiationKind,
         ResolvedKind,
         LogicalKind,
+        /// The values an optional slot takes: `void` or its declared type. A value flows into it
+        /// as into the slot, where `void` needs nothing of the declared type and anything else
+        /// must fit it.
+        OptionalKind,
         UnknownKind,
     }
 
@@ -9715,6 +9801,7 @@ pub mod object {
         #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
         pub enum RefManipulation {
             KeepRef,
+            /// Adds an optional `ref` prop of this type.
             AddRef(Type),
         }
     }
@@ -12003,11 +12090,6 @@ pub mod void {
         let reason = reason.replace_desc(desc());
         make(reason)
     }
-
-    pub fn why_with_use_desc(use_desc: bool, r: Reason) -> Type {
-        let r = if use_desc { r } else { r.replace_desc(desc()) };
-        make(r)
-    }
 }
 
 pub mod ts_void {
@@ -12384,7 +12466,6 @@ pub fn string_of_ctor(t: &Type) -> &'static str {
         TypeInner::TypeAppT(..) => "TypeAppT",
         TypeInner::UnionT(_, _) => "UnionT",
         TypeInner::IntersectionT(_, _) => "IntersectionT",
-        TypeInner::OptionalT { .. } => "OptionalT",
         TypeInner::MaybeT(_, _) => "MaybeT",
     }
 }
@@ -12776,7 +12857,10 @@ pub fn string_of_type_t_kind(kind: &TypeTKind) -> &'static str {
 pub fn extract_setter_type(t: &Type) -> Type {
     match &**t {
         TypeInner::DefT(reason, def_t) => match &**def_t {
-            DefTInner::FunT(_, ft) if !ft.params.is_empty() => ft.params[0].1.dupe(),
+            DefTInner::FunT(_, ft) if !ft.params.is_empty() => {
+                let param = &ft.params[0];
+                crate::type_util::slot_value_t(&param.t, param.optional)
+            }
             DefTInner::FunT(..) => any_t::error(reason.dupe()),
             _ => panic!("Setter property with unexpected type"),
         },
@@ -12867,29 +12951,19 @@ pub fn mk_methodtype(
     this_t: Type,
     subtyping: Option<ThisStatus>,
     effect_: Option<ReactEffectType>,
-    tins: Vec<Type>,
+    params: Vec<FunParam>,
     rest_param: Option<FunRestParam>,
     def_reason: Reason,
     function_reference_kind: FunctionReferenceKind,
-    params_names: Option<Vec<Option<Name>>>,
     type_guard: Option<TypeGuard>,
     tout: Type,
 ) -> FunType {
     let subtyping = subtyping.unwrap_or(ThisStatus::ThisFunction);
     let effect_ = effect_.unwrap_or(ReactEffectType::ArbitraryEffect);
 
-    let params = match params_names {
-        None => tins.into_iter().map(|t| FunParam(None, t)).collect(),
-        Some(names) => names
-            .into_iter()
-            .zip(tins)
-            .map(|(name_opt, t)| FunParam(name_opt.map(|n| n.to_string().into()), t))
-            .collect(),
-    };
-
     FunType {
         this_t: (this_t, subtyping),
-        params,
+        params: params.into(),
         rest_param,
         return_t: tout,
         type_guard,
@@ -12924,11 +12998,10 @@ pub fn mk_methodcalltype(
 pub fn mk_boundfunctiontype(
     this: Type,
     effect_: Option<ReactEffectType>,
-    tins: Vec<Type>,
+    params: Vec<FunParam>,
     rest_param: Option<FunRestParam>,
     def_reason: Reason,
     function_reference_kind: FunctionReferenceKind,
-    params_names: Option<Vec<Option<Name>>>,
     type_guard: Option<TypeGuard>,
     tout: Type,
 ) -> FunType {
@@ -12936,11 +13009,10 @@ pub fn mk_boundfunctiontype(
         this,
         Some(ThisStatus::ThisMethod),
         effect_,
-        tins,
+        params,
         rest_param,
         def_reason,
         function_reference_kind,
-        params_names,
         type_guard,
         tout,
     )
@@ -12954,11 +13026,10 @@ pub fn mk_functiontype(
     reason: Reason,
     this: Option<Type>,
     effect_: Option<ReactEffectType>,
-    tins: Vec<Type>,
+    params: Vec<FunParam>,
     rest_param: Option<FunRestParam>,
     def_reason: Reason,
     function_reference_kind: FunctionReferenceKind,
-    params_names: Option<Vec<Option<Name>>>,
     type_guard: Option<TypeGuard>,
     tout: Type,
 ) -> FunType {
@@ -12967,11 +13038,10 @@ pub fn mk_functiontype(
         this,
         None,
         effect_,
-        tins,
+        params,
         rest_param,
         def_reason,
         function_reference_kind,
-        params_names,
         type_guard,
         tout,
     )

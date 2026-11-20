@@ -1,0 +1,6 @@
+[options]
+all=true
+experimental.facebook_module_interop=true
+experimental.multi_platform=true
+experimental.multi_platform.extensions=.ios
+experimental.multi_platform.extensions=.android

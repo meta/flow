@@ -253,7 +253,8 @@ pub mod class {
         }
     }
 
-    pub type FieldPrime<C> = (Option<ALoc>, Polarity, Field<C>);
+    /// The key location, the polarity, the field, and whether it is optional.
+    pub type FieldPrime<C> = (Option<ALoc>, Polarity, Field<C>, bool);
 
     pub type TypeApp = (ALoc, Type, Option<Vec<Type>>);
 

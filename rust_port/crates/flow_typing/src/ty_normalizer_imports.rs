@@ -197,7 +197,7 @@ fn add_require_bindings_from_exports_map<'a>(
                                         bind_id.1.dupe(),
                                         ALoc::of_loc(bind_id.0.dupe()),
                                         ImportMode::ValueMode,
-                                        named_symbol.type_.dupe(),
+                                        named_symbol.value_t(),
                                     ));
                                 }
                                 None => {}
@@ -356,7 +356,7 @@ fn add_namespace_members<'a>(
     for ((name, named_symbol), mode) in exports {
         let class_loc = match mode {
             ImportMode::ValueMode | ImportMode::TypeofMode => {
-                class_def_loc(cx, &named_symbol.type_)
+                class_def_loc(cx, &named_symbol.value_t())
             }
             ImportMode::TypeMode => None,
         };

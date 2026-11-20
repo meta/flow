@@ -1,0 +1,1 @@
+declare module.exports: {readonly a: number, readonly b?: number};

@@ -270,10 +270,12 @@ fn object_type_of_slice<'cx>(cx: &mut Context<'cx>, slice: &object::Slice) -> Ty
 }
 
 pub fn type_optionality(prop: &Property) -> (Type, bool) {
-    let prop_t = property::type_(prop);
-    match prop_t.deref() {
-        TypeInner::OptionalT { type_: t, .. } => (t.dupe(), true),
-        _ => (prop_t.dupe(), false),
+    match prop.deref() {
+        PropertyInner::Field(fd) => (fd.type_.dupe(), fd.optional),
+        PropertyInner::Method {
+            type_, optional, ..
+        } => (type_.dupe(), *optional),
+        _ => (property::type_(prop).dupe(), false),
     }
 }
 
@@ -291,15 +293,21 @@ pub fn mk_slice_prop(
     type_: Type,
     polarity: Polarity,
     is_method: bool,
+    optional: bool,
 ) -> Property {
     if is_method {
-        Property::new(PropertyInner::Method { key_loc, type_ })
+        Property::new(PropertyInner::Method {
+            key_loc,
+            type_,
+            optional,
+        })
     } else {
         Property::new(PropertyInner::Field(Box::new(FieldData {
             preferred_def_locs: None,
             key_loc,
             type_,
             polarity,
+            optional,
         })))
     }
 }
@@ -318,18 +326,23 @@ pub fn read_prop(r: &Reason, _flags: &Flags, _x: &Name, p: &Property) -> Propert
         PropertyInner::Method { .. } => return p.dupe(),
         _ => {}
     }
-    let t = property::read_t(p).unwrap_or_else(|| {
-        let reason = r.dupe().replace_desc(None);
-        Type::new(TypeInner::DefT(
-            reason,
-            DefT::new(DefTInner::MixedT(MixedFlavor::MixedEverything)),
-        ))
-    });
+    let (t, optional) = property::read_slot_of_property_type(&property::property_type(p))
+        .unwrap_or_else(|| {
+            let reason = r.dupe().replace_desc(None);
+            (
+                Type::new(TypeInner::DefT(
+                    reason,
+                    DefT::new(DefTInner::MixedT(MixedFlavor::MixedEverything)),
+                )),
+                false,
+            )
+        });
     mk_slice_prop(
         property::first_loc(p),
         t,
         property::polarity(p),
         property::is_method(p),
+        optional,
     )
 }
 
@@ -447,9 +460,10 @@ pub fn get_prop<'a>(
         (Some(p), _) => Some(Cow::Borrowed(p)),
         (None, Some(d)) => Some(Cow::Owned(mk_slice_prop(
             Some(type_util::loc_of_t(&d.key).dupe()),
-            type_util::optional(read_dict(r, d), None, false),
+            read_dict(r, d),
             Polarity::Neutral,
             false,
+            true,
         ))),
         (None, None) => None,
     }
@@ -620,12 +634,17 @@ fn spread2<'cx>(
         let (t1_inner, opt1) = type_optionality(t1);
         let (t2_inner, opt2) = type_optionality(t2);
         if !opt2 {
-            mk_slice_prop(kl2, t2_inner, Polarity::Neutral, method2)
+            mk_slice_prop(kl2, t2_inner, Polarity::Neutral, method2, false)
         } else if opt1 && opt2 {
-            let prop_t = type_util::optional(union(t1_inner, t2_inner), None, false);
             // Since we cannot be sure which is spread, if either
             // are methods we must treat the result as a method
-            mk_slice_prop(None, prop_t, Polarity::Neutral, method2 || method1)
+            mk_slice_prop(
+                None,
+                union(t1_inner, t2_inner),
+                Polarity::Neutral,
+                method2 || method1,
+                true,
+            )
         } else {
             // In this case, we know opt2 is true and opt1 is false
             mk_slice_prop(
@@ -633,6 +652,7 @@ fn spread2<'cx>(
                 union(t1_inner, t2_inner),
                 Polarity::Neutral,
                 method1 || method2,
+                false,
             )
         }
     };
@@ -1381,10 +1401,21 @@ pub fn object_rest_with_env<'cx, A>(
     reason: &Reason,
     x: Vec1<object::Slice>,
 ) -> Result<A, FlowJsException> {
-    let optional = |t: Type| -> Type {
-        match t.deref() {
-            TypeInner::OptionalT { .. } => t.dupe(),
-            _ => type_util::optional(t, None, false),
+    // A property that the rest may not have.
+    let optional_prop = |p: &Property, polarity: Polarity| -> Property {
+        match p.deref() {
+            PropertyInner::Field(fd) => Property::new(PropertyInner::Field(Box::new(FieldData {
+                polarity,
+                optional: true,
+                ..(**fd).clone()
+            }))),
+            _ => mk_slice_prop(
+                property::first_loc(p),
+                property::type_(p).dupe(),
+                polarity,
+                property::is_method(p),
+                true,
+            ),
         }
     };
     // Subtract the second slice from the first slice and return the difference
@@ -1466,9 +1497,9 @@ pub fn object_rest_with_env<'cx, A>(
                     _,
                 ) => None,
                 (object::rest::MergeMode::ReactConfigMerge(_), Some(p1), Some(p2), _) => {
-                    let p1_t = property::type_(p1);
-                    let p2_t = property::type_(p2);
-                    match p2_t.deref() {
+                    let (p1_t, p1_optional) = type_optionality(p1);
+                    let (p2_t, p2_optional) = type_optionality(p2);
+                    if p2_optional {
                         // React config merging is special. We are trying to solve for C
                         // in the equation (where ... represents spread instead of rest):
                         //
@@ -1482,33 +1513,33 @@ pub fn object_rest_with_env<'cx, A>(
                         // {...{p?}, ...{p?}} is {p?} instead of {p}. This is inconsistent with
                         // the behavior of other object rest merge modes implemented in this
                         // pattern match.
-                        TypeInner::OptionalT { type_, .. } => {
-                            // We only test the subtyping relation of t1 and t2 if both t1 and t2
-                            // are optional types. If t1 is required then t2 will always
-                            // be overwritten.;
-                            if let TypeInner::OptionalT {
-                                type_: t1_inner, ..
-                            } = p1_t.deref()
-                            {
-                                subt_check(unknown_use(), cx, (type_, t1_inner))?;
-                            }
-                            Some(property::with_polarity(p1, Polarity::Neutral))
+                        //
+                        // We only test the subtyping relation of t1 and t2 if both t1 and t2
+                        // are optional types. If t1 is required then t2 will always
+                        // be overwritten.;
+                        if p1_optional {
+                            subt_check(unknown_use(), cx, (&p2_t, &p1_t))?;
                         }
-                        _ => {
-                            // Using our same equation. Consider this case:
-                            //
-                            //     {...{p}, ...C} = {p}
-                            //
-                            // The solution for C here is {p?}. An empty object, {}, is not a valid
-                            // solution unless that empty object is exact. Even for exact objects,
-                            // {|p?|} is the best solution since it accepts more valid
-                            // programs then {||}.
-                            // The DP type for p must be a subtype of the P type for p.
-                            subt_check(unknown_use(), cx, (p2_t, p1_t))?;
-                            Some(property::map_t_with_polarity(p1, Polarity::Positive, |t| {
-                                optional(t.dupe())
-                            }))
-                        }
+                        Some(property::with_polarity(p1, Polarity::Neutral))
+                    } else {
+                        // Using our same equation. Consider this case:
+                        //
+                        //     {...{p}, ...C} = {p}
+                        //
+                        // The solution for C here is {p?}. An empty object, {}, is not a valid
+                        // solution unless that empty object is exact. Even for exact objects,
+                        // {|p?|} is the best solution since it accepts more valid
+                        // programs then {||}.
+                        // The DP type for p must be a subtype of the P type for p.
+                        subt_check(
+                            unknown_use(),
+                            cx,
+                            (
+                                &type_util::slot_value_t(&p2_t, p2_optional),
+                                &type_util::slot_value_t(&p1_t, p1_optional),
+                            ),
+                        )?;
+                        Some(optional_prop(p1, Polarity::Positive))
                     }
                 }
                 (
@@ -1561,7 +1592,7 @@ pub fn object_rest_with_env<'cx, A>(
                 Some(DictType {
                     dict_name: None,
                     key: dict1_v.key.dupe(),
-                    value: optional(dict1_v.value.dupe()),
+                    value: type_util::slot_value_t(&dict1_v.value, true),
                     dict_polarity: Polarity::Neutral,
                 })
             }
@@ -1851,29 +1882,27 @@ pub fn object_update_optionality<'cx>(
         let props_map: properties::PropertiesMap = props
             .iter()
             .map(|(k, p)| {
-                // Methods pass through optionality unchanged. Fields get the type wrapped
-                // or unwrapped per `kind`, plus the frozen-overridden polarity.
-                let new_p = property::map_field_t_with_polarity(
-                    p,
-                    polarity_for(property::polarity(p)),
-                    |t| match (t.deref(), kind) {
-                        (TypeInner::OptionalT { .. }, ObjectUpdateOptionalityKind::Partial) => {
-                            t.dupe()
+                // Methods pass through optionality unchanged. Fields become optional or
+                // required per `kind`, plus the frozen-overridden polarity.
+                let polarity = polarity_for(property::polarity(p));
+                let new_p = match p.deref() {
+                    PropertyInner::Field(fd) => {
+                        let optional = match kind {
+                            ObjectUpdateOptionalityKind::Partial => true,
+                            ObjectUpdateOptionalityKind::Required => false,
+                        };
+                        if fd.polarity == polarity && fd.optional == optional {
+                            p.dupe()
+                        } else {
+                            Property::new(PropertyInner::Field(Box::new(FieldData {
+                                polarity,
+                                optional,
+                                ..(**fd).clone()
+                            })))
                         }
-                        (_, ObjectUpdateOptionalityKind::Partial) => {
-                            Type::new(TypeInner::OptionalT {
-                                reason: type_util::reason_of_t(t).dupe(),
-                                type_: t.dupe(),
-                                use_desc: false,
-                            })
-                        }
-                        (
-                            TypeInner::OptionalT { type_, .. },
-                            ObjectUpdateOptionalityKind::Required,
-                        ) => type_.dupe(),
-                        (_, ObjectUpdateOptionalityKind::Required) => t.dupe(),
-                    },
-                );
+                    }
+                    _ => p.dupe(),
+                };
                 (k.dupe(), new_p)
             })
             .collect();
@@ -2013,36 +2042,23 @@ fn intersect_slice_contents<'cx>(
     let dict1 = obj_type::get_dict_opt(&flags1.obj_kind);
     let dict2 = obj_type::get_dict_opt(&flags2.obj_kind);
     let mut merge_props = |q1: &Property, q2: &Property| -> Property {
-        let t1 = property::type_(q1);
-        let t2 = property::type_(q2);
         let m1 = property::is_method(q1);
         let m2 = property::is_method(q2);
         let p1 = property::polarity(q1);
         let p2 = property::polarity(q2);
         let key_loc = property::first_loc(q1);
-        let (t1_inner, t2_inner, opt) = match (t1.deref(), t2.deref()) {
-            (
-                TypeInner::OptionalT { type_: t1_opt, .. },
-                TypeInner::OptionalT { type_: t2_opt, .. },
-            ) => (t1_opt.dupe(), t2_opt.dupe(), true),
-            (TypeInner::OptionalT { type_: t1_opt, .. }, _) => (t1_opt.dupe(), t2.dupe(), false),
-            (_, TypeInner::OptionalT { type_: t2_opt, .. }) => (t1.dupe(), t2_opt.dupe(), false),
-            _ => (t1.dupe(), t2.dupe(), false),
-        };
-        let t = policy.intersect(cx, t1_inner, t2_inner);
-        let t = if opt {
-            type_util::optional(t, None, false)
-        } else {
-            t
-        };
-        mk_slice_prop(key_loc, t, Polarity::mult(p1, p2), m1 || m2)
+        let (t1, opt1) = type_optionality(q1);
+        let (t2, opt2) = type_optionality(q2);
+        let t = policy.intersect(cx, t1, t2);
+        mk_slice_prop(key_loc, t, Polarity::mult(p1, p2), m1 || m2, opt1 && opt2)
     };
     let read_dict_prop = |r: &Reason, d: &DictType| -> Property {
         mk_slice_prop(
             Some(type_util::loc_of_t(&d.key).dupe()),
-            type_util::optional(read_dict(r, d), None, false),
+            read_dict(r, d),
             policy.dict_polarity(d.dict_polarity),
             false,
+            true,
         )
     };
     let mut props = properties::PropertiesMap::new();
@@ -2810,15 +2826,9 @@ fn resolve_with_env<'cx, A>(
                 }) if matches!(tool, object::Tool::Partial) => {
                     let elements: Vec<TupleElement> = elements
                         .iter()
-                        .map(|elem| {
-                            let t = type_util::optional(elem.t.dupe(), None, false);
-                            TupleElement {
-                                t,
-                                name: elem.name.clone(),
-                                polarity: elem.polarity,
-                                optional: true,
-                                reason: elem.reason.dupe(),
-                            }
+                        .map(|elem| TupleElement {
+                            optional: true,
+                            ..elem.clone()
                         })
                         .collect();
                     // Each element of the rest element may be `undefined`.
@@ -2835,7 +2845,7 @@ fn resolve_with_env<'cx, A>(
                         elements
                             .iter()
                             .chain(&rest)
-                            .map(|elem| elem.t.dupe())
+                            .map(|elem| type_util::slot_value_t(&elem.t, elem.optional))
                             .collect(),
                         None,
                     );
@@ -2874,18 +2884,9 @@ fn resolve_with_env<'cx, A>(
                 }) if matches!(tool, object::Tool::Required) => {
                     let elements: Vec<TupleElement> = elements
                         .iter()
-                        .map(|elem| {
-                            let t = match elem.t.deref() {
-                                TypeInner::OptionalT { type_, .. } => type_.dupe(),
-                                _ => elem.t.dupe(),
-                            };
-                            TupleElement {
-                                t,
-                                name: elem.name.clone(),
-                                polarity: elem.polarity,
-                                optional: false,
-                                reason: elem.reason.dupe(),
-                            }
+                        .map(|elem| TupleElement {
+                            optional: false,
+                            ..elem.clone()
                         })
                         .collect();
                     let elem_t = type_util::union_of_ts(
@@ -3196,6 +3197,7 @@ pub fn mk_variance(variance: MappedTypeVariance, prop_polarity: Polarity) -> Pol
     }
 }
 
+/// The declared type of a mapped type's property, and whether it is optional.
 pub fn mk_mapped_prop_type<'cx>(
     cx: &mut Context<'cx>,
     filter_optional: &dyn Fn(&mut Context<'cx>, Type) -> Result<Type, FlowJsException>,
@@ -3204,7 +3206,7 @@ pub fn mk_mapped_prop_type<'cx>(
     poly_prop: &Type,
     key_t: Type,
     prop_optional: bool,
-) -> Result<Type, FlowJsException> {
+) -> Result<(Type, bool), FlowJsException> {
     // We persist the original use_op here so that errors involving the typeapp are positioned
     // at the use site and not the typeapp site
     let t = type_util::typeapp_with_use_op(
@@ -3216,26 +3218,16 @@ pub fn mk_mapped_prop_type<'cx>(
         vec![key_t],
     );
     match mapped_type_optionality {
-        MappedTypeOptionality::MakeOptional => Ok(type_util::optional(t, None, false)),
+        MappedTypeOptionality::MakeOptional => Ok((t, true)),
         MappedTypeOptionality::RemoveOptional => {
             if prop_optional {
-                filter_optional(cx, t)
+                Ok((filter_optional(cx, t)?, false))
             } else {
-                Ok(t)
+                Ok((t, false))
             }
         }
-        MappedTypeOptionality::KeepOptionality => {
-            if prop_optional {
-                Ok(type_util::optional(t, None, false))
-            } else {
-                Ok(t)
-            }
-        }
+        MappedTypeOptionality::KeepOptionality => Ok((t, prop_optional)),
     }
-}
-
-pub fn is_prop_optional(t: &Type) -> bool {
-    matches!(t.deref(), TypeInner::OptionalT { .. })
 }
 
 /* Per-source-key dispatch produced by [object_kit.rs] when a mapped type carries a [name_type]
@@ -3289,23 +3281,13 @@ pub fn mapped_type_meet_polarity(p1: Polarity, p2: Polarity) -> Polarity {
 }
 
 /* Merge two field props from the same destination key — used when multiple source keys remap to
- * the same destination, or when a source key remaps to multiple names that collide.
- *
- * Optionality must be preserved at the top level: `OptionalT<number> | string` would not be a
- * top-level OptionalT, and Flow's missing-property logic would treat the merged property as
- * required. We unwrap any contributing OptionalT, union the inner types, and re-wrap if any
- * contributor was optional. */
+ * the same destination, or when a source key remaps to multiple names that collide. The merged
+ * property is optional if any contributor is. */
 pub fn merge_field(
     reason: &Reason,
     existing: Option<&Property>,
     incoming: &Property,
 ) -> Option<Property> {
-    let unwrap_optional = |t: &Type| -> (Type, bool) {
-        match t.deref() {
-            TypeInner::OptionalT { type_, .. } => (type_.dupe(), true),
-            _ => (t.dupe(), false),
-        }
-    };
     match existing {
         None => Some(incoming.dupe()),
         Some(existing_prop) => {
@@ -3316,29 +3298,25 @@ pub fn merge_field(
                         key_loc: kl1,
                         type_: t1,
                         polarity: p1,
+                        optional: opt1,
                     }),
                     PropertyInner::Field(box FieldData {
                         preferred_def_locs: _,
                         key_loc: _,
                         type_: t2,
                         polarity: p2,
+                        optional: opt2,
                     }),
                 ) => {
-                    let (inner1, opt1) = unwrap_optional(t1);
-                    let (inner2, opt2) = unwrap_optional(t2);
-                    let merged_inner =
-                        type_util::union_of_ts(reason.dupe(), vec![inner1, inner2], None);
-                    let merged_type = if opt1 || opt2 {
-                        type_util::optional(merged_inner, None, false)
-                    } else {
-                        merged_inner
-                    };
+                    let merged_type =
+                        type_util::union_of_ts(reason.dupe(), vec![t1.dupe(), t2.dupe()], None);
                     let merged_polarity = mapped_type_meet_polarity(*p1, *p2);
                     Some(Property::new(PropertyInner::Field(Box::new(FieldData {
                         preferred_def_locs: pl1.clone(),
                         key_loc: kl1.clone(),
                         type_: merged_type,
                         polarity: merged_polarity,
+                        optional: *opt1 || *opt2,
                     }))))
                 }
                 _ => {
@@ -3380,7 +3358,7 @@ pub fn map_object<'cx>(
     let mk_prop_type = |cx: &mut Context<'cx>,
                         key_t: Type,
                         prop_optional: bool|
-     -> Result<Type, FlowJsException> {
+     -> Result<(Type, bool), FlowJsException> {
         mk_mapped_prop_type(
             cx,
             filter_optional,
@@ -3391,6 +3369,12 @@ pub fn map_object<'cx>(
             prop_optional,
         )
     };
+    // A dictionary value has no optionality: an optional one may be `undefined`.
+    let mk_dict_value_type =
+        |cx: &mut Context<'cx>, key_t: Type| -> Result<Type, FlowJsException> {
+            let (t, optional) = mk_prop_type(cx, key_t, false)?;
+            Ok(type_util::slot_value_t(&t, optional))
+        };
     /* Build the field for a given source key and its prop in the source object. */
     let build_source_field = |cx: &mut Context<'cx>,
                               key: &Name,
@@ -3423,17 +3407,19 @@ pub fn map_object<'cx>(
                 ))
             }
         };
-        let prop_optional = is_prop_optional(prop_t);
+        let prop_optional = property::is_optional(prop);
         let polarity = if *frozen {
             Polarity::Positive
         } else {
             mk_variance(variance, prop_polarity)
         };
+        let (type_, optional) = mk_prop_type(cx, key_t, prop_optional)?;
         let field = Property::new(PropertyInner::Field(Box::new(FieldData {
             preferred_def_locs: None,
             key_loc: Some(key_loc.dupe()),
-            type_: mk_prop_type(cx, key_t, prop_optional)?,
+            type_,
             polarity,
+            optional,
         })));
         Ok((key_loc, field))
     };
@@ -3447,6 +3433,7 @@ pub fn map_object<'cx>(
             } else {
                 Polarity::Neutral
             },
+            optional: false,
         })))
     };
     let meet_polarity = mapped_type_meet_polarity;
@@ -3523,8 +3510,14 @@ pub fn map_object<'cx>(
                             }
                             let (value_ts_for_indexer, field_polarity) = match field.deref() {
                                 PropertyInner::Field(box FieldData {
-                                    type_, polarity, ..
-                                }) => (vec![type_.dupe()], Some(*polarity)),
+                                    type_,
+                                    polarity,
+                                    optional,
+                                    ..
+                                }) => (
+                                    vec![type_util::slot_value_t(type_, *optional)],
+                                    Some(*polarity),
+                                ),
                                 _ => (vec![], None),
                             };
                             if !indexer_keys.is_empty() {
@@ -3552,11 +3545,10 @@ pub fn map_object<'cx>(
         None => match (selected_keys, &flags.obj_kind) {
             (Some((_, indexers)), _) if indexers.is_empty() => ObjKind::Exact,
             (Some((_, xs)), ObjKind::Indexed(dict_t)) => {
-                let dict_optional = is_prop_optional(&dict_t.value);
                 let dict_key = type_util::union_of_ts(reason.dupe(), xs.clone(), None);
                 let dict_t_prime = DictType {
                     key: dict_key,
-                    value: mk_prop_type(cx, dict_t.key.dupe(), dict_optional)?,
+                    value: mk_dict_value_type(cx, dict_t.key.dupe())?,
                     dict_polarity: mk_variance(variance, dict_t.dict_polarity),
                     ..dict_t.clone()
                 };
@@ -3573,9 +3565,8 @@ pub fn map_object<'cx>(
                 ObjKind::Indexed(dict)
             }
             (None, ObjKind::Indexed(dict_t)) => {
-                let dict_optional = is_prop_optional(&dict_t.value);
                 let dict_t_prime = DictType {
-                    value: mk_prop_type(cx, dict_t.key.dupe(), dict_optional)?,
+                    value: mk_dict_value_type(cx, dict_t.key.dupe())?,
                     dict_polarity: mk_variance(variance, dict_t.dict_polarity),
                     ..dict_t.clone()
                 };
@@ -3619,8 +3610,7 @@ pub fn map_object<'cx>(
                     xs,
                     ObjKind::Indexed(dict_t),
                 ) => {
-                    let dict_optional = is_prop_optional(&dict_t.value);
-                    let value = mk_prop_type(cx, dict_t.key.dupe(), dict_optional)?;
+                    let value = mk_dict_value_type(cx, dict_t.key.dupe())?;
                     let pol = mk_variance(variance, dict_t.dict_polarity);
                     let mut keys = vec![new_key.dupe()];
                     keys.extend(xs.iter().duped());
@@ -3629,8 +3619,7 @@ pub fn map_object<'cx>(
                 (None, xs, ObjKind::Indexed(dict_t)) if !xs.is_empty() => {
                     /* Selected_keys.xs entries with source dict — value comes from source dict_t.key,
                      * matching the legacy `(Some((_, xs)), ObjKind::Indexed(dict_t))` arm. */
-                    let dict_optional = is_prop_optional(&dict_t.value);
-                    let value = mk_prop_type(cx, dict_t.key.dupe(), dict_optional)?;
+                    let value = mk_dict_value_type(cx, dict_t.key.dupe())?;
                     let pol = mk_variance(variance, dict_t.dict_polarity);
                     (xs.iter().duped().collect(), Some(value), Some(pol))
                 }

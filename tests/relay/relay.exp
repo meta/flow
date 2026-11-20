@@ -310,23 +310,22 @@ Error --------------------------------------------------------------------------
 
 Cannot create `SingularTest` element because in property `optionalUser`: [incompatible-type]
  - Either `null` [1] is incompatible with `void` [2].
- - Or `null` [1] is incompatible with
-   `{readonly __fragments: FragmentReference<RelayModernTypedFlowtest_user$reference>, ...}` [3].
+ - Or `null` [1] is incompatible with `void` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    more.js:145:17
-   145|   optionalUser={null}
-                        ^^^^ [1]
+    145|   optionalUser={null}
+                         ^^^^ [1]
 
 References:
-   more.js:31:63
-    31| type MapRelayProps<Props> = {[K in keyof Props]: MapRelayProp<Props[K]>};
-                                                                      ^^^^^^^^ [2]
-   more.js:35:7
-    35|     ? {readonly __fragments: FragmentReference<V>, ...}
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es5.js:1563:15
+   1563|     [P in K]: T[P];
+                       ^^^^ [2]
+   more.js:69:18
+     69|   optionalUser?: RelayModernTypedFlowtest_user,
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------------- more.js:150:34
@@ -415,22 +414,22 @@ Error --------------------------------------------------------------------------
 
 Cannot create `PluralTest` element because in property `optionalUsers`: [incompatible-type]
  - Either `null` [1] is incompatible with `void` [2].
- - Or `null` [1] is incompatible with `ReadonlyArray<MapRelayProp<RelayModernTypedFlowtest_users[number]>>` [3].
+ - Or `null` [1] is incompatible with `void` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    more.js:194:66
-   194| <PluralTest users={usersRef} nullableUsers={null} optionalUsers={null} />;
-                                                                         ^^^^ [1]
+    194| <PluralTest users={usersRef} nullableUsers={null} optionalUsers={null} />;
+                                                                          ^^^^ [1]
 
 References:
-   more.js:31:63
-    31| type MapRelayProps<Props> = {[K in keyof Props]: MapRelayProp<Props[K]>};
-                                                                      ^^^^^^^^ [2]
-   more.js:37:9
-    37|       ? ReadonlyArray<MapRelayProp<T[number]>> : T;
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es5.js:1563:15
+   1563|     [P in K]: T[P];
+                       ^^^^ [2]
+   more.js:80:19
+     80|   optionalUsers?: RelayModernTypedFlowtest_users,
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------------- more.js:197:24

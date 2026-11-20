@@ -268,7 +268,7 @@ fn assertion_of_function(function: &flow_typing_type::type_::FunType) -> Option<
             function
                 .params
                 .iter()
-                .position(|param| param.0.as_ref() == Some(&guard.param_name.1))?,
+                .position(|param| param.name.as_ref() == Some(&guard.param_name.1))?,
         )
     };
     Some(AssertionInfo {
@@ -339,7 +339,7 @@ fn imported_assertion_info(
         }
     };
     let export = exports.get(&Name::new(export_name))?;
-    let callee_type = callee_type_for_classification(cx, candidate, &export.type_, prefix)?;
+    let callee_type = callee_type_for_classification(cx, candidate, &export.value_t(), prefix)?;
     assertion_info_of_type(cx, reason, &callee_type)
 }
 

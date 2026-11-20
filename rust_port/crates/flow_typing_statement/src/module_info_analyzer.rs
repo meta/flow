@@ -1073,6 +1073,7 @@ fn mk_module_type<'a>(
                                 key_loc: Some(key_loc.dupe()),
                                 polarity: Polarity::Positive,
                                 type_: type_.dupe(),
+                                optional: false,
                             }))),
                         )
                     })

@@ -86,7 +86,6 @@ use flow_typing_type::type_::object;
 use flow_typing_type::type_::poly;
 use flow_typing_type::type_::properties;
 use flow_typing_type::type_::union_rep;
-use flow_typing_type::type_::void;
 use flow_typing_type::type_util;
 
 /// NOTE: While union flattening could be performed at any time, it is most effective when we know
@@ -143,14 +142,6 @@ pub fn union_flatten<'cx>(cx: &mut Context<'cx>, ts: impl IntoIterator<Item = Ty
                     DefT::new(DefTInner::VoidT),
                 )));
                 flatten_into(cx, seen, inner_t.dupe(), out);
-            }
-            TypeInner::OptionalT {
-                reason,
-                type_,
-                use_desc,
-            } => {
-                out.push(void::why_with_use_desc(*use_desc, reason.dupe()));
-                flatten_into(cx, seen, type_.dupe(), out);
             }
             TypeInner::DefT(_, def_t) if matches!(&**def_t, DefTInner::EmptyT) => {}
             TypeInner::NominalT { nominal_type, .. } => match &nominal_type.underlying_t {
@@ -650,22 +641,6 @@ pub fn type_default<'cx, A, M: TypeMapper<'cx, A> + ?Sized>(
             }
         }
         TypeInner::AnyT(_, _) => t,
-        TypeInner::OptionalT {
-            reason,
-            type_,
-            use_desc,
-        } => {
-            let type_prime = mapper.type_(cx, map_cx, type_.dupe());
-            if type_prime.ptr_eq(type_) {
-                t
-            } else {
-                Type::new(TypeInner::OptionalT {
-                    reason: reason.dupe(),
-                    type_: type_prime,
-                    use_desc: *use_desc,
-                })
-            }
-        }
         TypeInner::MaybeT(r, inner_t) => {
             let inner_t_prime = mapper.type_(cx, map_cx, inner_t.dupe());
             if inner_t_prime.ptr_eq(inner_t) {
@@ -1121,15 +1096,17 @@ pub fn fun_type_default<'cx, A, M: TypeMapper<'cx, A> + ?Sized>(
     let this_prime = mapper.type_(cx, map_cx, t.this_t.0.dupe());
     let params_prime = list_utils::ident_map(
         |param| {
-            let FunParam(name, inner_t) = param;
-            let inner_t_prime = mapper.type_(cx, map_cx, inner_t.dupe());
-            if inner_t.ptr_eq(&inner_t_prime) {
+            let inner_t_prime = mapper.type_(cx, map_cx, param.t.dupe());
+            if param.t.ptr_eq(&inner_t_prime) {
                 param.dupe()
             } else {
-                FunParam(name.dupe(), inner_t_prime)
+                FunParam {
+                    t: inner_t_prime,
+                    ..param.dupe()
+                }
             }
         },
-        |a, b| a.1.ptr_eq(&b.1),
+        |a, b| a.t.ptr_eq(&b.t),
         t.params.dupe(),
     );
     let mut rest_param_changed = false;
@@ -2133,6 +2110,7 @@ pub fn prop_default<'cx, A, M: TypeMapper<'cx, A> + ?Sized>(
                     key_loc: fd.key_loc.clone(),
                     type_: type_prime,
                     polarity: fd.polarity,
+                    optional: fd.optional,
                 })))
             }
         }
@@ -2172,7 +2150,11 @@ pub fn prop_default<'cx, A, M: TypeMapper<'cx, A> + ?Sized>(
                 })))
             }
         }
-        PropertyInner::Method { key_loc, type_ } => {
+        PropertyInner::Method {
+            key_loc,
+            type_,
+            optional,
+        } => {
             let type_prime = mapper.type_(cx, map_cx, type_.dupe());
             if type_.ptr_eq(&type_prime) {
                 prop
@@ -2180,6 +2162,7 @@ pub fn prop_default<'cx, A, M: TypeMapper<'cx, A> + ?Sized>(
                 Property::new(PropertyInner::Method {
                     key_loc: key_loc.clone(),
                     type_: type_prime,
+                    optional: *optional,
                 })
             }
         }

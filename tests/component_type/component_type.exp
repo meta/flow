@@ -986,20 +986,38 @@ References:
 
 Error -------------------------------------------------------------------------- ref_prop_implicit_instantiation.js:11:1
 
+Cannot cast `refSetter` to `empty` because `{writeonly current: Promise<string> | null, ...}` [1] is incompatible with
+`empty` [2]. [incompatible-type]
+
+   ref_prop_implicit_instantiation.js:11:1
+    11| refSetter as empty; // error
+        ^^^^^^^^^
+
+References:
+   <BUILTINS>/react.js:107:7
+   107|     | { writeonly current: T | null, ... }
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   ref_prop_implicit_instantiation.js:11:14
+    11| refSetter as empty; // error
+                     ^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------- ref_prop_implicit_instantiation.js:11:1
+
 Cannot cast `refSetter` to `empty` because `(instance: Promise<string> | null) => void | (() => void)` [1] is
 incompatible with `empty` [2]. [incompatible-type]
 
    ref_prop_implicit_instantiation.js:11:1
-   11| refSetter as empty; // error
-       ^^^^^^^^^
+    11| refSetter as empty; // error
+        ^^^^^^^^^
 
 References:
-   ref_prop_implicit_instantiation.js:1:33
-    1| declare const C: component(ref: React.RefSetter<Promise<string>>);
-                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/react.js:108:8
+   108|     | ((instance: T | null) => void | (() => void))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    ref_prop_implicit_instantiation.js:11:14
-   11| refSetter as empty; // error
-                    ^^^^^ [2]
+    11| refSetter as empty; // error
+                     ^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------- ref_prop_implicit_instantiation.js:11:1
@@ -1007,16 +1025,16 @@ Error --------------------------------------------------------------------------
 Cannot cast `refSetter` to `empty` because `null` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    ref_prop_implicit_instantiation.js:11:1
-   11| refSetter as empty; // error
-       ^^^^^^^^^
+    11| refSetter as empty; // error
+        ^^^^^^^^^
 
 References:
-   ref_prop_implicit_instantiation.js:1:33
-    1| declare const C: component(ref: React.RefSetter<Promise<string>>);
-                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/react.js:109:7
+   109|     | null
+              ^^^^ [1]
    ref_prop_implicit_instantiation.js:11:14
-   11| refSetter as empty; // error
-                    ^^^^^ [2]
+    11| refSetter as empty; // error
+                     ^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------- ref_prop_implicit_instantiation.js:11:1
@@ -1024,34 +1042,16 @@ Error --------------------------------------------------------------------------
 Cannot cast `refSetter` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    ref_prop_implicit_instantiation.js:11:1
-   11| refSetter as empty; // error
-       ^^^^^^^^^
+    11| refSetter as empty; // error
+        ^^^^^^^^^
 
 References:
-   ref_prop_implicit_instantiation.js:1:33
-    1| declare const C: component(ref: React.RefSetter<Promise<string>>);
-                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/react.js:110:7
+   110|     | undefined;
+              ^^^^^^^^^ [1]
    ref_prop_implicit_instantiation.js:11:14
-   11| refSetter as empty; // error
-                    ^^^^^ [2]
-
-
-Error -------------------------------------------------------------------------- ref_prop_implicit_instantiation.js:11:1
-
-Cannot cast `refSetter` to `empty` because `{writeonly current: Promise<string> | null, ...}` [1] is incompatible with
-`empty` [2]. [incompatible-type]
-
-   ref_prop_implicit_instantiation.js:11:1
-   11| refSetter as empty; // error
-       ^^^^^^^^^
-
-References:
-   ref_prop_implicit_instantiation.js:1:33
-    1| declare const C: component(ref: React.RefSetter<Promise<string>>);
-                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   ref_prop_implicit_instantiation.js:11:14
-   11| refSetter as empty; // error
-                    ^^^^^ [2]
+    11| refSetter as empty; // error
+                     ^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------- ref_prop_implicit_instantiation.js:14:18

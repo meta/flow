@@ -1025,6 +1025,7 @@ mod tests {
             Some(Property::new(PropertyInner::Method {
                 key_loc: Some(ALoc::none()),
                 type_: fun_t(&[], void::make(dummy_reason())),
+                optional: false,
             })),
             None,
         );
@@ -1041,6 +1042,7 @@ mod tests {
             Some(Property::new(PropertyInner::Method {
                 key_loc: Some(ALoc::none()),
                 type_: fun_t(&[], void::make(dummy_reason())),
+                optional: false,
             })),
         );
     }
@@ -1055,6 +1057,7 @@ mod tests {
                 key_loc: Some(ALoc::none()),
                 type_: fun_t(&[], void::make(dummy_reason())),
                 polarity: Polarity::Neutral,
+                optional: false,
             })))),
             None,
             None,
@@ -1073,6 +1076,7 @@ mod tests {
                 key_loc: Some(ALoc::none()),
                 type_: fun_t(&[], void::make(dummy_reason())),
                 polarity: Polarity::Neutral,
+                optional: false,
             })))),
             None,
             None,

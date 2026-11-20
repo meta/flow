@@ -86,7 +86,7 @@ fn get_obj_prop_names(
             Some(cx.fold_props(
                 props_tmap,
                 |name, prop, mut acc| match property::read_t(prop) {
-                    Some(ref t) if matches!(Type::deref(t), TypeInner::OptionalT { .. }) => {
+                    Some(_) if property::is_optional(prop) => {
                         if include_optional && let Some(name) = name.as_smol_str_opt() {
                             acc.insert(name.dupe());
                         }

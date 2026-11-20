@@ -268,6 +268,7 @@ pub(super) fn inst_structural_subtype<'cx>(
                     key_loc: fd.key_loc.dupe(),
                     type_: fd.type_.dupe(),
                     polarity: Polarity::Positive,
+                    optional: fd.optional,
                 })))
             }
             _ => p.dupe(),
@@ -336,10 +337,12 @@ pub(super) fn inst_structural_subtype<'cx>(
                         &PropertyType::OrdinaryField {
                             type_: elemt_of_arrtype(arr),
                             polarity,
+                            optional: false,
                         },
                         &PropertyType::OrdinaryField {
                             type_: uvalue.dupe(),
                             polarity: *upolarity,
+                            optional: false,
                         },
                     )?;
                 }
@@ -380,10 +383,12 @@ pub(super) fn inst_structural_subtype<'cx>(
                             &PropertyType::OrdinaryField {
                                 type_: lkey.dupe(),
                                 polarity: *lpolarity,
+                                optional: false,
                             },
                             &PropertyType::OrdinaryField {
                                 type_: ukey.dupe(),
                                 polarity: *upolarity,
+                                optional: false,
                             },
                         )?;
                         subtyping_kit::rec_flow_p(
@@ -413,10 +418,12 @@ pub(super) fn inst_structural_subtype<'cx>(
                             &PropertyType::OrdinaryField {
                                 type_: lvalue.dupe(),
                                 polarity: *lpolarity,
+                                optional: false,
                             },
                             &PropertyType::OrdinaryField {
                                 type_: uvalue.dupe(),
                                 polarity: *upolarity,
+                                optional: false,
                             },
                         )?;
                     }
@@ -448,8 +455,8 @@ pub(super) fn inst_structural_subtype<'cx>(
     }
     for (name, p) in own_props.iter() {
         match p.deref() {
-            PropertyInner::Field(fd) if matches!(fd.type_.deref(), TypeInner::OptionalT { .. }) => {
-                let t = &fd.type_;
+            PropertyInner::Field(fd) if fd.optional => {
+                let t = type_util::slot_value_t(&fd.type_, true);
                 let reason = reason_struct.dupe().replace_desc(None);
                 let propref = mk_named_prop(reason.dupe(), false, name.dupe());
                 let polarity = if lit { Polarity::Positive } else { fd.polarity };
@@ -478,8 +485,9 @@ pub(super) fn inst_structural_subtype<'cx>(
                                         Property::new(PropertyInner::Field(Box::new(FieldData {
                                             preferred_def_locs: fd.preferred_def_locs.clone(),
                                             key_loc: fd.key_loc.dupe(),
-                                            type_: t.dupe(),
+                                            type_: fd.type_.dupe(),
                                             polarity,
+                                            optional: true,
                                         }))),
                                     )]),
                                     strictness_kind,

@@ -1162,17 +1162,6 @@ fn maybe_t<'cx>(
     Ok(ty::mk_union(false, vec![undefined_ty(env), Arc::new(ty::Ty::Null), t]).unwrap())
 }
 
-fn optional_t<'cx>(
-    cont: impl FnOnce(&mut Env<'_, 'cx>, &mut State, Option<IdKey>, &Type) -> Result<ALocTy, Error>,
-    env: &mut Env<'_, 'cx>,
-    state: &mut State,
-    id: Option<IdKey>,
-    t: &Type,
-) -> Result<ALocTy, Error> {
-    let t = cont(env, state, id, t)?;
-    Ok(ty::mk_union(false, vec![undefined_ty(env), t]).unwrap())
-}
-
 fn keys_t<'cx, I: NormalizerInput>(
     cont: fn(&mut Env<'_, 'cx>, &mut State, Option<IdKey>, &Type) -> Result<ALocTy, Error>,
     env: &mut Env<'_, 'cx>,
@@ -1756,7 +1745,6 @@ mod type_converter {
                 Ok(Arc::new(ty::Ty::Utility(utility)))
             }
             TypeInner::MaybeT(_, inner_t) => maybe_t(type__::<I>, env, state, id, inner_t),
-            TypeInner::OptionalT { type_, .. } => optional_t(type__::<I>, env, state, id, type_),
             TypeInner::UnionT(_, rep) => {
                 let types: Vec<Type> = rep.members_iter().map(|t| t.dupe()).collect();
                 let max_type_size = env.max_type_size();
@@ -1934,8 +1922,14 @@ mod type_converter {
         state: &mut State,
         param: &flow_typing_type::type_::FunParam,
     ) -> Result<(Option<FlowSmolStr>, ALocTy, ty::FunParam), Error> {
-        let (t, prm_optional) = opt_t::<I>(env, state, &param.1)?;
-        Ok((param.0.dupe(), t, ty::FunParam { prm_optional }))
+        let t = type__::<I>(env, state, None, &param.t)?;
+        Ok((
+            param.name.dupe(),
+            t,
+            ty::FunParam {
+                prm_optional: param.optional,
+            },
+        ))
     }
 
     fn fun_rest_param_t<'cx, I: NormalizerInput>(
@@ -2013,12 +2007,12 @@ mod type_converter {
         match prop.deref() {
             PropertyInner::Field(fd) => {
                 let polarity = type_polarity(fd.polarity);
-                let (t, optional) = opt_t::<I>(env, state, &fd.type_)?;
+                let t = type__::<I>(env, state, None, &fd.type_)?;
                 let dl = def_locs(&fd.type_, prop);
                 let named_prop = ty::NamedProp::Field {
                     t,
                     polarity,
-                    optional,
+                    optional: fd.optional,
                 };
                 Ok(vec![ty::Prop::NamedProp {
                     name: name.clone(),
@@ -2028,18 +2022,19 @@ mod type_converter {
                     def_locs: dl.into(),
                 }])
             }
-            PropertyInner::Method { type_, .. } => {
-                let (method_t, optional) = match type_.deref() {
-                    TypeInner::OptionalT { type_, .. } => (type_, true),
-                    _ => (type_, false),
-                };
-                let tys = method_ty::<I>(env, state, method_t)?;
+            PropertyInner::Method {
+                type_, optional, ..
+            } => {
+                let tys = method_ty::<I>(env, state, type_)?;
                 let dl = def_locs(type_, prop);
                 Ok(tys
                     .into_iter()
                     .map(|ft| ty::Prop::NamedProp {
                         name: name.clone(),
-                        prop: ty::NamedProp::Method { fun: ft, optional },
+                        prop: ty::NamedProp::Method {
+                            fun: ft,
+                            optional: *optional,
+                        },
                         inherited,
                         source: source.clone(),
                         def_locs: Arc::from(dl.clone()),
@@ -2175,11 +2170,7 @@ mod type_converter {
                     .all(|e| e.polarity == Polarity::Positive);
                 let mut ty_elements = Vec::new();
                 for elem in elements.iter() {
-                    let inner_t = match elem.t.deref() {
-                        TypeInner::OptionalT { type_, .. } if elem.optional => type_,
-                        _ => &elem.t,
-                    };
-                    let t = type__::<I>(env, state, None, inner_t)?;
+                    let t = type__::<I>(env, state, None, &elem.t)?;
                     let polarity = if readonly {
                         ty::Polarity::Neutral
                     } else {
@@ -2299,7 +2290,6 @@ mod type_converter {
         fn has_implicit_receiver(cx: &mut Context<'_>, t: &Type) -> bool {
             let t = cx.find_resolved(t).unwrap_or_else(|| t.dupe());
             match t.deref() {
-                TypeInner::OptionalT { type_, .. } => has_implicit_receiver(cx, type_),
                 TypeInner::DefT(_, def_t) => match def_t.deref() {
                     DefTInner::FunT(_, ft) => {
                         matches!(ft.this_t.1, flow_typing_type::type_::ThisStatus::ThisMethod)
@@ -3435,23 +3425,6 @@ mod type_converter {
             tp_default,
             tp_const: tp.is_const,
         })
-    }
-
-    fn opt_t<'cx, I: NormalizerInput>(
-        env: &mut Env<'_, 'cx>,
-        state: &mut State,
-        t: &Type,
-    ) -> Result<(ALocTy, bool), Error> {
-        match t.deref() {
-            TypeInner::OptionalT { type_, .. } => {
-                let ty = type__::<I>(env, state, None, type_)?;
-                Ok((ty, true))
-            }
-            _ => {
-                let ty = type__::<I>(env, state, None, t)?;
-                Ok((ty, false))
-            }
-        }
     }
 
     fn type_polarity(p: Polarity) -> ty::Polarity {
@@ -4872,7 +4845,7 @@ pub mod element_converter {
         ) -> Result<Vec<ty::Decl<ALoc>>, Error> {
             let mut result = Vec::new();
             for (x, named_symbol) in exports_tmap.iter() {
-                let t = &named_symbol.type_;
+                let t = &named_symbol.value_t();
                 match toplevel::<I>(env, state, t)? {
                     ty::Elt::Decl(d) => result.push(d),
                     ty::Elt::Type(t) => {
@@ -5862,25 +5835,6 @@ mod expand_members {
                 c.dupe(),
                 targs,
             ),
-            TypeInner::OptionalT { type_: inner_t, .. } => optional_t(
-                |env, state, id, t| {
-                    type__::<I>(
-                        env,
-                        state,
-                        id,
-                        inherited,
-                        source.clone(),
-                        imode,
-                        force_instance,
-                        allowed_prop_names,
-                        t,
-                    )
-                },
-                env,
-                state,
-                id,
-                inner_t,
-            ),
             TypeInner::EvalT {
                 type_: eval_type,
                 defer_use_t,
@@ -6096,13 +6050,6 @@ mod expand_literal_union {
                 result
             }
             TypeInner::MaybeT(_, inner_t) => maybe_t(
-                |env, state, id, t| type__::<I>(env, state, id, t),
-                env,
-                state,
-                id,
-                inner_t,
-            ),
-            TypeInner::OptionalT { type_: inner_t, .. } => optional_t(
                 |env, state, id, t| type__::<I>(env, state, id, t),
                 env,
                 state,

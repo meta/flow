@@ -273,7 +273,7 @@ fn invalid_exact_prop(
     slices
         .iter()
         .flat_map(|slice| slice.props.iter())
-        .filter(|(_, prop)| !matches!(property::type_(prop).deref(), TypeInner::OptionalT { .. }))
+        .filter(|(_, prop)| !property::is_optional(prop))
         .find_map(|(name, _)| {
             let exact_object = forbidding(name)?;
             Some(Box::new(EInvalidExactObjectIntersectionData {

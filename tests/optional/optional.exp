@@ -253,9 +253,9 @@ Cannot call `i.map` with function bound to `mapper` because in the return value:
                                     ^^
 
 References:
-   optional_param2.js:3:26
-   3|         mapper: (value?: V) => M
-                               ^ [1]
+   optional_param2.js:6:9
+   6| var i:I<number> = new I();
+              ^^^^^^ [1]
    optional_param2.js:7:9
    7| var j:I<number> = i.map(id => id);
               ^^^^^^ [2]

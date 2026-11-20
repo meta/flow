@@ -342,13 +342,9 @@ fn add_optional_ref_prop_to_props<'cx>(
                     state: object::react_config::State::Config {
                         component_default_props: None,
                     },
-                    ref_manipulation: object::react_config::RefManipulation::AddRef(Type::new(
-                        TypeInner::OptionalT {
-                            reason: reason_op.dupe(),
-                            use_desc: false,
-                            type_: ref_setter_type,
-                        },
-                    )),
+                    ref_manipulation: object::react_config::RefManipulation::AddRef(
+                        ref_setter_type,
+                    ),
                     literal: false,
                 },
             ))),
@@ -392,14 +388,18 @@ fn props_to_tout<'cx>(
                         ) =>
                     {
                         // Contravariance
-                        let t = ft.params.first().map(|p| p.1.dupe()).unwrap_or_else(|| {
-                            obj_type::mk(
-                                ObjKind::Exact,
-                                cx,
-                                r.dupe(),
-                                ObjLiteral::of_literal(ft.literal),
-                            )
-                        });
+                        let t = ft
+                            .params
+                            .first()
+                            .map(|p| type_util::slot_value_t(&p.t, p.optional))
+                            .unwrap_or_else(|| {
+                                obj_type::mk(
+                                    ObjKind::Exact,
+                                    cx,
+                                    r.dupe(),
+                                    ObjLiteral::of_literal(ft.literal),
+                                )
+                            });
                         FlowJs::rec_flow_t_with_env(cx, env, trace, unknown_use(), &t, &tout)?;
                     }
                     _ => {
@@ -638,8 +638,9 @@ pub fn get_config<'cx>(
                 let ref_prop = Property::new(PropertyInner::Field(Box::new(FieldData {
                     preferred_def_locs: None,
                     key_loc: None,
-                    type_: type_util::optional(ref_setter, None, false),
+                    type_: ref_setter,
                     polarity: Polarity::Neutral,
+                    optional: true,
                 })));
                 object::spread::OperandSlice::new(object::spread::OperandSliceInner {
                     reason: reason_props.dupe(),
@@ -807,15 +808,28 @@ pub(super) fn run_with_env<'cx>(
                             ) =>
                         {
                             // Contravariance
-                            let t = ft.params.first().map(|p| p.1.dupe()).unwrap_or_else(|| {
-                                obj_type::mk(
-                                    ObjKind::Exact,
-                                    cx,
-                                    r.dupe(),
-                                    ObjLiteral::of_literal(ft.literal),
-                                )
-                            });
-                            FlowJs::rec_flow_t_with_env(cx, env, trace, unknown_use(), tin, &t)?;
+                            let (t, optional) = ft
+                                .params
+                                .first()
+                                .map(|p| (p.t.dupe(), p.optional))
+                                .unwrap_or_else(|| {
+                                    (
+                                        obj_type::mk(
+                                            ObjKind::Exact,
+                                            cx,
+                                            r.dupe(),
+                                            ObjLiteral::of_literal(ft.literal),
+                                        ),
+                                        false,
+                                    )
+                                });
+                            FlowJs::rec_flow_with_env(
+                                cx,
+                                env,
+                                trace,
+                                tin,
+                                &type_util::slot_use_t(unknown_use(), t.dupe(), optional),
+                            )?;
                             if !env.in_implicit_instantiation() {
                                 let react_node = FlowJs::get_builtin_react_type_with_env(
                                     cx,
@@ -834,7 +848,7 @@ pub(super) fn run_with_env<'cx>(
                                     &react_node,
                                 )?;
                             }
-                            Ok(t)
+                            Ok(type_util::slot_value_t(&t, optional))
                         }
                         _ => {
                             err_incompatible(cx, env, unknown_use(), component, r)?;
@@ -1062,18 +1076,14 @@ pub(super) fn run_with_env<'cx>(
                 .dupe()
                 .replace_desc(None);
             // Create the key type.
-            let key_t = type_util::optional(
-                type_util::maybe(FlowJs::get_builtin_type_with_env(
-                    cx,
-                    env,
-                    None,
-                    &reason_key,
-                    None,
-                    "React$Key",
-                )?),
+            let key_t = type_util::maybe(FlowJs::get_builtin_type_with_env(
+                cx,
+                env,
                 None,
-                false,
-            );
+                &reason_key,
+                None,
+                "React$Key",
+            )?);
             let lookup_kind =
                 LookupKind::NonstrictReturning(Box::new(NonstrictReturningData(None, None)));
             let prop_name = Name::new("key");
@@ -1085,6 +1095,7 @@ pub(super) fn run_with_env<'cx>(
                         key_loc: None,
                         type_: key_t.dupe(),
                         polarity: Polarity::Positive,
+                        optional: true,
                     },
                 )),
             );
@@ -1094,7 +1105,7 @@ pub(super) fn run_with_env<'cx>(
                     props: Rc::from([(propref.clone(), key_prop)]),
                     strictness_kind: TypeStrictnessKind::Flow,
                     lower: normalized_jsx_props.dupe(),
-                    upper: key_t,
+                    upper: type_util::slot_value_t(&key_t, true),
                 }));
             FlowJs::rec_flow_with_env(
                 cx,

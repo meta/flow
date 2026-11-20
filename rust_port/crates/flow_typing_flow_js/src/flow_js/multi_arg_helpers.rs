@@ -88,7 +88,7 @@ pub(super) fn multiflow_full<'cx>(
     spread_arg: &Option<(Reason, ArrType, Option<GenericId>)>,
     rest_param: &Option<FunRestParam>,
     arglist: Vec<(Type, Option<GenericId>)>,
-    parlist: Vec<(Option<FlowSmolStr>, Type)>,
+    parlist: Vec<FunParam>,
 ) -> Result<(), FlowJsException> {
     let parlist_len = parlist.len();
     let unused_parameters = multiflow_args(
@@ -115,7 +115,7 @@ pub(super) fn multiflow_full<'cx>(
             Rc::new(ft.clone()),
         )),
     )));
-    for (n, (_, param)) in ((parlist_len as i32) - (unused_parameters.len() as i32) + 1..)
+    for (n, param) in ((parlist_len as i32) - (unused_parameters.len() as i32) + 1..)
         .zip(unused_parameters.iter())
     {
         let use_op = VirtualUseOp::Frame(
@@ -135,7 +135,7 @@ pub(super) fn multiflow_full<'cx>(
             trace,
             (
                 &void::why(reason_op.dupe()),
-                &UseT::new(UseTInner::UseT(use_op, param.dupe())),
+                &type_util::slot_use_t(use_op, param.t.dupe(), param.optional),
             ),
         )?;
     }
@@ -154,8 +154,8 @@ fn multiflow_args<'cx>(
     spread_arg: &Option<(Reason, ArrType, Option<GenericId>)>,
     rest_param: &Option<FunRestParam>,
     arglist: Vec<(Type, Option<GenericId>)>,
-    parlist: Vec<(Option<FlowSmolStr>, Type)>,
-) -> Result<Vec<(Option<FlowSmolStr>, Type)>, FlowJsException> {
+    parlist: Vec<FunParam>,
+) -> Result<Vec<FunParam>, FlowJsException> {
     use flow_typing_type::type_::elemt_of_arrtype;
 
     fn multiflow_non_spreads<'cx>(
@@ -163,17 +163,21 @@ fn multiflow_args<'cx>(
         use_op: &UseOp,
         n: i32,
         mut arglist: VecDeque<(Type, Option<GenericId>)>,
-        mut parlist: VecDeque<(Option<FlowSmolStr>, Type)>,
+        mut parlist: VecDeque<FunParam>,
     ) -> (
         Vec<(Type, UseT<Cx>)>,
         VecDeque<(Type, Option<GenericId>)>,
-        VecDeque<(Option<FlowSmolStr>, Type)>,
+        VecDeque<FunParam>,
     ) {
         match (arglist.front(), parlist.front()) {
             (_, None) | (None, _) => (vec![], arglist, parlist),
             (Some(_), Some(_)) => {
                 let (tin, _generic) = arglist.pop_front().unwrap();
-                let (name, tout) = parlist.pop_front().unwrap();
+                let FunParam {
+                    name,
+                    t: tout,
+                    optional,
+                } = parlist.pop_front().unwrap();
 
                 let tout_use = {
                     let use_op = VirtualUseOp::Frame(
@@ -183,11 +187,13 @@ fn multiflow_args<'cx>(
                             lower: reason_of_t(&tin).dupe(),
                             upper: reason_of_t(&tout).dupe(),
                             lower_t: flow_js_utils::type_or_type_desc_for_error(&tin),
-                            upper_t: flow_js_utils::type_or_type_desc_for_error(&tout),
+                            upper_t: flow_js_utils::type_or_type_desc_for_error(
+                                &type_util::slot_value_t(&tout, optional),
+                            ),
                         }))),
                         Arc::new(use_op.dupe()),
                     );
-                    UseT::new(UseTInner::UseT(use_op, tout.dupe()))
+                    type_util::slot_use_t(use_op, tout.dupe(), optional)
                 };
                 let (mut used_pairs, unused_arglist, unused_parlist) =
                     multiflow_non_spreads(cx, use_op, n + 1, arglist, parlist);
@@ -215,17 +221,17 @@ fn multiflow_args<'cx>(
         Some((reason, arrtype, _)) => {
             let spread_arg_elemt = elemt_of_arrtype(arrtype);
             let mut all_pairs = used_pairs;
-            for (_, param) in &unused_parlist {
+            for param in &unused_parlist {
                 let use_op = VirtualUseOp::Frame(
                     Arc::new(VirtualFrameUseOp::FunRestParam {
                         lower: reason.dupe(),
-                        upper: reason_of_t(param).dupe(),
+                        upper: reason_of_t(&param.t).dupe(),
                     }),
                     Arc::new(use_op.dupe()),
                 );
                 all_pairs.push((
                     spread_arg_elemt.dupe(),
-                    UseT::new(UseTInner::UseT(use_op, param.dupe())),
+                    type_util::slot_use_t(use_op, param.t.dupe(), param.optional),
                 ));
             }
             (all_pairs, VecDeque::new())
@@ -925,10 +931,12 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                                 ro_of_arrtype(arrtype),
                             ),
                             ResolvedParam::ResolvedArg(box ResolvedArgData(
-                                TupleElement { t: et, .. },
+                                TupleElement {
+                                    t: et, optional, ..
+                                },
                                 generic,
                             )) => (
-                                et.dupe(),
+                                type_util::slot_value_t(et, *optional),
                                 generic.as_ref(),
                                 array_spread::RoStatus::NonROSpread,
                             ),
@@ -1212,10 +1220,10 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                     let head = resolved.first().expect("non-empty");
                     match head {
                         ResolvedParam::ResolvedArg(box ResolvedArgData(
-                            TupleElement { t, .. },
+                            TupleElement { t, optional, .. },
                             generic,
                         )) => {
-                            args.push((t.dupe(), generic.clone()));
+                            args.push((type_util::slot_value_t(t, *optional), generic.clone()));
                             let mut rest = resolved.dupe();
                             rest.drop_first();
                             flatten(cx, args, None, rest)
@@ -1240,9 +1248,12 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                             }),
                             generic,
                         )) => {
-                            args.extend(
-                                elements.iter().map(|elem| (elem.t.dupe(), generic.clone())),
-                            );
+                            args.extend(elements.iter().map(|elem| {
+                                (
+                                    type_util::slot_value_t(&elem.t, elem.optional),
+                                    generic.clone(),
+                                )
+                            }));
                             let mut tset = type_ex_set::empty();
                             type_ex_set::add(rest_elem.t.dupe(), &mut tset);
                             let ro = if rest_elem.polarity == Polarity::Positive {
@@ -1293,7 +1304,12 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                             let inexact = *inexact;
                             let mapped: Vec<_> = elements
                                 .iter()
-                                .map(|elem| (elem.t.dupe(), generic.clone()))
+                                .map(|elem| {
+                                    (
+                                        type_util::slot_value_t(&elem.t, elem.optional),
+                                        generic.clone(),
+                                    )
+                                })
                                 .collect();
                             for item in mapped {
                                 args.push(item);
@@ -1324,10 +1340,10 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                     let head = resolved.first().expect("non-empty");
                     let (tset_new, lit_new, g_prime, ro, rest) = match head {
                         ResolvedParam::ResolvedArg(box ResolvedArgData(
-                            TupleElement { t, .. },
+                            TupleElement { t, optional, .. },
                             generic,
                         )) => {
-                            type_ex_set::add(t.dupe(), &mut tset);
+                            type_ex_set::add(type_util::slot_value_t(t, *optional), &mut tset);
                             let mut rest = resolved.dupe();
                             rest.drop_first();
                             (
@@ -1475,10 +1491,7 @@ pub(super) fn finish_resolve_spread_list<'cx>(
         let rest_param = &ft.rest_param;
         let def_reason = &ft.def_reason;
         let (args, spread_arg) = flatten_call_arg(cx, env, use_op.dupe(), reason_op, resolved)?;
-        let parlist: Vec<(Option<FlowSmolStr>, Type)> = params
-            .iter()
-            .map(|FunParam(name, t)| (name.dupe(), t.dupe()))
-            .collect();
+        let parlist: Vec<FunParam> = params.to_vec();
         multiflow_full(
             cx,
             env,

@@ -7,6 +7,7 @@
           "params":[
             {
               "name":"x",
+              "optional":false,
               "type":{"def":{"kind":"NumGeneral"},"kind":"Def","reason":"test.js:3:17-22: number"}
             }
           ],
@@ -43,6 +44,7 @@
           "params":[
             {
               "name":"x",
+              "optional":false,
               "type":{"def":{"kind":"NumGeneral"},"kind":"Def","reason":"test.js:3:17-22: number"}
             }
           ],
@@ -76,7 +78,7 @@
       "def":{
         "funtype":{
           "effect":{"kind":"ArbitraryEffect"},
-          "params":[{"name":"f","type":{"$ref":3}}],
+          "params":[{"name":"f","optional":false,"type":{"$ref":3}}],
           "rest_param":null,
           "return_t":{"def":{"kind":"Void"},"kind":"Def","reason":"test.js:7:79: undefined"},
           "this_t":{
@@ -156,7 +158,7 @@
       "def":{
         "funtype":{
           "effect":{"kind":"ArbitraryEffect"},
-          "params":[{"name":"val","type":{"$ref":11}}],
+          "params":[{"name":"val","optional":false,"type":{"$ref":11}}],
           "rest_param":null,
           "return_t":{"$ref":12},
           "this_t":{
@@ -545,7 +547,7 @@
       "def":{
         "funtype":{
           "effect":{"kind":"ArbitraryEffect"},
-          "params":[{"name":null,"type":{"$ref":2}}],
+          "params":[{"name":null,"optional":false,"type":{"$ref":2}}],
           "rest_param":null,
           "return_t":{"def":{"kind":"Mixed"},"kind":"Def","reason":"test.js:7:71-77: `unknown`"},
           "this_t":{
@@ -576,7 +578,7 @@
       "def":{
         "funtype":{
           "effect":{"kind":"ArbitraryEffect"},
-          "params":[{"name":"f","type":{"$ref":3}}],
+          "params":[{"name":"f","optional":false,"type":{"$ref":3}}],
           "rest_param":null,
           "return_t":{"def":{"kind":"Void"},"kind":"Def","reason":"test.js:7:79: undefined"},
           "this_t":{
@@ -622,7 +624,7 @@
       "def":{
         "funtype":{
           "effect":{"kind":"ArbitraryEffect"},
-          "params":[{"name":null,"type":{"$ref":5}}],
+          "params":[{"name":null,"optional":false,"type":{"$ref":5}}],
           "rest_param":null,
           "return_t":{"def":{"kind":"Mixed"},"kind":"Def","reason":"test.js:7:71-77: `unknown`"},
           "this_t":{
@@ -1421,7 +1423,7 @@
       "def":{
         "funtype":{
           "effect":{"kind":"ArbitraryEffect"},
-          "params":[{"name":"x","type":{"$ref":5}}],
+          "params":[{"name":"x","optional":false,"type":{"$ref":5}}],
           "rest_param":null,
           "return_t":{"$ref":7},
           "this_t":{"status":{"kind":"This_Function"},"type":{"$ref":6}},
@@ -1654,7 +1656,7 @@
       "def":{
         "funtype":{
           "effect":{"kind":"ArbitraryEffect"},
-          "params":[{"name":null,"type":{"$ref":24}}],
+          "params":[{"name":null,"optional":false,"type":{"$ref":24}}],
           "rest_param":null,
           "return_t":{"$ref":26},
           "this_t":{"status":{"kind":"This_Function"},"type":{"$ref":25}},
@@ -1673,7 +1675,7 @@
       "def":{
         "funtype":{
           "effect":{"kind":"ArbitraryEffect"},
-          "params":[{"name":"f","type":{"$ref":27}}],
+          "params":[{"name":"f","optional":false,"type":{"$ref":27}}],
           "rest_param":null,
           "return_t":{"$ref":29},
           "this_t":{"status":{"kind":"This_Function"},"type":{"$ref":28}},
@@ -1725,7 +1727,7 @@
       "def":{
         "funtype":{
           "effect":{"kind":"ArbitraryEffect"},
-          "params":[{"name":null,"type":{"$ref":39}}],
+          "params":[{"name":null,"optional":false,"type":{"$ref":39}}],
           "rest_param":null,
           "return_t":{"$ref":41},
           "this_t":{"status":{"kind":"This_Function"},"type":{"$ref":40}},
@@ -1809,7 +1811,7 @@
       "def":{
         "funtype":{
           "effect":{"kind":"ArbitraryEffect"},
-          "params":[{"name":"f","type":{"$ref":27}}],
+          "params":[{"name":"f","optional":false,"type":{"$ref":27}}],
           "rest_param":null,
           "return_t":{"$ref":29},
           "this_t":{"status":{"kind":"This_Function"},"type":{"$ref":28}},
@@ -1892,7 +1894,7 @@
       "def":{
         "funtype":{
           "effect":{"kind":"ArbitraryEffect"},
-          "params":[{"name":"x","type":{"$ref":5}}],
+          "params":[{"name":"x","optional":false,"type":{"$ref":5}}],
           "rest_param":null,
           "return_t":{"$ref":7},
           "this_t":{"status":{"kind":"This_Function"},"type":{"$ref":6}},
@@ -1923,7 +1925,7 @@
       "def":{
         "funtype":{
           "effect":{"kind":"ArbitraryEffect"},
-          "params":[{"name":"val","type":{"$ref":73}}],
+          "params":[{"name":"val","optional":false,"type":{"$ref":73}}],
           "rest_param":null,
           "return_t":{"$ref":83},
           "this_t":{"status":{"kind":"This_Function"},"type":{"$ref":74}},

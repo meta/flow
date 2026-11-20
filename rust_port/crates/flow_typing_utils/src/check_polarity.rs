@@ -127,7 +127,7 @@ fn check_polarity_impl<'cx>(
         TypeInner::AnnotT(..) => {}
         TypeInner::AnyT(..) => {}
         TypeInner::FunProtoT(_) | TypeInner::NullProtoT(_) | TypeInner::ObjProtoT(_) => {}
-        TypeInner::OptionalT { type_, .. } | TypeInner::MaybeT(_, type_) => {
+        TypeInner::MaybeT(_, type_) => {
             check_polarity_impl(cx, env, trace, seen, tparams, polarity, type_)?;
         }
         TypeInner::TemplateLiteralT { types, .. } => {
@@ -477,7 +477,7 @@ fn check_polarity_impl<'cx>(
                 } = f.deref();
                 let inv_polarity = Polarity::inv(polarity);
                 for param in params.iter() {
-                    check_polarity_impl(cx, env, trace, seen, tparams, inv_polarity, &param.1)?;
+                    check_polarity_impl(cx, env, trace, seen, tparams, inv_polarity, &param.t)?;
                 }
                 if let Some(rest_param) = rest_param {
                     check_polarity_impl(

@@ -13,7 +13,6 @@ use dupe::Dupe;
 use flow_aloc::ALoc;
 use flow_common::error_ref::FunctionReferenceKind;
 use flow_common::reason;
-use flow_common::reason::Name;
 use flow_common::reason::Reason;
 use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 use flow_parser::ast;
@@ -36,7 +35,6 @@ use flow_typing_loc_env::func_class_sig_types::func::Kind;
 use flow_typing_loc_env::func_class_sig_types::param;
 use flow_typing_type::type_;
 use flow_typing_type::type_::AnnotatedOrInferred;
-use flow_typing_type::type_::FunParam;
 use flow_typing_type::type_::PolyTKind;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::UseOp;
@@ -421,12 +419,6 @@ pub fn methodtype<'a, C: crate::func_params_intf::Config>(
         ..
     } = x;
     let params = func_params::value::<C>(&fparams.params);
-    let mut params_names: Vec<Option<Name>> = Vec::new();
-    let mut params_tlist = Vec::new();
-    for type_::FunParam(name, t) in params {
-        params_names.push(name.map(Name::new));
-        params_tlist.push(t);
-    }
     let rest_param = func_params::rest::<C>(fparams.rest.as_ref());
     let this_anno_t = func_params::this::<C>(fparams.this_.as_ref());
     if let (Some(t), Some(loc)) = (&this_anno_t, method_this_loc) {
@@ -440,11 +432,10 @@ pub fn methodtype<'a, C: crate::func_params_intf::Config>(
     let mut funtype = type_::mk_boundfunctiontype(
         param_this_t,
         Some(effect_.clone()),
-        params_tlist,
+        params,
         rest_param,
         reason.dupe(),
         x.function_reference_kind,
-        Some(params_names),
         type_guard,
         type_util::type_t_of_annotated_or_inferred(return_t).dupe(),
     );
@@ -478,7 +469,7 @@ pub fn settertype<C: crate::func_params_intf::Config>(x: &Func<C>) -> Type {
     match params.as_slice() {
         // setters must have exactly one param. more than one is a syntax error,
         // so ignore any extras
-        [FunParam(_, param_t), ..] => param_t.dupe(),
+        [param, ..] => type_util::slot_value_t(&param.t, param.optional),
         [] => type_::any_t::error(x.reason.dupe()),
     }
 }

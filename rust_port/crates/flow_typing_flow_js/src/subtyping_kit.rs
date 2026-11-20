@@ -300,12 +300,14 @@ fn property_type_for_subtyping(
     strictness_kind: TypeStrictnessKind,
 ) -> PropertyType {
     match prop.deref() {
-        PropertyInner::Method { type_, .. } if strictness_kind.is_typescript_loose() => {
-            PropertyType::SyntheticField {
-                get_type: Some(properties::method_to_function_for_subtyping(type_)),
-                set_type: None,
-            }
-        }
+        PropertyInner::Method {
+            type_,
+            optional: false,
+            ..
+        } if strictness_kind.is_typescript_loose() => PropertyType::SyntheticField {
+            get_type: Some(properties::method_to_function_for_subtyping(type_)),
+            set_type: None,
+        },
         _ => property::property_type(prop),
     }
 }
@@ -326,34 +328,25 @@ fn try_property_method_bivariant<'cx>(
             _ => false,
         }
     }
-    let ut = match upper_property.deref() {
-        PropertyInner::Method { type_, .. } => type_,
-        PropertyInner::Field(field) => &field.type_,
+    let (ut, upper_optional) = match upper_property.deref() {
+        PropertyInner::Method {
+            type_, optional, ..
+        } => (type_, *optional),
+        PropertyInner::Field(field) => (&field.type_, field.optional),
         _ => return Ok(false),
     };
     let ut = cx.find_resolved(ut).unwrap_or_else(|| ut.dupe());
-    let (ut, upper_optional) = match ut.deref() {
-        OptionalT { type_, .. } => (
-            cx.find_resolved(type_).unwrap_or_else(|| type_.dupe()),
-            true,
-        ),
-        _ => (ut, false),
-    };
     if !matches!(upper_property.deref(), PropertyInner::Method { .. }) && !is_method(&ut) {
         return Ok(false);
     }
     let lt = match lower_property.deref() {
-        PropertyInner::Field(field) => &field.type_,
-        PropertyInner::Method { type_, .. } => type_,
+        PropertyInner::Field(_) | PropertyInner::Method { .. } => type_util::slot_value_t(
+            property::type_(lower_property),
+            property::is_optional(lower_property) && !upper_optional,
+        ),
         _ => return Ok(false),
     };
-    let lt = cx.find_resolved(lt).unwrap_or_else(|| lt.dupe());
-    let lt = match lt.deref() {
-        OptionalT { type_, .. } if upper_optional => {
-            cx.find_resolved(type_).unwrap_or_else(|| type_.dupe())
-        }
-        _ => lt,
-    };
+    let lt = cx.find_resolved(&lt).unwrap_or(lt);
     try_method_bivariant(cx, env, trace, use_op, &lt, &ut)
 }
 
@@ -396,26 +389,37 @@ fn rec_flow_p_inner<'cx>(
             PropertyType::OrdinaryField {
                 type_: lt,
                 polarity: Polarity::Neutral,
+                optional: lower_optional,
             },
             PropertyType::OrdinaryField {
                 type_: ut,
                 polarity: Polarity::Neutral,
+                optional: upper_optional,
             },
         ) if strictness_kind.is_typescript_loose() => {
             // TS treats read-write-on-both-sides property type mismatch in
             // extends/implements/instantiation contexts as covariant, not invariant.
             // Match that by skipping unification and doing a covariant subtype check.
-            FlowJs::flow_opt_with_env(cx, env, trace, lt, &UseT::new(UseT(use_op, ut.dupe())))?;
+            FlowJs::flow_slot_with_env(
+                cx,
+                env,
+                trace,
+                use_op,
+                (lt, *lower_optional),
+                (ut, *upper_optional),
+            )?;
             Ok(vec![])
         }
         (
             PropertyType::OrdinaryField {
                 type_: lt,
                 polarity: Polarity::Neutral,
+                optional: lower_optional,
             },
             PropertyType::OrdinaryField {
                 type_: ut,
                 polarity: Polarity::Neutral,
+                optional: upper_optional,
             },
         ) => {
             let unify_cause = match lower_upper_subtyping_obj_ts {
@@ -430,23 +434,32 @@ fn rec_flow_p_inner<'cx>(
                     }
                 }
             };
-            FlowJs::unify_opt_with_env(cx, env, trace, use_op, unify_cause, None, lt, ut)?;
+            FlowJs::unify_slots_with_env(
+                cx,
+                env,
+                trace,
+                use_op,
+                unify_cause,
+                (lt, *lower_optional),
+                (ut, *upper_optional),
+            )?;
             Ok(vec![])
         }
         // directional cases
         (lp, up) => {
             let propref_error = name_of_propref(propref);
             let errs1 = match (
-                property::read_t_of_property_type(lp),
-                property::read_t_of_property_type(up),
+                property::read_slot_of_property_type(lp),
+                property::read_slot_of_property_type(up),
             ) {
-                (Some(lt), Some(ut)) => {
-                    FlowJs::flow_opt_with_env(
+                (Some(lower), Some((ut, upper_optional))) => {
+                    FlowJs::flow_slot_with_env(
                         cx,
                         env,
                         trace,
-                        &lt,
-                        &UseT::new(UseT(use_op.dupe(), ut)),
+                        use_op.dupe(),
+                        (&lower.0, lower.1),
+                        (&ut, upper_optional),
                     )?;
                     vec![]
                 }
@@ -456,16 +469,17 @@ fn rec_flow_p_inner<'cx>(
                 _ => vec![],
             };
             let errs2 = match (
-                property::write_t_of_property_type(lp, None),
-                property::write_t_of_property_type(up, None),
+                property::write_slot_of_property_type(lp, None),
+                property::write_slot_of_property_type(up, None),
             ) {
-                (Some(lt), Some(ut)) => {
-                    FlowJs::flow_opt_with_env(
+                (Some((lt, lower_optional)), Some(upper)) => {
+                    FlowJs::flow_slot_with_env(
                         cx,
                         env,
                         trace,
-                        &ut,
-                        &UseT::new(UseT(use_op.dupe(), lt)),
+                        use_op.dupe(),
+                        (&upper.0, upper.1),
+                        (&lt, lower_optional),
                     )?;
                     vec![]
                 }
@@ -856,12 +870,12 @@ fn funt_to_funt_check<'cx>(
             let params1: Vec<(Option<Name>, Type)> = ft1
                 .params
                 .iter()
-                .map(|p| (p.0.as_ref().map(|s| Name::new(s.dupe())), p.1.dupe()))
+                .map(|p| (p.name.as_ref().map(|s| Name::new(s.dupe())), p.t.dupe()))
                 .collect();
             let params2: Vec<(Option<Name>, Type)> = ft2
                 .params
                 .iter()
-                .map(|p| (p.0.as_ref().map(|s| Name::new(s.dupe())), p.1.dupe()))
+                .map(|p| (p.name.as_ref().map(|s| Name::new(s.dupe())), p.t.dupe()))
                 .collect();
             let name1 = Name::new(tg1.param_name.1.dupe());
             let name2 = Name::new(tg2.param_name.1.dupe());
@@ -908,19 +922,22 @@ fn bivariant_param_flow<'cx>(
     env: &FlowJsEnv,
     trace: DepthTrace,
     use_op: UseOp,
-    source: &Type,
-    target: &Type,
+    source: (&Type, bool),
+    target: (&Type, bool),
 ) -> Result<(), FlowJsException> {
+    // The value of the `lower` slot flows into the `upper` slot.
     fn flow_param<'cx>(
         cx: &mut Context<'cx>,
         env: &FlowJsEnv,
         trace: DepthTrace,
         use_op: &UseOp,
-        lower: &Type,
-        upper: &Type,
+        (lower, lower_optional): (&Type, bool),
+        (upper, upper_optional): (&Type, bool),
     ) -> Result<(), FlowJsException> {
+        let lower_value = type_util::slot_value_t(lower, lower_optional);
+        let upper_use = type_util::slot_use_t(use_op.dupe(), upper.dupe(), upper_optional);
         match (cx.find_resolved(lower), cx.find_resolved(upper)) {
-            (Some(lower_resolved), Some(upper_resolved)) => {
+            (Some(lower_resolved), Some(upper_resolved)) if !lower_optional && !upper_optional => {
                 match (lower_resolved.deref(), upper_resolved.deref()) {
                     (DefT(lreason, deref!(FunT(_, ft1))), DefT(ureason, deref!(FunT(_, ft2)))) => {
                         funt_to_funt_check(
@@ -942,33 +959,30 @@ fn bivariant_param_flow<'cx>(
                             },
                         )
                     }
-                    _ => FlowJs::rec_flow_with_env(
-                        cx,
-                        env,
-                        trace,
-                        lower,
-                        &UseT::new(UseT(use_op.dupe(), upper.dupe())),
-                    ),
+                    _ => FlowJs::rec_flow_with_env(cx, env, trace, &lower_value, &upper_use),
                 }
             }
-            _ => FlowJs::rec_flow_with_env(
-                cx,
-                env,
-                trace,
-                lower,
-                &UseT::new(UseT(use_op.dupe(), upper.dupe())),
-            ),
+            _ => FlowJs::rec_flow_with_env(cx, env, trace, &lower_value, &upper_use),
         }
     }
 
-    let source_spec = source.dupe();
-    let target_spec = target.dupe();
+    let (source_t, source_optional) = source;
+    let (target_t, target_optional) = target;
+    let source_spec = source_t.dupe();
+    let target_spec = target_t.dupe();
     let use_op_spec = use_op.dupe();
     match speculation_kit::try_singleton_custom_throw_on_failure(
         cx,
         env,
         Box::new(move |cx, env: &FlowJsEnv| {
-            flow_param(cx, env, trace, &use_op_spec, &target_spec, &source_spec)
+            flow_param(
+                cx,
+                env,
+                trace,
+                &use_op_spec,
+                (&target_spec, target_optional),
+                (&source_spec, source_optional),
+            )
         }),
     ) {
         Ok(()) => Ok(()),
@@ -994,7 +1008,7 @@ fn funt_to_funt_check_params_contravariant<'cx>(
     let mut args: Vec<CallArg> = ft2
         .params
         .iter()
-        .map(|p| CallArg::arg(p.1.dupe()))
+        .map(|p| CallArg::arg(type_util::slot_value_t(&p.t, p.optional)))
         .collect();
     if let Some(FunRestParam(_, _, rest)) = &ft2.rest_param {
         args.push(CallArg::spread_arg(rest.dupe()));
@@ -1066,7 +1080,6 @@ fn funt_to_funt_check_params_bivariant<'cx>(
         match (params1.split_first(), params2.split_first()) {
             (None, None) => break,
             (None, Some((p2, rest2))) => {
-                let t2 = &p2.1;
                 match &ft1.rest_param {
                     Some(FunRestParam(_, _, t1_rest)) => {
                         let inner_use_op = VirtualUseOp::Frame(
@@ -1084,7 +1097,14 @@ fn funt_to_funt_check_params_bivariant<'cx>(
                             t1_rest,
                             (n - 1) as usize - ft1.params.len(),
                         )?;
-                        bivariant_param_flow(cx, env, trace, inner_use_op, &t1, t2)?;
+                        bivariant_param_flow(
+                            cx,
+                            env,
+                            trace,
+                            inner_use_op,
+                            (&t1, false),
+                            (&p2.t, p2.optional),
+                        )?;
                         n += 1;
                         params2 = rest2;
                     }
@@ -1095,7 +1115,7 @@ fn funt_to_funt_check_params_bivariant<'cx>(
                 }
             }
             (Some((p1, rest1)), None) => {
-                let (name1, t1) = (&p1.0, &p1.1);
+                let name1 = &p1.name;
                 match &ft2.rest_param {
                     Some(FunRestParam(_, _, rest_t)) => {
                         let inner_use_op = VirtualUseOp::Frame(
@@ -1117,7 +1137,14 @@ fn funt_to_funt_check_params_bivariant<'cx>(
                             rest_t,
                             (n - 1) as usize - ft2.params.len(),
                         )?;
-                        bivariant_param_flow(cx, env, trace, inner_use_op, t1, &t2)?;
+                        bivariant_param_flow(
+                            cx,
+                            env,
+                            trace,
+                            inner_use_op,
+                            (&p1.t, p1.optional),
+                            (&t2, false),
+                        )?;
                         n += 1;
                         params1 = rest1;
                     }
@@ -1139,7 +1166,7 @@ fn funt_to_funt_check_params_bivariant<'cx>(
                             env,
                             trace,
                             &void,
-                            &UseT::new(UseT(inner_use_op, t1.dupe())),
+                            &type_util::slot_use_t(inner_use_op, p1.t.dupe(), p1.optional),
                         )?;
                         n += 1;
                         params1 = rest1;
@@ -1147,8 +1174,7 @@ fn funt_to_funt_check_params_bivariant<'cx>(
                 }
             }
             (Some((p1, rest1)), Some((p2, rest2))) => {
-                let t1 = &p1.1;
-                let (name2, t2) = (&p2.0, &p2.1);
+                let name2 = &p2.name;
                 let inner_use_op = VirtualUseOp::Frame(
                     Arc::new(VirtualFrameUseOp::FunParam(Box::new(FunParamData {
                         n,
@@ -1160,7 +1186,14 @@ fn funt_to_funt_check_params_bivariant<'cx>(
                     }))),
                     Arc::new(use_op.dupe()),
                 );
-                bivariant_param_flow(cx, env, trace, inner_use_op, t1, t2)?;
+                bivariant_param_flow(
+                    cx,
+                    env,
+                    trace,
+                    inner_use_op,
+                    (&p1.t, p1.optional),
+                    (&p2.t, p2.optional),
+                )?;
                 n += 1;
                 params1 = rest1;
                 params2 = rest2;
@@ -1176,7 +1209,7 @@ fn funt_to_funt_check_params_bivariant<'cx>(
                 }),
                 Arc::new(use_op.dupe()),
             );
-            bivariant_param_flow(cx, env, trace, use_op, t1_rest, t2_rest)
+            bivariant_param_flow(cx, env, trace, use_op, (t1_rest, false), (t2_rest, false))
         }
         _ => Ok(()),
     }
@@ -1475,6 +1508,7 @@ fn recover_missing_props<'cx>(
             PropertyType::OrdinaryField {
                 type_: ut,
                 polarity: Polarity::Neutral,
+                optional,
             } if strictness_kind.is_typescript_loose() => {
                 // This no-op flow intentionally avoids the invariant constraint used for Flow
                 // object subtyping while preserving the missing-property recovery path.
@@ -1483,32 +1517,32 @@ fn recover_missing_props<'cx>(
                     env,
                     Some(trace),
                     &any,
-                    &UseT::new(UseT(use_op.dupe(), ut)),
+                    &type_util::slot_use_t(use_op.dupe(), ut, optional),
                 )?;
             }
             PropertyType::OrdinaryField {
                 type_: ut,
                 polarity: Polarity::Neutral,
+                optional,
             } => {
-                FlowJs::unify_opt_with_env(
+                FlowJs::unify_slots_with_env(
                     cx,
                     env,
                     Some(trace),
                     use_op.dupe(),
                     UnifyCause::Uncategorized,
-                    None,
-                    &any,
-                    &ut,
+                    (&any, false),
+                    (&ut, optional),
                 )?;
             }
             up_pt => {
-                if let Some(ut) = property::read_t_of_property_type(&up_pt) {
+                if let Some((ut, optional)) = property::read_slot_of_property_type(&up_pt) {
                     FlowJs::flow_opt_with_env(
                         cx,
                         env,
                         Some(trace),
                         &any,
-                        &UseT::new(UseT(use_op.dupe(), ut)),
+                        &type_util::slot_use_t(use_op.dupe(), ut, optional),
                     )?;
                 }
                 if let Some(ut) = property::write_t_of_property_type(&up_pt, None) {
@@ -1646,18 +1680,20 @@ impl PropsToIndexerContext<'_> {
                 );
                 let lp_type = match lp.deref() {
                     PropertyInner::Field(box FieldData {
-                        type_: deref!(OptionalT { type_: lt, .. }),
+                        type_: lt,
                         polarity,
                         ..
                     }) => PropertyType::OrdinaryField {
                         type_: lt.dupe(),
                         polarity: *polarity,
+                        optional: false,
                     },
                     _ => property_type_for_subtyping(lp, strictness_kind),
                 };
                 let up_type = PropertyType::OrdinaryField {
                     type_: value.dupe(),
                     polarity: *dict_polarity,
+                    optional: false,
                 };
                 if lit {
                     match (
@@ -1875,10 +1911,12 @@ fn flow_obj_to_obj<'cx>(
                     &PropertyType::OrdinaryField {
                         type_: lk.dupe(),
                         polarity: *lpolarity,
+                        optional: false,
                     },
                     &PropertyType::OrdinaryField {
                         type_: uk.dupe(),
                         polarity: *upolarity,
+                        optional: false,
                     },
                 )?;
                 add_output_prop_polarity_mismatch(
@@ -1921,10 +1959,12 @@ fn flow_obj_to_obj<'cx>(
                     &PropertyType::OrdinaryField {
                         type_: lv.dupe(),
                         polarity: *lpolarity,
+                        optional: false,
                     },
                     &PropertyType::OrdinaryField {
                         type_: uv.dupe(),
                         polarity: *upolarity,
+                        optional: false,
                     },
                 )?;
                 add_output_prop_polarity_mismatch(
@@ -2095,19 +2135,20 @@ fn flow_obj_to_obj<'cx>(
                         };
                         if !bivariant_handled {
                             match (
-                                property::read_t_of_property_type(&property_type_for_subtyping(
+                                property::read_slot_of_property_type(&property_type_for_subtyping(
                                     &lp,
                                     strictness_kind,
                                 )),
-                                property::read_t(up),
+                                property::read_slot_of_property_type(&property::property_type(up)),
                             ) {
-                                (Some(lt), Some(ut)) => {
-                                    FlowJs::rec_flow_with_env(
+                                (Some((lt, lower_optional)), Some((ut, upper_optional))) => {
+                                    FlowJs::flow_slot_with_env(
                                         cx,
                                         env,
-                                        trace,
-                                        &lt,
-                                        &UseT::new(UseT(mk_use_op(), ut)),
+                                        Some(trace),
+                                        mk_use_op(),
+                                        (&lt, lower_optional),
+                                        (&ut, upper_optional),
                                     )?;
                                 }
                                 _ => {}
@@ -2131,10 +2172,12 @@ fn flow_obj_to_obj<'cx>(
                                     PropertyType::OrdinaryField {
                                         type_: ref lt,
                                         polarity: Polarity::Neutral,
+                                        optional: lower_optional,
                                     },
                                     PropertyType::OrdinaryField {
                                         type_: ref ut,
                                         polarity: Polarity::Neutral,
+                                        optional: upper_optional,
                                     },
                                 ) if strictness_kind.is_typescript_loose() => {
                                     // TS treats read-write-on-both-sides property type mismatch
@@ -2142,12 +2185,13 @@ fn flow_obj_to_obj<'cx>(
                                     // invariant. Skip the try_unify path and do a covariant
                                     // subtype check; do not record this property as an
                                     // invariant-subtyping failure.
-                                    FlowJs::rec_flow_with_env(
+                                    FlowJs::flow_slot_with_env(
                                         cx,
                                         env,
-                                        trace,
-                                        lt,
-                                        &UseT::new(UseT(mk_use_op(), ut.dupe())),
+                                        Some(trace),
+                                        mk_use_op(),
+                                        (lt, lower_optional),
+                                        (ut, upper_optional),
                                     )?;
                                     vec![]
                                 }
@@ -2155,10 +2199,12 @@ fn flow_obj_to_obj<'cx>(
                                     PropertyType::OrdinaryField {
                                         type_: ref lt,
                                         polarity: Polarity::Neutral,
+                                        optional: lower_optional,
                                     },
                                     PropertyType::OrdinaryField {
                                         type_: ref ut,
                                         polarity: Polarity::Neutral,
+                                        optional: upper_optional,
                                     },
                                 ) if !env.speculating()
                                     && !flow_js_utils::tvar_visitors::has_unresolved_tvars(
@@ -2168,13 +2214,13 @@ fn flow_obj_to_obj<'cx>(
                                         cx, ut,
                                     ) =>
                                 {
-                                    let failed = match speculation_kit::try_unify(
+                                    let failed = match FlowJs::try_unify_slots_with_env(
                                         cx,
                                         env,
                                         trace,
-                                        lt.dupe(),
+                                        (lt, lower_optional),
                                         mk_use_op(),
-                                        ut.dupe(),
+                                        (ut, upper_optional),
                                     ) {
                                         Ok(()) => false,
                                         Err(FlowJsException::SpeculationSingletonError) => true,
@@ -2183,8 +2229,8 @@ fn flow_obj_to_obj<'cx>(
                                     if failed {
                                         invariant_subtyping_failed_prop_names.push((
                                             name.dupe(),
-                                            lt.dupe(),
-                                            ut.dupe(),
+                                            type_util::slot_value_t(lt, lower_optional),
+                                            type_util::slot_value_t(ut, upper_optional),
                                         ));
                                     }
                                     vec![]
@@ -2220,14 +2266,7 @@ fn flow_obj_to_obj<'cx>(
                 // TypeScript never checks a source index signature against an optional target
                 // property that the source does not declare.
                 (None, Some(_))
-                    if ustrictness_kind.is_typescript_loose()
-                        && matches!(
-                            up.deref(),
-                            PropertyInner::Field(box FieldData {
-                                type_: deref!(OptionalT { .. }),
-                                ..
-                            })
-                        ) => {}
+                    if ustrictness_kind.is_typescript_loose() && property::is_optional(up) => {}
                 (None, Some(dict)) if !flow_js_utils::is_dictionary_exempt(name) => {
                     let DictType {
                         key,
@@ -2238,15 +2277,17 @@ fn flow_obj_to_obj<'cx>(
                     let lp_for_idx = PropertyType::OrdinaryField {
                         type_: value.dupe(),
                         polarity: *dict_polarity,
+                        optional: false,
                     };
                     let up_for_idx = match up.deref() {
                         PropertyInner::Field(box FieldData {
-                            type_: deref!(OptionalT { type_: ut, .. }),
+                            type_: ut,
                             polarity,
                             ..
                         }) => PropertyType::OrdinaryField {
                             type_: ut.dupe(),
                             polarity: *polarity,
+                            optional: false,
                         },
                         _ => property::property_type(up),
                     };
@@ -2294,7 +2335,7 @@ fn flow_obj_to_obj<'cx>(
                         };
                     match up.deref() {
                         PropertyInner::Field(fd)
-                            if matches!(fd.type_.deref(), OptionalT { .. })
+                            if fd.optional
                                 && (lit || fd.polarity == Polarity::Positive)
                                 && !env.in_implicit_instantiation() =>
                         {
@@ -2359,11 +2400,10 @@ fn flow_obj_to_obj<'cx>(
                 _ => {
                     // property doesn't exist in inflowing type
                     match up.deref() {
-                        PropertyInner::Field(fd)
-                            if matches!(fd.type_.deref(), OptionalT { .. }) && lit => {}
+                        PropertyInner::Field(fd) if fd.optional && lit => {}
                         PropertyInner::Field(fd)
                             if fd.polarity == Polarity::Positive
-                                && matches!(fd.type_.deref(), OptionalT { .. })
+                                && fd.optional
                                 && obj_type::is_exact(&lflags.obj_kind) =>
                         {
                             let propref = mk_propref();
@@ -2574,10 +2614,7 @@ fn flow_obj_to_obj<'cx>(
             ),
              (name, up)| {
                 match up.deref() {
-                    PropertyInner::Field(fd)
-                        if fd.polarity == Polarity::Neutral
-                            && matches!(fd.type_.deref(), OptionalT { .. }) =>
-                    {
+                    PropertyInner::Field(fd) if fd.polarity == Polarity::Neutral && fd.optional => {
                         rhs_neutral_optional.push(name);
                         ups_to_flow_any.push(up);
                     }
@@ -2701,18 +2738,15 @@ fn flow_obj_to_obj<'cx>(
                         ))),
                         Arc::new(use_op.dupe()),
                     );
-                    let call_t = cx.find_call(*lcall_id);
-                    let lp_t = match call_t.deref() {
-                        OptionalT { type_: t, .. } => t.dupe(),
-                        _ => call_t.dupe(),
-                    };
                     let lp_type = PropertyType::OrdinaryField {
-                        type_: lp_t,
+                        type_: cx.find_call(*lcall_id),
                         polarity: Polarity::Positive,
+                        optional: false,
                     };
                     let up_type = PropertyType::OrdinaryField {
                         type_: ud.value.dupe(),
                         polarity: ud.dict_polarity,
+                        optional: false,
                     };
                     if lit {
                         match (
@@ -3097,26 +3131,6 @@ pub fn rec_sub_t<'cx>(
             FlowJs::rec_flow_t_with_env(cx, env, trace, use_op.dupe(), &null, u)?;
             FlowJs::rec_flow_t_with_env(cx, env, trace, use_op.dupe(), &void, u)?;
             FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &t, u)
-        }
-        (DefT(r, deref!(VoidT)), OptionalT { type_: tout, .. }) => {
-            let empty = Type::new(DefT(r.dupe(), DefT::new(EmptyT)));
-            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &empty, tout)
-        }
-        (OptionalT { type_: t, .. }, OptionalT { .. })
-        | (OptionalT { type_: t, .. }, MaybeT(_, _)) => {
-            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, t, u)
-        }
-        (
-            OptionalT {
-                reason,
-                type_: t,
-                use_desc,
-            },
-            _,
-        ) => {
-            let void = void::why_with_use_desc(*use_desc, reason.dupe());
-            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op.dupe(), &void, u)?;
-            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, t, u)
         }
         (
             ThisTypeAppT(box ThisTypeAppTData {
@@ -4138,8 +4152,105 @@ pub fn rec_sub_t<'cx>(
                 UseT::new(UseT(use_op, u.dupe())),
             )
         }
+        // A value read from an optional slot flows into another optional slot as its declared
+        // type: its `undefined` fits any optional slot.
+        (UnionT(..), UnionT(..))
+            if let Some(lt) = type_util::optional_slot_type(l)
+                && type_util::optional_slot_type(u).is_some() =>
+        {
+            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &lt, u)
+        }
+        // A value flows into the union of an optional slot's values (`type_util::slot_value_t`) as
+        // into the slot. The `void` members of a union fit the slot, and the rest of the union
+        // meets the slot's type whole.
+        (UnionT(reason, rep), UnionT(..)) if let Some(rest) = type_util::optional_slot_type(u) => {
+            let void = Type::new(DefT(reason.dupe(), DefT::new(VoidT)));
+            match union_rep::quick_mem_enum(
+                cx,
+                |_, t1, t2| type_util::quick_subtype(None::<&mut fn(&Type)>, t1, t2),
+                &void,
+                rep,
+            ) {
+                union_rep::QuickMemResult::No => {
+                    FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, l, &rest)
+                }
+                union_rep::QuickMemResult::Yes => {
+                    let filtered = flow_js_utils::remove_predicate_from_union(
+                        reason.dupe(),
+                        cx,
+                        |t| type_util::quick_subtype(None::<&mut fn(&Type)>, t, &void),
+                        rep,
+                    );
+                    FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &filtered, &rest)
+                }
+                // Member by member, each `void` meeting the slot as `void` does.
+                _ => {
+                    for t in rep.members_iter() {
+                        FlowJs::rec_flow_t_with_env(cx, env, trace, use_op.dupe(), t, u)?;
+                    }
+                    Ok(())
+                }
+            }
+        }
+        // `undefined` in the upper union is matched only by `undefined` in the lower union, so
+        // the rest of the lower union is first tried against the rest of the upper union, as for
+        // the value of an optional property read through `T[K]`. The rest of the upper union can
+        // then be checked whole rather than member by member. When that fails, the unions are
+        // compared as usual, so that the errors are the same.
+        (UnionT(reason, rep), UnionT(ureason, urep))
+            if urep
+                .members_iter()
+                .any(|t| matches!(t.deref(), DefT(_, deref!(VoidT))))
+                && urep
+                    .members_iter()
+                    .any(|t| !matches!(t.deref(), DefT(_, deref!(VoidT))))
+                && let void = Type::new(DefT(reason.dupe(), DefT::new(VoidT)))
+                && let mem @ (union_rep::QuickMemResult::No | union_rep::QuickMemResult::Yes) =
+                    union_rep::quick_mem_enum(
+                        cx,
+                        |_, t1, t2| type_util::quick_subtype(None::<&mut fn(&Type)>, t1, t2),
+                        &void,
+                        rep,
+                    ) =>
+        {
+            let is_void = |t: &Type| matches!(t.deref(), DefT(_, deref!(VoidT)));
+            let upper = flow_js_utils::remove_predicate_from_union(ureason.dupe(), cx, is_void, urep);
+            let lower = match mem {
+                union_rep::QuickMemResult::Yes => flow_js_utils::remove_predicate_from_union(
+                    reason.dupe(),
+                    cx,
+                    |t| type_util::quick_subtype(None::<&mut fn(&Type)>, t, &void),
+                    rep,
+                ),
+                _ => l.dupe(),
+            };
+            let without_void_use_op = use_op.dupe();
+            match speculation_kit::try_singleton_custom_throw_on_failure(
+                cx,
+                env,
+                Box::new(move |cx: &mut Context<'cx>, env: &FlowJsEnv| {
+                    FlowJs::rec_flow_t_with_env(cx, env, trace, without_void_use_op, &lower, &upper)
+                }),
+            ) {
+                Ok(()) => Ok(()),
+                Err(FlowJsException::SpeculationSingletonError) => {
+                    union_to_union(cx, env, trace, use_op, l, rep, u)
+                }
+                Err(e) => Err(e),
+            }
+        }
         (UnionT(_, rep), UnionT(_, _)) => {
             union_to_union(cx, env, trace, use_op, l, rep, u)
+        }
+        // `void` fits an optional slot; its type gets `empty`, as a missing value says nothing
+        // about it.
+        (DefT(r, deref!(VoidT)), UnionT(..)) if let Some(rest) = type_util::optional_slot_type(u) => {
+            let empty = Type::new(DefT(r.dupe(), DefT::new(EmptyT)));
+            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &empty, &rest)
+        }
+        // Any other value must fit the type of the optional slot.
+        (_, UnionT(..)) if let Some(rest) = type_util::optional_slot_type(u) => {
+            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, l, &rest)
         }
         // Optimization to treat maybe and optional types as special unions for subset comparision
         (UnionT(reason, rep), MaybeT(r, maybe)) => {
@@ -4194,40 +4305,6 @@ pub fn rec_sub_t<'cx>(
                         rep,
                     );
                     FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &filtered, &maybe)
-                }
-                _ => flow_all_in_union(
-                    cx, env,
-                    &trace,
-                    rep,
-                    &UseT::new(UseT(use_op, u.dupe())),
-                ),
-            }
-        }
-        (
-            UnionT(reason, rep),
-            OptionalT {
-                reason: r,
-                type_: opt,
-                use_desc: opt_use_desc,
-            },
-        ) => {
-            let void = void::why_with_use_desc(*opt_use_desc, r.dupe());
-            // if the union doesn't contain void, then everything in it must be upper-bounded by u
-            match union_rep::quick_mem_enum(
-                cx,
-                |_, t1, t2| type_util::quick_subtype(None::<&mut fn(&Type)>, t1, t2),
-                &void,
-                rep,
-            ) {
-                union_rep::QuickMemResult::No => FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, l, opt),
-                union_rep::QuickMemResult::Yes => {
-                    let filtered = flow_js_utils::remove_predicate_from_union(
-                        reason.dupe(),
-                        cx,
-                        |t| type_util::quick_subtype(None::<&mut fn(&Type)>, t, &void),
-                        rep,
-                    );
-                    FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &filtered, opt)
                 }
                 _ => flow_all_in_union(
                     cx, env,
@@ -4576,9 +4653,6 @@ pub fn rec_sub_t<'cx>(
         (_, MaybeT(r2, t2)) => {
             let t2 = type_util::push_type_alias_reason(r2, t2.dupe());
             FlowJs::rec_flow_with_env(cx, env, trace, l, &UseT::new(UseT(use_op, t2)))
-        }
-        (_, OptionalT { type_: t2, .. }) => {
-            FlowJs::rec_flow_with_env(cx, env, trace, l, &UseT::new(UseT(use_op, t2.dupe())))
         }
         // object types: an intersection may satisfy an object UB without
         // any particular member of the intersection doing so completely.
@@ -5232,7 +5306,6 @@ pub fn rec_sub_t<'cx>(
                 reasonl.dupe(),
                 flow_common::error_ref::FunctionReferenceKind::FunctionType,
                 None,
-                None,
                 renders.dupe(),
             );
             let mixed = mixed_t::why(reasonu.dupe());
@@ -5584,12 +5657,7 @@ pub fn rec_sub_t<'cx>(
                             }
                         }
                         None => {
-                            let optional = matches!(
-                                up.deref(),
-                                PropertyInner::Field(box FieldData {
-                                    type_: deref!(OptionalT { .. }), ..
-                                })
-                            );
+                            let optional = property::is_optional(up);
                             if !optional && strictness_kind.is_typescript_loose() {
                                 missing_props.push((propref.clone(), up.dupe()));
                                 continue;
@@ -5861,7 +5929,8 @@ pub fn rec_sub_t<'cx>(
                                             p1: Polarity,
                                             p2: Polarity,
                                             optional1: bool,
-                                            optional2: bool|
+                                            optional2: bool,
+                                            missing1: bool|
                  -> Result<(), FlowJsException> {
                     if !(fresh.is_literal() || Polarity::compat(p1, p2)) {
                         flow_js_utils::add_output_with_env(
@@ -5906,37 +5975,39 @@ pub fn rec_sub_t<'cx>(
                     // ```
                     //
                     // A user can always add `| void` to the element type if they want to denote this.
-                    let t2_inner = if !optional1 {
-                        if let (
-                            true,
-                            OptionalT {
-                                type_: inner_t2, ..
-                            },
-                        ) = (optional2, t2.deref())
-                        {
-                            inner_t2
-                        } else {
-                            t2
-                        }
-                    } else {
-                        t2
-                    };
+                    // So the upper element takes `undefined` only from a lower element that may be
+                    // missing as well.
+                    let optional2 = optional2 && (optional1 || missing1);
                     match (fresh.is_literal(), p2) {
                         (true, _) | (_, Polarity::Positive) => {
-                            FlowJs::rec_flow_t_with_env(cx, env, trace, elem_use_op, t1, t2_inner)?;
+                            FlowJs::flow_slot_with_env(
+                                cx,
+                                env,
+                                Some(trace),
+                                elem_use_op,
+                                (t1, optional1),
+                                (t2, optional2),
+                            )?;
                         }
                         (_, Polarity::Negative) => {
-                            FlowJs::rec_flow_t_with_env(cx, env, trace, elem_use_op, t2_inner, t1)?;
+                            FlowJs::flow_slot_with_env(
+                                cx,
+                                env,
+                                Some(trace),
+                                elem_use_op,
+                                (t2, optional2),
+                                (t1, optional1),
+                            )?;
                         }
                         (_, Polarity::Neutral) => {
-                            FlowJs::rec_unify_with_env(
-                                cx, env,
-                                trace,
+                            FlowJs::unify_slots_with_env(
+                                cx,
+                                env,
+                                Some(trace),
                                 elem_use_op,
                                 UnifyCause::Uncategorized,
-                                None,
-                                t1,
-                                t2_inner,
+                                (t1, optional1),
+                                (t2, optional2),
                             )?;
                         }
                     }
@@ -5963,7 +6034,16 @@ pub fn rec_sub_t<'cx>(
                                 ..
                             }),
                         ) => {
-                            tuple_element_compat(n, t1, t2, *p1, *p2, *optional1, *optional2)?;
+                            tuple_element_compat(
+                                n,
+                                t1,
+                                t2,
+                                *p1,
+                                *p2,
+                                *optional1,
+                                *optional2,
+                                false,
+                            )?;
                             n += 1;
                         }
                         // The lower rest element supplies the remaining optional elements.
@@ -5972,11 +6052,10 @@ pub fn rec_sub_t<'cx>(
                             Some(TupleElement {
                                 t: t2,
                                 polarity: p2,
-                                optional: optional2,
                                 ..
                             }),
                         ) if let Some(TupleElement { t: t1, polarity: p1, .. }) = rest1 => {
-                            tuple_element_compat(n, t1, t2, *p1, *p2, false, *optional2)?;
+                            tuple_element_compat(n, t1, t2, *p1, *p2, false, false, false)?;
                             n += 1;
                         }
                         (
@@ -5993,8 +6072,7 @@ pub fn rec_sub_t<'cx>(
                                 void::make(r1.clone().replace_desc_new(
                                     VirtualReasonDesc::RTupleOutOfBoundsAccess(n),
                                 ));
-                            let optional1 = true;
-                            tuple_element_compat(n, &t1, t2, p1, *p2, optional1, *optional2)?;
+                            tuple_element_compat(n, &t1, t2, p1, *p2, false, *optional2, true)?;
                             n += 1;
                         }
                         // The remaining lower elements go to the upper rest element.
@@ -6007,7 +6085,7 @@ pub fn rec_sub_t<'cx>(
                             }),
                             None,
                         ) if let Some(TupleElement { t: t2, polarity: p2, .. }) = rest2 => {
-                            tuple_element_compat(n, t1, t2, *p1, *p2, *optional1, false)?;
+                            tuple_element_compat(n, t1, t2, *p1, *p2, *optional1, false, false)?;
                             n += 1;
                         }
                         _ => {}
@@ -6018,7 +6096,7 @@ pub fn rec_sub_t<'cx>(
                     Some(TupleElement { t: t2, polarity: p2, .. }),
                 ) = (rest1, rest2)
                 {
-                    tuple_element_compat(n, t1, t2, *p1, *p2, false, false)?;
+                    tuple_element_compat(n, t1, t2, *p1, *p2, false, false, false)?;
                 }
             }
             Ok(())
@@ -6240,7 +6318,6 @@ pub fn rec_sub_t<'cx>(
                         )),
                         reason_l.dupe(),
                         flow_common::error_ref::FunctionReferenceKind::FunctionType,
-                        None,
                         None,
                         class_instance.dupe(),
                     );

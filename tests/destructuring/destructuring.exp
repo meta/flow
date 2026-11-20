@@ -1628,31 +1628,28 @@ References:
 Error ----------------------------------------------------------------------------------------- poly_concretize.js:64:11
 
 Cannot assign `item` to `{...Item, name?: string, ...}` because: [incompatible-type]
- - Either in property `name`: `void` [1] is incompatible with `string` [2].
+ - Either in property `label` > at least one member of `void` [1]: `void` [1] is incompatible with `string` [2].
+ - Or in property `name`: `void` [3] is incompatible with `string` [4].
     - This property is invariantly typed. See
       https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
- - Or in property `label`: `void` [3] is incompatible with `string` [4].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
 
    poly_concretize.js:64:11
    64|  ...  } = item;
                  ^^^^
 
 References:
-   poly_concretize.js:63:12
-   63|     name?: string,
-                  ^^^^^^ [1]
-   poly_concretize.js:13:9
-   13|   name: string,
-               ^^^^^^ [2]
    poly_concretize.js:10:14
    10|   | {label?: void, labelledby: string, ...};
-                    ^^^^ [3]
+                    ^^^^ [1]
    poly_concretize.js:9:13
     9|   | {label: string, labelledby?: void, ...}
-                   ^^^^^^ [4]
+                   ^^^^^^ [2]
+   poly_concretize.js:63:12
+   63|     name?: string,
+                  ^^^^^^ [3]
+   poly_concretize.js:13:9
+   13|   name: string,
+               ^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------- poly_concretize.js:64:11

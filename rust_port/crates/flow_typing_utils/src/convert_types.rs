@@ -323,13 +323,14 @@ fn funtype_to_json<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, funtype: &FunT
             .params
             .iter()
             .map(|param| {
-                let name_json = match &param.0 {
+                let name_json = match &param.name {
                     None => Json::Null,
                     Some(name) => Json::String(name.to_string()),
                 };
                 json!({
                     "name": name_json,
-                    "type": type_to_json(cx, depth - 1, &param.1),
+                    "type": type_to_json(cx, depth - 1, &param.t),
+                    "optional": param.optional,
                 })
             })
             .collect(),
@@ -730,17 +731,6 @@ fn type_to_json_uncached<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, t: &Type
         TypeInner::MaybeT(_, t) => {
             json_with_type("Maybe", vec![("type", type_to_json(cx, depth - 1, t))])
         }
-        TypeInner::OptionalT {
-            reason: _,
-            type_,
-            use_desc,
-        } => json_with_type(
-            "Optional",
-            vec![
-                ("type", type_to_json(cx, depth - 1, type_)),
-                ("use_desc", Json::Bool(*use_desc)),
-            ],
-        ),
         TypeInner::KeysT(_, t) => {
             json_with_type("Keys", vec![("type", type_to_json(cx, depth - 1, t))])
         }
@@ -1285,6 +1275,7 @@ fn json_of_property<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, property: &Pr
                 "kind": "Field",
                 "type": type_to_json(cx, depth - 1, &fd.type_),
                 "polarity": polarity_to_string(&fd.polarity),
+                "optional": fd.optional,
             })
         }
         PropertyInner::Get { type_, .. } => {
@@ -1302,8 +1293,14 @@ fn json_of_property<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, property: &Pr
                 "set_type": type_to_json(cx, depth - 1, &gs.set_type),
             })
         }
-        PropertyInner::Method { type_, .. } => {
-            json!({"kind": "Method", "type": type_to_json(cx, depth - 1, type_)})
+        PropertyInner::Method {
+            type_, optional, ..
+        } => {
+            json!({
+                "kind": "Method",
+                "type": type_to_json(cx, depth - 1, type_),
+                "optional": optional,
+            })
         }
     }
 }

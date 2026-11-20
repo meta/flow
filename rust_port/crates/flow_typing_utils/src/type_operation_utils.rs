@@ -455,7 +455,6 @@ pub mod operators {
             | TypeInner::GenericT(..)
             | TypeInner::EvalT { .. }
             | TypeInner::TypeAppT(..)
-            | TypeInner::OptionalT { .. }
             | TypeInner::UnionT(_, _)
             | TypeInner::MaybeT(_, _)
             | TypeInner::AnnotT(_, _, _)
@@ -1845,7 +1844,7 @@ pub mod special_cased_functions {
                                     env,
                                     reason,
                                     fix_cache,
-                                    &elem.t,
+                                    &type_util::slot_value_t(&elem.t, elem.optional),
                                     use_op,
                                     reason_op,
                                     to_obj,
@@ -1864,7 +1863,7 @@ pub mod special_cased_functions {
                                 .elements
                                 .iter()
                                 .chain(&tuple_view.rest)
-                                .map(|elem| elem.t.dupe())
+                                .map(|elem| type_util::slot_value_t(&elem.t, elem.optional))
                                 .collect();
                             let default_kind = type_::default_obj_assign_kind();
                             for from in &ts {

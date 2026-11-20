@@ -422,9 +422,9 @@ fn is_nullish(t: &Type, maybe: bool) -> bool {
         if matches!(d.deref(), DefTInner::VoidT) || (maybe && matches!(d.deref(), DefTInner::NullT)))
 }
 
-/// Whether some members of a union are absorbed by a maybe (or optional) type, when subtyping
-/// knows it from the optimized representation of the union (`quick_mem_enum`); otherwise it
-/// compares the members one by one.
+/// Whether some members of a union are absorbed by a maybe type (or an optional slot), when
+/// subtyping knows it from the optimized representation of the union (`quick_mem_enum`); otherwise
+/// it compares the members one by one.
 fn nullish_members<'cx>(
     cx: &mut Context<'cx>,
     reason: &Reason,
@@ -510,15 +510,14 @@ fn local_underlying(cx: &Context<'_>, t: &Type) -> Option<Type> {
     }
 }
 
-/// A property as subtyping compares it with an indexer: an optional field with its inner type.
+/// A property as subtyping compares it with an indexer: an optional field with its declared type.
 fn field_for_indexer(p: &Property) -> PropertyType {
     match p.deref() {
-        PropertyInner::Field(f) if let TypeInner::OptionalT { type_, .. } = f.type_.deref() => {
-            PropertyType::OrdinaryField {
-                type_: type_.dupe(),
-                polarity: f.polarity,
-            }
-        }
+        PropertyInner::Field(f) => PropertyType::OrdinaryField {
+            type_: f.type_.dupe(),
+            polarity: f.polarity,
+            optional: false,
+        },
         _ => property::property_type(p),
     }
 }
@@ -1074,13 +1073,66 @@ impl<'e> Walker<'e> {
             let lthis = type_util::this_for_unification(lf);
             let uthis = type_util::this_for_unification(uf);
             self.walk_invariant(cx, &lthis, &uthis)?;
-            for (FunParam(_, lt), FunParam(_, ut)) in lf.params.iter().zip(uf.params.iter()) {
-                self.walk_invariant(cx, lt, ut)?;
+            for (lp, up) in lf.params.iter().zip(uf.params.iter()) {
+                self.walk_invariant_slots(cx, (&lp.t, lp.optional), (&up.t, up.optional))?;
             }
             return self.walk_invariant(cx, &lf.return_t, &uf.return_t);
         }
+        // As unification unifies two tuples element by element, each element with its own
+        // optionality.
+        if let (TypeInner::DefT(_, ld), TypeInner::DefT(_, ud)) = (lr.deref(), ur.deref())
+            && let (DefTInner::ArrT(la), DefTInner::ArrT(ua)) = (ld.deref(), ud.deref())
+            && let (ArrType::TupleAT(lt), ArrType::TupleAT(ut)) = (la.deref(), ua.deref())
+        {
+            let pairs: Vec<(TupleElement, TupleElement)> = lt
+                .elements
+                .iter()
+                .chain(&lt.rest)
+                .zip(ut.elements.iter().chain(&ut.rest))
+                .map(|(l, u)| (l.clone(), u.clone()))
+                .collect();
+            for (l, u) in pairs {
+                self.walk_invariant_slots(cx, (&l.t, l.optional), (&u.t, u.optional))?;
+            }
+            return Ok(());
+        }
         self.walk(cx, l, u)?;
         self.walk(cx, u, l)
+    }
+
+    /// Two slots, as unification compares them (`unify_slots`): two required slots are invariant,
+    /// and otherwise each slot's values go into the other slot.
+    fn walk_invariant_slots<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        (l, lopt): (&Type, bool),
+        (u, uopt): (&Type, bool),
+    ) -> Result<(), FlowJsException> {
+        if !lopt && !uopt {
+            return self.walk_invariant(cx, l, u);
+        }
+        if lopt == uopt && l == u {
+            return Ok(());
+        }
+        self.walk_slot(cx, (l, lopt), (u, uopt))?;
+        self.walk_slot(cx, (u, uopt), (l, lopt))
+    }
+
+    /// The values of one slot flowing into another, as `flow_slot` does: only the declared type
+    /// meets an optional slot, which holds `undefined` anyway, and a slot of the same type fits.
+    fn walk_slot<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        (l, lopt): (&Type, bool),
+        (u, uopt): (&Type, bool),
+    ) -> Result<(), FlowJsException> {
+        if !uopt {
+            return self.walk(cx, &type_util::slot_value_t(l, lopt), u);
+        }
+        if l.ptr_eq(u) {
+            return Ok(());
+        }
+        self.walk_to_optional(cx, l, u)
     }
 
     fn add_upper<'cx>(&mut self, cx: &mut Context<'cx>, name: &SubstName, t: &Type) {
@@ -1207,6 +1259,111 @@ impl<'e> Walker<'e> {
         result
     }
 
+    /// Records what `l` flowing into an optional slot of type `ui` says about the markers, as
+    /// subtyping does for the union of the slot's values: `undefined` fits the slot, and the rest
+    /// must fit `ui`.
+    fn walk_to_optional<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        l: &Type,
+        ui: &Type,
+    ) -> Result<(), FlowJsException> {
+        if self.depth > MAX_DEPTH {
+            return self.give_up(cx, "depth limit", l, ui);
+        }
+        // A marker is bounded by `ui` or `undefined`.
+        if self.marker_of(l).is_some() {
+            return self.walk(cx, l, &type_util::slot_value_t(ui, true));
+        }
+        let l = self.resolve(cx, l);
+        self.depth += 1;
+        let result = self.walk_resolved_to_optional(cx, &l, ui);
+        self.depth -= 1;
+        result
+    }
+
+    fn walk_resolved_to_optional<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        l: &Type,
+        ui: &Type,
+    ) -> Result<(), FlowJsException> {
+        match l.deref() {
+            // A destructor is evaluated first, and its result meets the slot whole, as in subtyping.
+            TypeInner::EvalT { .. } => {
+                self.walk_from_eval(cx, l, &type_util::slot_value_t(ui, true))
+            }
+            // As in subtyping, an opaque type stands for its underlying type in the file that
+            // defines it.
+            TypeInner::NominalT { .. } if let Some(t) = local_underlying(cx, l) => {
+                self.walk_to_optional(cx, &t, ui)
+            }
+            // A value read from an optional slot meets the slot as its declared type, as in
+            // subtyping.
+            TypeInner::UnionT(..) if let Some(lt) = type_util::optional_slot_type(l) => {
+                self.walk_to_optional(cx, &lt, ui)
+            }
+            // As in subtyping: a union meets the slot whole, without its `undefined` members, when
+            // the optimized union tells them apart; otherwise member by member.
+            TypeInner::UnionT(reason, rep) => match nullish_members(cx, reason, rep, false) {
+                Some(true) => {
+                    let filtered = flow_js_utils::remove_predicate_from_union(
+                        reason.dupe(),
+                        cx,
+                        |t| is_nullish(t, false),
+                        rep,
+                    );
+                    self.walk(cx, &filtered, ui)
+                }
+                Some(false) => self.walk(cx, l, ui),
+                None => {
+                    let members: Vec<Type> = rep.members_iter().duped().collect();
+                    for m in members {
+                        self.walk_to_optional(cx, &m, ui)?;
+                    }
+                    Ok(())
+                }
+            },
+            // An alias is expanded first, absorbing the `void` it stands for.
+            TypeInner::TypeAppT(_) | TypeInner::ThisTypeAppT(_)
+                if let Some(expanded) = self.expand_typeapp(cx, l)
+                    && !matches!(expanded.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::InstanceT(_))) =>
+            {
+                self.walk_to_optional(cx, &expanded, ui)
+            }
+            TypeInner::MaybeT(r, li) => {
+                self.walk(cx, &null::make(r.dupe()), ui)?;
+                self.walk_to_optional(cx, li, ui)
+            }
+            // `undefined` fits the slot: `ui` gets `empty`, as in subtyping.
+            _ if matches!(self.head(cx, l), Head::Void) => {
+                let empty = empty_t::why(type_util::reason_of_t(l).dupe());
+                self.walk(cx, &empty, ui)
+            }
+            // The members of the bound of a generic or opaque type, which subtyping narrows: the
+            // slot sees the type with the rest of its bound.
+            _ if let Some(narrowed) = self.narrowed_bounded(cx, l, |h| matches!(h, Head::Void)) => {
+                self.walk(cx, &narrowed, ui)
+            }
+            _ => self.walk(cx, l, ui),
+        }
+    }
+
+    /// Records what `l` flowing into a slot of type `t`, optional or not, says about the markers.
+    fn walk_to_slot<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        l: &Type,
+        t: &Type,
+        optional: bool,
+    ) -> Result<(), FlowJsException> {
+        if optional {
+            self.walk_to_optional(cx, l, t)
+        } else {
+            self.walk(cx, l, t)
+        }
+    }
+
     fn walk_structural<'cx>(
         &mut self,
         cx: &mut Context<'cx>,
@@ -1232,6 +1389,11 @@ impl<'e> Walker<'e> {
             return Ok(());
         }
         match (l.deref(), u.deref()) {
+            // As subtyping: a value flows into the union built for an optional slot as into the
+            // slot.
+            (_, TypeInner::UnionT(..)) if let Some(ui) = type_util::optional_slot_type(&u) => {
+                self.walk_to_optional(cx, &l, &ui)
+            }
             // A module namespace is the object of its values.
             (TypeInner::NamespaceT(ns), _) => {
                 let values = ns.values_type.dupe();
@@ -1340,27 +1502,20 @@ impl<'e> Walker<'e> {
             {
                 self.walk(cx, &l, &expanded)
             }
-            // As subtyping compares a union with a maybe or optional type as a subset: a union of
-            // types that are not null or void meets the inner type whole, and one with null or void
-            // members meets it without them. The union is then one bound of a marker there, as in
-            // the flow-based solve, rather than one bound per member.
-            (
-                TypeInner::UnionT(reason, rep),
-                TypeInner::MaybeT(_, inner) | TypeInner::OptionalT { type_: inner, .. },
-            ) if let Some(nullish) = nullish_members(
-                cx,
-                type_util::reason_of_t(&u),
-                rep,
-                matches!(u.deref(), TypeInner::MaybeT(..)),
-            ) =>
+            // As subtyping compares a union with a maybe type as a subset: a union of types that
+            // are not null or void meets the inner type whole, and one with null or void members
+            // meets it without them. The union is then one bound of a marker there, as in the
+            // flow-based solve, rather than one bound per member.
+            (TypeInner::UnionT(reason, rep), TypeInner::MaybeT(_, inner))
+                if let Some(nullish) =
+                    nullish_members(cx, type_util::reason_of_t(&u), rep, true) =>
             {
                 let inner = inner.dupe();
                 if nullish {
-                    let maybe = matches!(u.deref(), TypeInner::MaybeT(..));
                     let filtered = flow_js_utils::remove_predicate_from_union(
                         reason.dupe(),
                         cx,
-                        |t| is_nullish(t, maybe),
+                        |t| is_nullish(t, true),
                         rep,
                     );
                     self.walk(cx, &filtered, &inner)
@@ -1382,9 +1537,6 @@ impl<'e> Walker<'e> {
             // Null and void are absorbed; the rest is compared with the whole upper bound, so that it
             // can be evaluated or split first.
             (TypeInner::MaybeT(_, li), TypeInner::MaybeT(..)) => self.walk(cx, li, &u),
-            (TypeInner::OptionalT { type_: li, .. }, TypeInner::OptionalT { .. }) => {
-                self.walk(cx, li, &u)
-            }
             // `any` fits each member of a union: see `propagate_any`.
             (TypeInner::AnyT(..), TypeInner::UnionT(..)) => {
                 self.propagate_any(cx, &l, &u, true);
@@ -1444,39 +1596,34 @@ impl<'e> Walker<'e> {
                 }
                 self.walk_to_union(cx, &l, others)
             }
-            // Nor does an application of a class meet an optional or maybe application of the same
-            // class through its expansion: `null` and `void` play no part. (The flow-based solve
-            // expands an alias first.)
-            (
-                TypeInner::TypeAppT(a),
-                TypeInner::MaybeT(_, ui) | TypeInner::OptionalT { type_: ui, .. },
-            ) if !self.is_alias(cx, &a.type_)
-                && matches!(
-                    self.resolve(cx, ui).deref(),
-                    TypeInner::TypeAppT(b) if self.same_typeapp(cx, &a.type_, &b.type_).is_some()
-                ) =>
+            // Nor does an application of a class meet a maybe application of the same class through
+            // its expansion: `null` and `void` play no part. (The flow-based solve expands an alias
+            // first.)
+            (TypeInner::TypeAppT(a), TypeInner::MaybeT(_, ui))
+                if !self.is_alias(cx, &a.type_)
+                    && matches!(
+                        self.resolve(cx, ui).deref(),
+                        TypeInner::TypeAppT(b) if self.same_typeapp(cx, &a.type_, &b.type_).is_some()
+                    ) =>
             {
                 let ui = self.resolve(cx, ui);
                 self.walk(cx, &l, &ui)
             }
             // An alias or class below a union is expanded first, so that its members or its
-            // shape pick the members of the union it matches. So is an alias below a maybe or
-            // optional type, which absorbs the `null` and `void` it stands for.
+            // shape pick the members of the union it matches. So is an alias below a maybe type,
+            // which absorbs the `null` and `void` it stands for.
             (TypeInner::TypeAppT(_) | TypeInner::ThisTypeAppT(_), TypeInner::UnionT(..))
                 if let Some(expanded) = self.expand_typeapp(cx, &l) =>
             {
                 self.walk(cx, &expanded, &u)
             }
-            (
-                TypeInner::TypeAppT(_) | TypeInner::ThisTypeAppT(_),
-                TypeInner::MaybeT(..) | TypeInner::OptionalT { .. },
-            ) if let Some(expanded) = self.expand_typeapp(cx, &l)
-                && !matches!(expanded.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::InstanceT(_))) =>
+            (TypeInner::TypeAppT(_) | TypeInner::ThisTypeAppT(_), TypeInner::MaybeT(..))
+                if let Some(expanded) = self.expand_typeapp(cx, &l)
+                    && !matches!(expanded.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::InstanceT(_))) =>
             {
                 self.walk(cx, &expanded, &u)
             }
             (_, TypeInner::MaybeT(r, ui)) => match l.deref() {
-                TypeInner::OptionalT { type_: li, .. } => self.walk(cx, li, &u),
                 // A tvar without lower bounds yet: what it will hold, minus null and void.
                 TypeInner::OpenT(_) => {
                     let non_maybe = flow_cache::eval::id(
@@ -1510,40 +1657,10 @@ impl<'e> Walker<'e> {
                     self.walk(cx, &l, &ui)
                 }
             },
-            (_, TypeInner::OptionalT { type_: ui, .. }) => match l.deref() {
-                TypeInner::MaybeT(r, li) => {
-                    self.walk(cx, &null::make(r.dupe()), ui)?;
-                    self.walk(cx, li, &u)
-                }
-                _ if matches!(self.head(cx, &l), Head::Void) => {
-                    let empty = empty_t::why(type_util::reason_of_t(&l).dupe());
-                    let ui = ui.dupe();
-                    self.walk(cx, &empty, &ui)
-                }
-                _ if let Some(narrowed) =
-                    self.narrowed_bounded(cx, &l, |h| matches!(h, Head::Void)) =>
-                {
-                    let ui = ui.dupe();
-                    self.walk(cx, &narrowed, &ui)
-                }
-                _ => {
-                    let ui = ui.dupe();
-                    self.walk(cx, &l, &ui)
-                }
-            },
-            // A maybe or optional lower bound is the union of its parts.
+            // A maybe lower bound is the union of its parts.
             (TypeInner::MaybeT(r, li), _) => {
                 self.walk(cx, &null::make(r.dupe()), &u)?;
                 self.walk(cx, &void::why(r.dupe()), &u)?;
-                self.walk(cx, li, &u)
-            }
-            (
-                TypeInner::OptionalT {
-                    reason, type_: li, ..
-                },
-                _,
-            ) => {
-                self.walk(cx, &void::why(reason.dupe()), &u)?;
                 self.walk(cx, li, &u)
             }
             (_, TypeInner::UnionT(_, rep)) => {
@@ -1629,10 +1746,7 @@ impl<'e> Walker<'e> {
                 let up = cx.find_props(uo.props_tmap.dupe());
                 let required: Vec<Name> = up
                     .iter()
-                    .filter(|(_, p)| {
-                        property::read_t(p)
-                            .is_some_and(|t| !matches!(t.deref(), TypeInner::OptionalT { .. }))
-                    })
+                    .filter(|(_, p)| property::read_t(p).is_some() && !property::is_optional(p))
                     .map(|(name, _)| name.dupe())
                     .collect();
                 let members: Vec<Type> = rep.members_iter().duped().collect();
@@ -2350,20 +2464,21 @@ impl<'e> Walker<'e> {
             };
             return self.walk_call(cx, reason_op, this_t, &before, &truncated, return_hint);
         };
-        let mut pairs = Vec::new();
+        // An argument and the parameter it is passed to, which is optional or not.
+        let mut pairs: Vec<(Type, Type, bool)> = Vec::new();
         let mut rest_args = Vec::new();
         for (index, t) in args.iter().enumerate() {
             match params.get(index) {
-                Some(FunParam(_, param)) => pairs.push((t.dupe(), param.dupe())),
+                Some(param) => pairs.push((t.dupe(), param.t.dupe(), param.optional)),
                 None => rest_args.push(t.dupe()),
             }
         }
         if let Some(tail) = &tail {
             // The elements after a spread of unknown length may be passed to any of the remaining
             // parameters.
-            for FunParam(_, param) in params.iter().skip(args.len()) {
+            for param in params.iter().skip(args.len()) {
                 for elem in &tail.elems {
-                    pairs.push((elem.dupe(), param.dupe()));
+                    pairs.push((elem.dupe(), param.t.dupe(), param.optional));
                 }
             }
         }
@@ -2371,15 +2486,15 @@ impl<'e> Walker<'e> {
             if self.rest_is_array(cx, rest) {
                 let n = rest_args.len();
                 for (i, arg) in rest_args.into_iter().enumerate() {
-                    if let Some(elem) = self.rest_elem(cx, rest, i) {
-                        pairs.push((arg, elem));
+                    if let Some((elem, optional)) = self.rest_elem(cx, rest, i) {
+                        pairs.push((arg, elem, optional));
                     }
                 }
                 if let Some(tail) = &tail
-                    && let Some(rest_elem) = self.rest_elem(cx, rest, n)
+                    && let Some((rest_elem, optional)) = self.rest_elem(cx, rest, n)
                 {
                     for elem in &tail.elems {
-                        pairs.push((elem.dupe(), rest_elem.dupe()));
+                        pairs.push((elem.dupe(), rest_elem.dupe(), optional));
                     }
                 }
             } else {
@@ -2387,36 +2502,36 @@ impl<'e> Walker<'e> {
                 // spread array when nothing else gets its elements, or an array of all the
                 // elements.
                 match &tail {
-                    None => pairs.push((mk_tuple(reason_op, rest_args, true), rest.dupe())),
+                    None => pairs.push((mk_tuple(reason_op, rest_args, true), rest.dupe(), false)),
                     Some(Tail {
                         array: Some(arr), ..
                     }) if rest_args.is_empty() && args.len() == params.len() => {
-                        pairs.push((arr.dupe(), rest.dupe()))
+                        pairs.push((arr.dupe(), rest.dupe(), false))
                     }
                     Some(Tail { elems, .. }) => {
                         let ts = rest_args.into_iter().chain(elems.iter().duped()).collect();
-                        pairs.push((mk_array(reason_op, ts), rest.dupe()))
+                        pairs.push((mk_array(reason_op, ts), rest.dupe(), false))
                     }
                 }
             }
         }
         // An omitted argument passes `void`, as the call does.
         if tail.is_none() {
-            for FunParam(_, param) in params.iter().skip(args.len()) {
-                pairs.push((void::why(reason_op.dupe()), param.dupe()));
+            for param in params.iter().skip(args.len()) {
+                pairs.push((void::why(reason_op.dupe()), param.t.dupe(), param.optional));
             }
         }
         if let Some(this_param) = signature.this_param {
-            pairs.insert(0, (this_t.dupe(), this_param.dupe()));
+            pairs.insert(0, (this_t.dupe(), this_param.dupe(), false));
         }
 
         let (generic_values, others): (Vec<_>, Vec<_>) = pairs
             .into_iter()
-            .partition(|(arg, _)| self.is_generic_value(cx, arg));
+            .partition(|(arg, _, _)| self.is_generic_value(cx, arg));
         self.in_args = true;
         let walked = others
             .iter()
-            .try_for_each(|(arg, param)| self.walk(cx, arg, param));
+            .try_for_each(|(arg, param, optional)| self.walk_to_slot(cx, arg, param, *optional));
         self.in_args = false;
         walked?;
         // Pairs that wait for the evidence of other arguments, such as a spread tuple
@@ -2434,8 +2549,8 @@ impl<'e> Walker<'e> {
         generic_props
             .iter()
             .try_for_each(|(lprop, uprop)| self.walk_prop(cx, lprop, uprop, true))?;
-        for (arg, param) in &generic_values {
-            self.walk(cx, arg, param)?;
+        for (arg, param, optional) in &generic_values {
+            self.walk_to_slot(cx, arg, param, *optional)?;
         }
         Ok(())
     }
@@ -2804,11 +2919,7 @@ impl<'e> Walker<'e> {
                     .iter()
                     .any(|a| matches!(a.deref(), CallArgInner::SpreadArg(_)));
                 let admits = |f: &FunType| {
-                    let required = f
-                        .params
-                        .iter()
-                        .filter(|FunParam(_, t)| !matches!(t.deref(), TypeInner::OptionalT { .. }))
-                        .count();
+                    let required = f.params.iter().filter(|param| !param.optional).count();
                     spread || (required <= n && (n <= f.params.len() || f.rest_param.is_some()))
                 };
                 for member in rep.members_iter() {
@@ -2841,9 +2952,10 @@ impl<'e> Walker<'e> {
                 break;
             };
             let param = match f.params.get(i) {
-                Some(FunParam(_, param)) => Some(param.dupe()),
+                Some(param) => Some(type_util::slot_value_t(&param.t, param.optional)),
                 None => (f.rest_param.as_ref()).and_then(|FunRestParam(_, _, rest)| {
                     self.rest_elem(cx, rest, i - f.params.len())
+                        .map(|(t, optional)| type_util::slot_value_t(&t, optional))
                 }),
             };
             if let Some(param) = param
@@ -3188,12 +3300,13 @@ impl<'e> Walker<'e> {
         let urest = uf.rest_param.as_ref().map(|FunRestParam(_, _, t)| t.dupe());
         // `u`'s parameters that only `l`'s rest parameter receives, when it is not an array.
         let mut into_lrest = Vec::new();
-        for (i, FunParam(_, ut)) in uf.params.iter().enumerate() {
-            if let Some(FunParam(_, lt)) = lf.params.get(i) {
-                self.walk(cx, ut, lt)?;
+        for (i, up) in uf.params.iter().enumerate() {
+            let ut = type_util::slot_value_t(&up.t, up.optional);
+            if let Some(lp) = lf.params.get(i) {
+                self.walk_to_slot(cx, &ut, &lp.t, lp.optional)?;
             } else if let Some(lrest) = &lrest {
                 match self.rest_elem(cx, lrest, i - ln) {
-                    Some(elem) => self.walk(cx, ut, &elem)?,
+                    Some((elem, optional)) => self.walk_to_slot(cx, &ut, &elem, optional)?,
                     None => into_lrest.push(ut.dupe()),
                 }
             }
@@ -3201,13 +3314,16 @@ impl<'e> Walker<'e> {
         // `l`'s parameters that `u`'s rest parameter feeds.
         if let Some(urest) = &urest {
             let finite = self.rest_is_array(cx, urest);
-            for (i, FunParam(_, lt)) in lf.params.iter().enumerate().skip(un) {
+            for (i, lp) in lf.params.iter().enumerate().skip(un) {
                 match self.rest_elem(cx, urest, i - un) {
-                    Some(elem) => self.walk(cx, &elem, lt)?,
+                    Some((elem, optional)) => {
+                        let elem = type_util::slot_value_t(&elem, optional);
+                        self.walk_to_slot(cx, &elem, &lp.t, lp.optional)?
+                    }
                     // Past the end of a tuple, the caller passes nothing.
                     None if finite => {
                         let reason = type_util::reason_of_t(urest).dupe();
-                        self.walk(cx, &void::why(reason), lt)?;
+                        self.walk_to_slot(cx, &void::why(reason), &lp.t, lp.optional)?;
                     }
                     // When it is not an array, the reversal below covers them.
                     None => {}
@@ -3217,8 +3333,8 @@ impl<'e> Walker<'e> {
         let reason = type_util::reason_of_t(&lf.return_t).dupe();
         // A caller of `u` passes nothing for `l`'s extra parameters.
         if urest.is_none() {
-            for FunParam(_, lt) in lf.params.iter().skip(un) {
-                self.walk(cx, &void::why(reason.dupe()), lt)?;
+            for lp in lf.params.iter().skip(un) {
+                self.walk_to_slot(cx, &void::why(reason.dupe()), &lp.t, lp.optional)?;
             }
         }
         match (&urest, &lrest) {
@@ -3269,9 +3385,11 @@ impl<'e> Walker<'e> {
                 let reason = type_util::reason_of_t(lrest).dupe();
                 let params = uf.params.get(ln..).unwrap_or(&[]);
                 // `l`'s parameters past `u`'s took the first elements.
-                let args = (params.iter().map(|FunParam(_, t)| t.dupe()))
-                    .chain(elems.into_iter().skip(ln.saturating_sub(un)))
-                    .collect();
+                let args = (params
+                    .iter()
+                    .map(|param| type_util::slot_value_t(&param.t, param.optional)))
+                .chain(elems.into_iter().skip(ln.saturating_sub(un)))
+                .collect();
                 self.walk(cx, &mk_tuple(&reason, args, false), lrest)?;
             }
             (_, Some(lrest)) if !self.rest_is_array(cx, lrest) => {
@@ -3332,29 +3450,31 @@ impl<'e> Walker<'e> {
                 PropertyType::OrdinaryField {
                     type_: lt,
                     polarity: Polarity::Neutral,
+                    optional: lopt,
                 },
                 PropertyType::OrdinaryField {
                     type_: ut,
                     polarity: Polarity::Neutral,
+                    optional: uopt,
                 },
             ) = (lp, up)
         {
-            return self.walk_invariant(cx, lt, ut);
+            return self.walk_invariant_slots(cx, (lt, *lopt), (ut, *uopt));
         }
         if let (Some(lr), Some(ur)) = (
-            property::read_t_of_property_type(lp),
-            property::read_t_of_property_type(up),
+            property::read_slot_of_property_type(lp),
+            property::read_slot_of_property_type(up),
         ) {
-            self.walk(cx, &lr, &ur)?;
+            self.walk_slot(cx, (&lr.0, lr.1), (&ur.0, ur.1))?;
         }
         // The properties of an object literal are checked covariantly.
         if !lower_is_literal
             && let (Some(lw), Some(uw)) = (
-                property::write_t_of_property_type(lp, None),
-                property::write_t_of_property_type(up, None),
+                property::write_slot_of_property_type(lp, None),
+                property::write_slot_of_property_type(up, None),
             )
         {
-            self.walk(cx, &uw, &lw)?;
+            self.walk_slot(cx, (&uw.0, uw.1), (&lw.0, lw.1))?;
         }
         Ok(())
     }
@@ -3431,6 +3551,7 @@ impl<'e> Walker<'e> {
                         let lfield = PropertyType::OrdinaryField {
                             type_: ld.value.dupe(),
                             polarity: ld.dict_polarity,
+                            optional: false,
                         };
                         let ufield = field_for_indexer(uprop);
                         self.walk_property_type(cx, &lfield, &ufield, lower_is_literal)?;
@@ -3445,6 +3566,7 @@ impl<'e> Walker<'e> {
                     let ufield = PropertyType::OrdinaryField {
                         type_: ud.value.dupe(),
                         polarity: ud.dict_polarity,
+                        optional: false,
                     };
                     let lfield = field_for_indexer(lprop);
                     self.walk_property_type(cx, &lfield, &ufield, lower_is_literal)?;
@@ -3807,7 +3929,6 @@ impl<'e> Walker<'e> {
             TypeInner::TypeAppT(a) => a.targs.iter().duped().collect(),
             TypeInner::ThisTypeAppT(a) => a.targs.iter().flat_map(|ts| ts.iter().duped()).collect(),
             TypeInner::MaybeT(_, t) => return self.depth_of(cx, t, level),
-            TypeInner::OptionalT { type_, .. } => return self.depth_of(cx, type_, level),
             TypeInner::DefT(_, d) => match d.deref() {
                 DefTInner::InstanceT(i) => return self.inst_depth(cx, i, level),
                 DefTInner::ArrT(a) => match a.deref() {
@@ -3927,21 +4048,15 @@ impl<'e> Walker<'e> {
             // As in subtyping, the elements of a literal are compared covariantly, and read-write
             // elements of other tuples are unified.
             (ArrType::TupleAT(lt), ArrType::TupleAT(ut)) => {
-                let pairs: Vec<(Type, Type, Polarity)> = lt
+                let literal = lt.literal.is_literal();
+                let pairs: Vec<(TupleElement, TupleElement)> = lt
                     .elements
                     .iter()
                     .zip(ut.elements.iter())
-                    .map(|(l, u)| {
-                        let p = if lt.literal.is_literal() {
-                            Polarity::Positive
-                        } else {
-                            u.polarity
-                        };
-                        (l.t.dupe(), u.t.dupe(), p)
-                    })
+                    .map(|(l, u)| (l.clone(), u.clone()))
                     .collect();
-                for (l, u, p) in pairs {
-                    self.walk_by_polarity(cx, &l, &u, p)?;
+                for (l, u) in pairs {
+                    self.walk_tuple_element(cx, &l, &u, literal)?;
                 }
                 Ok(())
             }
@@ -3963,27 +4078,42 @@ impl<'e> Walker<'e> {
             (ArrType::ArrayAT(l), ArrType::TupleAT(u)) => match &l.tuple_view {
                 Some(view) => {
                     let literal = l.literal.is_literal();
-                    let pairs: Vec<(Type, Type, Polarity)> = view
+                    let pairs: Vec<(TupleElement, TupleElement)> = view
                         .elements
                         .iter()
                         .zip(u.elements.iter())
-                        .map(|(l, u)| {
-                            let p = if literal {
-                                Polarity::Positive
-                            } else {
-                                u.polarity
-                            };
-                            (l.t.dupe(), u.t.dupe(), p)
-                        })
+                        .map(|(l, u)| (l.clone(), u.clone()))
                         .collect();
-                    for (l, u, p) in pairs {
-                        self.walk_by_polarity(cx, &l, &u, p)?;
+                    for (l, u) in pairs {
+                        self.walk_tuple_element(cx, &l, &u, literal)?;
                     }
                     Ok(())
                 }
                 None => Ok(()),
             },
             _ => Ok(()),
+        }
+    }
+
+    /// Two tuple elements, as subtyping compares them (`tuple_element_compat`): the lower slot's
+    /// values go into the upper slot, which takes `undefined` only when the lower element is
+    /// optional too, reversed for a write-only element and unified for a read-write one.
+    fn walk_tuple_element<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        l: &TupleElement,
+        u: &TupleElement,
+        literal: bool,
+    ) -> Result<(), FlowJsException> {
+        let uopt = u.optional && l.optional;
+        match (literal, u.polarity) {
+            (true, _) | (_, Polarity::Positive) => {
+                self.walk_slot(cx, (&l.t, l.optional), (&u.t, uopt))
+            }
+            (_, Polarity::Negative) => self.walk_slot(cx, (&u.t, uopt), (&l.t, l.optional)),
+            (_, Polarity::Neutral) => {
+                self.walk_invariant_slots(cx, (&l.t, l.optional), (&u.t, uopt))
+            }
         }
     }
 
@@ -4009,18 +4139,24 @@ impl<'e> Walker<'e> {
         }
     }
 
-    /// The type of the `index`th argument that a rest parameter of type `rest` receives.
-    fn rest_elem<'cx>(&self, cx: &mut Context<'cx>, rest: &Type, index: usize) -> Option<Type> {
+    /// The type of the `index`th argument that a rest parameter of type `rest` receives, and whether
+    /// it may be omitted.
+    fn rest_elem<'cx>(
+        &self,
+        cx: &mut Context<'cx>,
+        rest: &Type,
+        index: usize,
+    ) -> Option<(Type, bool)> {
         let rest = self.resolve(cx, rest);
         match rest.deref() {
             TypeInner::DefT(_, d) => match d.deref() {
                 DefTInner::ArrT(a) => match a.deref() {
                     ArrType::ArrayAT(a) => match &a.tuple_view {
-                        Some(view) => view.elements.get(index).map(|e| e.t.dupe()),
-                        None => Some(a.elem_t.dupe()),
+                        Some(view) => view.elements.get(index).map(|e| (e.t.dupe(), e.optional)),
+                        None => Some((a.elem_t.dupe(), false)),
                     },
-                    ArrType::ROArrayAT(a) => Some(a.elem_t.dupe()),
-                    ArrType::TupleAT(t) => t.elements.get(index).map(|e| e.t.dupe()),
+                    ArrType::ROArrayAT(a) => Some((a.elem_t.dupe(), false)),
+                    ArrType::TupleAT(t) => t.elements.get(index).map(|e| (e.t.dupe(), e.optional)),
                 },
                 _ => None,
             },
@@ -4040,9 +4176,11 @@ impl<'e> Walker<'e> {
             return Ok(());
         }
         // A type flows to an opaque type through its lower bound: an opaque member whose lower
-        // bound is a union, such as `React.Node`, stands for the members of that union.
+        // bound is a union, such as `React.Node`, stands for the members of that union, also in
+        // a nested union.
         let resolved_l = self.resolve(cx, l);
-        let members = members
+        let members = self
+            .flatten_aliases(cx, members)
             .into_iter()
             .map(|m| {
                 let resolved = self.resolve(cx, &m);
@@ -4390,9 +4528,7 @@ impl<'e> Walker<'e> {
             return true;
         };
         let required = up.iter().all(|(name, p)| {
-            lp.get(name).is_some()
-                || property::read_t(p)
-                    .is_none_or(|t| matches!(t.deref(), TypeInner::OptionalT { .. }))
+            lp.get(name).is_some() || property::read_t(p).is_none() || property::is_optional(p)
         });
         required && (!exact || lp.iter().all(|(name, _)| up.get(name).is_some()))
     }
@@ -5573,14 +5709,14 @@ impl<'e> Walker<'e> {
         uc: &ReactAbstractComponentTData,
     ) -> Result<(), FlowJsException> {
         // Without parameters, the props are an exact empty object.
-        let props = match lf.params.first() {
-            Some(FunParam(_, props)) => props.dupe(),
+        match lf.params.first() {
+            Some(props) => self.walk_to_slot(cx, &uc.config, &props.t, props.optional)?,
             None => {
                 let reason = type_util::reason_of_t(&lf.return_t).dupe();
-                obj_type::mk(ObjKind::Exact, cx, reason, ObjLiteral::NonLiteral)
+                let props = obj_type::mk(ObjKind::Exact, cx, reason, ObjLiteral::NonLiteral);
+                self.walk(cx, &uc.config, &props)?
             }
         };
-        self.walk(cx, &uc.config, &props)?;
         self.walk(cx, &lf.return_t, &uc.renders)
     }
 
@@ -5785,8 +5921,8 @@ impl<'e> Walker<'e> {
     }
 
     /// The members of the bound of a generic or opaque type that narrowing by a maybe or optional
-    /// type sees: the members of a union, and null and void of a maybe or optional type, at any
-    /// depth, as subtyping distributes them.
+    /// type sees: the members of a union, and null and void of a maybe type, at any depth, as
+    /// subtyping distributes them.
     fn bound_members<'cx>(&self, cx: &mut Context<'cx>, t: &Type, members: &mut Vec<Type>) {
         let resolved = self.resolve(cx, t);
         match resolved.deref() {
@@ -5799,10 +5935,6 @@ impl<'e> Walker<'e> {
                 members.push(null::make(r.dupe()));
                 members.push(void::why(r.dupe()));
                 self.bound_members(cx, inner, members);
-            }
-            TypeInner::OptionalT { reason, type_, .. } => {
-                members.push(void::why(reason.dupe()));
-                self.bound_members(cx, type_, members);
             }
             _ => members.push(resolved.dupe()),
         }
@@ -6707,12 +6839,13 @@ fn tuple_elements(t: &Type) -> Option<Vec<Type>> {
     let DefTInner::ArrT(a) = d.deref() else {
         return None;
     };
+    let value = |e: &TupleElement| type_util::slot_value_t(&e.t, e.optional);
     match a.deref() {
-        ArrType::TupleAT(t) => Some(t.elements.iter().map(|e| e.t.dupe()).collect()),
+        ArrType::TupleAT(t) => Some(t.elements.iter().map(value).collect()),
         ArrType::ArrayAT(a) => a
             .tuple_view
             .as_ref()
-            .map(|view| view.elements.iter().map(|e| e.t.dupe()).collect()),
+            .map(|view| view.elements.iter().map(value).collect()),
         ArrType::ROArrayAT(_) => None,
     }
 }
@@ -6733,9 +6866,9 @@ fn spread_tuple_items(d: &DestructorSpreadTupleTypeData, spread: &Type) -> Optio
         .resolved
         .iter()
         .map(|p| match p {
-            ResolvedParam::ResolvedArg(box ResolvedArgData(elem, _)) => {
-                Some(TupleItem::Elem(elem.t.dupe()))
-            }
+            ResolvedParam::ResolvedArg(box ResolvedArgData(elem, _)) => Some(TupleItem::Elem(
+                type_util::slot_value_t(&elem.t, elem.optional),
+            )),
             ResolvedParam::ResolvedSpreadArg(box ResolvedSpreadArgData(r, arr, _)) => {
                 Some(TupleItem::Spread(Type::new(TypeInner::DefT(
                     r.dupe(),
@@ -6749,7 +6882,7 @@ fn spread_tuple_items(d: &DestructorSpreadTupleTypeData, spread: &Type) -> Optio
     items.push(TupleItem::Spread(spread.dupe()));
     items.extend(d.unresolved.iter().map(|p| match p {
         UnresolvedParam::UnresolvedArg(box UnresolvedArgData(elem, _)) => {
-            TupleItem::Elem(elem.t.dupe())
+            TupleItem::Elem(type_util::slot_value_t(&elem.t, elem.optional))
         }
         UnresolvedParam::UnresolvedSpreadArg(t) => TupleItem::Spread(t.dupe()),
     }));
@@ -6802,7 +6935,7 @@ fn arr_slice(t: &Type, n: usize, len: Option<usize>) -> Option<Type> {
             let ts = elements
                 .iter()
                 .chain(rest.iter())
-                .map(|e| e.t.dupe())
+                .map(|e| type_util::slot_value_t(&e.t, e.optional))
                 .collect();
             let elem_t = type_util::union_of_ts(r.dupe(), ts, None);
             match rest {
@@ -6831,7 +6964,7 @@ fn arr_slice(t: &Type, n: usize, len: Option<usize>) -> Option<Type> {
                     .iter()
                     .skip(n)
                     .take(len.unwrap_or(usize::MAX))
-                    .map(|e| e.t.dupe())
+                    .map(|e| type_util::slot_value_t(&e.t, e.optional))
                     .collect();
                 return Some(mk_tuple(r, ts, false));
             }
@@ -7359,8 +7492,8 @@ fn solve_targs_in_snapshot<'cx>(
                 let mut jsx_props = jsx_props.dupe();
                 let props = match component.deref() {
                     TypeInner::DefT(_, d) => match d.deref() {
-                        DefTInner::FunT(_, f) => f.params.first().map(|FunParam(_, t)| t.dupe()),
-                        DefTInner::ReactAbstractComponentT(c) => Some(c.config.dupe()),
+                        DefTInner::FunT(_, f) => f.params.first().map(|p| (p.t.dupe(), p.optional)),
+                        DefTInner::ReactAbstractComponentT(c) => Some((c.config.dupe(), false)),
                         DefTInner::ClassT(inner) => {
                             let instance = walker.normalize(cx, inner);
                             match walker.class_component_props(cx, &instance)? {
@@ -7375,7 +7508,7 @@ fn solve_targs_in_snapshot<'cx>(
                                     {
                                         jsx_props = with_defaults;
                                     }
-                                    Some(props)
+                                    Some((props, false))
                                 }
                                 None => {
                                     give_up!('op, "class component without props");
@@ -7386,8 +7519,12 @@ fn solve_targs_in_snapshot<'cx>(
                     },
                     _ => give_up!('op, "jsx component"),
                 };
-                if let Some(props) = props {
-                    walker.walk_jsx_props(cx, &jsx_props, &props)?;
+                if let Some((props, optional)) = props {
+                    if optional {
+                        walker.walk_to_optional(cx, &jsx_props, &props)?;
+                    } else {
+                        walker.walk_jsx_props(cx, &jsx_props, &props)?;
+                    }
                     // The element renders what the component renders, which the flow-based solve
                     // flows to the hint. Only a render type expected of the element, such as that
                     // of a prop, also an optional one, is walked: the flow-based solve drops a
@@ -7408,20 +7545,31 @@ fn solve_targs_in_snapshot<'cx>(
                     };
                     let expected = return_hint.as_ref().map(|(hint, _)| {
                         let mut t = walker.resolve(cx, hint);
-                        while let TypeInner::OptionalT { type_: inner, .. }
-                        | TypeInner::MaybeT(_, inner) = t.deref()
-                        {
-                            let inner = inner.dupe();
+                        loop {
+                            let inner = match t.deref() {
+                                TypeInner::MaybeT(_, inner) => inner.dupe(),
+                                // The value of an optional prop: its type or `undefined`.
+                                TypeInner::UnionT(_, rep)
+                                    if let [inner] = rep
+                                        .members_iter()
+                                        .filter(|m| !is_nullish(m, false))
+                                        .collect::<Vec<_>>()
+                                        .as_slice() =>
+                                {
+                                    (*inner).dupe()
+                                }
+                                _ => break,
+                            };
                             t = walker.resolve(cx, &inner);
                         }
                         t
                     });
-                    if let Some((hint, kind)) = return_hint
-                        && expected.as_ref().is_some_and(is_renders)
+                    if let Some((_, kind)) = return_hint
+                        && let Some(expected) = expected.filter(is_renders)
                         && let Some(renders) = renders.map(|t| walker.resolve(cx, &t))
                         && is_renders(&renders)
                     {
-                        walker.walk_return_hint(cx, &renders, hint, kind)?;
+                        walker.walk_return_hint(cx, &renders, &expected, kind)?;
                     }
                     walker.walk_deferred(cx)?;
                 }

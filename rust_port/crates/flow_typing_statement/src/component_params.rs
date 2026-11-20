@@ -50,7 +50,7 @@ impl Config for DeclarationConfig {
         component_declaration_config::eval_rest(cx, rest)
     }
 
-    fn param_type_with_name(param: &Self::Param) -> (ALoc, FlowSmolStr, Type) {
+    fn param_type_with_name(param: &Self::Param) -> (ALoc, FlowSmolStr, Type, bool) {
         component_declaration_config::param_type_with_name(param)
     }
 
@@ -125,9 +125,12 @@ pub fn config<'a, C: Config>(
     let pmap: properties::PropertiesMap = params
         .iter()
         .map(|p| {
-            let (key_loc, key, t) = C::param_type_with_name(p);
+            let (key_loc, key, t, optional) = C::param_type_with_name(p);
             if key.as_str() == "ref" {
-                ref_prop = Some((key_loc.dupe(), t.dupe()));
+                ref_prop = Some((
+                    key_loc.dupe(),
+                    flow_typing_type::type_util::slot_value_t(&t, optional),
+                ));
             }
             (
                 flow_common::reason::Name::new(key),
@@ -136,6 +139,7 @@ pub fn config<'a, C: Config>(
                     key_loc: Some(key_loc),
                     type_: t,
                     polarity: Polarity::Positive,
+                    optional,
                 }))),
             )
         })

@@ -255,8 +255,7 @@ impl CoverageVisitor {
             | TypeInner::NamespaceT(_)
             | TypeInner::NullProtoT(_)
             | TypeInner::NominalT { .. }
-            | TypeInner::ObjProtoT(_)
-            | TypeInner::OptionalT { .. } => Kind::Checked,
+            | TypeInner::ObjProtoT(_) => Kind::Checked,
             // Concrete uncovered constructors
             TypeInner::AnyT(..) | TypeInner::ImplicitInstantiationTvar(_) => Kind::Any,
         }

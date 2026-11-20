@@ -593,6 +593,7 @@ pub fn construct_base_instance<'cx>(
                     Property::new(PropertyInner::Method {
                         key_loc: None,
                         type_: void_returning(construct),
+                        optional: false,
                     }),
                 );
                 cx.generate_property_map(props)
@@ -979,7 +980,6 @@ pub mod invalid_cyclic_type_validation {
                 | TypeInner::IntersectionT(_, _)
                 | TypeInner::UnionT(_, _)
                 | TypeInner::MaybeT(_, _)
-                | TypeInner::OptionalT { .. }
                 | TypeInner::KeysT(_, _)
                 | TypeInner::AnnotT(_, _, _)
                 | TypeInner::NominalT { .. }
@@ -1122,7 +1122,6 @@ pub fn needs_resolution(t: &Type) -> bool {
 
     match t.deref() {
         TypeInner::UnionT(_, _) => true,
-        TypeInner::OptionalT { .. } => true,
         TypeInner::MaybeT(_, _) => true,
         TypeInner::AnnotT(_, _, _) => true,
         TypeInner::NominalT { nominal_type, .. } => {
@@ -3006,9 +3005,7 @@ pub fn quick_error_fun_as_obj<'cx>(
             let mut props_not_found = BTreeMap::new();
             for (x, p) in props.iter() {
                 let optional = match p.deref() {
-                    PropertyInner::Field(fd) => {
-                        matches!(fd.type_.deref(), TypeInner::OptionalT { .. })
-                    }
+                    PropertyInner::Field(fd) => fd.optional,
                     _ => false,
                 };
                 if !(optional || is_function_prototype(x) || statics_own_props.contains_key(x)) {
@@ -3515,38 +3512,28 @@ pub fn obj_key_mirror<'cx>(
     use flow_typing_type::type_::ObjType;
     use flow_typing_type::type_::Property;
     use flow_typing_type::type_::PropertyInner;
-    use flow_typing_type::type_util::optional;
 
-    let map_t = |key: Type, t: &Type| -> Type {
-        if matches!(t.deref(), TypeInner::OptionalT { .. }) {
-            optional(key, None, false)
-        } else {
-            key
-        }
-    };
-
-    let map_field = |key: &Name, t: &Type| -> Type {
+    let map_field = |key: &Name| -> Type {
         match key {
             // A symbol-typed key mirrors to its `unique symbol` type, not a string literal.
             Name::Symbol(_) => {
                 let r = reason_op
                     .dupe()
                     .update_desc(|_| Some(VirtualReasonDesc::RUniqueSymbol));
-                map_t(type_of_key_name_with_env(env, key.dupe(), &r), t)
+                type_of_key_name_with_env(env, key.dupe(), &r)
             }
             Name::Str(key_str) => {
                 let key_str = key_str.dupe();
                 let reason = reason_op
                     .dupe()
                     .update_desc(|_| Some(VirtualReasonDesc::RStringLit(key_str.dupe())));
-                let singleton = Type::new(TypeInner::DefT(
+                Type::new(TypeInner::DefT(
                     reason,
                     DefT::new(DefTInner::SingletonStrT {
                         from_annot: true,
                         value: key_str,
                     }),
-                ));
-                map_t(singleton, t)
+                ))
             }
         }
     };
@@ -3556,7 +3543,7 @@ pub fn obj_key_mirror<'cx>(
     for (name, prop) in props.iter() {
         match prop.deref() {
             PropertyInner::Field(fd) => {
-                let new_type = map_field(name, &fd.type_);
+                let new_type = map_field(name);
                 new_props.insert(
                     name.dupe(),
                     Property::new(PropertyInner::Field(Box::new(FieldData {
@@ -3564,6 +3551,7 @@ pub fn obj_key_mirror<'cx>(
                         key_loc: fd.key_loc.dupe(),
                         type_: new_type,
                         polarity: fd.polarity,
+                        optional: fd.optional,
                     }))),
                 );
             }
@@ -3574,15 +3562,12 @@ pub fn obj_key_mirror<'cx>(
     }
     let props_tmap = cx.generate_property_map(new_props.into());
     let obj_kind = match &o.flags.obj_kind {
-        ObjKind::Indexed(dict) => {
-            let value = map_t(dict.key.dupe(), &dict.value);
-            ObjKind::Indexed(flow_typing_type::type_::DictType {
-                dict_name: dict.dict_name.dupe(),
-                key: dict.key.dupe(),
-                value,
-                dict_polarity: dict.dict_polarity,
-            })
-        }
+        ObjKind::Indexed(dict) => ObjKind::Indexed(flow_typing_type::type_::DictType {
+            dict_name: dict.dict_name.dupe(),
+            key: dict.key.dupe(),
+            value: dict.key.dupe(),
+            dict_polarity: dict.dict_polarity,
+        }),
         other => other.clone(),
     };
     let flags = Flags {
@@ -3623,11 +3608,13 @@ pub fn namespace_type_with_values_type<'cx>(
     use flow_typing_type::type_::properties::PropertiesMap;
 
     let mk_prop = |symbol: &flow_typing_type::type_::NamedSymbol| -> Property {
+        let (type_, optional) = (symbol.type_.dupe(), symbol.optional);
         Property::new(PropertyInner::Field(Box::new(FieldData {
             preferred_def_locs: symbol.preferred_def_locs.clone(),
             key_loc: symbol.name_loc.dupe(),
-            type_: symbol.type_.dupe(),
+            type_,
             polarity: Polarity::Positive,
+            optional,
         })))
     };
 
@@ -3659,11 +3646,13 @@ pub fn namespace_type<'cx>(
     use flow_typing_type::type_::properties::PropertiesMap;
 
     let mk_prop = |symbol: &flow_typing_type::type_::NamedSymbol| -> Property {
+        let (type_, optional) = (symbol.type_.dupe(), symbol.optional);
         Property::new(PropertyInner::Field(Box::new(FieldData {
             preferred_def_locs: symbol.preferred_def_locs.clone(),
             key_loc: symbol.name_loc.dupe(),
-            type_: symbol.type_.dupe(),
+            type_,
             polarity: Polarity::Positive,
+            optional,
         })))
     };
 
@@ -5142,11 +5131,13 @@ pub mod cjs_require_t_kit {
                     let proto = Type::new(TypeInner::ObjProtoT(reason.dupe()));
 
                     let named_symbol_to_field = |ns: &NamedSymbol| -> PropertyInner {
+                        let (type_, optional) = (ns.type_.dupe(), ns.optional);
                         PropertyInner::Field(Box::new(FieldData {
                             preferred_def_locs: ns.preferred_def_locs.clone(),
                             key_loc: ns.name_loc.dupe(),
-                            type_: ns.type_.dupe(),
+                            type_,
                             polarity: Polarity::Positive,
+                            optional,
                         }))
                     };
 
@@ -5193,7 +5184,7 @@ pub mod cjs_require_t_kit {
                         cx.automatic_require_default() && !cx.is_lib_reason_def(module_reason);
                     if automatic_require_default {
                         match value_exports_tmap.get(&Name::new("default")) {
-                            Some(ns) => ns.type_.dupe(),
+                            Some(ns) => ns.value_t(),
                             _ => mk_exports_namespace(cx),
                         }
                     } else {
@@ -5305,15 +5296,16 @@ pub mod import_module_ns_t_kit {
         // [type_for_extends] is [None] (the common case)
         // we keep [type_] unchanged, matching the prior behavior.
         let named_symbol_to_field = |ns: &NamedSymbol| -> Property {
-            let type_ = ns
-                .type_for_extends
-                .clone()
-                .unwrap_or_else(|| ns.type_.dupe());
+            let (type_, optional) = match &ns.type_for_extends {
+                Some(t) => (t.clone(), false),
+                None => (ns.type_.dupe(), ns.optional),
+            };
             Property::new(PropertyInner::Field(Box::new(FieldData {
                 preferred_def_locs: ns.preferred_def_locs.clone(),
                 key_loc: ns.name_loc.dupe(),
                 type_,
                 polarity: Polarity::Positive,
+                optional,
             })))
         };
         let default_entry = if !cx.facebook_module_interop() {
@@ -5327,6 +5319,7 @@ pub mod import_module_ns_t_kit {
                     key_loc,
                     type_: type_.dupe(),
                     polarity: Polarity::Positive,
+                    optional: false,
                 })));
                 (Name::new("default"), p)
             })
@@ -5464,7 +5457,7 @@ pub mod import_default_t_kit {
             None => {
                 let exports_tmap = cx.find_exports(exports.value_exports_tmap);
                 match exports_tmap.get(&Name::new("default")) {
-                    Some(ns) => (ns.name_loc.dupe(), ns.type_.dupe()),
+                    Some(ns) => (ns.name_loc.dupe(), ns.value_t()),
                     None => {
                         // A common error while using `import` syntax is to forget or
                         // misunderstand the difference between `import foo from ...`
@@ -5561,7 +5554,7 @@ pub mod import_default_t_kit {
                             .type_for_extends
                             .as_ref()
                             .map(|t| t.dupe())
-                            .unwrap_or_else(|| ns.type_.dupe());
+                            .unwrap_or_else(|| ns.value_t());
                         Ok((ns.name_loc.dupe(), t))
                     }
                     None => {
@@ -5726,7 +5719,7 @@ pub mod import_named_t_kit {
                             t,
                         )
                     }),
-                    ns.type_.dupe(),
+                    ns.value_t(),
                 );
                 Ok((ns.name_loc.dupe(), t))
             }
@@ -5763,7 +5756,7 @@ pub mod import_named_t_kit {
                             &t,
                         )
                     }),
-                    ns.type_.dupe(),
+                    ns.value_t(),
                 );
                 Ok((ns.name_loc.dupe(), t))
             }
@@ -5788,7 +5781,7 @@ pub mod import_named_t_kit {
             }
             // A value export keeps every meaning, so `import type` binds it as `import` does.
             (ImportKind::ImportValue | ImportKind::ImportType, Some(ns)) => {
-                Ok((ns.name_loc.dupe(), ns.type_.dupe()))
+                Ok((ns.name_loc.dupe(), ns.value_t()))
             }
             (ImportKind::ImportValue, None) if has_every_named_export => {
                 let t = Type::new(TypeInner::AnyT(reason, AnySource::Untyped));
@@ -5812,7 +5805,7 @@ pub mod import_named_t_kit {
                                 t,
                             )
                         }),
-                        ns.type_.dupe(),
+                        ns.value_t(),
                     );
                     Ok((ns.name_loc.dupe(), t))
                 } else {
@@ -5927,7 +5920,7 @@ pub mod import_named_t_kit {
                     .type_for_extends
                     .as_ref()
                     .map(|t| t.dupe())
-                    .unwrap_or_else(|| ns.type_.dupe());
+                    .unwrap_or_else(|| ns.value_t());
                 Ok((ns.name_loc.dupe(), t))
             }
             None => match import_kind {
@@ -5940,7 +5933,7 @@ pub mod import_named_t_kit {
                             .type_for_extends
                             .as_ref()
                             .map(|t| t.dupe())
-                            .unwrap_or_else(|| ns.type_.dupe());
+                            .unwrap_or_else(|| ns.value_t());
                         Ok((ns.name_loc.dupe(), t))
                     } else {
                         Ok((
@@ -6211,7 +6204,7 @@ pub mod export_type_t_kit {
         export_name: Name,
         target_module_type: &ModuleType,
     ) {
-        let l = &named_symbol.type_;
+        let l = &named_symbol.value_t();
 
         let is_type_export = match l.deref() {
             TypeInner::DefT(_, def_t) => {
@@ -6276,7 +6269,8 @@ pub mod copy_type_exports_t_kit {
                     ns.preferred_def_locs.clone(),
                     type_,
                     ns.type_for_extends.clone(),
-                );
+                )
+                .with_optional(ns.optional);
                 export_type_t_kit::on_concrete_type(
                     cx,
                     reason.dupe(),
@@ -6401,7 +6395,8 @@ pub mod cjs_extract_named_exports_t_kit {
                                 symbol.preferred_def_locs.clone(),
                                 bind(&symbol.type_),
                                 symbol.type_for_extends.as_ref().map(bind),
-                            ),
+                            )
+                            .with_optional(symbol.optional),
                         )
                     })
                     .collect();
@@ -7181,12 +7176,15 @@ pub fn method_property_for_read(
     use flow_typing_type::type_::properties;
 
     match p.deref() {
-        PropertyInner::Method { key_loc, type_: t } => {
-            flow_typing_type::type_::Property::new(PropertyInner::Method {
-                key_loc: key_loc.dupe(),
-                type_: properties::method_to_function(t, method_accessible),
-            })
-        }
+        PropertyInner::Method {
+            key_loc,
+            type_: t,
+            optional,
+        } => flow_typing_type::type_::Property::new(PropertyInner::Method {
+            key_loc: key_loc.dupe(),
+            type_: properties::method_to_function(t, method_accessible),
+            optional: *optional,
+        }),
         _ => p,
     }
 }
@@ -7651,6 +7649,7 @@ pub mod get_prop_t_kit {
                         key_loc: None,
                         type_: value.dupe(),
                         polarity: *dict_polarity,
+                        optional: false,
                     }))),
                     PropertySource::IndexerProperty,
                 )))
@@ -7682,6 +7681,7 @@ pub mod get_prop_t_kit {
                         key_loc: None,
                         type_: value.dupe(),
                         polarity: *dict_polarity,
+                        optional: false,
                     }))),
                     PropertySource::IndexerProperty,
                 )))
@@ -7703,6 +7703,7 @@ pub mod get_prop_t_kit {
                         key_loc: None,
                         type_: value.dupe(),
                         polarity: *dict_polarity,
+                        optional: false,
                     }))),
                     PropertySource::IndexerProperty,
                 )))
@@ -7789,6 +7790,7 @@ pub mod get_prop_t_kit {
                         key_loc: None,
                         type_: value.dupe(),
                         polarity: *dict_polarity,
+                        optional: false,
                     }))),
                     PropertySource::IndexerProperty,
                 ));
@@ -8065,17 +8067,12 @@ pub mod get_prop_t_kit {
             (_, Some(prop), _) => {
                 // Property exists on this property map
                 let prop = match prop.deref() {
-                    PropertyInner::Field(field) if skip_optional => match field.type_.deref() {
-                        TypeInner::OptionalT {
-                            type_: inner_type, ..
-                        } => Property::new(PropertyInner::Field(Box::new(FieldData {
-                            preferred_def_locs: field.preferred_def_locs.clone(),
-                            key_loc: field.key_loc.dupe(),
-                            type_: inner_type.dupe(),
-                            polarity: field.polarity,
-                        }))),
-                        _ => prop.dupe(),
-                    },
+                    PropertyInner::Field(field) if skip_optional && field.optional => {
+                        Property::new(PropertyInner::Field(Box::new(FieldData {
+                            optional: false,
+                            ..(**field).clone()
+                        })))
+                    }
                     _ => prop.dupe(),
                 };
                 Ok(Some((prop, PropertySource::PropertyMapProperty)))
@@ -8101,6 +8098,7 @@ pub mod get_prop_t_kit {
                         key_loc: None,
                         type_,
                         polarity: *dict_polarity,
+                        optional: false,
                     }))),
                     PropertySource::IndexerProperty,
                 )))
@@ -8123,6 +8121,7 @@ pub mod get_prop_t_kit {
                         key_loc: None,
                         type_,
                         polarity: *dict_polarity,
+                        optional: false,
                     }))),
                     PropertySource::IndexerProperty,
                 )))
@@ -8491,19 +8490,8 @@ pub fn array_elem_check<'cx>(
                                         let (t, use_op) = if write_action {
                                             // We don't allowing writing `undefined` to optional tuple elements.
                                             // User can add `| void` to the element type if they want this behavior.
-                                            let t = if *optional {
-                                                if let TypeInner::OptionalT { type_, .. } =
-                                                    t.deref()
-                                                {
-                                                    type_.dupe()
-                                                } else {
-                                                    t.dupe()
-                                                }
-                                            } else {
-                                                t.dupe()
-                                            };
                                             (
-                                                t,
+                                                t.dupe(),
                                                 VirtualUseOp::Frame(
                                                     std::sync::Arc::new(
                                                         VirtualFrameUseOp::TupleAssignment,
@@ -8512,7 +8500,7 @@ pub fn array_elem_check<'cx>(
                                                 ),
                                             )
                                         } else {
-                                            (t.dupe(), use_op)
+                                            (type_util::slot_value_t(t, *optional), use_op)
                                         };
                                         (true, t, use_op)
                                     }
@@ -9032,6 +9020,7 @@ pub fn objt_to_obj_rest<'cx>(
                         key_loc: fd.key_loc.dupe(),
                         type_: fd.type_.dupe(),
                         polarity: Polarity::Neutral,
+                        optional: fd.optional,
                     })))
                 }
                 PropertyInner::Set { key_loc: _, type_ } => {

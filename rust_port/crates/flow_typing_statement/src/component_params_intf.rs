@@ -29,6 +29,7 @@ pub trait Config {
         cx: &mut Context<'a>,
         rest: &Self::Rest,
     ) -> Result<Self::RestAst, CheckExprError>;
-    fn param_type_with_name(param: &Self::Param) -> (ALoc, FlowSmolStr, Type);
+    /// The location and name of a param, its declared type, and whether it is optional.
+    fn param_type_with_name(param: &Self::Param) -> (ALoc, FlowSmolStr, Type, bool);
     fn rest_type(rest: &Self::Rest) -> Type;
 }

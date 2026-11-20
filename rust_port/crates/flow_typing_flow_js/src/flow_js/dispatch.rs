@@ -236,6 +236,7 @@ fn strict_lookup_failed<'cx>(
     let p = PropertyType::OrdinaryField {
         type_: any_t::error_of_kind(AnyErrorKind::UnresolvedName, reason_op.dupe()),
         polarity: Polarity::Neutral,
+        optional: false,
     };
     for (propref, up) in lookup_targets(propref, action) {
         perform_lookup_action(
@@ -293,6 +294,7 @@ fn strict_computed_lookup_failed<'cx>(
             let p = PropertyType::OrdinaryField {
                 type_: flow_js_utils::untyped_any_result(elem_t, reason_op.dupe()),
                 polarity: Polarity::Neutral,
+                optional: false,
             };
             for (propref, up) in lookup_targets(propref, action) {
                 perform_lookup_action(
@@ -1050,22 +1052,6 @@ fn __flow_impl<'cx>(
             rec_flow(cx, env, trace, (&void::make(lreason), u))?;
             rec_flow(cx, env, trace, (t, u))?;
         }
-        (
-            OptionalT {
-                reason: r,
-                type_: t,
-                use_desc,
-            },
-            ConcretizeT(..),
-        ) => {
-            rec_flow(
-                cx,
-                env,
-                trace,
-                (&void::why_with_use_desc(*use_desc, r.dupe()), u),
-            )?;
-            rec_flow(cx, env, trace, (t, u))?;
-        }
         (AnnotT(r, t, use_desc), ConcretizeT(..)) => {
             // TODO: directly derive loc and desc from the reason of tvar
             let loc = r.loc().dupe();
@@ -1142,45 +1128,6 @@ fn __flow_impl<'cx>(
                 (
                     l_inner,
                     &UseT::new(UseT(use_op.dupe(), Type::new(MaybeT(r, annoted_u)))),
-                ),
-            )?;
-        }
-        (
-            OptionalT {
-                reason: r,
-                type_: u_inner,
-                use_desc: use_desc_optional_t,
-            },
-            ReposUseT(box ReposUseTData {
-                reason,
-                use_desc,
-                use_op,
-                type_: l_inner,
-            }),
-        ) => {
-            let loc = reason.loc().dupe();
-            let annot_loc = reason.annot_loc().map(|l| l.dupe());
-            let r = r.dupe().reposition_and_opt_annotate(loc, annot_loc);
-            let r = if *use_desc {
-                r.replace_desc(reason.desc(true).cloned())
-            } else {
-                r
-            };
-            let annoted_u = annot(env.in_implicit_instantiation(), *use_desc, u_inner);
-            rec_flow(
-                cx,
-                env,
-                trace,
-                (
-                    l_inner,
-                    &UseT::new(UseT(
-                        use_op.dupe(),
-                        Type::new(OptionalT {
-                            reason: r,
-                            type_: annoted_u,
-                            use_desc: *use_desc_optional_t,
-                        }),
-                    )),
                 ),
             )?;
         }
@@ -1294,8 +1241,7 @@ fn __flow_impl<'cx>(
                 ),
             )?;
         }
-        (MaybeT(_, t), OptionalIndexedAccessT(..))
-        | (OptionalT { type_: t, .. }, OptionalIndexedAccessT(..)) => {
+        (MaybeT(_, t), OptionalIndexedAccessT(..)) => {
             rec_flow(cx, env, trace, (t, u))?;
         }
         (
@@ -1395,69 +1341,6 @@ fn __flow_impl<'cx>(
         // ********************
         // * DRO and hooklike *
         // ********************
-        (
-            OptionalT {
-                reason,
-                type_,
-                use_desc,
-            },
-            DeepReadOnlyT(tout, dro),
-        ) => {
-            let r = tout.reason();
-            let ReactDro(dro_loc, dro_type) = dro;
-            let new_type_ =
-                flow_typing_tvar::mk_no_wrap_where(cx, r.dupe(), |cx, tvar_reason, tvar_id| {
-                    let tvar = Tvar::new(tvar_reason.dupe(), tvar_id as u32);
-                    rec_flow(
-                        cx,
-                        env,
-                        trace,
-                        (
-                            type_,
-                            &UseT::new(DeepReadOnlyT(
-                                Box::new(tvar),
-                                ReactDro(dro_loc.dupe(), dro_type.clone()),
-                            )),
-                        ),
-                    )?;
-                    Ok::<(), FlowJsException>(())
-                })?;
-            let new_l = Type::new(OptionalT {
-                reason: reason.dupe(),
-                type_: new_type_,
-                use_desc: *use_desc,
-            });
-            let tout_t = Type::new(OpenT((**tout).dupe()));
-            rec_flow_t(cx, env, trace, unknown_use(), (&new_l, &tout_t))?;
-        }
-        (
-            OptionalT {
-                reason,
-                type_,
-                use_desc,
-            },
-            HooklikeT(tout),
-        ) => {
-            let r = tout.reason();
-            let new_type_ =
-                flow_typing_tvar::mk_no_wrap_where(cx, r.dupe(), |cx, tvar_reason, tvar_id| {
-                    let tvar = Tvar::new(tvar_reason.dupe(), tvar_id as u32);
-                    rec_flow(
-                        cx,
-                        env,
-                        trace,
-                        (type_, &UseT::new(HooklikeT(Box::new(tvar)))),
-                    )?;
-                    Ok::<(), FlowJsException>(())
-                })?;
-            let new_l = Type::new(OptionalT {
-                reason: reason.dupe(),
-                type_: new_type_,
-                use_desc: *use_desc,
-            });
-            let tout_t = Type::new(OpenT((**tout).dupe()));
-            rec_flow_t(cx, env, trace, unknown_use(), (&new_l, &tout_t))?;
-        }
         (MaybeT(rl, t), DeepReadOnlyT(tout, dro)) => {
             let r = tout.reason();
             let ReactDro(dro_loc, dro_type) = dro;
@@ -1491,6 +1374,45 @@ fn __flow_impl<'cx>(
                     Ok::<(), FlowJsException>(())
                 })?;
             let new_l = Type::new(MaybeT(rl.dupe(), new_t));
+            let tout_t = Type::new(OpenT((**tout).dupe()));
+            rec_flow_t(cx, env, trace, unknown_use(), (&new_l, &tout_t))?;
+        }
+        // The values of an optional slot: only its type is made read-only (or hook-like).
+        (UnionT(..), DeepReadOnlyT(tout, dro))
+            if let Some(t) = type_util::optional_slot_type(l) =>
+        {
+            let r = tout.reason();
+            let ReactDro(dro_loc, dro_type) = dro;
+            let new_t =
+                flow_typing_tvar::mk_no_wrap_where(cx, r.dupe(), |cx, tvar_reason, tvar_id| {
+                    let tvar = Tvar::new(tvar_reason.dupe(), tvar_id as u32);
+                    rec_flow(
+                        cx,
+                        env,
+                        trace,
+                        (
+                            &t,
+                            &UseT::new(DeepReadOnlyT(
+                                Box::new(tvar),
+                                ReactDro(dro_loc.dupe(), dro_type.clone()),
+                            )),
+                        ),
+                    )?;
+                    Ok::<(), FlowJsException>(())
+                })?;
+            let new_l = type_util::slot_value_t(&new_t, true);
+            let tout_t = Type::new(OpenT((**tout).dupe()));
+            rec_flow_t(cx, env, trace, unknown_use(), (&new_l, &tout_t))?;
+        }
+        (UnionT(..), HooklikeT(tout)) if let Some(t) = type_util::optional_slot_type(l) => {
+            let r = tout.reason();
+            let new_t =
+                flow_typing_tvar::mk_no_wrap_where(cx, r.dupe(), |cx, tvar_reason, tvar_id| {
+                    let tvar = Tvar::new(tvar_reason.dupe(), tvar_id as u32);
+                    rec_flow(cx, env, trace, (&t, &UseT::new(HooklikeT(Box::new(tvar)))))?;
+                    Ok::<(), FlowJsException>(())
+                })?;
+            let new_l = type_util::slot_value_t(&new_t, true);
             let tout_t = Type::new(OpenT((**tout).dupe()));
             rec_flow_t(cx, env, trace, unknown_use(), (&new_l, &tout_t))?;
         }
@@ -2082,8 +2004,7 @@ fn __flow_impl<'cx>(
             ));
             rec_flow_t(cx, env, trace, use_op.dupe(), (&mixed, tout))?;
         }
-        (OptionalT { type_: tout, .. }, FilterMaybeT(_, _))
-        | (MaybeT(_, tout), FilterMaybeT(_, _)) => {
+        (MaybeT(_, tout), FilterMaybeT(_, _)) => {
             rec_flow(cx, env, trace, (tout, u))?;
         }
         (DefT(_, deref!(EmptyT)), FilterMaybeT(use_op, tout)) => {
@@ -2144,61 +2065,34 @@ fn __flow_impl<'cx>(
         // * optional types *
         // ******************
 
-        // The type optional(T) is the same as undefined | UseT<Cx>
+        // `FilterOptionalT` drops `undefined`, and TypeScript's `void` as refinements do.
         (DefT(r, deref!(VoidT | TsVoidT)), FilterOptionalT(use_op, tout)) => {
             let empty = empty_t::why(r.dupe());
             rec_flow_t(cx, env, trace, use_op.dupe(), (&empty, tout))?;
         }
-        (OptionalT { type_: tout, .. }, FilterOptionalT(_, _)) => {
-            rec_flow(cx, env, trace, (tout, u))?;
-        }
-        (
-            OptionalT { .. },
-            ReposLowerT {
-                reason,
-                use_desc,
-                use_t: inner_u,
-            },
-        ) => {
-            // Don't split the optional type into its constituent members. Instead,
-            // reposition the entire optional type.
-            let repos = helpers::reposition_reason(cx, env, Some(trace), reason, *use_desc, l)?;
-            rec_flow(cx, env, trace, (&repos, inner_u))?;
-        }
-        (
-            OptionalT { .. },
-            ResolveUnionT(box ResolveUnionTData {
-                reason,
-                resolved,
-                unresolved,
-                upper,
-                id,
-            }),
-        ) => {
-            if let Some((tc_env, tc_l, tc_u, reason)) =
-                resolve_union(cx, env, trace, reason, *id, resolved, unresolved, l, upper)?
-            {
-                return Ok(Some(TailCall::Flow(tc_env, tc_l, tc_u, reason)));
-            }
-        }
-        (
-            OptionalT {
-                reason: r,
-                type_: t,
-                use_desc,
-            },
-            _,
-        ) if match u.deref() {
-            ConditionalT(box ConditionalTData {
-                distributive_tparam_name,
-                ..
-            }) => distributive_tparam_name.is_some(),
-            _ => true,
-        } =>
+        // The values of an optional slot: dropping `undefined` leaves the slot's type.
+        (UnionT(..), FilterMaybeT(..) | FilterOptionalT(..))
+            if let Some(t) = type_util::optional_slot_type(l) =>
         {
-            let void_t = void::why_with_use_desc(*use_desc, r.dupe());
-            rec_flow(cx, env, trace, (&void_t, u))?;
-            rec_flow(cx, env, trace, (t, u))?;
+            rec_flow(cx, env, trace, (&t, u))?;
+        }
+        // Otherwise `undefined` and the slot's type flow on their own, except where the values
+        // are repositioned or resolved whole, or meet a conditional type that does not
+        // distribute over them.
+        (UnionT(_, rep), _)
+            if type_util::optional_slot_type(l).is_some()
+                && !matches!(u.deref(), ReposLowerT { .. } | ResolveUnionT(..))
+                && match u.deref() {
+                    ConditionalT(box ConditionalTData {
+                        distributive_tparam_name,
+                        ..
+                    }) => distributive_tparam_name.is_some(),
+                    _ => true,
+                } =>
+        {
+            for t in rep.members_iter() {
+                rec_flow(cx, env, trace, (t, u))?;
+            }
         }
         // *********************
         // * type applications *
@@ -7413,6 +7307,7 @@ fn __flow_impl<'cx>(
                     let p = PropertyType::OrdinaryField {
                         type_: flow_js_utils::untyped_any_result(l, reason_op.dupe()),
                         polarity: Polarity::Neutral,
+                        optional: false,
                     };
                     if let LookupKind::NonstrictReturning(box NonstrictReturningData(
                         _,
@@ -8174,7 +8069,7 @@ fn __flow_impl<'cx>(
                             elements
                                 .iter()
                                 .chain(rest)
-                                .map(|elem| elem.t.dupe())
+                                .map(|elem| type_util::slot_value_t(&elem.t, elem.optional))
                                 .collect(),
                             None,
                         )
@@ -8448,11 +8343,11 @@ fn __flow_impl<'cx>(
                 let filter_id = crate::flow_js::filter_optional_with_env(cx, env, reason_op, &t)?;
                 Ok(Type::new(OpenT(Tvar::new(reason_op.dupe(), filter_id))))
             };
-            let f = |cx: &mut Context<'cx>,
-                     value_t: &Type,
-                     index: Option<usize>,
-                     optional: bool|
-             -> Result<Type, FlowJsException> {
+            let mapped = |cx: &mut Context<'cx>,
+                          value_t: &Type,
+                          index: Option<usize>,
+                          optional: bool|
+             -> Result<(Type, bool), FlowJsException> {
                 let r = reason_of_t(value_t).dupe();
                 let key_t = match index {
                     None => num_module_t::why(r),
@@ -8483,12 +8378,42 @@ fn __flow_impl<'cx>(
                     optional,
                 )
             };
+            // The type of the values in a mapped position.
+            let f = |cx: &mut Context<'cx>,
+                     value_t: &Type,
+                     index: Option<usize>,
+                     optional: bool|
+             -> Result<Type, FlowJsException> {
+                let (t, optional) = mapped(cx, value_t, index, optional)?;
+                Ok(type_util::slot_value_t(&t, optional))
+            };
             let new_element_optional = |optional: bool| -> bool {
                 match mapped_type_optionality {
                     flow_typing_type::type_::MappedTypeOptionality::RemoveOptional => false,
                     flow_typing_type::type_::MappedTypeOptionality::MakeOptional
                     | flow_typing_type::type_::MappedTypeOptionality::KeepOptionality => optional,
                 }
+            };
+            // An element that stays required holds `undefined` where its mapped value is optional.
+            let map_element = |cx: &mut Context<'cx>,
+                               i: usize,
+                               elem: &TupleElement,
+                               polarity: Polarity|
+             -> Result<TupleElement, FlowJsException> {
+                let (t, value_optional) = mapped(cx, &elem.t, Some(i), elem.optional)?;
+                let optional = new_element_optional(elem.optional);
+                let t = if optional {
+                    t
+                } else {
+                    type_util::slot_value_t(&t, value_optional)
+                };
+                Ok(TupleElement {
+                    name: elem.name.dupe(),
+                    t,
+                    polarity,
+                    optional,
+                    reason: elem.reason.dupe(),
+                })
             };
             let new_arity = |arity: (i32, i32)| -> (i32, i32) {
                 match mapped_type_optionality {
@@ -8552,15 +8477,7 @@ fn __flow_impl<'cx>(
                                 .elements
                                 .iter()
                                 .enumerate()
-                                .map(|(i, elem)| {
-                                    Ok::<TupleElement, FlowJsException>(TupleElement {
-                                        name: elem.name.dupe(),
-                                        t: f(cx, &elem.t, Some(i), elem.optional)?,
-                                        polarity: elem.polarity,
-                                        optional: new_element_optional(elem.optional),
-                                        reason: elem.reason.dupe(),
-                                    })
-                                })
+                                .map(|(i, elem)| map_element(cx, i, elem, elem.polarity))
                                 .collect::<Result<Vec<_>, _>>()?
                                 .into();
                             let rest = tv
@@ -8611,13 +8528,7 @@ fn __flow_impl<'cx>(
                             .iter()
                             .enumerate()
                             .map(|(i, elem)| {
-                                Ok::<TupleElement, FlowJsException>(TupleElement {
-                                    name: elem.name.dupe(),
-                                    t: f(cx, &elem.t, Some(i), elem.optional)?,
-                                    polarity: mapped_polarity(elem.polarity),
-                                    optional: new_element_optional(elem.optional),
-                                    reason: elem.reason.dupe(),
-                                })
+                                map_element(cx, i, elem, mapped_polarity(elem.polarity))
                             })
                             .collect::<Result<Vec<_>, _>>()?
                             .into(),

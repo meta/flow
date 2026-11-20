@@ -170,7 +170,6 @@ pub fn tag_of_t<'cx>(cx: &mut Context<'cx>, t: &Type) -> Option<TypeTagSet> {
         | TypeInner::IntersectionT(_, _)
         | TypeInner::UnionT(_, _)
         | TypeInner::MaybeT(_, _)
-        | TypeInner::OptionalT { .. }
         | TypeInner::KeysT(_, _)
         | TypeInner::AnyT(_, _)
         | TypeInner::ImplicitInstantiationTvar(_) => None,

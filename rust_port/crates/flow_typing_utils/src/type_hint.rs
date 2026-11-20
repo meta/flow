@@ -1284,15 +1284,14 @@ fn type_of_hint_decomposition<'cx>(
                         let params: Vec<FunParam> = xs
                             .iter()
                             .enumerate()
-                            .map(|(idx, x)| {
-                                if i == idx {
-                                    FunParam(x.as_ref().map(|s| s.dupe()), param_t.dupe())
+                            .map(|(idx, x)| FunParam {
+                                name: x.as_ref().map(|s| s.dupe()),
+                                t: if i == idx {
+                                    param_t.dupe()
                                 } else {
-                                    FunParam(
-                                        x.as_ref().map(|s| s.dupe()),
-                                        unsoundness::unresolved_any(reason2.dupe()),
-                                    )
-                                }
+                                    unsoundness::unresolved_any(reason2.dupe())
+                                },
+                                optional: false,
                             })
                             .collect();
                         let fun_type = make_fun_t(
@@ -1324,11 +1323,10 @@ fn type_of_hint_decomposition<'cx>(
                     move |cx, rest_t| {
                         let params: Vec<FunParam> = xs
                             .iter()
-                            .map(|x| {
-                                FunParam(
-                                    x.as_ref().map(|s| s.dupe()),
-                                    unsoundness::unresolved_any(reason2.dupe()),
-                                )
+                            .map(|x| FunParam {
+                                name: x.as_ref().map(|s| s.dupe()),
+                                t: unsoundness::unresolved_any(reason2.dupe()),
+                                optional: false,
                             })
                             .collect();
                         let fun_type = make_fun_t(
@@ -1689,7 +1687,6 @@ fn type_of_hint_decomposition<'cx>(
                         Ok(Type::new(TypeInner::UnionT(callee_reason.dupe(), new_rep)))
                     }
                     TypeInner::MaybeT(_, inner_t) => Ok(simplify(inner_t)?),
-                    TypeInner::OptionalT { type_, .. } => Ok(simplify(type_)?),
                     _ => Ok(simplified.dupe()),
                 }
             }

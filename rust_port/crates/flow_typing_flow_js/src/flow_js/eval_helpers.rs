@@ -550,17 +550,6 @@ pub(super) fn eval_destructor<'cx>(
         destruct_union(cx, f, null_or_void_reason, vec![inner_t, null, void], upper)
     };
 
-    let destruct_optional = |cx: &mut Context<'cx>,
-                             f: Option<Box<dyn Fn(Type) -> Type>>,
-                             r: Reason,
-                             inner_t: Type,
-                             upper: UseT<Cx>|
-     -> Result<(), FlowJsException> {
-        let void_reason = r.dupe().replace_desc_new(VirtualReasonDesc::RVoid);
-        let void = void::make(void_reason.dupe());
-        destruct_union(cx, f, void_reason, vec![inner_t, void], upper)
-    };
-
     let destruct_and_preserve_nominal_t = |cx: &mut Context<'cx>,
                                            r: &Reason,
                                            nominal_type: &Rc<NominalType>|
@@ -925,61 +914,6 @@ pub(super) fn eval_destructor<'cx>(
             let name = name.dupe();
             let no_infer = *no_infer;
             destruct_maybe(
-                cx,
-                Some(Box::new(move |bound: Type| {
-                    Type::new(TypeInner::GenericT(Box::new(GenericTData {
-                        reason: reason_of_t(&bound).dupe(),
-                        bound,
-                        id: g_id.clone(),
-                        name: name.dupe(),
-                        no_infer,
-                    })))
-                })),
-                g_reason.dupe(),
-                inner_t.dupe(),
-                UseT::new(UseTInner::UseT(
-                    use_op.dupe(),
-                    Type::new(TypeInner::OpenT(tout.dupe())),
-                )),
-            )
-        }
-        (
-            TypeInner::OptionalT {
-                reason: r,
-                type_: inner_t,
-                use_desc: _,
-            },
-            _,
-        ) if should_destruct_union(cx) => destruct_optional(
-            cx,
-            None,
-            r.dupe(),
-            inner_t.dupe(),
-            UseT::new(UseTInner::UseT(
-                unknown_use(),
-                Type::new(TypeInner::OpenT(tout.dupe())),
-            )),
-        ),
-        (
-            TypeInner::GenericT(box GenericTData {
-                reason: g_reason,
-                bound,
-                id: g_id,
-                name,
-                no_infer,
-            }),
-            _,
-        ) if let TypeInner::OptionalT {
-            reason: _,
-            type_: inner_t,
-            use_desc: _,
-        } = bound.deref()
-            && should_destruct_union(cx) =>
-        {
-            let g_id = g_id.clone();
-            let name = name.dupe();
-            let no_infer = *no_infer;
-            destruct_optional(
                 cx,
                 Some(Box::new(move |bound: Type| {
                     Type::new(TypeInner::GenericT(Box::new(GenericTData {

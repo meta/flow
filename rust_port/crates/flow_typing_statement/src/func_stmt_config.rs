@@ -36,33 +36,15 @@ use crate::destructuring;
 use crate::statement;
 
 pub fn param_type(param: &Param) -> FunParam {
-    match &param.pattern {
-        Pattern::Id(id) => {
-            let name = &id.name.name;
-            let optional = id.optional;
-            let t = if optional || param.default.is_some() {
-                type_util::optional(param.t.dupe(), None, false)
-            } else {
-                param.t.dupe()
-            };
-            FunParam(Some(name.dupe()), t)
-        }
-        Pattern::Object { optional, .. } | Pattern::Array { optional, .. } => {
-            let t = if *optional || param.default.is_some() {
-                type_util::optional(param.t.dupe(), None, false)
-            } else {
-                param.t.dupe()
-            };
-            FunParam(None, t)
-        }
-        Pattern::ParamPropertyPattern(_) => {
-            let t = if param.default.is_some() {
-                type_util::optional(param.t.dupe(), None, false)
-            } else {
-                param.t.dupe()
-            };
-            FunParam(None, t)
-        }
+    let (name, optional) = match &param.pattern {
+        Pattern::Id(id) => (Some(id.name.name.dupe()), id.optional),
+        Pattern::Object { optional, .. } | Pattern::Array { optional, .. } => (None, *optional),
+        Pattern::ParamPropertyPattern(_) => (None, false),
+    };
+    FunParam {
+        name,
+        t: param.t.dupe(),
+        optional: optional || param.default.is_some(),
     }
 }
 

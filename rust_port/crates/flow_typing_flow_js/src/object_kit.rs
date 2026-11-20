@@ -443,6 +443,7 @@ pub fn slice_of_keys(
             mixed.dupe(),
             Polarity::Neutral,
             false,
+            false,
         )
     };
     let props: properties::PropertiesMap = keys_with_reasons
@@ -938,6 +939,7 @@ pub(super) fn run_with_env<'cx>(
                                 prop_t.dupe(),
                                 prop_polarity,
                                 false,
+                                true,
                             )))
                         }
                         _ => {
@@ -994,8 +996,10 @@ pub(super) fn run_with_env<'cx>(
                             // then we will ignore the void type and use the type for the default
                             // parameter instead.
                             (Some(p1_prop), Some(p2_prop)) => {
-                                let t1 = property::type_(p1_prop);
-                                let t2 = property::type_(p2_prop);
+                                let (t1, opt1) = slice_utils::type_optionality(p1_prop);
+                                let t1 = type_util::slot_value_t(&t1, opt1);
+                                let (t2, opt2) = slice_utils::type_optionality(p2_prop);
+                                let t2 = type_util::slot_value_t(&t2, opt2);
                                 let is_method =
                                     property::is_method(p1_prop) || property::is_method(p2_prop);
                                 let l = property::first_loc(p1_prop);
@@ -1005,7 +1009,7 @@ pub(super) fn run_with_env<'cx>(
                                     env,
                                     Some(trace),
                                     reason,
-                                    t1,
+                                    &t1,
                                 )?;
                                 let open_t = Type::new(TypeInner::OpenT(Tvar::new(
                                     reason.dupe(),
@@ -1026,7 +1030,13 @@ pub(super) fn run_with_env<'cx>(
                                 let t = collector
                                     .union_opt(reason.dupe())
                                     .unwrap_or_else(|| tvar_resolver::default_no_lowers(reason));
-                                Some(slice_utils::mk_slice_prop(l, t, prop_polarity, is_method))
+                                Some(slice_utils::mk_slice_prop(
+                                    l,
+                                    t,
+                                    prop_polarity,
+                                    is_method,
+                                    false,
+                                ))
                             }
                         };
                         if let Some(prop) = result {
@@ -1122,6 +1132,7 @@ pub(super) fn run_with_env<'cx>(
                                     prop_t.dupe(),
                                     prop_polarity,
                                     false,
+                                    true,
                                 ),
                             );
                         }

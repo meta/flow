@@ -32,20 +32,6 @@ pub fn swap_reason(t2: &Type, t1: &Type) -> Type {
             Type::new(TypeInner::MaybeT(r.dupe(), swap_reason(inner_t2, inner_t1)))
         }
         (
-            TypeInner::OptionalT {
-                type_: inner_t2, ..
-            },
-            TypeInner::OptionalT {
-                reason,
-                type_: inner_t1,
-                use_desc,
-            },
-        ) => Type::new(TypeInner::OptionalT {
-            reason: reason.clone(),
-            type_: swap_reason(inner_t2, inner_t1),
-            use_desc: *use_desc,
-        }),
-        (
             TypeInner::NominalT {
                 nominal_type: nt2, ..
             },
@@ -116,7 +102,7 @@ pub fn swap_reason(t2: &Type, t1: &Type) -> Type {
 /// cross-variant answer; same-variant pairs whose `swap_reason` only
 /// differs in the top-level reason fall through to that helper. Variants
 /// whose nested data also carries reasons that `swap_reason` recursively
-/// swaps (`MaybeT`, `OptionalT`, `NominalT`) recurse here.
+/// swaps (`MaybeT`, `NominalT`) recurse here.
 fn eq_swap_reason(t1: &Type, t2: &Type) -> bool {
     if t1.ptr_eq(t2) {
         return true;
@@ -131,9 +117,6 @@ fn eq_swap_reason(t1: &Type, t2: &Type) -> bool {
     }
     match (inner1, inner2) {
         (TypeInner::MaybeT(_, i1), TypeInner::MaybeT(_, i2)) => eq_swap_reason(i1, i2),
-        (TypeInner::OptionalT { type_: i1, .. }, TypeInner::OptionalT { type_: i2, .. }) => {
-            eq_swap_reason(i1, i2)
-        }
         (
             TypeInner::NominalT {
                 nominal_type: nt1, ..

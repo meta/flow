@@ -31,27 +31,15 @@ use flow_typing_utils::type_env;
 use crate::destructuring;
 use crate::statement;
 
-pub fn param_type_with_name(param: &Param) -> (ALoc, FlowSmolStr, Type) {
-    let t = match &param.pattern {
-        Pattern::Id(id) => {
-            let optional = id.optional;
-            if optional || param.default.is_some() {
-                type_util::optional(param.t.dupe(), None, false)
-            } else {
-                param.t.dupe()
-            }
-        }
-        Pattern::Object { optional, .. } | Pattern::Array { optional, .. } => {
-            if *optional || param.default.is_some() {
-                type_util::optional(param.t.dupe(), None, false)
-            } else {
-                param.t.dupe()
-            }
-        }
-    };
+pub fn param_type_with_name(param: &Param) -> (ALoc, FlowSmolStr, Type, bool) {
+    let optional = match &param.pattern {
+        Pattern::Id(id) => id.optional,
+        Pattern::Object { optional, .. } | Pattern::Array { optional, .. } => *optional,
+    } || param.default.is_some();
+    let t = param.t.dupe();
     match &param.name {
-        ParamName::Identifier(id) => (id.loc.dupe(), id.name.dupe(), t),
-        ParamName::StringLiteral((loc, lit)) => (loc.dupe(), lit.value.dupe(), t),
+        ParamName::Identifier(id) => (id.loc.dupe(), id.name.dupe(), t, optional),
+        ParamName::StringLiteral((loc, lit)) => (loc.dupe(), lit.value.dupe(), t, optional),
     }
 }
 
@@ -60,11 +48,7 @@ pub fn rest_type(rest: &Rest) -> Type {
         Pattern::Id(id) => id.optional,
         Pattern::Object { optional, .. } | Pattern::Array { optional, .. } => *optional,
     };
-    if optional {
-        type_util::optional(rest.t.dupe(), None, false)
-    } else {
-        rest.t.dupe()
-    }
+    type_util::slot_value_t(&rest.t, optional)
 }
 
 fn destruct<'a>(

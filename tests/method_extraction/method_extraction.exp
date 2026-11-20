@@ -21,12 +21,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- destructors.js:16:5
 
-Cannot call `y` because in index `0`: [incompatible-type]
- - Either `42` [1] is incompatible with `string` [2].
- - Or `42` [1] is incompatible with `void` [2].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot call `y` because in index `0`: `42` [1] is incompatible with `string` [2]. [incompatible-type]
 
    destructors.js:16:5
    16|   y(42); // ERROR - number is incompatible with string

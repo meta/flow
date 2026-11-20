@@ -528,7 +528,6 @@ fn add_default_constructor<T>(
                 reason.dupe(),
                 FunctionReferenceKind::DefaultConstructor,
                 None,
-                None,
                 return_t,
             );
             let type_ = Type::new(type_::TypeInner::DefT(
@@ -540,6 +539,7 @@ fn add_default_constructor<T>(
                 type_::Property::new(type_::PropertyInner::Method {
                     key_loc: None,
                     type_,
+                    optional: false,
                 }),
             );
         }
@@ -569,17 +569,10 @@ fn add_record_constructor<'cx>(
                         .as_smol_str_opt()
                         .is_some_and(|s| defaulted_props.contains(s))
                     {
-                        let r = type_util::reason_of_t(&fd.type_).dupe();
                         type_::Property::new(type_::PropertyInner::Field(Box::new(
                             type_::FieldData {
-                                preferred_def_locs: fd.preferred_def_locs.clone(),
-                                key_loc: fd.key_loc.dupe(),
-                                type_: Type::new(type_::TypeInner::OptionalT {
-                                    reason: r,
-                                    type_: fd.type_.dupe(),
-                                    use_desc: false,
-                                }),
-                                polarity: fd.polarity.clone(),
+                                optional: true,
+                                ..(**fd).clone()
                             },
                         )))
                     } else {
@@ -606,11 +599,14 @@ fn add_record_constructor<'cx>(
     let funtype = type_::mk_boundfunctiontype(
         type_::mixed_t::make(reason.dupe()),
         None,
-        vec![param],
+        vec![type_::FunParam {
+            name: None,
+            t: param,
+            optional: false,
+        }],
         None,
         reason.dupe(),
         FunctionReferenceKind::FunctionType,
-        None,
         None,
         return_t,
     );
@@ -620,6 +616,7 @@ fn add_record_constructor<'cx>(
             reason,
             type_::DefT::new(type_::DefTInner::FunT(statics, Rc::new(funtype))),
         )),
+        optional: false,
     });
     class_props.insert(
         Name::new(FlowSmolStr::new_inline("constructor")),
@@ -635,6 +632,7 @@ fn add_name_field(reason: Reason, props: &mut BTreeMap<Name, type_::Property>) {
             key_loc: None,
             type_: type_::str_module_t::why(reason),
             polarity: Polarity::Neutral,
+            optional: false,
         })))
     });
 }
@@ -1674,7 +1672,24 @@ fn merge_overloaded_methods<M>(
     type_::Property::new(type_::PropertyInner::Method {
         key_loc: Some(key_loc),
         type_,
+        optional: false,
     })
+}
+
+/// Merges the annotation of a slot (a parameter, property or tuple element): a `?` makes the slot
+/// optional, and the type it wraps is the declared type of the slot.
+fn merge_slot<'cx>(
+    env: &MergeEnv,
+    cx: &mut Context<'cx>,
+    file: &SigFile,
+    packed: &Pack::Packed<ALoc>,
+) -> (Type, bool) {
+    match packed {
+        Pack::Packed::Annot(box flow_type_sig::type_sig::Annot::Optional(t)) => {
+            (merge_impl(env, cx, file, t, false, false), true)
+        }
+        _ => (merge_impl(env, cx, file, packed, false, false), false),
+    }
 }
 
 fn merge_impl<'cx>(
@@ -1984,6 +1999,7 @@ fn merge_overloaded_property(
             type_::PropertyInner::Method {
                 key_loc,
                 type_: new_t,
+                optional,
             },
         ) => {
             let reason = type_util::reason_of_t(new_t).dupe();
@@ -1993,6 +2009,7 @@ fn merge_overloaded_property(
                     reason,
                     type_::inter_rep::make(existing_t.dupe(), new_t.dupe(), vec![].into()),
                 )),
+                optional: *optional,
             })
         }
         _ => new_prop,
@@ -2026,6 +2043,7 @@ fn name_symbol_field(prop: type_::Property, name: &FlowSmolStr) -> type_::Proper
             key_loc: fd.key_loc.dupe(),
             type_,
             polarity: fd.polarity,
+            optional: fd.optional,
         })));
     }
     prop
@@ -2066,7 +2084,7 @@ fn merge_annot<'cx>(
         }
         Annot::Optional(t) => {
             let t = merge_impl(env, cx, file, t, false, false);
-            type_util::optional(t, None, false)
+            type_util::slot_value_t(&t, true)
         }
         Annot::Maybe(box (loc, t)) => {
             let t = merge_impl(env, cx, file, t, false, false);
@@ -2131,7 +2149,7 @@ fn merge_annot<'cx>(
                         optional,
                     }) => {
                         let reason = reason::mk_reason(None, loc.dupe());
-                        let t = merge_impl(env, cx, file, t, false, false);
+                        let (t, _) = merge_slot(env, cx, file, t);
                         let elem = type_::TupleElement {
                             name: name.dupe(),
                             t,
@@ -3852,6 +3870,7 @@ fn merge_obj_value_prop<'cx>(
                                 key_loc: Some(id_loc),
                                 type_,
                                 polarity,
+                                optional: false,
                             },
                         )))
                     } else {
@@ -3861,6 +3880,7 @@ fn merge_obj_value_prop<'cx>(
                                 key_loc: Some(id_loc),
                                 type_,
                                 polarity,
+                                optional: false,
                             },
                         )))
                     }
@@ -3881,6 +3901,7 @@ fn merge_obj_value_prop<'cx>(
                 key_loc: Some(id_loc.dupe()),
                 type_,
                 polarity,
+                optional: false,
             })))
         }
         ObjValueProp::ObjValueAccess(box x) => merge_accessor(env, cx, file, x),
@@ -3933,12 +3954,13 @@ fn merge_class_prop<'cx>(
 ) -> type_::Property {
     match prop {
         ObjValueProp::ObjValueField(box (id_loc, t, polarity)) => {
-            let type_ = merge_impl(env, cx, file, t, false, false);
+            let (type_, optional) = merge_slot(env, cx, file, t);
             type_::Property::new(type_::PropertyInner::Field(Box::new(type_::FieldData {
                 preferred_def_locs: None,
                 key_loc: Some(id_loc.dupe()),
                 type_,
                 polarity: *polarity,
+                optional,
             })))
         }
         ObjValueProp::ObjValueAccess(box x) => merge_accessor(env, cx, file, x),
@@ -3984,12 +4006,13 @@ fn merge_obj_annot_prop<'cx>(
     use flow_common::reason::VirtualReasonDesc::*;
     match prop {
         ObjAnnotProp::ObjAnnotField(box (id_loc, t, polarity)) => {
-            let type_ = merge_impl(env, cx, file, t, false, false);
+            let (type_, optional) = merge_slot(env, cx, file, t);
             type_::Property::new(type_::PropertyInner::Field(Box::new(type_::FieldData {
                 preferred_def_locs: None,
                 key_loc: Some(id_loc.dupe()),
                 type_,
                 polarity: *polarity,
+                optional,
             })))
         }
         ObjAnnotProp::ObjAnnotAccess(box x) => merge_accessor(env, cx, file, x),
@@ -4025,6 +4048,7 @@ fn merge_obj_annot_prop<'cx>(
             type_::Property::new(type_::PropertyInner::Method {
                 key_loc: Some(id_loc.dupe()),
                 type_,
+                optional: false,
             })
         }
     }
@@ -4040,12 +4064,13 @@ fn merge_interface_prop<'cx>(
     use flow_common::reason::VirtualReasonDesc::*;
     match prop {
         InterfaceProp::InterfaceField(box (id_loc, t, polarity)) => {
-            let t = merge_impl(env, cx, file, t, false, false);
+            let (t, optional) = merge_slot(env, cx, file, t);
             type_::Property::new(type_::PropertyInner::Field(Box::new(type_::FieldData {
                 preferred_def_locs: None,
                 key_loc: id_loc.dupe(),
                 type_: t,
                 polarity: *polarity,
+                optional,
             })))
         }
         InterfaceProp::InterfaceAccess(box x) => merge_accessor(env, cx, file, x),
@@ -5138,6 +5163,7 @@ fn merge_fun_statics<'cx, 'sig>(
                     key_loc: Some(id_loc.dupe()),
                     type_: t,
                     polarity,
+                    optional: false,
                 })));
             (Name::new(key.dupe()), prop)
         })
@@ -5224,8 +5250,12 @@ fn merge_fun<'cx>(
             .params
             .iter()
             .map(|param| {
-                let t = merge_impl(env, cx, file, &param.t, false, false);
-                type_::FunParam(param.name.dupe(), t)
+                let (t, optional) = merge_slot(env, cx, file, &param.t);
+                type_::FunParam {
+                    name: param.name.dupe(),
+                    t,
+                    optional,
+                }
             })
             .collect();
         let rest_param = def_ref.rest_param.as_ref().map(|rp| {
@@ -5268,7 +5298,7 @@ fn merge_fun<'cx>(
                     || name.as_str() != "this"
                         && params
                             .iter()
-                            .all(|p| p.0.as_ref().is_none_or(|pname| *pname != *name))
+                            .all(|p| p.name.as_ref().is_none_or(|pname| *pname != *name))
                     || name.as_str() == "this" && (!is_method || is_static)
                 {
                     None
@@ -5339,7 +5369,7 @@ fn merge_component<'cx>(
             .iter()
             .map(|param| {
                 let ComponentParam { name, name_loc, t } = param;
-                let t = merge_impl(env, cx, file, t, false, false);
+                let (t, optional) = merge_slot(env, cx, file, t);
                 (
                     Name::new(name.dupe()),
                     type_::Property::new(type_::PropertyInner::Field(Box::new(type_::FieldData {
@@ -5347,6 +5377,7 @@ fn merge_component<'cx>(
                         key_loc: Some(name_loc.dupe()),
                         type_: t,
                         polarity: Polarity::Positive,
+                        optional,
                     }))),
                 )
             })
@@ -6307,6 +6338,7 @@ pub fn classify_ts_pending_export<'cx>(
                 merged.type_.dupe(),
                 merged.type_for_extends.dupe(),
             )
+            .with_optional(merged.optional)
         }
         Pack::TsPendingExport::TsExportFrom {
             export_loc,

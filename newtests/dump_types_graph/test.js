@@ -46,6 +46,7 @@ module.exports = (suite(({addFile, flowCmd}) => [
                     "props": {
                       "next": {
                         "kind": "Field",
+                        "optional": false,
                         "polarity": "neutral",
                         "type": {
                           "$ref": 6
@@ -87,6 +88,7 @@ module.exports = (suite(({addFile, flowCmd}) => [
                     "props": {
                       "next": {
                         "kind": "Field",
+                        "optional": false,
                         "polarity": "neutral",
                         "type": {
                           "$ref": 6
@@ -121,6 +123,7 @@ module.exports = (suite(({addFile, flowCmd}) => [
                     "props": {
                       "next": {
                         "kind": "Field",
+                        "optional": false,
                         "polarity": "neutral",
                         "type": {
                           "$ref": 6
@@ -403,6 +406,7 @@ module.exports = (suite(({addFile, flowCmd}) => [
                     "props": {
                       "p": {
                         "kind": "Field",
+                        "optional": false,
                         "polarity": "neutral",
                         "type": {
                           "$ref": 9
@@ -410,6 +414,7 @@ module.exports = (suite(({addFile, flowCmd}) => [
                       },
                       "q": {
                         "kind": "Field",
+                        "optional": false,
                         "polarity": "neutral",
                         "type": {
                           "$ref": 9
@@ -465,6 +470,7 @@ module.exports = (suite(({addFile, flowCmd}) => [
                     "props": {
                       "p": {
                         "kind": "Field",
+                        "optional": false,
                         "polarity": "neutral",
                         "type": {
                           "$ref": 9
@@ -472,6 +478,7 @@ module.exports = (suite(({addFile, flowCmd}) => [
                       },
                       "q": {
                         "kind": "Field",
+                        "optional": false,
                         "polarity": "neutral",
                         "type": {
                           "$ref": 9
@@ -971,6 +978,7 @@ module.exports = (suite(({addFile, flowCmd}) => [
                     "proto_props": {
                       "constructor": {
                         "kind": "Method",
+                        "optional": false,
                         "type": {
                           "$ref": 17
                         }
@@ -1097,6 +1105,7 @@ module.exports = (suite(({addFile, flowCmd}) => [
                     "props": {
                       "name": {
                         "kind": "Field",
+                        "optional": false,
                         "polarity": "neutral",
                         "type": {
                           "$ref": 25

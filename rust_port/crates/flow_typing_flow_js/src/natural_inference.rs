@@ -153,7 +153,10 @@ fn is_literal_union(rep: &union_rep::UnionRep) -> bool {
         UnionKind::ConditionalKind
         | UnionKind::ImplicitInstantiationKind
         | UnionKind::LogicalKind => true,
-        UnionKind::ProvidersKind | UnionKind::ResolvedKind | UnionKind::UnknownKind => false,
+        UnionKind::ProvidersKind
+        | UnionKind::ResolvedKind
+        | UnionKind::OptionalKind
+        | UnionKind::UnknownKind => false,
     }
 }
 
@@ -690,7 +693,6 @@ impl<'cx, F: Fn(&Context<'_>, &ALoc) -> SingletonAction> TypeMapper<'cx, ()>
             | TypeInner::TypeAppT(..)
             | TypeInner::GenericT(..)
             | TypeInner::NominalT { .. }
-            | TypeInner::OptionalT { .. }
             | TypeInner::MaybeT(..)
             | TypeInner::IntersectionT(..)
             | TypeInner::UnionT(..) => type_mapper::type_default(self, cx, map_cx, t),
@@ -861,6 +863,7 @@ impl<'cx> TypeMapper<'cx, LiteralMapCx> for ConvertLiteralTypeToConstMapper {
                         key_loc: fd.key_loc.dupe(),
                         type_: type_prime,
                         polarity: Polarity::Positive,
+                        optional: fd.optional,
                     })))
                 }
             }

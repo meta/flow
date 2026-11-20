@@ -128,8 +128,8 @@ pub(super) fn any_prop_to_function<'cx>(
     covariant_flow: &dyn Fn(&mut Context<'cx>, &UseOp, &Type) -> Result<(), FlowJsException>,
     contravariant_flow: &dyn Fn(&mut Context<'cx>, &UseOp, &Type) -> Result<(), FlowJsException>,
 ) -> Result<(), FlowJsException> {
-    for FunParam(_, param_t) in funtype.params.iter() {
-        contravariant_flow(cx, use_op, param_t)?;
+    for param in funtype.params.iter() {
+        contravariant_flow(cx, use_op, &param.t)?;
     }
     if let Some(FunRestParam(_, _, rest_t)) = &funtype.rest_param {
         contravariant_flow(cx, use_op, rest_t)?;
@@ -477,8 +477,6 @@ pub(super) fn any_propagated<'cx>(
             TypeInner::AnnotT(..) => Ok(true),
             // used to filter maybe
             TypeInner::MaybeT(..) => Ok(false),
-            // used to filter optional
-            TypeInner::OptionalT { .. } => Ok(false),
             // Handled in __flow
             TypeInner::ThisTypeAppT(..) | TypeInner::TypeAppT(..) => Ok(false),
             // Ideally, any would pollute every member of the union. However, it should be safe to only
@@ -659,7 +657,6 @@ pub(super) fn any_propagated_use<'cx>(
         // Handled already in __flow
         TypeInner::ThisInstanceT(..)
         | TypeInner::EvalT { .. }
-        | TypeInner::OptionalT { .. }
         | TypeInner::MaybeT(..)
         | TypeInner::UnionT(..)
         | TypeInner::IntersectionT(..)

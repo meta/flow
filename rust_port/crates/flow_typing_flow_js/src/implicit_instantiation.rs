@@ -794,6 +794,7 @@ fn t_of_use_t<'cx>(
                                 key_loc: None,
                                 type_: ref_t.dupe(),
                                 polarity: Polarity::Neutral,
+                                optional: true,
                             }))),
                         )]));
                         let reversed =
@@ -1130,28 +1131,18 @@ fn reverse_resolve_spread_multiflow_subtype_full_no_resolution<'cx>(
     // Trailing optional params become optional tuple elements.
     let required_count = params
         .iter()
-        .rposition(|FunParam(_, t)| !matches!(t.deref(), TypeInner::OptionalT { .. }))
+        .rposition(|param| !param.optional)
         .map_or(0, |index| index + 1);
     let mut tuple_elements = Vec::new();
     let mut tuple_ts = Vec::new();
     for (index, param) in params.iter().enumerate() {
-        let name = &param.0;
-        let (t, optional) = match param.1.deref() {
-            // Unlike an optional tuple element, an optional param also accepts `undefined`.
-            TypeInner::OptionalT { reason, type_, .. } if index >= required_count => (
-                type_util::union_of_ts(
-                    reason.dupe(),
-                    vec![type_.dupe(), void::why(reason.dupe())],
-                    None,
-                ),
-                true,
-            ),
-            _ => (param.1.dupe(), false),
-        };
+        // Unlike an optional tuple element, an optional param also accepts `undefined`.
+        let t = type_util::slot_value_t(&param.t, param.optional);
+        let optional = param.optional && index >= required_count;
         let el = type_util::mk_tuple_element(
             type_util::reason_of_t(&t).dupe(),
             t.dupe(),
-            name.as_ref().map(|s| s.dupe()),
+            param.name.dupe(),
             optional,
             Polarity::Neutral,
         );
@@ -2655,8 +2646,9 @@ pub mod kit {
                     let params: Rc<[FunParam]> = ft
                         .params
                         .iter()
-                        .map(|FunParam(name, t)| {
-                            FunParam(name.dupe(), self.type_(cx, &params_cx, t.dupe()))
+                        .map(|param| FunParam {
+                            t: self.type_(cx, &params_cx, param.t.dupe()),
+                            ..param.dupe()
                         })
                         .collect();
                     let rest_param = ft.rest_param.as_ref().map(|FunRestParam(name, loc, t)| {
@@ -2675,7 +2667,7 @@ pub mod kit {
                         && params
                             .iter()
                             .zip(ft.params.iter())
-                            .all(|(a, b)| a.1.ptr_eq(&b.1))
+                            .all(|(a, b)| a.t.ptr_eq(&b.t))
                         && match (&rest_param, &ft.rest_param) {
                             (Some(a), Some(b)) => a.2.ptr_eq(&b.2),
                             _ => true,

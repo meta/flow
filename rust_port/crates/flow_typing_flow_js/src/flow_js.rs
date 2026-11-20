@@ -253,6 +253,19 @@ impl FlowJs {
         helpers::flow_opt(cx, env, trace, (t, use_t))
     }
 
+    /// Flows the values of one slot into another. An optional slot holds `undefined` anyway, so
+    /// only the type of the first slot is checked against it, and a slot of the same type fits.
+    pub(super) fn flow_slot_with_env<'cx>(
+        cx: &mut Context<'cx>,
+        env: &FlowJsEnv,
+        trace: Option<DepthTrace>,
+        use_op: UseOp,
+        slot1: (&Type, bool),
+        slot2: (&Type, bool),
+    ) -> Result<(), FlowJsException> {
+        helpers::flow_slot(cx, env, trace, use_op, slot1, slot2)
+    }
+
     fn flow_p_with_env<'cx>(
         cx: &mut Context<'cx>,
         env: &FlowJsEnv,
@@ -332,17 +345,33 @@ impl FlowJs {
         helpers::unify(cx, env, use_op, unify_cause, t1, t2)
     }
 
-    pub(super) fn unify_opt_with_env<'cx>(
+    /// Unifies two slots, each given as its declared type and whether it is optional.
+    pub(super) fn unify_slots_with_env<'cx>(
         cx: &mut Context<'cx>,
         env: &FlowJsEnv,
         trace: Option<DepthTrace>,
         use_op: UseOp,
         unify_cause: UnifyCause,
-        unify_any: Option<bool>,
-        t1: &Type,
-        t2: &Type,
+        slot1: (&Type, bool),
+        slot2: (&Type, bool),
     ) -> Result<(), FlowJsException> {
-        helpers::unify_opt(cx, env, trace, use_op, unify_cause, unify_any, t1, t2)
+        let trace = match trace {
+            None => DepthTrace::unit_trace(),
+            Some(trace) => DepthTrace::rec_trace(trace),
+        };
+        unification_helpers::unify_slots(cx, env, trace, use_op, unify_cause, slot1, slot2)
+    }
+
+    /// Speculatively unifies two slots, failing with `SpeculationSingletonError`.
+    pub(super) fn try_unify_slots_with_env<'cx>(
+        cx: &mut Context<'cx>,
+        env: &FlowJsEnv,
+        trace: DepthTrace,
+        slot1: (&Type, bool),
+        use_op: UseOp,
+        slot2: (&Type, bool),
+    ) -> Result<(), FlowJsException> {
+        unification_helpers::try_unify_slots(cx, env, trace, slot1, use_op, slot2)
     }
 
     pub(super) fn filter_optional_with_env<'cx>(

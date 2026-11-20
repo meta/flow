@@ -183,6 +183,7 @@ pub fn add_private_field<C: ConfigTypes>(
     loc: ALoc,
     polarity: Polarity,
     field: class_types::Field<C>,
+    optional: bool,
     static_: bool,
     x: &mut class_types::Class<C>,
 ) {
@@ -195,7 +196,8 @@ pub fn add_private_field<C: ConfigTypes>(
                 loc.dupe(),
                 s,
             );
-            s.private_fields.insert(name, (Some(loc), polarity, field));
+            s.private_fields
+                .insert(name, (Some(loc), polarity, field, optional));
             s.override_members = new_override_members;
         },
         x,
@@ -388,6 +390,7 @@ pub fn add_field<C: ConfigTypes>(
     loc: ALoc,
     polarity: Polarity,
     field: class_types::Field<C>,
+    optional: bool,
     x: &mut class_types::Class<C>,
 ) {
     let override_loc = if override_ { Some(loc.dupe()) } else { None };
@@ -396,7 +399,7 @@ pub fn add_field<C: ConfigTypes>(
         static_,
         override_loc,
         name,
-        (Some(loc), polarity, field),
+        (Some(loc), polarity, field, optional),
         x,
     );
 }
@@ -423,7 +426,7 @@ pub fn add_name_field<C: ConfigTypes>(x: &mut class_types::Class<C>) {
         true,
         None,
         Name::new(FlowSmolStr::new("name")),
-        (None, Polarity::Neutral, class_types::Field::Annot(t)),
+        (None, Polarity::Neutral, class_types::Field::Annot(t), false),
         x,
     );
 }
@@ -435,13 +438,14 @@ pub fn add_proto_field<C: ConfigTypes>(
     loc: ALoc,
     polarity: Polarity,
     field: class_types::Field<C>,
+    optional: bool,
     x: &mut class_types::Class<C>,
 ) {
     map_sig(
         false,
         |s| {
             s.proto_fields
-                .insert(name.dupe(), (Some(loc.dupe()), polarity, field));
+                .insert(name.dupe(), (Some(loc.dupe()), polarity, field, optional));
             s.methods.remove(&name);
             s.getters.remove(&name);
             s.setters.remove(&name);
@@ -728,7 +732,7 @@ fn tparams_with_this(tparams: &TypeParams, this_tp: TypeParam) -> TypeParams {
 }
 
 fn to_field<C: ConfigTypes>(entry: &class_types::FieldPrime<C>) -> Property {
-    let (key_loc, polarity, field) = entry;
+    let (key_loc, polarity, field, optional) = entry;
     let type_ = match field {
         class_types::Field::Annot(t) => t.dupe(),
         class_types::Field::Infer(fsig, _) => func_sig::gettertype(fsig),
@@ -738,6 +742,7 @@ fn to_field<C: ConfigTypes>(entry: &class_types::FieldPrime<C>) -> Property {
         key_loc: key_loc.dupe(),
         type_,
         polarity: *polarity,
+        optional: *optional,
     })))
 }
 
@@ -754,6 +759,7 @@ fn to_method<'a, C: crate::func_params_intf::Config>(
             this_default.dupe(),
             &info.func_sig,
         ),
+        optional: false,
     })
 }
 
@@ -970,7 +976,11 @@ fn elements<'a, C: crate::func_params_intf::Config>(
         .map(|(name, (key_loc, type_))| {
             (
                 name,
-                Property::new(PropertyInner::Method { key_loc, type_ }),
+                Property::new(PropertyInner::Method {
+                    key_loc,
+                    type_,
+                    optional: false,
+                }),
             )
         })
         .collect();
@@ -1017,7 +1027,7 @@ fn elements<'a, C: crate::func_params_intf::Config>(
     // Only un-initialized fields require annotations, so determine now
     // (syntactically) which fields have initializers
     let mut initialized_fields = FlowOrdSet::new();
-    for (x, (_, _, field)) in &s.fields {
+    for (x, (_, _, field, _)) in &s.fields {
         match field {
             class_types::Field::Annot(_) => {}
             class_types::Field::Infer(_, _) => {
@@ -2441,7 +2451,7 @@ fn check_override_obligations<'cx, C: crate::func_params_intf::Config>(
             // a shared string spelling.
             let add_fields = |m: &BTreeMap<Name, class_types::FieldPrime<C>>,
                               acc: &mut BTreeMap<Name, Option<ALoc>>| {
-                for (k, (loc, _, _)) in m.iter() {
+                for (k, (loc, _, _, _)) in m.iter() {
                     acc.insert(k.dupe(), loc.clone());
                 }
             };
@@ -2794,7 +2804,7 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
         let field = |cx: &mut Context<'a>,
                      entry: &class_types::FieldPrime<C>|
          -> Result<(), CheckExprError> {
-            let (_, _, value) = entry;
+            let (_, _, value, _) = entry;
             match value {
                 class_types::Field::Annot(_) => {}
                 class_types::Field::Infer(fsig, set_asts) => {

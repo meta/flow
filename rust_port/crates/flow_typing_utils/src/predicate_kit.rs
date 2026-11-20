@@ -31,7 +31,6 @@ use flow_typing_flow_common::obj_type;
 use flow_typing_flow_js::flow_js;
 use flow_typing_flow_js::flow_js::FlowJs;
 use flow_typing_flow_js::intersection_kit::disjoint;
-use flow_typing_flow_js::slice_utils::is_prop_optional;
 use flow_typing_flow_js::speculation_kit;
 use flow_typing_flow_js_env::FlowJsEnv;
 use flow_typing_type::type_::ArrType;
@@ -77,6 +76,7 @@ use flow_typing_type::type_::type_collector::TypeCollector;
 use flow_typing_type::type_::union_rep;
 use flow_typing_type::type_::union_rep::QuickMemResult;
 use flow_typing_type::type_::unknown_use;
+use flow_typing_type::type_::void;
 use flow_typing_type::type_util;
 use flow_typing_type::type_util::loc_of_t;
 use flow_typing_type::type_util::reason_of_t;
@@ -1360,7 +1360,9 @@ fn call_latent_param_pred<'cx>(
         sense,
         &|type_guard_name: &str, params: &[FunParam]| {
             idx_vec.iter().any(|&i| match params.get(i as usize) {
-                Some(FunParam(Some(name), _)) => name.as_str() == type_guard_name,
+                Some(FunParam {
+                    name: Some(name), ..
+                }) => name.as_str() == type_guard_name,
                 _ => false,
             })
         },
@@ -1793,10 +1795,10 @@ fn intersect_type_guard<'cx>(
         }
         // Own properties shadow those of the prototype.
         fn present_read_t(maps: &[PropertiesMap], name: &Name) -> Option<Type> {
-            let t = maps
+            let p = maps
                 .iter()
-                .find_map(|map| property::read_t(map.get(name)?))?;
-            (!is_prop_optional(&t)).then_some(t)
+                .find_map(|map| map.get(name).filter(|p| property::read_t(p).is_some()))?;
+            (!property::is_optional(p)).then(|| property::read_t(p))?
         }
         let (Some(ids1), Some(ids2)) = (props_of(t1.unwrap()), props_of(t2.unwrap())) else {
             return false;
@@ -2268,7 +2270,7 @@ fn has_prop<'cx>(
                     .iter()
                     .map(|props| match cx.get_prop(props.dupe(), key) {
                         Some(prop) => match prop.deref() {
-                            PropertyInner::Field(fd) if is_prop_optional(&fd.type_) => None,
+                            PropertyInner::Field(fd) if fd.optional => None,
                             _ => Some(true),
                         },
                         None => Some(false),
@@ -2566,14 +2568,18 @@ fn prop_exists_test_generic<'cx>(
                             );
                         }
                         Some(TupleElement {
-                            t, polarity, name, ..
+                            t,
+                            polarity,
+                            name,
+                            optional,
+                            ..
                         }) => {
                             if Polarity::compat(*polarity, Polarity::Positive) {
                                 let pred = if sense { pred } else { not_pred };
                                 concretize_and_guard_prop(
                                     cx,
                                     env,
-                                    t,
+                                    &type_util::slot_value_t(t, *optional),
                                     pred,
                                     orig_obj,
                                     result_collector,
@@ -3253,10 +3259,10 @@ fn sentinel_prop_test_generic<'cx>(
                              sentinel: &UnionEnumStar|
      -> Result<(), FlowJsException> {
         match cx.get_prop(props_tmap, &Name::new(key)) {
-            Some(p) => match flow_typing_type::type_::property::read_t(&p) {
-                Some(t_prop) => {
+            Some(p) => match property::read_slot_of_property_type(&property::property_type(&p)) {
+                Some((t_prop, optional)) => {
                     let reason = reason_of_t(orig_obj).dupe().replace_desc(None);
-                    concretize_and_run_sentinel_prop_test(
+                    concretize_and_run_sentinel_prop_test_on_slot(
                         cx,
                         env,
                         &reason,
@@ -3264,6 +3270,7 @@ fn sentinel_prop_test_generic<'cx>(
                         sense,
                         sentinel,
                         &t_prop,
+                        optional,
                         result_collector,
                     )?;
                 }
@@ -3310,11 +3317,12 @@ fn sentinel_prop_test_generic<'cx>(
                 t: elem_t,
                 polarity,
                 name,
+                optional,
                 ..
             }) => {
                 if Polarity::compat(*polarity, Polarity::Positive) {
                     let reason = reason_of_t(orig_obj).dupe().replace_desc(None);
-                    concretize_and_run_sentinel_prop_test(
+                    concretize_and_run_sentinel_prop_test_on_slot(
                         cx,
                         env,
                         &reason,
@@ -3322,6 +3330,7 @@ fn sentinel_prop_test_generic<'cx>(
                         sense,
                         sentinel,
                         elem_t,
+                        *optional,
                         result_collector,
                     )?;
                 } else {
@@ -3476,6 +3485,44 @@ fn sentinel_prop_test_generic<'cx>(
                 result_collector,
             );
         }
+    }
+    Ok(())
+}
+
+/// The test on a slot: on the values of its type and, for an optional slot, on `undefined`.
+fn concretize_and_run_sentinel_prop_test_on_slot<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    reason: &Reason,
+    orig_obj: &Type,
+    sense: bool,
+    sentinel: &UnionEnumStar,
+    t: &Type,
+    optional: bool,
+    result_collector: &PredicateResultCollector,
+) -> Result<(), FlowJsException> {
+    concretize_and_run_sentinel_prop_test(
+        cx,
+        env,
+        reason,
+        orig_obj,
+        sense,
+        sentinel,
+        t,
+        result_collector,
+    )?;
+    if optional {
+        let void = void::why(reason_of_t(t).dupe());
+        concretize_and_run_sentinel_prop_test(
+            cx,
+            env,
+            reason,
+            orig_obj,
+            sense,
+            sentinel,
+            &void,
+            result_collector,
+        )?;
     }
     Ok(())
 }

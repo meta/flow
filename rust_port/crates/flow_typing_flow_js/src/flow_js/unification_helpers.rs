@@ -61,103 +61,215 @@ pub(super) fn __unify<'cx>(
     // limit recursion depth
     recursion_check::check(cx, trace)?;
 
-    if !matches!(unify_cause, UnifyCause::Uncategorized)
-        && !env.speculating()
-        && !tvar_visitors::has_unresolved_tvars(cx, t1)
-        && !tvar_visitors::has_unresolved_tvars(cx, t2)
-    {
+    if reports_invariance(cx, env, &unify_cause, t1, t2) {
         match crate::speculation_kit::try_unify(cx, env, trace, t1.dupe(), use_op.dupe(), t2.dupe())
         {
             Ok(()) => Ok(()),
             Err(FlowJsException::SpeculationSingletonError) => {
-                let explanation = {
-                    match &unify_cause {
-                        UnifyCause::MutableArray {
-                            lower_array_t,
-                            upper_array_t,
-                        } => {
-                            let lower_array_desc = TypeOrTypeDescT::Type(lower_array_t.dupe());
-                            let upper_array_desc = TypeOrTypeDescT::Type(upper_array_t.dupe());
-                            let lower_array_loc = reason_of_t(lower_array_t).def_loc().dupe();
-                            let upper_array_loc = reason_of_t(upper_array_t).def_loc().dupe();
-                            let upper_array_reference_loc =
-                                type_util::ref_loc_of_t(upper_array_t).dupe();
-                            Some(
-                                ExplanationWithLazyParts::LazyExplanationInvariantSubtypingDueToMutableArray {
-                                    lower_array_loc,
-                                    upper_array_loc,
-                                    lower_array_desc,
-                                    upper_array_desc,
-                                    upper_array_reference_loc,
-                                },
-                            )
-                        }
-                        UnifyCause::MutableProperty {
-                            lower_obj_t,
-                            upper_obj_t,
-                            property_name,
-                        } => {
-                            let lower_obj_desc = TypeOrTypeDescT::Type(lower_obj_t.dupe());
-                            let upper_obj_desc = TypeOrTypeDescT::Type(upper_obj_t.dupe());
-                            let lower_obj_loc = reason_of_t(lower_obj_t).def_loc().dupe();
-                            let upper_obj_loc = reason_of_t(upper_obj_t).def_loc().dupe();
-                            let upper_object_loc = type_util::ref_loc_of_t(upper_obj_t).dupe();
-                            Some(
-                                ExplanationWithLazyParts::LazyExplanationInvariantSubtypingDueToMutableProperty {
-                                    lower_obj_loc,
-                                    upper_obj_loc,
-                                    lower_obj_desc,
-                                    upper_obj_desc,
-                                    upper_object_loc,
-                                    property_name: property_name.dupe(),
-                                },
-                            )
-                        }
-                        UnifyCause::Uncategorized => None,
-                    }
-                };
-                let lower_desc = TypeOrTypeDescT::Type(t1.dupe());
-                let upper_desc = TypeOrTypeDescT::Type(t2.dupe());
-                let lower_loc = {
-                    match t1.deref() {
-                        _ if let Some(node) = constraint_node_id(t1) => {
-                            let r = reason_of_t(t1);
-                            match flow_js_utils::merge_tvar_opt(
-                                cx,
-                                false,
-                                union_rep::UnionKind::ResolvedKind,
-                                r,
-                                node.id(),
-                            ) {
-                                Some(t) => loc_of_t(&t).dupe(),
-                                None => r.loc().dupe(),
-                            }
-                        }
-                        _ => loc_of_t(t1).dupe(),
-                    }
-                };
-                let upper_loc = loc_of_t(t2).dupe();
-                add_output_with_env(
-                    cx,
-                    env,
-                    ErrorMessage::EInvariantSubtypingWithUseOp(Box::new(
-                        EInvariantSubtypingWithUseOpData {
-                            sub_component: None,
-                            lower_loc,
-                            upper_loc,
-                            lower_desc,
-                            upper_desc,
-                            use_op,
-                            explanation,
-                        },
-                    )),
-                )
+                add_invariant_subtyping_error(cx, env, use_op, unify_cause, t1, t2)
             }
             Err(other) => Err(other),
         }
     } else {
         __unify_inner(cx, env, use_op, unify_any, t1, t2, trace)
     }
+}
+
+/// Whether a failed unification is reported as a whole, with the two types not being exactly the
+/// same, rather than by the flows that fail.
+fn reports_invariance<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    unify_cause: &UnifyCause,
+    t1: &Type,
+    t2: &Type,
+) -> bool {
+    !matches!(unify_cause, UnifyCause::Uncategorized)
+        && !env.speculating()
+        && !tvar_visitors::has_unresolved_tvars(cx, t1)
+        && !tvar_visitors::has_unresolved_tvars(cx, t2)
+}
+
+fn add_invariant_subtyping_error<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    use_op: UseOp,
+    unify_cause: UnifyCause,
+    t1: &Type,
+    t2: &Type,
+) -> Result<(), FlowJsException> {
+    let explanation = {
+        match &unify_cause {
+            UnifyCause::MutableArray {
+                lower_array_t,
+                upper_array_t,
+            } => {
+                let lower_array_desc = TypeOrTypeDescT::Type(lower_array_t.dupe());
+                let upper_array_desc = TypeOrTypeDescT::Type(upper_array_t.dupe());
+                let lower_array_loc = reason_of_t(lower_array_t).def_loc().dupe();
+                let upper_array_loc = reason_of_t(upper_array_t).def_loc().dupe();
+                let upper_array_reference_loc = type_util::ref_loc_of_t(upper_array_t).dupe();
+                Some(
+                    ExplanationWithLazyParts::LazyExplanationInvariantSubtypingDueToMutableArray {
+                        lower_array_loc,
+                        upper_array_loc,
+                        lower_array_desc,
+                        upper_array_desc,
+                        upper_array_reference_loc,
+                    },
+                )
+            }
+            UnifyCause::MutableProperty {
+                lower_obj_t,
+                upper_obj_t,
+                property_name,
+            } => {
+                let lower_obj_desc = TypeOrTypeDescT::Type(lower_obj_t.dupe());
+                let upper_obj_desc = TypeOrTypeDescT::Type(upper_obj_t.dupe());
+                let lower_obj_loc = reason_of_t(lower_obj_t).def_loc().dupe();
+                let upper_obj_loc = reason_of_t(upper_obj_t).def_loc().dupe();
+                let upper_object_loc = type_util::ref_loc_of_t(upper_obj_t).dupe();
+                Some(
+                    ExplanationWithLazyParts::LazyExplanationInvariantSubtypingDueToMutableProperty {
+                        lower_obj_loc,
+                        upper_obj_loc,
+                        lower_obj_desc,
+                        upper_obj_desc,
+                        upper_object_loc,
+                        property_name: property_name.dupe(),
+                    },
+                )
+            }
+            UnifyCause::Uncategorized => None,
+        }
+    };
+    let lower_desc = TypeOrTypeDescT::Type(t1.dupe());
+    let upper_desc = TypeOrTypeDescT::Type(t2.dupe());
+    let lower_loc = {
+        match t1.deref() {
+            _ if let Some(node) = constraint_node_id(t1) => {
+                let r = reason_of_t(t1);
+                match flow_js_utils::merge_tvar_opt(
+                    cx,
+                    false,
+                    union_rep::UnionKind::ResolvedKind,
+                    r,
+                    node.id(),
+                ) {
+                    Some(t) => loc_of_t(&t).dupe(),
+                    None => r.loc().dupe(),
+                }
+            }
+            _ => loc_of_t(t1).dupe(),
+        }
+    };
+    let upper_loc = loc_of_t(t2).dupe();
+    add_output_with_env(
+        cx,
+        env,
+        ErrorMessage::EInvariantSubtypingWithUseOp(Box::new(EInvariantSubtypingWithUseOpData {
+            sub_component: None,
+            lower_loc,
+            upper_loc,
+            lower_desc,
+            upper_desc,
+            use_op,
+            explanation,
+        })),
+    )
+}
+
+/// Unifies two slots, either of which may be optional. Two required slots unify their types.
+/// Otherwise each slot's values must fit the other slot, both ways, which is how two types that
+/// may be `undefined` are unified, with `undefined` passing into an optional slot.
+pub(super) fn unify_slots<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    trace: DepthTrace,
+    use_op: UseOp,
+    unify_cause: UnifyCause,
+    (t1, optional1): (&Type, bool),
+    (t2, optional2): (&Type, bool),
+) -> Result<(), FlowJsException> {
+    if !optional1 && !optional2 {
+        return rec_unify(cx, env, trace, use_op, unify_cause, None, t1, t2);
+    }
+    // As in `__unify`, a slot unifies with the same slot.
+    if optional1 == optional2 && t1 == t2 {
+        return Ok(());
+    }
+    let v1 = type_util::slot_value_t(t1, optional1);
+    let v2 = type_util::slot_value_t(t2, optional2);
+    if reports_invariance(cx, env, &unify_cause, &v1, &v2) {
+        match try_unify_slots(
+            cx,
+            env,
+            trace,
+            (t1, optional1),
+            use_op.dupe(),
+            (t2, optional2),
+        ) {
+            Ok(()) => Ok(()),
+            Err(FlowJsException::SpeculationSingletonError) => {
+                add_invariant_subtyping_error(cx, env, use_op, unify_cause, &v1, &v2)
+            }
+            Err(other) => Err(other),
+        }
+    } else {
+        flow_slots_both_ways(cx, env, trace, use_op, (t1, optional1), (t2, optional2))
+    }
+}
+
+/// Speculatively unifies two slots, failing with `SpeculationSingletonError`.
+pub(super) fn try_unify_slots<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    trace: DepthTrace,
+    (t1, optional1): (&Type, bool),
+    use_op: UseOp,
+    (t2, optional2): (&Type, bool),
+) -> Result<(), FlowJsException> {
+    if !optional1 && !optional2 {
+        return crate::speculation_kit::try_unify(cx, env, trace, t1.dupe(), use_op, t2.dupe());
+    }
+    // As in `__unify`, a slot unifies with the same slot.
+    if optional1 == optional2 && t1 == t2 {
+        return Ok(());
+    }
+    let (t1, t2) = (t1.dupe(), t2.dupe());
+    crate::speculation_kit::try_singleton_custom_throw_on_failure(
+        cx,
+        env,
+        Box::new(move |cx: &mut Context<'cx>, env: &FlowJsEnv| {
+            flow_slots_both_ways(cx, env, trace, use_op, (&t1, optional1), (&t2, optional2))
+        }),
+    )
+}
+
+fn flow_slots_both_ways<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    trace: DepthTrace,
+    use_op: UseOp,
+    (t1, optional1): (&Type, bool),
+    (t2, optional2): (&Type, bool),
+) -> Result<(), FlowJsException> {
+    helpers::flow_slot(
+        cx,
+        env,
+        Some(trace),
+        use_op.dupe(),
+        (t1, optional1),
+        (t2, optional2),
+    )?;
+    helpers::flow_slot(
+        cx,
+        env,
+        Some(trace),
+        unify_flip(use_op),
+        (t2, optional2),
+        (t1, optional1),
+    )
 }
 
 // Should only be called by __unify
@@ -321,15 +433,14 @@ fn __unify_inner<'cx>(
                                                     ),
                                                 )?;
                                             }
-                                            rec_unify(
+                                            unify_slots(
                                                 cx,
                                                 env,
                                                 trace,
                                                 use_op.dupe(),
                                                 UnifyCause::Uncategorized,
-                                                None,
-                                                &te1.t,
-                                                &te2.t,
+                                                (&te1.t, te1.optional),
+                                                (&te2.t, te2.optional),
                                             )?;
                                             n += 1;
                                         }
@@ -560,18 +671,15 @@ fn __unify_inner<'cx>(
                         &this1,
                         &this2,
                     )?;
-                    for (FunParam(_, param_t1), FunParam(_, param_t2)) in
-                        funtype1.params.iter().zip(funtype2.params.iter())
-                    {
-                        rec_unify(
+                    for (param1, param2) in funtype1.params.iter().zip(funtype2.params.iter()) {
+                        unify_slots(
                             cx,
                             env,
                             trace,
                             use_op.dupe(),
                             UnifyCause::Uncategorized,
-                            None,
-                            param_t1,
-                            param_t2,
+                            (&param1.t, param1.optional),
+                            (&param2.t, param2.optional),
                         )?;
                     }
                     return rec_unify(
@@ -720,15 +828,14 @@ pub(super) fn unify_props<'cx>(
         (PropertyInner::Field(fd1), PropertyInner::Field(fd2))
             if fd1.polarity == Polarity::Neutral && fd2.polarity == Polarity::Neutral =>
         {
-            rec_unify(
+            unify_slots(
                 cx,
                 env,
                 trace,
                 use_op,
                 UnifyCause::Uncategorized,
-                None,
-                &fd1.type_,
-                &fd2.type_,
+                (&fd1.type_, fd1.optional),
+                (&fd2.type_, fd2.optional),
             )
         }
         _ => {
@@ -849,6 +956,7 @@ pub(super) fn unify_prop_with_dict<'cx>(
                 key_loc: None,
                 type_: dict_t.value.dupe(),
                 polarity: dict_t.dict_polarity,
+                optional: false,
             })));
             unify_props(
                 cx,

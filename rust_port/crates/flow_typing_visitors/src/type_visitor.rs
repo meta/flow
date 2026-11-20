@@ -392,9 +392,7 @@ pub fn type_default<'cx, Acc, V: TypeVisitor<Acc> + ?Sized>(
                 .fold(acc, |acc, targ| visitor.type_(cx, pole_todo(), acc, targ))
         }
         TypeInner::AnyT { .. } => acc,
-        TypeInner::OptionalT { type_, .. } | TypeInner::MaybeT(_, type_) => {
-            visitor.type_(cx, pole, acc, type_)
-        }
+        TypeInner::MaybeT(_, type_) => visitor.type_(cx, pole, acc, type_),
         TypeInner::IntersectionT(_, members) => members
             .members_iter()
             .fold(acc, |acc, t| visitor.type_(cx, pole, acc, t)),
@@ -857,7 +855,7 @@ pub fn fun_type_default<'cx, Acc, V: TypeVisitor<Acc> + ?Sized>(
 ) -> Acc {
     let acc = visitor.type_(cx, pole, acc, &ft.this_t.0);
     let acc = ft.params.iter().fold(acc, |acc, param| {
-        visitor.type_(cx, pole.inv(), acc, &param.1)
+        visitor.type_(cx, pole.inv(), acc, &param.t)
     });
     let acc = if let Some(rest_param) = &ft.rest_param {
         visitor.type_(cx, pole.inv(), acc, &rest_param.2)

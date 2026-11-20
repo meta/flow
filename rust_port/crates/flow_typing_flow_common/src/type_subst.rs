@@ -350,18 +350,6 @@ where
                 }
                 flatten_into(inner_t.dupe(), seen, out);
             }
-            TypeInner::OptionalT {
-                reason,
-                type_,
-                use_desc,
-            } => {
-                let void_t =
-                    flow_typing_type::type_::void::why_with_use_desc(*use_desc, reason.dupe());
-                if seen.insert(void_t.dupe()) {
-                    out.push(void_t);
-                }
-                flatten_into(type_.dupe(), seen, out);
-            }
             _ => {
                 if seen.insert(t.dupe()) {
                     out.push(t);
@@ -477,6 +465,7 @@ pub fn exports<'cx, MapCx, M: TypeMapper<'cx, MapCx>>(
                 type_prime,
                 type_for_extends_prime,
             )
+            .with_optional(ns.optional)
         }
     });
     if exps.ptr_eq(&exps_prime) {

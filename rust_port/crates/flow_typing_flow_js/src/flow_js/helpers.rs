@@ -199,6 +199,7 @@ pub(super) fn perform_lookup_action<'cx>(
                 &PropertyType::OrdinaryField {
                     type_: tout.dupe(),
                     polarity: *polarity,
+                    optional: false,
                 },
             )?;
         }
@@ -308,26 +309,30 @@ pub(super) fn perform_lookup_action<'cx>(
             mode,
         }) => {
             match (
-                property::write_t_of_property_type(p, Some(*write_ctx)),
+                property::write_slot_of_property_type(p, Some(*write_ctx)),
                 target_kind,
                 mode,
             ) {
-                (Some(t), PropertySource::IndexerProperty, SetMode::Delete) => {
+                (Some((t, _)), PropertySource::IndexerProperty, SetMode::Delete) => {
                     // Always OK to delete a property we found via an indexer
                     let void = void::why(reason_of_t(&t).dupe());
                     if let Some(prop_tout) = prop_tout {
                         rec_flow_t(cx, env, trace, unknown_use(), (&void, prop_tout))?;
                     }
                 }
-                (Some(t), _, _) => {
+                (Some((t, optional)), _, _) => {
                     rec_flow(
                         cx,
                         env,
                         trace,
-                        (tin, &UseT::new(UseTInner::UseT(use_op.dupe(), t.dupe()))),
+                        (
+                            tin,
+                            &type_util::slot_use_t(use_op.dupe(), t.dupe(), optional),
+                        ),
                     )?;
                     if let Some(prop_tout) = prop_tout {
-                        rec_flow_t(cx, env, trace, unknown_use(), (&t, prop_tout))?;
+                        let value_t = type_util::slot_value_t(&t, optional);
+                        rec_flow_t(cx, env, trace, unknown_use(), (&value_t, prop_tout))?;
                     }
                 }
                 (None, _, _) => {
@@ -406,9 +411,11 @@ pub(super) fn lookup_prop_type_direct<'cx>(
     let name = type_util::string_of_singleton_string_type(key_type)?;
     let prop = props.get(&Name::new(name.dupe()))?;
     match property::property_type(prop) {
-        PropertyType::OrdinaryField { type_, polarity }
-            if Polarity::compat(polarity, Polarity::Positive) =>
-        {
+        PropertyType::OrdinaryField {
+            type_,
+            polarity,
+            optional,
+        } if Polarity::compat(polarity, Polarity::Positive) => {
             let type_ = match react_dro {
                 Some(dro) => {
                     let frame_use_op = VirtualUseOp::Frame(
@@ -422,7 +429,7 @@ pub(super) fn lookup_prop_type_direct<'cx>(
                 }
                 None => type_,
             };
-            Some(type_)
+            Some(type_util::slot_value_t(&type_, optional))
         }
         _ => None,
     }
@@ -472,7 +479,6 @@ fn is_concrete(t: &Type) -> bool {
         TypeInner::EvalT { .. }
         | TypeInner::AnnotT(..)
         | TypeInner::MaybeT(..)
-        | TypeInner::OptionalT { .. }
         | TypeInner::TypeAppT(..)
         | TypeInner::ThisTypeAppT(..) => false,
         _ => true,
@@ -886,30 +892,15 @@ pub(super) fn handle_bounded<'cx>(
             )?;
             Ok(true)
         }
-        UseTInner::UseT(use_op, t)
-            if let TypeInner::OptionalT {
-                reason: opt_reason,
-                type_: t_out,
-                use_desc: opt_use_desc,
-            } = t.deref() =>
-        {
-            let use_op_cloned = use_op.dupe();
-            let opt_reason = opt_reason.dupe();
-            let opt_use_desc = *opt_use_desc;
+        UseTInner::UseT(use_op, t) if let Some(t_out) = type_util::optional_slot_type(t) => {
+            let use_op = use_op.dupe();
             narrow_generic(
                 cx,
                 Some(use_op.dupe()),
                 &|t_out_prime: Type| -> UseT<Cx> {
-                    UseT::new(UseTInner::UseT(
-                        use_op_cloned.dupe(),
-                        Type::new(TypeInner::OptionalT {
-                            reason: opt_reason.dupe(),
-                            type_: t_out_prime,
-                            use_desc: opt_use_desc,
-                        }),
-                    ))
+                    type_util::slot_use_t(use_op.dupe(), t_out_prime, true)
                 },
-                t_out,
+                &t_out,
             )?;
             Ok(true)
         }
@@ -2301,18 +2292,6 @@ pub(super) fn reposition<'cx>(
                     recurse(cx, env, trace, desc, mod_reason, seen, inner_t)?,
                 )))
             }
-            TypeInner::OptionalT {
-                reason,
-                type_: inner_t,
-                use_desc,
-            } => {
-                let reason = mod_reason(reason.dupe());
-                Ok(Type::new(TypeInner::OptionalT {
-                    reason,
-                    type_: recurse(cx, env, trace, desc, mod_reason, seen, inner_t)?,
-                    use_desc: *use_desc,
-                }))
-            }
             TypeInner::UnionT(r, rep) => {
                 let r = mod_reason(r.dupe());
                 let rep = rep.try_ident_map(true, |inner_t| {
@@ -2557,6 +2536,35 @@ pub(super) fn flow_opt<'cx>(
         Some(trace) => DepthTrace::rec_trace(trace),
     };
     __flow(cx, env, (t1, t2), trace)
+}
+
+/// Flows the values of one slot into another. An optional slot holds `undefined` anyway, so only
+/// the type of the first slot is checked against it, and a slot of the same type fits.
+pub(super) fn flow_slot<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    trace: Option<DepthTrace>,
+    use_op: UseOp,
+    (t1, optional1): (&Type, bool),
+    (t2, optional2): (&Type, bool),
+) -> Result<(), FlowJsException> {
+    if optional2 && t1.ptr_eq(t2) {
+        return Ok(());
+    }
+    let values = if optional2 {
+        t1.dupe()
+    } else {
+        type_util::slot_value_t(t1, optional1)
+    };
+    flow_opt(
+        cx,
+        env,
+        trace,
+        (
+            &values,
+            &type_util::slot_use_t(use_op, t2.dupe(), optional2),
+        ),
+    )
 }
 
 pub(super) fn flow_opt_t<'cx>(

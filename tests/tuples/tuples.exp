@@ -1492,6 +1492,40 @@ References:
                        ^^^^^^^^^^^ [2]
 
 
+Error --------------------------------------------------------------------------------------------- optional_rest.js:5:1
+
+Cannot cast `rest[i]` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   optional_rest.js:5:1
+   5| rest[i] as string; // error
+      ^^^^^^^
+
+References:
+   optional_rest.js:2:34
+   2| declare const t: [a: number, b?: string];
+                                       ^^^^^^ [1]
+   optional_rest.js:5:12
+   5| rest[i] as string; // error
+                 ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- optional_rest.js:7:3
+
+Cannot cast `v` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   optional_rest.js:7:3
+   7|   v as string; // error
+        ^
+
+References:
+   optional_rest.js:2:34
+   2| declare const t: [a: number, b?: string];
+                                       ^^^^^^ [1]
+   optional_rest.js:7:8
+   7|   v as string; // error
+             ^^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------------------ readonly-array.js:16:74
 
 Cannot return `tup` because in array element: `number` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -3093,4 +3127,4 @@ References:
 
 
 
-Found 193 errors
+Found 195 errors

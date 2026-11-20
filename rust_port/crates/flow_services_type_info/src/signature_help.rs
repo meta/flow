@@ -360,13 +360,9 @@ pub mod callee_finder {
             TypeInner::DefT(_, def) if let DefTInner::ObjT(obj) = &**def => {
                 match cx.get_prop(obj.props_tmap.dupe(), name) {
                     None => None,
-                    Some(prop) => match property::read_t(&prop) {
-                        Some(read_t) => match read_t.deref() {
-                            TypeInner::OptionalT { type_, .. } => Some((type_.dupe(), true)),
-                            _ => Some((read_t, false)),
-                        },
-                        None => None,
-                    },
+                    Some(prop) => {
+                        property::read_slot_of_property_type(&property::property_type(&prop))
+                    }
                 }
             }
             TypeInner::IntersectionT(_, rep) => {

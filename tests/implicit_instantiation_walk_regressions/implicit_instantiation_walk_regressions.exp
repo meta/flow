@@ -877,6 +877,270 @@ References:
                                         ^^^^^ [2]
 
 
+Error --------------------------------------------------------------------------------- optional_props_component.js:10:5
+
+Cannot create `WithDefault` element because in property `value`: `"a"` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   optional_props_component.js:10:5
+   10|     'a' // error
+           ^^^ [1]
+
+References:
+   optional_props_component.js:5:38
+    5| function WithDefault(props: {value?: number} = {}): React.Node {
+                                            ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- optional_slot.js:19:1
+
+Cannot cast `fromUnion` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   optional_slot.js:19:1
+   19| fromUnion as string; // error
+       ^^^^^^^^^
+
+References:
+   optional_slot.js:16:28
+   16| declare const maybeNumber: number | void;
+                                  ^^^^^^ [1]
+   optional_slot.js:19:14
+   19| fromUnion as string; // error
+                    ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- optional_slot.js:22:1
+
+Cannot cast `fromMaybe` to `number` because `null` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   optional_slot.js:22:1
+   22| fromMaybe as number; // error: null
+       ^^^^^^^^^
+
+References:
+   optional_slot.js:20:25
+   20| declare const nullable: ?number;
+                               ^^^^^^^ [1]
+   optional_slot.js:22:14
+   22| fromMaybe as number; // error: null
+                    ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------- optional_slot.js:69:31
+
+Cannot call `objectOf` with `box` bound to `x` because `Box<number>` [1] is not a subtype of
+`{readonly x: number, ...}` [2]. Class instances are not subtypes of object types; consider rewriting
+`{readonly x: number, ...}` [2] as an interface. [class-object-subtyping]
+
+   optional_slot.js:69:31
+   69| const fromInstance = objectOf(box); // error: instances are not objects
+                                     ^^^
+
+References:
+   optional_slot.js:68:20
+   68| declare const box: Box<number>;
+                          ^^^^^^^^^^^ [1]
+   optional_slot.js:67:34
+   67| declare function objectOf<T>(x?: {readonly x: T, ...}): T;
+                                        ^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------- optional_slot.js:89:18
+
+Cannot call `readOnlyCallback` with function bound to `cb` because in the first parameter: property `a` is read-only in
+`{readonly a: number}` [1] but writable in `{a: number}` [2]. [incompatible-variance]
+
+   optional_slot.js:89:18
+   89| readOnlyCallback((x?: {a: number}) => {}) as {a: number}; // error
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   optional_slot.js:89:46
+   89| readOnlyCallback((x?: {a: number}) => {}) as {a: number}; // error
+                                                    ^^^^^^^^^^^ [1]
+   optional_slot.js:89:23
+   89| readOnlyCallback((x?: {a: number}) => {}) as {a: number}; // error
+                             ^^^^^^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- optional_slot.js:95:1
+
+Cannot cast `fromCallback` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   optional_slot.js:95:1
+   95| fromCallback as number; // error
+       ^^^^^^^^^^^^
+
+References:
+   optional_slot.js:93:49
+   93| const fromCallback = callback((o: {readonly p?: number}) => {});
+                                                       ^^^^^^ [1]
+   optional_slot.js:95:17
+   95| fromCallback as number; // error
+                       ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------- optional_slot.js:106:1
+
+Cannot cast `fromRwProp` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   optional_slot.js:106:1
+   106| fromRwProp as string; // error
+        ^^^^^^^^^^
+
+References:
+   optional_slot.js:103:23
+   103| declare const o: {p?: number};
+                              ^^^^^^ [1]
+   optional_slot.js:106:15
+   106| fromRwProp as string; // error
+                      ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------ optional_slot.js:114:10
+
+Cannot call `passOn` with `c` bound to `c` because in property `tier`: `unknown` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   optional_slot.js:114:10
+   114|   passOn(c, a); // error: the `void` of an explicit union gives `A` an `empty` bound
+                 ^
+
+References:
+   optional_slot.js:113:77
+   113| function passOnUnion<A>(c: component(...{tier: number, ...} & A), a: void | A) {
+                                                                                    ^ [1]
+   optional_slot.js:113:48
+   113| function passOnUnion<A>(c: component(...{tier: number, ...} & A), a: void | A) {
+                                                       ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------- optional_slot.js:122:1
+
+Cannot cast `fromTuple` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   optional_slot.js:122:1
+   122| fromTuple as string; // error
+        ^^^^^^^^^
+
+References:
+   optional_slot.js:119:34
+   119| declare const t: [a: string, b?: number];
+                                         ^^^^^^ [1]
+   optional_slot.js:122:14
+   122| fromTuple as string; // error
+                     ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------ optional_slot.js:139:32
+
+Cannot call `unifyRequired` with `optionalElements` bound to `x` because in array element: `[a?: number]` [1] is not
+exactly the same as `[a: void | number]` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
+- Either make `Array<[a?: number]>` [3] and `Array<[a: void | number]>` [4] exactly the same
+- Or make `Array<[a: void | number]>` [4] a `ReadonlyArray`.
+See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
+
+   optional_slot.js:139:32
+   139| const required = unifyRequired(optionalElements); // error
+                                       ^^^^^^^^^^^^^^^^
+
+References:
+   optional_slot.js:138:39
+   138| declare const optionalElements: Array<[a?: number]>;
+                                              ^^^^^^^^^^^^ [1]
+   optional_slot.js:137:44
+   137| declare function unifyRequired<T>(x: Array<[a: T]>): T;
+                                                   ^^^^^^ [2]
+   optional_slot.js:138:33
+   138| declare const optionalElements: Array<[a?: number]>;
+                                        ^^^^^^^^^^^^^^^^^^^ [3]
+   optional_slot.js:137:38
+   137| declare function unifyRequired<T>(x: Array<[a: T]>): T;
+                                             ^^^^^^^^^^^^^ [4]
+
+
+Error ------------------------------------------------------------------------------------------- optional_slot.js:140:1
+
+Cannot cast `required` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   optional_slot.js:140:1
+   140| required as empty; // error
+        ^^^^^^^^
+
+References:
+   optional_slot.js:138:44
+   138| declare const optionalElements: Array<[a?: number]>;
+                                                   ^^^^^^ [1]
+   optional_slot.js:140:13
+   140| required as empty; // error
+                    ^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------- optional_slot.js:140:1
+
+Cannot cast `required` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   optional_slot.js:140:1
+   140| required as empty; // error
+        ^^^^^^^^
+
+References:
+   optional_slot.js:138:44
+   138| declare const optionalElements: Array<[a?: number]>;
+                                                   ^^^^^^ [1]
+   optional_slot.js:140:13
+   140| required as empty; // error
+                    ^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------ optional_slot.js:143:32
+
+Cannot call `unifyOptional` with `requiredElements` bound to `x` because in array element: `[a: number | void]` [1] is
+not exactly the same as `[a?: number]` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
+- Either make `Array<[a: number | void]>` [3] and `Array<[a?: number]>` [4] exactly the same
+- Or make `Array<[a?: number]>` [4] a `ReadonlyArray`.
+See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
+
+   optional_slot.js:143:32
+   143| const optional = unifyOptional(requiredElements); // error
+                                       ^^^^^^^^^^^^^^^^
+
+References:
+   optional_slot.js:142:39
+   142| declare const requiredElements: Array<[a: number | void]>;
+                                              ^^^^^^^^^^^^^^^^^^ [1]
+   optional_slot.js:141:44
+   141| declare function unifyOptional<T>(x: Array<[a?: T]>): T;
+                                                   ^^^^^^^ [2]
+   optional_slot.js:142:33
+   142| declare const requiredElements: Array<[a: number | void]>;
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   optional_slot.js:141:38
+   141| declare function unifyOptional<T>(x: Array<[a?: T]>): T;
+                                             ^^^^^^^^^^^^^^ [4]
+
+
+Error ------------------------------------------------------------------------------------------- optional_slot.js:144:1
+
+Cannot cast `optional` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   optional_slot.js:144:1
+   144| optional as empty; // error
+        ^^^^^^^^
+
+References:
+   optional_slot.js:142:43
+   142| declare const requiredElements: Array<[a: number | void]>;
+                                                  ^^^^^^ [1]
+   optional_slot.js:144:13
+   144| optional as empty; // error
+                    ^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------ overloads_against_signature.js:8:17
 
 Cannot call `apply` with `parse` bound to `f` because: [incompatible-type]
@@ -1328,4 +1592,4 @@ References:
 
 
 
-Found 72 errors
+Found 86 errors
