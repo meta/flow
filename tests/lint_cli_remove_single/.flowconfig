@@ -9,4 +9,4 @@ all=true
 
 [lints]
 all=error
-sketchy-number=off
+unused-promise=off

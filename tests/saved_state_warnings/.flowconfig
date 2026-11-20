@@ -3,4 +3,4 @@ all=true
 lazy_mode=true
 
 [lints]
-sketchy-null-string=warn
+require-explicit-enum-switch-cases=warn

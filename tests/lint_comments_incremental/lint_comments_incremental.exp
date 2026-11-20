@@ -2,22 +2,19 @@ After start:
 No errors!
 
 After introducing a lint error:
-Error ------------------------------------------------------------------------------------------------------ test.js:5:5
+Error ------------------------------------------------------------------------------------------------------ test.js:5:1
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   test.js:5:5
-   5| if (x) { /* sketchy */ }
-          ^
+   test.js:5:1
+   5| x?.p; /* unnecessary */
+      ^^^^
 
 References:
-   test.js:3:9
-   3| var x: ?number = 0;
-              ^^^^^^ [1]
-   test.js:3:8
-   3| var x: ?number = 0;
-             ^^^^^^^ [2]
+   test.js:5:1
+   5| x?.p; /* unnecessary */
+      ^ [1]
 
 
 
@@ -31,8 +28,8 @@ Warning ------------------------------------------------------------------------
 
 Unused suppression comment. [InferError]
 
-   4| //flowlint-next-line sketchy-null:off
-                           ^^^^^^^^^^^^^^^^
+   4| //flowlint-next-line unnecessary-optional-chain:off
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 

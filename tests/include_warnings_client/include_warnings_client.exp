@@ -1,20 +1,17 @@
 Without --include-warnings
-Error ------------------------------------------------------------------------------------------------------ test.js:7:5
+Error ------------------------------------------------------------------------------------------------------ test.js:7:1
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   test.js:7:5
-   7| if (x) {} //Error
-          ^
+   test.js:7:1
+   7| x?.a; //Error
+      ^^^^
 
 References:
-   test.js:4:9
-   4| var x: ?number = 0;
-              ^^^^^^ [1]
-   test.js:4:8
-   4| var x: ?number = 0;
-             ^^^^^^^ [2]
+   test.js:7:1
+   7| x?.a; //Error
+      ^ [1]
 
 
 
@@ -22,40 +19,34 @@ Found 1 error
 
 
 With --include-warnings
-Error ------------------------------------------------------------------------------------------------------ test.js:7:5
+Error ------------------------------------------------------------------------------------------------------ test.js:7:1
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   test.js:7:5
-   7| if (x) {} //Error
-          ^
-
-References:
-   test.js:4:9
-   4| var x: ?number = 0;
-              ^^^^^^ [1]
-   test.js:4:8
-   4| var x: ?number = 0;
-             ^^^^^^^ [2]
-
-
-Warning --------------------------------------------------------------------------------------------------- test.js:10:5
-
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
-
-   test.js:10:5
-   10| if (x) {} //Warning
-           ^
+   test.js:7:1
+   7| x?.a; //Error
+      ^^^^
 
 References:
-   test.js:4:9
-    4| var x: ?number = 0;
-               ^^^^^^ [1]
-   test.js:4:8
-    4| var x: ?number = 0;
-              ^^^^^^^ [2]
+   test.js:7:1
+   7| x?.a; //Error
+      ^ [1]
+
+
+Warning --------------------------------------------------------------------------------------------------- test.js:10:1
+
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
+
+   test.js:10:1
+   10| x?.a; //Warning
+       ^^^^
+
+References:
+   test.js:10:1
+   10| x?.a; //Warning
+       ^ [1]
 
 
 
@@ -66,7 +57,7 @@ JSON without --include-warnings
 {
   "errors":[
     {
-      "error_codes":["sketchy-null-number"],
+      "error_codes":["unnecessary-optional-chain"],
       "extra":[
         {
           "message":[
@@ -85,39 +76,19 @@ JSON without --include-warnings
         {
           "message":[
             {
-              "context":"var x: ?number = 0;",
+              "context":"x?.a; //Error",
               "descr":"[1]",
-              "end":14,
-              "endline":4,
-              "line":4,
+              "end":1,
+              "endline":7,
+              "line":7,
               "loc":{
-                "end":{"column":14,"line":4,"offset":64},
+                "end":{"column":1,"line":7,"offset":149},
                 "source":"test.js",
-                "start":{"column":9,"line":4,"offset":58},
+                "start":{"column":1,"line":7,"offset":148},
                 "type":"SourceFile"
               },
               "path":"test.js",
-              "start":9,
-              "type":"Blame"
-            }
-          ]
-        },
-        {
-          "message":[
-            {
-              "context":"var x: ?number = 0;",
-              "descr":"[2]",
-              "end":14,
-              "endline":4,
-              "line":4,
-              "loc":{
-                "end":{"column":14,"line":4,"offset":64},
-                "source":"test.js",
-                "start":{"column":8,"line":4,"offset":57},
-                "type":"SourceFile"
-              },
-              "path":"test.js",
-              "start":8,
+              "start":1,
               "type":"Blame"
             }
           ]
@@ -127,19 +98,19 @@ JSON without --include-warnings
       "level":"error",
       "message":[
         {
-          "context":"if (x) {} //Error",
-          "descr":"Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]? [sketchy-null-number]",
-          "end":5,
+          "context":"x?.a; //Error",
+          "descr":"This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will short-circuit the nullish case. [unnecessary-optional-chain]",
+          "end":4,
           "endline":7,
           "line":7,
           "loc":{
-            "end":{"column":5,"line":7,"offset":116},
+            "end":{"column":4,"line":7,"offset":152},
             "source":"test.js",
-            "start":{"column":5,"line":7,"offset":115},
+            "start":{"column":1,"line":7,"offset":148},
             "type":"SourceFile"
           },
           "path":"test.js",
-          "start":5,
+          "start":1,
           "type":"Blame"
         }
       ],
@@ -155,7 +126,7 @@ JSON with --include-warnings
 {
   "errors":[
     {
-      "error_codes":["sketchy-null-number"],
+      "error_codes":["unnecessary-optional-chain"],
       "extra":[
         {
           "message":[
@@ -174,39 +145,19 @@ JSON with --include-warnings
         {
           "message":[
             {
-              "context":"var x: ?number = 0;",
+              "context":"x?.a; //Error",
               "descr":"[1]",
-              "end":14,
-              "endline":4,
-              "line":4,
+              "end":1,
+              "endline":7,
+              "line":7,
               "loc":{
-                "end":{"column":14,"line":4,"offset":64},
+                "end":{"column":1,"line":7,"offset":149},
                 "source":"test.js",
-                "start":{"column":9,"line":4,"offset":58},
+                "start":{"column":1,"line":7,"offset":148},
                 "type":"SourceFile"
               },
               "path":"test.js",
-              "start":9,
-              "type":"Blame"
-            }
-          ]
-        },
-        {
-          "message":[
-            {
-              "context":"var x: ?number = 0;",
-              "descr":"[2]",
-              "end":14,
-              "endline":4,
-              "line":4,
-              "loc":{
-                "end":{"column":14,"line":4,"offset":64},
-                "source":"test.js",
-                "start":{"column":8,"line":4,"offset":57},
-                "type":"SourceFile"
-              },
-              "path":"test.js",
-              "start":8,
+              "start":1,
               "type":"Blame"
             }
           ]
@@ -216,26 +167,26 @@ JSON with --include-warnings
       "level":"error",
       "message":[
         {
-          "context":"if (x) {} //Error",
-          "descr":"Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]? [sketchy-null-number]",
-          "end":5,
+          "context":"x?.a; //Error",
+          "descr":"This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will short-circuit the nullish case. [unnecessary-optional-chain]",
+          "end":4,
           "endline":7,
           "line":7,
           "loc":{
-            "end":{"column":5,"line":7,"offset":116},
+            "end":{"column":4,"line":7,"offset":152},
             "source":"test.js",
-            "start":{"column":5,"line":7,"offset":115},
+            "start":{"column":1,"line":7,"offset":148},
             "type":"SourceFile"
           },
           "path":"test.js",
-          "start":5,
+          "start":1,
           "type":"Blame"
         }
       ],
       "suppressions":[]
     },
     {
-      "error_codes":["sketchy-null-number"],
+      "error_codes":["unnecessary-optional-chain"],
       "extra":[
         {
           "message":[
@@ -254,39 +205,19 @@ JSON with --include-warnings
         {
           "message":[
             {
-              "context":"var x: ?number = 0;",
+              "context":"x?.a; //Warning",
               "descr":"[1]",
-              "end":14,
-              "endline":4,
-              "line":4,
+              "end":1,
+              "endline":10,
+              "line":10,
               "loc":{
-                "end":{"column":14,"line":4,"offset":64},
+                "end":{"column":1,"line":10,"offset":217},
                 "source":"test.js",
-                "start":{"column":9,"line":4,"offset":58},
+                "start":{"column":1,"line":10,"offset":216},
                 "type":"SourceFile"
               },
               "path":"test.js",
-              "start":9,
-              "type":"Blame"
-            }
-          ]
-        },
-        {
-          "message":[
-            {
-              "context":"var x: ?number = 0;",
-              "descr":"[2]",
-              "end":14,
-              "endline":4,
-              "line":4,
-              "loc":{
-                "end":{"column":14,"line":4,"offset":64},
-                "source":"test.js",
-                "start":{"column":8,"line":4,"offset":57},
-                "type":"SourceFile"
-              },
-              "path":"test.js",
-              "start":8,
+              "start":1,
               "type":"Blame"
             }
           ]
@@ -296,19 +227,19 @@ JSON with --include-warnings
       "level":"warning",
       "message":[
         {
-          "context":"if (x) {} //Warning",
-          "descr":"Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]? [sketchy-null-number]",
-          "end":5,
+          "context":"x?.a; //Warning",
+          "descr":"This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will short-circuit the nullish case. [unnecessary-optional-chain]",
+          "end":4,
           "endline":10,
           "line":10,
           "loc":{
-            "end":{"column":5,"line":10,"offset":174},
+            "end":{"column":4,"line":10,"offset":220},
             "source":"test.js",
-            "start":{"column":5,"line":10,"offset":173},
+            "start":{"column":1,"line":10,"offset":216},
             "type":"SourceFile"
           },
           "path":"test.js",
-          "start":5,
+          "start":1,
           "type":"Blame"
         }
       ],

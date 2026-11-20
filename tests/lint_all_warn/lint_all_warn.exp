@@ -1,19 +1,16 @@
-Error ---------------------------------------------------------------------------------------------- sketchy_null.js:6:5
+Error -------------------------------------------------------------------------------- unnecessary-optional-chain.js:6:1
 
-Sketchy null check on string [1] which is potentially an empty string. Perhaps you meant to check for null or
-undefined [2]? [sketchy-null-string]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   sketchy_null.js:6:5
-   6| if (x) { } // This should be an error
-          ^
+   unnecessary-optional-chain.js:6:1
+   6| x?.p; // This should be an error
+      ^^^^
 
 References:
-   sketchy_null.js:3:19
-   3| declare const x: ?string;
-                        ^^^^^^ [1]
-   sketchy_null.js:3:18
-   3| declare const x: ?string;
-                       ^^^^^^^ [2]
+   unnecessary-optional-chain.js:6:1
+   6| x?.p; // This should be an error
+      ^ [1]
 
 
 Warning ----------------------------------------------------------------------------------------- dynamic-export.js:3:23
@@ -24,22 +21,19 @@ Unclear type. Using `any` is not safe! [unclear-type]
                             ^^^
 
 
-Warning -------------------------------------------------------------------------------------------- sketchy_null.js:8:5
+Warning ------------------------------------------------------------------------------ unnecessary-optional-chain.js:8:1
 
-Sketchy null check on string [1] which is potentially an empty string. Perhaps you meant to check for null or
-undefined [2]? [sketchy-null-string]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   sketchy_null.js:8:5
-   8| if (x) { } // This should be a warning
-          ^
+   unnecessary-optional-chain.js:8:1
+   8| x?.p; // This should be a warning
+      ^^^^
 
 References:
-   sketchy_null.js:3:19
-   3| declare const x: ?string;
-                        ^^^^^^ [1]
-   sketchy_null.js:3:18
-   3| declare const x: ?string;
-                       ^^^^^^^ [2]
+   unnecessary-optional-chain.js:8:1
+   8| x?.p; // This should be a warning
+      ^ [1]
 
 
 

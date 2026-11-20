@@ -2,184 +2,184 @@ Error --------------------------------------------------------------------------
 
 Redundant argument. This argument doesn't change any lint settings. [lint-setting]
 
-   3| //flowlint-line sketchy-null:off
-                      ^^^^^^^^^^^^^^^^
+   3| //flowlint-line unnecessary-optional-chain:off
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:4:22
 
 Redundant argument. This argument doesn't change any lint settings. [lint-setting]
 
-   4| //flowlint-next-line sketchy-null:off
-                           ^^^^^^^^^^^^^^^^
+   4| //flowlint-next-line unnecessary-optional-chain:off
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:6:12
 
 Redundant argument. This argument doesn't change any lint settings. [lint-setting]
 
-   6| //flowlint sketchy-null:off
-                 ^^^^^^^^^^^^^^^^
+   6| //flowlint unnecessary-optional-chain:off
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:12:12
 
 Redundant argument. This argument doesn't change any lint settings. [lint-setting]
 
-   12| //flowlint sketchy-null:error
-                  ^^^^^^^^^^^^^^^^^^
+   12| //flowlint unnecessary-optional-chain:error
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:13:17
 
 Redundant argument. This argument doesn't change any lint settings. [lint-setting]
 
-   13| //flowlint-line sketchy-null:error
-                       ^^^^^^^^^^^^^^^^^^
+   13| //flowlint-line unnecessary-optional-chain:error
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:16:12
 
 Redundant argument. This argument doesn't change any lint settings. [lint-setting]
 
-   16| //flowlint sketchy-null:off
-                  ^^^^^^^^^^^^^^^^
+   16| //flowlint unnecessary-optional-chain:off
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:17:17
 
 Redundant argument. This argument doesn't change any lint settings. [lint-setting]
 
-   17| //flowlint-line sketchy-null:off
-                       ^^^^^^^^^^^^^^^^
+   17| //flowlint-line unnecessary-optional-chain:off
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Error ---------------------------------------------------------------------------------------------------- test.js:22:32
-
-Redundant argument. This argument doesn't change any lint settings. [lint-setting]
-
-   22| //flowlint sketchy-null:error, sketchy-null:error
-                                      ^^^^^^^^^^^^^^^^^^
-
-
-Error ---------------------------------------------------------------------------------------------------- test.js:23:35
+Error ---------------------------------------------------------------------------------------------------- test.js:22:46
 
 Redundant argument. This argument doesn't change any lint settings. [lint-setting]
 
-   23| //flowlint-line sketchy-null:off, sketchy-null:off
-                                         ^^^^^^^^^^^^^^^^
+   22| //flowlint unnecessary-optional-chain:error, unnecessary-optional-chain:error
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Error ---------------------------------------------------------------------------------------------------- test.js:25:30
-
-Redundant argument. This argument doesn't change any lint settings. [lint-setting]
-
-   25| //flowlint sketchy-null:off, sketchy-null:off
-                                    ^^^^^^^^^^^^^^^^
-
-
-Error ---------------------------------------------------------------------------------------------------- test.js:26:37
+Error ---------------------------------------------------------------------------------------------------- test.js:23:49
 
 Redundant argument. This argument doesn't change any lint settings. [lint-setting]
 
-   26| //flowlint-line sketchy-null:error, sketchy-null:error
-                                           ^^^^^^^^^^^^^^^^^^
+   23| //flowlint-line unnecessary-optional-chain:off, unnecessary-optional-chain:off
+                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:25:44
+
+Redundant argument. This argument doesn't change any lint settings. [lint-setting]
+
+   25| //flowlint unnecessary-optional-chain:off, unnecessary-optional-chain:off
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:26:51
+
+Redundant argument. This argument doesn't change any lint settings. [lint-setting]
+
+   26| //flowlint-line unnecessary-optional-chain:error, unnecessary-optional-chain:error
+                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:31:12
 
 Redundant argument. The values set by this argument are overwritten later in this comment. [lint-setting]
 
-   31| //flowlint sketchy-null:error, sketchy-null:off
-                  ^^^^^^^^^^^^^^^^^^
+   31| //flowlint unnecessary-optional-chain:error, unnecessary-optional-chain:off
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:32:17
 
 Redundant argument. The values set by this argument are overwritten later in this comment. [lint-setting]
 
-   32| //flowlint-line sketchy-null:error, sketchy-null:off
-                       ^^^^^^^^^^^^^^^^^^
+   32| //flowlint-line unnecessary-optional-chain:error, unnecessary-optional-chain:off
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:37:12
 
 Redundant argument. The values set by this argument are overwritten later in this comment. [lint-setting]
 
-   37| //flowlint sketchy-null-bool:error, sketchy-null:off
-                  ^^^^^^^^^^^^^^^^^^^^^^^
+   37| //flowlint unnecessary-invariant:error, unnecessary-assertion:off
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:38:17
 
 Redundant argument. The values set by this argument are overwritten later in this comment. [lint-setting]
 
-   38| //flowlint-line sketchy-null-bool:error, sketchy-null:off
-                       ^^^^^^^^^^^^^^^^^^^^^^^
+   38| //flowlint-line unnecessary-invariant:error, unnecessary-assertion:off
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:50:12
 
 Redundant argument. This argument doesn't change any lint settings. [lint-setting]
 
-   50| //flowlint sketchy-null:error, sketchy-null:error
-                  ^^^^^^^^^^^^^^^^^^
+   50| //flowlint unnecessary-optional-chain:error, unnecessary-optional-chain:error
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Error ---------------------------------------------------------------------------------------------------- test.js:50:32
+Error ---------------------------------------------------------------------------------------------------- test.js:50:46
 
 Redundant argument. This argument doesn't change any lint settings. [lint-setting]
 
-   50| //flowlint sketchy-null:error, sketchy-null:error
-                                      ^^^^^^^^^^^^^^^^^^
+   50| //flowlint unnecessary-optional-chain:error, unnecessary-optional-chain:error
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:51:17
 
 Redundant argument. This argument doesn't change any lint settings. [lint-setting]
 
-   51| //flowlint-line sketchy-null:error, sketchy-null:error
-                       ^^^^^^^^^^^^^^^^^^
+   51| //flowlint-line unnecessary-optional-chain:error, unnecessary-optional-chain:error
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Error ---------------------------------------------------------------------------------------------------- test.js:51:37
+Error ---------------------------------------------------------------------------------------------------- test.js:51:51
 
 Redundant argument. This argument doesn't change any lint settings. [lint-setting]
 
-   51| //flowlint-line sketchy-null:error, sketchy-null:error
-                                           ^^^^^^^^^^^^^^^^^^
+   51| //flowlint-line unnecessary-optional-chain:error, unnecessary-optional-chain:error
+                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:54:12
 
 Redundant argument. This argument doesn't change any lint settings. [lint-setting]
 
-   54| //flowlint sketchy-null:off, sketchy-null:off
-                  ^^^^^^^^^^^^^^^^
+   54| //flowlint unnecessary-optional-chain:off, unnecessary-optional-chain:off
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Error ---------------------------------------------------------------------------------------------------- test.js:54:30
+Error ---------------------------------------------------------------------------------------------------- test.js:54:44
 
 Redundant argument. This argument doesn't change any lint settings. [lint-setting]
 
-   54| //flowlint sketchy-null:off, sketchy-null:off
-                                    ^^^^^^^^^^^^^^^^
+   54| //flowlint unnecessary-optional-chain:off, unnecessary-optional-chain:off
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:55:17
 
 Redundant argument. This argument doesn't change any lint settings. [lint-setting]
 
-   55| //flowlint-line sketchy-null:off, sketchy-null:off
-                       ^^^^^^^^^^^^^^^^
+   55| //flowlint-line unnecessary-optional-chain:off, unnecessary-optional-chain:off
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Error ---------------------------------------------------------------------------------------------------- test.js:55:35
+Error ---------------------------------------------------------------------------------------------------- test.js:55:49
 
 Redundant argument. This argument doesn't change any lint settings. [lint-setting]
 
-   55| //flowlint-line sketchy-null:off, sketchy-null:off
-                                         ^^^^^^^^^^^^^^^^
+   55| //flowlint-line unnecessary-optional-chain:off, unnecessary-optional-chain:off
+                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:60:12
@@ -202,8 +202,8 @@ Warning ------------------------------------------------------------------------
 
 Unused suppression comment. [InferError]
 
-   15| /*flowlint sketchy-null:off*/ //Unused suppression
-                  ^^^^^^^^^^^^^^^^
+   15| /*flowlint unnecessary-optional-chain:off*/ //Unused suppression
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Warning -------------------------------------------------------------------------------------------------- test.js:43:32
@@ -226,8 +226,8 @@ Warning ------------------------------------------------------------------------
 
 Unused suppression comment. [InferError]
 
-   53| /*Clearing the settings; not an error.*/ /*flowlint sketchy-null:off*/ //Unused suppression
-                                                           ^^^^^^^^^^^^^^^^
+   53| /*Clearing the settings; not an error.*/ /*flowlint unnecessary-optional-chain:off*/ //Unused suppression
+                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Warning -------------------------------------------------------------------------------------------------- test.js:66:32

@@ -9,4 +9,6 @@ function f(x: number) {
   x = 1; // Error: cannot reassign constant parameter
 }
 
-const x: any = {}; // Error: unclear-type
+function g(o: {a: number}) {
+  o?.a; // Error: unnecessary-optional-chain
+}

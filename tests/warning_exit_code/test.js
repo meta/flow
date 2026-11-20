@@ -1,4 +1,4 @@
 /* @flow */
 
-var x: ?number = 0;
-if (x) {}
+var x: {p: number} = {p: 0};
+x?.p;

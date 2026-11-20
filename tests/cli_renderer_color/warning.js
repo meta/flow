@@ -3,10 +3,9 @@
  * @flow
  */
 
-/* flowlint sketchy-null:warn */
+/* flowlint unnecessary-optional-chain:warn */
 
-const x: ?number = 42;
+const x: {p: number} = {p: 42};
 
-// Warning: Sketchy-null check
-if (x) {
-}
+// Warning: Unnecessary optional chain
+x?.p;

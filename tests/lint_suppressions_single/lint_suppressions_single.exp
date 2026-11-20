@@ -1,186 +1,154 @@
-Error --------------------------------------------------------------------------------------------------- cycle_C.js:4:7
+Error --------------------------------------------------------------------------------------------------- cycle_C.js:6:3
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+`Promise` in sync scope is unused. Promises must be handled by calling .then with a rejection handler, .catch, or
+.finally. [unused-promise]
 
-   cycle_C.js:4:7
-   4|   if (x);
-            ^
-
-References:
-   cycle_C.js:3:15
-   3| function f(x: number | null) {
-                    ^^^^^^ [1]
-   cycle_C.js:3:24
-   3| function f(x: number | null) {
-                             ^^^^ [2]
+   6|   p(x);
+        ^^^^^
 
 
-Error ------------------------------------------------------------------------------------------ simple_sketchies.js:5:7
+Error ------------------------------------------------------------------------------------ simple_optional_chains.js:5:3
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   simple_sketchies.js:5:7
-   5|   if (x) {/* sketchy */}
-            ^
+   simple_optional_chains.js:5:3
+   5|   x?.a; /* unnecessary */
+        ^^^^
 
 References:
-   simple_sketchies.js:4:16
-   4| function f(x: ?number) {
-                     ^^^^^^ [1]
-   simple_sketchies.js:4:15
-   4| function f(x: ?number) {
-                    ^^^^^^^ [2]
+   simple_optional_chains.js:5:3
+   5|   x?.a; /* unnecessary */
+        ^ [1]
 
 
-Error ----------------------------------------------------------------------------------------- simple_sketchies.js:10:7
+Error ----------------------------------------------------------------------------------- simple_optional_chains.js:10:3
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   simple_sketchies.js:10:7
-   10|   if (x) { /* sketchy */ }
-             ^
+   simple_optional_chains.js:10:3
+   10|   x?.a; /* unnecessary */
+         ^^^^
 
 References:
-   simple_sketchies.js:9:15
-    9| function h(x: number|null) {
-                     ^^^^^^ [1]
-   simple_sketchies.js:9:22
-    9| function h(x: number|null) {
-                            ^^^^ [2]
+   simple_optional_chains.js:10:3
+   10|   x?.a; /* unnecessary */
+         ^ [1]
 
 
-Error ----------------------------------------------------------------------------------------- simple_sketchies.js:27:7
+Error ----------------------------------------------------------------------------------- simple_optional_chains.js:27:3
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [1]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `o.p` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   simple_sketchies.js:27:7
-   27|   if (o.p) {/* sketchy */}
-             ^^^
+   simple_optional_chains.js:27:3
+   27|   o.p?.a; /* unnecessary */
+         ^^^^^^
 
 References:
-   simple_sketchies.js:26:21
-   26| function l(o: { p?: number }) {
-                           ^^^^^^ [1]
+   simple_optional_chains.js:27:3
+   27|   o.p?.a; /* unnecessary */
+         ^^^ [1]
 
 
-Error ----------------------------------------------------------------------------------------- simple_sketchies.js:32:7
+Error ----------------------------------------------------------------------------------- simple_optional_chains.js:32:3
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `o.p` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   simple_sketchies.js:32:7
-   32|   if (o.p) {/* sketchy */}
-             ^^^
-
-References:
-   simple_sketchies.js:31:21
-   31| function m(o: { p: ?number }) {
-                           ^^^^^^ [1]
-   simple_sketchies.js:31:20
-   31| function m(o: { p: ?number }) {
-                          ^^^^^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------- simple_sketchies.js:37:7
-
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
-
-   simple_sketchies.js:37:7
-   37|   if (o.p) { /* sketchy */ }
-             ^^^
+   simple_optional_chains.js:32:3
+   32|   o.p?.(); /* unnecessary */
+         ^^^^^^^
 
 References:
-   simple_sketchies.js:36:20
-   36| function n(o: { p: number|null|void }) {
-                          ^^^^^^ [1]
-   simple_sketchies.js:36:32
-   36| function n(o: { p: number|null|void }) {
-                                      ^^^^ [2]
+   simple_optional_chains.js:32:3
+   32|   o.p?.(); /* unnecessary */
+         ^^^ [1]
 
 
-Error ----------------------------------------------------------------------------------------- simple_sketchies.js:48:7
+Error ----------------------------------------------------------------------------------- simple_optional_chains.js:37:3
 
-Sketchy null check on string [1] which is potentially an empty string. Perhaps you meant to check for null or
-undefined [2]? [sketchy-null-string]
+This use of optional chaining (`?.`) is unnecessary because `o.p` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   simple_sketchies.js:48:7
-   48|   if (assignee = x) { /* sketchy */ }
-             ^^^^^^^^
+   simple_optional_chains.js:37:3
+   37|   o.p?.a; /* unnecessary */
+         ^^^^^^
 
 References:
-   simple_sketchies.js:46:16
-   46| function z(x: ?string) {
-                      ^^^^^^ [1]
-   simple_sketchies.js:46:15
-   46| function z(x: ?string) {
-                     ^^^^^^^ [2]
+   simple_optional_chains.js:37:3
+   37|   o.p?.a; /* unnecessary */
+         ^^^ [1]
 
 
-Error ---------------------------------------------------------------------------------------- simple_sketchies.js:53:16
+Error ----------------------------------------------------------------------------------- simple_optional_chains.js:48:3
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `assignee = x` [1] cannot be nullish or because an earlier
+`?.` will short-circuit the nullish case. [unnecessary-optional-chain]
 
-   simple_sketchies.js:53:16
-   53| var valToUse = value || defaultVal; /* sketchy */
-                      ^^^^^
+   simple_optional_chains.js:48:3
+   48|   (assignee = x)?.a; /* unnecessary */
+         ^^^^^^^^^^^^^^^^^
 
 References:
-   simple_sketchies.js:51:13
-   51| var value: ?number = 0;
-                   ^^^^^^ [1]
-   simple_sketchies.js:51:12
-   51| var value: ?number = 0;
-                  ^^^^^^^ [2]
+   simple_optional_chains.js:48:4
+   48|   (assignee = x)?.a; /* unnecessary */
+          ^^^^^^^^^^^^ [1]
 
 
-Error ---------------------------------------------------------------------------------------- simple_sketchies.js:58:20
+Error ---------------------------------------------------------------------------------- simple_optional_chains.js:53:16
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `value` [1] cannot be nullish or because an earlier `?.`
+will short-circuit the nullish case. [unnecessary-optional-chain]
 
-   simple_sketchies.js:58:20
-   58| var sketchyFalse = value && false; /* sketchy */
-                          ^^^^^
+   simple_optional_chains.js:53:16
+   53| var valToUse = value?.a; /* unnecessary */
+                      ^^^^^^^^
 
 References:
-   simple_sketchies.js:51:13
-   51| var value: ?number = 0;
-                   ^^^^^^ [1]
-   simple_sketchies.js:51:12
-   51| var value: ?number = 0;
-                  ^^^^^^^ [2]
+   simple_optional_chains.js:53:16
+   53| var valToUse = value?.a; /* unnecessary */
+                      ^^^^^ [1]
 
 
-Error ---------------------------------------------------------------------------------------- simple_sketchies.js:59:19
+Error ---------------------------------------------------------------------------------- simple_optional_chains.js:58:17
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `value` [1] cannot be nullish or because an earlier `?.`
+will short-circuit the nullish case. [unnecessary-optional-chain]
 
-   simple_sketchies.js:59:19
-   59| var sketchyTrue = value || true; /* sketchy */
-                         ^^^^^
+   simple_optional_chains.js:58:17
+   58| var computedA = value?.['a']; /* unnecessary */
+                       ^^^^^^^^^^^^
 
 References:
-   simple_sketchies.js:51:13
-   51| var value: ?number = 0;
-                   ^^^^^^ [1]
-   simple_sketchies.js:51:12
-   51| var value: ?number = 0;
-                  ^^^^^^^ [2]
+   simple_optional_chains.js:58:17
+   58| var computedA = value?.['a']; /* unnecessary */
+                       ^^^^^ [1]
 
 
-Error -------------------------------------------------------------------------------------------------- unclear.js:1:35
+Error ---------------------------------------------------------------------------------- simple_optional_chains.js:59:15
 
-Unclear type. Using `any` is not safe! [unclear-type]
+This use of optional chaining (`?.`) is unnecessary because function [1] cannot be nullish or because an earlier `?.`
+will short-circuit the nullish case. [unnecessary-optional-chain]
 
-   1| declare function bar(x: unknown): any; // error
-                                        ^^^
+   simple_optional_chains.js:59:15
+   59| var calledA = (() => value)?.(); /* unnecessary */
+                     ^^^^^^^^^^^^^^^^^
+
+References:
+   simple_optional_chains.js:59:16
+   59| var calledA = (() => value)?.(); /* unnecessary */
+                      ^^^^^^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------- unused_promise.js:2:1
+
+`Promise` in sync scope is unused. Promises must be handled by calling .then with a rejection handler, .catch, or
+.finally. [unused-promise]
+
+   2| bar(0); // error
+      ^^^^^^^
 
 
 

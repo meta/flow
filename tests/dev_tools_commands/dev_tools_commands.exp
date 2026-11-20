@@ -29,9 +29,9 @@ takesNumber("nope");
 Removed 1 comments in 1 files
 Added 0 comments in 0 files
 >>> update_sites/shared.js
-function f(x: ?number) {
-  // $FlowFixMe[sketchy-null-number](site=bar)
-  if (x) {}
+function f(x: {a: number}) {
+  // $FlowFixMe[unnecessary-optional-chain](site=bar)
+  x?.a;
 }
 
 === add-comments adds suppressions for errors ===

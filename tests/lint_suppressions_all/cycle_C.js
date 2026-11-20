@@ -1,7 +1,9 @@
 var vars = require("./cycle_B.js")
 
+declare function p(x: number | null): Promise<void>;
+
 function f(x: number | null) {
-  if (x);
+  p(x);
 }
 
 const resNull: void = f(null);

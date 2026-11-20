@@ -4153,17 +4153,16 @@
 [0m[0m              [0m[0m[0m[0;2m113[0m[0;2m|[0m[0;2m[0m[0m
 [0m[0m
 [0m[0m
-[0m[33mWarning ------------------------------------------------------------------------------------------------ warning.js:11:5[0m[0m
+[0m[33mWarning ------------------------------------------------------------------------------------------------ warning.js:11:1[0m[0m
 [0m[0m
-[0m[0mSketchy[0m[0m [0m[0mnull[0m[0m [0m[0mcheck[0m[0m [0m[0mon[0m[0m [0m[0m[0m[0;4mnumber[0m[0m [0m[0;2m[[0m[36m1[0m[0;2m][0m[0m[0m[0m [0m[0m[0m[0mwhich[0m[0m [0m[0mis[0m[0m [0m[0mpotentially[0m[0m [0m[0m[0m[0m0[0m[0m.[0m[0m [0m[0mPerhaps[0m[0m [0m[0myou[0m[0m [0m[0mmeant[0m[0m [0m[0mto[0m[0m [0m[0m[0m[0mcheck[0m[0m [0m[0mfor[0m[0m [0m[0m[0m[0;4mnull[0m[0;4m [0m[0;4mor[0m[0;4m [0m[0;4mundefined[0m[0m [0m[0;2m[[0m[33m2[0m[0;2m][0m[0m?[0m[0m[0m[0m
-[0m[0m[[0m[0msketchy-null-number[0m[0m][0m[0m
+[0m[0mThis[0m[0m [0m[0muse[0m[0m [0m[0mof[0m[0m [0m[0moptional[0m[0m [0m[0mchaining[0m[0m [0m[0m([0m[0;1m?.[0m[0m)[0m[0m [0m[0mis[0m[0m [0m[0munnecessary[0m[0m [0m[0mbecause[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mx[0m[0;4m[0m[0m [0m[0;2m[[0m[36m1[0m[0;2m][0m[0m[0m[0m [0m[0mcannot[0m[0m [0m[0mbe[0m[0m [0m[0mnullish[0m[0m [0m[0mor[0m[0m [0m[0mbecause[0m[0m [0m[0man[0m[0m [0m[0mearlier[0m[0m [0m[0m[0m[0;1m?.[0m[0m[0m[0m [0m[0mwill[0m[0m
+[0m[0mshort-circuit[0m[0m [0m[0mthe[0m[0m [0m[0mnullish[0m[0m [0m[0mcase.[0m[0m[0m[0m [0m[0m[[0m[0munnecessary-optional-chain[0m[0m][0m[0m
 [0m[0m
-[0m[0m [0m[0;2m[[0m[33m2[0m[0;2m][0m[0;2m[[0m[36m1[0m[0;2m][0m[0m [0m[0m [0m[0;2m8[0m[0;2m|[0m[0m [0m[0;2mconst x: [0m[33m?[0m[36mnumber[0m[33m[0m[0;2m = 42;[0m[0m
-[0m[0m        [0m[0m [0m[0;2m9[0m[0;2m|[0m[0;2m[0m[0m
-[0m[0m        [0m[0m[0m[0;2m10[0m[0;2m|[0m[0m [0m[0;2m// Warning: Sketchy-null check[0m[0m
-[0m[0m        [0m[0m[0m[0;2m11[0m[0;2m|[0m[0m [0m[0;2mif ([0m[31mx[0m[0;2m) {[0m[0m
-[0m[0m        [0m[0m[0m[0;2m12[0m[0;2m|[0m[0m [0m[0;2m}[0m[0m
-[0m[0m        [0m[0m[0m[0;2m13[0m[0;2m|[0m[0;2m[0m[0m
+[0m[0m     [0m[0m [0m[0;2m8[0m[0;2m|[0m[0m [0m[0;2mconst x: {p: number} = {p: 42};[0m[0m
+[0m[0m     [0m[0m [0m[0;2m9[0m[0;2m|[0m[0;2m[0m[0m
+[0m[0m     [0m[0m[0m[0;2m10[0m[0;2m|[0m[0m [0m[0;2m// Warning: Unnecessary optional chain[0m[0m
+[0m[0m [0m[0;2m[[0m[36m1[0m[0;2m][0m[0m [0m[0m[0m[0;2m11[0m[0;2m|[0m[0m [0m[0;2m[0m[31m[0m[36mx[0m[31m?.p[0m[0;2m;[0m[0m
+[0m[0m     [0m[0m[0m[0;2m12[0m[0;2m|[0m[0;2m[0m[0m
 [0m[0m
 [0m[0m
 [0m
@@ -8852,22 +8851,19 @@ References:
 [0m[0m        [0m[36m                                             ^^[0m[36m [4][0m[0m
 [0m[0m
 [0m[0m
-[0m[33mWarning ------------------------------------------------------------------------------------------------ warning.js:11:5[0m[0m
+[0m[33mWarning ------------------------------------------------------------------------------------------------ warning.js:11:1[0m[0m
 [0m[0m
-[0m[0mSketchy[0m[0m [0m[0mnull[0m[0m [0m[0mcheck[0m[0m [0m[0mon[0m[0m [0m[0m[0m[0;4mnumber[0m[0m [0m[0;2m[[0m[36m1[0m[0;2m][0m[0m[0m[0m [0m[0m[0m[0mwhich[0m[0m [0m[0mis[0m[0m [0m[0mpotentially[0m[0m [0m[0m[0m[0m0[0m[0m.[0m[0m [0m[0mPerhaps[0m[0m [0m[0myou[0m[0m [0m[0mmeant[0m[0m [0m[0mto[0m[0m [0m[0m[0m[0mcheck[0m[0m [0m[0mfor[0m[0m [0m[0m[0m[0;4mnull[0m[0;4m [0m[0;4mor[0m[0;4m [0m[0;4mundefined[0m[0m [0m[0;2m[[0m[33m2[0m[0;2m][0m[0m?[0m[0m[0m[0m
-[0m[0m[[0m[0msketchy-null-number[0m[0m][0m[0m
+[0m[0mThis[0m[0m [0m[0muse[0m[0m [0m[0mof[0m[0m [0m[0moptional[0m[0m [0m[0mchaining[0m[0m [0m[0m([0m[0;1m?.[0m[0m)[0m[0m [0m[0mis[0m[0m [0m[0munnecessary[0m[0m [0m[0mbecause[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mx[0m[0;4m[0m[0m [0m[0;2m[[0m[36m1[0m[0;2m][0m[0m[0m[0m [0m[0mcannot[0m[0m [0m[0mbe[0m[0m [0m[0mnullish[0m[0m [0m[0mor[0m[0m [0m[0mbecause[0m[0m [0m[0man[0m[0m [0m[0mearlier[0m[0m [0m[0m[0m[0;1m?.[0m[0m[0m[0m [0m[0mwill[0m[0m
+[0m[0mshort-circuit[0m[0m [0m[0mthe[0m[0m [0m[0mnullish[0m[0m [0m[0mcase.[0m[0m[0m[0m [0m[0m[[0m[0munnecessary-optional-chain[0m[0m][0m[0m
 [0m[0m
-[0m[0m   [0m[0mwarning.js:11:5[0m[0m
-[0m[0m   [0m[0;2m11[0m[0;2m|[0m[0m [0m[0;2mif ([0m[31mx[0m[0;2m) {[0m[0m
-[0m[0m       [0m[31m    ^[0m[0m
+[0m[0m   [0m[0mwarning.js:11:1[0m[0m
+[0m[0m   [0m[0;2m11[0m[0;2m|[0m[0m [0m[0;2m[0m[31mx?.p[0m[0;2m;[0m[0m
+[0m[0m       [0m[31m^^^^[0m[0m
 [0m[0m
 References:
-[0m[0m   [0m[0mwarning.js:8:11[0m[0m
-[0m[0m    [0m[0;2m8[0m[0;2m|[0m[0m [0m[0;2mconst x: ?[0m[36mnumber[0m[0;2m = 42;[0m[0m
-[0m[0m       [0m[36m          ^^^^^^[0m[36m [1][0m[0m
-[0m[0m   [0m[0mwarning.js:8:10[0m[0m
-[0m[0m    [0m[0;2m8[0m[0;2m|[0m[0m [0m[0;2mconst x: [0m[33m?number[0m[0;2m = 42;[0m[0m
-[0m[0m       [0m[33m         ^^^^^^^[0m[33m [2][0m[0m
+[0m[0m   [0m[0mwarning.js:11:1[0m[0m
+[0m[0m   [0m[0;2m11[0m[0;2m|[0m[0m [0m[0;2m[0m[36mx[0m[0;2m?.p;[0m[0m
+[0m[0m       [0m[36m^[0m[36m [1][0m[0m
 [0m[0m
 [0m[0m
 [0m

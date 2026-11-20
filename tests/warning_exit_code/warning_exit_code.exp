@@ -1,63 +1,54 @@
 Check Existing Server With Warnings (zero exit code):
-Warning ---------------------------------------------------------------------------------------------------- test.js:4:5
+Warning ---------------------------------------------------------------------------------------------------- test.js:4:1
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   test.js:4:5
-   4| if (x) {}
-          ^
+   test.js:4:1
+   4| x?.p;
+      ^^^^
 
 References:
-   test.js:3:9
-   3| var x: ?number = 0;
-              ^^^^^^ [1]
-   test.js:3:8
-   3| var x: ?number = 0;
-             ^^^^^^^ [2]
+   test.js:4:1
+   4| x?.p;
+      ^ [1]
 
 
 
 Found 1 warning
 
 Check Existing Server With Warnings and --max-warnings 0 (nonzero exit code):
-Warning ---------------------------------------------------------------------------------------------------- test.js:4:5
+Warning ---------------------------------------------------------------------------------------------------- test.js:4:1
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   test.js:4:5
-   4| if (x) {}
-          ^
+   test.js:4:1
+   4| x?.p;
+      ^^^^
 
 References:
-   test.js:3:9
-   3| var x: ?number = 0;
-              ^^^^^^ [1]
-   test.js:3:8
-   3| var x: ?number = 0;
-             ^^^^^^^ [2]
+   test.js:4:1
+   4| x?.p;
+      ^ [1]
 
 
 
 Found 1 warning
 Check Existing Server With Errors (nonzero exit code):
-Error ------------------------------------------------------------------------------------------------------ test.js:4:5
+Error ------------------------------------------------------------------------------------------------------ test.js:4:1
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   test.js:4:5
-   4| if (x) {}
-          ^
+   test.js:4:1
+   4| x?.p;
+      ^^^^
 
 References:
-   test.js:3:9
-   3| var x: ?number = 0;
-              ^^^^^^ [1]
-   test.js:3:8
-   3| var x: ?number = 0;
-             ^^^^^^^ [2]
+   test.js:4:1
+   4| x?.p;
+      ^ [1]
 
 
 
@@ -65,84 +56,72 @@ Found 1 error
 
 
 Status (Running Server) With Warnings (zero exit code):
-Warning ---------------------------------------------------------------------------------------------------- test.js:4:5
+Warning ---------------------------------------------------------------------------------------------------- test.js:4:1
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   test.js:4:5
-   4| if (x) {}
-          ^
+   test.js:4:1
+   4| x?.p;
+      ^^^^
 
 References:
-   test.js:3:9
-   3| var x: ?number = 0;
-              ^^^^^^ [1]
-   test.js:3:8
-   3| var x: ?number = 0;
-             ^^^^^^^ [2]
+   test.js:4:1
+   4| x?.p;
+      ^ [1]
 
 
 
 Found 1 warning
-Warning ---------------------------------------------------------------------------------------------------- test.js:4:5
+Warning ---------------------------------------------------------------------------------------------------- test.js:4:1
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   test.js:4:5
-   4| if (x) {}
-          ^
+   test.js:4:1
+   4| x?.p;
+      ^^^^
 
 References:
-   test.js:3:9
-   3| var x: ?number = 0;
-              ^^^^^^ [1]
-   test.js:3:8
-   3| var x: ?number = 0;
-             ^^^^^^^ [2]
+   test.js:4:1
+   4| x?.p;
+      ^ [1]
 
 
 
 Found 1 warning
-Warning ---------------------------------------------------------------------------------------------------- test.js:4:5
+Warning ---------------------------------------------------------------------------------------------------- test.js:4:1
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   test.js:4:5
-   4| if (x) {}
-          ^
+   test.js:4:1
+   4| x?.p;
+      ^^^^
 
 References:
-   test.js:3:9
-   3| var x: ?number = 0;
-              ^^^^^^ [1]
-   test.js:3:8
-   3| var x: ?number = 0;
-             ^^^^^^^ [2]
+   test.js:4:1
+   4| x?.p;
+      ^ [1]
 
 
 
 Found 1 warning
 
 Status (Running Server) With Errors (nonzero exit code):
-Error ------------------------------------------------------------------------------------------------------ test.js:4:5
+Error ------------------------------------------------------------------------------------------------------ test.js:4:1
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   test.js:4:5
-   4| if (x) {}
-          ^
+   test.js:4:1
+   4| x?.p;
+      ^^^^
 
 References:
-   test.js:3:9
-   3| var x: ?number = 0;
-              ^^^^^^ [1]
-   test.js:3:8
-   3| var x: ?number = 0;
-             ^^^^^^^ [2]
+   test.js:4:1
+   4| x?.p;
+      ^ [1]
 
 
 
@@ -150,44 +129,38 @@ Found 1 error
 
 
 Status (No Running Server) With Warnings (zero exit code):
-Warning ---------------------------------------------------------------------------------------------------- test.js:4:5
+Warning ---------------------------------------------------------------------------------------------------- test.js:4:1
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   test.js:4:5
-   4| if (x) {}
-          ^
+   test.js:4:1
+   4| x?.p;
+      ^^^^
 
 References:
-   test.js:3:9
-   3| var x: ?number = 0;
-              ^^^^^^ [1]
-   test.js:3:8
-   3| var x: ?number = 0;
-             ^^^^^^^ [2]
+   test.js:4:1
+   4| x?.p;
+      ^ [1]
 
 
 
 Found 1 warning
 
 Status (No Running Server) With Errors (nonzero exit code):
-Error ------------------------------------------------------------------------------------------------------ test.js:4:5
+Error ------------------------------------------------------------------------------------------------------ test.js:4:1
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   test.js:4:5
-   4| if (x) {}
-          ^
+   test.js:4:1
+   4| x?.p;
+      ^^^^
 
 References:
-   test.js:3:9
-   3| var x: ?number = 0;
-              ^^^^^^ [1]
-   test.js:3:8
-   3| var x: ?number = 0;
-             ^^^^^^^ [2]
+   test.js:4:1
+   4| x?.p;
+      ^ [1]
 
 
 
@@ -195,64 +168,55 @@ Found 1 error
 
 
 Check Contents With Warnings (zero exit code):
-Warning ---------------------------------------------------------------------------------------------------- test.js:4:5
+Warning ---------------------------------------------------------------------------------------------------- test.js:4:1
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   test.js:4:5
-   4| if (x) {}
-          ^
+   test.js:4:1
+   4| x?.p;
+      ^^^^
 
 References:
-   test.js:3:9
-   3| var x: ?number = 0;
-              ^^^^^^ [1]
-   test.js:3:8
-   3| var x: ?number = 0;
-             ^^^^^^^ [2]
+   test.js:4:1
+   4| x?.p;
+      ^ [1]
 
 
 
 Found 1 warning
-Warning ---------------------------------------------------------------------------------------------------- test.js:4:5
+Warning ---------------------------------------------------------------------------------------------------- test.js:4:1
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   test.js:4:5
-   4| if (x) {}
-          ^
+   test.js:4:1
+   4| x?.p;
+      ^^^^
 
 References:
-   test.js:3:9
-   3| var x: ?number = 0;
-              ^^^^^^ [1]
-   test.js:3:8
-   3| var x: ?number = 0;
-             ^^^^^^^ [2]
+   test.js:4:1
+   4| x?.p;
+      ^ [1]
 
 
 
 Found 1 warning
 
 Check Contents With Errors (nonzero exit code):
-Error ------------------------------------------------------------------------------------------------------ test.js:4:5
+Error ------------------------------------------------------------------------------------------------------ test.js:4:1
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   test.js:4:5
-   4| if (x) {}
-          ^
+   test.js:4:1
+   4| x?.p;
+      ^^^^
 
 References:
-   test.js:3:9
-   3| var x: ?number = 0;
-              ^^^^^^ [1]
-   test.js:3:8
-   3| var x: ?number = 0;
-             ^^^^^^^ [2]
+   test.js:4:1
+   4| x?.p;
+      ^ [1]
 
 
 

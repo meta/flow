@@ -1,5 +1,5 @@
 //@flow
 
-var x: number = 0;
-//flowlint-next-line sketchy-null:off
-if (x) { /* not sketchy; suppression unused */ }
+var x: ?{p: number} = {p: 0};
+//flowlint-next-line unnecessary-optional-chain:off
+x?.p; /* necessary; suppression unused */

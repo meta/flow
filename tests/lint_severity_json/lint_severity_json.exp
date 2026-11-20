@@ -1,7 +1,7 @@
 {
   "errors":[
     {
-      "error_codes":["sketchy-null-number"],
+      "error_codes":["require-explicit-enum-switch-cases"],
       "extra":[
         {
           "message":[
@@ -20,19 +20,19 @@
         {
           "message":[
             {
-              "context":"var x: ?number = 0;",
+              "context":"declare const x: E;",
               "descr":"[1]",
-              "end":14,
-              "endline":5,
-              "line":5,
+              "end":18,
+              "endline":7,
+              "line":7,
               "loc":{
-                "end":{"column":14,"line":5,"offset":190},
+                "end":{"column":18,"line":7,"offset":260},
                 "source":"test.js",
-                "start":{"column":9,"line":5,"offset":184},
+                "start":{"column":18,"line":7,"offset":259},
                 "type":"SourceFile"
               },
               "path":"test.js",
-              "start":9,
+              "start":18,
               "type":"Blame"
             }
           ]
@@ -40,19 +40,19 @@
         {
           "message":[
             {
-              "context":"var x: ?number = 0;",
+              "context":"switch (x) { default: } //appears as an error",
               "descr":"[2]",
-              "end":14,
-              "endline":5,
-              "line":5,
+              "end":21,
+              "endline":15,
+              "line":15,
               "loc":{
-                "end":{"column":14,"line":5,"offset":190},
+                "end":{"column":21,"line":15,"offset":484},
                 "source":"test.js",
-                "start":{"column":8,"line":5,"offset":183},
+                "start":{"column":14,"line":15,"offset":476},
                 "type":"SourceFile"
               },
               "path":"test.js",
-              "start":8,
+              "start":14,
               "type":"Blame"
             }
           ]
@@ -62,26 +62,26 @@
       "level":"error",
       "message":[
         {
-          "context":"if (x) {} //appears as an error",
-          "descr":"Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]? [sketchy-null-number]",
-          "end":5,
-          "endline":13,
-          "line":13,
+          "context":"switch (x) { default: } //appears as an error",
+          "descr":"Incomplete exhaustive check: the members `A` and `B` of enum `E` [1] have not been considered in check of `x`. The default case [2] does not check for the missing members as the `require-explicit-enum-switch-cases` lint has been enabled. [require-explicit-enum-switch-cases]",
+          "end":9,
+          "endline":15,
+          "line":15,
           "loc":{
-            "end":{"column":5,"line":13,"offset":330},
+            "end":{"column":9,"line":15,"offset":472},
             "source":"test.js",
-            "start":{"column":5,"line":13,"offset":329},
+            "start":{"column":9,"line":15,"offset":471},
             "type":"SourceFile"
           },
           "path":"test.js",
-          "start":5,
+          "start":9,
           "type":"Blame"
         }
       ],
       "suppressions":[]
     },
     {
-      "error_codes":["sketchy-null-number"],
+      "error_codes":["require-explicit-enum-switch-cases"],
       "extra":[
         {
           "message":[
@@ -100,19 +100,19 @@
         {
           "message":[
             {
-              "context":"var x: ?number = 0;",
+              "context":"declare const x: E;",
               "descr":"[1]",
-              "end":14,
-              "endline":5,
-              "line":5,
+              "end":18,
+              "endline":7,
+              "line":7,
               "loc":{
-                "end":{"column":14,"line":5,"offset":190},
+                "end":{"column":18,"line":7,"offset":260},
                 "source":"test.js",
-                "start":{"column":9,"line":5,"offset":184},
+                "start":{"column":18,"line":7,"offset":259},
                 "type":"SourceFile"
               },
               "path":"test.js",
-              "start":9,
+              "start":18,
               "type":"Blame"
             }
           ]
@@ -120,19 +120,19 @@
         {
           "message":[
             {
-              "context":"var x: ?number = 0;",
+              "context":"switch (x) { default: } //appears as a warning",
               "descr":"[2]",
-              "end":14,
-              "endline":5,
-              "line":5,
+              "end":21,
+              "endline":12,
+              "line":12,
               "loc":{
-                "end":{"column":14,"line":5,"offset":190},
+                "end":{"column":21,"line":12,"offset":384},
                 "source":"test.js",
-                "start":{"column":8,"line":5,"offset":183},
+                "start":{"column":14,"line":12,"offset":376},
                 "type":"SourceFile"
               },
               "path":"test.js",
-              "start":8,
+              "start":14,
               "type":"Blame"
             }
           ]
@@ -142,19 +142,19 @@
       "level":"warning",
       "message":[
         {
-          "context":"if (x) {} //appears as a warning",
-          "descr":"Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]? [sketchy-null-number]",
-          "end":5,
-          "endline":10,
-          "line":10,
+          "context":"switch (x) { default: } //appears as a warning",
+          "descr":"Incomplete exhaustive check: the members `A` and `B` of enum `E` [1] have not been considered in check of `x`. The default case [2] does not check for the missing members as the `require-explicit-enum-switch-cases` lint has been enabled. [require-explicit-enum-switch-cases]",
+          "end":9,
+          "endline":12,
+          "line":12,
           "loc":{
-            "end":{"column":5,"line":10,"offset":266},
+            "end":{"column":9,"line":12,"offset":372},
             "source":"test.js",
-            "start":{"column":5,"line":10,"offset":265},
+            "start":{"column":9,"line":12,"offset":371},
             "type":"SourceFile"
           },
           "path":"test.js",
-          "start":5,
+          "start":9,
           "type":"Blame"
         }
       ],

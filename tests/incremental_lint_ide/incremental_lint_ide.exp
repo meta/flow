@@ -1,20 +1,21 @@
 No errors!
-Error --------------------------------------------------------------------------------------------------------- b.js:8:7
+Error -------------------------------------------------------------------------------------------------------- b.js:8:11
 
-Sketchy null check on string [1] which is potentially an empty string. Perhaps you meant to check for null or
-undefined [2]? [sketchy-null-string]
+Incomplete exhaustive check: the members `A` and `B` of enum `E` [1] have not been considered in check of `x`. The
+default case [2] does not check for the missing members as the `require-explicit-enum-switch-cases` lint has been
+enabled. [require-explicit-enum-switch-cases]
 
-   b.js:8:7
-    8|   if (x) {}
-             ^
+   b.js:8:11
+    8|   switch (x) { default: }
+                 ^
 
 References:
-   a.js:11:28
-   11| export type Fn = (cb: (s: ?string) => void) => void;
-                                  ^^^^^^ [1]
    a.js:11:27
-   11| export type Fn = (cb: (s: ?string) => void) => void;
-                                 ^^^^^^^ [2]
+   11| export type Fn = (cb: (s: E) => void) => void;
+                                 ^ [1]
+   b.js:8:16
+    8|   switch (x) { default: }
+                      ^^^^^^^^ [2]
 
 
 

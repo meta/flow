@@ -3,7 +3,4 @@ all=false
 
 [strict]
 nonstrict-import
-sketchy-null
-unclear-type
-unsafe-getters-setters
-untyped-import
+unnecessary-optional-chain

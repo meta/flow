@@ -5,14 +5,14 @@
 # LICENSE file in the root directory of this source tree.
 
 echo "Check Existing Server With Warnings (zero exit code):"
-assert_ok "$FLOW" full-check --include-warnings --lints "sketchy-null=warn"
+assert_ok "$FLOW" full-check --include-warnings --lints "unnecessary-optional-chain=warn"
 printf "\n"
 
 echo "Check Existing Server With Warnings and --max-warnings 0 (nonzero exit code):"
-assert_errors "$FLOW" full-check --max-warnings 0 --lints "sketchy-null=warn"
+assert_errors "$FLOW" full-check --max-warnings 0 --lints "unnecessary-optional-chain=warn"
 
 echo "Check Existing Server With Errors (nonzero exit code):"
-assert_errors "$FLOW" full-check --include-warnings --lints "sketchy-null=error"
+assert_errors "$FLOW" full-check --include-warnings --lints "unnecessary-optional-chain=error"
 printf "\n\n"
 
 # Status and check contents and both don't accept options flags, so they are manipulated by modifying the flowconfig

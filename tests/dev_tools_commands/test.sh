@@ -103,9 +103,9 @@ include_warnings=true
 all=error
 EOF
 cat > update_sites/shared.js <<'EOF'
-function f(x: ?number) {
-  // $FlowFixMe[sketchy-null-number](site=bar,foo)
-  if (x) {}
+function f(x: {a: number}) {
+  // $FlowFixMe[unnecessary-optional-chain](site=bar,foo)
+  x?.a;
 }
 EOF
 assert_ok "$FLOW" dev-tools update-suppressions --check check --sites foo,bar update_sites/foo update_sites/bar

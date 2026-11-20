@@ -1,4 +1,4 @@
-Error ----------------------------------------------------------------------------------------- simple_sketchies.js:5:12
+Error ----------------------------------------------------------------------------------- simple_optional_chains.js:5:12
 
 Nonexistent/misspelled lint rule. Perhaps you have a missing/extra `,`? [lint-setting]
 
@@ -6,7 +6,7 @@ Nonexistent/misspelled lint rule. Perhaps you have a missing/extra `,`? [lint-se
                  ^^^^^^^^^^^^^^^
 
 
-Error ----------------------------------------------------------------------------------------- simple_sketchies.js:5:30
+Error ----------------------------------------------------------------------------------- simple_optional_chains.js:5:30
 
 Invalid setting. Valid settings are error, warn, and off. [lint-setting]
 
@@ -14,222 +14,189 @@ Invalid setting. Valid settings are error, warn, and off. [lint-setting]
                                    ^^^^^^^^^^^^^^^^^^
 
 
-Error ----------------------------------------------------------------------------------------- simple_sketchies.js:13:7
+Error ----------------------------------------------------------------------------------- simple_optional_chains.js:13:3
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `x` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   simple_sketchies.js:13:7
-   13|   if (x) {/* sketchy */}/* flowlint sketchy-null:off */
-             ^
-
-References:
-   simple_sketchies.js:11:16
-   11| function f(x: ?number) {
-                      ^^^^^^ [1]
-   simple_sketchies.js:11:15
-   11| function f(x: ?number) {
-                     ^^^^^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------- simple_sketchies.js:44:5
-
-Sketchy null check on boolean [1] which is potentially false. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-bool]
-
-   simple_sketchies.js:44:5
-   44| if (x1) { /* sketchy */ }
-           ^^
+   simple_optional_chains.js:13:3
+   13|   x?.a; /* unnecessary */ /* flowlint unnecessary-optional-chain:off */
+         ^^^^
 
 References:
-   simple_sketchies.js:43:10
-   43| var x1: ?boolean = false;
-                ^^^^^^^ [1]
-   simple_sketchies.js:43:9
-   43| var x1: ?boolean = false;
-               ^^^^^^^^ [2]
+   simple_optional_chains.js:13:3
+   13|   x?.a; /* unnecessary */ /* flowlint unnecessary-optional-chain:off */
+         ^ [1]
 
 
-Error ----------------------------------------------------------------------------------------- simple_sketchies.js:67:5
+Error ----------------------------------------------------------------------------------- simple_optional_chains.js:44:1
 
-Sketchy null check on string [1] which is potentially an empty string. Perhaps you meant to check for null or
-undefined [2]? [sketchy-null-string]
+This use of optional chaining (`?.`) is unnecessary because `x1` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   simple_sketchies.js:67:5
-   67| if (x3) { /* sketchy */ }
-           ^^
+   simple_optional_chains.js:44:1
+   44| x1?.a; /* unnecessary */
+       ^^^^^
 
 References:
-   simple_sketchies.js:66:10
-   66| var x3: ?string = "";
-                ^^^^^^ [1]
-   simple_sketchies.js:66:9
-   66| var x3: ?string = "";
-               ^^^^^^^ [2]
+   simple_optional_chains.js:44:1
+   44| x1?.a; /* unnecessary */
+       ^^ [1]
 
 
-Error ----------------------------------------------------------------------------------------- simple_sketchies.js:86:7
+Error ----------------------------------------------------------------------------------- simple_optional_chains.js:67:1
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `x3` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   simple_sketchies.js:86:7
-   86|   if (o.p) { /* sketchy */ }
-             ^^^
+   simple_optional_chains.js:67:1
+   67| x3?.a; /* unnecessary */
+       ^^^^^
 
 References:
-   simple_sketchies.js:83:20
-   83| function n(o: { p: number|null|void, ... }) {
-                          ^^^^^^ [1]
-   simple_sketchies.js:83:32
-   83| function n(o: { p: number|null|void, ... }) {
-                                      ^^^^ [2]
+   simple_optional_chains.js:67:1
+   67| x3?.a; /* unnecessary */
+       ^^ [1]
 
 
-Error --------------------------------------------------------------------------------------- simple_sketchies.js:103:24
+Error ----------------------------------------------------------------------------------- simple_optional_chains.js:86:3
+
+This use of optional chaining (`?.`) is unnecessary because `o.p` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
+
+   simple_optional_chains.js:86:3
+   86|   o.p?.a; /* unnecessary */
+         ^^^^^^
+
+References:
+   simple_optional_chains.js:86:3
+   86|   o.p?.a; /* unnecessary */
+         ^^^ [1]
+
+
+Error --------------------------------------------------------------------------------- simple_optional_chains.js:103:24
 
 Redundant argument. This argument doesn't change any lint settings. [lint-setting]
 
-   103|   //flowlint-next-line sketchy-null:off
-                               ^^^^^^^^^^^^^^^^
+   103|   //flowlint-next-line unnecessary-optional-chain:off
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Error --------------------------------------------------------------------------------------- simple_sketchies.js:116:12
+Error --------------------------------------------------------------------------------- simple_optional_chains.js:116:12
 
 Redundant argument. This argument doesn't change any lint settings. [lint-setting]
 
-   116| //flowlint sketchy-null:error
-                   ^^^^^^^^^^^^^^^^^^
+   116| //flowlint unnecessary-optional-chain:error
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Error --------------------------------------------------------------------------------------- simple_sketchies.js:120:20
+Error --------------------------------------------------------------------------------- simple_optional_chains.js:120:17
 
-Avoid using `&&` to check the value of `number` [1]. Consider handling falsy values (0 and NaN) by using a conditional
-to choose an explicit default instead. [sketchy-number-and]
+This use of optional chaining (`?.`) is unnecessary because `val2` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   simple_sketchies.js:120:20
-   120| var sketchyFalse = val2 && false; /* sketchy */ /*flowlint-next-line sketchy-null:error*/ /* flowlint-line sketchy-null:error */
-                           ^^^^
-
-References:
-   simple_sketchies.js:117:12
-   117| var val2: ?number = 0;
-                   ^^^^^^ [1]
-
-
-Error --------------------------------------------------------------------------------------- simple_sketchies.js:120:20
-
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
-
-   simple_sketchies.js:120:20
-   120| var sketchyFalse = val2 && false; /* sketchy */ /*flowlint-next-line sketchy-null:error*/ /* flowlint-line sketchy-null:error */
-                           ^^^^
+   simple_optional_chains.js:120:17
+   120| var computedA = val2?.['a']; /* unnecessary */ /*flowlint-next-line unnecessary-optional-chain:error*/ /* flowlint-line unnecessary-optional-chain:error */
+                        ^^^^^^^^^^^
 
 References:
-   simple_sketchies.js:117:12
-   117| var val2: ?number = 0;
-                   ^^^^^^ [1]
-   simple_sketchies.js:117:11
-   117| var val2: ?number = 0;
-                  ^^^^^^^ [2]
+   simple_optional_chains.js:120:17
+   120| var computedA = val2?.['a']; /* unnecessary */ /*flowlint-next-line unnecessary-optional-chain:error*/ /* flowlint-line unnecessary-optional-chain:error */
+                        ^^^^ [1]
 
 
-Error --------------------------------------------------------------------------------------- simple_sketchies.js:121:19
+Error --------------------------------------------------------------------------------- simple_optional_chains.js:121:10
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `val2` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   simple_sketchies.js:121:19
-   121| var sketchyTrue = val2 || true; /* sketchy */
-                          ^^^^
+   simple_optional_chains.js:121:10
+   121| var a2 = val2?.a; /* unnecessary */
+                 ^^^^^^^
 
 References:
-   simple_sketchies.js:117:12
-   117| var val2: ?number = 0;
-                   ^^^^^^ [1]
-   simple_sketchies.js:117:11
-   117| var val2: ?number = 0;
-                  ^^^^^^^ [2]
+   simple_optional_chains.js:121:10
+   121| var a2 = val2?.a; /* unnecessary */
+                 ^^^^ [1]
 
 
-Error --------------------------------------------------------------------------------------- simple_sketchies.js:126:13
+Error --------------------------------------------------------------------------------- simple_optional_chains.js:126:13
 
 Malformed lint rule. Properly formed rules contain a single `:` character. Perhaps you have a missing/extra `,`?
 [lint-setting]
 
-   126| // flowlint ,sketchy-null-bool:error,,sketchy-null-mixed:error,
+   126| // flowlint ,unnecessary-optional-chain:error,,uninitialized-instance-property:error,
                     
 
 
-Error --------------------------------------------------------------------------------------- simple_sketchies.js:126:38
+Error --------------------------------------------------------------------------------- simple_optional_chains.js:126:47
 
 Malformed lint rule. Properly formed rules contain a single `:` character. Perhaps you have a missing/extra `,`?
 [lint-setting]
 
-   126| // flowlint ,sketchy-null-bool:error,,sketchy-null-mixed:error,
-                                             
+   126| // flowlint ,unnecessary-optional-chain:error,,uninitialized-instance-property:error,
+                                                      
 
 
-Error --------------------------------------------------------------------------------------- simple_sketchies.js:126:64
-
-Malformed lint rule. Properly formed rules contain a single `:` character. Perhaps you have a missing/extra `,`?
-[lint-setting]
-
-   126| // flowlint ,sketchy-null-bool:error,,sketchy-null-mixed:error,
-                                                                       
-
-
-Error --------------------------------------------------------------------------------------- simple_sketchies.js:129:13
+Error --------------------------------------------------------------------------------- simple_optional_chains.js:126:86
 
 Malformed lint rule. Properly formed rules contain a single `:` character. Perhaps you have a missing/extra `,`?
 [lint-setting]
 
-   129| // flowlint sketchy-null-bool:error sketchy-null-mixed:off
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   126| // flowlint ,unnecessary-optional-chain:error,,uninitialized-instance-property:error,
+                                                                                             
 
 
-Warning --------------------------------------------------------------------------------------- simple_sketchies.js:2:12
+Error --------------------------------------------------------------------------------- simple_optional_chains.js:129:13
 
-Unused suppression comment. [InferError]
+Malformed lint rule. Properly formed rules contain a single `:` character. Perhaps you have a missing/extra `,`?
+[lint-setting]
 
-   2| /*flowlint sketchy-null:off*/ //unused suppression
-                 ^^^^^^^^^^^^^^^^
-
-
-Warning --------------------------------------------------------------------------------------- simple_sketchies.js:51:4
-
-Unused suppression comment. [InferError]
-
-   51|  * sketchy-null-mixed:off
-          ^^^^^^^^^^^^^^^^^^^^^^
+   129| // flowlint unnecessary-optional-chain:error uninitialized-instance-property:off
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Warning --------------------------------------------------------------------------------------- simple_sketchies.js:62:4
+Warning --------------------------------------------------------------------------------- simple_optional_chains.js:2:12
 
 Unused suppression comment. [InferError]
 
-          v-----------------
-   62|  * sketchy-null-bool:
+   2| /*flowlint unnecessary-optional-chain:off*/ //unused suppression
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Warning --------------------------------------------------------------------------------- simple_optional_chains.js:51:4
+
+Unused suppression comment. [InferError]
+
+   51|  * uninitialized-instance-property:off
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Warning --------------------------------------------------------------------------------- simple_optional_chains.js:62:4
+
+Unused suppression comment. [InferError]
+
+          v--------------
+   62|  * unused-promise:
    63|  *    off
         -------^
 
 
-Warning -------------------------------------------------------------------------------------- simple_sketchies.js:84:14
+Warning -------------------------------------------------------------------------------- simple_optional_chains.js:84:14
 
 Unused suppression comment. [InferError]
 
-   84|   /*flowlint sketchy-null:off*/ //Unused suppression
-                    ^^^^^^^^^^^^^^^^
+   84|   /*flowlint unnecessary-optional-chain:off*/ //Unused suppression
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Warning ------------------------------------------------------------------------------------- simple_sketchies.js:118:12
+Warning ------------------------------------------------------------------------------- simple_optional_chains.js:118:12
 
 Unused suppression comment. [InferError]
 
-   118| /*flowlint sketchy-null:off*/ //Unused suppression
-                   ^^^^^^^^^^^^^^^^
+   118| /*flowlint unnecessary-optional-chain:off*/ //Unused suppression
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 
-Found 15 errors and 5 warnings
+Found 14 errors and 5 warnings

@@ -1,15 +1,15 @@
 /* @flow */
 
 //never enabled suppression; not added by --include-suppressed
-var a: ?number = 0;
-if (a){}
+var a: {p: number} = {p: 0};
+a?.p;
 
-//flowlint sketchy-null:warn
-var b: ?number = 0;
-//flowlint-next-line sketchy-null:off
-if (b){} //warning included by --include-suppressed (reported as an error)
+//flowlint unnecessary-optional-chain:warn
+var b: {p: number} = {p: 0};
+//flowlint-next-line unnecessary-optional-chain:off
+b?.p; //warning included by --include-suppressed (reported as an error)
 
-//flowlint sketchy-null:error
-var c: ?number = 0;
-//flowlint-next-line sketchy-null:off
-if (c){} //error included by --include-suppressed
+//flowlint unnecessary-optional-chain:error
+var c: {p: number} = {p: 0};
+//flowlint-next-line unnecessary-optional-chain:off
+c?.p; //error included by --include-suppressed

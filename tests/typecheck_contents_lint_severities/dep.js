@@ -1,3 +1,5 @@
 /* @flow */
 
-export function f(cb: ?number => void): void {}
+export function f(cb: E => void): void {}
+
+export enum E {A, B}

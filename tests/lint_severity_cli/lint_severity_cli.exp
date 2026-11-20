@@ -1,31 +1,33 @@
-[31mError ----------------------------------------------------------------------------------------------------- test.js:13:5[0m[0m
+[31mError ----------------------------------------------------------------------------------------------------- test.js:15:9[0m[0m
 [0m[0m
-[0m[0mSketchy[0m[0m [0m[0mnull[0m[0m [0m[0mcheck[0m[0m [0m[0mon[0m[0m [0m[0m[0m[0;4mnumber[0m[0m [0m[0;2m[[0m[36m1[0m[0;2m][0m[0m[0m[0m [0m[0m[0m[0mwhich[0m[0m [0m[0mis[0m[0m [0m[0mpotentially[0m[0m [0m[0m[0m[0m0[0m[0m.[0m[0m [0m[0mPerhaps[0m[0m [0m[0myou[0m[0m [0m[0mmeant[0m[0m [0m[0mto[0m[0m [0m[0m[0m[0mcheck[0m[0m [0m[0mfor[0m[0m [0m[0m[0m[0;4mnull[0m[0;4m [0m[0;4mor[0m[0;4m [0m[0;4mundefined[0m[0m [0m[0;2m[[0m[33m2[0m[0;2m][0m[0m?[0m[0m[0m[0m
-[0m[0m[[0m[0msketchy-null-number[0m[0m][0m[0m
+[0m[0mIncomplete[0m[0m [0m[0mexhaustive[0m[0m [0m[0mcheck:[0m[0m [0m[0m[0m[0mthe[0m[0m [0m[0mmembers[0m[0m [0m[0m[0m[0;1mA[0m[0m[0m[0m [0m[0mand[0m[0m [0m[0m[0m[0;1mB[0m[0m[0m[0m [0m[0mof[0m[0m [0m[0menum[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mE[0m[0;4m[0m[0m [0m[0;2m[[0m[36m1[0m[0;2m][0m[0m[0m[0m [0m[0mhave[0m[0m[0m[0m [0m[0mnot[0m[0m [0m[0mbeen[0m[0m [0m[0mconsidered[0m[0m [0m[0min[0m[0m [0m[0mcheck[0m[0m [0m[0mof[0m[0m [0m[0m[0m[0;1mx[0m[0m.[0m[0m[0m[0m [0m[0mThe[0m[0m [0m[0m[0m[0;4mdefault[0m[0m
+[0m[0;4mcase[0m[0m [0m[0;2m[[0m[36m2[0m[0;2m][0m[0m[0m[0m [0m[0mdoes[0m[0m [0m[0mnot[0m[0m [0m[0mcheck[0m[0m [0m[0mfor[0m[0m [0m[0mthe[0m[0m [0m[0mmissing[0m[0m [0m[0mmembers[0m[0m [0m[0mas[0m[0m [0m[0mthe[0m[0m [0m[0m[0m[0;1mrequire-explicit-enum-switch-cases[0m[0m[0m[0m [0m[0mlint[0m[0m [0m[0mhas[0m[0m [0m[0mbeen[0m[0m [0m[0menabled.[0m[0m[0m[0m
+[0m[0m[[0m[0mrequire-explicit-enum-switch-cases[0m[0m][0m[0m
 [0m[0m
-[0m[0m [0m[0;2m[[0m[33m2[0m[0;2m][0m[0;2m[[0m[36m1[0m[0;2m][0m[0m [0m[0m [0m[0;2m5[0m[0;2m|[0m[0m [0m[0;2mvar x: [0m[33m?[0m[36mnumber[0m[33m[0m[0;2m = 0;[0m[0m
-[0m[0m          [0m[0;2m:[0m[0m
-[0m[0m        [0m[0m[0m[0;2m10[0m[0;2m|[0m[0m [0m[0;2mif (x) {} //appears as a warning[0m[0m
-[0m[0m        [0m[0m[0m[0;2m11[0m[0;2m|[0m[0;2m[0m[0m
-[0m[0m        [0m[0m[0m[0;2m12[0m[0;2m|[0m[0m [0m[0;2m//flowlint sketchy-null:error[0m[0m
-[0m[0m        [0m[0m[0m[0;2m13[0m[0;2m|[0m[0m [0m[0;2mif ([0m[31mx[0m[0;2m) {} //appears as an error[0m[0m
-[0m[0m        [0m[0m[0m[0;2m14[0m[0;2m|[0m[0;2m[0m[0m
+[0m[0m [0m[0;2m[[0m[36m1[0m[0;2m][0m[0m [0m[0m [0m[0;2m7[0m[0;2m|[0m[0m [0m[0;2mdeclare const x: [0m[36mE[0m[0;2m;[0m[0m
+[0m[0m       [0m[0;2m:[0m[0m
+[0m[0m     [0m[0m[0m[0;2m12[0m[0;2m|[0m[0m [0m[0;2mswitch (x) { default: } //appears as a warning[0m[0m
+[0m[0m     [0m[0m[0m[0;2m13[0m[0;2m|[0m[0;2m[0m[0m
+[0m[0m     [0m[0m[0m[0;2m14[0m[0;2m|[0m[0m [0m[0;2m//flowlint require-explicit-enum-switch-cases:error[0m[0m
+[0m[0m [0m[0;2m[[0m[36m2[0m[0;2m][0m[0m [0m[0m[0m[0;2m15[0m[0;2m|[0m[0m [0m[0;2mswitch ([0m[31mx[0m[0;2m) { [0m[36mdefault:[0m[0;2m } //appears as an error[0m[0m
+[0m[0m     [0m[0m[0m[0;2m16[0m[0;2m|[0m[0;2m[0m[0m
 [0m[0m
 [0m[0m
-[0m[33mWarning --------------------------------------------------------------------------------------------------- test.js:10:5[0m[0m
+[0m[33mWarning --------------------------------------------------------------------------------------------------- test.js:12:9[0m[0m
 [0m[0m
-[0m[0mSketchy[0m[0m [0m[0mnull[0m[0m [0m[0mcheck[0m[0m [0m[0mon[0m[0m [0m[0m[0m[0;4mnumber[0m[0m [0m[0;2m[[0m[36m1[0m[0;2m][0m[0m[0m[0m [0m[0m[0m[0mwhich[0m[0m [0m[0mis[0m[0m [0m[0mpotentially[0m[0m [0m[0m[0m[0m0[0m[0m.[0m[0m [0m[0mPerhaps[0m[0m [0m[0myou[0m[0m [0m[0mmeant[0m[0m [0m[0mto[0m[0m [0m[0m[0m[0mcheck[0m[0m [0m[0mfor[0m[0m [0m[0m[0m[0;4mnull[0m[0;4m [0m[0;4mor[0m[0;4m [0m[0;4mundefined[0m[0m [0m[0;2m[[0m[33m2[0m[0;2m][0m[0m?[0m[0m[0m[0m
-[0m[0m[[0m[0msketchy-null-number[0m[0m][0m[0m
+[0m[0mIncomplete[0m[0m [0m[0mexhaustive[0m[0m [0m[0mcheck:[0m[0m [0m[0m[0m[0mthe[0m[0m [0m[0mmembers[0m[0m [0m[0m[0m[0;1mA[0m[0m[0m[0m [0m[0mand[0m[0m [0m[0m[0m[0;1mB[0m[0m[0m[0m [0m[0mof[0m[0m [0m[0menum[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mE[0m[0;4m[0m[0m [0m[0;2m[[0m[36m1[0m[0;2m][0m[0m[0m[0m [0m[0mhave[0m[0m[0m[0m [0m[0mnot[0m[0m [0m[0mbeen[0m[0m [0m[0mconsidered[0m[0m [0m[0min[0m[0m [0m[0mcheck[0m[0m [0m[0mof[0m[0m [0m[0m[0m[0;1mx[0m[0m.[0m[0m[0m[0m [0m[0mThe[0m[0m [0m[0m[0m[0;4mdefault[0m[0m
+[0m[0;4mcase[0m[0m [0m[0;2m[[0m[36m2[0m[0;2m][0m[0m[0m[0m [0m[0mdoes[0m[0m [0m[0mnot[0m[0m [0m[0mcheck[0m[0m [0m[0mfor[0m[0m [0m[0mthe[0m[0m [0m[0mmissing[0m[0m [0m[0mmembers[0m[0m [0m[0mas[0m[0m [0m[0mthe[0m[0m [0m[0m[0m[0;1mrequire-explicit-enum-switch-cases[0m[0m[0m[0m [0m[0mlint[0m[0m [0m[0mhas[0m[0m [0m[0mbeen[0m[0m [0m[0menabled.[0m[0m[0m[0m
+[0m[0m[[0m[0mrequire-explicit-enum-switch-cases[0m[0m][0m[0m
 [0m[0m
-[0m[0m [0m[0;2m[[0m[33m2[0m[0;2m][0m[0;2m[[0m[36m1[0m[0;2m][0m[0m [0m[0m [0m[0;2m5[0m[0;2m|[0m[0m [0m[0;2mvar x: [0m[33m?[0m[36mnumber[0m[33m[0m[0;2m = 0;[0m[0m
-[0m[0m        [0m[0m [0m[0;2m6[0m[0;2m|[0m[0;2m[0m[0m
-[0m[0m        [0m[0m [0m[0;2m7[0m[0;2m|[0m[0m [0m[0;2mif (x) {} //suppressed by default[0m[0m
-[0m[0m        [0m[0m [0m[0;2m8[0m[0;2m|[0m[0;2m[0m[0m
-[0m[0m        [0m[0m [0m[0;2m9[0m[0;2m|[0m[0m [0m[0;2m//flowlint sketchy-null:warn[0m[0m
-[0m[0m        [0m[0m[0m[0;2m10[0m[0;2m|[0m[0m [0m[0;2mif ([0m[31mx[0m[0;2m) {} //appears as a warning[0m[0m
-[0m[0m        [0m[0m[0m[0;2m11[0m[0;2m|[0m[0;2m[0m[0m
-[0m[0m        [0m[0m[0m[0;2m12[0m[0;2m|[0m[0m [0m[0;2m//flowlint sketchy-null:error[0m[0m
-[0m[0m        [0m[0m[0m[0;2m13[0m[0;2m|[0m[0m [0m[0;2mif (x) {} //appears as an error[0m[0m
+[0m[0m [0m[0;2m[[0m[36m1[0m[0;2m][0m[0m [0m[0m [0m[0;2m7[0m[0;2m|[0m[0m [0m[0;2mdeclare const x: [0m[36mE[0m[0;2m;[0m[0m
+[0m[0m     [0m[0m [0m[0;2m8[0m[0;2m|[0m[0;2m[0m[0m
+[0m[0m     [0m[0m [0m[0;2m9[0m[0;2m|[0m[0m [0m[0;2mswitch (x) { default: } //suppressed by default[0m[0m
+[0m[0m     [0m[0m[0m[0;2m10[0m[0;2m|[0m[0;2m[0m[0m
+[0m[0m     [0m[0m[0m[0;2m11[0m[0;2m|[0m[0m [0m[0;2m//flowlint require-explicit-enum-switch-cases:warn[0m[0m
+[0m[0m [0m[0;2m[[0m[36m2[0m[0;2m][0m[0m [0m[0m[0m[0;2m12[0m[0;2m|[0m[0m [0m[0;2mswitch ([0m[31mx[0m[0;2m) { [0m[36mdefault:[0m[0;2m } //appears as a warning[0m[0m
+[0m[0m     [0m[0m[0m[0;2m13[0m[0;2m|[0m[0;2m[0m[0m
+[0m[0m     [0m[0m[0m[0;2m14[0m[0;2m|[0m[0m [0m[0;2m//flowlint require-explicit-enum-switch-cases:error[0m[0m
+[0m[0m     [0m[0m[0m[0;2m15[0m[0;2m|[0m[0m [0m[0;2mswitch (x) { default: } //appears as an error[0m[0m
 [0m[0m
 [0m[0m
 [0m

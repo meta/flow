@@ -1,3 +1,5 @@
 // @flow
 
-export const foo: string | void = undefined;
+export enum E {A, B}
+
+export const foo: E = E.A;

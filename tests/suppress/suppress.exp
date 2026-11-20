@@ -59,8 +59,8 @@ Warning ------------------------------------------------------------------------
 
 Unused suppression comment. [InferError]
 
-   8| // $FlowFixMe[sketchy-null-string] - this is unused because sketchy-null-string is off
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8| // $FlowFixMe[unnecessary-optional-chain] - this is unused because unnecessary-optional-chain is off
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 

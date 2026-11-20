@@ -1,6 +1,6 @@
-File "test.js", line 10, characters 5-5
-Warning: Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]? [sketchy-null-number]
+File "test.js", line 12, characters 9-9
+Warning: Incomplete exhaustive check: the members `A` and `B` of enum `E` [1] have not been considered in check of `x`. The default case [2] does not check for the missing members as the `require-explicit-enum-switch-cases` lint has been enabled. [require-explicit-enum-switch-cases]
 
-File "test.js", line 13, characters 5-5
-Error: Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]? [sketchy-null-number]
+File "test.js", line 15, characters 9-9
+Error: Incomplete exhaustive check: the members `A` and `B` of enum `E` [1] have not been considered in check of `x`. The default case [2] does not check for the missing members as the `require-explicit-enum-switch-cases` lint has been enabled. [require-explicit-enum-switch-cases]
 

@@ -5,4 +5,4 @@
 # LICENSE file in the root directory of this source tree.
 
 assert_exit "$EXIT_USAGE" \
-  "$FLOW" full-check . --all --lints "sketchy-null=error,sketchy-null-bool=error"
+  "$FLOW" full-check . --all --lints "unnecessary-optional-chain=error,unnecessary-optional-chain=error"

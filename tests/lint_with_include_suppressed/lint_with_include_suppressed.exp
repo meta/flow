@@ -9,48 +9,42 @@ Getters and setters can have side effects and are unsafe. [unsafe-getters-setter
         ^^^^^^^^^^^^^^^^^
 
 
-Error ------------------------------------------------------------------------------------------------- libs/libs.js:4:3
+Error ------------------------------------------------------------------------------------------------- libs/libs.js:5:3
 
 Getters and setters can have side effects and are unsafe. [unsafe-getters-setters]
 
-   4|   set foo(value: number): void;
+   5|   set foo(value: number): void;
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Error ----------------------------------------------------------------------------------------------------- test.js:10:5
+Error ----------------------------------------------------------------------------------------------------- test.js:10:1
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+This use of optional chaining (`?.`) is unnecessary because `b` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
 
-   test.js:10:5
-   10| if (b){} //warning included by --include-suppressed (reported as an error)
-           ^
-
-References:
-   test.js:8:9
-    8| var b: ?number = 0;
-               ^^^^^^ [1]
-   test.js:8:8
-    8| var b: ?number = 0;
-              ^^^^^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------------------- test.js:15:5
-
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
-
-   test.js:15:5
-   15| if (c){} //error included by --include-suppressed
-           ^
+   test.js:10:1
+   10| b?.p; //warning included by --include-suppressed (reported as an error)
+       ^^^^
 
 References:
-   test.js:13:9
-   13| var c: ?number = 0;
-               ^^^^^^ [1]
-   test.js:13:8
-   13| var c: ?number = 0;
-              ^^^^^^^ [2]
+   test.js:10:1
+   10| b?.p; //warning included by --include-suppressed (reported as an error)
+       ^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:15:1
+
+This use of optional chaining (`?.`) is unnecessary because `c` [1] cannot be nullish or because an earlier `?.` will
+short-circuit the nullish case. [unnecessary-optional-chain]
+
+   test.js:15:1
+   15| c?.p; //error included by --include-suppressed
+       ^^^^
+
+References:
+   test.js:15:1
+   15| c?.p; //error included by --include-suppressed
+       ^ [1]
 
 
 

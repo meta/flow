@@ -13,8 +13,6 @@ class Class {
   }
 }
 
-declare const x : unknown;
-//$FlowFixMe[sketchy-null-mixed] should suppress
-if(x) {
-
-};
+declare const x : {p: unknown};
+//$FlowFixMe[unnecessary-optional-chain] should suppress
+x?.p;

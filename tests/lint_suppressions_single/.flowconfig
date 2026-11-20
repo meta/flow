@@ -3,8 +3,5 @@ all=true
 
 [lints]
 all=off
-sketchy-null-bool=error
-sketchy-null-string=error
-sketchy-null-number=error
-sketchy-null-mixed=error
-unclear-type=error
+unnecessary-optional-chain=error
+unused-promise=error

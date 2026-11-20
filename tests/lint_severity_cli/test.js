@@ -1,13 +1,15 @@
-// The variable declaration has level error, but the reported level is the min
-// of all levels in all locations touched by the error.
+// The declaration of `x` has level error and every error below references it,
+// but the reported level only depends on the level at the error's primary location.
 
-//flowlint-next-line sketchy-null:error
-var x: ?number = 0;
+enum E {A, B}
 
-if (x) {} //suppressed by default
+//flowlint-next-line require-explicit-enum-switch-cases:error
+declare const x: E;
 
-//flowlint sketchy-null:warn
-if (x) {} //appears as a warning
+switch (x) { default: } //suppressed by default
 
-//flowlint sketchy-null:error
-if (x) {} //appears as an error
+//flowlint require-explicit-enum-switch-cases:warn
+switch (x) { default: } //appears as a warning
+
+//flowlint require-explicit-enum-switch-cases:error
+switch (x) { default: } //appears as an error

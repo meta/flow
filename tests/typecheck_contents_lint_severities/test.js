@@ -7,6 +7,6 @@
 import {f} from "./dep";
 
 f((x) => {
-  // This is a sketchy null check, but the relevant location is in dep.js
-  if (x) {}
+  // This is an incomplete enum switch, but the relevant location is in dep.js
+  switch (x) { default: }
 });

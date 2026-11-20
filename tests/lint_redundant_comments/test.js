@@ -1,41 +1,41 @@
 //Comments Redundant with Default (Error.)
 
-//flowlint-line sketchy-null:off
-//flowlint-next-line sketchy-null:off
+//flowlint-line unnecessary-optional-chain:off
+//flowlint-next-line unnecessary-optional-chain:off
 
-//flowlint sketchy-null:off
+//flowlint unnecessary-optional-chain:off
 
 
 //Comments Redundant with Earlier Range Comments (The first in a triple is valid; the others are errors.)
 
-//flowlint sketchy-null:error
-//flowlint sketchy-null:error
-//flowlint-line sketchy-null:error
+//flowlint unnecessary-optional-chain:error
+//flowlint unnecessary-optional-chain:error
+//flowlint-line unnecessary-optional-chain:error
 
-/*flowlint sketchy-null:off*/ //Unused suppression
-//flowlint sketchy-null:off
-//flowlint-line sketchy-null:off
+/*flowlint unnecessary-optional-chain:off*/ //Unused suppression
+//flowlint unnecessary-optional-chain:off
+//flowlint-line unnecessary-optional-chain:off
 
 
 //Comments with Duplicate Arguments (Error.)
 
-//flowlint sketchy-null:error, sketchy-null:error
-//flowlint-line sketchy-null:off, sketchy-null:off
+//flowlint unnecessary-optional-chain:error, unnecessary-optional-chain:error
+//flowlint-line unnecessary-optional-chain:off, unnecessary-optional-chain:off
 
-//flowlint sketchy-null:off, sketchy-null:off
-//flowlint-line sketchy-null:error, sketchy-null:error
+//flowlint unnecessary-optional-chain:off, unnecessary-optional-chain:off
+//flowlint-line unnecessary-optional-chain:error, unnecessary-optional-chain:error
 
 
 //Comments with Self-Contradicting Arguments (Error.)
 
-//flowlint sketchy-null:error, sketchy-null:off
-//flowlint-line sketchy-null:error, sketchy-null:off
+//flowlint unnecessary-optional-chain:error, unnecessary-optional-chain:off
+//flowlint-line unnecessary-optional-chain:error, unnecessary-optional-chain:off
 
 
 //Comments with Shadowing Arguments (Error.)
 
-//flowlint sketchy-null-bool:error, sketchy-null:off
-//flowlint-line sketchy-null-bool:error, sketchy-null:off
+//flowlint unnecessary-invariant:error, unnecessary-assertion:off
+//flowlint-line unnecessary-invariant:error, unnecessary-assertion:off
 
 
 //Comments with Overlapping but Non-Shadowing Arguments (Not an error.)
@@ -46,13 +46,13 @@
 
 //Comments Both Redundant with Themselves and Earlier Settings (Should only show one kind of error.)
 
-/*Clearing the settings; not an error.*/ //flowlint sketchy-null:error
-//flowlint sketchy-null:error, sketchy-null:error
-//flowlint-line sketchy-null:error, sketchy-null:error
+/*Clearing the settings; not an error.*/ //flowlint unnecessary-optional-chain:error
+//flowlint unnecessary-optional-chain:error, unnecessary-optional-chain:error
+//flowlint-line unnecessary-optional-chain:error, unnecessary-optional-chain:error
 
-/*Clearing the settings; not an error.*/ /*flowlint sketchy-null:off*/ //Unused suppression
-//flowlint sketchy-null:off, sketchy-null:off
-//flowlint-line sketchy-null:off, sketchy-null:off
+/*Clearing the settings; not an error.*/ /*flowlint unnecessary-optional-chain:off*/ //Unused suppression
+//flowlint unnecessary-optional-chain:off, unnecessary-optional-chain:off
+//flowlint-line unnecessary-optional-chain:off, unnecessary-optional-chain:off
 
 
 //Piecewise Shadowing (Error.)

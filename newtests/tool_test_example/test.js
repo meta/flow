@@ -76,9 +76,19 @@ module.exports = (suite(({addFile, addFiles, addCode, flowCmd, labels, modifyFil
   // use another file as the flowconfig.
   test('flowconfig', [
     addCode(`
-      // $FlowFixMe[unclear-type] - This lint is enabled in other_flowconfig
-      const x: any = {};
-    `).noNewErrors(),
+      // This lint is only enabled in other_flowconfig
+      const x = {a: 1};
+      x?.a;
+    `).newErrors(
+        `
+          test.js:6
+            6:       x?.a;
+                     ^^^^ This use of optional chaining (\`?.\`) is unnecessary because \`x\` [1] cannot be nullish or because an earlier \`?.\` will short-circuit the nullish case. [unnecessary-optional-chain]
+            References:
+              6:       x?.a;
+                       ^ [1]
+        `,
+      ),
   ]).flowConfig('other_flowconfig'),
 
   // Sometimes we want the test to call the flow cli directly. This is possible

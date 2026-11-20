@@ -9,5 +9,5 @@ all=true
 
 [lints]
 all=off
-sketchy-null-bool=error
-sketchy-null=off
+unnecessary-optional-chain=error
+unnecessary-optional-chain=off

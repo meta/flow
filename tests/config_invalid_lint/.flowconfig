@@ -1,7 +1,7 @@
 [lints]
-sketchy-null=warn
+unnecessary-optional-chain=warn
 ; redundant
-sketchy-null=warn
+unnecessary-optional-chain=warn
 ; doesn't exist
 nonexisting-lint=warn
 

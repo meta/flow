@@ -6,6 +6,8 @@
  * In this case, we have a dependency graph A -> B, so when we recheck B, A does
  * not need to also be rechecked.
  *
- * The type here is carefully constructed to ensure the position of ?string
+ * The type here is carefully constructed to ensure the position of E
  * points here, and is not repositioned into B. */
-export type Fn = (cb: (s: ?string) => void) => void;
+export type Fn = (cb: (s: E) => void) => void;
+
+export enum E {A, B}

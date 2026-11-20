@@ -11,40 +11,42 @@ The Flow server is currently in lazy mode and is only checking 1/3 files.
 To learn more, visit flow.org/en/docs/lang/lazy-modes
 
 Focusing test.sh should find the warnings
-Warning ---------------------------------------------------------------------------------------------------- test.js:5:5
+Warning ---------------------------------------------------------------------------------------------------- test.js:5:9
 
-Sketchy null check on string [1] which is potentially an empty string. Perhaps you meant to check for null or
-undefined [2]? [sketchy-null-string]
+Incomplete exhaustive check: the members `A` and `B` of enum `E` [1] have not been considered in check of `foo`. The
+default case [2] does not check for the missing members as the `require-explicit-enum-switch-cases` lint has been
+enabled. [require-explicit-enum-switch-cases]
 
-   test.js:5:5
-   5| if (foo) { // sketchy null string (cross-module)
-          ^^^
-
-References:
-   dep.js:3:19
-   3| export const foo: string | void = undefined;
-                        ^^^^^^ [1]
-   dep.js:3:28
-   3| export const foo: string | void = undefined;
-                                 ^^^^ [2]
-
-
-Warning ---------------------------------------------------------------------------------------------------- test.js:9:5
-
-Sketchy null check on string [1] which is potentially an empty string. Perhaps you meant to check for null or
-undefined [2]? [sketchy-null-string]
-
-   test.js:9:5
-   9| if (bar) { // sketchy null string (local)
-          ^^^
+   test.js:5:9
+   5| switch (foo) { // incomplete enum switch (cross-module)
+              ^^^
 
 References:
-   test.js:8:12
-   8| const bar: string | void = undefined;
-                 ^^^^^^ [1]
-   test.js:8:21
-   8| const bar: string | void = undefined;
-                          ^^^^ [2]
+   dep.js:5:19
+   5| export const foo: E = E.A;
+                        ^ [1]
+   test.js:6:3
+   6|   default:
+        ^^^^^^^^ [2]
+
+
+Warning --------------------------------------------------------------------------------------------------- test.js:10:9
+
+Incomplete exhaustive check: the members `A` and `B` of enum `E` [1] have not been considered in check of `bar`. The
+default case [2] does not check for the missing members as the `require-explicit-enum-switch-cases` lint has been
+enabled. [require-explicit-enum-switch-cases]
+
+   test.js:10:9
+   10| switch (bar) { // incomplete enum switch (local)
+               ^^^
+
+References:
+   test.js:9:12
+    9| const bar: E = E.A;
+                  ^ [1]
+   test.js:11:3
+   11|   default:
+         ^^^^^^^^ [2]
 
 
 

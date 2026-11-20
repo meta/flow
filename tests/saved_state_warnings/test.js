@@ -1,10 +1,12 @@
 // @flow
 
-import {foo} from './dep';
+import {E, foo} from './dep';
 
-if (foo) { // sketchy null string (cross-module)
+switch (foo) { // incomplete enum switch (cross-module)
+  default:
 }
 
-const bar: string | void = undefined;
-if (bar) { // sketchy null string (local)
+const bar: E = E.A;
+switch (bar) { // incomplete enum switch (local)
+  default:
 }

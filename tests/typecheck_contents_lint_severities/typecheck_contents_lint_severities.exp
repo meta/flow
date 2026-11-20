@@ -1,19 +1,20 @@
-Error ----------------------------------------------------------------------------------------------------- test.js:11:7
+Error ---------------------------------------------------------------------------------------------------- test.js:11:11
 
-Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
-[sketchy-null-number]
+Incomplete exhaustive check: the members `A` and `B` of enum `E` [1] have not been considered in check of `x`. The
+default case [2] does not check for the missing members as the `require-explicit-enum-switch-cases` lint has been
+enabled. [require-explicit-enum-switch-cases]
 
-   test.js:11:7
-   11|   if (x) {}
-             ^
+   test.js:11:11
+   11|   switch (x) { default: }
+                 ^
 
 References:
-   dep.js:3:24
-    3| export function f(cb: ?number => void): void {}
-                              ^^^^^^ [1]
    dep.js:3:23
-    3| export function f(cb: ?number => void): void {}
-                             ^^^^^^^ [2]
+    3| export function f(cb: E => void): void {}
+                             ^ [1]
+   test.js:11:16
+   11|   switch (x) { default: }
+                      ^^^^^^^^ [2]
 
 
 

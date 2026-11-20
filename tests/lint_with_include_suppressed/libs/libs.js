@@ -1,6 +1,6 @@
 declare interface TestInterface {
-  // flowlint unsafe-getters-setters:off
+  // $FlowFixMe[unsafe-getters-setters]
   get foo(): string;
+  // $FlowFixMe[unsafe-getters-setters]
   set foo(value: number): void;
-  // flowlint unsafe-getters-setters:error
 }

@@ -1,5 +1,5 @@
 //@flow
 
-var x: number = 0;
+var x: ?{p: number} = {p: 0};
 
-if (x) { /* not sketchy */ }
+x?.p; /* necessary */

@@ -2,8 +2,8 @@
 // a suppression comment over a lint which was never enabled should not be
 // considered "used." Instead, it should show up as an unused suppression.
 
-// Note: this test assumes that sketchy-null-string is never explicitly enabled
+// Note: this test assumes that unnecessary-optional-chain is never explicitly enabled
 
-declare const x: ?string;
-// $FlowFixMe[sketchy-null-string] - this is unused because sketchy-null-string is off
-if (x) {}
+declare const x: {p: string};
+// $FlowFixMe[unnecessary-optional-chain] - this is unused because unnecessary-optional-chain is off
+x?.p;

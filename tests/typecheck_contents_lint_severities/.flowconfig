@@ -5,7 +5,7 @@
 [libs]
 
 [lints]
-sketchy-null=error
+require-explicit-enum-switch-cases=error
 
 [options]
 all=true
