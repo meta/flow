@@ -9518,12 +9518,6 @@ impl<L: Dupe + PartialOrd + Ord + PartialEq + Eq> ErrorMessage<L> {
             }
             ErrorMessage::ENestedComponent(_) => LintError(NestedComponent),
             ErrorMessage::ENestedHook(_) => LintError(NestedHook),
-            ErrorMessage::ESignatureBindingValidation(BindingValidation::ModuleOverride {
-                ..
-            })
-            | ErrorMessage::ESignatureBindingValidation(BindingValidation::NameOverride {
-                ..
-            }) => LintError(LibdefOverride),
 
             // Infer warnings
             ErrorMessage::EBadExportPosition(_) | ErrorMessage::EBadExportContext(box (_, _)) => {

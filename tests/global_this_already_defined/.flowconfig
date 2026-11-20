@@ -3,6 +3,3 @@ globals.js
 
 [options]
 all=true
-
-[lints]
-libdef-override=off

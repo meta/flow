@@ -8,7 +8,6 @@
 unsafe-object-assign=error
 nested-component=error
 nested-hook=error
-libdef-override=error
 
 [options]
 all=true
