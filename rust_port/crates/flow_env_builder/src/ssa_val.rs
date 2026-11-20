@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+use std::cmp;
 use std::collections::BTreeSet;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -137,10 +138,34 @@ impl<L: LocSig> WriteState<L> {
 /// single write, or a "join" of writes (in compiler terminology, a PHI node), or
 /// a reference to something that is unknown at a particular point in the AST
 /// during traversal, but will be known by the time traversal is complete.
-#[derive(Debug, Clone, Dupe, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Dupe)]
 pub struct Val<L: LocSig> {
     pub id: usize,
     pub write_state: WriteState<L>,
+}
+
+// Each Val gets a fresh id, so two Vals with the same id have the same write state. Comparing ids
+// alone therefore gives the same answers as comparing ids and then write states, without walking
+// the write states: they share parts (a refinement points at the value it refines), so a walk can
+// visit the same part exponentially many times.
+impl<L: LocSig> PartialEq for Val<L> {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl<L: LocSig> Eq for Val<L> {}
+
+impl<L: LocSig> PartialOrd for Val<L> {
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl<L: LocSig> Ord for Val<L> {
+    fn cmp(&self, other: &Self) -> cmp::Ordering {
+        self.id.cmp(&other.id)
+    }
 }
 
 impl<L: LocSig> std::hash::Hash for Val<L> {
@@ -692,50 +717,66 @@ pub fn writes_of_uninitialized<L: LocSig + Ord, F>(
 where
     F: Fn(usize) -> bool,
 {
-    fn state_is_uninitialized<L: LocSig, F>(
+    // Refinements share the values they refine, so the result for each refined value is computed
+    // once and reused.
+    fn state_is_uninitialized<L: LocSig + Ord, F>(
         v: &WriteStateInner<L>,
         refine_to_undefined: &F,
-    ) -> Vec<WriteStateInner<L>>
+        refined_vals: &mut HashMap<usize, BTreeSet<WriteStateInner<L>>>,
+    ) -> BTreeSet<WriteStateInner<L>>
     where
         F: Fn(usize) -> bool,
     {
         match v {
-            WriteStateInner::Undeclared(_, _) => vec![v.clone()],
-            WriteStateInner::DeclaredButSkipped(_, _) => vec![],
-            WriteStateInner::Undefined(_) => vec![],
-            WriteStateInner::Number(_) => vec![],
-            WriteStateInner::DeclaredFunction(_) => vec![],
-            WriteStateInner::Uninitialized(_) => vec![v.clone()],
+            WriteStateInner::Undeclared(_, _) => BTreeSet::from([v.clone()]),
+            WriteStateInner::DeclaredButSkipped(_, _) => BTreeSet::new(),
+            WriteStateInner::Undefined(_) => BTreeSet::new(),
+            WriteStateInner::Number(_) => BTreeSet::new(),
+            WriteStateInner::DeclaredFunction(_) => BTreeSet::new(),
+            WriteStateInner::Uninitialized(_) => BTreeSet::from([v.clone()]),
             WriteStateInner::PHI(states) => states
                 .iter()
-                .flat_map(|s| state_is_uninitialized(s, refine_to_undefined))
+                .flat_map(|s| state_is_uninitialized(s, refine_to_undefined, refined_vals))
                 .collect(),
             WriteStateInner::Refinement {
                 refinement_id,
                 val_t,
             } => {
-                let states = state_is_uninitialized(val_t.write_state.inner(), refine_to_undefined);
-                if states.is_empty() || !refine_to_undefined(*refinement_id) {
-                    vec![]
-                } else {
-                    states
+                if !refine_to_undefined(*refinement_id) {
+                    return BTreeSet::new();
                 }
+                if let Some(states) = refined_vals.get(&val_t.id) {
+                    return states.clone();
+                }
+                let states = state_is_uninitialized(
+                    val_t.write_state.inner(),
+                    refine_to_undefined,
+                    refined_vals,
+                );
+                refined_vals.insert(val_t.id, states.clone());
+                states
             }
-            WriteStateInner::Loc(_) => vec![],
-            WriteStateInner::EmptyArray { .. } => vec![],
-            WriteStateInner::IllegalWrite(_) => vec![],
-            WriteStateInner::FunctionThis(_) => vec![],
-            WriteStateInner::GlobalThis(_) => vec![],
-            WriteStateInner::IllegalThis(_) => vec![],
-            WriteStateInner::ClassInstanceThis(_) => vec![],
-            WriteStateInner::ClassStaticThis(_) => vec![],
-            WriteStateInner::ClassInstanceSuper(_) => vec![],
-            WriteStateInner::ClassStaticSuper(_) => vec![],
-            WriteStateInner::ModuleScoped(_) => vec![],
-            WriteStateInner::Global(_) => vec![],
-            WriteStateInner::Projection(_) => vec![],
+            WriteStateInner::Loc(_) => BTreeSet::new(),
+            WriteStateInner::EmptyArray { .. } => BTreeSet::new(),
+            WriteStateInner::IllegalWrite(_) => BTreeSet::new(),
+            WriteStateInner::FunctionThis(_) => BTreeSet::new(),
+            WriteStateInner::GlobalThis(_) => BTreeSet::new(),
+            WriteStateInner::IllegalThis(_) => BTreeSet::new(),
+            WriteStateInner::ClassInstanceThis(_) => BTreeSet::new(),
+            WriteStateInner::ClassStaticThis(_) => BTreeSet::new(),
+            WriteStateInner::ClassInstanceSuper(_) => BTreeSet::new(),
+            WriteStateInner::ClassStaticSuper(_) => BTreeSet::new(),
+            WriteStateInner::ModuleScoped(_) => BTreeSet::new(),
+            WriteStateInner::Global(_) => BTreeSet::new(),
+            WriteStateInner::Projection(_) => BTreeSet::new(),
         }
     }
 
-    state_is_uninitialized(t.write_state.inner(), &refine_to_undefined)
+    state_is_uninitialized(
+        t.write_state.inner(),
+        &refine_to_undefined,
+        &mut HashMap::new(),
+    )
+    .into_iter()
+    .collect()
 }
