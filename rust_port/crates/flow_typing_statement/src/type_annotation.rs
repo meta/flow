@@ -2659,10 +2659,26 @@ fn convert_inner<'a>(
                                 reason::VirtualReasonDesc::RType(FlowSmolStr::new_inline("Omit")),
                                 loc.dupe(),
                             );
+                            let key_tparam = TypeParam::new(type_::TypeParamInner {
+                                reason: reason.dupe(),
+                                name: SubstName::name(FlowSmolStr::new_inline("K")),
+                                bound: type_::mixed_t::make(reason.dupe()),
+                                polarity: None,
+                                default: None,
+                                is_this: false,
+                                is_const: false,
+                            });
+                            let property_type = type_util::poly_type_of_tparams(
+                                cx.make_source_poly_id(false, loc),
+                                Some((loc.dupe(), vec1::Vec1::new(key_tparam))),
+                                type_::mixed_t::make(reason.dupe()),
+                                cx.type_strictness_kind(),
+                                PolyTKind::MappedType,
+                            );
                             let destructor =
                                 type_::Destructor::MappedType(Box::new(DestructorMappedTypeData {
                                     homomorphic: type_::MappedTypeHomomorphicFlag::Unspecialized,
-                                    property_type: type_::mixed_t::make(reason.dupe()),
+                                    property_type,
                                     name_type: None,
                                     mapped_type_flags: type_::MappedTypeFlags {
                                         optional: type_::MappedTypeOptionality::KeepOptionality,

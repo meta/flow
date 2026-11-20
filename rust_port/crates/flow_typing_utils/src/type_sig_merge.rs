@@ -2514,6 +2514,26 @@ fn merge_annot<'cx>(
             let t1 = merge_impl(env, cx, file, t1, false, false);
             let t2 = merge_impl(env, cx, file, t2, false, false);
             let id = eval_id_of_aloc(cx, loc.dupe());
+            let key_tparam = type_::TypeParam::new(type_::TypeParamInner {
+                reason: reason.dupe(),
+                name: SubstName::name(FlowSmolStr::new_inline("K")),
+                bound: type_::mixed_t::make(reason.dupe()),
+                polarity: None,
+                default: None,
+                is_this: false,
+                is_const: false,
+            });
+            let property_type = Type::new(type_::TypeInner::DefT(
+                reason.dupe(),
+                type_::DefT::new(type_::DefTInner::PolyT(Box::new(type_::PolyTData {
+                    kind: PolyTKind::MappedType,
+                    tparams_loc: loc.dupe(),
+                    tparams: vec![key_tparam].into(),
+                    t_out: type_::mixed_t::make(reason.dupe()),
+                    id: cx.make_source_poly_id(true, loc),
+                    strictness_kind: *strictness_kind,
+                }))),
+            ));
             let t2 = Type::new(type_::TypeInner::EvalT {
                 type_: t2,
                 defer_use_t: type_::TypeDestructorT::new(type_::TypeDestructorTInner(
@@ -2522,7 +2542,7 @@ fn merge_annot<'cx>(
                     Rc::new(type_::Destructor::MappedType(Box::new(
                         DestructorMappedTypeData {
                             homomorphic: type_::MappedTypeHomomorphicFlag::Unspecialized,
-                            property_type: type_::mixed_t::make(reason.dupe()),
+                            property_type,
                             name_type: None,
                             mapped_type_flags: type_::MappedTypeFlags {
                                 optional: type_::MappedTypeOptionality::KeepOptionality,
