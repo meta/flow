@@ -1608,11 +1608,15 @@ fn function_(
     let tparams = diff_if_changed_opt(type_params, tparams1, tparams2);
     let params = diff_if_changed_ret_opt(function_params, params1, params2);
     let returns = Some(diff_if_changed(function_return_annot, return1, return2));
-    // reprint the parameter if it's the single parameter of a lambda, or when return annotation
-    // has changed to add () to avoid syntax errors.
+    // reprint the parameter if it's the single parameter of a lambda written without (), or when
+    // return annotation has changed to add () to avoid syntax errors. Such a parameter list is
+    // located at its parameter.
     let params = {
         let is_single_param_arrow = is_arrow
-            && params1.params.len() == 1
+            && matches!(
+                &*params1.params,
+                [ast::function::Param::RegularParam { loc, .. }] if *loc == params1.loc
+            )
             && params1.rest.is_none()
             && params1.this_.is_none()
             && params2.params.len() == 1

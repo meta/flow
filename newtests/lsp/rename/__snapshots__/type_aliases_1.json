@@ -30,14 +30,14 @@
           }
         },
         {
-          "newText": "(_: NEW_NAME)",
+          "newText": "NEW_NAME",
           "range": {
             "end": {
-              "character": 7,
+              "character": 6,
               "line": 11
             },
             "start": {
-              "character": 1,
+              "character": 5,
               "line": 11
             }
           }

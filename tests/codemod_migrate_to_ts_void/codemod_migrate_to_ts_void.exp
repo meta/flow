@@ -1,11 +1,11 @@
 flow codemod migrate-to-ts-void --write
 >>> Launching report...
 
-Found 16 rejected `void`s in 2 files, and 5 function types' return types rejecting returned `void`s
+Found 17 rejected `void`s in 2 files, and 5 function types' return types rejecting returned `void`s
 
 >>> Launching report...
 
-Changed `void` to `undefined`: 7
+Changed `void` to `undefined`: 8
 Added `: undefined` return annotations: 2
 Changed function types' return types to admit `void`: 4
 Changed type parameters' bounds to admit their `void` default: 1
@@ -54,7 +54,7 @@ Left because they are neither an annotation nor a return: 0
 
 Found 1 rejected `void`s in 1 files, and 0 function types' return types rejecting returned `void`s
 
-`void` annotations: 20 before, 17 after. `void` return types: 12 before, 9 after
+`void` annotations: 21 before, 17 after. `void` return types: 12 before, 9 after
 
 types.js
 export type Props = {
@@ -153,6 +153,7 @@ type Raw<T extends ?string | void = void, U extends ?string | void = T> = U; // 
 type Read<T extends ?string = undefined> = T; // read into `?string` below as well: changed instead
 declare const read: Read<>;
 const readValue: ?string = read;
+const commented = (x /*: undefined | string */) /*: ?string */ => x; // changed in the comment
 
 flow check under experimental.ts_void
 Error ---------------------------------------------------------------------------------------------------- uses.js:69:30

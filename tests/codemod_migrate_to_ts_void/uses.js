@@ -66,3 +66,4 @@ type Raw<T extends ?string = void, U extends ?string = T> = U; // their bounds r
 type Read<T extends ?string = void> = T; // read into `?string` below as well: changed instead
 declare const read: Read<>;
 const readValue: ?string = read;
+const commented = (x /*: void | string */) /*: ?string */ => x; // changed in the comment
