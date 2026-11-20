@@ -536,6 +536,8 @@ pub mod stats {
         pub kept_return_types: Vec<Loc>,
         /// `return undefined;` added to functions without a `return` statement.
         pub added_returns: usize,
+        /// `unknown` return types of functions without a `return` statement changed to `void`.
+        pub void_return_types: usize,
         /// Rejected `void`s returned by function types, kept: changed to `undefined`, they would
         /// reject every function they type that returns no value.
         pub kept_function_type_returns: usize,
@@ -556,6 +558,7 @@ pub mod stats {
             a.widened_return_types += b.widened_return_types;
             a.kept_return_types.extend(b.kept_return_types);
             a.added_returns += b.added_returns;
+            a.void_return_types += b.void_return_types;
             a.kept_function_type_returns += b.kept_function_type_returns;
             a.unchangeable += b.unchangeable;
             a.unmatched.extend(b.unmatched);
@@ -585,6 +588,10 @@ pub mod stats {
                 format!(
                     "Added `return undefined;` to functions without a `return` statement: {}",
                     self.added_returns
+                ),
+                format!(
+                    "Changed `unknown` return types of functions without a `return` statement to `void`: {}",
+                    self.void_return_types
                 ),
                 format!(
                     "Kept in the return types of function types: {}",
@@ -749,6 +756,44 @@ fn void_type() -> ast::types::Type<Loc, Loc> {
         loc: Loc::none(),
         comments: None,
     })
+}
+
+/// The `void` return type of a function without a `return` statement annotated as returning
+/// `unknown`, or a `Promise` of it: as in TypeScript, `void` types a function that returns no value.
+fn void_of_unknown_return(
+    t: &ast::types::Type<Loc, Loc>,
+    async_: bool,
+) -> Option<ast::types::Type<Loc, Loc>> {
+    let void_of_unknown = |t: &ast::types::Type<Loc, Loc>| match t.deref() {
+        ast::types::TypeInner::Unknown { loc, comments }
+        | ast::types::TypeInner::Mixed { loc, comments } => {
+            Some(ast::types::Type::new(ast::types::TypeInner::Void {
+                loc: loc.dupe(),
+                comments: comments.clone(),
+            }))
+        }
+        _ => None,
+    };
+    if !async_ {
+        return void_of_unknown(t);
+    }
+    match t.deref() {
+        ast::types::TypeInner::Generic { inner, .. }
+            if let ast::types::generic::Identifier::Unqualified(id) = &inner.id
+                && id.name == "Promise"
+                && let Some(targs) = &inner.targs
+                && let [targ] = &*targs.arguments =>
+        {
+            let void = void_of_unknown(targ)?;
+            Some(ast_builder::types::unqualified_generic(
+                None,
+                None,
+                Some(ast_builder::types::type_args(None, None, vec![void])),
+                "Promise",
+            ))
+        }
+        _ => None,
+    }
 }
 
 /// A return type that admits `undefined`, changed to admit `void` as well: a union's `undefined`
@@ -969,11 +1014,22 @@ impl<'ast> AstVisitor<'ast, Loc> for Mapper {
                 ast::function::ReturnAnnot::Available(ast_builder::types::annotation(return_t));
         }
         // A function without a `return` statement returns explicitly the `undefined` it returned
-        // implicitly at its end.
+        // implicitly at its end, unless it is annotated as returning `unknown`: that annotation
+        // becomes `void`.
         if let ast::function::Body::BodyBlock((body_loc, block)) = &function_.body
             && self.targets.contains(body_loc)
         {
             self.matched.insert(body_loc.dupe());
+            if let ast::function::ReturnAnnot::Available(annot) = &function_.return_
+                && let Some(void) = void_of_unknown_return(&annot.annotation, function.async_)
+            {
+                self.stats.void_return_types += 1;
+                function_.return_ = ast::function::ReturnAnnot::Available(ast::types::Annotation {
+                    loc: annot.loc.dupe(),
+                    annotation: void,
+                });
+                return function_;
+            }
             self.stats.added_returns += 1;
             let return_undefined = ast_builder::statements::return_(
                 None,

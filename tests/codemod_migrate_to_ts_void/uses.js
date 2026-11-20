@@ -45,7 +45,8 @@ import type {Form} from './types';
 const form: Form = {getError: (): void => {}}; // changed once `Form` no longer admits `void`
 const error: ?string = form.getError();
 
-function anything(): unknown {} // returns `undefined`
+function anything(): unknown {} // returns `void`
+async function settle(): Promise<unknown> {} // returns `Promise<void>`
 function nothing(): undefined {} // kept
 async function load(): Promise<?string> {} // returns `undefined`
 function noValue(): string | void {} // read into `?string` below: changed, then returns `undefined`
