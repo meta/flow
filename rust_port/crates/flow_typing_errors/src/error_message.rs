@@ -9516,7 +9516,6 @@ impl<L: Dupe + PartialOrd + Ord + PartialEq + Eq> ErrorMessage<L> {
             ErrorMessage::EReactIntrinsicOverlap(box EReactIntrinsicOverlapData { .. }) => {
                 LintError(ReactIntrinsicOverlap)
             }
-            ErrorMessage::ENestedComponent(_) => LintError(NestedComponent),
             ErrorMessage::ENestedHook(_) => LintError(NestedHook),
 
             // Infer warnings
@@ -13566,6 +13565,7 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             ErrorMessage::EUntypedTypeImport { .. } => Some(UntypedTypeImport),
             ErrorMessage::EInternalType { .. } => Some(InternalType),
             ErrorMessage::EInvalidThisArg(box EInvalidThisArgData { .. }) => Some(InvalidThisArg),
+            ErrorMessage::ENestedComponent { .. } => Some(NestedComponent),
             ErrorMessage::EUntypedImport { .. }
             | ErrorMessage::ENonstrictImport { .. }
             | ErrorMessage::EUnclearType { .. }
@@ -13578,7 +13578,6 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             | ErrorMessage::EAmbiguousObjectType { .. }
             | ErrorMessage::EReactIntrinsicOverlap(box EReactIntrinsicOverlapData { .. })
             | ErrorMessage::EUninitializedInstanceProperty { .. }
-            | ErrorMessage::ENestedComponent { .. }
             | ErrorMessage::ENestedHook { .. }
             | ErrorMessage::EUnusedPromise { .. } => match self.kind_of_msg() {
                 ErrorKind::LintError(kind) => {
