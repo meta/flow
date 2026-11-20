@@ -2176,7 +2176,6 @@ pub fn make_options(
         strict_mode,
         options:
             flow_config::opts::Opts {
-                agent_helper_hints: _,
                 agent_progress_keepalive: _,
                 all,
                 autoimports,

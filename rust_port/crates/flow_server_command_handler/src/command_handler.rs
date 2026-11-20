@@ -3547,15 +3547,10 @@ fn handle_status(
     transaction: &flow_heap::parsing_heaps::Transaction,
 ) -> EphemeralNonparallelizableResult {
     let (status_response, lazy_stats) = get_status(options, env, transaction);
-    let error_state_timestamps = env.collated_errors().error_state_timestamps;
-    let unresolved_error_rounds = error_state_timestamps
-        .timestamp_start_of_non_zero_type_errors
-        .map(|start| error_state_timestamps.round - start.round);
     Ok((
         server_prot::response::Response::STATUS {
             status_response,
             lazy_stats,
-            unresolved_error_rounds,
         },
         None,
     ))

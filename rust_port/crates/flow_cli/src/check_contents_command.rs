@@ -125,8 +125,6 @@ fn main(args: &arg_spec::Values) {
         }
         _ => None,
     };
-    let agent_helper_hints =
-        crate::agent_helper_command::error_hints_enabled(&flowconfig_name, &root);
     let strip_root = if strip_root { Some(root) } else { None };
     let print_json =
         |errors: &ConcreteLocPrintableErrorSet,
@@ -173,10 +171,6 @@ fn main(args: &arg_spec::Values) {
                     None,
                 )
                 .expect("failed to write cli errors");
-                if agent_helper_hints {
-                    crate::agent_helper_command::print_error_hints(&mut out, &errors, None)
-                        .expect("failed to write cli error hints");
-                }
                 out.flush().expect("failed to flush cli errors");
                 // Return a successful exit code if there were only warnings.
                 flow_common_exit_status::exit(flow_command_utils::get_check_or_status_exit_code(

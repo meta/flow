@@ -5,12 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-use std::path::Path;
-
 use flow_command_spec::arg_spec;
-use flow_common_errors::error_codes::ErrorCode;
-use flow_common_errors::error_utils::ConcreteLocPrintableErrorSet;
-use flow_common_errors::error_utils::code_of_printable_error;
 use flow_parser::loc::LOC_NONE;
 use flow_parser::loc::Loc;
 use flow_server_env::server_prot;
@@ -23,49 +18,6 @@ enum AgentHelperSubcommand {
 
 const INSPECT_TYPES_DOC: &str = "Shows the hover type at each `// ^?` comment in a file";
 const UNPACK_DOCS_DOC: &str = "Writes the Flow docs bundled into this binary to a directory";
-
-const MAX_UNRESOLVED_ERROR_ROUNDS: u32 = 5;
-
-pub(crate) fn error_hints_enabled(flowconfig_name: &str, root: &Path) -> bool {
-    let flowconfig_path = root.join(flowconfig_name);
-    flow_command_utils::read_config_or_exit(&flowconfig_path.to_string_lossy(), false)
-        .options
-        .agent_helper_hints
-}
-
-/// Under `experimental.agent_helper_hints`, points at the agent-helper command that fits the
-/// errors the CLI just printed.
-pub(crate) fn print_error_hints<W: std::io::Write>(
-    out: &mut W,
-    errors: &ConcreteLocPrintableErrorSet,
-    unresolved_error_rounds: Option<u32>,
-) -> std::io::Result<()> {
-    let has_deprecated_or_unsupported_syntax = errors.exists(|error| {
-        matches!(
-            code_of_printable_error(error),
-            Some(
-                ErrorCode::DeprecatedType
-                    | ErrorCode::DeprecatedUtility
-                    | ErrorCode::UnsupportedSyntax
-            )
-        )
-    });
-    if has_deprecated_or_unsupported_syntax {
-        writeln!(
-            out,
-            "\nSome errors are about deprecated or unsupported syntax. To read the docs for this version of Flow, run `flow agent-helper unpack-docs --reason REASON DIR` and search DIR."
-        )?;
-    }
-    if let Some(rounds) = unresolved_error_rounds
-        && rounds > MAX_UNRESOLVED_ERROR_ROUNDS
-    {
-        writeln!(
-            out,
-            "\nErrors have persisted through {rounds} rechecks. To see the types Flow infers, put a `// ^?` comment under an expression and run `flow agent-helper inspect-types --reason REASON FILE`. Add `--show-refinements --show-invalidations` to see where refinements were made or lost."
-        )?;
-    }
-    Ok(())
-}
 
 fn subcommand_flag() -> arg_spec::FlagType<Option<(AgentHelperSubcommand, Vec<String>)>> {
     arg_spec::command_flag(vec![

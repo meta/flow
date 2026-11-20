@@ -80,7 +80,6 @@ fn request_status(
 ) -> (
     server_prot::response::StatusResponse,
     server_prot::response::LazyStats,
-    Option<u32>,
 ) {
     let request = server_prot::request::Command::STATUS { include_warnings };
     match flow_command_utils::connect_and_make_request(
@@ -92,14 +91,13 @@ fn request_status(
         server_prot::response::Response::STATUS {
             status_response,
             lazy_stats,
-            unresolved_error_rounds,
-        } => (status_response, lazy_stats, unresolved_error_rounds),
+        } => (status_response, lazy_stats),
         response => flow_command_utils::failwith_bad_response(&request, &response),
     }
 }
 
 pub(crate) fn status_json(flowconfig_name: &str, root: &Path) -> io::Result<serde_json::Value> {
-    let (response, _, _) = request_status(flowconfig_name, root, &ConnectParams::default(), true);
+    let (response, _) = request_status(flowconfig_name, root, &ConnectParams::default(), true);
     match response {
         server_prot::response::StatusResponse::ERRORS {
             errors,
@@ -124,7 +122,7 @@ pub(crate) fn status_json(flowconfig_name: &str, root: &Path) -> io::Result<serd
 }
 
 fn check_status(flowconfig_name: &str, args: &StatusArgs, connect_flags: &ConnectParams) {
-    let (response, lazy_stats, unresolved_error_rounds) = request_status(
+    let (response, lazy_stats) = request_status(
         flowconfig_name,
         &args.root,
         connect_flags,
@@ -211,14 +209,6 @@ fn check_status(flowconfig_name: &str, args: &StatusArgs, connect_flags: &Connec
                     lazy_msg.as_deref(),
                 )
                 .expect("failed to write cli errors");
-                if crate::agent_helper_command::error_hints_enabled(flowconfig_name, &args.root) {
-                    crate::agent_helper_command::print_error_hints(
-                        &mut out,
-                        &cli_errors,
-                        unresolved_error_rounds,
-                    )
-                    .expect("failed to write cli error hints");
-                }
                 out.flush().expect("failed to flush cli errors");
             }
             flow_common_exit_status::exit(flow_command_utils::get_check_or_status_exit_code(
