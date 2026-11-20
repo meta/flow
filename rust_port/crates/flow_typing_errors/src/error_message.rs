@@ -9512,9 +9512,6 @@ impl<L: Dupe + PartialOrd + Ord + PartialEq + Eq> ErrorMessage<L> {
                 LintError(ExportRenamedDefault)
             }
             ErrorMessage::EUnusedPromise { .. } => LintError(UnusedPromise),
-            ErrorMessage::EReactIntrinsicOverlap(box EReactIntrinsicOverlapData { .. }) => {
-                LintError(ReactIntrinsicOverlap)
-            }
 
             // Infer warnings
             ErrorMessage::EBadExportPosition(_) | ErrorMessage::EBadExportContext(box (_, _)) => {
@@ -13566,6 +13563,9 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             ErrorMessage::ENestedComponent { .. } => Some(NestedComponent),
             ErrorMessage::ENestedHook { .. } => Some(NestedHook),
             ErrorMessage::EUnsafeObjectAssign { .. } => Some(UnsafeObjectAssign),
+            ErrorMessage::EReactIntrinsicOverlap(box EReactIntrinsicOverlapData { .. }) => {
+                Some(ReactIntrinsicOverlap)
+            }
             ErrorMessage::EUntypedImport { .. }
             | ErrorMessage::ENonstrictImport { .. }
             | ErrorMessage::EUnclearType { .. }
@@ -13575,7 +13575,6 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             | ErrorMessage::EUnnecessaryOptionalChain { .. }
             | ErrorMessage::EUnnecessaryInvariant { .. }
             | ErrorMessage::EAmbiguousObjectType { .. }
-            | ErrorMessage::EReactIntrinsicOverlap(box EReactIntrinsicOverlapData { .. })
             | ErrorMessage::EUninitializedInstanceProperty { .. }
             | ErrorMessage::EUnusedPromise { .. } => match self.kind_of_msg() {
                 ErrorKind::LintError(kind) => {
