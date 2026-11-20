@@ -6,4 +6,3 @@ builtin_lib=core-only
 
 [lints]
 nested-component=error
-internal-type=off

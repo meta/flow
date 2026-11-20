@@ -2,6 +2,3 @@
 all=true
 builtin_lib=core-only
 component_syntax=true
-
-[lints]
-internal-type=off

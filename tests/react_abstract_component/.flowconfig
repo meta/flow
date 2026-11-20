@@ -3,5 +3,4 @@ builtin_lib=core-only
 all=true
 
 [lints]
-internal-type=off
 react-intrinsic-overlap=error

@@ -9477,7 +9477,6 @@ impl<L: Dupe + PartialOrd + Ord + PartialEq + Eq> ErrorMessage<L> {
             // Lint errors
             ErrorMessage::EUntypedImport(box (_, _)) => LintError(UntypedImport),
             ErrorMessage::ENonstrictImport(_) => LintError(NonstrictImport),
-            ErrorMessage::EInternalType(_, _) => LintError(InternalType),
             ErrorMessage::EUnclearType(_) => LintError(UnclearType),
             ErrorMessage::EUnsafeGettersSetters(_) => LintError(UnsafeGettersSetters),
             ErrorMessage::EUnsafeObjectAssign(_) => LintError(UnsafeObjectAssign),
@@ -13574,9 +13573,9 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             }
             ErrorMessage::EDeprecatedBool { .. } => Some(DeprecatedType),
             ErrorMessage::EUntypedTypeImport { .. } => Some(UntypedTypeImport),
+            ErrorMessage::EInternalType { .. } => Some(InternalType),
             ErrorMessage::EUntypedImport { .. }
             | ErrorMessage::ENonstrictImport { .. }
-            | ErrorMessage::EInternalType { .. }
             | ErrorMessage::EUnclearType { .. }
             | ErrorMessage::EUnsafeObjectAssign { .. }
             | ErrorMessage::EUnsafeGettersSetters { .. }
