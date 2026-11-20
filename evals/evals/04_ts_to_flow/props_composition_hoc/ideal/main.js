@@ -39,6 +39,6 @@ component Clock(now: number, label: string) {
 }
 
 const BorderedClock: component(...ClockProps) = withBorder(Clock);
-const AutoClock: component(label: string) = withTimestamp(Clock);
+const AutoClock: component(label: string) = withTimestamp<{label: string}>(Clock);
 
 export {withBorder, withTimestamp, Clock, BorderedClock, AutoClock};
