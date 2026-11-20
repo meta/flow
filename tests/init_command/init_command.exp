@@ -10,7 +10,6 @@ Default .flowconfig looks like this:
 
 [lints]
 unsafe-object-assign=error
-nested-hook=error
 
 [options]
 

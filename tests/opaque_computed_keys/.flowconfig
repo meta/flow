@@ -6,7 +6,6 @@
 
 [lints]
 unsafe-object-assign=error
-nested-hook=error
 
 [options]
 all=true
