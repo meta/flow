@@ -1,0 +1,38 @@
+Error ---------------------------------------------------------------------------------------------------- lib.d.ts:1:35
+
+Cannot instantiate `Omit` because in type argument `T`: `unknown` [1] is incompatible with `interface {}` [2].
+[incompatible-type]
+
+   lib.d.ts:1:35
+      1| export type Spread<T1, T2> = Omit<T2, keyof T1> & T1;
+                                           ^^ [1]
+
+References:
+   <BUILTINS>/lib.es5.js:1586:21
+   1586| type Omit<T extends interface {}, K> = $Omit<T, K>;
+                             ^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:5:34
+
+Cannot assign `emoji` to `text` because in type argument `T1` [1]: property `text` is missing in
+`{className: string}` [2] but exists in `{text: string}` [3]. [incompatible-type]
+
+   test.js:5:34
+   5| const text: SerializedTextNode = emoji; // tsc: ok
+                                       ^^^^^
+
+References:
+   lib.d.ts:1:20
+   1| export type Spread<T1, T2> = Omit<T2, keyof T1> & T1;
+                         ^^ [1]
+   lib.d.ts:4:42
+   4| export type SerializedEmojiNode = Spread<{className: string}, SerializedTextNode>;
+                                               ^^^^^^^^^^^^^^^^^^^ [2]
+   lib.d.ts:3:41
+   3| export type SerializedTextNode = Spread<{text: string}, {type: string}>;
+                                              ^^^^^^^^^^^^^^ [3]
+
+
+
+Found 2 errors
