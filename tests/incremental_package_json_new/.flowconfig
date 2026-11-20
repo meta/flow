@@ -5,7 +5,6 @@
 [libs]
 
 [lints]
-untyped-type-import=error
 internal-type=error
 
 [options]

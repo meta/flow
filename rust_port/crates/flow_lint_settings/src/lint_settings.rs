@@ -38,7 +38,6 @@ impl<T: Copy> LintSettings<T> {
         map.insert(LintKind::NestedComponent, (Severity::Err, None));
         map.insert(LintKind::NestedHook, (Severity::Err, None));
         map.insert(LintKind::UnsafeObjectAssign, (Severity::Err, None));
-        map.insert(LintKind::UntypedTypeImport, (Severity::Err, None));
         map
     }
 

@@ -9475,7 +9475,6 @@ impl<L: Dupe + PartialOrd + Ord + PartialEq + Eq> ErrorMessage<L> {
 
         match self {
             // Lint errors
-            ErrorMessage::EUntypedTypeImport(box (_, _)) => LintError(UntypedTypeImport),
             ErrorMessage::EUntypedImport(box (_, _)) => LintError(UntypedImport),
             ErrorMessage::ENonstrictImport(_) => LintError(NonstrictImport),
             ErrorMessage::EInternalType(_, _) => LintError(InternalType),
@@ -13574,8 +13573,8 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                 Some(UnnecessaryDeclareTypeOnlyExport)
             }
             ErrorMessage::EDeprecatedBool { .. } => Some(DeprecatedType),
-            ErrorMessage::EUntypedTypeImport { .. }
-            | ErrorMessage::EUntypedImport { .. }
+            ErrorMessage::EUntypedTypeImport { .. } => Some(UntypedTypeImport),
+            ErrorMessage::EUntypedImport { .. }
             | ErrorMessage::ENonstrictImport { .. }
             | ErrorMessage::EInternalType { .. }
             | ErrorMessage::EUnclearType { .. }

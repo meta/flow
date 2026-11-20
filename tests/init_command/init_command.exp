@@ -9,7 +9,6 @@ Default .flowconfig looks like this:
 [libs]
 
 [lints]
-untyped-type-import=error
 internal-type=error
 unsafe-object-assign=error
 invalid-this-arg=error
