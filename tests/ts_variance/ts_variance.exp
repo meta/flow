@@ -174,6 +174,24 @@ References:
                                                    ^^^^^^ [2]
 
 
+Error -------------------------------------------------------------------------------------- method_bivariance.ts:160:49
+
+Cannot assign `tupleRestSource` to `tupleRestMissing` because in property `cb`:
+`(x: Animal, ...ys: [string]) => void` [1] requires another argument from function type [2]. [incompatible-type]
+
+   method_bivariance.ts:160:49
+   160| const tupleRestMissing: {cb(x: Animal): void} = tupleRestSource; // ERROR: requires another argument
+                                                        ^^^^^^^^^^^^^^^
+
+References:
+   method_bivariance.ts:158:33
+   158| declare const tupleRestSource: {cb(x: Animal, ...ys: [string]): void};
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   method_bivariance.ts:160:26
+   160| const tupleRestMissing: {cb(x: Animal): void} = tupleRestSource; // ERROR: requires another argument
+                                 ^^^^^^^^^^^^^^^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------ method_bivariance_consumer.js:30:32
 
 Cannot assign object literal to `m` because in property `cb` > the first parameter: `Dog` [1] is incompatible with
@@ -560,4 +578,4 @@ References:
 
 
 
-Found 28 errors
+Found 29 errors

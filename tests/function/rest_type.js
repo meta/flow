@@ -43,3 +43,19 @@ acceptsNumbersOrStrings as OneString;
 declare const acceptsOnlyNumbers: (...args: Array<number>) => void;
 acceptsOnlyNumbers as (value: number | string) => void; // Error: string ~> number
 acceptsOnlyNumbers as OneNumberOrString; // Error: string ~> number
+
+// A rest param of a tuple type of fixed length is a param per element.
+declare const noArgs: (...args: []) => void;
+noArgs as (done: () => void) => void; // OK
+noArgs(1); // Error: too many args
+declare const oneString: (...args: [string]) => void;
+oneString as (s: string, done: () => void) => void; // OK
+oneString as (s: number) => void; // Error: number ~> string
+declare const twoArgs: (...args: [string, number]) => void;
+twoArgs as (s: string) => void; // Error: too few args
+declare const restElement: (...args: [string, ...Array<number>]) => void;
+restElement as (s: string, n: number, m: string) => void; // Error: string ~> number
+
+declare function it(name: string, fn: ((done: () => void) => void) | (() => PromiseLike<unknown>)): void;
+function check(text: string, expected: boolean): void {}
+it('a', check.bind(null, '', false)); // OK

@@ -3295,14 +3295,16 @@ impl<'e> Walker<'e> {
         lf: &FunType,
         uf: &FunType,
     ) -> Result<(), FlowJsException> {
-        let (ln, un) = (lf.params.len(), uf.params.len());
-        let lrest = lf.rest_param.as_ref().map(|FunRestParam(_, _, t)| t.dupe());
+        let (lparams, lrest_param) =
+            crate::subtyping_kit::subtyping_params(cx, lf, |cx, t| self.concretize(cx, t))?;
+        let (ln, un) = (lparams.len(), uf.params.len());
+        let lrest = lrest_param.as_ref().map(|FunRestParam(_, _, t)| t.dupe());
         let urest = uf.rest_param.as_ref().map(|FunRestParam(_, _, t)| t.dupe());
         // `u`'s parameters that only `l`'s rest parameter receives, when it is not an array.
         let mut into_lrest = Vec::new();
         for (i, up) in uf.params.iter().enumerate() {
             let ut = type_util::slot_value_t(&up.t, up.optional);
-            if let Some(lp) = lf.params.get(i) {
+            if let Some(lp) = lparams.get(i) {
                 self.walk_to_slot(cx, &ut, &lp.t, lp.optional)?;
             } else if let Some(lrest) = &lrest {
                 match self.rest_elem(cx, lrest, i - ln) {
@@ -3314,7 +3316,7 @@ impl<'e> Walker<'e> {
         // `l`'s parameters that `u`'s rest parameter feeds.
         if let Some(urest) = &urest {
             let finite = self.rest_is_array(cx, urest);
-            for (i, lp) in lf.params.iter().enumerate().skip(un) {
+            for (i, lp) in lparams.iter().enumerate().skip(un) {
                 match self.rest_elem(cx, urest, i - un) {
                     Some((elem, optional)) => {
                         let elem = type_util::slot_value_t(&elem, optional);
@@ -3333,7 +3335,7 @@ impl<'e> Walker<'e> {
         let reason = type_util::reason_of_t(&lf.return_t).dupe();
         // A caller of `u` passes nothing for `l`'s extra parameters.
         if urest.is_none() {
-            for lp in lf.params.iter().skip(un) {
+            for lp in lparams.iter().skip(un) {
                 self.walk_to_slot(cx, &void::why(reason.dupe()), &lp.t, lp.optional)?;
             }
         }
@@ -3354,8 +3356,8 @@ impl<'e> Walker<'e> {
                 let tuple = reverse_resolve_spread_multiflow_subtype_full_no_resolution(
                     cx,
                     &reason,
-                    lf.params.get(un..).unwrap_or(&[]),
-                    &lf.rest_param,
+                    lparams.get(un..).unwrap_or(&[]),
+                    &lrest_param,
                 )?;
                 self.walk(cx, urest, &tuple)?;
             }

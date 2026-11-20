@@ -47,13 +47,13 @@ type WithReadOnlyOpt = [a: number, readonly b?: string];
   declare const f12: (...args: [readonly foo: string | void]) => number;
   declare const f2: (foo?: string) => number;
 
-  f11 as typeof f2; // error
+  f11 as typeof f2; // ok
   f12 as typeof f2; // ok
   f2 as typeof f11; // ok
   f2 as typeof f12; // ok
-  f11 as typeof f12; // error
+  f11 as typeof f12; // ok
   f12 as typeof f11; // ok
-  // from above, f12 = f2 <: f11
+  // from above, f11 = f12 = f2: an optional element of a rest tuple is an optional param
 }
 
 [1] as Single; // OK

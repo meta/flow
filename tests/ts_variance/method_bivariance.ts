@@ -154,6 +154,13 @@ type RestTarget = {
 declare const restNumberSource: {cb(...ys: number[]): void};
 const restRestMismatch: RestTarget = restNumberSource; // ERROR: bivariance still requires related types
 
+// A rest param of a tuple type of fixed length is a param per element.
+declare const tupleRestSource: {cb(x: Animal, ...ys: [string]): void};
+const tupleRestExtra: {cb(x: Animal, y: string, z: number): void} = tupleRestSource; // OK
+const tupleRestMissing: {cb(x: Animal): void} = tupleRestSource; // ERROR: requires another argument
+declare const optionalSecond: {cb(x: Animal, y?: string): void};
+const tupleRestTarget: {cb(x: Animal, ...ys: []): void} = optionalSecond; // OK
+
 // A method target marks its parameter types as bivariant even when the source
 // uses arrow-property syntax.
 export type MethodTarget = {

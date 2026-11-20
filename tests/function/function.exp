@@ -1197,5 +1197,76 @@ References:
                                                  ^^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------------------ rest_type.js:50:1
 
-Found 75 errors
+Cannot call `noArgs` because `[1]` [1] has 1 element but `Readonly<[]>` [2] has 0 elements. [invalid-tuple-arity]
+
+   rest_type.js:50:1
+   50| noArgs(1); // Error: too many args
+       ^^^^^^
+
+References:
+   rest_type.js:50:1
+   50| noArgs(1); // Error: too many args
+       ^^^^^^^^^ [1]
+   rest_type.js:48:33
+   48| declare const noArgs: (...args: []) => void;
+                                       ^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ rest_type.js:53:1
+
+Cannot cast `oneString` to `(s: number) => void` because in the first parameter: `string` [1] is incompatible with
+`number` [2]. [incompatible-type]
+
+   rest_type.js:53:1
+   53| oneString as (s: number) => void; // Error: number ~> string
+       ^^^^^^^^^
+
+References:
+   rest_type.js:51:37
+   51| declare const oneString: (...args: [string]) => void;
+                                           ^^^^^^ [1]
+   rest_type.js:53:18
+   53| oneString as (s: number) => void; // Error: number ~> string
+                        ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ rest_type.js:55:1
+
+Cannot cast `twoArgs` to `(s: string) => void` because `(...args: [string, number]) => void` [1] requires another
+argument from function type [2]. [incompatible-type]
+
+   rest_type.js:55:1
+   55| twoArgs as (s: string) => void; // Error: too few args
+       ^^^^^^^
+
+References:
+   rest_type.js:54:24
+   54| declare const twoArgs: (...args: [string, number]) => void;
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   rest_type.js:55:12
+   55| twoArgs as (s: string) => void; // Error: too few args
+                  ^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ rest_type.js:57:1
+
+Cannot cast `restElement` to `(s: string, n: number, m: string) => void` because in index `2`: `number` [1] is
+incompatible with `string` [2]. [incompatible-type]
+
+   rest_type.js:57:1
+   57| restElement as (s: string, n: number, m: string) => void; // Error: string ~> number
+       ^^^^^^^^^^^
+
+References:
+   rest_type.js:56:56
+   56| declare const restElement: (...args: [string, ...Array<number>]) => void;
+                                                              ^^^^^^ [1]
+   rest_type.js:57:42
+   57| restElement as (s: string, n: number, m: string) => void; // Error: string ~> number
+                                                ^^^^^^ [2]
+
+
+
+Found 79 errors

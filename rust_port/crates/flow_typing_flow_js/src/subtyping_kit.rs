@@ -77,9 +77,11 @@ use flow_typing_type::type_::Destructor;
 use flow_typing_type::type_::DictType;
 use flow_typing_type::type_::EnumInfoInner;
 use flow_typing_type::type_::FieldData;
+use flow_typing_type::type_::FunParam;
 use flow_typing_type::type_::FunParamData;
 use flow_typing_type::type_::FunRestParam;
 use flow_typing_type::type_::FunReturnData;
+use flow_typing_type::type_::FunType;
 use flow_typing_type::type_::GenericTData;
 use flow_typing_type::type_::HasOwnPropTData;
 use flow_typing_type::type_::IndexerKeyCompatibilityData;
@@ -668,6 +670,43 @@ pub(crate) fn ignores_return<'cx>(
             .all(|t| matches!(t.deref(), DefT(_, deref!(TsVoidT)))))
 }
 
+// The params of `ft` as function subtyping matches them against another
+// function's, and its rest param. As in TypeScript (`getParameterCount`), a
+// rest param of a tuple type of fixed length stands for a param per element,
+// so it receives no more arguments than that. `concretize` gives the types
+// the rest param's type stands for.
+pub(crate) fn subtyping_params<'cx>(
+    cx: &mut Context<'cx>,
+    ft: &FunType,
+    concretize: impl FnOnce(&mut Context<'cx>, &Type) -> Result<Vec<Type>, FlowJsException>,
+) -> Result<(Vec<FunParam>, Option<FunRestParam>), FlowJsException> {
+    let Some(FunRestParam(_, _, rest_t)) = &ft.rest_param else {
+        return Ok((ft.params.to_vec(), None));
+    };
+    match concretize(cx, rest_t)?.as_slice() {
+        [t] if let DefT(
+            _,
+            deref!(ArrT(deref!(
+                TupleAT(box TupleATData {
+                    elements,
+                    inexact: false,
+                    rest: None,
+                    ..
+                })
+            ))),
+        ) = t.deref() =>
+        {
+            let elements = elements.iter().map(|elem| FunParam {
+                name: elem.name.dupe(),
+                t: elem.t.dupe(),
+                optional: elem.optional,
+            });
+            Ok((ft.params.iter().cloned().chain(elements).collect(), None))
+        }
+        _ => Ok((ft.params.to_vec(), ft.rest_param.clone())),
+    }
+}
+
 // Shared FunT ~> FunT subtyping driver. The effect, return, and type-guard
 // checks are identical across callers; the differences are how `this` and
 // regular params are flowed. `check_params` receives the FunCompatibility-
@@ -1017,7 +1056,7 @@ fn funt_to_funt_check_params_contravariant<'cx>(
 }
 
 // TS-mode bivariant param-flow check used for method signatures: a
-// pairwise walk over ft1.params/ft2.params using `bivariant_param_flow`,
+// pairwise walk over their `subtyping_params` with `bivariant_param_flow`,
 // plus arity enforcement. Trailing ft1 params not provided by ft2 are
 // filled with VoidT so optional params (whose type unions in void) accept
 // and required ones produce a `FunMissingArg` error -- the same mechanism
@@ -1073,14 +1112,24 @@ fn funt_to_funt_check_params_bivariant<'cx>(
 
     let lower_t = flow_js_utils::type_or_type_desc_for_error(lower);
     let upper_t = flow_js_utils::type_or_type_desc_for_error(upper);
+    let concretize = |cx: &mut Context<'cx>, t: &Type| {
+        FlowJs::possible_concrete_types_for_inspection_with_env(
+            cx,
+            env,
+            type_util::reason_of_t(t),
+            t,
+        )
+    };
+    let (positional1, rest_param1) = subtyping_params(cx, ft1, concretize)?;
+    let (positional2, rest_param2) = subtyping_params(cx, ft2, concretize)?;
     let mut n: i32 = 1;
-    let mut params1: &[flow_typing_type::type_::FunParam] = &ft1.params;
-    let mut params2: &[flow_typing_type::type_::FunParam] = &ft2.params;
+    let mut params1: &[FunParam] = &positional1;
+    let mut params2: &[FunParam] = &positional2;
     loop {
         match (params1.split_first(), params2.split_first()) {
             (None, None) => break,
             (None, Some((p2, rest2))) => {
-                match &ft1.rest_param {
+                match &rest_param1 {
                     Some(FunRestParam(_, _, t1_rest)) => {
                         let inner_use_op = VirtualUseOp::Frame(
                             Arc::new(VirtualFrameUseOp::FunRestParam {
@@ -1095,7 +1144,7 @@ fn funt_to_funt_check_params_bivariant<'cx>(
                             trace,
                             &inner_use_op,
                             t1_rest,
-                            (n - 1) as usize - ft1.params.len(),
+                            (n - 1) as usize - positional1.len(),
                         )?;
                         bivariant_param_flow(
                             cx,
@@ -1116,7 +1165,7 @@ fn funt_to_funt_check_params_bivariant<'cx>(
             }
             (Some((p1, rest1)), None) => {
                 let name1 = &p1.name;
-                match &ft2.rest_param {
+                match &rest_param2 {
                     Some(FunRestParam(_, _, rest_t)) => {
                         let inner_use_op = VirtualUseOp::Frame(
                             Arc::new(VirtualFrameUseOp::FunParam(Box::new(FunParamData {
@@ -1135,7 +1184,7 @@ fn funt_to_funt_check_params_bivariant<'cx>(
                             trace,
                             &inner_use_op,
                             rest_t,
-                            (n - 1) as usize - ft2.params.len(),
+                            (n - 1) as usize - positional2.len(),
                         )?;
                         bivariant_param_flow(
                             cx,
@@ -1200,7 +1249,7 @@ fn funt_to_funt_check_params_bivariant<'cx>(
             }
         }
     }
-    match (&ft1.rest_param, &ft2.rest_param) {
+    match (&rest_param1, &rest_param2) {
         (Some(FunRestParam(_, _, t1_rest)), Some(FunRestParam(_, _, t2_rest))) => {
             let use_op = VirtualUseOp::Frame(
                 Arc::new(VirtualFrameUseOp::FunRestParam {
