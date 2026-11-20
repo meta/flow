@@ -72,4 +72,10 @@
   it(done => {
     done(); // okay: the member without a parameter says nothing about `done`
   });
+  declare const maybeIt: (fn?: ((done: Done) => void) | (() => Promise<unknown>)) => void;
+  maybeIt(done => {
+    done(); // okay
+  });
+  declare const optional: (cb?: () => void) => void;
+  optional(x => {}); // okay
 }

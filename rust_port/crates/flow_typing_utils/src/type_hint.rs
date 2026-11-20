@@ -833,22 +833,24 @@ fn functions_taking_param<'cx>(
     t: &Type,
     i: usize,
 ) -> Result<Type, FlowJsException> {
-    let lacks_param = |t: &Type| {
+    let fun_params = |t: &Type| {
         if let TypeInner::DefT(_, def) = t.deref()
             && let DefTInner::FunT(_, func) = def.deref()
         {
-            func.params.len() <= i && func.rest_param.is_none()
+            Some(func.params.len() > i || func.rest_param.is_some())
         } else {
-            false
+            None
         }
     };
     let ts = FlowJs::possible_concrete_types_for_inspection_with_env(cx, env, reason, t)?;
-    if ts.iter().all(lacks_param) || !ts.iter().any(lacks_param) {
+    if !ts.iter().any(|t| fun_params(t) == Some(true)) {
         return Ok(t.dupe());
     }
     Ok(type_util::union_of_ts(
         reason.dupe(),
-        ts.into_iter().filter(|t| !lacks_param(t)).collect(),
+        ts.into_iter()
+            .filter(|t| fun_params(t) != Some(false))
+            .collect(),
         Some(UnionKind::ResolvedKind),
     ))
 }
