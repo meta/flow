@@ -16,7 +16,7 @@ Error --------------------------------------------------------------------------
 
 The closest equivalent of TypeScript's `never` type in Flow is `empty`. [unsupported-syntax]
 
-   6| type N = never; // ERROR: the flag does not enable other TS syntax
+   6| type N = never; // ERROR: other TS syntax stays unsupported
                ^^^^^
 
 

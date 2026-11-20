@@ -1,4 +1,4 @@
-type T = undefined; // ERROR
+type T = undefined; // OK
 
 const x = undefined; // OK
 

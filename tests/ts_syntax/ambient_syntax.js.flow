@@ -16,7 +16,7 @@ declare class OptionalClassIndex {
 }
 type ReadonlyArrayType = readonly string[]; // ERROR
 type ReadonlyTuple = readonly [string, number]; // ERROR
-type Undefined = undefined; // ERROR
+type Undefined = undefined; // OK
 
 declare class Private {
   #private; // ERROR

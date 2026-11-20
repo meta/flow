@@ -211,7 +211,6 @@ pub struct Options {
     pub tslib_syntax: bool,
     pub typescript_library_definition_support: bool,
     pub type_expansion_recursion_limit: i32,
-    pub undefined_type: bool,
     pub unsuppressable_error_codes: Arc<HashSet<FlowSmolStr>>,
     pub use_unknown_in_catch_variables: bool,
     pub verbose: Option<Arc<Verbose>>,

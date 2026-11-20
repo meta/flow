@@ -226,7 +226,6 @@ pub struct FrozenMetadata {
     pub tslib_syntax: bool,
     pub typescript_library_definition_support: bool,
     pub type_expansion_recursion_limit: i32,
-    pub undefined_type: bool,
     pub use_unknown_in_catch_variables: bool,
 }
 
@@ -289,7 +288,6 @@ impl Default for FrozenMetadata {
             tslib_syntax: false,
             typescript_library_definition_support: false,
             type_expansion_recursion_limit: 3,
-            undefined_type: false,
             use_unknown_in_catch_variables: false,
         }
     }
@@ -991,7 +989,6 @@ pub fn mk_context_metadata(options: &Options, global_libdefs: Arc<BTreeSet<FileK
             typescript_library_definition_support: options.typescript_library_definition_support,
             assert_operator: options.assert_operator,
             type_expansion_recursion_limit: options.type_expansion_recursion_limit,
-            undefined_type: options.undefined_type,
             use_unknown_in_catch_variables: options.use_unknown_in_catch_variables,
             ban_spread_key_props: options.ban_spread_key_props,
         }),
@@ -1796,10 +1793,6 @@ impl<'a> Context<'a> {
     /// Whether `void` is TypeScript's `void` rather than `undefined`.
     pub fn ts_void(&self) -> bool {
         self.inner().metadata.frozen.ts_void
-    }
-
-    pub fn undefined_type(&self) -> bool {
-        self.inner().metadata.frozen.undefined_type
     }
 
     /// Whether library `declare module` blocks with the same name merge like TypeScript's

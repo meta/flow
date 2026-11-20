@@ -26,7 +26,6 @@ use crate::contains_mapper::ContainsMapper;
 #[derive(PartialEq, Eq)]
 enum Kind {
     NeverType,
-    UndefinedType,
     ReadOnlyArrayType,
     ReadOnlyTupleType,
     TypeParamColon,
@@ -59,11 +58,6 @@ impl AstVisitor<'_, Loc> for Mapper {
                 if self.kind == Kind::NeverType && self.contains.is_target(loc) =>
             {
                 ast_builder::types::empty(None, comments.clone())
-            }
-            TypeInner::Undefined { loc, comments }
-                if self.kind == Kind::UndefinedType && self.contains.is_target(loc) =>
-            {
-                ast_builder::types::void(None, comments.clone())
             }
             TypeInner::ReadOnly { loc, inner }
                 if self.kind == Kind::ReadOnlyArrayType && self.contains.is_target(loc) =>
@@ -260,14 +254,6 @@ pub fn convert_never_type(ast: &ast::Program<Loc, Loc>, loc: Loc) -> ast::Progra
     let mut mapper = Mapper {
         contains: ContainsMapper::new(loc),
         kind: Kind::NeverType,
-    };
-    mapper.map_program(ast)
-}
-
-pub fn convert_undefined_type(ast: &ast::Program<Loc, Loc>, loc: Loc) -> ast::Program<Loc, Loc> {
-    let mut mapper = Mapper {
-        contains: ContainsMapper::new(loc),
-        kind: Kind::UndefinedType,
     };
     mapper.map_program(ast)
 }

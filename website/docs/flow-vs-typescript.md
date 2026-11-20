@@ -780,8 +780,8 @@ How Flow spells absent or nullable types and the top and bottom of the type hier
 
 | Concept | TypeScript | Flow | Note |
 |---|---|---|---|
-| Type inhabited only by `undefined` | `undefined` | `void` | Flow has no separate `undefined` type. ([details](#toc-void-vs-undefined)) |
-| "No useful value" return marker | `void` | `void` | Same name; Flow has *only* `void` (see above). |
+| Type inhabited only by `undefined` | `undefined` | `void` or `undefined` | Flow's `undefined` type is another name for `void`. ([details](#toc-void-vs-undefined)) |
+| "No useful value" return marker | `void` | `void` | Same name; Flow's `void` is the same type as `undefined` (see above). |
 | Nullable value (`T \| null \| undefined`) | `T \| null \| undefined` | [`?T`](./types/maybe.md) (shorthand for `T \| null \| void`) | `T \| void` alone lacks `null`. |
 | Bottom type | `never` | [`empty`](./types/empty.md) | `never` is the natural TS reach when Flow expects `empty`. |
 | Top type | `unknown` | [`unknown`](./types/unknown.md) | Same name. |
@@ -790,12 +790,12 @@ See [type hierarchy](./lang/type-hierarchy.md) for where these sit relative to t
 
 #### `void` vs `undefined` {#toc-void-vs-undefined}
 
-`undefined` as an annotation is a hard error in Flow:
+`undefined` as an annotation is another name for `void` in Flow:
 
 ```js flow-check
 // Flow:
-function f(): undefined { // ERROR: [unsupported-syntax]
-  return undefined;
+function f(): undefined {
+  return undefined; // OK
 }
 ```
 
@@ -806,9 +806,9 @@ function f(): void {
 }
 ```
 
-This comes up most often when a TS-shaped function signature gets typed in Flow verbatim, and on TS utility-typed code (`Exclude<T, undefined>`, `T extends undefined ? ...`) where the `undefined` literal type appears inside a generic. Standard Flow forms: `undefined` → `void` for annotations; `T | undefined` → `?T` if `null` is also intended (most JS APIs) or `T | void` if only the absent case is intended.
+So a TS-shaped function signature and TS utility-typed code (`Exclude<T, undefined>`, `T extends undefined ? ...`) can keep their `undefined` types. `T | undefined` is the same type as `T | void`; use `?T` if `null` is also intended (most JS APIs).
 
-A related TS quirk worth flagging: TypeScript's `() => undefined` and `() => void` are assignably asymmetric (`undefined` returns satisfy `void` slots but not vice versa). Flow has no equivalent since there's only `void`.
+A related TS quirk worth flagging: TypeScript's `() => undefined` and `() => void` are assignably asymmetric (`undefined` returns satisfy `void` slots but not vice versa). Flow has no equivalent since `undefined` and `void` are the same type.
 
 A parameter type that includes `void` (whether spelled `T | void`, `?T`, or `T | null | void`) makes the argument implicitly optional, so callers can omit it entirely. This differs from TypeScript, where `(x: T | undefined)` still requires the call site to pass `undefined`.
 

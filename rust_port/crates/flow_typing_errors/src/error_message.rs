@@ -4227,7 +4227,6 @@ pub enum UpperKind<L: Dupe> {
 )]
 pub enum TSSyntaxKind {
     TSNever,
-    TSUndefined,
     TSInOutVariance,
     TSReadonlyType(Option<ReadonlyTypeKind>),
     TSClassAccessibility(ast::class::ts_accessibility::Kind),
@@ -12815,7 +12814,6 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
                 use crate::intermediate_error_types::Message;
                 let msg = match kind {
                     TSSyntaxKind::TSNever => Message::MessageTSNeverType,
-                    TSSyntaxKind::TSUndefined => Message::MessageTSUndefinedType,
                     TSSyntaxKind::TSInOutVariance => Message::MessageTSVarianceInOut,
                     TSSyntaxKind::TSReadonlyType(Some(arg_kind)) => match arg_kind {
                         ReadonlyTypeKind::Tuple => Message::MessageTSReadonlyOperatorOnTuple,

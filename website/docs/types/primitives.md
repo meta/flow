@@ -15,7 +15,7 @@ JavaScript has a number of different primitive types
 | **Strings** | `'foo'` | `string`
 | **Numbers** | `123` | `number`
 | **Null** | `null` | `null`
-| **Undefined** | `undefined` | `void`
+| **Undefined** | `undefined` | `void` or `undefined`
 | **Symbols** <small>*(new in ES2015)*</small> | `Symbol('foo')` | `symbol`
 | **BigInts** <small>*(new in ES2020)*</small> | `123n` | `bigint`
 
@@ -245,7 +245,7 @@ acceptsUndefined(null);      // Error!
 ```
 
 :::info TypeScript comparison
-Flow has no `undefined` type — only `void`. TypeScript's `T | undefined` corresponds to Flow's `T | void`. See [void vs undefined](../flow-vs-typescript.md#toc-void-vs-undefined) for the full comparison.
+Flow's `undefined` type is another name for `void`, so TypeScript's `T | undefined` means the same as Flow's `T | void`. See [void vs undefined](../flow-vs-typescript.md#toc-void-vs-undefined) for the full comparison.
 :::
 
 You can [refine](../lang/refinements.md) a value to `null` or `void` using equality checks:

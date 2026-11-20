@@ -126,32 +126,6 @@ module.exports = suite(
         ['textDocument/publishDiagnostics', ...lspIgnoreStatusAndCancellation],
       ),
     ]),
-    test('provide quickfix for `undefined` type', [
-      addFile('fix-undefined-type.js.ignored', 'fix-undefined-type.js'),
-      lspStartAndConnect(),
-      lspRequestAndWaitUntilResponse('textDocument/codeAction', {
-        textDocument: {
-          uri: '<PLACEHOLDER_PROJECT_URL>/fix-undefined-type.js',
-        },
-        range: {
-          start: {
-            line: 2,
-            character: 9,
-          },
-          end: {
-            line: 2,
-            character: 18,
-          },
-        },
-        context: {
-          only: ['quickfix'],
-          diagnostics: [],
-        },
-      }).verifyLSPMessageSnapshot(
-        path.join(__dirname, '__snapshots__', 'quickfix-undefined-type.json'),
-        ['textDocument/publishDiagnostics', ...lspIgnoreStatusAndCancellation],
-      ),
-    ]),
     test('provide quickfix for `keyof`', [
       addFile('fix-keyof.js.ignored', 'fix-keyof.js'),
       lspStartAndConnect(),

@@ -9517,18 +9517,6 @@ where
                     text(" instead."),
                 ])
             }
-            MessageTSUndefinedType => friendly::Message(vec![
-                text("The equivalent of TypeScript's "),
-                code("undefined"),
-                text(" type in Flow is "),
-                code("void"),
-                text(". "),
-                text("Flow does not have separate "),
-                code("void"),
-                text(" and "),
-                code("undefined"),
-                text(" types."),
-            ]),
             MessageUnclearType => friendly::Message(vec![
                 text("Unclear type. Using "),
                 code("any"),

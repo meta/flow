@@ -1,3 +1,2 @@
 [options]
 all=true
-experimental.undefined_type=true

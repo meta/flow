@@ -2735,7 +2735,6 @@ pub enum Message<L: Dupe> {
     MessageAbstractMethod,
     MessageAbstract(AbstractErrorKind<L>),
     MessageOverride(OverrideErrorKind<L>),
-    MessageTSUndefinedType,
 
     MessageTupleElementNotReadable(Box<MessageTupleElementNotReadableData<L>>),
 

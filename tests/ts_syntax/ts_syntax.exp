@@ -540,15 +540,6 @@ The equivalent of TypeScript's `readonly` type operator applied to a tuple type 
                             ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Error ------------------------------------------------------------------------------------- ambient_syntax.js.flow:19:18
-
-The equivalent of TypeScript's `undefined` type in Flow is `void`. Flow does not have separate `void` and `undefined`
-types. [unsupported-syntax]
-
-   19| type Undefined = undefined; // ERROR
-                        ^^^^^^^^^
-
-
 Error -------------------------------------------------------------------------------------- ambient_syntax.js.flow:22:3
 
 Private class field (`#private`) is not enabled. [unsupported-syntax]
@@ -1574,15 +1565,6 @@ References:
                  ^ [1]
 
 
-Error ------------------------------------------------------------------------------------------------ undefined.js:1:10
-
-The equivalent of TypeScript's `undefined` type in Flow is `void`. Flow does not have separate `void` and `undefined`
-types. [unsupported-syntax]
-
-   1| type T = undefined; // ERROR
-               ^^^^^^^^^
-
-
 Error ------------------------------------------------------------------------------------------------- undefined.js:9:1
 
 Cannot cast `libReturnsUndefined()` to `string` because `void` [1] is incompatible with `string` [2].
@@ -1602,4 +1584,4 @@ References:
 
 
 
-Found 178 errors
+Found 176 errors

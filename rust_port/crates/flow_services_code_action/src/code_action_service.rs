@@ -1511,24 +1511,6 @@ pub fn ast_transforms_of_error(
             }
         }
         ErrorMessage::ETSSyntax(box ETSSyntaxData {
-            kind: TSSyntaxKind::TSUndefined,
-            loc: error_loc,
-        }) => {
-            if loc_opt_intersects(loc, error_loc.dupe()) {
-                vec![AstTransformOfError {
-                    title: "Convert to `void`".to_string(),
-                    diagnostic_title: "convert_undefined_type".to_string(),
-                    transform: untyped_ast_transform(Box::new(|ast, loc| {
-                        autofix_ts_syntax::convert_undefined_type(ast, loc)
-                    })),
-                    target_loc: error_loc.dupe(),
-                    confidence: QuickfixConfidence::WillFixErrorAndSafeForRunningOnSave,
-                }]
-            } else {
-                vec![]
-            }
-        }
-        ErrorMessage::ETSSyntax(box ETSSyntaxData {
             kind: TSSyntaxKind::DeprecatedTypeParamColon,
             loc: error_loc,
         }) => {

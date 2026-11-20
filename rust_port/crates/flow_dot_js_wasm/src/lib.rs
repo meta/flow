@@ -221,7 +221,6 @@ fn config_options(config: Option<&Value>) -> Result<Options, String> {
         ts_void: bool_config(config, "experimental.ts_void", false),
         tslib_syntax: true,
         type_expansion_recursion_limit: 3,
-        undefined_type: bool_config(config, "experimental.undefined_type", false),
         use_unknown_in_catch_variables: bool_config(
             config,
             "use_unknown_in_catch_variables",

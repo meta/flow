@@ -496,16 +496,7 @@ References:
 Found 2 errors
 
 === block 25 ===
-Error ------------------------------------------------------------------------- -:3:15
-
-The equivalent of TypeScript's `undefined` type in Flow is `void`. Flow does not have separate `void` and `undefined`
-types. [unsupported-syntax]
-
-   3| function f(): undefined { // ERROR: [unsupported-syntax]
-                    ^^^^^^^^^
-
-
-Found 1 error
+No errors!
 
 === block 26 ===
 No errors!
