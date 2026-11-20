@@ -1,13 +1,14 @@
 flow codemod migrate-to-ts-void --write
 >>> Launching report...
 
-Found 13 rejected `void`s in 2 files, and 5 function types' return types rejecting returned `void`s
+Found 16 rejected `void`s in 2 files, and 5 function types' return types rejecting returned `void`s
 
 >>> Launching report...
 
-Changed `void` to `undefined`: 6
+Changed `void` to `undefined`: 7
 Added `: undefined` return annotations: 2
 Changed function types' return types to admit `void`: 4
+Changed type parameters' bounds to admit their `void` default: 1
 Return types that cannot admit `void`, whose `void`s are changed next: 1
 Added `return undefined;` to functions without a `return` statement: 2
 Changed `unknown` return types of functions without a `return` statement to `void`: 2
@@ -17,13 +18,14 @@ Left because they are neither an annotation nor a return: 0
 
 >>> Launching report...
 
-Found 4 rejected `void`s in 2 files, and 1 function types' return types rejecting returned `void`s
+Found 5 rejected `void`s in 2 files, and 1 function types' return types rejecting returned `void`s
 
 >>> Launching report...
 
 Changed `void` to `undefined`: 2
 Added `: undefined` return annotations: 0
 Changed function types' return types to admit `void`: 0
+Changed type parameters' bounds to admit their `void` default: 1
 Return types that cannot admit `void`, whose `void`s are changed next: 1
 Added `return undefined;` to functions without a `return` statement: 1
 Changed `unknown` return types of functions without a `return` statement to `void`: 0
@@ -40,6 +42,7 @@ Found 1 rejected `void`s in 1 files, and 2 function types' return types rejectin
 Changed `void` to `undefined`: 2
 Added `: undefined` return annotations: 0
 Changed function types' return types to admit `void`: 0
+Changed type parameters' bounds to admit their `void` default: 0
 Return types that cannot admit `void`, whose `void`s are changed next: 0
 Added `return undefined;` to functions without a `return` statement: 0
 Changed `unknown` return types of functions without a `return` statement to `void`: 0
@@ -51,7 +54,7 @@ Left because they are neither an annotation nor a return: 0
 
 Found 1 rejected `void`s in 1 files, and 0 function types' return types rejecting returned `void`s
 
-`void` annotations: 18 before, 14 after. `void` return types: 12 before, 9 after
+`void` annotations: 20 before, 17 after. `void` return types: 12 before, 9 after
 
 types.js
 export type Props = {
@@ -145,6 +148,11 @@ import type {Confirm} from './types';
 
 declare const confirm: Confirm;
 const confirmed: undefined = confirm(); // still an error
+
+type Raw<T extends ?string | void = void, U extends ?string | void = T> = U; // their bounds reject the `void` default: made to admit `void`
+type Read<T extends ?string = undefined> = T; // read into `?string` below as well: changed instead
+declare const read: Read<>;
+const readValue: ?string = read;
 
 flow check under experimental.ts_void
 Error ---------------------------------------------------------------------------------------------------- uses.js:69:30

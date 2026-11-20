@@ -61,3 +61,8 @@ import type {Confirm} from './types';
 
 declare const confirm: Confirm;
 const confirmed: undefined = confirm(); // still an error
+
+type Raw<T extends ?string = void, U extends ?string = T> = U; // their bounds reject the `void` default: made to admit `void`
+type Read<T extends ?string = void> = T; // read into `?string` below as well: changed instead
+declare const read: Read<>;
+const readValue: ?string = read;

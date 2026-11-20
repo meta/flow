@@ -13,8 +13,10 @@
 //! `: undefined` the functions that return no value whose inferred `void` is rejected. A function
 //! passed as a function type whose return type rejects its returned `void` keeps the `void`: the
 //! return type, which admits `undefined`, is changed to admit `void`, as TypeScript code types
-//! callbacks whose result is optional. Changing a `void` to `undefined` can make the values
-//! flowing into it rejected in turn, so the codemod checks again until nothing is rejected.
+//! callbacks whose result is optional. Likewise, a type parameter keeps its `void` default when its
+//! bound rejects it: the bound is changed to admit `void`. Changing a `void` to `undefined` can make
+//! the values flowing into it rejected in turn, so the codemod checks again until nothing is
+//! rejected.
 //!
 //! As in TypeScript, the flag also requires a `return` statement in a function whose return type
 //! doesn't include `void` and isn't `any` or `undefined`: such a function returns `undefined`
@@ -71,7 +73,7 @@ use crate::utils::codemod_context::typed::TypedCodemodContext;
 
 /// The `void`s to change, by file: the location of a `void` annotation, or of the missing return
 /// annotation of a function that returns no value. Also the bodies of the functions to return
-/// `undefined` at their end.
+/// `undefined` at their end, and the type parameters whose bound is to admit their `void` default.
 #[derive(Debug, Clone, Default)]
 pub struct Targets(pub BTreeMap<FileKey, BTreeSet<Loc>>);
 
@@ -252,6 +254,13 @@ pub enum Rejected {
     /// A function's returned `void` rejected by the return type of the function type the function
     /// is passed as.
     Return { void: ALoc, return_type: ALoc },
+    /// A `void`, written at `void`, flowing from `lower` into the type at `upper`. A type
+    /// parameter's default flows into its bound.
+    Flow {
+        void: ALoc,
+        lower: ALoc,
+        upper: ALoc,
+    },
     /// The return annotation of a function without a `return` statement, whose return type
     /// rejects the `void` it returns implicitly.
     MissingReturn(ALoc),
@@ -285,8 +294,10 @@ pub fn rejected_ts_voids(msg: &ErrorMessage<ALoc>, acc: &mut Vec<Rejected>) {
         }
         ErrorMessage::EIncompatibleTypesWithUseOp(box EIncompatibleTypesWithUseOpData {
             use_op,
+            lower_loc,
             lower_desc,
             lower_def_loc,
+            upper_def_loc,
             branches,
             ..
         }) => {
@@ -302,7 +313,11 @@ pub fn rejected_ts_voids(msg: &ErrorMessage<ALoc>, acc: &mut Vec<Rejected>) {
                             upper, ..
                         }),
                     ) => Rejected::MissingReturn(upper.loc().dupe()),
-                    (None, _) => Rejected::Void(lower_def_loc.dupe()),
+                    (None, _) => Rejected::Flow {
+                        void: lower_def_loc.dupe(),
+                        lower: lower_loc.dupe(),
+                        upper: upper_def_loc.dupe(),
+                    },
                 });
             }
             for branch in branches {
@@ -352,10 +367,12 @@ pub fn rejected_ts_voids(msg: &ErrorMessage<ALoc>, acc: &mut Vec<Rejected>) {
             }
             let return_type = checked_return_type(use_op);
             acc.extend(branch_acc.into_iter().map(|rejected| match (rejected, &return_type) {
-                (Rejected::Void(void), Some(return_type)) => Rejected::Return {
-                    void,
-                    return_type: return_type.dupe(),
-                },
+                (Rejected::Void(void) | Rejected::Flow { void, .. }, Some(return_type)) => {
+                    Rejected::Return {
+                        void,
+                        return_type: return_type.dupe(),
+                    }
+                }
                 (rejected, _) => rejected,
             }));
         }
@@ -413,7 +430,12 @@ pub fn targets_of_file(cctx: &mut TypedCodemodContext<'_>) -> (Targets, Returns)
     let mut returns = Returns::default();
     for rejected in rejected {
         match rejected {
-            Rejected::Void(void) => {
+            Rejected::Flow { lower, upper, .. }
+                if let Some(type_param) = rejecting_bound(cctx, &lower, &upper) =>
+            {
+                targets.insert(type_param);
+            }
+            Rejected::Void(void) | Rejected::Flow { void, .. } => {
                 let loc = cctx.reader.loc_of_aloc(&void);
                 for loc in written_ts_voids(cctx, loc) {
                     targets.insert(loc);
@@ -490,6 +512,75 @@ impl<'ast> AstVisitor<'ast, Loc, Loc, &'ast Loc, !> for BodyFinder<'_> {
     }
 }
 
+/// The type parameter whose bound rejects its default, flowing from `lower` into the type at
+/// `upper`, if the bound can be made to admit `void`.
+fn rejecting_bound(cctx: &TypedCodemodContext<'_>, lower: &ALoc, upper: &ALoc) -> Option<Loc> {
+    let lower = cctx.reader.loc_of_aloc(lower);
+    let upper = cctx.reader.loc_of_aloc(upper);
+    let program = cctx.reader.get_ast(lower.source.as_ref()?)?;
+    BoundFinder::find(&program, &lower, &upper)
+}
+
+/// Whether the type at `loc` is `t`, or one of the types `t` is a union of or a nullable type of.
+/// Making a bound admit `void` admits these types' `void`.
+fn is_member(t: &ast::types::Type<Loc, Loc>, loc: &Loc) -> bool {
+    t.loc() == loc
+        || match t.deref() {
+            ast::types::TypeInner::Nullable { inner, .. } => is_member(&inner.argument, loc),
+            ast::types::TypeInner::Union { inner, .. } => {
+                let (t0, t1, ts) = &inner.types;
+                [t0, t1].into_iter().chain(ts).any(|t| is_member(t, loc))
+            }
+            _ => false,
+        }
+}
+
+/// Finds the type parameter whose default has the type at `lower` as a member, and whose bound,
+/// which can be made to admit `void`, has the type at `upper` as a member.
+struct BoundFinder<'a> {
+    lower: &'a Loc,
+    upper: &'a Loc,
+    found: Option<Loc>,
+}
+
+impl BoundFinder<'_> {
+    fn find(program: &ast::Program<Loc, Loc>, lower: &Loc, upper: &Loc) -> Option<Loc> {
+        let mut finder = BoundFinder {
+            lower,
+            upper,
+            found: None,
+        };
+        let Ok(()) = finder.program(program);
+        finder.found
+    }
+}
+
+impl<'ast> AstVisitor<'ast, Loc, Loc, &'ast Loc, !> for BoundFinder<'_> {
+    fn normalize_loc(loc: &'ast Loc) -> &'ast Loc {
+        loc
+    }
+
+    fn normalize_type(type_: &'ast Loc) -> &'ast Loc {
+        type_
+    }
+
+    fn type_param(
+        &mut self,
+        kind: &ast_visitor::TypeParamsContext,
+        tparam: &'ast ast::types::TypeParam<Loc, Loc>,
+    ) -> Result<(), !> {
+        if let Some(default) = &tparam.default
+            && is_member(default, self.lower)
+            && let ast::types::AnnotationOrHint::Available(bound) = &tparam.bound
+            && is_member(&bound.annotation, self.upper)
+            && admitting_void(&bound.annotation).is_some()
+        {
+            self.found = Some(tparam.loc.dupe());
+        }
+        ast_visitor::type_param_default(self, kind, tparam)
+    }
+}
+
 /// Where the `void`s an error refers to at `loc` are written. An error refers to a `void` where
 /// its type was last placed: where it is written, or at a type alias referring to it, or at a
 /// call returning it. In the checked file, the type found there still knows where its `void`s
@@ -531,6 +622,8 @@ pub mod stats {
         pub added_return_annotations: usize,
         /// Function types' return types changed to admit the returned `void`s they rejected.
         pub widened_return_types: usize,
+        /// Type parameters' bounds changed to admit the `void` default they rejected.
+        pub widened_bounds: usize,
         /// Return types that could not be changed to admit `void`: the `void`s they reject are
         /// changed instead.
         pub kept_return_types: Vec<Loc>,
@@ -556,6 +649,7 @@ pub mod stats {
             a.changed_annotations += b.changed_annotations;
             a.added_return_annotations += b.added_return_annotations;
             a.widened_return_types += b.widened_return_types;
+            a.widened_bounds += b.widened_bounds;
             a.kept_return_types.extend(b.kept_return_types);
             a.added_returns += b.added_returns;
             a.void_return_types += b.void_return_types;
@@ -580,6 +674,10 @@ pub mod stats {
                 format!(
                     "Changed function types' return types to admit `void`: {}",
                     self.widened_return_types
+                ),
+                format!(
+                    "Changed type parameters' bounds to admit their `void` default: {}",
+                    self.widened_bounds
                 ),
                 format!(
                     "Return types that cannot admit `void`, whose `void`s are changed next: {}",
@@ -618,8 +716,8 @@ pub mod stats {
 }
 
 /// Changes the `void`s at the target locations of one file to `undefined`, and makes the functions
-/// whose body is there return `undefined` at their end. Makes the return types at the given
-/// locations admit `void`.
+/// whose body is there return `undefined` at their end, and the bounds of the type parameters
+/// there admit `void`. Makes the return types at the given locations admit `void`.
 pub struct Mapper {
     targets: BTreeSet<Loc>,
     return_types: BTreeSet<Loc>,
@@ -932,6 +1030,37 @@ impl<'ast> AstVisitor<'ast, Loc> for Mapper {
             }
             _ => ast_visitor::map_type_default(self, t),
         }
+    }
+
+    // A type parameter's bound that rejects its `void` default admits `void`, as in TypeScript:
+    // `T extends ?{...} | void = void`. A default whose `void`s are changed needs no such bound.
+    fn map_type_param(
+        &mut self,
+        kind: &ast_visitor::TypeParamsContext,
+        tparam: &'ast ast::types::TypeParam<Loc, Loc>,
+    ) -> ast::types::TypeParam<Loc, Loc> {
+        let tparam_ = ast_visitor::map_type_param_default(self, kind, tparam);
+        if !self.targets.contains(&tparam.loc) {
+            return tparam_;
+        }
+        if tparam_.default != tparam.default {
+            self.matched.insert(tparam.loc.dupe());
+            return tparam_;
+        }
+        if let ast::types::AnnotationOrHint::Available(bound) = &tparam_.bound
+            && let Some(annotation) = admitting_void(&bound.annotation)
+        {
+            self.matched.insert(tparam.loc.dupe());
+            self.stats.widened_bounds += 1;
+            return ast::types::TypeParam {
+                bound: ast::types::AnnotationOrHint::Available(ast::types::Annotation {
+                    loc: bound.loc.dupe(),
+                    annotation,
+                }),
+                ..tparam_
+            };
+        }
+        tparam_
     }
 
     // A `void` a function type returns stays `void`: as in TypeScript, the functions it types
