@@ -7838,32 +7838,30 @@ fn __flow_impl<'cx>(
                 ),
             )?;
         }
-        // If we are accessing `Iterable<T>` with a number, and have `access_iterables = true`,
-        // then output `T`.
+        // If we are accessing an instance without an indexer with a number, and have
+        // `access_iterables = true`, then output the `T` of the `Iterable<T>` it is.
         (
             DefT(_, deref!(NumGeneralT(_) | SingletonNumT { .. })),
             ElemT(box ElemTData {
                 use_op,
-                obj: deref!(DefT(_, deref!(InstanceT(inst)))),
+                reason,
+                obj: obj @ deref!(DefT(_, deref!(InstanceT(inst)))),
                 action:
                     box ElemAction::ReadElem(box ReadElemData {
                         access_iterables: true,
                         tout,
                         ..
                     }),
-                ..
             }),
-        ) if !inst.inst.type_args.is_empty()
-            && flow_js_utils::is_builtin_iterable_class_id(inst.inst.class_id.clone(), cx) =>
-        {
-            let (_, _, t, _) = &inst.inst.type_args[0];
-            rec_flow_t(
-                cx,
-                env,
-                trace,
-                use_op.dupe(),
-                (t, &Type::new(OpenT(tout.dupe()))),
-            )?;
+        ) if inst.inst.inst_dict.is_none() => {
+            let targs = vec![
+                Type::new(OpenT(tout.dupe())),
+                unsoundness::unresolved_any(reason.dupe()),
+                unsoundness::unresolved_any(reason.dupe()),
+            ];
+            let iterable_reason = reason.dupe().replace_desc_new(None);
+            let iterable = get_builtin_typeapp(cx, env, &iterable_reason, None, "Iterable", targs);
+            rec_flow_t(cx, env, trace, use_op.dupe(), (obj, &iterable))?;
         }
         (
             _,

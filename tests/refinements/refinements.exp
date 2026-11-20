@@ -8378,61 +8378,13 @@ References:
                ^^^^^^^^^^^^^^^^^^^ [1]
 
 
-Error ----------------------------------------------------------------------------------------------- issue-7105.js:7:13
-
-Cannot yield object literal because: [incompatible-type]
- - Either in property `type`: `string` [1] is incompatible with `"PENDING"` [2].
- - Or in property `type`: `string` [1] is incompatible with `"DONE"` [3].
-
-   issue-7105.js:7:13
-   7|       yield { type: "PENDING" }; // TODO(T225770374)
-                  ^^^^^^^^^^^^^^^^^^^
-
-References:
-   issue-7105.js:7:21
-   7|       yield { type: "PENDING" }; // TODO(T225770374)
-                          ^^^^^^^^^ [1]
-   issue-7105.js:2:31
-   2| type Result = {readonly type: "PENDING"} | {readonly type: "DONE", value: number};
-                                    ^^^^^^^^^ [2]
-   issue-7105.js:2:60
-   2| type Result = {readonly type: "PENDING"} | {readonly type: "DONE", value: number};
-                                                                 ^^^^^^ [3]
-
-
-Error ----------------------------------------------------------------------------------------------- issue-7105.js:9:15
-
-Cannot yield object literal because: [incompatible-type]
- - Either in property `type`: `string` [1] is incompatible with `"DONE"` [2].
- - Or property `value` is extra in object literal [3] but missing in `{readonly type: "PENDING"}` [4]. Exact objects do
-   not accept extra props.
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
-
-   issue-7105.js:9:15
-   9|         yield { type: "DONE", value: (box as empty).value }; // TODO(T225770374)
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
-
-References:
-   issue-7105.js:9:23
-   9|         yield { type: "DONE", value: (box as empty).value }; // TODO(T225770374)
-                            ^^^^^^ [1]
-   issue-7105.js:2:60
-   2| type Result = {readonly type: "PENDING"} | {readonly type: "DONE", value: number};
-                                                                 ^^^^^^ [2]
-   issue-7105.js:2:15
-   2| type Result = {readonly type: "PENDING"} | {readonly type: "DONE", value: number};
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
-
-
 Error ----------------------------------------------------------------------------------------------- issue-7105.js:9:39
 
 Cannot cast `box` to `empty` because `{readonly type: "BAD", readonly value: string}` [1] is incompatible with
 `empty` [2]. [incompatible-type]
 
    issue-7105.js:9:39
-   9|         yield { type: "DONE", value: (box as empty).value }; // TODO(T225770374)
+   9|         yield { type: "DONE", value: (box as empty).value };
                                             ^^^
 
 References:
@@ -8440,7 +8392,7 @@ References:
    4|   let box: Box = { type: "GOOD", value: t };
                  ^^^ [1]
    issue-7105.js:9:46
-   9|         yield { type: "DONE", value: (box as empty).value }; // TODO(T225770374)
+   9|         yield { type: "DONE", value: (box as empty).value };
                                                    ^^^^^ [2]
 
 
@@ -8449,7 +8401,7 @@ Error --------------------------------------------------------------------------
 Refined at [1] [InferError]
 
    issue-7105.js:9:39
-   9|         yield { type: "DONE", value: (box as empty).value }; // TODO(T225770374)
+   9|         yield { type: "DONE", value: (box as empty).value };
                                             ^^^
 
 References:
@@ -18201,4 +18153,4 @@ References:
 
 
 
-Found 1224 errors
+Found 1222 errors

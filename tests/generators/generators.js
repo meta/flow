@@ -127,3 +127,67 @@ let multiple_return_result = multiple_return().next();
 if (multiple_return_result.done) {
   multiple_return_result.value as void; // error: number|string ~> void
 }
+
+type YieldResult = {readonly type: "PENDING"} | {readonly type: "DONE", value: number};
+
+function *yield_hint(): Generator<YieldResult, void, void> {
+  yield {type: "PENDING"}; // ok
+  yield {type: "DONE", value: 1}; // ok
+  yield {type: "OTHER"}; // error: "OTHER" ~> YieldResult
+}
+
+function *yield_hint_literal(): Generator<"a" | "b", void, void> {
+  yield "a"; // ok
+}
+
+function *yield_hint_function(): Generator<(x: number) => void, void, void> {
+  yield (x) => { x as number; }; // ok
+}
+
+async function *async_yield_hint(): AsyncGenerator<YieldResult, void, void> {
+  yield {type: "PENDING"}; // ok
+}
+
+function *return_hint(): Generator<YieldResult, YieldResult, void> {
+  return {type: "PENDING"}; // ok
+}
+
+async function *async_return_hint(): AsyncGenerator<YieldResult, "DONE", void> {
+  return "DONE"; // ok
+}
+
+function *delegate_hint(): Generator<YieldResult, void, void> {
+  yield* [{type: "PENDING"}]; // ok
+  yield* [{type: "OTHER"}]; // error: "OTHER" ~> YieldResult
+}
+
+function *delegate_hint_function(): Generator<(x: number) => void, void, void> {
+  yield* [(x) => { x as number; }]; // ok
+}
+
+function *delegate_inner<T>(x: T): Generator<T, void, void> {
+  yield x;
+}
+
+function *delegate_hint_call(): Generator<YieldResult, void, void> {
+  yield* delegate_inner({type: "PENDING"}); // ok
+}
+
+async function *async_delegate_inner<T>(x: T): AsyncGenerator<T, void, void> {
+  yield x;
+}
+
+async function *async_delegate_hint(): AsyncGenerator<YieldResult, void, void> {
+  yield* [{type: "PENDING"}]; // ok
+  yield* async_delegate_inner({type: "PENDING"}); // ok
+}
+
+declare function run_generator<A>(f: () => Generator<unknown, A, void>): A;
+declare function delegate_to<T>(x: T): Generator<unknown, T, void>;
+declare function identity<T>(x: T): T;
+
+function unannotated_generator(text: string) {
+  return run_generator(function *() {
+    return yield* delegate_to(identity(text)); // ok
+  });
+}

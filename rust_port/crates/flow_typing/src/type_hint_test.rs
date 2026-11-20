@@ -669,6 +669,47 @@ mod tests {
     }
 
     #[test]
+    fn yield_decomp_iterable() {
+        mk_eval_hint_test(
+            "string",
+            "Iterable<string, number, boolean>",
+            vec![DecompYield(false)],
+        );
+    }
+
+    #[test]
+    fn yield_decomp_async_iterable() {
+        mk_eval_hint_test(
+            "string",
+            "AsyncIterable<string, number, boolean>",
+            vec![DecompYield(true)],
+        );
+    }
+
+    #[test]
+    fn generator_return_decomp_iterable() {
+        mk_eval_hint_test(
+            "number",
+            "Iterable<string, number, boolean>",
+            vec![DecompGeneratorReturn(false)],
+        );
+    }
+
+    #[test]
+    fn generator_return_decomp_async_iterable() {
+        mk_eval_hint_test(
+            "number",
+            "AsyncIterable<string, number, boolean>",
+            vec![DecompGeneratorReturn(true)],
+        );
+    }
+
+    #[test]
+    fn yield_decomp_non_iterable() {
+        mk_eval_hint_test("DecompositionError", "number", vec![DecompYield(false)]);
+    }
+
+    #[test]
     fn fun_decomp_simple_return() {
         mk_eval_hint_test(
             "number",

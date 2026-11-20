@@ -4,9 +4,9 @@ function coerce(t: string): number {
   let box: Box = { type: "GOOD", value: t };
   function* broken(): IteratorObject<Result> {
     if (box.type === "GOOD") {
-      yield { type: "PENDING" }; // TODO(T225770374)
+      yield { type: "PENDING" };
       if (box.type !== "GOOD") {
-        yield { type: "DONE", value: (box as empty).value }; // TODO(T225770374)
+        yield { type: "DONE", value: (box as empty).value };
       }
     }
   }

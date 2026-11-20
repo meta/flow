@@ -145,6 +145,10 @@ impl<CX: ContextFamily, T, TArgs, Args, PropsAndChildren>
             InstantiateCallee(_) => "Instantiate_Callee".to_string(),
             InstantiateComponent(_) => "Instantiate_Component".to_string(),
             DecompPromise => "Decomp_Promise".to_string(),
+            DecompYield(false) => "Decomp_Yield".to_string(),
+            DecompYield(true) => "Decomp_Yield (async)".to_string(),
+            DecompGeneratorReturn(false) => "Decomp_GeneratorReturn".to_string(),
+            DecompGeneratorReturn(true) => "Decomp_GeneratorReturn (async)".to_string(),
         }
     }
 }
@@ -314,6 +318,8 @@ impl<T, TArgs, Args, PropsAndChildren> HintDecomposition<(), T, TArgs, Args, Pro
                 })
             }
             DecompPromise => DecompPromise,
+            DecompYield(async_) => DecompYield(*async_),
+            DecompGeneratorReturn(async_) => DecompGeneratorReturn(*async_),
         };
         HintDecomposition::new(inner)
     }
@@ -371,6 +377,11 @@ pub enum HintDecompositionInner<CX: ContextFamily, T, TArgs, Args, PropsAndChild
     InstantiateComponent(JsxImplicitInstantiationHints<CX, T, TArgs, Args, PropsAndChildren>),
     /// T of Promise<T> becomes hint on return in async scope
     DecompPromise,
+    /// T of Iterable<T, R, N> (AsyncIterable<T, R, N> if async) becomes hint on yield argument
+    DecompYield(bool),
+    /// R of Iterable<T, R, N> (AsyncIterable<T, R, N> if async) becomes hint on return in a
+    /// generator
+    DecompGeneratorReturn(bool),
 }
 
 #[derive(Clone)]

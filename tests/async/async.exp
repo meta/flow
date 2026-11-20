@@ -215,7 +215,7 @@ Unexpected number, expected the token `,` [ParseError]
 
 Error ----------------------------------------------------------------------------------------------- generator.js:22:12
 
-Cannot yield `await Promise.all(...)` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot yield `await Promise.all(...)` because `"a"` [1] is incompatible with `number` [2]. [incompatible-type]
 
    generator.js:22:12
    22|     yield* await Promise.all(["a"]); // error string ~> number
@@ -232,8 +232,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- generator.js:26:12
 
-Cannot yield `1` because `number` [1], a primitive, cannot be used as a subtype of `Iterable<empty, empty, void>` [2].
-You can wrap it in `new Number(...))` to turn it into an object and attempt to use it as a subtype of an interface.
+Cannot yield `1` because `1` [1], a primitive, cannot be used as a subtype of `Iterable<empty, empty, void>` [2]. You
+can wrap it in `new Number(...))` to turn it into an object and attempt to use it as a subtype of an interface.
 [incompatible-type]
 
    generator.js:26:12

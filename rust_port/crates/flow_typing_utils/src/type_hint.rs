@@ -1730,6 +1730,35 @@ fn type_of_hint_decomposition<'cx>(
                     },
                 )?)
             }
+            ConcrHintDecompositionInner::DecompYield(async_)
+            | ConcrHintDecompositionInner::DecompGeneratorReturn(async_) => {
+                let iterable = if *async_ { "AsyncIterable" } else { "Iterable" };
+                let is_yield = matches!(op, ConcrHintDecompositionInner::DecompYield(_));
+                let t = t.dupe();
+                let reason2 = reason.dupe();
+                Ok(flow_typing_tvar::mk_where(
+                    cx,
+                    reason.dupe(),
+                    move |cx, out_t| {
+                        let any = || unsoundness::unresolved_any(reason2.dupe());
+                        let targs = if is_yield {
+                            vec![out_t.dupe(), any(), any()]
+                        } else {
+                            vec![any(), out_t.dupe(), any()]
+                        };
+                        let iterable_t = FlowJs::get_builtin_typeapp_with_env(
+                            cx, env, &reason2, None, iterable, targs,
+                        );
+                        speculation_flow::resolved_lower_flow_t_unsafe(
+                            cx,
+                            env,
+                            &reason2,
+                            (&t, &iterable_t),
+                        )?;
+                        Ok::<(), FlowJsException>(())
+                    },
+                )?)
+            }
         }
     })
 }

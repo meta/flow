@@ -294,16 +294,16 @@ Error --------------------------------------------------------------------------
 Cannot cast `result.value` to `string` because `unknown` [1] is incompatible with `string` [2]. [incompatible-type]
 
    typescript_generator.js:20:5
-   20|     result.value as string; // ERROR: unknown default yield
-           ^^^^^^^^^^^^
+    20|     result.value as string; // ERROR: unknown default yield
+            ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es2018.asyncgenerator.js:22:30
-   22| interface AsyncGenerator<T = unknown, TReturn = any, TNext = any> extends AsyncIteratorObject<T, TReturn, TNext> {
-                                    ^^^^^^^ [1]
+   <BUILTINS>/misc.js:487:34
+   487| interface AsyncGenerator<out T = unknown, out TReturn = any, in TNext = any> {}
+                                         ^^^^^^^ [1]
    typescript_generator.js:20:21
-   20|     result.value as string; // ERROR: unknown default yield
-                           ^^^^^^ [2]
+    20|     result.value as string; // ERROR: unknown default yield
+                            ^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------- typescript_generator.js:28:7

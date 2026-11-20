@@ -1734,6 +1734,8 @@ struct DefFinder<'a> {
     scope_kind: ScopeKind,
     class_stack: ClassStack,
     return_hint_stack: Vec<AstHints>,
+    /// Hints of the arguments of `yield` and of `yield*` in the enclosing function
+    yield_hint_stack: Vec<(AstHints, AstHints)>,
     predicate_kind: Option<PredicateKind>,
 }
 
@@ -1756,6 +1758,7 @@ impl<'a> DefFinder<'a> {
             scope_kind: toplevel_scope,
             class_stack: FlowVector::new(),
             return_hint_stack: Vec::new(),
+            yield_hint_stack: Vec::new(),
             predicate_kind: None,
         }
     }
@@ -2804,36 +2807,51 @@ impl<'a> DefFinder<'a> {
                 ast::function::ReturnAnnot::TypeGuard(tg) => tg.loc.dupe(),
                 ast::function::ReturnAnnot::Missing(loc) => loc.dupe(),
             };
-            let return_hint = if generator {
-                // Return hints do not apply to generators
-                vec![]
-            } else {
-                match return_ {
-                    ast::function::ReturnAnnot::Available(annot) => {
-                        vec![Hint::HintT(
-                            HintNode::AnnotationHint(this.tparams.clone(), annot.clone()),
-                            HintKind::ExpectedTypeHint,
-                        )]
-                    }
-                    ast::function::ReturnAnnot::TypeGuard(_) => vec![],
-                    ast::function::ReturnAnnot::Missing(_) => {
-                        let decomp =
-                            HintDecomposition::new(HintDecompositionInner::DecompFuncReturn);
-                        Hint::decompose(decomp, func_return_hints.clone())
-                    }
+            let return_hint = match return_ {
+                ast::function::ReturnAnnot::Available(annot) => {
+                    vec![Hint::HintT(
+                        HintNode::AnnotationHint(this.tparams.clone(), annot.clone()),
+                        HintKind::ExpectedTypeHint,
+                    )]
+                }
+                ast::function::ReturnAnnot::TypeGuard(_) => vec![],
+                ast::function::ReturnAnnot::Missing(_) => {
+                    let decomp = HintDecomposition::new(HintDecompositionInner::DecompFuncReturn);
+                    Hint::decompose(decomp, func_return_hints.clone())
                 }
             };
 
-            let return_hint = match scope_kind {
+            let (return_hint, yield_hints) = match scope_kind {
                 ScopeKind::Async => {
                     let decomp = HintDecomposition::new(HintDecompositionInner::DecompPromise);
-                    Hint::decompose(decomp, return_hint)
+                    (Hint::decompose(decomp, return_hint), (vec![], vec![]))
                 }
-                _ => return_hint,
+                ScopeKind::Generator | ScopeKind::AsyncGenerator => {
+                    // An unannotated generator is inferred from its body rather than from its
+                    // hint, so only an annotation provides hints for its body.
+                    let annot_hint = match return_ {
+                        ast::function::ReturnAnnot::Available(_) => return_hint,
+                        _ => vec![],
+                    };
+                    let return_decomp = HintDecomposition::new(
+                        HintDecompositionInner::DecompGeneratorReturn(async_),
+                    );
+                    let yield_decomp =
+                        HintDecomposition::new(HintDecompositionInner::DecompYield(async_));
+                    (
+                        Hint::decompose(return_decomp, annot_hint.clone()),
+                        (
+                            Hint::decompose(yield_decomp, annot_hint.clone()),
+                            annot_hint,
+                        ),
+                    )
+                }
+                _ => (return_hint, (vec![], vec![])),
             };
 
             this.record_hint(return_loc.dupe(), return_hint.clone());
             this.return_hint_stack.push(return_hint.clone());
+            this.yield_hint_stack.push(yield_hints);
             let body_loc = match body {
                 ast::function::Body::BodyBlock((loc, block)) => {
                     this.block(loc, block)?;
@@ -2852,6 +2870,7 @@ impl<'a> DefFinder<'a> {
             };
 
             this.return_hint_stack.pop();
+            this.yield_hint_stack.pop();
             this.predicate_kind = old_predicate_kind;
 
             if generator {
@@ -6258,6 +6277,24 @@ impl<'a, 'ast> AstVisitor<'ast, ALoc, ALoc, &'ast ALoc, EnvInvariant<ALoc>> for 
             };
             let arg_tuple = (argument.loc().dupe(), argument.clone());
             self.visit_expression(cond, &hints, &arg_tuple.1)?;
+        }
+        Ok(())
+    }
+
+    fn yield_(
+        &mut self,
+        _loc: &ALoc,
+        expr: &ast::expression::Yield<ALoc, ALoc>,
+    ) -> Result<(), EnvInvariant<ALoc>> {
+        if let Some(argument) = &expr.argument {
+            let (yield_hint, delegate_hint) =
+                self.yield_hint_stack.last().cloned().unwrap_or_default();
+            let hints = if expr.delegate {
+                delegate_hint
+            } else {
+                yield_hint
+            };
+            self.visit_expression(EnclosingContext::NoContext, &hints, argument)?;
         }
         Ok(())
     }

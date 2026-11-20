@@ -1,6 +1,6 @@
 Error ---------------------------------------------------------------------------------------------------- class.js:4:11
 
-Cannot yield empty string because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot yield empty string because `""` [1] is incompatible with `number` [2]. [incompatible-type]
 
    class.js:4:11
    4|     yield ""; // error: string ~> number
@@ -31,7 +31,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- class.js:24:12
 
-Cannot return empty string because in type argument `TReturn` [1]: `string` [2] is incompatible with `number` [3].
+Cannot return empty string because in type argument `TReturn` [1]: `""` [2] is incompatible with `number` [3].
 [incompatible-type]
 
    class.js:24:12
@@ -376,7 +376,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ generators.js:3:9
 
-Cannot yield empty string because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot yield empty string because `""` [1] is incompatible with `number` [2]. [incompatible-type]
 
    generators.js:3:9
    3|   yield ""; // error: string ~> number
@@ -407,7 +407,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- generators.js:23:10
 
-Cannot return empty string because in type argument `TReturn` [1]: `string` [2] is incompatible with `number` [3].
+Cannot return empty string because in type argument `TReturn` [1]: `""` [2] is incompatible with `number` [3].
 [incompatible-type]
 
    generators.js:23:10
@@ -682,6 +682,34 @@ References:
                                           ^^^^ [2]
 
 
+Error ---------------------------------------------------------------------------------------------- generators.js:136:9
+
+Cannot yield object literal because object literal [1] is incompatible with `YieldResult` [2]. [incompatible-type]
+
+   generators.js:136:9
+   136|   yield {type: "OTHER"}; // error: "OTHER" ~> YieldResult
+                ^^^^^^^^^^^^^^^ [1]
+
+References:
+   generators.js:133:35
+   133| function *yield_hint(): Generator<YieldResult, void, void> {
+                                          ^^^^^^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- generators.js:161:11
+
+Cannot yield array literal because object literal [1] is incompatible with `YieldResult` [2]. [incompatible-type]
+
+   generators.js:161:11
+   161|   yield* [{type: "OTHER"}]; // error: "OTHER" ~> YieldResult
+                  ^^^^^^^^^^^^^^^ [1]
+
+References:
+   generators.js:159:38
+   159| function *delegate_hint(): Generator<YieldResult, void, void> {
+                                             ^^^^^^^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------------------------------ refi.js:5:3
 
 Cannot cast `x.a` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -816,4 +844,4 @@ References:
 
 
 
-Found 42 errors
+Found 44 errors
