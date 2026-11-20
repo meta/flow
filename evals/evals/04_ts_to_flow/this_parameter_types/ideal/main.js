@@ -9,6 +9,7 @@
 
 type Counter = {
   count: number,
+  ...
 };
 
 function increment(this: Counter, by: number): number {
@@ -20,9 +21,10 @@ type IncrementThis = ThisParameterType<typeof increment>;
 type BoundIncrement = OmitThisParameter<typeof increment>;
 
 const ctx: IncrementThis = {count: 10};
-const next: number = increment.call(ctx, 5);
+const receiver = {...ctx, increment};
+const next: number = receiver.increment.call(receiver, 5);
 
-const bound: BoundIncrement = increment.bind(ctx);
+const bound: BoundIncrement = receiver.increment.bind(receiver);
 const after: number = bound(1);
 
 console.log(next, after);

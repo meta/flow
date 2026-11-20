@@ -12,13 +12,13 @@ import * as React from 'react';
 component Panel(
   header: React.Node,
   children: React.Node,
-  footer?: React.Node,
+  footer as footerContent?: React.Node,
 ) {
   return (
     <section className="panel">
       <header>{header}</header>
       <div className="panel-body">{children}</div>
-      {footer != null && <footer>{footer}</footer>}
+      {footerContent != null && <footer>{footerContent}</footer>}
     </section>
   );
 }

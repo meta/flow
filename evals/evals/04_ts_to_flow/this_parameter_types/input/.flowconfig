@@ -1,7 +1,6 @@
 [options]
 
 [lints]
-invalid-this-arg=off
 
 [strict]
 
