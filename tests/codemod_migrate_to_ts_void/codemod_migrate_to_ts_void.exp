@@ -1,0 +1,134 @@
+flow codemod migrate-to-ts-void --write
+>>> Launching report...
+
+Found 11 rejected `void`s in 2 files, and 4 function types' return types rejecting returned `void`s
+
+>>> Launching report...
+
+Changed `void` to `undefined`: 6
+Added `: undefined` return annotations: 2
+Changed function types' return types to admit `void`: 4
+Return types that cannot admit `void`, whose `void`s are changed next: 0
+Added `return undefined;` to functions without a `return` statement: 3
+Left in generated files and TypeScript declaration files: 0
+Left because they are neither an annotation nor a return: 0
+
+>>> Launching report...
+
+Found 3 rejected `void`s in 2 files, and 0 function types' return types rejecting returned `void`s
+
+>>> Launching report...
+
+Changed `void` to `undefined`: 2
+Added `: undefined` return annotations: 0
+Changed function types' return types to admit `void`: 0
+Return types that cannot admit `void`, whose `void`s are changed next: 0
+Added `return undefined;` to functions without a `return` statement: 1
+Left in generated files and TypeScript declaration files: 0
+Left because they are neither an annotation nor a return: 0
+
+>>> Launching report...
+
+Found 0 rejected `void`s in 0 files, and 1 function types' return types rejecting returned `void`s
+
+>>> Launching report...
+
+Changed `void` to `undefined`: 1
+Added `: undefined` return annotations: 0
+Changed function types' return types to admit `void`: 0
+Return types that cannot admit `void`, whose `void`s are changed next: 0
+Added `return undefined;` to functions without a `return` statement: 0
+Left in generated files and TypeScript declaration files: 0
+Left because they are neither an annotation nor a return: 0
+
+>>> Launching report...
+
+Found 0 rejected `void`s in 0 files, and 0 function types' return types rejecting returned `void`s
+
+`void` annotations: 16 before, 11 after. `void` return types: 10 before, 7 after
+
+types.js
+export type Props = {
+  label?: string | undefined, // read into `?string` in uses.js: changed
+  onChange: (value: string) => void, // kept
+};
+
+declare export function log(message: string): void; // kept
+declare export function get(): undefined; // read through `run` in uses.js: changed
+export type Options = undefined | {force: boolean}; // read into `?{force: boolean}` in uses.js: changed
+declare export function maybeName(): string | undefined; // read into `?string` in uses.js: changed
+export function exportedNoop(): undefined {} // read into `?string` in uses.js: annotated
+declare export function onResponse(handler: (response: string) => ?boolean | void): void; // rejects the returned `void` of `handle` in uses.js: made to admit `void`
+export function onRequest(handler: (request: string) => ?boolean | void): void {} // rejects the returned `void` of `handle` in uses.js: made to admit `void`
+export type Callback = () => boolean | void; // rejects the returned `void` of `callback` in uses.js: made to admit `void`
+export type Form = {getError: () => ?string}; // rejects the returned `void` of `form.getError` in uses.js, made to admit `void`, which is read as `?string`: dropped again
+export function stub(): ?string {
+  return undefined;
+} // no `return` statement: returns `undefined`
+
+
+uses.js
+import type {Props} from './types';
+import {get, log} from './types';
+
+function label(props: Props): ?string {
+  return props.label;
+}
+
+function run(): undefined { // read into `undefined` below: changed, then `get` is
+  return get();
+}
+const result: undefined = run();
+
+function noop(): undefined {} // read into `?string` below: annotated
+const s: ?string = noop();
+
+function keep(x: void): void { // kept
+  log('');
+}
+keep(undefined);
+
+import type {Options} from './types';
+import {exportedNoop, maybeName} from './types';
+
+function force(options: Options): ?{force: boolean} {
+  return options;
+}
+const name: ?string = maybeName();
+const exported: ?string = exportedNoop();
+
+function maybeOne(): number | undefined { // read into `?number` below: changed
+  return 1;
+}
+const one: ?number = maybeOne();
+
+import type {Callback} from './types';
+import {onRequest, onResponse} from './types';
+
+function handle(response: string): void {} // kept
+onResponse(handle);
+onRequest(handle);
+const callback: Callback = (): void => {}; // kept
+
+import type {Form} from './types';
+
+const form: Form = {getError: (): undefined => {}}; // changed once `Form` no longer admits `void`
+const error: ?string = form.getError();
+
+function anything(): unknown {
+  return undefined;
+} // returns `undefined`
+
+function nothing(): undefined {} // kept
+async function load(): Promise<?string> {
+  return undefined;
+} // returns `undefined`
+
+function noValue(): string | undefined {
+  return undefined;
+} // read into `?string` below: changed, then returns `undefined`
+
+const value: ?string = noValue();
+
+flow check under experimental.ts_void
+No errors!

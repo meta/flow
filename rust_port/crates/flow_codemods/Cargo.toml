@@ -37,6 +37,7 @@ flow_type_sig = { path = "../flow_type_sig" }
 flow_typing = { path = "../flow_typing" }
 flow_typing_context = { path = "../flow_typing_context" }
 flow_typing_errors = { path = "../flow_typing_errors" }
+flow_typing_flow_js = { path = "../flow_typing_flow_js" }
 flow_typing_ty_normalizer = { path = "../flow_typing_ty_normalizer" }
 flow_typing_type = { path = "../flow_typing_type" }
 flow_utils_concurrency = { path = "../flow_utils_concurrency" }

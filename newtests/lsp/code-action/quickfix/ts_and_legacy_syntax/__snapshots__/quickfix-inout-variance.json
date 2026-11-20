@@ -16,14 +16,14 @@
         "changes": {
           "<PLACEHOLDER_PROJECT_URL>/fix-in-out-variance.js": [
             {
-              "newText": ": (<A>(A) => A)",
+              "newText": "",
               "range": {
                 "end": {
-                  "character": 34,
+                  "character": 25,
                   "line": 2
                 },
                 "start": {
-                  "character": 18,
+                  "character": 19,
                   "line": 2
                 }
               }

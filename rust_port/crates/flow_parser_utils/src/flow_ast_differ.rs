@@ -1272,12 +1272,73 @@ fn declare_export(
         comments: comments2,
         ..
     } = export2;
-    if default1 != default2 || src1 != src2 || decl1 != decl2 {
-        None
-    } else {
-        let specs_diff = diff_if_changed_opt(export_named_declaration_specifier, specs1, specs2);
-        let comments_diff = syntax_opt(loc, comments1, comments2);
-        join_diff_list(vec![specs_diff, comments_diff])
+    if default1 != default2 || src1 != src2 {
+        return None;
+    }
+    let decl_diff = match (decl1, decl2) {
+        (None, None) => Some(vec![]),
+        (Some(d1), Some(d2)) if d1 == d2 => Some(vec![]),
+        (Some(d1), Some(d2)) => declare_export_declaration(d1, d2),
+        _ => None,
+    };
+    let specs_diff = diff_if_changed_opt(export_named_declaration_specifier, specs1, specs2);
+    let comments_diff = syntax_opt(loc, comments1, comments2);
+    join_diff_list(vec![decl_diff, specs_diff, comments_diff])
+}
+
+fn declare_export_declaration(
+    decl1: &ast::statement::declare_export_declaration::Declaration<Loc, Loc>,
+    decl2: &ast::statement::declare_export_declaration::Declaration<Loc, Loc>,
+) -> Option<Vec<NodeChange>> {
+    use ast::statement::declare_export_declaration::Declaration::*;
+    match (decl1, decl2) {
+        (
+            Variable {
+                loc,
+                declaration: v1,
+            },
+            Variable {
+                declaration: v2, ..
+            },
+        ) => declare_variable(loc, v1, v2),
+        (
+            Function {
+                loc,
+                declaration: f1,
+            },
+            Function {
+                declaration: f2, ..
+            },
+        ) => declare_function(loc, f1, f2),
+        (
+            Class {
+                loc,
+                declaration: c1,
+            },
+            Class {
+                declaration: c2, ..
+            },
+        ) => declare_class(loc, c1, c2),
+        (
+            NamedType {
+                loc,
+                declaration: t1,
+            },
+            NamedType {
+                declaration: t2, ..
+            },
+        ) => type_alias(loc, t1, t2),
+        (
+            NamedOpaqueType {
+                loc,
+                declaration: t1,
+            },
+            NamedOpaqueType {
+                declaration: t2, ..
+            },
+        ) => opaque_type(loc, t1, t2),
+        (DefaultType { type_: t1 }, DefaultType { type_: t2 }) => Some(type_(t1, t2)),
+        _ => None,
     }
 }
 
@@ -4724,12 +4785,102 @@ fn type_(typ1: &ast::types::Type<Loc, Loc>, typ2: &ast::types::Type<Loc, Loc>) -
     };
     let loc1 = typ1.loc();
     type_diff.unwrap_or_else(|| {
+        // A keyword replaced by a keyword with the same comments keeps the comments where they
+        // are in the source, which can be past a separator: only the keyword is replaced.
+        if let Some(comments1) = keyword_type_comments(typ1)
+            && let Some(comments2) = keyword_type_comments(typ2)
+            && comments1 == comments2
+        {
+            return vec![(
+                loc1.dupe(),
+                Change::Replace(
+                    Node::Type(typ1.dupe()),
+                    Node::Type(keyword_type_without_comments(typ2)),
+                ),
+            )];
+        }
         vec![replace(
             loc1,
             Node::Type(typ1.dupe()),
             Node::Type(typ2.dupe()),
         )]
     })
+}
+
+/// The comments of a keyword type, which has nothing but a location and comments.
+fn keyword_type_comments(t: &ast::types::Type<Loc, Loc>) -> Option<&Option<ast::Syntax<Loc, ()>>> {
+    use ast::types::TypeInner::*;
+    match &**t {
+        Any { comments, .. }
+        | Mixed { comments, .. }
+        | Empty { comments, .. }
+        | Void { comments, .. }
+        | Null { comments, .. }
+        | Number { comments, .. }
+        | BigInt { comments, .. }
+        | String { comments, .. }
+        | Symbol { comments, .. }
+        | Unknown { comments, .. }
+        | Never { comments, .. }
+        | Undefined { comments, .. } => Some(comments),
+        _ => None,
+    }
+}
+
+fn keyword_type_without_comments(t: &ast::types::Type<Loc, Loc>) -> ast::types::Type<Loc, Loc> {
+    use ast::types::TypeInner::*;
+    let without_comments = match &**t {
+        Any { loc, .. } => Any {
+            loc: loc.dupe(),
+            comments: None,
+        },
+        Mixed { loc, .. } => Mixed {
+            loc: loc.dupe(),
+            comments: None,
+        },
+        Empty { loc, .. } => Empty {
+            loc: loc.dupe(),
+            comments: None,
+        },
+        Void { loc, .. } => Void {
+            loc: loc.dupe(),
+            comments: None,
+        },
+        Null { loc, .. } => Null {
+            loc: loc.dupe(),
+            comments: None,
+        },
+        Number { loc, .. } => Number {
+            loc: loc.dupe(),
+            comments: None,
+        },
+        BigInt { loc, .. } => BigInt {
+            loc: loc.dupe(),
+            comments: None,
+        },
+        String { loc, .. } => String {
+            loc: loc.dupe(),
+            comments: None,
+        },
+        Symbol { loc, .. } => Symbol {
+            loc: loc.dupe(),
+            comments: None,
+        },
+        Unknown { loc, .. } => Unknown {
+            loc: loc.dupe(),
+            comments: None,
+        },
+        Never { loc, .. } => Never {
+            loc: loc.dupe(),
+            comments: None,
+        },
+        Undefined { loc, .. } => Undefined {
+            loc: loc.dupe(),
+            comments: None,
+        },
+        _ => return t.dupe(),
+    };
+    ast::types::Type::new(without_comments)
 }
 
 fn interface_type(
@@ -5777,14 +5928,19 @@ fn type_annotation(
     annot1: &ast::types::Annotation<Loc, Loc>,
     annot2: &ast::types::Annotation<Loc, Loc>,
 ) -> Vec<NodeChange> {
-    match &*annot2.annotation {
-        ast::types::TypeInner::Function { .. } => {
-            vec![replace(
-                &annot1.loc,
-                Node::TypeAnnotation(annot1.clone()),
-                Node::FunctionTypeAnnotation(annot2.clone()),
-            )]
-        }
+    let replace_function = || {
+        vec![replace(
+            &annot1.loc,
+            Node::TypeAnnotation(annot1.clone()),
+            Node::FunctionTypeAnnotation(annot2.clone()),
+        )]
+    };
+    match (&*annot1.annotation, &*annot2.annotation) {
+        (
+            ast::types::TypeInner::Function { loc, inner: ft1 },
+            ast::types::TypeInner::Function { inner: ft2, .. },
+        ) => function_type(loc, ft1, ft2).unwrap_or_else(replace_function),
+        (_, ast::types::TypeInner::Function { .. }) => replace_function(),
         _ => type_(&annot1.annotation, &annot2.annotation),
     }
 }

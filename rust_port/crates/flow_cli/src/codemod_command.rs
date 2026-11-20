@@ -34,6 +34,7 @@ use flow_common_modulename::Modulename;
 use flow_parser::ast;
 use flow_parser::file_key::FileKey;
 use flow_parser::loc::Loc;
+use flow_parser::loc::Position;
 use flow_parser_utils::flow_ast_differ;
 use flow_parser_utils_output::js_layout_generator::Opts as LayoutOptions;
 use flow_parser_utils_output::replacement_printer;
@@ -50,6 +51,7 @@ enum CodemodSubcommand {
     AnnotateLiteralDeclaration,
     AnnotateOptionalProperties,
     FixErrors,
+    MigrateToTsVoid,
     RemoveUnnecessaryReactImport,
 }
 
@@ -1033,6 +1035,256 @@ mod fix_errors_command {
     }
 }
 
+mod migrate_to_ts_void_command {
+    use flow_codemods::migrate_to_ts_void::CheckResult;
+    use flow_codemods::migrate_to_ts_void::Mapper;
+    use flow_codemods::migrate_to_ts_void::Targets;
+    use flow_codemods::migrate_to_ts_void::stats::Stats;
+
+    use super::*;
+
+    /// A codemod that keeps going this long still finds new `void`s to change, so it stops.
+    const MAX_ITERATIONS: usize = 10;
+
+    /// What the latest check found, from its reporter.
+    static FOUND: Mutex<Option<CheckResult>> = Mutex::new(None);
+
+    /// The targets the change step changes.
+    static TO_CHANGE: Mutex<Targets> = Mutex::new(Targets(BTreeMap::new()));
+
+    /// The return types the change step makes admit `void`.
+    static TO_WIDEN: Mutex<Targets> = Mutex::new(Targets(BTreeMap::new()));
+
+    /// What the latest change step changed, from its reporter.
+    static CHANGED: Mutex<Option<Stats>> = Mutex::new(None);
+
+    fn spec() -> flow_command_spec::Spec {
+        let doc = "Changes `void` to `undefined` where `experimental.ts_void` would reject it.";
+        codemod_common_spec(
+            "migrate-to-ts-void",
+            doc,
+            flow_command_spec::Visibility::Public,
+            format!(
+                "Usage: {} codemod migrate-to-ts-void [OPTION]... [FILE]\n\nUnder `experimental.ts_void`, `void` is TypeScript's `void`, which flows into nothing but `void`, `any` and `unknown`. Checks the code under the flag and changes to `undefined` only the `void` annotations whose values it rejects, and annotates `: undefined` the functions returning no value whose inferred `void` it rejects. A function type's return type that rejects the `void` returned by a function passed as it is changed to admit `void` instead, unless it is in a library definition. A function without a `return` statement whose return type doesn't include `void` and isn't `any` or `undefined` returns `undefined` at its end. With --write, checks again until nothing more is rejected.\n",
+                flow_command_utils::exe_name()
+            ),
+        )
+    }
+
+    struct CheckConfig;
+
+    impl SimpleTypedRunnerConfig for CheckConfig {
+        type Accumulator = CheckResult;
+
+        fn reporter() -> codemod_report::CodemodReport<Self::Accumulator> {
+            string_reporter(
+                |found: &CheckResult| {
+                    *FOUND.lock().unwrap() = Some(found.clone());
+                    format!(
+                        "Found {} rejected `void`s in {} files, and {} function types' return types rejecting returned `void`s",
+                        found.targets.len(),
+                        found.targets.0.len(),
+                        found.returns.0.values().map(BTreeMap::len).sum::<usize>(),
+                    )
+                },
+                CheckResult::combine,
+                CheckResult::default(),
+            )
+        }
+
+        // Changing a file changes the errors of the files that depend on it.
+        fn expand_roots(
+            env: &flow_server_env::server_env::Env,
+            _options: &Options,
+            roots: BTreeSet<FileKey>,
+        ) -> BTreeSet<FileKey> {
+            let dependency_info = env.dependency_info();
+            let dependents =
+                flow_services_inference::pure_dep_graph_operations::calc_all_dependents(
+                    dependency_info.sig_dependency_graph(),
+                    dependency_info.implementation_dependency_graph(),
+                    &roots.iter().cloned().collect(),
+                );
+            roots.into_iter().chain(dependents).collect()
+        }
+
+        fn check_options(options: Options) -> Options {
+            options
+        }
+
+        fn visit(
+            _options: &Options,
+            ast: &ast::Program<Loc, Loc>,
+            cctx: &mut flow_codemods::utils::codemod_context::typed::TypedCodemodContext<'_>,
+        ) -> Self::Accumulator {
+            let (targets, returns) = flow_codemods::migrate_to_ts_void::targets_of_file(cctx);
+            CheckResult {
+                targets,
+                returns,
+                counts: flow_codemods::migrate_to_ts_void::void_counts(ast),
+            }
+        }
+    }
+
+    struct ChangeConfig;
+
+    impl UntypedRunnerConfig for ChangeConfig {
+        type Accumulator = Stats;
+
+        fn reporter() -> codemod_report::CodemodReport<Self::Accumulator> {
+            string_reporter(
+                |stats: &Stats| {
+                    *CHANGED.lock().unwrap() = Some(stats.clone());
+                    stats.report()
+                },
+                Stats::combine,
+                Stats::default(),
+            )
+        }
+
+        fn visit(
+            options: &Options,
+            ast: &ast::Program<Loc, Loc>,
+            cctx: flow_codemods::utils::codemod_context::untyped::UntypedCodemodContext,
+        ) -> Self::Accumulator {
+            let targets = TO_CHANGE.lock().unwrap().0.get(&cctx.file).cloned();
+            let return_types = TO_WIDEN.lock().unwrap().0.get(&cctx.file).cloned();
+            if targets.is_none() && return_types.is_none() {
+                return Stats::default();
+            }
+            let targets = targets.unwrap_or_default();
+            let return_types = return_types.unwrap_or_default();
+            if !flow_codemods::migrate_to_ts_void::is_changeable(&cctx.file, ast) {
+                return Stats {
+                    unchangeable: targets.len(),
+                    kept_return_types: return_types.into_iter().collect(),
+                    ..Stats::default()
+                };
+            }
+            let mut mapper = Mapper::new(targets, return_types);
+            let ast_prime = mapper.program(ast);
+            save_ast_diff(options, &cctx.file, ast, &ast_prime);
+            mapper.stats
+        }
+    }
+
+    fn main(args: &arg_spec::Values) {
+        let mut prepared = prepare_codemod(args, false);
+        prepared.options.ts_void = true;
+        let in_scope = prepared.roots.clone();
+        let mut roots = prepared.roots;
+        let mut seen: BTreeSet<Loc> = BTreeSet::new();
+        let mut tried_return_types: BTreeSet<(FileKey, Position)> = BTreeSet::new();
+        let mut library_return_types: BTreeMap<Loc, usize> = BTreeMap::new();
+        let mut counts = None;
+        let mut changed = Stats::default();
+        for iteration in 1..=MAX_ITERATIONS {
+            eprintln!(">>> Iteration {iteration}: checking {} files", roots.len());
+            MakeMain::<codemod_runner::MakeSimpleTypedRunner<CheckConfig>>::main(
+                &prepared.options,
+                false,
+                false,
+                prepared.log_level,
+                roots,
+            );
+            let found = FOUND.lock().unwrap().take().unwrap_or_default();
+            // The first check covers every file in scope.
+            counts.get_or_insert(found.counts);
+            // A return type that rejects returned `void`s is changed to admit them, once. The
+            // `void`s are changed instead if it is in a library definition, out of scope, or
+            // still rejects them, as it does once a `void` it admits is rejected and dropped. It
+            // starts where it started when changed.
+            let mut targets = found.targets;
+            let mut to_widen = Targets::default();
+            for (file, return_types) in found.returns.0 {
+                for (return_type, voids) in return_types {
+                    if file.is_lib_file() {
+                        *library_return_types.entry(return_type.dupe()).or_default() += voids.len();
+                    }
+                    if !file.is_lib_file()
+                        && in_scope.contains(&file)
+                        && tried_return_types.insert((file.dupe(), return_type.start))
+                    {
+                        to_widen
+                            .0
+                            .entry(file.dupe())
+                            .or_default()
+                            .insert(return_type);
+                    } else {
+                        targets = targets.combine(voids);
+                    }
+                }
+            }
+            let to_change = Targets(
+                targets
+                    .0
+                    .into_iter()
+                    .filter(|(file, _)| in_scope.contains(file))
+                    .filter_map(|(file, locs)| {
+                        let locs: BTreeSet<Loc> = locs
+                            .into_iter()
+                            .filter(|loc| seen.insert(loc.dupe()))
+                            .collect();
+                        (!locs.is_empty()).then_some((file, locs))
+                    })
+                    .collect(),
+            );
+            if to_change.is_empty() && to_widen.is_empty() {
+                break;
+            }
+            let files: BTreeSet<FileKey> = to_change
+                .0
+                .keys()
+                .chain(to_widen.0.keys())
+                .cloned()
+                .collect();
+            flow_codemods::utils::diff_heaps::remove_batch(&files);
+            *TO_CHANGE.lock().unwrap() = to_change;
+            *TO_WIDEN.lock().unwrap() = to_widen;
+            MakeMain::<codemod_runner::MakeUntypedRunner<ChangeConfig>>::main(
+                &prepared.options,
+                prepared.write,
+                false,
+                prepared.log_level,
+                files.clone(),
+            );
+            if let Some(stats) = CHANGED.lock().unwrap().take() {
+                changed = Stats::combine(changed, stats);
+            }
+            // The next check must not print these changes again.
+            flow_codemods::utils::diff_heaps::remove_batch(&files);
+            if !prepared.write {
+                break;
+            }
+            roots = files;
+        }
+        if let Some(counts) = counts {
+            println!(
+                "{}",
+                flow_codemods::migrate_to_ts_void::kept_report(counts, &changed)
+            );
+        }
+        if !library_return_types.is_empty() {
+            let mut library_return_types: Vec<(Loc, usize)> =
+                library_return_types.into_iter().collect();
+            library_return_types.sort_by(|(_, a), (_, b)| b.cmp(a));
+            println!(
+                "Return types in library definitions that reject returned `void`s, which the codemod changed instead:"
+            );
+            for (loc, count) in library_return_types.iter().take(20) {
+                println!(
+                    "  {} ({count})",
+                    flow_common::reason::string_of_loc(None, loc)
+                );
+            }
+        }
+    }
+
+    pub(super) fn command() -> flow_command_spec::Command {
+        flow_command_spec::command(spec(), main)
+    }
+}
+
 fn root_spec() -> flow_command_spec::Spec {
     flow_command_spec::Spec::new(
         "codemod",
@@ -1056,6 +1308,7 @@ fn root_spec() -> flow_command_spec::Spec {
                 CodemodSubcommand::AnnotateOptionalProperties,
             ),
             ("fix-errors", CodemodSubcommand::FixErrors),
+            ("migrate-to-ts-void", CodemodSubcommand::MigrateToTsVoid),
             (
                 "remove-unnecessary-react-import",
                 CodemodSubcommand::RemoveUnnecessaryReactImport,
@@ -1080,6 +1333,7 @@ pub(crate) fn command() -> flow_command_spec::Command {
                     CodemodSubcommand::AnnotateOptionalProperties,
                 ),
                 ("fix-errors", CodemodSubcommand::FixErrors),
+                ("migrate-to-ts-void", CodemodSubcommand::MigrateToTsVoid),
                 (
                     "remove-unnecessary-react-import",
                     CodemodSubcommand::RemoveUnnecessaryReactImport,
@@ -1097,6 +1351,7 @@ pub(crate) fn command() -> flow_command_spec::Command {
                 annotate_optional_properties_command::command()
             }
             CodemodSubcommand::FixErrors => fix_errors_command::command(),
+            CodemodSubcommand::MigrateToTsVoid => migrate_to_ts_void_command::command(),
             CodemodSubcommand::RemoveUnnecessaryReactImport => {
                 remove_react_import_command::command()
             }
