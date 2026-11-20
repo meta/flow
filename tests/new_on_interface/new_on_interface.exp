@@ -353,5 +353,19 @@ References:
                          ^^^^^^^^^^^^^^^^ [1]
 
 
+Error ----------------------------------------------------------------------------------------- new_on_interface.js:39:5
 
-Found 22 errors
+Cannot use function type [1] with fewer than 2 type arguments. [missing-type-arg]
+
+   new_on_interface.js:39:5
+   39| new G<string>("a"); // ERROR: fewer than 2 type arguments
+           ^
+
+References:
+   new_on_interface.js:36:9
+   36|     new <T, U>(x: T): Gen;
+               ^^^^^^ [1]
+
+
+
+Found 23 errors

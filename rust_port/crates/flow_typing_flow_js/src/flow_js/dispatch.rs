@@ -6333,7 +6333,7 @@ fn __flow_impl<'cx>(
         // sig is the [inst_construct_t] slot plus anything inherited via
         // [extends]; [collect_construct_ts] collects both in
         // derived-first order.
-        (DefT(_, deref!(InstanceT(instance_t))), ConstructorT(box ctor_data)) => {
+        (DefT(reason, deref!(InstanceT(instance_t))), ConstructorT(box ctor_data)) => {
             let inst_abstract = instance_t.inst.inst_abstract;
             let use_op = &ctor_data.use_op;
             let reason_op = &ctor_data.reason;
@@ -6363,6 +6363,15 @@ fn __flow_impl<'cx>(
                 l,
             )?) {
                 Some(construct_t) => {
+                    let construct_t = helpers::reposition(
+                        cx,
+                        env,
+                        Some(trace),
+                        reason.loc().dupe(),
+                        None,
+                        None,
+                        construct_t,
+                    )?;
                     let ret = flow_typing_tvar::mk_no_wrap_where(
                         cx,
                         reason_op.dupe(),

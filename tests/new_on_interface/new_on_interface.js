@@ -30,3 +30,10 @@ interface NotConstructable {
 }
 declare const nc: NotConstructable;
 new nc(); // ERROR
+
+// Generic construct signature
+interface Gen {
+    new <T, U>(x: T): Gen;
+}
+declare const G: Gen;
+new G<string>("a"); // ERROR: fewer than 2 type arguments
