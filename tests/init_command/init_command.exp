@@ -9,7 +9,6 @@ Default .flowconfig looks like this:
 [libs]
 
 [lints]
-unsafe-object-assign=error
 
 [options]
 

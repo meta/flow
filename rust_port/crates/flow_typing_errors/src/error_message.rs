@@ -9479,7 +9479,6 @@ impl<L: Dupe + PartialOrd + Ord + PartialEq + Eq> ErrorMessage<L> {
             ErrorMessage::ENonstrictImport(_) => LintError(NonstrictImport),
             ErrorMessage::EUnclearType(_) => LintError(UnclearType),
             ErrorMessage::EUnsafeGettersSetters(_) => LintError(UnsafeGettersSetters),
-            ErrorMessage::EUnsafeObjectAssign(_) => LintError(UnsafeObjectAssign),
             ErrorMessage::ESketchyNullLint(box ESketchyNullLintData { kind, .. }) => {
                 LintError(SketchyNull(*kind))
             }
@@ -13566,10 +13565,10 @@ impl<L: Dupe + PartialEq + Eq + PartialOrd + Ord> ErrorMessage<L> {
             ErrorMessage::EInvalidThisArg(box EInvalidThisArgData { .. }) => Some(InvalidThisArg),
             ErrorMessage::ENestedComponent { .. } => Some(NestedComponent),
             ErrorMessage::ENestedHook { .. } => Some(NestedHook),
+            ErrorMessage::EUnsafeObjectAssign { .. } => Some(UnsafeObjectAssign),
             ErrorMessage::EUntypedImport { .. }
             | ErrorMessage::ENonstrictImport { .. }
             | ErrorMessage::EUnclearType { .. }
-            | ErrorMessage::EUnsafeObjectAssign { .. }
             | ErrorMessage::EUnsafeGettersSetters { .. }
             | ErrorMessage::ESketchyNullLint(box ESketchyNullLintData { .. })
             | ErrorMessage::ESketchyNumberLint { .. }

@@ -1,3 +1,16 @@
+Error -------------------------------------------------------------------------------------------------------- A.js:8:11
+
+Flow's support for `Object.assign` is unsafe. Use spreads instead. [unsafe-object-assign]
+
+                 v------------------------------------------------------------------
+    8| var Bad = Object.assign({} as {foo?: () => string}, EventEmitter.prototype, {
+    9|   foo: function (): string {
+   10|     return 'hi';
+   11|   },
+   12| });
+       -^
+
+
 Error ------------------------------------------------------------------------------------------------------- A.js:16:21
 
 Cannot assign `Bad.foo()` to `bad` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
@@ -13,6 +26,19 @@ References:
    A.js:16:12
    16|   var bad: number = Bad.foo();
                   ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------------- A.js:21:12
+
+Flow's support for `Object.assign` is unsafe. Use spreads instead. [unsafe-object-assign]
+
+                  v-------------------------------------------------------------------
+   21| var Good = Object.assign({} as {foo: () => string}, MyEventEmitter.prototype, {
+   22|   foo: function (): string {
+   23|     return 'hi';
+   24|   },
+   25| });
+       -^
 
 
 Error ------------------------------------------------------------------------------------------------------- A.js:21:26
@@ -126,6 +152,38 @@ References:
                                             ^^^^^^^^^^^^ [1]
 
 
+Error --------------------------------------------------------------------------------------------------- generic.js:2:5
+
+Flow's support for `Object.assign` is unsafe. Use spreads instead. [unsafe-object-assign]
+
+   2|     Object.assign({}, v); // ok, but really should error
+          ^^^^^^^^^^^^^^^^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------- intersection.js:2:1
+
+Flow's support for `Object.assign` is unsafe. Use spreads instead. [unsafe-object-assign]
+
+   2| Object.assign(inter1, {foo: ''}); // ok
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------- intersection.js:3:1
+
+Flow's support for `Object.assign` is unsafe. Use spreads instead. [unsafe-object-assign]
+
+   3| Object.assign(inter1, {bar: 3}); // ok
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Error ---------------------------------------------------------------------------------------------- intersection.js:4:1
+
+Flow's support for `Object.assign` is unsafe. Use spreads instead. [unsafe-object-assign]
+
+   4| Object.assign(inter1, inter1); // ok
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
 Error --------------------------------------------------------------------------------------------- intersection.js:5:15
 
 Incorrect arguments passed to `Object.assign` because: [incompatible-use]
@@ -143,6 +201,14 @@ References:
    intersection.js:1:44
    1| declare const inter1: {foo: string, ...} & {bar: number, ...};
                                                  ^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- intersection.js:5:1
+
+Flow's support for `Object.assign` is unsafe. Use spreads instead. [unsafe-object-assign]
+
+   5| Object.assign(inter1, {foo: '', bar: 3}); // error: should be ok
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error --------------------------------------------------------------------------------------------- intersection.js:6:15
@@ -167,6 +233,14 @@ References:
                                                  ^^^^^^^^^^^^^^^^^^ [3]
 
 
+Error ---------------------------------------------------------------------------------------------- intersection.js:6:1
+
+Flow's support for `Object.assign` is unsafe. Use spreads instead. [unsafe-object-assign]
+
+   6| Object.assign(inter1, {foo: 3});; // error
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
 Error --------------------------------------------------------------------------------------------- intersection.js:7:15
 
 Incorrect arguments passed to `Object.assign` because: [incompatible-use]
@@ -187,6 +261,14 @@ References:
    intersection.js:1:50
    1| declare const inter1: {foo: string, ...} & {bar: number, ...};
                                                        ^^^^^^ [3]
+
+
+Error ---------------------------------------------------------------------------------------------- intersection.js:7:1
+
+Flow's support for `Object.assign` is unsafe. Use spreads instead. [unsafe-object-assign]
+
+   7| Object.assign(inter1, {bar: ''});; // error
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error --------------------------------------------------------------------------------------------------- maybe.js:12:12
@@ -222,6 +304,18 @@ References:
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [5]
 
 
+Error --------------------------------------------------------------------------------------------------- maybe.js:12:34
+
+Flow's support for `Object.assign` is unsafe. Use spreads instead. [unsafe-object-assign]
+
+                                        v----------------------
+   12|     target[annotationTypeName] = Object.assign( // error
+   13|       target[annotationTypeName],
+   14|       source[annotationTypeName],
+   15|     );
+           ^
+
+
 Error ----------------------------------------------------------------------------------------------- non_objects.js:3:1
 
 Incorrect arguments passed to `Object.assign` because property `a` is missing in `string` [1]. [incompatible-use]
@@ -234,6 +328,14 @@ References:
    non_objects.js:3:15
    3| Object.assign("123", {a: "foo"});
                     ^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------- non_objects.js:3:1
+
+Flow's support for `Object.assign` is unsafe. Use spreads instead. [unsafe-object-assign]
+
+   3| Object.assign("123", {a: "foo"});
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ----------------------------------------------------------------------------------------------- non_objects.js:4:1
@@ -250,6 +352,14 @@ References:
                     ^^^ [1]
 
 
+Error ----------------------------------------------------------------------------------------------- non_objects.js:4:1
+
+Flow's support for `Object.assign` is unsafe. Use spreads instead. [unsafe-object-assign]
+
+   4| Object.assign(123, {a: "foo"});
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
 Error ----------------------------------------------------------------------------------------------- non_objects.js:5:1
 
 Incorrect arguments passed to `Object.assign` because `number` [1] is not an object. [not-an-object]
@@ -262,6 +372,14 @@ References:
    non_objects.js:5:27
    5| Object.assign({a: "foo"}, 123);
                                 ^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------- non_objects.js:5:1
+
+Flow's support for `Object.assign` is unsafe. Use spreads instead. [unsafe-object-assign]
+
+   5| Object.assign({a: "foo"}, 123);
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error ----------------------------------------------------------------------------------------------- non_objects.js:6:8
@@ -321,6 +439,14 @@ References:
                                                            ^^^^^^^^^^^^^^^ [4]
 
 
+Error ---------------------------------------------------------------------------------------------------- spread.js:5:1
+
+Flow's support for `Object.assign` is unsafe. Use spreads instead. [unsafe-object-assign]
+
+   5| Object.assign({} as {foo?: string}, ...arrOfObjs) as { foo?: number}; // Error: string ~> number
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
 Error --------------------------------------------------------------------------------------------------- spread.js:6:28
 
 Cannot cast `Object.assign(...)` to `{foo?: number}` because in property `foo`: `void | string` [1] is not exactly the
@@ -345,6 +471,14 @@ References:
    spread.js:6:56
    6| Object.assign({} as {foo?: string}, ...roArrOfObjs) as { foo?: number}; // Error: string ~> number
                                                              ^^^^^^^^^^^^^^^ [4]
+
+
+Error ---------------------------------------------------------------------------------------------------- spread.js:6:1
+
+Flow's support for `Object.assign` is unsafe. Use spreads instead. [unsafe-object-assign]
+
+   6| Object.assign({} as {foo?: string}, ...roArrOfObjs) as { foo?: number}; // Error: string ~> number
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Error --------------------------------------------------------------------------------------------------- spread.js:7:42
@@ -373,6 +507,14 @@ References:
                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
+Error ---------------------------------------------------------------------------------------------------- spread.js:7:1
+
+Flow's support for `Object.assign` is unsafe. Use spreads instead. [unsafe-object-assign]
+
+   7| Object.assign({} as {foo?: string, bar?: number}, ...tup) as { foo?: string, bar?: boolean}; // Error: number ~> boolean
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
 Error -------------------------------------------------------------------------------------------------- spread.js:10:26
 
 Cannot cast `Object.assign(...)` to `{a?: number, b?: true, c?: boolean}` because in property `b`: `void | string` [1]
@@ -399,6 +541,19 @@ References:
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
+Error ---------------------------------------------------------------------------------------------------- spread.js:9:2
+
+Flow's support for `Object.assign` is unsafe. Use spreads instead. [unsafe-object-assign]
+
+        v-------------
+    9| (Object.assign(
+   10|   {} as {a?: number, b?: string, c?: boolean},
+   11|   ...[{a: 1}, {b: 'foo'}],
+   12|   ...[{c: true}],
+   13| ) as {a?: number, b?: true, c?: boolean}); // Error: 'foo' => true
+       ^
+
+
 Error -------------------------------------------------------------------------------------- union_representative.js:4:1
 
 Incorrect arguments passed to `Object.assign` because in at least one member of `"A" | "B"` [1]: `"A"` [2] is
@@ -420,5 +575,13 @@ References:
                            ^^ [3]
 
 
+Error -------------------------------------------------------------------------------------- union_representative.js:4:1
 
-Found 22 errors
+Flow's support for `Object.assign` is unsafe. Use spreads instead. [unsafe-object-assign]
+
+   4| Object.assign(tgt, src); // error: "A" ~> En, in at least one member of `"A" | "B"`
+      ^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+Found 40 errors
