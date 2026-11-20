@@ -10,6 +10,8 @@ import DocCardList from '@theme/DocCardList';
 [flow-parser](https://www.npmjs.com/package/flow-parser) is the recommended parser for Flow code and supports the latest Flow syntax.
 Prettier includes flow-parser by default; see [our Prettier guide](./prettier.md) for configuration.
 
+[flow-upgrade](https://github.com/meta/flow/tree/main/packages/flow-upgrade) provides codemods that migrate your code when Flow deprecates or removes syntax, such as `(x: T)` casts or `{| |}` object types.
+
 <DocCardList items={[
   {type: 'link', label: 'Babel', href: '/en/docs/tools/babel'},
   {type: 'link', label: 'SWC', href: '/en/docs/tools/swc'},

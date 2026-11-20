@@ -24,20 +24,26 @@ yarn run flow-codemod <codemod name>
 
 If you just want to run a codemod without specifying Flow versions.
 
+Both commands transform the files under the current working directory and take no path argument,
+so `cd` into the directory you want to transform first. Files that fail to parse are skipped without an error.
+
+Only Flow 0.84.0, 0.170.0, 0.176.0 and 0.201.0 have upgrades attached, so `flow-upgrade` changes nothing
+when your current version is 0.201.0 or later. Run the codemods you need with `flow-codemod` instead.
+
 ## Options
 
 ### `all`
 
-By default, Flow will only upgrade files that have an `// @flow` header comment.
+By default, `flow-upgrade` only upgrades files that have an `// @flow` header comment.
 If you want to upgrade all of your JavaScript files you may pass in the `--all`:
 
 ```
-yarn create flow-upgrade --all
+yarn run flow-codemod <codemod name> --all
 ```
 
 ### `prettierrc`
 
-Path to a `.prettierrc` file to use.
+Path to a JSON file with Prettier options, such as `.prettierrc`.
 Upgrade codemods rely upon [`prettier`](https://www.npmjs.com/package/prettier) to print the resulting code after transformation.
 If this is not provided, we will just use the defaults.
 
@@ -118,6 +124,8 @@ Converts:
  - `$TEMPORARY$number<42>` annotations to `number`
  - `$TEMPORARY$string<"foo">` annotations to `string`
 
+Run with `yarn run flow-codemod replaceTemporaryTypes`.
+
 ### Replace `React.AbstractComponent<...>` types
 Converts:
 
@@ -125,6 +133,8 @@ Converts:
 - `React.ComponentProps<React.AbstractComponent<Props, Instance>>` to `Props`
 - `React.ElementRef<React.AbstractComponent<Props, Instance>>` to `Instance`
 - `React.ElementRef<React.AbstractComponent<Props>` to `mixed`
+
+Run with `yarn run flow-codemod eliminateAbstractComponent`.
 
 ### Convert legacy Flow utility types to modern equivalents
 Converts legacy Flow utility types to TypeScript-compatible equivalents:
