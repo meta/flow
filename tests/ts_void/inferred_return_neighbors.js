@@ -21,3 +21,12 @@ const fromConditional = (c: boolean): (() => void) =>
       };
 fromMatch('a')() as void; // OK
 fromConditional(true)() as undefined; // ERROR
+// Looking up the contextual return type of one argument leaves the hints of the
+// other arguments intact.
+declare const promise: {
+  then<T>(onFulfilled: (value: string) => T, onRejected: () => T): T,
+};
+(() => promise)().then(
+  id => id, // OK
+  () => {},
+);

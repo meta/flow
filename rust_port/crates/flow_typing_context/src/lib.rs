@@ -595,7 +595,7 @@ struct ContextInner {
     builtin_umd_values: HashMap<FlowSmolStr, (ALoc, Type)>,
     hint_map_arglist_cache: HashMap<(ALoc, Option<ALoc>), Vec<(ALoc, type_::CallArg)>>,
     hint_map_jsx_cache: HashMap<(Reason, String, Vec<ALoc>, ALoc), LazyHintMapJsx>,
-    hint_eval_cache: IntHashMap<i32, Option<Type>>,
+    hint_eval_cache: MultiLevelMap<i32, Option<Type>>,
     literal_cache: LiteralCache,
     type_app_expansions: TypeAppExpansions,
     environment: LocEnv<Cx>,
@@ -775,7 +775,7 @@ impl ContextArena {
             builtin_umd_values: HashMap::new(),
             hint_map_arglist_cache: HashMap::new(),
             hint_map_jsx_cache: HashMap::new(),
-            hint_eval_cache: IntHashMap::default(),
+            hint_eval_cache: MultiLevelMap::new(),
             literal_cache: LiteralCache::default(),
             type_app_expansions: TypeAppExpansions::default(),
             environment: LocEnv::empty(ScopeKind::Global),
@@ -2932,6 +2932,9 @@ impl<'a> Context<'a> {
         self.ccx_mut().synthesis_produced_uncacheable_result = false;
         self.inner_mut().typing_mode = TypingMode::SynthesisMode { target_loc };
         let cache_snapshot = self.take_cache_snapshot();
+        // The cache snapshot leaves out the decompositions hint evaluation keeps for later hints.
+        // Those computed while synthesizing can depend on placeholders, so they are dropped too.
+        self.inner_mut().hint_eval_cache.push_level();
 
         let result = f(self);
 
@@ -2939,6 +2942,7 @@ impl<'a> Context<'a> {
             self.ccx().synthesis_produced_uncacheable_result;
 
         self.restore_cache_snapshot(cache_snapshot);
+        self.inner_mut().hint_eval_cache.pop_level();
         self.inner_mut().typing_mode = old_typing_mode;
         self.ccx_mut().synthesis_produced_uncacheable_result =
             old_synthesis_produced_uncacheable_result;
