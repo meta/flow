@@ -239,26 +239,30 @@ References:
                                   ^^^^^^ [2]
 
 
-Error --------------------------------------------------------------------------------- filter_optional_property.js:8:12
+Error ---------------------------------------------------------------------------------- filter_optional_property.js:8:7
 
-Cannot call `[...].filter` because: [incompatible-type]
- - Either in the type predicate: `void` [1] is incompatible with `string` [2].
- - Or in array element: `void` [1] is incompatible with `string` [2].
+Cannot cast `[...].filter(...)` to `Array<string>` because in array element: `void` [1] is not exactly the same as
+`string` [2]. [incompatible-type]
 
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
+- Either make `Array<void>` [3] and `Array<string>` [4] exactly the same
+- Or make `Array<string>` [4] a `ReadonlyArray`.
+See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
 
-   filter_optional_property.js:8:12
-   8| [o.a, o.b].filter(v => v === undefined) as Array<string>; // error
-                 ^^^^^^
+   filter_optional_property.js:8:7
+      8| [o.a, o.b].filter(v => v === undefined) as Array<string>; // error
+               ^^^ [1]
 
 References:
-   filter_optional_property.js:4:34
-   4| declare const o: {a: string, b?: string};
-                                       ^^^^^^ [1]
    filter_optional_property.js:8:50
-   8| [o.a, o.b].filter(v => v === undefined) as Array<string>; // error
-                                                       ^^^^^^ [2]
+      8| [o.a, o.b].filter(v => v === undefined) as Array<string>; // error
+                                                          ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:1434:131
+   1434|     filter<This, S extends T>(predicate: (this: This, value: T, index: number, array: T[]) => implies value is S, thisArg: This): S[];
+                                                                                                                                           ^^^ [3]
+   filter_optional_property.js:8:44
+      8| [o.a, o.b].filter(v => v === undefined) as Array<string>; // error
+                                                    ^^^^^^^^^^^^^ [4]
 
 
 Error -------------------------------------------------------------------------------- generic_alias_application.js:13:3
@@ -1187,15 +1191,14 @@ References:
             ^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------- overloads_result_hint.js:24:11
+Error ------------------------------------------------------------------------------------ overloads_result_hint.js:24:9
 
-Cannot call `o.get` because: [incompatible-type]
- - Either `null` [1] is incompatible with `{...}` [2].
- - Or `null` [3] is incompatible with `{...}` [2].
+Cannot call `click` with `o.get(...)` bound to `e` because `null` [1] is incompatible with `{...}` [2].
+[incompatible-type]
 
-   overloads_result_hint.js:24:11
+   overloads_result_hint.js:24:9
    24|   click(o.get('a')); // error: `get` may return `null`
-                 ^^^
+               ^^^^^^^^^^
 
 References:
    overloads_result_hint.js:18:46
@@ -1204,9 +1207,6 @@ References:
    overloads_result_hint.js:22:29
    22|   declare function click(e: {...}): void;
                                    ^^^^^ [2]
-   overloads_result_hint.js:19:37
-   19|     get<E = {x: 2}>(k: string): E | null;
-                                           ^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------- partial_bound_reversal.js:11:3

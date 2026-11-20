@@ -1,46 +1,177 @@
 Error ---------------------------------------------------------------------------------------------------- test.js:24:10
 
-Cannot call `List` because: [incompatible-type]
- - Either in type argument `T` [1] > property `severity`: `"GREEN"` [2] is incompatible with `"RED" | "YELLOW"` [3].
- - Or in type argument `T` [1] > property `severity`: `"GREEN"` [2] is incompatible with `"RED" | "YELLOW"` [3].
+Cannot return `List(...)` because in type argument `T` [1] > property `severity`: `"YELLOW" | "GREEN" | "RED"` [2] is
+not exactly the same as `"RED" | "YELLOW"` [3]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `severity` is invariantly typed. To fix the error,
+- Either annotate object literal [4] with `Alert` [5]
+- Or make property `severity` in `Alert` [6] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
    test.js:24:10
+                v----
    24|   return List(
-                ^^^^
+   25|     values
+   26|       ?.map(severityValue => ({
+   27|         severity:
+   28|           severityValue !== 'RED' && severityValue !== 'GREEN'
+   29|             ? ('YELLOW' as const)
+   30|             : severityValue,
+   31|       }))
+   32|       .filter(Boolean) ?? [],
+   33|   ); // Error: 'GREEN' is incompatible with 'RED' | 'YELLOW'.
+         ^
 
 References:
    test.js:4:24
     4| declare class List<out T> {
                               ^ [1]
-   test.js:23:48
-   23| function invalidAlerts(values: ?ReadonlyArray<?string>): List<Alert> {
-                                                      ^^^^^^ [2]
+   test.js:28:11
+                 v---------------------------------------------------
+   28|           severityValue !== 'RED' && severityValue !== 'GREEN'
+   29|             ? ('YELLOW' as const)
+   30|             : severityValue,
+                   --------------^ [2]
    test.js:1:25
     1| type Alert = {severity: 'RED' | 'YELLOW'};
                                ^^^^^^^^^^^^^^^^ [3]
+   test.js:26:31
+                                     v
+   26|       ?.map(severityValue => ({
+   27|         severity:
+   28|           severityValue !== 'RED' && severityValue !== 'GREEN'
+   29|             ? ('YELLOW' as const)
+   30|             : severityValue,
+   31|       }))
+             ^ [4]
+   test.js:1:14
+    1| type Alert = {severity: 'RED' | 'YELLOW'};
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [5]
+   test.js:23:63
+   23| function invalidAlerts(values: ?ReadonlyArray<?string>): List<Alert> {
+                                                                     ^^^^^ [6]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:28:11
+
+Cannot return `List(...)` because in type argument `T` [1] > property `severity`: `"YELLOW" | "GREEN" | "RED"` [2] is
+not exactly the same as `"RED" | "YELLOW"` [3]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `severity` is invariantly typed. To fix the error,
+- Either annotate object literal [4] with `Alert` [5]
+- Or make property `severity` in `Alert` [6] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   test.js:28:11
+                 v---------------------------------------------------
+   28|           severityValue !== 'RED' && severityValue !== 'GREEN'
+   29|             ? ('YELLOW' as const)
+   30|             : severityValue,
+                   --------------^ [2]
+
+References:
+   test.js:4:24
+    4| declare class List<out T> {
+                              ^ [1]
+   test.js:1:25
+    1| type Alert = {severity: 'RED' | 'YELLOW'};
+                               ^^^^^^^^^^^^^^^^ [3]
+   test.js:26:31
+                                     v
+   26|       ?.map(severityValue => ({
+   27|         severity:
+   28|           severityValue !== 'RED' && severityValue !== 'GREEN'
+   29|             ? ('YELLOW' as const)
+   30|             : severityValue,
+   31|       }))
+             ^ [4]
+   test.js:1:14
+    1| type Alert = {severity: 'RED' | 'YELLOW'};
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [5]
+   test.js:23:63
+   23| function invalidAlerts(values: ?ReadonlyArray<?string>): List<Alert> {
+                                                                     ^^^^^ [6]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:47:10
 
-Cannot call `List` because: [incompatible-type]
- - Either in type argument `T` [1] > property `value`: `3` [2] is incompatible with `empty` [3].
- - Or in type argument `T` [1] > property `value`: `3` [2] is incompatible with `empty` [3].
+Cannot return `List(...)` because in type argument `T` [1] > property `value`: `1 | 3` [2] is not exactly the same as
+`1 | 2` [3]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `value` is invariantly typed. To fix the error,
+- Either annotate object literal [4] with `Count` [5]
+- Or make property `value` in `Count` [6] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
    test.js:47:10
+                v----
    47|   return List(
-                ^^^^
+   48|     values
+   49|       ?.map(value => ({
+   50|         value: value !== 1 && value !== 3 ? (1 as const) : value,
+   51|       }))
+   52|       .filter(Boolean) ?? [],
+   53|   ); // Error: 3 is incompatible with 1 | 2.
+         ^
 
 References:
    test.js:4:24
     4| declare class List<out T> {
                               ^ [1]
-   test.js:46:48
-   46| function invalidCounts(values: ?ReadonlyArray<?number>): List<Count> {
-                                                      ^^^^^^ [2]
+   test.js:50:16
+   50|         value: value !== 1 && value !== 3 ? (1 as const) : value,
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    test.js:2:22
     2| type Count = {value: 1 | 2};
                             ^^^^^ [3]
+   test.js:49:23
+                             v
+   49|       ?.map(value => ({
+   50|         value: value !== 1 && value !== 3 ? (1 as const) : value,
+   51|       }))
+             ^ [4]
+   test.js:2:14
+    2| type Count = {value: 1 | 2};
+                    ^^^^^^^^^^^^^^ [5]
+   test.js:46:63
+   46| function invalidCounts(values: ?ReadonlyArray<?number>): List<Count> {
+                                                                     ^^^^^ [6]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:50:16
+
+Cannot return `List(...)` because in type argument `T` [1] > property `value`: `1 | 3` [2] is not exactly the same as
+`1 | 2` [3]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `value` is invariantly typed. To fix the error,
+- Either annotate object literal [4] with `Count` [5]
+- Or make property `value` in `Count` [6] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   test.js:50:16
+   50|         value: value !== 1 && value !== 3 ? (1 as const) : value,
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+References:
+   test.js:4:24
+    4| declare class List<out T> {
+                              ^ [1]
+   test.js:2:22
+    2| type Count = {value: 1 | 2};
+                            ^^^^^ [3]
+   test.js:49:23
+                             v
+   49|       ?.map(value => ({
+   50|         value: value !== 1 && value !== 3 ? (1 as const) : value,
+   51|       }))
+             ^ [4]
+   test.js:2:14
+    2| type Count = {value: 1 | 2};
+                    ^^^^^^^^^^^^^^ [5]
+   test.js:46:63
+   46| function invalidCounts(values: ?ReadonlyArray<?number>): List<Count> {
+                                                                     ^^^^^ [6]
 
 
 
-Found 2 errors
+Found 4 errors

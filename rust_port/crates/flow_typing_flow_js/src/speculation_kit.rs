@@ -14,6 +14,7 @@ use std::sync::Arc;
 use dupe::Dupe;
 use dupe::IterDupedExt;
 use flow_aloc::ALoc;
+use flow_common::hint::HintKind;
 use flow_common::reason::Name;
 use flow_common::reason::Reason;
 use flow_lazy::ContextFamily;
@@ -40,6 +41,8 @@ use flow_typing_type::type_::DefT;
 use flow_typing_type::type_::DefTInner;
 use flow_typing_type::type_::DepthTrace;
 use flow_typing_type::type_::FuncallType;
+use flow_typing_type::type_::HintEvalResult;
+use flow_typing_type::type_::LazyHintT;
 use flow_typing_type::type_::LookupAction;
 use flow_typing_type::type_::LookupActionMatchPropData;
 use flow_typing_type::type_::LookupTData;
@@ -783,8 +786,10 @@ where
             Some(err) => {
                 // Roll back the constraint cache to before this failed branch,
                 // since entries added during speculation may depend on the
-                // speculative assumption that was just disproven.
-                cx.constraint_cache_mut().pop_level();
+                // speculative assumption that was just disproven. That includes
+                // the levels the branch left pushed, such as the preservation
+                // level of an implicit instantiation.
+                cx.constraint_cache_mut().truncate_to(cc_base_level + 1);
                 // ...adding to the error list if no promising alternative has been
                 // found yet
                 errs.push(*err.0);
@@ -793,7 +798,50 @@ where
     }
 
     // everything failed; restore constraint cache to pre-speculation state
-    cx.constraint_cache_mut().pop_level();
+    cx.constraint_cache_mut().truncate_to(cc_base_level);
+    // An expected-type return hint only chooses among the overloads that the arguments of a call
+    // allow. When it rules out all of them, the call is resolved again with the hint as a best
+    // effort, which guides inference without rejecting an overload, as in TypeScript.
+    if !env.speculating()
+        && let CasesSpec::IntersectionCases {
+            intersection,
+            ls,
+            use_t,
+        } = spec
+        && let UseTInner::CallT(call) = &**use_t
+        && let HintEvalResult::HintAvailable(_, HintKind::ExpectedTypeHint) =
+            (call.return_hint.1)(cx, false, None, call.reason.dupe())
+                .map_err(FlowJsException::from)?
+    {
+        let hint = call.return_hint.1.dupe();
+        let return_hint = LazyHintT(
+            call.return_hint.0,
+            Rc::new(
+                move |cx: &mut Context<'_>, expected_only, skip_optional, reason| {
+                    Ok(match hint(cx, expected_only, skip_optional, reason)? {
+                        HintEvalResult::HintAvailable(t, _) => {
+                            HintEvalResult::HintAvailable(t, HintKind::BestEffortHint)
+                        }
+                        result => result,
+                    })
+                },
+            ),
+        );
+        let use_t = UseT::new(UseTInner::CallT(Box::new(CallTData {
+            return_hint,
+            ..(**call).clone()
+        })));
+        return speculative_matches(
+            cx,
+            env,
+            trace,
+            CasesSpec::IntersectionCases {
+                intersection: intersection.dupe(),
+                ls: ls.clone(),
+                use_t,
+            },
+        );
+    }
     errs.reverse();
     return_errs(cx, env, spec, errs)
 }

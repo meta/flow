@@ -41,8 +41,8 @@ Cannot cast `P` to `false` because `PromiseConstructor` [1] is incompatible with
        ^
 
 References:
-   <BUILTINS>/lib.es2015.promise.js:65:22
-   65| declare var Promise: PromiseConstructor;
+   <BUILTINS>/lib.es2015.promise.js:70:22
+   70| declare var Promise: PromiseConstructor;
                             ^^^^^^^^^^^^^^^^^^ [1]
    test.js:9:6
     9| P as false; // error: `PromiseConstructor` ~> `false`

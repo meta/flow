@@ -8,8 +8,8 @@ surprising behaviors. [libdef-override]
                      ^^^^^^^
 
 References:
-   <BUILTINS>/lib.es2015.promise.js:65:13
-   65| declare var Promise: PromiseConstructor;
+   <BUILTINS>/lib.es2015.promise.js:70:13
+   70| declare var Promise: PromiseConstructor;
                    ^^^^^^^ [1]
 
 

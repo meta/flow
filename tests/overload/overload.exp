@@ -163,6 +163,23 @@ References:
                        ^^^^^^ [3]
 
 
+Error ---------------------------------------------------------------------------------------------- return_hint.js:11:1
+
+Cannot cast `b.value` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   return_hint.js:11:1
+   11| b.value as number; // error
+       ^^^^^^^
+
+References:
+   return_hint.js:9:30
+    9| const b = call(() => resolve('a')); // ok
+                                    ^^^ [1]
+   return_hint.js:11:12
+   11| b.value as number; // error
+                  ^^^^^^ [2]
+
+
 Error ----------------------------------------------------------------------------------------------------- test2.js:7:1
 
 Cannot cast `foo.bar(...)` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
@@ -253,4 +270,4 @@ References:
 
 
 
-Found 12 errors
+Found 13 errors

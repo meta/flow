@@ -178,13 +178,14 @@ References:
                                    ^^^^^^^^^^^ [2]
 
 
-Error ------------------------------------------------------------------------------------------------------ jsx.js:30:3
+Error ------------------------------------------------------------------------------------------------------ jsx.js:30:2
 
-Cannot create `AcceptsWhatever` element because `string` [1] is incompatible with `number` [2]. [incompatible-use]
+Cannot cast `<AcceptsWhatever />` to `number` because `string` [1] is incompatible with `number` [2].
+[incompatible-type]
 
-   jsx.js:30:3
+   jsx.js:30:2
    30| (<AcceptsWhatever />) as number; // Error string ~> number
-         ^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^^^
 
 References:
    jsx.js:29:71
@@ -195,13 +196,14 @@ References:
                                 ^^^^^^ [2]
 
 
-Error ------------------------------------------------------------------------------------------------------ jsx.js:31:3
+Error ------------------------------------------------------------------------------------------------------ jsx.js:31:2
 
-Cannot create `AcceptsWhatever` element because `string` [1] is incompatible with `number` [2]. [incompatible-use]
+Cannot cast `<AcceptsWhatever />` to `number` because `string` [1] is incompatible with `number` [2].
+[incompatible-type]
 
-   jsx.js:31:3
+   jsx.js:31:2
    31| (<AcceptsWhatever name="hi">Text</AcceptsWhatever>) as number; // Error string ~> number
-         ^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    jsx.js:29:71
@@ -238,13 +240,13 @@ References:
        ^^^^^^^^^^^^^^^^ [3]
 
 
-Error ------------------------------------------------------------------------------------------------------ jsx.js:35:3
+Error ------------------------------------------------------------------------------------------------------ jsx.js:35:2
 
-Cannot create `ExpectsProps` element because `string` [1] is incompatible with `number` [2]. [incompatible-use]
+Cannot cast `<ExpectsProps />` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
 
-   jsx.js:35:3
+   jsx.js:35:2
    35| (<ExpectsProps name="hi">Text</ExpectsProps>) as number; // Error string ~> number
-         ^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    jsx.js:33:75

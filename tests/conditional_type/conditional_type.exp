@@ -1197,24 +1197,19 @@ References:
 
 Error ------------------------------------------------------------------------------------ nested_instantiation.js:160:3
 
-Cannot call `exec` because: [incompatible-type]
- - Either no arguments are expected by function type [1].
- - Or `"utf8"` [2] is incompatible with `number` [3].
+Cannot cast `exec(...)` to `number` because `"utf8"` [1] is incompatible with `number` [2]. [incompatible-type]
 
    nested_instantiation.js:160:3
    160|   exec({encoding: 'utf8'}) as number; // error: 'utf8' ~> number
-          ^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   nested_instantiation.js:155:24
-   155|   declare function exec(): number;
-                               ^^^^^^^^^^ [1]
    nested_instantiation.js:158:6
    158|   ): Encoding<O>;
-             ^^^^^^^^^^^ [2]
+             ^^^^^^^^^^^ [1]
    nested_instantiation.js:160:31
    160|   exec({encoding: 'utf8'}) as number; // error: 'utf8' ~> number
-                                      ^^^^^^ [3]
+                                      ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------- non_distributive.js:23:3

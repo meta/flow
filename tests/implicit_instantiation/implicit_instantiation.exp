@@ -241,11 +241,11 @@ References:
 
 Error ---------------------------------------------------------------------------------------- poly_value_rounds.js:87:1
 
-Cannot call `genericOverloaded` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `genericOverloaded(...)` to `string` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
 
    poly_value_rounds.js:87:1
    87| genericOverloaded(id, 1) as string; // ERROR
-       ^^^^^^^^^^^^^^^^^
+       ^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    poly_value_rounds.js:87:23

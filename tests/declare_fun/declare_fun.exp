@@ -28,27 +28,19 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ test.js:7:1
 
-Cannot call `foo` because: [incompatible-type]
- - Either `false` [1] is incompatible with `number` [2].
- - Or `false` [1] is incompatible with `string` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot cast `foo(...)` to `void` because `false` [1] is incompatible with `void` [2]. [incompatible-type]
 
    test.js:7:1
    7| foo(false) as void; // error, boolean ~/~ undefined
-      ^^^
+      ^^^^^^^^^^
 
 References:
    test.js:7:5
    7| foo(false) as void; // error, boolean ~/~ undefined
           ^^^^^ [1]
-   test.js:1:25
-   1| declare function foo(x: number): string;
-                              ^^^^^^ [2]
-   test.js:2:25
-   2| declare function foo(x: string): number;
-                              ^^^^^^ [3]
+   test.js:7:15
+   7| foo(false) as void; // error, boolean ~/~ undefined
+                    ^^^^ [2]
 
 
 

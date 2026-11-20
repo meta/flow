@@ -153,35 +153,33 @@ References:
                                  ^^^^^^^^^^^^ [4]
 
 
-Error ------------------------------------------------------------------------------------------------ array_lib.js:79:9
+Error ------------------------------------------------------------------------------------------------ array_lib.js:79:3
 
-Cannot call `Array.from` because: [incompatible-type]
- - Either in type argument `T` [1]: `string` [2] is incompatible with `number` [3].
- - Or property `@@iterator` is missing in `ArrayLike<string>` [4] but exists in `Iterable<number, void, void>` [5].
+Cannot cast `Array.from(...)` to `Array<number>` because in array element: `string` [1] is not exactly the same as
+`number` [2]. [incompatible-type]
 
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
+- Either make `Array<string>` [3] and `Array<number>` [4] exactly the same
+- Or make `Array<number>` [4] a `ReadonlyArray`.
+See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
 
-   array_lib.js:79:9
+   array_lib.js:79:3
      79|   Array.from(arrayLike) as Array<number>; // ERROR
-                 ^^^^
+           ^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:380:25
-    380| interface ArrayLike<out T> {}
-                                 ^ [1]
    array_lib.js:75:30
      75|   const arrayLike: ArrayLike<string> = {0: 'hello', length: 1};
-                                      ^^^^^^ [2]
+                                      ^^^^^^ [1]
    array_lib.js:79:34
      79|   Array.from(arrayLike) as Array<number>; // ERROR
-                                          ^^^^^^ [3]
-   array_lib.js:75:20
-     75|   const arrayLike: ArrayLike<string> = {0: 'hello', length: 1};
-                            ^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/lib.es5.js:1483:30
+                                          ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:1483:59
    1483|     static from<T>(iterable: Iterable<T> | ArrayLike<T>): Array<T>;
-                                      ^^^^^^^^^^^ [5]
+                                                                   ^^^^^^^^ [3]
+   array_lib.js:79:28
+     79|   Array.from(arrayLike) as Array<number>; // ERROR
+                                    ^^^^^^^^^^^^^ [4]
 
 
 Error ------------------------------------------------------------------------------------------------ array_lib.js:80:3
@@ -392,18 +390,19 @@ References:
                                                   ^^^^ [1]
 
 
-Error ----------------------------------------------------------------------------- filter_error_msg_quality_test.js:3:9
+Error ----------------------------------------------------------------------------- filter_error_msg_quality_test.js:3:1
 
-Cannot call `str_arr.filter` because: [incompatible-type]
- - Either in array element: `string` [1] is incompatible with `boolean` [2].
- - Or `(s: string) => number` [3] is incompatible with class `Boolean` [4].
+Cannot cast `str_arr.filter(...)` to `Array<boolean>` because in array element: `string` [1] is not exactly the same as
+`boolean` [2]. [incompatible-type]
 
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
+- Either make `Array<string>` [3] and `Array<boolean>` [4] exactly the same
+- Or make `Array<boolean>` [4] a `ReadonlyArray`.
+See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
 
-   filter_error_msg_quality_test.js:3:9
+   filter_error_msg_quality_test.js:3:1
       3| str_arr.filter(s => s.length) as Array<boolean>;
-                 ^^^^^^
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    filter_error_msg_quality_test.js:2:30
@@ -412,26 +411,27 @@ References:
    filter_error_msg_quality_test.js:3:40
       3| str_arr.filter(s => s.length) as Array<boolean>;
                                                 ^^^^^^^ [2]
-   filter_error_msg_quality_test.js:3:16
+   <BUILTINS>/lib.es5.js:1440:107
+   1440|     filter<This>(predicate: (this: This, value: T, index: number, array: T[]) => unknown, thisArg: This): T[];
+                                                                                                                   ^^^ [3]
+   filter_error_msg_quality_test.js:3:34
       3| str_arr.filter(s => s.length) as Array<boolean>;
-                        ^^^^^^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:1428:23
-   1428|     filter(predicate: typeof Boolean): NonNullable<T>[];
-                               ^^^^^^^^^^^^^^ [4]
+                                          ^^^^^^^^^^^^^^ [4]
 
 
-Error ---------------------------------------------------------------------------- filter_error_msg_quality_test.js:7:18
+Error ----------------------------------------------------------------------------- filter_error_msg_quality_test.js:7:1
 
-Cannot call `nullable_str_arr.filter` because: [incompatible-type]
- - Either in array element: `null` [1] is incompatible with `string` [2].
- - Or `(s: ?string) => boolean` [3] is incompatible with class `Boolean` [4].
+Cannot cast `nullable_str_arr.filter(...)` to `Array<string>` because in array element: `?string` [1] is not exactly the
+same as `string` [2]. [incompatible-type]
 
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
+- Either make `Array<?string>` [3] and `Array<string>` [4] exactly the same
+- Or make `Array<string>` [4] a `ReadonlyArray`.
+See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
 
-   filter_error_msg_quality_test.js:7:18
+   filter_error_msg_quality_test.js:7:1
       7| nullable_str_arr.filter(s => !!s) as Array<string>;
-                          ^^^^^^
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    filter_error_msg_quality_test.js:6:39
@@ -440,12 +440,12 @@ References:
    filter_error_msg_quality_test.js:7:44
       7| nullable_str_arr.filter(s => !!s) as Array<string>;
                                                     ^^^^^^ [2]
-   filter_error_msg_quality_test.js:7:25
+   <BUILTINS>/lib.es5.js:1440:107
+   1440|     filter<This>(predicate: (this: This, value: T, index: number, array: T[]) => unknown, thisArg: This): T[];
+                                                                                                                   ^^^ [3]
+   filter_error_msg_quality_test.js:7:38
       7| nullable_str_arr.filter(s => !!s) as Array<string>;
-                                 ^^^^^^^^ [3]
-   <BUILTINS>/lib.es5.js:1428:23
-   1428|     filter(predicate: typeof Boolean): NonNullable<T>[];
-                               ^^^^^^^^^^^^^^ [4]
+                                              ^^^^^^^^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- flat.js:3:34

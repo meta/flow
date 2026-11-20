@@ -2378,43 +2378,45 @@ References:
                                           ^ [1]
 
 
-Error ---------------------------------------------------------------------------------------------- refinement.js:47:35
+Error ---------------------------------------------------------------------------------------------- refinement.js:47:61
 
-Cannot call `arr.filter` because: [incompatible-type]
- - Either in array element: `number` [1] is incompatible with `string` [2].
- - Or in array element: `unknown` [3] is incompatible with `string` [2].
+Cannot assign `arr.filter(...)` to `arr2` because in array element: `number` [1] is not exactly the same as
+`string` [2]. [incompatible-type]
 
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
+- Either make `Array<number>` [3] and `Array<string>` [4] exactly the same
+- Or make `Array<string>` [4] a `ReadonlyArray`.
+See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
 
-   refinement.js:47:35
-   47|   const arr2: Array<string> = arr.filter((x: unknown): x is number => { return typeof x === "number"; }); // error
-                                         ^^^^^^
-
-References:
    refinement.js:47:61
    47|   const arr2: Array<string> = arr.filter((x: unknown): x is number => { return typeof x === "number"; }); // error
                                                                    ^^^^^^ [1]
+
+References:
    refinement.js:47:21
    47|   const arr2: Array<string> = arr.filter((x: unknown): x is number => { return typeof x === "number"; }); // error
                            ^^^^^^ [2]
-   refinement.js:44:37
-   44|   declare const arr: ReadOnlyArray_<unknown>;
-                                           ^^^^^^^ [3]
+   refinement.js:40:137
+   40|     filter<This, S extends T>(predicate: (this: This, value: T, index: number, array: ReadonlyArray<T>) => value is S, thisArg?: This): Array<S>;
+                                                                                                                                               ^^^^^^^^ [3]
+   refinement.js:47:15
+   47|   const arr2: Array<string> = arr.filter((x: unknown): x is number => { return typeof x === "number"; }); // error
+                     ^^^^^^^^^^^^^ [4]
 
 
-Error ---------------------------------------------------------------------------------------------- refinement.js:48:35
+Error ---------------------------------------------------------------------------------------------- refinement.js:48:31
 
-Cannot call `arr.filter` because: [incompatible-type]
- - Either in array element: `unknown` [1] is incompatible with `string` [2].
- - Or `(x: unknown) => boolean` [3] is incompatible with class `Boolean` [4].
+Cannot assign `arr.filter(...)` to `arr3` because in array element: `unknown` [1] is not exactly the same as
+`string` [2]. [incompatible-type]
 
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
+- Either make `Array<unknown>` [3] and `Array<string>` [4] exactly the same
+- Or make `Array<string>` [4] a `ReadonlyArray`.
+See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
 
-   refinement.js:48:35
+   refinement.js:48:31
    48|   const arr3: Array<string> = arr.filter((x: unknown) => { return typeof x === "number"; }); // error no refinement
-                                         ^^^^^^
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    refinement.js:44:37
@@ -2423,12 +2425,12 @@ References:
    refinement.js:48:21
    48|   const arr3: Array<string> = arr.filter((x: unknown) => { return typeof x === "number"; }); // error no refinement
                            ^^^^^^ [2]
-   refinement.js:48:42
+   refinement.js:41:123
+   41|     filter<This>(callbackfn: (this : This, value: T, index: number, array: ReadonlyArray<T>) => unknown, thisArg : This): Array<T>;
+                                                                                                                                 ^^^^^^^^ [3]
+   refinement.js:48:15
    48|   const arr3: Array<string> = arr.filter((x: unknown) => { return typeof x === "number"; }); // error no refinement
-                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
-   refinement.js:39:24
-   39|     filter(callbackfn: typeof Boolean): Array<NonNullable<T>>;
-                              ^^^^^^^^^^^^^^ [4]
+                     ^^^^^^^^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------- refinement.js:61:7
@@ -3034,18 +3036,19 @@ References:
                                            ^ [1]
 
 
-Error ---------------------------------------------------------------------------------------------- refinement.js:249:7
+Error ---------------------------------------------------------------------------------------------- refinement.js:249:3
 
-Cannot call `arr.filter` because: [incompatible-type]
- - Either in the type predicate: `number` [1] is incompatible with `string` [2].
- - Or in array element: `unknown` [3] is incompatible with `string` [2].
+Cannot cast `arr.filter(...)` to `Array<string>` because in array element: `number` [1] is not exactly the same as
+`string` [2]. [incompatible-type]
 
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
+- Either make `Array<number>` [3] and `Array<string>` [4] exactly the same
+- Or make `Array<string>` [4] a `ReadonlyArray`.
+See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
 
-   refinement.js:249:7
+   refinement.js:249:3
    249|   arr.filter(fn) as Array<string>; // error number ~> string
-              ^^^^^^
+          ^^^^^^^^^^^^^^
 
 References:
    refinement.js:231:36
@@ -3054,59 +3057,70 @@ References:
    refinement.js:249:27
    249|   arr.filter(fn) as Array<string>; // error number ~> string
                                   ^^^^^^ [2]
-   refinement.js:247:37
-   247|   declare const arr: ReadOnlyArray_<unknown>;
-                                            ^^^^^^^ [3]
+   refinement.js:243:145
+   243|     filter<This, S extends T>(predicate: (this: This, value: T, index: number, array: ReadonlyArray<T>) => implies value is S, thisArg?: This): Array<S>;
+                                                                                                                                                        ^^^^^^^^ [3]
+   refinement.js:249:21
+   249|   arr.filter(fn) as Array<string>; // error number ~> string
+                            ^^^^^^^^^^^^^ [4]
 
 
-Error --------------------------------------------------------------------------------------------- refinement.js:253:10
+Error ---------------------------------------------------------------------------------------------- refinement.js:253:3
 
-Cannot call `ro_arr.filter` because: [incompatible-type]
- - Either in the type predicate: `number` [1] is incompatible with `string` [2].
- - Or in array element: `unknown` [3] is incompatible with `string` [2].
+Cannot cast `ro_arr.filter(...)` to `Array<string>` because in array element: `number` [1] is not exactly the same as
+`string` [2]. [incompatible-type]
 
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
+- Either make `Array<number>` [3] and `Array<string>` [4] exactly the same
+- Or make `Array<string>` [4] a `ReadonlyArray`.
+See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
 
-   refinement.js:253:10
-   253|   ro_arr.filter(fn) as Array<string>; // error number ~> string
-                 ^^^^^^
+   refinement.js:253:3
+    253|   ro_arr.filter(fn) as Array<string>; // error number ~> string
+           ^^^^^^^^^^^^^^^^^
 
 References:
    refinement.js:231:36
-   231|   fn: (x: unknown) => implies x is number,
-                                           ^^^^^^ [1]
+    231|   fn: (x: unknown) => implies x is number,
+                                            ^^^^^^ [1]
    refinement.js:253:30
-   253|   ro_arr.filter(fn) as Array<string>; // error number ~> string
-                                     ^^^^^^ [2]
-   refinement.js:251:39
-   251|   declare const ro_arr: ReadonlyArray<unknown>;
-                                              ^^^^^^^ [3]
+    253|   ro_arr.filter(fn) as Array<string>; // error number ~> string
+                                      ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:1249:140
+   1249|     filter<This, S extends T>(predicate: (this: This, value: T, index: number, array: readonly T[]) => implies value is S, thisArg: This): S[];
+                                                                                                                                                    ^^^ [3]
+   refinement.js:253:24
+    253|   ro_arr.filter(fn) as Array<string>; // error number ~> string
+                                ^^^^^^^^^^^^^ [4]
 
 
-Error --------------------------------------------------------------------------------------------- refinement.js:257:10
+Error ---------------------------------------------------------------------------------------------- refinement.js:257:3
 
-Cannot call `rw_arr.filter` because: [incompatible-type]
- - Either in the type predicate: `number` [1] is incompatible with `string` [2].
- - Or in array element: `unknown` [3] is incompatible with `string` [2].
+Cannot cast `rw_arr.filter(...)` to `Array<string>` because in array element: `number` [1] is not exactly the same as
+`string` [2]. [incompatible-type]
 
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
+- Either make `Array<number>` [3] and `Array<string>` [4] exactly the same
+- Or make `Array<string>` [4] a `ReadonlyArray`.
+See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
 
-   refinement.js:257:10
-   257|   rw_arr.filter(fn) as Array<string>; // error number ~> string
-                 ^^^^^^
+   refinement.js:257:3
+    257|   rw_arr.filter(fn) as Array<string>; // error number ~> string
+           ^^^^^^^^^^^^^^^^^
 
 References:
    refinement.js:231:36
-   231|   fn: (x: unknown) => implies x is number,
-                                           ^^^^^^ [1]
+    231|   fn: (x: unknown) => implies x is number,
+                                            ^^^^^^ [1]
    refinement.js:257:30
-   257|   rw_arr.filter(fn) as Array<string>; // error number ~> string
-                                     ^^^^^^ [2]
-   refinement.js:255:39
-   255|   declare const rw_arr: ReadonlyArray<unknown>;
-                                              ^^^^^^^ [3]
+    257|   rw_arr.filter(fn) as Array<string>; // error number ~> string
+                                      ^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:1249:140
+   1249|     filter<This, S extends T>(predicate: (this: This, value: T, index: number, array: readonly T[]) => implies value is S, thisArg: This): S[];
+                                                                                                                                                    ^^^ [3]
+   refinement.js:257:24
+    257|   rw_arr.filter(fn) as Array<string>; // error number ~> string
+                                ^^^^^^^^^^^^^ [4]
 
 
 Error ---------------------------------------------------------------------------------------------- refinement.js:275:7

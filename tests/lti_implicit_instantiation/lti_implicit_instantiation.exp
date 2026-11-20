@@ -49,58 +49,36 @@ References:
 
 Error ------------------------------------------------------------------------------ conditional_type_placeholder.js:9:1
 
-Cannot call `render` because: [incompatible-type]
- - Either `(props: Unbox<Box<{readonly s: unknown}>>) => unknown` [1] is incompatible with `number` [2].
- - Or `string` [3] is incompatible with `number` [4].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot cast `render(...)` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
 
    conditional_type_placeholder.js:9:1
    9| render(renderUnbox) as number; // error: string ~> number
-      ^^^^^^
+      ^^^^^^^^^^^^^^^^^^^
 
 References:
-   conditional_type_placeholder.js:7:29
-   7| declare function renderUnbox<S>(props: Unbox<Box<{readonly s: S}>>): S;
-                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   conditional_type_placeholder.js:3:37
-   3| declare const render: ((overrides?: number) => void) &
-                                          ^^^^^^ [2]
    conditional_type_placeholder.js:4:33
    4|   (<R>(cb: (props: {readonly s: string}) => R) => R);
-                                      ^^^^^^ [3]
+                                      ^^^^^^ [1]
    conditional_type_placeholder.js:9:24
    9| render(renderUnbox) as number; // error: string ~> number
-                             ^^^^^^ [4]
+                             ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------- conditional_type_placeholder.js:15:1
 
-Cannot call `render` because: [incompatible-type]
- - Either `(props: ParamOf<Box<(x: {readonly s: unknown}) => void>>) => unknown` [1] is incompatible with `number` [2].
- - Or `string` [3] is incompatible with `number` [4].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot cast `render(...)` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
 
    conditional_type_placeholder.js:15:1
    15| render(renderParam) as number; // error: string ~> number
-       ^^^^^^
+       ^^^^^^^^^^^^^^^^^^^
 
 References:
-   conditional_type_placeholder.js:13:29
-   13| declare function renderParam<S>(props: ParamOf<Box<(x: {readonly s: S}) => void>>): S;
-                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   conditional_type_placeholder.js:3:37
-    3| declare const render: ((overrides?: number) => void) &
-                                           ^^^^^^ [2]
    conditional_type_placeholder.js:4:33
     4|   (<R>(cb: (props: {readonly s: string}) => R) => R);
-                                       ^^^^^^ [3]
+                                       ^^^^^^ [1]
    conditional_type_placeholder.js:15:24
    15| render(renderParam) as number; // error: string ~> number
-                              ^^^^^^ [4]
+                              ^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------- conditional_type_without_infer.js:6:1

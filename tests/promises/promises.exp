@@ -264,15 +264,14 @@ References:
                    ^^^^^^^^^^^^^^ [3]
 
 
-Error ----------------------------------------------------------------------------------------------------- any.js:23:11
+Error ------------------------------------------------------------------------------------------------------ any.js:23:3
 
-Cannot call `Promise.any` because: [incompatible-type]
- - Either in type argument `T` [1]: `string` [2] is incompatible with `number` [3].
- - Or in type argument `T` [1]: `string` [4] is incompatible with `number` [3].
+Cannot cast `Promise.any(...)` to `Promise<number>` because in type argument `T` [1]: `string` [2] is incompatible with
+`number` [3]. [incompatible-type]
 
-   any.js:23:11
+   any.js:23:3
     23|   Promise.any([a, b]) as Promise<number>; // Error: string is incompatible with number
-                  ^^^
+          ^^^^^^^^^^^^^^^^^^^
 
 References:
    <BUILTINS>/misc.js:207:23
@@ -284,9 +283,6 @@ References:
    any.js:23:34
     23|   Promise.any([a, b]) as Promise<number>; // Error: string is incompatible with number
                                          ^^^^^^ [3]
-   <BUILTINS>/lib.es2021.promise.js:48:59
-    48|     any<T>(values: Iterable<T | PromiseLike<T>>): Promise<Awaited<T>>;
-                                                                  ^^^^^^^^^^ [4]
 
 
 Error ------------------------------------------------------------------------------------------------------ any.js:29:7
@@ -311,15 +307,14 @@ References:
                                                  ^^^^^^ [3]
 
 
-Error ----------------------------------------------------------------------------------------------------- any.js:34:18
+Error ----------------------------------------------------------------------------------------------------- any.js:34:10
 
-Cannot call `Promise.any` because: [incompatible-type]
- - Either in type argument `T` [1]: `unknown` [2] is incompatible with `empty` [3].
- - Or in type argument `T` [1]: `unknown` [4] is incompatible with `empty` [3].
+Cannot return `Promise.any(...)` because in type argument `T` [1]: `unknown` [2] is incompatible with `empty` [3].
+[incompatible-type]
 
-   any.js:34:18
+   any.js:34:10
     34|   return Promise.any(a); // Error
-                         ^^^
+                 ^^^^^^^^^^^^^^
 
 References:
    <BUILTINS>/misc.js:207:23
@@ -331,9 +326,6 @@ References:
    any.js:33:41
     33| function test6<X>(a: Array<X>): Promise<X> {
                                                 ^ [3]
-   <BUILTINS>/lib.es2021.promise.js:48:59
-    48|     any<T>(values: Iterable<T | PromiseLike<T>>): Promise<Awaited<T>>;
-                                                                  ^^^^^^^^^^ [4]
 
 
 Error -------------------------------------------------------------------------------------------------- finally.js:12:1
@@ -936,12 +928,15 @@ Cannot cast `Promise.resolve()` to `Promise<number>` because in type argument `T
 
    resolve_void.js:1:1
      1| Promise.resolve() as Promise<number>; // error
-        ^^^^^^^^^^^^^^^^^ [2]
+        ^^^^^^^^^^^^^^^^^
 
 References:
    <BUILTINS>/misc.js:207:23
    207| interface Promise<out T = unknown> {
                               ^ [1]
+   <BUILTINS>/lib.es2015.promise.js:61:24
+    61|     resolve(): Promise<void>;
+                               ^^^^ [2]
    resolve_void.js:1:30
      1| Promise.resolve() as Promise<number>; // error
                                      ^^^^^^ [3]
