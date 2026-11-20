@@ -66,3 +66,10 @@
   declare const emptyArray: Array<empty>;
   emptyArray.forEach(x => {}); // okay
 }
+{
+  type Done = () => void;
+  declare const it: (fn: ((done: Done) => void) | (() => Promise<unknown>)) => void;
+  it(done => {
+    done(); // okay: the member without a parameter says nothing about `done`
+  });
+}

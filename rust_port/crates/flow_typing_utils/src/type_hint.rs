@@ -824,6 +824,35 @@ fn instantiate_component<'cx>(
     }
 }
 
+/// The members of a union hint that take the parameter at `i`, as TypeScript reads a parameter's
+/// contextual type: a function that takes fewer parameters says nothing about it.
+fn functions_taking_param<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    reason: &Reason,
+    t: &Type,
+    i: usize,
+) -> Result<Type, FlowJsException> {
+    let lacks_param = |t: &Type| {
+        if let TypeInner::DefT(_, def) = t.deref()
+            && let DefTInner::FunT(_, func) = def.deref()
+        {
+            func.params.len() <= i && func.rest_param.is_none()
+        } else {
+            false
+        }
+    };
+    let ts = FlowJs::possible_concrete_types_for_inspection_with_env(cx, env, reason, t)?;
+    if ts.iter().all(lacks_param) || !ts.iter().any(lacks_param) {
+        return Ok(t.dupe());
+    }
+    Ok(type_util::union_of_ts(
+        reason.dupe(),
+        ts.into_iter().filter(|t| !lacks_param(t)).collect(),
+        Some(UnionKind::ResolvedKind),
+    ))
+}
+
 fn type_of_hint_decomposition<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
@@ -1245,7 +1274,7 @@ fn type_of_hint_decomposition<'cx>(
                     ));
                 }
                 let xs: Vec<_> = xs.iter().take(i + 1).collect();
-                let t = t.dupe();
+                let t = functions_taking_param(cx, env, reason, &t, i)?;
                 let reason2 = reason.dupe();
                 let type_guard = type_guard.clone();
                 Ok(flow_typing_tvar::mk_where(
