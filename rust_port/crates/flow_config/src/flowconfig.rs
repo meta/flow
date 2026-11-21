@@ -189,6 +189,7 @@ pub mod opts {
         pub hook_compatibility_excludes: Vec<String>,
         pub ignore_non_literal_requires: bool,
         pub include_warnings: bool,
+        pub incremental_package_json: bool,
         pub jest_integration: bool,
         pub lazy_mode: Option<LazyMode>,
         pub log_per_error_typing_telemetry: bool,
@@ -331,6 +332,7 @@ pub mod opts {
             hook_compatibility_excludes: Vec::new(),
             ignore_non_literal_requires: false,
             include_warnings: false,
+            incremental_package_json: false,
             jest_integration: false,
             lazy_mode: None,
             log_per_error_typing_telemetry: false,
@@ -2111,6 +2113,16 @@ pub mod opts {
             }),
             ("experimental.facebook_module_interop", |values, config| {
                 facebook_module_interop_parser(values, config)
+            }),
+            ("experimental.incremental_package_json", |values, config| {
+                parse_boolean(
+                    |opts, v| {
+                        opts.incremental_package_json = v;
+                        Ok(())
+                    },
+                    values,
+                    config,
+                )
             }),
             ("experimental.jsx_intrinsic_elements", |values, config| {
                 enum_parser(&[("true", ())], |_opts, ()| Ok(()), values, config)

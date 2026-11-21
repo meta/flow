@@ -2222,6 +2222,7 @@ pub fn make_options(
                 hook_compatibility_excludes,
                 ignore_non_literal_requires,
                 include_warnings,
+                incremental_package_json,
                 jest_integration,
                 lazy_mode,
                 log_per_error_typing_telemetry,
@@ -2567,6 +2568,7 @@ pub fn make_options(
         include_warnings: include_warnings_override
             || max_warnings_override.is_some()
             || include_warnings,
+        incremental_package_json,
         lazy_mode,
         log_per_error_typing_telemetry,
         lint_severities,

@@ -531,9 +531,19 @@ mod node {
         None
     }
 
-    fn parse_package(transaction: &ModuleResolver<'_>, package_filename: &str) -> Arc<PackageJson> {
+    fn parse_package(
+        transaction: &ModuleResolver<'_>,
+        phantom_acc: Option<&mut PhantomAcc>,
+        package_filename: &str,
+    ) -> Arc<PackageJson> {
         let package_filename = transaction.resolve_symlinks(package_filename);
         let file_key = FileKey::json_file_of_absolute(&package_filename);
+
+        if transaction.options.incremental_package_json {
+            let mname = Modulename::eponymous_module(file_key.dupe());
+            let dependency = transaction.get_dependency(&mname);
+            super::record_phantom_dependency(mname, dependency, phantom_acc);
+        }
 
         transaction
             .get_package_info(&file_key)
@@ -556,7 +566,11 @@ mod node {
             .map(FlowSmolStr::new)
             .collect();
         let package_json_path = Path::new(package_dir).join("package.json");
-        let package = parse_package(transaction, package_json_path.to_str().unwrap());
+        let package = parse_package(
+            transaction,
+            phantom_acc.as_deref_mut(),
+            package_json_path.to_str().unwrap(),
+        );
 
         let source_path = package
             .exports()
@@ -595,7 +609,7 @@ mod node {
         package_filename: &str,
         file_exts: &[FlowSmolStr],
     ) -> Option<Dependency> {
-        let package = parse_package(transaction, package_filename);
+        let package = parse_package(transaction, phantom_acc.as_deref_mut(), package_filename);
         package.main().and_then(|main| {
             let dir = Path::new(package_filename).parent()?.to_str()?;
             let path = files::normalize_path(dir, main.as_str());
@@ -684,9 +698,12 @@ mod node {
         let ts_lib_support = options.typescript_library_definition_support;
         let package_json_path = Path::new(package_dir).join("package.json");
         let package = std::cell::OnceCell::new();
+        // `parse_exports` below reads the same package.json first and records it as a dependency.
         let get_package = || -> Arc<PackageJson> {
             package
-                .get_or_init(|| parse_package(transaction, package_json_path.to_str().unwrap()))
+                .get_or_init(|| {
+                    parse_package(transaction, None, package_json_path.to_str().unwrap())
+                })
                 .clone()
         };
 
