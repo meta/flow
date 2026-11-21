@@ -140,12 +140,25 @@ struct EnvValInner {
     havoc: Val<ALoc>,
     writes_by_closure_provider_val: Option<Val<ALoc>>,
     def_loc: Option<ALoc>,
+    // `should_invalidate(false, def_loc)` and `should_invalidate(true, def_loc)`.
+    invalidated_by_call: bool,
+    invalidated_by_all: bool,
     heap_refinements: Rc<RefCell<HeapRefinementMap>>,
     kind: BindingsKind,
     // Per-loc kind for every declaration site of this name. This preserves the
     // per-loc kind info that to_map collapses (first-kind-wins). Used to judge
     // whether a specific declaration site is e.g. an interface vs. a type alias.
     kind_at_loc: BTreeMap<ALoc, BindingsKind>,
+}
+
+impl EnvValInner {
+    fn should_invalidate(&self, all: bool) -> bool {
+        if all {
+            self.invalidated_by_all
+        } else {
+            self.invalidated_by_call
+        }
+    }
 }
 
 #[derive(Debug, Clone, Dupe)]
@@ -376,6 +389,8 @@ mod full_env {
                 havoc: env_val.havoc.dupe(),
                 writes_by_closure_provider_val: env_val.writes_by_closure_provider_val.dupe(),
                 def_loc: env_val.def_loc.dupe(),
+                invalidated_by_call: env_val.invalidated_by_call,
+                invalidated_by_all: env_val.invalidated_by_all,
                 heap_refinements: empty_heap_refinements(),
                 kind: env_val.kind,
                 kind_at_loc: env_val.kind_at_loc.clone(),
@@ -386,6 +401,8 @@ mod full_env {
                 havoc: env_val.havoc.dupe(),
                 writes_by_closure_provider_val: env_val.writes_by_closure_provider_val.dupe(),
                 def_loc: env_val.def_loc.dupe(),
+                invalidated_by_call: env_val.invalidated_by_call,
+                invalidated_by_all: env_val.invalidated_by_all,
                 heap_refinements: empty_heap_refinements(),
                 kind: env_val.kind,
                 kind_at_loc: env_val.kind_at_loc.clone(),
@@ -1573,6 +1590,8 @@ fn initialize_globals(
             havoc: global_val,
             writes_by_closure_provider_val: None,
             def_loc: None,
+            invalidated_by_call: true,
+            invalidated_by_all: true,
             heap_refinements: empty_heap_refinements(),
             kind: BindingsKind::Var,
             kind_at_loc: BTreeMap::new(),
@@ -1587,6 +1606,8 @@ fn initialize_globals(
             havoc: global_val,
             writes_by_closure_provider_val: None,
             def_loc: None,
+            invalidated_by_call: true,
+            invalidated_by_all: true,
             heap_refinements: empty_heap_refinements(),
             kind: BindingsKind::Var,
             kind_at_loc: BTreeMap::new(),
@@ -1604,6 +1625,8 @@ fn initialize_globals(
             havoc: v,
             writes_by_closure_provider_val: None,
             def_loc: None,
+            invalidated_by_call: true,
+            invalidated_by_all: true,
             heap_refinements: empty_heap_refinements(),
             kind: BindingsKind::Var,
             kind_at_loc: BTreeMap::new(),
@@ -1628,6 +1651,8 @@ fn initialize_globals(
             havoc: module_val,
             writes_by_closure_provider_val: None,
             def_loc: None,
+            invalidated_by_call: true,
+            invalidated_by_all: true,
             heap_refinements: Rc::new(RefCell::new(heap_refinements)),
             kind: BindingsKind::Var,
             kind_at_loc: BTreeMap::new(),
@@ -1643,6 +1668,8 @@ fn initialize_globals(
             havoc: module_scoped_val,
             writes_by_closure_provider_val: None,
             def_loc: None,
+            invalidated_by_call: true,
+            invalidated_by_all: true,
             heap_refinements: empty_heap_refinements(),
             kind: BindingsKind::Var,
             kind_at_loc: BTreeMap::new(),
@@ -1683,6 +1710,8 @@ fn initial_env<Cx: Context>(
         havoc: exhaustive_val,
         writes_by_closure_provider_val: None,
         def_loc: None,
+        invalidated_by_call: true,
+        invalidated_by_all: true,
         heap_refinements: empty_heap_refinements(),
         kind: BindingsKind::Internal,
         kind_at_loc: BTreeMap::new(),
@@ -1706,6 +1735,8 @@ fn initial_env<Cx: Context>(
             havoc: global_val,
             writes_by_closure_provider_val: None,
             def_loc: None,
+            invalidated_by_call: true,
+            invalidated_by_all: true,
             heap_refinements: empty_heap_refinements(),
             kind: BindingsKind::Var,
             kind_at_loc: BTreeMap::new(),
@@ -2597,7 +2628,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                     return acc;
                 }
 
-                if self.should_invalidate(invalidate_all, &env_val.def_loc) {
+                if env_val.should_invalidate(invalidate_all) {
                     let val_is_undeclared_or_skipped =
                         ssa_val::is_undeclared_or_skipped(&env_val.val_ref.borrow());
 
@@ -2695,7 +2726,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         if env_val.kind == BindingsKind::Internal {
             return false;
         }
-        self.should_invalidate(true, &env_val.def_loc)
+        env_val.should_invalidate(true)
             || !ssa_val::writes_of_uninitialized(
                 |id| self.refinement_may_be_undefined(RefinementId(id)),
                 env_val.val_ref.borrow().deref(),
@@ -2787,6 +2818,8 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
             val_ref: Rc::new(RefCell::new(val)),
             havoc,
             writes_by_closure_provider_val: None,
+            invalidated_by_call: self.should_invalidate(false, &def_loc),
+            invalidated_by_all: self.should_invalidate(true, &def_loc),
             def_loc,
             heap_refinements: empty_heap_refinements(),
             kind,
@@ -2818,6 +2851,8 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                     continue;
                 }
             };
+            let invalidated_by_call = self.should_invalidate(false, &Some(loc.dupe()));
+            let invalidated_by_all = self.should_invalidate(true, &Some(loc.dupe()));
 
             let env_val = match kind {
                 BindingsKind::Type { .. } | BindingsKind::Interface { .. } => {
@@ -2833,6 +2868,8 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                         havoc: val,
                         writes_by_closure_provider_val: None,
                         def_loc: Some(loc.dupe()),
+                        invalidated_by_call,
+                        invalidated_by_all,
                         heap_refinements: empty_heap_refinements(),
                         kind: *kind,
                         kind_at_loc: kind_at_loc.clone(),
@@ -2851,6 +2888,8 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                         havoc: val,
                         writes_by_closure_provider_val: None,
                         def_loc: Some(loc.dupe()),
+                        invalidated_by_call,
+                        invalidated_by_all,
                         heap_refinements: empty_heap_refinements(),
                         kind: *kind,
                         kind_at_loc: kind_at_loc.clone(),
@@ -2872,6 +2911,8 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                         havoc: val,
                         writes_by_closure_provider_val: None,
                         def_loc: Some(loc.dupe()),
+                        invalidated_by_call,
+                        invalidated_by_all,
                         heap_refinements: empty_heap_refinements(),
                         kind: *kind,
                         kind_at_loc: kind_at_loc.clone(),
@@ -2894,6 +2935,8 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                         havoc,
                         writes_by_closure_provider_val: None,
                         def_loc: Some(loc.dupe()),
+                        invalidated_by_call,
+                        invalidated_by_all,
                         heap_refinements: empty_heap_refinements(),
                         kind: *kind,
                         kind_at_loc: kind_at_loc.clone(),
@@ -2915,6 +2958,8 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                         havoc: declared_function,
                         writes_by_closure_provider_val: None,
                         def_loc: Some(loc.dupe()),
+                        invalidated_by_call,
+                        invalidated_by_all,
                         heap_refinements: empty_heap_refinements(),
                         kind: *kind,
                         kind_at_loc: kind_at_loc.clone(),
@@ -2939,6 +2984,8 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                         havoc,
                         writes_by_closure_provider_val: None,
                         def_loc: Some(loc.dupe()),
+                        invalidated_by_call,
+                        invalidated_by_all,
                         heap_refinements: empty_heap_refinements(),
                         kind,
                         kind_at_loc: kind_at_loc.clone(),
@@ -2952,6 +2999,8 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                         havoc: val,
                         writes_by_closure_provider_val: None,
                         def_loc: None,
+                        invalidated_by_call: true,
+                        invalidated_by_all: true,
                         heap_refinements: empty_heap_refinements(),
                         kind: *kind,
                         kind_at_loc: kind_at_loc.clone(),
@@ -3060,6 +3109,8 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                         havoc,
                         writes_by_closure_provider_val,
                         def_loc: Some(loc.dupe()),
+                        invalidated_by_call,
+                        invalidated_by_all,
                         heap_refinements: empty_heap_refinements(),
                         kind: *kind,
                         kind_at_loc: kind_at_loc.clone(),
@@ -3223,11 +3274,14 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
             } else {
                 havoc.dupe()
             };
+            let def_loc = Some(canonical_loc);
             let env_val = EnvVal::new(EnvValInner {
                 val_ref: Rc::new(RefCell::new(val)),
                 havoc,
                 writes_by_closure_provider_val: None,
-                def_loc: Some(canonical_loc),
+                invalidated_by_call: self.should_invalidate(false, &def_loc),
+                invalidated_by_all: self.should_invalidate(true, &def_loc),
+                def_loc,
                 heap_refinements: empty_heap_refinements(),
                 kind: canonical_kind,
                 kind_at_loc: type_kind_at_loc,
@@ -9058,6 +9112,8 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                     havoc: val,
                     writes_by_closure_provider_val: None,
                     def_loc: None,
+                    invalidated_by_call: true,
+                    invalidated_by_all: true,
                     heap_refinements: empty_heap_refinements(),
                     kind: BindingsKind::Var,
                     kind_at_loc: BTreeMap::new(),
