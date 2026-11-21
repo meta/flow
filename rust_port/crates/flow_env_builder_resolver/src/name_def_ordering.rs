@@ -1409,10 +1409,9 @@ where
     // name_resolver determines reach the variable must be resolved
     fn expression(&mut self, expr: &ast::expression::Expression<ALoc, ALoc>) -> Result<(), !> {
         let loc = expr.loc();
-        if self.seen.contains(loc) {
+        if !self.seen.insert(loc.dupe()) {
             return Ok(());
         }
-        self.seen.insert(loc.dupe());
         // An expression might read an refined value. e.g. if (foo.bar) foo.bar.
         // Therefore, we need to record these writes.
         let writes = self.find_writes(false, true, loc);
