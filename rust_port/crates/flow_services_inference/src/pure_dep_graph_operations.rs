@@ -90,6 +90,15 @@ pub fn calc_direct_dependents(
     result
 }
 
+/// `calc_all_sig_dependents(graph, files)` will return `files` and the files whose signatures
+/// directly or transitively depend on them.
+pub fn calc_all_sig_dependents(
+    sig_dependency_graph: &(impl GraphLike<FileKey> + ?Sized),
+    files: &FlowOrdSet<FileKey>,
+) -> FlowOrdSet<FileKey> {
+    rdep_closure(sig_dependency_graph, files)
+}
+
 /// `calc_all_dependents(graph, files)` will return the set of direct and transitive dependents of
 /// `files`. This set include `files`.
 ///

@@ -570,11 +570,16 @@ fn calc_deps_for_recheck(
     calc_deps_impl(options, components, to_merge, true)
 }
 
+#[expect(
+    clippy::too_many_arguments,
+    reason = "each input is a distinct set or graph the pruning reads"
+)]
 fn include_dependencies_and_dependents_impl<IG, SG>(
     options: &Options,
     input: CheckedSet,
     unchanged_checked: CheckedSet,
     all_dependent_files: FlowOrdSet<FileKey>,
+    unchecked_dependent_files: FlowOrdSet<FileKey>,
     implementation_dependency_graph: &IG,
     sig_dependency_graph: &SG,
     cancelable: bool,
@@ -602,7 +607,7 @@ where
 
         let preliminary_dependencies = pure_dep_graph_operations::calc_direct_dependencies(
             implementation_dependency_graph,
-            &to_check_all,
+            &to_check_all.union(unchecked_dependent_files.dupe()),
         );
 
         let components = topsort(
@@ -630,7 +635,11 @@ where
         definitely_to_merge.add(None, None, Some(dependencies.dupe()));
 
         let mut to_merge = definitely_to_merge.dupe();
-        to_merge.add(None, Some(all_dependent_files), None);
+        to_merge.add(
+            None,
+            Some(all_dependent_files),
+            Some(unchecked_dependent_files),
+        );
 
         let recheck_set = definitely_to_merge.all();
 
@@ -660,6 +669,7 @@ where
         input,
         unchanged_checked,
         all_dependent_files,
+        FlowOrdSet::new(),
         implementation_dependency_graph,
         sig_dependency_graph,
         false,
@@ -672,6 +682,7 @@ fn include_dependencies_and_dependents_for_recheck<IG, SG>(
     input: CheckedSet,
     unchanged_checked: CheckedSet,
     all_dependent_files: FlowOrdSet<FileKey>,
+    unchecked_dependent_files: FlowOrdSet<FileKey>,
     implementation_dependency_graph: &IG,
     sig_dependency_graph: &SG,
 ) -> Result<
@@ -692,6 +703,7 @@ where
         input,
         unchanged_checked,
         all_dependent_files,
+        unchecked_dependent_files,
         implementation_dependency_graph,
         sig_dependency_graph,
         true,
@@ -1787,15 +1799,32 @@ pub(crate) mod recheck {
             .dependencies()
             .dupe()
             .union(unchanged_files_to_force.dependencies().dupe());
-        let all_dependent_files = with_memory_timer(options, "AllDependentFiles", || {
-            let roots = input_focused.dupe().union(dirty_direct_dependents.dupe());
-            let all_dependent_files = pure_dep_graph_operations::calc_all_dependents(
-                sig_dependency_graph,
-                implementation_dependency_graph,
-                &roots,
-            );
-            filter_out_node_modules(options, &all_dependent_files)
-        });
+        let (all_dependent_files, unchecked_dependent_files) =
+            with_memory_timer(options, "AllDependentFiles", || {
+                let roots = input_focused.dupe().union(dirty_direct_dependents.dupe());
+                let all_dependent_files = pure_dep_graph_operations::calc_all_dependents(
+                    sig_dependency_graph,
+                    implementation_dependency_graph,
+                    &roots,
+                );
+                let checked_dependent_files =
+                    filter_out_node_modules(options, &all_dependent_files);
+                // Files in node_modules are not checked. The ones whose signatures can change
+                // and that are already merged are merged again, or the change never reaches the
+                // checked files that depend on it through them.
+                let unchecked_dependent_files: FlowOrdSet<FileKey> =
+                    pure_dep_graph_operations::calc_all_sig_dependents(
+                        sig_dependency_graph,
+                        &roots,
+                    )
+                    .iter()
+                    .filter(|file| {
+                        !checked_dependent_files.contains(file) && unchanged_checked.mem(file)
+                    })
+                    .duped()
+                    .collect();
+                (checked_dependent_files, unchecked_dependent_files)
+            });
         check_recheck_canceled()?;
         let input = unfocused_files_to_infer(options, &input_focused, input_dependencies);
         let (to_merge, to_check, components, recheck_set) =
@@ -1804,9 +1833,13 @@ pub(crate) mod recheck {
                 input,
                 unchanged_checked.dupe(),
                 all_dependent_files.dupe(),
+                unchecked_dependent_files,
                 implementation_dependency_graph,
                 sig_dependency_graph,
             )?;
+        // A file whose imports now resolve differently is merged even when no signature it
+        // depends on changed.
+        let recheck_set = recheck_set.union(dirty_direct_dependents.dupe());
         let dependent_file_count = all_dependent_files.len();
         Ok(DetermineWhatToRecheckResult {
             to_merge,

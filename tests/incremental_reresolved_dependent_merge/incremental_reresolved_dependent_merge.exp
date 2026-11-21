@@ -1,0 +1,33 @@
+
+Initial state:
+Error --------------------------------------------------------------------------------------------------------- G.js:3:1
+
+Cannot cast `fv` to `number` because `null` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   G.js:3:1
+   3| fv as number; // ERROR while r.js exists
+      ^^
+
+References:
+   r.js:1:17
+   1| export const v: null = null;
+                      ^^^^ [1]
+   G.js:3:7
+   3| fv as number; // ERROR while r.js exists
+            ^^^^^^ [2]
+
+
+
+Found 1 error
+
+Delete r.js and edit the body of q.js in the same recheck:
+Error -------------------------------------------------------------------------------------------------------- F.js:2:17
+
+Cannot resolve module `./r`. [cannot-resolve-module]
+
+   2| import {v} from './r';
+                      ^^^^^
+
+
+
+Found 1 error
