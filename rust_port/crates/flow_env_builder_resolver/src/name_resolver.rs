@@ -11,6 +11,7 @@
 //! actually share much code. If you're here to add support for a new syntax feature, you'll likely
 //! need to modify the ssa_builder as well, but not necessarily with identical changes.
 
+use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
@@ -41,6 +42,7 @@ use flow_analysis::scope_builder::WithBindings;
 use flow_common::js_number::numeric_property_name;
 use flow_common::options::JsxMode;
 use flow_common::refinement_invalidation::RefinementInvalidation;
+use flow_data_structure_wrapper::ord_map::DiffItem;
 use flow_data_structure_wrapper::ord_map::FlowOrdMap;
 use flow_data_structure_wrapper::ord_set::FlowOrdSet;
 use flow_data_structure_wrapper::red_black_tree_map::FlowRedBlackTreeMap;
@@ -120,11 +122,11 @@ type HeapRefinementMap =
 
 type AppliedRefinementMap = FlowRedBlackTreeMap<usize, (Lookup, RefinementId)>;
 
-fn empty_heap_refinements() -> Rc<RefCell<HeapRefinementMap>> {
+fn empty_heap_refinements() -> HeapRefinementMap {
     thread_local! {
         static CACHED: HeapRefinementMap = FlowRedBlackTreeMap::new();
     }
-    Rc::new(RefCell::new(CACHED.with(|c| c.clone())))
+    CACHED.with(|c| c.clone())
 }
 
 fn empty_refining_locs() -> FlowOrdSet<ALoc> {
@@ -134,16 +136,93 @@ fn empty_refining_locs() -> FlowOrdSet<ALoc> {
     CACHED.with(|c| c.clone())
 }
 
+/// Identifies a binding: its variable, the `EnvValues` that has its value, and a number that
+/// tells it from the other bindings there.
+#[derive(Debug, Clone, Dupe, PartialEq, Eq, PartialOrd, Ord)]
+struct EnvValId(VarKey, u32, u32);
+
+/// The values and heap refinements of the bindings of a function scope. It is persistent, so
+/// that a snapshot of the environment is a copy of it, and the clones of a `FullEnv` share it, as
+/// they share its bindings.
+#[derive(Debug, Clone, Dupe)]
+struct EnvValues {
+    store: u32,
+    next_id: u32,
+    vals: FlowOrdMap<EnvValId, Val<ALoc>>,
+    // Only the bindings that have heap refinements.
+    heap_refinements: FlowOrdMap<EnvValId, HeapRefinementMap>,
+}
+
+impl EnvValues {
+    fn new() -> Self {
+        thread_local! {
+            static NEXT_STORE: Cell<u32> = const { Cell::new(0) };
+        }
+        EnvValues {
+            store: NEXT_STORE.with(|next| next.replace(next.get() + 1)),
+            next_id: 0,
+            vals: FlowOrdMap::new(),
+            heap_refinements: FlowOrdMap::new(),
+        }
+    }
+
+    fn add(&mut self, x: &VarKey, val: Val<ALoc>) -> EnvValId {
+        let id = EnvValId(x.dupe(), self.store, self.next_id);
+        self.next_id += 1;
+        self.vals.insert(id.dupe(), val);
+        id
+    }
+
+    fn val(&self, env_val: &EnvVal) -> Val<ALoc> {
+        self.vals
+            .get(&env_val.id)
+            .expect("every binding has a value")
+            .dupe()
+    }
+
+    fn heap_refinements(&self, env_val: &EnvVal) -> HeapRefinementMap {
+        match self.heap_refinements.get(&env_val.id) {
+            Some(heap_refinements) => heap_refinements.dupe(),
+            None => empty_heap_refinements(),
+        }
+    }
+
+    fn entry(&self, env_val: &EnvVal) -> PartialEnvEntry {
+        PartialEnvEntry {
+            env_val: self.val(env_val),
+            heap_refinements: self.heap_refinements(env_val),
+            def_loc: env_val.def_loc.dupe(),
+        }
+    }
+
+    fn set_val(&mut self, env_val: &EnvVal, val: Val<ALoc>) {
+        self.vals.insert(env_val.id.dupe(), val);
+    }
+
+    fn set_heap_refinements(&mut self, env_val: &EnvVal, heap_refinements: HeapRefinementMap) {
+        if heap_refinements.is_empty() {
+            self.heap_refinements.remove(&env_val.id);
+        } else {
+            self.heap_refinements
+                .insert(env_val.id.dupe(), heap_refinements);
+        }
+    }
+
+    fn set_entry(&mut self, env_val: &EnvVal, entry: &PartialEnvEntry) {
+        self.set_val(env_val, entry.env_val.dupe());
+        self.set_heap_refinements(env_val, entry.heap_refinements.dupe());
+    }
+}
+
 #[derive(Debug, Clone)]
 struct EnvValInner {
-    val_ref: Rc<RefCell<Val<ALoc>>>,
+    id: EnvValId,
     havoc: Val<ALoc>,
     writes_by_closure_provider_val: Option<Val<ALoc>>,
     def_loc: Option<ALoc>,
     // `should_invalidate(false, def_loc)` and `should_invalidate(true, def_loc)`.
     invalidated_by_call: bool,
     invalidated_by_all: bool,
-    heap_refinements: Rc<RefCell<HeapRefinementMap>>,
     kind: BindingsKind,
     // Per-loc kind for every declaration site of this name. This preserves the
     // per-loc kind info that to_map collapses (first-kind-wins). Used to judge
@@ -178,6 +257,12 @@ impl std::ops::Deref for EnvVal {
     }
 }
 
+impl PartialEq for EnvVal {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
 #[derive(Debug, Clone)]
 struct ReadEntry {
     def_loc: Option<ALoc>,
@@ -208,39 +293,36 @@ mod partial_env_snapshot {
         pub(super) def_loc: Option<ALoc>,
     }
 
-    impl Entry {
-        pub(super) fn of_env_val(env_val: &EnvVal) -> Self {
-            Entry {
-                env_val: env_val.val_ref.borrow().dupe(),
-                heap_refinements: env_val.heap_refinements.borrow().dupe(),
-                def_loc: env_val.def_loc.dupe(),
-            }
-        }
-
-        pub(super) fn reset_val_with_entry(&self, env_val: &EnvVal) {
-            *env_val.val_ref.borrow_mut() = self.env_val.dupe();
-            *env_val.heap_refinements.borrow_mut() = self.heap_refinements.dupe();
-        }
+    /// The value bindings of the current function scope at some point, and their values then.
+    #[derive(Debug, Clone, Dupe)]
+    pub(super) struct PartialEnvSnapshot {
+        pub(super) locals: FlowOrdMap<VarKey, Vec<EnvVal>>,
+        pub(super) captured: FlowOrdMap<VarKey, EnvVal>,
+        pub(super) values: EnvValues,
     }
-
-    #[derive(Debug, Clone, Dupe, Default)]
-    pub(super) struct PartialEnvSnapshot(Rc<HashMap<VarKey, Entry>>);
 
     impl PartialEnvSnapshot {
-        pub(super) fn from_hash_map(map: HashMap<VarKey, Entry>) -> Self {
-            PartialEnvSnapshot(Rc::new(map))
+        pub(super) fn binding(&self, x: &VarKey) -> Option<&EnvVal> {
+            self.locals
+                .get(x)
+                .and_then(|stack| stack.last())
+                .or_else(|| self.captured.get(x))
         }
 
-        pub(super) fn get(&self, x: &VarKey) -> Option<&Entry> {
-            self.0.get(x)
+        pub(super) fn get(&self, x: &VarKey) -> Option<Entry> {
+            self.binding(x).map(|env_val| self.values.entry(env_val))
         }
-    }
 
-    impl<'a> IntoIterator for &'a PartialEnvSnapshot {
-        type Item = (&'a VarKey, &'a Entry);
-        type IntoIter = std::collections::hash_map::Iter<'a, VarKey, Entry>;
-        fn into_iter(self) -> Self::IntoIter {
-            self.0.iter()
+        fn iter(&self) -> impl Iterator<Item = (&VarKey, Entry)> {
+            let locals = self.locals.iter().filter_map(|(x, stack)| {
+                stack.last().map(|env_val| (x, self.values.entry(env_val)))
+            });
+            let captured = self
+                .captured
+                .iter()
+                .filter(|(x, _)| self.locals.get(x).is_none_or(|stack| stack.is_empty()))
+                .map(|(x, env_val)| (x, self.values.entry(env_val)));
+            locals.chain(captured)
         }
     }
 
@@ -249,7 +331,7 @@ mod partial_env_snapshot {
         F: Fn(&VarKey) -> Entry,
     {
         match env.get(x) {
-            Some(v) => v.dupe(),
+            Some(v) => v,
             None => fallback(x),
         }
     }
@@ -266,20 +348,20 @@ mod partial_env_snapshot {
         // First: fold over s2, looking up in s1
         let mut map = BTreeMap::new();
         let mut env = env;
-        for (key, v2) in s2 {
+        for (key, v2) in s2.iter() {
             let v1opt = s1.get(key);
-            let (new_env, vopt) = combine(env, key, v1opt, Some(v2));
+            let (new_env, vopt) = combine(env, key, v1opt.as_ref(), Some(&v2));
             env = new_env;
             if let Some(v) = vopt {
                 map.insert(key.dupe(), v);
             }
         }
         // Second: fold over s1, but only for keys not in s2
-        for (key, v1) in s1 {
-            let v2opt = s2.get(key);
+        for (key, v1) in s1.iter() {
+            let v2opt = s2.binding(key);
             match v2opt {
                 None => {
-                    let (new_env, vopt) = combine(env, key, Some(v1), None);
+                    let (new_env, vopt) = combine(env, key, Some(&v1), None);
                     env = new_env;
                     if let Some(v) = vopt {
                         map.insert(key.dupe(), v);
@@ -345,69 +427,37 @@ mod full_env {
     use super::*;
 
     /// Two parallel namespaces — value and type — mirroring type_sig's Scope.
-    /// The value namespace carries SSA flow (val_ref, refinements, etc). The type
+    /// The value namespace carries SSA flow (values, refinements, etc). The type
     /// namespace records type bindings (interface, type alias) so name_def can
     /// find their declaration locs and so reads at type-positions resolve to the
     /// interface rather than the same-named const.
+    ///
+    /// The value bindings and `values` are persistent, so that snapshots of the environment copy
+    /// them. `values` has the values of the bindings made in the function scope.
     #[derive(Debug, Clone)]
     pub(super) struct FunctionScope {
-        pub(super) value_local_stacked_env: BTreeMap<VarKey, Vec<EnvVal>>,
+        pub(super) value_local_stacked_env: FlowOrdMap<VarKey, Vec<EnvVal>>,
         pub(super) type_local_stacked_env: BTreeMap<VarKey, Vec<EnvVal>>,
-        pub(super) value_captured: Rc<RefCell<BTreeMap<VarKey, EnvVal>>>,
+        pub(super) value_captured: Rc<RefCell<FlowOrdMap<VarKey, EnvVal>>>,
         pub(super) type_captured: Rc<RefCell<BTreeMap<VarKey, EnvVal>>>,
+        values: Rc<RefCell<EnvValues>>,
     }
 
     impl FunctionScope {
-        fn new() -> Self {
+        fn new(values: Rc<RefCell<EnvValues>>) -> Self {
             FunctionScope {
-                value_local_stacked_env: BTreeMap::new(),
+                value_local_stacked_env: FlowOrdMap::new(),
                 type_local_stacked_env: BTreeMap::new(),
-                value_captured: Rc::new(RefCell::new(BTreeMap::new())),
+                value_captured: Rc::new(RefCell::new(FlowOrdMap::new())),
                 type_captured: Rc::new(RefCell::new(BTreeMap::new())),
+                values,
             }
-        }
-    }
-
-    impl Default for FunctionScope {
-        fn default() -> Self {
-            Self::new()
         }
     }
 
     pub(super) struct FunctionScopeLocalEnvSnapshot {
         value: Vec<(VarKey, bool)>,
         type_: Vec<(VarKey, bool)>,
-    }
-
-    fn copy_env_val_from_env_below(
-        should_havoc: impl Fn(&EnvVal) -> bool,
-        env_val: &EnvVal,
-    ) -> EnvVal {
-        if should_havoc(env_val) {
-            EnvVal::new(EnvValInner {
-                val_ref: Rc::new(RefCell::new(env_val.havoc.dupe())),
-                havoc: env_val.havoc.dupe(),
-                writes_by_closure_provider_val: env_val.writes_by_closure_provider_val.dupe(),
-                def_loc: env_val.def_loc.dupe(),
-                invalidated_by_call: env_val.invalidated_by_call,
-                invalidated_by_all: env_val.invalidated_by_all,
-                heap_refinements: empty_heap_refinements(),
-                kind: env_val.kind,
-                kind_at_loc: env_val.kind_at_loc.clone(),
-            })
-        } else {
-            EnvVal::new(EnvValInner {
-                val_ref: Rc::new(RefCell::new(env_val.val_ref.borrow().dupe())),
-                havoc: env_val.havoc.dupe(),
-                writes_by_closure_provider_val: env_val.writes_by_closure_provider_val.dupe(),
-                def_loc: env_val.def_loc.dupe(),
-                invalidated_by_call: env_val.invalidated_by_call,
-                invalidated_by_all: env_val.invalidated_by_all,
-                heap_refinements: empty_heap_refinements(),
-                kind: env_val.kind,
-                kind_at_loc: env_val.kind_at_loc.clone(),
-            })
-        }
     }
 
     fn function_scope_read_value(x: &VarKey, scope: &FunctionScope) -> Option<EnvVal> {
@@ -440,40 +490,41 @@ mod full_env {
         }
     }
 
-    fn map_function_scope_value_into_partial_env_entries<F>(
-        scope: &FunctionScope,
-        f: F,
-    ) -> PartialEnvSnapshot
-    where
-        F: Fn(&VarKey, &EnvVal) -> PartialEnvEntry,
-    {
-        let captured = scope.value_captured.borrow();
-        let mut acc = HashMap::with_capacity(scope.value_local_stacked_env.len() + captured.len());
-        for (x, stack) in &scope.value_local_stacked_env {
-            if let Some(last) = stack.last() {
-                acc.insert(x.dupe(), f(x, last));
+    /// Adds to `vars` the variables whose bindings or whose values may differ between two
+    /// environments of the same function scope.
+    fn add_changed_vars(
+        vars: &mut BTreeSet<VarKey>,
+        (locals1, captured1, values1): (
+            &FlowOrdMap<VarKey, Vec<EnvVal>>,
+            &FlowOrdMap<VarKey, EnvVal>,
+            &EnvValues,
+        ),
+        (locals2, captured2, values2): (
+            &FlowOrdMap<VarKey, Vec<EnvVal>>,
+            &FlowOrdMap<VarKey, EnvVal>,
+            &EnvValues,
+        ),
+    ) {
+        fn key_of<'a, K, V>(item: DiffItem<'a, K, V>) -> &'a K {
+            match item {
+                DiffItem::Add(k, _) | DiffItem::Remove(k, _) => k,
+                DiffItem::Update { new: (k, _), .. } => k,
             }
         }
-        for (x, v) in captured.iter() {
-            acc.entry(x.dupe()).or_insert_with(|| f(x, v));
-        }
-        PartialEnvSnapshot::from_hash_map(acc)
-    }
-
-    fn iter_function_scope_value<F>(scope: &FunctionScope, mut f: F)
-    where
-        F: FnMut(&VarKey, &EnvVal),
-    {
-        for (x, stack) in &scope.value_local_stacked_env {
-            if let Some(last) = stack.last() {
-                f(x, last);
-            }
-        }
-        for (x, v) in scope.value_captured.borrow().iter() {
-            if !scope.value_local_stacked_env.contains_key(x) {
-                f(x, v);
-            }
-        }
+        vars.extend(locals1.diff(locals2).map(key_of).duped());
+        vars.extend(captured1.diff(captured2).map(key_of).duped());
+        vars.extend(
+            values1
+                .vals
+                .diff(&values2.vals)
+                .map(|item| key_of(item).0.dupe()),
+        );
+        vars.extend(
+            values1
+                .heap_refinements
+                .diff(&values2.heap_refinements)
+                .map(|item| key_of(item).0.dupe()),
+        );
     }
 
     #[derive(Debug, Clone)]
@@ -482,15 +533,15 @@ mod full_env {
     }
 
     impl FullEnv {
-        pub(super) fn init(globals: HashMap<VarKey, EnvVal>) -> Self {
-            let value_local_stacked_env = globals.into_iter().map(|(k, v)| (k, vec![v])).collect();
+        pub(super) fn init(
+            globals: HashMap<VarKey, EnvVal>,
+            values: Rc<RefCell<EnvValues>>,
+        ) -> Self {
+            let mut scope = FunctionScope::new(values);
+            scope.value_local_stacked_env =
+                globals.into_iter().map(|(k, v)| (k, vec![v])).collect();
             FullEnv {
-                scopes: vec![FunctionScope {
-                    value_local_stacked_env,
-                    type_local_stacked_env: BTreeMap::new(),
-                    value_captured: Rc::new(RefCell::new(BTreeMap::new())),
-                    type_captured: Rc::new(RefCell::new(BTreeMap::new())),
-                }],
+                scopes: vec![scope],
             }
         }
 
@@ -503,7 +554,202 @@ mod full_env {
                     stack.first().map(|binding| (name.dupe(), binding.dupe()))
                 })
                 .collect();
-            FullEnv::init(globals)
+            FullEnv::init(globals, root_scope.values.dupe())
+        }
+
+        fn current_values(&self) -> &RefCell<EnvValues> {
+            &self.scopes.last().unwrap().values
+        }
+
+        /// The values of the function scope where `env_val` was made.
+        fn values_of(&self, env_val: &EnvVal) -> &RefCell<EnvValues> {
+            let store = env_val.id.1;
+            self.scopes
+                .iter()
+                .rev()
+                .map(|scope| &*scope.values)
+                .find(|values| values.borrow().store == store)
+                .expect("the function scope of a binding outlives it")
+        }
+
+        /// Makes a binding of `x` in the current function scope whose value is `val`.
+        pub(super) fn add_binding(&self, x: &VarKey, val: Val<ALoc>) -> EnvValId {
+            self.current_values().borrow_mut().add(x, val)
+        }
+
+        pub(super) fn val(&self, env_val: &EnvVal) -> Val<ALoc> {
+            self.values_of(env_val).borrow().val(env_val)
+        }
+
+        pub(super) fn heap_refinements(&self, env_val: &EnvVal) -> HeapRefinementMap {
+            self.values_of(env_val).borrow().heap_refinements(env_val)
+        }
+
+        pub(super) fn entry(&self, env_val: &EnvVal) -> PartialEnvEntry {
+            self.values_of(env_val).borrow().entry(env_val)
+        }
+
+        pub(super) fn set_val(&self, env_val: &EnvVal, val: Val<ALoc>) {
+            self.values_of(env_val).borrow_mut().set_val(env_val, val);
+        }
+
+        pub(super) fn set_heap_refinements(
+            &self,
+            env_val: &EnvVal,
+            heap_refinements: HeapRefinementMap,
+        ) {
+            self.values_of(env_val)
+                .borrow_mut()
+                .set_heap_refinements(env_val, heap_refinements);
+        }
+
+        pub(super) fn set_entry(&self, env_val: &EnvVal, entry: &PartialEnvEntry) {
+            self.values_of(env_val)
+                .borrow_mut()
+                .set_entry(env_val, entry);
+        }
+
+        fn copy_env_val_from_env_below(
+            &self,
+            should_havoc: impl Fn(&EnvVal) -> bool,
+            x: &VarKey,
+            env_val: &EnvVal,
+        ) -> EnvVal {
+            let val = if should_havoc(env_val) {
+                env_val.havoc.dupe()
+            } else {
+                self.val(env_val)
+            };
+            EnvVal::new(EnvValInner {
+                id: self.add_binding(x, val),
+                havoc: env_val.havoc.dupe(),
+                writes_by_closure_provider_val: env_val.writes_by_closure_provider_val.dupe(),
+                def_loc: env_val.def_loc.dupe(),
+                invalidated_by_call: env_val.invalidated_by_call,
+                invalidated_by_all: env_val.invalidated_by_all,
+                kind: env_val.kind,
+                kind_at_loc: env_val.kind_at_loc.clone(),
+            })
+        }
+
+        pub(super) fn snapshot(&self) -> PartialEnvSnapshot {
+            let scope = self.scopes.last().unwrap();
+            PartialEnvSnapshot {
+                locals: scope.value_local_stacked_env.dupe(),
+                captured: scope.value_captured.borrow().dupe(),
+                values: scope.values.borrow().dupe(),
+            }
+        }
+
+        /// The variables whose bindings or values may differ between the environment and one of
+        /// `envs`.
+        pub(super) fn changed_vars(&self, envs: &[&PartialEnvSnapshot]) -> BTreeSet<VarKey> {
+            let scope = self.scopes.last().unwrap();
+            let captured = scope.value_captured.borrow();
+            let values = scope.values.borrow();
+            let mut vars = BTreeSet::new();
+            for env in envs {
+                add_changed_vars(
+                    &mut vars,
+                    (&scope.value_local_stacked_env, &captured, &values),
+                    (&env.locals, &env.captured, &env.values),
+                );
+            }
+            vars
+        }
+
+        /// The variables whose bindings or values may differ between `env1` and `env2`.
+        pub(super) fn changed_vars_between(
+            env1: &PartialEnvSnapshot,
+            env2: &PartialEnvSnapshot,
+        ) -> BTreeSet<VarKey> {
+            let mut vars = BTreeSet::new();
+            add_changed_vars(
+                &mut vars,
+                (&env1.locals, &env1.captured, &env1.values),
+                (&env2.locals, &env2.captured, &env2.values),
+            );
+            vars
+        }
+
+        /// Calls `f` on the value bindings of `vars` in the current function scope that are in
+        /// scope, first the local ones, then the captured ones.
+        pub(super) fn iter_bindings_of(
+            &self,
+            vars: &BTreeSet<VarKey>,
+            mut f: impl FnMut(&VarKey, &EnvVal),
+        ) {
+            let scope = self.scopes.last().unwrap();
+            for x in vars {
+                if let Some(env_val) = scope
+                    .value_local_stacked_env
+                    .get(x)
+                    .and_then(|stack| stack.last())
+                {
+                    f(x, env_val);
+                }
+            }
+            let captured: Vec<(&VarKey, EnvVal)> = {
+                let captured = scope.value_captured.borrow();
+                vars.iter()
+                    .filter(|x| !scope.value_local_stacked_env.contains_key(x))
+                    .filter_map(|x| captured.get(x).map(|env_val| (x, env_val.dupe())))
+                    .collect()
+            };
+            for (x, env_val) in captured {
+                f(x, &env_val);
+            }
+        }
+
+        /// The variables of the value bindings in scope in the current function scope that have
+        /// heap refinements.
+        pub(super) fn vars_with_heap_refinements(&self) -> BTreeSet<VarKey> {
+            let scope = self.scopes.last().unwrap();
+            let captured = scope.value_captured.borrow();
+            scope
+                .values
+                .borrow()
+                .heap_refinements
+                .keys()
+                .filter(|id| {
+                    let x = &id.0;
+                    let binding = match scope.value_local_stacked_env.get(x) {
+                        Some(stack) => stack.last(),
+                        None => captured.get(x),
+                    };
+                    binding.is_some_and(|env_val| env_val.id == **id)
+                })
+                .map(|id| id.0.dupe())
+                .collect()
+        }
+
+        /// The value bindings of the current function scope, also the shadowed ones, that have
+        /// heap refinements.
+        pub(super) fn current_function_scope_bindings_with_heap_refinements(&self) -> Vec<EnvVal> {
+            let scope = self.scopes.last().unwrap();
+            let captured = scope.value_captured.borrow();
+            scope
+                .values
+                .borrow()
+                .heap_refinements
+                .keys()
+                .filter_map(|id| {
+                    let x = &id.0;
+                    scope
+                        .value_local_stacked_env
+                        .get(x)
+                        .and_then(|stack| stack.iter().find(|env_val| env_val.id == *id))
+                        .or_else(|| captured.get(x).filter(|env_val| env_val.id == *id))
+                        .duped()
+                })
+                .collect()
+        }
+
+        fn remove_heap_refinements(&self, bindings: impl Iterator<Item = EnvVal>) {
+            let mut values = self.current_values().borrow_mut();
+            for env_val in bindings {
+                values.heap_refinements.remove(&env_val.id);
+            }
         }
 
         pub(super) fn fold_current_function_scope_values<A, F>(&self, init: A, mut f: F) -> A
@@ -535,7 +781,7 @@ mod full_env {
             let len = self.scopes.len();
             for i in (0..len.saturating_sub(1)).rev() {
                 if let Some(env_val) = function_scope_read_value(x, &self.scopes[i]) {
-                    let copy = copy_env_val_from_env_below(&should_havoc, &env_val);
+                    let copy = self.copy_env_val_from_env_below(&should_havoc, x, &env_val);
                     curr_scope
                         .value_captured
                         .borrow_mut()
@@ -546,26 +792,29 @@ mod full_env {
             None
         }
 
-        pub(super) fn env_read_from_below(
-            &self,
-            should_havoc: impl Fn(&EnvVal) -> bool,
-            x: &VarKey,
-        ) -> EnvVal {
-            let len = self.scopes.len();
-            for i in (0..len.saturating_sub(1)).rev() {
-                if let Some(env_val) = function_scope_read_value(x, &self.scopes[i]) {
-                    return copy_env_val_from_env_below(&should_havoc, &env_val);
-                }
-            }
-            panic!("Missing env entry from below: {x:?}")
-        }
-
+        /// The entry that a copy of the binding of `x` below the current function scope would
+        /// have.
         pub(super) fn env_read_entry_from_below(
             &self,
             should_havoc: impl Fn(&EnvVal) -> bool,
             x: &VarKey,
         ) -> PartialEnvEntry {
-            PartialEnvEntry::of_env_val(&self.env_read_from_below(should_havoc, x))
+            let len = self.scopes.len();
+            for i in (0..len.saturating_sub(1)).rev() {
+                if let Some(env_val) = function_scope_read_value(x, &self.scopes[i]) {
+                    let val = if should_havoc(&env_val) {
+                        env_val.havoc.dupe()
+                    } else {
+                        self.val(&env_val)
+                    };
+                    return PartialEnvEntry {
+                        env_val: val,
+                        heap_refinements: empty_heap_refinements(),
+                        def_loc: env_val.def_loc.dupe(),
+                    };
+                }
+            }
+            panic!("Missing env entry from below: {x:?}")
         }
 
         pub(super) fn type_env_read_opt(
@@ -582,7 +831,7 @@ mod full_env {
                 if let Some((env_val, namespace)) =
                     function_scope_read_type_or_value(x, &self.scopes[i])
                 {
-                    let copy = copy_env_val_from_env_below(&should_havoc, &env_val);
+                    let copy = self.copy_env_val_from_env_below(&should_havoc, x, &env_val);
                     match namespace {
                         TypeLookupNamespace::Type => {
                             curr_scope
@@ -614,14 +863,14 @@ mod full_env {
             let scope = self.scopes.last_mut().unwrap();
             let mut value_snapshot = Vec::with_capacity(value.len());
             for (x, v) in value {
-                match scope.value_local_stacked_env.entry(x) {
-                    std::collections::btree_map::Entry::Occupied(mut entry) => {
-                        value_snapshot.push((entry.key().dupe(), true));
-                        entry.get_mut().push(v);
+                match scope.value_local_stacked_env.get_mut(&x) {
+                    Some(stack) => {
+                        stack.push(v);
+                        value_snapshot.push((x, true));
                     }
-                    std::collections::btree_map::Entry::Vacant(entry) => {
-                        value_snapshot.push((entry.key().dupe(), false));
-                        entry.insert(vec![v]);
+                    None => {
+                        scope.value_local_stacked_env.insert(x.dupe(), vec![v]);
+                        value_snapshot.push((x, false));
                     }
                 }
             }
@@ -644,117 +893,86 @@ mod full_env {
             }
         }
 
+        /// Pops the bindings that `push_new_bindings` pushed. Nothing reads their heap refinements
+        /// anymore, so they leave the values.
         pub(super) fn pop_bindings(&mut self, snapshot: FunctionScopeLocalEnvSnapshot) {
             let scope = self.scopes.last_mut().unwrap();
+            let mut popped = Vec::with_capacity(snapshot.value.len() + snapshot.type_.len());
             for (name, had_existing_stack) in snapshot.value {
                 if had_existing_stack {
                     match scope.value_local_stacked_env.get_mut(&name) {
                         Some(stack) => {
-                            assert!(stack.pop().is_some(), "Missing value binding stack entry");
+                            popped.push(stack.pop().expect("Missing value binding stack entry"));
                             debug_assert!(!stack.is_empty());
                         }
                         None => panic!("Missing value binding stack"),
                     }
-                } else {
-                    scope.value_local_stacked_env.remove(&name);
+                } else if let Some(stack) = scope.value_local_stacked_env.remove(&name) {
+                    popped.extend(stack);
                 }
             }
             for (name, had_existing_stack) in snapshot.type_ {
                 if had_existing_stack {
                     match scope.type_local_stacked_env.get_mut(&name) {
                         Some(stack) => {
-                            assert!(stack.pop().is_some(), "Missing type binding stack entry");
+                            popped.push(stack.pop().expect("Missing type binding stack entry"));
                             debug_assert!(!stack.is_empty());
                         }
                         None => panic!("Missing type binding stack"),
                     }
-                } else {
-                    scope.type_local_stacked_env.remove(&name);
+                } else if let Some(stack) = scope.type_local_stacked_env.remove(&name) {
+                    popped.extend(stack);
                 }
             }
+            self.remove_heap_refinements(popped.into_iter());
         }
 
         pub(super) fn push_new_function_scope(&mut self) {
-            self.scopes.push(FunctionScope::new());
+            self.scopes
+                .push(FunctionScope::new(Rc::new(RefCell::new(EnvValues::new()))));
         }
 
         pub(super) fn pop_function_scope(&mut self) {
             self.scopes.pop().unwrap();
         }
 
-        pub(super) fn to_partial_env_snapshot<F>(&self, f: F) -> PartialEnvSnapshot
-        where
-            F: Fn(&VarKey, &EnvVal) -> PartialEnvEntry,
-        {
-            map_function_scope_value_into_partial_env_entries(self.scopes.last().unwrap(), f)
-        }
-
-        pub(super) fn update_env<F>(&self, f: F)
-        where
-            F: FnMut(&VarKey, &EnvVal),
-        {
-            iter_function_scope_value(self.scopes.last().unwrap(), f);
+        /// Calls `f` on the value bindings in scope in the current function scope, first the
+        /// local ones, then the captured ones.
+        fn iter_bindings(&self, mut f: impl FnMut(&VarKey, &EnvVal)) {
+            let scope = self.scopes.last().unwrap();
+            for (x, stack) in scope.value_local_stacked_env.iter() {
+                if let Some(last) = stack.last() {
+                    f(x, last);
+                }
+            }
+            for (x, v) in scope.value_captured.borrow().iter() {
+                if !scope.value_local_stacked_env.contains_key(x) {
+                    f(x, v);
+                }
+            }
         }
 
         pub(super) fn reset_to_unreachable_env(&self, cache: &mut ValCache<ALoc>) {
             let empty_val = ssa_val::empty(cache);
-            iter_function_scope_value(self.scopes.last().unwrap(), |_, env_val| {
-                *env_val.val_ref.borrow_mut() = empty_val.dupe();
-                let keys: Vec<_> = env_val.heap_refinements.borrow().keys().duped().collect();
-                *env_val.heap_refinements.borrow_mut() = keys
-                    .into_iter()
-                    .map(|k| (k, Ok(empty_val.dupe())))
+            self.iter_bindings(|_, env_val| {
+                let heap_refinements = self
+                    .heap_refinements(env_val)
+                    .keys()
+                    .map(|k| (k.dupe(), Ok(empty_val.dupe())))
                     .collect();
+                self.set_val(env_val, empty_val.dupe());
+                self.set_heap_refinements(env_val, heap_refinements);
             });
         }
 
-        pub(super) fn update_env_with_partial_env_snapshot<F>(
-            &self,
-            should_havoc: impl Fn(&EnvVal) -> bool,
-            partial_env: &PartialEnvSnapshot,
-            mut f: F,
-        ) where
-            F: FnMut(&VarKey, &PartialEnvEntry, &EnvVal),
-        {
-            iter_function_scope_value(self.scopes.last().unwrap(), |x, env_val| {
-                let env_entry = partial_env_snapshot::read_with_fallback(x, partial_env, |x| {
-                    self.env_read_entry_from_below(&should_havoc, x)
-                });
-                f(x, &env_entry, env_val)
-            });
-        }
-
-        pub(super) fn merge_env_with_partial_env_snapshots<F>(
-            &self,
-            should_havoc: impl Fn(&EnvVal) -> bool,
-            env1: &PartialEnvSnapshot,
-            env2: &PartialEnvSnapshot,
-            mut f: F,
-        ) where
-            F: FnMut(&PartialEnvEntry, &PartialEnvEntry, &EnvVal),
-        {
-            iter_function_scope_value(self.scopes.last().unwrap(), |x, env_val| {
-                let v1 = partial_env_snapshot::read_with_fallback(x, env1, |x| {
-                    self.env_read_entry_from_below(&should_havoc, x)
-                });
-                let v2 = partial_env_snapshot::read_with_fallback(x, env2, |x| {
-                    self.env_read_entry_from_below(&should_havoc, x)
-                });
-                f(&v1, &v2, env_val);
-            });
-        }
-
-        pub(super) fn current_scope_mut(&mut self) -> &mut FunctionScope {
-            self.scopes.last_mut().unwrap()
-        }
-
-        /// Get the keys of all variables in the current scope (value namespace)
-        pub(super) fn all_keys(&self) -> Vec<VarKey> {
-            let mut keys = Vec::new();
-            iter_function_scope_value(self.scopes.last().unwrap(), |key, _| {
-                keys.push(key.dupe());
-            });
-            keys
+        /// The innermost local value binding of `x` in the current function scope.
+        pub(super) fn local_binding(&self, x: &VarKey) -> Option<EnvVal> {
+            self.scopes
+                .last()
+                .unwrap()
+                .value_local_stacked_env
+                .get(x)
+                .map(|stack| stack.last().unwrap().dupe())
         }
 
         /// Get an env_val by key from the current scope (value namespace)
@@ -1577,6 +1795,7 @@ fn initialize_globals(
     unbound_names: &BTreeSet<FlowSmolStr>,
     program_loc: ALoc,
     cache: &mut ValCache<ALoc>,
+    values: &mut EnvValues,
 ) -> HashMap<VarKey, EnvVal> {
     use flow_common::reason::VirtualReason;
     use refinement_key::Proj;
@@ -1584,60 +1803,61 @@ fn initialize_globals(
     let mut globals = HashMap::with_capacity(unbound_names.len() + exclude_syms.len() + 10);
 
     for name in unbound_names {
+        let key = VarKey::Name(name.dupe());
         let global_val = ssa_val::global(cache, name.dupe());
         let entry = EnvVal::new(EnvValInner {
-            val_ref: Rc::new(RefCell::new(global_val.dupe())),
+            id: values.add(&key, global_val.dupe()),
             havoc: global_val,
             writes_by_closure_provider_val: None,
             def_loc: None,
             invalidated_by_call: true,
             invalidated_by_all: true,
-            heap_refinements: empty_heap_refinements(),
             kind: BindingsKind::Var,
             kind_at_loc: BTreeMap::new(),
         });
-        globals.insert(VarKey::Name(name.dupe()), entry);
+        globals.insert(key, entry);
     }
 
     for name in exclude_syms {
+        let key = VarKey::Name(name.dupe());
         let global_val = ssa_val::global(cache, name.dupe());
         let entry = EnvVal::new(EnvValInner {
-            val_ref: Rc::new(RefCell::new(global_val.dupe())),
+            id: values.add(&key, global_val.dupe()),
             havoc: global_val,
             writes_by_closure_provider_val: None,
             def_loc: None,
             invalidated_by_call: true,
             invalidated_by_all: true,
-            heap_refinements: empty_heap_refinements(),
             kind: BindingsKind::Var,
             kind_at_loc: BTreeMap::new(),
         });
-        globals.insert(VarKey::Name(name.dupe()), entry);
+        globals.insert(key, entry);
     }
 
     // this has to come later, since this can be thought to be unbound names
     // in SSA builder when it's used as a type.
     {
+        let key = VarKey::Name(FlowSmolStr::new_inline("this"));
         let reason = VirtualReason::new(None, program_loc.dupe());
         let v = ssa_val::global_this(cache, reason);
         let entry = EnvVal::new(EnvValInner {
-            val_ref: Rc::new(RefCell::new(v.dupe())),
+            id: values.add(&key, v.dupe()),
             havoc: v,
             writes_by_closure_provider_val: None,
             def_loc: None,
             invalidated_by_call: true,
             invalidated_by_all: true,
-            heap_refinements: empty_heap_refinements(),
             kind: BindingsKind::Var,
             kind_at_loc: BTreeMap::new(),
         });
-        globals.insert(VarKey::Name(FlowSmolStr::new_inline("this")), entry);
+        globals.insert(key, entry);
     }
 
     if !is_lib {
         let module_name = FlowSmolStr::new_inline("module");
         let exports_name = FlowSmolStr::new_inline("exports");
-        let module_val = ssa_val::global(cache, module_name.dupe());
+        let key = VarKey::Name(module_name.dupe());
+        let module_val = ssa_val::global(cache, module_name);
         let exports_val = ssa_val::global(cache, exports_name);
 
         let mut heap_refinements = FlowRedBlackTreeMap::new();
@@ -1647,34 +1867,34 @@ fn initialize_globals(
         );
 
         let entry = EnvVal::new(EnvValInner {
-            val_ref: Rc::new(RefCell::new(module_val.dupe())),
+            id: values.add(&key, module_val.dupe()),
             havoc: module_val,
             writes_by_closure_provider_val: None,
             def_loc: None,
             invalidated_by_call: true,
             invalidated_by_all: true,
-            heap_refinements: Rc::new(RefCell::new(heap_refinements)),
             kind: BindingsKind::Var,
             kind_at_loc: BTreeMap::new(),
         });
-        globals.insert(VarKey::Name(module_name), entry);
+        values.set_heap_refinements(&entry, heap_refinements);
+        globals.insert(key, entry);
     }
 
     for &name in MODULE_SCOPED_VARS {
         let name_str = FlowSmolStr::new_inline(name);
-        let module_scoped_val = ssa_val::module_scoped(cache, name_str.dupe());
+        let key = VarKey::Name(name_str.dupe());
+        let module_scoped_val = ssa_val::module_scoped(cache, name_str);
         let entry = EnvVal::new(EnvValInner {
-            val_ref: Rc::new(RefCell::new(module_scoped_val.dupe())),
+            id: values.add(&key, module_scoped_val.dupe()),
             havoc: module_scoped_val,
             writes_by_closure_provider_val: None,
             def_loc: None,
             invalidated_by_call: true,
             invalidated_by_all: true,
-            heap_refinements: empty_heap_refinements(),
             kind: BindingsKind::Var,
             kind_at_loc: BTreeMap::new(),
         });
-        globals.insert(VarKey::Name(name_str), entry);
+        globals.insert(key, entry);
     }
 
     globals
@@ -1701,18 +1921,25 @@ fn initial_env<Cx: Context>(
     program_loc: ALoc,
     cache: &mut ValCache<ALoc>,
 ) -> (full_env::FullEnv, Option<FlowSmolStr>) {
-    let mut globals = initialize_globals(is_lib, exclude_syms, unbound_names, program_loc, cache);
+    let mut values = EnvValues::new();
+    let mut globals = initialize_globals(
+        is_lib,
+        exclude_syms,
+        unbound_names,
+        program_loc,
+        cache,
+        &mut values,
+    );
 
     let exhaustive_key = VarKey::Synthetic(SyntheticVar::MaybeExhaustivelyChecked);
     let exhaustive_val = ssa_val::uninitialized(cache, ALoc::none());
     let exhaustive_entry = EnvVal::new(EnvValInner {
-        val_ref: Rc::new(RefCell::new(exhaustive_val.dupe())),
+        id: values.add(&exhaustive_key, exhaustive_val.dupe()),
         havoc: exhaustive_val,
         writes_by_closure_provider_val: None,
         def_loc: None,
         invalidated_by_call: true,
         invalidated_by_all: true,
-        heap_refinements: empty_heap_refinements(),
         kind: BindingsKind::Internal,
         kind_at_loc: BTreeMap::new(),
     });
@@ -1729,22 +1956,25 @@ fn initial_env<Cx: Context>(
     if let Some(ref jsx_name) = jsx_base_name {
         // We use a global here so that if the base name is never created locally
         // we first check the globals before emitting an error
+        let key = VarKey::Name(jsx_name.dupe());
         let global_val = ssa_val::global(cache, jsx_name.dupe());
         let env_val = EnvVal::new(EnvValInner {
-            val_ref: Rc::new(RefCell::new(global_val.dupe())),
+            id: values.add(&key, global_val.dupe()),
             havoc: global_val,
             writes_by_closure_provider_val: None,
             def_loc: None,
             invalidated_by_call: true,
             invalidated_by_all: true,
-            heap_refinements: empty_heap_refinements(),
             kind: BindingsKind::Var,
             kind_at_loc: BTreeMap::new(),
         });
-        globals.insert(VarKey::Name(jsx_name.dupe()), env_val);
+        globals.insert(key, env_val);
     }
 
-    (full_env::FullEnv::init(globals), jsx_base_name)
+    (
+        full_env::FullEnv::init(globals, Rc::new(RefCell::new(values))),
+        jsx_base_name,
+    )
 }
 
 /// The states at the `?.` of an optional chain from which the code after the chain may start
@@ -2236,9 +2466,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
     }
 
     fn env_snapshot(&self) -> PartialEnvSnapshot {
-        self.env_state
-            .env
-            .to_partial_env_snapshot(|_, v| partial_env_snapshot::Entry::of_env_val(v))
+        self.env_state.env.snapshot()
     }
 
     /// We often want to merge the refinement scopes and writes of two environments with
@@ -2296,36 +2524,43 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
             return self.env_snapshot();
         }
         let refinements_by_key = refinements_by_key(head);
-        self.env_state.env.to_partial_env_snapshot(|name, env_val| {
-            let value_refinement_ids = refinements_by_key.value.get(name);
-            let heap_refinements_for_name = refinements_by_key.heap.get(name);
-            if value_refinement_ids.is_none() && heap_refinements_for_name.is_none() {
-                return partial_env_snapshot::Entry::of_env_val(env_val);
-            }
-            let unrefined_env_val = unrefine(value_refinement_ids, env_val.val_ref.borrow().dupe());
-            let heap_refinements = env_val.heap_refinements.borrow();
-            let unrefined_heap_refinements = match heap_refinements_for_name {
-                None => heap_refinements.dupe(),
-                Some(heap_refinements_for_name) => heap_refinements
-                    .iter()
-                    .map(|(projections, heap_val)| {
-                        let new_val = match heap_val {
-                            Err(invalidation_info) => Err(invalidation_info.dupe()),
-                            Ok(v) => Ok(unrefine(
-                                heap_refinements_for_name.get(projections),
-                                v.dupe(),
-                            )),
-                        };
-                        (projections.dupe(), new_val)
-                    })
-                    .collect(),
-            };
-            partial_env_snapshot::Entry {
-                env_val: unrefined_env_val,
-                heap_refinements: unrefined_heap_refinements,
-                def_loc: env_val.def_loc.dupe(),
-            }
-        })
+        let mut snapshot = self.env_snapshot();
+        let refined: BTreeSet<VarKey> = refinements_by_key
+            .value
+            .keys()
+            .chain(refinements_by_key.heap.keys())
+            .duped()
+            .collect();
+        self.env_state
+            .env
+            .iter_bindings_of(&refined, |name, env_val| {
+                let value_refinement_ids = refinements_by_key.value.get(name);
+                let heap_refinements_for_name = refinements_by_key.heap.get(name);
+                let unrefined_env_val =
+                    unrefine(value_refinement_ids, snapshot.values.val(env_val));
+                let heap_refinements = snapshot.values.heap_refinements(env_val);
+                let unrefined_heap_refinements = match heap_refinements_for_name {
+                    None => heap_refinements,
+                    Some(heap_refinements_for_name) => heap_refinements
+                        .iter()
+                        .map(|(projections, heap_val)| {
+                            let new_val = match heap_val {
+                                Err(invalidation_info) => Err(invalidation_info.dupe()),
+                                Ok(v) => Ok(unrefine(
+                                    heap_refinements_for_name.get(projections),
+                                    v.dupe(),
+                                )),
+                            };
+                            (projections.dupe(), new_val)
+                        })
+                        .collect(),
+                };
+                snapshot.values.set_val(env_val, unrefined_env_val);
+                snapshot
+                    .values
+                    .set_heap_refinements(env_val, unrefined_heap_refinements);
+            });
+        snapshot
     }
 
     fn merge_heap_refinements(
@@ -2373,77 +2608,74 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         result
     }
 
+    // The functions below that set the environment from snapshots only go over the variables
+    // that may differ between them: for the others, merging or resetting a binding to the value
+    // it has gives that value.
+
     fn merge_remote_env(&self, env: &PartialEnvSnapshot) {
         // NOTE: env might have more keys than env_state.env, since the environment it
         // describes might be nested inside the current environment
-        self.env_state.env.update_env(|x, env_val| {
+        let changed = self.env_state.env.changed_vars(&[env]);
+        self.env_state.env.iter_bindings_of(&changed, |x, env_val| {
             let entry = self.partial_env_snapshot_read(x, env);
             if env_val.def_loc == entry.def_loc {
+                let current = self.env_state.env.entry(env_val);
                 let merged_val = self.merge_vals_with_havoc(
                     &env_val.havoc,
                     &env_val.def_loc,
-                    &env_val.val_ref.borrow(),
+                    &current.env_val,
                     &entry.env_val,
                 );
-                *env_val.val_ref.borrow_mut() = merged_val;
-                let merged_hr = self.merge_heap_refinements(
-                    &env_val.heap_refinements.borrow(),
-                    &entry.heap_refinements,
-                );
-                *env_val.heap_refinements.borrow_mut() = merged_hr;
+                self.env_state.env.set_val(env_val, merged_val);
+                let merged_hr =
+                    self.merge_heap_refinements(&current.heap_refinements, &entry.heap_refinements);
+                self.env_state.env.set_heap_refinements(env_val, merged_hr);
             }
         });
     }
 
     fn merge_env(&self, env1: &PartialEnvSnapshot, env2: &PartialEnvSnapshot) {
-        self.env_state.env.merge_env_with_partial_env_snapshots(
-            |env_val| self.should_havoc_val_to_initialized(env_val),
-            env1,
-            env2,
-            |e1, e2, env_val| {
-                let merged_val = self.merge_vals_with_havoc(
-                    &env_val.havoc,
-                    &env_val.def_loc,
-                    &e1.env_val,
-                    &e2.env_val,
-                );
-                *env_val.val_ref.borrow_mut() = merged_val;
-                let merged_hr =
-                    self.merge_heap_refinements(&e1.heap_refinements, &e2.heap_refinements);
-                *env_val.heap_refinements.borrow_mut() = merged_hr;
-            },
-        );
+        let mut changed = self.env_state.env.changed_vars(&[env1]);
+        changed.extend(FullEnv::changed_vars_between(env1, env2));
+        self.env_state.env.iter_bindings_of(&changed, |x, env_val| {
+            let e1 = self.partial_env_snapshot_read(x, env1);
+            let e2 = self.partial_env_snapshot_read(x, env2);
+            let merged_val = self.merge_vals_with_havoc(
+                &env_val.havoc,
+                &env_val.def_loc,
+                &e1.env_val,
+                &e2.env_val,
+            );
+            self.env_state.env.set_val(env_val, merged_val);
+            let merged_hr = self.merge_heap_refinements(&e1.heap_refinements, &e2.heap_refinements);
+            self.env_state.env.set_heap_refinements(env_val, merged_hr);
+        });
     }
 
     fn merge_self_env(&self, other_env: &PartialEnvSnapshot) {
-        self.env_state.env.update_env_with_partial_env_snapshot(
-            |env_val| self.should_havoc_val_to_initialized(env_val),
-            other_env,
-            |_x, entry, env_val| {
-                let merged_val = self.merge_vals_with_havoc(
-                    &env_val.havoc,
-                    &env_val.def_loc,
-                    &env_val.val_ref.borrow(),
-                    &entry.env_val,
-                );
-                *env_val.val_ref.borrow_mut() = merged_val;
-                let merged_hr = self.merge_heap_refinements(
-                    &env_val.heap_refinements.borrow(),
-                    &entry.heap_refinements,
-                );
-                *env_val.heap_refinements.borrow_mut() = merged_hr;
-            },
-        );
+        let changed = self.env_state.env.changed_vars(&[other_env]);
+        self.env_state.env.iter_bindings_of(&changed, |x, env_val| {
+            let entry = self.partial_env_snapshot_read(x, other_env);
+            let current = self.env_state.env.entry(env_val);
+            let merged_val = self.merge_vals_with_havoc(
+                &env_val.havoc,
+                &env_val.def_loc,
+                &current.env_val,
+                &entry.env_val,
+            );
+            self.env_state.env.set_val(env_val, merged_val);
+            let merged_hr =
+                self.merge_heap_refinements(&current.heap_refinements, &entry.heap_refinements);
+            self.env_state.env.set_heap_refinements(env_val, merged_hr);
+        });
     }
 
     fn reset_env(&self, env0: &PartialEnvSnapshot) {
-        self.env_state.env.update_env_with_partial_env_snapshot(
-            |env_val| self.should_havoc_val_to_initialized(env_val),
-            env0,
-            |_x, entry, env_val| {
-                entry.reset_val_with_entry(env_val);
-            },
-        );
+        let changed = self.env_state.env.changed_vars(&[env0]);
+        self.env_state.env.iter_bindings_of(&changed, |x, env_val| {
+            let entry = self.partial_env_snapshot_read(x, env0);
+            self.env_state.env.set_entry(env_val, &entry);
+        });
     }
 
     fn reset_to_unreachable_env(&self) {
@@ -2480,46 +2712,47 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         let env_val = self.env_read_opt(base)?;
 
         if projections.is_empty() {
-            let val = env_val.val_ref.borrow().dupe();
+            let val = self.env_state.env.val(&env_val);
             let (res, new_val) = f(self, val);
             let env_val = self.env_read_opt(base)?;
-            *env_val.val_ref.borrow_mut() = new_val;
+            self.env_state.env.set_val(&env_val, new_val);
             Some((res, None))
         } else {
-            let heap_refinements_ref = env_val.heap_refinements.borrow();
-            let find_result = heap_refinements_ref.get(projections);
+            let find_result = self
+                .env_state
+                .env
+                .heap_refinements(&env_val)
+                .get(projections)
+                .cloned();
 
             let (res, new_heap_refinements) = match find_result {
                 Some(Ok(heap_val)) => {
-                    let val = heap_val.dupe();
-                    drop(heap_refinements_ref);
-                    let (res, new_val) = f(self, val);
+                    let (res, new_val) = f(self, heap_val);
                     let env_val = self.env_read_opt(base)?;
-                    let mut new_hr = env_val.heap_refinements.borrow().dupe();
+                    let mut new_hr = self.env_state.env.heap_refinements(&env_val);
                     new_hr.insert(projections.dupe(), Ok(new_val));
                     (Some((res, None)), new_hr)
                 }
-                None | Some(Err(_)) => {
-                    drop(heap_refinements_ref);
-                    match create_val_for_heap {
-                        Some(create_default) => {
-                            let default = create_default(self);
-                            let (res, new_val) = f(self, default.dupe());
-                            let env_val = self.env_read_opt(base)?;
-                            let mut new_hr = env_val.heap_refinements.borrow().dupe();
-                            new_hr.insert(projections.dupe(), Ok(new_val));
-                            (Some((res, Some(default))), new_hr)
-                        }
-                        None => {
-                            let env_val = self.env_read_opt(base)?;
-                            let hr = env_val.heap_refinements.borrow().dupe();
-                            (None, hr)
-                        }
+                None | Some(Err(_)) => match create_val_for_heap {
+                    Some(create_default) => {
+                        let default = create_default(self);
+                        let (res, new_val) = f(self, default.dupe());
+                        let env_val = self.env_read_opt(base)?;
+                        let mut new_hr = self.env_state.env.heap_refinements(&env_val);
+                        new_hr.insert(projections.dupe(), Ok(new_val));
+                        (Some((res, Some(default))), new_hr)
                     }
-                }
+                    None => {
+                        let env_val = self.env_read_opt(base)?;
+                        let hr = self.env_state.env.heap_refinements(&env_val);
+                        (None, hr)
+                    }
+                },
             };
             let env_val = self.env_read_opt(base)?;
-            *env_val.heap_refinements.borrow_mut() = new_heap_refinements;
+            self.env_state
+                .env
+                .set_heap_refinements(&env_val, new_heap_refinements);
             res
         }
     }
@@ -2550,7 +2783,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         let base = &key.lookup.base;
         let projections = &key.lookup.projections;
         let env_val = self.env_read_opt(base)?;
-        let entry = partial_env_snapshot::Entry::of_env_val(&env_val);
+        let entry = self.env_state.env.entry(&env_val);
         if projections.is_empty() {
             Some(Ok(entry.env_val))
         } else {
@@ -2579,21 +2812,18 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         }
     }
 
-    fn havoc_heap_refinements(heap_refinements: &Rc<RefCell<HeapRefinementMap>>) {
-        if heap_refinements.borrow().is_empty() {
-            return;
-        }
-        thread_local! {
-            static CACHED: HeapRefinementMap = FlowRedBlackTreeMap::new();
-        }
-        *heap_refinements.borrow_mut() = CACHED.with(|c| c.clone());
+    fn havoc_heap_refinements(&self, env_val: &EnvVal) {
+        self.env_state
+            .env
+            .set_heap_refinements(env_val, empty_heap_refinements());
     }
 
     fn invalidate_heap_refinements(
-        heap_refinements: &Rc<RefCell<HeapRefinementMap>>,
+        &self,
+        env_val: &EnvVal,
         invalidation_info: flow_common::refinement_invalidation::RefinementInvalidation,
     ) {
-        let map = heap_refinements.borrow();
+        let map = self.env_state.env.heap_refinements(env_val);
         if map.is_empty() {
             return;
         }
@@ -2601,8 +2831,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
             .iter()
             .map(|(k, _)| (k.dupe(), Err(invalidation_info.dupe())))
             .collect();
-        drop(map);
-        *heap_refinements.borrow_mut() = new_map;
+        self.env_state.env.set_heap_refinements(env_val, new_map);
     }
 
     fn invalidate_all_heap_refinements_for_property_assignment(&mut self, loc: ALoc) {
@@ -2610,8 +2839,9 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         let invalidation_info =
             flow_common::refinement_invalidation::singleton(loc, Reason::PropertyAssignment);
 
-        self.env_state.env.update_env(|_, env_val| {
-            Self::invalidate_heap_refinements(&env_val.heap_refinements, invalidation_info.dupe());
+        let vars = self.env_state.env.vars_with_heap_refinements();
+        self.env_state.env.iter_bindings_of(&vars, |_, env_val| {
+            self.invalidate_heap_refinements(env_val, invalidation_info.dupe());
         });
     }
 
@@ -2627,55 +2857,45 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         let invalidation_info =
             flow_common::refinement_invalidation::singleton(loc.dupe(), invalidation_reason);
 
-        let havoced_ids: BTreeSet<usize> = self.env_state.env.fold_current_function_scope_values(
-            BTreeSet::new(),
-            |mut acc, env_val| {
-                if env_val.kind == BindingsKind::Internal {
+        let env = &self.env_state.env;
+        let havoced_ids: BTreeSet<usize> =
+            env.fold_current_function_scope_values(BTreeSet::new(), |mut acc, env_val| {
+                if env_val.kind == BindingsKind::Internal
+                    || !env_val.should_invalidate(invalidate_all)
+                {
                     return acc;
                 }
 
-                if env_val.should_invalidate(invalidate_all) {
-                    let val_is_undeclared_or_skipped =
-                        ssa_val::is_undeclared_or_skipped(&env_val.val_ref.borrow());
-
-                    let havoc_ref = if val_is_undeclared_or_skipped {
-                        env_val.val_ref.borrow().dupe()
-                    } else {
-                        let uninitialized_writes = || {
-                            ssa_val::writes_of_uninitialized(
-                                |id| self.refinement_may_be_undefined(RefinementId(id)),
-                                &env_val.val_ref.borrow(),
-                            )
-                        };
-
-                        let havoc = match (invalidate_all, &env_val.writes_by_closure_provider_val)
-                        {
-                            (false, Some(writes_by_closure_provider_val)) => ssa_val::merge(
-                                cache,
-                                env_val.val_ref.borrow().dupe(),
-                                writes_by_closure_provider_val.dupe(),
-                            ),
-                            _ => env_val.havoc.dupe(),
-                        };
-                        uninitialized_writes()
-                            .into_iter()
-                            .fold(havoc, |acc, write| {
-                                let write_val = ssa_val::of_write(cache, write);
-                                ssa_val::merge(cache, acc, write_val)
-                            })
-                    };
-                    Self::havoc_heap_refinements(&env_val.heap_refinements);
-                    *env_val.val_ref.borrow_mut() = havoc_ref.dupe();
-                    acc.insert(ssa_val::base_id_of_val(&havoc_ref));
+                let val = env.val(env_val);
+                let havoc_ref = if ssa_val::is_undeclared_or_skipped(&val) {
+                    val
                 } else {
-                    Self::invalidate_heap_refinements(
-                        &env_val.heap_refinements,
-                        invalidation_info.dupe(),
+                    let uninitialized_writes = ssa_val::writes_of_uninitialized(
+                        |id| self.refinement_may_be_undefined(RefinementId(id)),
+                        &val,
                     );
-                }
+                    let havoc = match (invalidate_all, &env_val.writes_by_closure_provider_val) {
+                        (false, Some(writes_by_closure_provider_val)) => {
+                            ssa_val::merge(cache, val, writes_by_closure_provider_val.dupe())
+                        }
+                        _ => env_val.havoc.dupe(),
+                    };
+                    uninitialized_writes.into_iter().fold(havoc, |acc, write| {
+                        let write_val = ssa_val::of_write(cache, write);
+                        ssa_val::merge(cache, acc, write_val)
+                    })
+                };
+                self.havoc_heap_refinements(env_val);
+                env.set_val(env_val, havoc_ref.dupe());
+                acc.insert(ssa_val::base_id_of_val(&havoc_ref));
                 acc
-            },
-        );
+            });
+        for env_val in env.current_function_scope_bindings_with_heap_refinements() {
+            if env_val.kind != BindingsKind::Internal && !env_val.should_invalidate(invalidate_all)
+            {
+                self.invalidate_heap_refinements(&env_val, invalidation_info.dupe());
+            }
+        }
 
         if let Some(ref tg_info) = self.env_state.type_guard_name {
             if havoced_ids.contains(&tg_info.id) {
@@ -2732,13 +2952,16 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         if env_val.kind == BindingsKind::Internal {
             return false;
         }
-        env_val.should_invalidate(true)
-            || !ssa_val::writes_of_uninitialized(
-                |id| self.refinement_may_be_undefined(RefinementId(id)),
-                env_val.val_ref.borrow().deref(),
-            )
-            .is_empty()
-            || ssa_val::is_undeclared_or_skipped(env_val.val_ref.borrow().deref())
+        if env_val.should_invalidate(true) {
+            return true;
+        }
+        let val = self.env_state.env.val(env_val);
+        !ssa_val::writes_of_uninitialized(
+            |id| self.refinement_may_be_undefined(RefinementId(id)),
+            &val,
+        )
+        .is_empty()
+            || ssa_val::is_undeclared_or_skipped(&val)
     }
 
     fn under_uninitialized_env<T, F: FnOnce(&mut Self) -> T>(&mut self, f: F) -> T {
@@ -2821,13 +3044,12 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
             }
         };
         EnvVal::new(EnvValInner {
-            val_ref: Rc::new(RefCell::new(val)),
+            id: self.env_state.env.add_binding(&VarKey::Synthetic(var), val),
             havoc,
             writes_by_closure_provider_val: None,
             invalidated_by_call: self.should_invalidate(false, &def_loc),
             invalidated_by_all: self.should_invalidate(true, &def_loc),
             def_loc,
-            heap_refinements: empty_heap_refinements(),
             kind,
             kind_at_loc,
         })
@@ -2870,13 +3092,12 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                     );
                     let val = ssa_val::one(&mut *self.cache.borrow_mut(), reason.dupe());
                     EnvVal::new(EnvValInner {
-                        val_ref: Rc::new(RefCell::new(val.dupe())),
+                        id: self.env_state.env.add_binding(key, val.dupe()),
                         havoc: val,
                         writes_by_closure_provider_val: None,
                         def_loc: Some(loc.dupe()),
                         invalidated_by_call,
                         invalidated_by_all,
-                        heap_refinements: empty_heap_refinements(),
                         kind: *kind,
                         kind_at_loc: kind_at_loc.clone(),
                     })
@@ -2890,13 +3111,12 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                     );
                     let val = ssa_val::one(&mut *self.cache.borrow_mut(), reason.dupe());
                     EnvVal::new(EnvValInner {
-                        val_ref: Rc::new(RefCell::new(val.dupe())),
+                        id: self.env_state.env.add_binding(key, val.dupe()),
                         havoc: val,
                         writes_by_closure_provider_val: None,
                         def_loc: Some(loc.dupe()),
                         invalidated_by_call,
                         invalidated_by_all,
-                        heap_refinements: empty_heap_refinements(),
                         kind: *kind,
                         kind_at_loc: kind_at_loc.clone(),
                     })
@@ -2913,13 +3133,12 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                     );
                     let val = ssa_val::one(&mut *self.cache.borrow_mut(), reason.dupe());
                     EnvVal::new(EnvValInner {
-                        val_ref: Rc::new(RefCell::new(val.dupe())),
+                        id: self.env_state.env.add_binding(key, val.dupe()),
                         havoc: val,
                         writes_by_closure_provider_val: None,
                         def_loc: Some(loc.dupe()),
                         invalidated_by_call,
                         invalidated_by_all,
-                        heap_refinements: empty_heap_refinements(),
                         kind: *kind,
                         kind_at_loc: kind_at_loc.clone(),
                     })
@@ -2937,13 +3156,12 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                     let val =
                         ssa_val::undeclared(&mut *self.cache.borrow_mut(), name.dupe(), loc.dupe());
                     EnvVal::new(EnvValInner {
-                        val_ref: Rc::new(RefCell::new(val)),
+                        id: self.env_state.env.add_binding(key, val),
                         havoc,
                         writes_by_closure_provider_val: None,
                         def_loc: Some(loc.dupe()),
                         invalidated_by_call,
                         invalidated_by_all,
-                        heap_refinements: empty_heap_refinements(),
                         kind: *kind,
                         kind_at_loc: kind_at_loc.clone(),
                     })
@@ -2960,13 +3178,15 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                     let declared_function =
                         ssa_val::declared_function(&mut *self.cache.borrow_mut(), loc.dupe());
                     EnvVal::new(EnvValInner {
-                        val_ref: Rc::new(RefCell::new(declared_function.dupe())),
+                        id: self
+                            .env_state
+                            .env
+                            .add_binding(key, declared_function.dupe()),
                         havoc: declared_function,
                         writes_by_closure_provider_val: None,
                         def_loc: Some(loc.dupe()),
                         invalidated_by_call,
                         invalidated_by_all,
-                        heap_refinements: empty_heap_refinements(),
                         kind: *kind,
                         kind_at_loc: kind_at_loc.clone(),
                     })
@@ -2986,13 +3206,12 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                     let val =
                         ssa_val::undeclared(&mut *self.cache.borrow_mut(), name.dupe(), loc.dupe());
                     EnvVal::new(EnvValInner {
-                        val_ref: Rc::new(RefCell::new(val)),
+                        id: self.env_state.env.add_binding(key, val),
                         havoc,
                         writes_by_closure_provider_val: None,
                         def_loc: Some(loc.dupe()),
                         invalidated_by_call,
                         invalidated_by_all,
-                        heap_refinements: empty_heap_refinements(),
                         kind,
                         kind_at_loc: kind_at_loc.clone(),
                     })
@@ -3001,13 +3220,12 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                     let val =
                         ssa_val::undeclared(&mut *self.cache.borrow_mut(), name.dupe(), loc.dupe());
                     EnvVal::new(EnvValInner {
-                        val_ref: Rc::new(RefCell::new(val.dupe())),
+                        id: self.env_state.env.add_binding(key, val.dupe()),
                         havoc: val,
                         writes_by_closure_provider_val: None,
                         def_loc: None,
                         invalidated_by_call: true,
                         invalidated_by_all: true,
-                        heap_refinements: empty_heap_refinements(),
                         kind: *kind,
                         kind_at_loc: kind_at_loc.clone(),
                     })
@@ -3111,13 +3329,12 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                     };
 
                     EnvVal::new(EnvValInner {
-                        val_ref: Rc::new(RefCell::new(initial_val)),
+                        id: self.env_state.env.add_binding(key, initial_val),
                         havoc,
                         writes_by_closure_provider_val,
                         def_loc: Some(loc.dupe()),
                         invalidated_by_call,
                         invalidated_by_all,
-                        heap_refinements: empty_heap_refinements(),
                         kind: *kind,
                         kind_at_loc: kind_at_loc.clone(),
                     })
@@ -3136,7 +3353,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
     /// Build the type-namespace env. Type bindings (Type/Interface) and the
     /// "type side" of NValueAndType bindings (Class/Enum/DeclaredClass/
     /// DeclaredNamespace) all produce a uniform "type-like" env_val. The
-    /// val_ref/havoc fields are not used for SSA flow on the type side
+    /// value and havoc are not used for SSA flow on the type side
     /// (types don't change), but they are populated for consistency.
     ///
     /// Critically, EVERY declaration loc in the type namespace gets an
@@ -3282,13 +3499,12 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
             };
             let def_loc = Some(canonical_loc);
             let env_val = EnvVal::new(EnvValInner {
-                val_ref: Rc::new(RefCell::new(val)),
+                id: self.env_state.env.add_binding(key, val),
                 havoc,
                 writes_by_closure_provider_val: None,
                 invalidated_by_call: self.should_invalidate(false, &def_loc),
                 invalidated_by_all: self.should_invalidate(true, &def_loc),
                 def_loc,
-                heap_refinements: empty_heap_refinements(),
                 kind: canonical_kind,
                 kind_at_loc: type_kind_at_loc,
             });
@@ -3736,7 +3952,6 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         let reason = VirtualReason::new(VirtualReasonDesc::RIdentifier(x.dupe()), loc.dupe());
 
         let env_val = self.env_read(x);
-        let val_ref = env_val.val_ref.dupe();
         let stored_binding_kind = env_val.kind;
         let def_loc = env_val.def_loc.dupe();
 
@@ -3744,7 +3959,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
             // Assignments to undeclared bindings that aren't part of declarations do not
             // initialize those bindings.
             PatternWriteKind::AssignmentWrite
-                if ssa_val::is_undeclared_or_skipped(&val_ref.borrow()) =>
+                if ssa_val::is_undeclared_or_skipped(&self.env_state.env.val(&env_val)) =>
             {
                 match def_loc {
                     None => {
@@ -3773,7 +3988,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                     def_loc.dupe(),
                     stored_binding_kind,
                     kind,
-                    &val_ref.borrow(),
+                    &self.env_state.env.val(&env_val),
                     self.enable_const_params,
                 );
                 match err {
@@ -3785,17 +4000,18 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                             stored_binding_kind,
                             kind,
                             err,
-                            &val_ref,
+                            &env_val,
                         );
                     }
                     None => {
-                        Self::havoc_heap_refinements(&env_val.heap_refinements);
-                        let current_val = val_ref.borrow().dupe();
+                        self.havoc_heap_refinements(&env_val);
+                        let current_val = self.env_state.env.val(&env_val);
                         if !ssa_val::is_declared_function(&current_val)
                             && !self.is_excluded_ordinary_name(x)
                         {
-                            *val_ref.borrow_mut() =
+                            let assigned_val =
                                 get_assigned_val(&mut self.cache.borrow_mut(), reason.dupe());
+                            self.env_state.env.set_val(&env_val, assigned_val);
                         }
                         let write_entry = if ssa_val::is_global(&current_val) {
                             env_api::EnvEntry::GlobalWrite(reason)
@@ -3820,14 +4036,14 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         stored_binding_kind: BindingsKind,
         kind: PatternWriteKind,
         err: ErrorMessage<ALoc>,
-        val_ref: &Rc<RefCell<Val<ALoc>>>,
+        env_val: &EnvVal,
     ) {
         Fl::add_output(self.cx, err);
         let write_entry = match kind {
             PatternWriteKind::ClassBinding => {
                 // Record duplicate classes as assigning writes so that in class_identifier_opt
                 // we can install entries for "this" and "super".
-                if ssa_val::is_global(&val_ref.borrow()) {
+                if ssa_val::is_global(&self.env_state.env.val(env_val)) {
                     env_api::EnvEntry::GlobalWrite(reason.dupe())
                 } else {
                     env_api::EnvEntry::AssigningWrite(reason.dupe())
@@ -3846,7 +4062,8 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
             && matches!(kind, PatternWriteKind::VarBinding)
             && !self.is_excluded_ordinary_name(x)
         {
-            *val_ref.borrow_mut() = ssa_val::illegal_write(&mut *self.cache.borrow_mut(), reason);
+            let illegal_write = ssa_val::illegal_write(&mut *self.cache.borrow_mut(), reason);
+            self.env_state.env.set_val(env_val, illegal_write);
         }
     }
 
@@ -3885,7 +4102,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         {
             env_val.havoc.dupe()
         } else {
-            env_val.val_ref.borrow().dupe()
+            self.env_state.env.val(&env_val)
         };
         if self.env_state.in_param_default
             && env_val.kind == BindingsKind::TypeParam
@@ -3944,7 +4161,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         {
             env_val.havoc.dupe()
         } else {
-            env_val.val_ref.borrow().dupe()
+            self.env_state.env.val(&env_val)
         };
         if self.env_state.in_param_default
             && env_val.kind == BindingsKind::TypeParam
@@ -4040,7 +4257,6 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         let loc = id.loc.dupe();
         let name = &id.name;
         let env_val = self.type_env_read(name);
-        let val_ref = env_val.val_ref.dupe();
         let def_loc_opt = env_val.def_loc.dupe();
         if let Some(def_loc) = def_loc_opt {
             match self.env_state.current_bindings.get(&def_loc) {
@@ -4054,8 +4270,9 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                         env_api::EnvKey::new(env_api::DefLocType::OrdinaryNameLoc, def_loc.dupe()),
                         env_api::EnvEntry::NonAssigningWrite,
                     );
-                    *val_ref.borrow_mut() =
+                    let illegal_write =
                         ssa_val::illegal_write(&mut *self.cache.borrow_mut(), reason);
+                    self.env_state.env.set_val(&env_val, illegal_write);
                     Fl::add_output(
                         self.cx,
                         ErrorMessage::EReferenceInAnnotation(Box::new((
@@ -4107,11 +4324,9 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
             Reason::PropertyAssignment,
         );
 
-        self.env_state.env.update_env(|_, env_val| {
-            let heap_refinements = env_val.heap_refinements.borrow();
-            if heap_refinements.is_empty() {
-                return;
-            }
+        let vars = self.env_state.env.vars_with_heap_refinements();
+        self.env_state.env.iter_bindings_of(&vars, |_, env_val| {
+            let heap_refinements = self.env_state.env.heap_refinements(env_val);
             let new_heap: HeapRefinementMap = heap_refinements
                 .iter()
                 .map(|(projections, entry)| {
@@ -4137,8 +4352,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                     (projections.dupe(), new_entry)
                 })
                 .collect();
-            drop(heap_refinements);
-            *env_val.heap_refinements.borrow_mut() = new_heap;
+            self.env_state.env.set_heap_refinements(env_val, new_heap);
         });
     }
 
@@ -4365,7 +4579,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
             return;
         };
         let assigned = ssa_val::one(&mut *self.cache.borrow_mut(), VirtualReason::new(None, loc));
-        *env_val.val_ref.borrow_mut() = assigned;
+        self.env_state.env.set_val(&env_val, assigned);
     }
 
     /// Records a field's state when construction ends, as a read at the field's declaration.
@@ -4398,7 +4612,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         let Some(env_val) = self.field_init_of_member(member) else {
             return;
         };
-        let value = env_val.val_ref.borrow().dupe();
+        let value = self.env_state.env.val(&env_val);
         self.env_state.values.insert(
             ReadKey::new(ReadKind::FieldInitUse, loc.dupe()),
             ReadEntry {
@@ -5227,30 +5441,35 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
             (None, Some(_)) => self.reset_env(refined_env1),
             (Some(_), None) => self.reset_env(refined_env2),
             _ => {
-                let keys = self.env_state.env.all_keys();
-                for key in keys {
+                // A variable whose bindings and values are the same in the four environments as
+                // in the current one keeps its value, and its heap refinements only change if it
+                // has some.
+                let mut keys =
+                    self.env_state
+                        .env
+                        .changed_vars(&[env1, env2, refined_env1, refined_env2]);
+                keys.extend(self.env_state.env.vars_with_heap_refinements());
+                self.env_state.env.iter_bindings_of(&keys, |key, env_val| {
                     let PartialEnvEntry {
                         env_val: value1,
                         heap_refinements: heap_entries1,
                         def_loc: _,
-                    } = self.partial_env_snapshot_read(&key, env1);
+                    } = self.partial_env_snapshot_read(key, env1);
                     let PartialEnvEntry {
                         env_val: value2,
                         heap_refinements: heap_entries2,
                         def_loc: _,
-                    } = self.partial_env_snapshot_read(&key, env2);
+                    } = self.partial_env_snapshot_read(key, env2);
                     let PartialEnvEntry {
                         env_val: refined_value1,
                         heap_refinements: refined_heap_entries1,
                         def_loc: _,
-                    } = self.partial_env_snapshot_read(&key, refined_env1);
+                    } = self.partial_env_snapshot_read(key, refined_env1);
                     let PartialEnvEntry {
                         env_val: refined_value2,
                         heap_refinements: refined_heap_entries2,
                         def_loc: _,
-                    } = self.partial_env_snapshot_read(&key, refined_env2);
-
-                    let env_val = self.env_state.env.env_val_by_key(&key).unwrap();
+                    } = self.partial_env_snapshot_read(key, refined_env2);
 
                     let merged_heap = {
                         let mut result: HeapRefinementMap = FlowRedBlackTreeMap::new();
@@ -5316,19 +5535,22 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                         }
                         result
                     };
-                    *env_val.heap_refinements.borrow_mut() = merged_heap;
+                    self.env_state
+                        .env
+                        .set_heap_refinements(env_val, merged_heap);
 
-                    if ssa_val::id_of_val(&value1) == ssa_val::id_of_val(&value2) {
-                        *env_val.val_ref.borrow_mut() = value1;
+                    let val = if ssa_val::id_of_val(&value1) == ssa_val::id_of_val(&value2) {
+                        value1
                     } else {
-                        *env_val.val_ref.borrow_mut() = self.merge_vals_with_havoc(
+                        self.merge_vals_with_havoc(
                             &env_val.havoc,
                             &env_val.def_loc,
                             &refined_value1,
                             &refined_value2,
-                        );
-                    }
-                }
+                        )
+                    };
+                    self.env_state.env.set_val(env_val, val);
+                });
             }
         }
     }
@@ -5504,12 +5726,12 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                     if !matches!(
                         env_val.kind,
                         BindingsKind::Const | BindingsKind::DeclaredConst
-                    ) && !ssa_val::is_undeclared_or_skipped(&env_val.val_ref.borrow())
+                    ) && !ssa_val::is_undeclared_or_skipped(&self.env_state.env.val(&env_val))
                     {
-                        env_val.heap_refinements.borrow_mut().clear();
+                        self.havoc_heap_refinements(&env_val);
                         let writes = ssa_val::writes_of_uninitialized(
                             |id| self.refinement_may_be_undefined(RefinementId(id)),
-                            &env_val.val_ref.borrow(),
+                            &self.env_state.env.val(&env_val),
                         );
                         let new_val =
                             writes.into_iter().fold(env_val.havoc.dupe(), |acc, write| {
@@ -5517,20 +5739,18 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                                     ssa_val::of_write(&mut *self.cache.borrow_mut(), write);
                                 ssa_val::merge(&mut *self.cache.borrow_mut(), acc, write_val)
                             });
-                        *env_val.val_ref.borrow_mut() = new_val;
+                        self.env_state.env.set_val(&env_val, new_val);
                     }
                 }
             } else {
                 let base = &lookup.base;
                 let projs = &lookup.projections;
-                let scope = self.env_state.env.current_scope_mut();
-                if let Some(stack) = scope.value_local_stacked_env.get(base) {
-                    stack
-                        .last()
-                        .unwrap()
-                        .heap_refinements
-                        .borrow_mut()
-                        .remove(projs);
+                if let Some(env_val) = self.env_state.env.local_binding(base) {
+                    let mut heap_refinements = self.env_state.env.heap_refinements(&env_val);
+                    heap_refinements.remove(projs);
+                    self.env_state
+                        .env
+                        .set_heap_refinements(&env_val, heap_refinements);
                 }
             }
         }
@@ -5873,7 +6093,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
             .synthetic_env_read_opt(SyntheticVar::MaybeExhaustivelyChecked)
             .expect("should be bound in every function and component body, and at the top level");
         let new_val = ssa_val::one(&mut *self.cache.borrow_mut(), reason);
-        *env_val.val_ref.borrow_mut() = new_val;
+        self.env_state.env.set_val(&env_val, new_val);
     }
 
     // **********************************************************
@@ -6095,14 +6315,15 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
             match kind {
                 Kind::Let | Kind::Const | Kind::DeclaredLet | Kind::DeclaredConst => {
                     let env_entry = self.env_read(name);
-                    Self::havoc_heap_refinements(&env_entry.heap_refinements);
+                    self.havoc_heap_refinements(&env_entry);
                     let (loc, _) = locs.first();
                     let loc = loc.dupe();
-                    *env_entry.val_ref.borrow_mut() = ssa_val::declared_but_skipped(
+                    let skipped = ssa_val::declared_but_skipped(
                         &mut *self.cache.borrow_mut(),
                         name.dupe(),
                         loc,
                     );
+                    self.env_state.env.set_val(&env_entry, skipped);
                 }
                 _ => {}
             }
@@ -6232,7 +6453,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                             )?;
 
                             if let Some(env_val) = r3.synthetic_env_read_opt(SyntheticVar::MaybeExhaustivelyChecked) {
-                                let val = env_val.val_ref.borrow();
+                                let val = r3.env_state.env.val(&env_val);
                                 let mut cache = HashMap::new();
                                 let simplified = ssa_val::simplify(
                                     &mut cache,
@@ -6492,7 +6713,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                             }
                             body_completion?;
                             if let Some(env_val) = r3.synthetic_env_read_opt(SyntheticVar::MaybeExhaustivelyChecked) {
-                                let val = env_val.val_ref.borrow();
+                                let val = r3.env_state.env.val(&env_val);
                                 let mut cache = HashMap::new();
                                 let simplified = ssa_val::simplify(&mut cache, None, ssa_val::ValBindingKind::InternalBinding, None, &val);
                                 let mut locs: Vec<ALoc> = Vec::new();
@@ -6704,8 +6925,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                 let env_val = self.env_read(&inner.name);
                 let stored_binding_kind = env_val.kind;
                 let def_loc = env_val.def_loc.dupe();
-                let val_ref = &env_val.val_ref;
-                let val_snapshot = val_ref.borrow().dupe();
+                let val_snapshot = self.env_state.env.val(&env_val);
                 match error_for_assignment_kind(
                     &inner.name,
                     id_loc.dupe(),
@@ -6716,7 +6936,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                     self.enable_const_params,
                 ) {
                     None => {
-                        *val_ref.borrow_mut() = undefined;
+                        self.env_state.env.set_val(&env_val, undefined);
                     }
                     Some(err) => {
                         self.env_state.write_entries.insert(
@@ -7017,7 +7237,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
                                 | BindingsKind::Let
                                 | BindingsKind::DeclaredConst
                                 | BindingsKind::DeclaredLet
-                        ) && ssa_val::is_undeclared_or_skipped(&env_val.val_ref.borrow())
+                        ) && ssa_val::is_undeclared_or_skipped(&self.env_state.env.val(&env_val))
                             && env_val.def_loc.is_some()
                     } else {
                         false
@@ -7310,7 +7530,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         self.any_identifier(loc.dupe(), &name);
 
         if let Some(env_val) = self.env_read_opt(&name) {
-            if !ssa_val::is_undeclared_or_skipped(&env_val.val_ref.borrow()) {
+            if !ssa_val::is_undeclared_or_skipped(&self.env_state.env.val(&env_val)) {
                 let key = refinement_key::RefinementKey::of_name(name, loc.dupe());
                 let mut refining_locs = empty_refining_locs();
                 refining_locs.insert(loc.dupe());
@@ -7637,7 +7857,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         let undefined_name = FlowSmolStr::new_inline("undefined");
         match self.env_read_opt(&undefined_name) {
             None => false,
-            Some(entry) => ssa_val::is_global_undefined(&entry.val_ref.borrow()),
+            Some(entry) => ssa_val::is_global_undefined(&self.env_state.env.val(&entry)),
         }
     }
 
@@ -9112,19 +9332,19 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         let global_bindings: BTreeMap<_, _> = names
             .iter()
             .map(|name| {
+                let key = VarKey::Name(name.dupe());
                 let val = ssa_val::global(&mut self.cache.borrow_mut(), name.dupe());
                 let entry = EnvVal::new(EnvValInner {
-                    val_ref: Rc::new(RefCell::new(val.dupe())),
+                    id: self.env_state.env.add_binding(&key, val.dupe()),
                     havoc: val,
                     writes_by_closure_provider_val: None,
                     def_loc: None,
                     invalidated_by_call: true,
                     invalidated_by_all: true,
-                    heap_refinements: empty_heap_refinements(),
                     kind: BindingsKind::Var,
                     kind_at_loc: BTreeMap::new(),
                 });
-                (VarKey::Name(name.dupe()), entry)
+                (key, entry)
             })
             .collect();
         let snapshot = self
@@ -9143,7 +9363,7 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         let v = if self.env_state.visiting_hoisted_type {
             env_val.havoc.dupe()
         } else {
-            env_val.val_ref.borrow().dupe()
+            self.env_state.env.val(&env_val)
         };
         ssa_val::simplify(
             &mut *self.simplify_cache.borrow_mut(),
@@ -9405,7 +9625,7 @@ impl<'ast, 'a, Cx: Context, Fl: Flow<Cx = Cx>>
             }
         }
         if kind == BindingsKind::TypeParam {
-            *env_val.val_ref.borrow_mut() = env_val.havoc.dupe();
+            self.env_state.env.set_val(&env_val, env_val.havoc.dupe());
         }
         ast_visitor::identifier_default(self, ident)
     }
@@ -10034,12 +10254,10 @@ impl<'ast, 'a, Cx: Context, Fl: Flow<Cx = Cx>>
                     };
 
                     let env_entry = self.env_read(x);
-                    let val_ref = env_entry.val_ref.dupe();
-                    let heap_refinements = env_entry.heap_refinements.dupe();
                     let stored_binding_kind = env_entry.kind;
                     let def_loc = env_entry.def_loc.dupe();
 
-                    let val_snapshot = val_ref.borrow().dupe();
+                    let val_snapshot = self.env_state.env.val(&env_entry);
                     match error_for_assignment_kind(
                         x,
                         name_loc.dupe(),
@@ -10061,10 +10279,10 @@ impl<'ast, 'a, Cx: Context, Fl: Flow<Cx = Cx>>
                         }
                         None => {
                             self.record_pattern_loc_writes(id);
-                            Self::havoc_heap_refinements(&heap_refinements);
-                            if !ssa_val::is_declared_function(&val_ref.borrow()) {
+                            self.havoc_heap_refinements(&env_entry);
+                            if !ssa_val::is_declared_function(&self.env_state.env.val(&env_entry)) {
                                 if !self.is_excluded_ordinary_name(x) {
-                                    *val_ref.borrow_mut() = assigned_val;
+                                    self.env_state.env.set_val(&env_entry, assigned_val);
                                 }
                                 self.env_state.write_entries.insert(
                                     env_api::EnvKey::new(
@@ -10113,25 +10331,24 @@ impl<'ast, 'a, Cx: Context, Fl: Flow<Cx = Cx>>
                     let name = &identifier.name;
 
                     let env_val = self.env_read(name);
-                    let val_ref = env_val.val_ref.dupe();
                     let stored_binding_kind = env_val.kind;
                     let def_loc = env_val.def_loc.dupe();
                     let write_kind =
                         variable_declaration_binding_kind_to_pattern_write_kind(Some(kind));
+                    let val = self.env_state.env.val(&env_val);
                     let error = error_for_assignment_kind(
                         name,
                         loc.dupe(),
                         def_loc.dupe(),
                         stored_binding_kind,
                         write_kind,
-                        &val_ref.borrow(),
+                        &val,
                         self.enable_const_params,
                     );
-                    if ssa_val::is_undeclared(&val_ref.borrow())
-                        && !self.is_excluded_ordinary_name(name)
-                    {
-                        *val_ref.borrow_mut() =
+                    if ssa_val::is_undeclared(&val) && !self.is_excluded_ordinary_name(name) {
+                        let uninitialized =
                             ssa_val::uninitialized(&mut *self.cache.borrow_mut(), loc.dupe());
+                        self.env_state.env.set_val(&env_val, uninitialized);
                     }
                     let reason =
                         VirtualReason::new(VirtualReasonDesc::RIdentifier(name.dupe()), loc.dupe());
@@ -10151,7 +10368,7 @@ impl<'ast, 'a, Cx: Context, Fl: Flow<Cx = Cx>>
                                 stored_binding_kind,
                                 write_kind,
                                 err,
-                                &val_ref,
+                                &env_val,
                             );
                         }
                         _ => {}
@@ -11247,7 +11464,7 @@ impl<'ast, 'a, Cx: Context, Fl: Flow<Cx = Cx>>
     ) -> Result<(), AbruptCompletion> {
         if let Some((loc, name)) = &self.env_state.inferred_type_guard_candidate {
             let entry = self.env_read(name);
-            let id = entry.val_ref.borrow().id;
+            let id = self.env_state.env.val(&entry).id;
             let info = TypeGuardNameInfo(Rc::new(TypeGuardNameInfoInner {
                 loc: loc.dupe(),
                 name: name.dupe(),
@@ -11269,7 +11486,7 @@ impl<'ast, 'a, Cx: Context, Fl: Flow<Cx = Cx>>
         let loc = guard_id.loc.dupe();
         let name = guard_id.name.dupe();
         let entry = self.env_read(&name);
-        let id = entry.val_ref.borrow().id;
+        let id = self.env_state.env.val(&entry).id;
         let info = TypeGuardNameInfo(Rc::new(TypeGuardNameInfoInner {
             loc,
             name,
