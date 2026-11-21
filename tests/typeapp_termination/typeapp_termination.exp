@@ -107,5 +107,89 @@ References:
                                   ^^^^^^ [3]
 
 
+Error ---------------------------------------------------------------------------------------- ts_type_arg_growth.js:5:1
 
-Found 6 errors
+Cannot cast `m` to `N<"y">` because: [incompatible-type]
+ - Either in property `v`: `"x"` [1] is incompatible with `"y"` [2].
+ - Or property `v` is missing in ``{next: N<`a${"x"}`>}`` [3] but exists in `{v: "y"}` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   ts_type_arg_growth.js:5:1
+   5| m as N<'y'>; // error
+      ^
+
+References:
+   ts_type_arg_growth.js:3:20
+   3| declare const m: M<'x'>;
+                         ^^^ [1]
+   ts_type_arg_growth.js:5:8
+   5| m as N<'y'>; // error
+             ^^^ [2]
+   ts_type_arg_growth.d.ts:1:44
+   1| export type M<T extends string> = {v: T} & {next: N<`a${T}`>};
+                                                 ^^^^^^^^^^^^^^^^^^ [3]
+   ts_type_arg_growth.d.ts:2:35
+   2| export type N<T extends string> = {v: T} & {next: M<`a${T}`>};
+                                        ^^^^^^ [4]
+
+
+Error ---------------------------------------------------------------------------------------- ts_type_arg_growth.js:5:1
+
+Cannot cast `m` to `N<"y">` because: [incompatible-type]
+ - Either in property `next` > property `v`: `"ax"` [1] is incompatible with `` `a${"y"}` `` [2].
+ - Or in property `next`: property `v` is missing in ``{next: M<`a${`a${"x"}`}`>}`` [3] but exists in
+   ``{v: `a${"y"}`}`` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   ts_type_arg_growth.js:5:1
+   5| m as N<'y'>; // error
+      ^
+
+References:
+   ts_type_arg_growth.d.ts:1:53
+   1| export type M<T extends string> = {v: T} & {next: N<`a${T}`>};
+                                                          ^^^^^^^ [1]
+   ts_type_arg_growth.d.ts:2:53
+   2| export type N<T extends string> = {v: T} & {next: M<`a${T}`>};
+                                                          ^^^^^^^ [2]
+   ts_type_arg_growth.d.ts:2:44
+   2| export type N<T extends string> = {v: T} & {next: M<`a${T}`>};
+                                                 ^^^^^^^^^^^^^^^^^^ [3]
+   ts_type_arg_growth.d.ts:1:35
+   1| export type M<T extends string> = {v: T} & {next: N<`a${T}`>};
+                                        ^^^^^^ [4]
+
+
+Error ------------------------------------------------------------------------------------------- type_arg_growth.js:6:1
+
+Cannot cast `g` to `H<number>` because properties `next` and `v` of `{next: H<{v: string}>, v: string}` [1] are not
+exactly the same as those of `{next: G<{v: number}>, v: number}` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because properties `next` and `v` are invariantly typed. To fix the
+error,
+- Either make `{next: H<{v: string}>, v: string}` [3] and `{next: G<{v: number}>, v: number}` [4] exactly the same
+- Or make properties `next` and `v` in `{next: G<{v: number}>, v: number}` [2] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   type_arg_growth.js:6:1
+   6| g as H<number>; // error
+      ^ [1]
+
+References:
+   type_arg_growth.js:6:6
+   6| g as H<number>; // error
+           ^^^^^^^^^ [2]
+   type_arg_growth.js:1:13
+   1| type G<T> = {v: T, next: H<{v: T}>};
+                  ^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   type_arg_growth.js:2:13
+   2| type H<T> = {v: T, next: G<{v: T}>};
+                  ^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+
+Found 9 errors

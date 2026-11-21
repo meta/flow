@@ -73,13 +73,16 @@ pub mod type_app_expansion {
 
     // Array types function like type applications but are not implemented as such. Unless
     // we decide to unify their implementation with regular typeapps, they need special
-    // handling here
+    // handling here. Object, intersection and template literal types are counted by where
+    // they were written, since a type argument like `{v: T}`, `T & string` or `` `a${T}` ``
+    // can grow without a nested type application.
     #[derive(Debug, Clone, Dupe, PartialEq, Eq, PartialOrd, Ord)]
     pub enum Root {
         Type(Type),
         Array(flow_common::reason::Reason),
         ROArray(flow_common::reason::Reason),
         Tuple(flow_common::reason::Reason, usize),
+        Written(flow_common::reason::Reason),
     }
 
     pub type RootSet = BTreeSet<Root>;

@@ -140,9 +140,18 @@ pub mod type_app_expansion {
                     acc.insert(Root::Type(inner_type.dupe()));
                     flow_typing_visitors::type_visitor::type_default(self, cx, pole, acc, t)
                 }
+                TypeInner::TemplateLiteralT { reason, .. }
+                | TypeInner::IntersectionT(reason, _) => {
+                    acc.insert(Root::Written(reason.dupe()));
+                    flow_typing_visitors::type_visitor::type_default(self, cx, pole, acc, t)
+                }
                 TypeInner::DefT(r, def_t) => match def_t.deref() {
                     DefTInner::ArrT(arr) => {
                         acc.insert(self.arrtype(r, arr));
+                        flow_typing_visitors::type_visitor::type_default(self, cx, pole, acc, t)
+                    }
+                    DefTInner::ObjT(_) => {
+                        acc.insert(Root::Written(r.dupe()));
                         flow_typing_visitors::type_visitor::type_default(self, cx, pole, acc, t)
                     }
                     _ => flow_typing_visitors::type_visitor::type_default(self, cx, pole, acc, t),
