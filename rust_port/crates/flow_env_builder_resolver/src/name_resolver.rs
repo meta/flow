@@ -2078,6 +2078,9 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         v1: &Val<ALoc>,
         v2: &Val<ALoc>,
     ) -> Val<ALoc> {
+        if ssa_val::id_of_val(v1) == ssa_val::id_of_val(v2) {
+            return v1.dupe();
+        }
         let can_merge_with_havoc = |v_havoc: &Val<ALoc>, v_other: &Val<ALoc>| -> bool {
             ssa_val::id_of_val(v_havoc) == ssa_val::id_of_val(havoc)
                 && ssa_val::writes_of_uninitialized(
@@ -2330,6 +2333,9 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> NameResolver<'a, Cx, Fl> {
         hr1: &HeapRefinementMap,
         hr2: &HeapRefinementMap,
     ) -> HeapRefinementMap {
+        if hr1.ptr_eq(hr2) {
+            return hr1.dupe();
+        }
         let mut result = FlowRedBlackTreeMap::new();
 
         // When we merge the heap refinements from two branches we cannot include
