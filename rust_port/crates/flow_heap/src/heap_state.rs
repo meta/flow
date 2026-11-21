@@ -888,6 +888,13 @@ impl<'a> HeapReader<'a> {
             .and_then(|entry| entry.parse())
     }
 
+    pub fn get_package_info_committed(&self, file: &FileKey) -> Option<Arc<PackageJson>> {
+        match self.get_parse_committed(file) {
+            Some(Parse::Package(package)) => Some(package.package_info.dupe()),
+            Some(Parse::Typed(_) | Parse::Untyped(_)) | None => None,
+        }
+    }
+
     pub fn get_haste_info(&self, file: &FileKey) -> Option<HasteModuleInfo> {
         self.file_entry(file)
             .and_then(|entry| entry.get_haste_info())

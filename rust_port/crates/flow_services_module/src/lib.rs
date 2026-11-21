@@ -2013,6 +2013,8 @@ pub fn commit_modules(
 
                 match (old_typed, new_typed) {
                     (true, false) | (false, true) => {}
+                    _ if reader.get_package_info_committed(file_key)
+                        != reader.get_package_info(file_key) => {}
                     _ => {
                         unchanged.insert(mname.clone());
                     }
