@@ -7198,7 +7198,7 @@ pub(super) fn solve_targs<'cx>(
     // The level sits below the ones the snapshot rolls back.
     let preserve_level = cx.constraint_cache().level_count();
     cx.constraint_cache_mut().push_level();
-    cx.run_and_rolled_back_cache(|cx| {
+    let result = cx.run_and_rolled_back_cache(|cx| {
         solve_targs_in_snapshot(
             cx,
             env,
@@ -7209,7 +7209,12 @@ pub(super) fn solve_targs<'cx>(
             return_hint,
             check,
         )
-    })
+    });
+    // Its entries join the enclosing level, which an enclosing speculation rolls back.
+    let cache = cx.constraint_cache_mut();
+    cache.move_top_entries_to_level(preserve_level - 1);
+    cache.pop_level();
+    result
 }
 
 fn solve_targs_in_snapshot<'cx>(
