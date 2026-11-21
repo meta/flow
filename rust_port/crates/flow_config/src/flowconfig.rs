@@ -3377,7 +3377,7 @@ pub fn empty_config() -> FlowConfig {
         declarations: Vec::new(),
         includes: Vec::new(),
         libs: Vec::new(),
-        lint_severities: LintSettings::<Severity>::default_severities(),
+        lint_severities: LintSettings::<Severity>::empty_severities(),
         strict_mode: StrictModeSettings::empty(),
         options: opts::default_options(),
         version: None,

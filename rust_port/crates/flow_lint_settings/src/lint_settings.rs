@@ -30,17 +30,6 @@ const IGNORED_BY_ALL: &[LintKind] = &[
 ];
 
 impl<T: Copy> LintSettings<T> {
-    fn default_explicit_values() -> BTreeMap<LintKind, (Severity, Option<Loc>)> {
-        BTreeMap::new()
-    }
-
-    fn config_default(kind: LintKind) -> (Severity, Option<Loc>) {
-        Self::default_explicit_values()
-            .get(&kind)
-            .cloned()
-            .unwrap_or((Severity::Off, None))
-    }
-
     pub fn set_value(&mut self, key: LintKind, value: (T, Option<Loc>)) {
         self.explicit_values.insert(key, value);
     }
@@ -107,13 +96,6 @@ impl<T: Copy> LintSettings<T> {
             explicit_values: BTreeMap::new(),
         }
     }
-
-    pub fn default_severities() -> LintSettings<Severity> {
-        LintSettings {
-            default_value: Severity::Off,
-            explicit_values: Self::default_explicit_values(),
-        }
-    }
 }
 
 enum ParseResult {
@@ -131,7 +113,7 @@ impl LintSettings<Severity> {
     pub fn of_default(default_value: Severity) -> LintSettings<Severity> {
         let mut explicit_values = BTreeMap::new();
         for kind in IGNORED_BY_ALL {
-            explicit_values.insert(*kind, (Self::config_default(*kind).0, None));
+            explicit_values.insert(*kind, (Severity::Off, None));
         }
         LintSettings {
             default_value,
@@ -202,7 +184,7 @@ impl LintSettings<Severity> {
         ) -> Result<(), String> {
             let all_redundant = keys.iter().copied().all(|key| {
                 let v = settings.get_value(key);
-                v == &value.0 && v != &LintSettings::<Severity>::config_default(key).0
+                v == &value.0 && v != &Severity::Off
             });
 
             if all_redundant {

@@ -144,7 +144,7 @@ fn config_options(config: Option<&Value>) -> Result<Options, String> {
     let empty = Value::Object(Default::default());
     let config = config.unwrap_or(&empty);
 
-    let mut lint_severities = LintSettings::<Severity>::default_severities();
+    let mut lint_severities = LintSettings::<Severity>::empty_severities();
     for lint in [
         "deprecated-type",
         "sketchy-null",
