@@ -445,6 +445,10 @@ impl EnvTransaction {
         self.unparsed = Some(unparsed);
     }
 
+    pub fn set_package_json_files(&mut self, package_json_files: FlowOrdSet<FileKey>) {
+        self.package_json_files = Some(package_json_files);
+    }
+
     pub fn set_configured_global_libs(&mut self, configured: BTreeSet<FlowSmolStr>) {
         self.global_lib_files = Some(GlobalLibFiles::new(
             Arc::new(configured),

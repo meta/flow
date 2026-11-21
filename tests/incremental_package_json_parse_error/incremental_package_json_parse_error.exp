@@ -1,0 +1,27 @@
+
+Initial state:
+No errors!
+
+Add an invalid bad/package.json:
+Error --------------------------------------------------------------------------------------------- bad/package.json:2:1
+
+Unexpected end of input, expected the token `}` [ParseError]
+
+   2|
+      
+
+
+
+Found 1 error
+
+Make it invalid in another way:
+Error -------------------------------------------------------------------------------------------- bad/package.json:2:11
+
+Unexpected token `]` [ParseError]
+
+   2|   "name": ]
+                ^
+
+
+
+Found 1 error

@@ -283,7 +283,7 @@ fn collate_parse_results(parse_results: parsing_service::ParseResults) -> Collat
         failed: (failed, errors),
         unchanged,
         not_found,
-        package_json,
+        package_json: (package_json_files, package_json_errors),
         dirty_modules,
         all_unordered_libs,
         dts_file_kinds,
@@ -312,6 +312,18 @@ fn collate_parse_results(parse_results: parsing_service::ParseResults) -> Collat
                 update_errset(&mut acc, file.dupe(), errset);
                 acc
             });
+    let local_errors = package_json_files.iter().zip(package_json_errors).fold(
+        local_errors,
+        |mut acc, (file, parse_error)| match parse_error {
+            None => acc,
+            Some(parse_error) => {
+                let errset = inference_utils::set_of_parse_error(file.dupe(), parse_error);
+                update_errset(&mut acc, file.dupe(), errset);
+                acc
+            }
+        },
+    );
+    let package_json_files: FlowOrdSet<FileKey> = package_json_files.into_iter().collect();
     let failed_set: FlowOrdSet<FileKey> = failed.into_iter().collect();
     let unparsed = unparsed.union(failed_set);
     CollatedParseResults {
@@ -321,7 +333,7 @@ fn collate_parse_results(parse_results: parsing_service::ParseResults) -> Collat
         not_found,
         dirty_modules,
         local_errors,
-        package_json,
+        package_json_files,
         all_unordered_libs,
         dts_file_kinds,
         ts_global_augmentation_files,
@@ -335,10 +347,7 @@ struct CollatedParseResults {
     not_found: FlowOrdSet<FileKey>,
     dirty_modules: BTreeSet<Modulename>,
     local_errors: BTreeMap<FileKey, ErrorSet>,
-    package_json: (
-        Vec<FileKey>,
-        Vec<Option<(Loc, flow_parser::parse_error::ParseError)>>,
-    ),
+    package_json_files: FlowOrdSet<FileKey>,
     all_unordered_libs: BTreeSet<FlowSmolStr>,
     dts_file_kinds: BTreeMap<FileKey, DtsFileKind>,
     ts_global_augmentation_files: FlowOrdSet<FileKey>,
@@ -1538,7 +1547,7 @@ pub(crate) mod recheck {
             not_found: deleted,
             dirty_modules,
             local_errors: new_local_errors,
-            package_json: _,
+            package_json_files: reparsed_package_json_files,
             all_unordered_libs: discovered_libs,
             dts_file_kinds: _,
             ts_global_augmentation_files: _,
@@ -1564,7 +1573,10 @@ pub(crate) mod recheck {
             },
         );
 
-        let new_or_changed = parsed_set.dupe().union(unparsed_set.dupe());
+        let new_or_changed = parsed_set
+            .dupe()
+            .union(unparsed_set.dupe())
+            .union(reparsed_package_json_files.dupe());
         let new_or_changed_or_deleted = new_or_changed.dupe().union(deleted.dupe());
 
         let mut all_unordered_libs = env.configured_libs().clone();
@@ -1739,6 +1751,14 @@ pub(crate) mod recheck {
         });
         check_recheck_canceled()?;
 
+        let package_json_files = FlowOrdSet::from(
+            env.package_json_files()
+                .dupe()
+                .into_inner()
+                .relative_complement(deleted.dupe().into_inner()),
+        )
+        .union(reparsed_package_json_files);
+
         let unparsed = with_timer(options, "UpdateUnparsed", || {
             let to_remove = parsed.dupe().union(deleted);
             FlowOrdSet::from(
@@ -1752,6 +1772,7 @@ pub(crate) mod recheck {
 
         env.set_files(parsed);
         env.set_unparsed(unparsed);
+        env.set_package_json_files(package_json_files);
         env.set_coverage(coverage);
 
         let errors = OverlayErrors {
@@ -2836,7 +2857,7 @@ fn init_with_initial_state(
         not_found: _not_found,
         dirty_modules: additional_dirty_modules,
         local_errors: additional_local_errors,
-        package_json: _package_json,
+        package_json_files: _,
         all_unordered_libs: discovered_libs,
         dts_file_kinds: _,
         ts_global_augmentation_files,
@@ -3233,7 +3254,7 @@ pub fn init_from_scratch(
             not_found: _not_found,
             dirty_modules,
             local_errors,
-            package_json: (package_json_files_list, package_json_errors),
+            package_json_files,
             all_unordered_libs: discovered_libs,
             dts_file_kinds: _,
             ts_global_augmentation_files,
@@ -3250,28 +3271,6 @@ pub fn init_from_scratch(
         assert!(unchanged.is_empty());
 
         let warnings = BTreeMap::new();
-        let package_errors = package_json_files_list
-            .iter()
-            .zip(package_json_errors.iter())
-            .fold(
-                BTreeMap::new(),
-                |mut acc, (source_file, parse_error)| match parse_error {
-                    None => acc,
-                    Some((loc, err)) => {
-                        let error_set = inference_utils::set_of_parse_error(
-                            source_file.dupe(),
-                            (loc.dupe(), err.clone()),
-                        );
-                        update_errset(&mut acc, source_file.dupe(), error_set);
-                        acc
-                    }
-                },
-            );
-        let package_json_files = package_json_files_list
-            .iter()
-            .duped()
-            .collect::<FlowOrdSet<_>>();
-        let local_errors = merge_error_maps(package_errors, local_errors);
 
         // The crawl only reports files that exist, so anything the previous environment
         // knew about and this one didn't find is gone. Its heap entry has to go with it,
