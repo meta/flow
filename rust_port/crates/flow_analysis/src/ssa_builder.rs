@@ -15,6 +15,7 @@
 //! If you're here to add support for a new syntax feature, you'll likely
 //! need to modify the name_resolver as well, but not necessarily with identical changes.
 
+use std::cell::Cell;
 use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
@@ -28,6 +29,8 @@ use dupe::IterDupedExt;
 use flow_common::reason::VirtualReason;
 use flow_common::reason::VirtualReasonDesc;
 use flow_common::reason::mk_reason;
+use flow_data_structure_wrapper::ord_map::DiffItem;
+use flow_data_structure_wrapper::ord_map::FlowOrdMap;
 use flow_data_structure_wrapper::smol_str::FlowSmolStr;
 use flow_parser::ast;
 use flow_parser::ast::expression::ExpressionInner;
@@ -357,57 +360,230 @@ mod val {
 
 use val::Val;
 
-/// An environment is a map from variables to values, kept as a vector sorted by variable.
+/// What every variable of an environment becomes when the environment gets a new base: entering
+/// a function havocs them to their uninitialized havoc values, an abrupt completion empties them,
+/// and the head of a loop merges their values before the loop with their values at the end of
+/// the loop body.
 #[derive(Debug, Clone)]
-struct Env<L: Dupe>(Vec<(FlowSmolStr, Val<L>)>);
-
-impl<L: Dupe> Env<L> {
-    fn get(&self, x: &FlowSmolStr) -> Option<&Val<L>> {
-        self.0
-            .binary_search_by(|(k, _)| k.cmp(x))
-            .ok()
-            .map(|i| &self.0[i].1)
-    }
-
-    /// Looks up variables in increasing order, resuming each search where the last one ended.
-    fn cursor(&self) -> EnvCursor<'_, L> {
-        EnvCursor { env: self, pos: 0 }
-    }
+enum BaseKind<L: Dupe> {
+    Uninitialized,
+    Empty,
+    Loop(Rc<LoopHead<L>>),
 }
 
-impl<L: Dupe> FromIterator<(FlowSmolStr, Val<L>)> for Env<L> {
-    /// The variables must come in increasing order, as the SSA environment iterates them.
-    fn from_iter<I: IntoIterator<Item = (FlowSmolStr, Val<L>)>>(iter: I) -> Self {
-        let entries: Vec<_> = iter.into_iter().collect();
-        debug_assert!(entries.windows(2).all(|w| w[0].0 < w[1].0));
-        Env(entries)
-    }
+#[derive(Debug, Clone)]
+struct Base<L: Dupe> {
+    /// Distinct among the bases of an analysis.
+    id: u32,
+    kind: BaseKind<L>,
+    /// The havocs of the environment when it got the base.
+    havocs: u32,
 }
 
-struct EnvCursor<'a, L: Dupe> {
-    env: &'a Env<L>,
-    pos: usize,
+/// The value of a variable at the end of a loop body is a ref until the loop ends. Variables get
+/// one when their values at the head of the loop are needed, or when the loop changed them.
+/// Once the loop has ended, the others have their values before the loop at the head, havoced
+/// if the end of the loop body was.
+#[derive(Debug)]
+struct LoopHead<L: Dupe> {
+    /// The environment before the loop.
+    env: Env<L>,
+    refs: RefCell<BTreeMap<FlowSmolStr, Val<L>>>,
+    havoced: Cell<Option<bool>>,
+    unresolved_ref_ids: Rc<Cell<u32>>,
 }
 
-impl<'a, L: Dupe> EnvCursor<'a, L> {
-    fn get(&mut self, x: &FlowSmolStr) -> Option<&'a Val<L>> {
-        let entries = &self.env.0;
-        if self.pos > 0 && entries[self.pos - 1].0 >= *x {
-            return self.env.get(x);
+impl<L: Dupe + Clone + Ord> LoopHead<L> {
+    fn end_ref(&self, x: &FlowSmolStr) -> Val<L> {
+        if let Some(r) = self.refs.borrow().get(x) {
+            return r.dupe();
         }
-        while self.pos < entries.len() {
-            let (k, v) = &entries[self.pos];
-            self.pos += 1;
-            match k.cmp(x) {
-                Ordering::Less => {}
-                Ordering::Equal => return Some(v),
-                Ordering::Greater => {
-                    self.pos -= 1;
-                    return None;
+        let id = self.unresolved_ref_ids.get() + 1;
+        self.unresolved_ref_ids.set(id);
+        let r = Val::mk_unresolved(id);
+        self.refs.borrow_mut().insert(x.dupe(), r.dupe());
+        r
+    }
+}
+
+/// The state of a variable in an environment: `val`, then the havocs of the environment after
+/// its first `havocs` ones, unless the environment has had a new base since `base`.
+#[derive(Debug)]
+struct SsaState<L: Dupe> {
+    val: Val<L>,
+    havocs: u32,
+    base: u32,
+    havoc: Havoc<L>,
+}
+
+/// Copies of an environment share states, and two states are the same when they are the same
+/// allocation.
+#[derive(Debug, Clone, Dupe)]
+struct Ssa<L: Dupe>(Rc<SsaState<L>>);
+
+impl<L: Dupe> PartialEq for Ssa<L> {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+
+impl<L: Dupe> Ssa<L> {
+    fn havoc(&self) -> &Havoc<L> {
+        &self.0.havoc
+    }
+
+    fn same_variable(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0.havoc.locs, &other.0.havoc.locs)
+    }
+}
+
+/// An environment maps variables to their states. It is persistent, so that copying it is cheap,
+/// and comparing an environment with one it was copied from only visits the variables whose
+/// states changed in between. Havocs and new bases change every variable, so the environment
+/// counts them instead, and a variable's value follows them when it is read.
+#[derive(Debug, Clone)]
+struct Env<L: Dupe> {
+    vars: FlowOrdMap<FlowSmolStr, Ssa<L>>,
+    havocs: u32,
+    base: Base<L>,
+    /// With an empty base, the variables given a state since the environment got the base.
+    written: Rc<Vec<FlowSmolStr>>,
+}
+
+impl<L: Dupe + Clone + Ord> Env<L> {
+    /// The value in this environment of variable `x` in state `ssa`.
+    fn val(&self, x: &FlowSmolStr, ssa: &Ssa<L>) -> Val<L> {
+        let state = &*ssa.0;
+        let (val, havocs) = if state.base == self.base.id {
+            (state.val.dupe(), state.havocs)
+        } else {
+            let val = match &self.base.kind {
+                BaseKind::Uninitialized => {
+                    if state.havoc.unresolved.is_unresolved_ref() {
+                        state.havoc.uninitialized.renew()
+                    } else {
+                        Val::merge(&Val::uninitialized(), &state.havoc.unresolved)
+                    }
+                }
+                BaseKind::Empty => Val::empty(),
+                BaseKind::Loop(head) => {
+                    let before = head.env.val(x, ssa);
+                    let end = if head.refs.borrow().contains_key(x) {
+                        Some(head.end_ref(x))
+                    } else {
+                        match head.havoced.get() {
+                            Some(true) => Some(state.havoc.unresolved.dupe()),
+                            Some(false) => None,
+                            None => Some(head.end_ref(x)),
+                        }
+                    };
+                    match end {
+                        Some(end) => Val::merge(&before, &end),
+                        None => before,
+                    }
+                }
+            };
+            (val, self.base.havocs)
+        };
+        if havocs < self.havocs {
+            Val::merge(&val, &state.havoc.unresolved)
+        } else {
+            val
+        }
+    }
+
+    /// Whether, in this environment, a variable in the state it had at the head of loop `head_id`
+    /// has its value at the head followed by a havoc. Adds the variables whose values changed in
+    /// loops in between to `changed`. `None` if this environment is not in the loop.
+    fn havoced_since(&self, head_id: u32, changed: &mut BTreeSet<FlowSmolStr>) -> Option<bool> {
+        let mut base = &self.base;
+        let mut havocs = self.havocs;
+        let mut havoced = false;
+        loop {
+            havoced |= base.havocs < havocs;
+            if base.id == head_id {
+                return Some(havoced);
+            }
+            match &base.kind {
+                BaseKind::Empty => return Some(havoced),
+                BaseKind::Uninitialized => return None,
+                BaseKind::Loop(head) => {
+                    changed.extend(head.refs.borrow().keys().duped());
+                    havoced |= head.havoced.get()?;
+                    havocs = base.havocs;
+                    base = &head.env.base;
                 }
             }
         }
-        None
+    }
+
+    /// The same environment, with the base before the loop it is in the head of, if the loop
+    /// has ended.
+    fn leave_loop(&self) -> Option<Self> {
+        let BaseKind::Loop(head) = &self.base.kind else {
+            return None;
+        };
+        let havoced = head.havoced.get()? || self.base.havocs < self.havocs;
+        let mut env = Env {
+            vars: self.vars.dupe(),
+            havocs: head.env.havocs + u32::from(havoced),
+            base: head.env.base.clone(),
+            written: head.env.written.dupe(),
+        };
+        let mut changed: BTreeSet<&FlowSmolStr> = BTreeSet::new();
+        let refs = head.refs.borrow();
+        changed.extend(refs.keys());
+        for item in head.env.vars.diff(&self.vars) {
+            match item {
+                DiffItem::Update { new: (x, _), .. } | DiffItem::Add(x, _) => {
+                    changed.insert(x);
+                }
+                DiffItem::Remove(..) => {}
+            }
+        }
+        let changes = changed
+            .into_iter()
+            .filter_map(|x| {
+                let ssa = self.vars.get(x)?;
+                Some((x.dupe(), Some((self.val(x, ssa), ssa.havoc().dupe()))))
+            })
+            .collect();
+        env.update(changes);
+        Some(env)
+    }
+
+    /// The same environment, with base `base_id` if it is in the head of loops that have ended
+    /// in an environment with that base.
+    fn with_base(&self, base_id: u32) -> Option<Self> {
+        let mut env = self.leave_loop()?;
+        while env.base.id != base_id {
+            env = env.leave_loop()?;
+        }
+        Some(env)
+    }
+
+    fn set(&mut self, x: &FlowSmolStr, val: Val<L>, havoc: Havoc<L>) {
+        if matches!(self.base.kind, BaseKind::Empty) {
+            Rc::make_mut(&mut self.written).push(x.dupe());
+        }
+        let state = SsaState {
+            val,
+            havocs: self.havocs,
+            base: self.base.id,
+            havoc,
+        };
+        self.vars.insert(x.dupe(), Ssa(Rc::new(state)));
+    }
+
+    fn update(&mut self, changes: Vec<(FlowSmolStr, Option<(Val<L>, Havoc<L>)>)>) {
+        for (x, change) in changes {
+            match change {
+                Some((val, havoc)) => self.set(&x, val, havoc),
+                None => {
+                    self.vars.remove(&x);
+                }
+            }
+        }
     }
 }
 
@@ -465,16 +641,6 @@ struct Havoc<L: Dupe> {
     locs: Rc<RefCell<Vec<VirtualReason<L>>>>,
 }
 
-/// SSA state for a variable.
-/// NOTE: val_ref uses Rc<RefCell<...>> to match OCaml's `Val.t ref` semantics -
-/// when ssa_env is cloned, all copies share the same underlying Val cell.
-/// This is critical for correct behavior in push_ssa_env/pop_ssa_env.
-#[derive(Debug, Clone)]
-struct Ssa<L: Dupe> {
-    val_ref: Rc<RefCell<Val<L>>>,
-    havoc: Havoc<L>,
-}
-
 pub struct SsaBuilder<Loc: Dupe + Clone + Eq + Ord + Hash + Default> {
     allow_declare_global_captures: bool,
     enable_enums: bool,
@@ -482,13 +648,15 @@ pub struct SsaBuilder<Loc: Dupe + Clone + Eq + Ord + Hash + Default> {
     /// simplified to lists of write locations once the analysis is done.
     values: BTreeMap<Loc, Val<Loc>>,
     unbound_names: BTreeSet<FlowSmolStr>,
-    unresolved_ref_id_counter: u32,
+    unresolved_ref_id_counter: Rc<Cell<u32>>,
     /// Utils to manipulate single-static-assignment (SSA) environments.
     ///
     /// TODO: These low-level operations should probably be replaced by
     /// higher-level "control-flow-graph" operations that can be implemented using
     /// them, e.g., those that deal with branches and loops.
-    ssa_env: BTreeMap<FlowSmolStr, Ssa<Loc>>,
+    ssa_env: Env<Loc>,
+    /// The number of bases given to environments so far.
+    bases: u32,
     /// List of (abrupt_completion, environment) pairs.When an abrupt completion is raised, it falls through any subsequent
     /// straight-line code, until it reaches a merge point in the control-flow
     /// graph. At that point, it can be re-raised if and only if all other reaching
@@ -520,10 +688,20 @@ impl<Loc: Dupe + Clone + Eq + Ord + Hash + Default> SsaBuilder<Loc> {
         Self {
             allow_declare_global_captures,
             enable_enums,
-            unresolved_ref_id_counter: 0,
+            unresolved_ref_id_counter: Rc::default(),
             values: BTreeMap::new(),
             unbound_names: BTreeSet::new(),
-            ssa_env: BTreeMap::new(),
+            ssa_env: Env {
+                vars: FlowOrdMap::new(),
+                havocs: 0,
+                base: Base {
+                    id: 0,
+                    kind: BaseKind::Uninitialized,
+                    havocs: 0,
+                },
+                written: Rc::default(),
+            },
+            bases: 0,
             abrupt_completion_envs: Vec::new(),
             possible_labeled_continues: Vec::new(),
         }
@@ -539,103 +717,241 @@ impl<Loc: Dupe + Clone + Eq + Ord + Hash + Default> SsaBuilder<Loc> {
     }
 
     fn mk_unresolved(&mut self) -> Val<Loc> {
-        self.unresolved_ref_id_counter += 1;
-        Val::mk_unresolved(self.unresolved_ref_id_counter)
+        let id = self.unresolved_ref_id_counter.get() + 1;
+        self.unresolved_ref_id_counter.set(id);
+        Val::mk_unresolved(id)
     }
 
     fn ssa_env(&self) -> Env<Loc> {
-        self.ssa_env
-            .iter()
-            .map(|(k, ssa)| (k.dupe(), ssa.val_ref.borrow().dupe()))
-            .collect()
+        self.ssa_env.clone()
     }
 
-    fn merge_remote_ssa_env(&self, env: &Env<Loc>) {
+    fn new_base(&mut self, kind: BaseKind<Loc>) -> Base<Loc> {
+        self.bases += 1;
+        Base {
+            id: self.bases,
+            kind,
+            havocs: self.ssa_env.havocs,
+        }
+    }
+
+    fn merge_remote_ssa_env(&mut self, env: &Env<Loc>) {
         // NOTE: env might have more keys than ssa_env, since the environment it
         // describes might be nested inside the current environment
-        let mut env = env.cursor();
-        for (x, ssa) in &self.ssa_env {
-            let remote_val = env.get(x).unwrap();
-            let current = ssa.val_ref.borrow().dupe();
-            *ssa.val_ref.borrow_mut() = Val::merge(&current, remote_val);
-        }
+        self.merge_self_ssa_env(env);
     }
 
-    fn merge_ssa_env(&self, env1: &Env<Loc>, env2: &Env<Loc>) {
-        let mut env1 = env1.cursor();
-        let mut env2 = env2.cursor();
-        for (key, ssa) in &self.ssa_env {
-            let val1 = env1.get(key).unwrap();
-            let val2 = env2.get(key).unwrap();
-            *ssa.val_ref.borrow_mut() = Val::merge(val1, val2);
-        }
+    fn merge_ssa_env(&mut self, env1: &Env<Loc>, env2: &Env<Loc>) {
+        self.reset_ssa_env(env1);
+        self.merge_self_ssa_env(env2);
     }
 
-    fn merge_self_ssa_env(&self, env: &Env<Loc>) {
-        let mut env = env.cursor();
-        for (x, ssa) in &self.ssa_env {
-            if let Some(env_val) = env.get(x) {
-                let current = ssa.val_ref.borrow().clone();
-                *ssa.val_ref.borrow_mut() = Val::merge(&current, env_val);
+    /// Merge the values of the variables in `env` into their current values.
+    fn merge_self_ssa_env(&mut self, env: &Env<Loc>) {
+        // An environment in the head of a loop that has ended can take the base of the
+        // environment the loop is in.
+        let lowered = if self.ssa_env.base.id == env.base.id {
+            None
+        } else {
+            env.with_base(self.ssa_env.base.id)
+        };
+        let env = lowered.as_ref().unwrap_or(env);
+        if self.ssa_env.base.id != env.base.id
+            && let Some(current) = self.ssa_env.with_base(env.base.id)
+        {
+            self.ssa_env = current;
+        }
+        let current = &self.ssa_env;
+        let merge = |x: &FlowSmolStr, ssa: &Ssa<Loc>, ssa1: &Ssa<Loc>| {
+            let val = Val::merge(&current.val(x, ssa), &env.val(x, ssa1));
+            (x.dupe(), Some((val, ssa.havoc().dupe())))
+        };
+        let keep = |x: &FlowSmolStr, ssa: &Ssa<Loc>| {
+            (x.dupe(), Some((current.val(x, ssa), ssa.havoc().dupe())))
+        };
+        let mut changes = Vec::new();
+        if current.base.id == env.base.id {
+            // A state in both environments has its value in both, followed by the havocs of
+            // either.
+            let havocs = current.havocs.max(env.havocs);
+            for item in current.vars.diff(&env.vars) {
+                match item {
+                    DiffItem::Update {
+                        old: (x, ssa),
+                        new: (_, ssa1),
+                    } => changes.push(merge(x, ssa, ssa1)),
+                    DiffItem::Remove(x, ssa) if havocs != current.havocs => {
+                        changes.push(keep(x, ssa))
+                    }
+                    DiffItem::Remove(..) | DiffItem::Add(..) => {}
+                }
+            }
+            self.ssa_env.havocs = havocs;
+        } else if matches!(env.base.kind, BaseKind::Empty) {
+            // The variables of `env` are empty, but for those written since it was emptied, and
+            // the havocs since.
+            let havoced = env.base.havocs < env.havocs;
+            let written: BTreeSet<_> = env.written.iter().collect();
+            if havoced {
+                for item in current.vars.diff(&env.vars) {
+                    match item {
+                        DiffItem::Update {
+                            old: (x, ssa),
+                            new: (_, ssa1),
+                        } => {
+                            if !written.contains(x) && !ssa.same_variable(ssa1) {
+                                changes.push(merge(x, ssa, ssa1));
+                            }
+                        }
+                        DiffItem::Remove(x, ssa) => changes.push(keep(x, ssa)),
+                        DiffItem::Add(..) => {}
+                    }
+                }
+            }
+            for x in written {
+                if let (Some(ssa), Some(ssa1)) = (current.vars.get(x), env.vars.get(x)) {
+                    changes.push(merge(x, ssa, ssa1));
+                }
+            }
+            if havoced {
+                self.ssa_env.havocs += 1;
+            }
+        } else if matches!(current.base.kind, BaseKind::Empty) {
+            // The current variables are empty, but for those written since they were emptied,
+            // and the havocs since: they take the states in `env`.
+            let havoced = current.base.havocs < current.havocs;
+            let written: BTreeSet<_> = current.written.iter().collect();
+            for item in current.vars.diff(&env.vars) {
+                match item {
+                    DiffItem::Update {
+                        old: (x, ssa),
+                        new: (_, ssa1),
+                    } => {
+                        if !written.contains(x) && !ssa.same_variable(ssa1) {
+                            changes.push(merge(x, ssa, ssa1));
+                        }
+                    }
+                    DiffItem::Remove(x, ssa) => changes.push(keep(x, ssa)),
+                    DiffItem::Add(x, _) => changes.push((x.dupe(), None)),
+                }
+            }
+            for x in written {
+                if let (Some(ssa), Some(ssa1)) = (current.vars.get(x), env.vars.get(x)) {
+                    changes.push(merge(x, ssa, ssa1));
+                }
+            }
+            self.ssa_env.vars = env.vars.dupe();
+            self.ssa_env.havocs = env.havocs + u32::from(havoced);
+            self.ssa_env.base = env.base.clone();
+            self.ssa_env.written = env.written.dupe();
+        } else {
+            for (x, ssa) in current.vars.iter() {
+                if let Some(ssa1) = env.vars.get(x) {
+                    changes.push(merge(x, ssa, ssa1));
+                }
             }
         }
+        self.ssa_env.update(changes);
     }
 
-    fn reset_ssa_env(&self, env0: &Env<Loc>) {
-        let mut env0 = env0.cursor();
-        for (x, ssa) in &self.ssa_env {
-            if let Some(env_val) = env0.get(x) {
-                *ssa.val_ref.borrow_mut() = env_val.clone();
-            }
-        }
+    fn reset_ssa_env(&mut self, env0: &Env<Loc>) {
+        // The current variables keep their states if `env0` does not have them, and their
+        // bindings if it has others with the same names.
+        let current = std::mem::replace(&mut self.ssa_env, env0.clone());
+        let changes = current
+            .vars
+            .diff(&env0.vars)
+            .filter_map(|item| match item {
+                DiffItem::Update {
+                    old: (x, ssa),
+                    new: (_, ssa0),
+                } => (!ssa.same_variable(ssa0))
+                    .then(|| (x.dupe(), Some((env0.val(x, ssa0), ssa.havoc().dupe())))),
+                DiffItem::Remove(x, ssa) => {
+                    Some((x.dupe(), Some((current.val(x, ssa), ssa.havoc().dupe()))))
+                }
+                DiffItem::Add(x, _) => Some((x.dupe(), None)),
+            })
+            .collect();
+        self.ssa_env.update(changes);
     }
 
-    fn fresh_ssa_env(&mut self) -> Env<Loc> {
-        let keys: Vec<_> = self.ssa_env.keys().map(|k| k.dupe()).collect();
-        keys.into_iter()
-            .map(|k| (k, self.mk_unresolved()))
-            .collect()
+    /// Enter the head of a loop, where every variable has its value before the loop merged with
+    /// its value at the end of the loop body. Returns the environment at the head.
+    fn loop_head_ssa_env(&mut self) -> Env<Loc> {
+        let head = LoopHead {
+            env: self.ssa_env.clone(),
+            refs: RefCell::default(),
+            havoced: Cell::new(None),
+            unresolved_ref_ids: self.unresolved_ref_id_counter.dupe(),
+        };
+        self.ssa_env.base = self.new_base(BaseKind::Loop(Rc::new(head)));
+        self.ssa_env.written = Rc::default();
+        self.ssa_env.clone()
     }
 
+    /// At the end of a loop body, resolve the values of the variables at the end of the loop
+    /// body that the head `env0` merged in.
     fn assert_ssa_env(&mut self, env0: &Env<Loc>) {
-        let mut env0 = env0.cursor();
-        for (x, ssa) in &self.ssa_env {
-            if let Some(env_val) = env0.get(x) {
-                Val::resolve(env_val, &ssa.val_ref.borrow());
+        let BaseKind::Loop(head) = &env0.base.kind else {
+            return;
+        };
+        let current = &self.ssa_env;
+        let mut changed: BTreeSet<FlowSmolStr> = head.refs.borrow().keys().duped().collect();
+        for item in env0.vars.diff(&current.vars) {
+            if let DiffItem::Update { old: (x, _), .. } = item {
+                changed.insert(x.dupe());
             }
         }
+        let havoced = current
+            .havoced_since(env0.base.id, &mut changed)
+            .unwrap_or_else(|| {
+                changed.extend(env0.vars.keys().duped());
+                false
+            });
+        for x in &changed {
+            if let (Some(_), Some(ssa)) = (env0.vars.get(x), current.vars.get(x)) {
+                let end = head.end_ref(x);
+                Val::resolve(&end, &current.val(x, ssa));
+            }
+        }
+        head.havoced.set(Some(havoced));
     }
 
-    fn empty_ssa_env(&self) -> Env<Loc> {
-        self.ssa_env
-            .keys()
-            .map(|k| (k.dupe(), Val::empty()))
-            .collect()
-    }
-
-    fn havoc_current_ssa_env(&self) {
-        for ssa in self.ssa_env.values() {
-            let current = ssa.val_ref.borrow().clone();
-            *ssa.val_ref.borrow_mut() = Val::merge(&current, &ssa.havoc.unresolved);
+    /// Leave a loop whose head is `env0`.
+    fn leave_loop_ssa_env(&mut self, env0: &Env<Loc>) {
+        if self.ssa_env.base.id == env0.base.id
+            && let Some(env) = self.ssa_env.leave_loop()
+        {
+            self.ssa_env = env;
         }
     }
 
-    fn havoc_uninitialized_ssa_env(&self) {
-        for ssa in self.ssa_env.values() {
-            let val = if ssa.havoc.unresolved.is_unresolved_ref() {
-                ssa.havoc.uninitialized.renew()
-            } else {
-                Val::merge(&Val::uninitialized(), &ssa.havoc.unresolved)
-            };
-            *ssa.val_ref.borrow_mut() = val;
+    fn empty_ssa_env(&mut self) -> Env<Loc> {
+        Env {
+            base: self.new_base(BaseKind::Empty),
+            written: Rc::default(),
+            ..self.ssa_env.clone()
         }
+    }
+
+    fn havoc_current_ssa_env(&mut self) {
+        self.ssa_env.havocs += 1;
+    }
+
+    fn havoc_uninitialized_ssa_env(&mut self) {
+        self.ssa_env.base = self.new_base(BaseKind::Uninitialized);
+        self.ssa_env.written = Rc::default();
     }
 
     /// Push new bindings onto the SSA environment.
     fn push_ssa_env(
         &mut self,
         bindings: &Bindings<Loc>,
-    ) -> (Vec<FlowSmolStr>, Vec<(FlowSmolStr, Option<Ssa<Loc>>)>) {
+    ) -> (
+        Vec<FlowSmolStr>,
+        Vec<(FlowSmolStr, Option<(Val<Loc>, Havoc<Loc>)>)>,
+    ) {
         let binding_names: Vec<_> = bindings
             .to_assoc()
             .into_iter()
@@ -643,27 +959,31 @@ impl<Loc: Dupe + Clone + Eq + Ord + Hash + Default> SsaBuilder<Loc> {
             .collect();
         let mut old_bindings = Vec::with_capacity(binding_names.len());
         for name in &binding_names {
-            old_bindings.push((name.dupe(), self.ssa_env.get(name).cloned()));
+            // A shadowed variable keeps its value until it is restored.
+            let old = self
+                .ssa_env
+                .vars
+                .get(name)
+                .map(|ssa| (self.ssa_env.val(name, ssa), ssa.havoc().dupe()));
+            old_bindings.push((name.dupe(), old));
             let unresolved = self.mk_unresolved();
             let uninitialized = Val::merge(&Val::uninitialized(), &unresolved);
-            let ssa = Ssa {
-                val_ref: Rc::new(RefCell::new(Val::uninitialized())),
-                havoc: Havoc {
-                    unresolved,
-                    uninitialized,
-                    locs: Rc::new(RefCell::new(Vec::new())),
-                },
+            let havoc = Havoc {
+                unresolved,
+                uninitialized,
+                locs: Rc::new(RefCell::new(Vec::new())),
             };
-            self.ssa_env.insert(name.dupe(), ssa);
+            self.ssa_env.set(name, Val::uninitialized(), havoc);
         }
         (binding_names, old_bindings)
     }
 
     fn resolve_havocs(&mut self, binding_names: &[FlowSmolStr]) {
         for x in binding_names {
-            if let Some(ssa) = self.ssa_env.get(x) {
-                let all_locs = Val::all(ssa.havoc.locs.borrow().iter().duped());
-                Val::resolve(&ssa.havoc.unresolved, &all_locs);
+            if let Some(ssa) = self.ssa_env.vars.get(x) {
+                let havoc = ssa.havoc();
+                let all_locs = Val::all(havoc.locs.borrow().iter().duped());
+                Val::resolve(&havoc.unresolved, &all_locs);
             }
         }
     }
@@ -671,19 +991,10 @@ impl<Loc: Dupe + Clone + Eq + Ord + Hash + Default> SsaBuilder<Loc> {
     fn pop_ssa_env(
         &mut self,
         binding_names: Vec<FlowSmolStr>,
-        old_bindings: Vec<(FlowSmolStr, Option<Ssa<Loc>>)>,
+        old_bindings: Vec<(FlowSmolStr, Option<(Val<Loc>, Havoc<Loc>)>)>,
     ) {
         self.resolve_havocs(&binding_names);
-        for (name, old_ssa) in old_bindings {
-            match old_ssa {
-                Some(old_ssa) => {
-                    self.ssa_env.insert(name, old_ssa);
-                }
-                None => {
-                    self.ssa_env.remove(&name);
-                }
-            }
-        }
+        self.ssa_env.update(old_bindings);
     }
 
     /// Run a computation, catching any abrupt completions; do some final work,
@@ -791,9 +1102,10 @@ impl<Loc: Dupe + Clone + Eq + Ord + Hash + Default> SsaBuilder<Loc> {
 
     // read
     fn any_identifier(&mut self, loc: Loc, name: &FlowSmolStr) {
-        match self.ssa_env.get(name) {
+        match self.ssa_env.vars.get(name) {
             Some(ssa) => {
-                self.values.insert(loc, ssa.val_ref.borrow().clone());
+                let val = self.ssa_env.val(name, ssa);
+                self.values.insert(loc, val);
             }
             None => {
                 self.unbound_names.insert(name.dupe());
@@ -820,8 +1132,7 @@ impl<Loc: Dupe + Clone + Eq + Ord + Hash + Default> SsaBuilder<Loc> {
             if let Some(init) = init {
                 this.for_statement_init(init)?;
             }
-            let env1 = this.fresh_ssa_env();
-            this.merge_self_ssa_env(&env1);
+            let env1 = this.loop_head_ssa_env();
             if let Some(test) = test {
                 this.expression(test)?;
             }
@@ -848,10 +1159,12 @@ impl<Loc: Dupe + Clone + Eq + Ord + Hash + Default> SsaBuilder<Loc> {
             let completion_state = this.run_to_completion(|_| {
                 Self::merge_completion_states(&for_completion_states.0, &for_completion_states.1)
             });
-            this.commit_abrupt_completion_matching(
+            let result = this.commit_abrupt_completion_matching(
                 |ac| matches!(ac, AbruptCompletion::Break(None)),
                 &completion_state,
-            )
+            );
+            this.leave_loop_ssa_env(&env1);
+            result
         })
     }
 
@@ -872,8 +1185,7 @@ impl<Loc: Dupe + Clone + Eq + Ord + Hash + Default> SsaBuilder<Loc> {
                 comments: _,
             } = stmt;
             this.expression(right)?;
-            let env1 = this.fresh_ssa_env();
-            this.merge_self_ssa_env(&env1);
+            let env1 = this.loop_head_ssa_env();
             let env2 = this.ssa_env();
             this.for_in_statement_lhs(left)?;
             let loop_completion_state = this.run_to_completion(|this2| this2.statement(body));
@@ -893,10 +1205,12 @@ impl<Loc: Dupe + Clone + Eq + Ord + Hash + Default> SsaBuilder<Loc> {
                     &for_in_completion_states.1,
                 )
             });
-            this.commit_abrupt_completion_matching(
+            let result = this.commit_abrupt_completion_matching(
                 |ac| matches!(ac, AbruptCompletion::Break(None)),
                 &completion_state,
-            )
+            );
+            this.leave_loop_ssa_env(&env1);
+            result
         })
     }
 
@@ -917,8 +1231,7 @@ impl<Loc: Dupe + Clone + Eq + Ord + Hash + Default> SsaBuilder<Loc> {
                 comments: _,
             } = stmt;
             this.expression(right)?;
-            let env1 = this.fresh_ssa_env();
-            this.merge_self_ssa_env(&env1);
+            let env1 = this.loop_head_ssa_env();
             let env2 = this.ssa_env();
             this.for_of_statement_lhs(left)?;
             let loop_completion_state = this.run_to_completion(|this2| this2.statement(body));
@@ -938,10 +1251,12 @@ impl<Loc: Dupe + Clone + Eq + Ord + Hash + Default> SsaBuilder<Loc> {
                     &for_of_completion_states.1,
                 )
             });
-            this.commit_abrupt_completion_matching(
+            let result = this.commit_abrupt_completion_matching(
                 |ac| matches!(ac, AbruptCompletion::Break(None)),
                 &completion_state,
-            )
+            );
+            this.leave_loop_ssa_env(&env1);
+            result
         })
     }
 
@@ -1193,7 +1508,11 @@ impl<Loc: Dupe + Clone + Eq + Ord + Hash + Default, E> WithBindings<Loc, E> for 
         bindings: Bindings<Loc>,
         visit: impl FnOnce(&mut Self) -> Result<T, E>,
     ) -> Result<T, E> {
-        let outer_env = std::mem::take(&mut self.ssa_env);
+        let isolated_env = Env {
+            vars: FlowOrdMap::new(),
+            ..self.ssa_env.clone()
+        };
+        let outer_env = std::mem::replace(&mut self.ssa_env, isolated_env);
         let result = self.with_bindings(lexical, loc, bindings, visit);
         self.ssa_env = outer_env;
         result
@@ -1222,10 +1541,10 @@ impl<'ast, Loc: Dupe + Clone + Eq + Ord + Hash + Default>
             let loc: &Loc = &ident.loc;
             let name: &FlowSmolStr = &ident.name;
             let reason = mk_reason(VirtualReasonDesc::RIdentifier(name.dupe()), loc.dupe());
-            match this.ssa_env.get_mut(name) {
-                Some(ssa) => {
-                    *ssa.val_ref.borrow_mut() = Val::one(reason.dupe());
-                    ssa.havoc.locs.borrow_mut().push(reason);
+            match this.ssa_env.vars.get(name).map(|ssa| ssa.havoc().dupe()) {
+                Some(havoc) => {
+                    havoc.locs.borrow_mut().push(reason.dupe());
+                    this.ssa_env.set(name, Val::one(reason), havoc);
                 }
                 None => {
                     this.unbound_names.insert(name.dupe());
@@ -1669,8 +1988,7 @@ impl<'ast, Loc: Dupe + Clone + Eq + Ord + Hash + Default>
             } = stmt;
 
             // Placeholder for environment at the end of the loop body
-            let env1 = this.fresh_ssa_env();
-            this.merge_self_ssa_env(&env1);
+            let env1 = this.loop_head_ssa_env();
             this.expression(test)?;
             let env2 = this.ssa_env();
 
@@ -1701,10 +2019,12 @@ impl<'ast, Loc: Dupe + Clone + Eq + Ord + Hash + Default>
 
             // Completion_state = None
             // Break exits
-            this.commit_abrupt_completion_matching(
+            let result = this.commit_abrupt_completion_matching(
                 |ac| matches!(ac, AbruptCompletion::Break(None)),
                 &completion_state,
-            )
+            );
+            this.leave_loop_ssa_env(&env1);
+            result
         })
     }
 
@@ -1731,8 +2051,7 @@ impl<'ast, Loc: Dupe + Clone + Eq + Ord + Hash + Default>
                 test,
                 comments: _,
             } = stmt;
-            let env1 = this.fresh_ssa_env();
-            this.merge_self_ssa_env(&env1);
+            let env1 = this.loop_head_ssa_env();
             let loop_completion_state = this.run_to_completion(|this2| this2.statement(body));
             let loop_completion_state = this.run_to_completion(|this2| {
                 this2.commit_abrupt_completion_matching(
@@ -1755,10 +2074,12 @@ impl<'ast, Loc: Dupe + Clone + Eq + Ord + Hash + Default>
                 )
             });
             // completion_state = loop_completion_state
-            this.commit_abrupt_completion_matching(
+            let result = this.commit_abrupt_completion_matching(
                 |ac| matches!(ac, AbruptCompletion::Break(None)),
                 &completion_state,
-            )
+            );
+            this.leave_loop_ssa_env(&env1);
+            result
         })
     }
 

@@ -16,6 +16,7 @@ use std::ops::DerefMut;
 
 use dupe::Dupe;
 pub use im::ordmap::ConsumingIter;
+pub use im::ordmap::DiffItem;
 pub use im::ordmap::Iter;
 
 /// A wrapper around im::OrdMap that implements Dupe for cheap cloning.
