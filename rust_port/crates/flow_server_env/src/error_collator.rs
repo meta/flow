@@ -92,11 +92,12 @@ fn add_suppression_warnings(
 fn collate_duplicate_providers<'a, I>(
     root: &Path,
     duplicate_providers: I,
-    acc: &mut Vec<(PrintableError<Loc>, FileKey, FileKey)>,
-) where
+) -> Vec<(PrintableError<Loc>, FileKey, FileKey)>
+where
     I: IntoIterator<Item = (&'a FlowSmolStr, &'a (FileKey, vec1::Vec1<FileKey>))>,
 {
     let pos = Position { line: 1, column: 0 };
+    let mut acc = Vec::new();
     for (module_name, (provider_file, duplicates)) in duplicate_providers {
         let provider = Loc {
             source: Some(provider_file.dupe()),
@@ -127,6 +128,7 @@ fn collate_duplicate_providers<'a, I>(
             acc.push((err, provider_file.dupe(), duplicate.dupe()));
         }
     }
+    acc
 }
 
 pub fn update_local_collated_errors<F, G, H>(
@@ -252,11 +254,10 @@ fn update_collated_errors_impl<
 
     monitor_rpc::status_update(server_status::Event::CollatingErrorsStart);
 
-    collate_duplicate_providers(
-        root,
-        duplicate_providers,
-        &mut acc.collated_duplicate_providers_errors,
-    );
+    // `duplicate_providers` is the whole map, so it replaces the collated errors instead of adding
+    // to them: an error stays only while its module still has that provider and duplicate.
+    acc.collated_duplicate_providers_errors =
+        collate_duplicate_providers(root, duplicate_providers);
 
     let mut unused = (*suppressions).clone();
     for (filename, file_errs) in local_errors {

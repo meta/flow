@@ -21,6 +21,59 @@ References:
 
 Found 1 error
 
+Copy A.js to 0/A.js, which sorts first and becomes the provider:
+Error --------------------------------------------------------------------------------------------------------- A.js:1:1
+
+Duplicate module provider for `A`. Change either the name of this file or the name of the current module provider [1].
+[duplicate-module]
+
+   A.js:1:1
+   1| /* @flow */
+      
+
+References:
+   0/A.js:1:1
+   1| /* @flow */
+       [1]
+
+
+Error -------------------------------------------------------------------------------------------------- nested/A.js:1:1
+
+Duplicate module provider for `A`. Change either the name of this file or the name of the current module provider [1].
+[duplicate-module]
+
+   nested/A.js:1:1
+   1| /* @flow */
+      
+
+References:
+   0/A.js:1:1
+   1| /* @flow */
+       [1]
+
+
+
+Found 2 errors
+
+Delete 0/A.js:
+Error -------------------------------------------------------------------------------------------------- nested/A.js:1:1
+
+Duplicate module provider for `A`. Change either the name of this file or the name of the current module provider [1].
+[duplicate-module]
+
+   nested/A.js:1:1
+   1| /* @flow */
+      
+
+References:
+   A.js:1:1
+   1| /* @flow */
+       [1]
+
+
+
+Found 1 error
+
 Move nested/A.js to A.js:
 No errors!
 
