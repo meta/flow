@@ -1420,13 +1420,22 @@ mod haste {
                     package_dir_opt(transaction, &provider_file),
                     subpath.as_slice(),
                 ) {
-                    (Some(package_dir), []) => super::node::resolve_package(
-                        options,
-                        transaction,
-                        phantom_acc.as_deref_mut(),
-                        None,
-                        &package_dir,
-                    ),
+                    (Some(package_dir), []) => {
+                        if options.incremental_package_json {
+                            record_phantom_dependency(
+                                mname.clone(),
+                                dependency.clone(),
+                                phantom_acc.as_deref_mut(),
+                            );
+                        }
+                        super::node::resolve_package(
+                            options,
+                            transaction,
+                            phantom_acc.as_deref_mut(),
+                            None,
+                            &package_dir,
+                        )
+                    }
                     (Some(package_dir), _) => {
                         record_phantom_dependency(
                             mname.clone(),
