@@ -4797,6 +4797,22 @@ fn convert_object<'a>(
         }
     }
 
+    fn ts_method_signature(
+        value_ast: ast::types::Type<ALoc, (ALoc, Type)>,
+    ) -> ast::types::Type<ALoc, (ALoc, Type)> {
+        let ast::types::TypeInner::Function {
+            loc: (loc, t),
+            inner,
+        } = value_ast.deref()
+        else {
+            return value_ast;
+        };
+        ast::types::Type::new(ast::types::TypeInner::Function {
+            loc: (loc.dupe(), type_util::object_type_method_signature(t)),
+            inner: inner.dupe(),
+        })
+    }
+
     fn named_property<'a>(
         cx: &mut Context<'a>,
         env: &mut ConvertEnv,
@@ -4816,6 +4832,7 @@ fn convert_object<'a>(
                 let optional = prop.optional;
                 let variance = &prop.variance;
                 let method = prop.method;
+                let ts_method = method && cx.type_strictness_kind().is_typescript_loose();
                 let abstract_ = prop.abstract_;
                 if abstract_ && !cx.tslib_syntax() {
                     flow_js_utils::add_output_non_speculating(
@@ -4852,6 +4869,11 @@ fn convert_object<'a>(
                         typed_ast_utils::polarity(variance.as_ref()),
                     );
                     let value_ast = convert_single_binding_value(cx, env, value, Some(&name))?;
+                    let value_ast = if ts_method {
+                        ts_method_signature(value_ast)
+                    } else {
+                        value_ast
+                    };
                     let t = value_ast.loc().1.dupe();
                     let make_prop_ast = |t: Type| {
                         let key_ast = match key {
@@ -5049,6 +5071,11 @@ fn convert_object<'a>(
                                     value,
                                     name.as_smol_str_opt(),
                                 )?;
+                                let value_ast = if ts_method {
+                                    ts_method_signature(value_ast)
+                                } else {
+                                    value_ast
+                                };
                                 let t = value_ast.loc().1.dupe();
                                 let id_loc = comp.expression.loc().dupe();
                                 if method {

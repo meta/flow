@@ -153,7 +153,8 @@ References:
 Error ------------------------------------------------------------------------------------------------- strings.js:24:20
 
 Cannot create `textarea` element because in property `onClick`: [incompatible-type]
- - Either in the first parameter: `number` [1] is incompatible with `MouseEvent<HTMLTextAreaElement, MouseEvent>` [2].
+ - Either in the first parameter: property `altKey` is missing in `Number` [1] but exists in
+   `MouseEvent<HTMLTextAreaElement, MouseEvent>` [2].
  - Or `(event: number) => void` [3] is incompatible with `void` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
@@ -381,7 +382,8 @@ Error --------------------------------------------------------------------------
 
 Cannot cast object literal to `Readonly<React.ComponentProps<"button">>` because in property `onClick`:
 [incompatible-type]
- - Either in the first parameter: `number` [1] is incompatible with `MouseEvent<HTMLButtonElement, MouseEvent>` [2].
+ - Either in the first parameter: property `altKey` is missing in `Number` [1] but exists in
+   `MouseEvent<HTMLButtonElement, MouseEvent>` [2].
  - Or `(event: number) => void` [3] is incompatible with `void` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
@@ -448,7 +450,8 @@ References:
 Error ------------------------------------------------------------------------------------------------- strings.js:57:18
 
 Cannot create `button` element because in property `onClick`: [incompatible-type]
- - Either in the first parameter: `number` [1] is incompatible with `MouseEvent<HTMLButtonElement, MouseEvent>` [2].
+ - Either in the first parameter: property `altKey` is missing in `Number` [1] but exists in
+   `MouseEvent<HTMLButtonElement, MouseEvent>` [2].
  - Or `(event: number) => void` [3] is incompatible with `void` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are

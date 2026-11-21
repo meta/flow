@@ -2720,6 +2720,40 @@ pub fn annotated_or_inferred_of_option(
     }
 }
 
+/// As in TypeScript, a method of a TypeScript object type is a method signature. It checks its
+/// receiver like a function does, since an object type's method has no `this` of its own.
+pub fn object_type_method_signature(t: &Type) -> Type {
+    use crate::type_::DefT;
+    use crate::type_::DefTInner;
+    use crate::type_::FunType;
+    use crate::type_::PolyTData;
+    use crate::type_::ThisStatus;
+
+    match t.deref() {
+        TypeInner::DefT(r, def_t) => match def_t.deref() {
+            DefTInner::FunT(statics, ft) => Type::new(TypeInner::DefT(
+                r.dupe(),
+                DefT::new(DefTInner::FunT(
+                    statics.dupe(),
+                    Rc::new(FunType {
+                        this_t: (ft.this_t.0.dupe(), ThisStatus::ThisUnboundMethod),
+                        ..(**ft).clone()
+                    }),
+                )),
+            )),
+            DefTInner::PolyT(poly) => Type::new(TypeInner::DefT(
+                r.dupe(),
+                DefT::new(DefTInner::PolyT(Box::new(PolyTData {
+                    t_out: object_type_method_signature(&poly.t_out),
+                    ..(**poly).clone()
+                }))),
+            )),
+            _ => t.dupe(),
+        },
+        _ => t.dupe(),
+    }
+}
+
 /// The receiver type unification compares a function by: its `this` type, or `mixed` for a method
 /// without an explicit `this`.
 pub fn this_for_unification(funtype: &crate::type_::FunType) -> Type {

@@ -4045,6 +4045,11 @@ fn merge_obj_annot_prop<'cx>(
                 false,
                 false,
             );
+            let type_ = if def.strictness_kind.is_typescript_loose() {
+                type_util::object_type_method_signature(&type_)
+            } else {
+                type_
+            };
             type_::Property::new(type_::PropertyInner::Method {
                 key_loc: Some(id_loc.dupe()),
                 type_,

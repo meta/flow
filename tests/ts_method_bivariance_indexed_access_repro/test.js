@@ -1,8 +1,13 @@
-import type {Emitter, EvCtor, I, J, NodeStatics} from 'repro';
+import type {Emitter, EvCtor, I, J, NodeStatics, O, ThisNum} from 'repro';
 import {Ev, InputEv, Node, registerNodes} from 'repro';
 
 // tsc accepts: a method has bivariant params, also read through `I['m']`.
 const m: I['m'] = (x: InputEv) => {};
+// tsc accepts: so does a method of an object type.
+const om: O['m'] = (x: InputEv) => {};
+// tsc errors: its receiver is still checked.
+declare const thisStr: (this: string) => void;
+const thisNum: ThisNum['m'] = thisStr; // ERROR
 // tsc accepts: a param is compared with the rest element at its position.
 const on: Emitter['on'] = (e: string) => {};
 // tsc errors: a function-typed property is not a method.
@@ -19,6 +24,8 @@ interface FlowI {
   m(x: Ev): void;
 }
 const flowM: FlowI['m'] = (x: InputEv) => {}; // ERROR
+type FlowO = {m(x: Ev): void};
+const flowOM: FlowO['m'] = (x: InputEv) => {}; // ERROR
 
 class EmojiNode extends Node {
   static clone(node: EmojiNode): EmojiNode {
