@@ -122,6 +122,15 @@ fn partition_keys_and_indexer<'cx>(
     );
     // All keys must be a subtype of string | number | symbol
     FlowJs::rec_flow_t_with_env(cx, env, trace, compatibility_use_op, keys, &union)?;
+    partition_concrete_keys_and_indexer(cx, env, reason, keys)
+}
+
+fn partition_concrete_keys_and_indexer<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    reason: &Reason,
+    keys: &Type,
+) -> Result<(Vec<(Name, Reason)>, Vec<Type>), FlowJsException> {
     let possible_types =
         FlowJs::possible_concrete_types_for_inspection_with_env(cx, env, reason, keys)?;
     let possible_types = expand_template_literal_keys(cx, env, possible_types)?;
@@ -1294,9 +1303,10 @@ pub(super) fn run_with_env<'cx>(
                       x: Vec1<object::Slice>,
                       tout: &Type|
      -> Result<(), FlowJsException> {
+        // Selected keys are bounded by `keyof` the mapped object, so they are already property keys.
         let selected_keys = selected_keys_opt
             .as_ref()
-            .map(|keys| partition_keys_and_indexer(cx, env, trace, use_op.dupe(), reason, keys))
+            .map(|keys| partition_concrete_keys_and_indexer(cx, env, reason, keys))
             .transpose()?;
         let filter_optional = |cx: &mut Context<'cx>, t: Type| -> Result<Type, FlowJsException> {
             let filter_id = crate::flow_js::filter_optional_with_env(cx, env, reason, &t)?;
