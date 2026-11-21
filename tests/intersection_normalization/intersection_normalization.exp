@@ -389,5 +389,21 @@ References:
                                            ^^^^^^^^^^^^^^^^^^ [1]
 
 
+Error ----------------------------------------------------------------------------------------------- typescript.ts:26:1
 
-Found 24 errors
+Cannot cast `'primitive'` to `OptionalOnlyInterface & interface {}` because `"primitive"` [1], a primitive, cannot be
+used as a subtype of `interface {}` [2]. You can wrap it in `new String(...))` to turn it into an object and attempt to
+use it as a subtype of an interface. [incompatible-type]
+
+   typescript.ts:26:1
+   26| 'primitive' as OptionalOnlyInterface & object; // ERROR: `object` rejects primitives
+       ^^^^^^^^^^^ [1]
+
+References:
+   typescript.ts:26:40
+   26| 'primitive' as OptionalOnlyInterface & object; // ERROR: `object` rejects primitives
+                                              ^^^^^^ [2]
+
+
+
+Found 25 errors

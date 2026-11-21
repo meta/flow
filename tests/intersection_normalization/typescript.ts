@@ -20,6 +20,11 @@ declare const typeScriptMergedInterface: TypeScriptMergedInterface;
 typeScriptMergedInterface.fromInterface as boolean;
 typeScriptMergedInterface.fromObject as string;
 
+interface OptionalOnlyInterface {
+  optional?: string;
+}
+'primitive' as OptionalOnlyInterface & object; // ERROR: `object` rejects primitives
+
 export type ImportedReadonlyDictionary =
   {readonly [key: string]: string} & {readonly [key: string]: string};
 

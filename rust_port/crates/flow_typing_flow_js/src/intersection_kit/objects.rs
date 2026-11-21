@@ -49,7 +49,8 @@ use crate::slice_utils::SliceIntersection;
 /// `Some(is_exact)` for a member that can be merged. Callable and constructible
 /// members are not: an intersection of signatures is an overload, which a
 /// spread-style merge would drop. Instantiated generic interfaces are left
-/// alone, so they keep their type arguments.
+/// alone, so they keep their type arguments. So is TypeScript's `object`, an
+/// interface that rejects primitives: the merge would accept them.
 fn supported_object(t: &Type) -> Option<bool> {
     match t.deref() {
         TypeInner::DefT(_, def_t) => match def_t.deref() {
@@ -58,8 +59,13 @@ fn supported_object(t: &Type) -> Option<bool> {
                     && !obj.strictness_kind.is_typescript_loose(),
             ),
             DefTInner::InstanceT(instance)
-                if matches!(instance.inst.inst_kind, InstanceKind::InterfaceKind { .. })
-                    && instance.inst.type_args.is_empty()
+                if matches!(
+                    instance.inst.inst_kind,
+                    InstanceKind::InterfaceKind {
+                        reject_primitives: false,
+                        ..
+                    }
+                ) && instance.inst.type_args.is_empty()
                     && instance.inst.inst_call_t.is_none()
                     && instance.inst.inst_construct_t.is_none() =>
             {
