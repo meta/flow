@@ -52,7 +52,8 @@ use flow_typing_type::type_::UnresolvedParam;
 use flow_typing_type::type_::eval;
 use flow_typing_type::type_util::reason_of_t;
 
-use crate::type_operation_utils;
+use crate::distribute_union_intersection;
+use crate::flow_js::FlowJs;
 
 pub fn check_polarity<'cx>(
     cx: &mut Context<'cx>,
@@ -183,14 +184,12 @@ fn check_polarity_impl<'cx>(
             // point. We need to know the polarity of the type parameters in order to
             // know the position of any found GenericTs. This call will continue
             // checking the type args once the root type is resolved.
-            type_operation_utils::distribute_union_intersection::distribute(
+            distribute_union_intersection::distribute(
                 cx,
                 env,
                 None,
                 &|cx, reason, t| {
-                    flow_typing_flow_js::flow_js::FlowJs::possible_concrete_types_for_inspection_with_env(
-                        cx, env, reason, t,
-                    )
+                    FlowJs::possible_concrete_types_for_inspection_with_env(cx, env, reason, t)
                 },
                 &|_, reason| reason.loc().dupe(),
                 &|cx, env, l| {
@@ -216,7 +215,7 @@ fn check_polarity_impl<'cx>(
                             }
                             if matches!(d.deref(), DefTInner::InstanceT(_)) {
                                 let concretize = |cx: &mut Context<'_>, t: &Type| {
-                                    flow_typing_flow_js::flow_js::FlowJs::possible_concrete_types_for_inspection_with_env(
+                                    FlowJs::possible_concrete_types_for_inspection_with_env(
                                         cx,
                                         env,
                                         reason_of_t(t),
@@ -298,10 +297,9 @@ fn check_polarity_impl<'cx>(
                     )?;
                 } else {
                     let type_::TypeDestructorTInner(_, reason, _) = defer_use_t.deref();
-                    let concrete_types =
-                        flow_typing_flow_js::flow_js::FlowJs::possible_concrete_types_for_inspection_with_env(
-                            cx, env, reason, t,
-                        )?;
+                    let concrete_types = FlowJs::possible_concrete_types_for_inspection_with_env(
+                        cx, env, reason, t,
+                    )?;
                     for ct in &concrete_types {
                         check_polarity_impl(cx, env, trace, seen, tparams, Polarity::Positive, ct)?;
                     }
@@ -844,12 +842,7 @@ fn check_spread_argument_polarity<'cx>(
         return check_polarity_impl(cx, env, trace, seen, tparams, elem_polarity, t);
     }
     let concrete_types =
-        flow_typing_flow_js::flow_js::FlowJs::possible_concrete_types_for_inspection_with_env(
-            cx,
-            env,
-            reason_of_t(t),
-            t,
-        )?;
+        FlowJs::possible_concrete_types_for_inspection_with_env(cx, env, reason_of_t(t), t)?;
     for ct in &concrete_types {
         match ct.deref() {
             TypeInner::DefT(_, d) if let DefTInner::ArrT(arr) = d.deref() => match arr.deref() {

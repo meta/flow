@@ -11,7 +11,6 @@
 pub mod abnormal;
 pub mod annotation_inference;
 pub mod avar;
-pub mod check_polarity;
 pub mod convert_types;
 pub mod exhaustive;
 pub mod members;

@@ -7,7 +7,9 @@
 
 #![feature(box_patterns)]
 #![feature(deref_patterns)]
+pub mod check_polarity;
 pub mod default_resolve;
+pub mod distribute_union_intersection;
 pub mod flow_js;
 pub mod implicit_instantiation;
 pub mod intersection_kit;
