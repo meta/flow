@@ -15,7 +15,6 @@ Enabling Flow Strict for a file means that several previously-allowed patterns w
  - [`nonstrict-import`](../linting/rule-reference.md#toc-nonstrict-import): Triggers an error when importing from a module which is not also `@flow strict`. This is very important, because it means that when a file is marked as strict, all of its dependencies are strict as well.
  - [`unclear-type`](../linting/rule-reference.md#toc-unclear-type): Triggers an error when using `any` in a type annotation.
  - [`untyped-import`](../linting/rule-reference.md#toc-untyped-import): Triggers an error when importing from an untyped module.
- - [`untyped-type-import`](../linting/rule-reference.md#toc-untyped-type-import): Triggers an error when importing a type from an untyped module.
  - [`unsafe-getters-setters`](../linting/rule-reference.md#toc-unsafe-getters-setters): Triggers an error when using getters and setters, which can be unsafe.
  - [`sketchy-null`](../linting/rule-reference.md#toc-sketchy-null): Triggers an error when doing an existence check on a value that could be null/undefined or falsey.
 
@@ -33,7 +32,6 @@ nonstrict-import
 unclear-type
 unsafe-getters-setters
 untyped-import
-untyped-type-import
 ```
 Also recommended, but optional as it may be too noisy in some codebases:
 `sketchy-null`

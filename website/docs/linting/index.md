@@ -13,7 +13,7 @@ Lint settings can be specified in the `[lints]` section of the `.flowconfig` as 
 ```
 [lints]
 all=warn
-untyped-type-import=error
+unused-promise=error
 sketchy-null-bool=off
 ```
 
@@ -22,7 +22,7 @@ sketchy-null-bool=off
 Lint settings can be specified using the `--lints` flag of a Flow server command as a comma-delimited list of `rule=severity` pairs. These settings apply globally to the entire project.
 
 ```
-flow start --lints "all=warn, untyped-type-import=error, sketchy-null-bool=off"
+flow start --lints "all=warn, unused-promise=error, sketchy-null-bool=off"
 ```
 
 ### Configuring Lints with Comments {#toc-configuring-lints-with-comments}

@@ -734,8 +734,6 @@ counter.increment.call(counter); // Works
 counter.increment.call(other); // ERROR: [invalid-this-arg]
 ```
 
-`invalid-this-arg` is a [lint](../linting/rule-reference.md#toc-invalid-this-arg) that is enabled as an error by default; `// flowlint invalid-this-arg:off` turns it off for a region of a file.
-
 ### `implements` and `extends` RHS must be an interface or class {#toc-cannot-implement}
 
 The right-hand side of `implements` (on a class) or `extends` (on an interface) must name an interface or class — passing an object-type alias errors:

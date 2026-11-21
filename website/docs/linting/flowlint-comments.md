@@ -20,15 +20,12 @@ and applying settings over part of a line.
 
 **settings over a block of code:**
 A pair of `flowlint` comments can be used to apply a certain setting over a block of code.
-For example, to disable the untyped-type-import lint over a block of type imports would look like this:
+For example, if you have `unused-promise=error` configured, you can disable it for two calls and then re-enable it:
 ```js
-import type {
-  // flowlint untyped-type-import:off
-  Foo,
-  Bar,
-  Baz,
-  // flowlint untyped-type-import:error
-} from './untyped.js';
+// flowlint unused-promise:off
+fireAndForget();
+alsoFireAndForget();
+// flowlint unused-promise:error
 ```
 
 **settings over a file:**

@@ -11,133 +11,6 @@ Please write this object type as explicitly exact (use `{|` and `|}` instead of 
 Found 1 error
 
 === block 2 ===
-Error --------------------------------------------------------------------- -:4:16
-
-Deprecated type. Use `boolean` instead. [deprecated-type]
-
-   4| type A = Array<bool>; // Error
-                     ^^^^
-
-
-Found 1 error
-
-=== block 3 ===
-Error ---------------------------------------------------------------------- -:5:3
-
-Components may not be nested directly within other components or hooks. [nested-component]
-
-   5|   component Inner() { // Error
-        ^^^^^^^^^^^^^^^^^
-
-
-Found 1 error
-
-=== block 4 ===
-Error ---------------------------------------------------------------------- -:5:3
-
-Components may not be nested directly within other components or hooks. [nested-component]
-
-   5|   component ItemView() { // Error
-        ^^^^^^^^^^^^^^^^^^^^
-
-
-Found 1 error
-
-=== block 5 ===
-No errors!
-
-=== block 6 ===
-Error ---------------------------------------------------------------------- -:6:3
-
-Hooks may not be nested directly within other components or hooks. [nested-hook]
-
-   6|   hook useNested() { // Error
-        ^^^^^^^^^^^^^^^^
-
-
-Found 1 error
-
-=== block 7 ===
-Error ---------------------------------------------------------------------- -:5:3
-
-Hooks may not be nested directly within other components or hooks. [nested-hook]
-
-   5|   hook useNested() { // Error
-        ^^^^^^^^^^^^^^^^
-
-
-Found 1 error
-
-=== block 8 ===
-No errors!
-
-=== block 9 ===
-Error --------------------------------------------------------------------- -:2:10
-
-`$Omit` is an internal Flow type. Use `Omit` instead. [internal-type]
-
-   2| type A = $Omit<{x: number, y: number}, 'x'>; // Error
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
-Found 1 error
-
-=== block 10 ===
-Error --------------------------------------------------------------------- -:4:10
-
-`React$Node` is an internal Flow type. Use `React.Node` instead. [internal-type]
-
-   4| type A = React$Node; // Error
-               ^^^^^^^^^^
-
-
-Found 1 error
-
-=== block 11 ===
-Error -------------------------------------------------------------------- -:11:19
-
-Cannot use `call` because its first argument must be the exact same value as the receiver `counter` [1] the method was
-read from. `Function.prototype.call` may not rebind a method to a different receiver. See
-https://flow.org/en/docs/types/classes/#toc-this-rebinding [invalid-this-arg]
-
-   -:11:19
-   11| counter.increment.call(other); // Error
-                         ^^^^
-
-References:
-   -:11:1
-   11| counter.increment.call(other); // Error
-       ^^^^^^^ [1]
-
-
-Found 1 error
-
-=== block 12 ===
-Error --------------------------------------------------------------------- -:5:18
-
-The name of intrinsic element `div` [1] overlaps with a local definition [2] which has a type [1] that can be
-instantiated as an element. To avoid confusion between this definition and the intrinsic, rename the definition
-[react-intrinsic-overlap]
-
-   -:5:18
-   5| declare function div(): React.Node; // ERROR
-                       ^^^ [2]
-
-References:
-   -:6:2
-   6| <div />;
-       ^^^ [1]
-
-
-Found 1 error
-
-=== block 13 ===
-No errors!
-
-=== block 14 ===
-No errors!
-
-=== block 15 ===
 Error ---------------------------------------------------------------------- -:5:5
 
 Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
@@ -158,7 +31,7 @@ References:
 
 Found 1 error
 
-=== block 16 ===
+=== block 3 ===
 Error ---------------------------------------------------------------------- -:4:5
 
 Sketchy null check on number [1] which is potentially 0. Perhaps you meant to check for null or undefined [2]?
@@ -179,7 +52,7 @@ References:
 
 Found 1 error
 
-=== block 17 ===
+=== block 4 ===
 Error --------------------------------------------------------------------- -:4:18
 
 Unclear type. Using `any` is not safe! [unclear-type]
@@ -190,7 +63,7 @@ Unclear type. Using `any` is not safe! [unclear-type]
 
 Found 1 error
 
-=== block 18 ===
+=== block 5 ===
 Error ---------------------------------------------------------------------- -:6:1
 
 This use of `invariant` is unnecessary because `Array<string>` [1] is always truthy. [unnecessary-assertion]
@@ -207,7 +80,7 @@ References:
 
 Found 1 error
 
-=== block 19 ===
+=== block 6 ===
 Error ---------------------------------------------------------------------- -:8:1
 
 This use of optional chaining (`?.`) is unnecessary because `foo` [1] cannot be nullish or because an earlier `?.` will
@@ -225,7 +98,7 @@ References:
 
 Found 1 error
 
-=== block 20 ===
+=== block 7 ===
 Error --------------------------------------------------------------------- -:10:1
 
 This use of optional chaining (`?.`) is unnecessary because `foo?.bar` [1] cannot be nullish or because an earlier `?.`
@@ -243,7 +116,7 @@ References:
 
 Found 1 error
 
-=== block 21 ===
+=== block 8 ===
 Error ---------------------------------------------------------------------- -:5:3
 
 Getters and setters can have side effects and are unsafe. [unsafe-getters-setters]
@@ -261,21 +134,7 @@ Getters and setters can have side effects and are unsafe. [unsafe-getters-setter
 
 Found 2 errors
 
-=== block 22 ===
-Error --------------------------------------------------------------------- -:5:16
-
-Flow's support for `Object.assign` is unsafe. Use spreads instead. [unsafe-object-assign]
-
-   5| const config = Object.assign(defaults, overrides); // Error
-                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
-Found 1 error
-
-=== block 23 ===
-No errors!
-
-=== block 24 ===
+=== block 9 ===
 Error ---------------------------------------------------------------------- -:7:3
 
 `Promise` in async scope is unused. Did you mean to `await` it? [unused-promise]

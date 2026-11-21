@@ -227,7 +227,7 @@ Component Syntax enforces a few restrictions in components to help ensure correc
 2. All branches of a component must end in an explicit return. Even though `undefined` is a valid return value, we've seen many instances where an explicit return would have prevented bugs in production.
 3. You cannot use `this` in a component.
 
-4. You cannot define a component inside another component or a hook. This triggers the [`nested-component`](../linting/rule-reference.md#toc-nested-component) lint, because a nested component gets a new identity on every render, causing React to unmount and remount it each time. Use a regular function instead if the inner "component" doesn't use hooks, or move the component to the top level.
+4. You cannot define a component inside another component or a hook. This triggers a `nested-component` error because a nested component gets a new identity on every render, causing React to unmount and remount it each time. Use a regular function instead if the inner "component" doesn't use hooks, or move the component to the top level.
 
 5. Components cannot be called as plain functions — they can only be rendered as JSX. Calling `Foo(props)` directly errors with `[react-rule-call-component]`. Use `<Foo {...props} />` instead.
 
