@@ -186,6 +186,31 @@ impl Default for FileOptions {
 pub static node_modules_containers: LazyLock<RwLock<BTreeMap<FlowSmolStr, BTreeSet<FlowSmolStr>>>> =
     LazyLock::new(|| RwLock::new(BTreeMap::new()));
 
+/// Records the node_modules directories under `root` that contain any of `paths`, as the crawl
+/// does for the directories it walks.
+pub fn add_node_modules_containers(
+    options: &FileOptions,
+    root: &Path,
+    paths: impl IntoIterator<Item = String>,
+) {
+    let mut containers = node_modules_containers.write().unwrap();
+    for path in paths {
+        for dir in Path::new(&path).ancestors().skip(1) {
+            if !dir.starts_with(root) {
+                break;
+            }
+            if let (Some(container), Some(dirname)) = (dir.parent(), dir.file_name())
+                && is_node_module(options, &dir.to_string_lossy())
+            {
+                containers
+                    .entry(FlowSmolStr::new(container.to_string_lossy()))
+                    .or_default()
+                    .insert(FlowSmolStr::new(dirname.to_string_lossy()));
+            }
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct SymlinkMap {
     building_paths: Mutex<Option<HashMap<PathBuf, PathBuf>>>,

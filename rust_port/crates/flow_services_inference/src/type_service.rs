@@ -1732,6 +1732,13 @@ pub(crate) mod recheck {
             handle_unexpected_file_changes(orchestrator, changed_files)
         })?;
         let parsed_set_for_resolve = parsed_set.dupe().union(dirty_direct_dependents.dupe());
+        if options.incremental_package_json {
+            files::add_node_modules_containers(
+                &options.file_options,
+                options.root.as_path(),
+                modified_set.iter().map(|file| file.to_absolute()),
+            );
+        }
         resolve_requires_for_recheck(pool, transaction, options, &parsed_set_for_resolve)?;
         check_recheck_canceled()?;
 

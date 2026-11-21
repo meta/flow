@@ -531,18 +531,30 @@ mod node {
         None
     }
 
+    fn package_json_file_key(transaction: &ModuleResolver<'_>, package_filename: &str) -> FileKey {
+        let package_filename = transaction.resolve_symlinks(package_filename);
+        FileKey::json_file_of_absolute(&package_filename)
+    }
+
+    fn record_package_json_dependency(
+        transaction: &ModuleResolver<'_>,
+        phantom_acc: Option<&mut PhantomAcc>,
+        file_key: &FileKey,
+    ) {
+        let mname = Modulename::eponymous_module(file_key.dupe());
+        let dependency = transaction.get_dependency(&mname);
+        super::record_phantom_dependency(mname, dependency, phantom_acc);
+    }
+
     fn parse_package(
         transaction: &ModuleResolver<'_>,
         phantom_acc: Option<&mut PhantomAcc>,
         package_filename: &str,
     ) -> Arc<PackageJson> {
-        let package_filename = transaction.resolve_symlinks(package_filename);
-        let file_key = FileKey::json_file_of_absolute(&package_filename);
+        let file_key = package_json_file_key(transaction, package_filename);
 
         if transaction.options.incremental_package_json {
-            let mname = Modulename::eponymous_module(file_key.dupe());
-            let dependency = transaction.get_dependency(&mname);
-            super::record_phantom_dependency(mname, dependency, phantom_acc);
+            record_package_json_dependency(transaction, phantom_acc, &file_key);
         }
 
         transaction
@@ -946,23 +958,35 @@ mod node {
         let file_options = &options.file_options;
         let (package_name, package_subpath) = parse_package_name(import_specifier);
 
-        if let Some(existing_node_modules_dirs) =
-            node_modules_containers.get(possible_node_module_container_dir)
-        {
-            for dirname in &file_options.node_resolver_dirnames {
-                if existing_node_modules_dirs.contains(&FlowSmolStr::new(dirname)) {
-                    if let Some(result) = resolve_relative(
-                        options,
-                        transaction,
-                        phantom_acc.as_deref_mut(),
-                        importing_file,
-                        possible_node_module_container_dir,
-                        Some(&package_subpath),
-                        &format!("{}{}{}", dirname, std::path::MAIN_SEPARATOR, package_name),
-                    ) {
-                        return Some(result);
-                    }
+        let existing_node_modules_dirs =
+            node_modules_containers.get(possible_node_module_container_dir);
+        for dirname in &file_options.node_resolver_dirnames {
+            if existing_node_modules_dirs
+                .is_some_and(|dirs| dirs.contains(&FlowSmolStr::new(dirname)))
+            {
+                if let Some(result) = resolve_relative(
+                    options,
+                    transaction,
+                    phantom_acc.as_deref_mut(),
+                    importing_file,
+                    possible_node_module_container_dir,
+                    Some(&package_subpath),
+                    &format!("{}{}{}", dirname, std::path::MAIN_SEPARATOR, package_name),
+                ) {
+                    return Some(result);
                 }
+            } else if options.incremental_package_json
+                && Path::new(possible_node_module_container_dir).starts_with(options.root.as_path())
+            {
+                // The crawl found no such directory here. A package installed into one later
+                // brings its package.json, which is what makes this resolution change.
+                let package_json_path = Path::new(possible_node_module_container_dir)
+                    .join(dirname)
+                    .join(&package_name)
+                    .join("package.json");
+                let file_key =
+                    package_json_file_key(transaction, package_json_path.to_str().unwrap());
+                record_package_json_dependency(transaction, phantom_acc.as_deref_mut(), &file_key);
             }
         }
 
