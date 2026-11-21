@@ -689,13 +689,9 @@ impl Transaction {
                 sig_hash,
             );
             let new_entry = match existing_entry.dupe() {
-                Some(entry) => {
-                    let entry = entry.with_parse(Some(Parse::Typed(typed_parse)));
-                    match haste_module_info {
-                        Some(info) => entry.with_haste_info(Some(info)),
-                        None => entry,
-                    }
-                }
+                Some(entry) => entry
+                    .with_parse(Some(Parse::Typed(typed_parse)))
+                    .with_haste_info(haste_module_info),
                 None => {
                     self.note_alloc();
                     FileEntry::new(
@@ -739,13 +735,9 @@ impl Transaction {
 
         let untyped_parse = UntypedParse::new(file_hash);
         let new_entry = match existing_entry {
-            Some(entry) => {
-                let entry = entry.with_parse(Some(Parse::Untyped(untyped_parse)));
-                match haste_module_info {
-                    Some(info) => entry.with_haste_info(Some(info)),
-                    None => entry,
-                }
-            }
+            Some(entry) => entry
+                .with_parse(Some(Parse::Untyped(untyped_parse)))
+                .with_haste_info(haste_module_info),
             None => {
                 self.note_alloc();
                 FileEntry::new(
@@ -820,13 +812,9 @@ impl Transaction {
         let package_parse = PackageParse::new(file_hash, package_info);
 
         let new_entry = match existing_entry {
-            Some(entry) => {
-                let entry = entry.with_parse(Some(Parse::Package(package_parse)));
-                match haste_module_info {
-                    Some(info) => entry.with_haste_info(Some(info)),
-                    None => entry,
-                }
-            }
+            Some(entry) => entry
+                .with_parse(Some(Parse::Package(package_parse)))
+                .with_haste_info(haste_module_info),
             None => {
                 self.note_alloc();
                 FileEntry::new(
@@ -1578,7 +1566,14 @@ mod tests {
         );
         assert_eq!(
             transaction.get_haste_provider_candidates(&new_haste),
-            vec![file]
+            vec![file.dupe()]
+        );
+
+        transaction.add_unparsed(file.dupe(), 3, None);
+
+        assert_eq!(
+            transaction.get_haste_provider_candidates(&new_haste),
+            Vec::<FileKey>::new()
         );
     }
 }
