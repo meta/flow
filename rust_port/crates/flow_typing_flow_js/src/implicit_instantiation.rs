@@ -240,6 +240,58 @@ fn speculative_subtyping_succeeds<'cx>(
     l: &Type,
     u: &Type,
 ) -> Result<bool, FlowJsException> {
+    // Literals are decided by enum membership before speculating, as in
+    // `speculation_kit::optimize_spec_try_shortcut`.
+    if let TypeInner::DefT(_, l_def) = l.deref()
+        && matches!(
+            l_def.deref(),
+            DefTInner::SingletonStrT { .. }
+                | DefTInner::SingletonNumT { .. }
+                | DefTInner::SingletonBoolT { .. }
+                | DefTInner::SingletonBigIntT { .. }
+                | DefTInner::VoidT
+                | DefTInner::NullT
+        )
+    {
+        let quick_mem = match u.deref() {
+            TypeInner::UnionT(_, rep) => {
+                if !rep.is_optimized_finally() {
+                    rep.optimize(
+                        cx,
+                        |cx, t1, t2| concrete_type_eq::eq_with_env(cx, env, t1, t2),
+                        |cx, ts: &mut dyn Iterator<Item = &Type>| {
+                            type_mapper::union_flatten(cx, ts.duped())
+                        },
+                        |cx, t| cx.find_resolved(t),
+                        |cx, id| cx.find_props(id),
+                    );
+                }
+                union_rep::quick_mem_enum(
+                    cx,
+                    |_, t1, t2| type_util::quick_subtype(None::<&mut fn(&Type)>, t1, t2),
+                    l,
+                    rep,
+                )
+            }
+            _ => match union_rep::canon(u) {
+                Some(_) if type_util::quick_subtype(None::<&mut fn(&Type)>, l, u) => {
+                    union_rep::QuickMemResult::Yes
+                }
+                Some(u_enum) if union_rep::canon(l).as_ref() != Some(&u_enum) => {
+                    union_rep::QuickMemResult::No
+                }
+                _ => union_rep::QuickMemResult::Unknown,
+            },
+        };
+        match quick_mem {
+            union_rep::QuickMemResult::Yes => {
+                flow_js_utils::update_lit_type_from_annot(cx, env, l);
+                return Ok(true);
+            }
+            union_rep::QuickMemResult::No => return Ok(false),
+            union_rep::QuickMemResult::Conditional(_) | union_rep::QuickMemResult::Unknown => {}
+        }
+    }
     match speculation_kit::try_singleton_throw_on_failure(
         cx,
         env,
