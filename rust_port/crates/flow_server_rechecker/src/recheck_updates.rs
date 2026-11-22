@@ -267,7 +267,9 @@ pub fn process_updates(
         is_incompatible_package_json(options, transaction, &want, &sroot, file_options, f)
     };
     check_for_flowconfig_change(options, skip_incompatible, &config_path, updates)?;
-    check_for_package_json_changes(&is_incompatible_pj, skip_incompatible, updates)?;
+    if !options.incremental_package_json {
+        check_for_package_json_changes(&is_incompatible_pj, skip_incompatible, updates)?;
+    }
     let filtered_updates = do_filter(updates);
     check_for_lib_changes(
         options,

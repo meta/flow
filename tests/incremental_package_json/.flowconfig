@@ -1,0 +1,5 @@
+[options]
+all=true
+experimental.incremental_package_json=true
+file_watcher=none
+module.system=haste

@@ -1,0 +1,253 @@
+
+Initial state:
+Error ------------------------------------------------------------------------------------------------------ test.js:4:1
+
+Cannot cast `x` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:4:1
+   4| x as string; // ERROR while dep's main is a.js
+      ^
+
+References:
+   node_modules/dep/a.js:1:17
+   1| export const x: number = 1;
+                      ^^^^^^ [1]
+   test.js:4:6
+   4| x as string; // ERROR while dep's main is a.js
+           ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------------ test.js:5:1
+
+Cannot cast `y` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:5:1
+   5| y as string; // ERROR while pkg/package.json names the package `pkg`
+      ^
+
+References:
+   pkg/index.js:1:17
+   1| export const y: number = 1;
+                      ^^^^^^ [1]
+   test.js:5:6
+   5| y as string; // ERROR while pkg/package.json names the package `pkg`
+           ^^^^^^ [2]
+
+
+
+Found 2 errors
+
+Change dep's main to b.js:
+Error ------------------------------------------------------------------------------------------------------ test.js:5:1
+
+Cannot cast `y` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:5:1
+   5| y as string; // ERROR while pkg/package.json names the package `pkg`
+      ^
+
+References:
+   pkg/index.js:1:17
+   1| export const y: number = 1;
+                      ^^^^^^ [1]
+   test.js:5:6
+   5| y as string; // ERROR while pkg/package.json names the package `pkg`
+           ^^^^^^ [2]
+
+
+
+Found 1 error
+
+Rename the Haste package pkg to other:
+Error ----------------------------------------------------------------------------------------------------- test.js:2:17
+
+Cannot resolve module `pkg`. [cannot-resolve-module]
+
+   2| import {y} from 'pkg';
+                      ^^^^^
+
+
+
+Found 1 error
+
+Make pkg/package.json invalid:
+Error --------------------------------------------------------------------------------------------- pkg/package.json:2:1
+
+Unexpected end of input, expected the token `}` [ParseError]
+
+   2|
+      
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:2:17
+
+Cannot resolve module `pkg`. [cannot-resolve-module]
+
+   2| import {y} from 'pkg';
+                      ^^^^^
+
+
+
+Found 2 errors
+
+Name the Haste package pkg again:
+Error ------------------------------------------------------------------------------------------------------ test.js:5:1
+
+Cannot cast `y` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:5:1
+   5| y as string; // ERROR while pkg/package.json names the package `pkg`
+      ^
+
+References:
+   pkg/index.js:1:17
+   1| export const y: number = 1;
+                      ^^^^^^ [1]
+   test.js:5:6
+   5| y as string; // ERROR while pkg/package.json names the package `pkg`
+           ^^^^^^ [2]
+
+
+
+Found 1 error
+
+Delete dep's package.json:
+Error ----------------------------------------------------------------------------------------------------- test.js:1:17
+
+Cannot resolve module `dep`. [cannot-resolve-module]
+
+   1| import {x} from 'dep';
+                      ^^^^^
+
+
+Error ------------------------------------------------------------------------------------------------------ test.js:5:1
+
+Cannot cast `y` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:5:1
+   5| y as string; // ERROR while pkg/package.json names the package `pkg`
+      ^
+
+References:
+   pkg/index.js:1:17
+   1| export const y: number = 1;
+                      ^^^^^^ [1]
+   test.js:5:6
+   5| y as string; // ERROR while pkg/package.json names the package `pkg`
+           ^^^^^^ [2]
+
+
+
+Found 2 errors
+
+Add dep's package.json back with main a.js:
+Error ------------------------------------------------------------------------------------------------------ test.js:4:1
+
+Cannot cast `x` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:4:1
+   4| x as string; // ERROR while dep's main is a.js
+      ^
+
+References:
+   node_modules/dep/a.js:1:17
+   1| export const x: number = 1;
+                      ^^^^^^ [1]
+   test.js:4:6
+   4| x as string; // ERROR while dep's main is a.js
+           ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------------ test.js:5:1
+
+Cannot cast `y` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:5:1
+   5| y as string; // ERROR while pkg/package.json names the package `pkg`
+      ^
+
+References:
+   pkg/index.js:1:17
+   1| export const y: number = 1;
+                      ^^^^^^ [1]
+   test.js:5:6
+   5| y as string; // ERROR while pkg/package.json names the package `pkg`
+           ^^^^^^ [2]
+
+
+
+Found 2 errors
+
+Add another Haste package named pkg, which becomes the provider:
+Error --------------------------------------------------------------------------------------------- pkg/package.json:1:1
+
+Duplicate module provider for `pkg`. Change either the name of this file or the name of the current module provider [1].
+[duplicate-module]
+
+   pkg/package.json:1:1
+   1| {"name": "pkg", "main": "index.js"}
+      
+
+References:
+   alt/package.json:1:1
+   1| {"name": "pkg", "main": "main.js"}
+       [1]
+
+
+Error ------------------------------------------------------------------------------------------------------ test.js:4:1
+
+Cannot cast `x` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:4:1
+   4| x as string; // ERROR while dep's main is a.js
+      ^
+
+References:
+   node_modules/dep/a.js:1:17
+   1| export const x: number = 1;
+                      ^^^^^^ [1]
+   test.js:4:6
+   4| x as string; // ERROR while dep's main is a.js
+           ^^^^^^ [2]
+
+
+
+Found 2 errors
+
+Remove the other Haste package:
+Error ------------------------------------------------------------------------------------------------------ test.js:4:1
+
+Cannot cast `x` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:4:1
+   4| x as string; // ERROR while dep's main is a.js
+      ^
+
+References:
+   node_modules/dep/a.js:1:17
+   1| export const x: number = 1;
+                      ^^^^^^ [1]
+   test.js:4:6
+   4| x as string; // ERROR while dep's main is a.js
+           ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------------ test.js:5:1
+
+Cannot cast `y` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   test.js:5:1
+   5| y as string; // ERROR while pkg/package.json names the package `pkg`
+      ^
+
+References:
+   pkg/index.js:1:17
+   1| export const y: number = 1;
+                      ^^^^^^ [1]
+   test.js:5:6
+   5| y as string; // ERROR while pkg/package.json names the package `pkg`
+           ^^^^^^ [2]
+
+
+
+Found 2 errors
