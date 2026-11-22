@@ -453,6 +453,21 @@ References:
                                   ^^^^^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------- inferred_return_neighbors.js:30:27
+
+Cannot return `c ? {...} : {...}` because in property `p`: `1` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   inferred_return_neighbors.js:30:27
+   30|   c ? {f: () => {}} : {p: 1, f: () => {}}; // ERROR
+                                 ^ [1]
+
+References:
+   inferred_return_neighbors.js:26:26
+   26| type WithOptional = {p?: string, f: () => void};
+                                ^^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------------------------ missing_return.js:14:15
 
 Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
@@ -673,4 +688,4 @@ References:
 
 
 
-Found 45 errors
+Found 46 errors

@@ -21,6 +21,13 @@ const fromConditional = (c: boolean): (() => void) =>
       };
 fromMatch('a')() as void; // OK
 fromConditional(true)() as undefined; // ERROR
+// Typing those values to look up the contextual return type does not leave
+// them typed without their own hints.
+type WithOptional = {p?: string, f: () => void};
+const fromBranches = (c: boolean): WithOptional =>
+  c ? {f: () => {}} : {f: () => {}}; // OK
+const fromBadBranch = (c: boolean): WithOptional =>
+  c ? {f: () => {}} : {p: 1, f: () => {}}; // ERROR
 // Looking up the contextual return type of one argument leaves the hints of the
 // other arguments intact.
 declare const promise: {

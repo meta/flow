@@ -2935,9 +2935,11 @@ impl<'a> Context<'a> {
         self.ccx_mut().synthesis_produced_uncacheable_result = false;
         self.inner_mut().typing_mode = TypingMode::SynthesisMode { target_loc };
         let cache_snapshot = self.take_cache_snapshot();
-        // The cache snapshot leaves out the decompositions hint evaluation keeps for later hints.
-        // Those computed while synthesizing can depend on placeholders, so they are dropped too.
+        // The cache snapshot leaves out the decompositions hint evaluation keeps for later hints,
+        // and the expressions env resolution keeps for checking. Those computed while synthesizing
+        // can depend on placeholders, or miss their hints, so they are dropped too.
         self.inner_mut().hint_eval_cache.push_level();
+        self.node_cache_mut().push_level();
 
         let result = f(self);
 
@@ -2946,6 +2948,7 @@ impl<'a> Context<'a> {
 
         self.restore_cache_snapshot(cache_snapshot);
         self.inner_mut().hint_eval_cache.pop_level();
+        self.node_cache_mut().pop_level();
         self.inner_mut().typing_mode = old_typing_mode;
         self.ccx_mut().synthesis_produced_uncacheable_result =
             old_synthesis_produced_uncacheable_result;

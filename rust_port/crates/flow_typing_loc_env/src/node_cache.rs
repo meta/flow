@@ -10,6 +10,7 @@ use std::rc::Rc;
 use dupe::Dupe;
 use flow_aloc::ALoc;
 use flow_aloc::ALocMap;
+use flow_data_structure_wrapper::multi_level_map::MultiLevelMap;
 use flow_lazy::ContextFamily;
 use flow_parser::ast;
 use flow_parser::ast::types::TypeParam as AstTypeParam;
@@ -31,12 +32,15 @@ pub type DeferredTypeGuardCheck<CX> = Option<
 
 struct Cache<CX: ContextFamily + Clone> {
     annotations: ALocMap<ast::types::Annotation<ALoc, (ALoc, Type)>>,
-    expressions: ALocMap<ast::expression::Expression<ALoc, (ALoc, Type)>>,
+    expressions: MultiLevelMap<ALoc, ast::expression::Expression<ALoc, (ALoc, Type)>>,
     statements: ALocMap<ast::statement::Statement<ALoc, (ALoc, Type)>>,
-    jsx_body: ALocMap<(
-        Vec<UnresolvedParam>,
-        (ALoc, Vec<ast::jsx::Child<ALoc, (ALoc, Type)>>),
-    )>,
+    jsx_body: MultiLevelMap<
+        ALoc,
+        (
+            Vec<UnresolvedParam>,
+            (ALoc, Vec<ast::jsx::Child<ALoc, (ALoc, Type)>>),
+        ),
+    >,
     functions: ALocMap<(Type, ast::function::Function<ALoc, (ALoc, Type)>)>,
     function_sigs: ALocMap<(
         func_class_sig_types::func::Func<func_class_sig_types::StmtConfigTypes>,
@@ -94,9 +98,9 @@ impl<CX: ContextFamily + Clone> NodeCache<CX> {
     pub fn mk_empty() -> NodeCache<CX> {
         NodeCache(Cache {
             annotations: ALocMap::new(),
-            expressions: ALocMap::new(),
+            expressions: MultiLevelMap::new(),
             statements: ALocMap::new(),
-            jsx_body: ALocMap::new(),
+            jsx_body: MultiLevelMap::new(),
             functions: ALocMap::new(),
             function_sigs: ALocMap::new(),
             aliases: ALocMap::new(),
@@ -113,6 +117,18 @@ impl<CX: ContextFamily + Clone> NodeCache<CX> {
             match_pattern_value_unions: ALocMap::new(),
             match_pattern_unions: ALocMap::new(),
         })
+    }
+
+    /// Expressions and JSX children cached after this call are dropped by the matching
+    /// `pop_level`.
+    pub fn push_level(&mut self) {
+        self.0.expressions.push_level();
+        self.0.jsx_body.push_level();
+    }
+
+    pub fn pop_level(&mut self) {
+        self.0.expressions.pop_level();
+        self.0.jsx_body.pop_level();
     }
 
     pub fn set_annotation(&mut self, anno: ast::types::Annotation<ALoc, (ALoc, Type)>) {
