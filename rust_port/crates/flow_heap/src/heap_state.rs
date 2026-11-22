@@ -969,6 +969,12 @@ impl<'a> HeapReader<'a> {
             .is_some_and(|overlay| overlay.files.get(file).is_some())
     }
 
+    /// The files the committed heap records other files as depending on, including files that do
+    /// not exist.
+    pub fn committed_file_dependencies(&self) -> impl Iterator<Item = &'a FileKey> + 'a {
+        self.committed.file_dependents.keys()
+    }
+
     pub fn dependents(&self, module: &Modulename) -> BTreeSet<FileKey> {
         match module {
             Modulename::Filename(file) => self.file_dependents(file),

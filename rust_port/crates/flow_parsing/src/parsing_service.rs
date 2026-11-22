@@ -7,6 +7,7 @@
 
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
+use std::path::Path;
 use std::sync::Arc;
 use std::sync::Mutex;
 
@@ -519,9 +520,16 @@ fn reducer(
 
     let filename_string = file_key.to_absolute();
 
+    // A file the crawl would report at another key (it is now reached through a symlink) is no
+    // longer at this one.
+    let moved = !is_init
+        && !skip_changed
+        && options.incremental_package_json
+        && !file_key.is_lib_file()
+        && !files::is_crawled_path(&options.root, Path::new(&filename_string));
     let bytes = match std::fs::read(&filename_string) {
-        Ok(bytes) => bytes,
-        Err(_) => {
+        Ok(bytes) if !moved => bytes,
+        _ => {
             let haste_module_info =
                 flow_services_module::exported_module(options, &file_key, &PackageInfo::none());
             let dirty_modules = transaction.clear_file(file_key.dupe(), haste_module_info);

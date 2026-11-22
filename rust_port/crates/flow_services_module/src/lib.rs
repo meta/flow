@@ -536,14 +536,23 @@ mod node {
         FileKey::json_file_of_absolute(&package_filename)
     }
 
+    /// Records the package.json at `package_filename`, read as `file_key`, as a dependency. When
+    /// a symlink leads to it, the path through the link is recorded too: the heap knows the file
+    /// only by its real path.
     fn record_package_json_dependency(
         transaction: &ModuleResolver<'_>,
-        phantom_acc: Option<&mut PhantomAcc>,
+        mut phantom_acc: Option<&mut PhantomAcc>,
+        package_filename: &str,
         file_key: &FileKey,
     ) {
-        let mname = Modulename::eponymous_module(file_key.dupe());
-        let dependency = transaction.get_dependency(&mname);
-        super::record_phantom_dependency(mname, dependency, phantom_acc);
+        let link_key =
+            FileKey::json_file_of_absolute(&files::lexically_normalize_path(package_filename));
+        let link_key = (link_key != *file_key).then_some(link_key);
+        for key in std::iter::once(file_key.dupe()).chain(link_key) {
+            let mname = Modulename::eponymous_module(key);
+            let dependency = transaction.get_dependency(&mname);
+            super::record_phantom_dependency(mname, dependency, phantom_acc.as_deref_mut());
+        }
     }
 
     fn parse_package(
@@ -554,7 +563,7 @@ mod node {
         let file_key = package_json_file_key(transaction, package_filename);
 
         if transaction.options.incremental_package_json {
-            record_package_json_dependency(transaction, phantom_acc, &file_key);
+            record_package_json_dependency(transaction, phantom_acc, package_filename, &file_key);
         }
 
         transaction
@@ -984,9 +993,14 @@ mod node {
                     .join(dirname)
                     .join(&package_name)
                     .join("package.json");
-                let file_key =
-                    package_json_file_key(transaction, package_json_path.to_str().unwrap());
-                record_package_json_dependency(transaction, phantom_acc.as_deref_mut(), &file_key);
+                let package_json_path = package_json_path.to_str().unwrap();
+                let file_key = package_json_file_key(transaction, package_json_path);
+                record_package_json_dependency(
+                    transaction,
+                    phantom_acc.as_deref_mut(),
+                    package_json_path,
+                    &file_key,
+                );
             }
         }
 

@@ -94,6 +94,7 @@ use crate::job_utils;
 use crate::merge_service;
 use crate::pure_dep_graph_operations;
 use crate::recheck_stats;
+use crate::symlink_changes;
 
 #[derive(Debug)]
 pub enum RecheckError {
@@ -1526,6 +1527,12 @@ pub(crate) mod recheck {
         ));
 
         let modified_set = updates.dupe().all();
+        if options.incremental_package_json
+            && modified_set.iter().any(symlink_changes::is_package_json)
+        {
+            // Packages are installed and removed with the symlinks that lead to them.
+            files::clear_canonicalize_cache();
+        }
         let modified_files: Vec<FileKey> = modified_set.iter().map(|f| f.dupe()).collect();
         let modified_next: parsing_service::Next = parsing_service::next_of_filename_set(
             pool,
@@ -1703,6 +1710,25 @@ pub(crate) mod recheck {
             dirty_modules,
         );
         check_recheck_canceled()?;
+        let changed_modules: flow_common_modulename::ModulenameSet =
+            if options.incremental_package_json {
+                let paths_through_links = symlink_changes::package_json_paths_through_links(
+                    pool,
+                    transaction,
+                    options,
+                    &modified_set,
+                );
+                changed_modules
+                    .into_iter()
+                    .chain(
+                        paths_through_links
+                            .into_iter()
+                            .map(Modulename::eponymous_module),
+                    )
+                    .collect()
+            } else {
+                changed_modules
+            };
 
         let unparsed_or_deleted: BTreeSet<FileKey> = {
             let mut set: BTreeSet<FileKey> = unparsed_set.iter().duped().collect();

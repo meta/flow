@@ -19,6 +19,7 @@ pub mod pure_dep_graph_operations;
 #[cfg(test)]
 mod pure_dep_graph_operations_test;
 pub mod recheck_stats;
+mod symlink_changes;
 pub mod type_contents;
 pub mod type_service;
 #[cfg(test)]

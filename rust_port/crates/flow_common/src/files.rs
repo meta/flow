@@ -77,6 +77,12 @@ impl CanonicalizeCache {
             result
         }
     }
+
+    fn clear(&self) {
+        for shard in &self.shards {
+            shard.lock().unwrap().clear();
+        }
+    }
 }
 
 static CANONICALIZE_CACHE: OnceLock<CanonicalizeCache> = OnceLock::new();
@@ -86,6 +92,22 @@ pub fn cached_canonicalize(path: &Path) -> std::io::Result<PathBuf> {
     CANONICALIZE_CACHE
         .get_or_init(CanonicalizeCache::new)
         .get_or_insert(path)
+}
+
+/// Makes [`cached_canonicalize`] ask the file system again, for when symlinks may have changed.
+pub fn clear_canonicalize_cache() {
+    CANONICALIZE_CACHE
+        .get_or_init(CanonicalizeCache::new)
+        .clear();
+}
+
+/// Whether the crawl reports the file at `path` by that path. It reports a file reached through a
+/// symlink, or under `node_modules`, by its real path.
+pub fn is_crawled_path(root: &Path, path: &Path) -> bool {
+    let is_symlink =
+        std::fs::symlink_metadata(path).is_ok_and(|metadata| metadata.file_type().is_symlink());
+    !should_canonicalize_discovered_entry(path, is_symlink, Some(root), &mut HashMap::new())
+        || dunce::canonicalize(path).is_ok_and(|real| real == path)
 }
 
 fn resolved_path<'a>(original: &'a str, resolved: &Path) -> Cow<'a, str> {
