@@ -84,19 +84,91 @@ References:
                           ^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------------- test.js:50:5
+Error ----------------------------------------------------------------------------------------------------- test.js:51:5
 
-Cannot call `f` with `null` bound to `u` because `null` [1] is incompatible with `U` [2]. [incompatible-type]
+Cannot call `f` with `null` bound to `u` because: [incompatible-type]
+ - Either `null` [1] is incompatible with `void` [2].
+ - Or `null` [1] is incompatible with `{readonly foo: string}` [2].
 
-   test.js:50:5
-   50|   f(null); // error
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   test.js:51:5
+   51|   f(null); // error
            ^^^^ [1]
 
 References:
-   test.js:49:37
-   49|   declare function f(u: NonNullable<U>): void;
+   test.js:50:37
+   50|   declare function f(u: NonNullable<U>): void;
                                            ^ [2]
 
 
+Error ----------------------------------------------------------------------------------------------------- test.js:60:7
 
-Found 6 errors
+Cannot assign `2` to `y` because `2` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+All writes to `y` must be compatible with the type of its initializer [3]. Add an annotation to `y` [3] if a different
+type is desired.
+
+   test.js:60:7
+   60|   y = 2; // error
+             ^ [1]
+
+References:
+   test.js:54:31
+   54|   declare opaque type S super 'a' | 1 extends string | number;
+                                     ^^^^^^^ [2]
+   test.js:57:7
+   57|   let y = first(s);
+             ^ [3]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:67:11
+
+Cannot call `ks.push` because `"zzz"` [1] is incompatible with `"a" | 1` [2]. [incompatible-type]
+
+   test.js:67:11
+   67|   ks.push('zzz'); // error
+                 ^^^^^ [1]
+
+References:
+   test.js:64:25
+   64|   declare const d: {[k: K]: boolean};
+                               ^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:71:33
+
+Cannot assign `null` to `p` because `null` [1] is incompatible with `"a"` [2]. [incompatible-type]
+
+   test.js:71:33
+   71|   const p: NonNullable<Outer> = null; // error
+                                       ^^^^ [1]
+
+References:
+   test.js:71:24
+   71|   const p: NonNullable<Outer> = null; // error
+                              ^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:79:31
+
+Cannot assign `'y'` to `cy` because: [incompatible-type]
+ - Either `"y"` [1] is incompatible with `"x" | null` [2].
+ - Or `"y"` [1] is incompatible with `null` [2].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   test.js:79:31
+   79|   const cy: NonNullable<C2> = 'y'; // error
+                                     ^^^ [1]
+
+References:
+   test.js:79:25
+   79|   const cy: NonNullable<C2> = 'y'; // error
+                               ^^ [2]
+
+
+
+Found 10 errors

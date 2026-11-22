@@ -33,6 +33,7 @@ use flow_typing_implicit_instantiation_check::MethodOptionalChain;
 use flow_typing_implicit_instantiation_check::Operation;
 use flow_typing_type::type_::ArrRestTData;
 use flow_typing_type::type_::ArrType::*;
+use flow_typing_type::type_::BoundedId;
 use flow_typing_type::type_::CallElemTData;
 use flow_typing_type::type_::CallMData;
 use flow_typing_type::type_::CallTData;
@@ -3226,12 +3227,26 @@ fn __flow_impl<'cx>(
             rec_flow(cx, env, trace, (&repos_l, u_inner))?;
         }
         (
-            UnionT(_, _),
+            UnionT(reason, rep),
             SealGenericT(box SealGenericTData {
                 bounded_id, cont, ..
             }),
         ) => {
-            let sealed = bounded_id.with_bound(reason_of_t(l).dupe(), l.dupe());
+            // A narrowed union holds the type variables the narrowing fills for its members. What
+            // flows into a narrowed opaque type through its lower bound is checked against its
+            // bound, so it is sealed with their concrete types.
+            let checks_values = matches!(
+                bounded_id,
+                BoundedId::Nominal(nominal_type) if nominal_type.lower_t.is_some()
+            );
+            let bound =
+                if checks_values && rep.members_iter().any(|t| matches!(t.deref(), OpenT(_))) {
+                    let ts = helpers::possible_concrete_types_for_inspection(cx, env, reason, l)?;
+                    type_util::union_of_ts(reason.dupe(), ts, None)
+                } else {
+                    l.dupe()
+                };
+            let sealed = bounded_id.with_bound(reason.dupe(), bound);
             continue_(cx, env, trace, &sealed, cont)?;
         }
         (UnionT(_, _), ObjKitT(use_op, reason, resolve_tool, tool, tout)) => {

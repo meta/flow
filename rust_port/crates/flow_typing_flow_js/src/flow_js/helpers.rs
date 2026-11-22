@@ -19,6 +19,7 @@ use flow_typing_errors::error_message::ETooFewTypeArgsData;
 use flow_typing_errors::error_message::ETooManyTypeArgsData;
 use flow_typing_errors::intermediate_error_types::NamedReferenceData;
 use flow_typing_errors::intermediate_error_types::PropPolarityMismatchObject;
+use flow_typing_flow_common::flow_cache;
 use flow_typing_flow_common::flow_js_utils::FlowJsException;
 use flow_typing_flow_js_env::FlowJsEnv;
 use flow_typing_type::type_::BoundedId;
@@ -539,6 +540,19 @@ fn keys_of_type_param<'cx>(
     )))))
 }
 
+/// Whether continuing with `cont` flows into the type variable `t`, as the narrowing of a type met
+/// again inside its own narrowing does.
+fn continues_into(cont: &Cont<Cx>, t: &Type) -> bool {
+    let (Cont::Upper(u), TypeInner::OpenT(tvar)) = (cont, t.deref()) else {
+        return false;
+    };
+    matches!(
+        u.deref().deref(),
+        UseTInner::UseT(_, target)
+            if matches!(target.deref(), TypeInner::OpenT(target) if target.id() == tvar.id())
+    )
+}
+
 /// A type that is known only through its bound `bound` and has the identity `bounded_id`, such
 /// as a type parameter, flows into `u`. Uses that can narrow the bound give the type with the same
 /// identity and the narrowed bound; uses that distribute over a union or intersection see the
@@ -571,12 +585,37 @@ pub(super) fn handle_bounded<'cx>(
         else {
             return continue_(cx, env, trace, &make_generic(bound.dupe()), &cont);
         };
-        let tvar_id = flow_typing_tvar::mk_no_wrap(cx, reason);
-        let t_out_prime = Tvar::new(reason.dupe(), tvar_id as u32);
-        let use_t = mk_use_t(t_out_prime.dupe());
-        let repos_bound = reposition_reason(cx, env, Some(trace), reason, false, bound)?;
-        rec_flow(cx, &bound_env, trace, (&repos_bound, &use_t))?;
-        let open_t = Type::new(TypeInner::OpenT(t_out_prime));
+        // The narrowing of a type by a use is the same wherever the type is met, such as in both
+        // bounds of another opaque type. A narrowing in a speculation branch may miss the flows
+        // the branch defers, so it is not reused, and neither is a narrowing that the type flows
+        // back into, met again inside it.
+        let cache_key =
+            (!env.speculating()).then(|| mk_use_t(Tvar::new(reason_of_t(bound).dupe(), 0)));
+        let open_t = match &cache_key {
+            Some(key) => flow_cache::narrowing::find(cx, bounded_id, bound, key),
+            None => None,
+        };
+        let open_t = match open_t {
+            Some(open_t) if !continues_into(&cont, &open_t) => open_t,
+            _ => {
+                let tvar_id = flow_typing_tvar::mk_no_wrap(cx, reason);
+                let t_out_prime = Tvar::new(reason.dupe(), tvar_id as u32);
+                let use_t = mk_use_t(t_out_prime.dupe());
+                let repos_bound = reposition_reason(cx, env, Some(trace), reason, false, bound)?;
+                rec_flow(cx, &bound_env, trace, (&repos_bound, &use_t))?;
+                let open_t = Type::new(TypeInner::OpenT(t_out_prime));
+                if let Some(key) = cache_key {
+                    flow_cache::narrowing::add(
+                        cx,
+                        bounded_id.clone(),
+                        bound.dupe(),
+                        key,
+                        open_t.dupe(),
+                    );
+                }
+                open_t
+            }
+        };
         let seal = UseT::new(UseTInner::SealGenericT(Box::new(SealGenericTData {
             loc: reason.loc().dupe(),
             bounded_id: bounded_id.clone(),

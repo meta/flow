@@ -3068,6 +3068,43 @@ fn take_n_from_set(n: usize, set: &UnionEnumSet) -> Vec<UnionEnum> {
     set.iter().take(n).cloned().collect()
 }
 
+/// Flows `l` into an opaque type through its lower bound `lower`. An opaque type narrowed by an
+/// operation has the type it narrows as its lower bound, whose values may not fit its narrowed
+/// upper bound `upper`, so `l` is checked against that too.
+fn flow_to_opaque_lower_bound<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    trace: DepthTrace,
+    use_op: UseOp,
+    l: &Type,
+    lower: &Type,
+    upper: Option<&Type>,
+) -> Result<(), FlowJsException> {
+    let Some(upper) = upper else {
+        return FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, l, lower);
+    };
+    // In a speculation branch an error ends the check. Elsewhere `l` is first tried against the
+    // lower bound, so that a value fitting neither bound gets one error.
+    if env.speculating() {
+        FlowJs::rec_flow_t_with_env(cx, env, trace, use_op.dupe(), l, lower)?;
+    } else {
+        match speculation_kit::try_singleton_throw_on_failure(
+            cx,
+            env,
+            trace,
+            l.dupe(),
+            UseT::new(UseT(use_op.dupe(), lower.dupe())),
+        ) {
+            Ok(()) => {}
+            Err(FlowJsException::SpeculationSingletonError) => {
+                return FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, l, lower);
+            }
+            Err(e) => return Err(e),
+        }
+    }
+    FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, l, upper)
+}
+
 pub fn union_to_union<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
@@ -6684,6 +6721,7 @@ pub fn rec_sub_t<'cx>(
         ) if lnom.upper_t.is_some() && unom.lower_t.is_some() => {
             let lower_upper = lnom.upper_t.as_ref().unwrap().dupe();
             let upper_lower = unom.lower_t.as_ref().unwrap().dupe();
+            let upper_upper = unom.narrowed_upper_t().duped();
             let l_clone = l.dupe();
             let u_clone = u.dupe();
             let opaque_u_reason_c = opaque_u_reason.dupe();
@@ -6704,7 +6742,15 @@ pub fn rec_sub_t<'cx>(
                             }),
                             Arc::new(use_op_c1),
                         );
-                        FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &l_clone, &upper_lower)
+                        flow_to_opaque_lower_bound(
+                            cx,
+                            env,
+                            trace,
+                            use_op,
+                            &l_clone,
+                            &upper_lower,
+                            upper_upper.as_ref(),
+                        )
                     }),
                     Box::new(move |cx: &mut Context, env: &FlowJsEnv| {
                         let use_op = VirtualUseOp::Frame(
@@ -6750,6 +6796,7 @@ pub fn rec_sub_t<'cx>(
             },
         ) if unom.lower_t.is_some() => {
             let upper_lower = unom.lower_t.as_ref().unwrap().dupe();
+            let upper_upper = unom.narrowed_upper_t().duped();
             let l_clone = l.dupe();
             let u_clone = u.dupe();
             let lower_upper = lower_upper.dupe();
@@ -6771,7 +6818,15 @@ pub fn rec_sub_t<'cx>(
                             }),
                             Arc::new(use_op_c1),
                         );
-                        FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &l_clone, &upper_lower)
+                        flow_to_opaque_lower_bound(
+                            cx,
+                            env,
+                            trace,
+                            use_op,
+                            &l_clone,
+                            &upper_lower,
+                            upper_upper.as_ref(),
+                        )
                     }),
                     Box::new(move |cx: &mut Context, env: &FlowJsEnv| {
                         let repositioned = FlowJs::reposition_reason(
@@ -6801,7 +6856,7 @@ pub fn rec_sub_t<'cx>(
                 }),
                 Arc::new(use_op),
             );
-            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, l, t)
+            flow_to_opaque_lower_bound(cx, env, trace, use_op, l, t, unom.narrowed_upper_t())
         }
 
         // `ExactObjectType` is the supertype of every exact object type, a lower bound no type

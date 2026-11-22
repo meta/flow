@@ -1958,7 +1958,8 @@ impl<'e> Walker<'e> {
                 }
                 None => Ok(()),
             },
-            // Elsewhere, a type flows to an opaque type through its lower bound.
+            // Elsewhere, a type flows to an opaque type through its lower bound, and into the upper
+            // bound of a narrowed opaque type, whose lower bound is the type it narrows.
             (
                 _,
                 TypeInner::NominalT {
@@ -1966,8 +1967,12 @@ impl<'e> Walker<'e> {
                 },
             ) => match &b.lower_t {
                 Some(lower) => {
-                    let lower = lower.dupe();
-                    self.walk(cx, &l, &lower)
+                    let (lower, upper) = (lower.dupe(), b.narrowed_upper_t().map(|t| t.dupe()));
+                    self.walk(cx, &l, &lower)?;
+                    match upper {
+                        Some(upper) => self.walk(cx, &l, &upper),
+                        None => Ok(()),
+                    }
                 }
                 None => Ok(()),
             },

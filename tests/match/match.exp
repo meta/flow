@@ -2480,6 +2480,28 @@ References:
                             ^^^^^ [2]
 
 
+Error ----------------------------------------------------------------------------------------------- refining.js:269:11
+
+Cannot assign `'a'` to `x` because: [incompatible-type]
+ - Either `"a"` [1] is incompatible with `"b"` [2].
+ - Or `"a"` [1] is incompatible with `1` [2].
+
+All writes to `x` must be compatible with the type of its initializer [3]. Add an annotation to `x` [3] if a different
+type is desired.
+
+   refining.js:269:11
+   269|       x = 'a'; // ERROR
+                  ^^^ [1]
+
+References:
+   refining.js:263:20
+   263|   declare const v: V;
+                           ^ [2]
+   refining.js:267:11
+   267|       let x = w;
+                  ^ [3]
+
+
 Error -------------------------------------------------------------------------------------------- render_types.js:16:34
 
 Cannot create `Inner` element because property `inner` is extra in `{a: number, b: string, inner?: void}` [1] but
@@ -2867,4 +2889,4 @@ References:
 
 
 
-Found 215 errors
+Found 216 errors

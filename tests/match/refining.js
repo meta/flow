@@ -255,3 +255,18 @@
     _ => {}
   }
 }
+
+// A value flows into an opaque type narrowed by patterns through its lower bound only if it is in
+// the values left
+{
+  declare opaque type V super 'a' | 1 extends 'a' | 'b' | 1;
+  declare const v: V;
+  match (v) {
+    'a' => {}
+    const w => {
+      let x = w;
+      x = 1; // OK
+      x = 'a'; // ERROR
+    }
+  }
+}

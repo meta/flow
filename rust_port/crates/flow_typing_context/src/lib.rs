@@ -438,6 +438,11 @@ pub struct ComponentT {
     eval_repos_cache: EvalReposCacheMap,
     fix_cache: FixCacheMap,
     this_specialize_cache: ThisSpecializeCacheMap,
+    // Keyed on a bounded type, its upper bound and the use that narrows it, with the use's output
+    // replaced: the type variable holding the narrowed upper bound. A bounded type nested in both
+    // bounds of another one is narrowed for each, so without this a chain of them is narrowed an
+    // exponential number of times, into types compared afresh.
+    narrowing_cache: NarrowingCacheMap,
     spread_cache: SpreadCache,
     const_fold_cache: ConstFoldMap,
 
@@ -640,6 +645,8 @@ pub type PostInferenceValidationCallback =
 /// The family of [Context], for the generic type structures of the crates below this one.
 #[derive(Debug, Clone, Copy, Dupe)]
 pub enum Cx {}
+
+pub type NarrowingCacheMap = MultiLevelMap<(type_::BoundedId, Type, type_::UseT<Cx>), Type>;
 
 impl ContextFamily for Cx {
     type Context<'cx> = Context<'cx>;
@@ -1132,6 +1139,7 @@ fn make_ccx() -> ComponentT {
         eval_repos_cache: Default::default(),
         fix_cache: Default::default(),
         this_specialize_cache: Default::default(),
+        narrowing_cache: MultiLevelMap::new(),
         spread_cache: SpreadCache::new(),
         const_fold_cache: Default::default(),
         annot_graph: IntHashMap::default(),
@@ -2649,7 +2657,7 @@ impl<'a> Context<'a> {
 pub struct CacheSnapshot {
     constraint_cache_level_count: usize,
     // eval_id_cache, id_cache, eval_repos_cache, fix_cache, this_specialize_cache,
-    // const_fold_cache use MultiLevelMap — their state is tracked internally
+    // narrowing_cache, const_fold_cache use MultiLevelMap — their state is tracked internally
     // via push_level/pop_level, not stored here.
     snapshot_subst_cache: type_::SubstCacheMap<Type>,
     snapshot_spread_cache: SpreadCache,
@@ -2863,6 +2871,7 @@ impl<'a> Context<'a> {
         ccx.eval_repos_cache.push_level();
         ccx.fix_cache.push_level();
         ccx.this_specialize_cache.push_level();
+        ccx.narrowing_cache.push_level();
         ccx.const_fold_cache.push_level();
         ccx.elab_open_memo.push_level();
         let constraint_cache_level_count = ccx.constraint_cache.level_count();
@@ -2891,6 +2900,7 @@ impl<'a> Context<'a> {
         ccx.eval_repos_cache.pop_level();
         ccx.fix_cache.pop_level();
         ccx.this_specialize_cache.pop_level();
+        ccx.narrowing_cache.pop_level();
         ccx.const_fold_cache.pop_level();
         ccx.elab_open_memo.pop_level();
         ccx.spread_cache = snapshot_spread_cache;
@@ -3492,6 +3502,14 @@ impl<'a> Context<'a> {
 
     pub fn this_specialize_cache_mut(&mut self) -> &mut ThisSpecializeCacheMap {
         &mut self.ccx_mut().this_specialize_cache
+    }
+
+    pub fn narrowing_cache(&self) -> &NarrowingCacheMap {
+        &self.ccx().narrowing_cache
+    }
+
+    pub fn narrowing_cache_mut(&mut self) -> &mut NarrowingCacheMap {
+        &mut self.ccx_mut().narrowing_cache
     }
 
     pub fn spread_cache(&self) -> &SpreadCache {

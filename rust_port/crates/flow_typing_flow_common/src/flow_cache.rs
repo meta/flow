@@ -235,6 +235,26 @@ pub mod this_specialize {
     }
 }
 
+// Keyed on a bounded type, its upper bound and the use that narrows it, with the use's output
+// replaced by a placeholder: the type variable holding the narrowed upper bound.
+pub mod narrowing {
+    use dupe::Dupe;
+    use flow_typing_type::type_::BoundedId;
+
+    use super::*;
+
+    pub fn find(cx: &Context, bounded_id: &BoundedId, upper: &Type, u: &UseT<Cx>) -> Option<Type> {
+        (cx.narrowing_cache())
+            .get(&(bounded_id.clone(), upper.dupe(), u.dupe()))
+            .map(|t| t.dupe())
+    }
+
+    pub fn add(cx: &mut Context, bounded_id: BoundedId, upper: Type, u: UseT<Cx>, narrowed: Type) {
+        cx.narrowing_cache_mut()
+            .insert((bounded_id, upper, u), narrowed);
+    }
+}
+
 // debug util: please don't dead-code-eliminate
 // Summarize flow constraints in cache as ctor/reason pairs, and return counts
 //    for each group.

@@ -3033,13 +3033,23 @@ impl BoundedId {
                 })))
             }
             BoundedId::Nominal(nominal_type) => Type::new(TypeInner::NominalT {
-                reason,
                 nominal_type: Rc::new(NominalType::new(NominalTypeInner {
                     upper_t: Some(bound),
-                    // A narrowed bound may no longer admit the lower bound's values.
-                    lower_t: None,
+                    // What flows in through the lower bound is of the type narrowed, and fits the
+                    // narrowed bound. Only the type narrowed's lower bound and, if it is narrowed
+                    // itself, its narrowed bound tell what it lets in.
+                    lower_t: nominal_type.lower_t.as_ref().map(|_| {
+                        Type::new(TypeInner::NominalT {
+                            reason: reason.dupe(),
+                            nominal_type: Rc::new(NominalType::new(NominalTypeInner {
+                                upper_t: nominal_type.narrowed_upper_t().map(|t| t.dupe()),
+                                ..NominalTypeInner::clone(nominal_type)
+                            })),
+                        })
+                    }),
                     ..NominalTypeInner::clone(nominal_type)
                 })),
+                reason,
             }),
         }
     }
@@ -6745,6 +6755,20 @@ impl NominalType {
 
     pub fn ptr_eq(&self, other: &NominalType) -> bool {
         Rc::ptr_eq(&self.0, &other.0)
+    }
+
+    /// The upper bound of an opaque type narrowed by an operation, which what flows in through
+    /// its lower bound must fit too: a narrowed opaque type has the type it narrows as its lower
+    /// bound.
+    pub fn narrowed_upper_t(&self) -> Option<&Type> {
+        match self.lower_t.as_ref()?.deref() {
+            TypeInner::NominalT { nominal_type, .. }
+                if nominal_type.nominal_id == self.nominal_id =>
+            {
+                self.upper_t.as_ref()
+            }
+            _ => None,
+        }
     }
 }
 

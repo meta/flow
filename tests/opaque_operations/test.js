@@ -44,10 +44,39 @@
 }
 
 {
-  // A narrowed upper bound does not keep the lower bound
-  declare opaque type U super null extends ?{readonly foo: string};
+  // A value flows into an opaque type narrowed by an operation through its lower bound only if it
+  // is in the narrowed upper bound
+  declare opaque type U super null | {readonly foo: 'a'} extends ?{readonly foo: string};
   declare function f(u: NonNullable<U>): void;
   f(null); // error
+  f({foo: 'a'}); // ok
+
+  declare opaque type S super 'a' | 1 extends string | number;
+  declare const s: S;
+  declare function first<X>(x: number | X): X;
+  let y = first(s);
+  y = 'a'; // ok
+  y = 1; // ok
+  y = 2; // error
+
+  // The keys of an opaque type keep its lower bound, whose values flow into them if they are keys
+  declare opaque type K super 'a' | 1 extends string | number;
+  declare const d: {[k: K]: boolean};
+  const ks = Object.keys(d);
+  ks.push('a'); // ok
+  ks.push('zzz'); // error
+
+  declare opaque type Plain super 'a' extends string;
+  declare opaque type Outer super null extends Plain | null;
+  const p: NonNullable<Outer> = null; // error
+  declare const q: NonNullable<Outer>;
+  q as string; // ok
+
+  declare opaque type C0 super 'x' | null extends ?string;
+  declare opaque type C1 super C0 | null extends C0 | ?string;
+  declare opaque type C2 super C1 | null extends C1 | ?string;
+  const cx: NonNullable<C2> = 'x'; // ok
+  const cy: NonNullable<C2> = 'y'; // error
 }
 
 import {useMemo} from './memo';

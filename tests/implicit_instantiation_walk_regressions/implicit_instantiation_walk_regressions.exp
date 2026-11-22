@@ -846,6 +846,46 @@ References:
               ^^^^^^^^^^^^^ [4]
 
 
+Error ----------------------------------------------------------------------------------- opaque_maybe_supertype.js:12:5
+
+Cannot assign `null` to `r` because `null` [1] is incompatible with `string` [2]. [incompatible-type]
+
+All writes to `r` must be compatible with the type of its initializer [3]. Add an annotation to `r` [3] if a different
+type is desired.
+
+   opaque_maybe_supertype.js:12:5
+   12| r = null; // error
+           ^^^^ [1]
+
+References:
+   opaque_maybe_supertype_def.js:2:55
+    2| export opaque type MaybeStr super 'a' | null extends ?string = ?string;
+                                                             ^^^^^^ [2]
+   opaque_maybe_supertype.js:10:5
+   10| let r = nonNull(s);
+           ^ [3]
+
+
+Error ----------------------------------------------------------------------------------- opaque_maybe_supertype.js:16:6
+
+Cannot assign `null` to `ra` because `null` [1] is incompatible with `string` [2]. [incompatible-type]
+
+All writes to `ra` must be compatible with the type of its initializer [3]. Add an annotation to `ra` [3] if a different
+type is desired.
+
+   opaque_maybe_supertype.js:16:6
+   16| ra = null; // error
+            ^^^^ [1]
+
+References:
+   opaque_maybe_supertype_def.js:4:57
+    4| export opaque type MaybeAlias super Maybe<'a'> extends ?string = ?string;
+                                                               ^^^^^^ [2]
+   opaque_maybe_supertype.js:14:5
+   14| let ra = nonNull(a);
+           ^^ [3]
+
+
 Error ------------------------------------------------------------------------------------ opaque_type_underlying.js:9:1
 
 Cannot cast `g(...)` to `empty` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
@@ -1606,4 +1646,4 @@ References:
 
 
 
-Found 87 errors
+Found 89 errors
