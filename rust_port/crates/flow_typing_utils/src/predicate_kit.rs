@@ -27,6 +27,7 @@ use flow_typing_errors::error_message::ETupleElementNotReadableData;
 use flow_typing_errors::error_message::ErrorMessage;
 use flow_typing_flow_common::flow_js_utils;
 use flow_typing_flow_common::flow_js_utils::FlowJsException;
+use flow_typing_flow_common::instantiation_utils;
 use flow_typing_flow_common::obj_type;
 use flow_typing_flow_js::flow_js;
 use flow_typing_flow_js::flow_js::FlowJs;
@@ -36,13 +37,13 @@ use flow_typing_flow_js_env::FlowJsEnv;
 use flow_typing_type::type_::ArrType;
 use flow_typing_type::type_::ArrayATData;
 use flow_typing_type::type_::BinaryTest;
+use flow_typing_type::type_::BoundedId;
 use flow_typing_type::type_::CallArg;
 use flow_typing_type::type_::DefT;
 use flow_typing_type::type_::DefTInner;
 use flow_typing_type::type_::DepthTrace;
 use flow_typing_type::type_::ExtendsUseTData;
 use flow_typing_type::type_::FunParam;
-use flow_typing_type::type_::GenericTData;
 use flow_typing_type::type_::InstanceKind;
 use flow_typing_type::type_::InstanceT;
 use flow_typing_type::type_::NominalType;
@@ -308,6 +309,19 @@ fn run_predicate_over_union_members(
     Ok(())
 }
 
+// The refinements of the bounded types met in one run of a predicate: whether the refinement
+// changed the type, the refined types, and the guards recorded as the fallback of a union whose
+// members all prune. A bounded type nested in both bounds of another one is met once for each.
+#[derive(Default)]
+struct RefinedBoundedTypes(RefCell<Vec<((Type, bool), RefinedBounded)>>);
+
+#[derive(Clone)]
+struct RefinedBounded {
+    changed: bool,
+    types: Vec<Type>,
+    disjoint_fallback: Vec<Type>,
+}
+
 fn concretize_and_run_predicate<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
@@ -322,71 +336,129 @@ fn concretize_and_run_predicate<'cx>(
         &Type,
     ) -> Result<(), FlowJsException>,
 ) -> Result<(), FlowJsException> {
+    concretize_and_run_predicate_memo(
+        cx,
+        env,
+        trace,
+        l,
+        variant,
+        result_collector,
+        predicate_no_concretization,
+        &RefinedBoundedTypes::default(),
+    )
+}
+
+fn concretize_and_run_predicate_memo<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    trace: DepthTrace,
+    l: &Type,
+    variant: PredicateConcretetizerVariant,
+    result_collector: &PredicateResultCollector,
+    predicate_no_concretization: &dyn Fn(
+        &mut Context<'cx>,
+        DepthTrace,
+        &PredicateResultCollector,
+        &Type,
+    ) -> Result<(), FlowJsException>,
+    refined_bounded_types: &RefinedBoundedTypes,
+) -> Result<(), FlowJsException> {
     let reason = reason_of_t(l);
     let ts = FlowJs::possible_concrete_types_for_predicate(variant, cx, env, reason, l)?;
     // Runs the predicate on a single concretized member `t`, reporting into `rc`.
-    let mut process_one =
-        |t: &Type, rc: &PredicateResultCollector| -> Result<(), FlowJsException> {
-            match t.deref() {
-                TypeInner::GenericT(box GenericTData {
-                    bound,
-                    name,
-                    reason,
-                    id,
-                    no_infer,
-                }) => {
-                    let bound_type_collector = TypeCollector::create();
-                    let changed = Rc::new(RefCell::new(false));
-                    let bound_result_collector = PredicateResultCollector {
-                        collector: bound_type_collector,
-                        changed: changed.dupe(),
-                        from_union: Cell::new(rc.from_union.get()),
-                        disjoint_fallback: rc.disjoint_fallback.dupe(),
-                        refined_generic: Some(RefinedGeneric {
-                            generic: t.dupe(),
-                            subsumed_by_guard: Rc::new(RefCell::new(Vec::new())),
-                        }),
-                    };
-                    let repositioned_bound =
-                        FlowJs::reposition_reason(cx, env, Some(trace), reason, None, bound)?;
-                    concretize_and_run_predicate(
+    let mut process_one = |t: &Type,
+                           rc: &PredicateResultCollector|
+     -> Result<(), FlowJsException> {
+        let Some((reason, bound, bounded_id)) = flow_js_utils::as_bounded(cx, t) else {
+            return predicate_no_concretization(cx, trace, rc, t);
+        };
+        let key = (t.dupe(), rc.from_union.get());
+        let refined = (refined_bounded_types.0.borrow().iter())
+            .find(|(k, _)| *k == key)
+            .map(|(_, refined)| refined.clone());
+        let refined = match refined {
+            Some(refined) => refined,
+            None => {
+                // An opaque type that is a member of its own upper bound, reached again inside
+                // the refinement of its bound, is refined as it is, as where its bound flows in
+                // its place.
+                let Some(bound_env) =
+                    instantiation_utils::type_app_expansion::push_bound_unless_loop(
                         cx,
                         env,
-                        trace,
-                        &repositioned_bound,
-                        variant.clone(),
-                        &bound_result_collector,
-                        predicate_no_concretization,
-                    )?;
-                    let changed_val = *changed.borrow();
-                    if changed_val {
-                        report_changes_to_input(rc);
+                        &bounded_id,
+                    )
+                else {
+                    return predicate_no_concretization(cx, trace, rc, t);
+                };
+                let bound_result_collector = PredicateResultCollector {
+                    collector: TypeCollector::create(),
+                    changed: Rc::new(RefCell::new(false)),
+                    from_union: Cell::new(rc.from_union.get()),
+                    disjoint_fallback: TypeCollector::create(),
+                    refined_generic: Some(RefinedGeneric {
+                        generic: t.dupe(),
+                        subsumed_by_guard: Rc::new(RefCell::new(Vec::new())),
+                    }),
+                };
+                let repositioned_bound =
+                    FlowJs::reposition_reason(cx, env, Some(trace), reason, None, &bound)?;
+                concretize_and_run_predicate_memo(
+                    cx,
+                    &bound_env,
+                    trace,
+                    &repositioned_bound,
+                    variant.clone(),
+                    &bound_result_collector,
+                    predicate_no_concretization,
+                    refined_bounded_types,
+                )?;
+                let refined_bounds = bound_result_collector.collector.collect_to_vec();
+                let types = match &bounded_id {
+                    // The pieces of an opaque type with a lower bound would each carry it, so
+                    // its refined members make one piece.
+                    BoundedId::Nominal(nominal_type) if nominal_type.lower_t.is_some() => {
+                        match refined_bounds.is_empty() {
+                            true => vec![],
+                            false => {
+                                let bound = type_util::union_of_ts(
+                                    reason_of_t(&repositioned_bound).dupe(),
+                                    refined_bounds,
+                                    None,
+                                );
+                                vec![bounded_id.with_bound(reason_of_t(&bound).dupe(), bound)]
+                            }
+                        }
                     }
-                    let name = name.dupe();
-                    let no_infer = *no_infer;
-                    let id = id.clone();
-                    bound_result_collector.collector.iter(|bound| {
-                        let type_ = Type::new(TypeInner::GenericT(Box::new(GenericTData {
-                            reason: reason_of_t(bound).dupe(),
-                            name: name.dupe(),
-                            bound: bound.dupe(),
-                            no_infer,
-                            id: id.clone(),
-                        })));
-                        report_filtering_result_to_predicate_result(
-                            FilterResult {
-                                type_,
-                                changed: changed_val,
-                            },
-                            rc,
-                        );
-                        Ok(())
-                    })?;
-                    Ok(())
-                }
-                _ => predicate_no_concretization(cx, trace, rc, t),
+                    _ => (refined_bounds.into_iter())
+                        .map(|bound| bounded_id.with_bound(reason_of_t(&bound).dupe(), bound))
+                        .collect(),
+                };
+                let refined = RefinedBounded {
+                    changed: *bound_result_collector.changed.borrow(),
+                    types,
+                    disjoint_fallback: bound_result_collector.disjoint_fallback.collect_to_vec(),
+                };
+                (refined_bounded_types.0.borrow_mut()).push((key, refined.clone()));
+                refined
             }
         };
+        let RefinedBounded {
+            changed,
+            types,
+            disjoint_fallback,
+        } = refined;
+        if changed {
+            report_changes_to_input(rc);
+        }
+        for type_ in types {
+            report_filtering_result_to_predicate_result(FilterResult { type_, changed }, rc);
+        }
+        for guard in disjoint_fallback {
+            rc.disjoint_fallback.add(guard);
+        }
+        Ok(())
+    };
     if ts.len() > 1 {
         run_predicate_over_union_members(&ts, result_collector, &mut process_one)?;
     } else {

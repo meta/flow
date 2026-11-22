@@ -1,3 +1,128 @@
+Error ----------------------------------------------------------------------------------------------- lower_bound.js:9:7
+
+Cannot assign `null` to `m` because `null` [1] is incompatible with `string` [2]. [incompatible-type]
+
+All writes to `m` must be compatible with the type of its initializer [3]. Add an annotation to `m` [3] if a different
+type is desired.
+
+   lower_bound.js:9:7
+   9|   m = null; // error
+            ^^^^ [1]
+
+References:
+   lower_bound.js:4:18
+   4| declare const n: N;
+                       ^ [2]
+   lower_bound.js:7:7
+   7|   let m = n;
+            ^ [3]
+
+
+Error ---------------------------------------------------------------------------------------------- lower_bound.js:18:7
+
+Cannot assign `1` to `w` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
+
+All writes to `w` must be compatible with the type of its initializer [3]. Add an annotation to `w` [3] if a different
+type is desired.
+
+   lower_bound.js:18:7
+   18|   w = 1; // error
+             ^ [1]
+
+References:
+   lower_bound.js:13:18
+   13| declare const v: V;
+                        ^ [2]
+   lower_bound.js:15:7
+   15|   let w = v;
+             ^ [3]
+
+
+Error ---------------------------------------------------------------------------------------------- lower_bound.js:28:7
+
+Cannot assign `new A()` to `u` because `A` [1] is incompatible with `C` [2]. [incompatible-type]
+
+All writes to `u` must be compatible with the type of its initializer [3]. Add an annotation to `u` [3] if a different
+type is desired.
+
+   lower_bound.js:28:7
+   28|   u = new A(); // error
+             ^^^^^^^ [1]
+
+References:
+   lower_bound.js:25:18
+   25| declare const t: T;
+                        ^ [2]
+   lower_bound.js:27:7
+   27|   let u = t;
+             ^ [3]
+
+
+Error ---------------------------------------------------------------------------------------------- lower_bound.js:35:7
+
+Cannot assign `null` to `p` because `null` [1] is incompatible with `string` [2]. [incompatible-type]
+
+All writes to `p` must be compatible with the type of its initializer [3]. Add an annotation to `p` [3] if a different
+type is desired.
+
+   lower_bound.js:35:7
+   35|   p = null; // error
+             ^^^^ [1]
+
+References:
+   lower_bound.js:32:18
+   32| declare const r: R<number>;
+                        ^^^^^^^^^ [2]
+   lower_bound.js:34:7
+   34|   let p = r;
+             ^ [3]
+
+
+Error ---------------------------------------------------------------------------------------------- lower_bound.js:42:7
+
+Cannot assign `null` to `p` because `null` [1] is incompatible with `string` [2]. [incompatible-type]
+
+All writes to `p` must be compatible with the type of its initializer [3]. Add an annotation to `p` [3] if a different
+type is desired.
+
+   lower_bound.js:42:7
+   42|   p = null; // error
+             ^^^^ [1]
+
+References:
+   lower_bound.js:39:19
+   39| declare const al: AnyLower;
+                         ^^^^^^^^ [2]
+   lower_bound.js:41:7
+   41|   let p = al;
+             ^ [3]
+
+
+Error ---------------------------------------------------------------------------------------------- lower_bound.js:52:7
+
+Cannot assign `'y'` to `p` because: [incompatible-type]
+ - Either `"y"` [1] is incompatible with `"x" | null` [2].
+ - Or `"y"` [1] is incompatible with `null` [2].
+
+All writes to `p` must be compatible with the type of its initializer [3]. Add an annotation to `p` [3] if a different
+type is desired.
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   lower_bound.js:52:7
+   52|   p = 'y'; // error
+             ^^^ [1]
+
+References:
+   lower_bound.js:48:18
+   48| declare const c: C2;
+                        ^^ [2]
+   lower_bound.js:50:7
+   50|   let p = c;
+             ^ [3]
+
+
 Error ------------------------------------------------------------------------------------------------------ test.js:7:5
 
 Sketchy null check on unknown [1] which is potentially false. Perhaps you meant to check for null or undefined [1]?
@@ -13,5 +138,58 @@ References:
                              ^^^^^^^ [1]
 
 
+Error ----------------------------------------------------------------------------------------------------- test.js:55:5
 
-Found 1 error
+Cannot cast `u` to `empty` because `{readonly a: number, readonly tag: "a"}` [1] is incompatible with `empty` [2].
+[incompatible-type]
+
+   test.js:55:5
+   55|     u as empty; // error
+           ^
+
+References:
+   test.js:52:20
+   52|   declare const u: V | string;
+                          ^ [1]
+   test.js:55:10
+   55|     u as empty; // error
+                ^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:55:5
+
+Cannot cast `u` to `empty` because `{readonly b: string, readonly tag: "b"}` [1] is incompatible with `empty` [2].
+[incompatible-type]
+
+   test.js:55:5
+   55|     u as empty; // error
+           ^
+
+References:
+   test.js:52:20
+   52|   declare const u: V | string;
+                          ^ [1]
+   test.js:55:10
+   55|     u as empty; // error
+                ^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:65:5
+
+Cannot cast `d` to `empty` because `null` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   test.js:65:5
+   65|     d as empty; // error
+           ^
+
+References:
+   test.js:62:20
+   62|   declare const d: D<string>;
+                          ^^^^^^^^^ [1]
+   test.js:65:10
+   65|     d as empty; // error
+                ^^^^^ [2]
+
+
+
+Found 10 errors

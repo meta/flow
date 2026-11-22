@@ -36,3 +36,32 @@ if (content != null) {
     x as null | void; // ok
   }
 }
+
+{
+  declare opaque type V:
+    | {readonly tag: 'a', readonly a: number}
+    | {readonly tag: 'b', readonly b: string};
+  declare const v: V;
+  if (v.tag === 'a') {
+    v.a as number; // ok
+    v as V; // ok
+  }
+  if ('b' in v) {
+    v.b as string; // ok
+  }
+  declare const u: V | string;
+  if (typeof u === 'object') {
+    u as V; // ok
+    u as empty; // error
+  }
+}
+
+{
+  // An opaque type that is a member of its own upper bound.
+  declare opaque type D<X>: D<X> | null;
+  declare const d: D<string>;
+  if (d != null) {
+    d as D<string>; // ok
+    d as empty; // error
+  }
+}
