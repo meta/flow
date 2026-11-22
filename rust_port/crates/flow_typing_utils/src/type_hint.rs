@@ -44,6 +44,7 @@ use flow_typing_flow_common::flow_js_utils::SpeculativeError;
 use flow_typing_flow_js::flow_js;
 use flow_typing_flow_js::flow_js::FlowJs;
 use flow_typing_flow_js::implicit_instantiation;
+use flow_typing_flow_js::subtyping_kit;
 use flow_typing_flow_js::tvar_resolver;
 use flow_typing_flow_js_env::FlowJsEnv;
 use flow_typing_implicit_instantiation_check::ImplicitInstantiationCheck;
@@ -66,10 +67,12 @@ use flow_typing_type::type_::FunParam;
 use flow_typing_type::type_::FunRestParam;
 use flow_typing_type::type_::FunType;
 use flow_typing_type::type_::FuncallType;
+use flow_typing_type::type_::GenericTData;
 use flow_typing_type::type_::GetElemTData;
 use flow_typing_type::type_::GetPrivatePropTData;
 use flow_typing_type::type_::GetPropTData;
 use flow_typing_type::type_::HintEvalResult;
+use flow_typing_type::type_::HintInstantiation;
 use flow_typing_type::type_::Literal;
 use flow_typing_type::type_::MethodAction;
 use flow_typing_type::type_::NumberLiteral;
@@ -102,6 +105,8 @@ use flow_typing_type::type_::concretize_seen::ConcretizeSeen;
 use flow_typing_type::type_::empty_tuple_view;
 use flow_typing_type::type_::hint_unavailable;
 use flow_typing_type::type_::inter_rep;
+use flow_typing_type::type_::mixed_t;
+use flow_typing_type::type_::placeholder_t;
 use flow_typing_type::type_::poly;
 use flow_typing_type::type_::react;
 use flow_typing_type::type_::type_collector::TypeCollector;
@@ -239,8 +244,10 @@ impl From<FlowJsException> for SandboxError {
     }
 }
 
+#[derive(Clone, Copy)]
 struct HintOptions {
     expected_only: bool,
+    instantiation: HintInstantiation,
     skip_optional: bool,
 }
 
@@ -391,6 +398,69 @@ fn synthesis_instantiate_callee<'cx>(
     flow_js::subst(cx, None, None, None, &map, tout.dupe())
 }
 
+/// The types `inferred` for the type parameters without an explicit type argument in `targs`.
+fn inferred_targs(
+    tparams: &[TypeParam],
+    targs: Option<&[Targ]>,
+    inferred: &FlowOrdMap<SubstName, Type>,
+) -> FlowOrdMap<SubstName, Type> {
+    tparams
+        .iter()
+        .enumerate()
+        .filter(|(i, _)| {
+            !matches!(
+                targs.and_then(|targs| targs.get(*i)),
+                Some(Targ::ExplicitArg(_))
+            )
+        })
+        .filter_map(|(_, tparam)| Some((tparam.name.dupe(), inferred.get(&tparam.name)?.dupe())))
+        .collect()
+}
+
+/// As TypeScript's `instantiateContextualType`, a contextual type that is a type parameter of an
+/// instantiated callee, alone or in a union, is instantiated with the type `inferred` for it.
+fn instantiate_contextual_type<'cx>(
+    cx: &mut Context<'cx>,
+    reason: &Reason,
+    inferred: &FlowOrdMap<SubstName, Type>,
+    t: &Type,
+) -> Result<Type, FlowJsException> {
+    let ts = FlowJs::possible_concrete_types_for_match_arg(cx, false, true, reason, t)?;
+    if !ts.iter().any(|t| {
+        matches!(t.deref(), TypeInner::GenericT(box GenericTData { name, .. }) if inferred.contains_key(name))
+    }) {
+        return Ok(t.dupe());
+    }
+    let ts = ts.into_iter().map(|t| match t.deref() {
+        TypeInner::GenericT(box GenericTData { name, .. })
+            if let Some(inferred) = inferred.get(name) =>
+        {
+            inferred.dupe()
+        }
+        _ => t,
+    });
+    Ok(type_util::union_of_ts(reason.dupe(), ts.collect(), None))
+}
+
+/// Substitutes the explicit type arguments among `targs` in `tout`. The type parameters with an
+/// implicit one stay type parameters, as in a TypeScript contextual type before inference.
+fn subst_explicit_targs<'cx>(
+    cx: &mut Context<'cx>,
+    tparams: &[TypeParam],
+    tout: &Type,
+    targs: Option<&[Targ]>,
+) -> Type {
+    let map: FlowOrdMap<SubstName, Type> = tparams
+        .iter()
+        .zip(targs.into_iter().flatten())
+        .filter_map(|(tparam, targ)| match targ {
+            Targ::ExplicitArg(t) => Some((tparam.name.dupe(), t.dupe())),
+            Targ::ImplicitArg(_) => None,
+        })
+        .collect();
+    flow_js::subst(cx, None, None, None, &map, tout.dupe())
+}
+
 fn get_t<'cx>(cx: &mut Context<'cx>, t: Type) -> Type {
     fn get_t_with_depth<'cx>(cx: &mut Context<'cx>, mut depth: i32, mut t: Type) -> Type {
         loop {
@@ -422,6 +492,8 @@ fn get_t<'cx>(cx: &mut Context<'cx>, t: Type) -> Type {
     get_t_with_depth(cx, 3, t)
 }
 
+/// The type of a callee at a call, and, without implicit instantiation, the types the return hint
+/// infers for the type parameters that the type keeps (see `instantiate_contextual_type`).
 fn instantiate_callee<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
@@ -429,7 +501,7 @@ fn instantiate_callee<'cx>(
     target_reason: &Reason,
     fn_t: &Type,
     instantiation_hint: &ConcrFunCallHints,
-) -> Result<Type, SandboxError> {
+) -> Result<(Type, FlowOrdMap<SubstName, Type>), SandboxError> {
     let reason = &instantiation_hint.reason;
     let targs = &instantiation_hint.targs;
     let arg_list = &instantiation_hint.arg_list;
@@ -447,7 +519,7 @@ fn instantiate_callee<'cx>(
         return_hints: &Rc<Lazy<Cx, Vec<ConcrHint>>>,
         arg_index: i32,
         t: &Type,
-    ) -> Result<Type, SandboxError> {
+    ) -> Result<(Type, FlowOrdMap<SubstName, Type>), SandboxError> {
         match t.deref() {
             TypeInner::DefT(_, def) => {
                 match def.deref() {
@@ -573,11 +645,35 @@ fn instantiate_callee<'cx>(
                         } else {
                             let call_targs: Option<Vec<Targ>> = targs.get_forced(cx).clone()?;
                             match type_util::all_explicit_targ_ts(call_targs.as_deref()) {
-                                Some(targ_ts) => Ok(synthesis_instantiate_callee(
-                                    cx, reason, tparams, t_out, targ_ts,
+                                Some(targ_ts) => Ok((
+                                    synthesis_instantiate_callee(
+                                        cx, reason, tparams, t_out, targ_ts,
+                                    ),
+                                    FlowOrdMap::new(),
                                 )),
                                 None => {
-                                    let call_args_tlist: Vec<CallArg> = {
+                                    // Without implicit instantiation, the arguments are not read:
+                                    // the placeholder standing for each of them bounds nothing.
+                                    let call_args_tlist: Vec<CallArg> = if opts.instantiation
+                                        != HintInstantiation::Implicit
+                                    {
+                                        let param_count = match t_out.deref() {
+                                            TypeInner::DefT(_, def)
+                                                if let DefTInner::FunT(_, fun) = def.deref() =>
+                                            {
+                                                fun.params.len()
+                                            }
+                                            _ => 0,
+                                        };
+                                        (0..param_count)
+                                            .map(|_| {
+                                                CallArg::arg(placeholder_t::why(
+                                                    reason.dupe(),
+                                                    mixed_t::why(reason.dupe()),
+                                                ))
+                                            })
+                                            .collect()
+                                    } else {
                                         let checked_t =
                                             |cx: &mut Context<'cx>, t: &Type, loc: ALoc| -> Type {
                                                 let desc =
@@ -618,10 +714,18 @@ fn instantiate_callee<'cx>(
                                     let return_hint = {
                                         let return_hints_val: &Vec<ConcrHint> =
                                             return_hints.get_forced(cx);
+                                        let return_opts = match opts.instantiation {
+                                            HintInstantiation::Implicit => *opts,
+                                            HintInstantiation::ReturnHint
+                                            | HintInstantiation::Contextual => HintOptions {
+                                                instantiation: HintInstantiation::ReturnHint,
+                                                ..*opts
+                                            },
+                                        };
                                         match evaluate_hints_inner(
                                             cx,
                                             env,
-                                            opts,
+                                            &return_opts,
                                             reason,
                                             return_hints_val.clone(),
                                         )? {
@@ -629,6 +733,22 @@ fn instantiate_callee<'cx>(
                                             _ => None,
                                         }
                                     };
+                                    // As TypeScript's `hasInferenceCandidatesOrDefault`, without a
+                                    // return hint or a default, the type parameters are kept.
+                                    if opts.instantiation != HintInstantiation::Implicit
+                                        && return_hint.is_none()
+                                        && tparams.iter().all(|tparam| tparam.default.is_none())
+                                    {
+                                        return Ok((
+                                            subst_explicit_targs(
+                                                cx,
+                                                tparams,
+                                                t_out,
+                                                call_targs.as_deref(),
+                                            ),
+                                            FlowOrdMap::new(),
+                                        ));
+                                    }
                                     let check = ImplicitInstantiationCheck::of_call(
                                         t.dupe(),
                                         (
@@ -660,60 +780,189 @@ fn instantiate_callee<'cx>(
                                             .collect();
                                         Ok::<_, SandboxError>(map)
                                     }?;
-                                    Ok(flow_js::subst(
-                                        cx,
-                                        None,
-                                        None,
-                                        None,
-                                        &subst_map,
-                                        t_out.dupe(),
+                                    if opts.instantiation == HintInstantiation::Contextual {
+                                        let inferred = inferred_targs(
+                                            tparams,
+                                            call_targs.as_deref(),
+                                            &subst_map,
+                                        );
+                                        return Ok((
+                                            subst_explicit_targs(
+                                                cx,
+                                                tparams,
+                                                t_out,
+                                                call_targs.as_deref(),
+                                            ),
+                                            inferred,
+                                        ));
+                                    }
+                                    Ok((
+                                        flow_js::subst(
+                                            cx,
+                                            None,
+                                            None,
+                                            None,
+                                            &subst_map,
+                                            t_out.dupe(),
+                                        ),
+                                        FlowOrdMap::new(),
                                     ))
                                 }
                             }
                         }
                     }
-                    _ => Ok(t.dupe()),
+                    _ => Ok((t.dupe(), FlowOrdMap::new())),
                 }
             }
-            _ => Ok(t.dupe()),
+            _ => Ok((t.dupe(), FlowOrdMap::new())),
         }
     }
 
-    let mut resolve_overload_and_targs = |fn_t: &Type| -> Result<Type, SandboxError> {
-        let t = match fn_t.deref() {
-            TypeInner::IntersectionT(r, rep) => {
-                let targs_val: &Result<Option<Vec<Targ>>, JobError> = targs.get_forced(cx);
-                let arg_list_fn: &ConcrArgListFn = arg_list.get_forced(cx);
-                let target_loc = Some(target_reason.loc().dupe());
-                let args_val = arg_list_fn(cx, target_loc)?;
-                let argts: Vec<CallArg> = args_val.iter().map(|(_, arg)| arg.clone()).collect();
-                synthesis_speculation_call(cx, env, reason, r, rep, targs_val.clone(), argts)?
-            }
-            _ => fn_t.dupe(),
+    let mut resolve_overload_and_targs =
+        |fn_t: &Type| -> Result<(Type, FlowOrdMap<SubstName, Type>), SandboxError> {
+            let t = match fn_t.deref() {
+                TypeInner::IntersectionT(r, rep)
+                    if opts.instantiation == HintInstantiation::Implicit =>
+                {
+                    let targs_val: &Result<Option<Vec<Targ>>, JobError> = targs.get_forced(cx);
+                    let arg_list_fn: &ConcrArgListFn = arg_list.get_forced(cx);
+                    let target_loc = Some(target_reason.loc().dupe());
+                    let args_val = arg_list_fn(cx, target_loc)?;
+                    let argts: Vec<CallArg> = args_val.iter().map(|(_, arg)| arg.clone()).collect();
+                    synthesis_speculation_call(cx, env, reason, r, rep, targs_val.clone(), argts)?
+                }
+                // As in TypeScript, the arguments are contextually typed by the first overload that
+                // takes as many type arguments and arguments as the call.
+                TypeInner::IntersectionT(_, rep) => {
+                    let targ_count = targs.get_forced(cx).clone()?.map(|targs| targs.len());
+                    let mut overload = None;
+                    for t in rep.members_iter() {
+                        if overload_takes_call(cx, env, reason, t, targ_count, instantiation_hint)?
+                        {
+                            overload = Some(t.dupe());
+                            break;
+                        }
+                    }
+                    overload.unwrap_or_else(|| fn_t.dupe())
+                }
+                _ => fn_t.dupe(),
+            };
+            let resolved = get_t(cx, t);
+            handle_poly(
+                cx,
+                env,
+                opts,
+                target_reason,
+                reason,
+                targs,
+                arg_list,
+                return_hints,
+                arg_index,
+                &resolved,
+            )
         };
-        let resolved = get_t(cx, t);
-        handle_poly(
-            cx,
-            env,
-            opts,
-            target_reason,
-            reason,
-            targs,
-            arg_list,
-            return_hints,
-            arg_index,
-            &resolved,
-        )
-    };
 
     match fn_t.deref() {
         TypeInner::UnionT(_, rep) => {
-            let new_rep = rep.ident_map(false, |t| {
-                resolve_overload_and_targs(t).unwrap_or_else(|_| t.dupe())
+            let mut inferred = FlowOrdMap::new();
+            let new_rep = rep.ident_map(false, |t| match resolve_overload_and_targs(t) {
+                Ok((t, member_inferred)) => {
+                    inferred.extend(member_inferred);
+                    t
+                }
+                Err(_) => t.dupe(),
             });
-            Ok(Type::new(TypeInner::UnionT(reason.dupe(), new_rep)))
+            Ok((
+                Type::new(TypeInner::UnionT(reason.dupe(), new_rep)),
+                inferred,
+            ))
         }
         _ => resolve_overload_and_targs(fn_t),
+    }
+}
+
+/// Whether the overload `t` takes the type arguments and arguments of the call, as TypeScript's
+/// `hasCorrectTypeArgumentArity` and `hasCorrectArity` decide: `targ_count` type arguments, if
+/// any, and the arguments counted by `instantiation_hint`.
+fn overload_takes_call<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    reason: &Reason,
+    t: &Type,
+    targ_count: Option<usize>,
+    instantiation_hint: &ConcrFunCallHints,
+) -> Result<bool, SandboxError> {
+    let t = get_t(cx, t.dupe());
+    let TypeInner::DefT(_, def) = t.deref() else {
+        return Ok(true);
+    };
+    let (tparams, fun) = match def.deref() {
+        DefTInner::FunT(_, fun) => (None, fun),
+        DefTInner::PolyT(box PolyTData { tparams, t_out, .. })
+            if let TypeInner::DefT(_, def) = t_out.deref()
+                && let DefTInner::FunT(_, fun) = def.deref() =>
+        {
+            (Some(tparams), fun)
+        }
+        DefTInner::ObjT(obj) => {
+            return match obj.call_t {
+                Some(id) => {
+                    let call_t = cx.find_call(id);
+                    overload_takes_call(cx, env, reason, &call_t, targ_count, instantiation_hint)
+                }
+                None => Ok(false),
+            };
+        }
+        _ => return Ok(true),
+    };
+    let takes_targs = match (targ_count, tparams) {
+        (None, _) => true,
+        (Some(n), Some(tparams)) => {
+            n >= tparams
+                .iter()
+                .filter(|tparam| tparam.default.is_none())
+                .count()
+                && n <= tparams.len()
+        }
+        (Some(n), None) => n == 0,
+    };
+    if !takes_targs {
+        return Ok(false);
+    }
+    // As TypeScript's `getParameterCount`, a rest param of a tuple type of fixed length stands for a
+    // param per element.
+    let (params, rest_param) = subtyping_kit::subtyping_params(cx, fun, |cx, t| {
+        FlowJs::possible_concrete_types_for_inspection_with_env(cx, env, reason, t)
+    })?;
+    let has_rest = rest_param.is_some();
+    // As TypeScript's `getMinArgumentCount`, trailing parameters that accept `void` can be left out.
+    let mut min_arg_count = params
+        .iter()
+        .rposition(|param| !param.optional)
+        .map_or(0, |i| i + 1);
+    while min_arg_count > 0 {
+        let ts = FlowJs::possible_concrete_types_for_inspection_with_env(
+            cx,
+            env,
+            reason,
+            &params[min_arg_count - 1].t,
+        )?;
+        if !ts.iter().any(|t| {
+            matches!(t.deref(), TypeInner::DefT(_, def) if matches!(def.deref(), DefTInner::TsVoidT))
+        }) {
+            break;
+        }
+        min_arg_count -= 1;
+    }
+    match instantiation_hint.spread_index {
+        Some(spread_index) => {
+            let spread_index = spread_index as usize;
+            Ok(spread_index >= min_arg_count && (has_rest || spread_index < params.len()))
+        }
+        None => {
+            let arg_count = instantiation_hint.arg_count as usize;
+            Ok(arg_count >= min_arg_count && (has_rest || arg_count <= params.len()))
+        }
     }
 }
 
@@ -740,6 +989,19 @@ fn instantiate_component<'cx>(
                 let jsx_props_and_children = &instantiation_hint.jsx_props_and_children;
                 let jsx_hints = &instantiation_hint.jsx_hints;
 
+                if opts.instantiation != HintInstantiation::Implicit {
+                    let jsx_targs_val: Option<Vec<Targ>> = jsx_targs.get_forced(cx).clone()?;
+                    return Ok(
+                        match type_util::all_explicit_targ_ts(jsx_targs_val.as_deref()) {
+                            Some(targ_ts) => {
+                                synthesis_instantiate_callee(cx, reason, tparams, t_out, targ_ts)
+                            }
+                            None => {
+                                subst_explicit_targs(cx, tparams, t_out, jsx_targs_val.as_deref())
+                            }
+                        },
+                    );
+                }
                 let return_hint = {
                     let hints_val: &Vec<ConcrHint> = jsx_hints.get_forced(cx);
                     match evaluate_hints_inner(cx, env, opts, reason, hints_val.clone())? {
@@ -1692,9 +1954,9 @@ fn type_of_hint_decomposition<'cx>(
                     _ => Ok(simplified.dupe()),
                 }
             }
-            ConcrHintDecompositionInner::InstantiateCallee(instantiation_hint) => Ok(
-                instantiate_callee(cx, env, opts, reason, &t, instantiation_hint)?,
-            ),
+            ConcrHintDecompositionInner::InstantiateCallee(instantiation_hint) => {
+                Ok(instantiate_callee(cx, env, opts, reason, &t, instantiation_hint)?.0)
+            }
             ConcrHintDecompositionInner::InstantiateComponent(instantiation_hint) => Ok(
                 instantiate_component(cx, env, opts, &t, instantiation_hint)?,
             ),
@@ -1800,14 +2062,56 @@ fn evaluate_hint_ops<'cx>(
         mut t: Type,
         ops: &[(usize, ConcrHintDecomposition)],
     ) -> Result<Option<Type>, JobError> {
+        let mut cached = true;
+        let mut inferred = FlowOrdMap::new();
         for (id, op) in ops {
-            let result = match cx.hint_eval_cache_find_opt(*id as i32) {
-                Some(result) => result,
-                None => {
-                    let result = type_of_hint_decomposition(cx, env, opts, op.inner(), reason, &t)?;
-                    cx.add_hint_eval_cache_entry(*id as i32, result.clone());
+            // A contextual instantiation also gives the types it infers for the type parameters
+            // it keeps, which the decompositions after it read: none of them is cached.
+            cached = cached
+                && !(opts.instantiation == HintInstantiation::Contextual
+                    && matches!(
+                        op.inner(),
+                        ConcrHintDecompositionInner::InstantiateCallee(_)
+                    ));
+            if !inferred.is_empty() {
+                match in_sandbox_cx(cx, &t, |cx, t| {
+                    Ok(instantiate_contextual_type(cx, reason, &inferred, &t)?)
+                })? {
+                    Some(t1) => t = t1,
+                    None => return Ok(None),
+                }
+            }
+            let result = match op.inner() {
+                ConcrHintDecompositionInner::InstantiateCallee(instantiation_hint)
+                    if opts.instantiation == HintInstantiation::Contextual =>
+                {
+                    let mut callee_inferred = FlowOrdMap::new();
+                    let result = in_sandbox_cx(cx, &t, |cx, t| {
+                        let (t, callee) =
+                            instantiate_callee(cx, env, opts, reason, &t, instantiation_hint)?;
+                        callee_inferred = callee;
+                        Ok(t)
+                    })?;
+                    inferred = callee_inferred;
                     result
                 }
+                _ => match cached
+                    .then(|| cx.hint_eval_cache_find_opt(*id as i32, opts.instantiation))
+                {
+                    Some(Some(result)) => result,
+                    _ => {
+                        let result =
+                            type_of_hint_decomposition(cx, env, opts, op.inner(), reason, &t)?;
+                        if cached {
+                            cx.add_hint_eval_cache_entry(
+                                *id as i32,
+                                opts.instantiation,
+                                result.clone(),
+                            );
+                        }
+                        result
+                    }
+                },
             };
             match result {
                 Some(t1) => t = t1,
@@ -1821,7 +2125,27 @@ fn evaluate_hint_ops<'cx>(
     // checking mode, so that any unresolved tvars in the midddle won't fail the evaluation, but
     // unsolved tvars in the final result will fail the evaluation.
     let hint_env = env.signature_tvar_env();
-    let result = cx.run_in_hint_eval_mode(|cx| loop_ops(cx, &hint_env, opts, reason, t, &ops))?;
+    let result = match opts.instantiation {
+        // The hint of a function's return ends with its `DecompFuncReturn`, giving the contextual
+        // return type, then with `DecompPromise` for an async function, which unwraps it as
+        // TypeScript's `unwrapReturnType`: neither result is instantiated.
+        HintInstantiation::Contextual
+            if let Some(i) = ops.iter().rposition(|(_, op)| {
+                matches!(op.inner(), ConcrHintDecompositionInner::DecompFuncReturn)
+            }) =>
+        {
+            let (contextual, unwrap) = ops.split_at(i + 1);
+            match cx
+                .run_in_hint_eval_mode(|cx| loop_ops(cx, &hint_env, opts, reason, t, contextual))?
+            {
+                Some(t) => {
+                    cx.run_in_hint_eval_mode(|cx| loop_ops(cx, &hint_env, opts, reason, t, unwrap))?
+                }
+                None => None,
+            }
+        }
+        _ => cx.run_in_hint_eval_mode(|cx| loop_ops(cx, &hint_env, opts, reason, t, &ops))?,
+    };
     Ok(match result {
         None => HintEvalResult::DecompositionError,
         Some(t) => fully_resolve_final_result(cx, t, kind),
@@ -1907,6 +2231,7 @@ fn evaluate_hint_with_env<'cx>(
 ) -> Result<HintEvalResult, JobError> {
     let opts = HintOptions {
         expected_only,
+        instantiation: HintInstantiation::Implicit,
         skip_optional: skip_optional.unwrap_or(false),
     };
     evaluate_hint_inner(cx, env, &opts, reason, hint)
@@ -1915,6 +2240,7 @@ fn evaluate_hint_with_env<'cx>(
 pub fn evaluate_hints<'cx>(
     cx: &mut Context<'cx>,
     expected_only: bool,
+    implicit_instantiation: bool,
     skip_optional: Option<bool>,
     reason: &Reason,
     hints: Vec<ConcrHint>,
@@ -1923,6 +2249,7 @@ pub fn evaluate_hints<'cx>(
         cx,
         &FlowJsEnv::entry(),
         expected_only,
+        implicit_instantiation,
         skip_optional,
         reason,
         hints,
@@ -1933,12 +2260,18 @@ fn evaluate_hints_with_env<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     expected_only: bool,
+    implicit_instantiation: bool,
     skip_optional: Option<bool>,
     reason: &Reason,
     hints: Vec<ConcrHint>,
 ) -> Result<HintEvalResult, JobError> {
     let opts = HintOptions {
         expected_only,
+        instantiation: if implicit_instantiation {
+            HintInstantiation::Implicit
+        } else {
+            HintInstantiation::Contextual
+        },
         skip_optional: skip_optional.unwrap_or(false),
     };
     evaluate_hints_inner(cx, env, &opts, reason, hints)

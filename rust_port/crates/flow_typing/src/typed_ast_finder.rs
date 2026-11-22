@@ -1115,7 +1115,7 @@ pub mod type_at_pos {
                     loc.dupe(),
                 );
                 let LazyHintT(_, lazy_hint) = type_env::get_hint(self.cx, loc.dupe());
-                let hint_result = lazy_hint(self.cx, false, None, reason)?;
+                let hint_result = lazy_hint(self.cx, false, true, None, reason)?;
                 // Split with_hint to avoid double &mut self borrow in closures
                 let hint_t = type_hint::with_hint(Some, || None, hint_result);
                 match hint_t {

@@ -431,7 +431,7 @@ pub fn get_hint<'cx>(cx: &Context<'cx>, loc: ALoc) -> LazyHintT<Cx> {
     if !matches!(cx.typing_mode(), TypingMode::CheckingMode) {
         return LazyHintT(
             false,
-            Rc::new(|_cx: &mut Context<'_>, _e, _s, _r| Ok(HintEvalResult::NoHint)),
+            Rc::new(|_cx: &mut Context<'_>, _e, _i, _s, _r| Ok(HintEvalResult::NoHint)),
         );
     }
     let env = cx.environment();
@@ -441,7 +441,7 @@ pub fn get_hint<'cx>(cx: &Context<'cx>, loc: ALoc) -> LazyHintT<Cx> {
         .unwrap_or_else(|| {
             LazyHintT(
                 false,
-                Rc::new(|_cx: &mut Context<'_>, _e, _s, _r| Ok(HintEvalResult::NoHint)),
+                Rc::new(|_cx: &mut Context<'_>, _e, _i, _s, _r| Ok(HintEvalResult::NoHint)),
             )
         })
 }

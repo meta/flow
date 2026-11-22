@@ -810,20 +810,32 @@ where
         } = spec
         && let UseTInner::CallT(call) = &**use_t
         && let HintEvalResult::HintAvailable(_, HintKind::ExpectedTypeHint) =
-            (call.return_hint.1)(cx, false, None, call.reason.dupe())
+            (call.return_hint.1)(cx, false, true, None, call.reason.dupe())
                 .map_err(FlowJsException::from)?
     {
         let hint = call.return_hint.1.dupe();
         let return_hint = LazyHintT(
             call.return_hint.0,
             Rc::new(
-                move |cx: &mut Context<'_>, expected_only, skip_optional, reason| {
-                    Ok(match hint(cx, expected_only, skip_optional, reason)? {
-                        HintEvalResult::HintAvailable(t, _) => {
-                            HintEvalResult::HintAvailable(t, HintKind::BestEffortHint)
-                        }
-                        result => result,
-                    })
+                move |cx: &mut Context<'_>,
+                      expected_only,
+                      implicit_instantiation,
+                      skip_optional,
+                      reason| {
+                    Ok(
+                        match hint(
+                            cx,
+                            expected_only,
+                            implicit_instantiation,
+                            skip_optional,
+                            reason,
+                        )? {
+                            HintEvalResult::HintAvailable(t, _) => {
+                                HintEvalResult::HintAvailable(t, HintKind::BestEffortHint)
+                            }
+                            result => result,
+                        },
+                    )
                 },
             ),
         );

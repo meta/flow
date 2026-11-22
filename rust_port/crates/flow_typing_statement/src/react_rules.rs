@@ -1575,7 +1575,7 @@ impl<'b, 'cx, 't> WholeAstVisitor<'b, 'cx, 't> {
                                 VirtualReasonDesc::RFunctionType,
                                 hint_loc.dupe(),
                             );
-                            match (lazy_hint.1)(cx, true, Some(true), reason.dupe())? {
+                            match (lazy_hint.1)(cx, true, true, Some(true), reason.dupe())? {
                                     type_::HintEvalResult::NoHint
                                     | type_::HintEvalResult::EncounteredPlaceholder(_)
                                     | type_::HintEvalResult::DecompositionError => false,

@@ -43,6 +43,9 @@ pub struct FunCallImplicitInstantiationHints<CX: ContextFamily, T, TArgs, Args, 
     pub targs: Rc<Lazy<CX, TArgs>>,
     pub arg_list: Rc<Lazy<CX, Args>>,
     pub arg_index: i32,
+    /// The number of arguments, and the index of the first spread argument.
+    pub arg_count: i32,
+    pub spread_index: Option<i32>,
 }
 
 #[derive(Clone)]
@@ -214,6 +217,8 @@ impl<T, TArgs, Args, PropsAndChildren> HintDecomposition<(), T, TArgs, Args, Pro
                     targs,
                     arg_list,
                     arg_index,
+                    arg_count,
+                    spread_index,
                 } = hints;
 
                 // IMPORTANT: These must remain LAZY — only map when accessed.
@@ -260,6 +265,8 @@ impl<T, TArgs, Args, PropsAndChildren> HintDecomposition<(), T, TArgs, Args, Pro
                     targs: targs_mapped,
                     arg_list: arg_list_mapped,
                     arg_index: *arg_index,
+                    arg_count: *arg_count,
+                    spread_index: *spread_index,
                 })
             }
             InstantiateComponent(hints) => {

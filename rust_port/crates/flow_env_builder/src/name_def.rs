@@ -3679,6 +3679,16 @@ impl<'a> DefFinder<'a> {
                                             arg_list_clone,
                                         )),
                                         arg_index: i as i32,
+                                        arg_count: arguments.len() as i32,
+                                        spread_index: arguments
+                                            .iter()
+                                            .position(|arg| {
+                                                matches!(
+                                                    arg,
+                                                    ast::expression::ExpressionOrSpread::Spread(_)
+                                                )
+                                            })
+                                            .map(|i| i as i32),
                                     },
                                 ));
                             let hints =

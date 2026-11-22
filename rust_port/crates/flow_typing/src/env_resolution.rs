@@ -846,11 +846,19 @@ pub fn lazily_resolve_hints<'cx>(
     let hints_owned: Vec<flow_env_builder::name_def_types::AstHint> = hints.to_vec();
     let lazy_hint = move |cx: &mut Context<'_>,
                           expected_only: bool,
+                          implicit_instantiation: bool,
                           skip_optional: Option<bool>,
                           r: Reason|
           -> Result<type_::HintEvalResult, JobError> {
         let resolved = resolve_hints(cx, loc.dupe(), &hints_owned);
-        type_hint::evaluate_hints(cx, expected_only, skip_optional, &r, resolved)
+        type_hint::evaluate_hints(
+            cx,
+            expected_only,
+            implicit_instantiation,
+            skip_optional,
+            &r,
+            resolved,
+        )
     };
     type_::LazyHintT(has_hint, Rc::new(lazy_hint))
 }
@@ -1940,7 +1948,7 @@ fn resolve_binding<'cx>(
         })) => {
             let param_loc = ctx_reason.loc().dupe();
             let type_::LazyHintT(has_hint, lazy_hint) = lazily_resolve_hints(cx, loc.dupe(), hints);
-            let t = match lazy_hint(cx, false, None, ctx_reason.dupe())? {
+            let t = match lazy_hint(cx, false, true, None, ctx_reason.dupe())? {
                 type_::HintEvalResult::HintAvailable(t, _) => {
                     let t = if default_expression.is_some() {
                         flow_typing_tvar::mk_where(

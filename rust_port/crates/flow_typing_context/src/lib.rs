@@ -598,7 +598,7 @@ struct ContextInner {
     builtin_umd_values: HashMap<FlowSmolStr, (ALoc, Type)>,
     hint_map_arglist_cache: HashMap<(ALoc, Option<ALoc>), Vec<(ALoc, type_::CallArg)>>,
     hint_map_jsx_cache: HashMap<(Reason, String, Vec<ALoc>, ALoc), LazyHintMapJsx>,
-    hint_eval_cache: MultiLevelMap<i32, Option<Type>>,
+    hint_eval_cache: MultiLevelMap<(i32, type_::HintInstantiation), Option<Type>>,
     literal_cache: LiteralCache,
     type_app_expansions: TypeAppExpansions,
     environment: LocEnv<Cx>,
@@ -2321,8 +2321,16 @@ impl<'a> Context<'a> {
         &mut self.inner_mut().hint_map_arglist_cache
     }
 
-    pub fn hint_eval_cache_find_opt(&self, id: i32) -> Option<Option<Type>> {
-        self.inner().hint_eval_cache.get(&id).duped()
+    /// The cached result of the hint decomposition `id` evaluated with `instantiation`.
+    pub fn hint_eval_cache_find_opt(
+        &self,
+        id: i32,
+        instantiation: type_::HintInstantiation,
+    ) -> Option<Option<Type>> {
+        self.inner()
+            .hint_eval_cache
+            .get(&(id, instantiation))
+            .duped()
     }
 
     pub fn automatic_require_default(&self) -> bool {
@@ -3143,8 +3151,15 @@ impl<'a> Context<'a> {
         self.ccx().maybe_unused_promises.dupe()
     }
 
-    pub fn add_hint_eval_cache_entry(&mut self, id: i32, result: Option<Type>) {
-        self.inner_mut().hint_eval_cache.insert(id, result);
+    pub fn add_hint_eval_cache_entry(
+        &mut self,
+        id: i32,
+        instantiation: type_::HintInstantiation,
+        result: Option<Type>,
+    ) {
+        self.inner_mut()
+            .hint_eval_cache
+            .insert((id, instantiation), result);
     }
 
     pub fn literal_cache_mut(&mut self) -> &mut LiteralCache {

@@ -634,6 +634,21 @@ pub enum ComponentKind {
     Nominal(ALocId, FlowSmolStr, Option<Rc<[Type]>>),
 }
 
+/// How a hint through a generic call or JSX element instantiates its type parameters.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum HintInstantiation {
+    /// The type arguments are solved from the arguments and the return hint.
+    Implicit,
+    /// The type arguments are solved from the return hint alone, without reading the arguments, as
+    /// TypeScript infers from the contextual type of a call instantiated by the outer call's
+    /// inferences.
+    ReturnHint,
+    /// The type parameters are kept, as in a TypeScript contextual type. As TypeScript's
+    /// `instantiateContextualType`, a contextual type that is one of them is instantiated with what
+    /// the return hint infers for it, while a contextual return type that is one of them stays one.
+    Contextual,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum HintEvalResult {
     HintAvailable(Type, HintKind),
@@ -646,6 +661,7 @@ pub type LazyHintCompute<CX = ()> = Rc<
     dyn for<'a> Fn(
         /* cx */ &mut <CX as ContextFamily>::Context<'a>,
         /* expected_only */ bool,
+        /* implicit_instantiation */ bool,
         /* skip_optional */ Option<bool>,
         /* reason */ Reason,
     ) -> Result<HintEvalResult, flow_utils_concurrency::job_error::JobError>,
@@ -12297,9 +12313,11 @@ pub fn hint_unavailable<CX: ContextFamily>() -> LazyHintT<CX> {
     LazyHintT(
         false,
         Rc::new(
-            |_cx: &mut CX::Context<'_>, _expected_only, _skip_optional, _reason| {
-                Ok(HintEvalResult::NoHint)
-            },
+            |_cx: &mut CX::Context<'_>,
+             _expected_only,
+             _implicit_instantiation,
+             _skip_optional,
+             _reason| { Ok(HintEvalResult::NoHint) },
         ),
     )
 }

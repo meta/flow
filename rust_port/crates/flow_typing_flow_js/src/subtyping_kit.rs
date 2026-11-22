@@ -675,7 +675,7 @@ pub(crate) fn ignores_return<'cx>(
 // rest param of a tuple type of fixed length stands for a param per element,
 // so it receives no more arguments than that. `concretize` gives the types
 // the rest param's type stands for.
-pub(crate) fn subtyping_params<'cx>(
+pub fn subtyping_params<'cx>(
     cx: &mut Context<'cx>,
     ft: &FunType,
     concretize: impl FnOnce(&mut Context<'cx>, &Type) -> Result<Vec<Type>, FlowJsException>,

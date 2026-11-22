@@ -37,3 +37,43 @@ declare const promise: {
   id => id, // OK
   () => {},
 );
+// The contextual return type of a function that returns no value keeps the
+// type parameters of a generic call: looking it up neither solves them from
+// the other arguments nor types those arguments.
+declare function gen(): Promise<?number>;
+declare function genString(): Promise<string>;
+declare function setN(v: ?number): void;
+declare function pd<R>(
+  p: Promise<R>,
+  ok: (v: R) => unknown,
+  err: (e: unknown) => unknown,
+): void;
+pd(gen(), v => setN(v), () => {}); // OK
+pd(genString(), v => setN(v), () => {}); // ERROR
+declare function subscribe<T>(
+  fetch: () => Promise<T>,
+  onNext: (d: T) => void,
+  onDone: () => void,
+): void;
+subscribe(() => gen(), d => setN(d), () => {}); // OK
+declare function onDone<R>(p: Promise<R>, cb: () => R): R;
+declare const p: Promise<?number>;
+onDone(p, () => {}) as ?number; // ERROR, `R` does not admit `undefined`
+declare function both<A, R>(a: A, cb: () => R): R;
+both<_, ?number>(1, () => {}); // OK, explicit type arguments are substituted
+// A contextual type that is a type parameter gets what the return hint infers
+// for it, also through the return hint of another generic call.
+declare function memo<T>(f: T): T;
+const memoized: () => ?number = memo(() => {}); // OK
+declare function make<T>(f: () => T): T;
+declare function each<T, U>(xs: Array<T>, f: (x: T) => U): Array<U>;
+const handlers: Array<{onBack: () => ?boolean}> = make(() =>
+  each([1], i => ({onBack: () => {}})),
+); // OK
+// Overloads are chosen by their numbers of type arguments and arguments.
+declare function first<R>(cb: () => R): R;
+declare function first(cb: () => ?number, n: number): void;
+const firstResult: undefined = first(() => {}); // ERROR
+// An async function's contextual return type is unwrapped, not instantiated.
+declare function wrap<R>(cb: () => R): () => R;
+const wrapped: () => Promise<?number> = wrap(async () => {}); // ERROR

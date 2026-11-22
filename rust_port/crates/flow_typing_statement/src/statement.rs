@@ -420,7 +420,7 @@ pub mod object_expression_acc {
                                     } else {
                                         let reason = reason_of_t(&key).dupe();
                                         if let HintEvalResult::HintAvailable(t, _) =
-                                            lazy_hint(cx, true, Some(true), reason)?
+                                            lazy_hint(cx, true, true, Some(true), reason)?
                                             && speculation_flow::is_subtyping_successful(
                                                 cx,
                                                 value.dupe(),
@@ -624,7 +624,7 @@ pub mod object_expression_acc {
                     if obj_key_autocomplete_flag {
                         let LazyHintT(_has_hint, lazy_hint) =
                             flow_typing_utils::type_env::get_hint(cx, reason.loc().dupe());
-                        let result = lazy_hint(cx, false, None, reason)?;
+                        let result = lazy_hint(cx, false, true, None, reason)?;
                         flow_typing_utils::type_hint::with_hint(Ok, || Ok(obj_t), result)
                     } else {
                         Ok(obj_t)
@@ -752,7 +752,7 @@ pub mod object_expression_acc {
                     if obj_key_autocomplete_flag {
                         let LazyHintT(_has_hint, lazy_hint) =
                             flow_typing_utils::type_env::get_hint(cx, reason.loc().dupe());
-                        let result = lazy_hint(cx, false, None, reason)?;
+                        let result = lazy_hint(cx, false, true, None, reason)?;
                         flow_typing_utils::type_hint::with_hint(Ok, || Ok(tout), result)
                     } else {
                         Ok(tout)
@@ -1458,7 +1458,7 @@ fn identifier_<'a>(
     if type_inference_hooks_js::dispatch_id_hook(name, loc.dupe()) {
         let reason = mk_reason(None, loc.dupe());
         let lazy_hint = type_env::get_hint(cx, loc.dupe());
-        let result = (lazy_hint.1)(cx, false, None, reason)?;
+        let result = (lazy_hint.1)(cx, false, true, None, reason)?;
         Ok(type_hint::with_hint(
             |t| t,
             || empty_t::at(loc.dupe()),
@@ -1493,7 +1493,7 @@ fn string_literal_value<'a>(
         if type_inference_hooks_js::dispatch_literal_hook(loc.dupe()) {
             let lazy_hint = type_env::get_hint(cx, loc.dupe());
             let reason = mk_reason(VirtualReasonDesc::RString, loc.dupe());
-            let hint = (lazy_hint.1)(cx, false, None, reason)?;
+            let hint = (lazy_hint.1)(cx, false, true, None, reason)?;
             type_hint::with_hint(|t| t, || empty_t::at(loc.dupe()), hint)
         } else if as_const || frozen == FrozenKind::FrozenProp {
             let reason = mk_annot_reason(VirtualReasonDesc::RStringLit(value.dupe()), loc);
@@ -6424,7 +6424,7 @@ pub fn empty_array<'a>(cx: &mut Context<'a>, loc: ALoc) -> Result<(Reason, Type)
     let elemt = if !has_hint {
         empty_t::make(mk_reason(None, loc.dupe()))
     } else {
-        match lazy_hint(cx, false, None, element_reason)? {
+        match lazy_hint(cx, false, true, None, element_reason)? {
             type_::HintEvalResult::HintAvailable(hint, _) => hint,
             type_::HintEvalResult::DecompositionError => {
                 // A hint is available, but cannot be used to provide a type for this
@@ -19741,7 +19741,9 @@ pub type DeferredTypeGuardCheck = flow_typing_loc_env::node_cache::DeferredTypeG
 /// Whether the contextual return type of a function, whose missing return annotation is at
 /// `loc`, admits `undefined`. TypeScript then infers `undefined` rather than `void` for a
 /// function that returns no value. As TypeScript's contextual types, only expected-type hints
-/// count, not the values of neighboring expressions.
+/// count, not the values of neighboring expressions, and type parameters stay type parameters:
+/// the contextual return type of `() => {}` in `f(() => {})`, where `f<R>` takes a `() => R`, is
+/// `R`, which does not admit `undefined` whatever its bound.
 fn contextual_return_admits_undefined<'a>(
     cx: &mut Context<'a>,
     loc: &ALoc,
@@ -19756,13 +19758,13 @@ fn contextual_return_admits_undefined<'a>(
     // hints, and only to look at the result.
     let (_, (admits_undefined, _)) = cx.run_in_synthesis_mode_with_errors(None, |cx| {
         let type_::HintEvalResult::HintAvailable(hint, _) =
-            lazy_hint(cx, true, None, reason.dupe())?
+            lazy_hint(cx, true, false, None, reason.dupe())?
         else {
             return Ok(false);
         };
-        let ts = flow_js_utils::flow_js_result_to_job_error(FlowJs::all_possible_concrete_types(
-            cx, reason, &hint,
-        ))?;
+        let ts = flow_js_utils::flow_js_result_to_job_error(
+            FlowJs::possible_concrete_types_for_match_arg(cx, false, true, reason, &hint),
+        )?;
         Ok(ts.iter().any(
             |t| matches!(t.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::VoidT)),
         ))

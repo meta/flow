@@ -2980,16 +2980,18 @@ pub mod kit {
         // the bound would reach the caller silently, so it is underconstrained instead. A partial
         // hint, which has placeholders, says nothing about their positions, so it only guides the
         // solve as a best-effort hint.
-        let (allow_underconstrained, rh) = match (return_hint.1)(cx, false, None, reason_op.dupe())?
-        {
-            HintEvalResult::HintAvailable(t, kind) => (true, Some((t, kind))),
-            HintEvalResult::DecompositionError => (true, None),
-            HintEvalResult::EncounteredPlaceholder(Some(t)) => (
-                false,
-                Some((t, flow_common::hint::HintKind::BestEffortHint)),
-            ),
-            HintEvalResult::NoHint | HintEvalResult::EncounteredPlaceholder(None) => (false, None),
-        };
+        let (allow_underconstrained, rh) =
+            match (return_hint.1)(cx, false, true, None, reason_op.dupe())? {
+                HintEvalResult::HintAvailable(t, kind) => (true, Some((t, kind))),
+                HintEvalResult::DecompositionError => (true, None),
+                HintEvalResult::EncounteredPlaceholder(Some(t)) => (
+                    false,
+                    Some((t, flow_common::hint::HintKind::BestEffortHint)),
+                ),
+                HintEvalResult::NoHint | HintEvalResult::EncounteredPlaceholder(None) => {
+                    (false, None)
+                }
+            };
 
         // The `has_syntactic_hint` flag will inform the decision on whether to keep
         // precise literal types in the instantiation result. Here, we avoid using
