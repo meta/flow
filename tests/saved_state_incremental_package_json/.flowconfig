@@ -1,0 +1,3 @@
+[options]
+all=true
+experimental.incremental_package_json=true

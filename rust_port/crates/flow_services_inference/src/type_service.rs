@@ -2725,15 +2725,23 @@ fn process_saved_state_updates(
 
     let sroot = format!("{}{}", root.to_string_lossy(), std::path::MAIN_SEPARATOR);
     let want = |f: &str| -> bool { files::wanted(file_options, false, f) };
-    for file in updates {
-        match is_incompatible_package_json(options, transaction, &want, &sroot, file_options, file)
-        {
-            PackageIncompatibleReturn::Compatible => {}
-            PackageIncompatibleReturn::Incompatible(reason) => {
-                return Err(format!(
-                    "Modified package: {} ({})\nPackages changed in an incompatible way",
-                    file, reason
-                ));
+    if !options.incremental_package_json {
+        for file in updates {
+            match is_incompatible_package_json(
+                options,
+                transaction,
+                &want,
+                &sroot,
+                file_options,
+                file,
+            ) {
+                PackageIncompatibleReturn::Compatible => {}
+                PackageIncompatibleReturn::Incompatible(reason) => {
+                    return Err(format!(
+                        "Modified package: {} ({})\nPackages changed in an incompatible way",
+                        file, reason
+                    ));
+                }
             }
         }
     }
