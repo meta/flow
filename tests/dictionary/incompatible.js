@@ -60,3 +60,8 @@ function foo8(x: {[key: string]: number}) {
   x.foo as string; // error
   x.foo as number;
 }
+
+declare function mkDict<T>(x: T): {[key: string]: T};
+const stringDict = mkDict<string>('x');
+const aDict = mkDict<'a'>('a');
+stringDict as typeof aDict; // error, string !~> 'a'

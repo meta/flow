@@ -1540,6 +1540,35 @@ References:
                   ^^^^^^ [2]
 
 
+Error --------------------------------------------------------------------------------------------- incompatible.js:67:1
+
+Cannot cast `stringDict` to `{[key: string]: "a"}` because in the indexer property: `string` [1] is not exactly the same
+as `"a"` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because the indexer is invariantly typed. To fix the error,
+- Either make `{[key: string]: string}` [3] and `{[key: string]: "a"}` [3] exactly the same
+- Or make the indexer in `{[key: string]: "a"}` [4] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   incompatible.js:67:1
+   67| stringDict as typeof aDict; // error, string !~> 'a'
+       ^^^^^^^^^^
+
+References:
+   incompatible.js:65:27
+   65| const stringDict = mkDict<string>('x');
+                                 ^^^^^^ [1]
+   incompatible.js:66:22
+   66| const aDict = mkDict<'a'>('a');
+                            ^^^ [2]
+   incompatible.js:64:35
+   64| declare function mkDict<T>(x: T): {[key: string]: T};
+                                         ^^^^^^^^^^^^^^^^^^ [3]
+   incompatible.js:67:15
+   67| stringDict as typeof aDict; // error, string !~> 'a'
+                     ^^^^^^^^^^^^ [4]
+
+
 Error ----------------------------------------------------------------------------------------------------- test.js:6:12
 
 Cannot assign object literal to `o` because in property `foo` > the return value: `number` [1] is incompatible with
@@ -1577,4 +1606,4 @@ References:
 
 
 
-Found 65 errors
+Found 66 errors

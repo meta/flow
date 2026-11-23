@@ -5562,7 +5562,10 @@ pub fn rec_sub_t<'cx>(
             let u_deft = u;
             type_inference_hooks_js::dispatch_obj_to_obj_hook(l, u_deft);
             let print_fast_path = cx.is_verbose();
-            if l_obj.props_tmap == u_obj.props_tmap && l_obj.call_t == u_obj.call_t {
+            if l_obj.props_tmap == u_obj.props_tmap
+                && l_obj.call_t == u_obj.call_t
+                && l_obj.flags.obj_kind == u_obj.flags.obj_kind
+            {
                 if print_fast_path {
                     eprintln!("ObjT ~> ObjT fast path: yes");
                 }
