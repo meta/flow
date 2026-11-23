@@ -227,6 +227,10 @@ type DisjointOptionalExact = {optionalLeft?: string} & {
 declare const disjointOptionalExact: DisjointOptionalExact;
 disjointOptionalExact.optionalLeft;
 
+type RequiredAndOptional = {maybeVoid: ?string, ...} & {maybeVoid?: string, ...};
+const requiredAndOptional: RequiredAndOptional = {maybeVoid: undefined};
+({maybeVoid: null}) as RequiredAndOptional; // ERROR: the optional member rejects `null`
+
 type ExactWithDictionary = {exactKey: number} & {[key: string]: number, ...};
 declare const exactWithDictionary: ExactWithDictionary;
 exactWithDictionary.exactKey as number;

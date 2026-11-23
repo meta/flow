@@ -1953,10 +1953,13 @@ pub(crate) trait SliceIntersection {
     fn intersect(&self, cx: &mut Context<'_>, left: Type, right: Type) -> Type;
     /// The polarity of an indexer, merged or read for a named prop.
     fn dict_polarity(&self, polarity: Polarity) -> Polarity;
+    /// The type of a prop that one slice declares optional and the other requires.
+    fn optional_prop_type(&self, t: Type) -> Type;
 }
 
 /// Spreads and rests copy props into a new object, so indexers become neutral
-/// and shared types stay plain intersections.
+/// and shared types stay plain intersections. A prop required by one slice is
+/// present in the copy, so it takes the other slice's declared type.
 struct ObjectKitIntersection<'a> {
     env: &'a FlowJsEnv,
     reason: &'a Reason,
@@ -1976,6 +1979,10 @@ impl SliceIntersection for ObjectKitIntersection<'_> {
 
     fn dict_polarity(&self, _: Polarity) -> Polarity {
         Polarity::Neutral
+    }
+
+    fn optional_prop_type(&self, t: Type) -> Type {
+        t
     }
 }
 
@@ -2049,16 +2056,27 @@ fn intersect_slice_contents<'cx>(
         let key_loc = property::first_loc(q1);
         let (t1, opt1) = type_optionality(q1);
         let (t2, opt2) = type_optionality(q2);
+        let t1 = if opt1 && !opt2 {
+            policy.optional_prop_type(t1)
+        } else {
+            t1
+        };
+        let t2 = if opt2 && !opt1 {
+            policy.optional_prop_type(t2)
+        } else {
+            t2
+        };
         let t = policy.intersect(cx, t1, t2);
         mk_slice_prop(key_loc, t, Polarity::mult(p1, p2), m1 || m2, opt1 && opt2)
     };
-    let read_dict_prop = |r: &Reason, d: &DictType| -> Property {
+    // A key read from an indexer is present exactly when the prop it merges with is.
+    let read_dict_prop = |r: &Reason, d: &DictType, optional: bool| -> Property {
         mk_slice_prop(
             Some(type_util::loc_of_t(&d.key).dupe()),
             read_dict(r, d),
             policy.dict_polarity(d.dict_polarity),
             false,
-            true,
+            optional,
         )
     };
     let mut props = properties::PropertiesMap::new();
@@ -2067,11 +2085,17 @@ fn intersect_slice_contents<'cx>(
             (None, None) => None,
             (Some(p1), Some(p2)) => Some(merge_props(p1, p2)),
             (Some(p1), None) => match dict2 {
-                Some(d2) => Some(merge_props(p1, &read_dict_prop(r2, d2))),
+                Some(d2) => Some(merge_props(
+                    p1,
+                    &read_dict_prop(r2, d2, property::is_optional(p1)),
+                )),
                 None => Some(p1.clone()),
             },
             (None, Some(p2)) => match dict1 {
-                Some(d1) => Some(merge_props(&read_dict_prop(r1, d1), p2)),
+                Some(d1) => Some(merge_props(
+                    &read_dict_prop(r1, d1, property::is_optional(p2)),
+                    p2,
+                )),
                 None => Some(p2.clone()),
             },
         };

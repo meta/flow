@@ -37,6 +37,7 @@ use flow_typing_type::type_::object;
 use flow_typing_type::type_::properties;
 use flow_typing_type::type_::property;
 use flow_typing_type::type_::type_or_type_desc::TypeOrTypeDescT;
+use flow_typing_type::type_util;
 use flow_typing_type::type_util::reason_of_t;
 use flow_typing_type::type_util::ref_loc_of_t;
 
@@ -259,6 +260,11 @@ impl SliceIntersection for Normalizer<'_> {
 
     fn dict_polarity(&self, polarity: Polarity) -> Polarity {
         polarity
+    }
+
+    /// The member that declares the prop optional also holds `undefined` there.
+    fn optional_prop_type(&self, t: Type) -> Type {
+        type_util::slot_value_t(&t, true)
     }
 }
 

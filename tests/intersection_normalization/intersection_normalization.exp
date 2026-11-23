@@ -370,22 +370,37 @@ References:
                                        ^^^^^^^ [2]
 
 
-Error --------------------------------------------------------------------------------------------------- test.js:235:36
+Error --------------------------------------------------------------------------------------------------- test.js:232:14
+
+Cannot cast object literal to `RequiredAndOptional` because in property `maybeVoid`: `null` [1] is incompatible with
+`string` [2]. [incompatible-type]
+
+   test.js:232:14
+   232| ({maybeVoid: null}) as RequiredAndOptional; // ERROR: the optional member rejects `null`
+                     ^^^^ [1]
+
+References:
+   test.js:230:69
+   230| type RequiredAndOptional = {maybeVoid: ?string, ...} & {maybeVoid?: string, ...};
+                                                                            ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------------- test.js:239:36
 
 Cannot normalize this intersection because property `inexactRequired` is missing in exact object
 `{exactKey: string}` [1]. [invalid-exact]
 
-   test.js:235:36
+   test.js:239:36
                                            v---------------------
-   235| type ExactMissingInexactRequired = {exactKey: string} & {
-   236|   inexactRequired: number,
-   237|   ...,
-   238| }; // ERROR: the exact object lacks a required property
+   239| type ExactMissingInexactRequired = {exactKey: string} & {
+   240|   inexactRequired: number,
+   241|   ...,
+   242| }; // ERROR: the exact object lacks a required property
         ^
 
 References:
-   test.js:235:36
-   235| type ExactMissingInexactRequired = {exactKey: string} & {
+   test.js:239:36
+   239| type ExactMissingInexactRequired = {exactKey: string} & {
                                            ^^^^^^^^^^^^^^^^^^ [1]
 
 
@@ -406,4 +421,4 @@ References:
 
 
 
-Found 25 errors
+Found 26 errors
