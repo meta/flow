@@ -70,7 +70,7 @@ pub mod implicit_type_argument {
         let reason = type_util::reason_of_t(tvar);
         let desc = reason.desc(true).cloned();
         match &desc {
-            Some(VirtualReasonDesc::RTypeParam(box (_, _, _))) => {
+            Some(VirtualReasonDesc::RTypeParam(deref!((_, _, _)))) => {
                 let reason = locationless_reason(desc);
                 Some(Type::new(TypeInner::OpenT(Tvar::new(reason, 0))))
             }
@@ -116,9 +116,9 @@ pub mod type_app_expansion {
     impl RootsCollector {
         fn arrtype(&self, r: &Reason, arr: &ArrType) -> Root {
             match arr {
-                ArrType::ArrayAT(box ArrayATData { .. }) => Root::Array(r.dupe()),
-                ArrType::ROArrayAT(box ROArrayATData { .. }) => Root::ROArray(r.dupe()),
-                ArrType::TupleAT(box TupleATData { elements, .. }) => {
+                ArrType::ArrayAT(deref!(ArrayATData { .. })) => Root::Array(r.dupe()),
+                ArrType::ROArrayAT(deref!(ROArrayATData { .. })) => Root::ROArray(r.dupe()),
+                ArrType::TupleAT(deref!(TupleATData { elements, .. })) => {
                     Root::Tuple(r.dupe(), elements.len())
                 }
             }
@@ -134,9 +134,9 @@ pub mod type_app_expansion {
             t: &Type,
         ) -> RootSet {
             match t.deref() {
-                TypeInner::TypeAppT(box TypeAppTData {
+                TypeInner::TypeAppT(deref!(TypeAppTData {
                     type_: inner_type, ..
-                }) => {
+                })) => {
                     acc.insert(Root::Type(inner_type.dupe()));
                     flow_typing_visitors::type_visitor::type_default(self, cx, pole, acc, t)
                 }

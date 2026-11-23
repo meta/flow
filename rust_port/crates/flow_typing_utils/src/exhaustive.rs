@@ -1097,13 +1097,13 @@ mod value_union_builder {
                             .insert(leaf::Leaf(enum_reason.dupe(), leaf::LeafCtor::BoolC(false)));
                     }
                     DefTInner::ArrT(arr_rc) => match arr_rc.deref() {
-                        ArrType::TupleAT(box TupleATData {
+                        ArrType::TupleAT(deref!(TupleATData {
                             elements,
                             arity: (num_req, num_total),
                             inexact,
                             rest: rest_elem,
                             ..
-                        }) => {
+                        })) => {
                             let reason = enum_reason;
                             // A tuple with a rest element has no maximum length, like an inexact
                             // tuple.
@@ -1165,8 +1165,8 @@ mod value_union_builder {
                                 value_union.tuples.push(tuple);
                             }
                         }
-                        ArrType::ArrayAT(box ArrayATData { .. })
-                        | ArrType::ROArrayAT(box ROArrayATData { .. }) => {
+                        ArrType::ArrayAT(deref!(ArrayATData { .. }))
+                        | ArrType::ROArrayAT(deref!(ROArrayATData { .. })) => {
                             let reason = enum_reason;
                             let arr = value_object::ValueObject(
                                 reason.dupe(),

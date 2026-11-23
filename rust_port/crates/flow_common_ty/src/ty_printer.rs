@@ -1871,41 +1871,41 @@ fn decl<L: Dupe>(
     size: &mut PrintState<L>,
 ) -> LayoutNode {
     match d {
-        Decl::VariableDecl(box (name, t)) => variable_decl(opts, depth, name, t, size),
-        Decl::TypeAliasDecl(box DeclTypeAliasDeclData {
+        Decl::VariableDecl(deref!((name, t))) => variable_decl(opts, depth, name, t, size),
+        Decl::TypeAliasDecl(deref!(DeclTypeAliasDeclData {
             name,
             tparams,
             type_,
             opaque,
             ..
-        }) => type_alias(opts, depth, name, tparams, type_, opaque.as_ref(), size),
-        Decl::ClassDecl(box (s, ps)) => class_decl(opts, depth, s, ps, size),
-        Decl::InterfaceDecl(box (s, ps)) => interface_decl(opts, depth, s, ps, size),
-        Decl::RecordDecl(box (s, ps)) => record_decl(opts, depth, s, ps, size),
-        Decl::EnumDecl(box DeclEnumDeclData {
+        })) => type_alias(opts, depth, name, tparams, type_, opaque.as_ref(), size),
+        Decl::ClassDecl(deref!((s, ps))) => class_decl(opts, depth, s, ps, size),
+        Decl::InterfaceDecl(deref!((s, ps))) => interface_decl(opts, depth, s, ps, size),
+        Decl::RecordDecl(deref!((s, ps))) => record_decl(opts, depth, s, ps, size),
+        Decl::EnumDecl(deref!(DeclEnumDeclData {
             name,
             members,
             has_unknown_members,
             truncated_members_count,
-        }) => enum_decl(
+        })) => enum_decl(
             name,
             members,
             *has_unknown_members,
             *truncated_members_count,
             size,
         ),
-        Decl::NominalComponentDecl(box DeclNominalComponentDeclData {
+        Decl::NominalComponentDecl(deref!(DeclNominalComponentDeclData {
             name,
             tparams,
             targs,
             props,
             renders,
             is_type,
-        }) => nominal_component_decl(
+        })) => nominal_component_decl(
             opts, depth, name, tparams, targs, props, renders, *is_type, size,
         ),
-        Decl::NamespaceDecl(box DeclNamespaceDeclData { name, .. }) => namespace(name, size),
-        Decl::ModuleDecl(box DeclModuleDeclData { name, .. }) => module_(opts, name, size),
+        Decl::NamespaceDecl(deref!(DeclNamespaceDeclData { name, .. })) => namespace(name, size),
+        Decl::ModuleDecl(deref!(DeclModuleDeclData { name, .. })) => module_(opts, name, size),
     }
 }
 
@@ -2031,10 +2031,10 @@ pub fn string_of_type_at_pos_result<R: Dupe + Ord>(
     };
     let type_str = pretty_printer::print(true, &layout).contents();
     let head = match result.ty {
-        Elt::Decl(Decl::NominalComponentDecl(box DeclNominalComponentDeclData {
+        Elt::Decl(Decl::NominalComponentDecl(deref!(DeclNominalComponentDeclData {
             is_type: true,
             ..
-        }))
+        })))
         | Elt::Type(_) => None,
         Elt::Decl(d) => {
             head_symbol_of_decl(d).map(|symbol| symbol.map_locs(&|aloc| loc_of_aloc(aloc)))

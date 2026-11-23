@@ -95,12 +95,12 @@ fn check_polarity_impl<'cx>(
 ) -> Result<(), FlowJsException> {
     match t.deref() {
         // base case
-        TypeInner::GenericT(box GenericTData {
+        TypeInner::GenericT(deref!(GenericTData {
             reason,
             name,
             bound,
             ..
-        }) => match tparams.get(name) {
+        })) => match tparams.get(name) {
             None => check_polarity_impl(cx, env, trace, seen, tparams, polarity, bound)?,
             Some(tp) => {
                 let tp_polarity = tp.polarity.unwrap_or(Polarity::Neutral);
@@ -167,18 +167,18 @@ fn check_polarity_impl<'cx>(
                 check_polarity_impl(cx, env, trace, seen, tparams, polarity, member)?;
             }
         }
-        TypeInner::ThisTypeAppT(box ThisTypeAppTData { targs: None, .. }) => {
+        TypeInner::ThisTypeAppT(deref!(ThisTypeAppTData { targs: None, .. })) => {
             // Perhaps surprisingly, there is nothing to do here. This type is used
             // specifically for the extends clause of a class declaration. The root
             // type of the extended class is looked up from the environment, and will
             // not contain any type parameters in scope -- only concrete types.
         }
-        TypeInner::ThisTypeAppT(box ThisTypeAppTData {
+        TypeInner::ThisTypeAppT(deref!(ThisTypeAppTData {
             type_,
             targs: Some(targs),
             ..
-        })
-        | TypeInner::TypeAppT(box TypeAppTData { type_, targs, .. }) => {
+        }))
+        | TypeInner::TypeAppT(deref!(TypeAppTData { type_, targs, .. })) => {
             // Type arguments in a typeapp might contain a GenericT, but the root type
             // which defines the type parameters is not necessarily resolved at this
             // point. We need to know the polarity of the type parameters in order to
@@ -195,11 +195,11 @@ fn check_polarity_impl<'cx>(
                 &|cx, env, l| {
                     match l.deref() {
                         TypeInner::DefT(_, d) => {
-                            if let DefTInner::PolyT(box PolyTData {
+                            if let DefTInner::PolyT(deref!(PolyTData {
                                 tparams: tps,
                                 strictness_kind,
                                 ..
-                            }) = d.deref()
+                            })) = d.deref()
                             {
                                 return variance_check(
                                     cx,
@@ -232,11 +232,11 @@ fn check_polarity_impl<'cx>(
                                 .next()
                                 .or_else(|| flow_js_utils::combine_construct_ts(construct_ts))
                                     && let TypeInner::DefT(_, construct_def) = construct_t.deref()
-                                    && let DefTInner::PolyT(box PolyTData {
+                                    && let DefTInner::PolyT(deref!(PolyTData {
                                         tparams: tps,
                                         strictness_kind,
                                         ..
-                                    }) = construct_def.deref()
+                                    })) = construct_def.deref()
                                 {
                                     return variance_check(
                                         cx,
@@ -501,17 +501,17 @@ fn check_polarity_impl<'cx>(
                 use flow_typing_type::type_::TupleATData;
                 match arr.deref() {
                     // This representation signifies a literal, which is not a type.
-                    ArrType::ArrayAT(box ArrayATData {
+                    ArrType::ArrayAT(deref!(ArrayATData {
                         tuple_view: Some(_),
                         ..
-                    }) => {
+                    })) => {
                         panic!("UnexpectedType: ArrayAT with tuple_view in check_polarity");
                     }
-                    ArrType::ArrayAT(box ArrayATData {
+                    ArrType::ArrayAT(deref!(ArrayATData {
                         elem_t,
                         tuple_view: None,
                         ..
-                    }) => {
+                    })) => {
                         check_polarity_impl(
                             cx,
                             env,
@@ -522,7 +522,7 @@ fn check_polarity_impl<'cx>(
                             elem_t,
                         )?;
                     }
-                    ArrType::TupleAT(box TupleATData { elements, rest, .. }) => {
+                    ArrType::TupleAT(deref!(TupleATData { elements, rest, .. })) => {
                         for elem in elements.iter().chain(rest) {
                             check_polarity_impl(
                                 cx,
@@ -535,9 +535,9 @@ fn check_polarity_impl<'cx>(
                             )?;
                         }
                     }
-                    ArrType::ROArrayAT(box ROArrayATData {
+                    ArrType::ROArrayAT(deref!(ROArrayATData {
                         elem_t: inner_t, ..
-                    }) => {
+                    })) => {
                         check_polarity_impl(cx, env, trace, seen, tparams, polarity, inner_t)?;
                     }
                 }
@@ -570,11 +570,11 @@ fn check_polarity_impl<'cx>(
                     check_polarity_call(cx, env, trace, seen, tparams, polarity, *call_t)?;
                 }
             }
-            DefTInner::PolyT(box PolyTData {
+            DefTInner::PolyT(deref!(PolyTData {
                 tparams: tps,
                 t_out,
                 ..
-            }) => {
+            })) => {
                 // We might encounter a polymorphic function type or method inside of an
                 // annotation. A newly introduced type parameter's bound or default might
                 // refer to one of the tparams we're looking for.
@@ -585,11 +585,11 @@ fn check_polarity_impl<'cx>(
                 }
                 check_polarity_impl(cx, env, trace, seen, &tparams_acc, polarity, t_out)?;
             }
-            DefTInner::ReactAbstractComponentT(box ReactAbstractComponentTData {
+            DefTInner::ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
                 config,
                 renders,
                 ..
-            }) => {
+            })) => {
                 check_polarity_impl(
                     cx,
                     env,
@@ -809,14 +809,14 @@ fn check_tuple_spread_polarity<'cx>(
     };
     check_spread_argument_polarity(cx, env, trace, seen, tparams, elem_polarity, first_spread)?;
     for param in resolved.iter() {
-        if let ResolvedParam::ResolvedArg(box ResolvedArgData(elem, _)) = param {
+        if let ResolvedParam::ResolvedArg(deref!(ResolvedArgData(elem, _))) = param {
             let polarity = own_polarity(elem.polarity);
             check_polarity_impl(cx, env, trace, seen, tparams, polarity, &elem.t)?;
         }
     }
     for param in unresolved.iter() {
         match param {
-            UnresolvedParam::UnresolvedArg(box UnresolvedArgData(elem, _)) => {
+            UnresolvedParam::UnresolvedArg(deref!(UnresolvedArgData(elem, _))) => {
                 let polarity = own_polarity(elem.polarity);
                 check_polarity_impl(cx, env, trace, seen, tparams, polarity, &elem.t)?;
             }
@@ -846,13 +846,13 @@ fn check_spread_argument_polarity<'cx>(
     for ct in &concrete_types {
         match ct.deref() {
             TypeInner::DefT(_, d) if let DefTInner::ArrT(arr) = d.deref() => match arr.deref() {
-                ArrType::TupleAT(box TupleATData { elements, .. }) => {
+                ArrType::TupleAT(deref!(TupleATData { elements, .. })) => {
                     for elem in elements.iter() {
                         check_polarity_impl(cx, env, trace, seen, tparams, elem_polarity, &elem.t)?;
                     }
                 }
-                ArrType::ArrayAT(box ArrayATData { elem_t, .. })
-                | ArrType::ROArrayAT(box ROArrayATData { elem_t, .. }) => {
+                ArrType::ArrayAT(deref!(ArrayATData { elem_t, .. }))
+                | ArrType::ROArrayAT(deref!(ROArrayATData { elem_t, .. })) => {
                     check_polarity_impl(cx, env, trace, seen, tparams, elem_polarity, elem_t)?;
                 }
             },

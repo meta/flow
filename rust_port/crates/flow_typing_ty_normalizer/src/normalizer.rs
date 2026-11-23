@@ -315,12 +315,12 @@ pub trait NormalizerInput {
     ) -> Result<A, Error> {
         match env.cx.find_resolved(&t).as_deref() {
             Some(TypeInner::DefT(_, def_t))
-                if let DefTInner::PolyT(box PolyTData {
+                if let DefTInner::PolyT(deref!(PolyTData {
                     kind: PolyTKind::MappedType,
                     tparams,
                     t_out,
                     ..
-                }) = def_t.deref() =>
+                })) = def_t.deref() =>
             {
                 if tparams.len() != targs.len() {
                     return Err(terr(
@@ -524,7 +524,7 @@ fn app_on_generic(
     let c = c?;
     let ts: Vec<ALocTy> = ts.into_iter().collect::<Result<_, Error>>()?;
     Ok(match c.as_ref() {
-        ty::Ty::Generic(box (s, k, _)) => Arc::new(ty::Ty::Generic(Box::new((
+        ty::Ty::Generic(deref!((s, k, _))) => Arc::new(ty::Ty::Generic(Box::new((
             s.clone(),
             k.clone(),
             Some(ts.into()),
@@ -732,7 +732,7 @@ fn unwrap_unless_aliased<'cx>(env: &mut Env<'_, 'cx>, t: &Type) -> Option<Type> 
             // As a result, we don't have to unwrap them
             let reason = flow_typing_type::type_util::reason_of_t(t);
             match reason.desc(false) {
-                Some(flow_common::reason::VirtualReasonDesc::RTypeAlias(box (_, Some(_), _))) => {
+                Some(flow_common::reason::VirtualReasonDesc::RTypeAlias(deref!((_, Some(_), _)))) => {
                     None
                 }
                 _ => Some(t.dupe()),
@@ -807,7 +807,7 @@ fn should_force_eval_to_avoid_giant_types<'cx>(
         | D::ReactElementConfigType
         | D::ReactCheckComponentConfig { .. }
         | D::ReactDRO(..)
-        | D::MappedType(box DestructorMappedTypeData { .. })
+        | D::MappedType(deref!(DestructorMappedTypeData { .. }))
         | D::EnumType => false,
     }
 }
@@ -855,7 +855,7 @@ fn should_evaluate_for_hover<'cx>(env: &mut Env<'_, 'cx>, t: &Type, d: &Destruct
         | D::ConditionalType(..) => !operand_is_generic(env, t),
         D::NormalizeIntersection { .. }
         | D::ValuesType
-        | D::MappedType(box DestructorMappedTypeData { .. }) => !operand_is_generic(env, t),
+        | D::MappedType(deref!(DestructorMappedTypeData { .. })) => !operand_is_generic(env, t),
         // The written spelling is the one a reader wants, whatever the operand
         // looks like.
         D::ReadOnlyType
@@ -894,7 +894,7 @@ fn should_evaluate_destructor<'cx>(
             EvaluateTypeDestructorsMode::EvaluateNone => false,
             EvaluateTypeDestructorsMode::EvaluateSome => match d {
                 D::NormalizeIntersection { .. }
-                | D::MappedType(box DestructorMappedTypeData { .. })
+                | D::MappedType(deref!(DestructorMappedTypeData { .. }))
                 | D::NonMaybeType
                 | D::PropertyType { .. }
                 | D::ElementType { .. }
@@ -1209,7 +1209,7 @@ mod reason_utils {
             Some(ReasonDesc::REnum { name: Some(name) }) => {
                 Ok(Some(symbol_from_reason(env, reason, name.dupe())?))
             }
-            Some(ReasonDesc::RTypeAlias(box (name, Some(loc), _))) => {
+            Some(ReasonDesc::RTypeAlias(deref!((name, Some(loc), _)))) => {
                 Ok(Some(symbol_from_loc(env, loc.dupe(), name.dupe())?))
             }
             Some(ReasonDesc::RType(name)) => {
@@ -1403,11 +1403,11 @@ mod type_converter {
             _ => {
                 let reason = flow_typing_type::type_util::reason_of_t(t);
                 match reason.desc(false) {
-                    Some(flow_common::reason::VirtualReasonDesc::RTypeAlias(box (
+                    Some(flow_common::reason::VirtualReasonDesc::RTypeAlias(deref!((
                         name,
                         Some(loc),
                         _,
-                    ))) => {
+                    )))) => {
                         // The default action is to avoid expansion by using the type alias name,
                         // when this can be trusted. The one case where we want to skip this process
                         // is when recovering the body of a type alias A. In that case the environment
@@ -1546,12 +1546,12 @@ mod type_converter {
                     Ok(Arc::new(ty::Ty::Obj(Box::new(obj))))
                 }
                 DefTInner::ArrT(a) => arr_ty::<I>(env, state, a),
-                DefTInner::PolyT(box PolyTData {
+                DefTInner::PolyT(deref!(PolyTData {
                     tparams,
                     t_out,
                     id: poly,
                     ..
-                }) => poly_ty::<I>(env, state, poly, t_out, tparams),
+                })) => poly_ty::<I>(env, state, poly, t_out, tparams),
                 DefTInner::InstanceT(instance_t_val) => instance_t::<I>(
                     env,
                     state,
@@ -1560,21 +1560,21 @@ mod type_converter {
                     &instance_t_val.inst,
                 ),
                 DefTInner::ClassT(class_t) => match class_t.deref() {
-                    TypeInner::ThisInstanceT(box ThisInstanceTData {
+                    TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                         reason: r,
                         instance: inst_t,
                         ..
-                    }) => this_class_t(env, r, inst_t),
+                    })) => this_class_t(env, r, inst_t),
                     _ => {
                         let ty = type__::<I>(env, state, id, class_t)?;
                         Ok(Arc::new(ty::Ty::Utility(ty::Utility::Class(ty))))
                     }
                 },
-                DefTInner::ReactAbstractComponentT(box ReactAbstractComponentTData {
+                DefTInner::ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
                     component_kind:
                         flow_typing_type::type_::ComponentKind::Nominal(_, name, inferred_targs),
                     ..
-                }) => {
+                })) => {
                     let targs = match inferred_targs {
                         None => None,
                         Some(targs) => {
@@ -1591,11 +1591,11 @@ mod type_converter {
                         targs.map(Into::into),
                     )))))
                 }
-                DefTInner::ReactAbstractComponentT(box ReactAbstractComponentTData {
+                DefTInner::ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
                     config,
                     renders,
                     ..
-                }) => {
+                })) => {
                     let (regular_props, renders_ty) =
                         convert_component::<I>(env, state, config, renders, false)?;
                     Ok(Arc::new(ty::Ty::Component {
@@ -1766,22 +1766,22 @@ mod type_converter {
                     max_type_size,
                 )
             }
-            TypeInner::TypeAppT(box TypeAppTData {
+            TypeInner::TypeAppT(deref!(TypeAppTData {
                 type_,
                 targs,
                 from_value,
                 ..
-            }) => type_app::<I>(env, state, *from_value, type_, Some(&**targs)),
-            TypeInner::ThisInstanceT(box ThisInstanceTData {
+            })) => type_app::<I>(env, state, *from_value, type_, Some(&**targs)),
+            TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                 reason,
                 instance: inst_t,
                 ..
-            }) => instance_t::<I>(env, state, reason, &inst_t.super_, &inst_t.inst),
-            TypeInner::ThisTypeAppT(box ThisTypeAppTData {
+            })) => instance_t::<I>(env, state, reason, &inst_t.super_, &inst_t.inst),
+            TypeInner::ThisTypeAppT(deref!(ThisTypeAppTData {
                 type_: c,
                 targs: ts,
                 ..
-            }) => match expand_members::constructed_instance(env.cx, c, ts.as_deref()) {
+            })) => match expand_members::constructed_instance(env.cx, c, ts.as_deref()) {
                 Some(inherited_t) => type__::<I>(env, state, None, &inherited_t),
                 None => type_app::<I>(env, state, false, c, ts.as_deref()),
             },
@@ -2144,7 +2144,7 @@ mod type_converter {
         use flow_typing_type::type_::TupleView;
         use flow_typing_type::type_::TupleViewKind;
         match arr {
-            ArrType::ArrayAT(box ArrayATData {
+            ArrType::ArrayAT(deref!(ArrayATData {
                 tuple_view:
                     Some(TupleView {
                         kind: TupleViewKind::RestArguments,
@@ -2154,13 +2154,13 @@ mod type_converter {
                         ..
                     }),
                 ..
-            })
-            | ArrType::TupleAT(box TupleATData {
+            }))
+            | ArrType::TupleAT(deref!(TupleATData {
                 elements,
                 inexact,
                 rest,
                 ..
-            }) => {
+            })) => {
                 let rest = rest.as_ref();
                 // Heuristic to use $ReadOnly<> instead of repeating the polarity symbol
                 // and a made up label in each element.
@@ -2205,14 +2205,14 @@ mod type_converter {
                     Ok(Arc::new(tup))
                 }
             }
-            ArrType::ArrayAT(box ArrayATData { elem_t, .. }) => {
+            ArrType::ArrayAT(deref!(ArrayATData { elem_t, .. })) => {
                 let arr_elt_t = type__::<I>(env, state, None, elem_t)?;
                 Ok(Arc::new(ty::Ty::Arr(ty::ArrT {
                     arr_readonly: false,
                     arr_elt_t,
                 })))
             }
-            ArrType::ROArrayAT(box ROArrayATData { elem_t, .. }) => {
+            ArrType::ROArrayAT(deref!(ROArrayATData { elem_t, .. })) => {
                 let arr_elt_t = type__::<I>(env, state, None, elem_t)?;
                 Ok(Arc::new(ty::Ty::Arr(ty::ArrT {
                     arr_readonly: true,
@@ -2320,8 +2320,8 @@ mod type_converter {
                 }
                 // Do not contribute to the extends clause
                 // interface {} && interface { (): void }
-                ty::Ty::TypeOf(box (ty::BuiltinOrSymbol::ObjProto, _))
-                | ty::Ty::TypeOf(box (ty::BuiltinOrSymbol::FunProto, _)) => Ok(Vec::new()),
+                ty::Ty::TypeOf(deref!((ty::BuiltinOrSymbol::ObjProto, _)))
+                | ty::Ty::TypeOf(deref!((ty::BuiltinOrSymbol::FunProto, _))) => Ok(Vec::new()),
                 // Top-level syntax only allows generics in extends
                 _ => Err(terr(ErrorKind::BadInlineInterfaceExtends, None, None)),
             }
@@ -2651,11 +2651,11 @@ mod type_converter {
         let result = match t_out.deref() {
             TypeInner::DefT(_, def_t) => match def_t.deref() {
                 DefTInner::ClassT(class_t) => match class_t.deref() {
-                    TypeInner::ThisInstanceT(box ThisInstanceTData {
+                    TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                         reason: r,
                         instance: inst_t,
                         ..
-                    }) => this_class_t(env, r, inst_t),
+                    })) => this_class_t(env, r, inst_t),
                     _ => Err(terr(ErrorKind::BadPoly, None, Some(t_out))),
                 },
                 DefTInner::FunT(static_, f) => {
@@ -2777,11 +2777,11 @@ mod type_converter {
             match t.deref() {
                 TypeInner::DefT(r, def_t) => match def_t.deref() {
                     DefTInner::TypeT(kind, inner) => match inner.deref() {
-                        TypeInner::ThisInstanceT(box ThisInstanceTData {
+                        TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                             reason,
                             instance,
                             ..
-                        }) if matches!(kind, TypeTKind::ImportClassKind) => {
+                        })) if matches!(kind, TypeTKind::ImportClassKind) => {
                             instance_app::<I>(env, state, reason, &instance.inst, tparams, targs)
                         }
                         TypeInner::DefT(inner_r, inner_def) => match inner_def.deref() {
@@ -2798,22 +2798,22 @@ mod type_converter {
                             }
                             _ => type_t_app::<I>(env, state, r, kind, tparams, targs),
                         },
-                        TypeInner::TypeAppT(box TypeAppTData {
+                        TypeInner::TypeAppT(deref!(TypeAppTData {
                             type_, from_value, ..
-                        }) => {
+                        })) => {
                             let is_interface = if matches!(kind, TypeTKind::ImportClassKind) {
                                 match type_.deref() {
                                     TypeInner::DefT(_, def_t) => match def_t.deref() {
-                                        DefTInner::PolyT(box PolyTData { t_out, .. }) => {
+                                        DefTInner::PolyT(deref!(PolyTData { t_out, .. })) => {
                                             match t_out.deref() {
                                                 TypeInner::DefT(_, inner_def_t) => {
                                                     match inner_def_t.deref() {
                                                         DefTInner::ClassT(inner) => {
                                                             match inner.deref() {
-                                                                TypeInner::ThisInstanceT(box ThisInstanceTData {
+                                                                TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                                                                     instance,
                                                                     ..
-                                                                }) => matches!(
+                                                                })) => matches!(
                                                                     instance.inst.inst_kind,
                                                                     InstanceKind::InterfaceKind { .. }
                                                                 ),
@@ -2851,11 +2851,11 @@ mod type_converter {
                         _ => type_t_app::<I>(env, state, r, kind, tparams, targs),
                     },
                     DefTInner::ClassT(inner) => match inner.deref() {
-                        TypeInner::ThisInstanceT(box ThisInstanceTData {
+                        TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                             reason,
                             instance,
                             ..
-                        }) => instance_app::<I>(env, state, reason, &instance.inst, tparams, targs),
+                        })) => instance_app::<I>(env, state, reason, &instance.inst, tparams, targs),
                         TypeInner::DefT(inner_r, inner_def) => match inner_def.deref() {
                             DefTInner::InstanceT(instance_t) => instance_app::<I>(
                                 env,
@@ -2871,19 +2871,19 @@ mod type_converter {
                                 Err(terr(ErrorKind::BadTypeApp, Some(&msg), None))
                             }
                         },
-                        TypeInner::TypeAppT(box TypeAppTData {
+                        TypeInner::TypeAppT(deref!(TypeAppTData {
                             type_, from_value, ..
-                        }) => type_app::<I>(env, state, *from_value, type_, targs),
+                        })) => type_app::<I>(env, state, *from_value, type_, targs),
                         _ => {
                             let msg =
                                 format!("PolyT:{}", flow_typing_type::type_::string_of_ctor(t));
                             Err(terr(ErrorKind::BadTypeApp, Some(&msg), None))
                         }
                     },
-                    DefTInner::ReactAbstractComponentT(box ReactAbstractComponentTData {
+                    DefTInner::ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
                         component_kind: flow_typing_type::type_::ComponentKind::Nominal(_, name, _),
                         ..
-                    }) => {
+                    })) => {
                         let symbol = reason_utils::component_symbol(env, name, r)?;
                         mk_generic::<I>(
                             env,
@@ -2931,15 +2931,15 @@ mod type_converter {
                     type__::<I>(env, state, None, t)
                 }
                 TypeInner::DefT(_, def_t) => match def_t.deref() {
-                    DefTInner::PolyT(box PolyTData { tparams, t_out, .. }) => {
+                    DefTInner::PolyT(deref!(PolyTData { tparams, t_out, .. })) => {
                         singleton_poly::<I>(env, state, targs, tparams, t_out)
                     }
                     DefTInner::ClassT(inner) => match inner.deref() {
-                        TypeInner::ThisInstanceT(box ThisInstanceTData {
+                        TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                             reason,
                             instance,
                             ..
-                        }) => {
+                        })) => {
                             // This is likely an error - cannot apply on non-polymorphic type.
                             // E.g type Foo = any; var x: Foo<number>
                             let synth = Type::new(TypeInner::DefT(
@@ -3042,10 +3042,10 @@ mod type_converter {
     ) -> Result<ALocTy, Error> {
         use flow_typing_type::type_::nominal::Id as NominalId;
         match &nominal.nominal_id {
-            NominalId::UserDefinedOpaqueTypeId(box nominal::UserDefinedOpaqueTypeIdData(
+            NominalId::UserDefinedOpaqueTypeId(deref!(nominal::UserDefinedOpaqueTypeIdData(
                 _,
                 name,
-            )) => {
+            ))) => {
                 let opaque_symbol = symbol_from_reason(env, reason, name.dupe())?;
                 let targs = if nominal.nominal_type_args.is_empty() {
                     None
@@ -3279,7 +3279,7 @@ mod type_converter {
     // The symbol of an `infer` type bounded by `ReadonlyArray<unknown>`.
     fn infer_with_implied_bound(t: &ty::Ty<ALoc>) -> Option<&ALocSymbol> {
         match t {
-            ty::Ty::Infer(box (symbol, Some(bound)))
+            ty::Ty::Infer(deref!((symbol, Some(bound))))
                 if let ty::Ty::Arr(ty::ArrT {
                     arr_readonly: true,
                     arr_elt_t,
@@ -3314,7 +3314,7 @@ mod type_converter {
                             .cloned(),
                     );
                 }
-                ty::Ty::Fun(box f) => self.0.extend(
+                ty::Ty::Fun(deref!(f)) => self.0.extend(
                     f.fun_rest_param
                         .iter()
                         .filter_map(|(_, t)| infer_with_implied_bound(t))
@@ -3570,7 +3570,7 @@ mod type_converter {
         let mut head: Vec<ty::TupleElement<ALoc>> = Vec::new();
         for resolved in resolved_rev_vec.iter().rev() {
             match resolved {
-                ResolvedParam::ResolvedArg(box ResolvedArgData(elem, _)) => {
+                ResolvedParam::ResolvedArg(deref!(ResolvedArgData(elem, _))) => {
                     let t = type__::<I>(env, state, None, &elem.t)?;
                     head.push(ty::TupleElement::TupleElement {
                         name: elem.name.clone(),
@@ -3579,9 +3579,9 @@ mod type_converter {
                         optional: elem.optional,
                     });
                 }
-                ResolvedParam::ResolvedSpreadArg(box ResolvedSpreadArgData(_, arr, _)) => match arr
+                ResolvedParam::ResolvedSpreadArg(deref!(ResolvedSpreadArgData(_, arr, _))) => match arr
                 {
-                    ArrType::TupleAT(box TupleATData { elements, rest, .. }) => {
+                    ArrType::TupleAT(deref!(TupleATData { elements, rest, .. })) => {
                         for elem in elements.iter() {
                             let t = type__::<I>(env, state, None, &elem.t)?;
                             head.push(ty::TupleElement::TupleElement {
@@ -3623,7 +3623,7 @@ mod type_converter {
         let mut tail: Vec<ty::TupleElement<ALoc>> = Vec::new();
         for u in unresolved {
             match u {
-                UnresolvedParam::UnresolvedArg(box UnresolvedArgData(elem, _)) => {
+                UnresolvedParam::UnresolvedArg(deref!(UnresolvedArgData(elem, _))) => {
                     let t = type__::<I>(env, state, None, &elem.t)?;
                     tail.push(ty::TupleElement::TupleElement {
                         name: elem.name.dupe(),
@@ -3683,7 +3683,7 @@ mod type_converter {
 
         let (key_tparam, prop) = match property_type.deref() {
             TypeInner::DefT(_, def_t) => match def_t.deref() {
-                DefTInner::PolyT(box PolyTData { tparams, t_out, .. }) if tparams.len() == 1 => {
+                DefTInner::PolyT(deref!(PolyTData { tparams, t_out, .. })) if tparams.len() == 1 => {
                     let key_tparam_ty = type_param::<I>(env, state, &tparams[0])?;
                     let property_ty = type__::<I>(env, state, None, t_out)?;
                     (key_tparam_ty, property_ty)
@@ -3697,11 +3697,11 @@ mod type_converter {
             None => None,
             Some(t) => match t.deref() {
                 TypeInner::DefT(_, def_t)
-                    if let DefTInner::PolyT(box PolyTData {
+                    if let DefTInner::PolyT(deref!(PolyTData {
                         tparams,
                         t_out: name_t_out,
                         ..
-                    }) = def_t.deref()
+                    })) = def_t.deref()
                         && tparams.len() == 1 =>
                 {
                     let nty = type__::<I>(env, state, None, name_t_out)?;
@@ -3808,13 +3808,13 @@ mod type_converter {
                 }))
             }
             D::OptionalIndexedAccessResultType { .. } => Ok(ty),
-            D::ConditionalType(box DestructorConditionalTypeData {
+            D::ConditionalType(deref!(DestructorConditionalTypeData {
                 infer_tparams,
                 extends_t,
                 true_t,
                 false_t,
                 ..
-            }) => {
+            })) => {
                 let infer_tparam_ids = Rc::new(
                     infer_tparams
                         .iter()
@@ -3851,15 +3851,15 @@ mod type_converter {
                 let ty_prime = type__::<I>(env, state, None, t_prime)?;
                 Ok(Arc::new(ty::Ty::Utility(ty::Utility::Omit(ty, ty_prime))))
             }
-            D::SpreadType(box DestructorSpreadTypeData(target, operands, head_slice)) => {
+            D::SpreadType(deref!(DestructorSpreadTypeData(target, operands, head_slice))) => {
                 spread::<I>(env, state, ty, target, operands, head_slice.as_ref())
             }
-            D::SpreadTupleType(box DestructorSpreadTupleTypeData {
+            D::SpreadTupleType(deref!(DestructorSpreadTupleTypeData {
                 inexact,
                 resolved,
                 unresolved,
                 ..
-            }) => tuple_spread::<I>(env, state, ty, *inexact, resolved, unresolved),
+            })) => tuple_spread::<I>(env, state, ty, *inexact, resolved, unresolved),
             D::ReactCheckComponentConfig { props, .. } => {
                 check_component::<I>(env, state, ty, props)
             }
@@ -3870,14 +3870,14 @@ mod type_converter {
                 let msg = flow_typing_debug::string_of_destructor(d);
                 Err(terr(ErrorKind::BadEvalT, Some(&msg), None))
             }
-            D::MappedType(box DestructorMappedTypeData {
+            D::MappedType(deref!(DestructorMappedTypeData {
                 property_type,
                 name_type,
                 mapped_type_flags,
                 homomorphic,
                 distributive_tparam_name,
                 strictness_kind: _,
-            }) => {
+            })) => {
                 let (property_type, name_type, homomorphic) =
                     flow_typing_flow_common::flow_js_utils::substitute_mapped_type_distributive_tparams(
                         env.cx,
@@ -4039,10 +4039,10 @@ pub mod element_converter {
         tparams: Option<Vec<ty::TypeParam<ALoc>>>,
     ) -> Result<ty::Decl<ALoc>, Error> {
         let name_str = match &nominal_type.nominal_id {
-            nominal::Id::UserDefinedOpaqueTypeId(box nominal::UserDefinedOpaqueTypeIdData(
+            nominal::Id::UserDefinedOpaqueTypeId(deref!(nominal::UserDefinedOpaqueTypeIdData(
                 _,
                 name,
-            )) => name.dupe(),
+            ))) => name.dupe(),
             // The following cases should error, for the same reason as in nominal_t
             nominal::Id::InternalEnforceUnionOptimized => {
                 return Err(terr(
@@ -4081,7 +4081,7 @@ pub mod element_converter {
         let impl_t: Option<&Type> = match &nominal_type.underlying_t {
             // opaque type A = number;
             nominal::UnderlyingT::OpaqueWithLocal { t } if same_file => Some(t),
-            nominal::UnderlyingT::CustomError(box nominal::CustomErrorData { t, .. }) => Some(t),
+            nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData { t, .. })) => Some(t),
             _ => None,
         };
         // declare opaque type B extends number;
@@ -4423,11 +4423,11 @@ pub mod element_converter {
                     // Imported interfaces
                     DefTInner::TypeT(TypeTKind::ImportClassKind, inner_t) => {
                         match inner_t.deref() {
-                            TypeInner::ThisInstanceT(box ThisInstanceTData {
+                            TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                                 reason: r,
                                 instance: inst_t,
                                 ..
-                            }) => {
+                            })) => {
                                 return class_or_interface_decl::<I>(
                                     env,
                                     state,
@@ -4457,7 +4457,7 @@ pub mod element_converter {
                             // survives the import. Unwrap to the original PolyT so the
                             // inner instance can be rendered as an interface declaration
                             // rather than [Class<...>].
-                            TypeInner::TypeAppT(box TypeAppTData { type_, .. }) => {
+                            TypeInner::TypeAppT(deref!(TypeAppTData { type_, .. })) => {
                                 return toplevel::<I>(env, state, type_);
                             }
                             _ => {}
@@ -4466,11 +4466,11 @@ pub mod element_converter {
                     // Classes, Interfaces
                     DefTInner::ClassT(inner_t) => {
                         match inner_t.deref() {
-                            TypeInner::ThisInstanceT(box ThisInstanceTData {
+                            TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                                 reason: r,
                                 instance: inst_t,
                                 ..
-                            }) => {
+                            })) => {
                                 return class_or_interface_decl::<I>(
                                     env,
                                     state,
@@ -4497,18 +4497,18 @@ pub mod element_converter {
                             // The initial abstraction is wrapper within an abstraction and a type application.
                             // The current case unwraps the abstraction and application to reveal the
                             // initial imported type.
-                            TypeInner::TypeAppT(box TypeAppTData { type_, .. }) => {
+                            TypeInner::TypeAppT(deref!(TypeAppTData { type_, .. })) => {
                                 return toplevel::<I>(env, state, type_);
                             }
                             _ => {}
                         }
                     }
-                    DefTInner::ReactAbstractComponentT(box ReactAbstractComponentTData {
+                    DefTInner::ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
                         component_kind:
                             flow_typing_type::type_::ComponentKind::Nominal(_, name, targs),
                         config,
                         renders,
-                    }) => {
+                    })) => {
                         let reason = type_util::reason_of_t(t_out);
                         return component_decl::<I>(
                             env,
@@ -4623,16 +4623,16 @@ pub mod element_converter {
                 TypeInner::DefT(r, def_t) => {
                     match &**def_t {
                         // Polymorphic variants - see singleton_poly
-                        DefTInner::PolyT(box PolyTData { tparams, t_out, .. }) => {
+                        DefTInner::PolyT(deref!(PolyTData { tparams, t_out, .. })) => {
                             return singleton_poly::<I>(env, state, orig_t, tparams, t_out);
                         }
                         // Monomorphic Classes/Interfaces
                         DefTInner::ClassT(inner_t) => match inner_t.deref() {
-                            TypeInner::ThisInstanceT(box ThisInstanceTData {
+                            TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                                 reason: r,
                                 instance: inst_t,
                                 ..
-                            }) => {
+                            })) => {
                                 return class_or_interface_decl::<I>(
                                     env,
                                     state,
@@ -4661,11 +4661,11 @@ pub mod element_converter {
                             kind @ (TypeTKind::InstanceKind | TypeTKind::ImportClassKind),
                             inner_t,
                         ) => match inner_t.deref() {
-                            TypeInner::ThisInstanceT(box ThisInstanceTData {
+                            TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                                 reason: inner_r,
                                 instance: inst_t,
                                 ..
-                            }) => {
+                            })) => {
                                 return class_or_interface_decl::<I>(
                                     env,
                                     state,
@@ -4713,12 +4713,12 @@ pub mod element_converter {
                         {
                             return enum_decl(env, r, Some(enum_info));
                         }
-                        DefTInner::ReactAbstractComponentT(box ReactAbstractComponentTData {
+                        DefTInner::ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
                             component_kind:
                                 flow_typing_type::type_::ComponentKind::Nominal(_, name, targs),
                             config,
                             renders,
-                        }) => {
+                        })) => {
                             return component_decl::<I>(
                                 env,
                                 state,
@@ -4730,11 +4730,11 @@ pub mod element_converter {
                                 r,
                             );
                         }
-                        DefTInner::ReactAbstractComponentT(box ReactAbstractComponentTData {
+                        DefTInner::ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
                             component_kind: flow_typing_type::type_::ComponentKind::Structural,
                             config,
                             renders,
-                        }) if env.toplevel_is_type_identifier_reference() => {
+                        })) if env.toplevel_is_type_identifier_reference() => {
                             let orig_reason = type_util::reason_of_t(orig_t);
                             match orig_reason.desc(true) {
                                 Some(ReasonDesc::RIdentifier(name)) => {
@@ -5003,20 +5003,20 @@ mod expand_members {
         a: &flow_typing_type::type_::ArrType,
     ) -> Result<ALocTy, Error> {
         let builtin = match a {
-            flow_typing_type::type_::ArrType::ArrayAT(box ArrayATData { .. }) => "Array",
-            flow_typing_type::type_::ArrType::ROArrayAT(box ROArrayATData { .. })
-            | flow_typing_type::type_::ArrType::TupleAT(box TupleATData { .. }) => "ReadonlyArray",
+            flow_typing_type::type_::ArrType::ArrayAT(deref!(ArrayATData { .. })) => "Array",
+            flow_typing_type::type_::ArrType::ROArrayAT(deref!(ROArrayATData { .. }))
+            | flow_typing_type::type_::ArrType::TupleAT(deref!(TupleATData { .. })) => "ReadonlyArray",
         };
         let t = match a {
-            flow_typing_type::type_::ArrType::ArrayAT(box ArrayATData { .. }) => {
+            flow_typing_type::type_::ArrType::ArrayAT(deref!(ArrayATData { .. })) => {
                 flow_typing_flow_common::flow_js_utils::lookup_builtin_value(
                     env.cx,
                     "Array",
                     r.dupe(),
                 )
             }
-            flow_typing_type::type_::ArrType::ROArrayAT(box ROArrayATData { .. })
-            | flow_typing_type::type_::ArrType::TupleAT(box TupleATData { .. }) => {
+            flow_typing_type::type_::ArrType::ROArrayAT(deref!(ROArrayATData { .. }))
+            | flow_typing_type::type_::ArrType::TupleAT(deref!(TupleATData { .. })) => {
                 flow_typing_flow_common::flow_js_utils::lookup_builtin_type(
                     env.cx,
                     "ReadonlyArray",
@@ -5347,7 +5347,7 @@ mod expand_members {
             }
             (
                 flow_typing_type::type_::nominal::UnderlyingT::CustomError(
-                    box flow_typing_type::type_::nominal::CustomErrorData { t, .. },
+                    deref!(flow_typing_type::type_::nominal::CustomErrorData { t, .. }),
                 ),
                 _,
             ) => type__::<I>(
@@ -5447,7 +5447,7 @@ mod expand_members {
         };
         let fun_t = match construct_t.deref() {
             TypeInner::DefT(_, def_t)
-                if let DefTInner::PolyT(box PolyTData { tparams, t_out, .. }) = def_t.deref() =>
+                if let DefTInner::PolyT(deref!(PolyTData { tparams, t_out, .. })) = def_t.deref() =>
             {
                 let map = tparams
                     .iter()
@@ -5536,9 +5536,9 @@ mod expand_members {
                 allowed_prop_names,
                 inner_t,
             ),
-            TypeInner::ThisTypeAppT(box ThisTypeAppTData {
+            TypeInner::ThisTypeAppT(deref!(ThisTypeAppTData {
                 type_: c, targs, ..
-            }) => {
+            })) => {
                 let inherited_t = constructed_instance(env.cx, c, targs.as_deref());
                 type__::<I>(
                     env,
@@ -5581,11 +5581,11 @@ mod expand_members {
                     Ok(Arc::new(ty::Ty::Obj(Box::new(obj))))
                 }
                 DefTInner::ClassT(class_t) => match class_t.deref() {
-                    TypeInner::ThisInstanceT(box ThisInstanceTData {
+                    TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                         reason: r2,
                         instance: inst_t,
                         ..
-                    }) => {
+                    })) => {
                         let def_t = Type::new(TypeInner::DefT(
                             r2.dupe(),
                             flow_typing_type::type_::DefT::new(DefTInner::InstanceT(Rc::new(
@@ -5647,7 +5647,7 @@ mod expand_members {
                     &instance_t_val.implements,
                     &instance_t_val.inst,
                 ),
-                DefTInner::PolyT(box PolyTData { t_out, .. }) => type__::<I>(
+                DefTInner::PolyT(deref!(PolyTData { t_out, .. })) => type__::<I>(
                     env,
                     state,
                     None,
@@ -5701,11 +5701,11 @@ mod expand_members {
                 ),
                 _ => type_converter::convert_t::<I>(env, state, false, t),
             },
-            TypeInner::ThisInstanceT(box ThisInstanceTData {
+            TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                 reason: r,
                 instance: inst_t,
                 ..
-            }) => instance_t::<I>(
+            })) => instance_t::<I>(
                 env,
                 state,
                 inherited,
@@ -5794,13 +5794,13 @@ mod expand_members {
                     max_type_size,
                 )
             }
-            TypeInner::TypeAppT(box TypeAppTData {
+            TypeInner::TypeAppT(deref!(TypeAppTData {
                 reason,
                 type_: c,
                 targs,
                 from_value,
                 ..
-            }) => I::typeapp(
+            })) => I::typeapp(
                 env,
                 state,
                 &mut |env, state, t| {
@@ -5878,7 +5878,7 @@ mod expand_members {
                 env.seen_eval_ids = old_seen_eval_ids;
                 result
             }
-            TypeInner::GenericT(box GenericTData { bound, .. }) => type__::<I>(
+            TypeInner::GenericT(deref!(GenericTData { bound, .. })) => type__::<I>(
                 env,
                 state,
                 None,
@@ -6001,13 +6001,13 @@ mod expand_literal_union {
                     max_type_size,
                 )
             }
-            TypeInner::TypeAppT(box TypeAppTData {
+            TypeInner::TypeAppT(deref!(TypeAppTData {
                 reason,
                 type_: c,
                 targs,
                 from_value,
                 ..
-            }) => I::typeapp(
+            })) => I::typeapp(
                 env,
                 state,
                 &mut |env, state, t| type__::<I>(env, state, None, t),
@@ -6164,11 +6164,11 @@ impl<I: NormalizerInput> Normalizer<I> {
         fn def_loc_of_ty(t: &ty::Ty<ALoc>) -> Option<ALoc> {
             match t {
                 ty::Ty::Utility(ty::Utility::Class(inner)) => match inner.as_ref() {
-                    ty::Ty::Generic(box (sym, _, None)) => Some(sym.sym_def_loc.clone()),
+                    ty::Ty::Generic(deref!((sym, _, None))) => Some(sym.sym_def_loc.clone()),
                     _ => None,
                 },
                 // This is an acceptable proxy only if the class is not polymorphic
-                ty::Ty::TypeOf(box (ty::BuiltinOrSymbol::TSymbol(sym), None)) => {
+                ty::Ty::TypeOf(deref!((ty::BuiltinOrSymbol::TSymbol(sym), None))) => {
                     Some(sym.sym_def_loc.clone())
                 }
                 _ => None,
@@ -6177,26 +6177,26 @@ impl<I: NormalizerInput> Normalizer<I> {
 
         fn def_loc_of_decl(d: &ty::Decl<ALoc>) -> Option<ALoc> {
             match d {
-                ty::Decl::TypeAliasDecl(box ty::DeclTypeAliasDeclData {
+                ty::Decl::TypeAliasDecl(deref!(ty::DeclTypeAliasDeclData {
                     import: false,
                     name,
                     ..
-                }) => Some(name.sym_def_loc.dupe()),
-                ty::Decl::ClassDecl(box (sym, _)) => Some(sym.sym_def_loc.dupe()),
-                ty::Decl::InterfaceDecl(box (sym, _)) => Some(sym.sym_def_loc.dupe()),
-                ty::Decl::RecordDecl(box (sym, _)) => Some(sym.sym_def_loc.dupe()),
-                ty::Decl::EnumDecl(box ty::DeclEnumDeclData { name, .. }) => {
+                })) => Some(name.sym_def_loc.dupe()),
+                ty::Decl::ClassDecl(deref!((sym, _))) => Some(sym.sym_def_loc.dupe()),
+                ty::Decl::InterfaceDecl(deref!((sym, _))) => Some(sym.sym_def_loc.dupe()),
+                ty::Decl::RecordDecl(deref!((sym, _))) => Some(sym.sym_def_loc.dupe()),
+                ty::Decl::EnumDecl(deref!(ty::DeclEnumDeclData { name, .. })) => {
                     Some(name.sym_def_loc.dupe())
                 }
-                ty::Decl::NominalComponentDecl(box ty::DeclNominalComponentDeclData {
+                ty::Decl::NominalComponentDecl(deref!(ty::DeclNominalComponentDeclData {
                     name,
                     ..
-                }) => Some(name.sym_def_loc.dupe()),
-                ty::Decl::TypeAliasDecl(box ty::DeclTypeAliasDeclData {
+                })) => Some(name.sym_def_loc.dupe()),
+                ty::Decl::TypeAliasDecl(deref!(ty::DeclTypeAliasDeclData {
                     import: true,
                     type_: Some(t),
                     ..
-                }) => def_loc_of_ty(t),
+                })) => def_loc_of_ty(t),
                 ty::Decl::TypeAliasDecl(..)
                 | ty::Decl::VariableDecl(..)
                 | ty::Decl::ModuleDecl(..)

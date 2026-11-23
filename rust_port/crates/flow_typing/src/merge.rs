@@ -238,16 +238,16 @@ fn detect_sketchy_null_checks<'cx>(cx: &mut Context<'cx>, tast: &ast::Program<AL
                     }
                     // Ignore AnyTs for sketchy null checks; otherwise they'd always trigger the lint.
                     TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => cur_checks,
-                    TypeInner::GenericT(box GenericTData { bound, .. }) => {
+                    TypeInner::GenericT(deref!(GenericTData { bound, .. })) => {
                         make_checks(cx, seen, cur_checks, loc, bound)
                     }
                     TypeInner::NominalT { nominal_type, .. }
                         if let Some(t) = match &nominal_type.underlying_t {
                             nominal::UnderlyingT::OpaqueWithLocal { t }
-                            | nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+                            | nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData {
                                 t,
                                 ..
-                            }) => Some(t),
+                            })) => Some(t),
                             _ => None,
                         } =>
                     {

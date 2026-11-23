@@ -182,23 +182,23 @@ pub mod exports_helper {
         ref_: &type_sig_pack::PackedRef<Index<Index<ALoc>>>,
     ) -> flow_data_structure_wrapper::smol_str::FlowSmolStr {
         match ref_ {
-            type_sig_pack::PackedRef::LocalRef(box type_sig_pack::PackedRefLocal {
+            type_sig_pack::PackedRef::LocalRef(deref!(type_sig_pack::PackedRefLocal {
                 index, ..
-            }) => {
+            })) => {
                 let def = type_sig.local_defs.get(*index);
                 def.name().dupe()
             }
-            type_sig_pack::PackedRef::RemoteRef(box type_sig_pack::PackedRefRemote {
+            type_sig_pack::PackedRef::RemoteRef(deref!(type_sig_pack::PackedRefRemote {
                 index,
                 ..
-            }) => {
+            })) => {
                 let remote_ref = type_sig.remote_refs.get(*index);
                 remote_ref.name().dupe()
             }
-            type_sig_pack::PackedRef::BuiltinRef(box type_sig_pack::PackedRefBuiltin {
+            type_sig_pack::PackedRef::BuiltinRef(deref!(type_sig_pack::PackedRefBuiltin {
                 name,
                 ..
-            }) => name.dupe(),
+            })) => name.dupe(),
         }
     }
 
@@ -217,7 +217,7 @@ pub mod exports_helper {
                     default: true,
                 })
             }
-            Some(type_sig_pack::Packed::TyRef(box type_sig_pack::TyRef::Unqualified(ref_)))
+            Some(type_sig_pack::Packed::TyRef(deref!(type_sig_pack::TyRef::Unqualified(ref_))))
                 if packed_ref_name(type_sig, ref_).as_str() == remote_name =>
             {
                 let import_kind = statement::ImportKind::ImportTypeof;
@@ -226,9 +226,9 @@ pub mod exports_helper {
                     default: true,
                 })
             }
-            Some(type_sig_pack::Packed::Value(box type_sig::Value::ObjLit(
-                box type_sig::ValueObjLit { props, .. },
-            ))) if props.contains_key(remote_name) => Some(ImportInfo {
+            Some(type_sig_pack::Packed::Value(deref!(type_sig::Value::ObjLit(
+                deref!(type_sig::ValueObjLit { props, .. }),
+            )))) if props.contains_key(remote_name) => Some(ImportInfo {
                 import_kind,
                 default: false,
             }),
@@ -260,7 +260,7 @@ pub mod exports_helper {
         let mut default_index = None;
         for export in exports {
             if let type_sig_pack::Export::ExportDefaultBinding(
-                box type_sig_pack::ExportDefaultBindingData { index, .. },
+                deref!(type_sig_pack::ExportDefaultBindingData { index, .. }),
             ) = export
             {
                 default_index = Some(*index);
@@ -765,7 +765,7 @@ pub mod imports_helper {
                     }
                     let converter = self.converter;
                     match t.as_ref() {
-                        ty::Ty::TypeOf(box (ty::BuiltinOrSymbol::TSymbol(s), None))
+                        ty::Ty::TypeOf(deref!((ty::BuiltinOrSymbol::TSymbol(s), None)))
                             if !s.sym_anonymous
                                 && matches!(
                                     &s.sym_provenance,
@@ -787,7 +787,7 @@ pub mod imports_helper {
                                 }
                             }
                         }
-                        ty::Ty::TypeOf(box (
+                        ty::Ty::TypeOf(deref!((
                             ty::BuiltinOrSymbol::TSymbol(Symbol {
                                 sym_provenance:
                                     Provenance::Remote(RemoteInfo {
@@ -802,7 +802,7 @@ pub mod imports_helper {
                                 ..
                             }),
                             None,
-                        )) => {
+                        ))) => {
                             let local = Symbol {
                                 sym_provenance: Provenance::Local,
                                 sym_def_loc: sym_def_loc.dupe(),

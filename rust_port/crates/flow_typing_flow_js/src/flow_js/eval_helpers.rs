@@ -224,13 +224,13 @@ fn evaluate_type_destructor_<'cx>(
             )));
             rec_flow(cx, env, trace, (&t, &x))
         }
-        TypeInner::GenericT(box GenericTData {
+        TypeInner::GenericT(deref!(GenericTData {
             bound,
             reason: g_reason,
             name,
             id,
             no_infer,
-        }) if type_util::constraint_node_id(bound).is_some() => {
+        })) if type_util::constraint_node_id(bound).is_some() => {
             let x = UseT::new(UseTInner::EvalTypeDestructorT(Box::new(
                 EvalTypeDestructorTData {
                     destructor_use_op: use_op,
@@ -242,13 +242,13 @@ fn evaluate_type_destructor_<'cx>(
             )));
             rec_flow(cx, env, trace, (&t, &x))
         }
-        TypeInner::GenericT(box GenericTData {
+        TypeInner::GenericT(deref!(GenericTData {
             bound,
             reason: g_reason,
             name,
             id,
             no_infer,
-        }) => {
+        })) => {
             if let TypeInner::AnnotT(r, inner_t, use_desc) = bound.deref() {
                 let x = UseT::new(UseTInner::EvalTypeDestructorT(Box::new(
                     EvalTypeDestructorTData {
@@ -469,14 +469,14 @@ pub(super) fn eval_destructor<'cx>(
         );
     }
 
-    if let Destructor::MappedType(box DestructorMappedTypeData {
+    if let Destructor::MappedType(deref!(DestructorMappedTypeData {
         homomorphic: MappedTypeHomomorphicFlag::Unspecialized,
         mapped_type_flags,
         property_type,
         name_type,
         distributive_tparam_name: _,
         strictness_kind,
-    }) = d
+    })) = d
     {
         // Non-homomorphic mapped types have their own special resolution code, so they do not fit well
         // into the structure of the rest of this function. We handle them upfront instead.
@@ -573,10 +573,10 @@ pub(super) fn eval_destructor<'cx>(
 
         let underlying_t = match &nominal_type.underlying_t {
             nominal::UnderlyingT::FullyOpaque => nominal::UnderlyingT::FullyOpaque,
-            nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+            nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData {
                 t: inner_t,
                 custom_error_loc,
-            }) => nominal::UnderlyingT::CustomError(Box::new(nominal::CustomErrorData {
+            })) => nominal::UnderlyingT::CustomError(Box::new(nominal::CustomErrorData {
                 t: eval_t(cx, inner_t)?,
                 custom_error_loc: custom_error_loc.dupe(),
             })),
@@ -615,10 +615,10 @@ pub(super) fn eval_destructor<'cx>(
 
     let should_destruct_union = |cx: &mut Context<'cx>| -> bool {
         match d {
-            Destructor::ConditionalType(box DestructorConditionalTypeData {
+            Destructor::ConditionalType(deref!(DestructorConditionalTypeData {
                 distributive_tparam_name,
                 ..
-            }) => distributive_tparam_name.is_some(),
+            })) => distributive_tparam_name.is_some(),
             Destructor::ReactDRO(_) if let TypeInner::UnionT(_, rep) = t.deref() => {
                 if !rep.is_optimized_finally() {
                     rep.optimize_enum_only(cx, |cx, members| {
@@ -633,18 +633,18 @@ pub(super) fn eval_destructor<'cx>(
 
     match (t.deref(), d) {
         (
-            TypeInner::GenericT(box GenericTData {
+            TypeInner::GenericT(deref!(GenericTData {
                 bound,
                 reason: r,
                 id: g_id,
                 name,
                 no_infer,
-            }),
+            })),
             _,
         ) if let TypeInner::NominalT { nominal_type, .. } = bound.deref()
             && let nominal::UnderlyingT::OpaqueWithLocal { t: inner_t } =
                 &nominal_type.underlying_t
-            && matches!(&nominal_type.nominal_id, nominal::Id::UserDefinedOpaqueTypeId(box nominal::UserDefinedOpaqueTypeIdData(aloc_id, _))
+            && matches!(&nominal_type.nominal_id, nominal::Id::UserDefinedOpaqueTypeId(deref!(nominal::UserDefinedOpaqueTypeIdData(aloc_id, _)))
                 if aloc_id.0.source() == Some(cx.file())) =>
         {
             let new_generic = Type::new(TypeInner::GenericT(Box::new(GenericTData {
@@ -657,19 +657,19 @@ pub(super) fn eval_destructor<'cx>(
             eval_destructor(cx, env, trace, use_op, reason, &new_generic, d, tout)
         }
         (
-            TypeInner::GenericT(box GenericTData {
+            TypeInner::GenericT(deref!(GenericTData {
                 bound,
                 reason: r,
                 id: g_id,
                 name,
                 no_infer,
-            }),
+            })),
             _,
         ) if let TypeInner::NominalT { nominal_type, .. } = bound.deref()
-            && let nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+            && let nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData {
                 t: inner_t,
                 custom_error_loc: _,
-            }) = &nominal_type.underlying_t =>
+            })) = &nominal_type.underlying_t =>
         {
             let new_generic = Type::new(TypeInner::GenericT(Box::new(GenericTData {
                 bound: inner_t.dupe(),
@@ -693,7 +693,7 @@ pub(super) fn eval_destructor<'cx>(
                 nominal_type,
             },
             _,
-        ) if matches!(&nominal_type.nominal_id, nominal::Id::UserDefinedOpaqueTypeId(box nominal::UserDefinedOpaqueTypeIdData(aloc_id, _))
+        ) if matches!(&nominal_type.nominal_id, nominal::Id::UserDefinedOpaqueTypeId(deref!(nominal::UserDefinedOpaqueTypeIdData(aloc_id, _)))
                     if aloc_id.0.source() == Some(cx.file()))
             && let nominal::UnderlyingT::OpaqueWithLocal { t: inner_t } =
                 &nominal_type.underlying_t =>
@@ -709,10 +709,10 @@ pub(super) fn eval_destructor<'cx>(
         ) if matches!(
             &nominal_type.nominal_id,
             nominal::Id::UserDefinedOpaqueTypeId(_)
-        ) && let nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+        ) && let nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData {
             t: inner_t,
             custom_error_loc: _,
-        }) = &nominal_type.underlying_t =>
+        })) = &nominal_type.underlying_t =>
         {
             eval_destructor(cx, env, trace, use_op, reason, inner_t, d, tout)
         }
@@ -720,22 +720,22 @@ pub(super) fn eval_destructor<'cx>(
         // cases. Like the union case below. mk_typeapp_instance will return an AnnotT
         // which will be fully resolved using the AnnotT case above.
         (
-            TypeInner::GenericT(box GenericTData {
+            TypeInner::GenericT(deref!(GenericTData {
                 bound,
                 reason: reason_tapp,
                 id: g_id,
                 name,
                 no_infer,
-            }),
+            })),
             _,
-        ) if let TypeInner::TypeAppT(box TypeAppTData {
+        ) if let TypeInner::TypeAppT(deref!(TypeAppTData {
             reason: _,
             use_op: use_op_tapp,
             type_: c,
             targs,
             from_value,
             use_desc: _,
-        }) = bound.deref() =>
+        })) = bound.deref() =>
         {
             let destructor = TypeDestructorT::new(TypeDestructorTInner(
                 use_op.dupe(),
@@ -776,14 +776,14 @@ pub(super) fn eval_destructor<'cx>(
             )
         }
         (
-            TypeInner::TypeAppT(box TypeAppTData {
+            TypeInner::TypeAppT(deref!(TypeAppTData {
                 reason: reason_tapp,
                 use_op: use_op_tapp,
                 type_: c,
                 targs,
                 from_value,
                 use_desc: _,
-            }),
+            })),
             _,
         ) => {
             // A type alias that keeps expanding within its own evaluation, like `FlatArray`
@@ -854,13 +854,13 @@ pub(super) fn eval_destructor<'cx>(
             )
         }
         (
-            TypeInner::GenericT(box GenericTData {
+            TypeInner::GenericT(deref!(GenericTData {
                 reason: _,
                 bound,
                 id: g_id,
                 name,
                 no_infer,
-            }),
+            })),
             _,
         ) if let TypeInner::UnionT(_, rep) = bound.deref()
             && should_destruct_union(cx) =>
@@ -899,13 +899,13 @@ pub(super) fn eval_destructor<'cx>(
             )),
         ),
         (
-            TypeInner::GenericT(box GenericTData {
+            TypeInner::GenericT(deref!(GenericTData {
                 reason: g_reason,
                 bound,
                 id: g_id,
                 name,
                 no_infer,
-            }),
+            })),
             _,
         ) if let TypeInner::MaybeT(_, inner_t) = bound.deref()
             && should_destruct_union(cx) =>
@@ -949,13 +949,13 @@ pub(super) fn eval_destructor<'cx>(
             )
         }
         (
-            TypeInner::GenericT(box GenericTData {
+            TypeInner::GenericT(deref!(GenericTData {
                 bound,
                 reason: r,
                 id: g_id,
                 name,
                 no_infer,
-            }),
+            })),
             _,
         ) if let TypeInner::AnnotT(_, inner_t, use_desc) = bound.deref() => {
             let repos_t = helpers::reposition_reason(cx, env, Some(trace), r, *use_desc, inner_t)?;
@@ -1071,11 +1071,11 @@ pub(super) fn eval_destructor<'cx>(
                     })));
                     rec_flow(cx, &env.push_parts_marker(id), trace, (t, &u))
                 }
-                Destructor::SpreadType(box DestructorSpreadTypeData(
+                Destructor::SpreadType(deref!(DestructorSpreadTypeData(
                     options,
                     todo_rev,
                     head_slice,
-                )) => {
+                ))) => {
                     use flow_typing_type::type_::object;
                     let tool = object::ResolveTool::Resolve(object::Resolve::Next);
                     let acc: flow_data_structure_wrapper::list::FlowOcamlList<
@@ -1103,13 +1103,13 @@ pub(super) fn eval_destructor<'cx>(
                     ));
                     rec_flow(cx, &env.push_parts_marker(spread_id), trace, (t, &u))
                 }
-                Destructor::SpreadTupleType(box DestructorSpreadTupleTypeData {
+                Destructor::SpreadTupleType(deref!(DestructorSpreadTupleTypeData {
                     reason_tuple,
                     reason_spread: _,
                     inexact,
                     resolved: resolved_rev,
                     unresolved,
-                }) => {
+                })) => {
                     let elem_t = flow_typing_tvar::mk(cx, reason_tuple.dupe());
                     let u = UseT::new(UseTInner::ResolveSpreadT(Box::new(ResolveSpreadTData {
                         use_op: use_op.dupe(),
@@ -1190,7 +1190,7 @@ pub(super) fn eval_destructor<'cx>(
                         ),
                     )
                 }
-                Destructor::ReactDRO(box react_dro) => rec_flow(
+                Destructor::ReactDRO(deref!(react_dro)) => rec_flow(
                     cx,
                     env,
                     trace,
@@ -1250,13 +1250,13 @@ pub(super) fn eval_destructor<'cx>(
                         )),
                     ),
                 ),
-                Destructor::ConditionalType(box DestructorConditionalTypeData {
+                Destructor::ConditionalType(deref!(DestructorConditionalTypeData {
                     distributive_tparam_name,
                     infer_tparams,
                     extends_t,
                     true_t,
                     false_t,
-                }) => {
+                })) => {
                     let u = UseT::new(UseTInner::ConditionalT(Box::new(ConditionalTData {
                         use_op: use_op.dupe(),
                         reason: reason.dupe(),
@@ -1298,14 +1298,14 @@ pub(super) fn eval_destructor<'cx>(
                         }))),
                     ),
                 ),
-                Destructor::MappedType(box DestructorMappedTypeData {
+                Destructor::MappedType(deref!(DestructorMappedTypeData {
                     property_type,
                     name_type,
                     mapped_type_flags,
                     homomorphic,
                     distributive_tparam_name,
                     strictness_kind,
-                }) => {
+                })) => {
                     let (property_type, name_type, homomorphic) =
                         flow_js_utils::substitute_mapped_type_distributive_tparams(
                             cx,
@@ -1716,7 +1716,7 @@ pub(super) fn mk_possibly_evaluated_destructor_for_annotations<'cx>(
                         None,
                     );
                 }
-                Destructor::ReactDRO(box ReactDro(_loc, dro_type)) => {
+                Destructor::ReactDRO(deref!(ReactDro(_loc, dro_type))) => {
                     try_evaluate(
                         nominal::StuckEvalKind::StuckEvalForReactDRO(dro_type.clone()),
                         vec![t.dupe()],

@@ -672,7 +672,7 @@ pub mod validator {
                         .push(ValidationError::ReactElementConfigFunArg);
                     ty::explicit_any()
                 }
-                ty::Ty::TypeOf(box (ty::BuiltinOrSymbol::TSymbol(symbol), _)) => {
+                ty::Ty::TypeOf(deref!((ty::BuiltinOrSymbol::TSymbol(symbol), _))) => {
                     if symbol.sym_anonymous {
                         self.env
                             .borrow_mut()
@@ -684,7 +684,7 @@ pub mod validator {
                         self.default_on_t(env, t)
                     }
                 }
-                ty::Ty::Generic(box (symbol, _, _)) => {
+                ty::Ty::Generic(deref!((symbol, _, _))) => {
                     if symbol.sym_anonymous {
                         self.env
                             .borrow_mut()
@@ -875,7 +875,7 @@ impl flow_common_ty::ty_ancestors::TyEndoBase<Loc, ALoc> for PatchUpReactMapper 
 impl flow_common_ty::ty::TyEndoTy<ALoc, Loc> for PatchUpReactMapper {
     fn on_t(&mut self, loc: &Loc, t: ALocTy) -> ALocTy {
         match t.as_ref() {
-            ty::Ty::Generic(box (symbol, kind, args_opt)) => {
+            ty::Ty::Generic(deref!((symbol, kind, args_opt))) => {
                 if let Some(new_symbol) = flow_common_ty::ty_utils::patch_up_react_symbol(symbol) {
                     let args_opt = args_opt.as_ref().map(|args| {
                         let mapped: Arc<[ALocTy]> =
@@ -932,7 +932,7 @@ impl flow_common_ty::ty::TyEndoTy<ALoc, Loc> for StylizeTyMapper {
                 self.on_union(loc, t.dupe(), *from_bounds)
             }
             // React name fixup (inherited from patch_up_react_mapper)
-            ty::Ty::Generic(box (symbol, kind, args_opt)) => {
+            ty::Ty::Generic(deref!((symbol, kind, args_opt))) => {
                 if let Some(new_symbol) = flow_common_ty::ty_utils::patch_up_react_symbol(symbol) {
                     let args_opt = args_opt.as_ref().map(|args| {
                         let mapped: Arc<[ALocTy]> =
@@ -1399,7 +1399,7 @@ impl<'a, 'cx> TypeNormalizationHardcodedFixesMapper<'a, 'cx> {
 
     fn super_on_t(&mut self, env: &Loc, t: ALocTy) -> ALocTy {
         match t.as_ref() {
-            ty::Ty::Generic(box (symbol, kind, args_opt)) => {
+            ty::Ty::Generic(deref!((symbol, kind, args_opt))) => {
                 if let Some(new_symbol) = flow_common_ty::ty_utils::patch_up_react_symbol(symbol) {
                     let args_opt = args_opt.as_ref().map(|args| {
                         let mapped: Arc<[ALocTy]> =
@@ -1462,7 +1462,7 @@ impl<'a, 'cx> TypeNormalizationHardcodedFixesMapper<'a, 'cx> {
 
                 let has_fbt = ts.iter().any(|t| {
                     matches!(t.as_ref(),
-                        ty::Ty::Generic(box (symbol, _, None))
+                        ty::Ty::Generic(deref!((symbol, _, None)))
                         if symbol.sym_name == "Fbt"
                            && matches!(&symbol.sym_provenance,
                                        flow_common_ty::ty_symbol::Provenance::Library(_))
@@ -1518,7 +1518,7 @@ impl<'a, 'cx> TypeNormalizationHardcodedFixesMapper<'a, 'cx> {
 
                 let ts = {
                     let react_element_def_loc = ts.iter().find_map(|t| match t.as_ref() {
-                        ty::Ty::Generic(box (symbol, _, _))
+                        ty::Ty::Generic(deref!((symbol, _, _)))
                             if matches!(
                                 Some(symbol.sym_name.as_str()),
                                 Some(
@@ -1542,7 +1542,7 @@ impl<'a, 'cx> TypeNormalizationHardcodedFixesMapper<'a, 'cx> {
                             let ts: Vec<_> = ts
                                 .into_iter()
                                 .filter(|t| match t.as_ref() {
-                                    ty::Ty::Generic(box (symbol, _, Some(_)))
+                                    ty::Ty::Generic(deref!((symbol, _, Some(_))))
                                         if matches!(
                                             Some(symbol.sym_name.as_str()),
                                             Some(
@@ -1557,7 +1557,7 @@ impl<'a, 'cx> TypeNormalizationHardcodedFixesMapper<'a, 'cx> {
                                     {
                                         !is_react_loc(&symbol.sym_def_loc, true)
                                     }
-                                    ty::Ty::Generic(box (symbol, _, None))
+                                    ty::Ty::Generic(deref!((symbol, _, None)))
                                         if symbol.sym_name == "Fbt"
                                             && matches!(
                                                 &symbol.sym_provenance,
@@ -1595,7 +1595,7 @@ impl<'a, 'cx> TypeNormalizationHardcodedFixesMapper<'a, 'cx> {
 
                 let has_react_node = ts.iter().any(|t| {
                     matches!(t.as_ref(),
-                        ty::Ty::Generic(box (symbol, _, _))
+                        ty::Ty::Generic(deref!((symbol, _, _)))
                         if matches!(symbol.sym_name.as_str(), "Node" | "React.Node")
                            && matches!(&symbol.sym_provenance,
                                        flow_common_ty::ty_symbol::Provenance::Library(_))
@@ -1605,7 +1605,7 @@ impl<'a, 'cx> TypeNormalizationHardcodedFixesMapper<'a, 'cx> {
                 let ts = if has_react_node && from_bounds {
                     ts.into_iter()
                         .filter(|t| match t.as_ref() {
-                            ty::Ty::Generic(box (symbol, _, Some(_)))
+                            ty::Ty::Generic(deref!((symbol, _, Some(_))))
                                 if matches!(
                                     Some(symbol.sym_name.as_str()),
                                     Some(
@@ -1620,7 +1620,7 @@ impl<'a, 'cx> TypeNormalizationHardcodedFixesMapper<'a, 'cx> {
                             {
                                 !is_react_loc(&symbol.sym_def_loc, true)
                             }
-                            ty::Ty::Generic(box (symbol, _, None))
+                            ty::Ty::Generic(deref!((symbol, _, None)))
                                 if symbol.sym_name == "Fbt"
                                     && matches!(
                                         &symbol.sym_provenance,
@@ -1663,7 +1663,7 @@ impl<'a, 'cx> TypeNormalizationHardcodedFixesMapper<'a, 'cx> {
                 (self.add_warning)(loc, warning::Kind::EmptySomeKnownUpper);
                 self.on_t(env, ub.dupe())
             }
-            ty::Ty::Generic(box (symbol, kind, Some(args)))
+            ty::Ty::Generic(deref!((symbol, kind, Some(args))))
                 if symbol.sym_name == "ExactReactElement_DEPRECATED"
                     && matches!(
                         &symbol.sym_provenance,
@@ -1682,7 +1682,7 @@ impl<'a, 'cx> TypeNormalizationHardcodedFixesMapper<'a, 'cx> {
                     Arc::new(ty::Ty::Generic(Box::new((new_symbol, *kind, None)))),
                 )
             }
-            ty::Ty::Generic(box (symbol, kind, Some(_)))
+            ty::Ty::Generic(deref!((symbol, kind, Some(_))))
                 if symbol.sym_name == "ExactReactElement_DEPRECATED"
                     && matches!(
                         &symbol.sym_provenance,
@@ -1704,7 +1704,7 @@ impl<'a, 'cx> TypeNormalizationHardcodedFixesMapper<'a, 'cx> {
                     Arc::new(ty::Ty::Generic(Box::new((new_symbol, *kind, None)))),
                 )
             }
-            ty::Ty::Generic(box (symbol, _, None))
+            ty::Ty::Generic(deref!((symbol, _, None)))
                 if matches!(
                     symbol.sym_name.as_str(),
                     "FbtElement" | "FbtResultBase" | "$FbtResultBase" | "FbtString"

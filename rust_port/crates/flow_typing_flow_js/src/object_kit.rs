@@ -104,7 +104,7 @@ fn partition_keys_and_indexer<'cx>(
         ),
     ));
     let mapped_type = match root_of_use_op(&use_op) {
-        VirtualRootUseOp::EvalMappedType(box EvalMappedTypeData { mapped_type, .. }) => {
+        VirtualRootUseOp::EvalMappedType(deref!(EvalMappedTypeData { mapped_type, .. })) => {
             mapped_type.clone()
         }
         _ => TypeOrTypeDescT::TypeDesc(ErrorTypeDesc::Unknown),
@@ -295,7 +295,7 @@ fn compute_name_remap<'cx>(
         match name_type.deref() {
             TypeInner::DefT(_, def_t)
                 if let flow_typing_type::type_::DefTInner::PolyT(
-                    box flow_typing_type::type_::PolyTData { tparams, t_out, .. },
+                    deref!(flow_typing_type::type_::PolyTData { tparams, t_out, .. }),
                 ) = def_t.deref()
                     && tparams.len() == 1 =>
             {
@@ -1374,19 +1374,19 @@ pub(super) fn run_with_env<'cx>(
      -> Result<(), FlowJsException> {
         match tool {
             object::Tool::MakeExact => object_make_exact(cx, use_op, reason, x, tout),
-            object::Tool::Spread(box (options, state)) => {
+            object::Tool::Spread(deref!((options, state))) => {
                 object_spread(options, state, cx, use_op, reason, x, tout)?;
                 Ok(())
             }
-            object::Tool::Rest(box (options, state)) => {
+            object::Tool::Rest(deref!((options, state))) => {
                 object_rest(options, state, cx, use_op, reason, x, tout)?;
                 Ok(())
             }
-            object::Tool::ReactConfig(box ObjectToolReactConfigData {
+            object::Tool::ReactConfig(deref!(ObjectToolReactConfigData {
                 state,
                 ref_manipulation,
                 literal,
-            }) => react_config(
+            })) => react_config(
                 ref_manipulation,
                 state,
                 *literal,
@@ -1403,13 +1403,13 @@ pub(super) fn run_with_env<'cx>(
             object::Tool::ReactCheckComponentConfig { props: pmap } => {
                 check_component_config(pmap, cx, use_op, reason, x, tout)
             }
-            object::Tool::ObjectMap(box ObjectToolObjectMapData {
+            object::Tool::ObjectMap(deref!(ObjectToolObjectMapData {
                 prop_type,
                 name_type,
                 mapped_type_flags,
                 selected_keys_opt,
                 strictness_kind,
-            }) => object_map(
+            })) => object_map(
                 prop_type,
                 name_type,
                 mapped_type_flags,
@@ -1428,10 +1428,10 @@ pub(super) fn run_with_env<'cx>(
     // result must reach `tout` in the same direction the tool's own return would use.
     let return_ = |cx: &mut Context<'cx>, use_op: UseOp, t: Type| -> Result<(), FlowJsException> {
         match tool {
-            object::Tool::Rest(box (
+            object::Tool::Rest(deref!((
                 object::rest::MergeMode::ReactConfigMerge(Polarity::Neutral),
                 _,
-            )) => {
+            ))) => {
                 FlowJs::rec_unify_with_env(
                     cx,
                     env,
@@ -1443,10 +1443,10 @@ pub(super) fn run_with_env<'cx>(
                     tout,
                 )?;
             }
-            object::Tool::Rest(box (
+            object::Tool::Rest(deref!((
                 object::rest::MergeMode::ReactConfigMerge(Polarity::Negative),
                 _,
-            )) => {
+            ))) => {
                 FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, tout, &t)?;
             }
             _ => {

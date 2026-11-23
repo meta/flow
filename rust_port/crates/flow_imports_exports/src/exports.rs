@@ -169,7 +169,7 @@ mod eval {
 
     fn seen_ref<Loc>(seen: &mut HashSet<usize>, r: &PackedRef<Index<Loc>>) -> bool {
         match r {
-            PackedRef::LocalRef(box PackedRefLocal { index, .. }) => {
+            PackedRef::LocalRef(deref!(PackedRefLocal { index, .. })) => {
                 let index_val = index.as_usize();
                 let dupe = seen.contains(&index_val);
                 seen.insert(index_val);
@@ -185,7 +185,7 @@ mod eval {
     ) -> Option<&'a Packed<Index<Loc>>> {
         // Looks up an object field by name. Returns None if the name doesn't exist or isn't a field.
         match props.get(name)? {
-            ObjValueProp::ObjValueField(box (_, field, _)) => Some(field),
+            ObjValueProp::ObjValueField(deref!((_, field, _))) => Some(field),
             // Accessors and methods don't have any sub-properties to contribute
             ObjValueProp::ObjValueAccess(_) | ObjValueProp::ObjValueMethod(_) => None,
         }
@@ -226,11 +226,11 @@ mod eval {
         match (r, name) {
             // This case is a heuristic to identify React.AbstractComponent exports, which can be used as types
             (
-                TyRef::Qualified(box TyRefQualified {
+                TyRef::Qualified(deref!(TyRefQualified {
                     name: tyname,
                     qualification,
                     ..
-                }),
+                })),
                 Some(n),
             ) if (tyname.as_str() == "AbstractComponent" || tyname.as_str() == "ComponentType")
                 && matches!(
@@ -240,7 +240,7 @@ mod eval {
             {
                 Evaled::ComponentDecl(n)
             }
-            (TyRef::Qualified(box TyRefQualified { qualification, .. }), _) => {
+            (TyRef::Qualified(deref!(TyRefQualified { qualification, .. })), _) => {
                 match tyref(export_sig, seen, None, qualification) {
                     Evaled::Annot(_, _) => {
                         // TODO: get `_qual._name`
@@ -271,7 +271,7 @@ mod eval {
         }
 
         match r {
-            PackedRef::LocalRef(box PackedRefLocal { index, .. }) => {
+            PackedRef::LocalRef(deref!(PackedRefLocal { index, .. })) => {
                 let d = super::local_def_of_index(export_sig, *index);
                 def(export_sig, seen, d)
             }
@@ -320,23 +320,23 @@ mod eval {
         p: &'a Packed<Index<Loc>>,
     ) -> Evaled<'a, Loc> {
         match p {
-            Packed::Value(box x) => Evaled::Value(x, name),
-            Packed::Annot(box a @ PackedAnnot::Typeof(box AnnotTypeof { qname, .. }))
+            Packed::Value(deref!(x)) => Evaled::Value(x, name),
+            Packed::Annot(deref!(a @ PackedAnnot::Typeof(deref!(AnnotTypeof { qname, .. }))))
                 if qname.len() == 1 =>
             {
                 let typeof_name = &qname[0];
                 Evaled::Annot(a, Some(name.unwrap_or(typeof_name)))
             }
-            Packed::Annot(box PackedAnnot::ComponentAnnot(_)) if name.is_some() => {
+            Packed::Annot(deref!(PackedAnnot::ComponentAnnot(_))) if name.is_some() => {
                 Evaled::ComponentDecl(name.unwrap())
             }
-            Packed::Annot(box x) => Evaled::Annot(x, name),
+            Packed::Annot(deref!(x)) => Evaled::Annot(x, name),
             Packed::Ref(r) => ref_(export_sig, seen, r),
             Packed::TyRef(r) => tyref(export_sig, seen, name, r),
-            Packed::TyRefApp(box PackedTyRefApp {
+            Packed::TyRefApp(deref!(PackedTyRefApp {
                 name: tyref_name, ..
-            }) => tyref(export_sig, seen, name, tyref_name),
-            Packed::Eval(box PackedEval { packed: x, op, .. }) => eval(export_sig, seen, x, op),
+            })) => tyref(export_sig, seen, name, tyref_name),
+            Packed::Eval(deref!(PackedEval { packed: x, op, .. })) => eval(export_sig, seen, x, op),
             Packed::Pattern(index) => {
                 let pat = super::pattern_of_index(export_sig, *index);
                 pattern(export_sig, seen, pat)
@@ -380,10 +380,10 @@ mod eval {
         evaled: &Evaled<'a, Loc>,
     ) -> Evaled<'a, Loc> {
         match evaled {
-            Evaled::Value(PackedValue::ObjLit(box ValueObjLit { props, .. }), _)
+            Evaled::Value(PackedValue::ObjLit(deref!(ValueObjLit { props, .. })), _)
             | Evaled::Value(
                 PackedValue::DeclareModuleImplicitlyExportedObject(
-                    box ValueDeclareModuleImplicitlyExportedObject { props, .. },
+                    deref!(ValueDeclareModuleImplicitlyExportedObject { props, .. }),
                 ),
                 _,
             ) => match field_of_obj_props(name, props) {
@@ -478,14 +478,14 @@ mod esm {
                 add_named_type(acc, name, &evaled);
                 acc.0.push(Export::Named(name.dupe()));
             }
-            TypeSigExport::ExportDefault(box ExportDefaultData { def, .. }) => {
+            TypeSigExport::ExportDefault(deref!(ExportDefaultData { def, .. })) => {
                 let mut seen = empty_seen();
                 let evaled = eval::packed(export_sig, &mut seen, None, def);
                 let opt_name = evaled.opt_name();
                 add_default_type(acc, opt_name, &evaled);
                 acc.0.push(Export::Default(opt_name.map(|n| n.dupe())));
             }
-            TypeSigExport::ExportDefaultBinding(box ExportDefaultBindingData { index, .. }) => {
+            TypeSigExport::ExportDefaultBinding(deref!(ExportDefaultBindingData { index, .. })) => {
                 let def = local_def_of_index(export_sig, *index);
                 let mut seen = empty_seen();
                 let evaled = eval::def(export_sig, &mut seen, def);
@@ -570,9 +570,9 @@ mod cjs {
         value: &PackedValue<Index<Loc>>,
     ) {
         match value {
-            PackedValue::ObjLit(box ValueObjLit { props, .. })
+            PackedValue::ObjLit(deref!(ValueObjLit { props, .. }))
             | PackedValue::DeclareModuleImplicitlyExportedObject(
-                box ValueDeclareModuleImplicitlyExportedObject { props, .. },
+                deref!(ValueDeclareModuleImplicitlyExportedObject { props, .. }),
             ) => {
                 // only property names that are valid identifier names can currently be
                 // imported: `module.exports = { "Foo Bar": true }` cannot be imported
@@ -582,14 +582,14 @@ mod cjs {
                 for (name, obj_value) in props {
                     if string_is_valid_identifier_name(name.as_str()) {
                         match obj_value {
-                            ObjValueProp::ObjValueField(box (
+                            ObjValueProp::ObjValueField(deref!((
                                 _,
-                                Packed::Value(box PackedValue::ClassExpr(_)),
+                                Packed::Value(deref!(PackedValue::ClassExpr(_))),
                                 _,
-                            )) => {
+                            ))) => {
                                 acc.0.push(Export::NamedType(name.dupe()));
                             }
-                            ObjValueProp::ObjValueField(box (_, Packed::Ref(r), _)) => {
+                            ObjValueProp::ObjValueField(deref!((_, Packed::Ref(r), _))) => {
                                 let mut seen = empty_seen();
                                 let evaled = eval::ref_(export_sig, &mut seen, r);
                                 add_named_type(acc, name, &evaled);
@@ -600,14 +600,14 @@ mod cjs {
                     }
                 }
             }
-            PackedValue::AsConst(box v) => exports_of_value(acc, export_sig, v),
+            PackedValue::AsConst(deref!(v)) => exports_of_value(acc, export_sig, v),
             _ => {}
         }
     }
 
     fn exports_of_annot<Loc>(acc: &mut Exports, annot: &PackedAnnot<Index<Loc>>) {
         match annot {
-            PackedAnnot::ObjAnnot(box AnnotObjAnnot { props, .. }) => {
+            PackedAnnot::ObjAnnot(deref!(AnnotObjAnnot { props, .. })) => {
                 for name in props.keys() {
                     acc.0.push(Export::Named(name.dupe()));
                 }

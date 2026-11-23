@@ -448,9 +448,9 @@ fn props_to_tout<'cx>(
                 let props = get_intrinsic_props(cx, env, trace, component)?;
                 FlowJs::rec_flow_t_with_env(cx, env, trace, unknown_use(), &props, &tout)
             }
-            DefTInner::ReactAbstractComponentT(box ReactAbstractComponentTData {
+            DefTInner::ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
                 config, ..
-            }) => {
+            })) => {
                 let collector = TypeCollector::create();
                 FlowJs::rec_flow_with_env(
                     cx,
@@ -493,9 +493,9 @@ fn props_to_tout<'cx>(
         }
         // Any and any specializations
         TypeInner::AnyT(reason, _)
-        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+        | TypeInner::ImplicitInstantiationTvar(deref!(ImplicitInstantiationTvarData {
             reason, ..
-        }) => {
+        })) => {
             FlowJs::rec_flow_t_with_env(
                 cx,
                 env,
@@ -559,9 +559,9 @@ pub fn get_config<'cx>(
 ) -> Result<(), FlowJsException> {
     let dropped = drop_generic(component.dupe());
     if let TypeInner::DefT(_, def_t) = dropped.deref()
-        && let DefTInner::ReactAbstractComponentT(box ReactAbstractComponentTData {
+        && let DefTInner::ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
             config, ..
-        }) = def_t.deref()
+        })) = def_t.deref()
     {
         let use_op = VirtualUseOp::Frame(
             Arc::new(VirtualFrameUseOp::ReactGetConfig { polarity: pole }),
@@ -900,10 +900,10 @@ pub(super) fn run_with_env<'cx>(
             },
             TypeInner::TemplateLiteralT { .. } => intrinsic_to_props(cx, &dropped),
             TypeInner::AnyT(reason, _)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            | TypeInner::ImplicitInstantiationTvar(deref!(ImplicitInstantiationTvarData {
                 reason,
                 ..
-            }) => {
+            })) => {
                 let any = flow_js_utils::any_result(&dropped, reason.dupe());
                 FlowJs::rec_flow_t_with_env(cx, env, trace, unknown_use(), tin, &any)?;
                 Ok(any)
@@ -932,10 +932,10 @@ pub(super) fn run_with_env<'cx>(
         let dropped = drop_generic(l.dupe());
         let (component_props, component_default_props, component_config) =
             if let TypeInner::DefT(_, def_t) = dropped.deref()
-                && let DefTInner::ReactAbstractComponentT(box ReactAbstractComponentTData {
+                && let DefTInner::ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
                     config,
                     ..
-                }) = def_t.deref()
+                })) = def_t.deref()
             {
                 (config.dupe(), None, config.dupe())
             } else {
@@ -1141,11 +1141,11 @@ pub(super) fn run_with_env<'cx>(
             if let TypeInner::DefT(r, def_t) = dropped.deref() {
                 match (def_t.deref(), inferred_targs) {
                     (
-                        DefTInner::ReactAbstractComponentT(box ReactAbstractComponentTData {
+                        DefTInner::ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
                             config,
                             renders,
                             component_kind: ComponentKind::Nominal(loc, name, _),
-                        }),
+                        })),
                         Some(inferred_targs_val),
                     ) => {
                         let ts = Some(
@@ -1276,7 +1276,7 @@ pub(super) fn run_with_env<'cx>(
     }
 
     match u {
-        react::Tool::CreateElement(box react::CreateElementData {
+        react::Tool::CreateElement(deref!(react::CreateElementData {
             component,
             jsx_props,
             tout,
@@ -1285,7 +1285,7 @@ pub(super) fn run_with_env<'cx>(
             inferred_targs,
             specialized_component,
             specialized_props,
-        }) => create_element(
+        })) => create_element(
             cx,
             env,
             trace,

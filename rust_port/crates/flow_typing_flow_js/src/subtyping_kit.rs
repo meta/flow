@@ -687,12 +687,12 @@ pub fn subtyping_params<'cx>(
         [t] if let DefT(
             _,
             deref!(ArrT(deref!(
-                TupleAT(box TupleATData {
+                TupleAT(deref!(TupleATData {
                     elements,
                     inexact: false,
                     rest: None,
                     ..
-                })
+                }))
             ))),
         ) = t.deref() =>
         {
@@ -729,10 +729,10 @@ fn funt_to_funt_check<'cx>(
 ) -> Result<(), FlowJsException> {
     let inner_use_op = if let VirtualUseOp::Frame(
         deref!(
-            VirtualFrameUseOp::PropertyCompatibility(box PropertyCompatibilityData {
+            VirtualFrameUseOp::PropertyCompatibility(deref!(PropertyCompatibilityData {
                 prop: Some(name),
                 ..
-            })
+            }))
         ),
         inner,
     ) = &use_op
@@ -1337,16 +1337,16 @@ fn try_method_bivariant<'cx>(
             }
             #[rustfmt::skip]
             (
-                DefT(_, deref!(PolyT(box PolyTData {
+                DefT(_, deref!(PolyT(deref!(PolyTData {
                     tparams: ps1,
                     t_out: inner1 @ deref!(DefT(_, deref!(FunT(_, _)))),
                     ..
-                }))),
-                DefT(_, deref!(PolyT(box PolyTData {
+                })))),
+                DefT(_, deref!(PolyT(deref!(PolyTData {
                     tparams: ps2,
                     t_out: inner2 @ deref!(DefT(_, deref!(FunT(_, _)))),
                     ..
-                }))),
+                })))),
             ) if ps1.len() == ps2.len() => {
                 // Like TypeScript, compare the methods at the type arguments a caller of the
                 // upper method passes, which are within its bounds, rather than within the
@@ -1474,16 +1474,16 @@ fn try_method_bivariant<'cx>(
             (DefT(_, deref!(FunT(_, _))), DefT(_, deref!(FunT(_, _)))) => true,
             #[rustfmt::skip]
             (
-                DefT(_, deref!(PolyT(box PolyTData {
+                DefT(_, deref!(PolyT(deref!(PolyTData {
                     tparams: ps1,
                     t_out: deref!(DefT(_, deref!(FunT(_, _)))),
                     ..
-                }))),
-                DefT(_, deref!(PolyT(box PolyTData {
+                })))),
+                DefT(_, deref!(PolyT(deref!(PolyTData {
                     tparams: ps2,
                     t_out: deref!(DefT(_, deref!(FunT(_, _)))),
                     ..
-                }))),
+                })))),
             ) if ps1.len() == ps2.len() => true,
             _ => false,
         }
@@ -1728,11 +1728,11 @@ impl PropsToIndexerContext<'_> {
                     Arc::new(use_op.dupe()),
                 );
                 let lp_type = match lp.deref() {
-                    PropertyInner::Field(box FieldData {
+                    PropertyInner::Field(deref!(FieldData {
                         type_: lt,
                         polarity,
                         ..
-                    }) => PropertyType::OrdinaryField {
+                    })) => PropertyType::OrdinaryField {
                         type_: lt.dupe(),
                         polarity: *polarity,
                         optional: false,
@@ -2329,11 +2329,11 @@ fn flow_obj_to_obj<'cx>(
                         optional: false,
                     };
                     let up_for_idx = match up.deref() {
-                        PropertyInner::Field(box FieldData {
+                        PropertyInner::Field(deref!(FieldData {
                             type_: ut,
                             polarity,
                             ..
-                        }) => PropertyType::OrdinaryField {
+                        })) => PropertyType::OrdinaryField {
                             type_: ut.dupe(),
                             polarity: *polarity,
                             optional: false,
@@ -3219,12 +3219,12 @@ pub fn rec_sub_t<'cx>(
             FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &t, u)
         }
         (
-            ThisTypeAppT(box ThisTypeAppTData {
+            ThisTypeAppT(deref!(ThisTypeAppTData {
                 reason,
                 type_: c,
                 this_t,
                 targs,
-            }),
+            })),
             _,
         ) => {
             let reason_op = type_util::reason_of_t(u);
@@ -3242,12 +3242,12 @@ pub fn rec_sub_t<'cx>(
         }
         (
             _,
-            ThisTypeAppT(box ThisTypeAppTData {
+            ThisTypeAppT(deref!(ThisTypeAppTData {
                 reason,
                 type_: c,
                 this_t,
                 targs,
-            }),
+            })),
         ) => {
             let reason_op = type_util::reason_of_t(l);
             FlowJs::instantiate_this_class_with_env(
@@ -3303,22 +3303,22 @@ pub fn rec_sub_t<'cx>(
         // The next step happens back in flow_js.rs, at the cases for a
         // ConcretizeTypeAppsT use type.
         (
-            TypeAppT(box TypeAppTData {
+            TypeAppT(deref!(TypeAppTData {
                 reason: r1,
                 use_op: op1,
                 type_: c1,
                 targs: ts1,
                 from_value: fv1,
                 use_desc: _,
-            }),
-            TypeAppT(box TypeAppTData {
+            })),
+            TypeAppT(deref!(TypeAppTData {
                 reason: r2,
                 use_op: op2,
                 type_: c2,
                 targs: ts2,
                 from_value: fv2,
                 use_desc: _,
-            }),
+            })),
         ) => {
             if let Some(env) = instantiation_utils::type_app_expansion::push_unless_loop(
                 cx,
@@ -3349,14 +3349,14 @@ pub fn rec_sub_t<'cx>(
             Ok(())
         }
         (
-            TypeAppT(box TypeAppTData {
+            TypeAppT(deref!(TypeAppTData {
                 reason: reason_tapp,
                 use_op: use_op_tapp,
                 type_,
                 targs,
                 from_value,
                 use_desc: type_app_use_desc,
-            }),
+            })),
             _,
         ) => {
             let reason_op = type_util::reason_of_t(u);
@@ -3391,14 +3391,14 @@ pub fn rec_sub_t<'cx>(
         }
         (
             _,
-            TypeAppT(box TypeAppTData {
+            TypeAppT(deref!(TypeAppTData {
                 reason: reason_tapp,
                 use_op: use_op_tapp,
                 type_,
                 targs,
                 from_value,
                 use_desc: type_app_use_desc,
-            }),
+            })),
         ) => {
             let reason_op = type_util::reason_of_t(l);
             if let Some(env) = instantiation_utils::type_app_expansion::push_unless_loop(
@@ -3526,14 +3526,14 @@ pub fn rec_sub_t<'cx>(
                 nominal_type: unom,
             },
         ) if let (
-            nominal::Id::UserDefinedOpaqueTypeId(box nominal::UserDefinedOpaqueTypeIdData(
+            nominal::Id::UserDefinedOpaqueTypeId(deref!(nominal::UserDefinedOpaqueTypeIdData(
                 id1,
                 name1,
-            )),
-            nominal::Id::UserDefinedOpaqueTypeId(box nominal::UserDefinedOpaqueTypeIdData(
+            ))),
+            nominal::Id::UserDefinedOpaqueTypeId(deref!(nominal::UserDefinedOpaqueTypeIdData(
                 id2,
                 name2,
-            )),
+            ))),
         ) = (&lnom.nominal_id, &unom.nominal_id)
             && type_util::nominal_id_have_same_logical_module(
                 &cx.file_options(),
@@ -3624,17 +3624,17 @@ pub fn rec_sub_t<'cx>(
         ) if matches!(
             (&lnom.nominal_id, &lnom.underlying_t),
             (
-                nominal::Id::UserDefinedOpaqueTypeId(box nominal::UserDefinedOpaqueTypeIdData(
+                nominal::Id::UserDefinedOpaqueTypeId(deref!(nominal::UserDefinedOpaqueTypeIdData(
                     _,
                     _,
-                )),
+                ))),
                 nominal::UnderlyingT::OpaqueWithLocal { .. },
             )
         ) && {
-            if let nominal::Id::UserDefinedOpaqueTypeId(box nominal::UserDefinedOpaqueTypeIdData(
+            if let nominal::Id::UserDefinedOpaqueTypeId(deref!(nominal::UserDefinedOpaqueTypeIdData(
                 nominal_id,
                 _,
-            )) = &lnom.nominal_id
+            ))) = &lnom.nominal_id
             {
                 nominal_id.0.source() == Some(cx.file())
             } else {
@@ -3657,17 +3657,17 @@ pub fn rec_sub_t<'cx>(
         ) if matches!(
             (&unom.nominal_id, &unom.underlying_t),
             (
-                nominal::Id::UserDefinedOpaqueTypeId(box nominal::UserDefinedOpaqueTypeIdData(
+                nominal::Id::UserDefinedOpaqueTypeId(deref!(nominal::UserDefinedOpaqueTypeIdData(
                     _,
                     _,
-                )),
+                ))),
                 nominal::UnderlyingT::OpaqueWithLocal { .. },
             )
         ) && {
-            if let nominal::Id::UserDefinedOpaqueTypeId(box nominal::UserDefinedOpaqueTypeIdData(
+            if let nominal::Id::UserDefinedOpaqueTypeId(deref!(nominal::UserDefinedOpaqueTypeIdData(
                 nominal_id,
                 _,
-            )) = &unom.nominal_id
+            ))) = &unom.nominal_id
             {
                 nominal_id.0.source() == Some(cx.file())
             } else {
@@ -3686,7 +3686,7 @@ pub fn rec_sub_t<'cx>(
                 nominal_type: lnom, ..
             },
             _,
-        ) if let nominal::UnderlyingT::CustomError(box nominal::CustomErrorData { t, .. }) =
+        ) if let nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData { t, .. })) =
             &lnom.underlying_t =>
         {
             FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, t, u)
@@ -3698,11 +3698,11 @@ pub fn rec_sub_t<'cx>(
                 nominal_type: unom,
             },
         ) if let (
-            nominal::Id::UserDefinedOpaqueTypeId(box nominal::UserDefinedOpaqueTypeIdData(_, name)),
-            nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+            nominal::Id::UserDefinedOpaqueTypeId(deref!(nominal::UserDefinedOpaqueTypeIdData(_, name))),
+            nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData {
                 t,
                 custom_error_loc,
-            }),
+            })),
         ) = (&unom.nominal_id, &unom.underlying_t) =>
         {
             let use_op = VirtualUseOp::Frame(
@@ -4001,11 +4001,11 @@ pub fn rec_sub_t<'cx>(
             )
         }
         (
-            GenericT(box GenericTData {
+            GenericT(deref!(GenericTData {
                 reason: reason_s,
                 bound: deref!(DefT(_, deref!(SingletonStrT { value: x, .. }))),
                 ..
-            }),
+            })),
             KeysT(reason_op, o),
         ) => {
             flow_js_utils::update_lit_type_from_annot(cx,env,  l);
@@ -4048,11 +4048,11 @@ pub fn rec_sub_t<'cx>(
             )
         }
         (
-            GenericT(box GenericTData {
+            GenericT(deref!(GenericTData {
                 reason: reason_s,
                 bound: deref!(DefT(_, deref!(StrGeneralT(_)))),
                 ..
-            }),
+            })),
             KeysT(reason_op, o),
         ) => {
             let reason_next = reason_s.dupe().replace_desc_new(None);
@@ -4102,11 +4102,11 @@ pub fn rec_sub_t<'cx>(
             )
         }
         (
-            GenericT(box GenericTData {
+            GenericT(deref!(GenericTData {
                 reason: reason_s,
                 bound: deref!(DefT(_, deref!(NumericStrKeyT(num_lit)))),
                 ..
-            }),
+            })),
             KeysT(reason_op, o),
         ) => {
             let reason_next = reason_s
@@ -4169,11 +4169,11 @@ pub fn rec_sub_t<'cx>(
             )
         }
         (
-            GenericT(box GenericTData {
+            GenericT(deref!(GenericTData {
                 reason: reason_s,
                 bound: deref!(TemplateLiteralT { from_annot, quasis, types, .. }),
                 ..
-            }),
+            })),
             KeysT(reason_op, o),
         ) => {
             let l_new = Type::new(TemplateLiteralT {
@@ -4699,7 +4699,7 @@ pub fn rec_sub_t<'cx>(
         // As in TypeScript (`structuredTypeRelatedToWorker`), a type parameter that is not a
         // subtype of any member of a union goes on to the rule for type parameters below: its bound
         // against the union as a whole.
-        (GenericT(box GenericTData { reason, bound, .. }), UnionT(r, rep)) => {
+        (GenericT(deref!(GenericTData { reason, bound, .. })), UnionT(r, rep)) => {
             let members_use_op = use_op.dupe();
             match speculation_kit::try_singleton_custom_throw_on_failure(
                 cx,
@@ -4995,8 +4995,8 @@ pub fn rec_sub_t<'cx>(
 
         // some shortcuts
         (
-            DefT(_, deref!(PolyT(box PolyTData { id: id1, .. }))),
-            DefT(_, deref!(PolyT(box PolyTData { id: id2, .. }))),
+            DefT(_, deref!(PolyT(deref!(PolyTData { id: id1, .. })))),
+            DefT(_, deref!(PolyT(deref!(PolyTData { id: id2, .. })))),
         ) if id1 == id2 => {
             if cx.is_verbose() {
                 eprintln!("PolyT ~> PolyT fast path");
@@ -5004,16 +5004,16 @@ pub fn rec_sub_t<'cx>(
             Ok(())
         }
         (
-            DefT(_, deref!(PolyT(box PolyTData {
+            DefT(_, deref!(PolyT(deref!(PolyTData {
                 tparams: params1,
                 t_out: t1,
                 ..
-            }))),
-            DefT(_, deref!(PolyT(box PolyTData {
+            })))),
+            DefT(_, deref!(PolyT(deref!(PolyTData {
                 tparams: params2,
                 t_out: t2,
                 ..
-            }))),
+            })))),
         ) if params1.len() == params2.len() => {
             // A description of this subtyping rule can be found in "Decidable Bounded
             // Quantifcation" by G. Castagna B. Pierce.
@@ -5112,7 +5112,7 @@ pub fn rec_sub_t<'cx>(
             Ok(())
         }
         // general case
-        (_, DefT(_, deref!(PolyT(box PolyTData { t_out: t, .. })))) => {
+        (_, DefT(_, deref!(PolyT(deref!(PolyTData { t_out: t, .. }))))) => {
             FlowJs::rec_flow_with_env(cx, env, trace, l, &UseT::new(UseT(use_op, t.dupe())))
         }
         // TODO: ideally we'd do the same when lower bounds flow to a
@@ -5121,9 +5121,9 @@ pub fn rec_sub_t<'cx>(
         #[rustfmt::skip]
         (
             _,
-            DefT(class_r, deref!(ClassT(deref!(ThisInstanceT(box ThisInstanceTData {
+            DefT(class_r, deref!(ClassT(deref!(ThisInstanceT(deref!(ThisInstanceTData {
                 reason: inst_r, instance: i, is_this: this, subst_name: this_name,
-            }))))),
+            })))))),
         ) => {
             let reason = type_util::reason_of_t(l);
             let fixed = flow_js_utils::fix_this_instance(
@@ -5142,12 +5142,12 @@ pub fn rec_sub_t<'cx>(
         }
         (
             _,
-            ThisInstanceT(box ThisInstanceTData {
+            ThisInstanceT(deref!(ThisInstanceTData {
                 reason: r,
                 instance: i,
                 is_this: this,
                 subst_name: this_name,
-            }),
+            })),
         ) => {
             let reason = type_util::reason_of_t(l);
             let fixed = flow_js_utils::fix_this_instance(
@@ -5169,9 +5169,9 @@ pub fn rec_sub_t<'cx>(
         // arguments, since typically they're easily inferred from context.
         #[rustfmt::skip]
         (
-            DefT(reason_tapp, deref!(PolyT(box PolyTData {
+            DefT(reason_tapp, deref!(PolyT(deref!(PolyTData {
                 tparams_loc, tparams: ids, t_out: t, ..
-            }))),
+            })))),
             _,
         ) => {
             let reason_op = type_util::reason_of_t(u);
@@ -5226,9 +5226,9 @@ pub fn rec_sub_t<'cx>(
         // when a this-abstracted class flows to upper bounds, fix the class
         #[rustfmt::skip]
         (
-            DefT(class_r, deref!(ClassT(deref!(ThisInstanceT(box ThisInstanceTData {
+            DefT(class_r, deref!(ClassT(deref!(ThisInstanceT(deref!(ThisInstanceTData {
                 reason: inst_r, instance: i, is_this: this, subst_name: this_name,
-            }))))),
+            })))))),
             _,
         ) => {
             let reason = type_util::reason_of_t(u);
@@ -5247,12 +5247,12 @@ pub fn rec_sub_t<'cx>(
             FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &class_t, u)
         }
         (
-            ThisInstanceT(box ThisInstanceTData {
+            ThisInstanceT(deref!(ThisInstanceTData {
                 reason: r,
                 instance: i,
                 is_this: this,
                 subst_name: this_name,
-            }),
+            })),
             _,
         ) => {
             let reason = type_util::reason_of_t(u);
@@ -5304,9 +5304,9 @@ pub fn rec_sub_t<'cx>(
         #[rustfmt::skip]
         (
             DefT(reasonl, deref!(ClassT(this))),
-            DefT(_, deref!(ReactAbstractComponentT(box ReactAbstractComponentTData {
+            DefT(_, deref!(ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
                 config, renders, component_kind: ComponentKind::Structural,
-            }))),
+            })))),
         ) => {
             // Contravariant config check
             FlowJs::react_get_config(
@@ -5328,9 +5328,9 @@ pub fn rec_sub_t<'cx>(
         #[rustfmt::skip]
         (
             DefT(reasonl, deref!(FunT(_, ft))),
-            DefT(_, deref!(ReactAbstractComponentT(box ReactAbstractComponentTData {
+            DefT(_, deref!(ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
                 config, renders, component_kind: ComponentKind::Structural,
-            }))),
+            })))),
         ) => {
             // Function components will not always have an annotation, so the config may
             // never resolve. To determine config compatibility, we instead
@@ -5361,9 +5361,9 @@ pub fn rec_sub_t<'cx>(
         #[rustfmt::skip]
         (
             DefT(reasonl, deref!(ObjT(deref!(ObjType { call_t: Some(call_t), .. })))),
-            DefT(reasonu, deref!(ReactAbstractComponentT(box ReactAbstractComponentTData {
+            DefT(reasonu, deref!(ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
                 config, renders, component_kind: ComponentKind::Structural,
-            }))),
+            })))),
         ) => {
             FlowJs::rec_flow_with_env(
                 cx, env,
@@ -5405,16 +5405,16 @@ pub fn rec_sub_t<'cx>(
         // AbstractComponent ~> AbstractComponent
         #[rustfmt::skip]
         (
-            DefT(reasonl, deref!(ReactAbstractComponentT(box ReactAbstractComponentTData {
+            DefT(reasonl, deref!(ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
                 config: configl,
                 renders: rendersl,
                 component_kind,
-            }))),
-            DefT(_, deref!(ReactAbstractComponentT(box ReactAbstractComponentTData {
+            })))),
+            DefT(_, deref!(ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
                 config: configu,
                 renders: rendersu,
                 component_kind: ComponentKind::Structural,
-            }))),
+            })))),
         ) => {
             FlowJs::rec_flow_t_with_env(cx, env, trace, use_op.dupe(), configu, configl)?;
             let rendersl = match component_kind {
@@ -5444,18 +5444,18 @@ pub fn rec_sub_t<'cx>(
         }
         #[rustfmt::skip]
         (
-            DefT(_, deref!(ReactAbstractComponentT(box ReactAbstractComponentTData {
+            DefT(_, deref!(ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
                 component_kind: ComponentKind::Nominal(idl, name_l, _),
                 config: configl,
                 renders: rendersl,
                 ..
-            }))),
-            DefT(_, deref!(ReactAbstractComponentT(box ReactAbstractComponentTData {
+            })))),
+            DefT(_, deref!(ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
                 component_kind: ComponentKind::Nominal(idu, name_u, _),
                 config: configu,
                 renders: rendersu,
                 ..
-            }))),
+            })))),
         ) if idl == idu || type_util::nominal_id_have_same_logical_module(
             &cx.file_options(),
             cx.projects_options(),
@@ -5926,12 +5926,12 @@ pub fn rec_sub_t<'cx>(
         // ********************************************
         #[rustfmt::skip]
         (
-            DefT(r1, deref!(ArrT(deref!(ArrayAT(box ArrayATData {
+            DefT(r1, deref!(ArrT(deref!(ArrayAT(deref!(ArrayATData {
                 elem_t: t1, tuple_view: tv1, strictness_kind: strictness_kind1, fresh: lit1, ..
-            }))))),
-            DefT(r2, deref!(ArrT(deref!(ArrayAT(box ArrayATData {
+            })))))),
+            DefT(r2, deref!(ArrT(deref!(ArrayAT(deref!(ArrayATData {
                 elem_t: t2, tuple_view: tv2, strictness_kind: strictness_kind2, ..
-            }))))),
+            })))))),
         ) => {
             let use_op = VirtualUseOp::Frame(
                 Arc::new(VirtualFrameUseOp::ArrayElementCompatibility(Box::new(
@@ -5974,13 +5974,13 @@ pub fn rec_sub_t<'cx>(
         // Tuples can flow to tuples with the same arity
         #[rustfmt::skip]
         (
-            DefT(r1, deref!(ArrT(deref!(TupleAT(box TupleATData {
+            DefT(r1, deref!(ArrT(deref!(TupleAT(deref!(TupleATData {
                 elements: elements1, arity: lower_arity, inexact: lower_inexact,
                 rest: rest1, literal: fresh, ..
-            }))))),
-            DefT(r2, deref!(ArrT(deref!(TupleAT(box TupleATData {
+            })))))),
+            DefT(r2, deref!(ArrT(deref!(TupleAT(deref!(TupleATData {
                 elements: elements2, arity: upper_arity, inexact: upper_inexact, rest: rest2, ..
-            }))))),
+            })))))),
         ) => {
             let (num_req1, num_total1) = *lower_arity;
             let (num_req2, num_total2) = *upper_arity;
@@ -6191,12 +6191,12 @@ pub fn rec_sub_t<'cx>(
         // TypeScript treats mutable arrays covariantly, including tuples used as arrays.
         #[rustfmt::skip]
         (
-            DefT(r1, deref!(ArrT(deref!(TupleAT(box TupleATData {
+            DefT(r1, deref!(ArrT(deref!(TupleAT(deref!(TupleATData {
                 elem_t: t1, strictness_kind: strictness_kind1, ..
-            }))))),
-            DefT(r2, deref!(ArrT(deref!(ArrayAT(box ArrayATData {
+            })))))),
+            DefT(r2, deref!(ArrT(deref!(ArrayAT(deref!(ArrayATData {
                 elem_t: t2, strictness_kind: strictness_kind2, ..
-            }))))),
+            })))))),
         ) if strictness_kind1
                     .join(*strictness_kind2)
                     .is_typescript_loose() =>
@@ -6218,10 +6218,10 @@ pub fn rec_sub_t<'cx>(
         // Arrays with known elements can flow to tuples
         #[rustfmt::skip]
         (
-            DefT(r1, deref!(ArrT(deref!(ArrayAT(box ArrayATData {
+            DefT(r1, deref!(ArrT(deref!(ArrayAT(deref!(ArrayATData {
                 elem_t: t1, tuple_view, react_dro, literal, fresh, ..
-            }))))),
-            DefT(r2, deref!(ArrT(deref!(TupleAT(box TupleATData { strictness_kind, .. }))))),
+            })))))),
+            DefT(r2, deref!(ArrT(deref!(TupleAT(deref!(TupleATData { strictness_kind, .. })))))),
         ) => {
             match tuple_view {
                 None => {
@@ -6263,11 +6263,11 @@ pub fn rec_sub_t<'cx>(
         #[rustfmt::skip]
         (
             DefT(r1, deref!(ArrT(deref!(
-                ArrayAT(box ArrayATData { elem_t: t1, .. })
-                | TupleAT(box TupleATData { elem_t: t1, .. })
-                | ROArrayAT(box ROArrayATData { elem_t: t1, .. })
+                ArrayAT(deref!(ArrayATData { elem_t: t1, .. }))
+                | TupleAT(deref!(TupleATData { elem_t: t1, .. }))
+                | ROArrayAT(deref!(ROArrayATData { elem_t: t1, .. }))
             )))),
-            DefT(r2, deref!(ArrT(deref!(ROArrayAT(box ROArrayATData { elem_t: t2, .. }))))),
+            DefT(r2, deref!(ArrT(deref!(ROArrayAT(deref!(ROArrayATData { elem_t: t2, .. })))))),
         ) => {
             let use_op = VirtualUseOp::Frame(
                 Arc::new(VirtualFrameUseOp::ArrayElementCompatibility(Box::new(
@@ -6289,14 +6289,14 @@ pub fn rec_sub_t<'cx>(
         }
         (
             DefT(_, deref!(InstanceT(_))),
-            DefT(r2, deref!(ArrT(deref!(ArrayAT(box ArrayATData { elem_t, .. }))))),
+            DefT(r2, deref!(ArrT(deref!(ArrayAT(deref!(ArrayATData { elem_t, .. })))))),
         ) => {
             let arrt = FlowJs::get_builtin_typeapp_with_env(cx, env, r2, None, "Array", vec![elem_t.dupe()]);
             FlowJs::rec_flow_with_env(cx, env, trace, l, &UseT::new(UseT(use_op, arrt)))
         }
         (
             DefT(_, deref!(InstanceT(_))),
-            DefT(r2, deref!(ArrT(deref!(ROArrayAT(box ROArrayATData { elem_t: elemt, .. }))))),
+            DefT(r2, deref!(ArrT(deref!(ROArrayAT(deref!(ROArrayATData { elem_t: elemt, .. })))))),
         ) => {
             let arrt = FlowJs::get_builtin_typeapp_with_env(
                 cx,
@@ -6785,11 +6785,11 @@ pub fn rec_sub_t<'cx>(
         // `upper_t` and the upper bound has a `lower_t`.
         // We need to do the same for GenericT.
         (
-            GenericT(box GenericTData {
+            GenericT(deref!(GenericTData {
                 reason,
                 bound: lower_upper,
                 ..
-            }),
+            })),
             NominalT {
                 reason: opaque_u_reason,
                 nominal_type: unom,
@@ -7099,20 +7099,20 @@ pub fn rec_sub_t<'cx>(
         }
 
         (
-            GenericT(box GenericTData {
+            GenericT(deref!(GenericTData {
                 bound: bound1,
                 id: id1,
                 reason: reason1,
                 name: name1,
                 no_infer: no_infer1,
-            }),
-            GenericT(box GenericTData {
+            })),
+            GenericT(deref!(GenericTData {
                 bound: bound2,
                 id: id2,
                 reason: reason2,
                 name: name2,
                 no_infer: no_infer2,
-            }),
+            })),
         ) => {
             use flow_typing_generics::GenericSatResult;
             let result = id1.satisfies(
@@ -7158,7 +7158,7 @@ pub fn rec_sub_t<'cx>(
             }
         }
 
-        (GenericT(box GenericTData { reason, bound, .. }), _) => {
+        (GenericT(deref!(GenericTData { reason, bound, .. })), _) => {
             let t = FlowJs::reposition_reason(cx, env, Some(trace), reason, None, bound)?;
             FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &t, u)
         }
@@ -7167,7 +7167,7 @@ pub fn rec_sub_t<'cx>(
         {
             FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &env.frozen_tvar_bound(data), u)
         }
-        (_, GenericT(box GenericTData { reason, .. })) => {
+        (_, GenericT(deref!(GenericTData { reason, .. }))) => {
             let bot = Type::new(DefT(
                 reason.dupe().replace_desc(None),
                 DefT::new(EmptyT),

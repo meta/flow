@@ -547,7 +547,7 @@ fn filter_irrelevant_errors(module_kind: ModuleKind, errors: &mut Vec<ErrorMessa
             errors.retain(|err| {
                 !matches!(
                     err,
-                    ErrorMessage::EBadExportPosition(_) | ErrorMessage::EBadExportContext(box (_, _))
+                    ErrorMessage::EBadExportPosition(_) | ErrorMessage::EBadExportContext(deref!((_, _)))
                 )
             });
         }

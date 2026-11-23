@@ -91,7 +91,7 @@ impl TyEndoBase<(), ALoc> for PatchUpReactTypes {}
 impl TyEndoTy<ALoc, ()> for PatchUpReactTypes {
     fn on_t(&mut self, env: &(), t: ALocTy) -> ALocTy {
         match t.as_ref() {
-            Ty::Generic(box (symbol, kind, args)) => match patch_up_react_symbol(symbol) {
+            Ty::Generic(deref!((symbol, kind, args))) => match patch_up_react_symbol(symbol) {
                 Some(symbol) => Arc::new(Ty::Generic(Box::new((
                     symbol,
                     *kind,
@@ -810,11 +810,11 @@ pub fn unmaybe_ty(t: ALocTy) -> ALocTy {
 pub fn typify_elt(elt: Elt<ALoc>) -> Option<ALocTy> {
     match elt {
         Elt::Type(ty) => Some(ty),
-        Elt::Decl(Decl::ClassDecl(box (s, _)))
-        | Elt::Decl(Decl::EnumDecl(box DeclEnumDeclData { name: s, .. }))
-        | Elt::Decl(Decl::NominalComponentDecl(box DeclNominalComponentDeclData {
+        Elt::Decl(Decl::ClassDecl(deref!((s, _))))
+        | Elt::Decl(Decl::EnumDecl(deref!(DeclEnumDeclData { name: s, .. })))
+        | Elt::Decl(Decl::NominalComponentDecl(deref!(DeclNominalComponentDeclData {
             name: s, ..
-        })) => Some(Arc::new(Ty::TypeOf(Box::new((
+        }))) => Some(Arc::new(Ty::TypeOf(Box::new((
             BuiltinOrSymbol::TSymbol(s),
             None,
         ))))),
@@ -824,14 +824,14 @@ pub fn typify_elt(elt: Elt<ALoc>) -> Option<ALocTy> {
 
 pub fn reinterpret_elt_as_type_identifier(elt: Elt<ALoc>) -> Elt<ALoc> {
     match elt {
-        Elt::Decl(Decl::NominalComponentDecl(box DeclNominalComponentDeclData {
+        Elt::Decl(Decl::NominalComponentDecl(deref!(DeclNominalComponentDeclData {
             name,
             tparams,
             targs,
             props,
             renders,
             ..
-        })) => Elt::Decl(Decl::NominalComponentDecl(Box::new(
+        }))) => Elt::Decl(Decl::NominalComponentDecl(Box::new(
             DeclNominalComponentDeclData {
                 name,
                 tparams,

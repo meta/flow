@@ -2883,11 +2883,11 @@ fn statement_<'a>(
             };
             let check_reason = reason_of_t(discriminant_t);
             match enum_exhaustive_check {
-                EnumPossibleExhaustiveCheckT::EnumExhaustiveCheckPossiblyValid(box EnumExhaustiveCheckPossiblyValidData {
+                EnumPossibleExhaustiveCheckT::EnumExhaustiveCheckPossiblyValid(deref!(EnumExhaustiveCheckPossiblyValidData {
                     possible_checks,
                     checks,
                     default_case_loc,
-                }) => {
+                })) => {
                     flow_js_utils::flow_js_result_to_job_error(check_possible_enum_exhaustive_check(
                         cx,
                         check_reason,
@@ -5685,7 +5685,7 @@ fn valid_computed_key(cx: &Context<'_>, key: &Type) -> bool {
         ),
         TypeInner::TemplateLiteralT { .. } => true,
         TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => true,
-        TypeInner::GenericT(box GenericTData { bound, .. }) => valid_computed_key(cx, bound),
+        TypeInner::GenericT(deref!(GenericTData { bound, .. })) => valid_computed_key(cx, bound),
         TypeInner::NominalT { nominal_type, .. }
             if matches!(
                 &nominal_type.nominal_id,
@@ -6607,7 +6607,7 @@ fn check_super_abstract<'a>(
         t: &Type,
     ) -> Result<FoundKind, JobError> {
         let inst_t_opt: Option<&InstanceT> = match t.deref() {
-            TypeInner::ThisInstanceT(box ThisInstanceTData { instance, .. }) => Some(instance),
+            TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance, .. })) => Some(instance),
             TypeInner::DefT(_, def_t) => match def_t.deref() {
                 DefTInner::InstanceT(instance_t) => Some(instance_t),
                 _ => None,
@@ -7576,10 +7576,10 @@ fn expression_<'a>(
                                     }
                                     _ => None,
                                 },
-                                TypeInner::ThisInstanceT(box ThisInstanceTData {
+                                TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                                     instance,
                                     ..
-                                }) => {
+                                })) => {
                                     if matches!(
                                         &instance.inst.inst_kind,
                                         InstanceKind::RecordKind { .. }
@@ -13609,7 +13609,7 @@ fn jsx_normalize_children_prop<'a>(
     children
         .into_iter()
         .map(|child| match child {
-            type_::UnresolvedParam::UnresolvedArg(box type_::UnresolvedArgData(elem, _)) => elem.t,
+            type_::UnresolvedParam::UnresolvedArg(deref!(type_::UnresolvedArgData(elem, _))) => elem.t,
             type_::UnresolvedParam::UnresolvedSpreadArg(a) => {
                 flow_js_utils::add_output_non_speculating(
                     cx,
@@ -13684,7 +13684,7 @@ fn react_jsx_desugar<'a>(
             vec![CallArg::arg(component_t.dupe()), CallArg::arg(props.dupe())];
         for child in &children {
             match child {
-                type_::UnresolvedParam::UnresolvedArg(box type_::UnresolvedArgData(elem, _)) => {
+                type_::UnresolvedParam::UnresolvedArg(deref!(type_::UnresolvedArgData(elem, _))) => {
                     argts.push(CallArg::arg(elem.t.dupe()));
                 }
                 type_::UnresolvedParam::UnresolvedSpreadArg(t) => {
@@ -13837,7 +13837,7 @@ fn non_react_jsx_desugar<'a>(
     let mut argts: Vec<CallArg> = vec![CallArg::arg(component_t.dupe()), CallArg::arg(props)];
     for child in &children {
         match child {
-            type_::UnresolvedParam::UnresolvedArg(box type_::UnresolvedArgData(elem, _)) => {
+            type_::UnresolvedParam::UnresolvedArg(deref!(type_::UnresolvedArgData(elem, _))) => {
                 argts.push(CallArg::arg(elem.t.dupe()));
             }
             type_::UnresolvedParam::UnresolvedSpreadArg(t) => {
@@ -21190,11 +21190,11 @@ fn enum_exhaustive_check_of_switch_cases(
                         exhaustive_check
                     }
                     EnumPossibleExhaustiveCheckAcc::EnumExhaustiveCheckPossiblyValid(
-                        box EnumExhaustiveCheckPossiblyValidData {
+                        deref!(EnumExhaustiveCheckPossiblyValidData {
                             mut possible_checks,
                             checks,
                             default_case_loc,
-                        },
+                        }),
                     ) => {
                         let possible_check = (
                             obj_t.dupe(),
@@ -21221,11 +21221,11 @@ fn enum_exhaustive_check_of_switch_cases(
             } => match exhaustive_check {
                 EnumPossibleExhaustiveCheckAcc::EnumExhaustiveCheckInvalid(_) => exhaustive_check,
                 EnumPossibleExhaustiveCheckAcc::EnumExhaustiveCheckPossiblyValid(
-                    box EnumExhaustiveCheckPossiblyValidData {
+                    deref!(EnumExhaustiveCheckPossiblyValidData {
                         possible_checks,
                         checks,
                         ..
-                    },
+                    }),
                 ) => EnumPossibleExhaustiveCheckAcc::EnumExhaustiveCheckPossiblyValid(Box::new(
                     EnumExhaustiveCheckPossiblyValidData {
                         possible_checks,

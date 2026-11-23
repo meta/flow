@@ -112,7 +112,7 @@ pub fn default_resolve_touts<C>(
     let resolve_method_action =
         |cx: &mut C, action: &MethodAction<Cx>| -> Result<(), FlowJsException> {
             match action {
-                MethodAction::ChainM(box ChainMData {
+                MethodAction::ChainM(deref!(ChainMData {
                     exp_reason: _,
                     lhs_reason: _,
                     lhs_expression: _,
@@ -120,16 +120,16 @@ pub fn default_resolve_touts<C>(
                     voided_out_collector: _,
                     return_hint: _,
                     specialized_callee,
-                }) => {
+                })) => {
                     resolve_tvar(cx, &methodcalltype.meth_tout)?;
                     resolve_specialized_callee(specialized_callee);
                     Ok(())
                 }
-                MethodAction::CallM(box CallMData {
+                MethodAction::CallM(deref!(CallMData {
                     methodcalltype,
                     return_hint: _,
                     specialized_callee,
-                }) => {
+                })) => {
                     resolve_tvar(cx, &methodcalltype.meth_tout)?;
                     resolve_specialized_callee(specialized_callee);
                     Ok(())
@@ -144,25 +144,25 @@ pub fn default_resolve_touts<C>(
                                  action: &LookupAction|
      -> Result<(), FlowJsException> {
         match action {
-            LookupAction::ReadProp(box ReadPropData { tout, .. }) => resolve_tvar(cx, tout),
-            LookupAction::WriteProp(box WritePropData { prop_tout, .. }) => map_opt(cx, prop_tout),
+            LookupAction::ReadProp(deref!(ReadPropData { tout, .. })) => resolve_tvar(cx, tout),
+            LookupAction::WriteProp(deref!(WritePropData { prop_tout, .. })) => map_opt(cx, prop_tout),
             LookupAction::LookupPropForTvarPopulation { .. }
             | LookupAction::LookupPropsForSubtyping(..)
             | LookupAction::SuperProp(..)
-            | LookupAction::MatchProp(box LookupActionMatchPropData { .. }) => Ok(()),
+            | LookupAction::MatchProp(deref!(LookupActionMatchPropData { .. })) => Ok(()),
         }
     };
     let resolve_elem_action =
         |cx: &mut C, action: &ElemAction<Cx>| -> Result<(), FlowJsException> {
             match action {
-                ElemAction::ReadElem(box ReadElemData { tout, .. }) => resolve_tvar(cx, tout),
-                ElemAction::WriteElem(box WriteElemData { tout, .. }) => map_opt(cx, tout),
+                ElemAction::ReadElem(deref!(ReadElemData { tout, .. })) => resolve_tvar(cx, tout),
+                ElemAction::WriteElem(deref!(WriteElemData { tout, .. })) => map_opt(cx, tout),
                 ElemAction::CallElem(_, action) => resolve_method_action(cx, action),
             }
         };
     let resolve_react_tool = |cx: &mut C, tool: &react::Tool<Cx>| -> Result<(), FlowJsException> {
         match tool {
-            react::Tool::CreateElement(box react::CreateElementData { tout, .. }) => {
+            react::Tool::CreateElement(deref!(react::CreateElementData { tout, .. })) => {
                 resolve_tvar(cx, tout)
             }
             react::Tool::ConfigCheck { props } => resolve(cx, props.dupe()),
@@ -194,38 +194,38 @@ pub fn default_resolve_touts<C>(
     };
     match u.deref() {
         UseTInner::UseT(..) => Ok(()),
-        UseTInner::CallT(box CallTData {
-            call_action: box CallAction::Funcalltype(box funcalltype),
+        UseTInner::CallT(deref!(CallTData {
+            call_action: deref!(CallAction::Funcalltype(deref!(funcalltype))),
             ..
-        }) => {
+        })) => {
             resolve_tvar(cx, &funcalltype.call_tout)?;
             resolve_specialized_callee(&funcalltype.call_specialized_callee);
             Ok(())
         }
-        UseTInner::CallT(box CallTData {
-            call_action: box CallAction::ConcretizeCallee(tout),
+        UseTInner::CallT(deref!(CallTData {
+            call_action: deref!(CallAction::ConcretizeCallee(tout)),
             ..
-        }) => {
+        })) => {
             tout.add(any.dupe());
             Ok(())
         }
-        UseTInner::ConditionalT(box ConditionalTData { tout, .. }) => resolve_tvar(cx, tout),
-        UseTInner::MethodT(box MethodTData {
+        UseTInner::ConditionalT(deref!(ConditionalTData { tout, .. })) => resolve_tvar(cx, tout),
+        UseTInner::MethodT(deref!(MethodTData {
             method_action: action,
             ..
-        }) => resolve_method_action(cx, action),
+        })) => resolve_method_action(cx, action),
         UseTInner::PrivateMethodT(data) => resolve_method_action(cx, &data.method_action),
         UseTInner::SetPropT(_, _, _, _, _, _, topt) => map_opt(cx, topt),
         UseTInner::SetPrivatePropT(data) => map_opt(cx, &data.tout),
-        UseTInner::TestPropT(box TestPropTData { tout: tvar, .. }) => resolve_tvar(cx, tvar),
+        UseTInner::TestPropT(deref!(TestPropTData { tout: tvar, .. })) => resolve_tvar(cx, tvar),
         UseTInner::GetPrivatePropT(data) => resolve_tvar(cx, &data.tout),
         UseTInner::GetPropT(data) => resolve_tvar(cx, &data.tout),
-        UseTInner::SetElemT(box SetElemTData { tout: topt, .. }) => map_opt(cx, topt),
-        UseTInner::GetElemT(box GetElemTData { tout, .. }) => resolve_tvar(cx, tout),
-        UseTInner::CallElemT(box CallElemTData {
+        UseTInner::SetElemT(deref!(SetElemTData { tout: topt, .. })) => map_opt(cx, topt),
+        UseTInner::GetElemT(deref!(GetElemTData { tout, .. })) => resolve_tvar(cx, tout),
+        UseTInner::CallElemT(deref!(CallElemTData {
             method_action: action,
             ..
-        }) => resolve_method_action(cx, action),
+        })) => resolve_method_action(cx, action),
         UseTInner::GetStaticsT(_, collector) => {
             collector.add(any.dupe());
             Ok(())
@@ -245,24 +245,24 @@ pub fn default_resolve_touts<C>(
         UseTInner::ToStringT { t_out, .. } => {
             default_resolve_touts(cx, flow, resolve_callee, env, loc.dupe(), t_out)
         }
-        UseTInner::SpecializeT(box SpecializeTData { upper, .. }) => match upper {
-            Some(box Cont::Upper(upper)) => flow(cx, &any, upper),
-            Some(box Cont::Collect(collector)) => {
+        UseTInner::SpecializeT(deref!(SpecializeTData { upper, .. })) => match upper {
+            Some(deref!(Cont::Upper(upper))) => flow(cx, &any, upper),
+            Some(deref!(Cont::Collect(collector))) => {
                 collector.add(any.dupe());
                 Ok(())
             }
-            Some(box Cont::Lower(..)) | None => Ok(()),
+            Some(deref!(Cont::Lower(..))) | None => Ok(()),
         },
         UseTInner::ThisSpecializeT(_, _, k) => resolve_cont(cx, k),
-        UseTInner::ValueToTypeReferenceT(box ValueToTypeReferenceTData { tout: tvar, .. }) => {
+        UseTInner::ValueToTypeReferenceT(deref!(ValueToTypeReferenceTData { tout: tvar, .. })) => {
             resolve_tvar(cx, tvar)
         }
         UseTInner::ConcretizeTypeAppsT(..) => Ok(()),
-        UseTInner::LookupT(box LookupTData { lookup_action, .. }) => {
+        UseTInner::LookupT(deref!(LookupTData { lookup_action, .. })) => {
             resolve_lookup_action(cx, lookup_action)
         }
         UseTInner::ObjRestT(_, _, t, _, _) => resolve(cx, t.dupe()),
-        UseTInner::ArrRestT(box ArrRestTData { tout: t, .. }) => resolve(cx, t.dupe()),
+        UseTInner::ArrRestT(deref!(ArrRestTData { tout: t, .. })) => resolve(cx, t.dupe()),
         UseTInner::ObjTestProtoT(_, collector) => {
             collector.add(any.dupe());
             Ok(())
@@ -275,31 +275,31 @@ pub fn default_resolve_touts<C>(
         }
         UseTInner::HasOwnPropT(..) => Ok(()),
         UseTInner::GetValuesT(_, t) => resolve(cx, t.dupe()),
-        UseTInner::ElemT(box ElemTData { action, .. }) => resolve_elem_action(cx, action),
-        UseTInner::MapTypeT(box MapTypeTData { tout: t, .. })
+        UseTInner::ElemT(deref!(ElemTData { action, .. })) => resolve_elem_action(cx, action),
+        UseTInner::MapTypeT(deref!(MapTypeTData { tout: t, .. }))
         | UseTInner::ObjKitT(_, _, _, _, t) => resolve(cx, t.dupe()),
-        UseTInner::ReactKitT(box ReactKitTData { tool, .. }) => resolve_react_tool(cx, tool),
+        UseTInner::ReactKitT(deref!(ReactKitTData { tool, .. })) => resolve_react_tool(cx, tool),
         UseTInner::ConcretizeT(..) => Ok(()),
-        UseTInner::ResolveSpreadT(box ResolveSpreadTData {
+        UseTInner::ResolveSpreadT(deref!(ResolveSpreadTData {
             resolve_spread_type,
             ..
-        }) => resolve_spread_resolve(cx, &resolve_spread_type.rrt_resolve_to),
-        UseTInner::CondT(box CondTData { collector, .. }) => {
+        })) => resolve_spread_resolve(cx, &resolve_spread_type.rrt_resolve_to),
+        UseTInner::CondT(deref!(CondTData { collector, .. })) => {
             collector.add(any.dupe());
             Ok(())
         }
         UseTInner::ExtendsUseT(..) => Ok(()),
-        UseTInner::ResolveUnionT(box ResolveUnionTData { upper, .. }) => {
+        UseTInner::ResolveUnionT(deref!(ResolveUnionTData { upper, .. })) => {
             default_resolve_touts(cx, flow, resolve_callee, env, loc.dupe(), upper)
         }
-        UseTInner::GetEnumT(box GetEnumTData { collector, .. }) => {
+        UseTInner::GetEnumT(deref!(GetEnumTData { collector, .. })) => {
             collector.add(any.dupe());
             Ok(())
         }
         UseTInner::HooklikeT(tvar) | UseTInner::DeepReadOnlyT(tvar, _) => resolve_tvar(cx, tvar),
         UseTInner::FilterOptionalT(_, t) | UseTInner::FilterMaybeT(_, t) => resolve(cx, t.dupe()),
-        UseTInner::SealGenericT(box SealGenericTData { cont, .. }) => resolve_cont(cx, cont),
-        UseTInner::OptionalIndexedAccessT(box OptionalIndexedAccessTData { tout_tvar, .. }) => {
+        UseTInner::SealGenericT(deref!(SealGenericTData { cont, .. })) => resolve_cont(cx, cont),
+        UseTInner::OptionalIndexedAccessT(deref!(OptionalIndexedAccessTData { tout_tvar, .. })) => {
             resolve_tvar(cx, tout_tvar)
         }
         UseTInner::ConvertEmptyPropsToMixedT(_, collector) => {

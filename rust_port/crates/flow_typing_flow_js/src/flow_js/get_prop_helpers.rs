@@ -348,13 +348,13 @@ pub(super) fn elem_action_on_obj<'cx>(
     action: &ElemAction<Cx>,
 ) -> Result<(), FlowJsException> {
     match action {
-        ElemAction::ReadElem(box ReadElemData {
+        ElemAction::ReadElem(deref!(ReadElemData {
             id,
             from_annot,
             skip_optional,
             tout,
             ..
-        }) => rec_flow(
+        })) => rec_flow(
             cx,
             env,
             trace,
@@ -372,7 +372,7 @@ pub(super) fn elem_action_on_obj<'cx>(
                 }))),
             ),
         ),
-        ElemAction::WriteElem(box WriteElemData { tin, tout, mode }) => {
+        ElemAction::WriteElem(deref!(WriteElemData { tin, tout, mode })) => {
             rec_flow(
                 cx,
                 env,
@@ -483,7 +483,7 @@ pub(super) fn write_computed_obj_prop<'cx>(
                 )?;
                 Ok(())
             }
-            TypeInner::GenericT(box GenericTData { bound, .. }) => {
+            TypeInner::GenericT(deref!(GenericTData { bound, .. })) => {
                 loop_(cx, env, trace, use_op, bound, reason, obj_t, tin)
             }
             TypeInner::NominalT { nominal_type, .. } if let Some(upper) = &nominal_type.upper_t => {

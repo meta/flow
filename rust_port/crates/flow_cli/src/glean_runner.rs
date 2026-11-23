@@ -930,15 +930,15 @@ pub(crate) fn loc_of_obj_value_prop<T>(
     prop: &ObjValueProp<Index<Loc>, T>,
 ) -> Loc {
     match prop {
-        ObjValueProp::ObjValueField(box (index, _, _)) => {
+        ObjValueProp::ObjValueField(deref!((index, _, _))) => {
             loc_of_index(loc_source, loc_of_aloc, *index)
         }
-        ObjValueProp::ObjValueAccess(box accessor) => match accessor {
-            Accessor::Get(box (index, _)) => loc_of_index(loc_source, loc_of_aloc, *index),
-            Accessor::Set(box (index, _)) => loc_of_index(loc_source, loc_of_aloc, *index),
-            Accessor::GetSet(box (_, _, index, _)) => loc_of_index(loc_source, loc_of_aloc, *index),
+        ObjValueProp::ObjValueAccess(deref!(accessor)) => match accessor {
+            Accessor::Get(deref!((index, _))) => loc_of_index(loc_source, loc_of_aloc, *index),
+            Accessor::Set(deref!((index, _))) => loc_of_index(loc_source, loc_of_aloc, *index),
+            Accessor::GetSet(deref!((_, _, index, _))) => loc_of_index(loc_source, loc_of_aloc, *index),
         },
-        ObjValueProp::ObjValueMethod(box ms) => {
+        ObjValueProp::ObjValueMethod(deref!(ms)) => {
             let type_sig::ObjValueMethodData { id_loc: index, .. } = &ms[0];
             loc_of_index(loc_source, loc_of_aloc, *index)
         }
@@ -951,17 +951,17 @@ pub(crate) fn loc_of_obj_annot_prop<T>(
     prop: &ObjAnnotProp<Index<Loc>, T>,
 ) -> Loc {
     match prop {
-        ObjAnnotProp::ObjAnnotField(box (index, _, _)) => {
+        ObjAnnotProp::ObjAnnotField(deref!((index, _, _))) => {
             loc_of_index(loc_source, loc_of_aloc, *index)
         }
-        ObjAnnotProp::ObjAnnotAccess(box accessor) => match accessor {
-            Accessor::Get(box (index, _)) => loc_of_index(loc_source, loc_of_aloc, *index),
-            Accessor::Set(box (index, _)) => loc_of_index(loc_source, loc_of_aloc, *index),
-            Accessor::GetSet(box (_, _, index, _)) => loc_of_index(loc_source, loc_of_aloc, *index),
+        ObjAnnotProp::ObjAnnotAccess(deref!(accessor)) => match accessor {
+            Accessor::Get(deref!((index, _))) => loc_of_index(loc_source, loc_of_aloc, *index),
+            Accessor::Set(deref!((index, _))) => loc_of_index(loc_source, loc_of_aloc, *index),
+            Accessor::GetSet(deref!((_, _, index, _))) => loc_of_index(loc_source, loc_of_aloc, *index),
         },
-        ObjAnnotProp::ObjAnnotMethod(box type_sig::ObjAnnotMethodData {
+        ObjAnnotProp::ObjAnnotMethod(deref!(type_sig::ObjAnnotMethodData {
             id_loc: index, ..
-        }) => loc_of_index(loc_source, loc_of_aloc, *index),
+        })) => loc_of_index(loc_source, loc_of_aloc, *index),
     }
 }
 

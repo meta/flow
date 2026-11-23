@@ -322,7 +322,7 @@ fn merge_type<'cx>(cx: &mut Context<'cx>, pair: (Type, Type)) -> Type {
             (DefTInner::ArrT(arr1), DefTInner::ArrT(arr2)) => {
                 match (arr1.deref(), arr2.deref()) {
                     (
-                        ArrType::ArrayAT(box ArrayATData {
+                        ArrType::ArrayAT(deref!(ArrayATData {
                             elem_t: et1,
                             tuple_view:
                                 Some(TupleView {
@@ -335,8 +335,8 @@ fn merge_type<'cx>(cx: &mut Context<'cx>, pair: (Type, Type)) -> Type {
                             react_dro: dro1,
                             strictness_kind: strictness_kind1,
                             ..
-                        }),
-                        ArrType::ArrayAT(box ArrayATData {
+                        })),
+                        ArrType::ArrayAT(deref!(ArrayATData {
                             elem_t: et2,
                             tuple_view:
                                 Some(TupleView {
@@ -349,7 +349,7 @@ fn merge_type<'cx>(cx: &mut Context<'cx>, pair: (Type, Type)) -> Type {
                             react_dro: dro2,
                             strictness_kind: strictness_kind2,
                             ..
-                        }),
+                        })),
                     ) if arity1 == arity2
                         && inexact1 == inexact2
                         && elements1.len() == elements2.len()
@@ -406,18 +406,18 @@ fn merge_type<'cx>(cx: &mut Context<'cx>, pair: (Type, Type)) -> Type {
                         ))
                     }
                     (
-                        ArrType::ArrayAT(box ArrayATData {
+                        ArrType::ArrayAT(deref!(ArrayATData {
                             elem_t: et1,
                             react_dro: dro1,
                             strictness_kind: strictness_kind1,
                             ..
-                        }),
-                        ArrType::ArrayAT(box ArrayATData {
+                        })),
+                        ArrType::ArrayAT(deref!(ArrayATData {
                             elem_t: et2,
                             react_dro: dro2,
                             strictness_kind: strictness_kind2,
                             ..
-                        }),
+                        })),
                     ) => Type::new(TypeInner::DefT(
                         locationless_reason(None),
                         DefT::new(DefTInner::ArrT(Rc::new(ArrType::ArrayAT(Box::new(
@@ -436,7 +436,7 @@ fn merge_type<'cx>(cx: &mut Context<'cx>, pair: (Type, Type)) -> Type {
                         ))))),
                     )),
                     (
-                        ArrType::TupleAT(box TupleATData {
+                        ArrType::TupleAT(deref!(TupleATData {
                             elem_t: et1,
                             elements: ts1,
                             arity: arity1,
@@ -445,8 +445,8 @@ fn merge_type<'cx>(cx: &mut Context<'cx>, pair: (Type, Type)) -> Type {
                             react_dro: dro1,
                             strictness_kind: strictness_kind1,
                             ..
-                        }),
-                        ArrType::TupleAT(box TupleATData {
+                        })),
+                        ArrType::TupleAT(deref!(TupleATData {
                             elem_t: et2,
                             elements: ts2,
                             arity: arity2,
@@ -455,7 +455,7 @@ fn merge_type<'cx>(cx: &mut Context<'cx>, pair: (Type, Type)) -> Type {
                             react_dro: dro2,
                             strictness_kind: strictness_kind2,
                             ..
-                        }),
+                        })),
                     ) if arity1 == arity2
                         && inexact1 == inexact2
                         && ts1.len() == ts2.len()
@@ -504,16 +504,16 @@ fn merge_type<'cx>(cx: &mut Context<'cx>, pair: (Type, Type)) -> Type {
                         ))
                     }
                     (
-                        ArrType::ROArrayAT(box ROArrayATData {
+                        ArrType::ROArrayAT(deref!(ROArrayATData {
                             elem_t: elemt1,
                             react_dro: dro1,
                             ..
-                        }),
-                        ArrType::ROArrayAT(box ROArrayATData {
+                        })),
+                        ArrType::ROArrayAT(deref!(ROArrayATData {
                             elem_t: elemt2,
                             react_dro: dro2,
                             ..
-                        }),
+                        })),
                     ) => Type::new(TypeInner::DefT(
                         locationless_reason(VirtualReasonDesc::RArrayType),
                         DefT::new(DefTInner::ArrT(Rc::new(ArrType::ROArrayAT(Box::new(
@@ -613,11 +613,11 @@ fn merge_type<'cx>(cx: &mut Context<'cx>, pair: (Type, Type)) -> Type {
 fn instantiate_poly_t<'cx>(cx: &mut Context<'cx>, t: Type, args: Option<&[Type]>) -> Type {
     match t.deref() {
         TypeInner::DefT(_, def_t) => match def_t.deref() {
-            DefTInner::PolyT(box PolyTData {
+            DefTInner::PolyT(deref!(PolyTData {
                 tparams: type_params,
                 t_out,
                 ..
-            }) => {
+            })) => {
                 let args = args.map(|s| s.to_vec()).unwrap_or_default();
                 let maximum_arity = type_params.len();
                 if args.len() > maximum_arity {
@@ -726,9 +726,9 @@ fn instantiate_type(t: Type) -> Type {
     match t.deref() {
         TypeInner::DefT(_, def_t) => match def_t.deref() {
             DefTInner::ClassT(inner) => match inner.deref() {
-                TypeInner::ThisInstanceT(box ThisInstanceTData {
+                TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                     reason, instance, ..
-                }) => Type::new(TypeInner::DefT(
+                })) => Type::new(TypeInner::DefT(
                     reason.dupe(),
                     DefT::new(DefTInner::InstanceT(Rc::new(instance.dupe()))),
                 )),
@@ -833,30 +833,30 @@ pub fn extract_type<'cx>(cx: &mut Context<'cx>, this_t: Type) -> GenericT<Type, 
         }
         TypeInner::MaybeT(_, ty) => extract_type(cx, ty.dupe()),
         TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => GenericT::FailureAnyType,
-        TypeInner::ThisInstanceT(box ThisInstanceTData {
+        TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
             reason, instance, ..
-        }) => GenericT::Success(Type::new(TypeInner::DefT(
+        })) => GenericT::Success(Type::new(TypeInner::DefT(
             reason.dupe(),
             DefT::new(DefTInner::InstanceT(Rc::new(instance.dupe()))),
         ))),
-        TypeInner::GenericT(box GenericTData { bound, .. }) => extract_type(cx, bound.dupe()),
+        TypeInner::GenericT(deref!(GenericTData { bound, .. })) => extract_type(cx, bound.dupe()),
         TypeInner::NamespaceT(_) => GenericT::SuccessNamespace(this_t),
-        TypeInner::ThisTypeAppT(box ThisTypeAppTData {
+        TypeInner::ThisTypeAppT(deref!(ThisTypeAppTData {
             type_: c,
             targs: ts_opt,
             ..
-        }) => {
+        })) => {
             let c = resolve_type(cx, c.dupe());
             let inst_t = instantiate_poly_t(cx, c, ts_opt.as_deref());
             let inst_t = instantiate_type(inst_t);
             extract_type(cx, inst_t)
         }
-        TypeInner::TypeAppT(box TypeAppTData {
+        TypeInner::TypeAppT(deref!(TypeAppTData {
             type_,
             targs,
             from_value,
             ..
-        }) => {
+        })) => {
             let c = resolve_type(cx, type_.dupe());
             let inst_t = instantiate_poly_t(cx, c, Some(&**targs));
             let inst_t = if *from_value {
@@ -877,7 +877,7 @@ pub fn extract_type<'cx>(cx: &mut Context<'cx>, this_t: Type) -> GenericT<Type, 
         }
         TypeInner::NominalT { nominal_type, .. } => match &nominal_type.underlying_t {
             nominal::UnderlyingT::OpaqueWithLocal { t } => extract_type(cx, t.dupe()),
-            nominal::UnderlyingT::CustomError(box nominal::CustomErrorData { t, .. }) => {
+            nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData { t, .. })) => {
                 extract_type(cx, t.dupe())
             }
             _ => match &nominal_type.upper_t {
@@ -920,9 +920,9 @@ pub fn extract_type<'cx>(cx: &mut Context<'cx>, this_t: Type) -> GenericT<Type, 
             DefTInner::ObjT(_) => GenericT::Success(this_t),
             DefTInner::EnumObjectT { .. } => GenericT::Success(this_t),
             // TODO: replace type parameters with stable/proper names?
-            DefTInner::PolyT(box PolyTData { t_out, .. }) => extract_type(cx, t_out.dupe()),
+            DefTInner::PolyT(deref!(PolyTData { t_out, .. })) => extract_type(cx, t_out.dupe()),
             DefTInner::ClassT(inner) => match inner.deref() {
-                TypeInner::ThisInstanceT(box ThisInstanceTData { instance, .. }) => {
+                TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance, .. })) => {
                     extract_type(cx, instance.static_.dupe())
                 }
                 TypeInner::DefT(_, inner_def) => match inner_def.deref() {
@@ -973,15 +973,15 @@ pub fn extract_type<'cx>(cx: &mut Context<'cx>, this_t: Type) -> GenericT<Type, 
             DefTInner::RendersT(_) => GenericT::Success(this_t),
             DefTInner::ArrT(arrtype) => {
                 let (builtin, elem_t) = match arrtype.deref() {
-                    ArrType::ArrayAT(box ArrayATData { elem_t, .. }) => (
+                    ArrType::ArrayAT(deref!(ArrayATData { elem_t, .. })) => (
                         flow_js_utils::lookup_builtin_value(cx, "Array", reason.dupe()),
                         elem_t.dupe(),
                     ),
-                    ArrType::TupleAT(box TupleATData { elem_t, .. }) => (
+                    ArrType::TupleAT(deref!(TupleATData { elem_t, .. })) => (
                         flow_js_utils::lookup_builtin_type(cx, "ReadonlyArray", reason.dupe()),
                         elem_t.dupe(),
                     ),
-                    ArrType::ROArrayAT(box ROArrayATData { elem_t, .. }) => (
+                    ArrType::ROArrayAT(deref!(ROArrayATData { elem_t, .. })) => (
                         flow_js_utils::lookup_builtin_type(cx, "ReadonlyArray", reason.dupe()),
                         elem_t.dupe(),
                     ),
@@ -1065,10 +1065,10 @@ pub fn extract_members<'cx>(
                 }
             };
             match t.deref() {
-                TypeInner::GenericT(box GenericTData { bound, .. }) => {
+                TypeInner::GenericT(deref!(GenericTData { bound, .. })) => {
                     extract_members(exclude_proto_members, cx, GenericT::Success(bound.dupe()))
                 }
-                TypeInner::ThisInstanceT(box ThisInstanceTData { instance, .. }) => {
+                TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance, .. })) => {
                     handle_instance(
                         instance.super_.dupe(),
                         instance.inst.own_props.dupe(),
@@ -1183,7 +1183,7 @@ pub fn extract_members<'cx>(
                             ),
                             TypeInner::AnyT(_, _)
                             | TypeInner::ImplicitInstantiationTvar(
-                                box ImplicitInstantiationTvarData { .. },
+                                deref!(ImplicitInstantiationTvarData { .. }),
                             ) => false,
                             _ => true,
                         })

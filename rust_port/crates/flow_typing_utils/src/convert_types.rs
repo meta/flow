@@ -631,13 +631,13 @@ fn type_to_json_uncached<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, t: &Type
                 ],
             )
         }
-        TypeInner::GenericT(box GenericTData {
+        TypeInner::GenericT(deref!(GenericTData {
             reason: _,
             name,
             bound,
             no_infer,
             id: _,
-        }) => json_with_type(
+        })) => json_with_type(
             "Generic",
             vec![
                 (
@@ -648,12 +648,12 @@ fn type_to_json_uncached<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, t: &Type
                 ("no_infer", Json::Bool(*no_infer)),
             ],
         ),
-        TypeInner::ThisInstanceT(box ThisInstanceTData {
+        TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
             reason: _,
             instance,
             is_this,
             subst_name,
-        }) => json_with_type(
+        })) => json_with_type(
             "ThisInstance",
             vec![
                 ("instance", json_of_instance_t(cx, depth, instance)),
@@ -664,12 +664,12 @@ fn type_to_json_uncached<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, t: &Type
                 ),
             ],
         ),
-        TypeInner::ThisTypeAppT(box ThisTypeAppTData {
+        TypeInner::ThisTypeAppT(deref!(ThisTypeAppTData {
             reason: _,
             this_t,
             type_,
             targs,
-        }) => {
+        })) => {
             let mut fields = vec![
                 ("t1", type_to_json(cx, depth - 1, this_t)),
                 ("t2", type_to_json(cx, depth - 1, type_)),
@@ -687,14 +687,14 @@ fn type_to_json_uncached<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, t: &Type
             }
             json_with_type("ThisTypeApp", fields)
         }
-        TypeInner::TypeAppT(box TypeAppTData {
+        TypeInner::TypeAppT(deref!(TypeAppTData {
             reason: _,
             use_op: _,
             type_,
             targs,
             from_value,
             use_desc,
-        }) => json_with_type(
+        })) => json_with_type(
             "TypeApp",
             vec![
                 ("type", type_to_json(cx, depth - 1, type_)),
@@ -747,7 +747,7 @@ fn type_to_json_uncached<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, t: &Type
         } => {
             let underlying_t_json = match &nominal_type.underlying_t {
                 nominal::UnderlyingT::FullyOpaque => Json::Null,
-                nominal::UnderlyingT::CustomError(box nominal::CustomErrorData { t, .. })
+                nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData { t, .. }))
                 | nominal::UnderlyingT::OpaqueWithLocal { t, .. } => type_to_json(cx, depth - 1, t),
             };
             let super_t_json = match &nominal_type.upper_t {
@@ -1100,14 +1100,14 @@ fn def_t_to_json<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, def_t: &DefT) ->
                 ("type", type_to_json(cx, depth - 1, t)),
             ],
         ),
-        DefTInner::PolyT(box PolyTData {
+        DefTInner::PolyT(deref!(PolyTData {
             kind: _,
             tparams_loc: _,
             tparams,
             t_out,
             id,
             strictness_kind: _,
-        }) => {
+        })) => {
             let mut fields = vec![
                 ("tparams", json_of_typeparams(cx, depth, tparams)),
                 ("t_out", type_to_json(cx, depth - 1, t_out)),
@@ -1119,11 +1119,11 @@ fn def_t_to_json<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, def_t: &DefT) ->
             }
             json_with_type("Poly", fields)
         }
-        DefTInner::ReactAbstractComponentT(box ReactAbstractComponentTData {
+        DefTInner::ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
             config,
             renders,
             component_kind,
-        }) => {
+        })) => {
             let component_kind_json = match component_kind {
                 ComponentKind::Structural => json!({"kind": "Structural"}),
                 ComponentKind::Nominal(id, name, types_opt) => {
@@ -1202,14 +1202,14 @@ fn json_of_dicttype<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, dicttype: &Di
 // Convert arrtype to JSON
 fn arrtype_to_json<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, arrtype: &ArrType) -> Json {
     match arrtype {
-        ArrType::ArrayAT(box ArrayATData {
+        ArrType::ArrayAT(deref!(ArrayATData {
             react_dro: _,
             elem_t,
             ..
-        }) => {
+        })) => {
             json!({"kind": "ArrayAT", "elem_t": type_to_json(cx, depth - 1, elem_t)})
         }
-        ArrType::TupleAT(box TupleATData {
+        ArrType::TupleAT(deref!(TupleATData {
             react_dro: _,
             elem_t,
             elements,
@@ -1217,7 +1217,7 @@ fn arrtype_to_json<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, arrtype: &ArrT
             inexact,
             rest,
             ..
-        }) => {
+        })) => {
             let mut json = json!({
                 "kind": "TupleAT",
                 "elem_t": type_to_json(cx, depth - 1, elem_t),
@@ -1231,7 +1231,7 @@ fn arrtype_to_json<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, arrtype: &ArrT
             }
             json
         }
-        ArrType::ROArrayAT(box ROArrayATData { elem_t, .. }) => {
+        ArrType::ROArrayAT(deref!(ROArrayATData { elem_t, .. })) => {
             json!({"kind": "ROArrayAT", "elem_t": type_to_json(cx, depth - 1, elem_t)})
         }
     }
@@ -1387,11 +1387,11 @@ fn json_of_destructor<'cx>(
         Destructor::ReadOnlyType => json!({"kind": "ReadOnlyType"}),
         Destructor::PartialType => json!({"kind": "PartialType"}),
         Destructor::RequiredType => json!({"kind": "RequiredType"}),
-        Destructor::SpreadType(box DestructorSpreadTypeData(
+        Destructor::SpreadType(deref!(DestructorSpreadTypeData(
             target,
             operands,
             operand_slice_opt,
-        )) => {
+        ))) => {
             let target_json = match target {
                 object::spread::Target::Value { make_seal, .. } => {
                     let seal_str = match make_seal {
@@ -1427,13 +1427,13 @@ fn json_of_destructor<'cx>(
                 "operand_slice": operand_slice_json,
             })
         }
-        Destructor::SpreadTupleType(box DestructorSpreadTupleTypeData {
+        Destructor::SpreadTupleType(deref!(DestructorSpreadTupleTypeData {
             reason_tuple: _,
             reason_spread: _,
             inexact,
             resolved: resolved_rev,
             unresolved,
-        }) => {
+        })) => {
             json!({
                 "kind": "SpreadTupleType",
                 "inexact": inexact,
@@ -1459,13 +1459,13 @@ fn json_of_destructor<'cx>(
             })
         }
         Destructor::ValuesType => json!({"kind": "ValuesType"}),
-        Destructor::ConditionalType(box DestructorConditionalTypeData {
+        Destructor::ConditionalType(deref!(DestructorConditionalTypeData {
             distributive_tparam_name,
             infer_tparams,
             extends_t,
             true_t,
             false_t,
-        }) => {
+        })) => {
             let dist_name_json = match distributive_tparam_name {
                 None => Json::Null,
                 Some(name) => Json::String(name.string_of_subst_name().to_string()),
@@ -1507,14 +1507,14 @@ fn json_of_destructor<'cx>(
             };
             json!({"kind": "ReactDRO", "dro_type": dro_type_str})
         }
-        Destructor::MappedType(box DestructorMappedTypeData {
+        Destructor::MappedType(deref!(DestructorMappedTypeData {
             homomorphic,
             distributive_tparam_name,
             property_type,
             name_type,
             mapped_type_flags,
             strictness_kind: _,
-        }) => {
+        })) => {
             let homomorphic_json = match homomorphic {
                 MappedTypeHomomorphicFlag::Homomorphic => json_with_type("Homomorphic", vec![]),
                 MappedTypeHomomorphicFlag::Unspecialized => json_with_type("Unspecialized", vec![]),

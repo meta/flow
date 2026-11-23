@@ -168,7 +168,7 @@ pub fn polymorphic_class_kind<'cx>(cx: &mut Context<'cx>, t: &Type) -> Polymorph
 
     match resolve(cx, t).deref() {
         TypeInner::DefT(_, def_t) => match def_t.deref() {
-            DefTInner::PolyT(box PolyTData { t_out, .. }) => match t_out.deref() {
+            DefTInner::PolyT(deref!(PolyTData { t_out, .. })) => match t_out.deref() {
                 TypeInner::DefT(_, inner_def_t) => match inner_def_t.deref() {
                     DefTInner::ClassT(inst)
                         if matches!(inst.deref(), TypeInner::ThisInstanceT(_)) =>
@@ -225,18 +225,18 @@ pub fn is_class_abstract(
             TypeInner::DefT(_, def_t) if let DefTInner::InstanceT(inst_t) = def_t.deref() => {
                 inst_t.inst.inst_abstract
             }
-            TypeInner::ThisInstanceT(box ThisInstanceTData { instance, .. }) => {
+            TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance, .. })) => {
                 instance.inst.inst_abstract
             }
             TypeInner::DefT(_, def_t) if let DefTInner::ClassT(inner) = def_t.deref() => {
                 is_class_abstract(cx, concretize, inner)?
             }
             TypeInner::DefT(_, def_t)
-                if let DefTInner::PolyT(box PolyTData { t_out, .. }) = def_t.deref() =>
+                if let DefTInner::PolyT(deref!(PolyTData { t_out, .. })) = def_t.deref() =>
             {
                 is_class_abstract(cx, concretize, t_out)?
             }
-            TypeInner::GenericT(box GenericTData { bound, .. }) => {
+            TypeInner::GenericT(deref!(GenericTData { bound, .. })) => {
                 is_class_abstract(cx, concretize, bound)?
             }
             TypeInner::IntersectionT(_, rep) => {
@@ -313,7 +313,7 @@ pub fn collect_construct_ts<'cx>(
                         _ => acc,
                     }
                 }
-                TypeInner::ThisInstanceT(box ThisInstanceTData { instance, .. }) => {
+                TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance, .. })) => {
                     if let Some(id) = instance.inst.inst_construct_t {
                         acc.push(read_construct_t(cx, id));
                     }
@@ -324,7 +324,7 @@ pub fn collect_construct_ts<'cx>(
                         _ => acc,
                     }
                 }
-                TypeInner::GenericT(box GenericTData { bound, .. }) => {
+                TypeInner::GenericT(deref!(GenericTData { bound, .. })) => {
                     go(concretize, cx, acc, bound)?
                 }
                 TypeInner::IntersectionT(_, rep) => {
@@ -374,10 +374,10 @@ pub fn collect_prototype_t<'cx>(
                 TypeInner::DefT(_, def_t) if let DefTInner::InstanceT(inst_t) = def_t.deref() => {
                     (&inst_t.inst, &inst_t.super_)
                 }
-                TypeInner::ThisInstanceT(box ThisInstanceTData { instance, .. }) => {
+                TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance, .. })) => {
                     (&instance.inst, &instance.super_)
                 }
-                TypeInner::GenericT(box GenericTData { bound, .. }) => {
+                TypeInner::GenericT(deref!(GenericTData { bound, .. })) => {
                     if let Some(prototype) = go(concretize, cx, name, bound)? {
                         return Ok(Some(prototype));
                     }
@@ -730,7 +730,7 @@ pub fn extract_class_ctor_t<'cx>(
                         |cx, t| find_ctor(concretize, cx, t),
                     )?
                 }
-                TypeInner::ThisInstanceT(box ThisInstanceTData { instance, .. }) => lookup_ctor(
+                TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance, .. })) => lookup_ctor(
                     cx,
                     instance.inst.proto_props.dupe(),
                     &instance.super_,
@@ -745,14 +745,14 @@ pub fn extract_class_ctor_t<'cx>(
                 // polytype is a different value from the class's [PolyT], so
                 // memoization on the original id would be wrong.
                 TypeInner::DefT(r, def_t)
-                    if let DefTInner::PolyT(box PolyTData {
+                    if let DefTInner::PolyT(deref!(PolyTData {
                         kind: poly_kind,
                         tparams_loc,
                         tparams,
                         t_out,
                         id: _,
                         strictness_kind,
-                    }) = def_t.deref() =>
+                    })) = def_t.deref() =>
                 {
                     find_ctor(concretize, cx, t_out)?.map(|ctor| {
                         Type::new(TypeInner::DefT(
@@ -768,7 +768,7 @@ pub fn extract_class_ctor_t<'cx>(
                         ))
                     })
                 }
-                TypeInner::GenericT(box GenericTData { bound, .. }) => {
+                TypeInner::GenericT(deref!(GenericTData { bound, .. })) => {
                     find_ctor(concretize, cx, bound)?
                 }
                 _ => None,
@@ -1128,7 +1128,7 @@ pub fn needs_resolution(t: &Type) -> bool {
             matches!(
                 nominal_type.underlying_t,
                 flow_typing_type::type_::nominal::UnderlyingT::CustomError(
-                    box flow_typing_type::type_::nominal::CustomErrorData { .. },
+                    deref!(flow_typing_type::type_::nominal::CustomErrorData { .. }),
                 )
             )
         }
@@ -1642,23 +1642,23 @@ pub fn error_message_kind_of_upper<CX: ContextFamily>(
             PropRef::Computed(t) => UpperKind::IncompatibleSetPropT(loc_of_t(t).dupe(), None),
         },
         UseTInner::SetPrivatePropT(..) => UpperKind::IncompatibleSetPrivatePropT,
-        UseTInner::MethodT(box MethodTData { propref, .. }) => match propref.as_ref() {
+        UseTInner::MethodT(deref!(MethodTData { propref, .. })) => match propref.as_ref() {
             PropRef::Named { reason, .. } | PropRef::Constructor(reason) => {
                 UpperKind::IncompatibleMethodT(reason.loc().dupe(), name_of_propref(propref))
             }
             PropRef::Computed(t) => UpperKind::IncompatibleMethodT(loc_of_t(t).dupe(), None),
         },
         UseTInner::CallT(..) => UpperKind::IncompatibleCallT,
-        UseTInner::GetElemT(box GetElemTData { key_t, .. }) => {
+        UseTInner::GetElemT(deref!(GetElemTData { key_t, .. })) => {
             UpperKind::IncompatibleGetElemT(loc_of_t(key_t).dupe())
         }
-        UseTInner::SetElemT(box SetElemTData { key_t: t, .. }) => {
+        UseTInner::SetElemT(deref!(SetElemTData { key_t: t, .. })) => {
             UpperKind::IncompatibleSetElemT(loc_of_t(t).dupe())
         }
-        UseTInner::CallElemT(box CallElemTData { key_t: t, .. }) => {
+        UseTInner::CallElemT(deref!(CallElemTData { key_t: t, .. })) => {
             UpperKind::IncompatibleCallElemT(loc_of_t(t).dupe())
         }
-        UseTInner::ElemT(box ElemTData { obj, .. }) => {
+        UseTInner::ElemT(deref!(ElemTData { obj, .. })) => {
             if matches!(obj.deref(), TypeInner::DefT(_, def_t) if matches!(def_t.deref(), DefTInner::ArrT(_)))
             {
                 UpperKind::IncompatibleElemTOfArrT
@@ -1670,7 +1670,7 @@ pub fn error_message_kind_of_upper<CX: ContextFamily>(
         UseTInner::ArrRestT(..) => UpperKind::IncompatibleArrRestT,
         UseTInner::SuperT(..) => UpperKind::IncompatibleSuperT,
         UseTInner::MixinT(..) => UpperKind::IncompatibleMixinT,
-        UseTInner::SpecializeT(box SpecializeTData { use_op, .. }) => {
+        UseTInner::SpecializeT(deref!(SpecializeTData { use_op, .. })) => {
             if matches!(
                 use_op,
                 flow_typing_type::type_::VirtualUseOp::Op(inner)
@@ -1684,11 +1684,11 @@ pub fn error_message_kind_of_upper<CX: ContextFamily>(
         UseTInner::ConcretizeTypeAppsT(..) => UpperKind::IncompatibleSpecializeT,
         UseTInner::ThisSpecializeT(..) => UpperKind::IncompatibleThisSpecializeT,
         UseTInner::GetKeysT { .. } => UpperKind::IncompatibleGetKeysT,
-        UseTInner::HasOwnPropT(box HasOwnPropTData {
+        UseTInner::HasOwnPropT(deref!(HasOwnPropTData {
             reason: r,
             type_: t,
             ..
-        }) => {
+        })) => {
             let name = match t.deref() {
                 TypeInner::DefT(_, def_t) => {
                     if let DefTInner::SingletonStrT { value, .. } = def_t.deref() {
@@ -1697,7 +1697,7 @@ pub fn error_message_kind_of_upper<CX: ContextFamily>(
                         None
                     }
                 }
-                TypeInner::GenericT(box GenericTData { bound, .. }) => match bound.deref() {
+                TypeInner::GenericT(deref!(GenericTData { bound, .. })) => match bound.deref() {
                     TypeInner::DefT(_, def_t) => {
                         if let DefTInner::SingletonStrT { value, .. } = def_t.deref() {
                             Some(Name::new(value.dupe()))
@@ -1713,7 +1713,7 @@ pub fn error_message_kind_of_upper<CX: ContextFamily>(
         }
         UseTInner::GetValuesT(..) => UpperKind::IncompatibleGetValuesT,
         UseTInner::GetDictValuesT(..) => UpperKind::IncompatibleGetValuesT,
-        UseTInner::MapTypeT(box MapTypeTData { type_map: kind, .. }) => {
+        UseTInner::MapTypeT(deref!(MapTypeTData { type_map: kind, .. })) => {
             if matches!(kind, flow_typing_type::type_::TypeMap::ObjectKeyMirror) {
                 UpperKind::IncompatibleMapTypeTObject
             } else {
@@ -1754,7 +1754,7 @@ pub fn error_message_loc_of_upper<CX: ContextFamily>(u: &UseT<CX>) -> ALoc {
         UseTInner::SpecializeT(data) => data.reason2.loc().dupe(),
         UseTInner::ThisSpecializeT(reason, _, _) => reason.loc().dupe(),
         UseTInner::ValueToTypeReferenceT(data) => data.reason.loc().dupe(),
-        UseTInner::ConcretizeTypeAppsT(_, box (_, _, _, reason), _, _) => reason.loc().dupe(),
+        UseTInner::ConcretizeTypeAppsT(_, deref!((_, _, _, reason)), _, _) => reason.loc().dupe(),
         UseTInner::LookupT(data) => data.reason.loc().dupe(),
         UseTInner::ObjRestT(reason, ..) => reason.loc().dupe(),
         UseTInner::ObjTestProtoT(reason, _) => reason.loc().dupe(),
@@ -1815,15 +1815,15 @@ pub fn primary_reason_of_use_op(use_op: &UseOp) -> Option<Reason> {
         | RootUseOp::DeclareComponentRef { op }
         | RootUseOp::GetExport(op)
         | RootUseOp::GetProperty(op)
-        | RootUseOp::InitField(box InitFieldData { op, .. })
+        | RootUseOp::InitField(deref!(InitFieldData { op, .. }))
         | RootUseOp::ReactGetIntrinsic { literal: op }
         | RootUseOp::TypeApplication {
             type_:
                 TypeApplicationTarget::Reason(op)
-                | TypeApplicationTarget::Typeof(box TypeofApplicationData { reason: op, .. }),
+                | TypeApplicationTarget::Typeof(deref!(TypeofApplicationData { reason: op, .. })),
         }
         | RootUseOp::RenderTypeInstantiation { render_type: op } => Some(op),
-        RootUseOp::JSXCreateElement(box JSXCreateElementData { op, .. }) => Some(op),
+        RootUseOp::JSXCreateElement(deref!(JSXCreateElementData { op, .. })) => Some(op),
         RootUseOp::AssignVar { var, init } => match var.as_deref() {
             Some(AssignVarTarget::Variable(reason) | AssignVarTarget::Pattern { reason, .. }) => {
                 Some(reason)
@@ -1835,30 +1835,30 @@ pub fn primary_reason_of_use_op(use_op: &UseOp) -> Option<Reason> {
                     return Some(mk_reason(None, expression.loc.dupe()));
                 }
                 AssignVarInit::Reason(reason) => Some(reason),
-                AssignVarInit::Default(box AssignVarDefaultData {
+                AssignVarInit::Default(deref!(AssignVarDefaultData {
                     default: TypeOrTypeDescT::Type(t),
                     ..
-                }) => Some(reason_of_t(t)),
-                AssignVarInit::Default(box AssignVarDefaultData {
+                })) => Some(reason_of_t(t)),
+                AssignVarInit::Default(deref!(AssignVarDefaultData {
                     default: TypeOrTypeDescT::TypeDesc(_),
                     ..
-                }) => None,
+                })) => None,
             },
         },
         RootUseOp::Cast {
-            upper: box upper, ..
+            upper: deref!(upper), ..
         }
-        | RootUseOp::ComponentRestParamCompatibility(box ComponentRestParamCompatibilityData {
+        | RootUseOp::ComponentRestParamCompatibility(deref!(ComponentRestParamCompatibilityData {
             rest_param: upper,
             ..
-        })
-        | RootUseOp::ClassExtendsCheck(box ClassExtendsCheckData { extends: upper, .. })
-        | RootUseOp::ClassImplementsCheck(box ClassImplementsCheckData {
+        }))
+        | RootUseOp::ClassExtendsCheck(deref!(ClassExtendsCheckData { extends: upper, .. }))
+        | RootUseOp::ClassImplementsCheck(deref!(ClassImplementsCheckData {
             implements: upper, ..
-        })
-        | RootUseOp::EvalMappedType(box EvalMappedTypeData {
+        }))
+        | RootUseOp::EvalMappedType(deref!(EvalMappedTypeData {
             mapped_type: upper, ..
-        }) => match upper {
+        })) => match upper {
             TypeOrTypeDescT::Type(t) => Some(reason_of_t(t)),
             TypeOrTypeDescT::TypeDesc(_) => None,
         },
@@ -1867,7 +1867,7 @@ pub fn primary_reason_of_use_op(use_op: &UseOp) -> Option<Reason> {
         RootUseOp::ClassMethodDefinition(data) => Some(&data.name),
         RootUseOp::Coercion { target, .. } => Some(target),
         RootUseOp::ConformToCommonInterface(_) => None,
-        RootUseOp::MergedDeclaration(box MergedDeclarationData { current_decl, .. }) => {
+        RootUseOp::MergedDeclaration(deref!(MergedDeclarationData { current_decl, .. })) => {
             Some(current_decl)
         }
         RootUseOp::DeleteProperty { prop, .. } => Some(prop),
@@ -1905,13 +1905,13 @@ pub fn use_op_of_lookup_action(action: &flow_typing_type::type_::LookupAction) -
     use flow_typing_type::type_::ReadPropData;
     use flow_typing_type::type_::WritePropData;
     match action {
-        LookupAction::ReadProp(box ReadPropData { use_op, .. })
-        | LookupAction::WriteProp(box WritePropData { use_op, .. })
-        | LookupAction::LookupPropsForSubtyping(box LookupPropsForSubtypingData {
+        LookupAction::ReadProp(deref!(ReadPropData { use_op, .. }))
+        | LookupAction::WriteProp(deref!(WritePropData { use_op, .. }))
+        | LookupAction::LookupPropsForSubtyping(deref!(LookupPropsForSubtypingData {
             use_op, ..
-        })
-        | LookupAction::SuperProp(box (use_op, _, _, _))
-        | LookupAction::MatchProp(box LookupActionMatchPropData { use_op, .. }) => use_op.dupe(),
+        }))
+        | LookupAction::SuperProp(deref!((use_op, _, _, _)))
+        | LookupAction::MatchProp(deref!(LookupActionMatchPropData { use_op, .. })) => use_op.dupe(),
         LookupAction::LookupPropForTvarPopulation { .. } => unknown_use(),
     }
 }
@@ -2157,7 +2157,7 @@ pub fn type_name_for_error(reason: &Reason) -> Option<FlowSmolStr> {
         Some(
             VirtualReasonDesc::RType(name)
             | VirtualReasonDesc::ROpaqueType(name)
-            | VirtualReasonDesc::RTypeAlias(box (name, _, _)),
+            | VirtualReasonDesc::RTypeAlias(deref!((name, _, _))),
         ) => Some(name.dupe()),
         _ => None,
     }
@@ -2458,12 +2458,12 @@ pub fn visible_underlying_t<'a>(
     use flow_typing_type::type_::nominal;
     match (&nominal_type.nominal_id, &nominal_type.underlying_t) {
         (
-            nominal::Id::UserDefinedOpaqueTypeId(box nominal::UserDefinedOpaqueTypeIdData(id, _)),
+            nominal::Id::UserDefinedOpaqueTypeId(deref!(nominal::UserDefinedOpaqueTypeIdData(id, _))),
             nominal::UnderlyingT::OpaqueWithLocal { t },
         ) if id.0.source() == Some(cx.file()) => Some(t),
         (
             nominal::Id::UserDefinedOpaqueTypeId(_),
-            nominal::UnderlyingT::CustomError(box nominal::CustomErrorData { t, .. }),
+            nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData { t, .. })),
         ) => Some(t),
         _ => None,
     }
@@ -2481,13 +2481,13 @@ pub fn as_bounded<'a>(
     use flow_typing_type::type_::GenericTData;
     use flow_typing_type::type_::nominal;
     match t.deref() {
-        TypeInner::GenericT(box GenericTData {
+        TypeInner::GenericT(deref!(GenericTData {
             reason,
             name,
             bound,
             id,
             no_infer,
-        }) => Some((
+        })) => Some((
             reason,
             bound,
             BoundedId::Generic {
@@ -3343,7 +3343,7 @@ pub fn is_builtin_class_id<'cx>(
                     let forced = cx.force_fully_resolved_tvar(s);
                     if let TypeInner::DefT(_, def_t) = forced.deref() {
                         match def_t.deref() {
-                            DefTInner::PolyT(box PolyTData { t_out, .. }) => {
+                            DefTInner::PolyT(deref!(PolyTData { t_out, .. })) => {
                                 if let TypeInner::DefT(_, inner_def_t) = t_out.deref() {
                                     if let DefTInner::ClassT(class_inner) = inner_def_t.deref() {
                                         let ref_class_id = match class_inner.deref() {
@@ -3356,10 +3356,10 @@ pub fn is_builtin_class_id<'cx>(
                                                     None
                                                 }
                                             }
-                                            TypeInner::ThisInstanceT(box ThisInstanceTData {
+                                            TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                                                 instance,
                                                 ..
-                                            }) => Some(instance.inst.class_id.dupe()),
+                                            })) => Some(instance.inst.class_id.dupe()),
                                             _ => None,
                                         };
                                         if let Some(ref_class_id) = ref_class_id {
@@ -3377,10 +3377,10 @@ pub fn is_builtin_class_id<'cx>(
                                             None
                                         }
                                     }
-                                    TypeInner::ThisInstanceT(box ThisInstanceTData {
+                                    TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                                         instance,
                                         ..
-                                    }) => Some(instance.inst.class_id.dupe()),
+                                    })) => Some(instance.inst.class_id.dupe()),
                                     _ => None,
                                 };
                                 if let Some(ref_class_id) = ref_class_id {
@@ -3413,7 +3413,7 @@ pub fn builtin_react_element_nominal_id<'cx>(
                 if let Constraints::FullyResolved(s) = &constraints {
                     let forced = cx.force_fully_resolved_tvar(s);
                     if let TypeInner::DefT(_, def_t) = forced.deref() {
-                        if let DefTInner::PolyT(box PolyTData { t_out, .. }) = def_t.deref() {
+                        if let DefTInner::PolyT(deref!(PolyTData { t_out, .. })) = def_t.deref() {
                             if let TypeInner::DefT(_, inner_def_t) = t_out.deref() {
                                 if let DefTInner::TypeT(TypeTKind::OpaqueKind, inner_type) =
                                     inner_def_t.deref()
@@ -3450,7 +3450,7 @@ pub fn builtin_react_renders_exactly_nominal_id<'cx>(
                 if let Constraints::FullyResolved(s) = &constraints {
                     let forced = cx.force_fully_resolved_tvar(s);
                     if let TypeInner::DefT(_, def_t) = forced.deref() {
-                        if let DefTInner::PolyT(box PolyTData { t_out, .. }) = def_t.deref() {
+                        if let DefTInner::PolyT(deref!(PolyTData { t_out, .. })) = def_t.deref() {
                             if let TypeInner::DefT(_, inner_def_t) = t_out.deref() {
                                 if let DefTInner::TypeT(TypeTKind::OpaqueKind, inner_type) =
                                     inner_def_t.deref()
@@ -4404,7 +4404,7 @@ pub mod value_to_type_reference_transform {
 
         match t.deref() {
             TypeInner::DefT(reason, def_t) => match def_t.deref() {
-                DefTInner::PolyT(box PolyTData { tparams, t_out, .. })
+                DefTInner::PolyT(deref!(PolyTData { tparams, t_out, .. }))
                     if kind == TypeTKind::RenderTypeKind
                         && matches!(
                             t_out.deref(),
@@ -4442,14 +4442,14 @@ pub mod value_to_type_reference_transform {
                     ))
                 }
 
-                DefTInner::PolyT(box PolyTData {
+                DefTInner::PolyT(deref!(PolyTData {
                     kind: poly_kind,
                     tparams_loc,
                     tparams: ids,
                     t_out,
                     id,
                     strictness_kind,
-                }) if kind == TypeTKind::RenderTypeKind
+                })) if kind == TypeTKind::RenderTypeKind
                     && let TypeInner::DefT(_, inner) = t_out.deref()
                     && let DefTInner::TypeT(TypeTKind::ImportTypeofKind, inner_t) =
                         inner.deref()
@@ -4478,14 +4478,14 @@ pub mod value_to_type_reference_transform {
                     )
                 }
 
-                DefTInner::PolyT(box PolyTData {
+                DefTInner::PolyT(deref!(PolyTData {
                     kind: poly_kind,
                     tparams_loc,
                     tparams: ids,
                     t_out,
                     id,
                     strictness_kind,
-                }) if let TypeInner::DefT(_, inner) = t_out.deref()
+                })) if let TypeInner::DefT(_, inner) = t_out.deref()
                     && let DefTInner::TypeT(TypeTKind::ImportTypeofKind, inner_t) =
                         inner.deref()
                     && let TypeInner::AnnotT(_, t_out_mono, _) = inner_t.deref() =>
@@ -4506,11 +4506,11 @@ pub mod value_to_type_reference_transform {
                     Ok(type_util::typeof_annotation(reason_op.dupe(), poly, None))
                 }
 
-                DefTInner::PolyT(box PolyTData {
+                DefTInner::PolyT(deref!(PolyTData {
                     tparams_loc,
                     tparams: ids,
                     ..
-                }) => {
+                })) => {
                     let tparams_loc = tparams_loc.dupe();
 
                     let min_arity = ids.iter().filter(|tp| tp.default.is_none()).count() as i32;
@@ -4533,12 +4533,12 @@ pub mod value_to_type_reference_transform {
                 DefTInner::ClassT(it) => {
                     // a class value annotation becomes the instance type
                     match it.deref() {
-                        TypeInner::ThisInstanceT(box ThisInstanceTData {
+                        TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                             reason: inst_r,
                             instance: i,
                             is_this,
                             subst_name: this_name,
-                        }) => Ok(fix_this_instance(
+                        })) => Ok(fix_this_instance(
                             cx,
                             reason_op.dupe(),
                             inst_r.dupe(),
@@ -4635,10 +4635,10 @@ pub mod value_to_type_reference_transform {
             // Short-circut as we already error on the unresolved name.
             TypeInner::AnyT(_, AnySource::AnyError(_)) => Ok(t),
             TypeInner::AnyT(r, _)
-            | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+            | TypeInner::ImplicitInstantiationTvar(deref!(ImplicitInstantiationTvarData {
                 reason: r,
                 ..
-            }) => {
+            })) => {
                 add_annot_output(
                     cx,
                     env,
@@ -4788,12 +4788,12 @@ pub mod import_type_t_kit {
             TypeInner::DefT(_, def_t) => match def_t.deref() {
                 // fix this-abstracted class when used as a type
                 DefTInner::ClassT(inst) => match inst.deref() {
-                    TypeInner::ThisInstanceT(box ThisInstanceTData {
+                    TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                         reason: r,
                         instance: i,
                         is_this,
                         subst_name: this_name,
-                    }) => {
+                    })) => {
                         let fixed = fix_this_instance(
                             cx,
                             reason.dupe(),
@@ -4820,19 +4820,19 @@ pub mod import_type_t_kit {
 
                 // delay fixing a polymorphic this-abstracted class until it is specialized,
                 // by transforming the instance type to a type application
-                DefTInner::PolyT(box PolyTData {
+                DefTInner::PolyT(deref!(PolyTData {
                     kind: poly_kind,
                     tparams_loc,
                     tparams: typeparams,
                     t_out,
                     id,
                     strictness_kind,
-                }) => match t_out.deref() {
+                })) => match t_out.deref() {
                     TypeInner::DefT(_, inner_def) => match inner_def.deref() {
                         DefTInner::ClassT(inst) => match inst.deref() {
-                            TypeInner::ThisInstanceT(box ThisInstanceTData {
+                            TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                                 instance: i, ..
-                            }) => {
+                            })) => {
                                 let (_, targs) = mk_tparams(cx, typeparams);
                                 let tapp = type_util::implicit_typeapp(t.dupe(), targs, None);
                                 let new_id = flow_typing_type::type_::poly::Id::generate_id();
@@ -4963,14 +4963,14 @@ pub mod import_typeof_t_kit {
     ) -> Type {
         match l.deref() {
             TypeInner::DefT(_, def_t) => match def_t.deref() {
-                DefTInner::PolyT(box PolyTData {
+                DefTInner::PolyT(deref!(PolyTData {
                     tparams_loc,
                     kind: poly_kind,
                     tparams: typeparams,
                     t_out,
                     strictness_kind,
                     ..
-                }) => match t_out.deref() {
+                })) => match t_out.deref() {
                     TypeInner::DefT(_, inner_def) => match inner_def.deref() {
                         DefTInner::ClassT(inst)
                             if matches!(inst.deref(), TypeInner::ThisInstanceT(..)) =>
@@ -6106,7 +6106,7 @@ pub mod assert_export_is_type_t_kit {
                 DefTInner::ClassT(_) | DefTInner::EnumObjectT { .. } | DefTInner::TypeT(_, _) => {
                     true
                 }
-                DefTInner::PolyT(box PolyTData { t_out, .. }) => is_type(t_out),
+                DefTInner::PolyT(deref!(PolyTData { t_out, .. })) => is_type(t_out),
                 _ => false,
             },
             TypeInner::NamespaceT { .. } => true,
@@ -8230,7 +8230,7 @@ pub mod get_prop_t_kit {
                                 )?;
                         F::error_type(cx, env, *trace, reason_op)
                     }
-                    TypeInner::GenericT(box GenericTData { bound, .. }) if matches!(bound.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::SingletonStrT { .. })) =>
+                    TypeInner::GenericT(deref!(GenericTData { bound, .. })) if matches!(bound.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::SingletonStrT { .. })) =>
                     {
                         let loc = type_util::loc_of_t(elem_t).dupe();
                         add_output_with_env(
@@ -8257,7 +8257,7 @@ pub mod get_prop_t_kit {
                                 )?;
                         F::error_type(cx, env, *trace, reason_op)
                     }
-                    TypeInner::GenericT(box GenericTData { bound, .. }) if matches!(bound.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::SingletonNumT { .. })) =>
+                    TypeInner::GenericT(deref!(GenericTData { bound, .. })) if matches!(bound.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::SingletonNumT { .. })) =>
                     {
                         let reason_prop = reason_of_t(elem_t).dupe();
                         let kind = InvalidObjKey::NumberNonFinite;
@@ -8377,12 +8377,12 @@ pub fn array_elem_check<'cx>(
         bool,
         Option<ReactDro>,
     ) = match arrtype {
-        ArrType::ArrayAT(box ArrayATData {
+        ArrType::ArrayAT(deref!(ArrayATData {
             elem_t,
             tuple_view,
             react_dro,
             ..
-        }) => {
+        })) => {
             let elements = tuple_view.as_ref().map(|tv| tv.elements.dupe());
             let elem_t = union_void_if_instructed(elem_t.dupe());
             (
@@ -8395,7 +8395,7 @@ pub fn array_elem_check<'cx>(
                 react_dro.clone(),
             )
         }
-        ArrType::TupleAT(box TupleATData {
+        ArrType::TupleAT(deref!(TupleATData {
             elem_t,
             elements,
             arity: _,
@@ -8403,7 +8403,7 @@ pub fn array_elem_check<'cx>(
             rest,
             react_dro,
             ..
-        }) => {
+        })) => {
             let elem_t = union_void_if_instructed(elem_t.dupe());
             // An index past the fixed elements accesses the rest element, which may not exist.
             let rest = rest.as_ref().map(|rest| TupleElement {
@@ -8424,9 +8424,9 @@ pub fn array_elem_check<'cx>(
                 react_dro.clone(),
             )
         }
-        ArrType::ROArrayAT(box ROArrayATData {
+        ArrType::ROArrayAT(deref!(ROArrayATData {
             elem_t, react_dro, ..
-        }) => {
+        })) => {
             let elem_t = union_void_if_instructed(elem_t.dupe());
             (elem_t, None, None, true, false, false, react_dro.clone())
         }
@@ -8655,7 +8655,7 @@ pub fn propref_for_elem_t_with_env<'cx>(
             }
             PropRef::Computed(l.dupe())
         }
-        TypeInner::GenericT(box GenericTData { bound, reason, .. }) => {
+        TypeInner::GenericT(deref!(GenericTData { bound, reason, .. })) => {
             if let TypeInner::DefT(_, def) = bound.deref() {
                 if let DefTInner::SingletonStrT { value: name, .. } = def.deref() {
                     update_lit_type_from_annot(cx, env, l);
@@ -8807,7 +8807,7 @@ fn ts_interface_key_sources<E>(
                 DefTInner::ObjT(obj) => Ok(obj_own_key_sources(obj)),
                 _ => Ok(empty_key_sources()),
             },
-            TypeInner::ThisInstanceT(box ThisInstanceTData { instance, .. }) => {
+            TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance, .. })) => {
                 collect_instance(concretize, seen, instance)
             }
             TypeInner::IntersectionT(_, rep) => {
@@ -8916,7 +8916,7 @@ fn ts_class_statics_key_sources<E>(
                         DefTInner::InstanceT(instance) => instance,
                         _ => return Ok(acc),
                     },
-                    TypeInner::ThisInstanceT(box ThisInstanceTData { instance, .. }) => instance,
+                    TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance, .. })) => instance,
                     _ => return Ok(acc),
                 };
                 if !seen.insert(instance.inst.class_id.dupe()) {
@@ -9530,7 +9530,7 @@ pub fn wraps_utility_type<'cx>(cx: &mut Context<'cx>, tin: &Type) -> bool {
                 id: _,
             } if matches!(
                 defer_use_t.2.deref(),
-                Destructor::ConditionalType(box DestructorConditionalTypeData { true_t, .. }) if matches!(true_t.deref(), TypeInner::GenericT(..))
+                Destructor::ConditionalType(deref!(DestructorConditionalTypeData { true_t, .. })) if matches!(true_t.deref(), TypeInner::GenericT(..))
             ) =>
             {
                 true
@@ -9541,7 +9541,7 @@ pub fn wraps_utility_type<'cx>(cx: &mut Context<'cx>, tin: &Type) -> bool {
                 id: _,
             } if matches!(
                 defer_use_t.2.deref(),
-                Destructor::ConditionalType(box DestructorConditionalTypeData { false_t, .. }) if matches!(false_t.deref(), TypeInner::GenericT(..))
+                Destructor::ConditionalType(deref!(DestructorConditionalTypeData { false_t, .. })) if matches!(false_t.deref(), TypeInner::GenericT(..))
             ) =>
             {
                 true
@@ -9564,9 +9564,9 @@ pub fn wraps_utility_type<'cx>(cx: &mut Context<'cx>, tin: &Type) -> bool {
                 id: _,
             } if matches!(
                 defer_use_t.2.deref(),
-                Destructor::MappedType(box flow_typing_type::type_::DestructorMappedTypeData {
+                Destructor::MappedType(deref!(flow_typing_type::type_::DestructorMappedTypeData {
                     ..
-                })
+                }))
             ) =>
             {
                 true
@@ -9581,7 +9581,7 @@ pub fn wraps_utility_type<'cx>(cx: &mut Context<'cx>, tin: &Type) -> bool {
             TypeInner::TemplateLiteralT { .. } => true,
             TypeInner::DefT(_, def_t) => match def_t.deref() {
                 DefTInner::TypeT(_, inner_t) => loop_inner(cx, inner_t, seen_open_id, seen_eval_id),
-                DefTInner::PolyT(box PolyTData { t_out, .. }) => {
+                DefTInner::PolyT(deref!(PolyTData { t_out, .. })) => {
                     loop_inner(cx, t_out, seen_open_id, seen_eval_id)
                 }
                 _ => false,
@@ -9604,14 +9604,14 @@ pub fn wraps_utility_type<'cx>(cx: &mut Context<'cx>, tin: &Type) -> bool {
                     }
                 }
             }
-            TypeInner::TypeAppT(box TypeAppTData {
+            TypeInner::TypeAppT(deref!(TypeAppTData {
                 reason: _,
                 use_op: _,
                 type_,
                 targs: _,
                 from_value: _,
                 use_desc: _,
-            }) => loop_inner(cx, type_, seen_open_id, seen_eval_id),
+            })) => loop_inner(cx, type_, seen_open_id, seen_eval_id),
             _ => false,
         }
     }
@@ -9730,7 +9730,7 @@ where
 
     for el in elements {
         match (&el, &first_spread) {
-            (UnresolvedParam::UnresolvedArg(box UnresolvedArgData(tuple_el, generic)), None) => {
+            (UnresolvedParam::UnresolvedArg(deref!(UnresolvedArgData(tuple_el, generic))), None) => {
                 resolved_rev.push_front((tuple_el.clone(), generic.clone()));
             }
             (UnresolvedParam::UnresolvedSpreadArg(t), None) => {
@@ -10051,12 +10051,12 @@ pub mod render_types {
     {
         match t.deref() {
             TypeInner::DefT(_, def_t) => match def_t.deref() {
-                DefTInner::PolyT(box PolyTData {
+                DefTInner::PolyT(deref!(PolyTData {
                     tparams_loc,
                     tparams,
                     t_out,
                     ..
-                }) => {
+                })) => {
                     let mut subst_map = FlowOrdMap::new();
                     for tparam in tparams.iter() {
                         subst_map.insert(
@@ -10078,11 +10078,11 @@ pub mod render_types {
                     );
                     on_concretized_component_normalization(normalization_cx, resolved_elem, t_out)?;
                 }
-                DefTInner::ReactAbstractComponentT(box ReactAbstractComponentTData {
+                DefTInner::ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
                     component_kind: ComponentKind::Nominal(renders_id, renders_name, _),
                     renders: renders_super,
                     ..
-                }) => {
+                })) => {
                     let reason = mk_reason(
                         VirtualReasonDesc::RType(renders_name.dupe()),
                         normalization_cx.result_reason.loc().dupe(),
@@ -10099,11 +10099,11 @@ pub mod render_types {
                     ));
                     normalization_cx.type_collector.add(new_t);
                 }
-                DefTInner::ReactAbstractComponentT(box ReactAbstractComponentTData {
+                DefTInner::ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
                     component_kind: ComponentKind::Structural,
                     renders: render_type,
                     ..
-                }) => {
+                })) => {
                     for concretized in
                         (normalization_cx.concretize)(normalization_cx.cx, render_type)?
                     {
@@ -10234,7 +10234,7 @@ pub mod render_types {
         G: Fn(&mut Context<'cx>, &Type) -> Result<bool, JobError>,
     {
         match &*t {
-            TypeInner::GenericT(box GenericTData { .. }) => {
+            TypeInner::GenericT(deref!(GenericTData { .. })) => {
                 normalization_cx
                     .type_collector
                     .add(any_t::error(normalization_cx.result_reason.dupe()));
@@ -10503,12 +10503,12 @@ pub mod callee_recorder {
     pub fn add_callee_use<CX: ContextFamily>(env: &FlowJsEnv, kind: Kind, l: Type, u: &UseT<CX>) {
         use flow_typing_type::type_::UseTInner;
         match &**u {
-            UseTInner::CallT(box CallTData { call_action, .. }) => match call_action.as_ref() {
+            UseTInner::CallT(deref!(CallTData { call_action, .. })) => match call_action.as_ref() {
                 flow_typing_type::type_::CallAction::Funcalltype(
-                    box flow_typing_type::type_::FuncallType {
+                    deref!(flow_typing_type::type_::FuncallType {
                         call_specialized_callee,
                         ..
-                    },
+                    }),
                 ) => {
                     add_callee(env, kind, l, call_specialized_callee.as_ref());
                 }

@@ -252,7 +252,7 @@ pub fn mk_instance<'a>(
         )?;
         match concrete.deref() {
             TypeInner::DefT(_, def_t)
-                if let DefTInner::PolyT(box PolyTData { tparams: ids, .. }) = def_t.deref()
+                if let DefTInner::PolyT(deref!(PolyTData { tparams: ids, .. })) = def_t.deref()
                     && !ids.is_empty()
                     && ids.iter().all(|tp| tp.default.is_some()) =>
             {

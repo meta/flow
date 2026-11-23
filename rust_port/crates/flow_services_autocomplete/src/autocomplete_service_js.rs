@@ -234,8 +234,8 @@ fn lsp_completion_of_type(ty_: &Ty<ALoc>) -> LspCompletionItemKind {
 
 fn lsp_completion_of_decl(decl: &Decl<ALoc>) -> LspCompletionItemKind {
     match decl {
-        Decl::VariableDecl(box (_, ty_)) => lsp_completion_of_type(ty_),
-        Decl::TypeAliasDecl(box DeclTypeAliasDeclData { type_, .. }) => match type_ {
+        Decl::VariableDecl(deref!((_, ty_))) => lsp_completion_of_type(ty_),
+        Decl::TypeAliasDecl(deref!(DeclTypeAliasDeclData { type_, .. })) => match type_ {
             Some(type_) => lsp_completion_of_type(type_),
             None => LspCompletionItemKind::ENUM,
         },
@@ -288,7 +288,7 @@ fn detail_of_ty_decl(decl: &Decl<ALoc>) -> (Option<String>, Option<String>) {
         | Decl::NamespaceDecl(..)
         | Decl::ModuleDecl(..)
         | Decl::TypeAliasDecl(..) => None,
-        Decl::VariableDecl(box (_, ty_)) => detail_of_ty(false, ty_).1,
+        Decl::VariableDecl(deref!((_, ty_))) => detail_of_ty(false, ty_).1,
     };
     (Some(type_), detail)
 }
@@ -1416,14 +1416,14 @@ fn exports_of_module_ty(
     let is_ok =
         |export_kind: ModuleExportKind, name: &str| is_kind(export_kind) && filter_name(name);
     let exports = match decl {
-        Decl::ModuleDecl(box DeclModuleDeclData { exports, .. })
-        | Decl::NamespaceDecl(box DeclNamespaceDeclData { exports, .. }) => exports,
+        Decl::ModuleDecl(deref!(DeclModuleDeclData { exports, .. }))
+        | Decl::NamespaceDecl(deref!(DeclNamespaceDeclData { exports, .. })) => exports,
         _ => return Vec::new(),
     };
     let mut items = exports
         .iter()
         .filter_map(|decl| match decl {
-            Decl::TypeAliasDecl(box DeclTypeAliasDeclData { name, .. })
+            Decl::TypeAliasDecl(deref!(DeclTypeAliasDeclData { name, .. }))
                 if is_ok(ModuleExportKind::Type, name.sym_name.as_str()) =>
             {
                 let documentation_and_tags =
@@ -1440,7 +1440,7 @@ fn exports_of_module_ty(
                     decl,
                 ))
             }
-            Decl::InterfaceDecl(box (name, _))
+            Decl::InterfaceDecl(deref!((name, _)))
                 if is_ok(ModuleExportKind::Type, name.sym_name.as_str()) =>
             {
                 let documentation_and_tags =
@@ -1457,7 +1457,7 @@ fn exports_of_module_ty(
                     decl,
                 ))
             }
-            Decl::ClassDecl(box (name, _))
+            Decl::ClassDecl(deref!((name, _)))
                 if is_ok(ModuleExportKind::Either, name.sym_name.as_str()) =>
             {
                 let documentation_and_tags =
@@ -1474,7 +1474,7 @@ fn exports_of_module_ty(
                     decl,
                 ))
             }
-            Decl::RecordDecl(box (name, _))
+            Decl::RecordDecl(deref!((name, _)))
                 if is_ok(ModuleExportKind::Either, name.sym_name.as_str()) =>
             {
                 let documentation_and_tags =
@@ -1491,7 +1491,7 @@ fn exports_of_module_ty(
                     decl,
                 ))
             }
-            Decl::EnumDecl(box DeclEnumDeclData { name, .. })
+            Decl::EnumDecl(deref!(DeclEnumDeclData { name, .. }))
                 if is_ok(ModuleExportKind::Either, name.sym_name.as_str()) =>
             {
                 let documentation_and_tags =
@@ -1509,7 +1509,7 @@ fn exports_of_module_ty(
                 ))
             }
             // A symbol-named export has no identifier spelling to complete.
-            Decl::VariableDecl(box (name, _))
+            Decl::VariableDecl(deref!((name, _)))
                 if let Some(name) = name.as_str_opt()
                     && is_ok(ModuleExportKind::Value, name) =>
             {
@@ -1525,7 +1525,7 @@ fn exports_of_module_ty(
                     decl,
                 ))
             }
-            Decl::NominalComponentDecl(box DeclNominalComponentDeclData { name, .. })
+            Decl::NominalComponentDecl(deref!(DeclNominalComponentDeclData { name, .. }))
                 if is_ok(ModuleExportKind::Value, name.sym_name.as_str()) =>
             {
                 let documentation_and_tags =
@@ -1542,9 +1542,9 @@ fn exports_of_module_ty(
                     decl,
                 ))
             }
-            Decl::NamespaceDecl(box DeclNamespaceDeclData {
+            Decl::NamespaceDecl(deref!(DeclNamespaceDeclData {
                 name: Some(name), ..
-            }) if is_ok(ModuleExportKind::Value, name.sym_name.as_str()) => {
+            })) if is_ok(ModuleExportKind::Value, name.sym_name.as_str()) => {
                 let documentation_and_tags =
                     documentation_and_tags_of_module_member(&name.sym_def_loc);
                 Some(autocomplete_create_result_decl(

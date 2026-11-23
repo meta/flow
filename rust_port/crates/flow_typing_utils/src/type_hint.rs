@@ -346,7 +346,7 @@ fn synthesis_speculation_call<'cx>(
             )?;
             Ok(any_t::error(reason.dupe()))
         }
-        SpeculationHintState::SpeculationHintSet(box SpeculationHintSetData(_, t)) => Ok(t.dupe()),
+        SpeculationHintState::SpeculationHintSet(deref!(SpeculationHintSetData(_, t))) => Ok(t.dupe()),
     }
 }
 
@@ -427,12 +427,12 @@ fn instantiate_contextual_type<'cx>(
 ) -> Result<Type, FlowJsException> {
     let ts = FlowJs::possible_concrete_types_for_match_arg(cx, false, true, reason, t)?;
     if !ts.iter().any(|t| {
-        matches!(t.deref(), TypeInner::GenericT(box GenericTData { name, .. }) if inferred.contains_key(name))
+        matches!(t.deref(), TypeInner::GenericT(deref!(GenericTData { name, .. })) if inferred.contains_key(name))
     }) {
         return Ok(t.dupe());
     }
     let ts = ts.into_iter().map(|t| match t.deref() {
-        TypeInner::GenericT(box GenericTData { name, .. })
+        TypeInner::GenericT(deref!(GenericTData { name, .. }))
             if let Some(inferred) = inferred.get(name) =>
         {
             inferred.dupe()
@@ -580,23 +580,23 @@ fn instantiate_callee<'cx>(
                             &resolved,
                         )
                     }
-                    DefTInner::PolyT(box PolyTData {
+                    DefTInner::PolyT(deref!(PolyTData {
                         kind: _,
                         tparams_loc,
                         tparams,
                         t_out,
                         id: _,
                         strictness_kind: _,
-                    }) => {
+                    })) => {
                         if let Some((class_r, inst_r, i, this, this_name)) =
                             if let TypeInner::DefT(class_r, inner_def) = t_out.deref()
                                 && let DefTInner::ClassT(class_inner) = inner_def.deref()
-                                && let TypeInner::ThisInstanceT(box ThisInstanceTData {
+                                && let TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                                     reason: inst_r,
                                     instance: i,
                                     is_this: this,
                                     subst_name: this_name,
-                                }) = class_inner.deref()
+                                })) = class_inner.deref()
                             {
                                 Some((class_r, inst_r, i, this, this_name))
                             } else {
@@ -898,7 +898,7 @@ fn overload_takes_call<'cx>(
     };
     let (tparams, fun) = match def.deref() {
         DefTInner::FunT(_, fun) => (None, fun),
-        DefTInner::PolyT(box PolyTData { tparams, t_out, .. })
+        DefTInner::PolyT(deref!(PolyTData { tparams, t_out, .. }))
             if let TypeInner::DefT(_, def) = t_out.deref()
                 && let DefTInner::FunT(_, fun) = def.deref() =>
         {
@@ -976,14 +976,14 @@ fn instantiate_component<'cx>(
     let component_resolved = get_t(cx, component.dupe());
     match component_resolved.deref() {
         TypeInner::DefT(_, def) => match def.deref() {
-            DefTInner::PolyT(box PolyTData {
+            DefTInner::PolyT(deref!(PolyTData {
                 kind: _,
                 tparams_loc,
                 tparams,
                 t_out,
                 id: _,
                 strictness_kind: _,
-            }) if *cx.jsx() == JsxMode::JsxReact => {
+            })) if *cx.jsx() == JsxMode::JsxReact => {
                 let reason = &instantiation_hint.jsx_reason;
                 let jsx_targs = &instantiation_hint.jsx_targs;
                 let jsx_props_and_children = &instantiation_hint.jsx_props_and_children;
@@ -1058,7 +1058,7 @@ fn instantiate_component<'cx>(
                     TypeInner::DefT(_, inner_def)
                         if matches!(
                             inner_def.deref(),
-                            DefTInner::PolyT(box PolyTData { t_out, .. })
+                            DefTInner::PolyT(deref!(PolyTData { t_out, .. }))
                                 if matches!(
                                     t_out.deref(),
                                     TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::FunT(..))
@@ -1073,7 +1073,7 @@ fn instantiate_component<'cx>(
             }
             _ => Ok(component_resolved.dupe()),
         },
-        TypeInner::TypeAppT(box TypeAppTData { reason, .. }) => {
+        TypeInner::TypeAppT(deref!(TypeAppTData { reason, .. })) => {
             let concrete = FlowJs::singleton_concrete_type_for_inspection_with_env(
                 cx,
                 env,
@@ -1229,14 +1229,14 @@ fn type_of_hint_decomposition<'cx>(
             }
         };
         if let TypeInner::DefT(_, def) = get_t(cx, t.dupe()).deref()
-            && let DefTInner::PolyT(box PolyTData {
+            && let DefTInner::PolyT(deref!(PolyTData {
                 kind: poly_kind,
                 tparams_loc,
                 tparams,
                 t_out: instance_type,
                 id: _,
                 strictness_kind,
-            }) = def.deref()
+            })) = def.deref()
         {
             let ctor_method = get_constructor_method_type(cx, instance_type)?;
             let tparams_loc = tparams_loc.dupe();
@@ -1247,14 +1247,14 @@ fn type_of_hint_decomposition<'cx>(
                 &ctor_method,
                 &|cx: &mut Context<'cx>, t_inner: &Type| -> Result<Type, SandboxError> {
                     if let TypeInner::DefT(_, inner_def) = t_inner.deref()
-                        && let DefTInner::PolyT(box PolyTData {
+                        && let DefTInner::PolyT(deref!(PolyTData {
                             kind: poly_kind2,
                             tparams_loc: tparams_loc2,
                             tparams: tparams2,
                             t_out,
                             id: _,
                             strictness_kind: strictness_kind2,
-                        }) = inner_def.deref()
+                        })) = inner_def.deref()
                     {
                         let t_out = mod_ctor_return(cx, &instance_type, t_out);
                         let mut combined_tparams: Vec<_> = tparams.to_vec();
@@ -1495,14 +1495,14 @@ fn type_of_hint_decomposition<'cx>(
                             };
                         let this_t = match get_t(cx, t.dupe()).deref() {
                             TypeInner::DefT(poly_reason, def) => match def.deref() {
-                                DefTInner::PolyT(box PolyTData {
+                                DefTInner::PolyT(deref!(PolyTData {
                                     kind: poly_kind,
                                     tparams_loc,
                                     tparams,
                                     t_out,
                                     id: _,
                                     strictness_kind,
-                                }) => Type::new(TypeInner::DefT(
+                                })) => Type::new(TypeInner::DefT(
                                     poly_reason.dupe(),
                                     DefT::new(DefTInner::PolyT(Box::new(PolyTData {
                                         kind: *poly_kind,

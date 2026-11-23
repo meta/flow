@@ -49,14 +49,14 @@ pub fn swap_reason(t2: &Type, t1: &Type) -> Type {
 
             let underlying_t = match (repr1, repr2) {
                 (
-                    nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+                    nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData {
                         t: t1_inner,
                         ..
-                    }),
-                    nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+                    })),
+                    nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData {
                         t: t2_inner,
                         custom_error_loc,
-                    }),
+                    })),
                 ) => nominal::UnderlyingT::CustomError(Box::new(nominal::CustomErrorData {
                     custom_error_loc: custom_error_loc.dupe(),
                     t: swap_reason(t2_inner, t1_inner),
@@ -149,14 +149,14 @@ fn eq_swap_reason(t1: &Type, t2: &Type) -> bool {
             }
             match (&nt1.underlying_t, &nt2.underlying_t) {
                 (
-                    nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+                    nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData {
                         t: t1_inner,
                         ..
-                    }),
-                    nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+                    })),
+                    nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData {
                         t: t2_inner,
                         ..
-                    }),
+                    })),
                 ) => eq_swap_reason(t1_inner, t2_inner),
                 (
                     nominal::UnderlyingT::OpaqueWithLocal { t: t1_inner },
@@ -236,18 +236,18 @@ pub fn eq_with_env<'cx>(cx: &mut Context<'cx>, env: &FlowJsEnv, t1: &Type, t2: &
                 }
             }
             (
-                TypeInner::TypeAppT(box TypeAppTData {
+                TypeInner::TypeAppT(deref!(TypeAppTData {
                     type_: inner_t1,
                     targs: targs1,
                     from_value: fv1,
                     ..
-                }),
-                TypeInner::TypeAppT(box TypeAppTData {
+                })),
+                TypeInner::TypeAppT(deref!(TypeAppTData {
                     type_: inner_t2,
                     targs: targs2,
                     from_value: fv2,
                     ..
-                }),
+                })),
             ) => {
                 eq_with_env(cx, env, inner_t1, inner_t2)
                     && fv1 == fv2

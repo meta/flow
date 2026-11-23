@@ -271,7 +271,7 @@ pub enum Rejected {
 fn checked_return_type(use_op: &VirtualUseOp<ALoc>) -> Option<ALoc> {
     match use_op {
         VirtualUseOp::Frame(frame, _) => match frame.deref() {
-            VirtualFrameUseOp::FunReturn(box FunReturnData { upper, .. }) => {
+            VirtualFrameUseOp::FunReturn(deref!(FunReturnData { upper, .. })) => {
                 Some(upper.def_loc().dupe())
             }
             _ => None,
@@ -283,16 +283,16 @@ fn checked_return_type(use_op: &VirtualUseOp<ALoc>) -> Option<ALoc> {
 /// The `void`s an error rejects.
 pub fn rejected_ts_voids(msg: &ErrorMessage<ALoc>, acc: &mut Vec<Rejected>) {
     match msg {
-        ErrorMessage::EIncompatibleType(box EIncompatibleTypeData {
+        ErrorMessage::EIncompatibleType(deref!(EIncompatibleTypeData {
             lower_desc,
             lower_def_loc,
             ..
-        }) => {
+        })) => {
             if is_ts_void(lower_desc) {
                 acc.push(Rejected::Void(lower_def_loc.dupe()));
             }
         }
-        ErrorMessage::EIncompatibleTypesWithUseOp(box EIncompatibleTypesWithUseOpData {
+        ErrorMessage::EIncompatibleTypesWithUseOp(deref!(EIncompatibleTypesWithUseOpData {
             use_op,
             lower_loc,
             lower_desc,
@@ -300,7 +300,7 @@ pub fn rejected_ts_voids(msg: &ErrorMessage<ALoc>, acc: &mut Vec<Rejected>) {
             upper_def_loc,
             branches,
             ..
-        }) => {
+        })) => {
             if is_ts_void(lower_desc) {
                 acc.push(match (checked_return_type(use_op), root_of_use_op(use_op)) {
                     (Some(return_type), _) => Rejected::Return {
@@ -309,9 +309,9 @@ pub fn rejected_ts_voids(msg: &ErrorMessage<ALoc>, acc: &mut Vec<Rejected>) {
                     },
                     (
                         None,
-                        VirtualRootUseOp::FunImplicitReturn(box FunImplicitReturnData {
+                        VirtualRootUseOp::FunImplicitReturn(deref!(FunImplicitReturnData {
                             upper, ..
-                        }),
+                        })),
                     ) => Rejected::MissingReturn(upper.loc().dupe()),
                     (None, _) => Rejected::Flow {
                         void: lower_def_loc.dupe(),
@@ -324,43 +324,43 @@ pub fn rejected_ts_voids(msg: &ErrorMessage<ALoc>, acc: &mut Vec<Rejected>) {
                 rejected_ts_voids(branch, acc);
             }
         }
-        ErrorMessage::EExpectedStringLit(box EExpectedStringLitData { lower: reference, .. })
-        | ErrorMessage::EExpectedNumberLit(box EExpectedNumberLitData {
+        ErrorMessage::EExpectedStringLit(deref!(EExpectedStringLitData { lower: reference, .. }))
+        | ErrorMessage::EExpectedNumberLit(deref!(EExpectedNumberLitData {
             lower: reference, ..
-        })
-        | ErrorMessage::EExpectedBooleanLit(box EExpectedBooleanLitData {
+        }))
+        | ErrorMessage::EExpectedBooleanLit(deref!(EExpectedBooleanLitData {
             lower: reference, ..
-        })
-        | ErrorMessage::EExpectedBigIntLit(box EExpectedBigIntLitData {
+        }))
+        | ErrorMessage::EExpectedBigIntLit(deref!(EExpectedBigIntLitData {
             lower: reference, ..
-        })
-        | ErrorMessage::EPropNotFoundInLookup(box EPropNotFoundInLookupData {
+        }))
+        | ErrorMessage::EPropNotFoundInLookup(deref!(EPropNotFoundInLookupData {
             object: reference,
             ..
-        })
-        | ErrorMessage::EObjectComputedPropertyAccess(box EObjectComputedPropertyAccessData {
+        }))
+        | ErrorMessage::EObjectComputedPropertyAccess(deref!(EObjectComputedPropertyAccessData {
             object: reference,
             ..
-        }) => {
+        })) => {
             if is_ts_void(&reference.type_desc) {
                 acc.push(Rejected::Void(reference.reference_loc.dupe()));
             }
         }
-        ErrorMessage::EIncompatibleSpeculation(box EIncompatibleSpeculationData {
+        ErrorMessage::EIncompatibleSpeculation(deref!(EIncompatibleSpeculationData {
             branches,
             ..
-        }) => {
+        })) => {
             for branch in branches {
                 rejected_ts_voids(branch, acc);
             }
         }
         // The branches of a union are checked within the union's use: a returned `void` they all
         // reject is rejected by the return type, which is the union.
-        ErrorMessage::EUnionSpeculationFailed(box EUnionSpeculationFailedData {
+        ErrorMessage::EUnionSpeculationFailed(deref!(EUnionSpeculationFailedData {
             use_op,
             branches,
             ..
-        }) => {
+        })) => {
             let mut branch_acc = vec![];
             for branch in branches {
                 rejected_ts_voids(branch, &mut branch_acc);
@@ -376,14 +376,14 @@ pub fn rejected_ts_voids(msg: &ErrorMessage<ALoc>, acc: &mut Vec<Rejected>) {
                 (rejected, _) => rejected,
             }));
         }
-        ErrorMessage::EConstantCondition(box EConstantConditionData {
+        ErrorMessage::EConstantCondition(deref!(EConstantConditionData {
             constant_condition_kind: ConstantConditionKind::TsVoid,
             warning:
                 ConstantConditionWarning::Likely {
                     suggested_loc: Some(loc),
                 },
             ..
-        }) => acc.push(Rejected::Void(loc.dupe())),
+        })) => acc.push(Rejected::Void(loc.dupe())),
         _ => {}
     }
 }

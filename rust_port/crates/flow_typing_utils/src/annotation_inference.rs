@@ -891,7 +891,7 @@ pub fn elab_t<'cx>(
                     let t = make_readonly(cx, use_op, reason, inner_t.dupe());
                     elab_t(cx, None, t, op)
                 }
-                Destructor::ReactDRO(box react_dro) => {
+                Destructor::ReactDRO(deref!(react_dro)) => {
                     let t = elab_t(
                         cx,
                         None,
@@ -918,11 +918,11 @@ pub fn elab_t<'cx>(
                     let t = make_required(cx, use_op, reason, inner_t.dupe());
                     elab_t(cx, None, t, op)
                 }
-                Destructor::SpreadType(box DestructorSpreadTypeData(
+                Destructor::SpreadType(deref!(DestructorSpreadTypeData(
                     target,
                     todo_rev,
                     head_slice,
-                )) => {
+                ))) => {
                     let acc: flow_data_structure_wrapper::list::FlowOcamlList<
                         flow_typing_type::type_::object::spread::AccElement,
                     > = match head_slice {
@@ -1023,14 +1023,14 @@ pub fn elab_t<'cx>(
                     );
                     elab_t(cx, None, t, op)
                 }
-                Destructor::MappedType(box type_::DestructorMappedTypeData {
+                Destructor::MappedType(deref!(type_::DestructorMappedTypeData {
                     property_type,
                     name_type: None,
                     mapped_type_flags,
                     homomorphic,
                     distributive_tparam_name,
                     strictness_kind,
-                }) => {
+                })) => {
                     let (property_type, _, homomorphic) =
                         flow_js_utils::substitute_mapped_type_distributive_tparams(
                             cx,
@@ -1135,12 +1135,12 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         // First handle catch-all cases of subtyping_kit.rs
         (TypeInner::MaybeT(_, _), OpInner::AnnotUseTTypeT { .. }) => error_unsupported(cx, &t, &op),
         (
-            TypeInner::ThisTypeAppT(box ThisTypeAppTData {
+            TypeInner::ThisTypeAppT(deref!(ThisTypeAppTData {
                 reason,
                 type_,
                 this_t,
                 targs,
-            }),
+            })),
             OpInner::AnnotUseTTypeT { .. },
         ) => {
             let reason_tapp = reason.dupe();
@@ -1157,14 +1157,14 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             elab_t(cx, Some(seen), t, op)
         }
         (
-            TypeInner::TypeAppT(box TypeAppTData {
+            TypeInner::TypeAppT(deref!(TypeAppTData {
                 reason,
                 use_op,
                 type_,
                 targs,
                 from_value,
                 ..
-            }),
+            })),
             OpInner::AnnotUseTTypeT { .. },
         ) => {
             // NOTE omitting TypeAppExpansion.push_unless_loop check.
@@ -1183,7 +1183,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         }
         (TypeInner::DefT(def_reason, def_t), OpInner::AnnotUseTTypeT { reason, kind }) => {
             match def_t.deref() {
-                DefTInner::PolyT(box PolyTData { tparams, t_out, .. })
+                DefTInner::PolyT(deref!(PolyTData { tparams, t_out, .. }))
                     if matches!(kind, flow_typing_type::type_::TypeTKind::RenderTypeKind)
                         && matches!(
                             t_out.deref(),
@@ -1205,14 +1205,14 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                     );
                     elab_t(cx, Some(seen), t_, op)
                 }
-                DefTInner::PolyT(box PolyTData {
+                DefTInner::PolyT(deref!(PolyTData {
                     kind: poly_kind,
                     tparams_loc,
                     tparams,
                     t_out,
                     id,
                     strictness_kind,
-                }) if matches!(kind, flow_typing_type::type_::TypeTKind::RenderTypeKind)
+                })) if matches!(kind, flow_typing_type::type_::TypeTKind::RenderTypeKind)
                     && let TypeInner::DefT(_, inner) = t_out.deref()
                     && let DefTInner::TypeT(TypeTKind::ImportTypeofKind, inner_t) =
                         inner.deref()
@@ -1232,14 +1232,14 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                     );
                     elab_t(cx, Some(seen), poly, op)
                 }
-                DefTInner::PolyT(box PolyTData {
+                DefTInner::PolyT(deref!(PolyTData {
                     kind: poly_kind,
                     tparams_loc,
                     tparams,
                     t_out,
                     id,
                     strictness_kind,
-                }) if let TypeInner::DefT(_, inner) = t_out.deref()
+                })) if let TypeInner::DefT(_, inner) = t_out.deref()
                     && let DefTInner::TypeT(TypeTKind::ImportTypeofKind, inner_t) =
                         inner.deref()
                     && let TypeInner::AnnotT(_, t_out_mono, _) = inner_t.deref() =>
@@ -1259,14 +1259,14 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                     );
                     type_util::typeof_annotation(reason.dupe(), poly, None)
                 }
-                DefTInner::PolyT(box PolyTData {
+                DefTInner::PolyT(deref!(PolyTData {
                     kind: _,
                     tparams_loc,
                     tparams: ids,
                     t_out,
                     id,
                     strictness_kind: _,
-                }) if !ids.is_empty() && ids.iter().all(|tp| tp.default.is_some()) => {
+                })) if !ids.is_empty() && ids.iter().all(|tp| tp.default.is_some()) => {
                     // Treat missing type args the same as empty type args (Foo = Foo<>) when all
                     // parameters have defaults. Otherwise, fall through to EMissingTypeArgs.
                     let reason_tapp = def_reason.dupe();
@@ -1283,11 +1283,11 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                     );
                     elab_t(cx, Some(seen), t, op)
                 }
-                DefTInner::PolyT(box PolyTData {
+                DefTInner::PolyT(deref!(PolyTData {
                     tparams_loc,
                     tparams,
                     ..
-                }) => {
+                })) => {
                     flow_js_utils::add_output_non_speculating(
                         cx,
                         flow_typing_errors::error_message::ErrorMessage::EMissingTypeArgs(
@@ -1307,12 +1307,12 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                     any_t::error(reason.dupe())
                 }
                 DefTInner::ClassT(instance) => match instance.deref() {
-                    TypeInner::ThisInstanceT(box ThisInstanceTData {
+                    TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                         reason: r,
                         instance: i,
                         is_this,
                         subst_name,
-                    }) => {
+                    })) => {
                         let fixed = flow_js_utils::fix_this_instance(
                             cx,
                             reason.dupe(),
@@ -1461,12 +1461,12 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         //  Type applications
         // *******************
         (
-            TypeInner::TypeAppT(box TypeAppTData {
+            TypeInner::TypeAppT(deref!(TypeAppTData {
                 reason,
                 type_,
                 targs,
                 ..
-            }),
+            })),
             OpInner::AnnotConcretizeForClassExtends { this_t, .. },
         ) => {
             let reason_tapp = reason.dupe();
@@ -1483,12 +1483,12 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             elab_t(cx, Some(seen), t, op)
         }
         (
-            TypeInner::ThisTypeAppT(box ThisTypeAppTData {
+            TypeInner::ThisTypeAppT(deref!(ThisTypeAppTData {
                 reason,
                 type_,
                 this_t,
                 targs,
-            }),
+            })),
             _,
         ) => {
             let reason_tapp = reason.dupe();
@@ -1505,14 +1505,14 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             elab_t(cx, Some(seen), t, op)
         }
         (
-            TypeInner::TypeAppT(box TypeAppTData {
+            TypeInner::TypeAppT(deref!(TypeAppTData {
                 reason,
                 use_op,
                 type_,
                 targs,
                 from_value,
                 ..
-            }),
+            })),
             _,
         ) => {
             let reason_op = op.reason();
@@ -1576,7 +1576,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         }
         (TypeInner::NominalT { nominal_type, .. }, _)
             if let type_::nominal::UnderlyingT::CustomError(
-                box type_::nominal::CustomErrorData { t: inner_t, .. },
+                deref!(type_::nominal::CustomErrorData { t: inner_t, .. }),
             ) = &nominal_type.underlying_t =>
         {
             elab_t(cx, Some(seen), inner_t.dupe(), op)
@@ -1835,34 +1835,34 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             if let TypeInner::DefT(class_r, def_t) = t.deref() {
                 match def_t.deref() {
                     DefTInner::ClassT(inner) => {
-                        if let TypeInner::ThisInstanceT(box ThisInstanceTData {
+                        if let TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                             reason: inst_r,
                             instance: i,
                             is_this,
                             subst_name,
-                        }) = inner.deref()
+                        })) = inner.deref()
                         {
                             make_mixin_instance(inst_r, i, *is_this, subst_name, class_r, r)
                         } else {
                             error_unsupported(cx, &t, &op)
                         }
                     }
-                    DefTInner::PolyT(box PolyTData {
+                    DefTInner::PolyT(deref!(PolyTData {
                         tparams_loc,
                         kind: poly_kind,
                         tparams: xs,
                         t_out,
                         strictness_kind,
                         ..
-                    }) => {
+                    })) => {
                         if let TypeInner::DefT(class_r2, inner_def_t) = t_out.deref() {
                             if let DefTInner::ClassT(inner) = inner_def_t.deref() {
-                                if let TypeInner::ThisInstanceT(box ThisInstanceTData {
+                                if let TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                                     reason: inst_r,
                                     instance: i,
                                     is_this,
                                     subst_name,
-                                }) = inner.deref()
+                                })) = inner.deref()
                                 {
                                     let t_out = make_mixin_instance(
                                         inst_r, i, *is_this, subst_name, class_r2, r,
@@ -1897,14 +1897,14 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         //  Type specialization
         // ********************
         (TypeInner::DefT(_, def_t), OpInner::AnnotSpecializeT(data))
-            if let DefTInner::PolyT(box PolyTData {
+            if let DefTInner::PolyT(deref!(PolyTData {
                 kind: _,
                 tparams_loc,
                 tparams: xs,
                 t_out,
                 id,
                 strictness_kind: _,
-            }) = def_t.deref() =>
+            })) = def_t.deref() =>
         {
             let ts: Rc<[Type]> = data
                 .types
@@ -1969,12 +1969,12 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 type_: this,
             },
         ) if let DefTInner::ClassT(instance) = def_t.deref()
-            && let TypeInner::ThisInstanceT(box ThisInstanceTData {
+            && let TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                 reason: r,
                 instance: i,
                 is_this: _,
                 subst_name,
-            }) = instance.deref() =>
+            })) = instance.deref() =>
         {
             let this_type = this.dupe();
             let map = flow_data_structure_wrapper::ord_map::FlowOrdMap::from_iter(std::iter::once(
@@ -1999,12 +1999,12 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             )
         }
         (
-            TypeInner::ThisInstanceT(box ThisInstanceTData {
+            TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                 reason: r,
                 instance: i,
                 is_this: _,
                 subst_name,
-            }),
+            })),
             OpInner::AnnotThisSpecializeT {
                 reason,
                 type_: this,
@@ -2086,12 +2086,12 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         //  Type instantiation
         // *********************
         (TypeInner::DefT(reason_tapp, def_t), _)
-            if let DefTInner::PolyT(box PolyTData {
+            if let DefTInner::PolyT(deref!(PolyTData {
                 tparams_loc,
                 tparams: ids,
                 t_out,
                 ..
-            }) = def_t.deref() =>
+            })) = def_t.deref() =>
         {
             let use_op = type_::unknown_use();
             let reason_op = op.reason();
@@ -2107,12 +2107,12 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             elab_t(cx, Some(seen), t, op)
         }
         (
-            TypeInner::ThisInstanceT(box ThisInstanceTData {
+            TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                 reason: r,
                 instance: i,
                 is_this,
                 subst_name,
-            }),
+            })),
             _,
         ) => {
             let reason = op.reason();
@@ -2398,7 +2398,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                         ))
                     }
                     DefTInner::ArrT(arr) => match arr.deref() {
-                        ArrType::TupleAT(box TupleATData {
+                        ArrType::TupleAT(deref!(TupleATData {
                             elem_t,
                             elements,
                             arity,
@@ -2407,7 +2407,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                             react_dro: _,
                             strictness_kind,
                             ..
-                        }) => Type::new(TypeInner::DefT(
+                        })) => Type::new(TypeInner::DefT(
                             r.dupe(),
                             type_::DefT::new(DefTInner::ArrT(Rc::new(ArrType::TupleAT(Box::new(
                                 TupleATData {
@@ -2423,13 +2423,13 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                                 },
                             ))))),
                         )),
-                        ArrType::ArrayAT(box ArrayATData {
+                        ArrType::ArrayAT(deref!(ArrayATData {
                             elem_t,
                             tuple_view,
                             react_dro: _,
                             strictness_kind,
                             ..
-                        }) => Type::new(TypeInner::DefT(
+                        })) => Type::new(TypeInner::DefT(
                             r.dupe(),
                             type_::DefT::new(DefTInner::ArrT(Rc::new(ArrType::ArrayAT(Box::new(
                                 ArrayATData {
@@ -2442,9 +2442,9 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                                 },
                             ))))),
                         )),
-                        ArrType::ROArrayAT(box ROArrayATData {
+                        ArrType::ROArrayAT(deref!(ROArrayATData {
                             elem_t: inner_t, ..
-                        }) => Type::new(TypeInner::DefT(
+                        })) => Type::new(TypeInner::DefT(
                             r.dupe(),
                             type_::DefT::new(DefTInner::ArrT(Rc::new(ArrType::ROArrayAT(
                                 Box::new(ROArrayATData {
@@ -2737,12 +2737,12 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 // **********************
                 TypeInner::DefT(reason, def_t)
                     if let DefTInner::ArrT(arr) = def_t.deref()
-                        && let flow_typing_type::type_::ArrType::TupleAT(box TupleATData {
+                        && let flow_typing_type::type_::ArrType::TupleAT(deref!(TupleATData {
                             arity,
                             inexact,
                             rest,
                             ..
-                        }) = arr.deref()
+                        })) = arr.deref()
                         && let type_::PropRef::Named { name, .. } = propref
                         && name == &Name::new("length") =>
                 {
@@ -2762,7 +2762,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 TypeInner::DefT(reason, def_t) if let DefTInner::ArrT(arr) = def_t.deref() => {
                     use flow_typing_type::type_::ArrType;
                     match arr.as_ref() {
-                        ArrType::ArrayAT(box ArrayATData { elem_t, .. }) => {
+                        ArrType::ArrayAT(deref!(ArrayATData { elem_t, .. })) => {
                             let arr_t = get_builtin_typeapp(
                                 cx,
                                 reason.dupe(),
@@ -2771,8 +2771,8 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                             );
                             elab_t(cx, Some(seen), arr_t, op)
                         }
-                        ArrType::TupleAT(box TupleATData { .. })
-                        | ArrType::ROArrayAT(box ROArrayATData { .. }) => {
+                        ArrType::TupleAT(deref!(TupleATData { .. }))
+                        | ArrType::ROArrayAT(deref!(ROArrayATData { .. })) => {
                             let elem_t = type_::elemt_of_arrtype(arr.as_ref());
                             let arr_t = get_builtin_typeapp(
                                 cx,
@@ -4034,7 +4034,7 @@ fn object_kit_concrete<'cx>(
             object::Tool::MakeExact => {
                 slice_utils::object_make_exact(cx, &FlowJsEnv::entry(), reason, x)
             }
-            object::Tool::Spread(box (options, state)) => slice_utils::object_spread(
+            object::Tool::Spread(deref!((options, state))) => slice_utils::object_spread(
                 &|_cx, _use_op, _d1, _d2| Ok(()),
                 &add_output,
                 &return_,
@@ -4048,7 +4048,7 @@ fn object_kit_concrete<'cx>(
                 reason,
                 x,
             ),
-            object::Tool::Rest(box (options, state)) => {
+            object::Tool::Rest(deref!((options, state))) => {
                 let rest_return =
                     |_cx: &mut Context<'cx>,
                      _use_op: Box<dyn Fn(flow_common::polarity::Polarity) -> UseOp>,
@@ -4087,7 +4087,7 @@ fn object_kit_concrete<'cx>(
                 x,
             )),
             object::Tool::ReadOnly => Ok(slice_utils::object_read_only(cx, reason, x)),
-            object::Tool::ReactConfig(box ObjectToolReactConfigData { .. }) => {
+            object::Tool::ReactConfig(deref!(ObjectToolReactConfigData { .. })) => {
                 Ok(error_internal(cx, "ReactConfig", &op2))
             }
             object::Tool::ReactCheckComponentConfig { props } => {
@@ -4103,13 +4103,13 @@ fn object_kit_concrete<'cx>(
                 )
             }
             object::Tool::ObjectRep => Ok(error_internal(cx, "ObjectRep", &op2)),
-            object::Tool::ObjectMap(box ObjectToolObjectMapData {
+            object::Tool::ObjectMap(deref!(ObjectToolObjectMapData {
                 prop_type,
                 name_type: None,
                 mapped_type_flags,
                 selected_keys_opt,
                 strictness_kind,
-            }) => {
+            })) => {
                 let selected_keys = match selected_keys_opt {
                     None => None,
                     Some(keys) => match partition_mapped_type_keys(cx, reason, keys.dupe()) {
@@ -4134,7 +4134,7 @@ fn object_kit_concrete<'cx>(
                     .collect();
                 Ok(type_util::union_of_ts(reason.dupe(), ts, None))
             }
-            object::Tool::ObjectMap(box ObjectToolObjectMapData { .. }) => {
+            object::Tool::ObjectMap(deref!(ObjectToolObjectMapData { .. })) => {
                 Ok(error_internal(cx, "ObjectMap", &op2))
             }
         }

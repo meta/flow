@@ -420,12 +420,12 @@ impl<A: Dupe> VirtualReasonDesc<A> {
 
             // Recursive variants
             RUnknownUnspecifiedProperty(d) => RUnknownUnspecifiedProperty(Arc::new(d.map_locs(f))),
-            RTypeAlias(box (s, loc_opt, d)) => RTypeAlias(Box::new((
+            RTypeAlias(deref!((s, loc_opt, d))) => RTypeAlias(Box::new((
                 s.dupe(),
                 loc_opt.as_ref().map(f),
                 d.as_ref().map(|d| Arc::new(d.map_locs(f))),
             ))),
-            RTypeParam(box (s, l1, l2)) => RTypeParam(Box::new((s.clone(), f(l1), f(l2)))),
+            RTypeParam(deref!((s, l1, l2))) => RTypeParam(Box::new((s.clone(), f(l1), f(l2)))),
             REnumMember {
                 enum_desc,
                 member_name,
@@ -441,7 +441,7 @@ impl<L: Dupe> VirtualReasonDesc<L> {
     /// Unwrap type aliases
     pub fn unwrap(&self) -> Option<&VirtualReasonDesc<L>> {
         match self {
-            VirtualReasonDesc::RTypeAlias(box (_, _, inner)) => inner.as_deref()?.unwrap(),
+            VirtualReasonDesc::RTypeAlias(deref!((_, _, inner))) => inner.as_deref()?.unwrap(),
             _ => Some(self),
         }
     }
@@ -501,7 +501,7 @@ impl<L: Dupe> VirtualReasonDesc<L> {
     /// Invalidate RTypeAlias by removing the reliable def_loc
     pub fn invalidate_rtype_alias(self) -> VirtualReasonDesc<L> {
         match &self {
-            VirtualReasonDesc::RTypeAlias(box (name, Some(_), inner)) => {
+            VirtualReasonDesc::RTypeAlias(deref!((name, Some(_), inner))) => {
                 VirtualReasonDesc::RTypeAlias(Box::new((name.dupe(), None, inner.clone())))
             }
             _ => self,
@@ -1165,9 +1165,9 @@ pub fn string_of_desc<L: Dupe>(desc: &VirtualReasonDesc<L>) -> String {
 
         // Type aliases and params
         RType(x) => format!("`{}`", prettify_react_util(x.as_str())),
-        RTypeAlias(box (x, _, _)) => format!("`{}`", prettify_react_util(x)),
+        RTypeAlias(deref!((x, _, _))) => format!("`{}`", prettify_react_util(x)),
         ROpaqueType(x) => format!("`{}`", prettify_react_util(x)),
-        RTypeParam(box (x, _, _)) => x.formatted_string_of_subst_name(),
+        RTypeParam(deref!((x, _, _))) => x.formatted_string_of_subst_name(),
 
         // Parameters
         RParameter(Some(x)) => format!("`{}`", x),

@@ -157,9 +157,9 @@ fn lookup_targets<'a>(
     action: &'a LookupAction,
 ) -> impl Iterator<Item = (&'a PropRef, Option<&'a Property>)> {
     let (props, single) = match action {
-        LookupAction::LookupPropsForSubtyping(box LookupPropsForSubtypingData {
+        LookupAction::LookupPropsForSubtyping(deref!(LookupPropsForSubtypingData {
             props, ..
-        }) => (Some(props), None),
+        })) => (Some(props), None),
         _ => (None, Some((propref, None))),
     };
     props
@@ -188,7 +188,7 @@ fn strict_lookup_failed<'cx>(
 ) -> Result<(), FlowJsException> {
     if !indexer_fallback.is_some_and(|fallback| fallback.suppress_missing_error) {
         match action {
-            LookupAction::LookupPropsForSubtyping(box data) => {
+            LookupAction::LookupPropsForSubtyping(deref!(data)) => {
                 subtyping_kit::add_output_missing_props_from_lookup(cx, env, data, ids)?;
             }
             _ => {
@@ -314,7 +314,7 @@ fn strict_computed_lookup_failed<'cx>(
             }
         }
         _ => match action {
-            LookupAction::LookupPropsForSubtyping(box data) => {
+            LookupAction::LookupPropsForSubtyping(deref!(data)) => {
                 subtyping_kit::add_output_missing_props_from_lookup(cx, env, data, None)?;
             }
             _ => {
@@ -380,7 +380,7 @@ fn remaining_lookup(
 ) -> Option<(PropRef, LookupAction)> {
     let (first_propref, _) = *missing.first()?;
     let action = match action {
-        LookupAction::LookupPropsForSubtyping(box data) if missing.len() < data.props.len() => {
+        LookupAction::LookupPropsForSubtyping(deref!(data)) if missing.len() < data.props.len() => {
             LookupAction::LookupPropsForSubtyping(Box::new(LookupPropsForSubtypingData {
                 props: missing
                     .iter()
@@ -440,7 +440,7 @@ pub(super) fn is_not_object<'cx>(
     t: &Type,
 ) -> Result<bool, FlowJsException> {
     Ok(match t.deref() {
-        GenericT(box GenericTData { bound, .. }) => {
+        GenericT(deref!(GenericTData { bound, .. })) => {
             let bounds = helpers::possible_concrete_types_for_inspection(cx, env, reason, bound)?;
             let mut not_object = !bounds.is_empty();
             for bound in &bounds {
@@ -534,7 +534,7 @@ fn acts_on_marker(t: &Type, d: &Destructor, markers: &BTreeSet<SubstName>) -> bo
     reaches_marker(t, markers)
         || matches!(
             d,
-            Destructor::SpreadType(box DestructorSpreadTypeData(_, todo_rev, _))
+            Destructor::SpreadType(deref!(DestructorSpreadTypeData(_, todo_rev, _)))
                 if todo_rev.iter().any(|operand| matches!(
                     operand,
                     object::spread::Operand::Type(t) if reaches_marker(t, markers)
@@ -544,7 +544,7 @@ fn acts_on_marker(t: &Type, d: &Destructor, markers: &BTreeSet<SubstName>) -> bo
 
 fn reaches_marker(t: &Type, markers: &BTreeSet<SubstName>) -> bool {
     match t.deref() {
-        GenericT(box GenericTData { name, .. }) => markers.contains(name),
+        GenericT(deref!(GenericTData { name, .. })) => markers.contains(name),
         UnionT(_, rep) => rep.members_iter().any(|t| reaches_marker(t, markers)),
         IntersectionT(_, rep) => rep.members_iter().any(|t| reaches_marker(t, markers)),
         EvalT {
@@ -675,7 +675,7 @@ fn __flow_impl<'cx>(
             handle_bounded(cx, env, trace, reason, bound, &bounded_id, u)?
         }
         // No solve infers a placeholder.
-        ImplicitInstantiationTvar(data @ box ImplicitInstantiationTvarData { .. }) => {
+        ImplicitInstantiationTvar(data @ deref!(ImplicitInstantiationTvarData { .. })) => {
             handle_frozen_tvar(cx, env, trace, l, data, u)?
         }
         _ => false,
@@ -739,11 +739,11 @@ fn __flow_impl<'cx>(
                 defer_use_t,
                 ..
             },
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 kind: ConcretizationKind::ConcretizeForWalk(markers),
                 collector,
                 ..
-            }),
+            })),
         ) if acts_on_marker(t, &defer_use_t.2, markers) => {
             collector.add(l.dupe());
         }
@@ -812,11 +812,11 @@ fn __flow_impl<'cx>(
 
         (
             _,
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 kind: ConcretizationKind::ConcretizeForLowerBounds,
                 collector,
                 ..
-            }),
+            })),
         ) => match constraint_node_id(l) {
             Some(node) => {
                 for lower in flow_js_utils::possible_types(cx, node.id()) {
@@ -846,7 +846,7 @@ fn __flow_impl<'cx>(
                 // come from indirections through OpenT, most of them are already defended with
                 // Flow_js_utils.InvalidCyclicTypeValidation and turned to any, but there are gaps
                 // (especially EvalT from type sig), so we defend it again here.
-                ConcretizeT(box ConcretizeTData { seen, .. }) => {
+                ConcretizeT(deref!(ConcretizeTData { seen, .. })) => {
                     let tvar_id = node.id();
                     if seen.contains(&tvar_id) {
                         true
@@ -901,16 +901,16 @@ fn __flow_impl<'cx>(
             UseT(
                 use_op,
                 placeholder @ deref!(
-                    ImplicitInstantiationTvar(box ImplicitInstantiationTvarData { id, .. })
+                    ImplicitInstantiationTvar(deref!(ImplicitInstantiationTvarData { id, .. }))
                 ),
             ),
         ) if env.restrictive_frozen_tvars() => {
             if !matches!(
                 l.deref(),
-                ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+                ImplicitInstantiationTvar(deref!(ImplicitInstantiationTvarData {
                     id: lower_id,
                     ..
-                }) if lower_id == id
+                })) if lower_id == id
             ) {
                 flow_js_utils::add_output_with_env(
                     cx,
@@ -924,13 +924,13 @@ fn __flow_impl<'cx>(
         // ************************
         (
             _,
-            EvalTypeDestructorT(box EvalTypeDestructorTData {
+            EvalTypeDestructorT(deref!(EvalTypeDestructorTData {
                 destructor_use_op,
                 reason,
                 repos,
                 destructor,
                 tout,
-            }),
+            })),
         ) => {
             let l_repos = match repos {
                 None => l.dupe(),
@@ -960,58 +960,58 @@ fn __flow_impl<'cx>(
         // prevents a drastic blowup of cases which can cause perf problems.
         (
             UnionT(_, _),
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 kind: ConcretizationKind::ConcretizeForSentinelPropTest,
                 collector,
                 ..
-            }),
+            })),
         )
         | (
             UnionT(_, _),
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 kind:
                     ConcretizationKind::ConcretizeForPredicate(
                         PredicateConcretetizerVariant::ConcretizeRHSForLiteralPredicateTest,
                     ),
                 collector,
                 ..
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
         (
             UnionT(_, rep),
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 kind:
                     ConcretizationKind::ConcretizeForPredicate(
                         PredicateConcretetizerVariant::ConcretizeKeepOptimizedUnions,
                     ),
                 collector,
                 ..
-            }),
+            })),
         ) if rep.is_optimized_finally() => {
             collector.add(l.dupe());
         }
         (
             UnionT(_, _),
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 kind:
                     ConcretizationKind::ConcretizeForMatchArg {
                         keep_unions: true, ..
                     },
                 collector,
                 ..
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
         (
             DefT(reason, deref!(RendersT(form))),
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 kind: ConcretizationKind::ConcretizeForMatchArg { .. },
                 collector,
                 ..
-            }),
+            })),
         ) if match form.deref() {
             CanonicalRendersForm::IntrinsicRenders(_)
             | CanonicalRendersForm::NominalRenders { .. } => true,
@@ -1075,12 +1075,12 @@ fn __flow_impl<'cx>(
         // Special cases where we want to recursively concretize types within the lower bound.
         (
             UnionT(r, rep),
-            ReposUseT(box ReposUseTData {
+            ReposUseT(deref!(ReposUseTData {
                 reason,
                 use_desc,
                 use_op,
                 type_: l_inner,
-            }),
+            })),
         ) => {
             let rep = {
                 let in_implicit = env.in_implicit_instantiation();
@@ -1106,12 +1106,12 @@ fn __flow_impl<'cx>(
         }
         (
             MaybeT(r, u_inner),
-            ReposUseT(box ReposUseTData {
+            ReposUseT(deref!(ReposUseTData {
                 reason,
                 use_desc,
                 use_op,
                 type_: l_inner,
-            }),
+            })),
         ) => {
             let loc = reason.loc().dupe();
             let annot_loc = reason.annot_loc().map(|l| l.dupe());
@@ -1140,12 +1140,12 @@ fn __flow_impl<'cx>(
                     renders_structural_type: deref!(UnionT(_, rep)),
                 }))),
             ),
-            ReposUseT(box ReposUseTData {
+            ReposUseT(deref!(ReposUseTData {
                 reason,
                 use_desc,
                 use_op,
                 type_: l_inner,
-            }),
+            })),
         ) => {
             let rep = {
                 let in_implicit = env.in_implicit_instantiation();
@@ -1183,12 +1183,12 @@ fn __flow_impl<'cx>(
         // through a tvar.
         (
             _,
-            ReposUseT(box ReposUseTData {
+            ReposUseT(deref!(ReposUseTData {
                 reason,
                 use_desc,
                 use_op,
                 type_: l_inner,
-            }),
+            })),
         ) => {
             let u_repos = helpers::reposition_reason(cx, env, Some(trace), reason, *use_desc, l)?;
             return Ok(Some(TailCall::RecFlow(
@@ -1214,11 +1214,11 @@ fn __flow_impl<'cx>(
         // ******************
         (
             _,
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 kind: ConcretizationKind::ConcretizeForCJSExtractNamedExportsAndTypeExports,
                 collector,
                 ..
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
@@ -1227,9 +1227,9 @@ fn __flow_impl<'cx>(
         // ***************************
         (
             DefT(r, deref!(EmptyT | VoidT | TsVoidT | NullT)),
-            OptionalIndexedAccessT(box OptionalIndexedAccessTData {
+            OptionalIndexedAccessT(deref!(OptionalIndexedAccessTData {
                 use_op, tout_tvar, ..
-            }),
+            })),
         ) => {
             rec_flow_t(
                 cx,
@@ -1247,12 +1247,12 @@ fn __flow_impl<'cx>(
         }
         (
             UnionT(_, rep),
-            OptionalIndexedAccessT(box OptionalIndexedAccessTData {
+            OptionalIndexedAccessT(deref!(OptionalIndexedAccessTData {
                 use_op,
                 reason,
                 index,
                 tout_tvar,
-            }),
+            })),
         ) => {
             let mut members = rep.members_iter();
             let t0 = members.next().unwrap();
@@ -1301,12 +1301,12 @@ fn __flow_impl<'cx>(
         }
         (
             _,
-            OptionalIndexedAccessT(box OptionalIndexedAccessTData {
+            OptionalIndexedAccessT(deref!(OptionalIndexedAccessTData {
                 use_op,
                 reason,
                 index,
                 tout_tvar,
-            }),
+            })),
         ) if !matches!(l.deref(), IntersectionT(_, _)) => {
             let u_new = match index {
                 OptionalIndexedAccessIndex::OptionalIndexedAccessStrLitIndex(name) => {
@@ -1528,7 +1528,7 @@ fn __flow_impl<'cx>(
         }
         #[rustfmt::skip]
         (
-            DefT(r, deref!(ArrT(deref!(TupleAT(box TupleATData {
+            DefT(r, deref!(ArrT(deref!(TupleAT(deref!(TupleATData {
                 elem_t,
                 elements,
                 arity,
@@ -1538,7 +1538,7 @@ fn __flow_impl<'cx>(
                 literal,
                 fresh,
                 ..
-            }))))),
+            })))))),
             DeepReadOnlyT(tout, dro),
         ) => {
             let ReactDro(dro_loc, dro_type) = dro;
@@ -1561,14 +1561,14 @@ fn __flow_impl<'cx>(
         }
         #[rustfmt::skip]
         (
-            DefT(r, deref!(ArrT(deref!(ArrayAT(box ArrayATData {
+            DefT(r, deref!(ArrT(deref!(ArrayAT(deref!(ArrayATData {
                 elem_t,
                 tuple_view,
                 strictness_kind,
                 literal,
                 fresh,
                 ..
-            }))))),
+            })))))),
             DeepReadOnlyT(tout, dro),
         ) => {
             let ReactDro(dro_loc, dro_type) = dro;
@@ -1590,9 +1590,9 @@ fn __flow_impl<'cx>(
             DefT(
                 r,
                 deref!(ArrT(deref!(
-                    ROArrayAT(box ROArrayATData {
+                    ROArrayAT(deref!(ROArrayATData {
                         elem_t: t, literal, ..
-                    })
+                    }))
                 ))),
             ),
             DeepReadOnlyT(tout, dro),
@@ -1640,14 +1640,14 @@ fn __flow_impl<'cx>(
             DefT(
                 rp,
                 deref!(
-                    PolyT(box PolyTData {
+                    PolyT(deref!(PolyTData {
                         kind: poly_kind,
                         tparams_loc,
                         tparams,
                         t_out: deref!(DefT(r, deref!(FunT(s, funtype)))),
                         id,
                         strictness_kind,
-                    })
+                    }))
                 ),
             ),
             HooklikeT(tout),
@@ -1715,14 +1715,14 @@ fn __flow_impl<'cx>(
                 DefT(
                     rp,
                     deref!(
-                        PolyT(box PolyTData {
+                        PolyT(deref!(PolyTData {
                             kind: poly_kind,
                             tparams_loc,
                             tparams,
                             t_out: deref!(DefT(rf, deref!(FunT(s, funtype)))),
                             id: poly_id,
                             strictness_kind,
-                        })
+                        }))
                     ),
                 ) if funtype.effect_ == ReactEffectType::ArbitraryEffect => {
                     let new_funtype = FunType {
@@ -1762,17 +1762,17 @@ fn __flow_impl<'cx>(
             let tout_t = Type::new(OpenT((**tout).dupe()));
             rec_flow_t(cx, env, trace, unknown_use(), (l, &tout_t))?;
         }
-        (DefT(_, deref!(PolyT(box _))), DeepReadOnlyT(tout, _) | HooklikeT(tout)) => {
+        (DefT(_, deref!(PolyT(deref!(_)))), DeepReadOnlyT(tout, _) | HooklikeT(tout)) => {
             let tout_t = Type::new(OpenT((**tout).dupe()));
             rec_flow_t(cx, env, trace, unknown_use(), (l, &tout_t))?;
         }
         // A polymorphic type becomes the bound of a generic or opaque type as it is, without
         // being instantiated.
         (
-            DefT(_, deref!(PolyT(box _))),
-            SealGenericT(box SealGenericTData {
+            DefT(_, deref!(PolyT(deref!(_)))),
+            SealGenericT(deref!(SealGenericTData {
                 bounded_id, cont, ..
-            }),
+            })),
         ) => {
             let sealed = bounded_id.with_bound(reason_of_t(l).dupe(), l.dupe());
             continue_(cx, env, trace, &sealed, cont)?;
@@ -1786,13 +1786,13 @@ fn __flow_impl<'cx>(
             | LookupT(..)
             | SetPropT(..)
             | GetPropT(..)
-            | MethodT(box MethodTData {
+            | MethodT(deref!(MethodTData {
                 use_op: _,
                 reason: _,
                 prop_reason: _,
                 propref: _,
                 method_action: _,
-            })
+            }))
             | ObjRestT(_, _, _, _, _)
             | SetElemT(..)
             | GetElemT(..)
@@ -1806,13 +1806,13 @@ fn __flow_impl<'cx>(
             let (_, _, val_t, _) = &inst.type_args[1];
 
             match u.deref() {
-                MethodT(box MethodTData {
+                MethodT(deref!(MethodTData {
                     use_op,
                     reason: _,
                     prop_reason: reason,
-                    propref: box PropRef::Named { name, .. },
+                    propref: deref!(PropRef::Named { name, .. }),
                     method_action: _,
-                }) if matches!(name.as_str_opt(), Some("clear" | "delete" | "set")) => {
+                })) if matches!(name.as_str_opt(), Some("clear" | "delete" | "set")) => {
                     flow_js_utils::add_output_with_env(
                         cx,
                         env,
@@ -1830,10 +1830,10 @@ fn __flow_impl<'cx>(
                     )?;
                 }
                 GetPropT(
-                    box data @ GetPropTData {
-                        propref: box PropRef::Named { name, .. },
+                    deref!(data @ GetPropTData {
+                        propref: deref!(PropRef::Named { name, .. }),
                         ..
-                    },
+                    }),
                 ) if matches!(name.as_str_opt(), Some("clear" | "delete" | "set")) => {
                     flow_js_utils::add_output_with_env(
                         cx,
@@ -1899,13 +1899,13 @@ fn __flow_impl<'cx>(
             | LookupT(..)
             | SetPropT(..)
             | GetPropT(..)
-            | MethodT(box MethodTData {
+            | MethodT(deref!(MethodTData {
                 use_op: _,
                 reason: _,
                 prop_reason: _,
                 propref: _,
                 method_action: _,
-            })
+            }))
             | ObjRestT(_, _, _, _, _)
             | SetElemT(..)
             | GetElemT(..)
@@ -1917,13 +1917,13 @@ fn __flow_impl<'cx>(
         {
             let (_, _, elem_t, _) = &inst.type_args[0];
             match u.deref() {
-                MethodT(box MethodTData {
+                MethodT(deref!(MethodTData {
                     use_op,
                     reason: _,
                     prop_reason: reason,
-                    propref: box PropRef::Named { name, .. },
+                    propref: deref!(PropRef::Named { name, .. }),
                     method_action: _,
-                }) if matches!(name.as_str_opt(), Some("add" | "clear" | "delete")) => {
+                })) if matches!(name.as_str_opt(), Some("add" | "clear" | "delete")) => {
                     flow_js_utils::add_output_with_env(
                         cx,
                         env,
@@ -1941,10 +1941,10 @@ fn __flow_impl<'cx>(
                     )?;
                 }
                 GetPropT(
-                    box data @ GetPropTData {
-                        propref: box PropRef::Named { name, .. },
+                    deref!(data @ GetPropTData {
+                        propref: deref!(PropRef::Named { name, .. }),
                         ..
-                    },
+                    }),
                 ) if matches!(name.as_str_opt(), Some("add" | "clear" | "delete")) => {
                     flow_js_utils::add_output_with_env(
                         cx,
@@ -2032,13 +2032,13 @@ fn __flow_impl<'cx>(
         }
         (
             MaybeT(_, _),
-            ResolveUnionT(box ResolveUnionTData {
+            ResolveUnionT(deref!(ResolveUnionTData {
                 reason,
                 resolved,
                 unresolved,
                 upper,
                 id,
-            }),
+            })),
         ) => {
             if let Some((tc_env, tc_l, tc_u, reason)) =
                 resolve_union(cx, env, trace, reason, *id, resolved, unresolved, l, upper)?
@@ -2048,10 +2048,10 @@ fn __flow_impl<'cx>(
         }
         (MaybeT(reason, t), _)
             if match u.deref() {
-                ConditionalT(box ConditionalTData {
+                ConditionalT(deref!(ConditionalTData {
                     distributive_tparam_name,
                     ..
-                }) => distributive_tparam_name.is_some(),
+                })) => distributive_tparam_name.is_some(),
                 _ => true,
             } =>
         {
@@ -2084,10 +2084,10 @@ fn __flow_impl<'cx>(
             if type_util::optional_slot_type(l).is_some()
                 && !matches!(u.deref(), ReposLowerT { .. } | ResolveUnionT(..))
                 && match u.deref() {
-                    ConditionalT(box ConditionalTData {
+                    ConditionalT(deref!(ConditionalTData {
                         distributive_tparam_name,
                         ..
-                    }) => distributive_tparam_name.is_some(),
+                    })) => distributive_tparam_name.is_some(),
                     _ => true,
                 } =>
         {
@@ -2099,16 +2099,16 @@ fn __flow_impl<'cx>(
         // * type applications *
         // *********************
         (
-            TypeAppT(box TypeAppTData {
+            TypeAppT(deref!(TypeAppTData {
                 reason: reason_tapp,
                 type_: c,
                 targs: ts,
                 ..
-            }),
-            ConcretizeT(box ConcretizeTData {
+            })),
+            ConcretizeT(deref!(ConcretizeTData {
                 kind: ConcretizationKind::ConcretizeForClassExtends(this_t),
                 ..
-            }),
+            })),
         ) => {
             let reason_op = upper_operation_reason_or(u, reason_tapp);
             FlowJs::instantiate_this_class_with_env(
@@ -2124,17 +2124,17 @@ fn __flow_impl<'cx>(
             )?;
         }
         (
-            ThisTypeAppT(box ThisTypeAppTData {
+            ThisTypeAppT(deref!(ThisTypeAppTData {
                 reason: reason_tapp,
                 this_t: this,
                 type_: c,
                 targs: ts,
-            }),
+            })),
             _,
         ) => {
             let reason_op = upper_operation_reason_or(u, reason_tapp);
             let seen = match u.deref() {
-                ConcretizeT(box ConcretizeTData { seen, .. }) => Some(seen),
+                ConcretizeT(deref!(ConcretizeTData { seen, .. })) => Some(seen),
                 _ => None,
             };
             if !seen.is_some_and(|seen| seen.is_expanding_type_app(l)) {
@@ -2170,22 +2170,22 @@ fn __flow_impl<'cx>(
             rec_flow(cx, env, trace, (&repos, inner_u))?;
         }
         (
-            TypeAppT(box TypeAppTData {
+            TypeAppT(deref!(TypeAppTData {
                 reason: reason_tapp,
                 use_op,
                 type_,
                 targs,
                 from_value,
                 use_desc,
-            }),
-            MethodT(box MethodTData {
+            })),
+            MethodT(deref!(MethodTData {
                 use_op: _,
                 reason: reason_op,
                 prop_reason: _,
                 propref: _,
                 method_action: _,
-            })
-            | PrivateMethodT(box PrivateMethodTData {
+            }))
+            | PrivateMethodT(deref!(PrivateMethodTData {
                 use_op: _,
                 reason: reason_op,
                 prop_reason: _,
@@ -2193,7 +2193,7 @@ fn __flow_impl<'cx>(
                 class_bindings: _,
                 static_: _,
                 method_action: _,
-            }),
+            })),
         ) => {
             let t = mk_typeapp_instance_annot(
                 cx,
@@ -2221,7 +2221,7 @@ fn __flow_impl<'cx>(
         // incompatible use error.
         (
             DefT(_, deref!(PolyT(_))),
-            ConcretizeTypeAppsT(use_op, box (ts2, fv2, op2, r2), box (c1, ts1, fv1, op1, r1), true),
+            ConcretizeTypeAppsT(use_op, deref!((ts2, fv2, op2, r2)), deref!((c1, ts1, fv1, op1, r1)), true),
         ) => {
             let c2 = l.dupe();
             rec_flow(
@@ -2255,35 +2255,35 @@ fn __flow_impl<'cx>(
             DefT(
                 _,
                 deref!(
-                    PolyT(box PolyTData {
+                    PolyT(deref!(PolyTData {
                         tparams_loc,
                         tparams,
                         id: id1,
                         t_out,
                         strictness_kind: lower_strictness_kind,
                         ..
-                    })
+                    }))
                 ),
             ),
             ConcretizeTypeAppsT(
                 use_op,
-                box (ts1, fv1, _, r1),
-                box (
+                deref!((ts1, fv1, _, r1)),
+                deref!((
                     deref!(DefT(
                         _,
                         deref!(
-                            PolyT(box PolyTData {
+                            PolyT(deref!(PolyTData {
                                 id: id2,
                                 strictness_kind: upper_strictness_kind,
                                 ..
-                            })
+                            }))
                         )
                     )),
                     ts2,
                     fv2,
                     _,
                     r2,
-                ),
+                )),
                 false,
             ),
         ) if id1 == id2
@@ -2315,36 +2315,36 @@ fn __flow_impl<'cx>(
             DefT(
                 _,
                 deref!(
-                    PolyT(box PolyTData {
+                    PolyT(deref!(PolyTData {
                         tparams_loc: tparams_loc1,
                         tparams: xs1,
                         t_out: t1,
                         id: id1,
                         ..
-                    })
+                    }))
                 ),
             ),
             ConcretizeTypeAppsT(
                 use_op,
-                box (ts1, fv1, op1, r1),
-                box (
+                deref!((ts1, fv1, op1, r1)),
+                deref!((
                     deref!(DefT(
                         _,
                         deref!(
-                            PolyT(box PolyTData {
+                            PolyT(deref!(PolyTData {
                                 tparams_loc: tparams_loc2,
                                 tparams: xs2,
                                 t_out: t2,
                                 id: id2,
                                 ..
-                            })
+                            }))
                         )
                     )),
                     ts2,
                     fv2,
                     op2,
                     r2,
-                ),
+                )),
                 false,
             ),
         ) => {
@@ -2388,14 +2388,14 @@ fn __flow_impl<'cx>(
             )?;
         }
         (
-            TypeAppT(box TypeAppTData {
+            TypeAppT(deref!(TypeAppTData {
                 reason: reason_tapp,
                 use_op,
                 type_,
                 targs,
                 from_value,
                 use_desc: _,
-            }),
+            })),
             _,
         ) => {
             let reason_op = upper_operation_reason_or(u, reason_tapp);
@@ -2404,7 +2404,7 @@ fn __flow_impl<'cx>(
             // application reappearing within its own expansion (e.g. `type T<X> = T<X>`)
             // would otherwise be expanded until the recursion limit.
             let seen = match u.deref() {
-                ConcretizeT(box ConcretizeTData { seen, .. }) => Some(seen),
+                ConcretizeT(deref!(ConcretizeTData { seen, .. })) => Some(seen),
                 _ => None,
             };
             if !seen.is_some_and(|seen| seen.is_expanding_type_app(l))
@@ -2443,11 +2443,11 @@ fn __flow_impl<'cx>(
         // recorded as lower bound to the target tvar.
         (
             _,
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 kind: ConcretizationKind::ConcretizeForImportsExports,
                 collector,
                 ..
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
@@ -2456,10 +2456,10 @@ fn __flow_impl<'cx>(
         (
             NamespaceT(ns),
             GetPropT(
-                box data @ GetPropTData {
+                deref!(data @ GetPropTData {
                     use_op: UseOp::Op(deref!(VirtualRootUseOp::GetProperty(prop_reason))),
                     ..
-                },
+                }),
             ),
         ) if ns.namespace_symbol.kind() == flow_common::flow_symbol::SymbolKind::SymbolModule => {
             let new_u = UseT::new(GetPropT(Box::new(GetPropTData {
@@ -2480,14 +2480,14 @@ fn __flow_impl<'cx>(
         // below would strip it to its values_type before the conversion runs.
         (
             NamespaceT(ns),
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 kind:
                     ConcretizationKind::ConcretizeForInspection
                     | ConcretizationKind::ConcretizeForWalk(_)
                     | ConcretizationKind::ConcretizeForClassExtends(_),
                 collector,
                 ..
-            }),
+            })),
         ) if flow_js_utils::is_ts_enum_symbol(&ns.namespace_symbol) => {
             collector.add(l.dupe());
         }
@@ -2503,20 +2503,20 @@ fn __flow_impl<'cx>(
             DefT(
                 reason_tapp,
                 deref!(
-                    PolyT(box PolyTData {
+                    PolyT(deref!(PolyTData {
                         tparams_loc,
                         tparams: ids,
                         t_out,
                         id,
                         ..
-                    })
+                    }))
                 ),
             ),
-            ValueToTypeReferenceT(box ValueToTypeReferenceTData {
+            ValueToTypeReferenceT(deref!(ValueToTypeReferenceTData {
                 use_op,
                 reason: reason_op,
                 ..
-            }),
+            })),
         ) if !ids.is_empty() && ids.iter().all(|tp| tp.default.is_some()) => {
             // Treat missing type args the same as empty type args (Foo = Foo<>) when all
             // parameters have defaults. Otherwise, fall through to EMissingTypeArgs.
@@ -2537,13 +2537,13 @@ fn __flow_impl<'cx>(
         }
         (
             _,
-            ValueToTypeReferenceT(box ValueToTypeReferenceTData {
+            ValueToTypeReferenceT(deref!(ValueToTypeReferenceTData {
                 use_op,
                 reason: reason_op,
                 kind: type_t_kind,
                 from_typeapp,
                 tout,
-            }),
+            })),
         ) => {
             let t =
                 flow_js_utils::value_to_type_reference_transform::run_on_concrete_type_with_env(
@@ -2620,7 +2620,7 @@ fn __flow_impl<'cx>(
                 t_out,
             },
         ) if let nominal::Id::UserDefinedOpaqueTypeId(
-            box nominal::UserDefinedOpaqueTypeIdData(nominal_id, _),
+            deref!(nominal::UserDefinedOpaqueTypeIdData(nominal_id, _)),
         ) = &nominal_type.nominal_id
             && nominal_id.0.source() == Some(cx.file())
             && let nominal::UnderlyingT::OpaqueWithLocal { t } = &nominal_type.underlying_t =>
@@ -2650,10 +2650,10 @@ fn __flow_impl<'cx>(
                 t_out,
             },
         ) if let nominal::Id::UserDefinedOpaqueTypeId(_) = &nominal_type.nominal_id
-            && let nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+            && let nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData {
                 t,
                 custom_error_loc: _,
-            }) = &nominal_type.underlying_t =>
+            })) = &nominal_type.underlying_t =>
         {
             rec_flow(
                 cx,
@@ -2681,11 +2681,11 @@ fn __flow_impl<'cx>(
         }
         (
             NominalT { nominal_type, .. },
-            ReactKitT(box ReactKitTData {
+            ReactKitT(deref!(ReactKitTData {
                 use_op: _,
                 reason: _,
                 tool: _,
-            }),
+            })),
         ) if let Some(t) = nominal_type.upper_t.as_ref() => {
             rec_flow(cx, env, trace, (t, u))?;
         }
@@ -2717,7 +2717,7 @@ fn __flow_impl<'cx>(
         // expose its underlying type information
         (NominalT { nominal_type, .. }, _)
             if let nominal::Id::UserDefinedOpaqueTypeId(
-                box nominal::UserDefinedOpaqueTypeIdData(nominal_id, _),
+                deref!(nominal::UserDefinedOpaqueTypeIdData(nominal_id, _)),
             ) = &nominal_type.nominal_id
                 && nominal_id.0.source() == Some(cx.file())
                 && let nominal::UnderlyingT::OpaqueWithLocal { t } = &nominal_type.underlying_t =>
@@ -2726,12 +2726,12 @@ fn __flow_impl<'cx>(
         }
         (NominalT { nominal_type, .. }, _)
             if let nominal::Id::UserDefinedOpaqueTypeId(
-                box nominal::UserDefinedOpaqueTypeIdData(_, _),
+                deref!(nominal::UserDefinedOpaqueTypeIdData(_, _)),
             ) = &nominal_type.nominal_id
-                && let nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+                && let nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData {
                     t,
                     custom_error_loc: _,
-                }) = &nominal_type.underlying_t =>
+                })) = &nominal_type.underlying_t =>
         {
             rec_flow(cx, env, trace, (t, u))?;
         }
@@ -2775,36 +2775,36 @@ fn __flow_impl<'cx>(
             }
         }
         (
-            GenericT(box GenericTData { reason, bound, .. }),
-            ConcretizeT(box ConcretizeTData {
+            GenericT(deref!(GenericTData { reason, bound, .. })),
+            ConcretizeT(deref!(ConcretizeTData {
                 kind: ConcretizationKind::ConcretizeForEnumExhaustiveCheck,
                 ..
-            }),
+            })),
         ) => {
             let repos = helpers::reposition_reason(cx, env, None, reason, false, bound)?;
             rec_flow(cx, env, trace, (&repos, u))?;
         }
         (
             _,
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 kind:
                     ConcretizationKind::ConcretizeForInspection
                     | ConcretizationKind::ConcretizeForWalk(_)
                     | ConcretizationKind::ConcretizeForClassExtends(_),
                 collector,
                 ..
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
         // helpers
         (
             DefT(reason_o, deref!(ObjT(obj))),
-            HasOwnPropT(box HasOwnPropTData {
+            HasOwnPropT(deref!(HasOwnPropTData {
                 use_op,
                 reason: reason_op,
                 type_: key,
-            }),
+            })),
         ) => {
             let (prop_ids, dict_keys) = flow_js_utils::key_sources_of_obj_t(
                 |reason, t| helpers::possible_concrete_types_for_inspection(cx, env, reason, t),
@@ -2883,20 +2883,20 @@ fn __flow_impl<'cx>(
         }
         (
             DefT(reason_o, deref!(InstanceT(instance_t))),
-            HasOwnPropT(box HasOwnPropTData {
+            HasOwnPropT(deref!(HasOwnPropTData {
                 use_op,
                 reason: reason_op,
                 type_: key,
-            }),
+            })),
         ) if let Some(x) = match key.deref() {
             DefT(_, deref!(SingletonStrT { value, .. })) => Some(Name::new(value.dupe())),
             // A `unique symbol` key resolves to a distinct named member by its
             // nominal identity, mirroring the `ObjT` branch above.
             DefT(_, deref!(UniqueSymbolT(data))) => Some(Name::symbol(data.symbol.dupe())),
-            GenericT(box GenericTData {
+            GenericT(deref!(GenericTData {
                 bound: deref!(DefT(_, deref!(SingletonStrT { value, .. }))),
                 ..
-            }) => Some(Name::new(value.dupe())),
+            })) => Some(Name::new(value.dupe())),
             _ => None,
         } =>
         {
@@ -2940,11 +2940,11 @@ fn __flow_impl<'cx>(
         }
         (
             DefT(reason_o, deref!(InstanceT(instance_t))),
-            HasOwnPropT(box HasOwnPropTData {
+            HasOwnPropT(deref!(HasOwnPropTData {
                 use_op,
                 reason: reason_op,
                 type_: key,
-            }),
+            })),
         ) => {
             let (_, dict_keys) = flow_js_utils::key_sources_of_instance_t(
                 |reason, t| helpers::possible_concrete_types_for_inspection(cx, env, reason, t),
@@ -2990,11 +2990,11 @@ fn __flow_impl<'cx>(
         // AnyT has every prop
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
-            HasOwnPropT(box HasOwnPropTData {
+            HasOwnPropT(deref!(HasOwnPropTData {
                 use_op: _,
                 reason: _,
                 type_: _,
-            }),
+            })),
         ) => {}
         (
             DefT(_, deref!(ObjT(obj))),
@@ -3141,13 +3141,13 @@ fn __flow_impl<'cx>(
         // considering its upper bound
         (
             _,
-            ResolveUnionT(box ResolveUnionTData {
+            ResolveUnionT(deref!(ResolveUnionTData {
                 reason,
                 resolved,
                 unresolved,
                 upper,
                 id,
-            }),
+            })),
         ) => {
             if let Some((tc_env, tc_l, tc_u, reason)) =
                 resolve_union(cx, env, trace, reason, *id, resolved, unresolved, l, upper)?
@@ -3228,9 +3228,9 @@ fn __flow_impl<'cx>(
         }
         (
             UnionT(reason, rep),
-            SealGenericT(box SealGenericTData {
+            SealGenericT(deref!(SealGenericTData {
                 bounded_id, cont, ..
-            }),
+            })),
         ) => {
             // A narrowed union holds the type variables the narrowing fills for its members. What
             // flows into a narrowed opaque type through its lower bound is checked against its
@@ -3290,7 +3290,7 @@ fn __flow_impl<'cx>(
         #[rustfmt::skip]
         (
             UnionT(_, _),
-            ElemT(box ElemTData {
+            ElemT(deref!(ElemTData {
                 use_op,
                 reason,
                 obj: deref!(DefT(_, deref!(ObjT(deref!(ObjType {
@@ -3300,8 +3300,8 @@ fn __flow_impl<'cx>(
                     },
                     ..
                 }))))),
-                action: box ElemAction::ReadElem(box ReadElemData { tout, .. }),
-            }),
+                action: deref!(ElemAction::ReadElem(deref!(ReadElemData { tout, .. }))),
+            })),
         ) if flow_typing_flow_common::concrete_type_eq::eq_with_env(cx, env, l, key)
             && Polarity::compat(*dict_polarity, Polarity::Positive) =>
         {
@@ -3324,19 +3324,19 @@ fn __flow_impl<'cx>(
         }
         (
             UnionT(_, rep),
-            ElemT(box ElemTData {
+            ElemT(deref!(ElemTData {
                 use_op,
                 reason,
                 obj,
                 action:
-                    box ElemAction::ReadElem(box ReadElemData {
+                    deref!(ElemAction::ReadElem(deref!(ReadElemData {
                         id,
                         from_annot: true,
                         skip_optional,
                         access_iterables,
                         tout,
-                    }),
-            }),
+                    }))),
+            })),
         ) => {
             let distribute = |cx: &mut Context<'cx>| -> Result<(), FlowJsException> {
                 let reason = reason
@@ -3447,10 +3447,10 @@ fn __flow_impl<'cx>(
         }
         (UnionT(_, rep), _)
             if match u.deref() {
-                ConditionalT(box ConditionalTData {
+                ConditionalT(deref!(ConditionalTData {
                     distributive_tparam_name,
                     ..
-                }) => distributive_tparam_name.is_some(),
+                })) => distributive_tparam_name.is_some(),
                 _ => true,
             } =>
         {
@@ -3523,7 +3523,7 @@ fn __flow_impl<'cx>(
         // lookup of properties
         (
             IntersectionT(_, rep),
-            LookupT(box LookupTData {
+            LookupT(deref!(LookupTData {
                 reason,
                 lookup_kind,
                 indexer_fallback,
@@ -3533,7 +3533,7 @@ fn __flow_impl<'cx>(
                 ids,
                 method_accessible,
                 ignore_dicts,
-            }),
+            })),
         ) => {
             let ts: Vec<_> = rep.members_iter().duped().collect();
             assert!(!ts.is_empty());
@@ -3567,7 +3567,7 @@ fn __flow_impl<'cx>(
         // Cases of an intersection need to produce errors on non-existent
         // properties instead of a default, so that other cases may be tried
         // instead and succeed.
-        (IntersectionT(_, _), GetPropT(box data)) if data.id.is_some() => {
+        (IntersectionT(_, _), GetPropT(deref!(data))) if data.id.is_some() => {
             rec_flow(
                 cx,
                 env,
@@ -3589,14 +3589,14 @@ fn __flow_impl<'cx>(
         }
         (
             IntersectionT(_, _),
-            TestPropT(box TestPropTData {
+            TestPropT(deref!(TestPropTData {
                 use_op,
                 reason,
                 id: _,
                 propref,
                 tout,
                 hint,
-            }),
+            })),
         ) => {
             rec_flow(
                 cx,
@@ -3621,7 +3621,7 @@ fn __flow_impl<'cx>(
         // `keyof (A & B)` reads each of its keys from the members that have it.
         (
             IntersectionT(_, _),
-            GetElemT(box GetElemTData {
+            GetElemT(deref!(GetElemTData {
                 use_op,
                 reason,
                 id,
@@ -3630,7 +3630,7 @@ fn __flow_impl<'cx>(
                 access_iterables,
                 key_t,
                 tout,
-            }),
+            })),
         ) => {
             let action = ElemAction::ReadElem(Box::new(ReadElemData {
                 id: *id,
@@ -3657,13 +3657,13 @@ fn __flow_impl<'cx>(
         // extends
         (
             IntersectionT(_, rep),
-            ExtendsUseT(box ExtendsUseTData {
+            ExtendsUseT(deref!(ExtendsUseTData {
                 use_op,
                 reason,
                 targs: try_ts_on_failure,
                 true_t: ext_l,
                 false_t: ext_u,
-            }),
+            })),
         ) => {
             let mut members = rep.members_iter();
             let t = members.next().unwrap();
@@ -3689,21 +3689,21 @@ fn __flow_impl<'cx>(
         // consistent override of properties
         (
             IntersectionT(_, rep),
-            SuperT(box SuperTData {
+            SuperT(deref!(SuperTData {
                 use_op,
                 reason,
                 derived_type: derived,
-            }),
+            })),
         ) => {
             for t in rep.members_iter() {
                 let u_inner = match use_op {
                     VirtualUseOp::Op(
                         deref!(
-                            VirtualRootUseOp::ClassExtendsCheck(box ClassExtendsCheckData {
+                            VirtualRootUseOp::ClassExtendsCheck(deref!(ClassExtendsCheckData {
                                 def_loc,
                                 def,
                                 ..
-                            })
+                            }))
                         ),
                     ) => {
                         let new_use_op = VirtualUseOp::Op(Arc::new(
@@ -3733,7 +3733,7 @@ fn __flow_impl<'cx>(
                         VirtualUseOp::Op(
                             deref!(
                                 VirtualRootUseOp::ClassImplementsCheck(
-                                    box ClassImplementsCheckData { def, name, .. },
+                                    deref!(ClassImplementsCheckData { def, name, .. }),
                                 )
                             ),
                         ) => {
@@ -3825,12 +3825,12 @@ fn __flow_impl<'cx>(
         // an intersection lower bound
         (
             IntersectionT(_, _),
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 reason: _,
                 kind: ConcretizationKind::ConcretizeForPredicate(_),
                 seen: _,
                 collector,
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
@@ -3863,25 +3863,25 @@ fn __flow_impl<'cx>(
         }
         (
             IntersectionT(_, _),
-            SealGenericT(box SealGenericTData {
+            SealGenericT(deref!(SealGenericTData {
                 bounded_id, cont, ..
-            }),
+            })),
         ) => {
             let sealed = bounded_id.with_bound(reason_of_t(l).dupe(), l.dupe());
             continue_(cx, env, trace, &sealed, cont)?;
         }
         (
             IntersectionT(_, _),
-            CallT(box CallTData {
-                call_action: box CallAction::ConcretizeCallee(tout),
+            CallT(deref!(CallTData {
+                call_action: deref!(CallAction::ConcretizeCallee(tout)),
                 ..
-            }),
+            })),
         ) => {
             tout.add(l.dupe());
         }
         (
             IntersectionT(_, _),
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 reason: _,
                 kind:
                     ConcretizationKind::ConcretizeForOptionalChain
@@ -3892,15 +3892,15 @@ fn __flow_impl<'cx>(
                     | ConcretizationKind::ConcretizeForDestructuring,
                 seen: _,
                 collector,
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
         (
             IntersectionT(_, rep),
-            SpecializeT(box SpecializeTData {
+            SpecializeT(deref!(SpecializeTData {
                 targs: Some(ts), ..
-            }),
+            })),
         ) => {
             // As in TypeScript, type arguments apply to the overloads that take that many.
             let members = rep
@@ -3939,12 +3939,12 @@ fn __flow_impl<'cx>(
         }
         (
             _,
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 reason: _,
                 kind: ConcretizationKind::ConcretizeForOptionalChain,
                 seen: _,
                 collector,
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
@@ -3958,11 +3958,11 @@ fn __flow_impl<'cx>(
         // iterable objects.
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
-            ResolveSpreadT(box ResolveSpreadTData {
+            ResolveSpreadT(deref!(ResolveSpreadTData {
                 use_op,
                 reason: reason_op,
                 resolve_spread_type: resolve_spread,
-            }),
+            })),
         ) => {
             let mut rrt_resolved = resolve_spread.rrt_resolved.dupe();
             rrt_resolved.push_front(ResolvedParam::ResolvedAnySpreadArg(l.dupe()));
@@ -3979,20 +3979,20 @@ fn __flow_impl<'cx>(
         }
         (
             _,
-            ResolveSpreadT(box ResolveSpreadTData {
+            ResolveSpreadT(deref!(ResolveSpreadTData {
                 use_op,
                 reason: reason_op,
                 resolve_spread_type: resolve_spread,
-            }),
+            })),
         ) => {
             let reason = reason_of_t(l);
             let (lt, generic) = match l.deref() {
-                GenericT(box GenericTData {
+                GenericT(deref!(GenericTData {
                     bound,
                     id,
                     reason: gen_reason,
                     ..
-                }) => {
+                })) => {
                     let repos =
                         helpers::reposition_reason(cx, env, None, gen_reason, false, bound)?;
                     (repos, Some(id.clone()))
@@ -4005,11 +4005,11 @@ fn __flow_impl<'cx>(
                     match (&resolve_spread.rrt_resolve_to, arrtype.as_ref()) {
                         (
                             SpreadResolve::ResolveSpreadsToTupleType { inexact, .. },
-                            ArrayAT(box ArrayATData {
+                            ArrayAT(deref!(ArrayATData {
                                 tuple_view: None, ..
-                            })
-                            | ROArrayAT(box ROArrayATData { .. })
-                            | TupleAT(box TupleATData { rest: Some(_), .. }),
+                            }))
+                            | ROArrayAT(deref!(ROArrayATData { .. }))
+                            | TupleAT(deref!(TupleATData { rest: Some(_), .. })),
                         ) if *inexact || !resolve_spread.rrt_unresolved.is_empty() => {
                             // Only the last spread of a tuple type can have an unknown number of
                             // elements, which become its rest element.
@@ -4017,7 +4017,7 @@ fn __flow_impl<'cx>(
                                 TupleAT(_) => {
                                     let loc = match resolve_spread.rrt_unresolved.first() {
                                         Some(UnresolvedParam::UnresolvedArg(
-                                            box UnresolvedArgData(elem, _),
+                                            deref!(UnresolvedArgData(elem, _)),
                                         )) => elem.reason.loc().dupe(),
                                         Some(UnresolvedParam::UnresolvedSpreadArg(t)) => {
                                             reason_of_t(t).loc().dupe()
@@ -4297,13 +4297,13 @@ fn __flow_impl<'cx>(
                                     // tuples or array literals into simple arrays.
                                     let new_arrtype = match &arrtype {
                                         // These can get us into constant folding loops
-                                        ArrayAT(box ArrayATData {
+                                        ArrayAT(deref!(ArrayATData {
                                             elem_t,
                                             tuple_view: Some(_),
                                             react_dro,
                                             strictness_kind,
                                             ..
-                                        }) => ArrayAT(Box::new(ArrayATData {
+                                        })) => ArrayAT(Box::new(ArrayATData {
                                             elem_t: elem_t.dupe(),
                                             tuple_view: None,
                                             react_dro: react_dro.clone(),
@@ -4311,12 +4311,12 @@ fn __flow_impl<'cx>(
                                             literal: arrtype.literal(),
                                             fresh: arrtype.fresh(),
                                         })),
-                                        TupleAT(box TupleATData {
+                                        TupleAT(deref!(TupleATData {
                                             elem_t,
                                             react_dro,
                                             strictness_kind,
                                             ..
-                                        }) => ArrayAT(Box::new(ArrayATData {
+                                        })) => ArrayAT(Box::new(ArrayATData {
                                             elem_t: elem_t.dupe(),
                                             tuple_view: None,
                                             react_dro: react_dro.clone(),
@@ -4325,10 +4325,10 @@ fn __flow_impl<'cx>(
                                             fresh: arrtype.fresh(),
                                         })),
                                         // These cannot
-                                        ArrayAT(box ArrayATData {
+                                        ArrayAT(deref!(ArrayATData {
                                             tuple_view: None, ..
-                                        })
-                                        | ROArrayAT(box ROArrayATData { .. }) => arrtype.clone(),
+                                        }))
+                                        | ROArrayAT(deref!(ROArrayATData { .. })) => arrtype.clone(),
                                     };
                                     let mut rrt_resolved = resolve_spread.rrt_resolved.dupe();
                                     rrt_resolved.push_front(ResolvedParam::ResolvedSpreadArg(
@@ -4377,17 +4377,17 @@ fn __flow_impl<'cx>(
         // ********************
         // * conditional type *
         // ********************
-        (DefT(_, deref!(EmptyT)), ConditionalT(box ConditionalTData { use_op, tout, .. })) => {
+        (DefT(_, deref!(EmptyT)), ConditionalT(deref!(ConditionalTData { use_op, tout, .. }))) => {
             let open_tout = Type::new(OpenT((**tout).dupe()));
             rec_flow_t(cx, env, trace, use_op.dupe(), (l, &open_tout))?;
         }
         (
-            DefT(reason_tapp, deref!(PolyT(box PolyTData { tparams, t_out, .. }))),
-            ConditionalT(box ConditionalTData {
+            DefT(reason_tapp, deref!(PolyT(deref!(PolyTData { tparams, t_out, .. })))),
+            ConditionalT(deref!(ConditionalTData {
                 use_op,
                 reason: reason_op,
                 ..
-            }),
+            })),
         ) => {
             let t_ = implicit_instantiation::kit::run_monomorphize(
                 cx,
@@ -4403,7 +4403,7 @@ fn __flow_impl<'cx>(
         }
         (
             _,
-            ConditionalT(box ConditionalTData {
+            ConditionalT(deref!(ConditionalTData {
                 use_op,
                 reason,
                 distributive_tparam_name: Some(name),
@@ -4412,7 +4412,7 @@ fn __flow_impl<'cx>(
                 true_t,
                 false_t,
                 tout,
-            }),
+            })),
         ) => {
             let subst = flow_js_utils::mk_distributive_tparam_subst_fn(
                 cx,
@@ -4458,7 +4458,7 @@ fn __flow_impl<'cx>(
         }
         (
             _,
-            ConditionalT(box ConditionalTData {
+            ConditionalT(deref!(ConditionalTData {
                 use_op,
                 reason,
                 distributive_tparam_name: None,
@@ -4467,7 +4467,7 @@ fn __flow_impl<'cx>(
                 true_t,
                 false_t,
                 tout,
-            }),
+            })),
         ) => {
             let result = implicit_instantiation::kit::run_conditional(
                 cx,
@@ -4522,12 +4522,12 @@ fn __flow_impl<'cx>(
         // and "erasing" its static and super
         #[rustfmt::skip]
         (
-            DefT(class_reason, deref!(ClassT(deref!(ThisInstanceT(box ThisInstanceTData {
+            DefT(class_reason, deref!(ClassT(deref!(ThisInstanceT(deref!(ThisInstanceTData {
                 instance,
                 is_this,
                 subst_name,
                 ..
-            }))))),
+            })))))),
             MixinT(r, collector),
         ) => {
             let inst = &instance.inst;
@@ -4551,19 +4551,19 @@ fn __flow_impl<'cx>(
 
         #[rustfmt::skip]
         (
-            DefT(_, deref!(PolyT(box PolyTData {
+            DefT(_, deref!(PolyT(deref!(PolyTData {
                 kind: poly_kind,
                 tparams_loc,
                 tparams: xs,
-                t_out: deref!(DefT(class_r, deref!(ClassT(deref!(ThisInstanceT(box ThisInstanceTData {
+                t_out: deref!(DefT(class_r, deref!(ClassT(deref!(ThisInstanceT(deref!(ThisInstanceTData {
                     instance,
                     is_this,
                     subst_name,
                     ..
-                })))))),
+                }))))))),
                 strictness_kind,
                 ..
-            }))),
+            })))),
             MixinT(r, collector),
         ) => {
             let inst = &instance.inst;
@@ -4612,17 +4612,17 @@ fn __flow_impl<'cx>(
         // of a type application where it is written.
         #[rustfmt::skip]
         (
-            DefT(_, deref!(PolyT(box PolyTData {
+            DefT(_, deref!(PolyT(deref!(PolyTData {
                 tparams_loc, tparams: xs, t_out: t, id, ..
-            }))),
-            SpecializeT(box SpecializeTData {
+            })))),
+            SpecializeT(deref!(SpecializeTData {
                 use_op,
                 reason: reason_op,
                 reason2: reason_tapp,
                 targs: ts,
                 upper,
                 from_value,
-            }),
+            })),
         ) => {
             let ts_val = ts
                 .as_ref()
@@ -4679,23 +4679,23 @@ fn __flow_impl<'cx>(
         // nothing to check where it is written.
         (
             DefT(..),
-            SpecializeT(box SpecializeTData {
+            SpecializeT(deref!(SpecializeTData {
                 targs: None,
                 upper: None,
                 ..
-            }),
+            })),
         ) => {}
         // empty targs specialization of non-polymorphic classes is a no-op
         (
             DefT(_, deref!(ClassT(_))),
-            SpecializeT(box SpecializeTData {
+            SpecializeT(deref!(SpecializeTData {
                 use_op: _,
                 reason: _,
                 reason2: _,
                 targs: None,
                 upper,
                 from_value: _,
-            }),
+            })),
         ) => {
             if let Some(upper) = upper {
                 continue_(cx, env, trace, l, upper)?;
@@ -4705,14 +4705,14 @@ fn __flow_impl<'cx>(
         // signature rather than the interface that contains it.
         (
             DefT(reason_l, deref!(InstanceT(instance))),
-            SpecializeT(box SpecializeTData {
+            SpecializeT(deref!(SpecializeTData {
                 use_op,
                 reason: reason_op,
                 reason2: reason_tapp,
                 targs: Some(ts),
                 upper,
                 from_value,
-            }),
+            })),
         ) => {
             let concretize =
                 |cx: &mut Context<'_>, t: &Type| -> Result<Vec<Type>, FlowJsException> {
@@ -4836,14 +4836,14 @@ fn __flow_impl<'cx>(
         // worked out by [ThisSpecializeT] below.
         (
             DefT(reason_l, deref!(InstanceT(_))),
-            SpecializeT(box SpecializeTData {
+            SpecializeT(deref!(SpecializeTData {
                 use_op,
                 reason: _,
                 reason2: _,
                 targs: None,
                 upper,
                 from_value: _,
-            }),
+            })),
         ) => {
             let concretize =
                 |cx: &mut Context<'_>, t: &Type| -> Result<Vec<Type>, FlowJsException> {
@@ -4873,14 +4873,14 @@ fn __flow_impl<'cx>(
         }
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
-            SpecializeT(box SpecializeTData {
+            SpecializeT(deref!(SpecializeTData {
                 use_op: _,
                 reason: reason_op,
                 reason2: reason_tapp,
                 targs: _,
                 upper,
                 from_value,
-            }),
+            })),
         ) => match upper {
             Some(upper) => continue_(cx, env, trace, l, upper)?,
             None if !from_value => {
@@ -4900,12 +4900,12 @@ fn __flow_impl<'cx>(
         // this-specialize a this-abstracted class by substituting This
         #[rustfmt::skip]
         (
-            DefT(_, deref!(ClassT(deref!(ThisInstanceT(box ThisInstanceTData {
+            DefT(_, deref!(ClassT(deref!(ThisInstanceT(deref!(ThisInstanceTData {
                 reason: inst_r,
                 instance: i,
                 subst_name,
                 ..
-            }))))),
+            })))))),
             ThisSpecializeT(r, this, k),
         ) => {
             let def_t = this_specialize_instance(cx, l, inst_r, i, subst_name, this);
@@ -4913,12 +4913,12 @@ fn __flow_impl<'cx>(
         }
         // this-specialize a this-abstracted interface
         (
-            ThisInstanceT(box ThisInstanceTData {
+            ThisInstanceT(deref!(ThisInstanceTData {
                 reason: inst_r,
                 instance: i,
                 subst_name,
                 ..
-            }),
+            })),
             ThisSpecializeT(r, this, k),
         ) => {
             let def_t = this_specialize_instance(cx, l, inst_r, i, subst_name, this);
@@ -4960,7 +4960,7 @@ fn __flow_impl<'cx>(
             continue_repos(cx, env, trace, r, false, l, k)?;
         }
         (
-            DefT(_, deref!(PolyT(box _))),
+            DefT(_, deref!(PolyT(deref!(_)))),
             ReposLowerT {
                 reason,
                 use_desc,
@@ -4984,17 +4984,17 @@ fn __flow_impl<'cx>(
         // Special case for `_ instanceof C` where C is polymorphic
         #[rustfmt::skip]
         (
-            DefT(reason_tapp, deref!(PolyT(box PolyTData {
+            DefT(reason_tapp, deref!(PolyT(deref!(PolyTData {
                 tparams_loc, tparams: ids, t_out: t, ..
-            }))),
-            ConcretizeT(box ConcretizeTData {
+            })))),
+            ConcretizeT(deref!(ConcretizeTData {
                 reason: reason_op,
                 kind:
                     ConcretizationKind::ConcretizeForPredicate(
                         PredicateConcretetizerVariant::ConcretizeRHSForInstanceOfPredicateTest,
                     ),
                 ..
-            }),
+            })),
         ) => {
             let new_l = instantiate_poly_default_args(
                 cx,
@@ -5010,36 +5010,36 @@ fn __flow_impl<'cx>(
             rec_flow(cx, env, trace, (&new_l, u))?;
         }
         (
-            DefT(_, deref!(PolyT(box _))),
-            ConcretizeT(box ConcretizeTData {
+            DefT(_, deref!(PolyT(deref!(_)))),
+            ConcretizeT(deref!(ConcretizeTData {
                 kind: ConcretizationKind::ConcretizeForPredicate(_),
                 collector,
                 ..
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
         (
-            DefT(_, deref!(PolyT(box _))),
-            ConcretizeT(box ConcretizeTData {
+            DefT(_, deref!(PolyT(deref!(_)))),
+            ConcretizeT(deref!(ConcretizeTData {
                 kind:
                     ConcretizationKind::ConcretizeForDestructuring
                     | ConcretizationKind::ConcretizeForUnusedPromiseCheck,
                 collector,
                 ..
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
         // A polymorphic value is not empty, so the conditional type switch below passes it on
         // without instantiating it.
         (
-            DefT(_, deref!(PolyT(box _))),
-            CondT(box CondTData {
+            DefT(_, deref!(PolyT(deref!(_)))),
+            CondT(deref!(CondTData {
                 opt_type: then_t_opt,
                 collector,
                 ..
-            }),
+            })),
         ) => {
             collector.add(then_t_opt.as_ref().unwrap_or(l).dupe());
         }
@@ -5062,17 +5062,17 @@ fn __flow_impl<'cx>(
         // instantiation here that would be un-annotatable.
         #[rustfmt::skip]
         (
-            DefT(reason_tapp, deref!(PolyT(box PolyTData {
+            DefT(reason_tapp, deref!(PolyT(deref!(PolyTData {
                 tparams_loc,
                 tparams: ids,
                 t_out: t @ deref!(DefT(_, deref!(ClassT(deref!(ThisInstanceT(..)))))),
                 ..
-            }))),
-            CallT(box CallTData {
+            })))),
+            CallT(deref!(CallTData {
                 use_op,
                 reason: reason_op,
                 ..
-            }),
+            })),
         ) => {
             let targs: Vec<Targ> = ids
                 .iter()
@@ -5101,17 +5101,17 @@ fn __flow_impl<'cx>(
         // instance rather than a static, so reading it still goes through the rule below.
         #[rustfmt::skip]
         (
-            DefT(reason_tapp, deref!(PolyT(box PolyTData {
+            DefT(reason_tapp, deref!(PolyT(deref!(PolyTData {
                 tparams_loc,
                 tparams: ids,
                 t_out: t @ deref!(DefT(_, deref!(ClassT(deref!(ThisInstanceT(..)))))),
                 ..
-            }))),
+            })))),
             _,
         ) if flow_js_utils::object_like_op(u)
             && !matches!(
                 u.deref(),
-                GetPropT(box GetPropTData { propref: box PropRef::Named { name, .. }, .. })
+                GetPropT(deref!(GetPropTData { propref: deref!(PropRef::Named { name, .. }), .. }))
                     if name == &Name::new("prototype")
             ) =>
         {
@@ -5138,11 +5138,11 @@ fn __flow_impl<'cx>(
         // much we can do about them here. These will be handled by the hint
         // decomposition code that has some knowledge of the call arguments.
         (
-            DefT(_, deref!(PolyT(box _))),
-            CallT(box CallTData {
-                call_action: box CallAction::ConcretizeCallee(tout),
+            DefT(_, deref!(PolyT(deref!(_)))),
+            CallT(deref!(CallTData {
+                call_action: deref!(CallAction::ConcretizeCallee(tout)),
                 ..
-            }),
+            })),
         ) => {
             tout.add(l.dupe());
         }
@@ -5171,15 +5171,15 @@ fn __flow_impl<'cx>(
         // without fearing regressions in termination guarantees.
         #[rustfmt::skip]
         (
-            DefT(reason_tapp, deref!(PolyT(box PolyTData {
+            DefT(reason_tapp, deref!(PolyT(deref!(PolyTData {
                 tparams_loc, tparams: ids, t_out: t, ..
-            }))),
-            CallT(box CallTData {
+            })))),
+            CallT(deref!(CallTData {
                 use_op,
                 reason: reason_op,
-                call_action: box CallAction::Funcalltype(box calltype),
+                call_action: deref!(CallAction::Funcalltype(deref!(calltype))),
                 return_hint,
-            }),
+            })),
         ) => {
             let lparts = (
                 reason_tapp.dupe(),
@@ -5240,10 +5240,10 @@ fn __flow_impl<'cx>(
         }
         #[rustfmt::skip]
         (
-            DefT(reason_tapp, deref!(PolyT(box PolyTData {
+            DefT(reason_tapp, deref!(PolyT(deref!(PolyTData {
                 tparams_loc, tparams: ids, t_out: t, ..
-            }))),
-            ConstructorT(box ctor_data),
+            })))),
+            ConstructorT(deref!(ctor_data)),
         ) => {
             let lparts = (
                 reason_tapp.dupe(),
@@ -5300,13 +5300,13 @@ fn __flow_impl<'cx>(
         }
         #[rustfmt::skip]
         (
-            DefT(reason_tapp, deref!(PolyT(box PolyTData {
+            DefT(reason_tapp, deref!(PolyT(deref!(PolyTData {
                 tparams_loc, tparams: ids, t_out: t, ..
-            }))),
-            ReactKitT(box ReactKitTData {
+            })))),
+            ReactKitT(deref!(ReactKitTData {
                 use_op,
                 reason: reason_op,
-                tool: box react::Tool::CreateElement(box react::CreateElementData {
+                tool: deref!(react::Tool::CreateElement(deref!(react::CreateElementData {
                     jsx_props,
                     return_hint,
                     targs,
@@ -5314,8 +5314,8 @@ fn __flow_impl<'cx>(
                     specialized_component,
                     specialized_props,
                     ..
-                }),
-            }),
+                }))),
+            })),
         ) => {
             let lparts = (
                 reason_tapp.dupe(),
@@ -5379,21 +5379,21 @@ fn __flow_impl<'cx>(
                     ..
                 }))),
             ),
-            ReactKitT(box ReactKitTData {
+            ReactKitT(deref!(ReactKitTData {
                 use_op: _,
                 reason: _,
                 tool:
-                    box (react::Tool::CreateElement(..)
+                    deref!((react::Tool::CreateElement(..)
                     | react::Tool::GetConfig { .. }
-                    | react::Tool::ConfigCheck { .. }),
-            }),
+                    | react::Tool::ConfigCheck { .. })),
+            })),
         ) if {
             let found = cx.find_call(id.dupe());
             match found.deref() {
                 #[rustfmt::skip]
-                DefT(_, deref!(PolyT(box PolyTData {
+                DefT(_, deref!(PolyT(deref!(PolyTData {
                     t_out: deref!(DefT(_, deref!(FunT(_, _)))), ..
-                }))) => {
+                })))) => {
                     let fun_t_repos = type_util::mod_reason_of_t(&|_| r.dupe(), &found);
                     rec_flow(cx, env, trace, (&fun_t_repos, u))?;
                     true
@@ -5402,12 +5402,12 @@ fn __flow_impl<'cx>(
             }
         } => {}
         (
-            DefT(reason_tapp, deref!(PolyT(box PolyTData { tparams, t_out, .. }))),
-            ReactKitT(box ReactKitTData {
+            DefT(reason_tapp, deref!(PolyT(deref!(PolyTData { tparams, t_out, .. })))),
+            ReactKitT(deref!(ReactKitTData {
                 use_op,
                 reason: reason_op,
-                tool: box react::Tool::GetConfig { .. },
-            }),
+                tool: deref!(react::Tool::GetConfig { .. }),
+            })),
         ) => {
             let t_ = implicit_instantiation::kit::run_monomorphize(
                 cx,
@@ -5428,16 +5428,16 @@ fn __flow_impl<'cx>(
         #[rustfmt::skip]
         (
             DefT(reason, deref!(FunT(static_, _)))
-            | DefT(_, deref!(PolyT(box PolyTData {
+            | DefT(_, deref!(PolyT(deref!(PolyTData {
                 t_out: deref!(DefT(reason, deref!(FunT(static_, _)))), ..
-            }))),
-            MethodT(box MethodTData {
+            })))),
+            MethodT(deref!(MethodTData {
                 use_op,
                 reason: reason_call,
                 prop_reason: reason_lookup,
                 propref,
                 method_action: action,
-            }),
+            })),
         ) => {
             // Class methods carry `dummy_static` statics, so the lookup below
             // resolves on `any` and never reaches the `FunProtoT` arm that
@@ -5508,18 +5508,18 @@ fn __flow_impl<'cx>(
         // parameters, so the function is not instantiated to read them.
         #[rustfmt::skip]
         (
-            DefT(_, deref!(PolyT(box PolyTData {
+            DefT(_, deref!(PolyT(deref!(PolyTData {
                 t_out: t_out @ deref!(DefT(_, deref!(FunT(_, _)))), ..
-            }))),
+            })))),
             _,
         ) if flow_js_utils::object_like_op(u) => {
             rec_flow(cx, env, trace, (t_out, u))?;
         }
         #[rustfmt::skip]
         (
-            DefT(reason_tapp, deref!(PolyT(box PolyTData {
+            DefT(reason_tapp, deref!(PolyT(deref!(PolyTData {
                 tparams_loc, tparams: ids, t_out: t, ..
-            }))),
+            })))),
             _,
         ) => {
             let reason_op = upper_operation_reason_or(u, reason_tapp);
@@ -5582,10 +5582,10 @@ fn __flow_impl<'cx>(
             } else {
                 let unify_bounds = matches!(
                     u.deref(),
-                    MethodT(box MethodTData {
-                        method_action: box MethodAction::NoMethodAction(_),
+                    MethodT(deref!(MethodTData {
+                        method_action: deref!(MethodAction::NoMethodAction(_)),
                         ..
-                    })
+                    }))
                 );
                 FlowJs::instantiate_poly_with_env(
                     cx,
@@ -5603,12 +5603,12 @@ fn __flow_impl<'cx>(
         // when a this-abstracted class flows to upper bounds, fix the class
         #[rustfmt::skip]
         (
-            DefT(class_r, deref!(ClassT(deref!(ThisInstanceT(box ThisInstanceTData {
+            DefT(class_r, deref!(ClassT(deref!(ThisInstanceT(deref!(ThisInstanceTData {
                 reason: r,
                 instance: i,
                 is_this: this,
                 subst_name,
-            }))))),
+            })))))),
             _,
         ) => {
             let reason = upper_operation_reason_or(u, r);
@@ -5618,12 +5618,12 @@ fn __flow_impl<'cx>(
             rec_flow(cx, env, trace, (&new_l, u))?;
         }
         (
-            ThisInstanceT(box ThisInstanceTData {
+            ThisInstanceT(deref!(ThisInstanceTData {
                 reason: r,
                 instance: i,
                 is_this: this,
                 subst_name,
-            }),
+            })),
             _,
         ) => {
             let reason = upper_operation_reason_or(u, r);
@@ -5636,7 +5636,7 @@ fn __flow_impl<'cx>(
         // * React Abstract Components *
         // *****************************
         (
-            DefT(r, deref!(ReactAbstractComponentT(box _))),
+            DefT(r, deref!(ReactAbstractComponentT(deref!(_)))),
             TestPropT(..) | GetPropT(..) | SetPropT(..) | GetElemT(..) | SetElemT(..),
         ) => {
             let statics = FlowJs::get_builtin_type_with_env(
@@ -5651,13 +5651,13 @@ fn __flow_impl<'cx>(
         }
         // Components can never be called
         (
-            DefT(r, deref!(ReactAbstractComponentT(box _))),
-            CallT(box CallTData {
+            DefT(r, deref!(ReactAbstractComponentT(deref!(_)))),
+            CallT(deref!(CallTData {
                 use_op,
                 reason,
-                call_action: box CallAction::Funcalltype(box calltype),
+                call_action: deref!(CallAction::Funcalltype(deref!(calltype))),
                 ..
-            }),
+            })),
         ) => {
             flow_js_utils::add_output_with_env(
                 cx,
@@ -5678,21 +5678,21 @@ fn __flow_impl<'cx>(
         // FunT ~> CallT
         (
             DefT(_, deref!(FunT(_, _))),
-            CallT(box CallTData {
-                call_action: box CallAction::ConcretizeCallee(tout),
+            CallT(deref!(CallTData {
+                call_action: deref!(CallAction::ConcretizeCallee(tout)),
                 ..
-            }),
+            })),
         ) => {
             tout.add(l.dupe());
         }
         (
             DefT(reason_fundef, deref!(FunT(_, funtype))),
-            CallT(box CallTData {
+            CallT(deref!(CallTData {
                 use_op,
                 reason: reason_callsite,
-                call_action: box CallAction::Funcalltype(box calltype),
+                call_action: deref!(CallAction::Funcalltype(deref!(calltype))),
                 return_hint: _,
-            }),
+            })),
         ) => {
             let return_t = match &funtype.effect_ {
                 ReactEffectType::HookDecl(_) | ReactEffectType::HookAnnot => {
@@ -5812,21 +5812,21 @@ fn __flow_impl<'cx>(
         }
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
-            CallT(box CallTData {
-                call_action: box CallAction::ConcretizeCallee(tout),
+            CallT(deref!(CallTData {
+                call_action: deref!(CallAction::ConcretizeCallee(tout)),
                 ..
-            }),
+            })),
         ) => {
             tout.add(l.dupe());
         }
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
-            CallT(box CallTData {
+            CallT(deref!(CallTData {
                 use_op,
                 reason: reason_op,
-                call_action: box CallAction::Funcalltype(box calltype),
+                call_action: deref!(CallAction::Funcalltype(deref!(calltype))),
                 return_hint: _,
-            }),
+            })),
         ) => {
             let call_this_t = &calltype.call_this_t;
             // An untyped receiver can't do anything with type args
@@ -5859,11 +5859,11 @@ fn __flow_impl<'cx>(
         }
         (
             _,
-            ReactKitT(box ReactKitTData {
+            ReactKitT(deref!(ReactKitTData {
                 use_op,
                 reason: reason_op,
                 tool,
-            }),
+            })),
         ) => {
             react_kit::run_with_env(cx, env, trace, use_op.dupe(), reason_op, l, tool)?;
         }
@@ -5873,11 +5873,11 @@ fn __flow_impl<'cx>(
         // ****************************************
         (
             DefT(reason, def_t @ deref!(ObjT(_) | InstanceT(_))),
-            CallT(box CallTData {
+            CallT(deref!(CallTData {
                 use_op,
                 reason: reason_op,
                 ..
-            }),
+            })),
         ) => {
             let prop_name = Some(Name::new(FlowSmolStr::new_inline("$call")));
             let fun_t = match def_t.deref() {
@@ -5915,11 +5915,11 @@ fn __flow_impl<'cx>(
         }
         (
             _,
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 kind: ConcretizationKind::ConcretizeForConstructorReturn,
                 collector,
                 ..
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
@@ -5961,13 +5961,13 @@ fn __flow_impl<'cx>(
         #[rustfmt::skip]
         (
             DefT(reason, deref!(InstanceT(inst_t))),
-            ExtendsUseT(box ExtendsUseTData {
+            ExtendsUseT(deref!(ExtendsUseTData {
                 use_op,
                 reason: reason_op,
                 targs: try_ts_on_failure,
                 true_t: ext_l,
                 false_t: ext_u @ deref!(DefT(reason_u, deref!(InstanceT(inst_super_t)))),
-            }),
+            })),
         ) => {
             let super_ = &inst_t.super_;
             let implements = &inst_t.implements;
@@ -6117,7 +6117,7 @@ fn __flow_impl<'cx>(
         // *********************************************************
         // * class types derive instance types (with constructors) *
         // *********************************************************
-        (DefT(reason, deref!(ClassT(this))), ConstructorT(box ctor_data)) => {
+        (DefT(reason, deref!(ClassT(this))), ConstructorT(deref!(ctor_data))) => {
             let use_op = &ctor_data.use_op;
             let reason_op = &ctor_data.reason;
             let targs = &ctor_data.targs;
@@ -6218,7 +6218,7 @@ fn __flow_impl<'cx>(
                 }
             }
         }
-        (AnyT(_, _) | ImplicitInstantiationTvar(_), ConstructorT(box ctor_data)) => {
+        (AnyT(_, _) | ImplicitInstantiationTvar(_), ConstructorT(deref!(ctor_data))) => {
             let any_op = flow_js_utils::untyped_any_result(l, ctor_data.reason.dupe());
             // An untyped receiver can't do anything with type args
             call_args_iter(
@@ -6242,7 +6242,7 @@ fn __flow_impl<'cx>(
         // sig is the [inst_construct_t] slot plus anything inherited via
         // [extends]; [collect_construct_ts] collects both in
         // derived-first order.
-        (DefT(reason, deref!(InstanceT(instance_t))), ConstructorT(box ctor_data)) => {
+        (DefT(reason, deref!(InstanceT(instance_t))), ConstructorT(deref!(ctor_data))) => {
             let inst_abstract = instance_t.inst.inst_abstract;
             let use_op = &ctor_data.use_op;
             let reason_op = &ctor_data.reason;
@@ -6330,7 +6330,7 @@ fn __flow_impl<'cx>(
             }
         }
         // Only classes (and `any`) can be constructed.
-        (_, ConstructorT(box ctor_data)) => {
+        (_, ConstructorT(deref!(ctor_data))) => {
             flow_js_utils::add_output_with_env(
                 cx,
                 env,
@@ -6349,13 +6349,13 @@ fn __flow_impl<'cx>(
         // parameter is an AnyT.
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
-            MethodT(box MethodTData {
+            MethodT(deref!(MethodTData {
                 use_op: _,
                 reason: _,
                 prop_reason: _,
                 propref,
-                method_action: box MethodAction::NoMethodAction(prop_t),
-            }),
+                method_action: deref!(MethodAction::NoMethodAction(prop_t)),
+            })),
         ) => {
             let any =
                 flow_js_utils::untyped_any_result(l, type_util::reason_of_propref(propref).dupe());
@@ -6364,10 +6364,10 @@ fn __flow_impl<'cx>(
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
             PrivateMethodT(
-                box pm_data @ PrivateMethodTData {
-                    method_action: box MethodAction::NoMethodAction(prop_t),
+                deref!(pm_data @ PrivateMethodTData {
+                    method_action: deref!(MethodAction::NoMethodAction(prop_t)),
                     ..
-                },
+                }),
             ),
         ) => {
             let any = flow_js_utils::untyped_any_result(l, pm_data.prop_reason.dupe());
@@ -6375,18 +6375,18 @@ fn __flow_impl<'cx>(
         }
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
-            MethodT(box MethodTData {
+            MethodT(deref!(MethodTData {
                 use_op,
                 reason: reason_op,
                 prop_reason: _,
                 propref: _,
                 method_action:
-                    box MethodAction::CallM(box CallMData {
+                    deref!(MethodAction::CallM(deref!(CallMData {
                         methodcalltype,
                         specialized_callee,
                         ..
-                    }),
-            }),
+                    }))),
+            })),
         ) => {
             let any = flow_js_utils::untyped_any_result(l, reason_op.dupe());
             call_args_iter(
@@ -6413,15 +6413,15 @@ fn __flow_impl<'cx>(
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
             PrivateMethodT(
-                box pm_data @ PrivateMethodTData {
+                deref!(pm_data @ PrivateMethodTData {
                     method_action:
-                        box MethodAction::CallM(box CallMData {
+                        deref!(MethodAction::CallM(deref!(CallMData {
                             methodcalltype,
                             specialized_callee,
                             ..
-                        }),
+                        }))),
                     ..
-                },
+                }),
             ),
         ) => {
             let any = flow_js_utils::untyped_any_result(l, pm_data.reason.dupe());
@@ -6448,13 +6448,13 @@ fn __flow_impl<'cx>(
         }
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
-            MethodT(box MethodTData {
+            MethodT(deref!(MethodTData {
                 use_op,
                 reason: reason_op,
                 prop_reason: _,
                 propref: _,
-                method_action: box chain @ MethodAction::ChainM(..),
-            }),
+                method_action: deref!(chain @ MethodAction::ChainM(..)),
+            })),
         ) => {
             let any = flow_js_utils::untyped_any_result(l, reason_op.dupe());
             apply_method_action(
@@ -6471,10 +6471,10 @@ fn __flow_impl<'cx>(
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
             PrivateMethodT(
-                box pm_data @ PrivateMethodTData {
-                    method_action: box chain @ MethodAction::ChainM(..),
+                deref!(pm_data @ PrivateMethodTData {
+                    method_action: deref!(chain @ MethodAction::ChainM(..)),
                     ..
-                },
+                }),
             ),
         ) => {
             let any = flow_js_utils::untyped_any_result(l, pm_data.reason.dupe());
@@ -6585,7 +6585,7 @@ fn __flow_impl<'cx>(
         // ********************************************************
         (
             DefT(_, deref!(InstanceT(inst_t))),
-            LookupT(box LookupTData {
+            LookupT(deref!(LookupTData {
                 reason: reason_op,
                 lookup_kind: kind,
                 indexer_fallback,
@@ -6595,7 +6595,7 @@ fn __flow_impl<'cx>(
                 ids,
                 method_accessible,
                 ignore_dicts,
-            }),
+            })),
         ) => {
             let super_ = &inst_t.super_;
             let inst = &inst_t.inst;
@@ -6627,10 +6627,10 @@ fn __flow_impl<'cx>(
                 // inherited declared property would have to beat.
                 indexer_fallback = indexer_fallback.or(candidate);
                 if (property.is_some() || indexer_fallback.is_some())
-                    && let LookupKind::NonstrictReturning(box NonstrictReturningData(
+                    && let LookupKind::NonstrictReturning(deref!(NonstrictReturningData(
                         _,
                         Some((id, _)),
-                    )) = &**kind
+                    ))) = &**kind
                 {
                     cx.test_prop_hit(*id);
                 }
@@ -6760,7 +6760,7 @@ fn __flow_impl<'cx>(
                 ),
             )?;
         }
-        (DefT(reason_c, deref!(InstanceT(_))), SetPrivatePropT(box spp_data))
+        (DefT(reason_c, deref!(InstanceT(_))), SetPrivatePropT(deref!(spp_data)))
             if spp_data.class_bindings.is_empty() =>
         {
             add_output_with_env(
@@ -6774,7 +6774,7 @@ fn __flow_impl<'cx>(
                 })),
             )?;
         }
-        (DefT(reason_c, deref!(InstanceT(inst_t))), SetPrivatePropT(box spp_data))
+        (DefT(reason_c, deref!(InstanceT(inst_t))), SetPrivatePropT(deref!(spp_data)))
             if !spp_data.class_bindings.is_empty() =>
         {
             let inst = &inst_t.inst;
@@ -6861,10 +6861,10 @@ fn __flow_impl<'cx>(
         (
             DefT(r, deref!(InstanceT(_))),
             GetPropT(
-                box data @ GetPropTData {
-                    propref: box PropRef::Named { name, .. },
+                deref!(data @ GetPropTData {
+                    propref: deref!(PropRef::Named { name, .. }),
                     ..
-                },
+                }),
             ),
         ) if name.matches_str("constructor") => {
             let t = match helpers::constructor_field(cx, env, l)? {
@@ -6879,7 +6879,7 @@ fn __flow_impl<'cx>(
                 (&t, &Type::new(OpenT((*data.tout).dupe()))),
             )?;
         }
-        (DefT(_, deref!(InstanceT(inst_t))), GetPropT(box data)) => {
+        (DefT(_, deref!(InstanceT(inst_t))), GetPropT(deref!(data))) => {
             let super_ = &inst_t.super_;
             let inst = &inst_t.inst;
             // An interface with a construct signature types a constructor. Its methods are
@@ -6917,7 +6917,7 @@ fn __flow_impl<'cx>(
                 access_strictness_kind,
             )?(cx, (*data.tout).dupe())?;
         }
-        (DefT(reason_c, deref!(InstanceT(inst_t))), GetPrivatePropT(box gpp_data)) => {
+        (DefT(reason_c, deref!(InstanceT(inst_t))), GetPrivatePropT(deref!(gpp_data))) => {
             let inst = &inst_t.inst;
             get_private_prop(
                 cx,
@@ -6940,13 +6940,13 @@ fn __flow_impl<'cx>(
         // ********************************
         (
             DefT(_, deref!(InstanceT(inst_t))),
-            MethodT(box MethodTData {
+            MethodT(deref!(MethodTData {
                 use_op,
                 reason: reason_call,
                 prop_reason: reason_lookup,
                 propref,
                 method_action: action,
-            }),
+            })),
         ) => {
             let super_ = &inst_t.super_;
             let inst = &inst_t.inst;
@@ -7005,7 +7005,7 @@ fn __flow_impl<'cx>(
                 action,
             )?;
         }
-        (DefT(reason_c, deref!(InstanceT(inst_t))), PrivateMethodT(box pm_data)) => {
+        (DefT(reason_c, deref!(InstanceT(inst_t))), PrivateMethodT(deref!(pm_data))) => {
             let inst = &inst_t.inst;
             let tvar = flow_typing_tvar::mk_no_wrap(cx, &pm_data.prop_reason);
             let funt = Type::new(OpenT(Tvar::new(pm_data.prop_reason.dupe(), tvar as u32)));
@@ -7046,21 +7046,21 @@ fn __flow_impl<'cx>(
         // *****************************************************************
         (
             _,
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 kind: ConcretizationKind::ConcretizeForObjectAssign,
                 collector,
                 ..
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
         (
             _,
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 kind: ConcretizationKind::ConcretizeForDestructuring,
                 collector,
                 ..
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
@@ -7223,7 +7223,7 @@ fn __flow_impl<'cx>(
         // *******************************************
         (
             DefT(_, deref!(ObjT(o))),
-            LookupT(box LookupTData {
+            LookupT(deref!(LookupTData {
                 reason: reason_op,
                 lookup_kind,
                 indexer_fallback,
@@ -7233,7 +7233,7 @@ fn __flow_impl<'cx>(
                 ids,
                 method_accessible,
                 ignore_dicts,
-            }),
+            })),
         ) => {
             let mut missing = vec![];
             for (propref, up) in lookup_targets(propref, action) {
@@ -7249,10 +7249,10 @@ fn __flow_impl<'cx>(
                     reason_op,
                 )? {
                     Some((p, target_kind)) => {
-                        if let LookupKind::NonstrictReturning(box NonstrictReturningData(
+                        if let LookupKind::NonstrictReturning(deref!(NonstrictReturningData(
                             _,
                             Some((id, _)),
-                        )) = &**lookup_kind
+                        ))) = &**lookup_kind
                         {
                             cx.test_prop_hit(*id);
                         }
@@ -7302,16 +7302,16 @@ fn __flow_impl<'cx>(
         }
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
-            LookupT(box LookupTData {
+            LookupT(deref!(LookupTData {
                 reason: reason_op,
                 lookup_kind,
                 propref,
                 lookup_action: action,
                 ..
-            }),
+            })),
         ) => {
             match action {
-                box LookupAction::SuperProp(box (_, lp, _, _))
+                deref!(LookupAction::SuperProp(deref!((_, lp, _, _))))
                     if property::read_t(lp).is_none() || property::write_t(lp).is_none() =>
                 {
                     // `any` accepts anything. Without this exception, we will call rec_flow_p
@@ -7324,10 +7324,10 @@ fn __flow_impl<'cx>(
                         polarity: Polarity::Neutral,
                         optional: false,
                     };
-                    if let LookupKind::NonstrictReturning(box NonstrictReturningData(
+                    if let LookupKind::NonstrictReturning(deref!(NonstrictReturningData(
                         _,
                         Some((id, _)),
-                    )) = &**lookup_kind
+                    ))) = &**lookup_kind
                     {
                         cx.test_prop_hit(*id);
                     }
@@ -7405,7 +7405,7 @@ fn __flow_impl<'cx>(
         // *****************************
         // * ... and their fields read *
         // *****************************
-        (DefT(_, deref!(ObjT(_))), GetPropT(box data))
+        (DefT(_, deref!(ObjT(_))), GetPropT(deref!(data)))
             if name_of_propref(&data.propref)
                 .is_some_and(|name| name.matches_str("constructor")) =>
         {
@@ -7420,7 +7420,7 @@ fn __flow_impl<'cx>(
                 ),
             )?;
         }
-        (DefT(reason_obj, deref!(ObjT(o))), GetPropT(box data)) => {
+        (DefT(reason_obj, deref!(ObjT(o))), GetPropT(deref!(data))) => {
             let lookup_info = data.id.map(|id| {
                 (
                     id,
@@ -7446,7 +7446,7 @@ fn __flow_impl<'cx>(
                 access_strictness_kind,
             )?(cx, (*data.tout).dupe())?;
         }
-        (AnyT(_, _) | ImplicitInstantiationTvar(_), GetPropT(box data)) => {
+        (AnyT(_, _) | ImplicitInstantiationTvar(_), GetPropT(deref!(data))) => {
             if let Some(id) = data.id {
                 cx.test_prop_hit(id);
             }
@@ -7461,7 +7461,7 @@ fn __flow_impl<'cx>(
                 ),
             )?;
         }
-        (AnyT(_, _) | ImplicitInstantiationTvar(_), GetPrivatePropT(box gpp_data)) => {
+        (AnyT(_, _) | ImplicitInstantiationTvar(_), GetPrivatePropT(deref!(gpp_data))) => {
             rec_flow_t(
                 cx,
                 env,
@@ -7478,25 +7478,25 @@ fn __flow_impl<'cx>(
         // ********************************
         (
             DefT(_, deref!(ObjT(_))),
-            MethodT(box MethodTData {
+            MethodT(deref!(MethodTData {
                 use_op: _,
                 reason: reason_call,
                 prop_reason: _,
                 propref,
                 method_action: action,
-            }),
+            })),
         ) if name_of_propref(propref).is_some_and(|name| name.matches_str("constructor")) => {
             add_specialized_callee_method_action(env, &any_t::untyped(reason_call.dupe()), action)?;
         }
         (
             DefT(reason_obj, deref!(ObjT(o))),
-            MethodT(box MethodTData {
+            MethodT(deref!(MethodTData {
                 use_op,
                 reason: reason_call,
                 prop_reason: reason_lookup,
                 propref,
                 method_action: action,
-            }),
+            })),
         ) => {
             let t = flow_typing_tvar::mk_no_wrap_where(
                 cx,
@@ -7536,13 +7536,13 @@ fn __flow_impl<'cx>(
         // ******************************************
         (
             DefT(reason_s, deref!(StrGeneralT(_) | SingletonStrT { .. })),
-            GetElemT(box GetElemTData {
+            GetElemT(deref!(GetElemTData {
                 use_op,
                 reason: reason_op,
                 key_t,
                 tout,
                 ..
-            }),
+            })),
         ) => {
             rec_flow(
                 cx,
@@ -7575,14 +7575,14 @@ fn __flow_impl<'cx>(
         // **********************************************************************
         (
             DefT(_, deref!(ObjT(_) | ArrT(_) | InstanceT(_))),
-            SetElemT(box SetElemTData {
+            SetElemT(deref!(SetElemTData {
                 use_op,
                 reason,
                 key_t: key,
                 set_mode: mode,
                 tin,
                 tout,
-            }),
+            })),
         ) => {
             let action = ElemAction::WriteElem(Box::new(WriteElemData {
                 tin: tin.dupe(),
@@ -7606,14 +7606,14 @@ fn __flow_impl<'cx>(
         }
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
-            SetElemT(box SetElemTData {
+            SetElemT(deref!(SetElemTData {
                 use_op,
                 reason,
                 key_t: key,
                 set_mode: mode,
                 tin,
                 tout,
-            }),
+            })),
         ) => {
             let action = ElemAction::WriteElem(Box::new(WriteElemData {
                 tin: tin.dupe(),
@@ -7637,7 +7637,7 @@ fn __flow_impl<'cx>(
         }
         (
             DefT(_, deref!(ObjT(_) | ArrT(_) | InstanceT(_))),
-            GetElemT(box GetElemTData {
+            GetElemT(deref!(GetElemTData {
                 use_op,
                 reason,
                 id,
@@ -7646,7 +7646,7 @@ fn __flow_impl<'cx>(
                 access_iterables,
                 key_t,
                 tout,
-            }),
+            })),
         ) => {
             let action = ElemAction::ReadElem(Box::new(ReadElemData {
                 id: *id,
@@ -7672,7 +7672,7 @@ fn __flow_impl<'cx>(
         }
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
-            GetElemT(box GetElemTData {
+            GetElemT(deref!(GetElemTData {
                 use_op,
                 reason,
                 id,
@@ -7681,7 +7681,7 @@ fn __flow_impl<'cx>(
                 access_iterables,
                 key_t,
                 tout,
-            }),
+            })),
         ) => {
             let action = ElemAction::ReadElem(Box::new(ReadElemData {
                 id: *id,
@@ -7707,13 +7707,13 @@ fn __flow_impl<'cx>(
         }
         (
             DefT(_, deref!(ObjT(_) | ArrT(_) | InstanceT(_))),
-            CallElemT(box CallElemTData {
+            CallElemT(deref!(CallElemTData {
                 use_op,
                 reason: reason_call,
                 prop_reason: reason_lookup,
                 key_t: key,
                 method_action: action,
-            }),
+            })),
         ) => {
             let action = ElemAction::CallElem(reason_call.dupe(), action.clone());
             rec_flow(
@@ -7733,13 +7733,13 @@ fn __flow_impl<'cx>(
         }
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
-            CallElemT(box CallElemTData {
+            CallElemT(deref!(CallElemTData {
                 use_op,
                 reason: reason_call,
                 prop_reason: reason_lookup,
                 key_t: key,
                 method_action: action,
-            }),
+            })),
         ) => {
             let action = ElemAction::CallElem(reason_call.dupe(), action.clone());
             rec_flow(
@@ -7761,17 +7761,17 @@ fn __flow_impl<'cx>(
         // `access_iterables = true`, then output the `T` of the `Iterable<T>` it is.
         (
             DefT(_, deref!(NumGeneralT(_) | SingletonNumT { .. })),
-            ElemT(box ElemTData {
+            ElemT(deref!(ElemTData {
                 use_op,
                 reason,
                 obj: obj @ deref!(DefT(_, deref!(InstanceT(inst)))),
                 action:
-                    box ElemAction::ReadElem(box ReadElemData {
+                    deref!(ElemAction::ReadElem(deref!(ReadElemData {
                         access_iterables: true,
                         tout,
                         ..
-                    }),
-            }),
+                    }))),
+            })),
         ) if inst.inst.inst_dict.is_none() => {
             let targs = vec![
                 Type::new(OpenT(tout.dupe())),
@@ -7784,12 +7784,12 @@ fn __flow_impl<'cx>(
         }
         (
             _,
-            ElemT(box ElemTData {
+            ElemT(deref!(ElemTData {
                 use_op,
                 reason,
                 obj: obj @ deref!(DefT(_, deref!(ObjT(_) | InstanceT(_)))),
                 action,
-            }),
+            })),
         ) => {
             let propref = flow_js_utils::propref_for_elem_t_with_env(cx, env, l);
             elem_action_on_obj(cx, env, trace, use_op, propref, obj, reason, action)?;
@@ -7798,19 +7798,19 @@ fn __flow_impl<'cx>(
         // members of the intersection.
         (
             _,
-            ElemT(box ElemTData {
+            ElemT(deref!(ElemTData {
                 use_op,
                 reason,
                 obj: obj @ deref!(IntersectionT(_, rep)),
                 action:
-                    box ElemAction::ReadElem(box ReadElemData {
+                    deref!(ElemAction::ReadElem(deref!(ReadElemData {
                         id,
                         from_annot,
                         skip_optional,
                         access_iterables,
                         tout,
-                    }),
-            }),
+                    }))),
+            })),
         ) => {
             let get_elem = UseT::new(GetElemT(Box::new(GetElemTData {
                 use_op: use_op.dupe(),
@@ -7826,12 +7826,12 @@ fn __flow_impl<'cx>(
         }
         (
             _,
-            ElemT(box ElemTData {
+            ElemT(deref!(ElemTData {
                 use_op,
                 reason,
                 obj: obj @ deref!(AnyT(_, _) | ImplicitInstantiationTvar(_)),
                 action,
-            }),
+            })),
         ) => {
             let value = flow_js_utils::any_result(obj, reason.dupe());
             perform_elem_action(
@@ -7851,33 +7851,33 @@ fn __flow_impl<'cx>(
         // error when `tup[0] = 123` does not.
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
-            ElemT(box ElemTData {
+            ElemT(deref!(ElemTData {
                 use_op,
                 reason: reason_op,
                 obj: obj @ deref!(DefT(_, deref!(ArrT(arrtype)))),
                 action,
-            }),
+            })),
         ) => {
             let react_dro = match (action, arrtype.as_ref()) {
                 (
-                    box ElemAction::WriteElem(..),
-                    ROArrayAT(box ROArrayATData { .. })
-                    | TupleAT(box TupleATData {
+                    deref!(ElemAction::WriteElem(..)),
+                    ROArrayAT(deref!(ROArrayATData { .. }))
+                    | TupleAT(deref!(TupleATData {
                         react_dro: Some(_), ..
-                    })
-                    | ArrayAT(box ArrayATData {
+                    }))
+                    | ArrayAT(deref!(ArrayATData {
                         react_dro: Some(_), ..
-                    }),
+                    })),
                 ) => {
                     let use_op_for_err = match arrtype.as_ref() {
-                        TupleAT(box TupleATData {
+                        TupleAT(deref!(TupleATData {
                             react_dro: Some(dro),
                             ..
-                        })
-                        | ArrayAT(box ArrayATData {
+                        }))
+                        | ArrayAT(deref!(ArrayATData {
                             react_dro: Some(dro),
                             ..
-                        }) => UseOp::Frame(
+                        })) => UseOp::Frame(
                             std::sync::Arc::new(VirtualFrameUseOp::ReactDeepReadOnly(Box::new((
                                 dro.0.dupe(),
                                 dro.1.clone(),
@@ -7894,10 +7894,10 @@ fn __flow_impl<'cx>(
                     None
                 }
                 (
-                    box ElemAction::ReadElem(..),
-                    ROArrayAT(box ROArrayATData { react_dro, .. })
-                    | TupleAT(box TupleATData { react_dro, .. })
-                    | ArrayAT(box ArrayATData { react_dro, .. }),
+                    deref!(ElemAction::ReadElem(..)),
+                    ROArrayAT(deref!(ROArrayATData { react_dro, .. }))
+                    | TupleAT(deref!(TupleATData { react_dro, .. }))
+                    | ArrayAT(deref!(ArrayATData { react_dro, .. })),
                 ) => react_dro.clone(),
                 _ => None,
             };
@@ -7920,12 +7920,12 @@ fn __flow_impl<'cx>(
         }
         (
             DefT(_, def_t_l),
-            ElemT(box ElemTData {
+            ElemT(deref!(ElemTData {
                 use_op,
                 reason,
                 obj: obj @ deref!(DefT(reason_tup, deref!(ArrT(arrtype)))),
                 action,
-            }),
+            })),
         ) if flow_js_utils::is_array_index_key(def_t_l.deref()) => {
             // An int-like string key indexes the array just like the equivalent
             // numeric key: `arr['0']` reads the element type, and `tup['2']`
@@ -7938,11 +7938,11 @@ fn __flow_impl<'cx>(
 
             let (write_action, read_action, never_union_void_on_computed_prop_access) = match action
             {
-                box ElemAction::ReadElem(box ReadElemData { from_annot, .. }) => {
+                deref!(ElemAction::ReadElem(deref!(ReadElemData { from_annot, .. }))) => {
                     (false, true, *from_annot)
                 }
-                box ElemAction::CallElem(_, _) => (false, false, false),
-                box ElemAction::WriteElem(..) => (true, false, true),
+                deref!(ElemAction::CallElem(_, _)) => (false, false, false),
+                deref!(ElemAction::WriteElem(..)) => (true, false, true),
             };
             let (value, is_tuple, use_op_out, react_dro) = flow_js_utils::array_elem_check(
                 cx,
@@ -7971,18 +7971,18 @@ fn __flow_impl<'cx>(
         // guard, and falls through to the "not an array index" error.
         (
             _,
-            ElemT(box ElemTData {
+            ElemT(deref!(ElemTData {
                 use_op,
                 reason,
                 obj: obj @ deref!(DefT(_, deref!(ArrT(_)))),
                 action,
-            }),
+            })),
         ) if let propref @ PropRef::Named { .. } =
             flow_js_utils::propref_for_elem_t_with_env(cx, env, l) =>
         {
             elem_action_on_obj(cx, env, trace, use_op, propref, obj, reason, action)?;
         }
-        (DefT(_, deref!(ArrT(_))), GetPropT(box data))
+        (DefT(_, deref!(ArrT(_))), GetPropT(deref!(data)))
             if name_of_propref(&data.propref)
                 .is_some_and(|name| name.matches_str("constructor")) =>
         {
@@ -7997,17 +7997,17 @@ fn __flow_impl<'cx>(
                 ),
             )?;
         }
-        (DefT(_, deref!(ArrT(_))), SetPropT(_, _, box PropRef::Named { name, .. }, _, _, _, _))
+        (DefT(_, deref!(ArrT(_))), SetPropT(_, _, deref!(PropRef::Named { name, .. }), _, _, _, _))
             if name.matches_str("constructor") => {}
         (
             DefT(_, deref!(ArrT(_))),
-            MethodT(box MethodTData {
+            MethodT(deref!(MethodTData {
                 use_op: _,
                 reason: reason_call,
                 prop_reason: _,
                 propref,
                 method_action: action,
-            }),
+            })),
         ) if name_of_propref(propref).is_some_and(|name| name.matches_str("constructor")) => {
             add_specialized_callee_method_action(env, &any_t::untyped(reason_call.dupe()), action)?;
         }
@@ -8016,28 +8016,28 @@ fn __flow_impl<'cx>(
         // **************************************************
         (
             DefT(_, deref!(ArrT(arrtype))),
-            ArrRestT(box ArrRestTData {
+            ArrRestT(deref!(ArrRestTData {
                 literal,
                 use_op: _,
                 reason,
                 index: i,
                 tout,
                 ..
-            }),
+            })),
         ) => {
             let i = *i as usize;
             let arrtype = match arrtype.deref() {
-                ArrayAT(box ArrayATData {
+                ArrayAT(deref!(ArrayATData {
                     tuple_view: None, ..
-                })
-                | ROArrayAT(box ROArrayATData { .. }) => arrtype.deref().clone(),
-                ArrayAT(box ArrayATData {
+                }))
+                | ROArrayAT(deref!(ROArrayATData { .. })) => arrtype.deref().clone(),
+                ArrayAT(deref!(ArrayATData {
                     elem_t,
                     tuple_view: Some(tuple_view),
                     react_dro,
                     strictness_kind,
                     ..
-                }) => {
+                })) => {
                     let elements = tuple_view.elements[i.min(tuple_view.elements.len())..].to_vec();
                     let (num_req, num_total) = tuple_view.arity;
                     let arity = (
@@ -8064,7 +8064,7 @@ fn __flow_impl<'cx>(
                         fresh: false,
                     }))
                 }
-                TupleAT(box TupleATData {
+                TupleAT(deref!(TupleATData {
                     elem_t,
                     elements,
                     arity: (num_req, num_total),
@@ -8073,7 +8073,7 @@ fn __flow_impl<'cx>(
                     react_dro,
                     strictness_kind,
                     ..
-                }) => {
+                })) => {
                     let elements = &elements[i.min(elements.len())..];
                     // The element type of an exact tuple is the union of its elements.
                     let elem_t = if *inexact {
@@ -8126,13 +8126,13 @@ fn __flow_impl<'cx>(
         }
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
-            ArrRestT(box ArrRestTData {
+            ArrRestT(deref!(ArrRestTData {
                 use_op: _,
                 reason,
                 index: _,
                 tout,
                 ..
-            }),
+            })),
         ) => {
             rec_flow_t(
                 cx,
@@ -8147,12 +8147,12 @@ fn __flow_impl<'cx>(
         // **************************************************
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
-            MapTypeT(box MapTypeTData {
+            MapTypeT(deref!(MapTypeTData {
                 use_op: _,
                 reason: reason_op,
                 type_map: _,
                 tout,
-            }),
+            })),
         ) => {
             rec_flow_t(
                 cx,
@@ -8167,12 +8167,12 @@ fn __flow_impl<'cx>(
         }
         (
             DefT(_, deref!(ObjT(o))),
-            MapTypeT(box MapTypeTData {
+            MapTypeT(deref!(MapTypeTData {
                 use_op: _,
                 reason: reason_op,
                 type_map: TypeMap::ObjectKeyMirror,
                 tout,
-            }),
+            })),
         ) => {
             let mirrored = flow_js_utils::obj_key_mirror(cx, env, o, reason_op);
             rec_flow_t(cx, env, trace, unknown_use(), (&mirrored, tout))?;
@@ -8187,16 +8187,16 @@ fn __flow_impl<'cx>(
             ObjKitT(
                 _use_op,
                 reason_op,
-                box object::ResolveTool::Resolve(object::Resolve::Next),
-                box object::Tool::ObjectMap(box ObjectToolObjectMapData {
+                deref!(object::ResolveTool::Resolve(object::Resolve::Next)),
+                deref!(object::Tool::ObjectMap(deref!(ObjectToolObjectMapData {
                     name_type: Some(_), ..
-                }),
+                }))),
                 deref!(OpenT(tout_tvar)),
             ),
         ) if {
             match l_inner {
                 DefT(_, deref!(ArrT(_))) => true,
-                GenericT(box GenericTData { reason, bound, .. }) => {
+                GenericT(deref!(GenericTData { reason, bound, .. })) => {
                     let roarray_bound = Type::new(DefT(
                         reason.dupe(),
                         DefT::new(ArrT(Rc::new(ROArrayAT(Box::new(ROArrayATData {
@@ -8235,24 +8235,24 @@ fn __flow_impl<'cx>(
             )?;
         }
         (
-            GenericT(box GenericTData {
+            GenericT(deref!(GenericTData {
                 reason,
                 no_infer,
                 bound,
                 id,
                 name,
-            }),
+            })),
             ObjKitT(
                 use_op,
                 reason_op,
-                box object::ResolveTool::Resolve(object::Resolve::Next),
-                box object::Tool::ObjectMap(box ObjectToolObjectMapData {
+                deref!(object::ResolveTool::Resolve(object::Resolve::Next)),
+                deref!(object::Tool::ObjectMap(deref!(ObjectToolObjectMapData {
                     prop_type,
                     name_type: None,
                     mapped_type_flags,
                     selected_keys_opt: None,
                     strictness_kind,
-                }),
+                }))),
                 tout,
             ),
         ) if {
@@ -8276,9 +8276,9 @@ fn __flow_impl<'cx>(
                     ls: flow_typing_generics::SpreadId,
                 ) -> (flow_typing_generics::SpreadId, Type) {
                     match t.deref() {
-                        GenericT(box GenericTData {
+                        GenericT(deref!(GenericTData {
                             id, bound, reason, ..
-                        }) => {
+                        })) => {
                             let bound_with_reason =
                                 type_util::mod_reason_of_t(&|_| reason.dupe(), bound);
                             let new_ls = flow_typing_generics::spread_append(
@@ -8339,14 +8339,14 @@ fn __flow_impl<'cx>(
             ObjKitT(
                 use_op,
                 reason_op,
-                box object::ResolveTool::Resolve(object::Resolve::Next),
-                box object::Tool::ObjectMap(box ObjectToolObjectMapData {
+                deref!(object::ResolveTool::Resolve(object::Resolve::Next)),
+                deref!(object::Tool::ObjectMap(deref!(ObjectToolObjectMapData {
                     prop_type: property_type,
                     name_type: None,
                     mapped_type_flags,
                     selected_keys_opt: None,
                     strictness_kind,
-                }),
+                }))),
                 deref!(OpenT(tout_tvar)),
             ),
         ) => {
@@ -8468,9 +8468,9 @@ fn __flow_impl<'cx>(
                 }
             };
             let new_arrtype = match arrtype.deref() {
-                ArrayAT(box ArrayATData {
+                ArrayAT(deref!(ArrayATData {
                     elem_t, react_dro, ..
-                }) if array_polarity == Some(Polarity::Positive) => {
+                })) if array_polarity == Some(Polarity::Positive) => {
                     let mapped_elem_t = f(cx, elem_t, None, false)?;
                     ROArrayAT(Box::new(ROArrayATData {
                         elem_t: array_elem(cx, mapped_elem_t)?,
@@ -8478,12 +8478,12 @@ fn __flow_impl<'cx>(
                         literal: ArrLiteral::NonLiteral,
                     }))
                 }
-                ArrayAT(box ArrayATData {
+                ArrayAT(deref!(ArrayATData {
                     elem_t,
                     tuple_view,
                     react_dro,
                     ..
-                }) => {
+                })) => {
                     let mapped_elem_t = f(cx, elem_t, None, false)?;
                     let mapped_tuple_view = match tuple_view.as_ref() {
                         None => None,
@@ -8526,7 +8526,7 @@ fn __flow_impl<'cx>(
                         fresh: false,
                     }))
                 }
-                TupleAT(box TupleATData {
+                TupleAT(deref!(TupleATData {
                     elem_t,
                     elements,
                     arity,
@@ -8534,7 +8534,7 @@ fn __flow_impl<'cx>(
                     rest,
                     react_dro,
                     ..
-                }) => {
+                })) => {
                     let mapped_elem_t = f(cx, elem_t, None, false)?;
                     TupleAT(Box::new(TupleATData {
                         elem_t: array_elem(cx, mapped_elem_t)?,
@@ -8565,11 +8565,11 @@ fn __flow_impl<'cx>(
                         fresh: false,
                     }))
                 }
-                ROArrayAT(box ROArrayATData {
+                ROArrayAT(deref!(ROArrayATData {
                     elem_t: elemt,
                     react_dro: dro,
                     ..
-                }) if array_polarity == Some(Polarity::Neutral) => {
+                })) if array_polarity == Some(Polarity::Neutral) => {
                     let mapped_elem_t = f(cx, elemt, None, false)?;
                     ArrayAT(Box::new(ArrayATData {
                         elem_t: array_elem(cx, mapped_elem_t)?,
@@ -8580,11 +8580,11 @@ fn __flow_impl<'cx>(
                         fresh: false,
                     }))
                 }
-                ROArrayAT(box ROArrayATData {
+                ROArrayAT(deref!(ROArrayATData {
                     elem_t: elemt,
                     react_dro: dro,
                     ..
-                }) => {
+                })) => {
                     let mapped_elem_t = f(cx, elemt, None, false)?;
                     ROArrayAT(Box::new(ROArrayATData {
                         elem_t: array_elem(cx, mapped_elem_t)?,
@@ -8737,11 +8737,11 @@ fn __flow_impl<'cx>(
                                 // members are those of `ReadonlyArray`.
                                 DefT(r, deref!(ArrT(arr))) => {
                                     let (name, elem_t) = match arr.as_ref() {
-                                        ArrayAT(box ArrayATData { elem_t, .. }) => {
+                                        ArrayAT(deref!(ArrayATData { elem_t, .. })) => {
                                             ("Array", elem_t)
                                         }
-                                        TupleAT(box TupleATData { elem_t, .. })
-                                        | ROArrayAT(box ROArrayATData { elem_t, .. }) => {
+                                        TupleAT(deref!(TupleATData { elem_t, .. }))
+                                        | ROArrayAT(deref!(ROArrayATData { elem_t, .. })) => {
                                             ("ReadonlyArray", elem_t)
                                         }
                                     };
@@ -8847,11 +8847,11 @@ fn __flow_impl<'cx>(
         // exist.
         (
             DefT(ureason, deref!(InstanceT(inst_t))),
-            SuperT(box SuperTData {
+            SuperT(deref!(SuperTData {
                 use_op,
                 reason,
                 derived_type: derived,
-            }),
+            })),
         ) if matches!(
             &inst_t.inst.inst_kind,
             InstanceKind::ClassKind | InstanceKind::InterfaceKind { .. }
@@ -8925,11 +8925,11 @@ fn __flow_impl<'cx>(
         }
         (
             DefT(ureason, deref!(ObjT(obj))),
-            SuperT(box SuperTData {
+            SuperT(deref!(SuperTData {
                 use_op,
                 reason,
                 derived_type: derived,
-            }),
+            })),
         ) if obj
             .strictness_kind
             .join(derived.strictness_kind)
@@ -8985,12 +8985,12 @@ fn __flow_impl<'cx>(
         // Keep opaque types in computed object keys
         (
             _,
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 reason: _,
                 kind: ConcretizationKind::ConcretizeForComputedObjectKeys,
                 seen: _,
                 collector,
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
@@ -9002,20 +9002,20 @@ fn __flow_impl<'cx>(
         // Predicate_kit should not see unwrapped opaque type
         (
             NominalT { .. },
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 reason: _,
                 kind: ConcretizationKind::ConcretizeForPredicate(_),
                 seen: _,
                 collector,
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
         (
             NominalT { .. },
-            SealGenericT(box SealGenericTData {
+            SealGenericT(deref!(SealGenericTData {
                 bounded_id, cont, ..
-            }),
+            })),
         ) => {
             let sealed = bounded_id.with_bound(reason_of_t(l).dupe(), l.dupe());
             continue_(cx, env, trace, &sealed, cont)?;
@@ -9026,12 +9026,12 @@ fn __flow_impl<'cx>(
                 nominal_type: opaque,
                 ..
             },
-            CondT(box CondTData {
+            CondT(deref!(CondTData {
                 loc,
                 opt_type: then_t_opt,
                 true_t: else_t,
                 collector,
-            }),
+            })),
         ) if opaque.upper_t.is_some() => {
             let t = opaque.upper_t.as_ref().unwrap();
             let new_then_t_opt = match then_t_opt {
@@ -9079,12 +9079,12 @@ fn __flow_impl<'cx>(
         // recorded as lower bound to the target tvar.
         (
             _,
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 reason: _,
                 kind: ConcretizationKind::ConcretizeForOperatorsChecking,
                 seen: _,
                 collector,
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
@@ -9093,14 +9093,14 @@ fn __flow_impl<'cx>(
         // **************************************************************************
         (
             _,
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 reason: _,
                 kind:
                     ConcretizationKind::ConcretizeForPredicate(_)
                     | ConcretizationKind::ConcretizeForSentinelPropTest,
                 seen: _,
                 collector,
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
@@ -9128,10 +9128,10 @@ fn __flow_impl<'cx>(
         (
             DefT(reason, deref!(ClassT(instance))),
             GetPropT(
-                box data @ GetPropTData {
-                    propref: box PropRef::Named { name, .. },
+                deref!(data @ GetPropTData {
+                    propref: deref!(PropRef::Named { name, .. }),
                     ..
-                },
+                }),
             ),
         ) if name == &Name::new("prototype") => {
             let instance = helpers::reposition(
@@ -9157,7 +9157,7 @@ fn __flow_impl<'cx>(
         // Instead, we just flip the boolean flag to true, indicating that when the
         // InstanceT ~> Set/GetPrivatePropT or PrivateMethodT constraint is processed that we should
         // look at the private static fields instead of the private instance fields.
-        (DefT(reason, deref!(ClassT(instance))), GetPrivatePropT(box gpp_data)) => {
+        (DefT(reason, deref!(ClassT(instance))), GetPrivatePropT(deref!(gpp_data))) => {
             let new_u = UseT::new(GetPrivatePropT(Box::new(GetPrivatePropTData {
                 use_op: gpp_data.use_op.dupe(),
                 reason: gpp_data.reason.dupe(),
@@ -9180,7 +9180,7 @@ fn __flow_impl<'cx>(
                 ),
             )?;
         }
-        (DefT(reason, deref!(ClassT(instance))), SetPrivatePropT(box spp_data)) => {
+        (DefT(reason, deref!(ClassT(instance))), SetPrivatePropT(deref!(spp_data))) => {
             let new_u = UseT::new(SetPrivatePropT(Box::new(SetPrivatePropTData {
                 use_op: spp_data.use_op.dupe(),
                 reason: spp_data.reason.dupe(),
@@ -9206,7 +9206,7 @@ fn __flow_impl<'cx>(
                 ),
             )?;
         }
-        (DefT(reason, deref!(ClassT(instance))), PrivateMethodT(box pm_data)) => {
+        (DefT(reason, deref!(ClassT(instance))), PrivateMethodT(deref!(pm_data))) => {
             let new_u = UseT::new(PrivateMethodT(Box::new(PrivateMethodTData {
                 use_op: pm_data.use_op.dupe(),
                 reason: pm_data.reason.dupe(),
@@ -9232,13 +9232,13 @@ fn __flow_impl<'cx>(
         }
         (
             DefT(reason, deref!(ClassT(instance))),
-            MethodT(box MethodTData {
+            MethodT(deref!(MethodTData {
                 use_op,
                 reason: reason_call,
                 prop_reason: reason_lookup,
                 propref,
                 method_action: action,
-            }),
+            })),
         ) => {
             let collector = type_collector::TypeCollector::create();
             rec_flow(
@@ -9351,15 +9351,15 @@ fn __flow_impl<'cx>(
                 }),
             ),
             GetPropT(
-                box data @ GetPropTData {
+                deref!(data @ GetPropTData {
                     propref:
-                        box PropRef::Named {
+                        deref!(PropRef::Named {
                             reason: prop_reason,
                             name: member_name,
                             ..
-                        },
+                        }),
                     ..
-                },
+                }),
             ),
         ) if let EnumInfoInner::ConcreteEnum(enum_info) = EnumInfo::deref(enum_info) => {
             let access_strictness_kind = cx.type_strictness_kind();
@@ -9381,13 +9381,13 @@ fn __flow_impl<'cx>(
         }
         (
             DefT(_, deref!(EnumObjectT { .. })),
-            TestPropT(box TestPropTData {
+            TestPropT(deref!(TestPropTData {
                 reason,
                 propref,
                 tout,
                 hint,
                 ..
-            }),
+            })),
         ) => {
             rec_flow(
                 cx,
@@ -9418,13 +9418,13 @@ fn __flow_impl<'cx>(
                     enum_info
                 }),
             ),
-            MethodT(box MethodTData {
+            MethodT(deref!(MethodTData {
                 use_op,
                 reason: call_reason,
                 prop_reason: lookup_reason,
-                propref: propref @ box PropRef::Named { .. },
+                propref: propref @ deref!(PropRef::Named { .. }),
                 method_action: action,
-            }),
+            })),
         ) => {
             let t = flow_typing_tvar::mk_no_wrap_where(
                 cx,
@@ -9477,7 +9477,7 @@ fn __flow_impl<'cx>(
         }
         (
             DefT(_, deref!(EnumObjectT { enum_info, .. })),
-            GetElemT(box GetElemTData { key_t, tout, .. }),
+            GetElemT(deref!(GetElemTData { key_t, tout, .. })),
         ) => {
             let reason = reason_of_t(key_t);
             flow_js_utils::add_output_with_env(
@@ -9524,14 +9524,14 @@ fn __flow_impl<'cx>(
         }
         (
             DefT(_, deref!(EnumObjectT { enum_info, .. })),
-            SetElemT(box SetElemTData {
+            SetElemT(deref!(SetElemTData {
                 use_op: _,
                 reason: op_reason,
                 key_t: _,
                 set_mode: _,
                 tin: _,
                 tout,
-            }),
+            })),
         ) => {
             flow_js_utils::add_output_with_env(
                 cx,
@@ -9589,13 +9589,13 @@ fn __flow_impl<'cx>(
         }
         (
             DefT(_, deref!(EnumValueT(enum_info))),
-            MethodT(box MethodTData {
+            MethodT(deref!(MethodTData {
                 use_op,
                 reason: call_reason,
                 prop_reason: lookup_reason,
-                propref: propref @ box PropRef::Named { .. },
+                propref: propref @ deref!(PropRef::Named { .. }),
                 method_action: action,
-            }),
+            })),
         ) => {
             let representation_t = match EnumInfo::deref(enum_info) {
                 EnumInfoInner::ConcreteEnum(ce) => &ce.representation_t,
@@ -9661,14 +9661,14 @@ fn __flow_impl<'cx>(
         // **************************************************************************
         (
             DefT(_, deref!(NullT | VoidT | TsVoidT)),
-            TestPropT(box TestPropTData {
+            TestPropT(deref!(TestPropTData {
                 use_op,
                 reason,
                 id,
                 propref,
                 tout,
                 hint,
-            }),
+            })),
         ) => {
             // The wildcard TestPropT implementation forwards the lower bound to
             // LookupT. This is unfortunate, because LookupT is designed to terminate
@@ -9702,9 +9702,9 @@ fn __flow_impl<'cx>(
                     MixedFlavor::MixedTruthy | MixedFlavor::MixedNonMaybe
                 )),
             ),
-            TestPropT(box TestPropTData {
+            TestPropT(deref!(TestPropTData {
                 use_op, id, tout, ..
-            }),
+            })),
         ) => {
             // Special-case property tests of definitely non-null/non-void values to
             // return mixed and treat them as a hit.
@@ -9718,14 +9718,14 @@ fn __flow_impl<'cx>(
         }
         (
             _,
-            TestPropT(box TestPropTData {
+            TestPropT(deref!(TestPropTData {
                 use_op,
                 reason,
                 id,
-                propref: propref @ box PropRef::Named { name, .. },
+                propref: propref @ deref!(PropRef::Named { name, .. }),
                 tout,
                 hint,
-            }),
+            })),
         ) if name == &Name::new("constructor") => {
             rec_flow(
                 cx,
@@ -9748,14 +9748,14 @@ fn __flow_impl<'cx>(
         }
         (
             _,
-            TestPropT(box TestPropTData {
+            TestPropT(deref!(TestPropTData {
                 use_op,
                 reason: reason_op,
                 id,
                 propref,
                 tout,
                 hint: _,
-            }),
+            })),
         ) => {
             let lookup_default = LookupDefaultResult::Flow {
                 use_op: use_op.dupe(),
@@ -9824,12 +9824,12 @@ fn __flow_impl<'cx>(
         // ***************************
         (
             _,
-            CondT(box CondTData {
+            CondT(deref!(CondTData {
                 loc: _,
                 opt_type: then_t_opt,
                 true_t: else_t,
                 collector,
-            }),
+            })),
         ) => {
             let t = match l.deref() {
                 DefT(_, deref!(EmptyT)) => else_t,
@@ -9866,14 +9866,14 @@ fn __flow_impl<'cx>(
         // ***********************************************************
         (
             _,
-            SealGenericT(box SealGenericTData {
+            SealGenericT(deref!(SealGenericTData {
                 bounded_id, cont, ..
-            }),
+            })),
         ) => {
             let sealed = bounded_id.with_bound(reason_of_t(l).dupe(), l.dupe());
             continue_(cx, env, trace, &sealed, cont)?;
         }
-        (GenericT(box GenericTData { reason, bound, .. }), _) => {
+        (GenericT(deref!(GenericTData { reason, bound, .. })), _) => {
             let repos = helpers::reposition_reason(cx, env, None, reason, false, bound)?;
             rec_flow(cx, env, trace, (&repos, u))?;
         }
@@ -9883,11 +9883,11 @@ fn __flow_impl<'cx>(
         }
         (
             _,
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 kind: ConcretizationKind::ConcretizeForEnumExhaustiveCheck,
                 collector,
                 ..
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
@@ -9896,12 +9896,12 @@ fn __flow_impl<'cx>(
         // ************
         (
             DefT(enum_reason, deref!(EnumValueT(enum_info))),
-            GetEnumT(box GetEnumTData {
+            GetEnumT(deref!(GetEnumTData {
                 orig_t,
                 kind: GetEnumKind::GetEnumObject,
                 collector,
                 ..
-            }),
+            })),
         ) => {
             let enum_value_t = match orig_t {
                 Some(t) => t.dupe(),
@@ -9918,21 +9918,21 @@ fn __flow_impl<'cx>(
         }
         (
             _,
-            GetEnumT(box GetEnumTData {
+            GetEnumT(deref!(GetEnumTData {
                 kind: GetEnumKind::GetEnumObject,
                 collector,
                 ..
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
         (
             DefT(_, deref!(EnumObjectT { enum_value_t, .. })),
-            GetEnumT(box GetEnumTData {
+            GetEnumT(deref!(GetEnumTData {
                 kind: GetEnumKind::GetEnumValue,
                 collector,
                 ..
-            }),
+            })),
         ) => {
             collector.add(enum_value_t.dupe());
         }
@@ -9941,11 +9941,11 @@ fn __flow_impl<'cx>(
         // **********************************
         (
             _,
-            GetEnumT(box GetEnumTData {
+            GetEnumT(deref!(GetEnumTData {
                 kind: GetEnumKind::GetEnumValue,
                 collector,
                 ..
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
@@ -9962,7 +9962,7 @@ fn __flow_impl<'cx>(
         // does not.
         (
             _,
-            LookupT(box LookupTData {
+            LookupT(deref!(LookupTData {
                 reason,
                 lookup_kind,
                 indexer_fallback,
@@ -9972,7 +9972,7 @@ fn __flow_impl<'cx>(
                 method_accessible,
                 ids,
                 ignore_dicts,
-            }),
+            })),
         ) if is_extends_use_t_root(l.deref()) && !try_ts_on_failure.is_empty() => {
             // When the property is not found, we always try to look it up in the next
             // element in the list try_ts_on_failure. (`__proto__` is a getter/setter on
@@ -10006,17 +10006,17 @@ fn __flow_impl<'cx>(
         // together.
         (
             _,
-            LookupT(box LookupTData {
+            LookupT(deref!(LookupTData {
                 reason,
                 lookup_kind,
                 indexer_fallback,
                 try_ts_on_failure,
                 propref: _,
-                lookup_action: box LookupAction::LookupPropsForSubtyping(box lookup_props_data),
+                lookup_action: deref!(LookupAction::LookupPropsForSubtyping(deref!(lookup_props_data))),
                 method_accessible,
                 ids,
                 ignore_dicts,
-            }),
+            })),
         ) if is_extends_use_t_root(l.deref())
             && try_ts_on_failure.is_empty()
             && lookup_props_data.props.len() > 1
@@ -10064,22 +10064,22 @@ fn __flow_impl<'cx>(
         }
         (
             ObjProtoT(_) | FunProtoT(_),
-            LookupT(box LookupTData {
+            LookupT(deref!(LookupTData {
                 reason: reason_op,
                 lookup_kind: _,
                 indexer_fallback: _,
                 try_ts_on_failure,
-                propref: box PropRef::Named { name, .. },
+                propref: deref!(PropRef::Named { name, .. }),
                 lookup_action:
-                    box LookupAction::ReadProp(box ReadPropData {
+                    deref!(LookupAction::ReadProp(deref!(ReadPropData {
                         use_op: _,
                         obj_t: lookup_l,
                         tout,
-                    }),
+                    }))),
                 ids: _,
                 method_accessible: _,
                 ignore_dicts: _,
-            }),
+            })),
         ) if try_ts_on_failure.is_empty() && name == &Name::new("__proto__") => {
             // __proto__ is a getter/setter on Object.prototype
             let collector = type_collector::TypeCollector::create();
@@ -10099,17 +10099,17 @@ fn __flow_impl<'cx>(
         }
         (
             ObjProtoT(_) | FunProtoT(_),
-            LookupT(box LookupTData {
+            LookupT(deref!(LookupTData {
                 reason: reason_op,
                 lookup_kind: _,
                 indexer_fallback: _,
                 try_ts_on_failure,
-                propref: box PropRef::Named { name, .. },
-                lookup_action: box LookupAction::WriteProp(_),
+                propref: deref!(PropRef::Named { name, .. }),
+                lookup_action: deref!(LookupAction::WriteProp(_)),
                 method_accessible: _,
                 ids: _,
                 ignore_dicts: _,
-            }),
+            })),
         ) if try_ts_on_failure.is_empty() && name == &Name::new("__proto__") => {
             // __proto__ is a getter/setter on Object.prototype
             flow_js_utils::add_output_with_env(
@@ -10120,12 +10120,12 @@ fn __flow_impl<'cx>(
         }
         (
             ObjProtoT(_),
-            LookupT(box LookupTData {
+            LookupT(deref!(LookupTData {
                 reason: reason_op,
                 try_ts_on_failure,
-                propref: box PropRef::Named { name, .. },
+                propref: deref!(PropRef::Named { name, .. }),
                 ..
-            }),
+            })),
         ) if try_ts_on_failure.is_empty() && flow_js_utils::is_object_prototype_method(name) => {
             // TODO: These properties should go in Object.prototype. Currently we
             // model Object.prototype as a ObjProtoT, as an optimization against a
@@ -10136,16 +10136,16 @@ fn __flow_impl<'cx>(
         }
         (
             FunProtoT(_),
-            LookupT(box LookupTData {
+            LookupT(deref!(LookupTData {
                 reason: reason_op,
                 propref:
-                    box PropRef::Named {
+                    deref!(PropRef::Named {
                         reason: reason_prop,
                         name,
                         ..
-                    },
+                    }),
                 ..
-            }),
+            })),
         ) if flow_js_utils::is_function_prototype(name) => {
             // Reaching here means the access resolved on `Function.prototype`
             // rather than on the receiver itself. `statement.rs` reads this back
@@ -10168,17 +10168,17 @@ fn __flow_impl<'cx>(
         }
         (
             DefT(_, deref!(NullT)),
-            LookupT(box LookupTData {
+            LookupT(deref!(LookupTData {
                 reason: reason_op,
-                lookup_kind: box LookupKind::Strict(strict_obj),
+                lookup_kind: deref!(LookupKind::Strict(strict_obj)),
                 indexer_fallback,
                 try_ts_on_failure,
-                propref: propref @ box (PropRef::Named { .. } | PropRef::Constructor(_)),
+                propref: propref @ deref!((PropRef::Named { .. } | PropRef::Constructor(_))),
                 lookup_action: action,
                 method_accessible: _,
                 ids,
                 ignore_dicts: _,
-            }),
+            })),
         ) if try_ts_on_failure.is_empty() => {
             strict_lookup_failed(
                 cx,
@@ -10197,20 +10197,20 @@ fn __flow_impl<'cx>(
         (
             ObjProtoT(_),
             LookupT(
-                box data @ LookupTData {
-                    lookup_kind: box LookupKind::Strict(strict_obj),
+                deref!(data @ LookupTData {
+                    lookup_kind: deref!(LookupKind::Strict(strict_obj)),
                     try_ts_on_failure,
                     propref,
                     lookup_action: action,
                     ..
-                },
+                }),
             ),
         ) if try_ts_on_failure.is_empty()
             && is_instance_constructor_member(l, &data.lookup_kind, propref) =>
         {
             let propref = PropRef::Constructor(type_util::reason_of_propref(propref).dupe());
             let action = match &**action {
-                LookupAction::LookupPropsForSubtyping(box props_data) => {
+                LookupAction::LookupPropsForSubtyping(deref!(props_data)) => {
                     LookupAction::LookupPropsForSubtyping(Box::new(LookupPropsForSubtypingData {
                         props: props_data
                             .props
@@ -10238,17 +10238,17 @@ fn __flow_impl<'cx>(
         }
         (
             ObjProtoT(_) | FunProtoT(_),
-            LookupT(box LookupTData {
+            LookupT(deref!(LookupTData {
                 reason: reason_op,
-                lookup_kind: box LookupKind::Strict(strict_obj),
+                lookup_kind: deref!(LookupKind::Strict(strict_obj)),
                 indexer_fallback,
                 try_ts_on_failure,
-                propref: propref @ box (PropRef::Named { .. } | PropRef::Constructor(_)),
+                propref: propref @ deref!((PropRef::Named { .. } | PropRef::Constructor(_))),
                 lookup_action: action,
                 method_accessible: _,
                 ids,
                 ignore_dicts: _,
-            }),
+            })),
         ) if try_ts_on_failure.is_empty() => {
             strict_lookup_failed(
                 cx,
@@ -10267,17 +10267,17 @@ fn __flow_impl<'cx>(
         // computed access on the spot, so there is nothing to hold back.
         (
             DefT(_, deref!(NullT)),
-            LookupT(box LookupTData {
+            LookupT(deref!(LookupTData {
                 reason: reason_op,
-                lookup_kind: box LookupKind::Strict(strict_obj),
+                lookup_kind: deref!(LookupKind::Strict(strict_obj)),
                 try_ts_on_failure,
-                propref: propref @ box PropRef::Computed(elem_t),
+                propref: propref @ deref!(PropRef::Computed(elem_t)),
                 lookup_action: action,
                 method_accessible: _,
                 ids: _,
                 ignore_dicts: _,
                 indexer_fallback: _,
-            }),
+            })),
         ) if try_ts_on_failure.is_empty() => {
             strict_computed_lookup_failed(
                 cx, env, trace, l, reason_op, strict_obj, propref, elem_t, action,
@@ -10285,17 +10285,17 @@ fn __flow_impl<'cx>(
         }
         (
             ObjProtoT(_) | FunProtoT(_),
-            LookupT(box LookupTData {
+            LookupT(deref!(LookupTData {
                 reason: reason_op,
-                lookup_kind: box LookupKind::Strict(strict_obj),
+                lookup_kind: deref!(LookupKind::Strict(strict_obj)),
                 indexer_fallback: _,
                 try_ts_on_failure,
-                propref: propref @ box PropRef::Computed(elem_t),
+                propref: propref @ deref!(PropRef::Computed(elem_t)),
                 lookup_action: action,
                 method_accessible: _,
                 ids: _,
                 ignore_dicts: _,
-            }),
+            })),
         ) if try_ts_on_failure.is_empty() => {
             strict_computed_lookup_failed(
                 cx, env, trace, l, reason_op, strict_obj, propref, elem_t, action,
@@ -10303,17 +10303,17 @@ fn __flow_impl<'cx>(
         }
         (
             ObjProtoT(_) | FunProtoT(_) | DefT(_, deref!(NullT)),
-            LookupT(box LookupTData {
+            LookupT(deref!(LookupTData {
                 reason: reason_op,
                 lookup_kind:
-                    box LookupKind::NonstrictReturning(box NonstrictReturningData(t_opt, test_opt)),
+                    deref!(LookupKind::NonstrictReturning(deref!(NonstrictReturningData(t_opt, test_opt)))),
                 indexer_fallback,
                 try_ts_on_failure,
                 propref,
                 lookup_action: action,
                 ids,
                 ..
-            }),
+            })),
         ) if try_ts_on_failure.is_empty() => {
             // An indexer matched the access on the way up, so the lookup did not fail and
             // the not-found default does not apply.
@@ -10403,7 +10403,7 @@ fn __flow_impl<'cx>(
         // extends, and `Object.prototype` for the builtin `Object`. Each can itself be the
         // superclass searched for. They are matched by identity only, then the search moves on to
         // `Object.prototype` and the root, never into the supers a library declares for them.
-        (ObjProtoT(reason), ExtendsUseT(box ExtendsUseTData { false_t: ext_u, .. })) => {
+        (ObjProtoT(reason), ExtendsUseT(deref!(ExtendsUseTData { false_t: ext_u, .. }))) => {
             let obj_proto =
                 helpers::get_builtin_type(cx, env, Some(trace), reason, Some(true), "Object")?;
             if !flow_js_utils::is_same_non_generic_instance_annot(cx, &obj_proto, ext_u) {
@@ -10411,7 +10411,7 @@ fn __flow_impl<'cx>(
                 rec_flow(cx, env, trace, (&null_t, u))?;
             }
         }
-        (FunProtoT(reason), ExtendsUseT(box ExtendsUseTData { false_t: ext_u, .. })) => {
+        (FunProtoT(reason), ExtendsUseT(deref!(ExtendsUseTData { false_t: ext_u, .. }))) => {
             let fun_proto = helpers::get_builtin_type(
                 cx,
                 env,
@@ -10437,13 +10437,13 @@ fn __flow_impl<'cx>(
         }
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
-            ExtendsUseT(box ExtendsUseTData {
+            ExtendsUseT(deref!(ExtendsUseTData {
                 use_op,
                 reason: reason_op,
                 targs: ts,
                 true_t: t1,
                 false_t: t2,
-            }),
+            })),
         ) => {
             for t in ts.iter() {
                 let any = flow_js_utils::any_result(l, reason_op.dupe());
@@ -10484,13 +10484,13 @@ fn __flow_impl<'cx>(
         }
         (
             root,
-            ExtendsUseT(box ExtendsUseTData {
+            ExtendsUseT(deref!(ExtendsUseTData {
                 use_op,
                 reason: reason_ext,
                 targs: try_ts,
                 true_t: ext_l,
                 false_t: ext_u,
-            }),
+            })),
         ) if is_extends_use_t_root(root) && !try_ts.is_empty() => {
             // When seaching for a nominal superclass fails, we always try to look it
             // up in the next element in the list try_ts_on_failure.
@@ -10514,13 +10514,13 @@ fn __flow_impl<'cx>(
         }
         (
             root,
-            ExtendsUseT(box ExtendsUseTData {
+            ExtendsUseT(deref!(ExtendsUseTData {
                 use_op,
                 reason: _,
                 targs: try_ts,
                 true_t: ext_l,
                 false_t: ext_u @ deref!(DefT(_, deref!(InstanceT(inst_t)))),
-            }),
+            })),
         ) if is_extends_use_t_root(root) && try_ts.is_empty() && {
             match &inst_t.inst.inst_kind {
                 InstanceKind::InterfaceKind { .. } => true,
@@ -10761,13 +10761,13 @@ fn __flow_impl<'cx>(
         }
         (
             _,
-            ExtendsUseT(box ExtendsUseTData {
+            ExtendsUseT(deref!(ExtendsUseTData {
                 use_op,
                 reason: _,
                 targs: try_ts,
                 true_t: t,
                 false_t: tc,
-            }),
+            })),
         ) if try_ts.is_empty() => {
             flow_js_utils::add_output_with_env(
                 cx,
@@ -10780,12 +10780,12 @@ fn __flow_impl<'cx>(
         // *********
         (
             _,
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 reason: _,
                 kind: ConcretizationKind::ConcretizeForMatchArg { .. },
                 seen: _,
                 collector,
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
@@ -10883,24 +10883,24 @@ fn __flow_impl<'cx>(
         // **********************
         #[rustfmt::skip]
         (
-            DefT(reason, deref!(ArrT(deref!(ArrayAT(box ArrayATData {
+            DefT(reason, deref!(ArrT(deref!(ArrayAT(deref!(ArrayATData {
                 elem_t,
                 react_dro: Some(ReactDro(dro_loc, dro_type)),
                 tuple_view,
                 strictness_kind,
                 literal,
                 fresh,
-            }))))),
+            })))))),
             GetPropT(..) | SetPropT(..) | MethodT(..) | LookupT(..),
         ) => {
             match u.deref() {
-                MethodT(box MethodTData {
+                MethodT(deref!(MethodTData {
                     use_op,
                     reason: _,
                     prop_reason: method_reason,
-                    propref: box PropRef::Named { name, .. },
+                    propref: deref!(PropRef::Named { name, .. }),
                     method_action: _,
-                }) if matches!(
+                })) if matches!(
                     name.as_str_opt(),
                     Some(
                         "fill"
@@ -10942,9 +10942,9 @@ fn __flow_impl<'cx>(
                     ));
                     rec_flow(cx, env, trace, (&arr_no_dro, u))?;
                 }
-                GetPropT(box data @ GetPropTData {
-                    propref: box PropRef::Named { name, .. }, ..
-                }) if matches!(
+                GetPropT(deref!(data @ GetPropTData {
+                    propref: deref!(PropRef::Named { name, .. }), ..
+                })) if matches!(
                             name.as_str_opt(),
                             Some(
                                 "fill"
@@ -11019,9 +11019,9 @@ fn __flow_impl<'cx>(
         },
         #[rustfmt::skip]
         (
-            DefT(reason, deref!(ArrT(deref!(ArrayAT(box ArrayATData {
+            DefT(reason, deref!(ArrT(deref!(ArrayAT(deref!(ArrayATData {
                 elem_t, strictness_kind, ..
-            }))))),
+            })))))),
             GetPropT(..) | SetPropT(..) | MethodT(..) | LookupT(..),
         ) => {
             // The members are those of the builtin `Array` instance, with `this` being the array
@@ -11052,12 +11052,12 @@ fn __flow_impl<'cx>(
         // *************************
         #[rustfmt::skip]
         (
-            DefT(reason, deref!(ArrT(deref!(TupleAT(box TupleATData {
+            DefT(reason, deref!(ArrT(deref!(TupleAT(deref!(TupleATData {
                 arity, inexact, rest, ..
-            }))))),
-            GetPropT(box data @ GetPropTData {
-                propref: box PropRef::Named { name, .. }, ..
-            }),
+            })))))),
+            GetPropT(deref!(data @ GetPropTData {
+                propref: deref!(PropRef::Named { name, .. }), ..
+            })),
         ) if name == &Name::new("length") => {
             flow_js_utils::get_prop_t_kit::on_array_length::<FlowJs>(
                 cx,
@@ -11072,12 +11072,12 @@ fn __flow_impl<'cx>(
         #[rustfmt::skip]
         (
             DefT(reason, deref!(ArrT(deref!(
-                TupleAT(box TupleATData {
+                TupleAT(deref!(TupleATData {
                     elem_t, react_dro: Some(ReactDro(dro_loc, dro_type)), ..
-                })
-                | ROArrayAT(box ROArrayATData {
+                }))
+                | ROArrayAT(deref!(ROArrayATData {
                     elem_t, react_dro: Some(ReactDro(dro_loc, dro_type)), ..
-                })
+                }))
             )))),
             GetPropT(..) | SetPropT(..) | MethodT(..) | LookupT(..),
         ) => {
@@ -11166,20 +11166,20 @@ fn __flow_impl<'cx>(
         }
         (
             DefT(_, deref!(MixedT(MixedFlavor::MixedFunction))),
-            CallT(box CallTData {
-                call_action: box CallAction::ConcretizeCallee(tout),
+            CallT(deref!(CallTData {
+                call_action: deref!(CallAction::ConcretizeCallee(tout)),
                 ..
-            }),
+            })),
         ) => {
             tout.add(l.dupe());
         }
         (
             DefT(lreason, deref!(MixedT(MixedFlavor::MixedFunction))),
-            CallT(box CallTData {
+            CallT(deref!(CallTData {
                 use_op,
                 reason: ureason,
                 ..
-            }),
+            })),
         ) => {
             flow_js_utils::add_output_with_env(
                 cx,
@@ -11198,11 +11198,11 @@ fn __flow_impl<'cx>(
         }
         (
             _,
-            LookupT(box LookupTData {
+            LookupT(deref!(LookupTData {
                 propref,
                 lookup_action,
                 ..
-            }),
+            })),
         ) => {
             default_resolve::default_resolve_touts(
                 cx,
@@ -11233,11 +11233,11 @@ fn __flow_impl<'cx>(
         // Super classes are collected too, so that subclasses of `Promise` are found
         (
             DefT(_, deref!(InstanceT(inst_t))),
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 kind: ConcretizationKind::ConcretizeForUnusedPromiseCheck,
                 collector,
                 ..
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
             if !flow_js_utils::is_builtin_class_id("Promise", inst_t.inst.class_id.dupe(), cx) {
@@ -11246,14 +11246,14 @@ fn __flow_impl<'cx>(
         }
         (
             _,
-            ConcretizeT(box ConcretizeTData {
+            ConcretizeT(deref!(ConcretizeTData {
                 reason: _,
                 kind:
                     ConcretizationKind::ConcretizeForUnusedPromiseCheck
                     | ConcretizationKind::ConcretizeAll,
                 seen: _,
                 collector,
-            }),
+            })),
         ) => {
             collector.add(l.dupe());
         }
@@ -11262,11 +11262,11 @@ fn __flow_impl<'cx>(
         // report it again.
         (
             _,
-            SpecializeT(box SpecializeTData {
+            SpecializeT(deref!(SpecializeTData {
                 targs: Some(_),
                 upper: Some(_),
                 ..
-            })
+            }))
             | ConcretizeTypeAppsT(..),
         ) => {
             default_resolve::default_resolve_touts(

@@ -1563,14 +1563,14 @@ fn check_methods<'a, C: crate::func_params_intf::Config>(
 /// Checks the type arguments written in an `extends`, `mixins` or `implements` clause.
 fn validate_heritage_type_args<'a>(cx: &mut Context<'a>, t: &Type) {
     match t.deref() {
-        TypeInner::TypeAppT(box TypeAppTData {
+        TypeInner::TypeAppT(deref!(TypeAppTData {
             reason,
             use_op,
             type_,
             targs,
             from_value,
             ..
-        }) => type_annotation_cons_gen::validate_type_args(
+        })) => type_annotation_cons_gen::validate_type_args(
             cx,
             use_op.dupe(),
             reason.dupe(),
@@ -1578,12 +1578,12 @@ fn validate_heritage_type_args<'a>(cx: &mut Context<'a>, t: &Type) {
             Some(targs.dupe()),
             *from_value,
         ),
-        TypeInner::ThisTypeAppT(box ThisTypeAppTData {
+        TypeInner::ThisTypeAppT(deref!(ThisTypeAppTData {
             reason,
             type_,
             targs: Some(targs),
             ..
-        }) => type_annotation_cons_gen::validate_type_args(
+        })) => type_annotation_cons_gen::validate_type_args(
             cx,
             unknown_use(),
             reason.dupe(),
@@ -1926,7 +1926,7 @@ fn post_inference_check_abstract_obligations<'cx>(
         t: &Type,
     ) -> Result<(), FlowJsException> {
         match t.deref() {
-            TypeInner::ThisInstanceT(box ThisInstanceTData { instance, .. })
+            TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance, .. }))
                 if process_inst(cx, &instance.inst) =>
             {
                 walk(cx, process_inst, &instance.super_)?;
@@ -2220,7 +2220,7 @@ fn collect_inherited_members_both_sides<'cx>(
         t: &Type,
     ) -> Result<(), FlowJsException> {
         match t.deref() {
-            TypeInner::ThisInstanceT(box ThisInstanceTData { instance, .. }) => {
+            TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance, .. })) => {
                 if process_inst(cx, instance) {
                     walk(cx, process_inst, &instance.super_)?;
                 }

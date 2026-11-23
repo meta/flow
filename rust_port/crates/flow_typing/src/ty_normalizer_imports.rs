@@ -286,7 +286,7 @@ fn class_def_loc(cx: &mut Context<'_>, t: &Type) -> Option<ALoc> {
         return None;
     };
     match def_t.deref() {
-        DefTInner::PolyT(box PolyTData { t_out, .. }) => class_def_loc(cx, t_out),
+        DefTInner::PolyT(deref!(PolyTData { t_out, .. })) => class_def_loc(cx, t_out),
         DefTInner::ClassT(instance) => {
             let instance = cx
                 .find_resolved(instance)
@@ -296,7 +296,7 @@ fn class_def_loc(cx: &mut Context<'_>, t: &Type) -> Option<ALoc> {
                     DefTInner::InstanceT(instance_t) => &instance_t.inst,
                     _ => return None,
                 },
-                TypeInner::ThisInstanceT(box ThisInstanceTData { instance, .. }) => &instance.inst,
+                TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance, .. })) => &instance.inst,
                 _ => return None,
             };
             inst.class_name.as_ref().map(|_| inst.class_id.0.dupe())

@@ -225,13 +225,13 @@ pub fn edge_import_ns<Loc>(
 
 fn visit_ref<Loc>(edge: &dyn Fn(Rc<Node>), file: &File, ref_: &P::PackedRef<Loc>) {
     match ref_ {
-        P::PackedRef::LocalRef(box P::PackedRefLocal { ref_loc: _, index }) => {
+        P::PackedRef::LocalRef(deref!(P::PackedRefLocal { ref_loc: _, index })) => {
             edge_local_def(edge, file, *index)
         }
-        P::PackedRef::RemoteRef(box P::PackedRefRemote { ref_loc: _, index }) => {
+        P::PackedRef::RemoteRef(deref!(P::PackedRefRemote { ref_loc: _, index })) => {
             edge_remote_ref(edge, file, *index)
         }
-        P::PackedRef::BuiltinRef(box P::PackedRefBuiltin { .. }) => {
+        P::PackedRef::BuiltinRef(deref!(P::PackedRefBuiltin { .. })) => {
             // If the builtins change, we will restart anyway, so there is no need to do
             // any hashing here.
         }
@@ -241,7 +241,7 @@ fn visit_ref<Loc>(edge: &dyn Fn(Rc<Node>), file: &File, ref_: &P::PackedRef<Loc>
 fn visit_tyref<Loc>(edge: &dyn Fn(Rc<Node>), file: &File, tyref: &P::TyRef<Loc>) {
     match tyref {
         P::TyRef::Unqualified(ref_) => visit_ref(edge, file, ref_),
-        P::TyRef::Qualified(box P::TyRefQualified { qualification, .. }) => {
+        P::TyRef::Qualified(deref!(P::TyRefQualified { qualification, .. })) => {
             visit_tyref(edge, file, qualification);
         }
     }
@@ -258,11 +258,11 @@ pub fn visit_packed<Loc>(
         P::Packed::Value(t) => visit_value(edge, dep_edge, file, t),
         P::Packed::Ref(ref_) => visit_ref(edge, file, ref_),
         P::Packed::TyRef(ref_) => visit_tyref(edge, file, ref_),
-        P::Packed::TyRefApp(box P::PackedTyRefApp {
+        P::Packed::TyRefApp(deref!(P::PackedTyRefApp {
             loc: _,
             name,
             targs,
-        }) => {
+        })) => {
             visit_tyref(edge, file, name);
             for targ in targs {
                 visit_packed(edge, dep_edge, file, targ);
@@ -271,24 +271,24 @@ pub fn visit_packed<Loc>(
         P::Packed::AsyncVoidReturn(_loc) => {}
         P::Packed::Pattern(index) => edge_pattern(edge, file, *index),
         P::Packed::Err(_loc) => {}
-        P::Packed::Eval(box P::PackedEval {
+        P::Packed::Eval(deref!(P::PackedEval {
             loc: _,
             packed: t,
             op,
             strictness_kind: _,
-        }) => {
+        })) => {
             visit_eval(edge, dep_edge, file, t, op);
         }
-        P::Packed::Require(box P::PackedLocIndex { loc: _, index, .. }) => {
+        P::Packed::Require(deref!(P::PackedLocIndex { loc: _, index, .. })) => {
             edge_require(edge, dep_edge, file, *index)
         }
-        P::Packed::ImportDynamic(box P::PackedLocIndex { loc: _, index, .. }) => {
+        P::Packed::ImportDynamic(deref!(P::PackedLocIndex { loc: _, index, .. })) => {
             edge_import_ns(edge, dep_edge, file, *index)
         }
-        P::Packed::ModuleRef(box P::PackedLocIndex { loc: _, index, .. }) => {
+        P::Packed::ModuleRef(deref!(P::PackedLocIndex { loc: _, index, .. })) => {
             edge_require(edge, dep_edge, file, *index)
         }
-        P::Packed::ImportTypeAnnot(box P::PackedLocIndex { loc: _, index, .. }) => {
+        P::Packed::ImportTypeAnnot(deref!(P::PackedLocIndex { loc: _, index, .. })) => {
             edge_import_ns(edge, dep_edge, file, *index)
         }
     }
@@ -392,17 +392,17 @@ pub fn visit_export<Loc>(
 ) {
     match export {
         P::Export::ExportRef(ref_) => visit_ref(edge, file, ref_),
-        P::Export::ExportDefault(box P::ExportDefaultData {
+        P::Export::ExportDefault(deref!(P::ExportDefaultData {
             default_loc: _,
             def,
-        }) => visit_packed(edge, dep_edge, file, def),
+        })) => visit_packed(edge, dep_edge, file, def),
         P::Export::ExportBinding(index) => {
             edge_local_def(edge, file, *index);
         }
-        P::Export::ExportDefaultBinding(box P::ExportDefaultBindingData {
+        P::Export::ExportDefaultBinding(deref!(P::ExportDefaultBindingData {
             default_loc: _,
             index,
-        }) => {
+        })) => {
             edge_local_def(edge, file, *index);
         }
         P::Export::ExportFrom(index) => edge_remote_ref(edge, file, *index),

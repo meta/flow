@@ -7,7 +7,7 @@
 
 //! Port of `services/get_def/`
 
-#![feature(box_patterns)]
+#![feature(deref_patterns)]
 #![feature(never_type)]
 
 pub mod find_refs_utils;

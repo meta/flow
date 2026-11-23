@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#![feature(box_patterns)]
+#![feature(deref_patterns)]
 #![feature(never_type)]
 
 use std::collections::BTreeMap;
@@ -197,11 +197,11 @@ impl CoverageVisitor {
             TypeInner::EvalT { type_, id, .. } => self.eval_t(cx, type_, id),
             // Non-concrete (fallthrough) constructors
             TypeInner::AnnotT(_, t, _)
-            | TypeInner::TypeAppT(box TypeAppTData { type_: t, .. })
-            | TypeInner::GenericT(box GenericTData { bound: t, .. })
-            | TypeInner::ThisTypeAppT(box ThisTypeAppTData { this_t: t, .. }) => self.type_(cx, t),
+            | TypeInner::TypeAppT(deref!(TypeAppTData { type_: t, .. }))
+            | TypeInner::GenericT(deref!(GenericTData { bound: t, .. }))
+            | TypeInner::ThisTypeAppT(deref!(ThisTypeAppTData { this_t: t, .. })) => self.type_(cx, t),
             TypeInner::DefT(_, def_t) => match def_t.deref() {
-                DefTInner::PolyT(box PolyTData { t_out: t, .. }) | DefTInner::TypeT(_, t) => {
+                DefTInner::PolyT(deref!(PolyTData { t_out: t, .. })) | DefTInner::TypeT(_, t) => {
                     self.type_(cx, t)
                 }
                 // Concrete covered

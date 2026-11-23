@@ -870,10 +870,10 @@ fn typeof_ref<'arena, 'ast>(
 
 fn merge_accessors<Loc, T>(a: Accessor<Loc, T>, b: Accessor<Loc, T>) -> Accessor<Loc, T> {
     match (a, b) {
-        (Accessor::Get(box (get_loc, get_t)), Accessor::Set(box (set_loc, set_t)))
-        | (Accessor::Set(box (set_loc, set_t)), Accessor::Get(box (get_loc, get_t)))
-        | (Accessor::GetSet(box (get_loc, get_t, _, _)), Accessor::Set(box (set_loc, set_t)))
-        | (Accessor::GetSet(box (_, _, set_loc, set_t)), Accessor::Get(box (get_loc, get_t))) => {
+        (Accessor::Get(deref!((get_loc, get_t))), Accessor::Set(deref!((set_loc, set_t))))
+        | (Accessor::Set(deref!((set_loc, set_t))), Accessor::Get(deref!((get_loc, get_t))))
+        | (Accessor::GetSet(deref!((get_loc, get_t, _, _))), Accessor::Set(deref!((set_loc, set_t))))
+        | (Accessor::GetSet(deref!((_, _, set_loc, set_t))), Accessor::Get(deref!((get_loc, get_t)))) => {
             Accessor::GetSet(Box::new((get_loc, get_t, set_loc, set_t)))
         }
         (_, x) => x,
@@ -2976,7 +2976,7 @@ pub(crate) mod scope {
             parsed: &Parsed<'arena, 'ast>,
         ) -> Parsed<'arena, 'ast> {
             match parsed {
-                Parsed::Annot(box Annot::Bound(inner)) => {
+                Parsed::Annot(deref!(Annot::Bound(inner))) => {
                     let name = loc_names
                         .iter()
                         .find_map(|(loc, name)| {
@@ -3034,7 +3034,7 @@ pub(crate) mod scope {
             value: &ParsedValue<'arena, 'ast>,
         ) -> ParsedValue<'arena, 'ast> {
             match value {
-                Value::ClassExpr(box (loc, def)) => Value::ClassExpr(Box::new((
+                Value::ClassExpr(deref!((loc, def))) => Value::ClassExpr(Box::new((
                     loc.dupe(),
                     rename_tparams_in_class_sig(rename_map, def),
                 ))),
@@ -3151,16 +3151,16 @@ pub(crate) mod scope {
                     ref_loc: inner.ref_loc.dupe(),
                     name: rename_tparam_name(rename_map, &inner.name),
                 })),
-                Annot::FunAnnot(box (loc, def)) => Annot::FunAnnot(Box::new((
+                Annot::FunAnnot(deref!((loc, def))) => Annot::FunAnnot(Box::new((
                     loc.dupe(),
                     rename_tparams_in_fun_sig(rename_map, def),
                 ))),
-                Annot::MethodAnnot(box (loc, is_static, def)) => Annot::MethodAnnot(Box::new((
+                Annot::MethodAnnot(deref!((loc, is_static, def))) => Annot::MethodAnnot(Box::new((
                     loc.dupe(),
                     *is_static,
                     rename_tparams_in_fun_sig(rename_map, def),
                 ))),
-                Annot::ComponentAnnot(box (loc, def)) => Annot::ComponentAnnot(Box::new((
+                Annot::ComponentAnnot(deref!((loc, def))) => Annot::ComponentAnnot(Box::new((
                     loc.dupe(),
                     rename_tparams_in_component_sig(rename_map, def),
                 ))),
@@ -3245,7 +3245,7 @@ pub(crate) mod scope {
                         strictness_kind: inner.strictness_kind,
                     }))
                 }
-                Annot::InlineInterface(box (loc, def)) => Annot::InlineInterface(Box::new((
+                Annot::InlineInterface(deref!((loc, def))) => Annot::InlineInterface(Box::new((
                     loc.dupe(),
                     rename_tparams_in_interface_sig(rename_map, def),
                 ))),
@@ -3444,15 +3444,15 @@ pub(crate) mod scope {
             accessor: &Accessor<LocNode<'arena>, Parsed<'arena, 'ast>>,
         ) -> Accessor<LocNode<'arena>, Parsed<'arena, 'ast>> {
             match accessor {
-                Accessor::Get(box (loc, t)) => Accessor::Get(Box::new((
+                Accessor::Get(deref!((loc, t))) => Accessor::Get(Box::new((
                     loc.dupe(),
                     rename_tparams_in_parsed(rename_map, t),
                 ))),
-                Accessor::Set(box (loc, t)) => Accessor::Set(Box::new((
+                Accessor::Set(deref!((loc, t))) => Accessor::Set(Box::new((
                     loc.dupe(),
                     rename_tparams_in_parsed(rename_map, t),
                 ))),
-                Accessor::GetSet(box (get_loc, get_t, set_loc, set_t)) => {
+                Accessor::GetSet(deref!((get_loc, get_t, set_loc, set_t))) => {
                     Accessor::GetSet(Box::new((
                         get_loc.dupe(),
                         rename_tparams_in_parsed(rename_map, get_t),
@@ -3468,7 +3468,7 @@ pub(crate) mod scope {
             prop: &InterfaceProp<LocNode<'arena>, Parsed<'arena, 'ast>>,
         ) -> InterfaceProp<LocNode<'arena>, Parsed<'arena, 'ast>> {
             match prop {
-                InterfaceProp::InterfaceField(box (id_loc, t, polarity)) => {
+                InterfaceProp::InterfaceField(deref!((id_loc, t, polarity))) => {
                     InterfaceProp::InterfaceField(Box::new((
                         id_loc.dupe(),
                         rename_tparams_in_parsed(rename_map, t),
@@ -3520,7 +3520,7 @@ pub(crate) mod scope {
             prop: &ObjAnnotProp<LocNode<'arena>, Parsed<'arena, 'ast>>,
         ) -> ObjAnnotProp<LocNode<'arena>, Parsed<'arena, 'ast>> {
             match prop {
-                ObjAnnotProp::ObjAnnotField(box (loc, t, polarity)) => {
+                ObjAnnotProp::ObjAnnotField(deref!((loc, t, polarity))) => {
                     ObjAnnotProp::ObjAnnotField(Box::new((
                         loc.dupe(),
                         rename_tparams_in_parsed(rename_map, t),
@@ -3546,7 +3546,7 @@ pub(crate) mod scope {
         ) -> ObjAnnotProto<LocNode<'arena>, Parsed<'arena, 'ast>> {
             match proto {
                 ObjAnnotProto::ObjAnnotImplicitProto => ObjAnnotProto::ObjAnnotImplicitProto,
-                ObjAnnotProto::ObjAnnotExplicitProto(box (loc, t)) => {
+                ObjAnnotProto::ObjAnnotExplicitProto(deref!((loc, t))) => {
                     ObjAnnotProto::ObjAnnotExplicitProto(Box::new((
                         loc.dupe(),
                         rename_tparams_in_parsed(rename_map, t),
@@ -3604,7 +3604,7 @@ pub(crate) mod scope {
             prop: &ObjValueProp<LocNode<'arena>, Parsed<'arena, 'ast>>,
         ) -> ObjValueProp<LocNode<'arena>, Parsed<'arena, 'ast>> {
             match prop {
-                ObjValueProp::ObjValueField(box (loc, t, polarity)) => {
+                ObjValueProp::ObjValueField(deref!((loc, t, polarity))) => {
                     ObjValueProp::ObjValueField(Box::new((
                         loc.dupe(),
                         rename_tparams_in_parsed(rename_map, t),
@@ -3667,13 +3667,13 @@ pub(crate) mod scope {
             extends: &ClassExtends<LocNode<'arena>, Parsed<'arena, 'ast>>,
         ) -> ClassExtends<LocNode<'arena>, Parsed<'arena, 'ast>> {
             match extends {
-                ClassExtends::ClassExplicitExtends(box (loc, t)) => {
+                ClassExtends::ClassExplicitExtends(deref!((loc, t))) => {
                     ClassExtends::ClassExplicitExtends(Box::new((
                         loc.dupe(),
                         rename_tparams_in_parsed(rename_map, t),
                     )))
                 }
-                ClassExtends::ClassExplicitExtendsApp(box (loc, t, targs)) => {
+                ClassExtends::ClassExplicitExtendsApp(deref!((loc, t, targs))) => {
                     ClassExtends::ClassExplicitExtendsApp(Box::new((
                         loc.dupe(),
                         rename_tparams_in_parsed(rename_map, t),
@@ -5316,7 +5316,7 @@ pub(crate) mod scope {
                         match parsed {
                             Parsed::Value(_) => {
                                 if let ModuleKind::CJSModule(Parsed::Value(
-                                    box ParsedValue::FunExpr(inner),
+                                    deref!(ParsedValue::FunExpr(inner)),
                                 )) = &mut exports.kind
                                 {
                                     inner.statics.insert(name, prop);
@@ -6810,11 +6810,11 @@ mod obj_annot_acc {
                 (last, self.tail)
             };
             if tail.is_empty()
-                && let ObjSpreadAnnotElem::ObjSpreadAnnotSlice(box ObjSpreadAnnotSliceData {
+                && let ObjSpreadAnnotElem::ObjSpreadAnnotSlice(deref!(ObjSpreadAnnotSliceData {
                     dict,
                     props,
                     computed_props,
-                }) = last
+                })) = last
             {
                 let proto = if let Ok(calls) = Vec1::try_from_vec(self.calls) {
                     ObjAnnotProto::ObjAnnotCallable(Box::new(calls))
@@ -7590,8 +7590,8 @@ mod object_literal_acc {
                 }))));
             }
             if elems.len() == 1
-                && matches!(&elems[0], ObjValueSpreadElem::ObjValueSpreadSlice(box _))
-                && let Some(ObjValueSpreadElem::ObjValueSpreadSlice(box props)) = elems.pop()
+                && matches!(&elems[0], ObjValueSpreadElem::ObjValueSpreadSlice(deref!(_)))
+                && let Some(ObjValueSpreadElem::ObjValueSpreadSlice(deref!(props))) = elems.pop()
             {
                 return Parsed::Value(Box::new(ParsedValue::ObjLit(Box::new(ValueObjLit {
                     loc,
@@ -11211,8 +11211,8 @@ fn expression<'arena: 'ast, 'ast>(
                 Parsed::Value(v) => Parsed::Value(Box::new(ParsedValue::AsConst(v))),
                 Parsed::Eval(
                     loc,
-                    box Parsed::Value(v),
-                    box Op::Unary(ast::expression::UnaryOperator::Minus),
+                    deref!(Parsed::Value(v)),
+                    deref!(Op::Unary(ast::expression::UnaryOperator::Minus)),
                     strictness_kind,
                 ) => Parsed::Eval(
                     loc,

@@ -973,7 +973,7 @@ fn maybe_predicate_function<'cx>(
             TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => false,
             TypeInner::DefT(_, def_t) => match def_t.deref() {
                 DefTInner::FunT(_, fun_t) => matches_position(fun_t, assertion),
-                DefTInner::PolyT(box PolyTData { t_out, .. }) => match t_out.deref() {
+                DefTInner::PolyT(deref!(PolyTData { t_out, .. })) => match t_out.deref() {
                     TypeInner::DefT(_, inner_def_t) => match inner_def_t.deref() {
                         DefTInner::FunT(_, fun_t) => matches_position(fun_t, assertion),
                         _ => false,
@@ -1850,7 +1850,7 @@ fn read_entry<'cx>(
                         match resolved.deref() {
                             TypeInner::DefT(_, def_t) => match def_t.deref() {
                                 DefTInner::ClassT(_) => false,
-                                DefTInner::PolyT(box PolyTData { t_out, .. })
+                                DefTInner::PolyT(deref!(PolyTData { t_out, .. }))
                                     if matches!(t_out.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::ClassT(_))) =>
                                 {
                                     false

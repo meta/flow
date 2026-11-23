@@ -73,7 +73,7 @@ impl TypeVisitor<Result<FlowOrdSet<SubstName>, Found>> for TparamFinder {
     ) -> Result<FlowOrdSet<SubstName>, Found> {
         let tparam_names = acc?;
         match t.deref() {
-            TypeInner::GenericT(box GenericTData { name: s, .. }) => {
+            TypeInner::GenericT(deref!(GenericTData { name: s, .. })) => {
                 if tparam_names.contains(s) {
                     Err(Found(s.string_of_subst_name().dupe()))
                 } else {
@@ -81,7 +81,7 @@ impl TypeVisitor<Result<FlowOrdSet<SubstName>, Found>> for TparamFinder {
                 }
             }
             TypeInner::DefT(_, def_t)
-                if let DefTInner::PolyT(box PolyTData { tparams, .. }) = def_t.deref() =>
+                if let DefTInner::PolyT(deref!(PolyTData { tparams, .. })) = def_t.deref() =>
             {
                 let mut tparam_names_prime = tparam_names.dupe();
                 for tp in tparams.iter() {

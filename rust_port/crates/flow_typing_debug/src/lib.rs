@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#![feature(box_patterns)]
+#![feature(deref_patterns)]
 
 use std::collections::BTreeSet;
 use std::ops::Deref;
@@ -294,17 +294,17 @@ pub fn string_of_destructor(destructor: &Destructor) -> String {
         Destructor::PartialType => "PartialType".to_string(),
         Destructor::RequiredType => "RequiredType".to_string(),
         Destructor::SpreadType(..) => "Spread".to_string(),
-        Destructor::SpreadTupleType(box DestructorSpreadTupleTypeData { .. }) => {
+        Destructor::SpreadTupleType(deref!(DestructorSpreadTupleTypeData { .. })) => {
             "SpreadTupleType".to_string()
         }
         Destructor::RestType(..) => "Rest".to_string(),
         Destructor::ValuesType => "Values".to_string(),
-        Destructor::ConditionalType(box DestructorConditionalTypeData { .. }) => {
+        Destructor::ConditionalType(deref!(DestructorConditionalTypeData { .. })) => {
             "ConditionalType".to_string()
         }
         Destructor::TypeMap(TypeMap::ObjectKeyMirror) => "ObjectKeyMirror".to_string(),
         Destructor::ReactElementConfigType => "ReactElementConfig".to_string(),
-        Destructor::MappedType(box DestructorMappedTypeData { .. }) => "MappedType".to_string(),
+        Destructor::MappedType(deref!(DestructorMappedTypeData { .. })) => "MappedType".to_string(),
         Destructor::ReactDRO(_) => "ReactDRO".to_string(),
     }
 }
@@ -607,9 +607,9 @@ fn dump_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, t: &Type) -> Str
             | DefTInner::NullT
             | DefTInner::VoidT
             | DefTInner::TsVoidT => p(cx, t, true, ""),
-            DefTInner::PolyT(box PolyTData {
+            DefTInner::PolyT(deref!(PolyTData {
                 tparams, t_out, id, ..
-            }) => {
+            })) => {
                 let c_str = kid(tvars, t_out);
                 let tparams_str: Vec<String> =
                     tparams.iter().map(|tp| tp.name.to_string()).collect();
@@ -641,35 +641,35 @@ fn dump_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, t: &Type) -> Str
                 use flow_typing_type::type_::ArrayATData;
                 use flow_typing_type::type_::TupleATData;
                 match arr.as_ref() {
-                    ArrType::ArrayAT(box ArrayATData {
+                    ArrType::ArrayAT(deref!(ArrayATData {
                         elem_t,
                         tuple_view: None,
                         ..
-                    }) => {
+                    })) => {
                         let extra = format!("Array {}", kid(tvars, elem_t));
                         p(cx, t, true, &extra)
                     }
-                    ArrType::ArrayAT(box ArrayATData {
+                    ArrType::ArrayAT(deref!(ArrayATData {
                         elem_t,
                         tuple_view: Some(tv),
                         ..
-                    }) => {
+                    })) => {
                         let elems_str =
                             tuple_elements(tvars, &tv.elements, tv.rest.as_ref(), tv.inexact);
                         let extra = format!("Array {}, [{}]", kid(tvars, elem_t), elems_str);
                         p(cx, t, true, &extra)
                     }
-                    ArrType::TupleAT(box TupleATData {
+                    ArrType::TupleAT(deref!(TupleATData {
                         elements,
                         inexact,
                         rest,
                         ..
-                    }) => {
+                    })) => {
                         let elems_str = tuple_elements(tvars, elements, rest.as_ref(), *inexact);
                         let extra = format!("Tuple [{}]", elems_str);
                         p(cx, t, true, &extra)
                     }
-                    ArrType::ROArrayAT(box ROArrayATData { elem_t, .. }) => {
+                    ArrType::ROArrayAT(deref!(ROArrayATData { elem_t, .. })) => {
                         let extra = format!("ReadOnlyArray {}", kid(tvars, elem_t));
                         p(cx, t, true, &extra)
                     }
@@ -780,10 +780,10 @@ fn dump_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, t: &Type) -> Str
                 nominal::UnderlyingT::OpaqueWithLocal { t } => {
                     format!(" ({})", kid(tvars, t))
                 }
-                nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+                nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData {
                     t,
                     custom_error_loc,
-                }) => {
+                })) => {
                     format!(
                         " ({}, custom_error_loc={})",
                         kid(tvars, t),
@@ -802,11 +802,11 @@ fn dump_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, t: &Type) -> Str
         TypeInner::NullProtoT(_) | TypeInner::ObjProtoT(_) | TypeInner::FunProtoT(_) => {
             p(cx, t, true, "")
         }
-        TypeInner::ThisInstanceT(box ThisInstanceTData { instance, .. }) => {
+        TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance, .. })) => {
             let extra = instance_t(tvars, instance);
             p(cx, t, true, &extra)
         }
-        TypeInner::GenericT(box GenericTData { name, bound, .. }) => {
+        TypeInner::GenericT(deref!(GenericTData { name, bound, .. })) => {
             let extra = format!("{}: {}", name, kid(tvars, bound));
             p(cx, t, true, &extra)
         }
@@ -820,18 +820,18 @@ fn dump_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, t: &Type) -> Str
             let extra = format!("{}, {}", defer_str, id.debug_string());
             p(cx, t, true, &extra)
         }
-        TypeInner::TypeAppT(box TypeAppTData { type_, targs, .. }) => {
+        TypeInner::TypeAppT(deref!(TypeAppTData { type_, targs, .. })) => {
             let type_str = kid(tvars, type_);
             let targs_str: Vec<String> = targs.iter().map(|t| kid(tvars, t)).collect();
             let extra = format!("{}, [{}]", type_str, targs_str.join("; "));
             p(cx, t, true, &extra)
         }
-        TypeInner::ThisTypeAppT(box ThisTypeAppTData {
+        TypeInner::ThisTypeAppT(deref!(ThisTypeAppTData {
             type_,
             this_t,
             targs,
             ..
-        }) => {
+        })) => {
             let base_str = kid(tvars, type_);
             let this_str = kid(tvars, this_t);
             let extra = match targs {
@@ -969,10 +969,10 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
 
     let lookup_kind = |tvars: &mut BTreeSet<i32>, kind: &type_::LookupKind| -> String {
         match kind {
-            type_::LookupKind::NonstrictReturning(box type_::NonstrictReturningData(
+            type_::LookupKind::NonstrictReturning(deref!(type_::NonstrictReturningData(
                 default_opt,
                 testid_opt,
-            )) => {
+            ))) => {
                 let default_str = match default_opt {
                     Some((t, _)) => format!(" returning {}", kid(tvars, t)),
                     None => String::new(),
@@ -991,14 +991,14 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
 
     let lookup_action = |tvars: &mut BTreeSet<i32>, action: &type_::LookupAction| -> String {
         match action {
-            type_::LookupAction::ReadProp(box type_::ReadPropData { tout, .. }) => {
+            type_::LookupAction::ReadProp(deref!(type_::ReadPropData { tout, .. })) => {
                 format!(
                     "Read ({}, {})",
                     string_of_reason(cx, tout.reason()),
                     tvar(tvars, tout.id() as i32)
                 )
             }
-            type_::LookupAction::WriteProp(box type_::WritePropData { tin, .. }) => {
+            type_::LookupAction::WriteProp(deref!(type_::WritePropData { tin, .. })) => {
                 format!("Write {}", kid(tvars, tin))
             }
             type_::LookupAction::LookupPropForTvarPopulation { tout, polarity } => {
@@ -1009,7 +1009,7 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
                 )
             }
             type_::LookupAction::LookupPropsForSubtyping(
-                box type_::LookupPropsForSubtypingData { use_op, props, .. },
+                deref!(type_::LookupPropsForSubtypingData { use_op, props, .. }),
             ) => {
                 let props = props
                     .iter()
@@ -1022,12 +1022,12 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
                     props
                 )
             }
-            type_::LookupAction::SuperProp(box (_, p, _, _)) => {
+            type_::LookupAction::SuperProp(deref!((_, p, _, _))) => {
                 format!("Super {}", dump_prop_(depth - 1, tvars, cx, p))
             }
-            type_::LookupAction::MatchProp(box type_::LookupActionMatchPropData {
+            type_::LookupAction::MatchProp(deref!(type_::LookupActionMatchPropData {
                 prop_t, ..
-            }) => {
+            })) => {
                 format!("Match {}", kid(tvars, prop_t))
             }
         }
@@ -1035,11 +1035,11 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
 
     let react_kit = |tvars: &mut BTreeSet<i32>, tool: &type_::react::Tool<Cx>| -> String {
         match tool {
-            type_::react::Tool::CreateElement(box type_::react::CreateElementData {
+            type_::react::Tool::CreateElement(deref!(type_::react::CreateElementData {
                 jsx_props,
                 tout,
                 ..
-            }) => {
+            })) => {
                 let jsx_str = kid(tvars, jsx_props);
                 let tout_str = tvar(tvars, tout.id() as i32);
                 format!("CreateElement ({}) => {}", jsx_str, tout_str)
@@ -1260,25 +1260,25 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             type_::object::Tool::Partial => "Partial".to_string(),
             type_::object::Tool::Required => "Required".to_string(),
             type_::object::Tool::ObjectRep => "ObjectRep".to_string(),
-            type_::object::Tool::Spread(box (target, state)) => spread_fn(tvars, target, state),
-            type_::object::Tool::Rest(box (merge_mode, state)) => rest_fn(tvars, merge_mode, state),
-            type_::object::Tool::ReactConfig(box type_::object::ObjectToolReactConfigData {
+            type_::object::Tool::Spread(deref!((target, state))) => spread_fn(tvars, target, state),
+            type_::object::Tool::Rest(deref!((merge_mode, state))) => rest_fn(tvars, merge_mode, state),
+            type_::object::Tool::ReactConfig(deref!(type_::object::ObjectToolReactConfigData {
                 state,
                 ref_manipulation,
                 literal: _,
-            }) => react_props_fn(state, ref_manipulation),
-            type_::object::Tool::ObjectMap(box type_::object::ObjectToolObjectMapData {
+            })) => react_props_fn(state, ref_manipulation),
+            type_::object::Tool::ObjectMap(deref!(type_::object::ObjectToolObjectMapData {
                 prop_type,
                 ..
-            }) => object_map_fn(tvars, prop_type),
+            })) => object_map_fn(tvars, prop_type),
         };
         format!("({}, {})", resolve_tool_str, tool_str)
     };
 
     let method_action = |tvars: &mut BTreeSet<i32>, action: &type_::MethodAction<Cx>| -> String {
         match action {
-            type_::MethodAction::CallM(box type_::CallMData { methodcalltype, .. })
-            | type_::MethodAction::ChainM(box type_::ChainMData { methodcalltype, .. }) => {
+            type_::MethodAction::CallM(deref!(type_::CallMData { methodcalltype, .. }))
+            | type_::MethodAction::ChainM(deref!(type_::ChainMData { methodcalltype, .. })) => {
                 let this_str = match &methodcalltype.meth_generic_this {
                     Some(t) => kid(tvars, t),
                     None => "None".to_string(),
@@ -1316,15 +1316,15 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
                 format!("UseT ({}, {})", string_of_use_op(use_op), extra)
             }
         },
-        UseTInner::ArrRestT(box ArrRestTData { use_op, .. }) => {
+        UseTInner::ArrRestT(deref!(ArrRestTData { use_op, .. })) => {
             p(cx, use_t, true, &string_of_use_op(use_op))
         }
-        UseTInner::CallElemT(box CallElemTData { .. }) => p(cx, use_t, true, ""),
-        UseTInner::CallT(box CallTData {
+        UseTInner::CallElemT(deref!(CallElemTData { .. })) => p(cx, use_t, true, ""),
+        UseTInner::CallT(deref!(CallTData {
             use_op,
             call_action,
             ..
-        }) => match call_action.as_ref() {
+        })) => match call_action.as_ref() {
             type_::CallAction::Funcalltype(funcall) => {
                 let this_str = kid(tvars, &funcall.call_this_t);
                 let args: Vec<String> = funcall
@@ -1354,11 +1354,11 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             }
         },
         UseTInner::ConstructorT(..) => p(cx, use_t, true, ""),
-        UseTInner::ElemT(box ElemTData { obj, .. }) => {
+        UseTInner::ElemT(deref!(ElemTData { obj, .. })) => {
             let extra = format!("obj: {}", kid(tvars, obj));
             p(cx, use_t, true, &extra)
         }
-        UseTInner::ConditionalT(box ConditionalTData {
+        UseTInner::ConditionalT(deref!(ConditionalTData {
             distributive_tparam_name,
             infer_tparams,
             extends_t,
@@ -1366,7 +1366,7 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             false_t,
             tout,
             ..
-        }) => {
+        })) => {
             let dist = distributive_tparam_name
                 .as_ref()
                 .map(|n| format!("distributive over {}: ", n))
@@ -1384,13 +1384,13 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             );
             p(cx, use_t, true, &extra)
         }
-        UseTInner::GetElemT(box GetElemTData {
+        UseTInner::GetElemT(deref!(GetElemTData {
             from_annot,
             access_iterables,
             key_t,
             tout,
             ..
-        }) => {
+        })) => {
             let extra = format!(
                 "{}, ({}, {}), from_annot={}, access_iterables={}",
                 kid(tvars, key_t),
@@ -1426,16 +1426,16 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
         }
         UseTInner::GetProtoT(..) => p(cx, use_t, true, ""),
         UseTInner::GetStaticsT(..) => p(cx, use_t, true, ""),
-        UseTInner::HasOwnPropT(box HasOwnPropTData { .. }) | UseTInner::ConcretizeT { .. } => {
+        UseTInner::HasOwnPropT(deref!(HasOwnPropTData { .. })) | UseTInner::ConcretizeT { .. } => {
             p(cx, use_t, true, "")
         }
-        UseTInner::LookupT(box LookupTData {
+        UseTInner::LookupT(deref!(LookupTData {
             propref: prop,
             lookup_kind: kind,
             lookup_action: action,
             ids,
             ..
-        }) => {
+        })) => {
             let ids_str = match ids {
                 None => "None".to_string(),
                 Some(_ids) => "Some [...]".to_string(),
@@ -1449,12 +1449,12 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             );
             p(cx, use_t, true, &extra)
         }
-        UseTInner::MapTypeT(box MapTypeTData { .. }) => p(cx, use_t, true, ""),
-        UseTInner::MethodT(box MethodTData {
+        UseTInner::MapTypeT(deref!(MapTypeTData { .. })) => p(cx, use_t, true, ""),
+        UseTInner::MethodT(deref!(MethodTData {
             propref: prop,
             method_action: action,
             ..
-        }) => {
+        })) => {
             let extra = format!(
                 "({}, {})",
                 propref(tvars, prop),
@@ -1476,7 +1476,7 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             p(cx, use_t, true, &extra)
         }
         UseTInner::ObjTestProtoT(_, _) => p(cx, use_t, true, ""),
-        UseTInner::OptionalIndexedAccessT(box OptionalIndexedAccessTData { index, .. }) => {
+        UseTInner::OptionalIndexedAccessT(deref!(OptionalIndexedAccessTData { index, .. })) => {
             let extra = match index {
                 type_::OptionalIndexedAccessIndex::OptionalIndexedAccessTypeIndex(t) => {
                     kid(tvars, t)
@@ -1487,7 +1487,7 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             };
             p(cx, use_t, true, &extra)
         }
-        UseTInner::ReactKitT(box ReactKitTData { use_op, tool, .. }) => {
+        UseTInner::ReactKitT(deref!(ReactKitTData { use_op, tool, .. })) => {
             let extra = format!("{}, {}", string_of_use_op(use_op), react_kit(tvars, tool));
             p(cx, use_t, true, &extra)
         }
@@ -1499,21 +1499,21 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             let extra = format!("use_desc={}, {}", use_desc, use_kid(tvars, arg));
             p(cx, use_t, true, &extra)
         }
-        UseTInner::ReposUseT(box ReposUseTData {
+        UseTInner::ReposUseT(deref!(ReposUseTData {
             use_desc,
             use_op,
             type_: arg,
             ..
-        }) => {
+        })) => {
             let inner = UseT::new(UseTInner::UseT(use_op.clone(), arg.clone()));
             let extra = format!("use_desc={}, {}", use_desc, use_kid(tvars, &inner));
             p(cx, use_t, true, &extra)
         }
-        UseTInner::ResolveSpreadT(box ResolveSpreadTData {
+        UseTInner::ResolveSpreadT(deref!(ResolveSpreadTData {
             use_op,
             resolve_spread_type: spread,
             ..
-        }) => {
+        })) => {
             let extra = match &spread.rrt_resolve_to {
                 type_::SpreadResolve::ResolveSpreadsToTupleType { elem_t, tout, .. }
                 | type_::SpreadResolve::ResolveSpreadsToArrayLiteral { elem_t, tout, .. } => {
@@ -1539,16 +1539,16 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             };
             p(cx, use_t, true, &extra)
         }
-        UseTInner::SuperT(box SuperTData { .. }) => p(cx, use_t, true, ""),
+        UseTInner::SuperT(deref!(SuperTData { .. })) => p(cx, use_t, true, ""),
         UseTInner::ImplementsT(_, arg) => {
             let extra = kid(tvars, arg);
             p(cx, use_t, false, &extra)
         }
-        UseTInner::SetElemT(box SetElemTData {
+        UseTInner::SetElemT(deref!(SetElemTData {
             key_t: ix,
             tin: etype,
             ..
-        }) => {
+        })) => {
             let extra = format!("{}, {}", kid(tvars, ix), kid(tvars, etype));
             p(cx, use_t, true, &extra)
         }
@@ -1565,15 +1565,15 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             let extra = format!("({}), {}", data.name, kid(tvars, &data.tin));
             p(cx, use_t, true, &extra)
         }
-        UseTInner::SpecializeT(box SpecializeTData {
+        UseTInner::SpecializeT(deref!(SpecializeTData {
             targs: args_opt,
             upper,
             ..
-        }) => {
+        })) => {
             let ret = match upper {
-                Some(box type_::Cont::Upper(ret)) => dump_use_t_(depth - 1, tvars, cx, ret),
-                Some(box type_::Cont::Lower(_, ret)) => kid(tvars, ret),
-                Some(box type_::Cont::Collect(_)) => "TypeCollector".to_owned(),
+                Some(deref!(type_::Cont::Upper(ret))) => dump_use_t_(depth - 1, tvars, cx, ret),
+                Some(deref!(type_::Cont::Lower(_, ret))) => kid(tvars, ret),
+                Some(deref!(type_::Cont::Collect(_))) => "TypeCollector".to_owned(),
                 None => "None".to_owned(),
             };
             let extra = match args_opt {
@@ -1594,12 +1594,12 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             );
             p(cx, use_t, true, &extra)
         }
-        UseTInner::TestPropT(box TestPropTData {
+        UseTInner::TestPropT(deref!(TestPropTData {
             use_op,
             propref: prop,
             tout,
             ..
-        }) => {
+        })) => {
             let extra = format!(
                 "{}, ({}), ({}, {})",
                 string_of_use_op(use_op),
@@ -1617,12 +1617,12 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             let extra = use_kid(tvars, t_out);
             p(cx, use_t, true, &extra)
         }
-        UseTInner::ValueToTypeReferenceT(box ValueToTypeReferenceTData {
+        UseTInner::ValueToTypeReferenceT(deref!(ValueToTypeReferenceTData {
             use_op,
             kind,
             tout,
             ..
-        }) => {
+        })) => {
             let extra = format!(
                 "{}, reason, {}, {}",
                 string_of_use_op(use_op),
@@ -1632,7 +1632,7 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             p(cx, use_t, true, &extra)
         }
         UseTInner::ConcretizeTypeAppsT(_, _, _, _) => p(cx, use_t, true, ""),
-        UseTInner::GetEnumT(box GetEnumTData { kind, .. }) => {
+        UseTInner::GetEnumT(deref!(GetEnumTData { kind, .. })) => {
             let extra = match kind {
                 type_::GetEnumKind::GetEnumObject => "get enum object",
                 type_::GetEnumKind::GetEnumValue => "get enum value",
@@ -1655,9 +1655,9 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             let extra = tvar(tvars, tv.id() as i32);
             p(cx, use_t, true, &extra)
         }
-        UseTInner::SealGenericT(box SealGenericTData {
+        UseTInner::SealGenericT(deref!(SealGenericTData {
             bounded_id, cont, ..
-        }) => {
+        })) => {
             let name = match bounded_id {
                 type_::BoundedId::Generic { name, .. } => name.to_string(),
                 type_::BoundedId::Nominal(nominal_type) => format!("{:?}", nominal_type.nominal_id),
@@ -1673,11 +1673,11 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             };
             p(cx, use_t, true, &extra)
         }
-        UseTInner::CondT(box CondTData {
+        UseTInner::CondT(deref!(CondTData {
             opt_type: then_t,
             true_t: else_t,
             ..
-        }) => {
+        })) => {
             let then_str = match then_t {
                 Some(t) => format!("Some ({})", kid(tvars, t)),
                 None => "None".to_string(),
@@ -1685,12 +1685,12 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             let extra = format!("{}, {}", then_str, kid(tvars, else_t));
             p(cx, use_t, true, &extra)
         }
-        UseTInner::ExtendsUseT(box ExtendsUseTData {
+        UseTInner::ExtendsUseT(deref!(ExtendsUseTData {
             targs: nexts,
             true_t: l,
             false_t: u,
             ..
-        }) => {
+        })) => {
             let nexts_str: Vec<String> = nexts.iter().map(|t| kid(tvars, t)).collect();
             let extra = format!(
                 "[{}], {}, {}",
@@ -1700,13 +1700,13 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
             );
             p(cx, use_t, true, &extra)
         }
-        UseTInner::ResolveUnionT(box ResolveUnionTData {
+        UseTInner::ResolveUnionT(deref!(ResolveUnionTData {
             resolved,
             unresolved,
             upper,
             id,
             ..
-        }) => {
+        })) => {
             let resolved_str: Vec<String> = resolved.iter().map(|t| kid(tvars, t)).collect();
             let unresolved_str: Vec<String> = unresolved.iter().map(|t| kid(tvars, t)).collect();
             let extra = format!(
@@ -1720,9 +1720,9 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
         }
         UseTInner::ConvertEmptyPropsToMixedT(_, _) => "ConvertEmptyPropsToMixedT".to_string(),
         UseTInner::ExitRendersT { .. } => "ExitRendersT".to_string(),
-        UseTInner::EvalTypeDestructorT(box EvalTypeDestructorTData {
+        UseTInner::EvalTypeDestructorT(deref!(EvalTypeDestructorTData {
             destructor, tout, ..
-        }) => {
+        })) => {
             let extra = format!(
                 "{} on upper, ({}, {})",
                 string_of_destructor(destructor),
@@ -2028,13 +2028,13 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
     }
 
     match err {
-        ErrorMessage::EIncompatibleType(box EIncompatibleTypeData {
+        ErrorMessage::EIncompatibleType(deref!(EIncompatibleTypeData {
             lower_loc,
             lower_desc,
             upper,
             use_op,
             ..
-        }) => {
+        })) => {
             let lower_desc = match lower_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -2051,11 +2051,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 }
             )
         }
-        ErrorMessage::EIncompatibleSpeculation(box EIncompatibleSpeculationData {
+        ErrorMessage::EIncompatibleSpeculation(deref!(EIncompatibleSpeculationData {
             loc,
             use_op,
             branches: _,
-        }) => {
+        })) => {
             format!(
                 "EIncompatibleSpeculation {{ upper = {}; use_op = {}; branches = _ }}",
                 string_of_aloc(None, loc),
@@ -2065,55 +2065,55 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 }
             )
         }
-        ErrorMessage::EIncompatibleProp(box EIncompatiblePropData {
+        ErrorMessage::EIncompatibleProp(deref!(EIncompatiblePropData {
             prop_loc,
             object,
             special: _,
             prop: _,
             use_op: _,
-        }) => {
+        })) => {
             format!(
                 "EIncompatibleProp(Box::new(EIncompatiblePropData {{ reason_prop = {}; object = {}; special = _; prop = _; use_op = _ }}))",
                 string_of_aloc(None, prop_loc),
                 dump_error_type_reference(cx, object)
             )
         }
-        ErrorMessage::EExportValueAsType(box (loc, name)) => {
+        ErrorMessage::EExportValueAsType(deref!((loc, name))) => {
             format!(
                 "EExportValueAsType(Box::new(({}, {})))",
                 string_of_aloc(None, loc),
                 name
             )
         }
-        ErrorMessage::EImportValueAsType(box (loc, s)) => {
+        ErrorMessage::EImportValueAsType(deref!((loc, s))) => {
             format!(
                 "EImportValueAsType(Box::new(({}, {})))",
                 string_of_aloc(None, loc),
                 s
             )
         }
-        ErrorMessage::EImportTypeAsTypeof(box (loc, s)) => {
+        ErrorMessage::EImportTypeAsTypeof(deref!((loc, s))) => {
             format!(
                 "EImportTypeAsTypeof(Box::new(({}, {})))",
                 string_of_aloc(None, loc),
                 s
             )
         }
-        ErrorMessage::EImportTypeAsValue(box (loc, s)) => {
+        ErrorMessage::EImportTypeAsValue(deref!((loc, s))) => {
             format!(
                 "EImportTypeAsValue(Box::new(({}, {})))",
                 string_of_aloc(None, loc),
                 s
             )
         }
-        ErrorMessage::ENoDefaultExport(box (loc, module_name, _)) => {
+        ErrorMessage::ENoDefaultExport(deref!((loc, module_name, _))) => {
             format!(
                 "ENoDefaultExport(Box::new(({}, {})))",
                 string_of_aloc(None, loc),
                 module_name.display()
             )
         }
-        ErrorMessage::EOnlyDefaultExport(box (loc, module_name, export_name)) => {
+        ErrorMessage::EOnlyDefaultExport(deref!((loc, module_name, export_name))) => {
             format!(
                 "EOnlyDefaultExport(Box::new(({}, {}, {})))",
                 string_of_aloc(None, loc),
@@ -2121,7 +2121,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 export_name
             )
         }
-        ErrorMessage::ENoNamedExport(box (loc, module_name, export_name, _)) => {
+        ErrorMessage::ENoNamedExport(deref!((loc, module_name, export_name, _))) => {
             format!(
                 "ENoNamedExport(Box::new(({}, {}, {})))",
                 string_of_aloc(None, loc),
@@ -2129,13 +2129,13 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 export_name
             )
         }
-        ErrorMessage::EMissingTypeArgs(box EMissingTypeArgsData {
+        ErrorMessage::EMissingTypeArgs(deref!(EMissingTypeArgsData {
             loc,
             type_,
             arity_loc,
             min_arity,
             max_arity,
-        }) => {
+        })) => {
             format!(
                 "EMissingTypeArgs(Box::new(EMissingTypeArgsData {{ loc={}; type_={}; arity_loc={}; min_arity={}; max_arity={} }}))",
                 string_of_aloc(None, loc),
@@ -2157,11 +2157,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 dump_value_as_type_reference(cx, &value.loc, reference.as_ref(), &value.type_desc,)
             )
         }
-        ErrorMessage::EExpectedStringLit(box EExpectedStringLitData {
+        ErrorMessage::EExpectedStringLit(deref!(EExpectedStringLitData {
             lower,
             upper,
             use_op,
-        }) => {
+        })) => {
             let dump_type =
                 |type_ref: &ErrorTypeReferenceWithLocData<ALoc>| match &type_ref.type_desc {
                     TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
@@ -2174,11 +2174,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::EExpectedNumberLit(box EExpectedNumberLitData {
+        ErrorMessage::EExpectedNumberLit(deref!(EExpectedNumberLitData {
             lower,
             upper,
             use_op,
-        }) => {
+        })) => {
             let dump_type =
                 |type_ref: &ErrorTypeReferenceWithLocData<ALoc>| match &type_ref.type_desc {
                     TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
@@ -2191,11 +2191,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::EExpectedBooleanLit(box EExpectedBooleanLitData {
+        ErrorMessage::EExpectedBooleanLit(deref!(EExpectedBooleanLitData {
             lower,
             upper,
             use_op,
-        }) => {
+        })) => {
             let dump_type =
                 |type_ref: &ErrorTypeReferenceWithLocData<ALoc>| match &type_ref.type_desc {
                     TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
@@ -2208,11 +2208,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::EExpectedBigIntLit(box EExpectedBigIntLitData {
+        ErrorMessage::EExpectedBigIntLit(deref!(EExpectedBigIntLitData {
             lower,
             upper,
             use_op,
-        }) => {
+        })) => {
             let dump_type =
                 |type_ref: &ErrorTypeReferenceWithLocData<ALoc>| match &type_ref.type_desc {
                     TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
@@ -2225,13 +2225,13 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::EPropNotFoundInLookup(box EPropNotFoundInLookupData {
+        ErrorMessage::EPropNotFoundInLookup(deref!(EPropNotFoundInLookupData {
             prop_name,
             prop_loc,
             object,
             use_op,
             suggestion,
-        }) => {
+        })) => {
             let prop_str = match prop_name {
                 Some(prop) => format!("Some {}", prop),
                 None => "None".to_string(),
@@ -2249,13 +2249,13 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 suggestion_str
             )
         }
-        ErrorMessage::EPropNotFoundInSubtyping(box EPropNotFoundInSubtypingData {
+        ErrorMessage::EPropNotFoundInSubtyping(deref!(EPropNotFoundInSubtypingData {
             prop_name,
             lower,
             upper,
             use_op,
             suggestion,
-        }) => {
+        })) => {
             let prop_str = match prop_name {
                 Some(prop) => format!("Some {}", prop),
                 None => "None".to_string(),
@@ -2274,23 +2274,23 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             )
         }
         ErrorMessage::EConstructSignatureMissingInSubtyping(
-            box EConstructSignatureMissingInSubtypingData {
+            deref!(EConstructSignatureMissingInSubtypingData {
                 lower,
                 upper,
                 use_op,
-            },
+            }),
         ) => format!(
             "EConstructSignatureMissingInSubtyping ({}, {}, {})",
             dump_error_type_reference(cx, lower),
             dump_error_type_reference(cx, upper),
             string_of_use_op(use_op)
         ),
-        ErrorMessage::EPropsNotFoundInSubtyping(box EPropsNotFoundInSubtypingData {
+        ErrorMessage::EPropsNotFoundInSubtyping(deref!(EPropsNotFoundInSubtypingData {
             prop_names,
             lower,
             upper,
             use_op,
-        }) => {
+        })) => {
             let names: Vec<String> = prop_names.iter().map(|n| n.to_string()).collect();
             format!(
                 "EPropsNotFoundInSubtyping ([{}], {}, {}, {})",
@@ -2301,12 +2301,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             )
         }
         ErrorMessage::EPropsNotFoundInInvariantSubtyping(
-            box EPropsNotFoundInInvariantSubtypingData {
+            deref!(EPropsNotFoundInInvariantSubtypingData {
                 prop_names,
                 lower,
                 upper,
                 use_op,
-            },
+            }),
         ) => {
             let names: Vec<String> = prop_names.iter().map(|n| n.to_string()).collect();
             format!(
@@ -2319,14 +2319,14 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::EIndexerCheckFailed(box EIndexerCheckFailedData {
+        ErrorMessage::EIndexerCheckFailed(deref!(EIndexerCheckFailedData {
             prop_name,
             lower,
             upper,
             indexer_desc,
             use_op,
             ..
-        }) => {
+        })) => {
             let indexer = match indexer_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -2345,13 +2345,13 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::EPropsExtraAgainstExactObject(box EPropsExtraAgainstExactObjectData {
+        ErrorMessage::EPropsExtraAgainstExactObject(deref!(EPropsExtraAgainstExactObjectData {
             prop_names,
             lower,
             upper,
             use_op,
             ..
-        }) => {
+        })) => {
             let names: Vec<String> = prop_names.iter().map(|n| n.to_string()).collect();
             let dump_type =
                 |type_ref: &ErrorTypeReferenceWithLocData<ALoc>| match &type_ref.type_desc {
@@ -2366,11 +2366,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::EPropNotReadable(box EPropNotReadableData {
+        ErrorMessage::EPropNotReadable(deref!(EPropNotReadableData {
             prop_loc,
             prop_name,
             use_op,
-        }) => {
+        })) => {
             let prop_str = match prop_name {
                 Some(x) => format!("{:?}", x.display_smol_str()),
                 None => "(computed)".to_string(),
@@ -2382,11 +2382,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::EPropNotWritable(box EPropNotWritableData {
+        ErrorMessage::EPropNotWritable(deref!(EPropNotWritableData {
             prop_loc,
             prop_name,
             use_op,
-        }) => {
+        })) => {
             let prop_str = match prop_name {
                 Some(x) => format!("{:?}", x.display_smol_str()),
                 None => "(computed)".to_string(),
@@ -2398,12 +2398,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::EPropPolarityMismatch(box EPropPolarityMismatchData {
+        ErrorMessage::EPropPolarityMismatch(deref!(EPropPolarityMismatchData {
             lower,
             upper,
             props,
             use_op: _,
-        }) => {
+        })) => {
             let dump_object = |object: &PropPolarityMismatchObject<_, _>| match object {
                 PropPolarityMismatchObject::Type(t) => dump_error_type_reference(cx, t),
                 PropPolarityMismatchObject::Class(class) => {
@@ -2424,13 +2424,13 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 props_str.join(", ")
             )
         }
-        ErrorMessage::EPolarityMismatch(box EPolarityMismatchData {
+        ErrorMessage::EPolarityMismatch(deref!(EPolarityMismatchData {
             loc,
             name,
             expected_polarity,
             actual_polarity,
             ..
-        }) => {
+        })) => {
             format!(
                 "EPolarityMismatch(Box::new(EPolarityMismatchData {{ reason={}; name={:?}; expected_polarity={}; actual_polarity={} }}))",
                 string_of_aloc(None, loc),
@@ -2439,25 +2439,25 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 actual_polarity.string()
             )
         }
-        ErrorMessage::EBuiltinNameLookupFailed(box EBuiltinNameLookupFailedData { loc, name }) => {
+        ErrorMessage::EBuiltinNameLookupFailed(deref!(EBuiltinNameLookupFailedData { loc, name })) => {
             format!(
                 "EBuiltinNameLookupFailed(Box::new(EBuiltinNameLookupFailedData {{ loc = {}; name = {:?} }}))",
                 string_of_aloc(None, loc),
                 name
             )
         }
-        ErrorMessage::EUmdGlobalValueInModule(box EUmdGlobalValueInModuleData { loc, name }) => {
+        ErrorMessage::EUmdGlobalValueInModule(deref!(EUmdGlobalValueInModuleData { loc, name })) => {
             format!(
                 "EUmdGlobalValueInModule(Box::new(EUmdGlobalValueInModuleData {{ loc = {}; name = {:?} }}))",
                 string_of_aloc(None, loc),
                 name
             )
         }
-        ErrorMessage::EBuiltinModuleLookupFailed(box EBuiltinModuleLookupFailedData {
+        ErrorMessage::EBuiltinModuleLookupFailed(deref!(EBuiltinModuleLookupFailedData {
             loc,
             name,
             potential_generator,
-        }) => {
+        })) => {
             let gen_str = match potential_generator {
                 Some(g) => format!("Some({})", g),
                 None => "None".to_string(),
@@ -2469,22 +2469,22 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 gen_str
             )
         }
-        ErrorMessage::EExpectedModuleLookupFailed(box EExpectedModuleLookupFailedData {
+        ErrorMessage::EExpectedModuleLookupFailed(deref!(EExpectedModuleLookupFailedData {
             loc,
             name,
             expected_module_purpose: _,
-        }) => {
+        })) => {
             format!(
                 "EExpectedModuleLookupFailed(Box::new(EExpectedModuleLookupFailedData {{ loc = {}; name = {:?} }}))",
                 string_of_aloc(None, loc),
                 name
             )
         }
-        ErrorMessage::ECannotImportGlobalLibdef(box ECannotImportGlobalLibdefData {
+        ErrorMessage::ECannotImportGlobalLibdef(deref!(ECannotImportGlobalLibdefData {
             loc,
             module_name,
             libdef_name,
-        }) => {
+        })) => {
             format!(
                 "ECannotImportGlobalLibdef(Box::new(ECannotImportGlobalLibdefData {{ loc = {}; module_name = {:?}; libdef_name = {:?} }}))",
                 string_of_aloc(None, loc),
@@ -2492,12 +2492,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 libdef_name
             )
         }
-        ErrorMessage::EPrivateLookupFailed(box EPrivateLookupFailedData {
+        ErrorMessage::EPrivateLookupFailed(deref!(EPrivateLookupFailedData {
             loc,
             object,
             prop_name,
             use_op,
-        }) => {
+        })) => {
             let object = match &object.type_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -2511,19 +2511,19 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             )
         }
         ErrorMessage::EPlatformSpecificImplementationModuleLookupFailed(
-            box EPlatformSpecificImplementationModuleLookupFailedData { loc: _, name },
+            deref!(EPlatformSpecificImplementationModuleLookupFailedData { loc: _, name }),
         ) => {
             format!(
                 "EPlatformSpecificImplementationModuleLookupFailed({})",
                 name
             )
         }
-        ErrorMessage::EComparison(box EComparisonData {
+        ErrorMessage::EComparison(deref!(EComparisonData {
             r1,
             r2,
             loc_opt,
             strict_comparison_opt,
-        }) => {
+        })) => {
             let loc_str = match loc_opt {
                 Some(loc) => string_of_aloc(None, loc),
                 None => "None".to_string(),
@@ -2542,10 +2542,10 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             };
             format!("EComparison ({}, {}, {}, {})", r1, r2, loc_str, strict_str)
         }
-        ErrorMessage::ENonStrictEqualityComparison(box ENonStrictEqualityComparisonData {
+        ErrorMessage::ENonStrictEqualityComparison(deref!(ENonStrictEqualityComparisonData {
             lower,
             upper,
-        }) => {
+        })) => {
             let dump_type = |type_desc: &TypeOrTypeDescT<ALoc>| match type_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -2556,7 +2556,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 dump_type(&upper.type_desc)
             )
         }
-        ErrorMessage::ETupleArityMismatch(box ETupleArityMismatchData {
+        ErrorMessage::ETupleArityMismatch(deref!(ETupleArityMismatchData {
             use_op,
             lower,
             lower_arity,
@@ -2567,7 +2567,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             upper_inexact,
             upper_rest,
             unify,
-        }) => {
+        })) => {
             let (num_req1, num_total1) = lower_arity;
             let (num_req2, num_total2) = upper_arity;
             format!(
@@ -2606,11 +2606,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::ETupleRequiredAfterOptional(box ETupleRequiredAfterOptionalData {
+        ErrorMessage::ETupleRequiredAfterOptional(deref!(ETupleRequiredAfterOptionalData {
             tuple_loc,
             required,
             optional,
-        }) => {
+        })) => {
             let tuple = format!("{}: {:?}", string_of_aloc(None, tuple_loc), "tuple type");
             format!(
                 "ETupleRequiredAfterOptional(Box::new(ETupleRequiredAfterOptionalData {{reason_tuple = {}; reason_required = {}; reason_optional = {}}}))",
@@ -2619,10 +2619,10 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 dump_tuple_element_reference(&optional.loc, optional.name.as_deref())
             )
         }
-        ErrorMessage::ETupleInvalidTypeSpread(box ETupleInvalidTypeSpreadData {
+        ErrorMessage::ETupleInvalidTypeSpread(deref!(ETupleInvalidTypeSpreadData {
             spread_loc,
             argument,
-        }) => {
+        })) => {
             let argument_type = match &argument.type_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -2633,14 +2633,14 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 argument_type
             )
         }
-        ErrorMessage::ETupleOutOfBounds(box ETupleOutOfBoundsData {
+        ErrorMessage::ETupleOutOfBounds(deref!(ETupleOutOfBoundsData {
             use_op,
             loc,
             tuple,
             inexact,
             length,
             index,
-        }) => {
+        })) => {
             let tuple_type = match &tuple.type_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -2655,12 +2655,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 index
             )
         }
-        ErrorMessage::ETupleNonIntegerIndex(box ETupleNonIntegerIndexData {
+        ErrorMessage::ETupleNonIntegerIndex(deref!(ETupleNonIntegerIndexData {
             use_op,
             loc,
             index,
             ..
-        }) => {
+        })) => {
             format!(
                 "ETupleNonIntegerIndex(Box::new(ETupleNonIntegerIndexData {{ use_op = {}; reason = {}; index = {} }}))",
                 string_of_use_op(use_op),
@@ -2675,13 +2675,13 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::ETupleElementNotReadable(box ETupleElementNotReadableData {
+        ErrorMessage::ETupleElementNotReadable(deref!(ETupleElementNotReadableData {
             loc,
             index,
             name: _,
             use_op,
             ..
-        }) => {
+        })) => {
             format!(
                 "ETupleElementNotReadable(Box::new(ETupleElementNotReadableData {{ reason = {}; index = {}; use_op = {} }}))",
                 string_of_aloc(None, loc),
@@ -2689,13 +2689,13 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::ETupleElementNotWritable(box ETupleElementNotWritableData {
+        ErrorMessage::ETupleElementNotWritable(deref!(ETupleElementNotWritableData {
             loc,
             index,
             name: _,
             use_op,
             ..
-        }) => {
+        })) => {
             format!(
                 "ETupleElementNotWritable(Box::new(ETupleElementNotWritableData {{ reason = {}; index = {}; use_op = {} }}))",
                 string_of_aloc(None, loc),
@@ -2703,14 +2703,14 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::ETupleElementPolarityMismatch(box ETupleElementPolarityMismatchData {
+        ErrorMessage::ETupleElementPolarityMismatch(deref!(ETupleElementPolarityMismatchData {
             index,
             lower,
             polarity_lower,
             upper,
             polarity_upper,
             use_op,
-        }) => {
+        })) => {
             format!(
                 "ETupleElementPolarityMismatch(Box::new(ETupleElementPolarityMismatchData {{ index = {}; lower = {}; polarity_lower = {}; upper = {}; polarity_upper = {}; use_op = {} }}))",
                 index,
@@ -2746,11 +2746,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::EUnionSpeculationFailed(box EUnionSpeculationFailedData {
+        ErrorMessage::EUnionSpeculationFailed(deref!(EUnionSpeculationFailedData {
             use_op,
             loc,
             branches: _,
-        }) => {
+        })) => {
             format!(
                 "EUnionSpeculationFailed {{ use_op = {}; loc = {}; branches = _ }}",
                 string_of_use_op(use_op),
@@ -2779,7 +2779,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::EUnsupportedExact(box EUnsupportedExactData { value_desc, .. }) => {
+        ErrorMessage::EUnsupportedExact(deref!(EUnsupportedExactData { value_desc, .. })) => {
             let value = match value_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -2787,7 +2787,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             format!("EUnsupportedExact(Box::new({}))", value)
         }
         ErrorMessage::EInvalidExactObjectIntersection(
-            box EInvalidExactObjectIntersectionData { loc, prop, .. },
+            deref!(EInvalidExactObjectIntersectionData { loc, prop, .. }),
         ) => format!(
             "EInvalidExactObjectIntersection({}, {})",
             string_of_aloc(None, loc),
@@ -2803,12 +2803,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 expected
             )
         }
-        ErrorMessage::ECallTypeArity(box ECallTypeArityData {
+        ErrorMessage::ECallTypeArity(deref!(ECallTypeArityData {
             call_loc,
             is_new,
             callee,
             expected_arity,
-        }) => {
+        })) => {
             let callee = match callee {
                 CallTypeArityCallee::Type(callee) => {
                     dump_loc_type_desc(cx, &callee.reference_loc, &callee.type_desc)
@@ -2824,11 +2824,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 expected_arity
             )
         }
-        ErrorMessage::ETooManyTypeArgs(box ETooManyTypeArgsData {
+        ErrorMessage::ETooManyTypeArgs(deref!(ETooManyTypeArgsData {
             reason_tapp,
             arity_loc,
             maximum_arity,
-        }) => {
+        })) => {
             format!(
                 "ETooManyTypeArgs ({}, {}, {})",
                 format_args!(
@@ -2840,11 +2840,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 maximum_arity
             )
         }
-        ErrorMessage::ETooFewTypeArgs(box ETooFewTypeArgsData {
+        ErrorMessage::ETooFewTypeArgs(deref!(ETooFewTypeArgsData {
             reason_tapp,
             arity_loc,
             minimum_arity,
-        }) => {
+        })) => {
             format!(
                 "ETooFewTypeArgs ({}, {}, {})",
                 format_args!(
@@ -2856,10 +2856,10 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 minimum_arity
             )
         }
-        ErrorMessage::EInvalidReactCreateElement(box EInvalidReactCreateElementData {
+        ErrorMessage::EInvalidReactCreateElement(deref!(EInvalidReactCreateElementData {
             create_element_loc,
             react,
-        }) => {
+        })) => {
             format!(
                 "EInvalidReactCreateElement {{ loc = {}; react = {} {} }}",
                 string_of_aloc(None, create_element_loc),
@@ -2867,13 +2867,13 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 react.name,
             )
         }
-        ErrorMessage::EInvalidThisArg(box EInvalidThisArgData {
+        ErrorMessage::EInvalidThisArg(deref!(EInvalidThisArgData {
             loc,
             name,
             receiver_expression,
             kind,
             ..
-        }) => {
+        })) => {
             format!(
                 "EInvalidThisArg ({}) ({}) ({}) ({:?})",
                 string_of_aloc(None, loc),
@@ -2885,7 +2885,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
         ErrorMessage::EInvalidInfer(loc) => {
             format!("EInvalidInfer ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::EInvalidExtends(box (loc, expression)) => {
+        ErrorMessage::EInvalidExtends(deref!((loc, expression))) => {
             format!(
                 "EInvalidExtends ({} RCode({expression:?}))",
                 string_of_aloc(None, loc)
@@ -2894,12 +2894,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
         ErrorMessage::EExportsAnnot(loc) => {
             format!("EExportsAnnot ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::EInvalidRendersTypeArgument(box EInvalidRendersTypeArgumentData {
+        ErrorMessage::EInvalidRendersTypeArgument(deref!(EInvalidRendersTypeArgumentData {
             loc,
             renders_variant,
             invalid_render_type_kind,
             invalid_types,
-        }) => {
+        })) => {
             let variant_str = match renders_variant {
                 flow_parser::ast::types::RendersVariant::Normal => "renders",
                 flow_parser::ast::types::RendersVariant::Maybe => "renders?",
@@ -2957,10 +2957,10 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::ETypeGuardInvalidParameter(box ETypeGuardInvalidParameterData {
+        ErrorMessage::ETypeGuardInvalidParameter(deref!(ETypeGuardInvalidParameterData {
             type_guard,
             ..
-        }) => {
+        })) => {
             format!(
                 "ETypeGuardInvalidParameter ({} {})",
                 string_of_aloc(None, &type_guard.loc),
@@ -2979,22 +2979,22 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
         ErrorMessage::ETypeGuardParamUnbound(_) => "ETypeGuardParamUnbound".to_string(),
         ErrorMessage::ETypeGuardThisParam(_) => "ETypeGuardThisParam".to_string(),
         ErrorMessage::ETypeGuardFunctionInvalidWrites(
-            box ETypeGuardFunctionInvalidWritesData { .. },
+            deref!(ETypeGuardFunctionInvalidWritesData { .. }),
         ) => "ETypeGuardFunctionInvalidWrites".to_string(),
-        ErrorMessage::ETypeGuardFunctionParamHavoced(box ETypeGuardFunctionParamHavocedData {
+        ErrorMessage::ETypeGuardFunctionParamHavoced(deref!(ETypeGuardFunctionParamHavocedData {
             ..
-        }) => "ETypeGuardFunctionParamHavoced".to_string(),
+        })) => "ETypeGuardFunctionParamHavoced".to_string(),
         ErrorMessage::ETypeGuardIncompatibleWithFunctionKind(
-            box ETypeGuardIncompatibleWithFunctionKindData { .. },
+            deref!(ETypeGuardIncompatibleWithFunctionKindData { .. }),
         ) => "ETypeGuardIncompatibleWithFunctionKind".to_string(),
-        ErrorMessage::EInternal(box (loc, err)) => {
+        ErrorMessage::EInternal(deref!((loc, err))) => {
             format!(
                 "EInternal(Box::new(({}, {})))",
                 string_of_aloc(None, loc),
                 dump_internal_error(err)
             )
         }
-        ErrorMessage::EUnsupportedSyntax(box (loc, _)) => {
+        ErrorMessage::EUnsupportedSyntax(deref!((loc, _))) => {
             format!(
                 "EUnsupportedSyntax(Box::new(({}, _)))",
                 string_of_aloc(None, loc)
@@ -3035,7 +3035,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             string_of_aloc(None, loc),
             hint_available
         ),
-        ErrorMessage::EBindingError(box (_binding_error, loc, x, entry_loc)) => {
+        ErrorMessage::EBindingError(deref!((_binding_error, loc, x, entry_loc))) => {
             format!(
                 "EBindingError(Box::new((_, {}, {}, {})))",
                 string_of_aloc(None, loc),
@@ -3070,7 +3070,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 err_str
             )
         }
-        ErrorMessage::EUninitializedProperty(box (loc, name, kind)) => {
+        ErrorMessage::EUninitializedProperty(deref!((loc, name, kind))) => {
             format!(
                 "EUninitializedProperty ({}, {}, {:?})",
                 string_of_aloc(None, loc),
@@ -3084,14 +3084,14 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
         ErrorMessage::EBadExportPosition(loc) => {
             format!("EBadExportPosition ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::EBadExportContext(box (name, loc)) => {
+        ErrorMessage::EBadExportContext(deref!((name, loc))) => {
             format!(
                 "EBadExportContext(Box::new(({}, {})))",
                 name,
                 string_of_aloc(None, loc)
             )
         }
-        ErrorMessage::EBadDefaultImportAccess(box (loc, import_star_loc)) => {
+        ErrorMessage::EBadDefaultImportAccess(deref!((loc, import_star_loc))) => {
             format!(
                 "EBadDefaultImportAccess(Box::new(({}, {})))",
                 string_of_aloc(None, loc),
@@ -3104,14 +3104,14 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_aloc(None, loc)
             )
         }
-        ErrorMessage::EInvalidImportStarUse(box (loc, import_star_loc)) => {
+        ErrorMessage::EInvalidImportStarUse(deref!((loc, import_star_loc))) => {
             format!(
                 "EInvalidImportStarUse(Box::new(({}, {})))",
                 string_of_aloc(None, loc),
                 string_of_aloc(None, import_star_loc)
             )
         }
-        ErrorMessage::ENonConstVarExport(box (loc, declaration)) => {
+        ErrorMessage::ENonConstVarExport(deref!((loc, declaration))) => {
             let declaration = match declaration {
                 Some((declaration_loc, name)) => {
                     format!("{} {name}", string_of_aloc(None, declaration_loc))
@@ -3127,32 +3127,32 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
         ErrorMessage::EThisInExportedFunction(loc) => {
             format!("EThisInExportedFunction ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::EMixedImportAndRequire(box (loc, import_loc)) => {
+        ErrorMessage::EMixedImportAndRequire(deref!((loc, import_loc))) => {
             format!(
                 "EMixedImportAndRequire(Box::new(({}, {})))",
                 string_of_aloc(None, loc),
                 string_of_aloc(None, import_loc)
             )
         }
-        ErrorMessage::EPackageBoundaryImport(box (loc, boundary)) => {
+        ErrorMessage::EPackageBoundaryImport(deref!((loc, boundary))) => {
             format!(
                 "EPackageBoundaryImport ({}, {})",
                 string_of_aloc(None, loc),
                 boundary
             )
         }
-        ErrorMessage::EUnsupportedVarianceAnnotation(box (loc, s)) => {
+        ErrorMessage::EUnsupportedVarianceAnnotation(deref!((loc, s))) => {
             format!(
                 "EUnsupportedVarianceAnnotation(Box::new(({}, {})))",
                 string_of_aloc(None, loc),
                 s
             )
         }
-        ErrorMessage::EExportRenamedDefault(box EExportRenamedDefaultData {
+        ErrorMessage::EExportRenamedDefault(deref!(EExportRenamedDefaultData {
             loc,
             name,
             is_reexport,
-        }) => {
+        })) => {
             let name_str = match name {
                 Some(n) => n.to_string(),
                 None => "None".to_string(),
@@ -3167,12 +3167,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
         ErrorMessage::EUnreachable(loc) => {
             format!("EUnreachable ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::EInvalidObjectKit(box EInvalidObjectKitData {
+        ErrorMessage::EInvalidObjectKit(deref!(EInvalidObjectKitData {
             loc,
             value,
             use_op,
             requirement,
-        }) => {
+        })) => {
             let value = match &value.type_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -3185,14 +3185,14 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 requirement
             )
         }
-        ErrorMessage::EInvalidTypeof(box (loc, name)) => {
+        ErrorMessage::EInvalidTypeof(deref!((loc, name))) => {
             format!(
                 "EInvalidTypeof(Box::new(({}, {:?})))",
                 string_of_aloc(None, loc),
                 name
             )
         }
-        ErrorMessage::EBinaryInLHS(box EBinaryInLHSData { loc, lhs_desc, .. }) => {
+        ErrorMessage::EBinaryInLHS(deref!(EBinaryInLHSData { loc, lhs_desc, .. })) => {
             let lhs = match lhs_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -3203,7 +3203,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 lhs,
             )
         }
-        ErrorMessage::EBinaryInRHS(box EBinaryInRHSData { loc, rhs_desc, .. }) => {
+        ErrorMessage::EBinaryInRHS(deref!(EBinaryInRHSData { loc, rhs_desc, .. })) => {
             let rhs = match rhs_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -3214,7 +3214,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 rhs,
             )
         }
-        ErrorMessage::EArithmeticOperand(box EArithmeticOperandData { loc, operand }) => {
+        ErrorMessage::EArithmeticOperand(deref!(EArithmeticOperandData { loc, operand })) => {
             let operand = match &operand.type_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -3225,7 +3225,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 operand,
             )
         }
-        ErrorMessage::EForInRHS(box EForInRHSData { loc, rhs_desc, .. }) => {
+        ErrorMessage::EForInRHS(deref!(EForInRHSData { loc, rhs_desc, .. })) => {
             let rhs = match rhs_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -3236,7 +3236,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 rhs,
             )
         }
-        ErrorMessage::EInstanceofRHS(box EInstanceofRHSData { loc, rhs_desc, .. }) => {
+        ErrorMessage::EInstanceofRHS(deref!(EInstanceofRHSData { loc, rhs_desc, .. })) => {
             let rhs = match rhs_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -3247,11 +3247,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 rhs,
             )
         }
-        ErrorMessage::EObjectComputedPropertyAccess(box EObjectComputedPropertyAccessData {
+        ErrorMessage::EObjectComputedPropertyAccess(deref!(EObjectComputedPropertyAccessData {
             object,
             property,
             kind,
-        }) => {
+        })) => {
             let dump_type =
                 |type_ref: &ErrorTypeReferenceWithLocData<ALoc>| match &type_ref.type_desc {
                     TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
@@ -3264,7 +3264,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 kind.str_of_kind()
             )
         }
-        ErrorMessage::EObjectComputedPropertyAssign(box (reason1, reason2, kind)) => {
+        ErrorMessage::EObjectComputedPropertyAssign(deref!((reason1, reason2, kind))) => {
             let reason2_str = match reason2 {
                 Some(r) => format!("{r:?}"),
                 None => "none".to_string(),
@@ -3277,7 +3277,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             )
         }
         ErrorMessage::EObjectComputedPropertyPotentialOverwrite(
-            box EObjectComputedPropertyPotentialOverwriteData { key_loc, .. },
+            deref!(EObjectComputedPropertyPotentialOverwriteData { key_loc, .. }),
         ) => {
             format!(
                 "EObjectComputedPropertyPotentialOverwrite ({})",
@@ -3287,14 +3287,14 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
         ErrorMessage::EInvalidLHSInAssignment(loc) => {
             format!("EInvalidLHSInAssignment ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::EIncompatibleTypesWithUseOp(box EIncompatibleTypesWithUseOpData {
+        ErrorMessage::EIncompatibleTypesWithUseOp(deref!(EIncompatibleTypesWithUseOpData {
             lower_loc,
             upper_loc,
             lower_desc,
             upper_desc,
             use_op,
             ..
-        }) => {
+        })) => {
             let dump_type_or_desc = |type_or_desc: &TypeOrTypeDescT<ALoc>| match type_or_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -3308,12 +3308,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::EInvariantSubtypingWithUseOp(box EInvariantSubtypingWithUseOpData {
+        ErrorMessage::EInvariantSubtypingWithUseOp(deref!(EInvariantSubtypingWithUseOpData {
             lower_loc,
             upper_loc,
             use_op,
             ..
-        }) => {
+        })) => {
             format!(
                 "EInvariantSubtypingWithUseOp {{ lower_loc = {}; upper_loc = {};  use_op = {} }}",
                 string_of_aloc(None, lower_loc),
@@ -3332,7 +3332,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 type_desc,
             )
         }
-        ErrorMessage::ENotAReactComponent(box ENotAReactComponentData { component, use_op }) => {
+        ErrorMessage::ENotAReactComponent(deref!(ENotAReactComponentData { component, use_op })) => {
             let component_type = match &component.type_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -3343,13 +3343,13 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::EFunctionCallExtraArg(box EFunctionCallExtraArgData {
+        ErrorMessage::EFunctionCallExtraArg(deref!(EFunctionCallExtraArgData {
             loc,
             function_reference,
             param_count,
             use_op,
             ..
-        }) => {
+        })) => {
             let function = match function_reference.kind {
                 FunctionReferenceKind::Function => "function",
                 FunctionReferenceKind::FunctionType => "function type",
@@ -3369,11 +3369,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
         ErrorMessage::EUnsupportedSetProto(loc) => {
             format!("EUnsupportedSetProto ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::EDuplicateModuleProvider(box EDuplicateModuleProviderData {
+        ErrorMessage::EDuplicateModuleProvider(deref!(EDuplicateModuleProviderData {
             module_name,
             provider,
             conflict,
-        }) => {
+        })) => {
             format!(
                 "EDuplicateModuleProvider ({:?}, {}, {})",
                 module_name,
@@ -3381,10 +3381,10 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_aloc(None, conflict)
             )
         }
-        ErrorMessage::EParseError(box (loc, _)) => {
+        ErrorMessage::EParseError(deref!((loc, _))) => {
             format!("EParseError(Box::new(({}, _)))", string_of_aloc(None, loc))
         }
-        ErrorMessage::EDocblockError(box (loc, err)) => {
+        ErrorMessage::EDocblockError(deref!((loc, err))) => {
             let err_str = match err {
                 DocblockError::MultipleFlowAttributes => "MultipleFlowAttributes",
                 DocblockError::InvalidFlowMode(_) => "InvalidFlowMode",
@@ -3404,14 +3404,14 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
         ErrorMessage::EAmbiguousObjectType(loc) => {
             format!("EAmbiguousObjectType ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::EUntypedTypeImport(box (loc, module_name)) => {
+        ErrorMessage::EUntypedTypeImport(deref!((loc, module_name))) => {
             format!(
                 "EUntypedTypeImport(Box::new(({}, {})))",
                 string_of_aloc(None, loc),
                 module_name.display()
             )
         }
-        ErrorMessage::EUntypedImport(box (loc, module_name)) => {
+        ErrorMessage::EUntypedImport(deref!((loc, module_name))) => {
             format!(
                 "EUntypedImport(Box::new(({}, {})))",
                 string_of_aloc(None, loc),
@@ -3430,10 +3430,10 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
         ErrorMessage::EDeprecatedBool(loc) => {
             format!("EDeprecatedBool ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::EIncorrectTypeWithReplacement(box EIncorrectTypeWithReplacementData {
+        ErrorMessage::EIncorrectTypeWithReplacement(deref!(EIncorrectTypeWithReplacementData {
             loc,
             kind,
-        }) => {
+        })) => {
             format!(
                 "EIncorrectTypeWithReplacement ({}) ({:?})",
                 string_of_aloc(None, loc),
@@ -3452,7 +3452,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
         ErrorMessage::ECodelessSuppression(loc) => {
             format!("ECodelessSuppression ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::ELintSetting(box (loc, kind)) => {
+        ErrorMessage::ELintSetting(deref!((loc, kind))) => {
             let kind_str = match kind {
                 LintParseError::InvalidSetting => "Invalid_setting",
                 LintParseError::MalformedArgument => "Malformed_argument",
@@ -3467,12 +3467,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 kind_str
             )
         }
-        ErrorMessage::ESketchyNullLint(box ESketchyNullLintData {
+        ErrorMessage::ESketchyNullLint(deref!(ESketchyNullLintData {
             kind,
             loc,
             null_loc,
             falsy_loc,
-        }) => {
+        })) => {
             let kind_str = match kind {
                 SketchyNullKind::Bool => "SketchyNullBool",
                 SketchyNullKind::String => "SketchyNullString",
@@ -3502,9 +3502,9 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             };
             format!("ESketchyNumberLint ({}) ({})", kind_str, value)
         }
-        ErrorMessage::EInvalidConstructor(box EInvalidConstructorData {
+        ErrorMessage::EInvalidConstructor(deref!(EInvalidConstructorData {
             loc, value_desc, ..
-        }) => {
+        })) => {
             let value = match value_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -3515,11 +3515,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 value,
             )
         }
-        ErrorMessage::EInvalidPrototype(box EInvalidPrototypeData {
+        ErrorMessage::EInvalidPrototype(deref!(EInvalidPrototypeData {
             loc,
             prototype_desc,
             ..
-        }) => {
+        })) => {
             let prototype = match prototype_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -3530,14 +3530,14 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 prototype,
             )
         }
-        ErrorMessage::EUnnecessaryOptionalChain(box (loc, _)) => {
+        ErrorMessage::EUnnecessaryOptionalChain(deref!((loc, _))) => {
             format!("EUnnecessaryOptionalChain ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::EUnnecessaryInvariant(box EUnnecessaryInvariantData {
+        ErrorMessage::EUnnecessaryInvariant(deref!(EUnnecessaryInvariantData {
             loc,
             condition,
             ..
-        }) => {
+        })) => {
             let condition = match &condition.type_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -3554,7 +3554,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_aloc(None, loc)
             )
         }
-        ErrorMessage::ECannotDelete(box ECannotDeleteData { loc, expression }) => {
+        ErrorMessage::ECannotDelete(deref!(ECannotDeleteData { loc, expression })) => {
             let expression = match &expression.type_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -3620,12 +3620,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             let msg = string_of_signature_error(|loc: &ALoc| string_of_aloc(None, loc), sve);
             format!("ESignatureVerification ({})", msg)
         }
-        ErrorMessage::EPrimitiveAsInterface(box EPrimitiveAsInterfaceData {
+        ErrorMessage::EPrimitiveAsInterface(deref!(EPrimitiveAsInterfaceData {
             use_op,
             lower,
             upper,
             kind: _,
-        }) => {
+        })) => {
             let dump_type =
                 |type_ref: &ErrorTypeReferenceWithLocData<ALoc>| match &type_ref.type_desc {
                     TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
@@ -3638,11 +3638,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 dump_type(upper)
             )
         }
-        ErrorMessage::ECannotSpreadInterface(box ECannotSpreadInterfaceData {
+        ErrorMessage::ECannotSpreadInterface(deref!(ECannotSpreadInterfaceData {
             spread_loc,
             interface,
             use_op,
-        }) => {
+        })) => {
             format!(
                 "ECannotSpreadInterface ({}) ({}) ({})",
                 string_of_aloc(None, spread_loc),
@@ -3650,13 +3650,13 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::ECannotSpreadIndexerOnRight(box ECannotSpreadIndexerOnRightData {
+        ErrorMessage::ECannotSpreadIndexerOnRight(deref!(ECannotSpreadIndexerOnRightData {
             spread_loc,
             object,
             key_desc,
             use_op,
             ..
-        }) => {
+        })) => {
             let key = match key_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -3669,14 +3669,14 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::EUnableToSpread(box EUnableToSpreadData {
+        ErrorMessage::EUnableToSpread(deref!(EUnableToSpreadData {
             spread_loc,
             object1,
             object2,
             propname,
             error_kind: _,
             use_op,
-        }) => {
+        })) => {
             format!(
                 "EUnableToSpread ({}) ({}) ({}) ({}) ({})",
                 string_of_aloc(None, spread_loc),
@@ -3686,14 +3686,14 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::EInexactMayOverwriteIndexer(box EInexactMayOverwriteIndexerData {
+        ErrorMessage::EInexactMayOverwriteIndexer(deref!(EInexactMayOverwriteIndexerData {
             spread_loc,
             key_desc,
             value_desc,
             object2,
             use_op,
             ..
-        }) => {
+        })) => {
             let key = match key_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -3711,11 +3711,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::EExponentialSpread(box EExponentialSpreadData {
+        ErrorMessage::EExponentialSpread(deref!(EExponentialSpreadData {
             spread_loc,
             operand1,
             operand2,
-        }) => {
+        })) => {
             let format_operand_group =
                 |g: &ExponentialSpreadOperandGroup<ErrorTypeReferenceWithLocData<ALoc>>| {
                     let second = match &g.second {
@@ -3744,11 +3744,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                     string_of_aloc(None, loc)
                 )
             }
-            EnumErrorKind::EnumInvalidMemberAccess(box EnumInvalidMemberAccessData {
+            EnumErrorKind::EnumInvalidMemberAccess(deref!(EnumInvalidMemberAccessData {
                 member,
                 member_loc,
                 enum_,
-            }) => {
+            })) => {
                 let (member_str, suggestion_str, member) = match member {
                     EnumMemberAccess::Named { name, suggestion } => (
                         name.to_string(),
@@ -3769,18 +3769,18 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                     dump_enum_reference(enum_)
                 )
             }
-            EnumErrorKind::EnumModification(box EnumModificationData { loc, enum_ }) => {
+            EnumErrorKind::EnumModification(deref!(EnumModificationData { loc, enum_ })) => {
                 format!(
                     "EEnumError (EnumModification ({}) ({}))",
                     string_of_aloc(None, loc),
                     dump_enum_reference(enum_)
                 )
             }
-            EnumErrorKind::EnumMemberDuplicateValue(box EnumMemberDuplicateValueData {
+            EnumErrorKind::EnumMemberDuplicateValue(deref!(EnumMemberDuplicateValueData {
                 loc,
                 prev_use_loc,
                 enum_,
-            }) => {
+            })) => {
                 format!(
                     "EEnumError (EnumMemberDuplicateValue ({}) ({}) ({}))",
                     string_of_aloc(None, loc),
@@ -3788,48 +3788,48 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                     dump_enum_reference(enum_)
                 )
             }
-            EnumErrorKind::EnumInvalidObjectUtilType(box EnumInvalidObjectUtilTypeData {
+            EnumErrorKind::EnumInvalidObjectUtilType(deref!(EnumInvalidObjectUtilTypeData {
                 operation_loc,
                 operation_name,
                 enum_,
                 ..
-            }) => {
+            })) => {
                 format!(
                     "EEnumError (EnumInvalidObjectUtilType ({} RType({operation_name:?})) ({}))",
                     string_of_aloc(None, operation_loc),
                     dump_enum_reference(enum_)
                 )
             }
-            EnumErrorKind::EnumInvalidObjectFunction(box EnumInvalidObjectFunctionData {
+            EnumErrorKind::EnumInvalidObjectFunction(deref!(EnumInvalidObjectFunctionData {
                 operation_loc,
                 function_name,
                 enum_,
                 ..
-            }) => {
+            })) => {
                 format!(
                     "EEnumError (EnumInvalidObjectFunction ({} RIdentifier({function_name:?})) ({}))",
                     string_of_aloc(None, operation_loc),
                     dump_enum_reference(enum_)
                 )
             }
-            EnumErrorKind::EnumNotIterable(box EnumNotIterableData { enum_ }) => {
+            EnumErrorKind::EnumNotIterable(deref!(EnumNotIterableData { enum_ })) => {
                 format!(
                     "EEnumError (EnumNotIterable ({}))",
                     dump_enum_reference(enum_)
                 )
             }
-            EnumErrorKind::EnumNotIterableForIn(box EnumNotIterableForInData { enum_, .. }) => {
+            EnumErrorKind::EnumNotIterableForIn(deref!(EnumNotIterableForInData { enum_, .. })) => {
                 format!(
                     "EEnumError (EnumNotIterableForIn ({}))",
                     dump_enum_reference(enum_)
                 )
             }
-            EnumErrorKind::EnumMemberAlreadyChecked(box EnumMemberAlreadyCheckedData {
+            EnumErrorKind::EnumMemberAlreadyChecked(deref!(EnumMemberAlreadyCheckedData {
                 case_test_loc,
                 prev_check_loc,
                 enum_,
                 member_name,
-            }) => {
+            })) => {
                 format!(
                     "EEnumError (EnumMemberAlreadyChecked ({}) ({}) ({} {}) ({}))",
                     string_of_aloc(None, case_test_loc),
@@ -3839,10 +3839,10 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                     member_name
                 )
             }
-            EnumErrorKind::EnumAllMembersAlreadyChecked(box EnumAllMembersAlreadyCheckedData {
+            EnumErrorKind::EnumAllMembersAlreadyChecked(deref!(EnumAllMembersAlreadyCheckedData {
                 loc,
                 enum_,
-            }) => {
+            })) => {
                 format!(
                     "EEnumError (EnumAllMembersAlreadyChecked ({}) ({} {}))",
                     string_of_aloc(None, loc),
@@ -3850,13 +3850,13 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                     enum_.name
                 )
             }
-            EnumErrorKind::EnumNotAllChecked(box EnumNotAllCheckedData {
+            EnumErrorKind::EnumNotAllChecked(deref!(EnumNotAllCheckedData {
                 loc,
                 description_name,
                 enum_,
                 left_to_check,
                 default_case_loc,
-            }) => {
+            })) => {
                 let default_str = match default_case_loc {
                     Some(loc) => string_of_aloc(None, loc),
                     None => "<None>".to_string(),
@@ -3871,11 +3871,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                     default_str
                 )
             }
-            EnumErrorKind::EnumUnknownNotChecked(box EnumUnknownNotCheckedData {
+            EnumErrorKind::EnumUnknownNotChecked(deref!(EnumUnknownNotCheckedData {
                 loc,
                 description_name,
                 enum_,
-            }) => {
+            })) => {
                 format!(
                     "EEnumError (EnumUnknownNotChecked ({} {}) ({} {}))",
                     string_of_aloc(None, loc),
@@ -3884,13 +3884,13 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                     enum_.name
                 )
             }
-            EnumErrorKind::EnumInvalidCheck(box EnumInvalidCheckData {
+            EnumErrorKind::EnumInvalidCheck(deref!(EnumInvalidCheckData {
                 loc,
                 enum_,
                 example_member,
                 from_match,
                 ..
-            }) => {
+            })) => {
                 let member_str = match example_member {
                     Some(m) => m.to_string(),
                     None => "<None>".to_string(),
@@ -3903,11 +3903,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                     from_match
                 )
             }
-            EnumErrorKind::EnumMemberUsedAsType(box EnumMemberUsedAsTypeData {
+            EnumErrorKind::EnumMemberUsedAsType(deref!(EnumMemberUsedAsTypeData {
                 loc,
                 description_name,
                 enum_,
-            }) => {
+            })) => {
                 format!(
                     "EEnumError (EnumMemberUsedAsType ({} {}) ({}))",
                     string_of_aloc(None, loc),
@@ -3915,12 +3915,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                     dump_enum_reference(enum_)
                 )
             }
-            EnumErrorKind::EnumIncompatible(box EIncompatibleTypesWithUseOpData {
+            EnumErrorKind::EnumIncompatible(deref!(EIncompatibleTypesWithUseOpData {
                 lower_desc,
                 upper_desc,
                 use_op,
                 ..
-            }) => {
+            })) => {
                 let lower = match lower_desc {
                     TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                     TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -3936,12 +3936,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                     string_of_use_op(use_op)
                 )
             }
-            EnumErrorKind::EnumInvalidAbstractUse(box EnumInvalidAbstractUseData {
+            EnumErrorKind::EnumInvalidAbstractUse(deref!(EnumInvalidAbstractUseData {
                 loc,
                 description_name,
                 enum_loc,
                 enum_name,
-            }) => {
+            })) => {
                 format!(
                     "EEnumError (EnumInvalidAbstractUse ({} {}) ({} {}))",
                     string_of_aloc(None, loc),
@@ -3950,11 +3950,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                     enum_name.as_deref().unwrap_or("<None>")
                 )
             }
-            EnumErrorKind::EnumInvalidMemberName(box EnumInvalidMemberNameData {
+            EnumErrorKind::EnumInvalidMemberName(deref!(EnumInvalidMemberNameData {
                 loc,
                 enum_,
                 member_name,
-            }) => {
+            })) => {
                 format!(
                     "EEnumError (EnumInvalidMemberName ({}) ({}) ({}))",
                     string_of_aloc(None, loc),
@@ -3962,11 +3962,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                     member_name
                 )
             }
-            EnumErrorKind::EnumNonIdentifierMemberName(box EnumNonIdentifierMemberNameData {
+            EnumErrorKind::EnumNonIdentifierMemberName(deref!(EnumNonIdentifierMemberNameData {
                 loc,
                 enum_,
                 member_name,
-            }) => {
+            })) => {
                 format!(
                     "EEnumError (EnumNonIdentifierMemberName ({}) ({}) ({}))",
                     string_of_aloc(None, loc),
@@ -3974,12 +3974,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                     member_name
                 )
             }
-            EnumErrorKind::EnumDuplicateMemberName(box EnumDuplicateMemberNameData {
+            EnumErrorKind::EnumDuplicateMemberName(deref!(EnumDuplicateMemberNameData {
                 loc,
                 prev_use_loc,
                 enum_,
                 member_name,
-            }) => {
+            })) => {
                 format!(
                     "EEnumError (EnumDuplicateMemberName ({}) ({}) ({}) ({}))",
                     string_of_aloc(None, loc),
@@ -3988,22 +3988,22 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                     member_name
                 )
             }
-            EnumErrorKind::EnumInconsistentMemberValues(box EnumInconsistentMemberValuesData {
+            EnumErrorKind::EnumInconsistentMemberValues(deref!(EnumInconsistentMemberValuesData {
                 loc,
                 enum_,
-            }) => {
+            })) => {
                 format!(
                     "EEnumError (EnumInconsistentMemberValues ({}) ({}))",
                     string_of_aloc(None, loc),
                     dump_enum_reference(enum_)
                 )
             }
-            EnumErrorKind::EnumInvalidMemberInitializer(box EnumInvalidMemberInitializerData {
+            EnumErrorKind::EnumInvalidMemberInitializer(deref!(EnumInvalidMemberInitializerData {
                 loc,
                 enum_,
                 member_name,
                 ..
-            }) => {
+            })) => {
                 format!(
                     "EEnumError (EnumInvalidMemberInitializer ({}) ({}) ({}))",
                     string_of_aloc(None, loc),
@@ -4012,11 +4012,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 )
             }
             EnumErrorKind::EnumBooleanMemberNotInitialized(
-                box EnumBooleanMemberNotInitializedData {
+                deref!(EnumBooleanMemberNotInitializedData {
                     loc,
                     enum_,
                     member_name,
-                },
+                }),
             ) => {
                 format!(
                     "EEnumError (EnumBooleanMemberNotInitialized ({}) ({}) ({}))",
@@ -4026,11 +4026,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 )
             }
             EnumErrorKind::EnumNumberMemberNotInitialized(
-                box EnumNumberMemberNotInitializedData {
+                deref!(EnumNumberMemberNotInitializedData {
                     loc,
                     enum_,
                     member_name,
-                },
+                }),
             ) => {
                 format!(
                     "EEnumError (EnumNumberMemberNotInitialized ({}) ({}) ({}))",
@@ -4040,11 +4040,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 )
             }
             EnumErrorKind::EnumBigIntMemberNotInitialized(
-                box EnumBigIntMemberNotInitializedData {
+                deref!(EnumBigIntMemberNotInitializedData {
                     loc,
                     enum_,
                     member_name,
-                },
+                }),
             ) => {
                 format!(
                     "EEnumError (EnumBigIntMemberNotInitialized ({}) ({}) ({}))",
@@ -4054,7 +4054,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 )
             }
             EnumErrorKind::EnumStringMemberInconsistentlyInitialized(
-                box EnumStringMemberInconsistentlyInitializedData { loc, enum_ },
+                deref!(EnumStringMemberInconsistentlyInitializedData { loc, enum_ }),
             ) => {
                 format!(
                     "EEnumError (EnumStringMemberInconsistentlyInitialized ({}) ({}))",
@@ -4062,12 +4062,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                     dump_enum_reference(enum_)
                 )
             }
-            EnumErrorKind::TSEnumInvalidMember(box TSEnumInvalidMemberData {
+            EnumErrorKind::TSEnumInvalidMember(deref!(TSEnumInvalidMemberData {
                 loc,
                 enum_,
                 member_name,
                 kind: _,
-            }) => {
+            })) => {
                 format!(
                     "EEnumError (TSEnumInvalidMember ({}) ({}) ({}))",
                     string_of_aloc(None, loc),
@@ -4075,11 +4075,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                     member_name
                 )
             }
-            EnumErrorKind::TSEnumInvalidSyntax(box TSEnumInvalidSyntaxData {
+            EnumErrorKind::TSEnumInvalidSyntax(deref!(TSEnumInvalidSyntaxData {
                 loc,
                 enum_,
                 kind: _,
-            }) => {
+            })) => {
                 format!(
                     "EEnumError (TSEnumInvalidSyntax ({}) ({}))",
                     string_of_aloc(None, loc),
@@ -4087,12 +4087,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 )
             }
         },
-        ErrorMessage::EAssignConstLikeBinding(box EAssignConstLikeBindingData {
+        ErrorMessage::EAssignConstLikeBinding(deref!(EAssignConstLikeBindingData {
             loc,
             definition_loc,
             name,
             binding_kind,
-        }) => {
+        })) => {
             format!(
                 "EAssignConstLikeBinding ({}) (identifier `{}` ({}) ) ({})",
                 string_of_aloc(None, loc),
@@ -4104,12 +4104,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
         ErrorMessage::EMalformedCode(loc) => {
             format!("EMalformedCode ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::EObjectThisSuperReference(box EObjectThisSuperReferenceData {
+        ErrorMessage::EObjectThisSuperReference(deref!(EObjectThisSuperReferenceData {
             loc,
             method_loc,
             method_name,
             kind: _,
-        }) => {
+        })) => {
             format!(
                 "EObjectThisSuperReference(Box::new(({}, {}, {:?}, _)))",
                 string_of_aloc(None, loc),
@@ -4117,10 +4117,10 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 method_name
             )
         }
-        ErrorMessage::EComponentThisReference(box EComponentThisReferenceData {
+        ErrorMessage::EComponentThisReference(deref!(EComponentThisReferenceData {
             this_loc,
             component_loc,
-        }) => {
+        })) => {
             format!(
                 "EComponentThisReference (this={}, component={})",
                 string_of_aloc(None, this_loc),
@@ -4148,11 +4148,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
         ErrorMessage::ENestedHook(loc) => {
             format!("ENestedHook ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::EInvalidDeclaration(box EInvalidDeclarationData {
+        ErrorMessage::EInvalidDeclaration(deref!(EInvalidDeclarationData {
             declaration_loc,
             name,
             ..
-        }) => {
+        })) => {
             format!(
                 "EInvalidDeclaration(Box::new(EInvalidDeclarationData {} {}))",
                 string_of_aloc(None, declaration_loc),
@@ -4160,20 +4160,20 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             )
         }
         ErrorMessage::EImplicitInstantiationUnderconstrainedError(
-            box EImplicitInstantiationUnderconstrainedErrorData { use_op, .. },
+            deref!(EImplicitInstantiationUnderconstrainedErrorData { use_op, .. }),
         ) => {
             format!(
                 "EImplicitInstantiationUnderconstrainedError ({})",
                 string_of_use_op(use_op)
             )
         }
-        ErrorMessage::EClassToObject(box EClassToObjectData { .. }) => "EClassToObject".to_string(),
-        ErrorMessage::EHookIncompatible(box EHookIncompatibleData {
+        ErrorMessage::EClassToObject(deref!(EClassToObjectData { .. })) => "EClassToObject".to_string(),
+        ErrorMessage::EHookIncompatible(deref!(EHookIncompatibleData {
             use_op,
             lower,
             upper,
             ..
-        }) => {
+        })) => {
             let dump_type =
                 |type_ref: &ErrorTypeReferenceWithLocData<ALoc>| match &type_ref.type_desc {
                     TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
@@ -4186,11 +4186,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 dump_type(upper)
             )
         }
-        ErrorMessage::EHookUniqueIncompatible(box EHookUniqueIncompatibleData {
+        ErrorMessage::EHookUniqueIncompatible(deref!(EHookUniqueIncompatibleData {
             use_op,
             lower,
             upper,
-        }) => {
+        })) => {
             let dump_type =
                 |type_ref: &ErrorTypeReferenceWithLocData<ALoc>| match &type_ref.type_desc {
                     TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
@@ -4203,11 +4203,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 dump_type(upper)
             )
         }
-        ErrorMessage::EHookRuleViolation(box EHookRuleViolationData { .. }) => {
+        ErrorMessage::EHookRuleViolation(deref!(EHookRuleViolationData { .. })) => {
             "EHookRuleViolation ( )".to_string()
         }
         ErrorMessage::EHookNaming(_) => "EHookNaming ( )".to_string(),
-        ErrorMessage::EInvalidGraphQL(box (loc, err)) => {
+        ErrorMessage::EInvalidGraphQL(deref!((loc, err))) => {
             let err_str = match err {
                 flow_parser_utils::graphql::GraphqlError::InvalidTaggedTemplate => {
                     "invalid tagged template"
@@ -4220,13 +4220,13 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 err_str
             )
         }
-        ErrorMessage::EAnnotationInference(box EAnnotationInferenceData {
+        ErrorMessage::EAnnotationInference(deref!(EAnnotationInferenceData {
             loc,
             operation,
             operation_loc: _,
             target_loc,
             target_desc,
-        }) => {
+        })) => {
             format!(
                 "EAnnotationInference ({}) ({:?}) ({}) ({:?})",
                 string_of_aloc(None, loc),
@@ -4252,27 +4252,27 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             data.1
         ),
         ErrorMessage::EDefinitionCycle(_) => "EDefinitionCycle".to_string(),
-        ErrorMessage::ERecursiveDefinition(box ERecursiveDefinitionData { .. }) => {
+        ErrorMessage::ERecursiveDefinition(deref!(ERecursiveDefinitionData { .. })) => {
             "ERecursiveDefinition".to_string()
         }
-        ErrorMessage::EDuplicateClassMember(box EDuplicateClassMemberData {
+        ErrorMessage::EDuplicateClassMember(deref!(EDuplicateClassMemberData {
             loc, name, ..
-        }) => {
+        })) => {
             format!(
                 "EDuplicateClassMember ({}) ({})",
                 string_of_aloc(None, loc),
                 name
             )
         }
-        ErrorMessage::EReferenceInAnnotation(box (_, _, _)) => "EReferenceInAnnotation".to_string(),
-        ErrorMessage::EReferenceInDefault(box (_, _, _)) => "EReferenceInDefault".to_string(),
+        ErrorMessage::EReferenceInAnnotation(deref!((_, _, _))) => "EReferenceInAnnotation".to_string(),
+        ErrorMessage::EReferenceInDefault(deref!((_, _, _))) => "EReferenceInDefault".to_string(),
         ErrorMessage::EEmptyArrayNoProvider { loc } => {
             format!("EEmptyArrayNoProvider ({})", string_of_aloc(None, loc))
         }
         ErrorMessage::EUnusedPromise { loc, .. } => {
             format!("EUnusedPromise ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::EReactIntrinsicOverlap(box EReactIntrinsicOverlapData { .. }) => {
+        ErrorMessage::EReactIntrinsicOverlap(deref!(EReactIntrinsicOverlapData { .. })) => {
             "EReactIntrinsicOverlap (_, _, _)".to_string()
         }
         ErrorMessage::EReactRefInRender { .. } => "EReactRefInRender _".to_string(),
@@ -4296,24 +4296,24 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 string_of_aloc(None, loc)
             )
         }
-        ErrorMessage::ETSSyntax(box ETSSyntaxData { loc, .. }) => {
+        ErrorMessage::ETSSyntax(deref!(ETSSyntaxData { loc, .. })) => {
             format!("ETSSyntax ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::EAbstractClass(box EAbstractClassData { loc, .. }) => {
+        ErrorMessage::EAbstractClass(deref!(EAbstractClassData { loc, .. })) => {
             format!("EAbstractClass ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::EOverride(box EOverrideData { loc, .. }) => {
+        ErrorMessage::EOverride(deref!(EOverrideData { loc, .. })) => {
             format!("EOverride ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::EVarianceKeyword(box EVarianceKeywordData { loc, .. }) => {
+        ErrorMessage::EVarianceKeyword(deref!(EVarianceKeywordData { loc, .. })) => {
             format!("EVarianceKeyword ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::EInvalidBinaryArith(box EInvalidBinaryArithData {
+        ErrorMessage::EInvalidBinaryArith(deref!(EInvalidBinaryArithData {
             loc,
             left,
             right,
             kind,
-        }) => {
+        })) => {
             let left = match &left.type_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -4356,12 +4356,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 kind_str
             )
         }
-        ErrorMessage::EDuplicateComponentProp(box EDuplicateComponentPropData {
+        ErrorMessage::EDuplicateComponentProp(deref!(EDuplicateComponentPropData {
             spread, ..
-        }) => {
+        })) => {
             format!("EDuplicateComponentProp ({})", string_of_aloc(None, spread))
         }
-        ErrorMessage::EKeySpreadProp(box EKeySpreadPropData { loc, .. }) => {
+        ErrorMessage::EKeySpreadProp(deref!(EKeySpreadPropData { loc, .. })) => {
             format!("EKeySpreadProp ({})", string_of_aloc(None, loc))
         }
         ErrorMessage::EInvalidComponentRestParam(loc) => {
@@ -4371,11 +4371,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             format!("EInvalidTypeCastSyntax ({})", string_of_aloc(None, loc))
         }
         ErrorMessage::EMissingPlatformSupportWithAvailablePlatforms(
-            box EMissingPlatformSupportWithAvailablePlatformsData {
+            deref!(EMissingPlatformSupportWithAvailablePlatformsData {
                 loc,
                 available_platforms,
                 required_platforms,
-            },
+            }),
         ) => {
             format!(
                 "EMissingPlatformSupportWithAvailablePlatforms({}, {:?}, {:?})",
@@ -4385,21 +4385,21 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             )
         }
         ErrorMessage::EUnionPartialOptimizationNonUniqueKey(
-            box EUnionPartialOptimizationNonUniqueKeyData { loc, .. },
+            deref!(EUnionPartialOptimizationNonUniqueKeyData { loc, .. }),
         ) => {
             format!(
                 "EUnionPartialOptimizationNonUniqueKey ({})",
                 string_of_aloc(None, loc)
             )
         }
-        ErrorMessage::EUnionOptimization(box EUnionOptimizationData { loc, .. }) => {
+        ErrorMessage::EUnionOptimization(deref!(EUnionOptimizationData { loc, .. })) => {
             format!("EUnionOptimization ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::EUnionOptimizationOnNonUnion(box EUnionOptimizationOnNonUnionData {
+        ErrorMessage::EUnionOptimizationOnNonUnion(deref!(EUnionOptimizationOnNonUnionData {
             loc,
             arg_desc,
             ..
-        }) => {
+        })) => {
             let arg = match arg_desc {
                 TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
                 TypeOrTypeDescT::TypeDesc(desc) => format!("{desc:?}"),
@@ -4417,34 +4417,34 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             };
             format!("ECannotCallReactComponent ({component})")
         }
-        ErrorMessage::ENegativeTypeGuardConsistency(box ENegativeTypeGuardConsistencyData {
+        ErrorMessage::ENegativeTypeGuardConsistency(deref!(ENegativeTypeGuardConsistencyData {
             return_expression,
             ..
-        }) => {
+        })) => {
             format!(
                 "ENegativeTypeGuardConsistency ({})",
                 string_of_aloc(None, &return_expression.loc)
             )
         }
-        ErrorMessage::EAssertionFunctionFalsyAtExit(box EAssertionFunctionFalsyAtExitData {
+        ErrorMessage::EAssertionFunctionFalsyAtExit(deref!(EAssertionFunctionFalsyAtExitData {
             loc,
             ..
-        }) => format!(
+        })) => format!(
             "EAssertionFunctionFalsyAtExit ({})",
             string_of_aloc(None, loc)
         ),
-        ErrorMessage::EUnrecognizedAssertionCall(box EUnrecognizedAssertionCallData {
+        ErrorMessage::EUnrecognizedAssertionCall(deref!(EUnrecognizedAssertionCallData {
             loc,
             ..
-        }) => format!("EUnrecognizedAssertionCall ({})", string_of_aloc(None, loc)),
+        })) => format!("EUnrecognizedAssertionCall ({})", string_of_aloc(None, loc)),
         ErrorMessage::EMatchError(e) => match e {
-            MatchErrorKind::MatchNotExhaustive(box MatchNotExhaustiveData { loc, .. }) => {
+            MatchErrorKind::MatchNotExhaustive(deref!(MatchNotExhaustiveData { loc, .. })) => {
                 format!("EMatchNotExhaustive ({})", string_of_aloc(None, loc))
             }
-            MatchErrorKind::MatchUnusedPattern(box MatchUnusedPatternData {
+            MatchErrorKind::MatchUnusedPattern(deref!(MatchUnusedPatternData {
                 pattern,
                 already_seen,
-            }) => {
+            })) => {
                 let already_str = match already_seen {
                     Some(already_seen) => format!(
                         "{} {:?}",
@@ -4461,7 +4461,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 )
             }
             MatchErrorKind::MatchNonExhaustiveObjectPattern(
-                box MatchNonExhaustiveObjectPatternData { loc, rest, .. },
+                deref!(MatchNonExhaustiveObjectPatternData { loc, rest, .. }),
             ) => {
                 let rest_str = match rest {
                     Some(r) => dump_loc_type_desc(cx, &r.loc, &r.type_desc),
@@ -4473,11 +4473,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                     rest_str
                 )
             }
-            MatchErrorKind::MatchNonExplicitEnumCheck(box MatchNonExplicitEnumCheckData {
+            MatchErrorKind::MatchNonExplicitEnumCheck(deref!(MatchNonExplicitEnumCheckData {
                 loc,
                 wildcard_loc,
                 ..
-            }) => {
+            })) => {
                 format!(
                     "EMatchNonExplicitEnumCheck ({}) ({})",
                     string_of_aloc(None, loc),
@@ -4491,7 +4491,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 )
             }
             MatchErrorKind::MatchInvalidIdentOrMemberPattern(
-                box MatchInvalidIdentOrMemberPatternData { loc, type_desc, .. },
+                deref!(MatchInvalidIdentOrMemberPatternData { loc, type_desc, .. }),
             ) => {
                 let type_ = match type_desc {
                     TypeOrTypeDescT::Type(t) => dump_t(None, cx, t),
@@ -4523,7 +4523,7 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 format!("EMatchInvalidUnaryBigInt ({})", string_of_aloc(None, loc))
             }
             MatchErrorKind::MatchDuplicateObjectProperty(
-                box MatchDuplicateObjectPropertyData { loc, name, .. },
+                deref!(MatchDuplicateObjectPropertyData { loc, name, .. }),
             ) => {
                 format!(
                     "EMatchDuplicateObjectProperty ({}) ({})",
@@ -4538,11 +4538,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 format!("EMatchInvalidAsPattern ({})", string_of_aloc(None, loc))
             }
             MatchErrorKind::MatchInvalidPatternReference(
-                box MatchInvalidPatternReferenceData {
+                deref!(MatchInvalidPatternReferenceData {
                     loc,
                     binding_loc,
                     name,
-                },
+                }),
             ) => {
                 format!(
                     "EMatchInvalidPatternReference ({}) ({} {})",
@@ -4551,11 +4551,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                     name
                 )
             }
-            MatchErrorKind::MatchInvalidObjectShorthand(box MatchInvalidObjectShorthandData {
+            MatchErrorKind::MatchInvalidObjectShorthand(deref!(MatchInvalidObjectShorthandData {
                 loc,
                 name,
                 ..
-            }) => {
+            })) => {
                 format!(
                     "EMatchInvalidObjectShorthand ({}) ({})",
                     string_of_aloc(None, loc),
@@ -4565,9 +4565,9 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
             MatchErrorKind::MatchStatementInvalidBody { loc } => {
                 format!("EMatchStatementInvalidBody ({})", string_of_aloc(None, loc))
             }
-            MatchErrorKind::MatchInvalidCaseSyntax(box MatchInvalidCaseSyntaxData {
+            MatchErrorKind::MatchInvalidCaseSyntax(deref!(MatchInvalidCaseSyntaxData {
                 loc, ..
-            }) => {
+            })) => {
                 format!("EMatchInvalidCaseSyntax ({})", string_of_aloc(None, loc))
             }
             MatchErrorKind::MatchInvalidWildcardSyntax(loc) => {
@@ -4616,11 +4616,11 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
         ErrorMessage::EUndocumentedFeature { loc } => {
             format!("EUndocumentedFeature ({})", string_of_aloc(None, loc))
         }
-        ErrorMessage::EIllegalAssertOperator(box EIllegalAssertOperatorData {
+        ErrorMessage::EIllegalAssertOperator(deref!(EIllegalAssertOperatorData {
             obj,
             op_loc,
             specialized,
-        }) => {
+        })) => {
             format!(
                 "EIllegalAssertOperator(Box::new(EIllegalAssertOperatorData {{obj={}, op={}, specialized={}}}))",
                 dump_expression_reference(obj),
@@ -4628,27 +4628,27 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 specialized
             )
         }
-        ErrorMessage::EDevOnlyRefinedLocInfo(box EDevOnlyRefinedLocInfoData {
+        ErrorMessage::EDevOnlyRefinedLocInfo(deref!(EDevOnlyRefinedLocInfoData {
             refined_loc,
             ..
-        }) => {
+        })) => {
             format!(
                 "EDevOnlyRefinedLocInfo(Box::new(EDevOnlyRefinedLocInfoData {{refined_loc={}}}))",
                 string_of_aloc(None, refined_loc)
             )
         }
         ErrorMessage::EDevOnlyInvalidatedRefinementInfo(
-            box EDevOnlyInvalidatedRefinementInfoData { read_loc, .. },
+            deref!(EDevOnlyInvalidatedRefinementInfoData { read_loc, .. }),
         ) => {
             format!(
                 "EDevOnlyInvalidatedRefinementInfo(Box::new(EDevOnlyInvalidatedRefinementInfoData {{read_loc={}}}))",
                 string_of_aloc(None, read_loc)
             )
         }
-        ErrorMessage::ETypeParamConstIncompatibility(box ETypeParamConstIncompatibilityData {
+        ErrorMessage::ETypeParamConstIncompatibility(deref!(ETypeParamConstIncompatibilityData {
             lower,
             ..
-        }) => {
+        })) => {
             format!(
                 "ETypeParamConstIncompatibility ({})",
                 format_args!("{} {:?}", string_of_aloc(None, &lower.loc), lower.name)
@@ -4661,12 +4661,12 @@ pub fn dump_error_message(cx: &Context, err: &ErrorMessage<ALoc>) -> String {
                 data.1
             )
         }
-        ErrorMessage::EConstantCondition(box EConstantConditionData {
+        ErrorMessage::EConstantCondition(deref!(EConstantConditionData {
             loc,
             is_truthy,
             warning,
             constant_condition_kind,
-        }) => {
+        })) => {
             let kind_str = match constant_condition_kind {
                 ConstantConditionKind::UnawaitedPromise => "UnawaitedPromise",
                 ConstantConditionKind::UncalledFunction => "UncalledFunction",

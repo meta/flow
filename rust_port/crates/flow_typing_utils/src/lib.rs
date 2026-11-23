@@ -6,7 +6,7 @@
  */
 
 #![feature(never_type)]
-#![feature(box_patterns)]
+#![feature(deref_patterns)]
 
 pub mod abnormal;
 pub mod annotation_inference;

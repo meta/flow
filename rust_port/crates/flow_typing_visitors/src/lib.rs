@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#![feature(box_patterns)]
+#![feature(deref_patterns)]
 
 pub mod type_mapper;
 pub mod type_visitor;

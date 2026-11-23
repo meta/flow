@@ -47,7 +47,7 @@ impl<Loc, T> TArg<Loc, T> {
         T: Clone,
     {
         match self {
-            TArg::ImplicitArg(box loc) => TArg::ImplicitArg(Box::new(f(cx, loc))),
+            TArg::ImplicitArg(deref!(loc)) => TArg::ImplicitArg(Box::new(f(cx, loc))),
             // clone needed: generic T with Clone bound
             TArg::ExplicitArg(t) => TArg::ExplicitArg(t.clone()),
         }
@@ -228,7 +228,7 @@ pub enum ReactEffect<Loc> {
 impl<Loc> ReactEffect<Loc> {
     pub fn iter<CX>(&self, cx: &mut CX, f_loc: &impl Fn(&mut CX, &Loc)) {
         match self {
-            ReactEffect::HookDecl(box loc) => f_loc(cx, loc),
+            ReactEffect::HookDecl(deref!(loc)) => f_loc(cx, loc),
             ReactEffect::HookAnnot | ReactEffect::ArbitraryEffect | ReactEffect::AnyEffect => {}
         }
     }
@@ -239,7 +239,7 @@ impl<Loc> ReactEffect<Loc> {
         f: impl Fn(&mut CX, &Loc) -> Loc2,
     ) -> ReactEffect<Loc2> {
         match self {
-            ReactEffect::HookDecl(box loc) => ReactEffect::HookDecl(Box::new(f(cx, loc))),
+            ReactEffect::HookDecl(deref!(loc)) => ReactEffect::HookDecl(Box::new(f(cx, loc))),
             ReactEffect::HookAnnot => ReactEffect::HookAnnot,
             ReactEffect::ArbitraryEffect => ReactEffect::ArbitraryEffect,
             ReactEffect::AnyEffect => ReactEffect::AnyEffect,
@@ -426,20 +426,20 @@ impl<Loc, T> TupleElement<Loc, T> {
         f_t: impl Fn(&mut CX, &T) -> T2,
     ) -> TupleElement<Loc2, T2> {
         match self {
-            TupleElement::TupleElement(box TupleElementData {
+            TupleElement::TupleElement(deref!(TupleElementData {
                 loc,
                 name,
                 t,
                 polarity,
                 optional,
-            }) => TupleElement::TupleElement(Box::new(TupleElementData {
+            })) => TupleElement::TupleElement(Box::new(TupleElementData {
                 loc: f_loc(cx, loc),
                 name: name.dupe(),
                 t: f_t(cx, t),
                 polarity: *polarity,
                 optional: *optional,
             })),
-            TupleElement::TupleSpread(box TupleSpreadData { loc, name, t }) => {
+            TupleElement::TupleSpread(deref!(TupleSpreadData { loc, name, t })) => {
                 TupleElement::TupleSpread(Box::new(TupleSpreadData {
                     loc: f_loc(cx, loc),
                     name: name.dupe(),
@@ -466,10 +466,10 @@ impl<Loc, T> ObjAnnotProto<Loc, T> {
     ) -> ObjAnnotProto<Loc2, T2> {
         match self {
             ObjAnnotProto::ObjAnnotImplicitProto => ObjAnnotProto::ObjAnnotImplicitProto,
-            ObjAnnotProto::ObjAnnotExplicitProto(box (loc, t)) => {
+            ObjAnnotProto::ObjAnnotExplicitProto(deref!((loc, t))) => {
                 ObjAnnotProto::ObjAnnotExplicitProto(Box::new((f_loc(cx, loc), f_t(cx, t))))
             }
-            ObjAnnotProto::ObjAnnotCallable(box ts) => {
+            ObjAnnotProto::ObjAnnotCallable(deref!(ts)) => {
                 ObjAnnotProto::ObjAnnotCallable(Box::new(ts.mapped_ref(|t| f_t(cx, t))))
             }
         }
@@ -491,15 +491,15 @@ impl<Loc, T> Accessor<Loc, T> {
         f_t: &impl Fn(&mut CX, &T),
     ) {
         match self {
-            Accessor::Get(box (loc, t)) => {
+            Accessor::Get(deref!((loc, t))) => {
                 f_loc(cx, loc);
                 f_t(cx, t);
             }
-            Accessor::Set(box (loc, t)) => {
+            Accessor::Set(deref!((loc, t))) => {
                 f_loc(cx, loc);
                 f_t(cx, t);
             }
-            Accessor::GetSet(box (loc1, t1, loc2, t2)) => {
+            Accessor::GetSet(deref!((loc1, t1, loc2, t2))) => {
                 f_loc(cx, loc1);
                 f_t(cx, t1);
                 f_loc(cx, loc2);
@@ -515,9 +515,9 @@ impl<Loc, T> Accessor<Loc, T> {
         f_t: impl Fn(&mut CX, &T) -> T2,
     ) -> Accessor<Loc2, T2> {
         match self {
-            Accessor::Get(box (loc, t)) => Accessor::Get(Box::new((f_loc(cx, loc), f_t(cx, t)))),
-            Accessor::Set(box (loc, t)) => Accessor::Set(Box::new((f_loc(cx, loc), f_t(cx, t)))),
-            Accessor::GetSet(box (loc1, t1, loc2, t2)) => Accessor::GetSet(Box::new((
+            Accessor::Get(deref!((loc, t))) => Accessor::Get(Box::new((f_loc(cx, loc), f_t(cx, t)))),
+            Accessor::Set(deref!((loc, t))) => Accessor::Set(Box::new((f_loc(cx, loc), f_t(cx, t)))),
+            Accessor::GetSet(deref!((loc1, t1, loc2, t2))) => Accessor::GetSet(Box::new((
                 f_loc(cx, loc1),
                 f_t(cx, t1),
                 f_loc(cx, loc2),
@@ -552,12 +552,12 @@ impl<Loc, T> ObjValueProp<Loc, T> {
         f_t: &impl Fn(&mut CX, &T),
     ) {
         match self {
-            ObjValueProp::ObjValueField(box (loc, t, _)) => {
+            ObjValueProp::ObjValueField(deref!((loc, t, _))) => {
                 f_loc(cx, loc);
                 f_t(cx, t);
             }
-            ObjValueProp::ObjValueAccess(box accessor) => accessor.iter(cx, f_loc, f_t),
-            ObjValueProp::ObjValueMethod(box ms) => {
+            ObjValueProp::ObjValueAccess(deref!(accessor)) => accessor.iter(cx, f_loc, f_t),
+            ObjValueProp::ObjValueMethod(deref!(ms)) => {
                 for ObjValueMethodData {
                     id_loc,
                     fn_loc,
@@ -582,13 +582,13 @@ impl<Loc, T> ObjValueProp<Loc, T> {
         f_t: impl Fn(&mut CX, &T) -> T2,
     ) -> ObjValueProp<Loc2, T2> {
         match self {
-            ObjValueProp::ObjValueField(box (loc, t, pol)) => {
+            ObjValueProp::ObjValueField(deref!((loc, t, pol))) => {
                 ObjValueProp::ObjValueField(Box::new((f_loc(cx, loc), f_t(cx, t), *pol)))
             }
-            ObjValueProp::ObjValueAccess(box accessor) => {
+            ObjValueProp::ObjValueAccess(deref!(accessor)) => {
                 ObjValueProp::ObjValueAccess(Box::new(accessor.map(cx, &f_loc, &f_t)))
             }
-            ObjValueProp::ObjValueMethod(box ms) => {
+            ObjValueProp::ObjValueMethod(deref!(ms)) => {
                 ObjValueProp::ObjValueMethod(Box::new(ms.mapped_ref(
                     |ObjValueMethodData {
                          id_loc,
@@ -633,17 +633,17 @@ impl<Loc, T> ObjAnnotProp<Loc, T> {
         f_t: impl Fn(&mut CX, &T) -> T2,
     ) -> ObjAnnotProp<Loc2, T2> {
         match self {
-            ObjAnnotProp::ObjAnnotField(box (loc, t, pol)) => {
+            ObjAnnotProp::ObjAnnotField(deref!((loc, t, pol))) => {
                 ObjAnnotProp::ObjAnnotField(Box::new((f_loc(cx, loc), f_t(cx, t), *pol)))
             }
-            ObjAnnotProp::ObjAnnotAccess(box accessor) => {
+            ObjAnnotProp::ObjAnnotAccess(deref!(accessor)) => {
                 ObjAnnotProp::ObjAnnotAccess(Box::new(accessor.map(cx, &f_loc, &f_t)))
             }
-            ObjAnnotProp::ObjAnnotMethod(box ObjAnnotMethodData {
+            ObjAnnotProp::ObjAnnotMethod(deref!(ObjAnnotMethodData {
                 id_loc,
                 fn_loc,
                 def,
-            }) => ObjAnnotProp::ObjAnnotMethod(Box::new(ObjAnnotMethodData {
+            })) => ObjAnnotProp::ObjAnnotMethod(Box::new(ObjAnnotMethodData {
                 id_loc: f_loc(cx, id_loc),
                 fn_loc: f_loc(cx, fn_loc),
                 def: def.map(cx, &f_loc, &f_t),
@@ -667,14 +667,14 @@ impl<Loc, T> InterfaceProp<Loc, T> {
         f_t: &impl Fn(&mut CX, &T),
     ) {
         match self {
-            InterfaceProp::InterfaceField(box (loc_opt, t, _)) => {
+            InterfaceProp::InterfaceField(deref!((loc_opt, t, _))) => {
                 if let Some(loc) = loc_opt {
                     f_loc(cx, loc);
                 }
                 f_t(cx, t);
             }
-            InterfaceProp::InterfaceAccess(box accessor) => accessor.iter(cx, f_loc, f_t),
-            InterfaceProp::InterfaceMethod(box methods) => {
+            InterfaceProp::InterfaceAccess(deref!(accessor)) => accessor.iter(cx, f_loc, f_t),
+            InterfaceProp::InterfaceMethod(deref!(methods)) => {
                 for (loc1, loc2, sig) in methods.iter() {
                     f_loc(cx, loc1);
                     f_loc(cx, loc2);
@@ -691,13 +691,13 @@ impl<Loc, T> InterfaceProp<Loc, T> {
         f_t: impl Fn(&mut CX, &T) -> T2,
     ) -> InterfaceProp<Loc2, T2> {
         match self {
-            InterfaceProp::InterfaceField(box (loc_opt, t, pol)) => InterfaceProp::InterfaceField(
+            InterfaceProp::InterfaceField(deref!((loc_opt, t, pol))) => InterfaceProp::InterfaceField(
                 Box::new((loc_opt.as_ref().map(|loc| f_loc(cx, loc)), f_t(cx, t), *pol)),
             ),
-            InterfaceProp::InterfaceAccess(box accessor) => {
+            InterfaceProp::InterfaceAccess(deref!(accessor)) => {
                 InterfaceProp::InterfaceAccess(Box::new(accessor.map(cx, &f_loc, &f_t)))
             }
-            InterfaceProp::InterfaceMethod(box methods) => {
+            InterfaceProp::InterfaceMethod(deref!(methods)) => {
                 InterfaceProp::InterfaceMethod(Box::new(methods.mapped_ref(|(loc1, loc2, sig)| {
                     (f_loc(cx, loc1), f_loc(cx, loc2), sig.map(cx, &f_loc, &f_t))
                 })))
@@ -746,14 +746,14 @@ impl<Loc, T> ObjSpreadAnnotElem<Loc, T> {
         f_t: impl Fn(&mut CX, &T) -> T2,
     ) -> ObjSpreadAnnotElem<Loc2, T2> {
         match self {
-            ObjSpreadAnnotElem::ObjSpreadAnnotElem(box t) => {
+            ObjSpreadAnnotElem::ObjSpreadAnnotElem(deref!(t)) => {
                 ObjSpreadAnnotElem::ObjSpreadAnnotElem(Box::new(f_t(cx, t)))
             }
-            ObjSpreadAnnotElem::ObjSpreadAnnotSlice(box ObjSpreadAnnotSliceData {
+            ObjSpreadAnnotElem::ObjSpreadAnnotSlice(deref!(ObjSpreadAnnotSliceData {
                 dict,
                 props,
                 computed_props,
-            }) => ObjSpreadAnnotElem::ObjSpreadAnnotSlice(Box::new(ObjSpreadAnnotSliceData {
+            })) => ObjSpreadAnnotElem::ObjSpreadAnnotSlice(Box::new(ObjSpreadAnnotSliceData {
                 dict: dict.as_ref().map(|d| d.map(cx, &f_t)),
                 props: props
                     .iter()
@@ -782,8 +782,8 @@ impl<Loc, T> ObjValueSpreadElem<Loc, T> {
         f_t: &impl Fn(&mut CX, &T),
     ) {
         match self {
-            ObjValueSpreadElem::ObjValueSpreadElem(box t) => f_t(cx, t),
-            ObjValueSpreadElem::ObjValueSpreadSlice(box props) => {
+            ObjValueSpreadElem::ObjValueSpreadElem(deref!(t)) => f_t(cx, t),
+            ObjValueSpreadElem::ObjValueSpreadSlice(deref!(props)) => {
                 for v in props.values() {
                     v.iter(cx, f_loc, f_t);
                 }
@@ -798,10 +798,10 @@ impl<Loc, T> ObjValueSpreadElem<Loc, T> {
         f_t: impl Fn(&mut CX, &T) -> T2,
     ) -> ObjValueSpreadElem<Loc2, T2> {
         match self {
-            ObjValueSpreadElem::ObjValueSpreadElem(box t) => {
+            ObjValueSpreadElem::ObjValueSpreadElem(deref!(t)) => {
                 ObjValueSpreadElem::ObjValueSpreadElem(Box::new(f_t(cx, t)))
             }
-            ObjValueSpreadElem::ObjValueSpreadSlice(box props) => {
+            ObjValueSpreadElem::ObjValueSpreadSlice(deref!(props)) => {
                 ObjValueSpreadElem::ObjValueSpreadSlice(Box::new(
                     props
                         .iter()
@@ -829,11 +829,11 @@ impl<Loc, T> ClassExtends<Loc, T> {
         f_t: &impl Fn(&mut CX, &T),
     ) {
         match self {
-            ClassExtends::ClassExplicitExtends(box (loc, t)) => {
+            ClassExtends::ClassExplicitExtends(deref!((loc, t))) => {
                 f_loc(cx, loc);
                 f_t(cx, t);
             }
-            ClassExtends::ClassExplicitExtendsApp(box (loc, t, targs)) => {
+            ClassExtends::ClassExplicitExtendsApp(deref!((loc, t, targs))) => {
                 f_loc(cx, loc);
                 f_t(cx, t);
                 for t in targs {
@@ -851,10 +851,10 @@ impl<Loc, T> ClassExtends<Loc, T> {
         f_t: impl Fn(&mut CX, &T) -> T2,
     ) -> ClassExtends<Loc2, T2> {
         match self {
-            ClassExtends::ClassExplicitExtends(box (loc, t)) => {
+            ClassExtends::ClassExplicitExtends(deref!((loc, t))) => {
                 ClassExtends::ClassExplicitExtends(Box::new((f_loc(cx, loc), f_t(cx, t))))
             }
-            ClassExtends::ClassExplicitExtendsApp(box (loc, t, targs)) => {
+            ClassExtends::ClassExplicitExtendsApp(deref!((loc, t, targs))) => {
                 ClassExtends::ClassExplicitExtendsApp(Box::new((
                     f_loc(cx, loc),
                     f_t(cx, t),
@@ -881,11 +881,11 @@ impl<Loc, T> ClassMixins<Loc, T> {
         f_t: &impl Fn(&mut CX, &T),
     ) {
         match self {
-            ClassMixins::ClassMixin(box (loc, t)) => {
+            ClassMixins::ClassMixin(deref!((loc, t))) => {
                 f_loc(cx, loc);
                 f_t(cx, t);
             }
-            ClassMixins::ClassMixinApp(box (loc, t, targs)) => {
+            ClassMixins::ClassMixinApp(deref!((loc, t, targs))) => {
                 f_loc(cx, loc);
                 f_t(cx, t);
                 for t in targs {
@@ -902,10 +902,10 @@ impl<Loc, T> ClassMixins<Loc, T> {
         f_t: impl Fn(&mut CX, &T) -> T2,
     ) -> ClassMixins<Loc2, T2> {
         match self {
-            ClassMixins::ClassMixin(box (loc, t)) => {
+            ClassMixins::ClassMixin(deref!((loc, t))) => {
                 ClassMixins::ClassMixin(Box::new((f_loc(cx, loc), f_t(cx, t))))
             }
-            ClassMixins::ClassMixinApp(box (loc, t, targs)) => {
+            ClassMixins::ClassMixinApp(deref!((loc, t, targs))) => {
                 ClassMixins::ClassMixinApp(Box::new((
                     f_loc(cx, loc),
                     f_t(cx, t),
@@ -2545,23 +2545,23 @@ impl<Loc, T> Annot<Loc, T> {
         f_t: &impl Fn(&mut CX, &T),
     ) {
         match self {
-            Annot::Any(box loc)
-            | Annot::Mixed(box loc)
-            | Annot::Empty(box loc)
-            | Annot::Void(box loc)
-            | Annot::Undefined(box loc)
-            | Annot::Null(box loc)
-            | Annot::Symbol(box loc)
-            | Annot::UniqueSymbol(box loc)
-            | Annot::Number(box loc)
-            | Annot::BigInt(box loc)
-            | Annot::String(box loc)
-            | Annot::Boolean(box loc)
-            | Annot::Exists(box loc)
-            | Annot::InferTypeImpliedBound(box loc)
-            | Annot::ExactObjectType(box (loc, _)) => f_loc(cx, loc),
-            Annot::ObjectBuiltin(box (loc, _)) => f_loc(cx, loc),
-            Annot::Optional(box t) => f_t(cx, t),
+            Annot::Any(deref!(loc))
+            | Annot::Mixed(deref!(loc))
+            | Annot::Empty(deref!(loc))
+            | Annot::Void(deref!(loc))
+            | Annot::Undefined(deref!(loc))
+            | Annot::Null(deref!(loc))
+            | Annot::Symbol(deref!(loc))
+            | Annot::UniqueSymbol(deref!(loc))
+            | Annot::Number(deref!(loc))
+            | Annot::BigInt(deref!(loc))
+            | Annot::String(deref!(loc))
+            | Annot::Boolean(deref!(loc))
+            | Annot::Exists(deref!(loc))
+            | Annot::InferTypeImpliedBound(deref!(loc))
+            | Annot::ExactObjectType(deref!((loc, _))) => f_loc(cx, loc),
+            Annot::ObjectBuiltin(deref!((loc, _))) => f_loc(cx, loc),
+            Annot::Optional(deref!(t)) => f_t(cx, t),
             Annot::Maybe(inner) => {
                 f_loc(cx, &inner.0);
                 f_t(cx, &inner.1);
@@ -2586,17 +2586,17 @@ impl<Loc, T> Annot<Loc, T> {
                 f_loc(cx, &inner.loc);
                 for elem in &inner.elems {
                     match elem {
-                        TupleElement::TupleElement(box TupleElementData {
+                        TupleElement::TupleElement(deref!(TupleElementData {
                             loc,
                             name: _,
                             t,
                             polarity: _,
                             optional: _,
-                        }) => {
+                        })) => {
                             f_loc(cx, loc);
                             f_t(cx, t);
                         }
-                        TupleElement::TupleSpread(box TupleSpreadData { loc, name: _, t }) => {
+                        TupleElement::TupleSpread(deref!(TupleSpreadData { loc, name: _, t })) => {
                             f_loc(cx, loc);
                             f_t(cx, t);
                         }
@@ -2647,7 +2647,7 @@ impl<Loc, T> Annot<Loc, T> {
                 }
             }
             Annot::Bound(inner) => f_loc(cx, &inner.ref_loc),
-            Annot::NoInfer(box t) => f_t(cx, t),
+            Annot::NoInfer(deref!(t)) => f_t(cx, t),
             Annot::PropertyType(inner) => {
                 f_loc(cx, &inner.loc);
                 f_t(cx, &inner.obj);
@@ -2691,7 +2691,7 @@ impl<Loc, T> Annot<Loc, T> {
                 f_loc(cx, &inner.loc);
                 f_t(cx, &inner.arg);
             }
-            Annot::ComponentMissingRenders(box loc) => f_loc(cx, loc),
+            Annot::ComponentMissingRenders(deref!(loc)) => f_loc(cx, loc),
             Annot::ExportsT(inner) => f_loc(cx, &inner.0),
             Annot::Conditional(inner) => {
                 f_loc(cx, &inner.loc);
@@ -2745,23 +2745,23 @@ impl<Loc, T> Annot<Loc, T> {
                 f_loc(cx, &inner.loc);
                 match &inner.obj_kind {
                     ObjKind::ExactObj | ObjKind::InexactObj => {}
-                    ObjKind::IndexedObj(box dict) => {
+                    ObjKind::IndexedObj(deref!(dict)) => {
                         f_t(cx, &dict.key);
                         f_t(cx, &dict.value);
                     }
                 }
                 for v in inner.props.values() {
                     match v {
-                        ObjAnnotProp::ObjAnnotField(box (loc, t, _)) => {
+                        ObjAnnotProp::ObjAnnotField(deref!((loc, t, _))) => {
                             f_loc(cx, loc);
                             f_t(cx, t);
                         }
-                        ObjAnnotProp::ObjAnnotAccess(box accessor) => accessor.iter(cx, f_loc, f_t),
-                        ObjAnnotProp::ObjAnnotMethod(box ObjAnnotMethodData {
+                        ObjAnnotProp::ObjAnnotAccess(deref!(accessor)) => accessor.iter(cx, f_loc, f_t),
+                        ObjAnnotProp::ObjAnnotMethod(deref!(ObjAnnotMethodData {
                             id_loc,
                             fn_loc,
                             def,
-                        }) => {
+                        })) => {
                             f_loc(cx, id_loc);
                             f_loc(cx, fn_loc);
                             def.iter(cx, f_loc, f_t);
@@ -2771,16 +2771,16 @@ impl<Loc, T> Annot<Loc, T> {
                 for (t, prop) in &inner.computed_props {
                     f_t(cx, t);
                     match prop {
-                        ObjAnnotProp::ObjAnnotField(box (loc, t, _)) => {
+                        ObjAnnotProp::ObjAnnotField(deref!((loc, t, _))) => {
                             f_loc(cx, loc);
                             f_t(cx, t);
                         }
-                        ObjAnnotProp::ObjAnnotAccess(box accessor) => accessor.iter(cx, f_loc, f_t),
-                        ObjAnnotProp::ObjAnnotMethod(box ObjAnnotMethodData {
+                        ObjAnnotProp::ObjAnnotAccess(deref!(accessor)) => accessor.iter(cx, f_loc, f_t),
+                        ObjAnnotProp::ObjAnnotMethod(deref!(ObjAnnotMethodData {
                             id_loc,
                             fn_loc,
                             def,
-                        }) => {
+                        })) => {
                             f_loc(cx, id_loc);
                             f_loc(cx, fn_loc);
                             def.iter(cx, f_loc, f_t);
@@ -2789,11 +2789,11 @@ impl<Loc, T> Annot<Loc, T> {
                 }
                 match &inner.proto {
                     ObjAnnotProto::ObjAnnotImplicitProto => {}
-                    ObjAnnotProto::ObjAnnotExplicitProto(box (loc, t)) => {
+                    ObjAnnotProto::ObjAnnotExplicitProto(deref!((loc, t))) => {
                         f_loc(cx, loc);
                         f_t(cx, t);
                     }
-                    ObjAnnotProto::ObjAnnotCallable(box ts) => {
+                    ObjAnnotProto::ObjAnnotCallable(deref!(ts)) => {
                         for t in ts.iter() {
                             f_t(cx, t);
                         }
@@ -2804,30 +2804,30 @@ impl<Loc, T> Annot<Loc, T> {
                 f_loc(cx, &inner.loc);
                 for elem in inner.elems.iter() {
                     match elem {
-                        ObjSpreadAnnotElem::ObjSpreadAnnotElem(box t) => f_t(cx, t),
-                        ObjSpreadAnnotElem::ObjSpreadAnnotSlice(box ObjSpreadAnnotSliceData {
+                        ObjSpreadAnnotElem::ObjSpreadAnnotElem(deref!(t)) => f_t(cx, t),
+                        ObjSpreadAnnotElem::ObjSpreadAnnotSlice(deref!(ObjSpreadAnnotSliceData {
                             dict,
                             props,
                             computed_props,
-                        }) => {
+                        })) => {
                             if let Some(d) = dict {
                                 f_t(cx, &d.key);
                                 f_t(cx, &d.value);
                             }
                             for v in props.values() {
                                 match v {
-                                    ObjAnnotProp::ObjAnnotField(box (loc, t, _)) => {
+                                    ObjAnnotProp::ObjAnnotField(deref!((loc, t, _))) => {
                                         f_loc(cx, loc);
                                         f_t(cx, t);
                                     }
-                                    ObjAnnotProp::ObjAnnotAccess(box accessor) => {
+                                    ObjAnnotProp::ObjAnnotAccess(deref!(accessor)) => {
                                         accessor.iter(cx, f_loc, f_t)
                                     }
-                                    ObjAnnotProp::ObjAnnotMethod(box ObjAnnotMethodData {
+                                    ObjAnnotProp::ObjAnnotMethod(deref!(ObjAnnotMethodData {
                                         id_loc,
                                         fn_loc,
                                         def,
-                                    }) => {
+                                    })) => {
                                         f_loc(cx, id_loc);
                                         f_loc(cx, fn_loc);
                                         def.iter(cx, f_loc, f_t);
@@ -2837,18 +2837,18 @@ impl<Loc, T> Annot<Loc, T> {
                             for (t, prop) in computed_props {
                                 f_t(cx, t);
                                 match prop {
-                                    ObjAnnotProp::ObjAnnotField(box (loc, t, _)) => {
+                                    ObjAnnotProp::ObjAnnotField(deref!((loc, t, _))) => {
                                         f_loc(cx, loc);
                                         f_t(cx, t);
                                     }
-                                    ObjAnnotProp::ObjAnnotAccess(box accessor) => {
+                                    ObjAnnotProp::ObjAnnotAccess(deref!(accessor)) => {
                                         accessor.iter(cx, f_loc, f_t)
                                     }
-                                    ObjAnnotProp::ObjAnnotMethod(box ObjAnnotMethodData {
+                                    ObjAnnotProp::ObjAnnotMethod(deref!(ObjAnnotMethodData {
                                         id_loc,
                                         fn_loc,
                                         def,
-                                    }) => {
+                                    })) => {
                                         f_loc(cx, id_loc);
                                         f_loc(cx, fn_loc);
                                         def.iter(cx, f_loc, f_t);
@@ -2889,10 +2889,10 @@ impl<Loc, T> Annot<Loc, T> {
             Annot::InferTypeImpliedBound(loc) => {
                 Annot::InferTypeImpliedBound(Box::new(f_loc(cx, loc)))
             }
-            Annot::ObjectBuiltin(box (loc, strictness_kind)) => {
+            Annot::ObjectBuiltin(deref!((loc, strictness_kind))) => {
                 Annot::ObjectBuiltin(Box::new((f_loc(cx, loc), *strictness_kind)))
             }
-            Annot::ExactObjectType(box (loc, strictness_kind)) => {
+            Annot::ExactObjectType(deref!((loc, strictness_kind))) => {
                 Annot::ExactObjectType(Box::new((f_loc(cx, loc), *strictness_kind)))
             }
             Annot::Optional(t) => Annot::Optional(Box::new(f_t(cx, t))),
@@ -3026,7 +3026,7 @@ impl<Loc, T> Annot<Loc, T> {
                 arg: f_t(cx, &inner.arg),
                 variant: inner.variant,
             })),
-            Annot::ComponentMissingRenders(box loc) => {
+            Annot::ComponentMissingRenders(deref!(loc)) => {
                 Annot::ComponentMissingRenders(Box::new(f_loc(cx, loc)))
             }
             Annot::Values(inner) => {
@@ -3087,7 +3087,7 @@ impl<Loc, T> Annot<Loc, T> {
                 obj_kind: match &inner.obj_kind {
                     ObjKind::ExactObj => ObjKind::ExactObj,
                     ObjKind::InexactObj => ObjKind::InexactObj,
-                    ObjKind::IndexedObj(box dict) => {
+                    ObjKind::IndexedObj(deref!(dict)) => {
                         ObjKind::IndexedObj(Box::new(dict.map(cx, &f_t)))
                     }
                 },
@@ -3133,9 +3133,9 @@ pub enum Op<T> {
 impl<T> Op<T> {
     pub fn iter(&self, mut f_t: impl FnMut(&T)) {
         match self {
-            Op::Arith(box (_, t)) => f_t(t),
+            Op::Arith(deref!((_, t))) => f_t(t),
             Op::GetProp(_) => {}
-            Op::GetElem(box t) => f_t(t),
+            Op::GetElem(deref!(t)) => f_t(t),
             Op::Unary(_) => {}
             Op::Update => {}
         }
@@ -3143,9 +3143,9 @@ impl<T> Op<T> {
 
     pub fn map<CX, T2>(&self, cx: &mut CX, f_t: impl Fn(&mut CX, &T) -> T2) -> Op<T2> {
         match self {
-            Op::Arith(box (op, t)) => Op::Arith(Box::new((*op, f_t(cx, t)))),
+            Op::Arith(deref!((op, t))) => Op::Arith(Box::new((*op, f_t(cx, t)))),
             Op::GetProp(s) => Op::GetProp(s.clone()),
-            Op::GetElem(box t) => Op::GetElem(Box::new(f_t(cx, t))),
+            Op::GetElem(deref!(t)) => Op::GetElem(Box::new(f_t(cx, t))),
             Op::Unary(op) => Op::Unary(*op),
             Op::Update => Op::Update,
         }

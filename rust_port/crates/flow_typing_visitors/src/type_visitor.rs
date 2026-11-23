@@ -325,7 +325,7 @@ pub fn type_default<'cx, Acc, V: TypeVisitor<Acc> + ?Sized>(
             };
             visitor.eval_id(cx, eval_pole, acc, id.dupe())
         }
-        TypeInner::GenericT(box GenericTData { bound, .. }) => visitor.type_(cx, pole, acc, bound),
+        TypeInner::GenericT(deref!(GenericTData { bound, .. })) => visitor.type_(cx, pole, acc, bound),
         TypeInner::KeysT(_, t) => visitor.type_(cx, Polarity::Positive, acc, t),
         TypeInner::TemplateLiteralT { types, .. } => types
             .iter()
@@ -344,7 +344,7 @@ pub fn type_default<'cx, Acc, V: TypeVisitor<Acc> + ?Sized>(
             let acc = match &nominal_type.underlying_t {
                 flow_typing_type::type_::nominal::UnderlyingT::OpaqueWithLocal { t }
                 | flow_typing_type::type_::nominal::UnderlyingT::CustomError(
-                    box flow_typing_type::type_::nominal::CustomErrorData { t, .. },
+                    deref!(flow_typing_type::type_::nominal::CustomErrorData { t, .. }),
                 ) => visitor.type_(cx, pole, acc, t),
                 flow_typing_type::type_::nominal::UnderlyingT::FullyOpaque => acc,
             };
@@ -360,15 +360,15 @@ pub fn type_default<'cx, Acc, V: TypeVisitor<Acc> + ?Sized>(
             }
         }
         TypeInner::NamespaceT(namespace_t) => visitor.namespace_type(cx, pole, acc, namespace_t),
-        TypeInner::ThisInstanceT(box ThisInstanceTData { instance, .. }) => {
+        TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance, .. })) => {
             visitor.instance_type(cx, pole, acc, instance)
         }
-        TypeInner::ThisTypeAppT(box ThisTypeAppTData {
+        TypeInner::ThisTypeAppT(deref!(ThisTypeAppTData {
             type_,
             this_t,
             targs,
             ..
-        }) => {
+        })) => {
             let acc = visitor.type_(cx, Polarity::Positive, acc, type_);
             let acc = visitor.type_(cx, pole, acc, this_t);
             if let Some(targs) = targs {
@@ -382,7 +382,7 @@ pub fn type_default<'cx, Acc, V: TypeVisitor<Acc> + ?Sized>(
                 acc
             }
         }
-        TypeInner::TypeAppT(box TypeAppTData { type_, targs, .. }) => {
+        TypeInner::TypeAppT(deref!(TypeAppTData { type_, targs, .. })) => {
             let acc = visitor.type_(cx, Polarity::Positive, acc, type_);
             targs
                 .iter()
@@ -465,18 +465,18 @@ pub fn def_type_default<'cx, Acc, V: TypeVisitor<Acc> + ?Sized>(
 
         DefTInner::TypeT(_, t) => visitor.type_(cx, pole, acc, t),
 
-        DefTInner::PolyT(box PolyTData { tparams, t_out, .. }) => {
+        DefTInner::PolyT(deref!(PolyTData { tparams, t_out, .. })) => {
             let acc = tparams
                 .iter()
                 .fold(acc, |acc, tp| visitor.type_param(cx, pole, acc, tp));
             visitor.type_(cx, pole, acc, t_out)
         }
 
-        DefTInner::ReactAbstractComponentT(box ReactAbstractComponentTData {
+        DefTInner::ReactAbstractComponentT(deref!(ReactAbstractComponentTData {
             config,
             renders,
             component_kind,
-        }) => {
+        })) => {
             let acc = visitor.type_(cx, pole.inv(), acc, config);
             let acc = visitor.type_(cx, pole, acc, renders);
             match component_kind {
@@ -648,7 +648,7 @@ pub fn destructor_default<'cx, Acc, V: TypeVisitor<Acc> + ?Sized>(
             .values()
             .fold(acc, |acc, prop| visitor.prop(cx, pole_todo(), acc, prop)),
         ElementType { index_type, .. } => visitor.type_(cx, pole_todo(), acc, index_type),
-        SpreadType(box flow_typing_type::type_::DestructorSpreadTypeData(_, ts, head_slice)) => {
+        SpreadType(deref!(flow_typing_type::type_::DestructorSpreadTypeData(_, ts, head_slice))) => {
             let acc = ts.iter().fold(acc, |acc, operand| {
                 visitor.object_kit_spread_operand(cx, acc, operand)
             });
@@ -658,29 +658,29 @@ pub fn destructor_default<'cx, Acc, V: TypeVisitor<Acc> + ?Sized>(
                 acc
             }
         }
-        SpreadTupleType(box flow_typing_type::type_::DestructorSpreadTupleTypeData {
+        SpreadTupleType(deref!(flow_typing_type::type_::DestructorSpreadTupleTypeData {
             resolved,
             unresolved,
             ..
-        }) => {
+        })) => {
             let acc = resolved.iter().fold(acc, |acc, resolved_el| {
                 use flow_typing_type::type_::ResolvedParam::*;
                 match resolved_el {
-                    ResolvedArg(box flow_typing_type::type_::ResolvedArgData(element, _)) => {
+                    ResolvedArg(deref!(flow_typing_type::type_::ResolvedArgData(element, _))) => {
                         visitor.tuple_element(cx, pole_todo(), acc, element)
                     }
-                    ResolvedSpreadArg(box flow_typing_type::type_::ResolvedSpreadArgData(
+                    ResolvedSpreadArg(deref!(flow_typing_type::type_::ResolvedSpreadArgData(
                         _,
                         arr,
                         _,
-                    )) => visitor.arr_type(cx, pole_todo(), acc, arr),
+                    ))) => visitor.arr_type(cx, pole_todo(), acc, arr),
                     ResolvedAnySpreadArg(..) => acc,
                 }
             });
             unresolved.iter().fold(acc, |acc, unresolved_el| {
                 use flow_typing_type::type_::UnresolvedParam::*;
                 match unresolved_el {
-                    UnresolvedArg(box flow_typing_type::type_::UnresolvedArgData(element, _)) => {
+                    UnresolvedArg(deref!(flow_typing_type::type_::UnresolvedArgData(element, _))) => {
                         visitor.tuple_element(cx, pole_todo(), acc, element)
                     }
                     UnresolvedSpreadArg(t) => visitor.type_(cx, pole_todo(), acc, t),
@@ -688,13 +688,13 @@ pub fn destructor_default<'cx, Acc, V: TypeVisitor<Acc> + ?Sized>(
             })
         }
         RestType(_, t) => visitor.type_(cx, pole_todo(), acc, t),
-        ConditionalType(box flow_typing_type::type_::DestructorConditionalTypeData {
+        ConditionalType(deref!(flow_typing_type::type_::DestructorConditionalTypeData {
             infer_tparams,
             extends_t,
             true_t,
             false_t,
             ..
-        }) => {
+        })) => {
             let acc = infer_tparams
                 .iter()
                 .fold(acc, |acc, tp| visitor.type_param(cx, pole_todo(), acc, tp));
@@ -703,12 +703,12 @@ pub fn destructor_default<'cx, Acc, V: TypeVisitor<Acc> + ?Sized>(
             visitor.type_(cx, pole_todo(), acc, false_t)
         }
         TypeMap(flow_typing_type::type_::TypeMap::ObjectKeyMirror) => acc,
-        MappedType(box flow_typing_type::type_::DestructorMappedTypeData {
+        MappedType(deref!(flow_typing_type::type_::DestructorMappedTypeData {
             property_type,
             name_type,
             homomorphic,
             ..
-        }) => {
+        })) => {
             let acc = visitor.type_(cx, pole_todo(), acc, property_type);
             let acc = match name_type {
                 Some(t) => visitor.type_(cx, pole_todo(), acc, t),
@@ -951,16 +951,16 @@ pub fn arr_type_default<'cx, Acc, V: TypeVisitor<Acc> + ?Sized>(
     arr: &ArrType,
 ) -> Acc {
     match arr {
-        ArrType::ArrayAT(box ArrayATData {
+        ArrType::ArrayAT(deref!(ArrayATData {
             elem_t,
             tuple_view: None,
             ..
-        }) => visitor.type_(cx, Polarity::Neutral, acc, elem_t),
-        ArrType::ArrayAT(box ArrayATData {
+        })) => visitor.type_(cx, Polarity::Neutral, acc, elem_t),
+        ArrType::ArrayAT(deref!(ArrayATData {
             elem_t,
             tuple_view: Some(tuple_view),
             ..
-        }) => {
+        })) => {
             let acc = visitor.type_(cx, Polarity::Neutral, acc, elem_t);
             tuple_view
                 .elements
@@ -968,19 +968,19 @@ pub fn arr_type_default<'cx, Acc, V: TypeVisitor<Acc> + ?Sized>(
                 .chain(&tuple_view.rest)
                 .fold(acc, |acc, el| visitor.tuple_element(cx, pole, acc, el))
         }
-        ArrType::TupleAT(box TupleATData {
+        ArrType::TupleAT(deref!(TupleATData {
             elem_t,
             elements,
             rest,
             ..
-        }) => {
+        })) => {
             let acc = visitor.type_(cx, Polarity::Neutral, acc, elem_t);
             elements
                 .iter()
                 .chain(rest)
                 .fold(acc, |acc, el| visitor.tuple_element(cx, pole, acc, el))
         }
-        ArrType::ROArrayAT(box ROArrayATData { elem_t: t, .. }) => visitor.type_(cx, pole, acc, t),
+        ArrType::ROArrayAT(deref!(ROArrayATData { elem_t: t, .. })) => visitor.type_(cx, pole, acc, t),
     }
 }
 

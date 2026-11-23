@@ -121,7 +121,7 @@ fn is_builtin_promise<'cx>(cx: &mut Context<'cx>, t: &Type) -> bool {
                 }
             }
             TypeInner::DefT(_, def_t)
-                if let DefTInner::PolyT(box PolyTData { t_out, .. }) = def_t.deref() =>
+                if let DefTInner::PolyT(deref!(PolyTData { t_out, .. })) = def_t.deref() =>
             {
                 match t_out.deref() {
                     TypeInner::DefT(_, inner_def_t)
@@ -389,15 +389,15 @@ fn map_literal_array<'cx, M: TypeMapper<'cx, LiteralMapCx>>(
                 t
             } else {
                 let arr_prime = match arr.deref() {
-                    ArrType::ArrayAT(box data) => ArrType::ArrayAT(Box::new(ArrayATData {
+                    ArrType::ArrayAT(deref!(data)) => ArrType::ArrayAT(Box::new(ArrayATData {
                         elem_t: elem_t_prime,
                         ..data.clone()
                     })),
-                    ArrType::TupleAT(box data) => ArrType::TupleAT(Box::new(TupleATData {
+                    ArrType::TupleAT(deref!(data)) => ArrType::TupleAT(Box::new(TupleATData {
                         elem_t: elem_t_prime,
                         ..data.clone()
                     })),
-                    ArrType::ROArrayAT(box data) => ArrType::ROArrayAT(Box::new(ROArrayATData {
+                    ArrType::ROArrayAT(deref!(data)) => ArrType::ROArrayAT(Box::new(ROArrayATData {
                         elem_t: elem_t_prime,
                         ..data.clone()
                     })),
@@ -460,7 +460,7 @@ fn literal_type_mapper_type_dispatch<'cx>(
                 )),
             )))
         }
-        TypeInner::TypeAppT(box TypeAppTData { type_, .. }) if is_builtin_promise(cx, type_) => {
+        TypeInner::TypeAppT(deref!(TypeAppTData { type_, .. })) if is_builtin_promise(cx, type_) => {
             // async expressions will wrap result in Promise<>, so we need to descend here
             LiteralMapAction::TypeDefault(t.dupe())
         }
@@ -781,11 +781,11 @@ impl<'cx> TypeMapper<'cx, LiteralMapCx> for ConvertLiteralTypeToConstMapper {
         match t.deref() {
             TypeInner::DefT(r, def_t) if let DefTInner::ArrT(arr) = def_t.deref() => {
                 match arr.deref() {
-                    ArrType::ArrayAT(box ArrayATData {
+                    ArrType::ArrayAT(deref!(ArrayATData {
                         elem_t,
                         tuple_view: Some(tv),
                         ..
-                    }) => {
+                    })) => {
                         if arr.literal().is_literal() && self.reason_def_loc_within_call(r) {
                             let elem_t_prime =
                                 literal_array_elem_t(self, cx, map_cx, elem_t.dupe());

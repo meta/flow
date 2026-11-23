@@ -242,10 +242,10 @@ fn filter_opaque(
                 },
             }
         }
-        nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+        nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData {
             custom_error_loc,
             t,
-        }) => {
+        })) => {
             let FilterResult { type_, changed } = filter_fn(t.dupe());
             match type_.deref() {
                 TypeInner::DefT(_, d) if matches!(&**d, DefTInner::EmptyT) => changed_result(
@@ -298,14 +298,14 @@ fn filter_opaque(
 fn map_poly(f: &mut dyn FnMut(Type) -> FilterResult, t: Type) -> FilterResult {
     match t.deref() {
         TypeInner::DefT(r, d) => match d.deref() {
-            DefTInner::PolyT(box PolyTData {
+            DefTInner::PolyT(deref!(PolyTData {
                 kind: poly_kind,
                 tparams_loc,
                 tparams,
                 t_out,
                 id,
                 strictness_kind,
-            }) => {
+            })) => {
                 let FilterResult { type_, changed } = f(t_out.dupe());
                 match type_.deref() {
                     TypeInner::DefT(_, d2) if matches!(&**d2, DefTInner::EmptyT) => {
@@ -396,10 +396,10 @@ pub fn not_truthy<'cx>(cx: &mut Context<'cx>, t: Type) -> FilterResult {
             nominal_type,
         } => filter_opaque(&mut |t| not_truthy(cx, t), reason.dupe(), nominal_type),
         TypeInner::AnyT(r, _)
-        | TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
+        | TypeInner::ImplicitInstantiationTvar(deref!(ImplicitInstantiationTvarData {
             reason: r,
             ..
-        }) => changed_result(empty_t::why(r.dupe())),
+        })) => changed_result(empty_t::why(r.dupe())),
         TypeInner::UnionT(r, rep) => recurse_into_union(
             cx,
             &not_truthy,
@@ -483,7 +483,7 @@ pub fn not_truthy<'cx>(cx: &mut Context<'cx>, t: Type) -> FilterResult {
             }
             _ => unchanged_result(t),
         },
-        TypeInner::ThisInstanceT(box ThisInstanceTData { reason, .. }) => {
+        TypeInner::ThisInstanceT(deref!(ThisInstanceTData { reason, .. })) => {
             changed_result(empty_t::why(reason.dupe()))
         }
         // unknown boolies become falsy
@@ -1590,12 +1590,12 @@ pub fn array_length(sense: bool, op: &ArrayLengthOp, n: i32, t: Type) -> FilterR
         && let DefTInner::ArrT(arr) = d.deref()
     {
         match arr.deref() {
-            ArrType::TupleAT(box TupleATData {
+            ArrType::TupleAT(deref!(TupleATData {
                 arity: (num_req, num_total),
                 inexact,
                 ..
-            })
-            | ArrType::ArrayAT(box ArrayATData {
+            }))
+            | ArrType::ArrayAT(deref!(ArrayATData {
                 tuple_view:
                     Some(TupleView {
                         arity: (num_req, num_total),
@@ -1603,16 +1603,16 @@ pub fn array_length(sense: bool, op: &ArrayLengthOp, n: i32, t: Type) -> FilterR
                         ..
                     }),
                 ..
-            }) => {
+            })) => {
                 // A tuple with a rest element has no maximum length, like an inexact tuple.
                 let inexact = *inexact
                     || matches!(
                         arr.deref(),
-                        ArrType::TupleAT(box TupleATData { rest: Some(_), .. })
-                            | ArrType::ArrayAT(box ArrayATData {
+                        ArrType::TupleAT(deref!(TupleATData { rest: Some(_), .. }))
+                            | ArrType::ArrayAT(deref!(ArrayATData {
                                 tuple_view: Some(TupleView { rest: Some(_), .. }),
                                 ..
-                            })
+                            }))
                     );
                 let matches = match op {
                     ArrayLengthOp::ArrLenEqual => {
@@ -1641,8 +1641,8 @@ pub fn array_length(sense: bool, op: &ArrayLengthOp, n: i32, t: Type) -> FilterR
                     }
                 }
             }
-            ArrType::ArrayAT(box ArrayATData { .. })
-            | ArrType::ROArrayAT(box ROArrayATData { .. }) => {
+            ArrType::ArrayAT(deref!(ArrayATData { .. }))
+            | ArrType::ROArrayAT(deref!(ROArrayATData { .. })) => {
                 // [...]` matches every length, so arrays are matched.
                 let matches = n == 0 && *op == ArrayLengthOp::ArrLenGreaterThanEqual;
                 if matches == sense {

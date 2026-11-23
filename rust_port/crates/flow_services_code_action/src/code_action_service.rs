@@ -906,10 +906,10 @@ fn find_unbound_names_from_scope(
                     error.msg_of_error().clone(),
                 );
                 match error_message {
-                    ErrorMessage::EBuiltinNameLookupFailed(box EBuiltinNameLookupFailedData {
+                    ErrorMessage::EBuiltinNameLookupFailed(deref!(EBuiltinNameLookupFailedData {
                         loc: error_loc,
                         name: _,
-                    }) => {
+                    })) => {
                         loc_set.insert(error_loc);
                         loc_set
                     }
@@ -1263,10 +1263,10 @@ pub fn ast_transforms_of_error(
                 vec![]
             }
         }
-        ErrorMessage::EDuplicateComponentProp(box EDuplicateComponentPropData {
+        ErrorMessage::EDuplicateComponentProp(deref!(EDuplicateComponentPropData {
             spread: error_loc,
             duplicates,
-        }) => {
+        })) => {
             // Component prop keys are always string-named. A `unique symbol` key
             // has no faithful string-literal spelling for the `Omit<...>`
             // annotation, so offer the quickfix only when every duplicate is a
@@ -1354,7 +1354,7 @@ pub fn ast_transforms_of_error(
             }
         }
         ErrorMessage::EEnumError(EnumErrorKind::EnumInvalidMemberAccess(
-            box EnumInvalidMemberAccessData {
+            deref!(EnumInvalidMemberAccessData {
                 member_loc: reason_loc,
                 member:
                     EnumMemberAccess::Named {
@@ -1362,7 +1362,7 @@ pub fn ast_transforms_of_error(
                         suggestion: Some(fixed_prop_name),
                     },
                 ..
-            },
+            }),
         )) => {
             if loc_opt_intersects(loc, reason_loc.dupe()) {
                 let original_prop_name = member_name.display_smol_str();
@@ -1389,11 +1389,11 @@ pub fn ast_transforms_of_error(
             }
         }
         ErrorMessage::EEnumError(EnumErrorKind::EnumInvalidMemberName(
-            box EnumInvalidMemberNameData {
+            deref!(EnumInvalidMemberNameData {
                 loc: error_loc,
                 member_name,
                 ..
-            },
+            }),
         )) => {
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 let mut chars = member_name.chars();
@@ -1416,7 +1416,7 @@ pub fn ast_transforms_of_error(
                 vec![]
             }
         }
-        ErrorMessage::EClassToObject(box EClassToObjectData { lower, upper, .. }) => {
+        ErrorMessage::EClassToObject(deref!(EClassToObjectData { lower, upper, .. })) => {
             let error_loc = lower.loc.dupe();
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 let obj_loc = upper.definition_loc.dupe();
@@ -1492,10 +1492,10 @@ pub fn ast_transforms_of_error(
                 vec![]
             }
         }
-        ErrorMessage::ETSSyntax(box ETSSyntaxData {
+        ErrorMessage::ETSSyntax(deref!(ETSSyntaxData {
             kind: TSSyntaxKind::TSNever,
             loc: error_loc,
-        }) => {
+        })) => {
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 vec![AstTransformOfError {
                     title: "Convert to `empty`".to_string(),
@@ -1510,10 +1510,10 @@ pub fn ast_transforms_of_error(
                 vec![]
             }
         }
-        ErrorMessage::ETSSyntax(box ETSSyntaxData {
+        ErrorMessage::ETSSyntax(deref!(ETSSyntaxData {
             kind: TSSyntaxKind::DeprecatedTypeParamColon,
             loc: error_loc,
-        }) => {
+        })) => {
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 vec![AstTransformOfError {
                     title: "Convert to `extends T`".to_string(),
@@ -1528,10 +1528,10 @@ pub fn ast_transforms_of_error(
                 vec![]
             }
         }
-        ErrorMessage::ETSSyntax(box ETSSyntaxData {
+        ErrorMessage::ETSSyntax(deref!(ETSSyntaxData {
             kind: TSSyntaxKind::TSInOutVariance,
             loc: error_loc,
-        }) => {
+        })) => {
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 vec![AstTransformOfError {
                     title: "Remove".to_string(),
@@ -1546,10 +1546,10 @@ pub fn ast_transforms_of_error(
                 vec![]
             }
         }
-        ErrorMessage::EVarianceKeyword(box EVarianceKeywordData {
+        ErrorMessage::EVarianceKeyword(deref!(EVarianceKeywordData {
             kind: VarianceKeywordKind::Plus(VarianceSigilParent::Property),
             loc: error_loc,
-        }) => {
+        })) => {
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 vec![AstTransformOfError {
                     title: "Convert to `readonly`".to_string(),
@@ -1564,10 +1564,10 @@ pub fn ast_transforms_of_error(
                 vec![]
             }
         }
-        ErrorMessage::EVarianceKeyword(box EVarianceKeywordData {
+        ErrorMessage::EVarianceKeyword(deref!(EVarianceKeywordData {
             kind: VarianceKeywordKind::Plus(VarianceSigilParent::TypeParam),
             loc: error_loc,
-        }) => {
+        })) => {
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 vec![AstTransformOfError {
                     title: "Convert to `out`".to_string(),
@@ -1582,10 +1582,10 @@ pub fn ast_transforms_of_error(
                 vec![]
             }
         }
-        ErrorMessage::EVarianceKeyword(box EVarianceKeywordData {
+        ErrorMessage::EVarianceKeyword(deref!(EVarianceKeywordData {
             kind: VarianceKeywordKind::Minus(VarianceSigilParent::Property),
             loc: error_loc,
-        }) => {
+        })) => {
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 vec![AstTransformOfError {
                     title: "Convert to `writeonly`".to_string(),
@@ -1600,10 +1600,10 @@ pub fn ast_transforms_of_error(
                 vec![]
             }
         }
-        ErrorMessage::EVarianceKeyword(box EVarianceKeywordData {
+        ErrorMessage::EVarianceKeyword(deref!(EVarianceKeywordData {
             kind: VarianceKeywordKind::Minus(VarianceSigilParent::TypeParam),
             loc: error_loc,
-        }) => {
+        })) => {
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 vec![AstTransformOfError {
                     title: "Convert to `in`".to_string(),
@@ -1618,10 +1618,10 @@ pub fn ast_transforms_of_error(
                 vec![]
             }
         }
-        ErrorMessage::ETSSyntax(box ETSSyntaxData {
+        ErrorMessage::ETSSyntax(deref!(ETSSyntaxData {
             kind: TSSyntaxKind::TSReadonlyType(Some(ReadonlyTypeKind::Array)),
             loc: error_loc,
-        }) => {
+        })) => {
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 vec![AstTransformOfError {
                     title: "Convert to `ReadonlyArray`".to_string(),
@@ -1636,10 +1636,10 @@ pub fn ast_transforms_of_error(
                 vec![]
             }
         }
-        ErrorMessage::ETSSyntax(box ETSSyntaxData {
+        ErrorMessage::ETSSyntax(deref!(ETSSyntaxData {
             kind: TSSyntaxKind::TSReadonlyType(Some(ReadonlyTypeKind::Tuple)),
             loc: error_loc,
-        }) => {
+        })) => {
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 vec![AstTransformOfError {
                     title: "Convert to `Readonly`".to_string(),
@@ -1671,10 +1671,10 @@ pub fn ast_transforms_of_error(
                 vec![]
             }
         }
-        ErrorMessage::EIncorrectTypeWithReplacement(box EIncorrectTypeWithReplacementData {
+        ErrorMessage::EIncorrectTypeWithReplacement(deref!(EIncorrectTypeWithReplacementData {
             kind: IncorrectType::DollarKeys,
             loc: error_loc,
-        }) => {
+        })) => {
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 vec![AstTransformOfError {
                     title: "Convert to `keyof`".to_string(),
@@ -1689,10 +1689,10 @@ pub fn ast_transforms_of_error(
                 vec![]
             }
         }
-        ErrorMessage::EIncorrectTypeWithReplacement(box EIncorrectTypeWithReplacementData {
+        ErrorMessage::EIncorrectTypeWithReplacement(deref!(EIncorrectTypeWithReplacementData {
             kind,
             loc: error_loc,
-        }) => {
+        })) => {
             let incorrect_name = kind.incorrect_of_kind();
             let replacement_name = kind.replacement_of_kind();
             let title = format!("Convert to `{}`", replacement_name);
@@ -1774,12 +1774,12 @@ pub fn ast_transforms_of_error(
                 vec![]
             }
         }
-        ErrorMessage::EInvalidRendersTypeArgument(box EInvalidRendersTypeArgumentData {
+        ErrorMessage::EInvalidRendersTypeArgument(deref!(EInvalidRendersTypeArgumentData {
             loc: error_loc,
             renders_variant,
             invalid_render_type_kind,
             ..
-        }) => {
+        })) => {
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 match (renders_variant, invalid_render_type_kind) {
                     (
@@ -1843,10 +1843,10 @@ pub fn ast_transforms_of_error(
                 vec![]
             }
         }
-        ErrorMessage::EBuiltinNameLookupFailed(box EBuiltinNameLookupFailedData {
+        ErrorMessage::EBuiltinNameLookupFailed(deref!(EBuiltinNameLookupFailedData {
             loc: error_loc,
             name,
-        }) => {
+        })) => {
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 let name = name.to_string();
                 let loc_of_aloc = loc_of_aloc.dupe();
@@ -1871,12 +1871,12 @@ pub fn ast_transforms_of_error(
                 vec![]
             }
         }
-        ErrorMessage::EBindingError(box (
+        ErrorMessage::EBindingError(deref!((
             BindingError::ETypeInValuePosition { name, .. },
             error_loc,
             _,
             _,
-        )) => {
+        ))) => {
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 let name = name.to_string();
                 vec![AstTransformOfError {
@@ -1895,11 +1895,11 @@ pub fn ast_transforms_of_error(
             }
         }
         ErrorMessage::EMatchError(MatchErrorKind::MatchInvalidObjectShorthand(
-            box MatchInvalidObjectShorthandData {
+            deref!(MatchInvalidObjectShorthandData {
                 loc: error_loc,
                 name,
                 pattern_kind: _,
-            },
+            }),
         )) => {
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 vec![
@@ -1976,10 +1976,10 @@ pub fn ast_transforms_of_error(
             }
         }
         ErrorMessage::EMatchError(MatchErrorKind::MatchInvalidCaseSyntax(
-            box MatchInvalidCaseSyntaxData {
+            deref!(MatchInvalidCaseSyntaxData {
                 loc: error_loc,
                 kind: _,
-            },
+            }),
         )) => {
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 vec![AstTransformOfError {
@@ -1996,12 +1996,12 @@ pub fn ast_transforms_of_error(
             }
         }
         ErrorMessage::EMatchError(MatchErrorKind::MatchNonExhaustiveObjectPattern(
-            box MatchNonExhaustiveObjectPatternData {
+            deref!(MatchNonExhaustiveObjectPatternData {
                 loc: error_loc,
                 rest,
                 missing_props,
                 pattern_kind: _,
-            },
+            }),
         )) => {
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 let add_only_rest = AstTransformOfError {
@@ -2084,11 +2084,11 @@ pub fn ast_transforms_of_error(
             }
         }
         ErrorMessage::EMatchError(MatchErrorKind::MatchNotExhaustive(
-            box MatchNotExhaustiveData {
+            deref!(MatchNotExhaustiveData {
                 loc: error_loc,
                 examples,
                 missing_pattern_asts,
-            },
+            }),
         )) => {
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 let num_examples = examples.len();
@@ -2122,10 +2122,10 @@ pub fn ast_transforms_of_error(
             }
         }
         ErrorMessage::EMatchError(MatchErrorKind::MatchUnusedPattern(
-            box MatchUnusedPatternData {
+            deref!(MatchUnusedPatternData {
                 pattern,
                 already_seen: _,
-            },
+            }),
         )) => {
             let error_loc = pattern.loc.dupe();
             if loc_opt_intersects(loc, error_loc.dupe()) {
@@ -2160,12 +2160,12 @@ pub fn ast_transforms_of_error(
                 vec![]
             }
         }
-        ErrorMessage::EIncompatibleTypesWithUseOp(box EIncompatibleTypesWithUseOpData {
+        ErrorMessage::EIncompatibleTypesWithUseOp(deref!(EIncompatibleTypesWithUseOpData {
             lower_loc,
             explanation:
                 Some(Explanation::ExplanationObjectLiteralNeedsRecordSyntax { record_name, .. }),
             ..
-        }) => {
+        })) => {
             let error_loc = lower_loc.dupe();
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 let record_name_str = record_name.to_string();
@@ -2206,10 +2206,10 @@ pub fn ast_transforms_of_error(
                 vec![]
             }
         }
-        ErrorMessage::EInvariantSubtypingWithUseOp(box EInvariantSubtypingWithUseOpData {
+        ErrorMessage::EInvariantSubtypingWithUseOp(deref!(EInvariantSubtypingWithUseOpData {
             explanation,
             ..
-        }) if {
+        })) if {
             matches!(
                 explanation,
                 Some(
@@ -2281,7 +2281,7 @@ pub fn ast_transforms_of_error(
             invariant_subtyping_actions(lower_loc, upper_loc, &upper_ty, &lazy_error_loc, loc)
         }
         ErrorMessage::EPropsNotFoundInInvariantSubtyping(
-            box EPropsNotFoundInInvariantSubtypingData {
+            deref!(EPropsNotFoundInInvariantSubtypingData {
                 lower:
                     ErrorTypeReferenceWithLocData {
                         definition_loc: lower_obj_loc,
@@ -2299,7 +2299,7 @@ pub fn ast_transforms_of_error(
                         ..
                     },
                 ..
-            },
+            }),
         ) => invariant_subtyping_actions(
             lower_obj_loc.dupe(),
             upper_obj_loc.dupe(),
@@ -2307,12 +2307,12 @@ pub fn ast_transforms_of_error(
             &lazy_error_loc,
             loc,
         ),
-        ErrorMessage::EPropNotFoundInLookup(box EPropNotFoundInLookupData {
+        ErrorMessage::EPropNotFoundInLookup(deref!(EPropNotFoundInLookupData {
             prop_loc: error_loc,
             suggestion: Some(suggestion),
             prop_name: Some(prop_name),
             ..
-        }) => {
+        })) => {
             if loc_opt_intersects(loc, error_loc.dupe()) {
                 let title = format!(
                     "Replace `{}` with `{}`",
@@ -2334,18 +2334,18 @@ pub fn ast_transforms_of_error(
             }
         }
         error_message => match error_message.clone().friendly_message_of_msg() {
-            FriendlyMessageRecipe::IncompatibleTypeUse(box IncompatibleTypeUseData {
+            FriendlyMessageRecipe::IncompatibleTypeUse(deref!(IncompatibleTypeUseData {
                 loc: error_loc,
                 upper_kind: UpperKind::IncompatibleGetPropT(..),
                 lower_desc: ErrorTypeDesc::ReasonDesc(reason_desc),
                 ..
-            }) => optional_chaining_actions(error_loc, &reason_desc),
-            FriendlyMessageRecipe::IncompatibleTypeUse(box IncompatibleTypeUseData {
+            })) => optional_chaining_actions(error_loc, &reason_desc),
+            FriendlyMessageRecipe::IncompatibleTypeUse(deref!(IncompatibleTypeUseData {
                 loc: error_loc,
                 upper_kind: UpperKind::IncompatibleGetPropT(..),
                 lower_desc: ErrorTypeDesc::Normalized(Elt::Type(lower_ty)),
                 ..
-            }) => match lower_ty.as_ref() {
+            })) => match lower_ty.as_ref() {
                 Ty::Void | Ty::Undefined => {
                     optional_chaining_actions(error_loc, &VirtualReasonDesc::RVoid)
                 }
@@ -2448,10 +2448,10 @@ fn code_actions_of_errors(
                 bool,
             ) = match (&error_message, &env.exports) {
                 (
-                    ErrorMessage::EBuiltinNameLookupFailed(box EBuiltinNameLookupFailedData {
+                    ErrorMessage::EBuiltinNameLookupFailed(deref!(EBuiltinNameLookupFailedData {
                         loc: error_loc,
                         name,
-                    }),
+                    })),
                     Some(exports),
                 ) if options.autoimports => {
                     let actions = if include_quick_fixes && Loc::intersects(error_loc, &loc) {
@@ -2962,10 +2962,10 @@ fn autofix_imports_fn(
             );
             match (&error_message, &env.exports) {
                 (
-                    ErrorMessage::EBuiltinNameLookupFailed(box EBuiltinNameLookupFailedData {
+                    ErrorMessage::EBuiltinNameLookupFailed(deref!(EBuiltinNameLookupFailedData {
                         loc: error_loc,
                         name,
-                    }),
+                    })),
                     Some(exports),
                 ) if options.autoimports => {
                     match preferred_import(ast, exports, name.as_str(), error_loc.dupe()) {
@@ -3304,10 +3304,10 @@ pub fn suggest_imports_cli(
                     match (&error_message, &env.exports) {
                         (
                             ErrorMessage::EBuiltinNameLookupFailed(
-                                box EBuiltinNameLookupFailedData {
+                                deref!(EBuiltinNameLookupFailedData {
                                     loc: error_loc,
                                     name,
-                                },
+                                }),
                             ),
                             Some(exports),
                         ) if options.autoimports => {

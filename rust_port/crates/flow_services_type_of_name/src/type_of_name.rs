@@ -112,10 +112,10 @@ fn extract_prop_docs(
         {
             &props[..]
         }
-        Elt::Decl(Decl::NominalComponentDecl(box DeclNominalComponentDeclData {
+        Elt::Decl(Decl::NominalComponentDecl(deref!(DeclNominalComponentDeclData {
             props: ty::ComponentProps::FlattenedComponentProps { props, .. },
             ..
-        })) => &props[..],
+        }))) => &props[..],
         _ => return None,
     };
     // Collect all def_locs, then batch-lookup JSDoc in a single AST traversal per file
@@ -207,10 +207,10 @@ fn lookup_member_in_elt<L: Dupe>(
             lookup_member_in_component_props(member_name, props)
         }
         // Component declaration types
-        Elt::Decl(Decl::NominalComponentDecl(box DeclNominalComponentDeclData {
+        Elt::Decl(Decl::NominalComponentDecl(deref!(DeclNominalComponentDeclData {
             props: ty::ComponentProps::FlattenedComponentProps { props, .. },
             ..
-        })) => lookup_member_in_component_props(member_name, props),
+        }))) => lookup_member_in_component_props(member_name, props),
         // Object types
         Elt::Type(t) if let Ty::Obj(obj_t) = t.as_ref() => {
             lookup_member_in_obj_props(member_name, &obj_t.obj_props)
@@ -220,9 +220,9 @@ fn lookup_member_in_elt<L: Dupe>(
             lookup_member_in_obj_props(member_name, &iface.if_props)
         }
         // Type alias with body -- unwrap and recurse
-        Elt::Decl(Decl::TypeAliasDecl(box DeclTypeAliasDeclData {
+        Elt::Decl(Decl::TypeAliasDecl(deref!(DeclTypeAliasDeclData {
             type_: Some(body), ..
-        })) => lookup_member_in_elt(member_name, &Elt::Type(body.dupe())),
+        }))) => lookup_member_in_elt(member_name, &Elt::Type(body.dupe())),
         _ => None,
     }
 }
@@ -260,10 +260,10 @@ fn summarize_ty<L: Dupe>(t: &Ty<L>) -> Option<String> {
                 Some(format!("= {}", type_str))
             }
         }
-        Ty::Generic(box (_, ty::GenKind::ClassKind, _)) => Some("(class)".to_string()),
-        Ty::Generic(box (_, ty::GenKind::InterfaceKind, _)) => Some("(interface)".to_string()),
-        Ty::Generic(box (_, ty::GenKind::EnumKind, _)) => Some("(enum)".to_string()),
-        Ty::Generic(box (_, ty::GenKind::ComponentKind, _)) => Some("(component)".to_string()),
+        Ty::Generic(deref!((_, ty::GenKind::ClassKind, _))) => Some("(class)".to_string()),
+        Ty::Generic(deref!((_, ty::GenKind::InterfaceKind, _))) => Some("(interface)".to_string()),
+        Ty::Generic(deref!((_, ty::GenKind::EnumKind, _))) => Some("(enum)".to_string()),
+        Ty::Generic(deref!((_, ty::GenKind::ComponentKind, _))) => Some("(component)".to_string()),
         _ => {
             if type_str.len() > 60 {
                 None
@@ -281,14 +281,14 @@ fn summarize_ty_elt<L: Dupe>(ty_elt: &Elt<L>) -> Option<String> {
         Elt::Decl(Decl::InterfaceDecl(..)) => Some("(interface)".to_string()),
         Elt::Decl(Decl::NominalComponentDecl(..)) => Some("(component)".to_string()),
         Elt::Decl(Decl::EnumDecl(..)) => Some("(enum)".to_string()),
-        Elt::Decl(Decl::TypeAliasDecl(box DeclTypeAliasDeclData {
+        Elt::Decl(Decl::TypeAliasDecl(deref!(DeclTypeAliasDeclData {
             tparams: Some(_), ..
-        })) => Some("(generic type)".to_string()),
-        Elt::Decl(Decl::TypeAliasDecl(box DeclTypeAliasDeclData {
+        }))) => Some("(generic type)".to_string()),
+        Elt::Decl(Decl::TypeAliasDecl(deref!(DeclTypeAliasDeclData {
             type_: Some(body),
             tparams: None,
             ..
-        })) => summarize_ty(body),
+        }))) => summarize_ty(body),
         Elt::Type(t) => summarize_ty(t),
         _ => None,
     }

@@ -712,7 +712,7 @@ fn extract_instancet<'cx>(cx: &mut Context<'cx>, ty: &Type) -> Result<Type, Stri
     if let TypeInner::DefT(_r, def) = resolved.deref() {
         let class_t = match def.deref() {
             DefTInner::ClassT(class_t) => Some(class_t),
-            DefTInner::PolyT(box PolyTData { t_out, .. })
+            DefTInner::PolyT(deref!(PolyTData { t_out, .. }))
                 if let TypeInner::DefT(_, inner_def) = t_out.deref()
                     && let DefTInner::ClassT(class_t) = inner_def.deref() =>
             {
@@ -721,11 +721,11 @@ fn extract_instancet<'cx>(cx: &mut Context<'cx>, ty: &Type) -> Result<Type, Stri
             _ => None,
         };
         if let Some(class_t) = class_t
-            && let TypeInner::ThisInstanceT(box ThisInstanceTData {
+            && let TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                 reason: r2,
                 instance: t,
                 ..
-            }) = class_t.deref()
+            })) = class_t.deref()
         {
             return Ok(Type::new(TypeInner::DefT(
                 r2.dupe(),
@@ -865,7 +865,7 @@ fn extract_def_loc_resolved<'cx>(
                 }
                 _ => Ok(DefLoc::UnsupportedType),
             },
-            TypeInner::ThisInstanceT(box ThisInstanceTData { instance: inst, .. }) => {
+            TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance: inst, .. })) => {
                 let super_ = &inst.super_;
                 let extracted_dupe = members::extract_type(cx, ty.dupe());
                 extract_def_locs_from_instancet(loc_of_aloc, cx, extracted_dupe, super_, name)

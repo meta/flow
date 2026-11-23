@@ -83,7 +83,7 @@ pub fn extract_strings_aux(expand_generics: bool, t: &Type) -> Option<Vec<FlowSm
             .map(|t| extract_strings_aux(expand_generics, t))
             .collect::<Option<Vec<_>>>()
             .map(|v| v.into_iter().flatten().collect()),
-        TypeInner::GenericT(box GenericTData { bound, .. }) if expand_generics => {
+        TypeInner::GenericT(deref!(GenericTData { bound, .. })) if expand_generics => {
             extract_strings_aux(expand_generics, bound)
         }
         // Nested template literal whose placeholders are themselves concrete (or
@@ -610,7 +610,7 @@ pub fn placeholder_coerces_to_string(t: &Type) -> bool {
         ),
         TypeInner::TemplateLiteralT { .. } => true,
         TypeInner::UnionT(_, rep) => rep.members_iter().all(placeholder_coerces_to_string),
-        TypeInner::GenericT(box GenericTData { bound, .. }) => placeholder_coerces_to_string(bound),
+        TypeInner::GenericT(deref!(GenericTData { bound, .. })) => placeholder_coerces_to_string(bound),
         _ => false,
     }
 }
@@ -812,7 +812,7 @@ pub fn definitely_invalid_placeholder(t: &Type) -> bool {
 pub fn definitely_invalid_placeholder_deep(t: &Type) -> bool {
     match t.deref() {
         TypeInner::UnionT(_, rep) => rep.members_iter().any(definitely_invalid_placeholder_deep),
-        TypeInner::GenericT(box GenericTData { bound, .. }) => match bound.deref() {
+        TypeInner::GenericT(deref!(GenericTData { bound, .. })) => match bound.deref() {
             TypeInner::DefT(_, def) if matches!(def.deref(), DefTInner::MixedT(_)) => false,
             _ => definitely_invalid_placeholder_deep(bound),
         },

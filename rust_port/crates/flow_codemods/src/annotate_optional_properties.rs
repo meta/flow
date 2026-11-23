@@ -38,21 +38,21 @@ fn data_of_prop_missing_error(
     );
     let root = flow_typing_type::type_::root_of_use_op(&op);
     let value_loc = match root {
-        VirtualRootUseOp::SetProperty(box SetPropertyData { value, .. }) => &value.loc,
+        VirtualRootUseOp::SetProperty(deref!(SetPropertyData { value, .. })) => &value.loc,
         VirtualRootUseOp::GetProperty(value) => value.def_loc(),
         _ => return None,
     };
     let (name, object) = match msg {
-        ErrorMessage::EIncompatibleProp(box EIncompatiblePropData {
+        ErrorMessage::EIncompatibleProp(deref!(EIncompatiblePropData {
             object,
             prop: Some(name),
             ..
-        })
-        | ErrorMessage::EPropNotFoundInLookup(box EPropNotFoundInLookupData {
+        }))
+        | ErrorMessage::EPropNotFoundInLookup(deref!(EPropNotFoundInLookupData {
             object,
             prop_name: Some(name),
             ..
-        }) => (name, object),
+        })) => (name, object),
         _ => return None,
     };
     let obj_loc = loc_of_aloc(&object.definition_loc);
@@ -122,9 +122,9 @@ pub fn prop_accesses(op: &flow_typing_type::type_::UseOp) -> Vec<Name> {
         |_| vec![],
         &|mut acc: Vec<Name>, frame: &flow_typing_type::type_::FrameUseOp| match frame {
             flow_typing_type::type_::FrameUseOp::PropertyCompatibility(
-                box flow_typing_type::type_::PropertyCompatibilityData {
+                deref!(flow_typing_type::type_::PropertyCompatibilityData {
                     prop: Some(name), ..
-                },
+                }),
             ) => {
                 acc.push(name.clone());
                 acc
@@ -408,7 +408,7 @@ impl<'a, 'cx> AnnotateOptionalPropertiesMapper<'a, 'cx> {
 
         fn access_prop(accesses: &[Name], t: &ALocTy) -> ALocTy {
             match &**t {
-                TyEnum::Obj(box ObjT { obj_props, .. }) => match accesses {
+                TyEnum::Obj(deref!(ObjT { obj_props, .. })) => match accesses {
                     [] => t.clone(),
                     [n, rest @ ..] => obj_props
                         .iter()

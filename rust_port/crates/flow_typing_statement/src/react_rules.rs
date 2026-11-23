@@ -117,9 +117,9 @@ pub fn check_ref_use<'a>(
                     nominal::UnderlyingT::OpaqueWithLocal { t } => {
                         recur_id(cx, rrid, in_hook, usage, kind, seen, t)
                     }
-                    nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+                    nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData {
                         t, ..
-                    }) => recur_id(cx, rrid, in_hook, usage, kind, seen, t),
+                    })) => recur_id(cx, rrid, in_hook, usage, kind, seen, t),
                     nominal::UnderlyingT::FullyOpaque => vec![],
                 };
                 if let Some(upper_t) = &nominal_type.upper_t {
@@ -150,14 +150,14 @@ pub fn check_ref_use<'a>(
             TypeInner::AnnotT(_, inner_t, _) => {
                 recur_id(cx, rrid, in_hook, usage, kind, seen, inner_t)
             }
-            TypeInner::TypeAppT(box TypeAppTData { type_: inner_t, .. }) => {
+            TypeInner::TypeAppT(deref!(TypeAppTData { type_: inner_t, .. })) => {
                 recur_id(cx, rrid, in_hook, usage, kind, seen, inner_t)
             }
-            TypeInner::GenericT(box GenericTData { bound: inner_t, .. }) => {
+            TypeInner::GenericT(deref!(GenericTData { bound: inner_t, .. })) => {
                 recur_id(cx, rrid, in_hook, usage, kind, seen, inner_t)
             }
             TypeInner::DefT(_, def_t)
-                if let DefTInner::PolyT(box PolyTData { t_out: inner_t, .. }) = def_t.deref() =>
+                if let DefTInner::PolyT(deref!(PolyTData { t_out: inner_t, .. })) = def_t.deref() =>
             {
                 recur_id(cx, rrid, in_hook, usage, kind, seen, inner_t)
             }
@@ -298,9 +298,9 @@ fn hook_callee<'a>(cx: &mut Context<'a>, t: Type) -> HookResult {
                 match (&nominal_type.underlying_t, &nominal_type.upper_t) {
                     (nominal::UnderlyingT::OpaqueWithLocal { t }, _) => recur_id(cx, seen, t),
                     (
-                        nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+                        nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData {
                             t, ..
-                        }),
+                        })),
                         _,
                     ) => recur_id(cx, seen, t),
                     (nominal::UnderlyingT::FullyOpaque, Some(t)) => recur_id(cx, seen, t),
@@ -348,14 +348,14 @@ fn hook_callee<'a>(cx: &mut Context<'a>, t: Type) -> HookResult {
             }
             TypeInner::MaybeT(_, inner_t) => recur_id(cx, seen, inner_t),
             TypeInner::AnnotT(_, inner_t, _) => recur_id(cx, seen, inner_t),
-            TypeInner::TypeAppT(box TypeAppTData { type_: inner_t, .. }) => {
+            TypeInner::TypeAppT(deref!(TypeAppTData { type_: inner_t, .. })) => {
                 recur_id(cx, seen, inner_t)
             }
-            TypeInner::GenericT(box GenericTData { bound: inner_t, .. }) => {
+            TypeInner::GenericT(deref!(GenericTData { bound: inner_t, .. })) => {
                 recur_id(cx, seen, inner_t)
             }
             TypeInner::DefT(_, def_t)
-                if let DefTInner::PolyT(box PolyTData { t_out: inner_t, .. }) = def_t.deref() =>
+                if let DefTInner::PolyT(deref!(PolyTData { t_out: inner_t, .. })) = def_t.deref() =>
             {
                 recur_id(cx, seen, inner_t)
             }
@@ -717,9 +717,9 @@ fn downstream_effects<'cx>(
             let mut acc = Vec::new();
             for (def, _, _, _, _) in defs {
                 match def {
-                    Def::ExpressionDef(box name_def_types::ExpressionDef { expr, .. })
-                    | Def::MemberAssign(box MemberAssignData { rhs: (_, expr), .. })
-                    | Def::OpAssign(box OpAssignData { rhs: (_, expr), .. }) => {
+                    Def::ExpressionDef(deref!(name_def_types::ExpressionDef { expr, .. }))
+                    | Def::MemberAssign(deref!(MemberAssignData { rhs: (_, expr), .. }))
+                    | Def::OpAssign(deref!(OpAssignData { rhs: (_, expr), .. })) => {
                         let stripped = strip_use_callback(expr);
                         match stripped.deref() {
                             ExpressionInner::ArrowFunction { inner: func, .. }
@@ -732,13 +732,13 @@ fn downstream_effects<'cx>(
                             _ => {}
                         }
                     }
-                    Def::Function(box FunctionDefData {
+                    Def::Function(deref!(FunctionDefData {
                         function_: func, ..
-                    }) => {
+                    })) => {
                         acc.extend(visit_func(ev_cx, cx, seen, &loc, func)?);
                     }
                     Def::Component(_) => {}
-                    Def::Class(box ClassDefData { class_: cls, .. }) => {
+                    Def::Class(deref!(ClassDefData { class_: cls, .. })) => {
                         acc.extend(visit_class(ev_cx, cx, seen, &loc, cls)?);
                     }
                     // Records don't contain React hooks/rules violation
@@ -761,17 +761,17 @@ fn downstream_effects<'cx>(
                                 | Binding::Hooklike(bind) => {
                                     handle_binding(bind, ev_cx, cx, seen, loc)
                                 }
-                                Binding::Root(Root::Annotation(box AnnotationData {
+                                Binding::Root(Root::Annotation(deref!(AnnotationData {
                                     concrete: Some(root),
                                     ..
-                                })) => {
+                                }))) => {
                                     let root_bind = Binding::Root(*root.clone());
                                     handle_binding(&root_bind, ev_cx, cx, seen, loc)
                                 }
-                                Binding::Root(Root::Value(box name_def_types::Value {
+                                Binding::Root(Root::Value(deref!(name_def_types::Value {
                                     expr,
                                     ..
-                                })) => {
+                                }))) => {
                                     let stripped = strip_use_callback(expr);
                                     match stripped.deref() {
                                         ExpressionInner::ArrowFunction { inner: func, .. }
@@ -784,10 +784,10 @@ fn downstream_effects<'cx>(
                                         _ => Ok(vec![]),
                                     }
                                 }
-                                Binding::Root(Root::Contextual(box ContextualData {
+                                Binding::Root(Root::Contextual(deref!(ContextualData {
                                     default_expression: Some((_, expr)),
                                     ..
-                                })) => {
+                                }))) => {
                                     let stripped = strip_use_callback(expr);
                                     match stripped.deref() {
                                         ExpressionInner::ArrowFunction { inner: func, .. }
@@ -800,10 +800,10 @@ fn downstream_effects<'cx>(
                                         _ => Ok(vec![]),
                                     }
                                 }
-                                Binding::Root(Root::FunctionValue(box FunctionValueData {
+                                Binding::Root(Root::FunctionValue(deref!(FunctionValueData {
                                     function_: func,
                                     ..
-                                })) => visit_func(ev_cx, cx, seen, loc, func),
+                                }))) => visit_func(ev_cx, cx, seen, loc, func),
                                 _ => Ok(vec![]),
                             }
                         }
@@ -2416,7 +2416,7 @@ pub fn check_react_rules<'cx>(
         if let Some(pair) = lhs.as_ref()
             && let t = get_t(cx, pair)
             && let TypeInner::DefT(_, def_t) = t.deref()
-            && let DefTInner::PolyT(box PolyTData { t_out, .. }) = def_t.deref()
+            && let DefTInner::PolyT(deref!(PolyTData { t_out, .. })) = def_t.deref()
             && let TypeInner::DefT(_, inner_def_t) = t_out.deref()
             && let DefTInner::TypeT(_, inner_t) = inner_def_t.deref()
             && let TypeInner::NominalT { nominal_type, .. } = inner_t.deref()

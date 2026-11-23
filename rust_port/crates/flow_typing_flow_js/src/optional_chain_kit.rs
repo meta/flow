@@ -90,14 +90,14 @@ fn run_on_concretized<'cx>(
                         hint: data.hint.clone(),
                     })))
                 }
-                UseTInner::TestPropT(box TestPropTData {
+                UseTInner::TestPropT(deref!(TestPropTData {
                     use_op,
                     reason: test_reason,
                     id: _,
                     propref,
                     tout,
                     hint,
-                }) => UseT::new(UseTInner::GetPropT(Box::new(GetPropTData {
+                })) => UseT::new(UseTInner::GetPropT(Box::new(GetPropTData {
                     use_op: use_op.dupe(),
                     reason: test_reason.dupe(),
                     id: None,

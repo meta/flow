@@ -86,7 +86,7 @@ fn tag_of_def_t<'cx>(cx: &mut Context<'cx>, d: &DefTInner) -> Option<TypeTagSet>
         }
         DefTInner::InstanceT(instance_t) => tag_of_inst(&instance_t.inst),
         DefTInner::ArrT(_) => Some(BTreeSet::from([TypeTag(TypeTagInner::ArrTag)])),
-        DefTInner::PolyT(box PolyTData { t_out, .. }) => tag_of_t(cx, t_out),
+        DefTInner::PolyT(deref!(PolyTData { t_out, .. })) => tag_of_t(cx, t_out),
         DefTInner::EnumValueT(_) => Some(BTreeSet::from([TypeTag(TypeTagInner::EnumTag)])),
         DefTInner::EmptyT => Some(BTreeSet::new()),
         DefTInner::RendersT(_) => Some(BTreeSet::from([TypeTag(TypeTagInner::RendersTag)])),
@@ -132,7 +132,7 @@ fn tag_of_inst(inst: &InstType) -> Option<TypeTagSet> {
 pub fn tag_of_t<'cx>(cx: &mut Context<'cx>, t: &Type) -> Option<TypeTagSet> {
     match t.deref() {
         TypeInner::DefT(_, d) => tag_of_def_t(cx, d.deref()),
-        TypeInner::ThisInstanceT(box ThisInstanceTData { instance, .. }) => {
+        TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance, .. })) => {
             tag_of_inst(&instance.inst)
         }
         TypeInner::OpenT(_) | TypeInner::AnnotT(_, _, _) => cx
@@ -147,9 +147,9 @@ pub fn tag_of_t<'cx>(cx: &mut Context<'cx>, t: &Type) -> Option<TypeTagSet> {
             {
                 tag_of_t(cx, inner)
             }
-            nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+            nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData {
                 t: inner, ..
-            }) => tag_of_t(cx, inner),
+            })) => tag_of_t(cx, inner),
             _ => match &nominal_type.upper_t {
                 Some(upper) => tag_of_t(cx, upper),
                 None => None,

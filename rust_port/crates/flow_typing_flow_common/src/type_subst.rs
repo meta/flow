@@ -92,7 +92,7 @@ impl TypeVisitor<FvAcc> for FreeVarVisitor {
     ) -> FvAcc {
         match t.deref() {
             TypeInner::ImplicitInstantiationTvar(_) => acc,
-            TypeInner::GenericT(box GenericTData { name, .. }) if !acc.bound.contains(name) => {
+            TypeInner::GenericT(deref!(GenericTData { name, .. })) if !acc.bound.contains(name) => {
                 acc.free.insert(name.dupe());
                 // A synthetic generic also refers to the generics it was built from.
                 if let SubstNameInner::Synthetic { ts, .. } = name.deref() {
@@ -105,11 +105,11 @@ impl TypeVisitor<FvAcc> for FreeVarVisitor {
                 flow_typing_visitors::type_visitor::type_default(self, cx, pole, acc, t)
             }
             TypeInner::DefT(_, def_t) => {
-                if let DefTInner::PolyT(box PolyTData {
+                if let DefTInner::PolyT(deref!(PolyTData {
                     tparams: xs,
                     t_out: inner,
                     ..
-                }) = def_t.deref()
+                })) = def_t.deref()
                 {
                     let orig_bound = acc.bound.dupe();
                     for tp in xs.iter() {
@@ -123,11 +123,11 @@ impl TypeVisitor<FvAcc> for FreeVarVisitor {
                     flow_typing_visitors::type_visitor::type_default(self, cx, pole, acc, t)
                 }
             }
-            TypeInner::ThisInstanceT(box ThisInstanceTData {
+            TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                 instance,
                 subst_name: this_name,
                 ..
-            }) => {
+            })) => {
                 let orig_bound = acc.bound.dupe();
                 acc.bound.insert(this_name.dupe());
                 acc = self.instance_type(cx, pole, acc, instance);
@@ -174,13 +174,13 @@ impl TypeVisitor<FvAcc> for FreeVarVisitor {
 
     fn destructor<'cx>(&mut self, cx: &mut Context<'cx>, acc: FvAcc, t: &Destructor) -> FvAcc {
         match t {
-            Destructor::ConditionalType(box DestructorConditionalTypeData {
+            Destructor::ConditionalType(deref!(DestructorConditionalTypeData {
                 distributive_tparam_name,
                 infer_tparams,
                 extends_t,
                 true_t,
                 false_t,
-            }) => self.with_distributive_tparam_name(
+            })) => self.with_distributive_tparam_name(
                 acc,
                 distributive_tparam_name,
                 |this, mut acc| {
@@ -194,13 +194,13 @@ impl TypeVisitor<FvAcc> for FreeVarVisitor {
                     this.type_(cx, pole, acc, true_t)
                 },
             ),
-            Destructor::MappedType(box DestructorMappedTypeData {
+            Destructor::MappedType(deref!(DestructorMappedTypeData {
                 distributive_tparam_name,
                 property_type,
                 name_type,
                 homomorphic,
                 ..
-            }) => self.with_distributive_tparam_name(
+            })) => self.with_distributive_tparam_name(
                 acc,
                 distributive_tparam_name,
                 |this, mut acc| {
@@ -706,11 +706,11 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
             return t;
         }
         let t_out = match t.deref() {
-            TypeInner::GenericT(box GenericTData {
+            TypeInner::GenericT(deref!(GenericTData {
                 name: subst_name,
                 reason,
                 ..
-            }) if matches!(subst_name.deref(), SubstNameInner::Synthetic { .. }) => {
+            })) if matches!(subst_name.deref(), SubstNameInner::Synthetic { .. }) => {
                 let (name, op_kind, ids) = match &**subst_name {
                     SubstNameInner::Synthetic { name, op_kind, ts } => (name, op_kind, ts),
                     _ => unreachable!(),
@@ -728,13 +728,13 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
                     type_mapper::type_default(self, cx, map_cx, t.dupe())
                 }
             }
-            TypeInner::GenericT(box GenericTData {
+            TypeInner::GenericT(deref!(GenericTData {
                 reason: tp_reason,
                 name,
                 no_infer,
                 bound,
                 id: gen_id,
-            }) => {
+            })) => {
                 let annot_loc = tp_reason.loc();
                 match map.get(name) {
                     None => type_mapper::type_default(self, cx, map_cx, t.dupe()),
@@ -778,14 +778,14 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
                 }
             }
             TypeInner::DefT(reason, def_t) => {
-                if let DefTInner::PolyT(box PolyTData {
+                if let DefTInner::PolyT(deref!(PolyTData {
                     kind: poly_kind,
                     tparams_loc,
                     tparams: xs,
                     t_out: inner,
                     id: poly_id,
                     strictness_kind,
-                }) = def_t.deref()
+                })) = def_t.deref()
                 {
                     let prev_change_id = self.change_id;
                     self.change_id = false;
@@ -901,12 +901,12 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
                     type_mapper::type_default(self, cx, map_cx, t.dupe())
                 }
             }
-            TypeInner::ThisInstanceT(box ThisInstanceTData {
+            TypeInner::ThisInstanceT(deref!(ThisInstanceTData {
                 reason: r,
                 instance: this,
                 is_this: i,
                 subst_name: this_name,
-            }) => {
+            })) => {
                 let (name, new_map) = self.avoid_capture(cx, map.dupe(), this_name.dupe());
                 let this_prime = self.instance_type(
                     cx,
@@ -930,14 +930,14 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
                     })))
                 }
             }
-            TypeInner::TypeAppT(box TypeAppTData {
+            TypeInner::TypeAppT(deref!(TypeAppTData {
                 reason,
                 use_op: op,
                 type_: type_inner,
                 targs,
                 from_value,
                 use_desc,
-            }) => {
+            })) => {
                 let type_prime = self.type_(cx, map_cx, type_inner.dupe());
                 let targs_prime = list_utils::ident_map(
                     |targ| self.type_(cx, map_cx, targ.dupe()),
@@ -1025,7 +1025,7 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
             use flow_common::reason::VirtualReasonDesc;
             let t_out_reason = reason_of_t(&t_out);
             match t_out_reason.desc(false) {
-                Some(VirtualReasonDesc::RTypeAlias(box (name, Some(_), desc))) => {
+                Some(VirtualReasonDesc::RTypeAlias(deref!((name, Some(_), desc)))) => {
                     let new_desc = flow_common::reason::VirtualReasonDesc::RTypeAlias(Box::new((
                         name.dupe(),
                         None,
@@ -1088,13 +1088,13 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
     ) -> Rc<Destructor> {
         let (map, _, placeholder_no_infer, purpose, use_op) = map_cx;
         match t.deref() {
-            Destructor::ConditionalType(box DestructorConditionalTypeData {
+            Destructor::ConditionalType(deref!(DestructorConditionalTypeData {
                 distributive_tparam_name,
                 infer_tparams,
                 extends_t,
                 true_t,
                 false_t,
-            }) => {
+            })) => {
                 let (distributive_tparam_name_new, mut current_map) =
                     self.subst_distributive_tparam_name(cx, distributive_tparam_name, map.dupe());
                 let false_t_prime = self.type_(
@@ -1177,14 +1177,14 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
                     t
                 }
             }
-            Destructor::MappedType(box DestructorMappedTypeData {
+            Destructor::MappedType(deref!(DestructorMappedTypeData {
                 distributive_tparam_name,
                 property_type,
                 name_type,
                 mapped_type_flags,
                 homomorphic,
                 strictness_kind,
-            }) => {
+            })) => {
                 let (distributive_tparam_name_new, new_map) =
                     self.subst_distributive_tparam_name(cx, distributive_tparam_name, map.dupe());
                 let property_type_prime = self.type_(
