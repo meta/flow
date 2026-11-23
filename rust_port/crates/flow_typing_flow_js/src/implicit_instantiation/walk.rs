@@ -7978,11 +7978,17 @@ fn pin<'cx>(
                             (t, None)
                         }
                         None => {
+                            // The default or the bound mentions the other type parameters through
+                            // their markers, which take their solutions below.
+                            let default = (tparam.default.as_ref())
+                                .map(|default| subst(cx, pinning.subst_map, default));
                             let t = pin_without_bounds(
                                 cx,
                                 env,
                                 pinning.use_op,
                                 tparam,
+                                default.as_ref(),
+                                &bound,
                                 polarity.is_some(),
                                 &reason,
                                 reason_op,

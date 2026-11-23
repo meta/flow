@@ -334,7 +334,7 @@ References:
 Error -------------------------------------------------------------------------------------------- abstract-enum.js:42:3
 
 Cannot call `f` with `true` bound to `e` because `true` [1] is incompatible with
-`Enum<EnumValue<TRepresentationType>>` [2]. [incompatible-type]
+`Enum<EnumValue<EnumRepresentationTypes>>` [2]. [incompatible-type]
 
    abstract-enum.js:42:3
    42| f(true); // ERROR

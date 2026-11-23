@@ -1566,13 +1566,15 @@ fn pin_without_bounds<'cx>(
     env: &FlowJsEnv,
     use_op: &UseOp,
     tparam: &TypeParam,
+    default: Option<&Type>,
+    bound: &Type,
     marked: bool,
     tparam_binder_reason: &Reason,
     instantiation_reason: &Reason,
 ) -> Result<Type, FlowJsException> {
-    match (marked, &tparam.default) {
+    match (marked, default) {
         (false, default) => {
-            let inferred = default.as_ref().unwrap_or(&tparam.bound).dupe();
+            let inferred = default.unwrap_or(bound).dupe();
             flow_typing_debug::verbose::print_if_verbose_lazy(cx, None, None, None, || {
                 vec![format!(
                     "Constant type parameter {} is pinned to {}",
@@ -1718,6 +1720,8 @@ fn pin_type<'cx>(
             env,
             use_op,
             tparam,
+            tparam.default.as_ref(),
+            &tparam.bound,
             marked,
             tparam_binder_reason,
             instantiation_reason,

@@ -80,3 +80,10 @@ declare function wrap<T>(x: T): Box<T>;
   new B('a').p as number; // error
   const b: B<string> = new B('a'); // ok
 }
+
+// A type parameter without evidence takes its bound, with the solutions of the
+// type parameters it mentions.
+{
+  declare function f<T extends Array<V>, V>(v: V): void;
+  f(1); // ok
+}
