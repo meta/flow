@@ -211,6 +211,36 @@ References:
                  ^^ [2]
 
 
+Error -------------------------------------------------------------------------------------------- nested_unions.js:26:2
+
+Cannot cast object literal to `{p?: number}` because property `q` is extra in object literal [1] but missing in
+`{p?: number}` [2]. Exact objects do not accept extra props. [incompatible-type]
+
+   nested_unions.js:26:2
+   26| ({...unionInUnion}) as {p?: number}; // error: `q` is extra
+        ^^^^^^^^^^^^^^^^^ [1]
+
+References:
+   nested_unions.js:26:24
+   26| ({...unionInUnion}) as {p?: number}; // error: `q` is extra
+                              ^^^^^^^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- nested_unions.js:28:2
+
+Cannot cast object literal to `{p?: number, r?: boolean}` because property `q` is extra in object literal [1] but
+missing in `{p?: number, r?: boolean}` [2]. Exact objects do not accept extra props. [incompatible-type]
+
+   nested_unions.js:28:2
+   28| ({...intersectionInUnion}) as {p?: number, r?: boolean}; // error: `q` is extra
+        ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+References:
+   nested_unions.js:28:31
+   28| ({...intersectionInUnion}) as {p?: number, r?: boolean}; // error: `q` is extra
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
 Error ----------------------------------------------------------------------------------------------------- null.js:4:10
 
 Cannot get `empty.x` because property `x` is missing in object literal [1]. [prop-missing]
@@ -426,4 +456,4 @@ References:
 
 
 
-Found 24 errors
+Found 26 errors

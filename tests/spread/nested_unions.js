@@ -16,3 +16,13 @@ declare const x1: ABC;
 declare const x2: A | BC;
 const o1: BC = { ...x1 }; // errors
 const o2: BC = { ...x2 }; // errors
+
+type P = {p: number};
+type Q = {q: string};
+declare const unionInIntersection: (P | null | void) & Q;
+({...unionInIntersection}).q as string; // ok
+type Id<T> = T;
+declare const unionInUnion: Q | Id<P | null>;
+({...unionInUnion}) as {p?: number}; // error: `q` is extra
+declare const intersectionInUnion: Q | (P & {r: boolean});
+({...intersectionInUnion}) as {p?: number, r?: boolean}; // error: `q` is extra

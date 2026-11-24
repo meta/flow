@@ -2324,6 +2324,7 @@ pub fn resolve<'cx, A>(
         &object::Tool,
         Type,
     ) -> Result<A, FlowJsException>,
+    join_outputs: &dyn Fn(&mut Context<'cx>, &Reason, Vec<A>) -> A,
     statics: &dyn Fn(
         &mut Context<'cx>,
         &FlowJsEnv,
@@ -2342,6 +2343,7 @@ pub fn resolve<'cx, A>(
         return_,
         next,
         recurse,
+        join_outputs,
         statics,
         cx,
         &FlowJsEnv::entry(),
@@ -2376,6 +2378,7 @@ fn resolve_with_env<'cx, A>(
         &object::Tool,
         Type,
     ) -> Result<A, FlowJsException>,
+    join_outputs: &dyn Fn(&mut Context<'cx>, &Reason, Vec<A>) -> A,
     statics: &dyn Fn(
         &mut Context<'cx>,
         &FlowJsEnv,
@@ -2983,6 +2986,65 @@ fn resolve_with_env<'cx, A>(
             let union_loc = union_reason.loc().dupe();
             let members_filtered =
                 flow_typing_visitors::type_mapper::union_flatten(cx, rep.members_iter().duped());
+            match resolve_tool {
+                // A union that is a member of an intersection being resolved: each of its members
+                // goes on with the intersection.
+                object::Resolve::List0(_, object::Join(_, object::JoinOp::And))
+                | object::Resolve::List(_, _, object::Join(_, object::JoinOp::And))
+                    if !members_filtered.is_empty() =>
+                {
+                    let outputs = members_filtered
+                        .iter()
+                        .map(|t| {
+                            recurse(
+                                cx,
+                                env,
+                                use_op.dupe(),
+                                reason,
+                                object::ResolveTool::Resolve(resolve_tool.clone()),
+                                tool,
+                                t.dupe(),
+                            )
+                        })
+                        .collect::<Result<Vec<_>, _>>()?;
+                    return Ok(join_outputs(cx, reason, outputs));
+                }
+                // A union that is a member of a union being resolved: its members join that union.
+                object::Resolve::List0(types, join)
+                    if let [t_first, rest @ ..] = members_filtered.as_slice() =>
+                {
+                    let types =
+                        Vec1::try_from_vec(rest.iter().chain(types.iter()).duped().collect())
+                            .expect("should be non-empty, as the pending members are");
+                    return recurse(
+                        cx,
+                        env,
+                        use_op,
+                        reason,
+                        object::ResolveTool::Resolve(object::Resolve::List0(types, join)),
+                        tool,
+                        t_first.dupe(),
+                    );
+                }
+                object::Resolve::List(todo, done_rev, join)
+                    if let [t_first, rest @ ..] = members_filtered.as_slice() =>
+                {
+                    return recurse(
+                        cx,
+                        env,
+                        use_op,
+                        reason,
+                        object::ResolveTool::Resolve(object::Resolve::List(
+                            rest.iter().chain(todo.iter()).duped().collect(),
+                            done_rev,
+                            join,
+                        )),
+                        tool,
+                        t_first.dupe(),
+                    );
+                }
+                _ => {}
+            }
             let tool = match tool {
                 object::Tool::Spread(deref!((options, state))) => {
                     let mut state = state.clone();
@@ -3031,8 +3093,78 @@ fn resolve_with_env<'cx, A>(
                 Vec1::try_from_vec(todo).unwrap(),
                 object::Join(intersection_loc, object::JoinOp::And),
             ));
+            let output = recurse(
+                cx,
+                env,
+                use_op.dupe(),
+                reason,
+                resolve_tool_new,
+                tool,
+                t_first,
+            )?;
 
-            return recurse(cx, env, use_op, reason, resolve_tool_new, tool, t_first);
+            // An intersection that is a member of a union being resolved is resolved on its own
+            // above, and the union goes on with its other members.
+            let others = match resolve_tool {
+                object::Resolve::List0(types, join @ object::Join(_, object::JoinOp::Or)) => {
+                    let (t, types) = types.split_off_first();
+                    let resolve_tool = match Vec1::try_from_vec(types) {
+                        Ok(types) => object::Resolve::List0(types, join),
+                        Err(_) => object::Resolve::Next,
+                    };
+                    Some(recurse(
+                        cx,
+                        env,
+                        use_op,
+                        reason,
+                        object::ResolveTool::Resolve(resolve_tool),
+                        tool,
+                        t,
+                    )?)
+                }
+                object::Resolve::List(
+                    todo,
+                    done_rev,
+                    join @ object::Join(_, object::JoinOp::Or),
+                ) => Some(match &*todo {
+                    [] => {
+                        let (object::Resolved(x), done_rev) = done_rev.split_off_first();
+                        let resolve_tool = match Vec1::try_from_vec(done_rev) {
+                            Ok(done_rev) => object::Resolve::List(Rc::from([]), done_rev, join),
+                            Err(_) => object::Resolve::Next,
+                        };
+                        resolved(
+                            next,
+                            recurse,
+                            cx,
+                            env,
+                            use_op,
+                            reason,
+                            resolve_tool,
+                            tool,
+                            x,
+                        )?
+                    }
+                    [t, rest @ ..] => recurse(
+                        cx,
+                        env,
+                        use_op,
+                        reason,
+                        object::ResolveTool::Resolve(object::Resolve::List(
+                            rest.iter().duped().collect(),
+                            done_rev,
+                            join,
+                        )),
+                        tool,
+                        t.dupe(),
+                    )?,
+                }),
+                _ => None,
+            };
+            return Ok(match others {
+                Some(others) => join_outputs(cx, reason, vec![output, others]),
+                None => output,
+            });
         }
         // Propagate any.
         TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => {
@@ -3789,6 +3921,7 @@ pub fn run<'cx, A>(
         &object::Tool,
         Type,
     ) -> Result<A, FlowJsException>,
+    join_outputs: &dyn Fn(&mut Context<'cx>, &Reason, Vec<A>) -> A,
     statics: &dyn Fn(
         &mut Context<'cx>,
         &FlowJsEnv,
@@ -3807,6 +3940,7 @@ pub fn run<'cx, A>(
         return_,
         next,
         recurse,
+        join_outputs,
         statics,
         cx,
         &FlowJsEnv::entry(),
@@ -3841,6 +3975,7 @@ pub fn run_with_env<'cx, A>(
         &object::Tool,
         Type,
     ) -> Result<A, FlowJsException>,
+    join_outputs: &dyn Fn(&mut Context<'cx>, &Reason, Vec<A>) -> A,
     statics: &dyn Fn(
         &mut Context<'cx>,
         &FlowJsEnv,
@@ -3857,7 +3992,19 @@ pub fn run_with_env<'cx, A>(
 ) -> Result<A, FlowJsException> {
     match resolve_tool {
         object::ResolveTool::Resolve(rt) => resolve_with_env(
-            add_output, return_, next, recurse, statics, cx, env, use_op, reason, rt, tool, l,
+            add_output,
+            return_,
+            next,
+            recurse,
+            join_outputs,
+            statics,
+            cx,
+            env,
+            use_op,
+            reason,
+            rt,
+            tool,
+            l,
         ),
         object::ResolveTool::Super(acc, pending, rt) => super_(
             return_,

@@ -111,7 +111,7 @@ function passOnOptional<A>(c: component(...{tier: number, ...} & A), a?: A) {
   passOn(c, a); // ok
 }
 function passOnUnion<A>(c: component(...{tier: number, ...} & A), a: void | A) {
-  passOn(c, a); // error: the `void` of an explicit union gives `A` an `empty` bound
+  passOn(c, a); // ok
 }
 
 // An optional tuple element.

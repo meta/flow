@@ -4191,6 +4191,7 @@ fn object_kit_concrete<'cx>(
         &return_,
         &next,
         &recurse,
+        &|_, reason, ts| type_util::union_of_ts(reason.dupe(), ts, None),
         &statics,
         cx,
         use_op,

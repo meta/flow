@@ -1508,6 +1508,7 @@ pub(super) fn run_with_env<'cx>(
         &return_,
         &next,
         &recurse,
+        &|_, _, _| (),
         &statics,
         cx,
         env,
