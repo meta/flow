@@ -1527,6 +1527,35 @@ impl<'e> Walker<'e> {
                     self.walk(cx, &l, &inner)
                 }
             }
+            // As subtyping compares a union with a maybe type (a union with `null` and `void`
+            // members, as `?T` is) as a subset: a maybe type meets another without its `null` and
+            // `void`, which the other absorbs, and a union of types that are not null or void
+            // meets the rest of the maybe type whole, and one with null or void members meets it
+            // without them. The union is then one bound of a marker there, as in the flow-based
+            // solve, rather than one bound per member.
+            (TypeInner::UnionT(..), TypeInner::UnionT(..))
+                if type_util::is_maybe_union(&u)
+                    && let Some(li) = type_util::non_maybe_members(&l) =>
+            {
+                self.walk(cx, &li, &u)
+            }
+            (TypeInner::UnionT(reason, rep), TypeInner::UnionT(..))
+                if let Some(inner) = type_util::non_maybe_members(&u)
+                    && let Some(nullish) =
+                        nullish_members(cx, type_util::reason_of_t(&u), rep, true) =>
+            {
+                if nullish {
+                    let filtered = flow_js_utils::remove_predicate_from_union(
+                        reason.dupe(),
+                        cx,
+                        |t| is_nullish(t, true),
+                        rep,
+                    );
+                    self.walk(cx, &filtered, &inner)
+                } else {
+                    self.walk(cx, &l, &inner)
+                }
+            }
             // As in subtyping, a union meets each member of an intersection whole, before it is
             // split.
             (TypeInner::UnionT(_, rep), _)
@@ -1541,6 +1570,15 @@ impl<'e> Walker<'e> {
             // Null and void are absorbed; the rest is compared with the whole upper bound, so that it
             // can be evaluated or split first.
             (TypeInner::MaybeT(_, li), TypeInner::MaybeT(..)) => self.walk(cx, li, &u),
+            // Null and void fit a union with `null` and `void` members, as `?T` is, and the rest
+            // sees `empty`, as in subtyping.
+            (_, TypeInner::UnionT(..))
+                if let Some(ui) = type_util::non_maybe_members(&u)
+                    && matches!(self.head(cx, &l), Head::Null | Head::Void) =>
+            {
+                let empty = empty_t::why(type_util::reason_of_t(&l).dupe());
+                self.walk(cx, &empty, &ui)
+            }
             // `any` fits each member of a union: see `propagate_any`.
             (TypeInner::AnyT(..), TypeInner::UnionT(..)) => {
                 self.propagate_any(cx, &l, &u, true);

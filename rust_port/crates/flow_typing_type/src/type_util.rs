@@ -2420,6 +2420,63 @@ pub fn maybe(t: Type) -> Type {
     Type::new(TypeInner::MaybeT(reason, t))
 }
 
+fn is_null_or_void(t: &Type) -> bool {
+    use crate::type_::DefTInner;
+
+    matches!(t.deref(), TypeInner::DefT(_, d) if matches!(**d, DefTInner::NullT | DefTInner::VoidT))
+}
+
+/// Whether `t` is a union with `null` and `void` members and others, as `?T` is (`maybe_t`).
+pub fn is_maybe_union(t: &Type) -> bool {
+    use crate::type_::DefTInner;
+
+    let TypeInner::UnionT(_, rep) = t.deref() else {
+        return false;
+    };
+    let (mut null, mut void, mut other) = (false, false, false);
+    for m in rep.members_iter() {
+        match m.deref() {
+            TypeInner::DefT(_, d) if matches!(**d, DefTInner::NullT) => null = true,
+            TypeInner::DefT(_, d) if matches!(**d, DefTInner::VoidT) => void = true,
+            _ => other = true,
+        }
+    }
+    null && void && other
+}
+
+/// `T` when `t` is `?T` (`maybe_t`): a union of `T`, `null` and `void`.
+pub fn maybe_inner(t: &Type) -> Option<Type> {
+    if !is_maybe_union(t) {
+        return None;
+    }
+    let TypeInner::UnionT(_, rep) = t.deref() else {
+        return None;
+    };
+    let mut rest = rep.members_iter().filter(|t| !is_null_or_void(t));
+    match (rest.next(), rest.next()) {
+        (Some(t), None) => Some(t.dupe()),
+        _ => None,
+    }
+}
+
+/// The members of `t` other than `null` and `void`, when `t` is a union with `null` and `void`
+/// members, as `?T` is (`maybe_t`). A value fits `t` when the rest of it, without its own `null`
+/// and `void`, fits these members.
+pub fn non_maybe_members(t: &Type) -> Option<Type> {
+    if !is_maybe_union(t) {
+        return None;
+    }
+    let TypeInner::UnionT(reason, rep) = t.deref() else {
+        return None;
+    };
+    let rest: Vec<Type> = rep
+        .members_iter()
+        .filter(|t| !is_null_or_void(t))
+        .map(|t| t.dupe())
+        .collect();
+    Some(union_of_ts(reason.dupe(), rest, None))
+}
+
 pub fn make_exact_object(
     reason_obj: Reason,
     obj: Rc<crate::type_::ObjType>,

@@ -3196,6 +3196,11 @@ pub fn rec_sub_t<'cx>(
         (DefT(_, deref!(NumGeneralT(_) | SingletonNumT { .. })), DefT(_, deref!(NumGeneralT(_)))) => {
             Ok(())
         }
+        // `null` and `void` fit `?T`; `T` gets `empty`.
+        (DefT(r, deref!(NullT | VoidT)), UnionT(..)) if let Some(t) = type_util::maybe_inner(u) => {
+            let empty = Type::new(DefT(r.dupe(), DefT::new(EmptyT)));
+            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &empty, &t)
+        }
         (DefT(r, deref!(NullT | VoidT)), MaybeT(_, tout)) => {
             let empty = Type::new(DefT(r.dupe(), DefT::new(EmptyT)));
             FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &empty, tout)
@@ -4278,6 +4283,72 @@ pub fn rec_sub_t<'cx>(
                     }
                     Ok(())
                 }
+            }
+        }
+        // As `?T` is a union of `T`, `null` and `void`, a union with `null` and `void` members is
+        // compared with another union as a subset: a union with `null` and `void` members fits
+        // another without them, and otherwise, if the other union has no `null` or `void`,
+        // everything in it must fit the rest of the union, and otherwise the rest of it must.
+        // A union that is quickly found to fit, as an identical one is, fits as is.
+        (UnionT(..), UnionT(..))
+            if type_util::is_maybe_union(u)
+                && matches!(
+                    flow_js_utils::union_optimization_guard(
+                        cx,
+                        |t1, t2| type_util::quick_subtype(None::<&mut fn(&Type)>, t1, t2),
+                        l,
+                        u,
+                    ),
+                    flow_js_utils::UnionOptimizationGuardResult::True
+                ) =>
+        {
+            Ok(())
+        }
+        (UnionT(..), UnionT(..))
+            if type_util::is_maybe_union(u)
+                && let Some(rest) = type_util::non_maybe_members(l) =>
+        {
+            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &rest, u)
+        }
+        (UnionT(reason, rep), UnionT(..)) if let Some(rest) = type_util::non_maybe_members(u) => {
+            let r = type_util::reason_of_t(u);
+            let void = Type::new(DefT(r.dupe(), DefT::new(VoidT)));
+            let null = Type::new(DefT(r.dupe(), DefT::new(NullT)));
+            let mem = |cx: &mut Context<'cx>, t: &Type| {
+                union_rep::quick_mem_enum(
+                    cx,
+                    |_, t1, t2| type_util::quick_subtype(None::<&mut fn(&Type)>, t1, t2),
+                    t,
+                    rep,
+                )
+            };
+            let filtered = |cx: &mut Context<'cx>, f: &dyn Fn(&Type) -> bool| {
+                flow_js_utils::remove_predicate_from_union(reason.dupe(), cx, f, rep)
+            };
+            let is = |t: &Type, x: &Type| type_util::quick_subtype(None::<&mut fn(&Type)>, t, x);
+            match (mem(cx, &void), mem(cx, &null)) {
+                (union_rep::QuickMemResult::No, union_rep::QuickMemResult::No) => {
+                    FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, l, &rest)
+                }
+                (union_rep::QuickMemResult::Yes, union_rep::QuickMemResult::No) => {
+                    let filtered = filtered(cx, &|t| is(t, &void));
+                    FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &filtered, &rest)
+                }
+                (union_rep::QuickMemResult::No, union_rep::QuickMemResult::Yes) => {
+                    let filtered = filtered(cx, &|t| is(t, &null));
+                    FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &filtered, &rest)
+                }
+                (union_rep::QuickMemResult::Yes, union_rep::QuickMemResult::Yes) => {
+                    let filtered = filtered(cx, &|t| is(t, &void) || is(t, &null));
+                    FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &filtered, &rest)
+                }
+                _ => flow_all_in_union(
+                    cx,
+                    env,
+                    &trace,
+                    rep,
+                    &UseT::new(UseT(use_op, u.dupe())),
+                ),
             }
         }
         // `undefined` in the upper union is matched only by `undefined` in the lower union, so
