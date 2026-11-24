@@ -29,6 +29,7 @@ use flow_typing_type::type_::ArrayLengthOp;
 use flow_typing_type::type_::BigIntLiteral;
 use flow_typing_type::type_::DefT;
 use flow_typing_type::type_::DefTInner;
+use flow_typing_type::type_::Destructor;
 use flow_typing_type::type_::DictType;
 use flow_typing_type::type_::ImplicitInstantiationTvarData;
 use flow_typing_type::type_::Literal;
@@ -82,19 +83,31 @@ pub fn unchanged_result(type_: Type) -> FilterResult {
     }
 }
 
-/// Filters see the members of an optimized union as they are, not concretized: a member can be a
-/// type variable, resolved to another one, and so can the inner type of a maybe or optional type.
+/// Filters see the members of an optimized union as they are, not concretized. A member is
+/// resolved as `union_flatten` resolves it for the optimization: through type variables,
+/// annotations and evaluated `Values` types.
 fn resolved(cx: &mut Context<'_>, t: &Type) -> Type {
     let mut t = t.dupe();
     let mut seen = BTreeSet::new();
-    while let TypeInner::OpenT(tvar) = t.deref() {
-        if !seen.insert(tvar.id()) {
-            break;
-        }
-        t = match cx.find_constraints(tvar.id() as i32).1 {
-            Constraints::FullyResolved(s) => cx.force_fully_resolved_tvar(&s),
-            Constraints::Resolved(resolved) => resolved,
-            Constraints::Unresolved(_) => break,
+    loop {
+        t = match t.deref() {
+            TypeInner::AnnotT(_, inner, _) => inner.dupe(),
+            TypeInner::EvalT {
+                defer_use_t, id, ..
+            } if matches!(&*defer_use_t.2, Destructor::ValuesType) => {
+                match cx.evaluated().get(id) {
+                    Some(evaluated) => evaluated.dupe(),
+                    None => break,
+                }
+            }
+            TypeInner::OpenT(tvar) if seen.insert(tvar.id()) => {
+                match cx.find_constraints(tvar.id() as i32).1 {
+                    Constraints::FullyResolved(s) => cx.force_fully_resolved_tvar(&s),
+                    Constraints::Resolved(resolved) => resolved,
+                    Constraints::Unresolved(_) => break,
+                }
+            }
+            _ => break,
         };
     }
     t

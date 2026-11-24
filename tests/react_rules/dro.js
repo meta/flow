@@ -63,3 +63,21 @@ component NonInterferenceWithInference(arr: Array<number>) {
   });
   return null;
 }
+
+type MaybeUnion = 'A' | 'B' | null;
+
+component RefineAliasMember(x: MaybeUnion | void) {
+  if (x != null) {
+    x as Union; // ok
+  }
+  return null;
+}
+
+const Enum = Object.freeze({A: '', B: 'b'});
+
+component RefineValuesMember(x: Values<typeof Enum> | void) {
+  if (x) {
+    x as 'b'; // ok
+  }
+  return null;
+}
