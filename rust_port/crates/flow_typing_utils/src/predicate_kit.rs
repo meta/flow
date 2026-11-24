@@ -402,7 +402,7 @@ fn concretize_and_run_predicate_memo<'cx>(
                     }),
                 };
                 let repositioned_bound =
-                    FlowJs::reposition_reason(cx, env, Some(trace), reason, None, &bound)?;
+                    FlowJs::reposition_reason(cx, env, Some(trace), reason, None, bound)?;
                 concretize_and_run_predicate_memo(
                     cx,
                     &bound_env,
