@@ -637,17 +637,16 @@ pub fn sig_hash(
     assert!(component_rec.set(files).is_ok(), "Should be initialized");
 
     let cx = cycle_hash::create_cx();
-    let mut component_hash = 0u64;
-
-    for checked_dep in component_rec.get().unwrap() {
-        match checked_dep.as_ref() {
-            CheckedDep::CJS { ns, .. } | CheckedDep::ES { ns, .. } => {
-                cycle_hash::root(&cx, ns);
-                let file_hash = cycle_hash::read_hash(ns);
-                component_hash ^= file_hash;
-            }
-        }
-    }
+    // `component_rec` was built by mapping over `component`, so the two zip in step.
+    let component_hash =
+        component_sig_hash(component.iter().zip(component_rec.get().unwrap()).map(
+            |((file_key, _), checked_dep)| match checked_dep.as_ref() {
+                CheckedDep::CJS { ns, .. } | CheckedDep::ES { ns, .. } => {
+                    cycle_hash::root(&cx, ns);
+                    (file_key, cycle_hash::read_hash(ns))
+                }
+            },
+        ));
 
     let merge_hashes = component_rec
         .get()
@@ -694,6 +693,17 @@ pub fn sig_hash(
     );
 
     (component_hash, merge_hashes)
+}
+
+/// A component's signature hash, from each of its files' namespace hashes.
+///
+/// It changes whenever any file's namespace hash does, whatever the order of the files. The files
+/// of an import cycle share one namespace hash, so each hash is mixed with its file's path before
+/// they are added up; added or XORed bare, equal hashes would cancel out.
+fn component_sig_hash<'a>(files: impl IntoIterator<Item = (&'a FileKey, u64)>) -> u64 {
+    files.into_iter().fold(0, |hash, (file_key, ns_hash)| {
+        hash.wrapping_add(xx::hash(file_key.as_str().as_bytes(), ns_hash))
+    })
 }
 
 fn merge_component(
@@ -1342,5 +1352,29 @@ pub fn mk_check(
         find_ref_request,
         check_file_and_comp_env,
         cache,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use flow_parser::file_key::FileKey;
+    use flow_parser::file_key::FileKeyInner;
+
+    use super::component_sig_hash;
+
+    fn file(name: &str) -> FileKey {
+        FileKey::new(FileKeyInner::SourceFile(name.to_owned()))
+    }
+
+    #[test]
+    fn each_hash_counts_for_its_own_file() {
+        let (a, b) = (file("a.js"), file("b.js"));
+        let hash = component_sig_hash([(&a, 1), (&b, 2)]);
+        assert_ne!(hash, component_sig_hash([(&a, 1), (&b, 3)]));
+        assert_ne!(
+            hash,
+            component_sig_hash([(&a, 2), (&b, 1)]),
+            "swapping two files' hashes should change the component's hash"
+        );
     }
 }
