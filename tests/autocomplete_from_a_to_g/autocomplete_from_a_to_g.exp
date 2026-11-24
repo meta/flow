@@ -251,11 +251,13 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof E) => IteratorObject<E>",
+  "detail":"(this: typeof E) => IteratorObject<E, BuiltinIteratorReturn, unknown>",
   "insertTextFormat":1,
   "kind":3,
   "label":"members",
-  "labelDetails":{"detail":": (this: typeof E) => IteratorObject<E>"},
+  "labelDetails":{
+    "detail":": (this: typeof E) => IteratorObject<E, BuiltinIteratorReturn, unknown>"
+  },
   "sortText":"00000000000000000001",
   "textEdit":{
     "newText":"members",

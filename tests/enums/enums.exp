@@ -3087,7 +3087,7 @@ References:
     98|   cast(this: TEnum, input: ?TRepresentationType): undefined | TEnumValue,
     99|   getName(this: TEnum, input: TEnumValue): string,
    100|   isValid(this: TEnum, input: ?TRepresentationType | TEnumValue): boolean,
-   101|   members(this: TEnum): IteratorObject<TEnumValue>,
+   101|   members(this: TEnum): IteratorObject<TEnumValue, BuiltinIteratorReturn, unknown>,
    102|   __proto__: null,
    103| }
         ^ [1]
@@ -3110,7 +3110,7 @@ References:
     98|   cast(this: TEnum, input: ?TRepresentationType): undefined | TEnumValue,
     99|   getName(this: TEnum, input: TEnumValue): string,
    100|   isValid(this: TEnum, input: ?TRepresentationType | TEnumValue): boolean,
-   101|   members(this: TEnum): IteratorObject<TEnumValue>,
+   101|   members(this: TEnum): IteratorObject<TEnumValue, BuiltinIteratorReturn, unknown>,
    102|   __proto__: null,
    103| }
         ^ [1]
@@ -3147,7 +3147,7 @@ References:
     98|   cast(this: TEnum, input: ?TRepresentationType): undefined | TEnumValue,
     99|   getName(this: TEnum, input: TEnumValue): string,
    100|   isValid(this: TEnum, input: ?TRepresentationType | TEnumValue): boolean,
-   101|   members(this: TEnum): IteratorObject<TEnumValue>,
+   101|   members(this: TEnum): IteratorObject<TEnumValue, BuiltinIteratorReturn, unknown>,
    102|   __proto__: null,
    103| }
         ^ [1]
@@ -3170,7 +3170,7 @@ References:
     98|   cast(this: TEnum, input: ?TRepresentationType): undefined | TEnumValue,
     99|   getName(this: TEnum, input: TEnumValue): string,
    100|   isValid(this: TEnum, input: ?TRepresentationType | TEnumValue): boolean,
-   101|   members(this: TEnum): IteratorObject<TEnumValue>,
+   101|   members(this: TEnum): IteratorObject<TEnumValue, BuiltinIteratorReturn, unknown>,
    102|   __proto__: null,
    103| }
         ^ [1]

@@ -2672,12 +2672,12 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof DefaultedStringEnum) => IteratorObject<DefaultedStringEnum>",
+  "detail":"(this: typeof DefaultedStringEnum) => IteratorObject<DefaultedStringEnum, BuiltinIteratorReturn, unknown>",
   "insertTextFormat":1,
   "kind":3,
   "label":"members",
   "labelDetails":{
-    "detail":": (this: typeof DefaultedStringEnum) => IteratorObject<DefaultedStringEnum>"
+    "detail":": (this: typeof DefaultedStringEnum) => IteratorObject<DefaultedStringEnum, Buil..."
   },
   "sortText":"00000000000000000001",
   "textEdit":{
@@ -2859,12 +2859,12 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof InitializedStringEnum) => IteratorObject<InitializedStringEnum>",
+  "detail":"(this: typeof InitializedStringEnum) => IteratorObject<InitializedStringEnum, BuiltinIteratorReturn, unknown>",
   "insertTextFormat":1,
   "kind":3,
   "label":"members",
   "labelDetails":{
-    "detail":": (this: typeof InitializedStringEnum) => IteratorObject<InitializedStringEnum>"
+    "detail":": (this: typeof InitializedStringEnum) => IteratorObject<InitializedStringEnum, ..."
   },
   "sortText":"00000000000000000001",
   "textEdit":{
@@ -3042,11 +3042,13 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof NumberEnum) => IteratorObject<NumberEnum>",
+  "detail":"(this: typeof NumberEnum) => IteratorObject<NumberEnum, BuiltinIteratorReturn, unknown>",
   "insertTextFormat":1,
   "kind":3,
   "label":"members",
-  "labelDetails":{"detail":": (this: typeof NumberEnum) => IteratorObject<NumberEnum>"},
+  "labelDetails":{
+    "detail":": (this: typeof NumberEnum) => IteratorObject<NumberEnum, BuiltinIteratorReturn,..."
+  },
   "sortText":"00000000000000000001",
   "textEdit":{
     "insert":{"end":{"character":11,"line":14},"start":{"character":11,"line":14}},
@@ -3225,11 +3227,13 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof BooleanEnum) => IteratorObject<BooleanEnum>",
+  "detail":"(this: typeof BooleanEnum) => IteratorObject<BooleanEnum, BuiltinIteratorReturn, unknown>",
   "insertTextFormat":1,
   "kind":3,
   "label":"members",
-  "labelDetails":{"detail":": (this: typeof BooleanEnum) => IteratorObject<BooleanEnum>"},
+  "labelDetails":{
+    "detail":": (this: typeof BooleanEnum) => IteratorObject<BooleanEnum, BuiltinIteratorRetur..."
+  },
   "sortText":"00000000000000000001",
   "textEdit":{
     "insert":{"end":{"character":12,"line":16},"start":{"character":12,"line":16}},
@@ -3406,11 +3410,13 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof SymbolEnum) => IteratorObject<SymbolEnum>",
+  "detail":"(this: typeof SymbolEnum) => IteratorObject<SymbolEnum, BuiltinIteratorReturn, unknown>",
   "insertTextFormat":1,
   "kind":3,
   "label":"members",
-  "labelDetails":{"detail":": (this: typeof SymbolEnum) => IteratorObject<SymbolEnum>"},
+  "labelDetails":{
+    "detail":": (this: typeof SymbolEnum) => IteratorObject<SymbolEnum, BuiltinIteratorReturn,..."
+  },
   "sortText":"00000000000000000001",
   "textEdit":{
     "insert":{"end":{"character":11,"line":18},"start":{"character":11,"line":18}},
