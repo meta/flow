@@ -477,7 +477,7 @@ fn generic_constructor(cx: &mut Context<'_>, poly: &Type) -> Option<Type> {
     let TypeInner::DefT(_, def) = &**poly else {
         return None;
     };
-    let DefTInner::PolyT(box poly_data) = &**def else {
+    let DefTInner::PolyT(deref!(poly_data)) = &**def else {
         return None;
     };
     let TypeInner::DefT(_, class) = &*poly_data.t_out else {
@@ -709,7 +709,7 @@ pub fn type_at_pos_type<'a>(
                         let TypeInner::DefT(_, def) = &*generic else {
                             return None;
                         };
-                        let DefTInner::PolyT(box PolyTData { id: poly, .. }) = &**def else {
+                        let DefTInner::PolyT(deref!(PolyTData { id: poly, .. })) = &**def else {
                             return None;
                         };
                         let mut normalize = |t: &Type, instantiation| {
@@ -736,7 +736,7 @@ pub fn type_at_pos_type<'a>(
                             // A type parameter instantiated with itself, as in
                             // a recursive call, says nothing and is left out.
                             .filter(|(name, t)| match &**t {
-                                Ty::Bound(box (_, bound)) => bound != name.as_str(),
+                                Ty::Bound(deref!((_, bound))) => bound != name.as_str(),
                                 _ => true,
                             })
                             .collect();

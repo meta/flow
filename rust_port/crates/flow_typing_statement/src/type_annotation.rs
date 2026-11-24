@@ -520,13 +520,15 @@ fn use_distributive_tparam_name_from_ast<'a>(
 /// The type parameter `t` where it is also known to satisfy `bound`, as in TypeScript: in the
 /// true branch of a conditional type that checks it.
 fn narrow_tparam(t: &Type, bound: Type) -> Option<Type> {
-    let type_::TypeInner::GenericT(box type_::GenericTData {
-        reason,
-        name,
-        id,
-        bound: declared_bound,
-        no_infer,
-    }) = t.deref()
+    let type_::TypeInner::GenericT(
+        deref!(type_::GenericTData {
+            reason,
+            name,
+            id,
+            bound: declared_bound,
+            no_infer,
+        }),
+    ) = t.deref()
     else {
         return None;
     };
@@ -622,7 +624,7 @@ fn implied_constraint(
 fn is_array_or_constrained_to_array(t: &Type) -> bool {
     match t.deref() {
         type_::TypeInner::DefT(_, d) => matches!(d.deref(), type_::DefTInner::ArrT(_)),
-        type_::TypeInner::GenericT(box type_::GenericTData { bound, .. }) => {
+        type_::TypeInner::GenericT(deref!(type_::GenericTData { bound, .. })) => {
             is_array_or_constrained_to_array(bound)
         }
         _ => false,
@@ -951,7 +953,7 @@ fn is_type_name_value(cx: &mut Context, t: &Type) -> bool {
         TypeInner::NamespaceT(_) => true,
         TypeInner::DefT(_, def_t) => match def_t.deref() {
             DefTInner::ClassT(_) | DefTInner::EnumObjectT { .. } => true,
-            DefTInner::PolyT(box PolyTData { t_out, .. }) => {
+            DefTInner::PolyT(deref!(PolyTData { t_out, .. })) => {
                 matches!(t_out.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::ClassT(_)))
             }
             _ => false,
@@ -1494,13 +1496,15 @@ fn convert_inner<'a>(
             let reason_tapp =
                 reason::mk_annot_reason(type_util::desc_of_t(&valtype).cloned(), loc.dupe());
             let rt = type_util::typeof_annotation(reason, valtype, targs);
-            if let type_::TypeInner::TypeAppT(box TypeAppTData {
-                use_op,
-                type_: type_t,
-                targs: app_targs,
-                from_value,
-                ..
-            }) = rt.deref()
+            if let type_::TypeInner::TypeAppT(
+                deref!(TypeAppTData {
+                    use_op,
+                    type_: type_t,
+                    targs: app_targs,
+                    from_value,
+                    ..
+                }),
+            ) = rt.deref()
             {
                 crate::type_annotation_cons_gen::validate_type_args(
                     cx,
@@ -2273,13 +2277,15 @@ fn convert_inner<'a>(
                                 .unwrap()
                                 .dupe();
                             if env.in_no_infer {
-                                if let type_::TypeInner::GenericT(box GenericTData {
-                                    reason: gr,
-                                    name: gn,
-                                    bound: gb,
-                                    no_infer: _,
-                                    id: gid,
-                                }) = tp.deref()
+                                if let type_::TypeInner::GenericT(
+                                    deref!(GenericTData {
+                                        reason: gr,
+                                        name: gn,
+                                        bound: gb,
+                                        no_infer: _,
+                                        id: gid,
+                                    }),
+                                ) = tp.deref()
                                 {
                                     tp = Type::new(type_::TypeInner::GenericT(Box::new(
                                         GenericTData {
@@ -3547,7 +3553,7 @@ fn convert_inner<'a>(
 
                             match env.tparams_map.get(&subst_name).map(|v| v.dupe()) {
                                 Some(ref tparam_type)
-                                    if let TI::GenericT(box GenericTData { bound, .. }) =
+                                    if let TI::GenericT(deref!(GenericTData { bound, .. })) =
                                         tparam_type.deref()
                                         && let TI::KeysT(_, obj_t) = bound.deref() =>
                                 {
@@ -3555,11 +3561,13 @@ fn convert_inner<'a>(
                                     let (_, selected_keys) = source_ast.loc();
                                     let selected_keys = selected_keys.dupe();
                                     let distributive_tparam_name = match obj_t.deref() {
-                                        TI::GenericT(box GenericTData {
-                                            name: obj_name,
-                                            reason: obj_reason,
-                                            ..
-                                        }) => use_distributive_tparam_name(
+                                        TI::GenericT(
+                                            deref!(GenericTData {
+                                                name: obj_name,
+                                                reason: obj_reason,
+                                                ..
+                                            }),
+                                        ) => use_distributive_tparam_name(
                                             cx,
                                             obj_name.string_of_subst_name(),
                                             obj_reason.def_loc().dupe(),
@@ -6573,14 +6581,16 @@ fn mk_nominal_type_inner<'a>(
             let (targs_ts, targs_ast) = convert_list_inner(cx, env, &targs_node.arguments)?;
             let t = type_util::typeapp_annot(false, false, annot_loc, c, targs_ts);
             match t.deref() {
-                type_::TypeInner::TypeAppT(box TypeAppTData {
-                    reason: app_reason,
-                    use_op,
-                    type_: type_t,
-                    targs: app_targs,
-                    from_value,
-                    ..
-                }) => crate::type_annotation_cons_gen::validate_type_args(
+                type_::TypeInner::TypeAppT(
+                    deref!(TypeAppTData {
+                        reason: app_reason,
+                        use_op,
+                        type_: type_t,
+                        targs: app_targs,
+                        from_value,
+                        ..
+                    }),
+                ) => crate::type_annotation_cons_gen::validate_type_args(
                     cx,
                     use_op.dupe(),
                     app_reason.dupe(),

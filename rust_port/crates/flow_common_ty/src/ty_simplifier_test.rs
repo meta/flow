@@ -102,7 +102,7 @@ mod tests {
         let patched = patch_up_react_types(component_props);
         assert!(matches!(
             patched.as_ref(),
-            Ty::Generic(box (symbol, _, Some(args)))
+            Ty::Generic(deref!((symbol, _, Some(args))))
                 if symbol.sym_name == "React.ComponentProps"
                     && matches!(args.as_ref(), [type_] if matches!(type_.as_ref(), Ty::Num))
         ));

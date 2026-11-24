@@ -301,12 +301,12 @@ pub mod callee_finder {
         t: &Type,
     ) -> Result<Vec<Type>, flow_utils_concurrency::job_error::JobError> {
         match t.deref() {
-            TypeInner::GenericT(box GenericTData { bound, .. }) => get_func(cx, reason, bound),
+            TypeInner::GenericT(deref!(GenericTData { bound, .. })) => get_func(cx, reason, bound),
             TypeInner::DefT(_, def) if matches!(&**def, DefTInner::FunT(..)) => {
                 Ok(vec![fix_reason_of_t(t)])
             }
             TypeInner::DefT(_, def)
-                if let DefTInner::PolyT(box PolyTData { t_out, .. }) = &**def
+                if let DefTInner::PolyT(deref!(PolyTData { t_out, .. })) = &**def
                     && matches!(t_out.deref(), TypeInner::DefT(_, d) if matches!(&**d, DefTInner::FunT(..))) =>
             {
                 Ok(vec![fix_reason_of_t(t)])
@@ -354,7 +354,7 @@ pub mod callee_finder {
         t: &Type,
     ) -> Option<(Type, bool)> {
         match t.deref() {
-            TypeInner::GenericT(box GenericTData { bound, .. }) => {
+            TypeInner::GenericT(deref!(GenericTData { bound, .. })) => {
                 get_prop_of_obj(cx, name, reason, bound)
             }
             TypeInner::DefT(_, def) if let DefTInner::ObjT(obj) = &**def => {

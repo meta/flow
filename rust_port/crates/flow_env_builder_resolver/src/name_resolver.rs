@@ -9614,7 +9614,12 @@ impl<'ast, 'a, Cx: Context, Fl: Flow<Cx = Cx>>
         if let Some(err) = error {
             let is_reserved_keyword = matches!(
                 &err,
-                ErrorMessage::EBindingError(box (BindingError::EReservedKeyword { .. }, _, _, _))
+                ErrorMessage::EBindingError(deref!((
+                    BindingError::EReservedKeyword { .. },
+                    _,
+                    _,
+                    _
+                )))
             );
             Fl::add_output(self.cx, err);
             if !is_reserved_keyword {

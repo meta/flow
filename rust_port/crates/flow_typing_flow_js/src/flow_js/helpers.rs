@@ -204,13 +204,15 @@ pub(super) fn perform_lookup_action<'cx>(
                 },
             )?;
         }
-        LookupAction::LookupPropsForSubtyping(box LookupPropsForSubtypingData {
-            use_op,
-            props: _,
-            strictness_kind,
-            lower,
-            upper,
-        }) => {
+        LookupAction::LookupPropsForSubtyping(
+            deref!(LookupPropsForSubtypingData {
+                use_op,
+                props: _,
+                strictness_kind,
+                lower,
+                upper,
+            }),
+        ) => {
             if let Some(up) = up {
                 let use_op = UseOp::Frame(
                     Arc::new(VirtualFrameUseOp::PropertyCompatibility(Box::new(
@@ -241,7 +243,7 @@ pub(super) fn perform_lookup_action<'cx>(
                 )?;
             }
         }
-        LookupAction::SuperProp(box (use_op, lp, strictness_kind, derived)) => {
+        LookupAction::SuperProp(deref!((use_op, lp, strictness_kind, derived))) => {
             let lp_type = property::property_type(lp);
             let strictness_kind = match prop {
                 Some((_, declared_strictness_kind)) => {
@@ -273,11 +275,13 @@ pub(super) fn perform_lookup_action<'cx>(
                 p,
             )?;
         }
-        LookupAction::ReadProp(box ReadPropData {
-            use_op,
-            obj_t,
-            tout,
-        }) => {
+        LookupAction::ReadProp(
+            deref!(ReadPropData {
+                use_op,
+                obj_t,
+                tout,
+            }),
+        ) => {
             let react_dro = match obj_t.deref() {
                 _ if constraint_node_id(obj_t).is_some() => panic!("Expected concrete type"),
                 TypeInner::DefT(_, def_t) if let DefTInner::InstanceT(inst) = def_t.deref() => {
@@ -301,14 +305,16 @@ pub(super) fn perform_lookup_action<'cx>(
                 tout,
             )?;
         }
-        LookupAction::WriteProp(box WritePropData {
-            use_op,
-            obj_t: _,
-            tin,
-            write_ctx,
-            prop_tout,
-            mode,
-        }) => {
+        LookupAction::WriteProp(
+            deref!(WritePropData {
+                use_op,
+                obj_t: _,
+                tin,
+                write_ctx,
+                prop_tout,
+                mode,
+            }),
+        ) => {
             match (
                 property::write_slot_of_property_type(p, Some(*write_ctx)),
                 target_kind,
@@ -348,11 +354,13 @@ pub(super) fn perform_lookup_action<'cx>(
                 }
             }
         }
-        LookupAction::MatchProp(box LookupActionMatchPropData {
-            use_op,
-            drop_generic: drop_generic_,
-            prop_t: tin,
-        }) => match property::read_t_of_property_type(p) {
+        LookupAction::MatchProp(
+            deref!(LookupActionMatchPropData {
+                use_op,
+                drop_generic: drop_generic_,
+                prop_t: tin,
+            }),
+        ) => match property::read_t_of_property_type(p) {
             Some(t) => {
                 let t = if *drop_generic_ { drop_generic(t) } else { t };
                 rec_flow(
@@ -440,10 +448,12 @@ pub(super) fn lookup_prop_type_direct<'cx>(
 pub(super) fn empty_success(u: &UseT<Cx>) -> bool {
     match u.deref() {
         // Work has to happen when Empty flows to these types
-        UseTInner::ConcretizeT(box ConcretizeTData {
-            kind: ConcretizationKind::ConcretizeForLowerBounds,
-            ..
-        }) => false,
+        UseTInner::ConcretizeT(
+            deref!(ConcretizeTData {
+                kind: ConcretizationKind::ConcretizeForLowerBounds,
+                ..
+            }),
+        ) => false,
         UseTInner::UseT(_, t) if type_util::constraint_node_id(t).is_some() => false,
         UseTInner::EvalTypeDestructorT(..) => false,
         UseTInner::UseT(_, t)
@@ -504,12 +514,14 @@ fn keys_of_type_param<'cx>(
             _ => return Ok(None),
         },
     };
-    let TypeInner::GenericT(box GenericTData {
-        id: GenericId::Bound(param),
-        name,
-        no_infer,
-        ..
-    }) = t.deref()
+    let TypeInner::GenericT(
+        deref!(GenericTData {
+            id: GenericId::Bound(param),
+            name,
+            no_infer,
+            ..
+        }),
+    ) = t.deref()
     else {
         return Ok(None);
     };
@@ -711,11 +723,13 @@ pub(super) fn handle_bounded<'cx>(
     let update_action_meth_generic_this =
         |l: Type, action: &MethodAction<Cx>| -> MethodAction<Cx> {
             match action {
-                MethodAction::CallM(box CallMData {
-                    methodcalltype,
-                    return_hint,
-                    specialized_callee,
-                }) => MethodAction::CallM(Box::new(CallMData {
+                MethodAction::CallM(
+                    deref!(CallMData {
+                        methodcalltype,
+                        return_hint,
+                        specialized_callee,
+                    }),
+                ) => MethodAction::CallM(Box::new(CallMData {
                     methodcalltype: MethodCallType {
                         meth_generic_this: Some(l),
                         ..methodcalltype.clone()
@@ -723,15 +737,17 @@ pub(super) fn handle_bounded<'cx>(
                     return_hint: return_hint.clone(),
                     specialized_callee: specialized_callee.clone(),
                 })),
-                MethodAction::ChainM(box ChainMData {
-                    exp_reason,
-                    lhs_reason,
-                    lhs_expression,
-                    methodcalltype,
-                    voided_out_collector,
-                    return_hint,
-                    specialized_callee,
-                }) => MethodAction::ChainM(Box::new(ChainMData {
+                MethodAction::ChainM(
+                    deref!(ChainMData {
+                        exp_reason,
+                        lhs_reason,
+                        lhs_expression,
+                        methodcalltype,
+                        voided_out_collector,
+                        return_hint,
+                        specialized_callee,
+                    }),
+                ) => MethodAction::ChainM(Box::new(ChainMData {
                     exp_reason: exp_reason.dupe(),
                     lhs_reason: lhs_reason.dupe(),
                     lhs_expression: lhs_expression.dupe(),
@@ -748,12 +764,14 @@ pub(super) fn handle_bounded<'cx>(
         };
 
     if match bound.deref() {
-        TypeInner::GenericT(box GenericTData {
-            bound: inner_bound,
-            id: id_prime,
-            no_infer: inner_no_infer,
-            ..
-        }) if let Some((id, name)) = bounded_id.as_generic() => match id.collapse(id_prime) {
+        TypeInner::GenericT(
+            deref!(GenericTData {
+                bound: inner_bound,
+                id: id_prime,
+                no_infer: inner_no_infer,
+                ..
+            }),
+        ) if let Some((id, name)) = bounded_id.as_generic() => match id.collapse(id_prime) {
             Some(collapsed_id) => {
                 let generic_t = Type::new(TypeInner::GenericT(Box::new(GenericTData {
                     reason: reason.dupe(),
@@ -807,14 +825,18 @@ pub(super) fn handle_bounded<'cx>(
     match u.deref() {
         // In this set of cases, we flow the generic's upper bound to u. This is what we normally would do
         // in the catch-all generic case anyways, but these rules are to avoid wildcards elsewhere in __flow.
-        UseTInner::ConcretizeT(box ConcretizeTData {
-            kind: ConcretizationKind::ConcretizeForOperatorsChecking,
-            ..
-        })
-        | UseTInner::ConcretizeT(box ConcretizeTData {
-            kind: ConcretizationKind::ConcretizeForOptionalChain,
-            ..
-        })
+        UseTInner::ConcretizeT(
+            deref!(ConcretizeTData {
+                kind: ConcretizationKind::ConcretizeForOperatorsChecking,
+                ..
+            }),
+        )
+        | UseTInner::ConcretizeT(
+            deref!(ConcretizeTData {
+                kind: ConcretizationKind::ConcretizeForOptionalChain,
+                ..
+            }),
+        )
         | UseTInner::TestPropT(..)
         | UseTInner::OptionalIndexedAccessT(..) => {
             let repos_bound = reposition_reason(cx, env, Some(trace), reason, false, bound)?;
@@ -822,10 +844,12 @@ pub(super) fn handle_bounded<'cx>(
             Ok(true)
         }
         // A computed object key keeps its identity, over each member of a union bound.
-        UseTInner::ConcretizeT(box ConcretizeTData {
-            kind: ConcretizationKind::ConcretizeForComputedObjectKeys,
-            ..
-        }) => {
+        UseTInner::ConcretizeT(
+            deref!(ConcretizeTData {
+                kind: ConcretizationKind::ConcretizeForComputedObjectKeys,
+                ..
+            }),
+        ) => {
             if matches!(bound.deref(), TypeInner::UnionT(..)) {
                 distribute_union_intersection(cx, None)
             } else if is_concrete(bound) {
@@ -836,14 +860,16 @@ pub(super) fn handle_bounded<'cx>(
         }
         // A match argument keeps its identity. The exhaustiveness check takes its bound apart and
         // puts the identity back on what the patterns leave of it.
-        UseTInner::ConcretizeT(box ConcretizeTData {
-            kind:
-                ConcretizationKind::ConcretizeForMatchArg {
-                    keep_bounded: true, ..
+        UseTInner::ConcretizeT(
+            deref!(ConcretizeTData {
+                kind: ConcretizationKind::ConcretizeForMatchArg {
+                    keep_bounded: true,
+                    ..
                 },
-            collector,
-            ..
-        }) => {
+                collector,
+                ..
+            }),
+        ) => {
             collector.add(make_generic(bound.dupe()));
             Ok(true)
         }
@@ -1108,13 +1134,15 @@ pub(super) fn handle_bounded<'cx>(
                 wait_for_concrete_bound(cx, None)
             }
         }
-        UseTInner::MethodT(box MethodTData {
-            use_op: op,
-            reason: r1,
-            prop_reason: r2,
-            propref: prop,
-            method_action: action,
-        }) => {
+        UseTInner::MethodT(
+            deref!(MethodTData {
+                use_op: op,
+                reason: r1,
+                prop_reason: r2,
+                propref: prop,
+                method_action: action,
+            }),
+        ) => {
             let l = make_generic(bound.dupe());
             let action_prime = update_action_meth_generic_this(l, action);
             let u_prime = UseT::new(UseTInner::MethodT(Box::new(MethodTData {
@@ -1283,13 +1311,13 @@ pub(super) fn handle_frozen_tvar<'cx>(
     match u.deref() {
         // Whether a conditional holds for the bound says nothing about the tvar.
         // `run_conditional` decides one over a placeholder itself.
-        UseTInner::EvalTypeDestructorT(box EvalTypeDestructorTData {
+        UseTInner::EvalTypeDestructorT(deref!(EvalTypeDestructorTData {
             destructor_use_op,
             reason: use_reason,
             repos,
             destructor,
             tout,
-        }) if !matches!(**destructor, Destructor::ConditionalType(_)) => derive(
+        })) if !matches!(**destructor, Destructor::ConditionalType(_)) => derive(
             cx,
             use_reason,
             &|tout| {
@@ -1355,13 +1383,13 @@ pub(super) fn handle_frozen_tvar<'cx>(
         // the react kit itself.
         | UseTInner::ReactKitT(..)
             | UseTInner::ConstructorT(..)
-            | UseTInner::ConcretizeT(box ConcretizeTData {
+            | UseTInner::ConcretizeT(deref!(ConcretizeTData {
                 kind:
                     ConcretizationKind::ConcretizeForOperatorsChecking
                     | ConcretizationKind::ConcretizeForComputedObjectKeys
                     | ConcretizationKind::ConcretizeForOptionalChain,
                 ..
-            })
+            }))
             | UseTInner::TestPropT(..)
             | UseTInner::OptionalIndexedAccessT(..) => {
             let bound = env.frozen_tvar_bound(tvar);
@@ -1525,8 +1553,8 @@ pub(super) fn pick_use_op(env: &FlowJsEnv, op1: &UseOp, op2: &UseOp) -> UseOp {
                 // abstract locations, we determine whether to do this using a heuristic
                 // based on the 'locality' of the use_op root.
                 VirtualFrameUseOp::ImplicitTypeParam if !should_replace => match root_of_op2 {
-                    VirtualRootUseOp::FunCall(box FunCallData { local, .. })
-                    | VirtualRootUseOp::FunCallMethod(box FunCallMethodData { local, .. }) => {
+                    VirtualRootUseOp::FunCall(deref!(FunCallData { local, .. }))
+                    | VirtualRootUseOp::FunCallMethod(deref!(FunCallMethodData { local, .. })) => {
                         *local
                     }
                     VirtualRootUseOp::AssignVar { .. }
@@ -1556,9 +1584,9 @@ pub(super) fn pick_use_op(env: &FlowJsEnv, op1: &UseOp, op2: &UseOp) -> UseOp {
                     | VirtualRootUseOp::SwitchRefinementCheck(..)
                     | VirtualRootUseOp::ClassExtendsCheck(..)
                     | VirtualRootUseOp::ClassMethodDefinition { .. }
-                    | VirtualRootUseOp::ClassImplementsCheck(box ClassImplementsCheckData {
-                        ..
-                    })
+                    | VirtualRootUseOp::ClassImplementsCheck(
+                        deref!(ClassImplementsCheckData { .. }),
+                    )
                     | VirtualRootUseOp::ClassOwnProtoCheck(..)
                     | VirtualRootUseOp::ConformToCommonInterface(..)
                     | VirtualRootUseOp::MergedDeclaration(..)
@@ -1613,11 +1641,13 @@ pub(super) fn apply_method_action<'cx>(
     action: &MethodAction<Cx>,
 ) -> Result<(), FlowJsException> {
     match action {
-        MethodAction::CallM(box CallMData {
-            methodcalltype: app,
-            return_hint,
-            specialized_callee,
-        }) => {
+        MethodAction::CallM(
+            deref!(CallMData {
+                methodcalltype: app,
+                return_hint,
+                specialized_callee,
+            }),
+        ) => {
             let u = UseT::new(UseTInner::CallT(Box::new(CallTData {
                 use_op,
                 reason: reason_call,
@@ -1630,15 +1660,17 @@ pub(super) fn apply_method_action<'cx>(
             })));
             rec_flow(cx, env, trace, (l, &u))
         }
-        MethodAction::ChainM(box ChainMData {
-            exp_reason,
-            lhs_reason,
-            lhs_expression,
-            methodcalltype: app,
-            voided_out_collector,
-            return_hint,
-            specialized_callee,
-        }) => crate::optional_chain_kit::run_with_env(
+        MethodAction::ChainM(
+            deref!(ChainMData {
+                exp_reason,
+                lhs_reason,
+                lhs_expression,
+                methodcalltype: app,
+                voided_out_collector,
+                return_hint,
+                specialized_callee,
+            }),
+        ) => crate::optional_chain_kit::run_with_env(
             cx,
             env,
             trace,
@@ -1677,7 +1709,7 @@ pub(super) fn perform_elem_action<'cx>(
     action: &ElemAction<Cx>,
 ) -> Result<(), FlowJsException> {
     match (action, restrict_deletes) {
-        (ElemAction::ReadElem(box ReadElemData { tout, .. }), _) => {
+        (ElemAction::ReadElem(deref!(ReadElemData { tout, .. })), _) => {
             let loc = reason_op.loc().dupe();
             let value = reposition(cx, env, Some(trace), loc, None, None, value.dupe())?;
             rec_flow_t(
@@ -1689,19 +1721,23 @@ pub(super) fn perform_elem_action<'cx>(
             )?;
         }
         (
-            ElemAction::WriteElem(box WriteElemData {
-                tin,
-                tout,
-                mode: SetMode::Assign,
-            }),
+            ElemAction::WriteElem(
+                deref!(WriteElemData {
+                    tin,
+                    tout,
+                    mode: SetMode::Assign,
+                }),
+            ),
             _,
         )
         | (
-            ElemAction::WriteElem(box WriteElemData {
-                tin,
-                tout,
-                mode: SetMode::Delete,
-            }),
+            ElemAction::WriteElem(
+                deref!(WriteElemData {
+                    tin,
+                    tout,
+                    mode: SetMode::Delete,
+                }),
+            ),
             true,
         ) => {
             rec_flow(
@@ -1718,11 +1754,13 @@ pub(super) fn perform_elem_action<'cx>(
             }
         }
         (
-            ElemAction::WriteElem(box WriteElemData {
-                tin,
-                tout,
-                mode: SetMode::Delete,
-            }),
+            ElemAction::WriteElem(
+                deref!(WriteElemData {
+                    tin,
+                    tout,
+                    mode: SetMode::Delete,
+                }),
+            ),
             false,
         ) => {
             // Ok to delete arbitrary elements on arrays, not OK for tuples
@@ -2343,14 +2381,16 @@ pub(super) fn reposition<'cx>(
                 inner_t.dupe(),
                 matches!(desc, Some(Some(ReasonDesc::RReactElement { .. }))) || *use_desc,
             ))),
-            TypeInner::TypeAppT(box TypeAppTData {
-                reason,
-                use_op,
-                type_,
-                targs,
-                from_value,
-                use_desc,
-            }) => Ok(Type::new(TypeInner::TypeAppT(Box::new(TypeAppTData {
+            TypeInner::TypeAppT(
+                deref!(TypeAppTData {
+                    reason,
+                    use_op,
+                    type_,
+                    targs,
+                    from_value,
+                    use_desc,
+                }),
+            ) => Ok(Type::new(TypeInner::TypeAppT(Box::new(TypeAppTData {
                 reason: mod_reason(reason.dupe()),
                 use_op: use_op.dupe(),
                 type_: type_.dupe(),
@@ -2373,10 +2413,12 @@ pub(super) fn reposition<'cx>(
                             nominal::UnderlyingT::OpaqueWithLocal { t: t_prime }
                         }
                     }
-                    nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
-                        t: inner_t,
-                        custom_error_loc,
-                    }) => {
+                    nominal::UnderlyingT::CustomError(
+                        deref!(nominal::CustomErrorData {
+                            t: inner_t,
+                            custom_error_loc,
+                        }),
+                    ) => {
                         let t_prime = recurse(cx, env, trace, desc, mod_reason, seen, inner_t)?;
                         if Type::ptr_eq(inner_t, &t_prime) {
                             nominal_type.underlying_t.clone()
@@ -2998,13 +3040,15 @@ pub(super) fn drop_resolved<'cx>(cx: &mut Context<'cx>, t: &Type) -> Type {
             |cx, resolved_t| drop_resolved(cx, resolved_t),
             node.id(),
         ),
-        TypeInner::GenericT(box GenericTData {
-            reason,
-            name,
-            id: g_id,
-            bound,
-            no_infer,
-        }) if let Some(node) = constraint_node_id(bound) => find_resolved_opt(
+        TypeInner::GenericT(
+            deref!(GenericTData {
+                reason,
+                name,
+                id: g_id,
+                bound,
+                no_infer,
+            }),
+        ) if let Some(node) = constraint_node_id(bound) => find_resolved_opt(
             cx,
             t.dupe(),
             |cx, resolved_t| {
@@ -3199,12 +3243,18 @@ pub(super) fn add_specialized_callee_method_action(
     action: &MethodAction<Cx>,
 ) -> Result<(), FlowJsException> {
     match action {
-        MethodAction::CallM(box CallMData {
-            specialized_callee, ..
-        })
-        | MethodAction::ChainM(box ChainMData {
-            specialized_callee, ..
-        }) => {
+        MethodAction::CallM(
+            deref!(CallMData {
+                specialized_callee,
+                ..
+            }),
+        )
+        | MethodAction::ChainM(
+            deref!(ChainMData {
+                specialized_callee,
+                ..
+            }),
+        ) => {
             callee_recorder::add_callee(
                 env,
                 callee_recorder::Kind::All,

@@ -364,14 +364,17 @@ fn object_tool_dict_polarity_override(tool: &object::Tool) -> Option<Polarity> {
         | object::Tool::ReadOnly
         | object::Tool::Partial
         | object::Tool::Required
-        | object::Tool::Rest(box (object::rest::MergeMode::Omit, _))
+        | object::Tool::Rest(deref!((object::rest::MergeMode::Omit, _)))
         | object::Tool::ObjectRep
         | object::Tool::ObjectMap(_) => None,
         object::Tool::Spread(_)
-        | object::Tool::Rest(box (
-            object::rest::MergeMode::SpreadReversal | object::rest::MergeMode::ReactConfigMerge(_),
-            _,
-        ))
+        | object::Tool::Rest(
+            deref!((
+                object::rest::MergeMode::SpreadReversal
+                    | object::rest::MergeMode::ReactConfigMerge(_),
+                _,
+            )),
+        )
         | object::Tool::ReactConfig(_)
         | object::Tool::ReactCheckComponentConfig { .. } => Some(Polarity::Neutral),
     }
@@ -385,13 +388,13 @@ fn record_banned_type_util_op(tool: &object::Tool) -> Option<RecordBannedTypeUti
         object::Tool::ReadOnly => Some(RecordBannedTypeUtilOp::ReadOnly),
         object::Tool::Partial => Some(RecordBannedTypeUtilOp::Partial),
         object::Tool::Required => Some(RecordBannedTypeUtilOp::Required),
-        object::Tool::Rest(box (object::rest::MergeMode::Omit, _)) => {
+        object::Tool::Rest(deref!((object::rest::MergeMode::Omit, _))) => {
             Some(RecordBannedTypeUtilOp::Omit)
         }
-        object::Tool::Rest(box (object::rest::MergeMode::SpreadReversal, _)) => {
+        object::Tool::Rest(deref!((object::rest::MergeMode::SpreadReversal, _))) => {
             Some(RecordBannedTypeUtilOp::Rest)
         }
-        object::Tool::Rest(box (object::rest::MergeMode::ReactConfigMerge(_), _))
+        object::Tool::Rest(deref!((object::rest::MergeMode::ReactConfigMerge(_), _)))
         | object::Tool::ReactConfig(_)
         | object::Tool::ReactCheckComponentConfig { .. } => {
             Some(RecordBannedTypeUtilOp::ReactConfig)
@@ -1713,11 +1716,11 @@ pub fn object_make_exact<'cx>(
                 // This case analysis aims at recovering a potential type alias associated
                 // with an $Exact<> constructor.
                 let reason_obj = match reason.desc(false) {
-                    Some(VirtualReasonDesc::RTypeAlias(box (n, loc, _))) => {
+                    Some(VirtualReasonDesc::RTypeAlias(deref!((n, loc, _)))) => {
                         let n = n.dupe();
                         let loc = loc.dupe();
                         r.dupe().update_desc(|d| match &d {
-                            Some(VirtualReasonDesc::RTypeAlias(box (_, _, desc))) => {
+                            Some(VirtualReasonDesc::RTypeAlias(deref!((_, _, desc)))) => {
                                 Some(VirtualReasonDesc::RTypeAlias(Box::new((
                                     n.dupe(),
                                     loc.dupe(),
@@ -2389,8 +2392,8 @@ fn resolve_with_env<'cx, A>(
 ) -> Result<A, FlowJsException> {
     let dict_polarity_override = object_tool_dict_polarity_override(tool);
     let literal = match tool {
-        object::Tool::Spread(box (target, _)) => target.literal(),
-        object::Tool::ReactConfig(box ObjectToolReactConfigData { literal, .. }) => {
+        object::Tool::Spread(deref!((target, _))) => target.literal(),
+        object::Tool::ReactConfig(deref!(ObjectToolReactConfigData { literal, .. })) => {
             ObjLiteral::of_literal(*literal)
         }
         _ => ObjLiteral::NonLiteral,
@@ -2402,19 +2405,26 @@ fn resolve_with_env<'cx, A>(
             ls: object::GenericSpreadId,
         ) -> (object::GenericSpreadId, Type) {
             match t.deref() {
-                TypeInner::GenericT(box GenericTData {
-                    id, bound, reason, ..
-                }) => loop_generic(
+                TypeInner::GenericT(
+                    deref!(GenericTData {
+                        id,
+                        bound,
+                        reason,
+                        ..
+                    }),
+                ) => loop_generic(
                     cx,
                     &type_util::mod_reason_of_t(&|_| reason.dupe(), bound),
                     flow_typing_generics::spread_append(&id.make_spread(), &ls),
                 ),
-                TypeInner::ThisInstanceT(box ThisInstanceTData {
-                    reason,
-                    instance,
-                    is_this,
-                    subst_name,
-                }) => (
+                TypeInner::ThisInstanceT(
+                    deref!(ThisInstanceTData {
+                        reason,
+                        instance,
+                        is_this,
+                        subst_name,
+                    }),
+                ) => (
                     ls,
                     flow_js_utils::fix_this_instance(
                         cx,
@@ -2522,12 +2532,12 @@ fn resolve_with_env<'cx, A>(
                 let inst_kind = &inst.inst_kind;
                 let is_type_spread = matches!(
                     tool,
-                    object::Tool::Spread(box (object::spread::Target::Annot { .. }, _))
+                    object::Tool::Spread(deref!((object::spread::Target::Annot { .. }, _)))
                 );
                 let is_typescript_interface_value_spread =
                     matches!(
                         tool,
-                        object::Tool::Spread(box (object::spread::Target::Value { .. }, _))
+                        object::Tool::Spread(deref!((object::spread::Target::Value { .. }, _)))
                     ) && inst.strictness_kind.is_typescript_loose();
                 let is_type_operation = matches!(
                     tool,
@@ -2535,7 +2545,7 @@ fn resolve_with_env<'cx, A>(
                         | object::Tool::ReadOnly
                         | object::Tool::Partial
                         | object::Tool::Required
-                        | object::Tool::Rest(box (object::rest::MergeMode::Omit, _))
+                        | object::Tool::Rest(deref!((object::rest::MergeMode::Omit, _)))
                         | object::Tool::ObjectRep
                         | object::Tool::ObjectMap(_)
                 );
@@ -2558,7 +2568,7 @@ fn resolve_with_env<'cx, A>(
                     Rc::new(resolve_tool.clone()),
                 );
                 return match (tool, inst_kind) {
-                    (object::Tool::Spread(box (_, _)), InstanceKind::InterfaceKind { .. })
+                    (object::Tool::Spread(deref!((_, _))), InstanceKind::InterfaceKind { .. })
                         if !(is_type_spread || is_typescript_interface_value_spread) =>
                     {
                         add_output(
@@ -2577,15 +2587,17 @@ fn resolve_with_env<'cx, A>(
                         )?;
                         return_(cx, use_op, any_t::error(reason.dupe()))
                     }
-                    (object::Tool::Spread(box (_, _)), InstanceKind::RecordKind { .. }) => recurse(
-                        cx,
-                        env,
-                        use_op,
-                        reason,
-                        resolve_tool_inner,
-                        tool,
-                        super_t.dupe(),
-                    ),
+                    (object::Tool::Spread(deref!((_, _))), InstanceKind::RecordKind { .. }) => {
+                        recurse(
+                            cx,
+                            env,
+                            use_op,
+                            reason,
+                            resolve_tool_inner,
+                            tool,
+                            super_t.dupe(),
+                        )
+                    }
                     (_, InstanceKind::RecordKind { .. })
                         if let Some(op) = record_banned_type_util_op(tool) =>
                     {
@@ -2640,7 +2652,7 @@ fn resolve_with_env<'cx, A>(
                     object::Tool::Partial
                         | object::Tool::Required
                         | object::Tool::MakeExact
-                        | object::Tool::ObjectMap(box ObjectToolObjectMapData { .. })
+                        | object::Tool::ObjectMap(deref!(ObjectToolObjectMapData { .. }))
                 ) =>
             {
                 return return_(cx, use_op, t.dupe());
@@ -2682,7 +2694,7 @@ fn resolve_with_env<'cx, A>(
             // They don't make sense with $ReadOnly's semantics, since $ReadOnly doesn't model
             // copying/spreading an object.
             DefTInner::BoolGeneralT | DefTInner::SingletonBoolT { .. }
-                if matches!(tool, object::Tool::Spread(box (_, _))) =>
+                if matches!(tool, object::Tool::Spread(deref!((_, _)))) =>
             {
                 let flags = Flags {
                     obj_kind: ObjKind::Exact,
@@ -2725,9 +2737,9 @@ fn resolve_with_env<'cx, A>(
                     react_dro: None,
                 };
                 let x = match tool {
-                    object::Tool::Spread(box (_, _))
+                    object::Tool::Spread(deref!((_, _)))
                     | object::Tool::ObjectRep
-                    | object::Tool::ReactConfig(box ObjectToolReactConfigData { .. }) => {
+                    | object::Tool::ReactConfig(deref!(ObjectToolReactConfigData { .. })) => {
                         Vec1::new(object::Slice {
                             reason: reason.dupe(),
                             strictness_kind: TypeStrictnessKind::Flow,
@@ -2778,12 +2790,20 @@ fn resolve_with_env<'cx, A>(
                 );
             }
             DefTInner::ArrT(arr) => match arr.deref() {
-                ArrType::ArrayAT(box ArrayATData {
-                    elem_t, react_dro, ..
-                })
-                | ArrType::ROArrayAT(box ROArrayATData {
-                    elem_t, react_dro, ..
-                }) if matches!(tool, object::Tool::ReadOnly) => {
+                ArrType::ArrayAT(
+                    deref!(ArrayATData {
+                        elem_t,
+                        react_dro,
+                        ..
+                    }),
+                )
+                | ArrType::ROArrayAT(
+                    deref!(ROArrayATData {
+                        elem_t,
+                        react_dro,
+                        ..
+                    }),
+                ) if matches!(tool, object::Tool::ReadOnly) => {
                     return return_(
                         cx,
                         use_op,
@@ -2799,16 +2819,18 @@ fn resolve_with_env<'cx, A>(
                         )),
                     );
                 }
-                ArrType::TupleAT(box TupleATData {
-                    elem_t,
-                    elements,
-                    arity,
-                    inexact,
-                    rest,
-                    react_dro,
-                    strictness_kind,
-                    ..
-                }) if matches!(tool, object::Tool::ReadOnly) => {
+                ArrType::TupleAT(
+                    deref!(TupleATData {
+                        elem_t,
+                        elements,
+                        arity,
+                        inexact,
+                        rest,
+                        react_dro,
+                        strictness_kind,
+                        ..
+                    }),
+                ) if matches!(tool, object::Tool::ReadOnly) => {
                     let read_only = |elem: &TupleElement| TupleElement {
                         t: elem.t.dupe(),
                         name: elem.name.clone(),
@@ -2838,16 +2860,18 @@ fn resolve_with_env<'cx, A>(
                         )),
                     );
                 }
-                ArrType::TupleAT(box TupleATData {
-                    elem_t,
-                    elements,
-                    arity,
-                    inexact,
-                    rest,
-                    react_dro,
-                    strictness_kind,
-                    ..
-                }) if matches!(tool, object::Tool::Partial) => {
+                ArrType::TupleAT(
+                    deref!(TupleATData {
+                        elem_t,
+                        elements,
+                        arity,
+                        inexact,
+                        rest,
+                        react_dro,
+                        strictness_kind,
+                        ..
+                    }),
+                ) if matches!(tool, object::Tool::Partial) => {
                     let elements: Vec<TupleElement> = elements
                         .iter()
                         .map(|elem| TupleElement {
@@ -2896,16 +2920,18 @@ fn resolve_with_env<'cx, A>(
                         )),
                     );
                 }
-                ArrType::TupleAT(box TupleATData {
-                    elem_t,
-                    elements,
-                    arity,
-                    inexact,
-                    rest,
-                    react_dro,
-                    strictness_kind,
-                    ..
-                }) if matches!(tool, object::Tool::Required) => {
+                ArrType::TupleAT(
+                    deref!(TupleATData {
+                        elem_t,
+                        elements,
+                        arity,
+                        inexact,
+                        rest,
+                        react_dro,
+                        strictness_kind,
+                        ..
+                    }),
+                ) if matches!(tool, object::Tool::Required) => {
                     let elements: Vec<TupleElement> = elements
                         .iter()
                         .map(|elem| TupleElement {
@@ -2958,7 +2984,7 @@ fn resolve_with_env<'cx, A>(
             let members_filtered =
                 flow_typing_visitors::type_mapper::union_flatten(cx, rep.members_iter().duped());
             let tool = match tool {
-                object::Tool::Spread(box (options, state)) => {
+                object::Tool::Spread(deref!((options, state))) => {
                     let mut state = state.clone();
                     state.union_t = Some(t.dupe());
                     object::Tool::Spread(Box::new((options.clone(), state)))
@@ -3121,7 +3147,7 @@ pub fn super_<'cx, A>(
                                 | object::Tool::ReadOnly
                                 | object::Tool::Partial
                                 | object::Tool::Required
-                                | object::Tool::Rest(box (object::rest::MergeMode::Omit, _))
+                                | object::Tool::Rest(deref!((object::rest::MergeMode::Omit, _)))
                                 | object::Tool::ObjectRep
                                 | object::Tool::ObjectMap(_)
                         ) && matches!(inst.inst_kind, InstanceKind::InterfaceKind { .. });
@@ -3317,20 +3343,24 @@ pub fn merge_field(
         Some(existing_prop) => {
             match (existing_prop.deref(), incoming.deref()) {
                 (
-                    PropertyInner::Field(box FieldData {
-                        preferred_def_locs: pl1,
-                        key_loc: kl1,
-                        type_: t1,
-                        polarity: p1,
-                        optional: opt1,
-                    }),
-                    PropertyInner::Field(box FieldData {
-                        preferred_def_locs: _,
-                        key_loc: _,
-                        type_: t2,
-                        polarity: p2,
-                        optional: opt2,
-                    }),
+                    PropertyInner::Field(
+                        deref!(FieldData {
+                            preferred_def_locs: pl1,
+                            key_loc: kl1,
+                            type_: t1,
+                            polarity: p1,
+                            optional: opt1,
+                        }),
+                    ),
+                    PropertyInner::Field(
+                        deref!(FieldData {
+                            preferred_def_locs: _,
+                            key_loc: _,
+                            type_: t2,
+                            polarity: p2,
+                            optional: opt2,
+                        }),
+                    ),
                 ) => {
                     let merged_type =
                         type_util::union_of_ts(reason.dupe(), vec![t1.dupe(), t2.dupe()], None);
@@ -3533,12 +3563,14 @@ pub fn map_object<'cx>(
                                 );
                             }
                             let (value_ts_for_indexer, field_polarity) = match field.deref() {
-                                PropertyInner::Field(box FieldData {
-                                    type_,
-                                    polarity,
-                                    optional,
-                                    ..
-                                }) => (
+                                PropertyInner::Field(
+                                    deref!(FieldData {
+                                        type_,
+                                        polarity,
+                                        optional,
+                                        ..
+                                    }),
+                                ) => (
                                     vec![type_util::slot_value_t(type_, *optional)],
                                     Some(*polarity),
                                 ),

@@ -121,7 +121,7 @@ pub fn reason_of_t(t: &Type) -> &Reason {
         TypeInner::AnnotT(reason, _, _) => reason,
         TypeInner::DefT(reason, _) => reason,
         TypeInner::EvalT { defer_use_t, .. } => reason_of_defer_use_t(defer_use_t),
-        TypeInner::GenericT(box GenericTData { reason, .. }) => reason,
+        TypeInner::GenericT(deref!(GenericTData { reason, .. })) => reason,
         TypeInner::ImplicitInstantiationTvar(data) => &data.reason,
         TypeInner::FunProtoT(reason) => reason,
         TypeInner::KeysT(reason, _) => reason,
@@ -131,9 +131,9 @@ pub fn reason_of_t(t: &Type) -> &Reason {
         TypeInner::NullProtoT(reason) => reason,
         TypeInner::ObjProtoT(reason) => reason,
         TypeInner::NominalT { reason, .. } => reason,
-        TypeInner::ThisInstanceT(box ThisInstanceTData { reason, .. }) => reason,
-        TypeInner::ThisTypeAppT(box ThisTypeAppTData { reason, .. }) => reason,
-        TypeInner::TypeAppT(box TypeAppTData { reason, .. }) => reason,
+        TypeInner::ThisInstanceT(deref!(ThisInstanceTData { reason, .. })) => reason,
+        TypeInner::ThisTypeAppT(deref!(ThisTypeAppTData { reason, .. })) => reason,
+        TypeInner::TypeAppT(deref!(TypeAppTData { reason, .. })) => reason,
         TypeInner::AnyT(reason, _) => reason,
         TypeInner::UnionT(reason, _) => reason,
         TypeInner::IntersectionT(reason, _) => reason,
@@ -257,25 +257,29 @@ pub fn mod_reason_of_t(f: &dyn Fn(Reason) -> Reason, t: &Type) -> Type {
             defer_use_t: mod_reason_of_defer_use_t(&f, defer_use_t),
             id: id.dupe(),
         }),
-        TypeInner::GenericT(box GenericTData {
-            reason,
-            name,
-            bound,
-            no_infer,
-            id,
-        }) => Type::new(TypeInner::GenericT(Box::new(GenericTData {
+        TypeInner::GenericT(
+            deref!(GenericTData {
+                reason,
+                name,
+                bound,
+                no_infer,
+                id,
+            }),
+        ) => Type::new(TypeInner::GenericT(Box::new(GenericTData {
             reason: f(reason.dupe()),
             name: name.dupe(),
             bound: bound.dupe(),
             no_infer: *no_infer,
             id: id.clone(),
         }))),
-        TypeInner::ImplicitInstantiationTvar(box ImplicitInstantiationTvarData {
-            reason,
-            name,
-            bound,
-            id,
-        }) => Type::new(TypeInner::ImplicitInstantiationTvar(Box::new(
+        TypeInner::ImplicitInstantiationTvar(
+            deref!(ImplicitInstantiationTvarData {
+                reason,
+                name,
+                bound,
+                id,
+            }),
+        ) => Type::new(TypeInner::ImplicitInstantiationTvar(Box::new(
             ImplicitInstantiationTvarData {
                 reason: f(reason.dupe()),
                 name: name.dupe(),
@@ -317,36 +321,42 @@ pub fn mod_reason_of_t(f: &dyn Fn(Reason) -> Reason, t: &Type) -> Type {
             reason: f(reason.dupe()),
             nominal_type: nominal_type.dupe(),
         }),
-        TypeInner::ThisInstanceT(box ThisInstanceTData {
-            reason,
-            instance,
-            is_this,
-            subst_name,
-        }) => Type::new(TypeInner::ThisInstanceT(Box::new(ThisInstanceTData {
+        TypeInner::ThisInstanceT(
+            deref!(ThisInstanceTData {
+                reason,
+                instance,
+                is_this,
+                subst_name,
+            }),
+        ) => Type::new(TypeInner::ThisInstanceT(Box::new(ThisInstanceTData {
             reason: f(reason.dupe()),
             instance: instance.dupe(),
             is_this: *is_this,
             subst_name: subst_name.dupe(),
         }))),
-        TypeInner::ThisTypeAppT(box ThisTypeAppTData {
-            reason,
-            this_t,
-            type_,
-            targs,
-        }) => Type::new(TypeInner::ThisTypeAppT(Box::new(ThisTypeAppTData {
+        TypeInner::ThisTypeAppT(
+            deref!(ThisTypeAppTData {
+                reason,
+                this_t,
+                type_,
+                targs,
+            }),
+        ) => Type::new(TypeInner::ThisTypeAppT(Box::new(ThisTypeAppTData {
             reason: f(reason.dupe()),
             this_t: this_t.dupe(),
             type_: type_.dupe(),
             targs: targs.dupe(),
         }))),
-        TypeInner::TypeAppT(box TypeAppTData {
-            reason,
-            use_op,
-            type_,
-            targs,
-            from_value,
-            use_desc,
-        }) => Type::new(TypeInner::TypeAppT(Box::new(TypeAppTData {
+        TypeInner::TypeAppT(
+            deref!(TypeAppTData {
+                reason,
+                use_op,
+                type_,
+                targs,
+                from_value,
+                use_desc,
+            }),
+        ) => Type::new(TypeInner::TypeAppT(Box::new(TypeAppTData {
             reason: f(reason.dupe()),
             use_op: use_op.dupe(),
             type_: type_.dupe(),
@@ -777,7 +787,7 @@ pub fn util_use_op_of_use_t<T, CX: ContextFamily>(
                 UseT::new(UseTInner::FilterMaybeT(op, t.dupe()))
             })
         }
-        UseTInner::ConcretizeTypeAppsT(u_inner, box (ts1, b1, op, r1), x2, b2) => {
+        UseTInner::ConcretizeTypeAppsT(u_inner, deref!((ts1, b1, op, r1)), x2, b2) => {
             let u_inner = u_inner.clone();
             let ts1 = ts1.clone();
             let b1 = *b1;
@@ -1080,18 +1090,20 @@ where
         use VirtualRootUseOp::*;
 
         let mod_value = |value: ValueReference<L>| match value {
-            ValueReference::Expression(box ExpressionReferenceData { loc, kind }) => {
+            ValueReference::Expression(deref!(ExpressionReferenceData { loc, kind })) => {
                 ValueReference::Expression(Box::new(ExpressionReferenceData { loc: f(loc), kind }))
             }
             ValueReference::Reason(reason) => ValueReference::Reason(mod_reason(reason)),
         };
 
         match root {
-            InitField(box InitFieldData {
-                op,
-                field,
-                body: ExpressionReferenceData { loc, kind },
-            }) => InitField(Box::new(InitFieldData {
+            InitField(
+                deref!(InitFieldData {
+                    op,
+                    field,
+                    body: ExpressionReferenceData { loc, kind },
+                }),
+            ) => InitField(Box::new(InitFieldData {
                 op: mod_reason(op),
                 field,
                 body: ExpressionReferenceData { loc: f(loc), kind },
@@ -1101,7 +1113,7 @@ where
             ObjectRest { op } => ObjectRest { op: mod_reason(op) },
             ObjectChain { op } => ObjectChain { op: mod_reason(op) },
             AssignVar { var, init } => AssignVar {
-                var: var.map(|box target| {
+                var: var.map(|deref!(target)| {
                     Box::new(match target {
                         AssignVarTarget::Variable(reason) => {
                             AssignVarTarget::Variable(mod_reason(reason))
@@ -1116,14 +1128,14 @@ where
                     })
                 }),
                 init: match init {
-                    AssignVarInit::Expression(box ExpressionReferenceData { loc, kind }) => {
+                    AssignVarInit::Expression(deref!(ExpressionReferenceData { loc, kind })) => {
                         AssignVarInit::Expression(Box::new(ExpressionReferenceData {
                             loc: f(loc),
                             kind,
                         }))
                     }
                     AssignVarInit::Reason(reason) => AssignVarInit::Reason(mod_reason(reason)),
-                    AssignVarInit::Default(box AssignVarDefaultData { loc, default }) => {
+                    AssignVarInit::Default(deref!(AssignVarDefaultData { loc, default })) => {
                         AssignVarInit::Default(Box::new(AssignVarDefaultData {
                             loc: f(loc),
                             default: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), default),
@@ -1132,74 +1144,86 @@ where
                 },
             },
             Cast {
-                lower: box ExpressionReferenceData { loc, kind },
-                upper: box upper,
+                lower: deref!(ExpressionReferenceData { loc, kind }),
+                upper: deref!(upper),
             } => Cast {
                 lower: Box::new(ExpressionReferenceData { loc: f(loc), kind }),
                 upper: Box::new(type_or_type_desc::map_loc(|l: &L| f(l.dupe()), upper)),
             },
-            ClassExtendsCheck(box ClassExtendsCheckData {
-                def_loc,
-                def,
-                extends_loc,
-                extends,
-            }) => ClassExtendsCheck(Box::new(ClassExtendsCheckData {
+            ClassExtendsCheck(
+                deref!(ClassExtendsCheckData {
+                    def_loc,
+                    def,
+                    extends_loc,
+                    extends,
+                }),
+            ) => ClassExtendsCheck(Box::new(ClassExtendsCheckData {
                 def_loc: f(def_loc),
                 def: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), def),
                 extends_loc: f(extends_loc),
                 extends: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), extends),
             })),
-            ClassMethodDefinition(box ClassMethodDefinitionData {
-                def_loc,
-                method_name,
-                name,
-            }) => ClassMethodDefinition(Box::new(ClassMethodDefinitionData {
+            ClassMethodDefinition(
+                deref!(ClassMethodDefinitionData {
+                    def_loc,
+                    method_name,
+                    name,
+                }),
+            ) => ClassMethodDefinition(Box::new(ClassMethodDefinitionData {
                 def_loc: f(def_loc),
                 method_name,
                 name: mod_reason(name),
             })),
-            ClassImplementsCheck(box ClassImplementsCheckData {
-                def,
-                name,
-                implements_loc,
-                implements,
-            }) => ClassImplementsCheck(Box::new(ClassImplementsCheckData {
+            ClassImplementsCheck(
+                deref!(ClassImplementsCheckData {
+                    def,
+                    name,
+                    implements_loc,
+                    implements,
+                }),
+            ) => ClassImplementsCheck(Box::new(ClassImplementsCheckData {
                 def: mod_reason(def),
                 name: mod_reason(name),
                 implements_loc: f(implements_loc),
                 implements: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), implements),
             })),
-            ClassOwnProtoCheck(box ClassOwnProtoCheckData {
-                own_loc,
-                proto_loc,
-                prop,
-            }) => ClassOwnProtoCheck(Box::new(ClassOwnProtoCheckData {
+            ClassOwnProtoCheck(
+                deref!(ClassOwnProtoCheckData {
+                    own_loc,
+                    proto_loc,
+                    prop,
+                }),
+            ) => ClassOwnProtoCheck(Box::new(ClassOwnProtoCheckData {
                 prop,
                 own_loc: own_loc.map(f),
                 proto_loc: proto_loc.map(f),
             })),
             Coercion {
-                from: box ExpressionReferenceData { loc, kind },
+                from: deref!(ExpressionReferenceData { loc, kind }),
                 target,
             } => Coercion {
                 from: Box::new(ExpressionReferenceData { loc: f(loc), kind }),
                 target: mod_reason(target),
             },
-            ConformToCommonInterface(box ConformToCommonInterfaceData {
-                self_sig_loc,
-                self_module_loc,
-                originate_from_import,
-            }) => ConformToCommonInterface(Box::new(ConformToCommonInterfaceData {
+            ConformToCommonInterface(
+                deref!(ConformToCommonInterfaceData {
+                    self_sig_loc,
+                    self_module_loc,
+                    originate_from_import,
+                }),
+            ) => ConformToCommonInterface(Box::new(ConformToCommonInterfaceData {
                 self_sig_loc: f(self_sig_loc),
                 self_module_loc: f(self_module_loc),
                 originate_from_import,
             })),
-            MergedDeclaration(box MergedDeclarationData {
-                conflict,
-                first_decl_loc,
-                first_decl,
-                current_decl,
-            }) => MergedDeclaration(Box::new(MergedDeclarationData {
+            MergedDeclaration(
+                deref!(MergedDeclarationData {
+                    conflict,
+                    first_decl_loc,
+                    first_decl,
+                    current_decl,
+                }),
+            ) => MergedDeclaration(Box::new(MergedDeclarationData {
                 conflict: conflict.dupe(),
                 first_decl_loc: f(first_decl_loc),
                 first_decl: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), first_decl),
@@ -1213,27 +1237,31 @@ where
             DeleteVar { var } => DeleteVar {
                 var: mod_reason(var),
             },
-            FunCall(box FunCallData {
-                op,
-                fn_,
-                args,
-                implicit_instantiation_reference,
-                local,
-            }) => FunCall(Box::new(FunCallData {
+            FunCall(
+                deref!(FunCallData {
+                    op,
+                    fn_,
+                    args,
+                    implicit_instantiation_reference,
+                    local,
+                }),
+            ) => FunCall(Box::new(FunCallData {
                 local,
                 op: mod_reason(op),
                 fn_: mod_value(fn_),
                 args: args.iter().map(|a| mod_value(a.clone())).collect(),
                 implicit_instantiation_reference,
             })),
-            FunCallMethod(box FunCallMethodData {
-                op,
-                fn_,
-                args,
-                prop,
-                implicit_instantiation_reference,
-                local,
-            }) => FunCallMethod(Box::new(FunCallMethodData {
+            FunCallMethod(
+                deref!(FunCallMethodData {
+                    op,
+                    fn_,
+                    args,
+                    prop,
+                    implicit_instantiation_reference,
+                    local,
+                }),
+            ) => FunCallMethod(Box::new(FunCallMethodData {
                 local,
                 op: mod_reason(op),
                 fn_: match fn_ {
@@ -1249,12 +1277,14 @@ where
             FunReturnStatement { value } => FunReturnStatement {
                 value: mod_value(value),
             },
-            FunImplicitReturn(box FunImplicitReturnData {
-                fn_,
-                upper,
-                upper_t,
-                type_guard,
-            }) => FunImplicitReturn(Box::new(FunImplicitReturnData {
+            FunImplicitReturn(
+                deref!(FunImplicitReturnData {
+                    fn_,
+                    upper,
+                    upper_t,
+                    type_guard,
+                }),
+            ) => FunImplicitReturn(Box::new(FunImplicitReturnData {
                 fn_: mod_reason(fn_),
                 upper: mod_reason(upper),
                 upper_t: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), upper_t),
@@ -1265,11 +1295,13 @@ where
             },
             GetExport(reason) => GetExport(mod_reason(reason)),
             GetProperty(reason) => GetProperty(mod_reason(reason)),
-            IndexedTypeAccess(box IndexedTypeAccessData {
-                index_loc,
-                object,
-                index,
-            }) => IndexedTypeAccess(Box::new(IndexedTypeAccessData {
+            IndexedTypeAccess(
+                deref!(IndexedTypeAccessData {
+                    index_loc,
+                    object,
+                    index,
+                }),
+            ) => IndexedTypeAccess(Box::new(IndexedTypeAccessData {
                 index_loc: f(index_loc),
                 object: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), object),
                 index: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), index),
@@ -1278,21 +1310,25 @@ where
                 bound: mod_reason(bound),
                 infer: mod_reason(infer),
             },
-            JSXCreateElement(box JSXCreateElementData {
-                op,
-                component,
-                implicit_instantiation_reference,
-            }) => JSXCreateElement(Box::new(JSXCreateElementData {
+            JSXCreateElement(
+                deref!(JSXCreateElementData {
+                    op,
+                    component,
+                    implicit_instantiation_reference,
+                }),
+            ) => JSXCreateElement(Box::new(JSXCreateElementData {
                 op: mod_reason(op),
                 component: mod_reason(component),
                 implicit_instantiation_reference,
             })),
-            ReactCreateElementCall(box ReactCreateElementCallData {
-                op,
-                component,
-                children,
-                implicit_instantiation_reference,
-            }) => ReactCreateElementCall(Box::new(ReactCreateElementCallData {
+            ReactCreateElementCall(
+                deref!(ReactCreateElementCallData {
+                    op,
+                    component,
+                    children,
+                    implicit_instantiation_reference,
+                }),
+            ) => ReactCreateElementCall(Box::new(ReactCreateElementCallData {
                 op: mod_reason(op),
                 component: mod_reason(component),
                 children: f(children),
@@ -1301,11 +1337,13 @@ where
             ReactGetIntrinsic { literal } => ReactGetIntrinsic {
                 literal: mod_reason(literal),
             },
-            RecordCreate(box RecordCreateData {
-                op,
-                constructor,
-                properties,
-            }) => RecordCreate(Box::new(RecordCreateData {
+            RecordCreate(
+                deref!(RecordCreateData {
+                    op,
+                    constructor,
+                    properties,
+                }),
+            ) => RecordCreate(Box::new(RecordCreateData {
                 op: mod_reason(op),
                 constructor: mod_reason(constructor),
                 properties: f(properties),
@@ -1318,22 +1356,24 @@ where
                     TypeApplicationTarget::Reason(reason) => {
                         TypeApplicationTarget::Reason(mod_reason(reason))
                     }
-                    TypeApplicationTarget::Typeof(box TypeofApplicationData { reason, name }) => {
-                        TypeApplicationTarget::Typeof(Box::new(TypeofApplicationData {
-                            reason: mod_reason(reason),
-                            name,
-                        }))
-                    }
+                    TypeApplicationTarget::Typeof(
+                        deref!(TypeofApplicationData { reason, name }),
+                    ) => TypeApplicationTarget::Typeof(Box::new(TypeofApplicationData {
+                        reason: mod_reason(reason),
+                        name,
+                    })),
                 },
             },
-            MakeReadOnly { loc: box loc } => MakeReadOnly {
+            MakeReadOnly { loc: deref!(loc) } => MakeReadOnly {
                 loc: Box::new(f(loc)),
             },
-            SetProperty(box SetPropertyData {
-                lhs,
-                prop,
-                value: ExpressionReferenceData { loc, kind },
-            }) => SetProperty(Box::new(SetPropertyData {
+            SetProperty(
+                deref!(SetPropertyData {
+                    lhs,
+                    prop,
+                    value: ExpressionReferenceData { loc, kind },
+                }),
+            ) => SetProperty(Box::new(SetPropertyData {
                 lhs: mod_reason(lhs),
                 prop: mod_reason(prop),
                 value: ExpressionReferenceData { loc: f(loc), kind },
@@ -1346,25 +1386,29 @@ where
                 test: mod_reason(test),
                 discriminant: mod_reason(discriminant),
             },
-            SwitchRefinementCheck(box SwitchRefinementCheckData { test, discriminant }) => {
+            SwitchRefinementCheck(deref!(SwitchRefinementCheckData { test, discriminant })) => {
                 SwitchRefinementCheck(Box::new(SwitchRefinementCheckData {
                     test: f(test),
                     discriminant: f(discriminant),
                 }))
             }
-            EvalMappedType(box EvalMappedTypeData {
-                mapped_type_loc,
-                mapped_type,
-            }) => EvalMappedType(Box::new(EvalMappedTypeData {
+            EvalMappedType(
+                deref!(EvalMappedTypeData {
+                    mapped_type_loc,
+                    mapped_type,
+                }),
+            ) => EvalMappedType(Box::new(EvalMappedTypeData {
                 mapped_type_loc: f(mapped_type_loc),
                 mapped_type: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), mapped_type),
             })),
-            TypeGuardIncompatibility(box TypeGuardIncompatibilityData {
-                guard_type_loc,
-                guard_type_reference_loc,
-                guard_type,
-                param_name,
-            }) => TypeGuardIncompatibility(Box::new(TypeGuardIncompatibilityData {
+            TypeGuardIncompatibility(
+                deref!(TypeGuardIncompatibilityData {
+                    guard_type_loc,
+                    guard_type_reference_loc,
+                    guard_type,
+                    param_name,
+                }),
+            ) => TypeGuardIncompatibility(Box::new(TypeGuardIncompatibilityData {
                 guard_type_loc: f(guard_type_loc),
                 guard_type_reference_loc: f(guard_type_reference_loc),
                 guard_type: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), guard_type),
@@ -1373,22 +1417,26 @@ where
             RenderTypeInstantiation { render_type } => RenderTypeInstantiation {
                 render_type: mod_reason(render_type),
             },
-            ComponentRestParamCompatibility(box ComponentRestParamCompatibilityData {
-                rest_param_loc,
-                rest_param,
-            }) => ComponentRestParamCompatibility(Box::new(ComponentRestParamCompatibilityData {
+            ComponentRestParamCompatibility(
+                deref!(ComponentRestParamCompatibilityData {
+                    rest_param_loc,
+                    rest_param,
+                }),
+            ) => ComponentRestParamCompatibility(Box::new(ComponentRestParamCompatibilityData {
                 rest_param_loc: f(rest_param_loc),
                 rest_param: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), rest_param),
             })),
-            PositiveTypeGuardConsistency(box PositiveTypeGuardConsistencyData {
-                reason,
-                return_expression: ExpressionReferenceData { loc, kind },
-                param_loc,
-                param_name,
-                guard_type_reference_loc,
-                guard_type,
-                is_return_false_statement,
-            }) => PositiveTypeGuardConsistency(Box::new(PositiveTypeGuardConsistencyData {
+            PositiveTypeGuardConsistency(
+                deref!(PositiveTypeGuardConsistencyData {
+                    reason,
+                    return_expression: ExpressionReferenceData { loc, kind },
+                    param_loc,
+                    param_name,
+                    guard_type_reference_loc,
+                    guard_type,
+                    is_return_false_statement,
+                }),
+            ) => PositiveTypeGuardConsistency(Box::new(PositiveTypeGuardConsistencyData {
                 reason: mod_reason(reason),
                 return_expression: ExpressionReferenceData { loc: f(loc), kind },
                 param_loc: f(param_loc),
@@ -1397,14 +1445,16 @@ where
                 guard_type: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), guard_type),
                 is_return_false_statement,
             })),
-            AssertionFunctionConsistency(box AssertionFunctionConsistencyData {
-                exit_reason,
-                param_loc,
-                param_name,
-                guard_type_reference_loc,
-                guard_type,
-                implicit_return,
-            }) => AssertionFunctionConsistency(Box::new(AssertionFunctionConsistencyData {
+            AssertionFunctionConsistency(
+                deref!(AssertionFunctionConsistencyData {
+                    exit_reason,
+                    param_loc,
+                    param_name,
+                    guard_type_reference_loc,
+                    guard_type,
+                    implicit_return,
+                }),
+            ) => AssertionFunctionConsistency(Box::new(AssertionFunctionConsistencyData {
                 exit_reason: mod_reason(exit_reason),
                 param_loc: f(param_loc),
                 param_name,
@@ -1430,22 +1480,26 @@ where
         use VirtualFrameUseOp::*;
 
         match frame {
-            ConstrainedAssignment(box ConstrainedAssignmentData {
-                name,
-                declaration,
-                providers,
-            }) => ConstrainedAssignment(Box::new(ConstrainedAssignmentData {
+            ConstrainedAssignment(
+                deref!(ConstrainedAssignmentData {
+                    name,
+                    declaration,
+                    providers,
+                }),
+            ) => ConstrainedAssignment(Box::new(ConstrainedAssignmentData {
                 name,
                 declaration: f(declaration),
                 providers: providers.iter().map(|p| f(p.dupe())).collect(),
             })),
-            ReactDeepReadOnly(box (loc, l)) => ReactDeepReadOnly(Box::new((f(loc), l))),
-            ArrayElementCompatibility(box ArrayElementCompatibilityData {
-                lower,
-                upper,
-                lower_t,
-                upper_t,
-            }) => ArrayElementCompatibility(Box::new(ArrayElementCompatibilityData {
+            ReactDeepReadOnly(deref!((loc, l))) => ReactDeepReadOnly(Box::new((f(loc), l))),
+            ArrayElementCompatibility(
+                deref!(ArrayElementCompatibilityData {
+                    lower,
+                    upper,
+                    lower_t,
+                    upper_t,
+                }),
+            ) => ArrayElementCompatibility(Box::new(ArrayElementCompatibilityData {
                 lower: mod_reason(lower),
                 upper: mod_reason(upper),
                 lower_t: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), lower_t),
@@ -1455,15 +1509,17 @@ where
                 lower: mod_reason(lower),
                 upper: mod_reason(upper),
             },
-            StandaloneCallThis(box StandaloneCallThisData {
-                op,
-                fn_,
-                receiver_loc,
-                receiver: box receiver,
-            }) => StandaloneCallThis(Box::new(StandaloneCallThisData {
+            StandaloneCallThis(
+                deref!(StandaloneCallThisData {
+                    op,
+                    fn_,
+                    receiver_loc,
+                    receiver: deref!(receiver),
+                }),
+            ) => StandaloneCallThis(Box::new(StandaloneCallThisData {
                 op: mod_reason(op),
                 fn_: match fn_ {
-                    ValueReference::Expression(box ExpressionReferenceData { loc, kind }) => {
+                    ValueReference::Expression(deref!(ExpressionReferenceData { loc, kind })) => {
                         ValueReference::Expression(Box::new(ExpressionReferenceData {
                             loc: f(loc),
                             kind,
@@ -1474,7 +1530,7 @@ where
                 receiver_loc: f(receiver_loc),
                 receiver: Box::new(type_or_type_desc::map_loc(|l: &L| f(l.dupe()), receiver)),
             })),
-            FunMissingArg(box FunMissingArgData { n, op, def, def_t }) => {
+            FunMissingArg(deref!(FunMissingArgData { n, op, def, def_t })) => {
                 FunMissingArg(Box::new(FunMissingArgData {
                     n,
                     op: mod_reason(op),
@@ -1482,14 +1538,16 @@ where
                     def_t: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), def_t),
                 }))
             }
-            FunParam(box FunParamData {
-                n,
-                name,
-                lower,
-                upper,
-                lower_t,
-                upper_t,
-            }) => FunParam(Box::new(FunParamData {
+            FunParam(
+                deref!(FunParamData {
+                    n,
+                    name,
+                    lower,
+                    upper,
+                    lower_t,
+                    upper_t,
+                }),
+            ) => FunParam(Box::new(FunParamData {
                 n,
                 name,
                 lower: mod_reason(lower),
@@ -1501,24 +1559,28 @@ where
                 lower: mod_reason(lower),
                 upper: mod_reason(upper),
             },
-            FunReturn(box FunReturnData {
-                lower,
-                upper,
-                lower_t,
-                upper_t,
-            }) => FunReturn(Box::new(FunReturnData {
+            FunReturn(
+                deref!(FunReturnData {
+                    lower,
+                    upper,
+                    lower_t,
+                    upper_t,
+                }),
+            ) => FunReturn(Box::new(FunReturnData {
                 lower: mod_reason(lower),
                 upper: mod_reason(upper),
                 lower_t: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), lower_t),
                 upper_t: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), upper_t),
             })),
             ImplicitTypeParam => ImplicitTypeParam,
-            IndexerKeyCompatibility(box IndexerKeyCompatibilityData {
-                lower,
-                upper,
-                lower_t,
-                upper_t,
-            }) => IndexerKeyCompatibility(Box::new(IndexerKeyCompatibilityData {
+            IndexerKeyCompatibility(
+                deref!(IndexerKeyCompatibilityData {
+                    lower,
+                    upper,
+                    lower_t,
+                    upper_t,
+                }),
+            ) => IndexerKeyCompatibility(Box::new(IndexerKeyCompatibilityData {
                 lower: mod_reason(lower),
                 upper: mod_reason(upper),
                 lower_t: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), lower_t),
@@ -1536,14 +1598,16 @@ where
                     upper: mod_reason(upper),
                 }
             }
-            OpaqueTypeCustomErrorCompatibility(box OpaqueTypeCustomErrorCompatibilityData {
-                lower,
-                upper,
-                lower_t,
-                upper_t,
-                name,
-                custom_error_loc,
-            }) => OpaqueTypeCustomErrorCompatibility(Box::new(
+            OpaqueTypeCustomErrorCompatibility(
+                deref!(OpaqueTypeCustomErrorCompatibilityData {
+                    lower,
+                    upper,
+                    lower_t,
+                    upper_t,
+                    name,
+                    custom_error_loc,
+                }),
+            ) => OpaqueTypeCustomErrorCompatibility(Box::new(
                 OpaqueTypeCustomErrorCompatibilityData {
                     lower: mod_reason(lower),
                     upper: mod_reason(upper),
@@ -1553,24 +1617,28 @@ where
                     custom_error_loc: f(custom_error_loc),
                 },
             )),
-            MappedTypeKeyCompatibility(box MappedTypeKeyCompatibilityData {
-                source_type_loc,
-                source_type,
-                mapped_type_loc,
-                mapped_type,
-            }) => MappedTypeKeyCompatibility(Box::new(MappedTypeKeyCompatibilityData {
+            MappedTypeKeyCompatibility(
+                deref!(MappedTypeKeyCompatibilityData {
+                    source_type_loc,
+                    source_type,
+                    mapped_type_loc,
+                    mapped_type,
+                }),
+            ) => MappedTypeKeyCompatibility(Box::new(MappedTypeKeyCompatibilityData {
                 source_type_loc: f(source_type_loc),
                 source_type: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), source_type),
                 mapped_type_loc: f(mapped_type_loc),
                 mapped_type: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), mapped_type),
             })),
-            PropertyCompatibility(box PropertyCompatibilityData {
-                prop,
-                lower,
-                upper,
-                lower_t,
-                upper_t,
-            }) => PropertyCompatibility(Box::new(PropertyCompatibilityData {
+            PropertyCompatibility(
+                deref!(PropertyCompatibilityData {
+                    prop,
+                    lower,
+                    upper,
+                    lower_t,
+                    upper_t,
+                }),
+            ) => PropertyCompatibility(Box::new(PropertyCompatibilityData {
                 prop,
                 lower: mod_reason(lower),
                 upper: mod_reason(upper),
@@ -1579,13 +1647,15 @@ where
             })),
             ReactConfigCheck => ReactConfigCheck,
             ReactGetConfig { polarity } => ReactGetConfig { polarity },
-            TupleElementCompatibility(box TupleElementCompatibilityData {
-                n,
-                lower,
-                upper,
-                lower_t,
-                upper_t,
-            }) => TupleElementCompatibility(Box::new(TupleElementCompatibilityData {
+            TupleElementCompatibility(
+                deref!(TupleElementCompatibilityData {
+                    n,
+                    lower,
+                    upper,
+                    lower_t,
+                    upper_t,
+                }),
+            ) => TupleElementCompatibility(Box::new(TupleElementCompatibilityData {
                 n,
                 lower: mod_reason(lower),
                 upper: mod_reason(upper),
@@ -1593,13 +1663,15 @@ where
                 upper_t: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), upper_t),
             })),
             TupleAssignment => TupleAssignment,
-            TypeArgCompatibility(box TypeArgCompatibilityData {
-                name,
-                targ,
-                lower,
-                upper,
-                polarity,
-            }) => TypeArgCompatibility(Box::new(TypeArgCompatibilityData {
+            TypeArgCompatibility(
+                deref!(TypeArgCompatibilityData {
+                    name,
+                    targ,
+                    lower,
+                    upper,
+                    polarity,
+                }),
+            ) => TypeArgCompatibility(Box::new(TypeArgCompatibilityData {
                 name,
                 polarity,
                 targ: mod_reason(targ),
@@ -1622,11 +1694,13 @@ where
                     upper: mod_reason(upper),
                 }
             }
-            UnionRepresentative(box UnionRepresentativeData {
-                loc,
-                reference_loc,
-                union,
-            }) => UnionRepresentative(Box::new(UnionRepresentativeData {
+            UnionRepresentative(
+                deref!(UnionRepresentativeData {
+                    loc,
+                    reference_loc,
+                    union,
+                }),
+            ) => UnionRepresentative(Box::new(UnionRepresentativeData {
                 loc: f(loc),
                 reference_loc: f(reference_loc),
                 union: type_or_type_desc::map_loc(|l: &L| f(l.dupe()), union),
@@ -1913,7 +1987,7 @@ pub fn is_concrete(t: &Type) -> bool {
     match t.deref() {
         TypeInner::OpenT(_)
         | TypeInner::EvalT { .. }
-        | TypeInner::TypeAppT(box TypeAppTData { .. })
+        | TypeInner::TypeAppT(deref!(TypeAppTData { .. }))
         | TypeInner::KeysT(_, _)
         | TypeInner::IntersectionT(_, _)
         | TypeInner::UnionT(_, _)
@@ -2367,11 +2441,11 @@ pub fn make_exact_object(
     // This case analysis aims at recovering a potential type alias associated
     // with an $Exact<> constructor.
     let reason_obj = match reason_op.desc(false) {
-        Some(RTypeAlias(box (n, loc, _))) => {
+        Some(RTypeAlias(deref!((n, loc, _)))) => {
             let n = n.dupe();
             let loc = loc.dupe();
             reason_obj.update_desc(|desc| match &desc {
-                Some(RTypeAlias(box (_, _, inner_desc))) => {
+                Some(RTypeAlias(deref!((_, _, inner_desc)))) => {
                     Some(flow_common::reason::VirtualReasonDesc::RTypeAlias(
                         Box::new((n.dupe(), loc.dupe(), inner_desc.clone())),
                     ))
@@ -2624,7 +2698,7 @@ pub fn push_type_alias_reason(r: &Reason, t: Type) -> Type {
     use flow_common::reason::VirtualReasonDesc::RTypeAlias;
 
     match r.desc(false) {
-        Some(RTypeAlias(box (n, _, _))) => {
+        Some(RTypeAlias(deref!((n, _, _)))) => {
             let n = n.dupe();
             mod_reason_of_t(
                 &|reason: Reason| {
@@ -2854,9 +2928,9 @@ pub fn reason_of_resolved_param(param: &crate::type_::ResolvedParam) -> &Reason 
     use crate::type_::ResolvedParam::*;
 
     match param {
-        ResolvedSpreadArg(box crate::type_::ResolvedSpreadArgData(reason, _, _)) => reason,
+        ResolvedSpreadArg(deref!(crate::type_::ResolvedSpreadArgData(reason, _, _))) => reason,
         ResolvedAnySpreadArg(t) => reason_of_t(t),
-        ResolvedArg(box crate::type_::ResolvedArgData(tuple_elem, _)) => &tuple_elem.reason,
+        ResolvedArg(deref!(crate::type_::ResolvedArgData(tuple_elem, _))) => &tuple_elem.reason,
     }
 }
 
@@ -2870,7 +2944,7 @@ pub fn string_of_singleton_string_type(t: &Type) -> Option<&FlowSmolStr> {
             DefTInner::SingletonStrT { value: name, .. } => Some(name),
             _ => None,
         },
-        TypeInner::GenericT(box GenericTData { bound, .. }) => match bound.deref() {
+        TypeInner::GenericT(deref!(GenericTData { bound, .. })) => match bound.deref() {
             TypeInner::DefT(_, def_t) => match def_t.deref() {
                 DefTInner::SingletonStrT { value: name, .. } => Some(name),
                 _ => None,
@@ -2892,9 +2966,9 @@ pub fn dro_of_type(t: &Type) -> Option<&crate::type_::ReactDro> {
             DefTInner::ObjT(obj) => obj.flags.react_dro.as_ref(),
             DefTInner::InstanceT(inst) => inst.inst.inst_react_dro.as_ref(),
             DefTInner::ArrT(arr) => match arr.as_ref() {
-                ArrType::ArrayAT(box ArrayATData { react_dro, .. }) => react_dro.as_ref(),
-                ArrType::TupleAT(box TupleATData { react_dro, .. }) => react_dro.as_ref(),
-                ArrType::ROArrayAT(box ROArrayATData { react_dro, .. }) => react_dro.as_ref(),
+                ArrType::ArrayAT(deref!(ArrayATData { react_dro, .. })) => react_dro.as_ref(),
+                ArrType::TupleAT(deref!(TupleATData { react_dro, .. })) => react_dro.as_ref(),
+                ArrType::ROArrayAT(deref!(ROArrayATData { react_dro, .. })) => react_dro.as_ref(),
             },
             _ => None,
         },
@@ -3112,14 +3186,16 @@ pub fn normalize_construct_sig(override_return_t: Option<Type>, t: Type) -> Type
                 // instantiation cache only ever holds entries computed from the
                 // normalized body; reusing the id lets repeated reads share those
                 // entries. Regenerating it would be correct but defeat the cache.
-                DefTInner::PolyT(box PolyTData {
-                    kind: poly_kind,
-                    tparams_loc,
-                    tparams,
-                    t_out,
-                    id,
-                    strictness_kind,
-                }) => Type::new(TypeInner::DefT(
+                DefTInner::PolyT(
+                    deref!(PolyTData {
+                        kind: poly_kind,
+                        tparams_loc,
+                        tparams,
+                        t_out,
+                        id,
+                        strictness_kind,
+                    }),
+                ) => Type::new(TypeInner::DefT(
                     r.dupe(),
                     DefT::new(DefTInner::PolyT(Box::new(PolyTData {
                         kind: *poly_kind,

@@ -1001,7 +1001,7 @@ pub mod type_synthesizer {
         ) -> BTreeSet<flow_common::subst_name::SubstName> {
             use flow_typing_type::type_::TypeInner;
             match &**t {
-                TypeInner::GenericT(box flow_typing_type::type_::GenericTData { id, .. }) => id
+                TypeInner::GenericT(deref!(flow_typing_type::type_::GenericTData { id, .. })) => id
                     .fold_ids(
                         |_aloc_id, name, mut acc| {
                             acc.insert(name.dupe());

@@ -319,7 +319,7 @@ impl TypeVisitor<(Marked<SubstName>, FlowOrdSet<SubstName>)> for ImplicitInstant
     ) -> (Marked<SubstName>, FlowOrdSet<SubstName>) {
         let (mut marked, tparam_names) = acc;
         match t.deref() {
-            TypeInner::GenericT(box GenericTData { name: s, .. }) => {
+            TypeInner::GenericT(deref!(GenericTData { name: s, .. })) => {
                 if tparam_names.contains(s) {
                     match marked.add(s.dupe(), pole) {
                         None => (marked, tparam_names),
@@ -337,9 +337,13 @@ impl TypeVisitor<(Marked<SubstName>, FlowOrdSet<SubstName>)> for ImplicitInstant
             }
             // We remove any tparam names from the map when entering a PolyT to avoid naming conflicts.
             TypeInner::DefT(_, def_t) => {
-                if let DefTInner::PolyT(box PolyTData {
-                    tparams, t_out: t, ..
-                }) = def_t.deref()
+                if let DefTInner::PolyT(
+                    deref!(PolyTData {
+                        tparams,
+                        t_out: t,
+                        ..
+                    }),
+                ) = def_t.deref()
                 {
                     let mut tparam_names_prime = tparam_names.clone();
                     for tp in tparams.iter() {
@@ -352,7 +356,7 @@ impl TypeVisitor<(Marked<SubstName>, FlowOrdSet<SubstName>)> for ImplicitInstant
                     type_visitor::type_default(self, cx, pole, (marked, tparam_names), t)
                 }
             }
-            TypeInner::TypeAppT(box TypeAppTData { type_, targs, .. }) => {
+            TypeInner::TypeAppT(deref!(TypeAppTData { type_, targs, .. })) => {
                 self.typeapp(targs, cx, pole, (marked, tparam_names), type_)
             }
             // ThisTypeAppT is created from a new expression, which cannot be used as an annotation,
@@ -402,7 +406,7 @@ impl ImplicitInstantiationVisitor<'_> {
         match resolved.deref() {
             TypeInner::AnnotT(_, t, _) => self.typeapp(targs, cx, pole, acc, t),
             TypeInner::DefT(_, def_t) if matches!(def_t.deref(), DefTInner::PolyT(_)) => {
-                if let DefTInner::PolyT(box PolyTData { tparams, .. }) = def_t.deref() {
+                if let DefTInner::PolyT(deref!(PolyTData { tparams, .. })) = def_t.deref() {
                     loop_(self, cx, pole, acc, Some(tparams), targs)
                 } else {
                     unreachable!()
@@ -468,26 +472,32 @@ fn t_of_use_t<'cx>(
             merge_upper_bounds(cx, env, seen, t)
         }
         UseTInner::UseT(_, t) => Ok(UseTResult::UpperT(t.dupe())),
-        UseTInner::EvalTypeDestructorT(box EvalTypeDestructorTData {
-            reason: r,
-            destructor,
-            tout,
-            ..
-        }) => {
+        UseTInner::EvalTypeDestructorT(
+            deref!(EvalTypeDestructorTData {
+                reason: r,
+                destructor,
+                tout,
+                ..
+            }),
+        ) => {
             let tout_t = Type::new(TypeInner::OpenT((**tout).dupe()));
             match destructor {
-                box Destructor::PropertyType { .. }
-                | box Destructor::ElementType { .. }
-                | box Destructor::OptionalIndexedAccessNonMaybeType { .. }
-                | box Destructor::OptionalIndexedAccessResultType { .. }
-                | box Destructor::ValuesType
-                | box Destructor::ConditionalType(box DestructorConditionalTypeData { .. })
-                | box Destructor::TypeMap(_)
-                | box Destructor::MappedType(box DestructorMappedTypeData { .. }) => {
+                deref!(Destructor::PropertyType { .. })
+                | deref!(Destructor::ElementType { .. })
+                | deref!(Destructor::OptionalIndexedAccessNonMaybeType { .. })
+                | deref!(Destructor::OptionalIndexedAccessResultType { .. })
+                | deref!(Destructor::ValuesType)
+                | deref!(Destructor::ConditionalType(deref!(
+                    DestructorConditionalTypeData { .. }
+                )))
+                | deref!(Destructor::TypeMap(_))
+                | deref!(Destructor::MappedType(deref!(
+                    DestructorMappedTypeData { .. }
+                ))) => {
                     // Mapped Type reversals
                     Ok(UseTResult::UpperEmpty)
                 }
-                box Destructor::EnumType => {
+                deref!(Destructor::EnumType) => {
                     let result = merge_lower_or_upper_bounds(cx, env, seen, &tout_t)?;
                     bind_use_t_result(cx, result, |cx, tout_val: Type| {
                         let collector = TypeCollector::create();
@@ -521,7 +531,7 @@ fn t_of_use_t<'cx>(
                         })
                     })
                 }
-                box Destructor::ReactElementConfigType => {
+                deref!(Destructor::ReactElementConfigType) => {
                     let result = merge_lower_or_upper_bounds(cx, env, seen, &tout_t)?;
                     bind_use_t_result(cx, result, |cx, config: Type| {
                         let react_node = FlowJs::get_builtin_react_type_with_env(
@@ -543,7 +553,7 @@ fn t_of_use_t<'cx>(
                         ))))
                     })
                 }
-                box Destructor::RestType(_, t_rest) => {
+                deref!(Destructor::RestType(_, t_rest)) => {
                     let result = merge_lower_or_upper_bounds(cx, env, seen, &tout_t)?;
                     let t_rest = t_rest.dupe();
                     bind_use_t_result(cx, result, |cx, tout_val: Type| {
@@ -551,7 +561,7 @@ fn t_of_use_t<'cx>(
                         use_t_result_of_t_option(merge_lower_bounds(cx, env, false, &reversed))
                     })
                 }
-                box Destructor::NonMaybeType => {
+                deref!(Destructor::NonMaybeType) => {
                     let result = merge_lower_or_upper_bounds(cx, env, seen, &tout_t)?;
                     bind_use_t_result(cx, result, |_, t: Type| {
                         Ok(UseTResult::UpperT(Type::new(TypeInner::MaybeT(
@@ -560,15 +570,15 @@ fn t_of_use_t<'cx>(
                         ))))
                     })
                 }
-                box Destructor::NormalizeIntersection { .. }
-                | box Destructor::ExactType
-                | box Destructor::ReadOnlyType
-                | box Destructor::ReactDRO(_)
-                | box Destructor::PartialType
-                | box Destructor::RequiredType => {
+                deref!(Destructor::NormalizeIntersection { .. })
+                | deref!(Destructor::ExactType)
+                | deref!(Destructor::ReadOnlyType)
+                | deref!(Destructor::ReactDRO(_))
+                | deref!(Destructor::PartialType)
+                | deref!(Destructor::RequiredType) => {
                     merge_lower_or_upper_bounds(cx, env, seen, &tout_t)
                 }
-                box Destructor::ReactCheckComponentConfig { props: pmap } => {
+                deref!(Destructor::ReactCheckComponentConfig { props: pmap }) => {
                     let result = merge_lower_or_upper_bounds(cx, env, seen, &tout_t)?;
                     let pmap = pmap.clone();
                     bind_use_t_result(cx, result, |cx, t: Type| {
@@ -577,11 +587,11 @@ fn t_of_use_t<'cx>(
                         use_t_result_of_t_option(merge_lower_bounds(cx, env, false, &reversed))
                     })
                 }
-                box Destructor::SpreadType(box DestructorSpreadTypeData(
+                deref!(Destructor::SpreadType(deref!(DestructorSpreadTypeData(
                     _,
                     todo_rev,
                     head_slice,
-                )) => {
+                )))) => {
                     let acc_elements: flow_data_structure_wrapper::list::FlowOcamlList<
                         object::spread::AccElement,
                     > = match head_slice {
@@ -605,13 +615,15 @@ fn t_of_use_t<'cx>(
                         use_t_result_of_t_option(merge_lower_bounds(cx, env, false, &reversed))
                     })
                 }
-                box Destructor::SpreadTupleType(box DestructorSpreadTupleTypeData {
-                    reason_tuple: _,
-                    inexact,
-                    reason_spread,
-                    resolved: resolved_rev,
-                    unresolved,
-                }) => {
+                deref!(Destructor::SpreadTupleType(deref!(
+                    DestructorSpreadTupleTypeData {
+                        reason_tuple: _,
+                        inexact,
+                        reason_spread,
+                        resolved: resolved_rev,
+                        unresolved,
+                    }
+                ))) => {
                     fn is_spread(rp: &ResolvedParam) -> bool {
                         match rp {
                             ResolvedParam::ResolvedArg(..) => false,
@@ -664,22 +676,27 @@ fn t_of_use_t<'cx>(
                 }
             }
         }
-        UseTInner::ArrRestT(box ArrRestTData { index: i, tout, .. }) => {
+        UseTInner::ArrRestT(deref!(ArrRestTData { index: i, tout, .. })) => {
             if let TypeInner::DefT(_, def_t) = get_t(cx, tout).deref()
                 && let DefTInner::ArrT(arr_t) = def_t.deref()
             {
                 match arr_t.as_ref() {
-                    ArrType::ArrayAT(box ArrayATData {
-                        tuple_view: None, ..
-                    })
-                    | ArrType::ROArrayAT(box ROArrayATData { .. }) => {
+                    ArrType::ArrayAT(
+                        deref!(ArrayATData {
+                            tuple_view: None,
+                            ..
+                        }),
+                    )
+                    | ArrType::ROArrayAT(deref!(ROArrayATData { .. })) => {
                         identity_reverse_upper_bound(cx, env, seen, tvar, tout)
                     }
-                    ArrType::ArrayAT(box ArrayATData {
-                        tuple_view: Some(_),
-                        ..
-                    })
-                    | ArrType::TupleAT(box TupleATData { .. })
+                    ArrType::ArrayAT(
+                        deref!(ArrayATData {
+                            tuple_view: Some(_),
+                            ..
+                        }),
+                    )
+                    | ArrType::TupleAT(deref!(TupleATData { .. }))
                         if *i == 0 =>
                     {
                         identity_reverse_upper_bound(cx, env, seen, tvar, tout)
@@ -727,10 +744,12 @@ fn t_of_use_t<'cx>(
         | UseTInner::ConvertEmptyPropsToMixedT(..)
         | UseTInner::ValueToTypeReferenceT(..)
         | UseTInner::ExitRendersT { .. }
-        | UseTInner::ConcretizeT(box ConcretizeTData {
-            kind: ConcretizationKind::ConcretizeForConstructorReturn,
-            ..
-        }) => Ok(UseTResult::UpperEmpty),
+        | UseTInner::ConcretizeT(
+            deref!(ConcretizeTData {
+                kind: ConcretizationKind::ConcretizeForConstructorReturn,
+                ..
+            }),
+        ) => Ok(UseTResult::UpperEmpty),
         // Remaining unhandled upper bounds
         UseTInner::SpecializeT(..)
         | UseTInner::ThisSpecializeT(..)
@@ -751,15 +770,17 @@ fn t_of_use_t<'cx>(
             identity_reverse_upper_bound(cx, env, seen, tvar, &tout)
         }
         UseTInner::ReposLowerT { use_t, .. } => t_of_use_t(cx, env, seen, tvar, use_t),
-        UseTInner::ReposUseT(box ReposUseTData { type_: t, .. }) => {
+        UseTInner::ReposUseT(deref!(ReposUseTData { type_: t, .. })) => {
             FlowJs::flow_t_with_env(cx, env, t, tvar)?;
             Ok(UseTResult::UpperT(t.dupe()))
         }
-        UseTInner::ResolveSpreadT(box ResolveSpreadTData {
-            reason,
-            resolve_spread_type,
-            ..
-        }) if resolve_spread_type.rrt_unresolved.is_empty() => {
+        UseTInner::ResolveSpreadT(
+            deref!(ResolveSpreadTData {
+                reason,
+                resolve_spread_type,
+                ..
+            }),
+        ) if resolve_spread_type.rrt_unresolved.is_empty() => {
             match &resolve_spread_type.rrt_resolve_to {
                 SpreadResolve::ResolveSpreadsToMultiflowSubtypeFull(_, funtype) => {
                     use_t_result_of_t_option(
@@ -815,24 +836,28 @@ fn t_of_use_t<'cx>(
             }
         }
         UseTInner::ResolveSpreadT(..) => Ok(UseTResult::UpperNonT(u.dupe())),
-        UseTInner::ResolveUnionT(box ResolveUnionTData { upper, .. }) => {
+        UseTInner::ResolveUnionT(deref!(ResolveUnionTData { upper, .. })) => {
             t_of_use_t(cx, env, seen, tvar, upper)
         }
-        UseTInner::ObjKitT(_, r, _, box tool, tout) => match tool {
+        UseTInner::ObjKitT(_, r, _, deref!(tool), tout) => match tool {
             object::Tool::MakeExact
             | object::Tool::ReadOnly
             | object::Tool::Partial
             | object::Tool::Required
             | object::Tool::ObjectRep => identity_reverse_upper_bound(cx, env, seen, tvar, tout),
-            object::Tool::ReactConfig(box ObjectToolReactConfigData {
-                ref_manipulation: object::react_config::RefManipulation::KeepRef,
-                ..
-            }) => identity_reverse_upper_bound(cx, env, seen, tvar, tout),
-            object::Tool::ReactConfig(box ObjectToolReactConfigData {
-                ref_manipulation: object::react_config::RefManipulation::AddRef(ref_t),
-                literal,
-                ..
-            }) => {
+            object::Tool::ReactConfig(
+                deref!(ObjectToolReactConfigData {
+                    ref_manipulation: object::react_config::RefManipulation::KeepRef,
+                    ..
+                }),
+            ) => identity_reverse_upper_bound(cx, env, seen, tvar, tout),
+            object::Tool::ReactConfig(
+                deref!(ObjectToolReactConfigData {
+                    ref_manipulation: object::react_config::RefManipulation::AddRef(ref_t),
+                    literal,
+                    ..
+                }),
+            ) => {
                 let solution = merge_upper_bounds(cx, env, seen, tout)?;
                 match solution {
                     UseTResult::UpperEmpty => Ok(UseTResult::UpperEmpty),
@@ -879,10 +904,10 @@ fn t_of_use_t<'cx>(
                     }
                 }
             }
-            object::Tool::ObjectMap(box ObjectToolObjectMapData { .. }) => {
+            object::Tool::ObjectMap(deref!(ObjectToolObjectMapData { .. })) => {
                 Ok(UseTResult::UpperEmpty)
             }
-            object::Tool::Spread(box (target, state)) => {
+            object::Tool::Spread(deref!((target, state))) => {
                 let literal = target.literal();
                 let solution = merge_upper_bounds(cx, env, seen, tout)?;
                 match solution {
@@ -909,7 +934,7 @@ fn t_of_use_t<'cx>(
                     }
                 }
             }
-            object::Tool::Rest(box (_, object::rest::State::One(t_rest))) => {
+            object::Tool::Rest(deref!((_, object::rest::State::One(t_rest)))) => {
                 let result = merge_upper_bounds(cx, env, seen, tout)?;
                 let t_rest = t_rest.dupe();
                 bind_use_t_result(cx, result, |cx, t: Type| {
@@ -923,7 +948,7 @@ fn t_of_use_t<'cx>(
                     }
                 })
             }
-            object::Tool::Rest(box (_, object::rest::State::Done(_))) => {
+            object::Tool::Rest(deref!((_, object::rest::State::Done(_)))) => {
                 Ok(UseTResult::UpperNonT(u.dupe()))
             }
         },
@@ -935,26 +960,26 @@ fn resolved_elements_count(
 ) -> Option<usize> {
     resolved.iter().try_fold(0, |n, param| match param {
         ResolvedParam::ResolvedArg(_) => Some(n + 1),
-        ResolvedParam::ResolvedSpreadArg(box ResolvedSpreadArgData(
-            _,
-            ArrType::TupleAT(box TupleATData {
-                elements,
-                inexact: false,
-                rest: None,
-                ..
-            })
-            | ArrType::ArrayAT(box ArrayATData {
-                tuple_view:
-                    Some(TupleView {
+        ResolvedParam::ResolvedSpreadArg(
+            deref!(ResolvedSpreadArgData(
+                _,
+                ArrType::TupleAT(deref!(TupleATData {
+                    elements,
+                    inexact: false,
+                    rest: None,
+                    ..
+                })) | ArrType::ArrayAT(deref!(ArrayATData {
+                    tuple_view: Some(TupleView {
                         elements,
                         inexact: false,
                         rest: None,
                         ..
                     }),
-                ..
-            }),
-            _,
-        )) => Some(n + elements.len()),
+                    ..
+                })),
+                _,
+            )),
+        ) => Some(n + elements.len()),
         ResolvedParam::ResolvedSpreadArg(_) | ResolvedParam::ResolvedAnySpreadArg(..) => None,
     })
 }
@@ -1499,7 +1524,7 @@ fn merge_lower_bounds<'cx>(
     {
         let upper = bounds.borrow().upper.clone();
         for key in upper.keys() {
-            if let UseTInner::ReposUseT(box ReposUseTData { type_: ref l, .. }) = *key.use_t {
+            if let UseTInner::ReposUseT(deref!(ReposUseTData { type_: ref l, .. })) = *key.use_t {
                 FlowJs::flow_t_with_env(cx, env, l, t)?;
             }
         }
@@ -2512,7 +2537,7 @@ pub mod kit {
         let TypeInner::DefT(_, def_t) = l.deref() else {
             return Ok(Rc::from([]));
         };
-        let DefTInner::PolyT(box PolyTData { tparams, .. }) = def_t.deref() else {
+        let DefTInner::PolyT(deref!(PolyTData { tparams, .. })) = def_t.deref() else {
             return Ok(Rc::from([]));
         };
         let placeholders = || {
@@ -2538,12 +2563,14 @@ pub mod kit {
         let hinted_u = substituter.type_(cx, &(), u.dupe());
         let poly_t = match hinted_l.deref() {
             TypeInner::DefT(_, def_t)
-                if let DefTInner::PolyT(box PolyTData {
-                    tparams_loc,
-                    tparams,
-                    t_out,
-                    ..
-                }) = def_t.deref() =>
+                if let DefTInner::PolyT(
+                    deref!(PolyTData {
+                        tparams_loc,
+                        tparams,
+                        t_out,
+                        ..
+                    }),
+                ) = def_t.deref() =>
             {
                 (
                     tparams_loc.dupe(),

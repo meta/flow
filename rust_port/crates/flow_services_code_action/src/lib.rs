@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#![feature(box_patterns)]
+#![feature(deref_patterns)]
 #![feature(never_type)]
 
 //! Port of `services/code_action/`

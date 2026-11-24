@@ -663,14 +663,14 @@ fn predicate_no_concretization<'cx>(
                     Ok(())
                 }
                 // _ ~ "some string"
-                PredicateInner::SingletonStrP(box (_, _, lit)) => {
+                PredicateInner::SingletonStrP(deref!((_, _, lit))) => {
                     let filtered_str =
                         type_filter::not_string_literal(FlowSmolStr::new(lit), l.dupe());
                     report_filtering_result_to_predicate_result(filtered_str, result_collector);
                     Ok(())
                 }
                 // _ ~ some number n
-                PredicateInner::SingletonNumP(box (_, _, lit)) => {
+                PredicateInner::SingletonNumP(deref!((_, _, lit))) => {
                     let filtered_num = type_filter::not_number_literal(lit.clone(), l.dupe());
                     report_filtering_result_to_predicate_result(filtered_num, result_collector);
                     Ok(())
@@ -684,7 +684,7 @@ fn predicate_no_concretization<'cx>(
                     Ok(())
                 }
                 // _ ~ some bigint n
-                PredicateInner::SingletonBigIntP(box (_, _, lit)) => {
+                PredicateInner::SingletonBigIntP(deref!((_, _, lit))) => {
                     let filtered_bigint = type_filter::not_bigint_literal(lit.clone(), l.dupe());
                     report_filtering_result_to_predicate_result(filtered_bigint, result_collector);
                     Ok(())
@@ -748,13 +748,13 @@ fn predicate_no_concretization<'cx>(
                     Ok(())
                 }
                 // true
-                PredicateInner::SingletonBoolP(box (_, true)) => {
+                PredicateInner::SingletonBoolP(deref!((_, true))) => {
                     let filtered = type_filter::not_true(l.dupe());
                     report_filtering_result_to_predicate_result(filtered, result_collector);
                     Ok(())
                 }
                 // false
-                PredicateInner::SingletonBoolP(box (_, false)) => {
+                PredicateInner::SingletonBoolP(deref!((_, false))) => {
                     let filtered = type_filter::not_false(l.dupe());
                     report_filtering_result_to_predicate_result(filtered, result_collector);
                     Ok(())
@@ -876,7 +876,7 @@ fn predicate_no_concretization<'cx>(
             }
         }
         // typeof _ ~ "boolean"
-        PredicateInner::BoolP(box loc) => {
+        PredicateInner::BoolP(deref!(loc)) => {
             report_filtering_result_to_predicate_result(
                 type_filter::boolean(loc.dupe(), l.dupe()),
                 result_collector,
@@ -884,7 +884,7 @@ fn predicate_no_concretization<'cx>(
             Ok(())
         }
         // typeof _ ~ "string"
-        PredicateInner::StrP(box loc) => {
+        PredicateInner::StrP(deref!(loc)) => {
             report_filtering_result_to_predicate_result(
                 type_filter::string(loc.dupe(), l.dupe()),
                 result_collector,
@@ -892,7 +892,7 @@ fn predicate_no_concretization<'cx>(
             Ok(())
         }
         // typeof _ ~ "symbol"
-        PredicateInner::SymbolP(box loc) => {
+        PredicateInner::SymbolP(deref!(loc)) => {
             report_filtering_result_to_predicate_result(
                 type_filter::symbol(loc.dupe(), l.dupe()),
                 result_collector,
@@ -900,21 +900,21 @@ fn predicate_no_concretization<'cx>(
             Ok(())
         }
         // _ ~ "some string"
-        PredicateInner::SingletonStrP(box (expected_loc, _sense, lit)) => {
+        PredicateInner::SingletonStrP(deref!((expected_loc, _sense, lit))) => {
             let filtered_str =
                 type_filter::string_literal(expected_loc.dupe(), FlowSmolStr::new(lit), l.dupe());
             report_filtering_result_to_predicate_result(filtered_str, result_collector);
             Ok(())
         }
         // _ ~ some number n
-        PredicateInner::SingletonNumP(box (expected_loc, _sense, lit)) => {
+        PredicateInner::SingletonNumP(deref!((expected_loc, _sense, lit))) => {
             let filtered_num =
                 type_filter::number_literal(expected_loc.dupe(), lit.clone(), l.dupe());
             report_filtering_result_to_predicate_result(filtered_num, result_collector);
             Ok(())
         }
         // typeof _ ~ "number"
-        PredicateInner::NumP(box loc) => {
+        PredicateInner::NumP(deref!(loc)) => {
             report_filtering_result_to_predicate_result(
                 type_filter::number(loc.dupe(), l.dupe()),
                 result_collector,
@@ -922,14 +922,14 @@ fn predicate_no_concretization<'cx>(
             Ok(())
         }
         // _ ~ some bigint n
-        PredicateInner::SingletonBigIntP(box (expected_loc, _sense, lit)) => {
+        PredicateInner::SingletonBigIntP(deref!((expected_loc, _sense, lit))) => {
             let filtered_bigint =
                 type_filter::bigint_literal(expected_loc.dupe(), lit.clone(), l.dupe());
             report_filtering_result_to_predicate_result(filtered_bigint, result_collector);
             Ok(())
         }
         // typeof _ ~ "bigint"
-        PredicateInner::BigIntP(box loc) => {
+        PredicateInner::BigIntP(deref!(loc)) => {
             report_filtering_result_to_predicate_result(
                 type_filter::bigint(loc.dupe(), l.dupe()),
                 result_collector,
@@ -987,13 +987,13 @@ fn predicate_no_concretization<'cx>(
             Ok(())
         }
         // true
-        PredicateInner::SingletonBoolP(box (_, true)) => {
+        PredicateInner::SingletonBoolP(deref!((_, true))) => {
             let filtered = type_filter::true_(l.dupe());
             report_filtering_result_to_predicate_result(filtered, result_collector);
             Ok(())
         }
         // false
-        PredicateInner::SingletonBoolP(box (_, false)) => {
+        PredicateInner::SingletonBoolP(deref!((_, false))) => {
             let filtered = type_filter::false_(l.dupe());
             report_filtering_result_to_predicate_result(filtered, result_collector);
             Ok(())
@@ -1293,14 +1293,16 @@ fn call_latent_pred<'cx>(
                             );
                         }
                     }
-                    DefTInner::PolyT(box PolyTData {
-                        kind: _,
-                        tparams_loc,
-                        tparams: ids,
-                        t_out: t_out_inner,
-                        id: _,
-                        strictness_kind: _,
-                    }) => {
+                    DefTInner::PolyT(
+                        deref!(PolyTData {
+                            kind: _,
+                            tparams_loc,
+                            tparams: ids,
+                            t_out: t_out_inner,
+                            id: _,
+                            strictness_kind: _,
+                        }),
+                    ) => {
                         let reason_tapp = r;
                         let fun_t_c = t.dupe();
                         let calltype = flow_typing_implicit_instantiation_check::Call {
@@ -1500,11 +1502,11 @@ fn has_shallow_any<'cx>(cx: &mut Context<'cx>, t: &Type) -> bool {
     match t.deref() {
         TypeInner::DefT(_, d) => match d.deref() {
             DefTInner::ArrT(arr) => match arr.deref() {
-                ArrType::ArrayAT(box ArrayATData { elem_t, .. })
-                | ArrType::ROArrayAT(box ROArrayATData { elem_t, .. }) => {
+                ArrType::ArrayAT(deref!(ArrayATData { elem_t, .. }))
+                | ArrType::ROArrayAT(deref!(ROArrayATData { elem_t, .. })) => {
                     resolves_to_any(cx, elem_t)
                 }
-                ArrType::TupleAT(box TupleATData { elements, .. }) => {
+                ArrType::TupleAT(deref!(TupleATData { elements, .. })) => {
                     elements.iter().any(|elem| resolves_to_any(cx, &elem.t))
                 }
             },
@@ -1832,12 +1834,12 @@ fn intersect_type_guard<'cx>(
                         .any(|(t1, t2)| inhabited_types_differ(cx, env, depth, t1, t2))
             }
             (
-                ArrType::ArrayAT(box ArrayATData { elem_t: e1, .. }),
-                ArrType::ArrayAT(box ArrayATData { elem_t: e2, .. }),
+                ArrType::ArrayAT(deref!(ArrayATData { elem_t: e1, .. })),
+                ArrType::ArrayAT(deref!(ArrayATData { elem_t: e2, .. })),
             )
             | (
-                ArrType::ROArrayAT(box ROArrayATData { elem_t: e1, .. }),
-                ArrType::ROArrayAT(box ROArrayATData { elem_t: e2, .. }),
+                ArrType::ROArrayAT(deref!(ROArrayATData { elem_t: e1, .. })),
+                ArrType::ROArrayAT(deref!(ROArrayATData { elem_t: e2, .. })),
             ) => inhabited_types_differ(cx, env, depth, e1, e2),
             _ => false,
         }
@@ -2019,10 +2021,12 @@ fn intersect_type_guard<'cx>(
                     });
                     let underlying_t = match &nominal_type.underlying_t {
                         nominal::UnderlyingT::FullyOpaque => nominal::UnderlyingT::FullyOpaque,
-                        nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
-                            custom_error_loc,
-                            t: inner_t,
-                        }) => {
+                        nominal::UnderlyingT::CustomError(
+                            deref!(nominal::CustomErrorData {
+                                custom_error_loc,
+                                t: inner_t,
+                            }),
+                        ) => {
                             nominal::UnderlyingT::CustomError(Box::new(nominal::CustomErrorData {
                                 custom_error_loc: custom_error_loc.dupe(),
                                 t: intersect_type_guard(cx, env, inner_t.dupe(), t2.dupe())?
@@ -2626,7 +2630,7 @@ fn prop_exists_test_generic<'cx>(
                     }
                 }
                 DefTInner::ArrT(arr_t)
-                    if let ArrType::TupleAT(box TupleATData { elements, rest, .. }) =
+                    if let ArrType::TupleAT(deref!(TupleATData { elements, rest, .. })) =
                         arr_t.deref()
                         && flow_js_utils::is_str_intlike(key) =>
                 {
@@ -3478,12 +3482,14 @@ fn sentinel_prop_test_generic<'cx>(
                         }
                         // tuple.length ===/!== literal value
                         DefTInner::ArrT(arr_t)
-                            if let ArrType::TupleAT(box TupleATData {
-                                arity,
-                                inexact,
-                                rest,
-                                ..
-                            }) = arr_t.deref()
+                            if let ArrType::TupleAT(
+                                deref!(TupleATData {
+                                    arity,
+                                    inexact,
+                                    rest,
+                                    ..
+                                }),
+                            ) = arr_t.deref()
                                 && key == "length" =>
                         {
                             let reason = reason_of_t(obj).dupe();
@@ -3505,7 +3511,7 @@ fn sentinel_prop_test_generic<'cx>(
                             )?;
                         }
                         DefTInner::ArrT(arr_t)
-                            if let ArrType::TupleAT(box TupleATData { elements, .. }) =
+                            if let ArrType::TupleAT(deref!(TupleATData { elements, .. })) =
                                 arr_t.deref()
                                 && flow_js_utils::is_str_intlike(key) =>
                         {

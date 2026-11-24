@@ -499,7 +499,7 @@ fn local_underlying(cx: &Context<'_>, t: &Type) -> Option<Type> {
     match t.deref() {
         TypeInner::NominalT { nominal_type, .. }
             if let nominal::Id::UserDefinedOpaqueTypeId(
-                box nominal::UserDefinedOpaqueTypeIdData(id, _),
+                deref!(nominal::UserDefinedOpaqueTypeIdData(id, _)),
             ) = &nominal_type.nominal_id
                 && id.0.source() == Some(cx.file())
                 && let nominal::UnderlyingT::OpaqueWithLocal { t } = &nominal_type.underlying_t =>
@@ -745,7 +745,9 @@ impl TypeVisitor<()> for MarkerVisitor<'_> {
             }
         }
         match t.deref() {
-            TypeInner::GenericT(box GenericTData { name, .. }) if self.names.contains_key(name) => {
+            TypeInner::GenericT(deref!(GenericTData { name, .. }))
+                if self.names.contains_key(name) =>
+            {
                 self.found.insert(name.dupe());
                 self.mentions = true;
             }
@@ -914,7 +916,9 @@ impl<'e> Walker<'e> {
 
     fn marker_of(&self, t: &Type) -> Option<SubstName> {
         match t.deref() {
-            TypeInner::GenericT(box GenericTData { name, .. }) if self.vars.contains_key(name) => {
+            TypeInner::GenericT(deref!(GenericTData { name, .. }))
+                if self.vars.contains_key(name) =>
+            {
                 Some(name.dupe())
             }
             _ => None,
@@ -1427,11 +1431,11 @@ impl<'e> Walker<'e> {
             }
             // A rigid type parameter is matched by itself among the members of a union, before its
             // bound is compared.
-            (TypeInner::GenericT(box GenericTData { id, .. }), TypeInner::UnionT(_, rep))
+            (TypeInner::GenericT(deref!(GenericTData { id, .. })), TypeInner::UnionT(_, rep))
                 if rep.members_iter().any(|m| {
                     matches!(
                         self.resolve(cx, m).deref(),
-                        TypeInner::GenericT(box GenericTData { id: other, .. }) if other.equal(id)
+                        TypeInner::GenericT(deref!(GenericTData { id: other, .. })) if other.equal(id)
                     )
                 }) =>
             {
@@ -1476,9 +1480,9 @@ impl<'e> Walker<'e> {
                     nominal_type: a, ..
                 },
                 _,
-            ) if let nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+            ) if let nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData {
                 t, ..
-            }) = &a.underlying_t =>
+            })) = &a.underlying_t =>
             {
                 let t = t.dupe();
                 self.walk(cx, &t, &u)
@@ -1488,9 +1492,9 @@ impl<'e> Walker<'e> {
                 TypeInner::NominalT {
                     nominal_type: b, ..
                 },
-            ) if let nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
+            ) if let nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData {
                 t, ..
-            }) = &b.underlying_t =>
+            })) = &b.underlying_t =>
             {
                 let t = t.dupe();
                 self.walk(cx, &l, &t)
@@ -1806,7 +1810,7 @@ impl<'e> Walker<'e> {
             // parameter is replaced by its bound, so that the parameter can match a marker in the
             // expansion. A bound that applies the same alias or class is compared argument by
             // argument instead.
-            (TypeInner::GenericT(box GenericTData { bound, .. }), TypeInner::TypeAppT(b))
+            (TypeInner::GenericT(deref!(GenericTData { bound, .. })), TypeInner::TypeAppT(b))
                 if !self.bound_applies(cx, bound, &b.type_, 0)
                     && let Some(e) = self.expand_typeapp(cx, &u) =>
             {
@@ -1820,7 +1824,7 @@ impl<'e> Walker<'e> {
             {
                 self.walk_renders(cx, &l, &u)
             }
-            (TypeInner::GenericT(box GenericTData { bound, .. }), _) => self.walk(cx, bound, &u),
+            (TypeInner::GenericT(deref!(GenericTData { bound, .. })), _) => self.walk(cx, bound, &u),
             (TypeInner::TypeAppT(a), TypeInner::TypeAppT(b)) => {
                 // Applications of the same alias or class are compared argument by argument
                 // when they write as many arguments, as subtyping does (`ConcretizeTypeAppsT`);
@@ -3144,7 +3148,7 @@ impl<'e> Walker<'e> {
         else {
             return false;
         };
-        let Destructor::SpreadType(box DestructorSpreadTypeData(_, todo_rev, _)) =
+        let Destructor::SpreadType(deref!(DestructorSpreadTypeData(_, todo_rev, _))) =
             defer_use_t.2.deref()
         else {
             return false;
@@ -4863,7 +4867,7 @@ impl<'e> Walker<'e> {
         }
         let bound = self.resolve(cx, bound);
         match bound.deref() {
-            TypeInner::GenericT(box GenericTData { bound, .. }) => {
+            TypeInner::GenericT(deref!(GenericTData { bound, .. })) => {
                 self.bound_applies(cx, bound, c, depth + 1)
             }
             TypeInner::TypeAppT(a) if self.same_typeapp(cx, &a.type_, c).is_some() => true,
@@ -5420,14 +5424,12 @@ impl<'e> Walker<'e> {
             // the flow-based solve's reversal computes it, bounds `T` from above, as the
             // flow-based solve reads it when it merges the upper bounds of `T`, with the priority of
             // a reversal.
-            Destructor::SpreadType(box DestructorSpreadTypeData(target, ..))
+            Destructor::SpreadType(deref!(DestructorSpreadTypeData(target, ..)))
                 if !self.mentions(cx, l)
                     && let Some((bounded, d)) = self.reversal_target(cx, type_, d)
-                    && let Destructor::SpreadType(box DestructorSpreadTypeData(
-                        _,
-                        todo_rev,
-                        head_slice,
-                    )) = &d =>
+                    && let Destructor::SpreadType(
+                        deref!(DestructorSpreadTypeData(_, todo_rev, head_slice,)),
+                    ) = &d =>
             {
                 let acc = match head_slice {
                     Some(slice) => flow_data_structure_wrapper::list::FlowOcamlList::unit(
@@ -5449,7 +5451,7 @@ impl<'e> Walker<'e> {
             // made in full, with the markers inside its props, as the flow-based solve flows `l`
             // into the evaluated spread. (A spread of a union makes a union, which the flow-based
             // solve matches by speculation.)
-            Destructor::SpreadType(box DestructorSpreadTypeData(_, todo_rev, _))
+            Destructor::SpreadType(deref!(DestructorSpreadTypeData(_, todo_rev, _)))
                 if self.marker_of(type_).is_none()
                     && todo_rev.iter().all(|operand| match operand {
                         object::spread::Operand::Type(t) => self.marker_of(t).is_none(),
@@ -5697,9 +5699,11 @@ impl<'e> Walker<'e> {
         match t.deref() {
             TypeInner::DefT(_, d) => match d.deref() {
                 DefTInner::ArrT(a) => match a.deref() {
-                    ArrType::ArrayAT(box ArrayATData { elem_t, .. })
-                    | ArrType::TupleAT(box TupleATData { elem_t, .. })
-                    | ArrType::ROArrayAT(box ROArrayATData { elem_t, .. }) => Some(elem_t.dupe()),
+                    ArrType::ArrayAT(deref!(ArrayATData { elem_t, .. }))
+                    | ArrType::TupleAT(deref!(TupleATData { elem_t, .. }))
+                    | ArrType::ROArrayAT(deref!(ROArrayATData { elem_t, .. })) => {
+                        Some(elem_t.dupe())
+                    }
                 },
                 _ => None,
             },
@@ -5836,7 +5840,8 @@ impl<'e> Walker<'e> {
         type_: &Type,
         d: &Destructor,
     ) -> Option<(ReversalTarget, Destructor)> {
-        let Destructor::SpreadType(box DestructorSpreadTypeData(target, todo_rev, head_slice)) = d
+        let Destructor::SpreadType(deref!(DestructorSpreadTypeData(target, todo_rev, head_slice))) =
+            d
         else {
             return self
                 .marker_through_identity(cx, type_)
@@ -5979,7 +5984,7 @@ impl<'e> Walker<'e> {
     /// Whether a spread has several operands that are markers without evidence yet: its reversal
     /// waits for the other arguments, which may give all but one of them a solution.
     fn spread_waits<'cx>(&self, cx: &mut Context<'cx>, type_: &Type, d: &Destructor) -> bool {
-        let Destructor::SpreadType(box DestructorSpreadTypeData(_, todo_rev, _)) = d else {
+        let Destructor::SpreadType(deref!(DestructorSpreadTypeData(_, todo_rev, _))) = d else {
             return false;
         };
         let operands: Vec<Type> = std::iter::once(type_.dupe())
@@ -6052,7 +6057,7 @@ impl<'e> Walker<'e> {
                 })?
                 .flatten()
             }
-            Destructor::SpreadType(box DestructorSpreadTypeData(_, todo_rev, head_slice)) => {
+            Destructor::SpreadType(deref!(DestructorSpreadTypeData(_, todo_rev, head_slice))) => {
                 let acc = match head_slice {
                     Some(slice) => flow_data_structure_wrapper::list::FlowOcamlList::unit(
                         object::spread::AccElement::InlineSlice(slice.clone()),
@@ -6173,11 +6178,9 @@ impl<'e> Walker<'e> {
                     // `onClose: C` in `{...T, ...{onClose: C}}` or in `{...T, onClose: C}`, meet
                     // those of `u`. That waits for the end of the walk.
                     if matches!(target, ReversalTarget::Marker(_))
-                        && let Destructor::SpreadType(box DestructorSpreadTypeData(
-                            _,
-                            others,
-                            head_slice,
-                        )) = &d
+                        && let Destructor::SpreadType(
+                            deref!(DestructorSpreadTypeData(_, others, head_slice,)),
+                        ) = &d
                         && (head_slice.iter().any(|s| self.slice_mentions(cx, s))
                             || others.iter().any(|operand| match operand {
                                 object::spread::Operand::Type(t) => self.mentions(cx, t),
@@ -6291,10 +6294,12 @@ impl<'e> Walker<'e> {
         d: &Destructor,
     ) -> Option<Vec<SubstName>> {
         let keys = match d {
-            Destructor::MappedType(box DestructorMappedTypeData {
-                homomorphic: MappedTypeHomomorphicFlag::SemiHomomorphic(keys),
-                ..
-            }) => self.marker_of(keys),
+            Destructor::MappedType(
+                deref!(DestructorMappedTypeData {
+                    homomorphic: MappedTypeHomomorphicFlag::SemiHomomorphic(keys),
+                    ..
+                }),
+            ) => self.marker_of(keys),
             _ => None,
         };
         let names: Vec<SubstName> = self
@@ -6492,7 +6497,7 @@ impl<'e> Walker<'e> {
             }
             // A generic standing for a type built from markers, like the config of
             // `component(...P)`, which the walk can't take apart.
-            TypeInner::GenericT(box GenericTData { name, .. }) => match name.deref() {
+            TypeInner::GenericT(deref!(GenericTData { name, .. })) => match name.deref() {
                 flow_common::subst_name::SubstNameInner::Synthetic { ts, .. } => {
                     ts.iter().any(|t| self.vars.contains_key(t))
                 }
@@ -6530,7 +6535,7 @@ impl<'e> Walker<'e> {
                     return;
                 }
                 match t.deref() {
-                    TypeInner::GenericT(box GenericTData { name, .. })
+                    TypeInner::GenericT(deref!(GenericTData { name, .. }))
                         if self.walker.vars.contains_key(name) =>
                     {
                         self.found.insert((name.dupe(), pole));
@@ -6771,7 +6776,7 @@ fn key_markers_seen<'cx>(
     }
     fn marker(t: &Type) -> Option<SubstName> {
         match t.deref() {
-            TypeInner::GenericT(box GenericTData { name, .. }) => Some(name.dupe()),
+            TypeInner::GenericT(deref!(GenericTData { name, .. })) => Some(name.dupe()),
             _ => None,
         }
     }
@@ -6873,10 +6878,10 @@ fn spread_tuple_items(d: &DestructorSpreadTupleTypeData, spread: &Type) -> Optio
         .resolved
         .iter()
         .map(|p| match p {
-            ResolvedParam::ResolvedArg(box ResolvedArgData(elem, _)) => Some(TupleItem::Elem(
+            ResolvedParam::ResolvedArg(deref!(ResolvedArgData(elem, _))) => Some(TupleItem::Elem(
                 type_util::slot_value_t(&elem.t, elem.optional),
             )),
-            ResolvedParam::ResolvedSpreadArg(box ResolvedSpreadArgData(r, arr, _)) => {
+            ResolvedParam::ResolvedSpreadArg(deref!(ResolvedSpreadArgData(r, arr, _))) => {
                 Some(TupleItem::Spread(Type::new(TypeInner::DefT(
                     r.dupe(),
                     DefT::new(DefTInner::ArrT(Rc::new(arr.clone()))),
@@ -6888,7 +6893,7 @@ fn spread_tuple_items(d: &DestructorSpreadTupleTypeData, spread: &Type) -> Optio
     items.reverse();
     items.push(TupleItem::Spread(spread.dupe()));
     items.extend(d.unresolved.iter().map(|p| match p {
-        UnresolvedParam::UnresolvedArg(box UnresolvedArgData(elem, _)) => {
+        UnresolvedParam::UnresolvedArg(deref!(UnresolvedArgData(elem, _))) => {
             TupleItem::Elem(type_util::slot_value_t(&elem.t, elem.optional))
         }
         UnresolvedParam::UnresolvedSpreadArg(t) => TupleItem::Spread(t.dupe()),

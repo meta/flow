@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#![feature(box_patterns)]
+#![feature(deref_patterns)]
 
 pub mod signature_help;
 pub mod type_info_service;

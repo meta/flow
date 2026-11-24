@@ -569,16 +569,16 @@ pub fn non_renders_to_renders<'cx>(
         ) if matches!(
             &**def_t,
             DefTInner::ArrT(arr) if matches!(arr.deref(),
-                ArrType::ArrayAT(box ArrayATData { .. })
-                | ArrType::TupleAT(box TupleATData { .. })
-                | ArrType::ROArrayAT(box ROArrayATData { .. }))
+                ArrType::ArrayAT(deref!(ArrayATData { .. }))
+                | ArrType::TupleAT(deref!(TupleATData { .. }))
+                | ArrType::ROArrayAT(deref!(ROArrayATData { .. })))
         ) =>
         {
             if let DefTInner::ArrT(arr) = def_t.deref() {
                 let t = match arr.deref() {
-                    ArrType::ArrayAT(box ArrayATData { elem_t: t, .. })
-                    | ArrType::TupleAT(box TupleATData { elem_t: t, .. })
-                    | ArrType::ROArrayAT(box ROArrayATData { elem_t: t, .. }) => t,
+                    ArrType::ArrayAT(deref!(ArrayATData { elem_t: t, .. }))
+                    | ArrType::TupleAT(deref!(TupleATData { elem_t: t, .. }))
+                    | ArrType::ROArrayAT(deref!(ROArrayATData { elem_t: t, .. })) => t,
                 };
                 FlowJs::rec_flow_t_with_env(
                     cx,
@@ -861,9 +861,9 @@ pub(super) fn try_synthesize_render_type_with_env<'cx>(
                     }
                     DefTInner::ArrT(arr) => {
                         let arr_elem_t = match arr.deref() {
-                            ArrType::ArrayAT(box ArrayATData { elem_t, .. }) => elem_t,
-                            ArrType::TupleAT(box TupleATData { elem_t, .. }) => elem_t,
-                            ArrType::ROArrayAT(box ROArrayATData { elem_t: t, .. }) => t,
+                            ArrType::ArrayAT(deref!(ArrayATData { elem_t, .. })) => elem_t,
+                            ArrType::TupleAT(deref!(TupleATData { elem_t, .. })) => elem_t,
+                            ArrType::ROArrayAT(deref!(ROArrayATData { elem_t: t, .. })) => t,
                         };
                         let concrete = FlowJs::possible_concrete_types_for_inspection_with_env(
                             cx,

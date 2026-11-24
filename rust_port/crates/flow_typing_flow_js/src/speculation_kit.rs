@@ -134,10 +134,9 @@ fn log_synthesis_result(
                 SpeculationHintState::SpeculationHintInvalid => {
                     SpeculationHintState::SpeculationHintInvalid
                 }
-                SpeculationHintState::SpeculationHintSet(box SpeculationHintSetData(
-                    old_spec_id_path,
-                    old_t,
-                )) => {
+                SpeculationHintState::SpeculationHintSet(
+                    deref!(SpeculationHintSetData(old_spec_id_path, old_t,)),
+                ) => {
                     if old_spec_id_path.contains(&speculation_id) {
                         // We are moving back a successful speculation path.
                         old_callee_hint.clone()
@@ -174,35 +173,39 @@ fn log_specialized_use<CX: ContextFamily>(
         }
     };
     match use_t.deref() {
-        UseTInner::CallT(box CallTData {
-            call_action:
-                box CallAction::Funcalltype(box FuncallType {
+        UseTInner::CallT(
+            deref!(CallTData {
+                call_action: deref!(CallAction::Funcalltype(deref!(FuncallType {
                     call_specialized_callee: Some(c),
                     ..
-                }),
-            ..
-        })
-        | UseTInner::MethodT(box MethodTData {
-            method_action:
-                box MethodAction::CallM(box CallMData {
+                }))),
+                ..
+            }),
+        )
+        | UseTInner::MethodT(
+            deref!(MethodTData {
+                method_action: deref!(MethodAction::CallM(deref!(CallMData {
                     specialized_callee: Some(c),
                     ..
-                })
-                | box MethodAction::ChainM(box ChainMData {
+                }))) | deref!(MethodAction::ChainM(deref!(ChainMData {
                     specialized_callee: Some(c),
                     ..
-                }),
-            ..
-        }) => finalize(c),
-        UseTInner::ReactKitT(box ReactKitTData {
-            tool:
-                box react::Tool::CreateElement(box react::CreateElementData {
-                    specialized_component,
-                    specialized_props,
-                    ..
-                }),
-            ..
-        }) => specialized_component
+                }))),
+                ..
+            }),
+        ) => finalize(c),
+        UseTInner::ReactKitT(
+            deref!(ReactKitTData {
+                tool: deref!(react::Tool::CreateElement(deref!(
+                    react::CreateElementData {
+                        specialized_component,
+                        specialized_props,
+                        ..
+                    }
+                ))),
+                ..
+            }),
+        ) => specialized_component
             .iter()
             .chain(specialized_props)
             .for_each(finalize),
@@ -668,14 +671,15 @@ where
                             msgs,
                         )
                     }
-                    UseTInner::LookupT(box LookupTData {
-                        reason,
-                        lookup_action:
-                            box LookupAction::MatchProp(box LookupActionMatchPropData {
-                                use_op, ..
-                            }),
-                        ..
-                    }) => ErrorMessage::EUnionSpeculationFailed(Box::new(
+                    UseTInner::LookupT(
+                        deref!(LookupTData {
+                            reason,
+                            lookup_action: deref!(LookupAction::MatchProp(deref!(
+                                LookupActionMatchPropData { use_op, .. }
+                            ))),
+                            ..
+                        }),
+                    ) => ErrorMessage::EUnionSpeculationFailed(Box::new(
                         EUnionSpeculationFailedData {
                             use_op: use_op.dupe(),
                             loc: reason.loc().dupe(),
@@ -706,10 +710,12 @@ where
     for (case_id, case_spec) in trials {
         let information_for_synthesis_logging = match &case_spec {
             CaseSpec::FlowCase(lhs_t, use_t)
-                if let UseTInner::CallT(box CallTData {
-                    call_action: box CallAction::Funcalltype(box funcalltype),
-                    ..
-                }) = use_t.deref() =>
+                if let UseTInner::CallT(
+                    deref!(CallTData {
+                        call_action: deref!(CallAction::Funcalltype(deref!(funcalltype))),
+                        ..
+                    }),
+                ) = use_t.deref() =>
             {
                 match &funcalltype.call_speculation_hint_state {
                     Some(call_callee_hint_ref) => {

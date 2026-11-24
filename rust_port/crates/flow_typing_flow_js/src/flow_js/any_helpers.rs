@@ -23,9 +23,12 @@ pub(super) fn expand_any<'cx>(_cx: &Context<'cx>, any: &Type, t: &Type) -> Type 
     match t.deref() {
         TypeInner::DefT(r, def_t) => match def_t.deref() {
             DefTInner::ArrT(arr) => match arr.deref() {
-                ArrType::ArrayAT(box ArrayATData {
-                    strictness_kind, ..
-                }) => {
+                ArrType::ArrayAT(
+                    deref!(ArrayATData {
+                        strictness_kind,
+                        ..
+                    }),
+                ) => {
                     return Type::new(TypeInner::DefT(
                         r.dupe(),
                         DefT::new(DefTInner::ArrT(Rc::new(ArrType::ArrayAT(Box::new(
@@ -40,15 +43,17 @@ pub(super) fn expand_any<'cx>(_cx: &Context<'cx>, any: &Type, t: &Type) -> Type 
                         ))))),
                     ));
                 }
-                ArrType::TupleAT(box TupleATData {
-                    elements,
-                    arity,
-                    inexact,
-                    rest,
-                    react_dro,
-                    strictness_kind,
-                    ..
-                }) => {
+                ArrType::TupleAT(
+                    deref!(TupleATData {
+                        elements,
+                        arity,
+                        inexact,
+                        rest,
+                        react_dro,
+                        strictness_kind,
+                        ..
+                    }),
+                ) => {
                     let only_any_element = |te: &TupleElement| TupleElement {
                         name: te.name.dupe(),
                         t: only_any(&te.t),
@@ -84,10 +89,12 @@ pub(super) fn expand_any<'cx>(_cx: &Context<'cx>, any: &Type, t: &Type) -> Type 
         } => {
             let underlying_t = match &nominal_type.underlying_t {
                 nominal::UnderlyingT::FullyOpaque => nominal::UnderlyingT::FullyOpaque,
-                nominal::UnderlyingT::CustomError(box nominal::CustomErrorData {
-                    t: inner_t,
-                    custom_error_loc,
-                }) => nominal::UnderlyingT::CustomError(Box::new(nominal::CustomErrorData {
+                nominal::UnderlyingT::CustomError(
+                    deref!(nominal::CustomErrorData {
+                        t: inner_t,
+                        custom_error_loc,
+                    }),
+                ) => nominal::UnderlyingT::CustomError(Box::new(nominal::CustomErrorData {
                     t: only_any(inner_t),
                     custom_error_loc: custom_error_loc.dupe(),
                 })),
@@ -391,7 +398,8 @@ pub(super) fn any_propagated<'cx>(
             TypeInner::DefT(_, def_t) => match def_t.deref() {
                 DefTInner::ArrT(arr_t) => {
                     // read-only arrays are covariant
-                    if let ArrType::ROArrayAT(box ROArrayATData { elem_t, .. }) = arr_t.deref() {
+                    if let ArrType::ROArrayAT(deref!(ROArrayATData { elem_t, .. })) = arr_t.deref()
+                    {
                         covariant_flow(cx, use_op, elem_t)?;
                         Ok(true)
                     } else {
@@ -404,11 +412,13 @@ pub(super) fn any_propagated<'cx>(
                     covariant_flow(cx, use_op, class_t)?;
                     Ok(true)
                 }
-                DefTInner::ReactAbstractComponentT(box ReactAbstractComponentTData {
-                    config,
-                    renders,
-                    component_kind: _,
-                }) => {
+                DefTInner::ReactAbstractComponentT(
+                    deref!(ReactAbstractComponentTData {
+                        config,
+                        renders,
+                        component_kind: _,
+                    }),
+                ) => {
                     contravariant_flow(cx, use_op, config)?;
                     covariant_flow(cx, use_op, renders)?;
                     Ok(true)
@@ -578,7 +588,7 @@ pub(super) fn any_propagated_use<'cx>(
             }
 
             DefTInner::ArrT(arr_t)
-                if let ArrType::ROArrayAT(box ROArrayATData { elem_t, .. }) = arr_t.deref() =>
+                if let ArrType::ROArrayAT(deref!(ROArrayATData { elem_t, .. })) = arr_t.deref() =>
             {
                 covariant_flow(cx, use_op, elem_t)?;
                 Ok(true)
@@ -591,11 +601,13 @@ pub(super) fn any_propagated_use<'cx>(
                 covariant_flow(cx, use_op, class_t)?;
                 Ok(true)
             }
-            DefTInner::ReactAbstractComponentT(box ReactAbstractComponentTData {
-                config,
-                renders,
-                component_kind: _,
-            }) => {
+            DefTInner::ReactAbstractComponentT(
+                deref!(ReactAbstractComponentTData {
+                    config,
+                    renders,
+                    component_kind: _,
+                }),
+            ) => {
                 contravariant_flow(cx, use_op, config)?;
                 covariant_flow(cx, use_op, renders)?;
                 Ok(true)
@@ -646,7 +658,7 @@ pub(super) fn any_propagated_use<'cx>(
         }
         // Keys cannot be tainted by any
         TypeInner::KeysT(..) => Ok(true),
-        TypeInner::GenericT(box GenericTData { bound, .. }) => {
+        TypeInner::GenericT(deref!(GenericTData { bound, .. })) => {
             covariant_flow(cx, use_op, bound)?;
             Ok(true)
         }

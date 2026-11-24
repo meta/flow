@@ -247,7 +247,7 @@ fn score_of_use_op<L: Dupe + PartialEq + Eq + PartialOrd + Ord>(use_op: &Virtual
                 // then FunParam after adding n.
                 //
                 // We do _not_ add n to the score if this use_op was added to an implicit type parameter.
-                VirtualFrameUseOp::FunParam(box FunParamData { n, .. }) => FRAME_SCORE + *n,
+                VirtualFrameUseOp::FunParam(deref!(FunParamData { n, .. })) => FRAME_SCORE + *n,
                 VirtualFrameUseOp::FunRestParam { .. } => FRAME_SCORE + FRAME_SCORE - 1,
                 // FunCompatibility is generally followed by another use_op. So let's not
                 // count FunCompatibility.
@@ -388,10 +388,12 @@ pub fn score_of_msg<L: Dupe + PartialEq + Eq + PartialOrd + Ord>(msg: &FlowError
     // the right types.
     let score = score
         + match msg {
-            FlowErrorMessage::EIncompatibleProp(box EIncompatiblePropData {
-                use_op: Some(use_op),
-                ..
-            }) => match use_op {
+            FlowErrorMessage::EIncompatibleProp(
+                deref!(EIncompatiblePropData {
+                    use_op: Some(use_op),
+                    ..
+                }),
+            ) => match use_op {
                 VirtualUseOp::Frame(frame, _)
                     if matches!(frame.as_ref(), VirtualFrameUseOp::PropertyCompatibility(..)) =>
                 {
@@ -399,10 +401,9 @@ pub fn score_of_msg<L: Dupe + PartialEq + Eq + PartialOrd + Ord>(msg: &FlowError
                 }
                 _ => 0,
             },
-            FlowErrorMessage::EPropNotFoundInLookup(box EPropNotFoundInLookupData {
-                use_op,
-                ..
-            }) => match use_op {
+            FlowErrorMessage::EPropNotFoundInLookup(
+                deref!(EPropNotFoundInLookupData { use_op, .. }),
+            ) => match use_op {
                 VirtualUseOp::Frame(frame, _)
                     if matches!(frame.as_ref(), VirtualFrameUseOp::PropertyCompatibility(..)) =>
                 {
@@ -421,12 +422,12 @@ pub fn score_of_msg<L: Dupe + PartialEq + Eq + PartialOrd + Ord>(msg: &FlowError
     score
         + match msg {
             FlowErrorMessage::EIncompatibleTypesWithUseOp(
-                box EIncompatibleTypesWithUseOpData {
+                deref!(EIncompatibleTypesWithUseOpData {
                     lower_desc,
                     upper_desc,
                     branches,
                     ..
-                },
+                }),
             ) => {
                 if branches.is_empty() {
                     score_categories(type_category(lower_desc), type_category(upper_desc))
@@ -452,12 +453,14 @@ fn flip_frame<L: Dupe + PartialEq + Eq + PartialOrd + Ord>(
     use VirtualFrameUseOp::*;
 
     match frame {
-        ArrayElementCompatibility(box ArrayElementCompatibilityData {
-            lower,
-            upper,
-            lower_t,
-            upper_t,
-        }) => ArrayElementCompatibility(Box::new(ArrayElementCompatibilityData {
+        ArrayElementCompatibility(
+            deref!(ArrayElementCompatibilityData {
+                lower,
+                upper,
+                lower_t,
+                upper_t,
+            }),
+        ) => ArrayElementCompatibility(Box::new(ArrayElementCompatibilityData {
             lower: upper,
             upper: lower,
             lower_t: upper_t,
@@ -467,14 +470,16 @@ fn flip_frame<L: Dupe + PartialEq + Eq + PartialOrd + Ord>(
             lower: upper,
             upper: lower,
         },
-        FunParam(box FunParamData {
-            n,
-            name,
-            lower,
-            upper,
-            lower_t,
-            upper_t,
-        }) => FunParam(Box::new(FunParamData {
+        FunParam(
+            deref!(FunParamData {
+                n,
+                name,
+                lower,
+                upper,
+                lower_t,
+                upper_t,
+            }),
+        ) => FunParam(Box::new(FunParamData {
             n,
             name,
             lower: upper,
@@ -486,23 +491,27 @@ fn flip_frame<L: Dupe + PartialEq + Eq + PartialOrd + Ord>(
             lower: upper,
             upper: lower,
         },
-        FunReturn(box FunReturnData {
-            lower,
-            upper,
-            lower_t,
-            upper_t,
-        }) => FunReturn(Box::new(FunReturnData {
+        FunReturn(
+            deref!(FunReturnData {
+                lower,
+                upper,
+                lower_t,
+                upper_t,
+            }),
+        ) => FunReturn(Box::new(FunReturnData {
             lower: upper,
             upper: lower,
             lower_t: upper_t,
             upper_t: lower_t,
         })),
-        IndexerKeyCompatibility(box IndexerKeyCompatibilityData {
-            lower,
-            upper,
-            lower_t,
-            upper_t,
-        }) => IndexerKeyCompatibility(Box::new(IndexerKeyCompatibilityData {
+        IndexerKeyCompatibility(
+            deref!(IndexerKeyCompatibilityData {
+                lower,
+                upper,
+                lower_t,
+                upper_t,
+            }),
+        ) => IndexerKeyCompatibility(Box::new(IndexerKeyCompatibilityData {
             lower: upper,
             upper: lower,
             lower_t: upper_t,
@@ -516,13 +525,15 @@ fn flip_frame<L: Dupe + PartialEq + Eq + PartialOrd + Ord>(
             lower: upper,
             upper: lower,
         },
-        PropertyCompatibility(box PropertyCompatibilityData {
-            prop,
-            lower,
-            upper,
-            lower_t,
-            upper_t,
-        }) => PropertyCompatibility(Box::new(PropertyCompatibilityData {
+        PropertyCompatibility(
+            deref!(PropertyCompatibilityData {
+                prop,
+                lower,
+                upper,
+                lower_t,
+                upper_t,
+            }),
+        ) => PropertyCompatibility(Box::new(PropertyCompatibilityData {
             prop,
             lower: upper,
             upper: lower,
@@ -530,26 +541,30 @@ fn flip_frame<L: Dupe + PartialEq + Eq + PartialOrd + Ord>(
             upper_t: lower_t,
         })),
         ReactConfigCheck => ReactConfigCheck,
-        TupleElementCompatibility(box TupleElementCompatibilityData {
-            n,
-            lower,
-            upper,
-            lower_t,
-            upper_t,
-        }) => TupleElementCompatibility(Box::new(TupleElementCompatibilityData {
+        TupleElementCompatibility(
+            deref!(TupleElementCompatibilityData {
+                n,
+                lower,
+                upper,
+                lower_t,
+                upper_t,
+            }),
+        ) => TupleElementCompatibility(Box::new(TupleElementCompatibilityData {
             n,
             lower: upper,
             upper: lower,
             lower_t: upper_t,
             upper_t: lower_t,
         })),
-        TypeArgCompatibility(box TypeArgCompatibilityData {
-            name,
-            targ,
-            lower,
-            upper,
-            polarity,
-        }) => TypeArgCompatibility(Box::new(TypeArgCompatibilityData {
+        TypeArgCompatibility(
+            deref!(TypeArgCompatibilityData {
+                name,
+                targ,
+                lower,
+                upper,
+                polarity,
+            }),
+        ) => TypeArgCompatibility(Box::new(TypeArgCompatibilityData {
             name,
             targ,
             lower: upper,
@@ -657,11 +672,13 @@ pub fn post_process_errors(original_errors: ErrorSet) -> ErrorSet {
         };
 
         match error.msg_of_error() {
-            FlowErrorMessage::EExpectedStringLit(box EExpectedStringLitData {
-                lower,
-                upper,
-                use_op,
-            }) => {
+            FlowErrorMessage::EExpectedStringLit(
+                deref!(EExpectedStringLitData {
+                    lower,
+                    upper,
+                    use_op,
+                }),
+            ) => {
                 let ((lower_new, upper_new), use_op_new) =
                     dedupe_by_flip(lower.clone(), upper.clone(), use_op.clone());
                 lower == &lower_new
@@ -673,11 +690,13 @@ pub fn post_process_errors(original_errors: ErrorSet) -> ErrorSet {
                         },
                     )))
             }
-            FlowErrorMessage::EExpectedNumberLit(box EExpectedNumberLitData {
-                lower,
-                upper,
-                use_op,
-            }) => {
+            FlowErrorMessage::EExpectedNumberLit(
+                deref!(EExpectedNumberLitData {
+                    lower,
+                    upper,
+                    use_op,
+                }),
+            ) => {
                 let ((lower_new, upper_new), use_op_new) =
                     dedupe_by_flip(lower.clone(), upper.clone(), use_op.clone());
                 lower == &lower_new
@@ -689,11 +708,13 @@ pub fn post_process_errors(original_errors: ErrorSet) -> ErrorSet {
                         },
                     )))
             }
-            FlowErrorMessage::EExpectedBooleanLit(box EExpectedBooleanLitData {
-                lower,
-                upper,
-                use_op,
-            }) => {
+            FlowErrorMessage::EExpectedBooleanLit(
+                deref!(EExpectedBooleanLitData {
+                    lower,
+                    upper,
+                    use_op,
+                }),
+            ) => {
                 let ((lower_new, upper_new), use_op_new) =
                     dedupe_by_flip(lower.clone(), upper.clone(), use_op.clone());
                 lower == &lower_new
@@ -705,11 +726,13 @@ pub fn post_process_errors(original_errors: ErrorSet) -> ErrorSet {
                         },
                     )))
             }
-            FlowErrorMessage::EExpectedBigIntLit(box EExpectedBigIntLitData {
-                lower,
-                upper,
-                use_op,
-            }) => {
+            FlowErrorMessage::EExpectedBigIntLit(
+                deref!(EExpectedBigIntLitData {
+                    lower,
+                    upper,
+                    use_op,
+                }),
+            ) => {
                 let ((lower_new, upper_new), use_op_new) =
                     dedupe_by_flip(lower.clone(), upper.clone(), use_op.clone());
                 lower == &lower_new
@@ -722,7 +745,7 @@ pub fn post_process_errors(original_errors: ErrorSet) -> ErrorSet {
                     )))
             }
             FlowErrorMessage::EIncompatibleTypesWithUseOp(
-                box EIncompatibleTypesWithUseOpData {
+                deref!(EIncompatibleTypesWithUseOpData {
                     use_op,
                     lower_loc,
                     lower_def_loc,
@@ -733,7 +756,7 @@ pub fn post_process_errors(original_errors: ErrorSet) -> ErrorSet {
                     explanation,
                     example,
                     branches,
-                },
+                }),
             ) => {
                 let (
                     (
@@ -763,7 +786,7 @@ pub fn post_process_errors(original_errors: ErrorSet) -> ErrorSet {
                     )))
             }
             FlowErrorMessage::EEnumError(EnumErrorKind::EnumIncompatible(
-                box EIncompatibleTypesWithUseOpData {
+                deref!(EIncompatibleTypesWithUseOpData {
                     use_op,
                     lower_loc,
                     lower_def_loc,
@@ -774,7 +797,7 @@ pub fn post_process_errors(original_errors: ErrorSet) -> ErrorSet {
                     explanation,
                     example,
                     branches,
-                },
+                }),
             )) => {
                 let (
                     (
@@ -805,13 +828,15 @@ pub fn post_process_errors(original_errors: ErrorSet) -> ErrorSet {
                         )),
                     ))
             }
-            FlowErrorMessage::EPropNotFoundInLookup(box EPropNotFoundInLookupData {
-                prop_name,
-                object,
-                prop_loc,
-                use_op,
-                suggestion,
-            }) => {
+            FlowErrorMessage::EPropNotFoundInLookup(
+                deref!(EPropNotFoundInLookupData {
+                    prop_name,
+                    object,
+                    prop_loc,
+                    use_op,
+                    suggestion,
+                }),
+            ) => {
                 // PropNotFound error will always display the missing vs existing prop in the same order
                 let use_op_new = remove_unify_flip(use_op.clone());
                 use_op == &use_op_new
@@ -1182,7 +1207,7 @@ where
             use VirtualFrameUseOp::*;
 
             match (frame, use_op) {
-                (FunParam(box FunParamData { .. }), VirtualUseOp::Frame(f, _))
+                (FunParam(deref!(FunParamData { .. })), VirtualUseOp::Frame(f, _))
                     if matches!(f.as_ref(), FunCompatibility { .. }) =>
                 {
                     (true, true)
@@ -1199,10 +1224,12 @@ where
                     _,
                 ) => (true, false),
                 (
-                    TypeArgCompatibility(box TypeArgCompatibilityData {
-                        polarity: Polarity::Negative,
-                        ..
-                    }),
+                    TypeArgCompatibility(
+                        deref!(TypeArgCompatibilityData {
+                            polarity: Polarity::Negative,
+                            ..
+                        }),
+                    ),
                     _,
                 ) => (true, false),
                 _ => (false, false),
@@ -1324,7 +1351,9 @@ where
                         use flow_common::reason::VirtualReasonDesc::*;
                         matches!(
                             desc,
-                            REnum { name: Some(_), .. } | RType(_) | RTypeAlias(box (_, Some(_), _))
+                            REnum { name: Some(_), .. }
+                                | RType(_)
+                                | RTypeAlias(deref!((_, Some(_), _)))
                         )
                     };
 
@@ -1377,12 +1406,12 @@ where
                     VirtualUseOp::Frame(frame_rc, inner) => {
                         match frame_rc.as_ref() {
                             VirtualFrameUseOp::PropertyCompatibility(
-                                box PropertyCompatibilityData {
+                                deref!(PropertyCompatibilityData {
                                     prop: Some(prop),
                                     lower,
                                     upper,
                                     ..
-                                },
+                                }),
                             ) if !prop.matches_str("$call")
                                 && opt_incompatibility_pair(
                                     &inner,
@@ -1417,9 +1446,12 @@ where
                             }
 
                             VirtualFrameUseOp::TupleElementCompatibility(
-                                box TupleElementCompatibilityData {
-                                    n, lower, upper, ..
-                                },
+                                deref!(TupleElementCompatibilityData {
+                                    n,
+                                    lower,
+                                    upper,
+                                    ..
+                                }),
                             ) if opt_incompatibility_pair(
                                 &inner,
                                 &(lower.dupe(), upper.dupe()),
@@ -1684,12 +1716,12 @@ where
                                     AssignVarInit::Reason(reason) => {
                                         (&reason.loc, ValueDesc::Reason(reason.desc.clone()))
                                     }
-                                    AssignVarInit::Default(box AssignVarDefaultData {
-                                        loc: default_loc,
-                                        default,
-                                    }) => {
-                                        (default_loc, ValueDesc::Type(printed_type_desc(default)))
-                                    }
+                                    AssignVarInit::Default(
+                                        deref!(AssignVarDefaultData {
+                                            loc: default_loc,
+                                            default,
+                                        }),
+                                    ) => (default_loc, ValueDesc::Type(printed_type_desc(default))),
                                 };
                                 root_at_loc(
                                     loc,
@@ -1719,18 +1751,18 @@ where
                                 custom_error_message,
                             ),
 
-                            VirtualRootUseOp::InitField(box InitFieldData { op, field, body }) => {
-                                root(
-                                    loc,
-                                    frames,
-                                    op,
-                                    RootMessage::RootCannotInitializeField {
-                                        field: field.dupe(),
-                                        body: body.kind.dupe(),
-                                    },
-                                    custom_error_message,
-                                )
-                            }
+                            VirtualRootUseOp::InitField(
+                                deref!(InitFieldData { op, field, body }),
+                            ) => root(
+                                loc,
+                                frames,
+                                op,
+                                RootMessage::RootCannotInitializeField {
+                                    field: field.dupe(),
+                                    body: body.kind.dupe(),
+                                },
+                                custom_error_message,
+                            ),
 
                             // Cast
                             VirtualRootUseOp::Cast { lower, upper } => root_at_loc(
@@ -1744,12 +1776,14 @@ where
                                 custom_error_message,
                             ),
 
-                            VirtualRootUseOp::ClassExtendsCheck(box ClassExtendsCheckData {
-                                extends_loc,
-                                extends,
-                                def_loc,
-                                def,
-                            }) => root_at_loc(
+                            VirtualRootUseOp::ClassExtendsCheck(
+                                deref!(ClassExtendsCheckData {
+                                    extends_loc,
+                                    extends,
+                                    def_loc,
+                                    def,
+                                }),
+                            ) => root_at_loc(
                                 loc,
                                 frames,
                                 loc_of_aloc(def_loc),
@@ -1767,11 +1801,11 @@ where
                             ),
 
                             VirtualRootUseOp::ClassMethodDefinition(
-                                box ClassMethodDefinitionData {
+                                deref!(ClassMethodDefinitionData {
                                     def_loc,
                                     method_name,
                                     name,
-                                },
+                                }),
                             ) => root_at_loc(
                                 loc,
                                 frames,
@@ -1787,12 +1821,12 @@ where
                             ),
 
                             VirtualRootUseOp::ClassImplementsCheck(
-                                box ClassImplementsCheckData {
+                                deref!(ClassImplementsCheckData {
                                     implements_loc,
                                     implements,
                                     def,
                                     ..
-                                },
+                                }),
                             ) => root(
                                 loc,
                                 frames,
@@ -1807,11 +1841,13 @@ where
                                 custom_error_message,
                             ),
 
-                            VirtualRootUseOp::ClassOwnProtoCheck(box ClassOwnProtoCheckData {
-                                prop,
-                                own_loc,
-                                proto_loc,
-                            }) => match (own_loc, proto_loc) {
+                            VirtualRootUseOp::ClassOwnProtoCheck(
+                                deref!(ClassOwnProtoCheckData {
+                                    prop,
+                                    own_loc,
+                                    proto_loc,
+                                }),
+                            ) => match (own_loc, proto_loc) {
                                 (None, None) => {
                                     let (all_frames, explanations) = frames;
                                     (None, custom_error_message, loc, all_frames, explanations)
@@ -1854,11 +1890,11 @@ where
                             ),
 
                             VirtualRootUseOp::ConformToCommonInterface(
-                                box ConformToCommonInterfaceData {
+                                deref!(ConformToCommonInterfaceData {
                                     self_sig_loc,
                                     self_module_loc,
                                     originate_from_import,
-                                },
+                                }),
                             ) => {
                                 let (all_frames, mut explanations) = frames;
                                 explanations.push(Explanation::ExplanationMultiplatform);
@@ -1888,12 +1924,14 @@ where
                                 )
                             }
 
-                            VirtualRootUseOp::MergedDeclaration(box MergedDeclarationData {
-                                conflict,
-                                first_decl_loc,
-                                first_decl,
-                                current_decl,
-                            }) => root(
+                            VirtualRootUseOp::MergedDeclaration(
+                                deref!(MergedDeclarationData {
+                                    conflict,
+                                    first_decl_loc,
+                                    first_decl,
+                                    current_decl,
+                                }),
+                            ) => root(
                                 loc,
                                 frames,
                                 current_decl,
@@ -1915,7 +1953,7 @@ where
                                 custom_error_message,
                             ),
 
-                            VirtualRootUseOp::FunCall(box FunCallData { op, fn_, .. }) => {
+                            VirtualRootUseOp::FunCall(deref!(FunCallData { op, fn_, .. })) => {
                                 let (fn_loc, fn_) = callee_desc_of_reference(fn_);
                                 let root_loc = loc_of_aloc(&op.loc);
                                 let specific_loc = loc_of_aloc(fn_loc);
@@ -1936,12 +1974,9 @@ where
                                 )
                             }
 
-                            VirtualRootUseOp::FunCallMethod(box FunCallMethodData {
-                                op,
-                                fn_,
-                                prop,
-                                ..
-                            }) => {
+                            VirtualRootUseOp::FunCallMethod(
+                                deref!(FunCallMethodData { op, fn_, prop, .. }),
+                            ) => {
                                 let root_loc = loc_of_aloc(&op.loc);
                                 let specific_loc = loc_of_aloc(&prop.loc);
 
@@ -1983,12 +2018,14 @@ where
                                 )
                             }
 
-                            VirtualRootUseOp::FunImplicitReturn(box FunImplicitReturnData {
-                                upper,
-                                fn_,
-                                type_guard: true,
-                                ..
-                            }) => root(
+                            VirtualRootUseOp::FunImplicitReturn(
+                                deref!(FunImplicitReturnData {
+                                    upper,
+                                    fn_,
+                                    type_guard: true,
+                                    ..
+                                }),
+                            ) => root(
                                 loc,
                                 frames,
                                 upper,
@@ -1999,12 +2036,14 @@ where
                                 custom_error_message,
                             ),
 
-                            VirtualRootUseOp::FunImplicitReturn(box FunImplicitReturnData {
-                                upper,
-                                upper_t,
-                                fn_,
-                                ..
-                            }) => root(
+                            VirtualRootUseOp::FunImplicitReturn(
+                                deref!(FunImplicitReturnData {
+                                    upper,
+                                    upper_t,
+                                    fn_,
+                                    ..
+                                }),
+                            ) => root(
                                 loc,
                                 frames,
                                 upper,
@@ -2042,11 +2081,13 @@ where
                                 custom_error_message,
                             ),
 
-                            VirtualRootUseOp::IndexedTypeAccess(box IndexedTypeAccessData {
-                                index_loc,
-                                object,
-                                index,
-                            }) => root_at_loc(
+                            VirtualRootUseOp::IndexedTypeAccess(
+                                deref!(IndexedTypeAccessData {
+                                    index_loc,
+                                    object,
+                                    index,
+                                }),
+                            ) => root_at_loc(
                                 loc,
                                 frames,
                                 loc_of_aloc(index_loc),
@@ -2069,13 +2110,11 @@ where
                                 )
                             }
 
-                            VirtualRootUseOp::JSXCreateElement(box JSXCreateElementData {
-                                op,
-                                component,
-                                ..
-                            })
+                            VirtualRootUseOp::JSXCreateElement(
+                                deref!(JSXCreateElementData { op, component, .. }),
+                            )
                             | VirtualRootUseOp::ReactCreateElementCall(
-                                box ReactCreateElementCallData { op, component, .. },
+                                deref!(ReactCreateElementCallData { op, component, .. }),
                             ) => {
                                 let root_loc = loc_of_aloc(&op.loc);
                                 let specific_loc = loc_of_aloc(&component.loc);
@@ -2109,11 +2148,13 @@ where
                                 custom_error_message,
                             ),
 
-                            VirtualRootUseOp::RecordCreate(box RecordCreateData {
-                                op,
-                                constructor,
-                                ..
-                            }) => {
+                            VirtualRootUseOp::RecordCreate(
+                                deref!(RecordCreateData {
+                                    op,
+                                    constructor,
+                                    ..
+                                }),
+                            ) => {
                                 let root_loc = loc_of_aloc(&op.loc);
                                 let specific_loc = loc_of_aloc(&constructor.loc);
 
@@ -2150,10 +2191,9 @@ where
 
                             VirtualRootUseOp::TypeApplication {
                                 type_:
-                                    TypeApplicationTarget::Typeof(box TypeofApplicationData {
-                                        reason,
-                                        name,
-                                    }),
+                                    TypeApplicationTarget::Typeof(
+                                        deref!(TypeofApplicationData { reason, name }),
+                                    ),
                             } => root(
                                 loc,
                                 frames,
@@ -2163,7 +2203,7 @@ where
                             ),
 
                             VirtualRootUseOp::MakeReadOnly {
-                                loc: box readonly_loc,
+                                loc: deref!(readonly_loc),
                             } => root_at_loc(
                                 loc,
                                 frames,
@@ -2172,12 +2212,14 @@ where
                                 custom_error_message,
                             ),
 
-                            VirtualRootUseOp::SetProperty(box SetPropertyData {
-                                prop,
-                                value,
-                                lhs,
-                                ..
-                            }) => {
+                            VirtualRootUseOp::SetProperty(
+                                deref!(SetPropertyData {
+                                    prop,
+                                    value,
+                                    lhs,
+                                    ..
+                                }),
+                            ) => {
                                 let lhs_loc = loc_of_aloc(&lhs.loc);
                                 let root_loc = if lhs_loc.contains(&loc) {
                                     lhs_loc
@@ -2224,7 +2266,7 @@ where
                             ),
 
                             VirtualRootUseOp::SwitchRefinementCheck(
-                                box SwitchRefinementCheckData { test, discriminant },
+                                deref!(SwitchRefinementCheckData { test, discriminant }),
                             ) => {
                                 let root_loc = loc_of_aloc(test);
                                 let specific_loc = root_loc.dupe();
@@ -2250,10 +2292,12 @@ where
                                 )
                             }
 
-                            VirtualRootUseOp::EvalMappedType(box EvalMappedTypeData {
-                                mapped_type_loc,
-                                mapped_type,
-                            }) => root_at_loc(
+                            VirtualRootUseOp::EvalMappedType(
+                                deref!(EvalMappedTypeData {
+                                    mapped_type_loc,
+                                    mapped_type,
+                                }),
+                            ) => root_at_loc(
                                 loc,
                                 frames,
                                 loc_of_aloc(mapped_type_loc),
@@ -2265,12 +2309,12 @@ where
                             ),
 
                             VirtualRootUseOp::TypeGuardIncompatibility(
-                                box TypeGuardIncompatibilityData {
+                                deref!(TypeGuardIncompatibilityData {
                                     guard_type_loc,
                                     guard_type_reference_loc,
                                     guard_type,
                                     param_name,
-                                },
+                                }),
                             ) => root_at_loc(
                                 loc,
                                 frames,
@@ -2291,7 +2335,7 @@ where
                             }
 
                             VirtualRootUseOp::PositiveTypeGuardConsistency(
-                                box PositiveTypeGuardConsistencyData {
+                                deref!(PositiveTypeGuardConsistencyData {
                                     return_expression,
                                     param_loc,
                                     param_name,
@@ -2299,7 +2343,7 @@ where
                                     guard_type,
                                     is_return_false_statement,
                                     ..
-                                },
+                                }),
                             ) => {
                                 let (all_frames, mut explanations) = frames;
                                 explanations.push(
@@ -2334,14 +2378,14 @@ where
                             }
 
                             VirtualRootUseOp::AssertionFunctionConsistency(
-                                box AssertionFunctionConsistencyData {
+                                deref!(AssertionFunctionConsistencyData {
                                     exit_reason,
                                     param_loc,
                                     param_name,
                                     guard_type_reference_loc,
                                     guard_type,
                                     implicit_return,
-                                },
+                                }),
                             ) => {
                                 let (all_frames, mut explanations) = frames;
                                 explanations.push(
@@ -2407,13 +2451,15 @@ where
                     }
 
                     VirtualUseOp::Frame(ref frame_rc, ref inner_use_op)
-                        if let VirtualFrameUseOp::FunParam(box FunParamData {
-                            n,
-                            name,
-                            lower: lower_prime,
-                            lower_t,
-                            ..
-                        }) = frame_rc.as_ref()
+                        if let VirtualFrameUseOp::FunParam(
+                            deref!(FunParamData {
+                                n,
+                                name,
+                                lower: lower_prime,
+                                lower_t,
+                                ..
+                            }),
+                        ) = frame_rc.as_ref()
                             && let VirtualUseOp::Op(op_rc) = inner_use_op.as_ref()
                             && matches!(
                                 op_rc.as_ref(),
@@ -2460,7 +2506,7 @@ where
                                 )
                             };
                         match op_rc.as_ref() {
-                            VirtualRootUseOp::FunCall(box FunCallData { args, fn_, .. }) => {
+                            VirtualRootUseOp::FunCall(deref!(FunCallData { args, fn_, .. })) => {
                                 fun_param_root(
                                     args,
                                     callee_desc_of_reference(fn_).1,
@@ -2468,21 +2514,17 @@ where
                                     custom_error_message,
                                 )
                             }
-                            VirtualRootUseOp::FunCallMethod(box FunCallMethodData {
-                                args,
-                                fn_,
-                                ..
-                            }) => fun_param_root(
+                            VirtualRootUseOp::FunCallMethod(
+                                deref!(FunCallMethodData { args, fn_, .. }),
+                            ) => fun_param_root(
                                 args,
                                 method_callee_desc(fn_),
                                 frames,
                                 custom_error_message,
                             ),
-                            VirtualRootUseOp::JSXCreateElement(box JSXCreateElementData {
-                                op,
-                                component,
-                                ..
-                            }) => {
+                            VirtualRootUseOp::JSXCreateElement(
+                                deref!(JSXCreateElementData { op, component, .. }),
+                            ) => {
                                 let root_loc = loc_of_aloc(&op.loc);
                                 let specific_loc = loc_of_aloc(&component.loc);
 
@@ -2506,11 +2548,13 @@ where
                                     explanations,
                                 )
                             }
-                            VirtualRootUseOp::RecordCreate(box RecordCreateData {
-                                op,
-                                constructor,
-                                ..
-                            }) => {
+                            VirtualRootUseOp::RecordCreate(
+                                deref!(RecordCreateData {
+                                    op,
+                                    constructor,
+                                    ..
+                                }),
+                            ) => {
                                 let root_loc = loc_of_aloc(&op.loc);
                                 let specific_loc = loc_of_aloc(&constructor.loc);
 
@@ -2542,12 +2586,14 @@ where
                     }
 
                     VirtualUseOp::Frame(frame, inner) => match frame.as_ref() {
-                        VirtualFrameUseOp::StandaloneCallThis(box StandaloneCallThisData {
-                            op,
-                            fn_,
-                            receiver_loc,
-                            receiver: box receiver,
-                        }) => {
+                        VirtualFrameUseOp::StandaloneCallThis(
+                            deref!(StandaloneCallThisData {
+                                op,
+                                fn_,
+                                receiver_loc,
+                                receiver: deref!(receiver),
+                            }),
+                        ) => {
                             let (fn_loc, fn_) = callee_desc_of_reference(fn_);
                             let (all_frames, explanations) = frames;
                             (
@@ -2664,7 +2710,7 @@ where
                             speculation,
                         ),
 
-                        VirtualFrameUseOp::ReactDeepReadOnly(box (_, DroType::DebugAnnot)) => {
+                        VirtualFrameUseOp::ReactDeepReadOnly(deref!((_, DroType::DebugAnnot))) => {
                             loop_impl(
                                 loc,
                                 frames,
@@ -2678,12 +2724,14 @@ where
                             )
                         }
 
-                        VirtualFrameUseOp::FunReturn(box FunReturnData {
-                            lower,
-                            upper,
-                            lower_t,
-                            upper_t,
-                        }) => {
+                        VirtualFrameUseOp::FunReturn(
+                            deref!(FunReturnData {
+                                lower,
+                                upper,
+                                lower_t,
+                                upper_t,
+                            }),
+                        ) => {
                             let (mut all_frames, explanations) = frames;
                             let incompatibility_pair = opt_incompatibility_pair(
                                 inner.as_ref(),
@@ -2745,11 +2793,13 @@ where
                             )
                         }
 
-                        VirtualFrameUseOp::UnionRepresentative(box UnionRepresentativeData {
-                            loc: union_loc,
-                            reference_loc,
-                            union,
-                        }) => {
+                        VirtualFrameUseOp::UnionRepresentative(
+                            deref!(UnionRepresentativeData {
+                                loc: union_loc,
+                                reference_loc,
+                                union,
+                            }),
+                        ) => {
                             let frame_loc = loc_of_aloc(union_loc);
                             let final_loc = if frame_loc.contains(&loc) {
                                 loc
@@ -2776,7 +2826,9 @@ where
                             )
                         }
 
-                        VirtualFrameUseOp::ReactDeepReadOnly(box (props_loc, DroType::Props)) => {
+                        VirtualFrameUseOp::ReactDeepReadOnly(
+                            deref!((props_loc, DroType::Props)),
+                        ) => {
                             let (all_frames, mut explanations) = frames;
                             explanations.push(
                                 Explanation::ExplanationReactComponentPropsDeepReadOnly(
@@ -2796,7 +2848,9 @@ where
                             )
                         }
 
-                        VirtualFrameUseOp::ReactDeepReadOnly(box (props_loc, DroType::HookArg)) => {
+                        VirtualFrameUseOp::ReactDeepReadOnly(
+                            deref!((props_loc, DroType::HookArg)),
+                        ) => {
                             let (all_frames, mut explanations) = frames;
                             explanations.push(Explanation::ExplanationReactHookArgsDeepReadOnly(
                                 props_loc.dupe(),
@@ -2814,10 +2868,9 @@ where
                             )
                         }
 
-                        VirtualFrameUseOp::ReactDeepReadOnly(box (
-                            hook_loc,
-                            DroType::HookReturn,
-                        )) => {
+                        VirtualFrameUseOp::ReactDeepReadOnly(
+                            deref!((hook_loc, DroType::HookReturn,)),
+                        ) => {
                             let (all_frames, mut explanations) = frames;
                             explanations.push(Explanation::ExplanationReactHookReturnDeepReadOnly(
                                 hook_loc.dupe(),
@@ -2836,11 +2889,11 @@ where
                         }
 
                         VirtualFrameUseOp::ConstrainedAssignment(
-                            box ConstrainedAssignmentData {
+                            deref!(ConstrainedAssignmentData {
                                 name,
                                 declaration,
                                 providers,
-                            },
+                            }),
                         ) => {
                             let (all_frames, mut explanations) = frames;
                             explanations.push(Explanation::ExplanationConstrainedAssign(Box::new(
@@ -2884,12 +2937,12 @@ where
                         }
 
                         VirtualFrameUseOp::ArrayElementCompatibility(
-                            box ArrayElementCompatibilityData {
+                            deref!(ArrayElementCompatibilityData {
                                 lower,
                                 upper,
                                 lower_t,
                                 upper_t,
-                            },
+                            }),
                         ) => {
                             let frame_loc = loc_of_aloc(&lower.loc);
                             let final_loc = if frame_loc.contains(&loc) {
@@ -2926,12 +2979,12 @@ where
                         }
 
                         VirtualFrameUseOp::IndexerKeyCompatibility(
-                            box IndexerKeyCompatibilityData {
+                            deref!(IndexerKeyCompatibilityData {
                                 lower,
                                 upper,
                                 lower_t,
                                 ..
-                            },
+                            }),
                         ) => {
                             let frame_loc = loc_of_aloc(&lower.loc);
                             let final_loc = if frame_loc.contains(&loc) {
@@ -2962,11 +3015,9 @@ where
                             )
                         }
 
-                        VirtualFrameUseOp::TypeArgCompatibility(box TypeArgCompatibilityData {
-                            targ,
-                            lower,
-                            ..
-                        }) => {
+                        VirtualFrameUseOp::TypeArgCompatibility(
+                            deref!(TypeArgCompatibilityData { targ, lower, .. }),
+                        ) => {
                             let frame_loc = loc_of_aloc(&lower.loc);
                             let final_loc = if frame_loc.contains(&loc) {
                                 loc
@@ -3014,14 +3065,16 @@ where
                             )
                         }
 
-                        VirtualFrameUseOp::FunParam(box FunParamData {
-                            n,
-                            lower,
-                            upper,
-                            name,
-                            lower_t,
-                            upper_t,
-                        }) if matches!(
+                        VirtualFrameUseOp::FunParam(
+                            deref!(FunParamData {
+                                n,
+                                lower,
+                                upper,
+                                name,
+                                lower_t,
+                                upper_t,
+                            }),
+                        ) if matches!(
                             inner.as_ref(),
                             VirtualUseOp::Frame(f_rc, _) if matches!(
                                 f_rc.as_ref(),
@@ -3073,14 +3126,16 @@ where
                             )
                         }
 
-                        VirtualFrameUseOp::FunParam(box FunParamData {
-                            n,
-                            lower,
-                            upper,
-                            name,
-                            lower_t,
-                            upper_t,
-                        }) => {
+                        VirtualFrameUseOp::FunParam(
+                            deref!(FunParamData {
+                                n,
+                                lower,
+                                upper,
+                                name,
+                                lower_t,
+                                upper_t,
+                            }),
+                        ) => {
                             let frame_loc = loc_of_aloc(&lower.loc);
                             let final_loc = if frame_loc.contains(&loc) {
                                 loc
@@ -3126,13 +3181,13 @@ where
                         }
 
                         VirtualFrameUseOp::PropertyCompatibility(
-                            box PropertyCompatibilityData {
+                            deref!(PropertyCompatibilityData {
                                 prop: None,
                                 lower,
                                 upper,
                                 lower_t,
                                 ..
-                            },
+                            }),
                         ) => {
                             let frame_loc = loc_of_aloc(&lower.loc);
                             let final_loc = if frame_loc.contains(&loc) {
@@ -3165,13 +3220,13 @@ where
                         }
 
                         VirtualFrameUseOp::PropertyCompatibility(
-                            box PropertyCompatibilityData {
+                            deref!(PropertyCompatibilityData {
                                 prop: Some(name),
                                 lower,
                                 upper,
                                 lower_t,
                                 ..
-                            },
+                            }),
                         ) if name.matches_str("$call") => {
                             let frame_loc = loc_of_aloc(&lower.loc);
                             let final_loc = if frame_loc.contains(&loc) {
@@ -3228,14 +3283,14 @@ where
                         }
 
                         VirtualFrameUseOp::OpaqueTypeCustomErrorCompatibility(
-                            box OpaqueTypeCustomErrorCompatibilityData {
+                            deref!(OpaqueTypeCustomErrorCompatibilityData {
                                 lower,
                                 upper,
                                 lower_t,
                                 upper_t,
                                 name,
                                 custom_error_loc,
-                            },
+                            }),
                         ) => {
                             let lower_desc = match lower_t {
                                 TypeOrTypeDescT::Type(_) => ErrorTypeDesc::Unknown,
@@ -3290,13 +3345,13 @@ where
                         }
 
                         VirtualFrameUseOp::PropertyCompatibility(
-                            box PropertyCompatibilityData {
+                            deref!(PropertyCompatibilityData {
                                 prop: Some(prop),
                                 lower,
                                 upper,
                                 lower_t,
                                 ..
-                            },
+                            }),
                         ) => {
                             let lower_loc =
                                 loc_of_prop_compatibility_reason(loc.dupe(), lower, &inner);
@@ -3342,13 +3397,13 @@ where
                         }
 
                         VirtualFrameUseOp::TupleElementCompatibility(
-                            box TupleElementCompatibilityData {
+                            deref!(TupleElementCompatibilityData {
                                 n,
                                 lower,
                                 upper,
                                 lower_t,
                                 ..
-                            },
+                            }),
                         ) => {
                             let lower_loc = loc_of_aloc(&lower.loc);
 
@@ -3504,10 +3559,9 @@ where
          -> IntermediateError<L> {
             let use_op = match &use_op {
                 VirtualUseOp::Frame(frame_rc, inner_use_op) => match frame_rc.as_ref() {
-                    VirtualFrameUseOp::PropertyCompatibility(box PropertyCompatibilityData {
-                        prop,
-                        ..
-                    }) => {
+                    VirtualFrameUseOp::PropertyCompatibility(
+                        deref!(PropertyCompatibilityData { prop, .. }),
+                    ) => {
                         // `props` is already rendered, so this matches on display
                         // spelling: two unnamed symbol keys both render `[symbol]`
                         // and compare equal here. That only picks which use_op
@@ -3606,12 +3660,12 @@ where
 
         if let VirtualUseOp::Frame(frame, inner_use_op) = &use_op {
             if let VirtualFrameUseOp::MappedTypeKeyCompatibility(
-                box MappedTypeKeyCompatibilityData {
+                deref!(MappedTypeKeyCompatibilityData {
                     source_type_loc,
                     source_type,
                     mapped_type_loc,
                     mapped_type,
-                },
+                }),
             ) = frame.as_ref()
             {
                 return mk_use_op_error(
@@ -3741,10 +3795,10 @@ where
                     let root_use_op = root_of_use_op(&use_op);
                     match root_use_op {
                         VirtualRootUseOp::ComponentRestParamCompatibility(
-                            box ComponentRestParamCompatibilityData {
+                            deref!(ComponentRestParamCompatibilityData {
                                 rest_param_loc,
                                 rest_param,
-                            },
+                            }),
                         ) => mk_no_frame_or_explanation_error(
                             rest_param_loc,
                             Message::MessageIncompatibleComponentRestParam(
@@ -3766,9 +3820,9 @@ where
             },
 
             VirtualUseOp::Frame(frame, inner_use_op) => match frame.as_ref() {
-                VirtualFrameUseOp::FunMissingArg(box FunMissingArgData {
-                    def, op, def_t, ..
-                }) => {
+                VirtualFrameUseOp::FunMissingArg(
+                    deref!(FunMissingArgData { def, op, def_t, .. }),
+                ) => {
                     let message = missing_argument_message(
                         printed_type_reference(def, def_t),
                         op,
@@ -3790,11 +3844,13 @@ where
                     },
                 ),
 
-                VirtualFrameUseOp::UnionRepresentative(box UnionRepresentativeData {
-                    loc: union_loc,
-                    reference_loc,
-                    union,
-                }) => mk_use_op_error(
+                VirtualFrameUseOp::UnionRepresentative(
+                    deref!(UnionRepresentativeData {
+                        loc: union_loc,
+                        reference_loc,
+                        union,
+                    }),
+                ) => mk_use_op_error(
                     loc_of_aloc(union_loc),
                     inner_use_op.as_ref().clone(),
                     additional_explanation.clone(),
@@ -3812,10 +3868,10 @@ where
                     let root_use_op = root_of_use_op(&use_op);
                     match root_use_op {
                         VirtualRootUseOp::ComponentRestParamCompatibility(
-                            box ComponentRestParamCompatibilityData {
+                            deref!(ComponentRestParamCompatibilityData {
                                 rest_param_loc,
                                 rest_param,
-                            },
+                            }),
                         ) => mk_no_frame_or_explanation_error(
                             rest_param_loc,
                             Message::MessageIncompatibleComponentRestParam(
@@ -4001,26 +4057,27 @@ where
 
         (
             None,
-            FriendlyMessageRecipe::UseOp(box UseOpData {
-                loc: primary_loc,
-                message:
-                    Message::MessageIncompatibleGeneralWithPrintedTypes(
-                        box MessageIncompatibleGeneralWithPrintedTypesData {
+            FriendlyMessageRecipe::UseOp(
+                deref!(UseOpData {
+                    loc: primary_loc,
+                    message: Message::MessageIncompatibleGeneralWithPrintedTypes(deref!(
+                        MessageIncompatibleGeneralWithPrintedTypesData {
                             lower_loc,
                             upper_loc,
                             lower_desc,
                             upper_desc,
-                        },
-                    ),
-                use_op,
-                explanation,
-            }),
+                        }
+                    ),),
+                    use_op,
+                    explanation,
+                }),
+            ),
         ) => {
             if let VirtualRootUseOp::ComponentRestParamCompatibility(
-                box ComponentRestParamCompatibilityData {
+                deref!(ComponentRestParamCompatibilityData {
                     rest_param_loc,
                     rest_param,
-                },
+                }),
             ) = root_of_use_op(&use_op)
             {
                 mk_no_frame_or_explanation_error(
@@ -4031,12 +4088,9 @@ where
                     }),
                 )
             } else if let VirtualUseOp::Frame(frame, inner_use_op) = &use_op
-                && let VirtualFrameUseOp::FunMissingArg(box FunMissingArgData {
-                    def,
-                    op,
-                    def_t,
-                    ..
-                }) = frame.as_ref()
+                && let VirtualFrameUseOp::FunMissingArg(
+                    deref!(FunMissingArgData { def, op, def_t, .. }),
+                ) = frame.as_ref()
             {
                 let message =
                     missing_argument_message(printed_type_reference(def, def_t), op, inner_use_op);
@@ -4065,7 +4119,7 @@ where
         (
             None,
             FriendlyMessageRecipe::IncompatibleTypesWithExample(
-                box IncompatibleTypesWithExampleData {
+                deref!(IncompatibleTypesWithExampleData {
                     loc,
                     lower_loc,
                     upper_loc,
@@ -4074,7 +4128,7 @@ where
                     use_op,
                     explanation,
                     example,
-                },
+                }),
             ),
         ) => {
             use super::flow_error::error_of_msg;
@@ -4113,22 +4167,26 @@ where
 
         (
             None,
-            FriendlyMessageRecipe::UseOp(box UseOpData {
-                loc,
-                message,
-                use_op,
-                explanation,
-            }),
+            FriendlyMessageRecipe::UseOp(
+                deref!(UseOpData {
+                    loc,
+                    message,
+                    use_op,
+                    explanation,
+                }),
+            ),
         ) => mk_use_op_error(loc_of_aloc(&loc), use_op, explanation, message),
 
         (
             None,
-            FriendlyMessageRecipe::PrivatePropMissingInLookup(box PrivatePropMissingInLookupData {
-                loc,
-                object,
-                prop,
-                use_op,
-            }),
+            FriendlyMessageRecipe::PrivatePropMissingInLookup(
+                deref!(PrivatePropMissingInLookupData {
+                    loc,
+                    object,
+                    prop,
+                    use_op,
+                }),
+            ),
         ) => mk_use_op_error(
             loc_of_aloc(&loc),
             use_op,
@@ -4138,13 +4196,15 @@ where
 
         (
             None,
-            FriendlyMessageRecipe::IndexerCheckFailed(box IndexerCheckFailedData {
-                prop,
-                lower,
-                upper,
-                indexer,
-                use_op,
-            }),
+            FriendlyMessageRecipe::IndexerCheckFailed(
+                deref!(IndexerCheckFailedData {
+                    prop,
+                    lower,
+                    upper,
+                    indexer,
+                    use_op,
+                }),
+            ),
         ) => mk_use_op_error(
             loc_of_aloc(&lower.loc),
             use_op,
@@ -4159,14 +4219,16 @@ where
 
         (
             None,
-            FriendlyMessageRecipe::PropMissingInSubtyping(box PropMissingInSubtypingData {
-                prop,
-                suggestion,
-                loc,
-                lower,
-                upper,
-                use_op,
-            }),
+            FriendlyMessageRecipe::PropMissingInSubtyping(
+                deref!(PropMissingInSubtypingData {
+                    prop,
+                    suggestion,
+                    loc,
+                    lower,
+                    upper,
+                    use_op,
+                }),
+            ),
         ) => mk_prop_missing_in_subtyping_error(
             prop.dupe(),
             suggestion.dupe(),
@@ -4178,13 +4240,15 @@ where
 
         (
             None,
-            FriendlyMessageRecipe::PropsMissingInSubtyping(box PropsMissingInSubtypingData {
-                props,
-                loc,
-                lower,
-                upper,
-                use_op,
-            }),
+            FriendlyMessageRecipe::PropsMissingInSubtyping(
+                deref!(PropsMissingInSubtypingData {
+                    props,
+                    loc,
+                    lower,
+                    upper,
+                    use_op,
+                }),
+            ),
         ) => mk_props_missing_in_subtyping_error(
             Vec1::try_from_vec(props.iter().map(|s| FlowSmolStr::new(s.as_str())).collect())
                 .unwrap(),
@@ -4197,7 +4261,7 @@ where
         (
             None,
             FriendlyMessageRecipe::PropsMissingInInvariantSubtyping(
-                box PropsMissingInInvariantSubtypingData {
+                deref!(PropsMissingInInvariantSubtypingData {
                     props,
                     loc,
                     lower_obj_loc,
@@ -4205,7 +4269,7 @@ where
                     lower,
                     upper,
                     use_op,
-                },
+                }),
             ),
         ) => mk_props_missing_in_invariant_subtyping_error(
             Vec1::try_from_vec(props.to_vec()).unwrap(),
@@ -4220,14 +4284,14 @@ where
         (
             None,
             FriendlyMessageRecipe::PropsExtraAgainstExactObject(
-                box PropsExtraAgainstExactObjectData {
+                deref!(PropsExtraAgainstExactObjectData {
                     props,
                     loc,
                     lower,
                     upper,
                     upper_is_record,
                     use_op,
-                },
+                }),
             ),
         ) => mk_use_op_error(
             loc_of_aloc(&loc),
@@ -4248,13 +4312,15 @@ where
 
         (
             None,
-            FriendlyMessageRecipe::PropPolarityMismatch(box PropPolarityMismatchData {
-                loc,
-                lower,
-                upper,
-                props,
-                use_op,
-            }),
+            FriendlyMessageRecipe::PropPolarityMismatch(
+                deref!(PropPolarityMismatchData {
+                    loc,
+                    lower,
+                    upper,
+                    props,
+                    use_op,
+                }),
+            ),
         ) => mk_prop_polarity_mismatch_error(
             loc,
             lower,
@@ -4271,14 +4337,16 @@ where
 
         (
             None,
-            FriendlyMessageRecipe::IncompatibleTypeUse(box IncompatibleTypeUseData {
-                loc,
-                upper_kind,
-                lower_loc,
-                lower_kind,
-                lower_desc,
-                use_op,
-            }),
+            FriendlyMessageRecipe::IncompatibleTypeUse(
+                deref!(IncompatibleTypeUseData {
+                    loc,
+                    upper_kind,
+                    lower_loc,
+                    lower_kind,
+                    lower_desc,
+                    use_op,
+                }),
+            ),
         ) => mk_incompatible_use_error(
             loc_of_aloc(&loc),
             upper_kind,
@@ -4290,18 +4358,20 @@ where
 
         (
             None,
-            FriendlyMessageRecipe::IncompatibleSubtyping(box IncompatibleSubtypingData {
-                reason_lower,
-                reason_upper,
-                use_op,
-                explanation,
-            }),
+            FriendlyMessageRecipe::IncompatibleSubtyping(
+                deref!(IncompatibleSubtypingData {
+                    reason_lower,
+                    reason_upper,
+                    use_op,
+                    explanation,
+                }),
+            ),
         ) => mk_incompatible_error(explanation, reason_lower, reason_upper, use_op),
 
         (
             None,
             FriendlyMessageRecipe::IncompatibleInvariantSubtyping(
-                box IncompatibleInvariantSubtypingData {
+                deref!(IncompatibleInvariantSubtypingData {
                     sub_component,
                     lower_loc,
                     upper_loc,
@@ -4309,7 +4379,7 @@ where
                     upper_desc,
                     use_op,
                     explanation,
-                },
+                }),
             ),
         ) => mk_incompatible_invariant_subtyping_error(
             explanation,
@@ -4323,11 +4393,13 @@ where
 
         (
             None,
-            FriendlyMessageRecipe::Speculation(box SpeculationData {
-                loc,
-                use_op,
-                branches,
-            }),
+            FriendlyMessageRecipe::Speculation(
+                deref!(SpeculationData {
+                    loc,
+                    use_op,
+                    branches,
+                }),
+            ),
         ) => mk_use_op_speculation_error(loc, use_op, branches),
 
         (None, FriendlyMessageRecipe::Normal(_)) | (Some(_), _) => {
@@ -4427,16 +4499,15 @@ where
 
     fn decl_description(decl: &Decl<ALoc>) -> String {
         match decl {
-            Decl::ClassDecl(box (name, _)) => format!("class `{}`", name.sym_name),
-            Decl::InterfaceDecl(box (name, _)) => format!("interface `{}`", name.sym_name),
-            Decl::EnumDecl(box flow_common_ty::ty::DeclEnumDeclData { name, .. }) => {
+            Decl::ClassDecl(deref!((name, _))) => format!("class `{}`", name.sym_name),
+            Decl::InterfaceDecl(deref!((name, _))) => format!("interface `{}`", name.sym_name),
+            Decl::EnumDecl(deref!(flow_common_ty::ty::DeclEnumDeclData { name, .. })) => {
                 format!("enum `{}`", name.sym_name)
             }
-            Decl::NominalComponentDecl(box flow_common_ty::ty::DeclNominalComponentDeclData {
-                name,
-                ..
-            }) => format!("component {}", name.sym_name),
-            Decl::TypeAliasDecl(box flow_common_ty::ty::DeclTypeAliasDeclData { name, .. }) => {
+            Decl::NominalComponentDecl(
+                deref!(flow_common_ty::ty::DeclNominalComponentDeclData { name, .. }),
+            ) => format!("component {}", name.sym_name),
+            Decl::TypeAliasDecl(deref!(flow_common_ty::ty::DeclTypeAliasDeclData { name, .. })) => {
                 format!("`{}`", name.sym_name)
             }
             Decl::VariableDecl(_)
@@ -5780,11 +5851,11 @@ where
         match message {
             MessagePlainTextReservedForInternalErrorOnly(s) => friendly::Message(vec![text(s)]),
             MessageAlreadyExhaustivelyCheckOneEnumMember(
-                box MessageAlreadyExhaustivelyCheckOneEnumMemberData {
+                deref!(MessageAlreadyExhaustivelyCheckOneEnumMemberData {
                     prev_check_loc,
                     enum_,
                     member_name,
-                },
+                }),
             ) => friendly::Message(vec![
                 text("Invalid exhaustive check: "),
                 text("case checks for enum member "),
@@ -5846,11 +5917,11 @@ where
                 render_named_reference(x),
                 text(". Overriding in library definitions can lead to surprising behaviors."),
             ]),
-            MessageCannotAccessEnumMember(box MessageCannotAccessEnumMemberData {
+            MessageCannotAccessEnumMember(deref!(MessageCannotAccessEnumMemberData {
                 member_name,
                 suggestion,
                 enum_,
-            }) => {
+            })) => {
                 let name = member_name.display_smol_str();
                 let mut features = vec![
                     text("Cannot access "),
@@ -6024,7 +6095,7 @@ where
                 friendly::Message(parts)
             }
             MessageInvalidKeyMirrorArgument(
-                box MessageInvalidKeyMirrorArgumentData { lower },
+                deref!(MessageInvalidKeyMirrorArgumentData { lower }),
             ) => friendly::Message(vec![
                 ref_of_type_desc(&lower.loc, &lower.desc),
                 text(" is not a valid argument of "),
@@ -6061,10 +6132,10 @@ where
                 friendly::Message(features)
             }
             MessageCannotAddComputedPropertyDueToPotentialOverwrite(
-                box MessageCannotAddComputedPropertyDueToPotentialOverwriteData {
+                deref!(MessageCannotAddComputedPropertyDueToPotentialOverwriteData {
                     key_loc,
                     overwritten_locs,
-                },
+                }),
             ) => {
                 let mut features = vec![
                     text("Cannot add computed property because the indexer"),
@@ -6123,11 +6194,11 @@ where
                 result.extend(features);
                 friendly::Message(result)
             }
-            MessageCannotCallMaybeReactHook(box MessageCannotCallMaybeReactHookData {
+            MessageCannotCallMaybeReactHook(deref!(MessageCannotCallMaybeReactHookData {
                 callee_loc,
                 hooks,
                 non_hooks,
-            }) => {
+            })) => {
                 let hook_blame = if hooks.is_empty() {
                     vec![text("React hook")]
                 } else {
@@ -6273,11 +6344,11 @@ where
                 render_enum_reference(enum_),
                 text(" because enums are frozen."),
             ]),
-            MessageCannotCompare(box MessageCannotCompareData {
+            MessageCannotCompare(deref!(MessageCannotCompareData {
                 lower,
                 upper,
                 strict_comparison_opt,
-            }) => {
+            })) => {
                 let mut features = vec![
                     text("Cannot compare "),
                     ref_of_type_desc(&lower.loc, &lower.desc),
@@ -6406,10 +6477,10 @@ where
                 text(" are used in the "),
                 text("same module!"),
             ]),
-            MessageCannotExportRenamedDefault(box MessageCannotExportRenamedDefaultData {
+            MessageCannotExportRenamedDefault(deref!(MessageCannotExportRenamedDefaultData {
                 name,
                 is_reexport,
-            }) => {
+            })) => {
                 let reexport_msg = vec![
                     text("If you intended to set the default export please "),
                     code("import"),
@@ -6450,11 +6521,11 @@ where
                 }
             }
             MessageCannotExhaustivelyCheckAbstractEnums(
-                box MessageCannotExhaustivelyCheckAbstractEnumsData {
+                deref!(MessageCannotExhaustivelyCheckAbstractEnumsData {
                     description_name,
                     enum_loc,
                     enum_name,
-                },
+                }),
             ) => {
                 let enum_reference = match enum_name {
                     Some(name) => hardcoded_string_desc_ref(&format!("`{name}`"), enum_loc),
@@ -6472,10 +6543,10 @@ where
                 ])
             }
             MessageCannotExhaustivelyCheckEnumWithUnknowns(
-                box MessageCannotExhaustivelyCheckEnumWithUnknownsData {
+                deref!(MessageCannotExhaustivelyCheckEnumWithUnknownsData {
                     description_name,
                     enum_,
-                },
+                }),
             ) => friendly::Message(vec![
                 text("Missing "),
                 code("default"),
@@ -6495,10 +6566,10 @@ where
                 text(" because it is not an interface."),
             ]),
             MessageCannotInstantiateObjectUtilTypeWithEnum(
-                box MessageCannotInstantiateObjectUtilTypeWithEnumData {
+                deref!(MessageCannotInstantiateObjectUtilTypeWithEnumData {
                     operation_name,
                     enum_,
-                },
+                }),
             ) => {
                 let suggestion = match &enum_.name {
                     Some(enum_name) => vec![
@@ -6765,10 +6836,10 @@ where
                      used as a value in a module. Import it instead.",
                 ),
             ]),
-            MessageCannotResolveBuiltinModule(box MessageCannotResolveBuiltinModuleData {
+            MessageCannotResolveBuiltinModule(deref!(MessageCannotResolveBuiltinModuleData {
                 name,
                 potential_generator,
-            }) => {
+            })) => {
                 let mut features = vec![text("Cannot resolve module "), code(name), text(".")];
                 if let Some(generator) = potential_generator {
                     features.extend(vec![
@@ -6779,10 +6850,10 @@ where
                 }
                 friendly::Message(features)
             }
-            MessageCannotImportGlobalLibdef(box MessageCannotImportGlobalLibdefData {
+            MessageCannotImportGlobalLibdef(deref!(MessageCannotImportGlobalLibdefData {
                 module_name,
                 libdef_name,
-            }) => friendly::Message(vec![
+            })) => friendly::Message(vec![
                 text("Cannot import "),
                 code(module_name),
                 text(" because "),
@@ -6867,13 +6938,13 @@ where
                 ref_of_type_desc(&object.loc, &object.desc),
                 text(" first or remove the indexer"),
             ]),
-            MessageCannotSpreadGeneral(box MessageCannotSpreadGeneralData {
+            MessageCannotSpreadGeneral(deref!(MessageCannotSpreadGeneralData {
                 spread_loc,
                 object1,
                 object2,
                 propname,
                 error_kind,
-            }) => {
+            })) => {
                 use super::intermediate_error_types::ExactnessErrorKind;
                 let (error_reason, fix_suggestion) = match error_kind {
                     ExactnessErrorKind::UnexpectedInexact => (
@@ -6914,12 +6985,12 @@ where
                 friendly::Message(features)
             }
             MessageCannotSpreadInexactMayOverwriteIndexer(
-                box MessageCannotSpreadInexactMayOverwriteIndexerData {
+                deref!(MessageCannotSpreadInexactMayOverwriteIndexerData {
                     spread_loc,
                     key,
                     value,
                     object2,
-                },
+                }),
             ) => friendly::Message(vec![
                 text("Flow cannot determine a type for the "),
                 hardcoded_string_desc_ref("spread", spread_loc),
@@ -6983,10 +7054,10 @@ where
                 text("argument must be a string literal."),
             ]),
             MessageCannotUseEnumMemberUsedAsType(
-                box MessageCannotUseEnumMemberUsedAsTypeData {
+                deref!(MessageCannotUseEnumMemberUsedAsTypeData {
                     description_name,
                     enum_,
-                },
+                }),
             ) => friendly::Message(vec![
                 text("Cannot use "),
                 match description_name.as_ref().or(enum_.name.as_ref()) {
@@ -7111,12 +7182,12 @@ where
                 ])
             }
             MessageCannotUseTypeForAnnotationInference(
-                box MessageCannotUseTypeForAnnotationInferenceData {
+                deref!(MessageCannotUseTypeForAnnotationInferenceData {
                     operation,
                     operation_loc,
                     target_loc,
                     target_desc,
-                },
+                }),
             ) => {
                 let operation_desc = annotation_inference_operation_description(operation);
                 let mut features = vec![
@@ -7137,11 +7208,11 @@ where
                 friendly::Message(features)
             }
             MessageCannotUseTypeGuardWithFunctionParamHavoced(
-                box MessageCannotUseTypeGuardWithFunctionParamHavocedData {
+                deref!(MessageCannotUseTypeGuardWithFunctionParamHavocedData {
                     type_guard,
                     param,
                     call_locs,
-                },
+                }),
             ) => {
                 let loc_str: Vec<_> = if call_locs.is_empty() {
                     vec![text("in this function")]
@@ -7170,11 +7241,11 @@ where
                 features.push(text("."));
                 friendly::Message(features)
             }
-            MessageCannotUseTypeInValuePosition(box MessageCannotUseTypeInValuePositionData {
+            MessageCannotUseTypeInValuePosition(deref!(MessageCannotUseTypeInValuePositionData {
                 binding,
                 type_only_namespace,
                 imported_name,
-            }) => {
+            })) => {
                 let base = if *type_only_namespace {
                     vec![
                         text("Cannot use type-only namespace "),
@@ -7389,11 +7460,11 @@ where
                 }
                 friendly::Message(features)
             }
-            MessageDefinitionInvalidRecursive(box MessageDefinitionInvalidRecursiveData {
+            MessageDefinitionInvalidRecursive(deref!(MessageDefinitionInvalidRecursiveData {
                 definition,
                 recursion,
                 annot_locs,
-            }) => {
+            })) => {
                 use flow_env_builder::env_api::AnnotLoc;
                 let (itself, tl_recur): (
                     friendly::MessageFeature<Loc>,
@@ -7633,11 +7704,11 @@ where
                 render_enum_reference(enum_),
                 text("."),
             ]),
-            MessageDuplicateModuleProvider(box MessageDuplicateModuleProviderData {
+            MessageDuplicateModuleProvider(deref!(MessageDuplicateModuleProviderData {
                 module_name,
                 provider,
                 conflict,
-            }) => {
+            })) => {
                 let provider_file = loc_of_aloc(provider).source.clone();
                 let conflict_file = loc_of_aloc(conflict).source.clone();
                 match (&provider_file, &conflict_file) {
@@ -7717,11 +7788,11 @@ where
                     text("."),
                 ])
             }
-            MessageEnumDuplicateMemberName(box MessageEnumDuplicateMemberNameData {
+            MessageEnumDuplicateMemberName(deref!(MessageEnumDuplicateMemberNameData {
                 member_name,
                 prev_use_loc,
                 enum_,
-            }) => friendly::Message(vec![
+            })) => friendly::Message(vec![
                 text("Enum member names need to be unique, but the name "),
                 code(member_name),
                 text(" has already been used for a "),
@@ -7736,11 +7807,11 @@ where
                     " has been specified with inconsistent member initializers. All members need to consistently either use no initializer, or have a literal (boolean, number, bigint, or string) initializer.",
                 ),
             ]),
-            MessageEnumInvalidMemberInitializer(box MessageEnumInvalidMemberInitializerData {
+            MessageEnumInvalidMemberInitializer(deref!(MessageEnumInvalidMemberInitializerData {
                 member_name,
                 explicit_type,
                 enum_,
-            }) => {
+            })) => {
                 use flow_parser::ast::statement::enum_declaration::ExplicitType;
                 match explicit_type {
                     Some(ExplicitType::Symbol) => friendly::Message(vec![
@@ -7879,11 +7950,11 @@ where
                     ])
                 }
             },
-            MessageExponentialSpread(box MessageExponentialSpreadData {
+            MessageExponentialSpread(deref!(MessageExponentialSpreadData {
                 spread_loc,
                 operand1,
                 operand2,
-            }) => {
+            })) => {
                 use super::intermediate_error_types::ExponentialSpreadOperandGroup;
                 let format_operand_group =
                     |ExponentialSpreadOperandGroup { first, second }: &ExponentialSpreadOperandGroup<
@@ -7966,12 +8037,12 @@ where
                 friendly::Message(features)
             }
             MessageIncompatibleGeneralWithPrintedTypes(
-                box MessageIncompatibleGeneralWithPrintedTypesData {
+                deref!(MessageIncompatibleGeneralWithPrintedTypesData {
                     lower_loc,
                     upper_loc,
                     lower_desc,
                     upper_desc,
-                },
+                }),
             ) => friendly::Message(vec![
                 ref_of_type_desc(lower_loc, lower_desc),
                 text(" is incompatible with "),
@@ -7987,7 +8058,7 @@ where
                 text(", so it cannot be used to generate keys for "),
                 ref_of_type(mapped_type),
             ]),
-            MessageIncompatibleTupleArity(box MessageIncompatibleTupleArityData {
+            MessageIncompatibleTupleArity(deref!(MessageIncompatibleTupleArityData {
                 lower,
                 lower_arity,
                 lower_inexact,
@@ -7997,7 +8068,7 @@ where
                 upper_inexact,
                 upper_rest,
                 ..
-            }) => {
+            })) => {
                 let str_of_arity =
                     |inexact: bool, rest: bool, (num_req, num_total): &(i32, i32)| {
                         if rest {
@@ -8084,12 +8155,12 @@ where
                 text(" is incompatible with indexed "),
                 ref_of_type_desc(&upper.loc, &upper.desc),
             ]),
-            MessageIncompleteExhausiveCheckEnum(box MessageIncompleteExhausiveCheckEnumData {
+            MessageIncompleteExhausiveCheckEnum(deref!(MessageIncompleteExhausiveCheckEnumData {
                 description_name,
                 enum_,
                 left_to_check,
                 default_case_loc,
-            }) => {
+            })) => {
                 let left_to_check_features: Vec<friendly::MessageFeature<Loc>> =
                     if left_to_check.len() == 1 {
                         vec![
@@ -8238,11 +8309,11 @@ where
                 code("typeof"),
                 text(" return value."),
             ]),
-            MessageInvalidEnumMemberCheck(box MessageInvalidEnumMemberCheckData {
+            MessageInvalidEnumMemberCheck(deref!(MessageInvalidEnumMemberCheckData {
                 enum_,
                 example_member,
                 from_match,
-            }) => {
+            })) => {
                 let suggestion = match &enum_.name {
                     Some(enum_name) => {
                         let example_member =
@@ -8397,17 +8468,17 @@ where
                 text(" may not rebind a method to a different receiver."),
                 text(" See https://flow.org/en/docs/types/classes/#toc-this-rebinding"),
             ]),
-            MessageInvalidKeyPropertyInSpread(box MessageInvalidKeyPropertyInSpreadData {
+            MessageInvalidKeyPropertyInSpread(deref!(MessageInvalidKeyPropertyInSpreadData {
                 key_loc,
                 spread_loc,
-            }) => friendly::Message(vec![
+            })) => friendly::Message(vec![
                 text("Cannot "),
                 friendly::hardcoded_string_desc_ref("spread", loc_of_aloc(spread_loc)),
                 text(" an object that contains a "),
                 friendly::hardcoded_string_desc_ref("`key` property", loc_of_aloc(key_loc)),
             ]),
             MessageInvalidSelfReferencingTypeAnnotation(
-                box MessageInvalidSelfReferencingTypeAnnotationData { name, loc },
+                deref!(MessageInvalidSelfReferencingTypeAnnotationData { name, loc }),
             ) => friendly::Message(vec![
                 text("Invalid type annotation for "),
                 code(name.as_str()),
@@ -8416,11 +8487,11 @@ where
                 text(" to the binding being declared."),
             ]),
             MessageInvalidSelfReferencingDefault(
-                box MessageInvalidSelfReferencingDefaultData {
+                deref!(MessageInvalidSelfReferencingDefaultData {
                     name,
                     def_loc,
                     ref_loc,
-                },
+                }),
             ) => friendly::Message(vec![
                 text("Invalid default expression for parameter "),
                 friendly::hardcoded_string_desc_ref(name.as_str(), loc_of_aloc(def_loc)),
@@ -8477,11 +8548,11 @@ where
             MessageTupleElementAfterRestSpread => friendly::Message(vec![text(
                 "Cannot have element after spread of tuple with a rest element.",
             )]),
-            MessageInvalidRendersTypeArgument(box MessageInvalidRendersTypeArgumentData {
+            MessageInvalidRendersTypeArgument(deref!(MessageInvalidRendersTypeArgumentData {
                 renders_variant,
                 invalid_render_type_kind,
                 invalid_types,
-            }) => {
+            })) => {
                 use flow_parser::ast::types::RendersVariant;
 
                 use super::intermediate_error_types::InvalidRenderTypeKind;
@@ -8743,10 +8814,10 @@ where
                 ref_of_type_desc(&lower.loc, &lower.desc),
                 text(" does not have properties"),
             ]),
-            MessageNoDefaultExport(box MessageNoDefaultExportData {
+            MessageNoDefaultExport(deref!(MessageNoDefaultExportData {
                 module_name,
                 suggestion,
-            }) => {
+            })) => {
                 let mut features = vec![
                     text("Cannot import a default export because there is no default export "),
                     text("in "),
@@ -8763,11 +8834,11 @@ where
                 }
                 friendly::Message(features)
             }
-            MessageNoNamedExport(box MessageNoNamedExportData {
+            MessageNoNamedExport(deref!(MessageNoNamedExportData {
                 module_name,
                 export_name,
                 suggestion,
-            }) => {
+            })) => {
                 let mut features = vec![
                     text("Cannot import "),
                     code(export_name),
@@ -8812,10 +8883,10 @@ where
             MessageNonToplevelExport => {
                 friendly::Message(vec![text("Exports can only appear at the top level")])
             }
-            MessageOnlyDefaultExport(box MessageOnlyDefaultExportData {
+            MessageOnlyDefaultExport(deref!(MessageOnlyDefaultExportData {
                 module_name,
                 export_name,
-            }) => friendly::Message(vec![
+            })) => friendly::Message(vec![
                 text("Cannot import "),
                 code(export_name),
                 text(" because "),
@@ -8869,12 +8940,12 @@ where
                 ]);
                 friendly::Message(features)
             }
-            MessageIndexerCheckFailed(box MessageIndexerCheckFailedData {
+            MessageIndexerCheckFailed(deref!(MessageIndexerCheckFailedData {
                 prop,
                 lower,
                 upper,
                 indexer,
-            }) => {
+            })) => {
                 use super::error_message::mk_prop_message;
                 let mut features = mk_prop_message(Some(prop.as_str()));
                 features.extend(vec![
@@ -8889,10 +8960,10 @@ where
                 ]);
                 friendly::Message(features)
             }
-            MessageConstructSignatureMissing(box MessageConstructSignatureMissingData {
+            MessageConstructSignatureMissing(deref!(MessageConstructSignatureMissingData {
                 lower,
                 upper,
-            }) => friendly::Message(vec![
+            })) => friendly::Message(vec![
                 text(
                     "a construct signature declaring the expected parameter / return type is missing in ",
                 ),
@@ -8900,11 +8971,11 @@ where
                 text(" but exists in "),
                 ref_of_type_desc(&upper.loc, &upper.desc),
             ]),
-            MessagePropsMissingWithPrintedType(box MessagePropsMissingWithPrintedTypeData {
+            MessagePropsMissingWithPrintedType(deref!(MessagePropsMissingWithPrintedTypeData {
                 lower,
                 upper,
                 props,
-            }) => {
+            })) => {
                 let lower = ref_of_type_desc(&lower.loc, &lower.desc);
                 let upper = ref_of_type_desc(&upper.loc, &upper.desc);
                 let (first_prop, rest_props) = props.clone().split_off_first();
@@ -8946,11 +9017,11 @@ where
                     friendly::Message(features)
                 }
             }
-            MessagePropPolarityMismatch(box MessagePropPolarityMismatchData {
+            MessagePropPolarityMismatch(deref!(MessagePropPolarityMismatchData {
                 lower,
                 upper,
                 props,
-            }) => {
+            })) => {
                 use super::error_message::mk_prop_message;
                 use super::error_message::polarity_explanation;
                 let reference = |object: &PropPolarityMismatchObject<
@@ -9031,12 +9102,12 @@ where
                 features.push(text(" is not writable"));
                 friendly::Message(features)
             }
-            MessageReactIntrinsicOverlap(box MessageReactIntrinsicOverlapData {
+            MessageReactIntrinsicOverlap(deref!(MessageReactIntrinsicOverlapData {
                 use_,
                 def,
                 type_,
                 mixed,
-            }) => friendly::Message(vec![
+            })) => friendly::Message(vec![
                 text("The name of intrinsic element "),
                 hardcoded_string_desc_ref(&format!("`{}`", use_.name), &use_.loc),
                 text(" overlaps with a "),
@@ -9055,10 +9126,10 @@ where
             MessageRecursionLimitExceeded => {
                 friendly::Message(vec![text("*** Recursion limit exceeded ***")])
             }
-            MessageRedeclareComponentProp(box MessageRedeclareComponentPropData {
+            MessageRedeclareComponentProp(deref!(MessageRedeclareComponentPropData {
                 duplicates,
                 spread_loc,
-            }) => {
+            })) => {
                 let ((first_loc, name, second_loc), rest) = duplicates.clone().split_off_first();
                 if rest.is_empty() {
                     friendly::Message(vec![
@@ -9129,12 +9200,12 @@ where
                 friendly::Message(features)
             }
             MessageShouldAnnotateVariableUsedInGenericContext(
-                box MessageShouldAnnotateVariableUsedInGenericContextData {
+                deref!(MessageShouldAnnotateVariableUsedInGenericContextData {
                     declaration,
                     null_loc,
                     initialized,
                     possible_generic_escape_locs,
-                },
+                }),
             ) => {
                 let null_ref = if *initialized {
                     code("null")
@@ -9179,11 +9250,11 @@ where
                 ),
                 text("explicit default instead."),
             ]),
-            MessageSketchyNullCheck(box MessageSketchyNullCheckData {
+            MessageSketchyNullCheck(deref!(MessageSketchyNullCheckData {
                 kind,
                 falsy_loc,
                 null_loc,
-            }) => {
+            })) => {
                 use flow_lint_settings::lints::SketchyNullKind;
                 let (type_str, value_str) = match kind {
                     SketchyNullKind::Bool => ("boolean", "false"),
@@ -9557,11 +9628,11 @@ where
                 features.extend(explanation);
                 friendly::Message(features)
             }
-            MessageTupleElementNotReadable(box MessageTupleElementNotReadableData {
+            MessageTupleElementNotReadable(deref!(MessageTupleElementNotReadableData {
                 index_def_loc,
                 index,
                 name,
-            }) => {
+            })) => {
                 let index_ref = friendly::MessageFeature::Reference(
                     vec![friendly::MessageInline::Code(format!("{}", index))],
                     loc_of_aloc(index_def_loc),
@@ -9575,11 +9646,11 @@ where
                 features.push(text(" is not readable"));
                 friendly::Message(features)
             }
-            MessageTupleElementNotWritable(box MessageTupleElementNotWritableData {
+            MessageTupleElementNotWritable(deref!(MessageTupleElementNotWritableData {
                 index_def_loc,
                 index,
                 name,
-            }) => {
+            })) => {
                 let index_ref = friendly::MessageFeature::Reference(
                     vec![friendly::MessageInline::Code(format!("{}", index))],
                     loc_of_aloc(index_def_loc),
@@ -9593,12 +9664,12 @@ where
                 features.push(text(" is not writable"));
                 friendly::Message(features)
             }
-            MessageTupleIndexOutOfBound(box MessageTupleIndexOutOfBoundData {
+            MessageTupleIndexOutOfBound(deref!(MessageTupleIndexOutOfBoundData {
                 tuple,
                 inexact,
                 length,
                 index,
-            }) => {
+            })) => {
                 let plural = if *length == 1 { "" } else { "s" };
                 let explicit = if *inexact { " explicitly defined" } else { "" };
                 let bounds_msg = if *inexact {
@@ -9614,10 +9685,10 @@ where
                     )),
                 ])
             }
-            MessageTupleNonIntegerIndex(box MessageTupleNonIntegerIndexData {
+            MessageTupleNonIntegerIndex(deref!(MessageTupleNonIntegerIndexData {
                 index_def_loc,
                 index,
-            }) => friendly::Message(vec![
+            })) => friendly::Message(vec![
                 text("the index into a tuple must be an integer, but "),
                 friendly::MessageFeature::Reference(
                     vec![friendly::MessageInline::Code(index.to_string())],
@@ -9918,10 +9989,10 @@ where
                 render_named_reference(declaration),
                 text(" is never initialized, annotated, or assigned to."),
             ]),
-            MessageVariableOnlyAssignedByNull(box MessageVariableOnlyAssignedByNullData {
+            MessageVariableOnlyAssignedByNull(deref!(MessageVariableOnlyAssignedByNullData {
                 declaration,
                 null_loc,
-            }) => {
+            })) => {
                 let null_ref = match null_loc {
                     Some(loc) => null_literal_reference(loc),
                     None => code("null"),
@@ -10453,11 +10524,11 @@ where
                 friendly::Message(msg)
             }
             MessageMatchNonExhaustiveObjectPattern(
-                box MessageMatchNonExhaustiveObjectPatternData {
+                deref!(MessageMatchNonExhaustiveObjectPatternData {
                     rest,
                     missing_props,
                     pattern_kind,
-                },
+                }),
             ) => {
                 let pattern_kind_str = pattern_kind.to_string();
                 let prefix = vec![
@@ -10533,10 +10604,10 @@ where
                 ));
                 friendly::Message(msg)
             }
-            MessageMatchNonExplicitEnumCheck(box MessageMatchNonExplicitEnumCheckData {
+            MessageMatchNonExplicitEnumCheck(deref!(MessageMatchNonExplicitEnumCheckData {
                 wildcard_loc,
                 unchecked_members,
-            }) => {
+            })) => {
                 let member_msgs: Vec<friendly::Message<Loc>> = unchecked_members
                     .iter()
                     .map(|member| friendly::Message(vec![code(member)]))
@@ -11043,10 +11114,10 @@ where
                 friendly::Message(features)
             }
             MessageMissingPlatformSupportWithAvailablePlatforms(
-                box MessageMissingPlatformSupportWithAvailablePlatformsData {
+                deref!(MessageMissingPlatformSupportWithAvailablePlatformsData {
                     available_platforms,
                     required_platforms,
-                },
+                }),
             ) => {
                 let missing_platforms: Vec<_> = required_platforms
                     .difference(available_platforms)
@@ -11089,12 +11160,12 @@ where
                 friendly::Message(vec![ref_(lower), text(" does not render "), ref_(upper)])
             }
             MessageDoesNotRenderWithPrintedTypes(
-                box MessageIncompatibleGeneralWithPrintedTypesData {
+                deref!(MessageIncompatibleGeneralWithPrintedTypesData {
                     lower_loc,
                     upper_loc,
                     lower_desc,
                     upper_desc,
-                },
+                }),
             ) => friendly::Message(vec![
                 ref_of_type_desc(lower_loc, &rendered_type_desc(lower_desc)),
                 text(" does not render "),
@@ -11126,13 +11197,13 @@ where
                 ),
             ]),
             MessageIncompatibleDueToInvariantSubtyping(
-                box MessageIncompatibleDueToInvariantSubtypingData {
+                deref!(MessageIncompatibleDueToInvariantSubtypingData {
                     sub_component,
                     lower_loc,
                     upper_loc,
                     lower_desc,
                     upper_desc,
-                },
+                }),
             ) => match sub_component {
                 None => friendly::Message(vec![
                     ref_of_type_desc(lower_loc, lower_desc),
@@ -11153,12 +11224,12 @@ where
                     friendly::Message(features)
                 }
             },
-            MessagePropExtraAgainstExactObject(box MessagePropExtraAgainstExactObjectData {
+            MessagePropExtraAgainstExactObject(deref!(MessagePropExtraAgainstExactObjectData {
                 lower,
                 upper,
                 upper_is_record,
                 props,
-            }) => {
+            })) => {
                 let number_to_check = props.len();
                 let prop_message: Vec<friendly::MessageFeature<Loc>> = if number_to_check > 5 {
                     let max_display_amount = 4;

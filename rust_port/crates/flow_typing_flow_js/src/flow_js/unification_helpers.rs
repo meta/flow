@@ -304,24 +304,28 @@ fn __unify_inner<'cx>(
         (TypeInner::DefT(r1, def1), TypeInner::DefT(r2, def2)) => {
             match (def1.deref(), def2.deref()) {
                 (
-                    DefTInner::PolyT(box PolyTData { id: id1, .. }),
-                    DefTInner::PolyT(box PolyTData { id: id2, .. }),
+                    DefTInner::PolyT(deref!(PolyTData { id: id1, .. })),
+                    DefTInner::PolyT(deref!(PolyTData { id: id2, .. })),
                 ) if id1 == id2 => {
                     return Ok(());
                 }
                 (DefTInner::ArrT(arr1), DefTInner::ArrT(arr2)) => {
                     match (arr1.deref(), arr2.deref()) {
                         (
-                            ArrType::ArrayAT(box ArrayATData {
-                                elem_t: elem_t1,
-                                tuple_view: tv1,
-                                ..
-                            }),
-                            ArrType::ArrayAT(box ArrayATData {
-                                elem_t: elem_t2,
-                                tuple_view: tv2,
-                                ..
-                            }),
+                            ArrType::ArrayAT(
+                                deref!(ArrayATData {
+                                    elem_t: elem_t1,
+                                    tuple_view: tv1,
+                                    ..
+                                }),
+                            ),
+                            ArrType::ArrayAT(
+                                deref!(ArrayATData {
+                                    elem_t: elem_t2,
+                                    tuple_view: tv2,
+                                    ..
+                                }),
+                            ),
                         ) => {
                             let ts1 = tv1
                                 .as_ref()
@@ -335,26 +339,30 @@ fn __unify_inner<'cx>(
                             return Ok(());
                         }
                         (
-                            ArrType::TupleAT(box TupleATData {
-                                elem_t: _,
-                                elements: elements1,
-                                arity: lower_arity,
-                                inexact: lower_inexact,
-                                rest: rest1,
-                                react_dro: _,
-                                strictness_kind: lower_strictness_kind,
-                                ..
-                            }),
-                            ArrType::TupleAT(box TupleATData {
-                                elem_t: _,
-                                elements: elements2,
-                                arity: upper_arity,
-                                inexact: upper_inexact,
-                                rest: rest2,
-                                react_dro: _,
-                                strictness_kind: upper_strictness_kind,
-                                ..
-                            }),
+                            ArrType::TupleAT(
+                                deref!(TupleATData {
+                                    elem_t: _,
+                                    elements: elements1,
+                                    arity: lower_arity,
+                                    inexact: lower_inexact,
+                                    rest: rest1,
+                                    react_dro: _,
+                                    strictness_kind: lower_strictness_kind,
+                                    ..
+                                }),
+                            ),
+                            ArrType::TupleAT(
+                                deref!(TupleATData {
+                                    elem_t: _,
+                                    elements: elements2,
+                                    arity: upper_arity,
+                                    inexact: upper_inexact,
+                                    rest: rest2,
+                                    react_dro: _,
+                                    strictness_kind: upper_strictness_kind,
+                                    ..
+                                }),
+                            ),
                         ) => {
                             let (num_req1, num_total1) = lower_arity;
                             let (num_req2, num_total2) = upper_arity;
@@ -698,22 +706,26 @@ fn __unify_inner<'cx>(
             }
         }
         (
-            TypeInner::TypeAppT(box TypeAppTData {
-                reason: _,
-                use_op: _,
-                type_: c1,
-                targs: ts1,
-                from_value: fv1,
-                use_desc: _,
-            }),
-            TypeInner::TypeAppT(box TypeAppTData {
-                reason: _,
-                use_op: _,
-                type_: c2,
-                targs: ts2,
-                from_value: fv2,
-                use_desc: _,
-            }),
+            TypeInner::TypeAppT(
+                deref!(TypeAppTData {
+                    reason: _,
+                    use_op: _,
+                    type_: c1,
+                    targs: ts1,
+                    from_value: fv1,
+                    use_desc: _,
+                }),
+            ),
+            TypeInner::TypeAppT(
+                deref!(TypeAppTData {
+                    reason: _,
+                    use_op: _,
+                    type_: c2,
+                    targs: ts2,
+                    from_value: fv2,
+                    use_desc: _,
+                }),
+            ),
         ) if c1 == c2 && ts1.len() == ts2.len() && fv1 == fv2 => {
             for (t1_elem, t2_elem) in ts1.iter().zip(ts2.iter()) {
                 rec_unify(

@@ -752,16 +752,18 @@ fn dump_t<L: Debug + Clone + Dupe>(depth: i32, t: &Ty<L>) -> String {
 
 fn dump_decl<L: Debug + Clone + Dupe>(depth: i32, d: &Decl<L>) -> String {
     match d {
-        Decl::VariableDecl(box (name, t)) => {
+        Decl::VariableDecl(deref!((name, t))) => {
             format!("VariableDecl ({}, {})", name, dump_t(depth, t))
         }
-        Decl::TypeAliasDecl(box DeclTypeAliasDeclData {
-            import,
-            name,
-            tparams,
-            type_,
-            opaque,
-        }) => {
+        Decl::TypeAliasDecl(
+            deref!(DeclTypeAliasDeclData {
+                import,
+                name,
+                tparams,
+                type_,
+                opaque,
+            }),
+        ) => {
             let type_str = match type_ {
                 Some(t) => cut_off(&dump_t(depth, t), 1000),
                 None => String::new(),
@@ -789,27 +791,29 @@ fn dump_decl<L: Debug + Clone + Dupe>(depth: i32, d: &Decl<L>) -> String {
                 opaque_str
             )
         }
-        Decl::ClassDecl(box (s, ps)) => format!(
+        Decl::ClassDecl(deref!((s, ps))) => format!(
             "ClassDecl ({}) ({})",
             dump_symbol(s),
             dump_type_params(depth, ps.as_deref())
         ),
-        Decl::InterfaceDecl(box (s, ps)) => format!(
+        Decl::InterfaceDecl(deref!((s, ps))) => format!(
             "InterfaceDecl ({}) ({})",
             dump_symbol(s),
             dump_type_params(depth, ps.as_deref())
         ),
-        Decl::RecordDecl(box (s, ps)) => format!(
+        Decl::RecordDecl(deref!((s, ps))) => format!(
             "RecordDecl ({}) ({})",
             dump_symbol(s),
             dump_type_params(depth, ps.as_deref())
         ),
-        Decl::EnumDecl(box DeclEnumDeclData {
-            name,
-            members,
-            has_unknown_members,
-            truncated_members_count,
-        }) => {
+        Decl::EnumDecl(
+            deref!(DeclEnumDeclData {
+                name,
+                members,
+                has_unknown_members,
+                truncated_members_count,
+            }),
+        ) => {
             let members_str = match members {
                 None => String::new(),
                 Some(ms) => {
@@ -828,18 +832,20 @@ fn dump_decl<L: Debug + Clone + Dupe>(depth: i32, d: &Decl<L>) -> String {
             };
             format!("Enum({}){}", dump_symbol(name), members_str)
         }
-        Decl::NominalComponentDecl(box DeclNominalComponentDeclData {
-            name,
-            tparams,
-            is_type,
-            ..
-        }) => format!(
+        Decl::NominalComponentDecl(
+            deref!(DeclNominalComponentDeclData {
+                name,
+                tparams,
+                is_type,
+                ..
+            }),
+        ) => format!(
             "NominalComponentDecl ({}, {}, {})",
             dump_symbol(name),
             dump_type_params(depth, tparams.as_deref()),
             is_type
         ),
-        Decl::NamespaceDecl(box DeclNamespaceDeclData { name, exports }) => {
+        Decl::NamespaceDecl(deref!(DeclNamespaceDeclData { name, exports })) => {
             let name_str = match name {
                 Some(n) => dump_symbol(n),
                 None => "<no name>".to_string(),
@@ -847,11 +853,13 @@ fn dump_decl<L: Debug + Clone + Dupe>(depth: i32, d: &Decl<L>) -> String {
             let exports_str: Vec<String> = exports.iter().map(|d| dump_decl(depth, d)).collect();
             format!("Namespace({}, {})", name_str, exports_str.join(", "))
         }
-        Decl::ModuleDecl(box DeclModuleDeclData {
-            name,
-            exports,
-            default: _,
-        }) => {
+        Decl::ModuleDecl(
+            deref!(DeclModuleDeclData {
+                name,
+                exports,
+                default: _,
+            }),
+        ) => {
             let name_str = match name {
                 Some(n) => dump_symbol(n),
                 None => "<no name>".to_string(),
@@ -1770,18 +1778,20 @@ fn json_of_decl<L: Debug + Clone + Dupe>(
     strip_root: Option<&Path>,
 ) -> Vec<(String, Json)> {
     match d {
-        Decl::VariableDecl(box (name, t)) => {
+        Decl::VariableDecl(deref!((name, t))) => {
             vec![
                 ("name".to_string(), Json::String(name.to_string())),
                 ("type_".to_string(), json_of_t(converter, t, strip_root)),
             ]
         }
-        Decl::TypeAliasDecl(box DeclTypeAliasDeclData {
-            name,
-            tparams,
-            type_,
-            ..
-        }) => {
+        Decl::TypeAliasDecl(
+            deref!(DeclTypeAliasDeclData {
+                name,
+                tparams,
+                type_,
+                ..
+            }),
+        ) => {
             vec![
                 (
                     "name".to_string(),
@@ -1800,15 +1810,19 @@ fn json_of_decl<L: Debug + Clone + Dupe>(
                 ),
             ]
         }
-        Decl::ClassDecl(box (s, ps)) => json_of_class_decl(converter, s, ps, strip_root),
-        Decl::InterfaceDecl(box (s, ps)) => json_of_interface_decl(converter, s, ps, strip_root),
-        Decl::RecordDecl(box (s, ps)) => json_of_record_decl(converter, s, ps, strip_root),
-        Decl::EnumDecl(box DeclEnumDeclData {
-            name,
-            members,
-            has_unknown_members,
-            truncated_members_count,
-        }) => vec![
+        Decl::ClassDecl(deref!((s, ps))) => json_of_class_decl(converter, s, ps, strip_root),
+        Decl::InterfaceDecl(deref!((s, ps))) => {
+            json_of_interface_decl(converter, s, ps, strip_root)
+        }
+        Decl::RecordDecl(deref!((s, ps))) => json_of_record_decl(converter, s, ps, strip_root),
+        Decl::EnumDecl(
+            deref!(DeclEnumDeclData {
+                name,
+                members,
+                has_unknown_members,
+                truncated_members_count,
+            }),
+        ) => vec![
             (
                 "name".to_string(),
                 json_of_symbol(converter, name, strip_root),
@@ -1833,20 +1847,22 @@ fn json_of_decl<L: Debug + Clone + Dupe>(
                 Json::Number(serde_json::Number::from(*truncated_members_count)),
             ),
         ],
-        Decl::NominalComponentDecl(box DeclNominalComponentDeclData {
-            name,
-            tparams,
-            props,
-            renders,
-            is_type,
-            ..
-        }) => json_of_nominal_component_decl(
+        Decl::NominalComponentDecl(
+            deref!(DeclNominalComponentDeclData {
+                name,
+                tparams,
+                props,
+                renders,
+                is_type,
+                ..
+            }),
+        ) => json_of_nominal_component_decl(
             converter, name, tparams, props, renders, *is_type, strip_root,
         ),
-        Decl::NamespaceDecl(box DeclNamespaceDeclData { name, .. }) => {
+        Decl::NamespaceDecl(deref!(DeclNamespaceDeclData { name, .. })) => {
             json_of_namespace(converter, name, strip_root)
         }
-        Decl::ModuleDecl(box DeclModuleDeclData { name, .. }) => {
+        Decl::ModuleDecl(deref!(DeclModuleDeclData { name, .. })) => {
             json_of_module(converter, name, strip_root)
         }
     }
