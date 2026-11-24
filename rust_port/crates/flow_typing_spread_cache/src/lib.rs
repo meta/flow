@@ -93,9 +93,19 @@ pub fn add_lower_bound(
                     }
                     Some((slice, group)) => {
                         let has_new_lower_bound = objtypes.iter().any(|s| &slice != s);
+                        // The members of a union operand can arrive in more than one part: they
+                        // are still that one union.
+                        let second = match (&group.first, bound) {
+                            (LowerBound::Union(first), LowerBound::Union(t))
+                                if first.ptr_eq(&t) =>
+                            {
+                                group.second
+                            }
+                            (_, bound) => Some(bound),
+                        };
                         let group = ExponentialSpreadOperandGroup {
                             first: group.first,
-                            second: Some(bound),
+                            second,
                         };
                         ((slice, group), has_new_lower_bound)
                     }
