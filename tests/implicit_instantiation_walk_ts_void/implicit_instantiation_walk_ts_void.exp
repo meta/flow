@@ -19,6 +19,23 @@ References:
                                      ^^^^^^ [3]
 
 
+Error ------------------------------------------------------------------------------------------ promise_resolve.js:14:1
+
+Cannot cast `act(...)` to `void` because `Promise<1>` [1] is incompatible with `void` [2]. [incompatible-type]
+
+   promise_resolve.js:14:1
+     14| act(() => 1) as void; // ERROR
+         ^^^^^^^^^^^^
+
+References:
+   <BUILTINS>/react.js:1166:69
+   1166|     declare export function act<T>(callback: () => T | Promise<T>): Promise<T>;
+                                                                             ^^^^^^^^^^ [1]
+   promise_resolve.js:14:17
+     14| act(() => 1) as void; // ERROR
+                         ^^^^ [2]
+
+
 Error --------------------------------------------------------------------------------------------- union_members.js:6:1
 
 Cannot call `f` because `T` [1] is underconstrained by call of `f` [2]. Either add explicit type arguments or cast the
@@ -90,4 +107,4 @@ References:
 
 
 
-Found 5 errors
+Found 6 errors
