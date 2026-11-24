@@ -2527,7 +2527,7 @@ Error --------------------------------------------------------------------------
 - `true` to match `true` [1]
 - `null` to match `null` [1]
 - `undefined` to match `void` [1]
-- `Iterable {...}` to match `Iterable<?React.Node, void, void>` [1]
+- `Iterable {...}` to match `Iterable<?React.Node, any, any>` [1]
 and 2 others. [match-not-exhaustive]
 
    render_types.js:92:3

@@ -38,7 +38,7 @@ You can wrap it in `new Number(...))` to turn it into an object and attempt to u
 
 References:
    <BUILTINS>/misc.js:271:11
-   271| interface Iterable<out T, out TReturn = void, in TNext = void> {}
+   271| interface Iterable<out T, out TReturn, in TNext> {}
                   ^^^^^^^^ [2]
 
 

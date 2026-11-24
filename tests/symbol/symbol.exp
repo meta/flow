@@ -1,7 +1,7 @@
 Error ------------------------------------------------------------------------------------------ class_iterator.js:39:31
 
 Cannot assign `new BadIterable()` to `bad` because: [incompatible-type]
- - in property `@@iterator`: `IteratorObject<string>` [1] is incompatible with `Iterator<number, void, void>` [2]
+ - in property `@@iterator`: `IteratorObject<string>` [1] is incompatible with `Iterator<number, any, any>` [2]
     - in the return value > type argument `T` [3]: `string` [4] is incompatible with `number` [5]
 
    class_iterator.js:39:31
@@ -16,7 +16,7 @@ References:
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/misc.js:269:24
-   269| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   269| interface Iterator<out T, out TReturn, in TNext> {}
                                ^ [3]
    class_iterator.js:35:40
     35|   *[Symbol.iterator](): IteratorObject<string> {
@@ -486,7 +486,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- iterator.js:6:1
 
-Cannot cast `foo[Symbol.iterator]` to `boolean` because `Iterator<number, void, void>` [1] is incompatible with
+Cannot cast `foo[Symbol.iterator]` to `boolean` because `Iterator<number, any, any>` [1] is incompatible with
 `boolean` [2]. [incompatible-type]
 
    iterator.js:6:1
@@ -643,7 +643,7 @@ References:
 Error ----------------------------------------------------------------------------------- type_well_known_symbol.js:18:1
 
 Cannot cast `bad` to `Iterable<number>` because: [incompatible-type]
- - in property `@@iterator`: `Iterator<string>` [1] is incompatible with `Iterator<number, void, void>` [2]
+ - in property `@@iterator`: `Iterator<string>` [1] is incompatible with `Iterator<number, any, any>` [2]
     - in the return value > type argument `T` [3]: `string` [4] is incompatible with `number` [5]
 
    type_well_known_symbol.js:18:1
@@ -658,7 +658,7 @@ References:
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/misc.js:269:24
-   269| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   269| interface Iterator<out T, out TReturn, in TNext> {}
                                ^ [3]
    type_well_known_symbol.js:16:44
     16| type Bad = { [Symbol.iterator](): Iterator<string> };
@@ -671,7 +671,7 @@ References:
 Error ----------------------------------------------------------------------------------- type_well_known_symbol.js:31:1
 
 Cannot cast `new DStaticIterable()` to `Iterable<number>` because property `@@iterator` is missing in
-`DStaticIterable` [1] but exists in `Iterable<number, void, void>` [2]. [incompatible-type]
+`DStaticIterable` [1] but exists in `Iterable<number, any, any>` [2]. [incompatible-type]
 
    type_well_known_symbol.js:31:1
    31| new DStaticIterable() as Iterable<number>; // ERROR: no instance @@iterator

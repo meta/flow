@@ -26,7 +26,7 @@ Error --------------------------------------------------------------------------
 Cannot call `Map` with array literal bound to `entries` because: [incompatible-type]
  - array literal [1] is incompatible with `Iterable` [2]
     - in property `@@iterator`: `ArrayIterator<"foo" | 123>` [3] is incompatible with
-      `Iterator<Readonly<[key: any, value: any]>, void, void>` [4]
+      `Iterator<Readonly<[key: any, value: any]>, any, any>` [4]
        - in the return value > type argument `T` [5]: `"foo"` [6] is incompatible with
          `Readonly<[key: any, value: any]>` [7]
 
@@ -45,7 +45,7 @@ References:
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
    <BUILTINS>/misc.js:269:24
-   269| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   269| interface Iterator<out T, out TReturn, in TNext> {}
                                ^ [5]
    map.js:28:22
     28|     let x = new Map(['foo', 123]); // error
@@ -60,7 +60,7 @@ Error --------------------------------------------------------------------------
 Cannot call `Map` with array literal bound to `entries` because: [incompatible-type]
  - array literal [1] is incompatible with `Iterable` [2]
     - in property `@@iterator`: `ArrayIterator<"foo" | 123>` [3] is incompatible with
-      `Iterator<Readonly<[key: any, value: any]>, void, void>` [4]
+      `Iterator<Readonly<[key: any, value: any]>, any, any>` [4]
        - in the return value > type argument `T` [5]: `123` [6] is incompatible with
          `Readonly<[key: any, value: any]>` [7]
 
@@ -79,7 +79,7 @@ References:
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
    <BUILTINS>/misc.js:269:24
-   269| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   269| interface Iterator<out T, out TReturn, in TNext> {}
                                ^ [5]
    map.js:28:29
     28|     let x = new Map(['foo', 123]); // error
@@ -94,7 +94,7 @@ Error --------------------------------------------------------------------------
 Cannot call `Map` with array literal bound to `entries` because: [incompatible-type]
  - array literal [1] is incompatible with `Iterable` [2]
     - in property `@@iterator`: `ArrayIterator<Array<"foo" | 123>>` [3] is incompatible with
-      `Iterator<Readonly<[key: number, value: string]>, void, void>` [4]
+      `Iterator<Readonly<[key: number, value: string]>, any, any>` [4]
        - in the return value > type argument `T` [5] > index `0`: `"foo"` [6] is incompatible with `number` [7]
 
    map.js:29:42
@@ -112,7 +112,7 @@ References:
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
    <BUILTINS>/misc.js:269:24
-   269| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   269| interface Iterator<out T, out TReturn, in TNext> {}
                                ^ [5]
    map.js:29:44
     29|     let y: Map<number, string> = new Map([['foo', 123]]); // error
@@ -127,7 +127,7 @@ Error --------------------------------------------------------------------------
 Cannot call `Map` with array literal bound to `entries` because: [incompatible-type]
  - array literal [1] is incompatible with `Iterable` [2]
     - in property `@@iterator`: `ArrayIterator<Array<"foo" | 123>>` [3] is incompatible with
-      `Iterator<Readonly<[key: number, value: string]>, void, void>` [4]
+      `Iterator<Readonly<[key: number, value: string]>, any, any>` [4]
        - in the return value > type argument `T` [5] > index `1`: `123` [6] is incompatible with `string` [7]
 
    map.js:29:42
@@ -145,7 +145,7 @@ References:
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
    <BUILTINS>/misc.js:269:24
-   269| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   269| interface Iterator<out T, out TReturn, in TNext> {}
                                ^ [5]
    map.js:29:51
     29|     let y: Map<number, string> = new Map([['foo', 123]]); // error

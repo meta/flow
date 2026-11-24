@@ -511,7 +511,7 @@ No errors!
 Error ---------------------------------------------------------------------------- -:9:1
 
 Cannot cast `countdown` to `Iterable<string>` because: [incompatible-type]
- - in property `@@iterator`: `Iterator<number>` [1] is incompatible with `Iterator<string, void, void>` [2]
+ - in property `@@iterator`: `Iterator<number>` [1] is incompatible with `Iterator<string, any, any>` [2]
     - in the return value > type argument `T` [3]: `number` [4] is incompatible with `string` [5]
 
    -:9:1
@@ -526,7 +526,7 @@ References:
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    <BUILTINS>/misc.js:269:24
-   269| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   269| interface Iterator<out T, out TReturn, in TNext> {}
                                ^ [3]
    -:3:33
      3|   [Symbol.iterator](): Iterator<number>,

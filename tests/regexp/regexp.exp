@@ -48,7 +48,7 @@ References:
 Error ---------------------------------------------------------------------------------------------------- regexp.js:6:1
 
 Cannot cast `regExp[Symbol.match]` to `(str: string) => Iterator<RegExp$matchResult>` because in the return value:
-`null` [1] is incompatible with `Iterator<RegExp$matchResult, void, void>` [2]. [incompatible-type]
+`null` [1] is incompatible with `Iterator<RegExp$matchResult, any, any>` [2]. [incompatible-type]
 
    regexp.js:6:1
      6| regExp[Symbol.match] as (str: string) => Iterator<RegExp$matchResult>; // error: the method's `this` is `RegExp` and it returns `RegExpMatchArray | null`
@@ -66,7 +66,7 @@ References:
 Error ---------------------------------------------------------------------------------------------------- regexp.js:6:1
 
 Cannot cast `regExp[Symbol.match]` to `(str: string) => Iterator<RegExp$matchResult>` because in the return value:
-property `next` is missing in `RegExpMatchArray` [1] but exists in `Iterator<RegExp$matchResult, void, void>` [2].
+property `next` is missing in `RegExpMatchArray` [1] but exists in `Iterator<RegExp$matchResult, any, any>` [2].
 [incompatible-type]
 
    regexp.js:6:1

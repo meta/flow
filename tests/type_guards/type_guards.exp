@@ -1741,7 +1741,7 @@ Error --------------------------------------------------------------------------
 
 References:
    <BUILTINS>/misc.js:271:11
-   271| interface Iterable<out T, out TReturn = void, in TNext = void> {}
+   271| interface Iterable<out T, out TReturn, in TNext> {}
                   ^^^^^^^^ [2]
 
 

@@ -109,8 +109,8 @@ No errors!
 Error ---------------------------------------------------------------------------- -:7:8
 
 Cannot call `logAll` with `msgs` bound to `items` because `"foo"` [1], a primitive, cannot be used as a subtype of
-`Iterable<string, void, void>` [2]. You can wrap it in `new String(...))` to turn it into an object and attempt to use
-it as a subtype of an interface. [incompatible-type]
+`Iterable<string, any, any>` [2]. You can wrap it in `new String(...))` to turn it into an object and attempt to use it
+as a subtype of an interface. [incompatible-type]
 
    -:7:8
    7| logAll(msgs); // Error: `string` is not a subtype of `Iterable<string>`

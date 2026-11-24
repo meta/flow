@@ -1,7 +1,7 @@
 Error --------------------------------------------------------------------------------------------------- apply.js:11:15
 
-Cannot call `f.apply` because in type argument `A`: property `length` is missing in `Iterable<number, void, void>` [1]
-but exists in `ArrayLike<unknown>` [2]. [incompatible-type]
+Cannot call `f.apply` because in type argument `A`: property `length` is missing in `Iterable<number, any, any>` [1] but
+exists in `ArrayLike<unknown>` [2]. [incompatible-type]
 
    apply.js:11:15
     11| f.apply(null, it); // Error
@@ -18,7 +18,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- iterables.js:2:5
 
-`Iterable<number, void, void>` [1] is incompatible with `ReadonlyArray<empty>` [2]. [incompatible-type]
+`Iterable<number, any, any>` [1] is incompatible with `ReadonlyArray<empty>` [2]. [incompatible-type]
 
    iterables.js:2:5
       2| [...it]; // Error
@@ -35,7 +35,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- iterables.js:3:6
 
-Cannot call `f` because `Iterable<number, void, void>` [1] is incompatible with `ReadonlyArray<empty>` [2].
+Cannot call `f` because `Iterable<number, any, any>` [1] is incompatible with `ReadonlyArray<empty>` [2].
 [incompatible-type]
 
    iterables.js:3:6
@@ -54,7 +54,7 @@ References:
 Error ------------------------------------------------------------------------------------------------- iterables.js:4:3
 
 Cannot call `f.bind` because: [incompatible-type]
- - Either `Iterable<number, void, void>` [1] is incompatible with `ReadonlyArray<empty>` [2].
+ - Either `Iterable<number, any, any>` [1] is incompatible with `ReadonlyArray<empty>` [2].
  - Or cannot spread non-tuple (`Array<number>` [3]) into tuple type.
 
    iterables.js:4:3
@@ -75,7 +75,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ iterables.js:12:5
 
-`Iterable<number, void, void>` [1] is incompatible with `ReadonlyArray<empty>` [2]. [incompatible-type]
+`Iterable<number, any, any>` [1] is incompatible with `ReadonlyArray<empty>` [2]. [incompatible-type]
 
    iterables.js:12:5
      12| [...oit]; // Error
@@ -92,7 +92,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ iterables.js:13:6
 
-Cannot call `f` because `Iterable<number, void, void>` [1] is incompatible with `ReadonlyArray<empty>` [2].
+Cannot call `f` because `Iterable<number, any, any>` [1] is incompatible with `ReadonlyArray<empty>` [2].
 [incompatible-type]
 
    iterables.js:13:6
@@ -111,7 +111,7 @@ References:
 Error ------------------------------------------------------------------------------------------------ iterables.js:14:3
 
 Cannot call `f.bind` because: [incompatible-type]
- - Either `Iterable<number, void, void>` [1] is incompatible with `ReadonlyArray<empty>` [2].
+ - Either `Iterable<number, any, any>` [1] is incompatible with `ReadonlyArray<empty>` [2].
  - Or cannot spread non-tuple (`Array<number>` [3]) into tuple type.
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are

@@ -2647,7 +2647,7 @@ Error --------------------------------------------------------------------------
 
 Cannot call `Set` with array literal bound to `values` because: [incompatible-type]
  - array literal [1] is incompatible with `Iterable` [2]
-    - in property `@@iterator`: `ArrayIterator<"C">` [3] is incompatible with `Iterator<"A" | "B", void, void>` [4]
+    - in property `@@iterator`: `ArrayIterator<"C">` [3] is incompatible with `Iterator<"A" | "B", any, any>` [4]
        - in the return value > type argument `T` [5]: `"C"` [6] is incompatible with `"A" | "B"` [7]
 
    local.js:658:20
@@ -2665,7 +2665,7 @@ References:
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
    <BUILTINS>/misc.js:269:24
-   269| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   269| interface Iterator<out T, out TReturn, in TNext> {}
                                ^ [5]
    local.js:658:21
    658|   fn(() => new Set(['C'])); // error 'C' ~> 'A' | 'B'

@@ -2317,7 +2317,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- propsof.js:14:1
 
-Cannot cast `intrinsicProp.children` to `empty` because `Iterable<?React.Node, void, void>` [1] is incompatible with
+Cannot cast `intrinsicProp.children` to `empty` because `Iterable<?React.Node, any, any>` [1] is incompatible with
 `empty` [2]. [incompatible-type]
 
    propsof.js:14:1

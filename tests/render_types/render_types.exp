@@ -259,7 +259,7 @@ Error --------------------------------------------------------------------------
 Cannot return `Bar` because: [incompatible-type]
  - Either class `Bar` [1] is incompatible with `ExactReactElement_DEPRECATED<any, React.ComponentProps<any>>` [2].
  - Or class `Bar` [1] is incompatible with `React.Portal` [3].
- - Or property `@@iterator` is missing in class `Bar` [1] but exists in `Iterable<?React.Node, void, void>` [4].
+ - Or property `@@iterator` is missing in class `Bar` [1] but exists in `Iterable<?React.Node, any, any>` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -769,7 +769,7 @@ Cannot use `ExactReactElement_DEPRECATED<any, React.ComponentProps<any>>` [1] as
 
 Error --------------------------------------------------------------------------------------- renders_to_renders.js:5:28
 
-Cannot use `Iterable<?React.Node, void, void>` [1], `null` [1] and `void` [1] as the type argument of renders type. Only
+Cannot use `Iterable<?React.Node, any, any>` [1], `null` [1] and `void` [1] as the type argument of renders type. Only
 elements of a component-syntax components can appear in renders. If you want to express the idea of rendering zero or
 more items, please use `renders*` instead. [invalid-render]
 
@@ -820,7 +820,7 @@ Cannot use `ExactReactElement_DEPRECATED<any, React.ComponentProps<any>>` [1] as
 
 Error -------------------------------------------------------------------------------------- renders_to_renders.js:20:36
 
-Cannot use `Iterable<?React.Node, void, void>` [1], `null` [1] and `void` [1] as the type argument of renders type. Only
+Cannot use `Iterable<?React.Node, any, any>` [1], `null` [1] and `void` [1] as the type argument of renders type. Only
 elements of a component-syntax components can appear in renders. If you want to express the idea of rendering zero or
 more items, please use `renders*` instead. [invalid-render]
 
@@ -871,7 +871,7 @@ Cannot use `ExactReactElement_DEPRECATED<any, React.ComponentProps<any>>` [1] as
 
 Error -------------------------------------------------------------------------------------- renders_to_renders.js:37:26
 
-Cannot use `Iterable<?React.Node, void, void>` [1], `null` [1] and `void` [1] as the type argument of renders type. Only
+Cannot use `Iterable<?React.Node, any, any>` [1], `null` [1] and `void` [1] as the type argument of renders type. Only
 elements of a component-syntax components can appear in renders. If you want to express the idea of rendering zero or
 more items, please use `renders*` instead. [invalid-render]
 
@@ -1269,7 +1269,7 @@ References:
 
 Error ------------------------------------------------------------------------------------- renders_to_renders.js:120:15
 
-Cannot get `rendersNode.props` because property `props` is missing in `Iterable<?React.Node, void, void>` [1].
+Cannot get `rendersNode.props` because property `props` is missing in `Iterable<?React.Node, any, any>` [1].
 [prop-missing]
 
    renders_to_renders.js:120:15
@@ -1501,7 +1501,7 @@ References:
 
 Error ----------------------------------------------------------------------------------- validation/autofixable.js:8:23
 
-Cannot use `Set<React.RendersExactly<typeof Foo>>` [1], `Iterable<React.RendersExactly<typeof Foo>, void, void>` [2],
+Cannot use `Set<React.RendersExactly<typeof Foo>>` [1], `Iterable<React.RendersExactly<typeof Foo>, any, any>` [2],
 `ReadonlyArray<React.RendersExactly<typeof Foo>>` [3], `Array<React.RendersExactly<typeof Foo>>` [4] and
 `Array<React.RendersExactly<typeof Foo>>` [5] as the type argument of renders type. Only elements of a component-syntax
 components can appear in renders. If you want to express the idea of rendering zero or more items, please use `renders*`
@@ -1691,7 +1691,7 @@ Cannot use `ExactReactElement_DEPRECATED<any, React.ComponentProps<any>>` [1] as
 
 Error ----------------------------------------------------------------------------------- validation/validation.js:10:25
 
-Cannot use `Iterable<?React.Node, void, void>` [1], `null` [1] and `void` [1] as the type argument of renders type. Only
+Cannot use `Iterable<?React.Node, any, any>` [1], `null` [1] and `void` [1] as the type argument of renders type. Only
 elements of a component-syntax components can appear in renders. If you want to express the idea of rendering zero or
 more items, please use `renders*` instead. [invalid-render]
 
@@ -1744,7 +1744,7 @@ Error --------------------------------------------------------------------------
 Render types must be a subtype of `React.Node` or a reference to a component-syntax component: [incompatible-type]
  - Either `Error` [1] is incompatible with `ExactReactElement_DEPRECATED<any, React.ComponentProps<any>>` [2].
  - Or `Error` [1] is incompatible with `React.Portal` [3].
- - Or property `@@iterator` is missing in `Error` [1] but exists in `Iterable<?React.Node, void, void>` [4].
+ - Or property `@@iterator` is missing in `Error` [1] but exists in `Iterable<?React.Node, any, any>` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -1824,7 +1824,7 @@ please use `renders*` instead. [invalid-render]
 
 Error ----------------------------------------------------------------------------------- validation/validation.js:25:37
 
-Cannot use `Iterable<React.RendersExactly<typeof Foo>, void, void>` [1] as the type argument of renders type. Only
+Cannot use `Iterable<React.RendersExactly<typeof Foo>, any, any>` [1] as the type argument of renders type. Only
 elements of a component-syntax components can appear in renders. If you want to express the idea of rendering zero or
 more items, please use `renders*` instead. [invalid-render]
 

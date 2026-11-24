@@ -5,7 +5,7 @@ Cannot create `Suspense` element because in type argument `TFallback`: [incompat
    `ExactReactElement_DEPRECATED<any, React.ComponentProps<any>>` [2].
  - Or `() => React.MixedElement` [1] is incompatible with `React.Portal` [3].
  - Or property `@@iterator` is missing in `{...}` [1] but exists in
-   `{"@@iterator"(this: Iterable<?React.Node, void, void>): Iterator<?React.Node, void, void>, ...}` [4].
+   `{"@@iterator"(this: Iterable<?React.Node, any, any>): Iterator<?React.Node, any, any>, ...}` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.

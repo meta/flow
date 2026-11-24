@@ -159,8 +159,8 @@ Error --------------------------------------------------------------------------
 
 Cannot call `Promise.allSettled` because: [incompatible-type]
  - Either `0` [1], a primitive, cannot be used as a subtype of
-   `Iterable<Array<unknown> | PromiseLike<Array<unknown>>, void, void>` [2]. You can wrap it in `new Number(...))` to
-   turn it into an object and attempt to use it as a subtype of an interface.
+   `Iterable<Array<unknown> | PromiseLike<Array<unknown>>, any, any>` [2]. You can wrap it in `new Number(...))` to turn
+   it into an object and attempt to use it as a subtype of an interface.
  - Or `0` [1] is incompatible with `Array<unknown>` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
@@ -241,8 +241,8 @@ Error --------------------------------------------------------------------------
 
 Cannot call `Promise.any` because: [incompatible-type]
  - Either `0` [1], a primitive, cannot be used as a subtype of
-   `Iterable<Array<unknown> | PromiseLike<Array<unknown>>, void, void>` [2]. You can wrap it in `new Number(...))` to
-   turn it into an object and attempt to use it as a subtype of an interface.
+   `Iterable<Array<unknown> | PromiseLike<Array<unknown>>, any, any>` [2]. You can wrap it in `new Number(...))` to turn
+   it into an object and attempt to use it as a subtype of an interface.
  - Or `0` [1] is incompatible with `Array<unknown>` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are

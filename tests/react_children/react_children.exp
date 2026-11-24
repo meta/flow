@@ -217,7 +217,7 @@ Cannot create `builtin` element because in property `children`: [incompatible-ty
  - Either object literal [1] is incompatible with `ExactReactElement_DEPRECATED<any, React.ComponentProps<any>>` [2].
  - Or object literal [1] is incompatible with `React.Portal` [3].
  - Or property `@@iterator` is missing in object literal [1] but exists in
-   `{"@@iterator"(this: Iterable<?React.Node, void, void>): Iterator<?React.Node, void, void>, ...}` [4].
+   `{"@@iterator"(this: Iterable<?React.Node, any, any>): Iterator<?React.Node, any, any>, ...}` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -298,7 +298,7 @@ Cannot create `MyComponent` element because in property `children`: [incompatibl
  - Either object literal [1] is incompatible with `ExactReactElement_DEPRECATED<any, React.ComponentProps<any>>` [2].
  - Or object literal [1] is incompatible with `React.Portal` [3].
  - Or property `@@iterator` is missing in object literal [1] but exists in
-   `{"@@iterator"(this: Iterable<?React.Node, void, void>): Iterator<?React.Node, void, void>, ...}` [4].
+   `{"@@iterator"(this: Iterable<?React.Node, any, any>): Iterator<?React.Node, any, any>, ...}` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
