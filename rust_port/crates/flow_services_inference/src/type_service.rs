@@ -2916,6 +2916,7 @@ fn init_with_initial_state(
         transaction,
         all_unordered_libs_set.dupe(),
         init::assemble_ordered_lib_inputs(
+            &options.file_options,
             &ordered_libs,
             &discovered_global_libdefs,
             &ts_global_augmentation_files,
@@ -3333,6 +3334,7 @@ pub fn init_from_scratch(
             transaction,
             all_unordered_libs_set.dupe(),
             init::assemble_ordered_lib_inputs(
+                &options.file_options,
                 &ordered_libs,
                 &discovered_global_libdefs,
                 &ts_global_augmentation_files,

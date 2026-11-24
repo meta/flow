@@ -22,6 +22,8 @@ use std::sync::Arc;
 use dupe::Dupe;
 use flow_aloc::ALoc;
 use flow_aloc::ALocTable;
+use flow_common::files;
+use flow_common::files::FileOptions;
 use flow_common::flow_import_specifier::FlowImportSpecifier;
 use flow_common::options::Options;
 use flow_data_structure_wrapper::ord_set::FlowOrdSet;
@@ -65,22 +67,37 @@ impl OrderedLibInput {
 }
 
 pub(crate) fn assemble_ordered_lib_inputs(
+    file_options: &FileOptions,
     configured_libs: &[String],
     discovered_globals: &BTreeSet<FileKey>,
     global_augmentations: &FlowOrdSet<FileKey>,
 ) -> Vec<OrderedLibInput> {
+    // Flow's builtins come first, the `.d.ts` ones too, so that `[libs]` override all of them.
+    let (builtin_libs, configured_libs): (Vec<&String>, Vec<&String>) = configured_libs
+        .iter()
+        .partition(|path| files::is_in_flowlib(file_options, path));
     // `FileKey` stores a root-relative, `/`-separated path suffix, so its `Ord` is already the
     // canonical cross-platform order the global scope needs; a `BTreeSet` iterates in it.
-    configured_libs
+    let (builtin_globals, discovered_globals): (Vec<&FileKey>, Vec<&FileKey>) = discovered_globals
         .iter()
+        .partition(|file| files::is_in_flowlib(file_options, &file.to_absolute()));
+    let discovered_global = |file: &FileKey| {
+        assert!(
+            !file.is_lib_file(),
+            "configured LibFile cannot be a parse-discovered global"
+        );
+        OrderedLibInput::discovered(file.dupe())
+    };
+    builtin_libs
+        .into_iter()
         .map(|path| OrderedLibInput::configured(path))
-        .chain(discovered_globals.iter().map(|file| {
-            assert!(
-                !file.is_lib_file(),
-                "configured LibFile cannot be a parse-discovered global"
-            );
-            OrderedLibInput::discovered(file.dupe())
-        }))
+        .chain(builtin_globals.into_iter().map(discovered_global))
+        .chain(
+            configured_libs
+                .into_iter()
+                .map(|path| OrderedLibInput::configured(path)),
+        )
+        .chain(discovered_globals.into_iter().map(discovered_global))
         .chain(
             global_augmentations
                 .iter()

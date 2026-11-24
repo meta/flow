@@ -1,3 +1,18 @@
+Error ------------------------------------------------------------------------------------------------- libs/dom.js:1:14
+
+This name declaration overrides an existing binding `SVGMatrix` [1]. Overriding in library definitions can lead to
+surprising behaviors. [libdef-override]
+
+   libs/dom.js:1:14
+      1| declare type SVGMatrix = string; // intentional-libdef-override of the bundled lib.dom.d.ts
+                      ^^^^^^^^^
+
+References:
+   <BUILTINS>/lib.dom.d.ts:8831:6
+   8831| type SVGMatrix = DOMMatrix;
+              ^^^^^^^^^ [1]
+
+
 Error ----------------------------------------------------------------------------------------------- libs/react.js:1:14
 
 This name declaration overrides an existing binding `React$Node` [1]. Overriding in library definitions can lead to
@@ -13,5 +28,19 @@ References:
                     ^^^^^^^^^^ [1]
 
 
+Error ------------------------------------------------------------------------------------------------------ test.js:7:1
 
-Found 1 error
+Cannot cast `1` to `SVGMatrix` because `1` [1] is incompatible with `SVGMatrix` [2]. [incompatible-type]
+
+   test.js:7:1
+   7| 1 as SVGMatrix; // ERROR
+      ^ [1]
+
+References:
+   test.js:7:6
+   7| 1 as SVGMatrix; // ERROR
+           ^^^^^^^^^ [2]
+
+
+
+Found 3 errors
