@@ -2124,9 +2124,6 @@ pub mod opts {
                     config,
                 )
             }),
-            ("experimental.jsx_intrinsic_elements", |values, config| {
-                enum_parser(&[("true", ())], |_opts, ()| Ok(()), values, config)
-            }),
             (
                 "experimental.log_per_error_typing_telemetry",
                 |values, config| {
@@ -2219,9 +2216,6 @@ pub mod opts {
             ("experimental.projects_path_mapping", |values, config| {
                 projects_path_mapping_parser(values, config)
             }),
-            ("experimental.react_managed_attributes", |values, config| {
-                enum_parser(&[("true", ())], |_opts, ()| Ok(()), values, config)
-            }),
             ("experimental.records", |values, config| {
                 parse_boolean(
                     |opts, v| {
@@ -2247,18 +2241,6 @@ pub mod opts {
                     config,
                 )
             }),
-            (
-                "experimental.ban_explicit_exact_object_types",
-                |values, config| enum_parser(&[("true", ())], |_opts, ()| Ok(()), values, config),
-            ),
-            (
-                "experimental.require_dictionary_key_label",
-                |values, config| enum_parser(&[("true", ())], |_opts, ()| Ok(()), values, config),
-            ),
-            (
-                "experimental.require_function_type_param_name",
-                |values, config| enum_parser(&[("true", ())], |_opts, ()| Ok(()), values, config),
-            ),
             ("experimental.strict_es6_import_export", |values, config| {
                 strict_es6_import_export_parser(values, config)
             }),
@@ -2371,9 +2353,6 @@ pub mod opts {
                     )
                 },
             ),
-            ("experimental.undefined_type", |values, config| {
-                enum_parser(&[("true", ())], |_opts, ()| Ok(()), values, config)
-            }),
             ("facebook.fbs", |values, config| {
                 parse_string(
                     |opts, v| {
