@@ -84,3 +84,38 @@ pluginTester({
     },
   },
 });
+
+// Test running the plugin twice in one pass, as when both a preset and the
+// project's own config include it
+pluginTester({
+  plugin,
+  pluginName: 'transform-flow-enums',
+  babelOptions: {
+    plugins: [[plugin, {}, 'transform-flow-enums-duplicate']],
+  },
+  tests: {
+    duplicate: {
+      code: `enum E {A = 1, B = 2}`,
+      output: `const E = require("flow-enums-runtime")({
+  A: 1,
+  B: 2
+});`,
+    },
+    duplicate_export: {
+      code: `export enum E {A = 1, B = 2}`,
+      output: `export const E = require("flow-enums-runtime")({
+  A: 1,
+  B: 2
+});`,
+    },
+    duplicate_export_default: {
+      code: `export default enum E {A = 1, B = 2}`,
+      output: `const E = require("flow-enums-runtime")({
+  A: 1,
+  B: 2
+});
+
+export default E;`,
+    },
+  },
+});
