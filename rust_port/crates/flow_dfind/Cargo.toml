@@ -8,7 +8,7 @@ edition = "2024"
 [dependencies]
 flow_daemon = { path = "../flow_daemon" }
 flow_hh_logger = { path = "../flow_hh_logger" }
-notify = "9.0.0-rc.6"
+notify = "9.0.0"
 regex = "1.13.1"
 serde = { version = "1.0.229", features = ["derive", "rc"] }
 tokio = { version = "1.54.1", features = ["full", "test-util", "tracing"] }
