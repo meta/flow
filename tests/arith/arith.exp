@@ -643,13 +643,13 @@ Error --------------------------------------------------------------------------
 Cannot get `(x + y).length` because property `length` is missing in `Number` [1]. [prop-missing]
 
    Arith.js:87:13
-    87|     (x + y).length; // error
-                    ^^^^^^
+   87|     (x + y).length; // error
+                   ^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:539:11
-   539| interface Number {
-                  ^^^^^^ [1]
+   <BUILTINS>/lib.es2020.number.js:22:11
+   22| interface Number {
+                 ^^^^^^ [1]
 
 
 Error --------------------------------------------------------------------------------------------------- Arith.js:88:13
@@ -657,13 +657,13 @@ Error --------------------------------------------------------------------------
 Cannot get `(1 + 2).length` because property `length` is missing in `Number` [1]. [prop-missing]
 
    Arith.js:88:13
-    88|     (1 + 2).length; // error
-                    ^^^^^^
+   88|     (1 + 2).length; // error
+                   ^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:539:11
-   539| interface Number {
-                  ^^^^^^ [1]
+   <BUILTINS>/lib.es2020.number.js:22:11
+   22| interface Number {
+                 ^^^^^^ [1]
 
 
 Error ---------------------------------------------------------------------------------------------------- Arith.js:94:1

@@ -6,13 +6,13 @@ Quick start.
 Expect no errors.
 No errors!
 
-The Flow server is currently in lazy mode and is only checking 71/74 files.
+The Flow server is currently in lazy mode and is only checking 72/75 files.
 To learn more, visit flow.org/en/docs/lang/lazy-modes
 
 Change @flow file with dependency on a @flow file, expect no error.
 No errors!
 
-The Flow server is currently in lazy mode and is only checking 72/74 files.
+The Flow server is currently in lazy mode and is only checking 73/75 files.
 To learn more, visit flow.org/en/docs/lang/lazy-modes
 
 Done!

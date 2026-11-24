@@ -5,16 +5,16 @@ Cannot call `listen` with `1` bound to `e` because `Number` [1] is incompatible 
 `AT_TARGET` is missing in `Number` [1] but exists in `Event` [2]. [incompatible-type]
 
    test.js:1:8
-     1| listen(1);
-               ^
+    1| listen(1);
+              ^
 
 References:
-   <BUILTINS>/lib.es5.js:539:11
-   539| interface Number {
-                  ^^^^^^ [1]
+   <BUILTINS>/lib.es2020.number.js:22:11
+   22| interface Number {
+                 ^^^^^^ [1]
    lib/legacy.js:1:28
-     1| declare function listen(e: Event): void;
-                                   ^^^^^ [2]
+    1| declare function listen(e: Event): void;
+                                  ^^^^^ [2]
 
 
 
@@ -26,16 +26,16 @@ Cannot call `listen` with `1` bound to `e` because `Number` [1] is incompatible 
 `AT_TARGET` is missing in `Number` [1] but exists in `Event` [2]. [incompatible-type]
 
    test.js:1:8
-     1| listen(1);
-               ^
+    1| listen(1);
+              ^
 
 References:
-   <BUILTINS>/lib.es5.js:539:11
-   539| interface Number {
-                  ^^^^^^ [1]
+   <BUILTINS>/lib.es2020.number.js:22:11
+   22| interface Number {
+                 ^^^^^^ [1]
    lib/legacy.js:1:28
-     1| declare function listen(e: Event): void;
-                                   ^^^^^ [2]
+    1| declare function listen(e: Event): void;
+                                  ^^^^^ [2]
 
 
 

@@ -44,8 +44,8 @@ References:
    <BUILTINS>/lib.es2015.iterable.js:50:26
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/misc.js:293:24
-   293| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:269:24
+   269| interface Iterator<out T, out TReturn = void, in TNext = void> {}
                                ^ [5]
    map.js:28:22
     28|     let x = new Map(['foo', 123]); // error
@@ -78,8 +78,8 @@ References:
    <BUILTINS>/lib.es2015.iterable.js:50:26
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/misc.js:293:24
-   293| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:269:24
+   269| interface Iterator<out T, out TReturn = void, in TNext = void> {}
                                ^ [5]
    map.js:28:29
     28|     let x = new Map(['foo', 123]); // error
@@ -111,8 +111,8 @@ References:
    <BUILTINS>/lib.es2015.iterable.js:50:26
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/misc.js:293:24
-   293| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:269:24
+   269| interface Iterator<out T, out TReturn = void, in TNext = void> {}
                                ^ [5]
    map.js:29:44
     29|     let y: Map<number, string> = new Map([['foo', 123]]); // error
@@ -144,8 +144,8 @@ References:
    <BUILTINS>/lib.es2015.iterable.js:50:26
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
-   <BUILTINS>/misc.js:293:24
-   293| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:269:24
+   269| interface Iterator<out T, out TReturn = void, in TNext = void> {}
                                ^ [5]
    map.js:29:51
     29|     let y: Map<number, string> = new Map([['foo', 123]]); // error

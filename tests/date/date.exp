@@ -20,16 +20,16 @@ Error --------------------------------------------------------------------------
 Cannot assign `d` to `y` because `Date` [1] is incompatible with `number` [2]. [incompatible-type]
 
    date.js:4:16
-     4| var y:number = d; // expect error
-                       ^
+    4| var y:number = d; // expect error
+                      ^
 
 References:
-   <BUILTINS>/lib.es5.js:907:35
-   907|     new (value: number | string): Date;
-                                          ^^^^ [1]
+   <BUILTINS>/lib.es2015.core.js:91:42
+   91|     new (value: number | string | Date): Date;
+                                                ^^^^ [1]
    date.js:4:7
-     4| var y:number = d; // expect error
-              ^^^^^^ [2]
+    4| var y:number = d; // expect error
+             ^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- date.js:18:5
@@ -60,8 +60,8 @@ References:
    <BUILTINS>/lib.es5.js:766:16
    766|     valueOf(): number;
                        ^^^^^^ [4]
-   <BUILTINS>/lib.es5.js:907:17
-   907|     new (value: number | string): Date;
+   <BUILTINS>/lib.es2015.core.js:91:17
+    91|     new (value: number | string | Date): Date;
                         ^^^^^^ [5]
 
 
@@ -69,7 +69,7 @@ Error --------------------------------------------------------------------------
 
 Cannot call `Date` because: [incompatible-type]
  - Either `"6"` [1] is incompatible with `number` [2].
- - Or no arguments are expected by function type [3].
+ - Or no more than 1 argument is expected by function type [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -85,16 +85,16 @@ References:
    <BUILTINS>/lib.es5.js:918:36
    918|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
                                            ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:906:5
-   906|     new (): Date;
-            ^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es2015.core.js:91:5
+    91|     new (value: number | string | Date): Date;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- date.js:20:5
 
 Cannot call `Date` because: [incompatible-type]
  - Either `"18"` [1] is incompatible with `number` [2].
- - Or no arguments are expected by function type [3].
+ - Or no more than 1 argument is expected by function type [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -110,16 +110,16 @@ References:
    <BUILTINS>/lib.es5.js:918:51
    918|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
                                                           ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:906:5
-   906|     new (): Date;
-            ^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es2015.core.js:91:5
+    91|     new (value: number | string | Date): Date;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- date.js:21:5
 
 Cannot call `Date` because: [incompatible-type]
  - Either `"11"` [1] is incompatible with `number` [2].
- - Or no arguments are expected by function type [3].
+ - Or no more than 1 argument is expected by function type [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -135,16 +135,16 @@ References:
    <BUILTINS>/lib.es5.js:918:67
    918|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
                                                                           ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:906:5
-   906|     new (): Date;
-            ^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es2015.core.js:91:5
+    91|     new (value: number | string | Date): Date;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- date.js:22:5
 
 Cannot call `Date` because: [incompatible-type]
  - Either `"55"` [1] is incompatible with `number` [2].
- - Or no arguments are expected by function type [3].
+ - Or no more than 1 argument is expected by function type [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -160,16 +160,16 @@ References:
    <BUILTINS>/lib.es5.js:918:85
    918|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
                                                                                             ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:906:5
-   906|     new (): Date;
-            ^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es2015.core.js:91:5
+    91|     new (value: number | string | Date): Date;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- date.js:23:5
 
 Cannot call `Date` because: [incompatible-type]
  - Either `"42"` [1] is incompatible with `number` [2].
- - Or no arguments are expected by function type [3].
+ - Or no more than 1 argument is expected by function type [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -185,16 +185,16 @@ References:
    <BUILTINS>/lib.es5.js:918:103
    918|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
                                                                                                               ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:906:5
-   906|     new (): Date;
-            ^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es2015.core.js:91:5
+    91|     new (value: number | string | Date): Date;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- date.js:24:5
 
 Cannot call `Date` because: [incompatible-type]
  - Either `"999"` [1] is incompatible with `number` [2].
- - Or no arguments are expected by function type [3].
+ - Or no more than 1 argument is expected by function type [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -210,43 +210,43 @@ References:
    <BUILTINS>/lib.es5.js:918:116
    918|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
                                                                                                                            ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:906:5
-   906|     new (): Date;
-            ^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es2015.core.js:91:5
+    91|     new (value: number | string | Date): Date;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- date.js:25:5
 
 Cannot call `Date` because: [incompatible-type]
- - Either no arguments are expected by function type [1].
- - Or no more than 1 argument is expected by function type [2].
- - Or no more than 7 arguments are expected by function type [3].
- - Or no more than 1 argument is expected by function type [4].
+ - Either no more than 1 argument is expected by function type [1].
+ - Or no arguments are expected by function type [2].
+ - Or no more than 1 argument is expected by function type [3].
+ - Or no more than 7 arguments are expected by function type [4].
 
    date.js:25:5
     25| new Date(2015, 6, 18, 11, 55, 42, 999, 'hahaha');
             ^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:906:5
-   906|     new (): Date;
-            ^^^^^^^^^^^^ [1]
-   <BUILTINS>/lib.es5.js:907:5
-   907|     new (value: number | string): Date;
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:918:5
-   918|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    <BUILTINS>/lib.es2015.core.js:91:5
     91|     new (value: number | string | Date): Date;
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:906:5
+   906|     new (): Date;
+            ^^^^^^^^^^^^ [2]
+   <BUILTINS>/lib.es5.js:907:5
+   907|     new (value: number | string): Date;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es5.js:918:5
+   918|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- date.js:26:5
 
 Cannot call `Date` because: [incompatible-type]
  - Either `"2015"` [1] is incompatible with `number` [2].
- - Or no arguments are expected by function type [3].
+ - Or no more than 1 argument is expected by function type [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -262,9 +262,9 @@ References:
    <BUILTINS>/lib.es5.js:918:16
    918|     new (year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): Date;
                        ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:906:5
-   906|     new (): Date;
-            ^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es2015.core.js:91:5
+    91|     new (value: number | string | Date): Date;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- date.js:28:17
@@ -272,16 +272,16 @@ Error --------------------------------------------------------------------------
 Cannot compare `Date` [1] to `number` [2]. [invalid-compare]
 
    date.js:28:17
-    28| var b:boolean = d > 0; // expect error
-                        ^
+   28| var b:boolean = d > 0; // expect error
+                       ^
 
 References:
-   <BUILTINS>/lib.es5.js:907:35
-   907|     new (value: number | string): Date;
-                                          ^^^^ [1]
+   <BUILTINS>/lib.es2015.core.js:91:42
+   91|     new (value: number | string | Date): Date;
+                                                ^^^^ [1]
    date.js:28:21
-    28| var b:boolean = d > 0; // expect error
-                            ^ [2]
+   28| var b:boolean = d > 0; // expect error
+                           ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- date.js:29:17
@@ -289,16 +289,16 @@ Error --------------------------------------------------------------------------
 Cannot use operator `-` with operands `Date` [1] and `number` [2] [unsafe-arithmetic]
 
    date.js:29:17
-    29| var n1:number = d - 12; // expect error
-                        ^^^^^^
+   29| var n1:number = d - 12; // expect error
+                       ^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:907:35
-   907|     new (value: number | string): Date;
-                                          ^^^^ [1]
+   <BUILTINS>/lib.es2015.core.js:91:42
+   91|     new (value: number | string | Date): Date;
+                                                ^^^^ [1]
    date.js:29:21
-    29| var n1:number = d - 12; // expect error
-                            ^^ [2]
+   29| var n1:number = d - 12; // expect error
+                           ^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- date.js:30:17
@@ -306,16 +306,16 @@ Error --------------------------------------------------------------------------
 Cannot use operator `&` with operands `Date` [1] and `number` [2] [unsafe-arithmetic]
 
    date.js:30:17
-    30| var n2:number = d & 255; // expect error
-                        ^^^^^^^
+   30| var n2:number = d & 255; // expect error
+                       ^^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:907:35
-   907|     new (value: number | string): Date;
-                                          ^^^^ [1]
+   <BUILTINS>/lib.es2015.core.js:91:42
+   91|     new (value: number | string | Date): Date;
+                                                ^^^^ [1]
    date.js:30:21
-    30| var n2:number = d & 255; // expect error
-                            ^^^ [2]
+   30| var n2:number = d & 255; // expect error
+                           ^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- date.js:31:17
@@ -323,16 +323,16 @@ Error --------------------------------------------------------------------------
 Cannot use operator `+` with operands `Date` [1] and `number` [2] [unsafe-addition]
 
    date.js:31:17
-    31| var n3:number = d + 12; // expect error
-                        ^^^^^^
+   31| var n3:number = d + 12; // expect error
+                       ^^^^^^
 
 References:
-   <BUILTINS>/lib.es5.js:907:35
-   907|     new (value: number | string): Date;
-                                          ^^^^ [1]
+   <BUILTINS>/lib.es2015.core.js:91:42
+   91|     new (value: number | string | Date): Date;
+                                                ^^^^ [1]
    date.js:31:21
-    31| var n3:number = d + 12; // expect error
-                            ^^ [2]
+   31| var n3:number = d + 12; // expect error
+                           ^^ [2]
 
 
 

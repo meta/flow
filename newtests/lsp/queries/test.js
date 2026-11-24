@@ -333,7 +333,7 @@ module.exports = suite(
         [
           [
             'telemetry/rage',
-            '{Focused: 73,LSP adapter state: Connected,.monitor_log,.log}',
+            '{Focused: 74,LSP adapter state: Connected,.monitor_log,.log}',
           ],
         ],
         [...lspIgnoreStatusAndCancellation],

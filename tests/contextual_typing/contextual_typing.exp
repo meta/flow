@@ -339,8 +339,8 @@ Property `@@iterator` is missing in `{...}` [1] but exists in
                ^^^^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/misc.js:295:11
-   295| interface Iterable<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:271:11
+   271| interface Iterable<out T, out TReturn = void, in TNext = void> {}
                   ^^^^^^^^ [2]
 
 
@@ -485,8 +485,8 @@ Cannot cast `a` to `Set<empty>` because in type argument `T` [1]: `string` [2] i
           ^
 
 References:
-   <BUILTINS>/misc.js:283:15
-   283| interface Set<T> extends ReadonlySet<T> {}
+   <BUILTINS>/misc.js:259:15
+   259| interface Set<T> extends ReadonlySet<T> {}
                       ^ [1]
    implicit_instantiation.js:144:29
    144| function test12(foo: ?Array<string>) {
@@ -506,8 +506,8 @@ Cannot cast `b` to `Set<empty>` because in type argument `T` [1]: `string` [2] i
           ^
 
 References:
-   <BUILTINS>/misc.js:283:15
-   283| interface Set<T> extends ReadonlySet<T> {}
+   <BUILTINS>/misc.js:259:15
+   259| interface Set<T> extends ReadonlySet<T> {}
                       ^ [1]
    implicit_instantiation.js:144:29
    144| function test12(foo: ?Array<string>) {
@@ -783,8 +783,8 @@ Cannot cast `s2.values()` to `Iterator<string>` because in type argument `T` [1]
           ^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:293:24
-   293| interface Iterator<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:269:24
+   269| interface Iterator<out T, out TReturn = void, in TNext = void> {}
                                ^ [1]
    lits.js:50:17
     50|   const s2: Set<number> = new Set([]);

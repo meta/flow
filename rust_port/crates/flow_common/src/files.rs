@@ -154,6 +154,8 @@ pub struct UntypedPattern {
 #[derive(Debug, Clone)]
 pub struct FileOptions {
     pub default_lib_dir: Option<LibDir>,
+    /// The files of `default_lib_dir`, in the order the builtin libraries are merged.
+    pub default_lib_files: Vec<FlowSmolStr>,
     pub ignores: Vec<IgnorePattern>,
     pub untyped: Vec<UntypedPattern>,
     pub declarations: Vec<(String, Regex)>,
@@ -176,6 +178,7 @@ impl Default for FileOptions {
     fn default() -> Self {
         Self {
             default_lib_dir: None,
+            default_lib_files: Vec::new(),
             ignores: Vec::new(),
             untyped: Vec::new(),
             declarations: Vec::new(),
@@ -722,6 +725,18 @@ pub fn is_in_flowlib(options: &FileOptions, path: &str) -> bool {
     }
 }
 
+/// The position of a builtin library file in the order the builtin libraries are merged.
+pub fn default_lib_position(options: &FileOptions, path: &str) -> Option<usize> {
+    if !is_in_flowlib(options, path) {
+        return None;
+    }
+    let name = Path::new(path).file_name()?;
+    options
+        .default_lib_files
+        .iter()
+        .position(|file| OsStr::new(file.as_str()) == name)
+}
+
 /// true if a TypeScript library definition is a bundled compiler library or matches an
 /// `experimental.typescript_library_definition_support.includes` glob. Without any includes,
 /// every library definition is included.
@@ -807,7 +822,10 @@ pub fn ordered_and_unordered_lib_paths(options: &FileOptions) -> Vec<String> {
                         }
                     }
                 }
-                files.into_iter().collect::<Vec<_>>()
+                // The builtin libraries are merged in the order of their contents list.
+                let mut files: Vec<String> = files.into_iter().collect();
+                files.sort_by_cached_key(|path| default_lib_position(options, path));
+                files
             })
             .collect()
     };

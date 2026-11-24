@@ -40,8 +40,8 @@ incompatible with `void` [3]. [incompatible-type]
                              ^^^^^^^^^^^^^^^ [3]
 
 References:
-   <BUILTINS>/misc.js:207:23
-   207| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:195:23
+   195| interface Promise<out T = unknown> {}
                               ^ [1]
    implicit.js:7:30
      7| async function g2(): Promise<number> {}

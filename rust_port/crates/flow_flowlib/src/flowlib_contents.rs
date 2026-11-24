@@ -12,17 +12,18 @@ use flow_common_xx as xx;
 use crate::tslib_contents;
 
 macro_rules! flowlib_file {
-    ($name:ident, $filename:literal) => {
+    ($vis:vis $name:ident, $filename:literal) => {
         #[cfg(fbcode_build)]
-        const $name: &str = include_str!(concat!("flowlib/", $filename));
+        $vis const $name: &str = include_str!(concat!("flowlib/", $filename));
         #[cfg(not(fbcode_build))]
-        const $name: &str = include_str!(concat!("../../../../lib/", $filename));
+        $vis const $name: &str = include_str!(concat!("../../../../lib/", $filename));
     };
 }
 
+flowlib_file!(FALLBACKS_JS, "fallbacks.js");
 flowlib_file!(LIB_ES5_JS, "lib.es5.js");
-flowlib_file!(MISC_JS, "misc.js");
-flowlib_file!(REACT_JS, "react.js");
+flowlib_file!(pub(super) MISC_JS, "misc.js");
+flowlib_file!(pub(super) REACT_JS, "react.js");
 flowlib_file!(DOM_EXTRA_TO_BE_REMOVED_JS, "dom_extra_to_be_removed.js");
 
 /// A library from `tslib/` with the Flow-specific changes in `tslib_patches/<name>.diff` applied.
@@ -60,22 +61,22 @@ tslib_patched_file!(LIB_ESNEXT_COLLECTION_D_TS, "lib.esnext.collection");
 tslib_patched_file!(LIB_ESNEXT_ITERATOR_D_TS, "lib.esnext.iterator");
 tslib_patched_file!(pub(super) REACT_DOM_D_TS, "react-dom");
 
-/// The embedded flowlib file contents as (filename, contents) pairs.
+/// The embedded flowlib file contents as (filename, contents) pairs, in the order the libraries are
+/// merged: Flow's fallback overloads, then the TypeScript libraries in TypeScript's order. A library
+/// merged later overrides the ones before it, and its overloads of a method come first. The
+/// TypeScript module `lib.esnext.iterator.js` is merged with the global augmentations instead.
 ///
 /// Files taken from `tslib/`, verbatim or patched, keep a `.js` name so they are checked as Flow
 /// libdefs: a `.d.ts` partial would make every interface it merges into TS-loose.
 pub(super) static COMMON_CONTENTS: LazyLock<Vec<(&str, &str)>> = LazyLock::new(|| {
     vec![
-        ("lib.decorators.js", tslib_contents::LIB_DECORATORS_D_TS),
-        (
-            "lib.decorators.legacy.js",
-            tslib_contents::LIB_DECORATORS_LEGACY_D_TS,
-        ),
+        ("fallbacks.js", FALLBACKS_JS),
+        ("lib.es5.js", LIB_ES5_JS),
+        ("lib.es2015.core.js", LIB_ES2015_CORE_D_TS.as_str()),
         (
             "lib.es2015.collection.js",
             LIB_ES2015_COLLECTION_D_TS.as_str(),
         ),
-        ("lib.es2015.core.js", LIB_ES2015_CORE_D_TS.as_str()),
         (
             "lib.es2015.generator.js",
             tslib_contents::LIB_ES2015_GENERATOR_D_TS,
@@ -105,7 +106,6 @@ pub(super) static COMMON_CONTENTS: LazyLock<Vec<(&str, &str)>> = LazyLock::new(|
             tslib_contents::LIB_ES2017_ARRAYBUFFER_D_TS,
         ),
         ("lib.es2017.date.js", tslib_contents::LIB_ES2017_DATE_D_TS),
-        ("lib.es2017.intl.js", tslib_contents::LIB_ES2017_INTL_D_TS),
         ("lib.es2017.object.js", LIB_ES2017_OBJECT_D_TS.as_str()),
         (
             "lib.es2017.sharedmemory.js",
@@ -115,6 +115,7 @@ pub(super) static COMMON_CONTENTS: LazyLock<Vec<(&str, &str)>> = LazyLock::new(|
             "lib.es2017.string.js",
             tslib_contents::LIB_ES2017_STRING_D_TS,
         ),
+        ("lib.es2017.intl.js", tslib_contents::LIB_ES2017_INTL_D_TS),
         (
             "lib.es2017.typedarrays.js",
             tslib_contents::LIB_ES2017_TYPEDARRAYS_D_TS,
@@ -137,7 +138,6 @@ pub(super) static COMMON_CONTENTS: LazyLock<Vec<(&str, &str)>> = LazyLock::new(|
             tslib_contents::LIB_ES2018_REGEXP_D_TS,
         ),
         ("lib.es2019.array.js", LIB_ES2019_ARRAY_D_TS.as_str()),
-        ("lib.es2019.intl.js", tslib_contents::LIB_ES2019_INTL_D_TS),
         ("lib.es2019.object.js", LIB_ES2019_OBJECT_D_TS.as_str()),
         (
             "lib.es2019.string.js",
@@ -147,16 +147,12 @@ pub(super) static COMMON_CONTENTS: LazyLock<Vec<(&str, &str)>> = LazyLock::new(|
             "lib.es2019.symbol.js",
             tslib_contents::LIB_ES2019_SYMBOL_D_TS,
         ),
+        ("lib.es2019.intl.js", tslib_contents::LIB_ES2019_INTL_D_TS),
         (
             "lib.es2020.bigint.js",
             tslib_contents::LIB_ES2020_BIGINT_D_TS,
         ),
         ("lib.es2020.date.js", tslib_contents::LIB_ES2020_DATE_D_TS),
-        ("lib.es2020.intl.js", tslib_contents::LIB_ES2020_INTL_D_TS),
-        (
-            "lib.es2020.number.js",
-            tslib_contents::LIB_ES2020_NUMBER_D_TS,
-        ),
         ("lib.es2020.promise.js", LIB_ES2020_PROMISE_D_TS.as_str()),
         (
             "lib.es2020.sharedmemory.js",
@@ -170,7 +166,11 @@ pub(super) static COMMON_CONTENTS: LazyLock<Vec<(&str, &str)>> = LazyLock::new(|
             "lib.es2020.symbol.wellknown.js",
             tslib_contents::LIB_ES2020_SYMBOL_WELLKNOWN_D_TS,
         ),
-        ("lib.es2021.intl.js", tslib_contents::LIB_ES2021_INTL_D_TS),
+        ("lib.es2020.intl.js", tslib_contents::LIB_ES2020_INTL_D_TS),
+        (
+            "lib.es2020.number.js",
+            tslib_contents::LIB_ES2020_NUMBER_D_TS,
+        ),
         (
             "lib.es2021.promise.js",
             tslib_contents::LIB_ES2021_PROMISE_D_TS,
@@ -183,6 +183,7 @@ pub(super) static COMMON_CONTENTS: LazyLock<Vec<(&str, &str)>> = LazyLock::new(|
             "lib.es2021.weakref.js",
             tslib_contents::LIB_ES2021_WEAKREF_D_TS,
         ),
+        ("lib.es2021.intl.js", tslib_contents::LIB_ES2021_INTL_D_TS),
         ("lib.es2022.array.js", tslib_contents::LIB_ES2022_ARRAY_D_TS),
         ("lib.es2022.error.js", tslib_contents::LIB_ES2022_ERROR_D_TS),
         ("lib.es2022.intl.js", tslib_contents::LIB_ES2022_INTL_D_TS),
@@ -191,12 +192,12 @@ pub(super) static COMMON_CONTENTS: LazyLock<Vec<(&str, &str)>> = LazyLock::new(|
             tslib_contents::LIB_ES2022_OBJECT_D_TS,
         ),
         (
-            "lib.es2022.regexp.js",
-            tslib_contents::LIB_ES2022_REGEXP_D_TS,
-        ),
-        (
             "lib.es2022.string.js",
             tslib_contents::LIB_ES2022_STRING_D_TS,
+        ),
+        (
+            "lib.es2022.regexp.js",
+            tslib_contents::LIB_ES2022_REGEXP_D_TS,
         ),
         ("lib.es2023.array.js", tslib_contents::LIB_ES2023_ARRAY_D_TS),
         (
@@ -229,43 +230,49 @@ pub(super) static COMMON_CONTENTS: LazyLock<Vec<(&str, &str)>> = LazyLock::new(|
             "lib.es2024.string.js",
             tslib_contents::LIB_ES2024_STRING_D_TS,
         ),
-        ("lib.es5.js", LIB_ES5_JS),
         ("lib.esnext.array.js", tslib_contents::LIB_ESNEXT_ARRAY_D_TS),
         (
             "lib.esnext.collection.js",
             LIB_ESNEXT_COLLECTION_D_TS.as_str(),
         ),
-        (
-            "lib.esnext.decorators.js",
-            tslib_contents::LIB_ESNEXT_DECORATORS_D_TS,
-        ),
+        ("lib.esnext.intl.js", tslib_contents::LIB_ESNEXT_INTL_D_TS),
         (
             "lib.esnext.disposable.js",
             tslib_contents::LIB_ESNEXT_DISPOSABLE_D_TS,
         ),
-        ("lib.esnext.error.js", tslib_contents::LIB_ESNEXT_ERROR_D_TS),
-        (
-            "lib.esnext.float16.js",
-            tslib_contents::LIB_ESNEXT_FLOAT16_D_TS,
-        ),
-        ("lib.esnext.intl.js", tslib_contents::LIB_ESNEXT_INTL_D_TS),
-        ("lib.esnext.iterator.js", LIB_ESNEXT_ITERATOR_D_TS.as_str()),
         (
             "lib.esnext.promise.js",
             tslib_contents::LIB_ESNEXT_PROMISE_D_TS,
         ),
         (
+            "lib.esnext.decorators.js",
+            tslib_contents::LIB_ESNEXT_DECORATORS_D_TS,
+        ),
+        ("lib.esnext.iterator.js", LIB_ESNEXT_ITERATOR_D_TS.as_str()),
+        (
+            "lib.esnext.float16.js",
+            tslib_contents::LIB_ESNEXT_FLOAT16_D_TS,
+        ),
+        ("lib.esnext.error.js", tslib_contents::LIB_ESNEXT_ERROR_D_TS),
+        (
             "lib.esnext.sharedmemory.js",
             tslib_contents::LIB_ESNEXT_SHAREDMEMORY_D_TS,
         ),
-        ("misc.js", MISC_JS),
-        ("react.js", REACT_JS),
+        ("lib.decorators.js", tslib_contents::LIB_DECORATORS_D_TS),
+        (
+            "lib.decorators.legacy.js",
+            tslib_contents::LIB_DECORATORS_LEGACY_D_TS,
+        ),
     ]
 });
 
 pub static CONTENTS: LazyLock<Vec<(&str, &str)>> = LazyLock::new(|| {
     let mut contents = COMMON_CONTENTS.to_vec();
-    contents.push(("dom_extra_to_be_removed.js", DOM_EXTRA_TO_BE_REMOVED_JS));
+    contents.extend([
+        ("react.js", REACT_JS),
+        ("misc.js", MISC_JS),
+        ("dom_extra_to_be_removed.js", DOM_EXTRA_TO_BE_REMOVED_JS),
+    ]);
     contents
 });
 

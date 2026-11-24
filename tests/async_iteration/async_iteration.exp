@@ -298,8 +298,8 @@ Cannot cast `result.value` to `string` because `unknown` [1] is incompatible wit
             ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:487:34
-   487| interface AsyncGenerator<out T = unknown, out TReturn = any, in TNext = any> {}
+   <BUILTINS>/misc.js:443:34
+   443| interface AsyncGenerator<out T = unknown, out TReturn = any, in TNext = any> {}
                                          ^^^^^^^ [1]
    typescript_generator.js:20:21
     20|     result.value as string; // ERROR: unknown default yield

@@ -512,7 +512,7 @@ Flags: --pretty
     {"name":"toFixed","type":"(this: Number, fractionDigits?: number) => string"},
     {
       "name":"toLocaleString",
-      "type":"(this: Number, locales?: LocalesArgument, options?: NumberFormatOptions) => string"
+      "type":"(this: Number, locales?: string | Array<string>, options?: NumberFormatOptions) => string"
     },
     {"name":"toPrecision","type":"(this: Number, precision?: number) => string"},
     {"name":"toString","type":"(this: Number, radix?: number) => string"},

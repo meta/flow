@@ -8,8 +8,8 @@ Cannot cast `Promise.resolve()` to `Promise<number>` because in type argument `T
         ^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:207:23
-   207| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:195:23
+   195| interface Promise<out T = unknown> {}
                               ^ [1]
    <BUILTINS>/lib.es2015.promise.js:61:24
     61|     resolve(): Promise<void>;

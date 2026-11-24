@@ -97,6 +97,83 @@ const SPLIT_FLOWLIB_FILES: ReadonlyArray<string> = [
   'dom_extra_to_be_removed.js',
 ];
 
+// Since 0.343, in the order the builtins are merged.
+const SPLIT_FLOWLIB_FILES_343: ReadonlyArray<string> = [
+  'fallbacks.js',
+  'lib.es5.js',
+  'lib.es2015.core.js',
+  'lib.es2015.collection.js',
+  'lib.es2015.generator.js',
+  'lib.es2015.iterable.js',
+  'lib.es2015.promise.js',
+  'lib.es2015.proxy.js',
+  'lib.es2015.reflect.js',
+  'lib.es2015.symbol.js',
+  'lib.es2015.symbol.wellknown.js',
+  'lib.es2016.array.include.js',
+  'lib.es2016.intl.js',
+  'lib.es2017.arraybuffer.js',
+  'lib.es2017.date.js',
+  'lib.es2017.object.js',
+  'lib.es2017.sharedmemory.js',
+  'lib.es2017.string.js',
+  'lib.es2017.intl.js',
+  'lib.es2017.typedarrays.js',
+  'lib.es2018.asyncgenerator.js',
+  'lib.es2018.asynciterable.js',
+  'lib.es2018.intl.js',
+  'lib.es2018.promise.js',
+  'lib.es2018.regexp.js',
+  'lib.es2019.array.js',
+  'lib.es2019.object.js',
+  'lib.es2019.string.js',
+  'lib.es2019.symbol.js',
+  'lib.es2019.intl.js',
+  'lib.es2020.bigint.js',
+  'lib.es2020.date.js',
+  'lib.es2020.promise.js',
+  'lib.es2020.sharedmemory.js',
+  'lib.es2020.string.js',
+  'lib.es2020.symbol.wellknown.js',
+  'lib.es2020.intl.js',
+  'lib.es2020.number.js',
+  'lib.es2021.promise.js',
+  'lib.es2021.string.js',
+  'lib.es2021.weakref.js',
+  'lib.es2021.intl.js',
+  'lib.es2022.array.js',
+  'lib.es2022.error.js',
+  'lib.es2022.intl.js',
+  'lib.es2022.object.js',
+  'lib.es2022.string.js',
+  'lib.es2022.regexp.js',
+  'lib.es2023.array.js',
+  'lib.es2023.collection.js',
+  'lib.es2023.intl.js',
+  'lib.es2024.arraybuffer.js',
+  'lib.es2024.collection.js',
+  'lib.es2024.object.js',
+  'lib.es2024.promise.js',
+  'lib.es2024.regexp.js',
+  'lib.es2024.sharedmemory.js',
+  'lib.es2024.string.js',
+  'lib.esnext.array.js',
+  'lib.esnext.collection.js',
+  'lib.esnext.intl.js',
+  'lib.esnext.disposable.js',
+  'lib.esnext.promise.js',
+  'lib.esnext.decorators.js',
+  'lib.esnext.iterator.js',
+  'lib.esnext.float16.js',
+  'lib.esnext.error.js',
+  'lib.esnext.sharedmemory.js',
+  'lib.decorators.js',
+  'lib.decorators.legacy.js',
+  'react.js',
+  'misc.js',
+  'dom_extra_to_be_removed.js',
+];
+
 // Flowlib files taken verbatim from `tslib/`. They keep their `.js` name so they are checked as
 // Flow libdefs, but their contents are fetched from the `.d.ts` file.
 const TSLIB_SOURCED_FLOWLIB_FILES: ReadonlyArray<string> = [
@@ -335,7 +412,7 @@ export function load(
   let libs: Array<string>;
   if (masterBasePath != null) {
     flowPath = withBaseUrl(`${masterBasePath}/flow.js`);
-    libs = SPLIT_FLOWLIB_FILES.map(filename =>
+    libs = SPLIT_FLOWLIB_FILES_343.map(filename =>
       withBaseUrl(`${masterBasePath}/flowlib/${filename}`),
     );
   } else {
@@ -355,9 +432,11 @@ export function load(
     tslibPatchedFiles =
       minorVersion >= 338 ? TSLIB_PATCHED_FLOWLIB_FILES_338 : [];
     flowPath = `${versionedBaseUrl}/flow.js`;
+    const splitFlowlibFiles =
+      minorVersion >= 343 ? SPLIT_FLOWLIB_FILES_343 : SPLIT_FLOWLIB_FILES;
     libs =
       minorVersion >= 333
-        ? SPLIT_FLOWLIB_FILES.map(
+        ? splitFlowlibFiles.map(
             filename => `${versionedBaseUrl}/flowlib/${filename}`,
           )
         : minorVersion >= 266

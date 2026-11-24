@@ -56,8 +56,8 @@ Cannot call `f` because property `@@iterator` is missing in `{...}` [1] but exis
                ^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/misc.js:295:11
-   295| interface Iterable<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:271:11
+   271| interface Iterable<out T, out TReturn = void, in TNext = void> {}
                   ^^^^^^^^ [2]
 
 
@@ -582,8 +582,8 @@ Property `@@iterator` is missing in `{...}` [1] but exists in
                          ^^^^^^^^ [1]
 
 References:
-   <BUILTINS>/misc.js:295:11
-   295| interface Iterable<out T, out TReturn = void, in TNext = void> {}
+   <BUILTINS>/misc.js:271:11
+   271| interface Iterable<out T, out TReturn = void, in TNext = void> {}
                   ^^^^^^^^ [2]
 
 

@@ -6,7 +6,7 @@ Quick start.
 Expect no errors.
 No errors!
 
-The Flow server is currently in lazy mode and is only checking 71/77 files.
+The Flow server is currently in lazy mode and is only checking 72/78 files.
 To learn more, visit flow.org/en/docs/lang/lazy-modes
 
 Check contents with dependency, expect errors in contents.
@@ -33,7 +33,7 @@ Found 1 error
 No error in dependency (it is not checked).
 No errors!
 
-The Flow server is currently in lazy mode and is only checking 71/77 files.
+The Flow server is currently in lazy mode and is only checking 72/78 files.
 To learn more, visit flow.org/en/docs/lang/lazy-modes
 
 Unsaved files don't have dependents, as in non-lazy mode.

@@ -1169,6 +1169,10 @@ pub fn file_options(
 
     Arc::new(FileOptions {
         default_lib_dir,
+        default_lib_files: flow_flowlib::contents_list(builtin_lib)
+            .into_iter()
+            .map(|(file, _)| FlowSmolStr::new(file))
+            .collect(),
         ignores,
         untyped,
         declarations,

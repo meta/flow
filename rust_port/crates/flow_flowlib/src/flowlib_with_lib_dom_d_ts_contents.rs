@@ -15,6 +15,8 @@ use crate::tslib_contents;
 pub static CONTENTS: LazyLock<Vec<(&str, &str)>> = LazyLock::new(|| {
     let mut contents = flowlib_contents::COMMON_CONTENTS.to_vec();
     contents.extend([
+        ("react.js", flowlib_contents::REACT_JS),
+        ("misc.js", flowlib_contents::MISC_JS),
         ("csstype.d.ts", tslib_contents::CSSTYPE_D_TS),
         (
             "lib.dom.asynciterable.d.ts",

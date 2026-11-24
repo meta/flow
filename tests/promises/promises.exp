@@ -274,8 +274,8 @@ Cannot cast `Promise.any(...)` to `Promise<number>` because in type argument `T`
           ^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:207:23
-   207| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:195:23
+   195| interface Promise<out T = unknown> {}
                               ^ [1]
    <BUILTINS>/lib.es2021.promise.js:41:64
     41|     any<T extends readonly unknown[] | []>(values: T): Promise<Awaited<T[number]>>;
@@ -317,8 +317,8 @@ Cannot return `Promise.any(...)` because in type argument `T` [1]: `unknown` [2]
                  ^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:207:23
-   207| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:195:23
+   195| interface Promise<out T = unknown> {}
                               ^ [1]
    <BUILTINS>/lib.es2021.promise.js:41:64
     41|     any<T extends readonly unknown[] | []>(values: T): Promise<Awaited<T[number]>>;
@@ -338,8 +338,8 @@ Cannot cast `p.finally(...)` to `Promise<string>` because in type argument `T` [
         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:207:23
-   207| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:195:23
+   195| interface Promise<out T = unknown> {}
                               ^ [1]
    finally.js:1:26
      1| declare const p: Promise<number>;
@@ -352,26 +352,98 @@ References:
 Error -------------------------------------------------------------------------------------------------- finally.js:14:3
 
 Cannot call `p.finally` because: [incompatible-type]
- - Either `1` [1] is incompatible with `() => unknown` [2].
- - Or `1` [1] is incompatible with `() => void` [3].
+ - Either `1` [1] is incompatible with `() => void` [2].
+ - Or `1` [1] is incompatible with `() => unknown` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    finally.js:14:3
-    14| p.finally(1); // Error: not a function
-          ^^^^^^^
+   14| p.finally(1); // Error: not a function
+         ^^^^^^^
 
 References:
    finally.js:14:11
-    14| p.finally(1); // Error: not a function
-                  ^ [1]
-   <BUILTINS>/misc.js:208:24
-   208|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
-                               ^^^^^^^^^^^^^ [2]
+   14| p.finally(1); // Error: not a function
+                 ^ [1]
    <BUILTINS>/lib.es2018.promise.js:30:26
-    30|     finally(onfinally?: (() => void) | undefined | null): Promise<T>;
-                                 ^^^^^^^^^^ [3]
+   30|     finally(onfinally?: (() => void) | undefined | null): Promise<T>;
+                                ^^^^^^^^^^ [2]
+   <BUILTINS>/fallbacks.js:40:24
+   40|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
+                              ^^^^^^^^^^^^^ [3]
+
+
+Error ------------------------------------------------------------------------------------------------- finally.js:18:22
+
+Cannot extend `Promise<R>` [1] with `NarrowFinally<R>` [2] because in property `finally` > the first parameter:
+`() => unknown` [3] is incompatible with `void` [4]. [incompatible-type]
+
+   finally.js:18:22
+   18|   finally(onFinally: () => unknown): NarrowFinally<R>; // Error: `null` and `undefined` are not functions
+                            ^^^^^^^^^^^^^ [3]
+
+References:
+   finally.js:17:40
+   17| declare class NarrowFinally<R> extends Promise<R> {
+                                              ^^^^^^^^^^ [1]
+   finally.js:17:1
+       v--------------------------------------------------
+   17| declare class NarrowFinally<R> extends Promise<R> {
+   18|   finally(onFinally: () => unknown): NarrowFinally<R>; // Error: `null` and `undefined` are not functions
+   19| }
+       ^ [2]
+   <BUILTINS>/fallbacks.js:40:23
+   40|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
+Error ------------------------------------------------------------------------------------------------- finally.js:18:22
+
+Cannot extend `Promise<R>` [1] with `NarrowFinally<R>` [2] because in property `finally` > the first parameter:
+`() => unknown` [3] is incompatible with `void` [4]. [incompatible-type]
+
+   finally.js:18:22
+   18|   finally(onFinally: () => unknown): NarrowFinally<R>; // Error: `null` and `undefined` are not functions
+                            ^^^^^^^^^^^^^ [3]
+
+References:
+   finally.js:17:40
+   17| declare class NarrowFinally<R> extends Promise<R> {
+                                              ^^^^^^^^^^ [1]
+   finally.js:17:1
+       v--------------------------------------------------
+   17| declare class NarrowFinally<R> extends Promise<R> {
+   18|   finally(onFinally: () => unknown): NarrowFinally<R>; // Error: `null` and `undefined` are not functions
+   19| }
+       ^ [2]
+   <BUILTINS>/fallbacks.js:40:41
+   40|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
+                                               ^^^^^^^^^ [4]
+
+
+Error ------------------------------------------------------------------------------------------------- finally.js:18:22
+
+Cannot extend `Promise<R>` [1] with `NarrowFinally<R>` [2] because in property `finally` > the first parameter:
+`() => unknown` [3] is incompatible with `null` [4]. [incompatible-type]
+
+   finally.js:18:22
+   18|   finally(onFinally: () => unknown): NarrowFinally<R>; // Error: `null` and `undefined` are not functions
+                            ^^^^^^^^^^^^^ [3]
+
+References:
+   finally.js:17:40
+   17| declare class NarrowFinally<R> extends Promise<R> {
+                                              ^^^^^^^^^^ [1]
+   finally.js:17:1
+       v--------------------------------------------------
+   17| declare class NarrowFinally<R> extends Promise<R> {
+   18|   finally(onFinally: () => unknown): NarrowFinally<R>; // Error: `null` and `undefined` are not functions
+   19| }
+       ^ [2]
+   <BUILTINS>/fallbacks.js:40:53
+   40|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
+                                                           ^^^^ [4]
 
 
 Error ------------------------------------------------------------------------------------------------- finally.js:18:22
@@ -444,78 +516,6 @@ References:
    <BUILTINS>/lib.es2018.promise.js:30:52
    30|     finally(onfinally?: (() => void) | undefined | null): Promise<T>;
                                                           ^^^^ [4]
-
-
-Error ------------------------------------------------------------------------------------------------- finally.js:18:22
-
-Cannot extend `Promise<R>` [1] with `NarrowFinally<R>` [2] because in property `finally` > the first parameter:
-`() => unknown` [3] is incompatible with `void` [4]. [incompatible-type]
-
-   finally.js:18:22
-    18|   finally(onFinally: () => unknown): NarrowFinally<R>; // Error: `null` and `undefined` are not functions
-                             ^^^^^^^^^^^^^ [3]
-
-References:
-   finally.js:17:40
-    17| declare class NarrowFinally<R> extends Promise<R> {
-                                               ^^^^^^^^^^ [1]
-   finally.js:17:1
-        v--------------------------------------------------
-    17| declare class NarrowFinally<R> extends Promise<R> {
-    18|   finally(onFinally: () => unknown): NarrowFinally<R>; // Error: `null` and `undefined` are not functions
-    19| }
-        ^ [2]
-   <BUILTINS>/misc.js:208:23
-   208|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
-                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
-
-
-Error ------------------------------------------------------------------------------------------------- finally.js:18:22
-
-Cannot extend `Promise<R>` [1] with `NarrowFinally<R>` [2] because in property `finally` > the first parameter:
-`() => unknown` [3] is incompatible with `void` [4]. [incompatible-type]
-
-   finally.js:18:22
-    18|   finally(onFinally: () => unknown): NarrowFinally<R>; // Error: `null` and `undefined` are not functions
-                             ^^^^^^^^^^^^^ [3]
-
-References:
-   finally.js:17:40
-    17| declare class NarrowFinally<R> extends Promise<R> {
-                                               ^^^^^^^^^^ [1]
-   finally.js:17:1
-        v--------------------------------------------------
-    17| declare class NarrowFinally<R> extends Promise<R> {
-    18|   finally(onFinally: () => unknown): NarrowFinally<R>; // Error: `null` and `undefined` are not functions
-    19| }
-        ^ [2]
-   <BUILTINS>/misc.js:208:41
-   208|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
-                                                ^^^^^^^^^ [4]
-
-
-Error ------------------------------------------------------------------------------------------------- finally.js:18:22
-
-Cannot extend `Promise<R>` [1] with `NarrowFinally<R>` [2] because in property `finally` > the first parameter:
-`() => unknown` [3] is incompatible with `null` [4]. [incompatible-type]
-
-   finally.js:18:22
-    18|   finally(onFinally: () => unknown): NarrowFinally<R>; // Error: `null` and `undefined` are not functions
-                             ^^^^^^^^^^^^^ [3]
-
-References:
-   finally.js:17:40
-    17| declare class NarrowFinally<R> extends Promise<R> {
-                                               ^^^^^^^^^^ [1]
-   finally.js:17:1
-        v--------------------------------------------------
-    17| declare class NarrowFinally<R> extends Promise<R> {
-    18|   finally(onFinally: () => unknown): NarrowFinally<R>; // Error: `null` and `undefined` are not functions
-    19| }
-        ^ [2]
-   <BUILTINS>/misc.js:208:53
-   208|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
-                                                            ^^^^ [4]
 
 
 Error ------------------------------------------------------------------------------------------ generic_awaited.js:17:1
@@ -931,8 +931,8 @@ Cannot cast `Promise.resolve()` to `Promise<number>` because in type argument `T
         ^^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:207:23
-   207| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:195:23
+   195| interface Promise<out T = unknown> {}
                               ^ [1]
    <BUILTINS>/lib.es2015.promise.js:61:24
     61|     resolve(): Promise<void>;
@@ -952,8 +952,8 @@ with `number` [3]. [incompatible-type]
                         ^^^^^^^^^ [2]
 
 References:
-   <BUILTINS>/misc.js:207:23
-   207| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:195:23
+   195| interface Promise<out T = unknown> {}
                               ^ [1]
    resolve_void.js:3:39
      3| Promise.resolve(undefined) as Promise<number>; // error
@@ -977,8 +977,8 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
         ^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:207:23
-   207| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:195:23
+   195| interface Promise<out T = unknown> {}
                               ^ [1]
    <BUILTINS>/lib.es2020.promise.js:20:34
     20| interface PromiseFulfilledResult<T> {
@@ -1012,8 +1012,8 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
         ^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:207:23
-   207| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:195:23
+   195| interface Promise<out T = unknown> {}
                               ^ [1]
    <BUILTINS>/lib.es2020.promise.js:20:34
     20| interface PromiseFulfilledResult<T> {
@@ -1049,8 +1049,8 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
         ^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:207:23
-   207| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:195:23
+   195| interface Promise<out T = unknown> {}
                               ^ [1]
    <BUILTINS>/lib.es2020.promise.js:20:34
     20| interface PromiseFulfilledResult<T> {
@@ -1084,8 +1084,8 @@ not shown. To see all branches, re-run Flow with --show-all-branches.
         ^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:207:23
-   207| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:195:23
+   195| interface Promise<out T = unknown> {}
                               ^ [1]
    <BUILTINS>/lib.es2020.promise.js:20:34
     20| interface PromiseFulfilledResult<T> {
@@ -1121,8 +1121,8 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
         ^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:207:23
-   207| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:195:23
+   195| interface Promise<out T = unknown> {}
                               ^ [1]
    <BUILTINS>/lib.es2020.promise.js:43:99
     43|     allSettled<T extends readonly unknown[] | []>(values: T): Promise<{ -readonly [P in keyof T]: PromiseSettledResult<$AllSettledAwaited<T[P]>>; }>;
@@ -1155,8 +1155,8 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
         ^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:207:23
-   207| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:195:23
+   195| interface Promise<out T = unknown> {}
                               ^ [1]
    <BUILTINS>/lib.es2020.promise.js:51:66
     51|     allSettled<T>(values: Iterable<T | PromiseLike<T>>): Promise<PromiseSettledResult<$AllSettledAwaited<T>>[]>;
@@ -1295,8 +1295,8 @@ Cannot cast `promise` to `Promise<string>` because in type argument `T` [1]: `nu
         ^^^^^^^
 
 References:
-   <BUILTINS>/misc.js:207:23
-   207| interface Promise<out T = unknown> {
+   <BUILTINS>/misc.js:195:23
+   195| interface Promise<out T = unknown> {}
                               ^ [1]
    withResolvers.js:1:58
      1| const {promise, resolve, reject} = Promise.withResolvers<number>();
