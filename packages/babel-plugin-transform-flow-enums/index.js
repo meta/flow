@@ -67,14 +67,14 @@ module.exports = function transformEnums(babel) {
         ]);
 
         // Default exports do not support variable declaration statements as
-        // children, instead we need to replace the statement and append a
-        // default export of the identifier. e.g.
+        // children, so the declaration goes before the export and the export
+        // takes the identifier. e.g.
         //   export default enum A {} -> const A = ...; export default A;
+        // Replacing the enum node rather than the export statement means a
+        // second instance of this plugin in the same pass skips the node.
         if (t.isExportDefaultDeclaration(path.parentPath)) {
-          path.parentPath.replaceWithMultiple([
-            enumDeclaration,
-            t.exportDefaultDeclaration(t.identifier(path.node.id.name)),
-          ]);
+          path.parentPath.insertBefore(enumDeclaration);
+          path.replaceWith(t.identifier(path.node.id.name));
           return;
         }
 
