@@ -944,29 +944,29 @@ References:
 Error --------------------------------------------------------------------------------------- object_prototype.js:150:32
 
 Cannot assign `x.toLocaleString` to `xToLocaleString` because: [incompatible-type]
- - Either `(this: Date, locales?: LocalesArgument, options?: DateTimeFormatOptions) => string` [1] is incompatible with
+ - Either `(this: Date, locales?: string | Array<string>, options?: DateTimeFormatOptions) => string` [1] is
+   incompatible with `number` [2].
+ - Or `(this: Date) => string` [3] is incompatible with `number` [2].
+ - Or `(this: Date, locales?: LocalesArgument, options?: DateTimeFormatOptions) => string` [4] is incompatible with
    `number` [2].
- - Or `(this: Date, locales?: string | Array<string>, options?: DateTimeFormatOptions) => string` [3] is incompatible
-   with `number` [2].
- - Or `(this: Date) => string` [4] is incompatible with `number` [2].
 
    object_prototype.js:150:32
     150| var xToLocaleString : number = x.toLocaleString; // error
                                         ^^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/lib.es2020.date.js:28:5
-     28|     toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string;
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:4515:5
+   4515|     toLocaleString(locales?: string | string[], options?: Intl.DateTimeFormatOptions): string;
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    object_prototype.js:150:23
     150| var xToLocaleString : number = x.toLocaleString; // error
                                ^^^^^^ [2]
-   <BUILTINS>/lib.es5.js:4515:5
-   4515|     toLocaleString(locales?: string | string[], options?: Intl.DateTimeFormatOptions): string;
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    <BUILTINS>/lib.es5.js:760:5
     760|     toLocaleString(): string;
-             ^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+             ^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es2020.date.js:28:5
+     28|     toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string;
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error --------------------------------------------------------------------------------------- object_prototype.js:151:39

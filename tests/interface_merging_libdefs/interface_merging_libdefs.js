@@ -35,3 +35,10 @@ varianceDefault.value as string | number;
 
 declare const varianceUnchecked: VarianceUnchecked<string>;
 varianceUnchecked as VarianceUnchecked<string | number>; // ok: covariant
+
+// The overloads of a lib file merged later come first, and in one file, those of the later
+// declaration.
+declare const mergedAcrossFiles: MergedAcrossFiles;
+mergedAcrossFiles.m('') as 'later file'; // ok
+mergedAcrossFiles.n('') as 'earlier file, second'; // ok
+'a,b'.split('magic') as Array<number>; // ok: before the overloads of the builtin String

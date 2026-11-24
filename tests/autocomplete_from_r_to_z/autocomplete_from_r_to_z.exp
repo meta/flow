@@ -832,14 +832,17 @@ Flags: --pretty
     },
     {"name":"length","type":"number"},
     {"name":"link","type":"(this: String, url: string) => string"},
-    {"name":"localeCompare","type":"(this: String, that: string) => number"},
+    {
+      "name":"localeCompare",
+      "type":"(this: String, that: string, locales?: LocalesArgument, options?: CollatorOptions) => number"
+    },
     {
       "name":"match",
-      "type":"(this: String, regexp: string | RegExp) => RegExpMatchArray | null"
+      "type":"(this: String, matcher: {[match](string: string): RegExpMatchArray | null}) => RegExpMatchArray | null"
     },
     {
       "name":"matchAll",
-      "type":"(this: String, regexp: string | RegExp) => RegExpStringIterator<RegExpExecArray>"
+      "type":"(this: String, regexp: RegExp) => RegExpStringIterator<RegExpExecArray>"
     },
     {"name":"normalize","type":"(this: String, form?: string) => string"},
     {
@@ -853,13 +856,16 @@ Flags: --pretty
     {"name":"repeat","type":"(this: String, count: number) => string"},
     {
       "name":"replace",
-      "type":"(this: String, searchValue: string | RegExp, replacer: (substring: string, ...args: Array<any>) => string) => string"
+      "type":"(this: String, searchValue: {[replace](string: string, replacer: (substring: string, ...args: Array<any>) => string): string}, replacer: (substring: string, ...args: Array<any>) => string) => string"
     },
     {
       "name":"replaceAll",
       "type":"(this: String, searchValue: string | RegExp, replacer: (substring: string, ...args: Array<any>) => string) => string"
     },
-    {"name":"search","type":"(this: String, regexp: string | RegExp) => number"},
+    {
+      "name":"search",
+      "type":"(this: String, searcher: {[search](string: string): number}) => number"
+    },
     {
       "name":"slice",
       "type":"(this: String, start?: number, end?: number) => string"
@@ -867,7 +873,7 @@ Flags: --pretty
     {"name":"small","type":"(this: String) => string"},
     {
       "name":"split",
-      "type":"(this: String, separator: string | RegExp, limit?: number) => Array<string>"
+      "type":"(this: String, splitter: {[split](string: string, limit?: number): Array<string>}, limit?: number) => Array<string>"
     },
     {
       "name":"startsWith",
@@ -886,11 +892,11 @@ Flags: --pretty
     {"name":"sup","type":"(this: String) => string"},
     {
       "name":"toLocaleLowerCase",
-      "type":"(this: String, locales?: string | Array<string>) => string"
+      "type":"(this: String, locales?: LocalesArgument) => string"
     },
     {
       "name":"toLocaleUpperCase",
-      "type":"(this: String, locales?: string | Array<string>) => string"
+      "type":"(this: String, locales?: LocalesArgument) => string"
     },
     {"name":"toLowerCase","type":"(this: String) => string"},
     {"name":"toString","type":"(this: String) => string"},
@@ -1336,7 +1342,7 @@ Flags: --pretty
     {"name":"toFixed","type":"(this: Number, fractionDigits?: number) => string"},
     {
       "name":"toLocaleString",
-      "type":"(this: Number, locales?: string | Array<string>, options?: NumberFormatOptions) => string"
+      "type":"(this: Number, locales?: LocalesArgument, options?: NumberFormatOptions) => string"
     },
     {"name":"toPrecision","type":"(this: Number, precision?: number) => string"},
     {"name":"toString","type":"(this: Number, radix?: number) => string"},

@@ -20,6 +20,7 @@ use std::cell::Cell;
 use std::cell::OnceCell;
 use std::cell::RefCell;
 use std::cell::UnsafeCell;
+use std::cmp::Reverse;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::ops::Deref;
@@ -42,6 +43,7 @@ use flow_parser::ast::types::TypeInner;
 use flow_parser::ast_utils;
 use flow_parser::ast_visitor;
 use flow_parser::ast_visitor::AstVisitor;
+use flow_parser::file_key::FileKey;
 use flow_parser::jsdoc;
 use flow_parser::loc::Loc;
 use flow_parser_utils::enum_validate;
@@ -676,6 +678,8 @@ pub(super) struct Tables<'arena, 'ast> {
     pub(super) patterns: Builder<'arena, Pattern<'arena, 'ast>>,
     pub(super) additional_errors: Vec<signature_error::BindingValidation<LocNode<'arena>>>,
     pub(super) strictness_kind: TypeStrictnessKind,
+    /// The position of each library file in the order the libraries are merged in.
+    pub(super) lib_merge_order: BTreeMap<FileKey, usize>,
 }
 
 impl<'arena, 'ast> Tables<'arena, 'ast> {
@@ -689,11 +693,24 @@ impl<'arena, 'ast> Tables<'arena, 'ast> {
             patterns: Builder::new(arena),
             additional_errors: Vec::new(),
             strictness_kind,
+            lib_merge_order: BTreeMap::new(),
         }
     }
 
     pub(super) fn set_strictness_kind(&mut self, strictness_kind: TypeStrictnessKind) {
         self.strictness_kind = strictness_kind;
+    }
+
+    pub(super) fn set_lib_merge_order(&mut self, lib_merge_order: BTreeMap<FileKey, usize>) {
+        self.lib_merge_order = lib_merge_order;
+    }
+
+    fn lib_merge_position(&self, loc: &LocNode<'arena>) -> Option<usize> {
+        let loc = loc.0.data();
+        loc.source
+            .as_ref()
+            .and_then(|file| self.lib_merge_order.get(file))
+            .copied()
     }
 
     // Builtin files share these tables, and a definition may be forced after a later file is parsed.
@@ -3879,7 +3896,33 @@ pub(crate) mod scope {
         }
     }
 
+    // As in TypeScript, the overloads of a later declaration come first. Library files are parsed
+    // from the one merged last, so the overloads of a library merged later come first.
+    fn merge_method_overloads<'arena, 'ast>(
+        tbls: &Tables<'arena, 'ast>,
+        old_sigs: &Vec1<(
+            LocNode<'arena>,
+            LocNode<'arena>,
+            FunSig<LocNode<'arena>, Parsed<'arena, 'ast>>,
+        )>,
+        new_sigs: &Vec1<(
+            LocNode<'arena>,
+            LocNode<'arena>,
+            FunSig<LocNode<'arena>, Parsed<'arena, 'ast>>,
+        )>,
+    ) -> Vec1<(
+        LocNode<'arena>,
+        LocNode<'arena>,
+        FunSig<LocNode<'arena>, Parsed<'arena, 'ast>>,
+    )> {
+        let mut merged = new_sigs.clone();
+        merged.extend(old_sigs.iter().cloned());
+        merged.sort_by_cached_key(|(id_loc, _, _)| Reverse(tbls.lib_merge_position(id_loc)));
+        merged
+    }
+
     fn merge_interface_props_combine<'arena, 'ast>(
+        tbls: &Tables<'arena, 'ast>,
         _prop_name: &FlowSmolStr,
         existing_prop: &InterfaceProp<LocNode<'arena>, Parsed<'arena, 'ast>>,
         new_prop: &InterfaceProp<LocNode<'arena>, Parsed<'arena, 'ast>>,
@@ -3888,12 +3931,9 @@ pub(crate) mod scope {
             (
                 InterfaceProp::InterfaceMethod(old_sigs),
                 InterfaceProp::InterfaceMethod(new_sigs),
-            ) => {
-                let mut merged: Vec<_> = new_sigs.iter().cloned().collect();
-                merged.extend(old_sigs.iter().cloned());
-                let merged = Vec1::try_from_vec(merged).unwrap();
-                Some(InterfaceProp::InterfaceMethod(Box::new(merged)))
-            }
+            ) => Some(InterfaceProp::InterfaceMethod(Box::new(
+                merge_method_overloads(tbls, old_sigs, new_sigs),
+            ))),
             _ => Some(existing_prop.clone()),
         }
     }
@@ -3920,7 +3960,7 @@ pub(crate) mod scope {
             match proto_props.entry(prop_name.clone()) {
                 Entry::Occupied(mut e) => {
                     if let Some(combined) =
-                        merge_interface_props_combine(prop_name, e.get(), new_prop)
+                        merge_interface_props_combine(tbls, prop_name, e.get(), new_prop)
                     {
                         *e.get_mut() = combined;
                     }
@@ -3996,9 +4036,7 @@ pub(crate) mod scope {
                     ) = (e.get(), new_prop)
                     {
                         // merge overloads
-                        let mut merged: Vec<_> = new_sigs.iter().cloned().collect();
-                        merged.extend(old_sigs.iter().cloned());
-                        let merged = Vec1::try_from_vec(merged).unwrap();
+                        let merged = merge_method_overloads(tbls, old_sigs, new_sigs);
                         *e.get_mut() = InterfaceProp::InterfaceMethod(Box::new(merged));
                     } else {
                         // First prop wins. Type conflict checking is deferred to

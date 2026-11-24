@@ -61,6 +61,18 @@ fn parse_libs<'arena: 'ast, 'ast>(
     let mut scopes = parse::scope::Scopes::new();
     let global_scope = parse::scope::create_global(&mut scopes);
     let mut tbls = parse::Tables::new(arenas, TypeStrictnessKind::Flow);
+    // The first binding of a name wins, so the libraries come from the one merged last to the
+    // one merged first. Global augmentations are merged after them.
+    tbls.set_lib_merge_order(
+        ordered_asts
+            .iter()
+            .rev()
+            .map(|(ast, _)| ast)
+            .chain(global_augmentation_asts.iter().map(|(ast, _, _)| ast))
+            .enumerate()
+            .filter_map(|(position, ast)| ast.loc.source.dupe().map(|file| (file, position)))
+            .collect(),
+    );
     for (ast, strictness_kind) in ordered_asts {
         tbls.set_strictness_kind(*strictness_kind);
         // For builtins, each lib file is parsed separately into an unresolved global
@@ -181,6 +193,7 @@ fn pack_builtins<'arena: 'ast, 'ast>(
         patterns,
         additional_errors,
         strictness_kind: _,
+        lib_merge_order: _,
     } = tbls;
     let locs = locs.compact_without_merge();
     let module_refs = module_refs.compact_without_merge();
@@ -366,6 +379,7 @@ fn pack<'arena, 'ast>(
         patterns,
         additional_errors,
         strictness_kind: _,
+        lib_merge_order: _,
     } = tbls;
 
     // compact
@@ -538,6 +552,7 @@ pub fn parse_and_pack_targets<'arena: 'ast, 'ast>(
         patterns,
         additional_errors,
         strictness_kind: _,
+        lib_merge_order: _,
     } = tbls;
 
     let locs = locs.compact_with_merge(merge_locs_allow_unordered);

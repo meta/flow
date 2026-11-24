@@ -352,8 +352,8 @@ References:
 Error -------------------------------------------------------------------------------------------------- finally.js:14:3
 
 Cannot call `p.finally` because: [incompatible-type]
- - Either `1` [1] is incompatible with `() => void` [2].
- - Or `1` [1] is incompatible with `() => unknown` [3].
+ - Either `1` [1] is incompatible with `() => unknown` [2].
+ - Or `1` [1] is incompatible with `() => void` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -366,12 +366,12 @@ References:
    finally.js:14:11
     14| p.finally(1); // Error: not a function
                   ^ [1]
-   <BUILTINS>/lib.es2018.promise.js:30:26
-    30|     finally(onfinally?: (() => void) | undefined | null): Promise<T>;
-                                 ^^^^^^^^^^ [2]
    <BUILTINS>/misc.js:208:24
    208|   finally(onfinally?: (() => unknown) | undefined | null): Promise<T>;
-                               ^^^^^^^^^^^^^ [3]
+                               ^^^^^^^^^^^^^ [2]
+   <BUILTINS>/lib.es2018.promise.js:30:26
+    30|     finally(onfinally?: (() => void) | undefined | null): Promise<T>;
+                                 ^^^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------------- finally.js:18:22
