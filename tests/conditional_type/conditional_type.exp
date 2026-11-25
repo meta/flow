@@ -848,128 +848,292 @@ References:
                                                                 ^^^^^^^^^^^^ [2]
 
 
-Error -------------------------------------------------------------------------------------------------- generic.js:92:2
+Error ------------------------------------------------------------------------------------------------- generic.js:88:51
+
+Cannot instantiate `Uppercase` because `unknown` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   generic.js:88:51
+   88| type UpperOfDistributedFalseBranch<T> = Uppercase<T extends string ? 'a' : T>; // error
+                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   generic.js:88:76
+   88| type UpperOfDistributedFalseBranch<T> = Uppercase<T extends string ? 'a' : T>; // error
+                                                                                  ^ [1]
+   generic.js:88:41
+   88| type UpperOfDistributedFalseBranch<T> = Uppercase<T extends string ? 'a' : T>; // error
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- generic.js:96:10
+
+Cannot return `x` because `unknown` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   generic.js:96:10
+   96|   return x; // error: `T` is `unknown`
+                ^
+
+References:
+   generic.js:95:38
+   95| function decidedByAnAliasOfAny<T>(x: OfUntyped<T>): string {
+                                            ^^^^^^^^^^^^ [1]
+   generic.js:95:53
+   95| function decidedByAnAliasOfAny<T>(x: OfUntyped<T>): string {
+                                                           ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ generic.js:108:10
+
+Cannot return `v` because `unknown` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   generic.js:108:10
+   108|   return v; // error
+                 ^
+
+References:
+   generic.js:107:40
+   107| function narrowsOnlyTheCheckType<T>(v: IfString<T, T>): string {
+                                               ^^^^^^^^^^^^^^ [1]
+   generic.js:107:57
+   107| function narrowsOnlyTheCheckType<T>(v: IfString<T, T>): string {
+                                                                ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ generic.js:111:10
+
+Cannot return `v` because: [incompatible-type]
+ - Either in array element: `unknown` [1] is incompatible with `string` [2].
+ - Or `ReadonlyArray<T>` [3] is incompatible with `string` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   generic.js:111:10
+   111|   return v; // error
+                 ^
+
+References:
+   generic.js:110:73
+   110| function narrowsOnlyTheCheckTypeInArray<T>(v: IfString<T, ReadonlyArray<T>>): ReadonlyArray<string> | string {
+                                                                                ^ [1]
+   generic.js:110:93
+   110| function narrowsOnlyTheCheckTypeInArray<T>(v: IfString<T, ReadonlyArray<T>>): ReadonlyArray<string> | string {
+                                                                                                    ^^^^^^ [2]
+   generic.js:110:47
+   110| function narrowsOnlyTheCheckTypeInArray<T>(v: IfString<T, ReadonlyArray<T>>): ReadonlyArray<string> | string {
+                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   generic.js:110:103
+   110| function narrowsOnlyTheCheckTypeInArray<T>(v: IfString<T, ReadonlyArray<T>>): ReadonlyArray<string> | string {
+                                                                                                              ^^^^^^ [4]
+
+
+Error ------------------------------------------------------------------------------------------------ generic.js:118:12
+
+Cannot return `b.m(...)` because: [incompatible-type]
+ - Either `unknown` [1] is incompatible with `empty` [2].
+ - Or `unknown` [1] is incompatible with `string` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   generic.js:118:12
+   118|     return b.m(x); // error
+                   ^^^^^^
+
+References:
+   generic.js:114:15
+   114|   m<U>(u: U): IfString<U, T>;
+                      ^^^^^^^^^^^^^^ [1]
+   generic.js:117:28
+   117|   function inner<T>(x: T): T | string {
+                                   ^ [2]
+   generic.js:117:32
+   117|   function inner<T>(x: T): T | string {
+                                       ^^^^^^ [3]
+
+
+Error ------------------------------------------------------------------------------------------------ generic.js:124:10
+
+Cannot return `x` because: [incompatible-type]
+ - Either in array element: `unknown` [1] is incompatible with `string` [2].
+    - Arrays are invariantly typed. See
+      https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
+ - Or `Array<T>` [3] is incompatible with `null` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   generic.js:124:10
+   124|   return x; // error, though TypeScript accepts it
+                 ^
+
+References:
+   generic.js:123:57
+   123| function narrowedInArray<T>(x: ArrayOfString<T>): Array<T> | null {
+                                                                ^ [1]
+   generic.js:122:50
+   122| type ArrayOfString<X> = X extends string ? Array<X> : null;
+                                                         ^ [2]
+   generic.js:123:32
+   123| function narrowedInArray<T>(x: ArrayOfString<T>): Array<T> | null {
+                                       ^^^^^^^^^^^^^^^^ [3]
+   generic.js:123:62
+   123| function narrowedInArray<T>(x: ArrayOfString<T>): Array<T> | null {
+                                                                     ^^^^ [4]
+
+
+Error ------------------------------------------------------------------------------------------------ generic.js:128:10
+
+Cannot return `arrayOfString(...)` because: [incompatible-type]
+ - Either in array element: `unknown` [1] is incompatible with `string` [2].
+    - Arrays are invariantly typed. See
+      https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
+ - Or `Array<T>` [3] is incompatible with `null` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   generic.js:128:10
+   128|   return arrayOfString(t); // error, though TypeScript accepts it
+                 ^^^^^^^^^^^^^^^^
+
+References:
+   generic.js:127:50
+   127| function narrowedInReturnedArray<T>(t: T): Array<T> | null {
+                                                         ^ [1]
+   generic.js:126:67
+   126| declare function arrayOfString<X>(x: X): X extends string ? Array<X> : null;
+                                                                          ^ [2]
+   generic.js:126:61
+   126| declare function arrayOfString<X>(x: X): X extends string ? Array<X> : null;
+                                                                    ^^^^^^^^ [3]
+   generic.js:127:55
+   127| function narrowedInReturnedArray<T>(t: T): Array<T> | null {
+                                                              ^^^^ [4]
+
+
+Error ------------------------------------------------------------------------------------------------- generic.js:137:2
 
 Cannot cast object literal to `TSOmit<{a: number, b: string}, "a">` because property `a` is extra in object literal [1]
 but missing in `{b: {a: number, b: string}["b"]}` [2]. Exact objects do not accept extra props. [incompatible-type]
 
-   generic.js:92:2
-   92| ({a: 1, b: ''}) as TSOmit<{a: number, b: string}, 'a'>; // error: a is extra
-        ^^^^^^^^^^^^^ [1]
+   generic.js:137:2
+   137| ({a: 1, b: ''}) as TSOmit<{a: number, b: string}, 'a'>; // error: a is extra
+         ^^^^^^^^^^^^^ [1]
 
 References:
-   generic.js:92:20
-   92| ({a: 1, b: ''}) as TSOmit<{a: number, b: string}, 'a'>; // error: a is extra
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   generic.js:137:20
+   137| ({a: 1, b: ''}) as TSOmit<{a: number, b: string}, 'a'>; // error: a is extra
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
-Error ------------------------------------------------------------------------------------------------ generic.js:100:10
+Error ------------------------------------------------------------------------------------------------ generic.js:145:10
 
 Cannot return `1` because `1` [1] is incompatible with `keyof T extends string ? 1 : 2` [2]. [incompatible-type]
 
-   generic.js:100:10
-   100|   return 1; // error: `keyof T` may be a number or a symbol
+   generic.js:145:10
+   145|   return 1; // error: `keyof T` may be a number or a symbol
                  ^ [1]
 
 References:
-   generic.js:99:51
-    99| function keysOfUnboundedTypeParamNotDecided<T>(): keyof T extends string ? 1 : 2 {
+   generic.js:144:51
+   144| function keysOfUnboundedTypeParamNotDecided<T>(): keyof T extends string ? 1 : 2 {
                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
-Error ------------------------------------------------------------------------------------------------ generic.js:110:10
+Error ------------------------------------------------------------------------------------------------ generic.js:155:10
 
 Cannot return `'zzz'` because `"zzz"` [1] is incompatible with `empty` [2]. [incompatible-type]
 
-   generic.js:110:10
-   110|   return 'zzz'; // error: `U` is `keyof T`
+   generic.js:155:10
+   155|   return 'zzz'; // error: `U` is `keyof T`
                  ^^^^^ [1]
 
 References:
-   generic.js:109:72
-   109| function keysOfUnboundedTypeParamInfer<T>(): keyof T extends infer U ? U : empty {
+   generic.js:154:72
+   154| function keysOfUnboundedTypeParamInfer<T>(): keyof T extends infer U ? U : empty {
                                                                                ^ [2]
 
 
-Error ------------------------------------------------------------------------------------------------ generic.js:119:10
+Error ------------------------------------------------------------------------------------------------ generic.js:164:10
 
 Cannot return `k` because `number` [1] is incompatible with `"a"` [2]. [incompatible-type]
 
-   generic.js:119:10
-   119|   return k; // error x4: neither the string, number or symbol of `keyof T` nor 'c' is 'a'
+   generic.js:164:10
+   164|   return k; // error x4: neither the string, number or symbol of `keyof T` nor 'c' is 'a'
                  ^
 
 References:
-   generic.js:118:46
-   118| function keysOfUnboundedTypeParamOrKey<T>(k: keyof T | 'c'): 'a' {
+   generic.js:163:46
+   163| function keysOfUnboundedTypeParamOrKey<T>(k: keyof T | 'c'): 'a' {
                                                      ^^^^^^^ [1]
-   generic.js:118:62
-   118| function keysOfUnboundedTypeParamOrKey<T>(k: keyof T | 'c'): 'a' {
+   generic.js:163:62
+   163| function keysOfUnboundedTypeParamOrKey<T>(k: keyof T | 'c'): 'a' {
                                                                      ^^^ [2]
 
 
-Error ------------------------------------------------------------------------------------------------ generic.js:119:10
+Error ------------------------------------------------------------------------------------------------ generic.js:164:10
 
 Cannot return `k` because `string` [1] is incompatible with `"a"` [2]. [incompatible-type]
 
-   generic.js:119:10
-   119|   return k; // error x4: neither the string, number or symbol of `keyof T` nor 'c' is 'a'
+   generic.js:164:10
+   164|   return k; // error x4: neither the string, number or symbol of `keyof T` nor 'c' is 'a'
                  ^
 
 References:
-   generic.js:118:46
-   118| function keysOfUnboundedTypeParamOrKey<T>(k: keyof T | 'c'): 'a' {
+   generic.js:163:46
+   163| function keysOfUnboundedTypeParamOrKey<T>(k: keyof T | 'c'): 'a' {
                                                      ^^^^^^^ [1]
-   generic.js:118:62
-   118| function keysOfUnboundedTypeParamOrKey<T>(k: keyof T | 'c'): 'a' {
+   generic.js:163:62
+   163| function keysOfUnboundedTypeParamOrKey<T>(k: keyof T | 'c'): 'a' {
                                                                      ^^^ [2]
 
 
-Error ------------------------------------------------------------------------------------------------ generic.js:119:10
+Error ------------------------------------------------------------------------------------------------ generic.js:164:10
 
 Cannot return `k` because `symbol` [1] is incompatible with `"a"` [2]. [incompatible-type]
 
-   generic.js:119:10
-   119|   return k; // error x4: neither the string, number or symbol of `keyof T` nor 'c' is 'a'
+   generic.js:164:10
+   164|   return k; // error x4: neither the string, number or symbol of `keyof T` nor 'c' is 'a'
                  ^
 
 References:
-   generic.js:118:46
-   118| function keysOfUnboundedTypeParamOrKey<T>(k: keyof T | 'c'): 'a' {
+   generic.js:163:46
+   163| function keysOfUnboundedTypeParamOrKey<T>(k: keyof T | 'c'): 'a' {
                                                      ^^^^^^^ [1]
-   generic.js:118:62
-   118| function keysOfUnboundedTypeParamOrKey<T>(k: keyof T | 'c'): 'a' {
+   generic.js:163:62
+   163| function keysOfUnboundedTypeParamOrKey<T>(k: keyof T | 'c'): 'a' {
                                                                      ^^^ [2]
 
 
-Error ------------------------------------------------------------------------------------------------ generic.js:119:10
+Error ------------------------------------------------------------------------------------------------ generic.js:164:10
 
 Cannot return `k` because `"c"` [1] is incompatible with `"a"` [2]. [incompatible-type]
 
-   generic.js:119:10
-   119|   return k; // error x4: neither the string, number or symbol of `keyof T` nor 'c' is 'a'
+   generic.js:164:10
+   164|   return k; // error x4: neither the string, number or symbol of `keyof T` nor 'c' is 'a'
                  ^
 
 References:
-   generic.js:118:56
-   118| function keysOfUnboundedTypeParamOrKey<T>(k: keyof T | 'c'): 'a' {
+   generic.js:163:56
+   163| function keysOfUnboundedTypeParamOrKey<T>(k: keyof T | 'c'): 'a' {
                                                                ^^^ [1]
-   generic.js:118:62
-   118| function keysOfUnboundedTypeParamOrKey<T>(k: keyof T | 'c'): 'a' {
+   generic.js:163:62
+   163| function keysOfUnboundedTypeParamOrKey<T>(k: keyof T | 'c'): 'a' {
                                                                      ^^^ [2]
 
 
-Error ------------------------------------------------------------------------------------------------ generic.js:122:10
+Error ------------------------------------------------------------------------------------------------ generic.js:167:10
 
 Cannot return `'zzz'` because `"zzz"` [1] is incompatible with `empty` [2]. [incompatible-type]
 
-   generic.js:122:10
-   122|   return 'zzz'; // error: `U` is `keyof T`
+   generic.js:167:10
+   167|   return 'zzz'; // error: `U` is `keyof T`
                  ^^^^^ [1]
 
 References:
-   generic.js:121:83
-   121| function keysOfUnboundedTypeParamInferUnderMaybe<T>(): keyof T extends ?infer U ? U : empty {
+   generic.js:166:83
+   166| function keysOfUnboundedTypeParamInferUnderMaybe<T>(): keyof T extends ?infer U ? U : empty {
                                                                                           ^ [2]
 
 
@@ -1881,4 +2045,4 @@ References:
 
 
 
-Found 120 errors
+Found 127 errors

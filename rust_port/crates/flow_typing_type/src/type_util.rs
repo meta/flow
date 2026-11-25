@@ -451,6 +451,7 @@ pub fn util_use_op_of_use_t<T, CX: ContextFamily>(
             let infer_tparams = data.infer_tparams.dupe();
             let extends_t = data.extends_t.clone();
             let true_t = data.true_t.clone();
+            let narrowed_true_t = data.narrowed_true_t.clone();
             let false_t = data.false_t.clone();
             let tout = data.tout.clone();
             call_util(&data.use_op, &move |use_op| {
@@ -461,6 +462,7 @@ pub fn util_use_op_of_use_t<T, CX: ContextFamily>(
                     infer_tparams: infer_tparams.dupe(),
                     extends_t: extends_t.clone(),
                     true_t: true_t.clone(),
+                    narrowed_true_t: narrowed_true_t.clone(),
                     false_t: false_t.clone(),
                     tout: tout.clone(),
                 })))
@@ -3019,6 +3021,44 @@ pub fn reason_of_resolved_param(param: &crate::type_::ResolvedParam) -> &Reason 
         ResolvedAnySpreadArg(t) => reason_of_t(t),
         ResolvedArg(deref!(crate::type_::ResolvedArgData(tuple_elem, _))) => &tuple_elem.reason,
     }
+}
+
+/// The type parameter `t` where it is also known to satisfy `bound`, as in TypeScript: in the
+/// true branch of a conditional type that checks it.
+pub fn narrow_tparam(t: &Type, bound: Type) -> Option<Type> {
+    use crate::type_::DefTInner;
+    use crate::type_::inter_rep;
+
+    let TypeInner::GenericT(
+        deref!(GenericTData {
+            reason,
+            name,
+            id,
+            bound: declared_bound,
+            no_infer,
+        }),
+    ) = t.deref()
+    else {
+        return None;
+    };
+    let bound = match declared_bound.deref() {
+        TypeInner::DefT(_, d)
+            if matches!(d.deref(), DefTInner::MixedT(MixedFlavor::MixedEverything)) =>
+        {
+            bound
+        }
+        _ => Type::new(TypeInner::IntersectionT(
+            reason_of_t(&bound).dupe(),
+            inter_rep::make(declared_bound.dupe(), bound, Rc::from([])),
+        )),
+    };
+    Some(Type::new(TypeInner::GenericT(Box::new(GenericTData {
+        reason: reason.dupe(),
+        name: name.dupe(),
+        id: id.clone(),
+        bound,
+        no_infer: *no_infer,
+    }))))
 }
 
 /// Extract the property name from a key type that is a SingletonStrT,

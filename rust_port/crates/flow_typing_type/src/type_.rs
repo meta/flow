@@ -2387,6 +2387,10 @@ pub struct ConditionalTData {
     pub infer_tparams: Rc<[TypeParam]>,
     pub extends_t: Type,
     pub true_t: Type,
+    /// The true branch where the member of the check type that it distributes over, a type
+    /// parameter, is narrowed by the extends type: the true branch of the conditional type kept
+    /// abstract.
+    pub narrowed_true_t: Option<Type>,
     pub false_t: Type,
     pub tout: Box<Tvar>,
 }

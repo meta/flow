@@ -3248,6 +3248,7 @@ pub mod kit {
         check_t: &Type,
         extends_t: &Type,
         true_t: &Type,
+        narrowed_true_t: Option<&Type>,
         false_t: &Type,
     ) -> Result<Type, FlowJsException> {
         // A conditional type that a solve can't decide is deferred, as in TypeScript: a new
@@ -3408,7 +3409,7 @@ pub mod kit {
                                         union_rep::make(
                                             None,
                                             union_rep::UnionKind::UnknownKind,
-                                            true_t.dupe(),
+                                            narrowed_true_t.unwrap_or(true_t).dupe(),
                                             false_t.dupe(),
                                             Rc::from([]),
                                         ),

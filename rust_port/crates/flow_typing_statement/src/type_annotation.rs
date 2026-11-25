@@ -517,46 +517,6 @@ fn use_distributive_tparam_name_from_ast<'a>(
     }
 }
 
-/// The type parameter `t` where it is also known to satisfy `bound`, as in TypeScript: in the
-/// true branch of a conditional type that checks it.
-fn narrow_tparam(t: &Type, bound: Type) -> Option<Type> {
-    let type_::TypeInner::GenericT(
-        deref!(type_::GenericTData {
-            reason,
-            name,
-            id,
-            bound: declared_bound,
-            no_infer,
-        }),
-    ) = t.deref()
-    else {
-        return None;
-    };
-    let bound = match declared_bound.deref() {
-        type_::TypeInner::DefT(_, d)
-            if matches!(
-                d.deref(),
-                type_::DefTInner::MixedT(type_::MixedFlavor::MixedEverything)
-            ) =>
-        {
-            bound
-        }
-        _ => Type::new(type_::TypeInner::IntersectionT(
-            type_util::reason_of_t(&bound).dupe(),
-            type_::inter_rep::make(declared_bound.dupe(), bound, Rc::from([])),
-        )),
-    };
-    Some(Type::new(type_::TypeInner::GenericT(Box::new(
-        type_::GenericTData {
-            reason: reason.dupe(),
-            name: name.dupe(),
-            id: id.clone(),
-            bound,
-            no_infer: *no_infer,
-        },
-    ))))
-}
-
 /// TypeScript's implied constraint of a conditional type: when its check type is a type
 /// parameter `T`, or `[T]` checked against a one element tuple, the name of `T` and the type
 /// that `T` is known to satisfy in the true branch. As in TypeScript, `any` and `unknown` imply
@@ -1841,7 +1801,7 @@ fn convert_inner<'a>(
                 && let Some(narrowed) = env
                     .tparams_map
                     .get(&subst_name)
-                    .and_then(|t| narrow_tparam(t, constraint))
+                    .and_then(|t| type_util::narrow_tparam(t, constraint))
             {
                 additional_true_type_tparams_map.insert(subst_name, narrowed);
             }

@@ -83,6 +83,51 @@ type UpperOfFalseBranch<T> = T extends string ? empty : Uppercase<T>; // error
 type UpperOfAny<T> = T extends any ? Uppercase<T> : empty; // error
 type UpperOfOptional<T> = [a?: T] extends [b?: string] ? Uppercase<T> : empty; // error
 
+// So it is where a distributive one is evaluated over a type parameter.
+type UpperOfDistributed<T> = Uppercase<T extends string ? T : 'a'>; // ok
+type UpperOfDistributedFalseBranch<T> = Uppercase<T extends string ? 'a' : T>; // error
+type StringOf<T> = T extends string ? T : 'a';
+type UpperOfStringOf<U> = Uppercase<StringOf<U>>; // ok
+type Names = {a: 'x', b: 'y'};
+type UpperOfName<K> = Uppercase<K extends keyof Names ? Names[K] : 'z'>; // ok
+type Untyped = any;
+type OfUntyped<T> = T extends Untyped ? T : empty;
+function decidedByAnAliasOfAny<T>(x: OfUntyped<T>): string {
+  return x; // error: `T` is `unknown`
+}
+type ExtractChain<T> = Extract<Extract<Extract<Extract<Extract<Extract<Extract<Extract<
+  Extract<Extract<Extract<Extract<Extract<Extract<Extract<Extract<T,
+  string>, string>, string>, string>, string>, string>, string>, string>,
+  string>, string>, string>, string>, string>, string>, string>, string>;
+function extractChain<T>(x: ExtractChain<T>): string {
+  return x; // ok
+}
+// Only the type parameter that the conditional type checks is narrowed.
+type IfString<X, Then> = X extends string ? Then : string;
+function narrowsOnlyTheCheckType<T>(v: IfString<T, T>): string {
+  return v; // error
+}
+function narrowsOnlyTheCheckTypeInArray<T>(v: IfString<T, ReadonlyArray<T>>): ReadonlyArray<string> | string {
+  return v; // error
+}
+declare class StringIfString<T> {
+  m<U>(u: U): IfString<U, T>;
+}
+function narrowsOnlyTheCheckTypeOfTheSameName<T>(b: StringIfString<T>) {
+  function inner<T>(x: T): T | string {
+    return b.m(x); // error
+  }
+}
+// The narrowed type parameter is not the type parameter where it must be the same type.
+type ArrayOfString<X> = X extends string ? Array<X> : null;
+function narrowedInArray<T>(x: ArrayOfString<T>): Array<T> | null {
+  return x; // error, though TypeScript accepts it
+}
+declare function arrayOfString<X>(x: X): X extends string ? Array<X> : null;
+function narrowedInReturnedArray<T>(t: T): Array<T> | null {
+  return arrayOfString(t); // error, though TypeScript accepts it
+}
+
 // A conditional type decides `keyof T` key by key over the keys of the bound of `T`, and as a
 // whole when the bound is not an object.
 type Excl<T, U> = T extends U ? empty : T;

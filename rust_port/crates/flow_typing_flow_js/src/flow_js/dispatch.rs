@@ -4434,6 +4434,7 @@ fn __flow_impl<'cx>(
                     true_t,
                     false_t,
                     tout,
+                    ..
                 }),
             ),
         ) => {
@@ -4458,6 +4459,16 @@ fn __flow_impl<'cx>(
                 })
                 .collect();
             let extends_t = subst(cx, extends_t.dupe());
+            // A member that is still a type parameter is known to satisfy the extends type in the
+            // true branch, which matters when the conditional type is kept abstract.
+            let narrowed_true_t = type_util::narrow_tparam(l, extends_t.dupe()).map(|narrowed| {
+                flow_js_utils::mk_distributive_tparam_subst_fn(
+                    cx,
+                    Some(use_op.dupe()),
+                    name.dupe(),
+                    narrowed,
+                )(cx, true_t.dupe())
+            });
             let true_t = subst(cx, true_t.dupe());
             let false_t = subst(cx, false_t.dupe());
             rec_flow(
@@ -4473,6 +4484,7 @@ fn __flow_impl<'cx>(
                         infer_tparams: new_infer_tparams.into(),
                         extends_t,
                         true_t,
+                        narrowed_true_t,
                         false_t,
                         tout: tout.clone(),
                     }))),
@@ -4489,6 +4501,7 @@ fn __flow_impl<'cx>(
                     infer_tparams,
                     extends_t,
                     true_t,
+                    narrowed_true_t,
                     false_t,
                     tout,
                 }),
@@ -4504,6 +4517,7 @@ fn __flow_impl<'cx>(
                 l,
                 extends_t,
                 true_t,
+                narrowed_true_t.as_ref(),
                 false_t,
             )?;
             let open_tout = Type::new(OpenT((**tout).dupe()));

@@ -1242,6 +1242,7 @@ pub(super) fn eval_destructor<'cx>(
                         infer_tparams: infer_tparams.dupe(),
                         extends_t: extends_t.dupe(),
                         true_t: true_t.dupe(),
+                        narrowed_true_t: None,
                         false_t: false_t.dupe(),
                         tout: Box::new(tout.dupe()),
                     })));
