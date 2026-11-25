@@ -5,18 +5,23 @@
 import {
   type Animal,
   type AnimalMethod,
+  type BoxArgs,
   type Dog,
   type DogMethod,
   type MutableTuple,
   type MutableValue,
+  type NarrowTuple,
   type NarrowValue,
   type OptionalValues,
   type PresentValue,
   type ReadonlyTuple,
   type ReadonlyValue,
+  type WideTuple,
   type WideValue,
   Box,
   InvariantBox,
+  setFirst,
+  takesA,
 } from "./cross_lang_lib";
 
 declare const dogBox: Box<Dog>;
@@ -39,3 +44,17 @@ const wideValue: WideValue = narrowValue; // OK: properties come from .ts
 
 declare const presentValue: PresentValue;
 const optionalValues: OptionalValues = presentValue; // OK: optional properties come from .ts
+
+declare const narrowTuple: NarrowTuple;
+const wideTuple: WideTuple = narrowTuple; // OK: tuples come from .ts
+const narrowTuple2: NarrowTuple = wideTuple; // ERROR: `string` is not `"a"`
+
+declare const argsA: BoxArgs<"a">;
+const argsString: Box<string> | BoxArgs<string> = argsA; // OK: tuples come from .ts
+
+declare const arrayA: Array<"a">;
+setFirst(arrayA, "b"); // OK: arrays come from .ts
+
+type Params<F> = F extends (...args: infer A) => unknown ? A : empty;
+declare const paramsA: Params<typeof takesA>;
+const paramsString: [string] = paramsA; // OK: the function comes from .ts

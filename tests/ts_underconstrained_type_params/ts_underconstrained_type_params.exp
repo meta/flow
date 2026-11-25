@@ -76,77 +76,59 @@ References:
        ^^^^^^^^^^ [2]
 
 
-Error ---------------------------------------------------------------------------------------------------- test.js:25:25
-
-Cannot call `empty` because `T` [1] is underconstrained by call of `empty` [2]. Either add explicit type arguments or
-cast the expression to your expected type. [underconstrained-implicit-instantiation]
-
-   test.js:25:25
-   25| const n: number = first(empty()); // ERROR: `T` of `empty` is underconstrained
-                               ^^^^^
-
-References:
-   node_modules/repro/index.d.ts:13:31
-   13| export declare function empty<T>(): Array<T>;
-                                     ^ [1]
-   test.js:25:25
-   25| const n: number = first(empty()); // ERROR: `T` of `empty` is underconstrained
-                               ^^^^^^^ [2]
-
-
-Error ----------------------------------------------------------------------------------------------------- test.js:28:1
+Error ----------------------------------------------------------------------------------------------------- test.js:27:1
 
 Cannot call `linked` because `T` [1] is underconstrained by call of `linked` [2]. Either add explicit type arguments or
 cast the expression to your expected type. [underconstrained-implicit-instantiation]
 
-   test.js:28:1
-   28| linked(); // ERROR: `T` is underconstrained
+   test.js:27:1
+   27| linked(); // ERROR: `T` is underconstrained
        ^^^^^^
 
 References:
    node_modules/repro/index.d.ts:17:32
    17| export declare function linked<T extends {next: T | null}>(): T;
                                       ^ [1]
-   test.js:28:1
-   28| linked(); // ERROR: `T` is underconstrained
+   test.js:27:1
+   27| linked(); // ERROR: `T` is underconstrained
        ^^^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------------- test.js:35:1
+Error ----------------------------------------------------------------------------------------------------- test.js:34:1
 
 Cannot call `defineFlow` because `Config` [1] is underconstrained by call of `defineFlow` [2]. Either add explicit type
 arguments or cast the expression to your expected type. [underconstrained-implicit-instantiation]
 
-   test.js:35:1
-   35| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
+   test.js:34:1
+   34| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
        ^^^^^^^^^^
 
 References:
-   test.js:31:29
-   31| declare function defineFlow<Config extends {...}, Output>(extension: {
+   test.js:30:29
+   30| declare function defineFlow<Config extends {...}, Output>(extension: {
                                    ^^^^^^ [1]
-   test.js:35:1
-   35| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
+   test.js:34:1
+   34| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
        ^^^^^^^^^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------------- test.js:35:1
+Error ----------------------------------------------------------------------------------------------------- test.js:34:1
 
 Cannot call `defineFlow` because `Output` [1] is underconstrained by call of `defineFlow` [2]. Either add explicit type
 arguments or cast the expression to your expected type. [underconstrained-implicit-instantiation]
 
-   test.js:35:1
-   35| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
+   test.js:34:1
+   34| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
        ^^^^^^^^^^
 
 References:
-   test.js:31:51
-   31| declare function defineFlow<Config extends {...}, Output>(extension: {
+   test.js:30:51
+   30| declare function defineFlow<Config extends {...}, Output>(extension: {
                                                          ^^^^^^ [1]
-   test.js:35:1
-   35| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
+   test.js:34:1
+   34| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
        ^^^^^^^^^^^^^^ [2]
 
 
 
-Found 8 errors
+Found 7 errors

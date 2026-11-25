@@ -107,6 +107,7 @@ use flow_typing_type::type_::TypeDestructorTInner;
 use flow_typing_type::type_::TypeInner;
 use flow_typing_type::type_::TypeParam;
 use flow_typing_type::type_::TypeParamInner;
+use flow_typing_type::type_::TypeStrictnessKind;
 use flow_typing_type::type_::UnresolvedArgData;
 use flow_typing_type::type_::UnresolvedParam;
 use flow_typing_type::type_::UseOp;
@@ -794,8 +795,7 @@ fn t_of_use_t<'cx>(
                             tvar,
                             reason,
                             &resolve_spread_type.rrt_resolved,
-                            &funtype.params,
-                            &funtype.rest_param,
+                            funtype,
                         ),
                     )
                 }
@@ -1216,6 +1216,7 @@ fn reverse_resolve_spread_multiflow_subtype_full_no_resolution<'cx>(
     reason: &Reason,
     params: &[FunParam],
     rest_param: &Option<FunRestParam>,
+    strictness_kind: TypeStrictnessKind,
 ) -> Result<Type, FlowJsException> {
     // Trailing optional params become optional tuple elements.
     let required_count = params
@@ -1262,7 +1263,7 @@ fn reverse_resolve_spread_multiflow_subtype_full_no_resolution<'cx>(
                 inexact: false,
                 rest: None,
                 react_dro: None,
-                strictness_kind: Default::default(),
+                strictness_kind,
                 literal: ArrLiteral::NonLiteral,
                 fresh: false,
             }));
@@ -1288,7 +1289,7 @@ fn reverse_resolve_spread_multiflow_subtype_full_no_resolution<'cx>(
                 .update_desc(|_| Some(flow_common::reason::VirtualReasonDesc::RTupleType));
             return flow_js_utils::mk_tuple_type(
                 cx,
-                cx.type_strictness_kind(),
+                strictness_kind,
                 eval::Id::generate_id(),
                 |_cx, use_op, reason, t, destructor, id| {
                     Ok(Type::new(TypeInner::EvalT {
@@ -1319,9 +1320,14 @@ fn reverse_resolve_spread_multiflow_subtype_full_partial_resolution<'cx>(
     tvar: &Type,
     reason: &Reason,
     resolved: &flow_data_structure_wrapper::list::FlowOcamlList<ResolvedParam>,
-    params: &[FunParam],
-    rest_param: &Option<FunRestParam>,
+    funtype: &FunType,
 ) -> Result<Option<Type>, FlowJsException> {
+    let FunType {
+        params,
+        rest_param,
+        strictness_kind,
+        ..
+    } = funtype;
     // The spread receives the params after the resolved arguments. The resolved arguments past
     // the positional params went to the rest param, so they are dropped from it.
     let remaining_params = params.get(resolved.len()..).unwrap_or_default();
@@ -1330,6 +1336,7 @@ fn reverse_resolve_spread_multiflow_subtype_full_partial_resolution<'cx>(
         reason,
         remaining_params,
         rest_param,
+        *strictness_kind,
     )?;
     let solution = match resolved.len().saturating_sub(params.len()) {
         0 => Some(params_t),

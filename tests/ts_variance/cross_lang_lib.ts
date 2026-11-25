@@ -38,3 +38,10 @@ export type NarrowValue = {value: Dog};
 
 export type PresentValue = {a: Animal};
 export type OptionalValues = {a?: Animal; b?: Animal};
+
+export type NarrowTuple = ["a"];
+export type WideTuple = [string];
+export type BoxArgs<T> = [Box<T>, ...{}[]];
+
+export declare function setFirst<T>(array: T[], value: T): void;
+export declare function takesA(a: "a"): void;

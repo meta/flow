@@ -1,16 +1,34 @@
-Error ------------------------------------------------------------------------------------- cross_lang_consumer.js:26:45
+Error ------------------------------------------------------------------------------------- cross_lang_consumer.js:31:45
 
 Cannot use `T` [1] in an input/output position because `T` [1] is expected to occur only in output positions.
 [incompatible-variance]
 
-   cross_lang_consumer.js:26:45
-   26| type InvariantBoxView<out T> = InvariantBox<T>; // ERROR: `in out` is invariant
+   cross_lang_consumer.js:31:45
+   31| type InvariantBoxView<out T> = InvariantBox<T>; // ERROR: `in out` is invariant
                                                    ^
 
 References:
-   cross_lang_consumer.js:26:27
-   26| type InvariantBoxView<out T> = InvariantBox<T>; // ERROR: `in out` is invariant
+   cross_lang_consumer.js:31:27
+   31| type InvariantBoxView<out T> = InvariantBox<T>; // ERROR: `in out` is invariant
                                  ^ [1]
+
+
+Error ------------------------------------------------------------------------------------- cross_lang_consumer.js:50:35
+
+Cannot assign `wideTuple` to `narrowTuple2` because in index `0`: `string` [1] is incompatible with `"a"` [2].
+[incompatible-type]
+
+   cross_lang_consumer.js:50:35
+   50| const narrowTuple2: NarrowTuple = wideTuple; // ERROR: `string` is not `"a"`
+                                         ^^^^^^^^^
+
+References:
+   cross_lang_lib.ts:43:26
+   43| export type WideTuple = [string];
+                                ^^^^^^ [1]
+   cross_lang_lib.ts:42:28
+   42| export type NarrowTuple = ["a"];
+                                  ^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------- extends_implements.ts:36:8
@@ -612,4 +630,4 @@ References:
 
 
 
-Found 30 errors
+Found 31 errors

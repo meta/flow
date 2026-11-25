@@ -6088,12 +6088,14 @@ pub fn rec_sub_t<'cx>(
         (
             DefT(r1, deref!(ArrT(deref!(TupleAT(deref!(TupleATData {
                 elements: elements1, arity: lower_arity, inexact: lower_inexact,
-                rest: rest1, literal: fresh, ..
+                rest: rest1, strictness_kind: strictness_kind1, literal: fresh, ..
             })))))),
             DefT(r2, deref!(ArrT(deref!(TupleAT(deref!(TupleATData {
-                elements: elements2, arity: upper_arity, inexact: upper_inexact, rest: rest2, ..
+                elements: elements2, arity: upper_arity, inexact: upper_inexact, rest: rest2,
+                strictness_kind: strictness_kind2, ..
             })))))),
         ) => {
+            let strictness_kind = strictness_kind1.join(*strictness_kind2);
             let (num_req1, num_total1) = *lower_arity;
             let (num_req2, num_total2) = *upper_arity;
             // A tuple with a rest element has no maximum length, like an inexact tuple.
@@ -6178,6 +6180,18 @@ pub fn rec_sub_t<'cx>(
                     let optional2 = optional2 && (optional1 || missing1);
                     match (fresh.is_literal(), p2) {
                         (true, _) | (_, Polarity::Positive) => {
+                            FlowJs::flow_slot_with_env(
+                                cx,
+                                env,
+                                Some(trace),
+                                elem_use_op,
+                                (t1, optional1),
+                                (t2, optional2),
+                            )?;
+                        }
+                        // TypeScript compares read-write tuple elements covariantly, as it does
+                        // the elements of arrays.
+                        (_, Polarity::Neutral) if strictness_kind.is_typescript_loose() => {
                             FlowJs::flow_slot_with_env(
                                 cx,
                                 env,

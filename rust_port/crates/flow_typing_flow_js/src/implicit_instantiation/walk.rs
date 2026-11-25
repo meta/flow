@@ -3469,6 +3469,7 @@ impl<'e> Walker<'e> {
                     &reason,
                     uf.params.get(ln..).unwrap_or(&[]),
                     &uf.rest_param,
+                    uf.strictness_kind,
                 )?;
                 self.walk(cx, &tuple, lrest)?;
             }
@@ -3480,6 +3481,7 @@ impl<'e> Walker<'e> {
                     &reason,
                     lparams.get(un..).unwrap_or(&[]),
                     &lrest_param,
+                    lf.strictness_kind,
                 )?;
                 self.walk(cx, urest, &tuple)?;
             }
@@ -3522,6 +3524,7 @@ impl<'e> Walker<'e> {
                     &reason,
                     uf.params.get(ln..).unwrap_or(&[]),
                     &uf.rest_param,
+                    uf.strictness_kind,
                 )?;
                 self.walk(cx, &tuple, lrest)?;
             }
@@ -4177,9 +4180,10 @@ impl<'e> Walker<'e> {
     ) -> Result<(), FlowJsException> {
         match (la, ua) {
             // As in subtyping, the elements of a literal are compared covariantly, and read-write
-            // elements of other tuples are unified.
+            // elements of other tuples are unified, unless either tuple is from TypeScript.
             (ArrType::TupleAT(lt), ArrType::TupleAT(ut)) => {
                 let literal = lt.literal.is_literal();
+                let strictness = lt.strictness_kind.join(ut.strictness_kind);
                 let pairs: Vec<(TupleElement, TupleElement)> = lt
                     .elements
                     .iter()
@@ -4187,7 +4191,7 @@ impl<'e> Walker<'e> {
                     .map(|(l, u)| (l.clone(), u.clone()))
                     .collect();
                 for (l, u) in pairs {
-                    self.walk_tuple_element(cx, &l, &u, literal)?;
+                    self.walk_tuple_element(cx, &l, &u, literal, strictness)?;
                 }
                 self.lacks_elements(cx, lt.elements.len(), &ut.elements);
                 Ok(())
@@ -4196,12 +4200,25 @@ impl<'e> Walker<'e> {
                 let l = arr_elem(la);
                 self.walk(cx, &l, &u.elem_t)
             }
-            // A fresh array literal is checked covariantly.
-            (ArrType::ArrayAT(l), ArrType::ArrayAT(u)) if l.fresh => {
+            // A fresh array literal is checked covariantly, and so is an array when either array
+            // is from TypeScript, as in subtyping.
+            (ArrType::ArrayAT(l), ArrType::ArrayAT(u))
+                if l.fresh
+                    || l.strictness_kind
+                        .join(u.strictness_kind)
+                        .is_typescript_loose() =>
+            {
                 self.walk(cx, &l.elem_t, &u.elem_t)
             }
             (ArrType::ArrayAT(l), ArrType::ArrayAT(u)) => {
                 self.walk_invariant(cx, &l.elem_t, &u.elem_t)
+            }
+            (ArrType::TupleAT(l), ArrType::ArrayAT(u))
+                if l.strictness_kind
+                    .join(u.strictness_kind)
+                    .is_typescript_loose() =>
+            {
+                self.walk(cx, &l.elem_t, &u.elem_t)
             }
             (ArrType::TupleAT(l), ArrType::ArrayAT(u)) => {
                 self.walk(cx, &l.elem_t, &u.elem_t)?;
@@ -4210,6 +4227,7 @@ impl<'e> Walker<'e> {
             (ArrType::ArrayAT(l), ArrType::TupleAT(u)) => match &l.tuple_view {
                 Some(view) => {
                     let literal = l.literal.is_literal();
+                    let strictness = u.strictness_kind;
                     let pairs: Vec<(TupleElement, TupleElement)> = view
                         .elements
                         .iter()
@@ -4217,7 +4235,7 @@ impl<'e> Walker<'e> {
                         .map(|(l, u)| (l.clone(), u.clone()))
                         .collect();
                     for (l, u) in pairs {
-                        self.walk_tuple_element(cx, &l, &u, literal)?;
+                        self.walk_tuple_element(cx, &l, &u, literal, strictness)?;
                     }
                     self.lacks_elements(cx, view.elements.len(), &u.elements);
                     Ok(())
@@ -4230,17 +4248,22 @@ impl<'e> Walker<'e> {
 
     /// Two tuple elements, as subtyping compares them (`tuple_element_compat`): the lower slot's
     /// values go into the upper slot, which takes `undefined` only when the lower element is
-    /// optional too, reversed for a write-only element and unified for a read-write one.
+    /// optional too, reversed for a write-only element and unified for a read-write one, unless
+    /// the tuples are from TypeScript.
     fn walk_tuple_element<'cx>(
         &mut self,
         cx: &mut Context<'cx>,
         l: &TupleElement,
         u: &TupleElement,
         literal: bool,
+        strictness: TypeStrictnessKind,
     ) -> Result<(), FlowJsException> {
         let uopt = u.optional && l.optional;
         match (literal, u.polarity) {
             (true, _) | (_, Polarity::Positive) => {
+                self.walk_slot(cx, (&l.t, l.optional), (&u.t, uopt))
+            }
+            (_, Polarity::Neutral) if strictness.is_typescript_loose() => {
                 self.walk_slot(cx, (&l.t, l.optional), (&u.t, uopt))
             }
             (_, Polarity::Negative) => self.walk_slot(cx, (&u.t, uopt), (&l.t, l.optional)),
@@ -7642,6 +7665,7 @@ fn solve_targs_in_snapshot<'cx>(
                                         reason_op,
                                         &f.params,
                                         &f.rest_param,
+                                        f.strictness_kind,
                                     )?;
                                     walker.walk(cx, arr, &params)?;
                                 }

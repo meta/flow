@@ -1308,7 +1308,7 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                                 inexact,
                                 rest: rest.dupe(),
                                 react_dro: None,
-                                strictness_kind: Default::default(),
+                                strictness_kind,
                                 literal,
                                 fresh,
                             })),

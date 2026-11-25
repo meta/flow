@@ -15,14 +15,13 @@ anyBound().t as number; // ERROR: `T` is `unknown`
 
 // The hint of an enclosing call still decides it.
 const nums: Array<number> = id(empty()); // OK
+const n: number = first(empty()); // OK
 
 // One that a part of the arguments or the hint reaches is still
-// underconstrained: TypeScript infers `null` from `null` against `T | null`,
-// `{a: any}` from `'a'` against `keyof T`, and `number` through the hint
-// of `first`.
+// underconstrained: TypeScript infers `null` from `null` against `T | null`
+// and `{a: any}` from `'a'` against `keyof T`.
 refLike(null); // ERROR: `T` is underconstrained
 keyOf('a'); // ERROR: `T` is underconstrained
-const n: number = first(empty()); // ERROR: `T` of `empty` is underconstrained
 
 // So is one whose bound is `any` after an error.
 linked(); // ERROR: `T` is underconstrained
