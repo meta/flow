@@ -170,6 +170,25 @@ fn newly_direct<'a>(
         .map(|(_, (t, _))| t)
 }
 
+/// The type that `t` stands for through the tvars it is resolved to, or `None` if it is a tvar not
+/// resolved yet, or resolved only to itself, which says nothing about a marker.
+fn through_tvars<'cx>(cx: &mut Context<'cx>, t: &Type) -> Option<Type> {
+    let mut seen = BTreeSet::new();
+    let mut t = t.dupe();
+    while let TypeInner::OpenT(tvar) = t.deref() {
+        let (root, constraints) = cx.find_constraints(tvar.id() as i32);
+        if !seen.insert(root) {
+            return None;
+        }
+        t = match constraints {
+            constraint::Constraints::Resolved(t) => t,
+            constraint::Constraints::FullyResolved(s) => cx.force_fully_resolved_tvar(&s),
+            constraint::Constraints::Unresolved(_) => return None,
+        };
+    }
+    Some(t)
+}
+
 /// Adds `t` to `bounds` with `priority`, or raises the priority of `t` if it is there.
 fn add_bound(bounds: &mut Vec<(Type, Priority)>, t: &Type, priority: Priority) {
     match bounds.iter_mut().find(|(b, _)| b.ptr_eq(t)) {
@@ -980,6 +999,9 @@ impl<'e> Walker<'e> {
         t: &Type,
         priority: Priority,
     ) {
+        let Some(t) = &through_tvars(cx, t) else {
+            return;
+        };
         if flow_js_utils::tvar_visitors::has_placeholders(cx, t) {
             // As in the flow-based solve, the members of a union are bounds one by one, so the
             // members that are placeholders drop out. A maybe type (a union with `null` and
@@ -1025,9 +1047,13 @@ impl<'e> Walker<'e> {
     }
 
     fn add_exact<'cx>(&mut self, cx: &mut Context<'cx>, name: &SubstName, t: &Type) {
+        // A placeholder itself unifies with nothing, unlike a type variable that holds one.
+        let unifies = !is_placeholder(t);
+        if through_tvars(cx, t).is_none() {
+            return;
+        }
         if flow_js_utils::tvar_visitors::has_placeholders(cx, t) {
-            // A placeholder itself unifies with nothing.
-            if !self.soft_exact && !is_placeholder(t) {
+            if !self.soft_exact && unifies {
                 let bounds = self.vars.get_mut(name).expect("marker should have bounds");
                 bounds.placeholder.get_or_insert_with(|| t.dupe());
             }
@@ -1158,6 +1184,9 @@ impl<'e> Walker<'e> {
         t: &Type,
         priority: Priority,
     ) {
+        let Some(t) = &through_tvars(cx, t) else {
+            return;
+        };
         if flow_js_utils::tvar_visitors::has_placeholders(cx, t) {
             return;
         }
@@ -8262,16 +8291,9 @@ fn pin_bounds<'cx>(
         if lowers.is_empty() {
             return None;
         }
-        let mut collected = Vec::new();
-        collect_pinning_lowers(
-            cx,
-            &mut BTreeSet::new(),
-            &mut collected,
-            lowers.iter().duped().collect(),
-        );
-        // Lower bounds that are tvars holding the same type are one bound.
+        // A type that is a member of several lower bounds is one bound.
         let mut seen = BTreeSet::new();
-        let filtered: Vec<Type> = union_flatten_list(collected)
+        let filtered: Vec<Type> = union_flatten_list(lowers.iter().duped())
             .into_iter()
             .filter(|t| seen.insert(t.dupe()))
             .filter(|t| {
@@ -8292,18 +8314,7 @@ fn pin_bounds<'cx>(
     // the bounds does not decide the solution.
     let merge_uppers = |cx: &mut Context<'cx>| -> Result<Option<Type>, FlowJsException> {
         let mut acc: Option<Type> = None;
-        for t in uppers.iter() {
-            let t = match type_util::constraint_node_id(t) {
-                Some(_) => match merge_upper_bounds(cx, env, &mut BTreeSet::new(), t)? {
-                    UseTResult::UpperT(t)
-                        if !flow_js_utils::tvar_visitors::has_placeholders(cx, &t) =>
-                    {
-                        t
-                    }
-                    _ => continue,
-                },
-                None => t.dupe(),
-            };
+        for t in uppers.iter().duped() {
             acc = Some(match acc {
                 Some(prev) if matches!(t.deref(), TypeInner::AnyT(..)) => prev,
                 Some(prev)
