@@ -3994,7 +3994,14 @@ fn __flow_impl<'cx>(
             ),
         ) => {
             let reason = reason_of_t(l);
-            let (lt, generic) = match l.deref() {
+            let tuple_type_inexact = match &resolve_spread.rrt_resolve_to {
+                SpreadResolve::ResolveSpreadsToTupleType { inexact, .. } => Some(*inexact),
+                _ => None,
+            };
+            // A type known only through its bound. A spread in a tuple type must be an array or a
+            // tuple, so a nominal type there, such as a stuck evaluation, is seen as its upper
+            // bound.
+            let (lt, generic, bounded) = match l.deref() {
                 GenericT(
                     deref!(GenericTData {
                         bound,
@@ -4005,9 +4012,15 @@ fn __flow_impl<'cx>(
                 ) => {
                     let repos =
                         helpers::reposition_reason(cx, env, None, gen_reason, false, bound)?;
-                    (repos, Some(id.clone()))
+                    (repos, Some(id.clone()), true)
                 }
-                _ => (l.dupe(), None),
+                NominalT { nominal_type, .. }
+                    if tuple_type_inexact.is_some()
+                        && let Some(upper_t) = &nominal_type.upper_t =>
+                {
+                    (upper_t.dupe(), None, true)
+                }
+                _ => (l.dupe(), None, false),
             };
             let arrtype = match lt.deref() {
                 DefT(_, deref!(ArrT(arrtype))) => {
@@ -4060,6 +4073,71 @@ fn __flow_impl<'cx>(
                         }
                         _ => (**arrtype).clone(),
                     }
+                }
+                // A spread in a tuple type of a type known only through a bound that is not an
+                // array type, such as a union of arrays or the branches of a stuck conditional
+                // type, is an array of the operand's element type. The bound is not taken apart.
+                _ if bounded && let Some(inexact) = tuple_type_inexact => {
+                    let arr_t = Type::new(DefT(
+                        reason.dupe().replace_desc_new(None),
+                        DefT::new(ArrT(Rc::new(ROArrayAT(Box::new(ROArrayATData {
+                            elem_t: mixed_t::why(reason.dupe()),
+                            react_dro: None,
+                            literal: ArrLiteral::NonLiteral,
+                        }))))),
+                    ));
+                    // Only the last spread of a tuple type can have an unknown number of
+                    // elements, which become its rest element.
+                    let spreadable = !inexact
+                        && resolve_spread.rrt_unresolved.is_empty()
+                        && match speculation_kit::try_singleton_throw_on_failure(
+                            cx,
+                            env,
+                            trace,
+                            lt.dupe(),
+                            UseT::new(UseT(use_op.dupe(), arr_t)),
+                        ) {
+                            Ok(()) => true,
+                            Err(FlowJsException::SpeculationSingletonError) => false,
+                            Err(e) => return Err(e),
+                        };
+                    if !spreadable {
+                        flow_js_utils::add_output_with_env(
+                            cx,
+                            env,
+                            ErrorMessage::ETupleInvalidTypeSpread(Box::new(
+                                ETupleInvalidTypeSpreadData {
+                                    spread_loc: reason_op.loc().dupe(),
+                                    argument: flow_js_utils::type_reference_with_reason_for_error(
+                                        l,
+                                        reason.dupe(),
+                                    ),
+                                },
+                            )),
+                        )?;
+                        // Continue as if `any` was spread, which makes the tuple type `any`.
+                        return Ok(Some(TailCall::RecFlow(
+                            any_t::error(reason.dupe()),
+                            u.dupe(),
+                            DepthTrace::rec_trace(trace),
+                        )));
+                    }
+                    let elem_t = flow_cache::eval::id(
+                        cx,
+                        l.dupe(),
+                        TypeDestructorT::new(TypeDestructorTInner(
+                            use_op.dupe(),
+                            reason.dupe(),
+                            Rc::new(Destructor::ElementType {
+                                index_type: num_module_t::why(reason.dupe()),
+                            }),
+                        )),
+                    );
+                    ROArrayAT(Box::new(ROArrayATData {
+                        elem_t,
+                        react_dro: None,
+                        literal: ArrLiteral::NonLiteral,
+                    }))
                 }
                 _ => {
                     // Non-array non-any iterables, opaque arrays, etc

@@ -88,6 +88,40 @@ type WithTail<T> = [1, ...T];
 [1, 2, 3] as WithTail<[2, 3]>; // OK
 [1, 2, 66] as WithTail<[2, 3]>; // ERROR
 
+// A spread of a type known only through its bound, when the bound is not an array type, is an array
+// of the operand's element type: the bound is not taken apart.
+type Elems<T extends ReadonlyArray<unknown>> = T;
+type IntersectionBound<T extends [2, 3] & ReadonlyArray<unknown>> = Elems<[1, ...T]>; // OK
+type NarrowedTail<T> = T extends ReadonlyArray<string> ? Elems<[1, ...T]> : []; // OK
+type Recur<T> = T extends [infer H, ...infer Rest] ? [H, ...Recur<Rest>] : [];
+type RecurOfGeneric<T> = Elems<Recur<T>>; // OK
+type NotArray<T> = T extends string ? 1 : 2;
+type NotArrayOfGeneric<T> = Elems<[...NotArray<T>]>; // ERROR
+function unionLast<S extends [0], T extends [1] | [2, 3]>(
+  x: [...S, ...T],
+): ReadonlyArray<0 | 1 | 2 | 3> {
+  return x; // OK
+}
+function unionNotLast<S extends [0], T extends [1] | [2, 3]>(x: [...S, ...T, 4]) {
+  x as ReadonlyArray<unknown>; // ERROR at the type (TypeScript accepts)
+}
+type Big = [1] | [2] | [3] | [4] | [5] | [6] | [7] | [8] | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19] | [20];
+function manySpreads<T extends Big>(x: [...T, ...T, ...T, ...T]) {
+  x as ReadonlyArray<unknown>; // ERROR at the type, at the spreads of `T` before others (TypeScript accepts)
+}
+function intersectionOrder1<T extends ReadonlyArray<number> & [number]>(t: T): [...T, ...T] {
+  return t; // ERROR at the type (TypeScript errors here)
+}
+function intersectionOrder2<T extends [number] & ReadonlyArray<number>>(t: T): [...T, ...T] {
+  return t; // ERROR at the type (TypeScript errors here)
+}
+// TypeScript accepts this. Flow errors, because repositioning the tuple type while it is evaluated
+// gives `empty`.
+type B6<T> = T extends [infer H] ? (H extends 1 ? [0, ...B6<H>] : [1]) : [];
+function b6<X>(x: B6<X>): ReadonlyArray<0 | 1> {
+  return x;
+}
+
 // Reversal
 declare function tail<T>(xs: [1, ...T]): T;
 tail<[2, 3]>([ 1, 2, 3]); // OK

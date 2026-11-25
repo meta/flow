@@ -2201,106 +2201,226 @@ References:
                                   ^ [2]
 
 
-Error -------------------------------------------------------------------------------------------------- spread.js:101:3
+Error -------------------------------------------------------------------------------------------------- spread.js:99:35
+
+Cannot spread non-tuple (`T extends string ? 1 : 2` [1]) into tuple type. [tuple-invalid-type-spread]
+
+   spread.js:99:35
+   99| type NotArrayOfGeneric<T> = Elems<[...NotArray<T>]>; // ERROR
+                                         ^^^^^^^^^^^^^^^^
+
+References:
+   spread.js:99:39
+   99| type NotArrayOfGeneric<T> = Elems<[...NotArray<T>]>; // ERROR
+                                             ^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------- spread.js:105:65
+
+Cannot spread non-tuple (`T` [1]) into tuple type. [tuple-invalid-type-spread]
+
+   spread.js:105:65
+   105| function unionNotLast<S extends [0], T extends [1] | [2, 3]>(x: [...S, ...T, 4]) {
+                                                                        ^^^^^^^^^^^^^^^
+
+References:
+   spread.js:105:75
+   105| function unionNotLast<S extends [0], T extends [1] | [2, 3]>(x: [...S, ...T, 4]) {
+                                                                                  ^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------- spread.js:109:40
+
+Cannot spread non-tuple (`Big` [1]) into tuple type. [tuple-invalid-type-spread]
+
+   spread.js:109:40
+   109| function manySpreads<T extends Big>(x: [...T, ...T, ...T, ...T]) {
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   spread.js:109:50
+   109| function manySpreads<T extends Big>(x: [...T, ...T, ...T, ...T]) {
+                                                         ^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------- spread.js:109:40
+
+Cannot spread non-tuple (`Big` [1]) into tuple type. [tuple-invalid-type-spread]
+
+   spread.js:109:40
+   109| function manySpreads<T extends Big>(x: [...T, ...T, ...T, ...T]) {
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   spread.js:109:56
+   109| function manySpreads<T extends Big>(x: [...T, ...T, ...T, ...T]) {
+                                                               ^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------- spread.js:112:80
+
+Cannot spread non-tuple (`T` [1]) into tuple type. [tuple-invalid-type-spread]
+
+   spread.js:112:80
+   112| function intersectionOrder1<T extends ReadonlyArray<number> & [number]>(t: T): [...T, ...T] {
+                                                                                       ^^^^^^^^^^^^
+
+References:
+   spread.js:112:84
+   112| function intersectionOrder1<T extends ReadonlyArray<number> & [number]>(t: T): [...T, ...T] {
+                                                                                           ^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------- spread.js:115:80
+
+Cannot spread non-tuple (`T` [1]) into tuple type. [tuple-invalid-type-spread]
+
+   spread.js:115:80
+   115| function intersectionOrder2<T extends [number] & ReadonlyArray<number>>(t: T): [...T, ...T] {
+                                                                                       ^^^^^^^^^^^^
+
+References:
+   spread.js:115:84
+   115| function intersectionOrder2<T extends [number] & ReadonlyArray<number>>(t: T): [...T, ...T] {
+                                                                                           ^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------- spread.js:121:19
+
+Cannot instantiate `B6` because
+`[0, ...Array<(H extends [infer H] ? H extends 1 ? [0, ...B6<H>] : [1] : Readonly<[]>)[number]>]` [1] is incompatible
+with `empty` [2]. [incompatible-type]
+
+   spread.js:121:19
+   121| function b6<X>(x: B6<X>): ReadonlyArray<0 | 1> {
+                          ^^^^^
+
+References:
+   spread.js:120:51
+   120| type B6<T> = T extends [infer H] ? (H extends 1 ? [0, ...B6<H>] : [1]) : [];
+                                                          ^^^^^^^^^^^^^ [1]
+   spread.js:120:37
+   120| type B6<T> = T extends [infer H] ? (H extends 1 ? [0, ...B6<H>] : [1]) : [];
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- spread.js:121:19
+
+Cannot instantiate `B6` because `[1]` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   spread.js:121:19
+   121| function b6<X>(x: B6<X>): ReadonlyArray<0 | 1> {
+                          ^^^^^
+
+References:
+   spread.js:120:67
+   120| type B6<T> = T extends [infer H] ? (H extends 1 ? [0, ...B6<H>] : [1]) : [];
+                                                                          ^^^ [1]
+   spread.js:120:37
+   120| type B6<T> = T extends [infer H] ? (H extends 1 ? [0, ...B6<H>] : [1]) : [];
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------------- spread.js:135:3
 
 Cannot cast `x` to `[1, 2, 3]` because `[2, 3]` [1] has 2 elements but `[1, 2, 3]` [2] has 3 elements.
 [invalid-tuple-arity]
 
-   spread.js:101:3
-   101|   x as [1, 2, 3]; // ERROR
+   spread.js:135:3
+   135|   x as [1, 2, 3]; // ERROR
           ^
 
 References:
-   spread.js:99:18
-    99|   const x = tail([1, 2, 3]);
+   spread.js:133:18
+   133|   const x = tail([1, 2, 3]);
                          ^^^^^^^^^ [1]
-   spread.js:101:8
-   101|   x as [1, 2, 3]; // ERROR
+   spread.js:135:8
+   135|   x as [1, 2, 3]; // ERROR
                ^^^^^^^^^ [2]
 
 
-Error -------------------------------------------------------------------------------------------------- spread.js:103:7
+Error -------------------------------------------------------------------------------------------------- spread.js:137:7
 
 Cannot call `tail` with array literal bound to `xs` because in index `0`: `666` [1] is incompatible with `1` [2].
 [incompatible-type]
 
-   spread.js:103:7
-   103| tail([666, 2, 3]); // ERROR
+   spread.js:137:7
+   137| tail([666, 2, 3]); // ERROR
               ^^^ [1]
 
 References:
-   spread.js:92:31
-    92| declare function tail<T>(xs: [1, ...T]): T;
+   spread.js:126:31
+   126| declare function tail<T>(xs: [1, ...T]): T;
                                       ^ [2]
 
 
-Error -------------------------------------------------------------------------------------------------- spread.js:106:1
+Error -------------------------------------------------------------------------------------------------- spread.js:140:1
 
 Cannot call `noReversal1` because `T` [1] is underconstrained by call of `noReversal1` [2]. Either add explicit type
 arguments or cast the expression to your expected type. [underconstrained-implicit-instantiation]
 
-   spread.js:106:1
-   106| noReversal1([1, 9, 2]); // ERROR
+   spread.js:140:1
+   140| noReversal1([1, 9, 2]); // ERROR
         ^^^^^^^^^^^
 
 References:
-   spread.js:105:30
-   105| declare function noReversal1<T>(xs: [1, ...T, 2]): T;
+   spread.js:139:30
+   139| declare function noReversal1<T>(xs: [1, ...T, 2]): T;
                                      ^ [1]
-   spread.js:106:1
-   106| noReversal1([1, 9, 2]); // ERROR
+   spread.js:140:1
+   140| noReversal1([1, 9, 2]); // ERROR
         ^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
-Error -------------------------------------------------------------------------------------------------- spread.js:109:1
+Error -------------------------------------------------------------------------------------------------- spread.js:143:1
 
 Cannot call `noReversal2` because `T` [1] is underconstrained by call of `noReversal2` [2]. Either add explicit type
 arguments or cast the expression to your expected type. [underconstrained-implicit-instantiation]
 
-   spread.js:109:1
-   109| noReversal2([1, 2, 3]); // ERROR
+   spread.js:143:1
+   143| noReversal2([1, 2, 3]); // ERROR
         ^^^^^^^^^^^
 
 References:
-   spread.js:108:30
-   108| declare function noReversal2<T>(xs: [...T, ...any]): T;
+   spread.js:142:30
+   142| declare function noReversal2<T>(xs: [...T, ...any]): T;
                                      ^ [1]
-   spread.js:109:1
-   109| noReversal2([1, 2, 3]); // ERROR
+   spread.js:143:1
+   143| noReversal2([1, 2, 3]); // ERROR
         ^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
-Error -------------------------------------------------------------------------------------------------- spread.js:122:3
+Error -------------------------------------------------------------------------------------------------- spread.js:156:3
 
 Cannot cast `x[0]` to `empty` because `0` [1] is incompatible with `empty` [2]. [incompatible-type]
 
-   spread.js:122:3
-   122|   x[0] as empty; // ERROR
+   spread.js:156:3
+   156|   x[0] as empty; // ERROR
           ^^^^
 
 References:
-   spread.js:121:21
-   121|   declare const x: [0, 1, ...[]];
+   spread.js:155:21
+   155|   declare const x: [0, 1, ...[]];
                             ^ [1]
-   spread.js:122:11
-   122|   x[0] as empty; // ERROR
+   spread.js:156:11
+   156|   x[0] as empty; // ERROR
                   ^^^^^ [2]
 
 
-Error -------------------------------------------------------------------------------------------------- spread.js:128:3
+Error -------------------------------------------------------------------------------------------------- spread.js:162:3
 
 Cannot cast `x[0]` to `empty` because `0` [1] is incompatible with `empty` [2]. [incompatible-type]
 
-   spread.js:128:3
-   128|   x[0] as empty; // ERROR
+   spread.js:162:3
+   162|   x[0] as empty; // ERROR
           ^^^^
 
 References:
-   spread.js:127:21
-   127|   declare const x: [0, 1, ...[2, 3]];
+   spread.js:161:21
+   161|   declare const x: [0, 1, ...[2, 3]];
                             ^ [1]
-   spread.js:128:11
-   128|   x[0] as empty; // ERROR
+   spread.js:162:11
+   162|   x[0] as empty; // ERROR
                   ^^^^^ [2]
 
 
@@ -3091,4 +3211,4 @@ References:
 
 
 
-Found 193 errors
+Found 201 errors
