@@ -209,8 +209,10 @@ pub mod class {
     /// polymorphic-[this] shape). The raw override is computed via the parallel
     /// [_for_extends] import path that bypasses canonicalization. The class-sig
     /// consumer ([class_sig.rs]) wraps this raw override in [TypeUtil.this_typeapp]
-    /// so polymorphic [this] rebinds correctly across module boundaries. For
-    /// namespace-member references like [NS.I] the converted [c] is already raw
+    /// so polymorphic [this] rebinds correctly across module boundaries. A
+    /// namespace-member reference like [NS.I] to a local [declare namespace]
+    /// member is classified from the member's declaration, like a local binding.
+    /// For other namespace-member references the converted [c] is already raw
     /// (the namespace's [types_tmap] stores raw exporter-side types), so the
     /// override carries the same [c] — the variant is the marker that triggers
     /// the [this_typeapp] wrap path.

@@ -1483,7 +1483,7 @@ fn add_namespace_member(
         .or_insert_with(|| EnvKey::new(DefLocType::OrdinaryNameLoc, loc.dupe()));
 }
 
-fn collect_declared_namespace_members(
+pub fn collect_declared_namespace_members(
     statements: &[ast::statement::Statement<ALoc, ALoc>],
     env_info: &EnvInfo<ALoc>,
 ) -> (StaticsMap, NamespaceTypesMap) {

@@ -672,6 +672,41 @@ References:
                     ^^^^ [3]
 
 
+Error ----------------------------------------------------------------------------------- self_qualified_extends.js:25:1
+
+Cannot cast `child.value` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   self_qualified_extends.js:25:1
+   25| child.value as number; // ERROR
+       ^^^^^^^^^^^
+
+References:
+   self_qualified_extends.js:9:55
+    9|   declare export interface Child extends SelfRef.Base<string> {
+                                                             ^^^^^^ [1]
+   self_qualified_extends.js:25:16
+   25| child.value as number; // ERROR
+                      ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------- self_qualified_extends.js:29:1
+
+Cannot cast `nested.clone().nested` to `string` because `boolean` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   self_qualified_extends.js:29:1
+   29| nested.clone().nested as string; // ERROR
+       ^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   self_qualified_extends.js:18:13
+   18|     nested: boolean;
+                   ^^^^^^^ [1]
+   self_qualified_extends.js:29:26
+   29| nested.clone().nested as string; // ERROR
+                                ^^^^^^ [2]
+
+
 Error --------------------------------------------------------------------------------- type_only_react_namespace.js:3:3
 
 Cannot resolve name `React`. [cannot-resolve-name]
@@ -1403,4 +1438,4 @@ References:
 
 
 
-Found 95 errors
+Found 97 errors

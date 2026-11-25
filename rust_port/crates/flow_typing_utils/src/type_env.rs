@@ -32,6 +32,7 @@ use flow_env_builder::env_api::RefinementKind;
 use flow_env_builder::env_api::ValKind;
 use flow_env_builder::env_api::WriteLoc;
 use flow_env_builder::env_api::has_assigning_write;
+use flow_env_builder::name_def::collect_declared_namespace_members;
 use flow_env_builder::name_def_types::Def as NameDef;
 use flow_env_builder::name_def_types::Import as NameDefImport;
 use flow_env_builder::name_def_types::ScopeKind;
@@ -661,35 +662,61 @@ pub fn local_classlike_binding_kind_at_loc<'cx>(
                     Some(entry) => Some(entry),
                     None => lookup(DefLocType::ClassSelfLoc),
                 };
-                match def_opt {
-                    None => None,
-                    Some((def, _scope, _stack, _reason, _definition_kind)) => {
-                        let poly_or_mono = |has_tparams: bool| {
-                            if has_tparams {
-                                LocalClasslikeBindingKind::Poly
-                            } else {
-                                LocalClasslikeBindingKind::Mono
-                            }
-                        };
-                        match def {
-                            NameDef::Class(data) => {
-                                Some(poly_or_mono(data.class_.tparams.is_some()))
-                            }
-                            NameDef::Record(data) => {
-                                Some(poly_or_mono(data.record.tparams.is_some()))
-                            }
-                            NameDef::DeclaredClass(data) => {
-                                Some(poly_or_mono(data.decl.tparams.is_some()))
-                            }
-                            NameDef::Interface(_, iface) => {
-                                Some(poly_or_mono(iface.tparams.is_some()))
-                            }
-                            _ => Some(LocalClasslikeBindingKind::Other),
-                        }
-                    }
-                }
+                def_opt.map(|(def, ..)| classlike_binding_kind_of_def(def))
             }
         },
+    }
+}
+
+/// The kind of the class-like binding that `path` names in the local `declare namespace` read at
+/// `use_loc`, as `N.A.B` names `B` in `A` in `N`. It is read from the namespace's declarations
+/// without forcing any tvar, since the namespace can belong to the component being resolved.
+/// `None` when the read is not of a local `declare namespace` or `path` does not name one of its
+/// declared members.
+pub fn local_namespace_member_classlike_binding_kind_at_loc<'cx>(
+    cx: &mut Context<'cx>,
+    use_loc: ALoc,
+    path: &[FlowSmolStr],
+) -> Option<LocalClasslikeBindingKind> {
+    let env = cx.environment();
+    let Ok(EnvRead {
+        def_loc: Some(def_loc),
+        ..
+    }) = find_var_opt(&env.var_info, &use_loc)
+    else {
+        return None;
+    };
+    let (member, namespaces) = path.split_last()?;
+    let members_of = |key: &EnvKey<ALoc>| match env.name_defs.get(key) {
+        Some((NameDef::DeclaredNamespace(_, namespace), ..)) => Some(
+            collect_declared_namespace_members(&namespace.body.1.body, &env.var_info),
+        ),
+        _ => None,
+    };
+    let mut namespace_key = EnvKey::new(DefLocType::OrdinaryNameLoc, def_loc.dupe());
+    for name in namespaces {
+        let (values, _) = members_of(&namespace_key)?;
+        namespace_key = values.get(name)?.dupe();
+    }
+    let (_, types) = members_of(&namespace_key)?;
+    let (def, ..) = env.name_defs.get(types.get(member)?)?;
+    Some(classlike_binding_kind_of_def(def))
+}
+
+fn classlike_binding_kind_of_def(def: &NameDef) -> LocalClasslikeBindingKind {
+    let poly_or_mono = |has_tparams: bool| {
+        if has_tparams {
+            LocalClasslikeBindingKind::Poly
+        } else {
+            LocalClasslikeBindingKind::Mono
+        }
+    };
+    match def {
+        NameDef::Class(data) => poly_or_mono(data.class_.tparams.is_some()),
+        NameDef::Record(data) => poly_or_mono(data.record.tparams.is_some()),
+        NameDef::DeclaredClass(data) => poly_or_mono(data.decl.tparams.is_some()),
+        NameDef::Interface(_, iface) => poly_or_mono(iface.tparams.is_some()),
+        _ => LocalClasslikeBindingKind::Other,
     }
 }
 

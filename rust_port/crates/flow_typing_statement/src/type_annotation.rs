@@ -6912,6 +6912,18 @@ pub fn binding_kind_of_generic_id_post_convert(
         }
     }
 
+    fn path(id: &ast::types::generic::Identifier<ALoc, ALoc>) -> Option<(ALoc, Vec<FlowSmolStr>)> {
+        match id {
+            Identifier::Unqualified(ident) => Some((ident.loc.dupe(), vec![])),
+            Identifier::Qualified(q) => {
+                let (leaf_loc, mut path) = path(&q.qualification)?;
+                path.push(q.id.name.dupe());
+                Some((leaf_loc, path))
+            }
+            Identifier::ImportTypeAnnot(_) => None,
+        }
+    }
+
     let initial = binding_kind_of_generic_id_pre_convert(cx, id_pre_convert);
     match initial {
         ClassLikeBindingKind::BindingUnknown => {
@@ -7019,6 +7031,24 @@ pub fn binding_kind_of_generic_id_post_convert(
         }
         ClassLikeBindingKind::BindingOther => {
             if matches!(id_pre_convert, Identifier::Qualified(_)) {
+                if let Some((leaf_loc, path)) = path(id_pre_convert)
+                    && let Some(kind) =
+                        type_env::local_namespace_member_classlike_binding_kind_at_loc(
+                            cx, leaf_loc, &path,
+                        )
+                {
+                    return Ok(match kind {
+                        type_env::LocalClasslikeBindingKind::Mono => {
+                            ClassLikeBindingKind::ClassLikeMono
+                        }
+                        type_env::LocalClasslikeBindingKind::Poly => {
+                            ClassLikeBindingKind::ClassLikePoly
+                        }
+                        type_env::LocalClasslikeBindingKind::Other => {
+                            ClassLikeBindingKind::BindingOther
+                        }
+                    });
+                }
                 Ok(
                     match flow_js_utils::polymorphic_class_kind(cx, converted_t) {
                         flow_js_utils::PolymorphicClassKind::Mono => {
