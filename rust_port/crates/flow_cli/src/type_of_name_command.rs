@@ -5,9 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+use std::path::Path;
+
 use flow_command_spec::arg_spec;
 use flow_parser::loc_sig::LocSig;
 use flow_server_env::server_prot;
+use flow_server_utils::file_input::FileInput;
 use flow_services_export::export_index;
 
 fn spec() -> flow_command_spec::Spec {
@@ -196,14 +199,24 @@ fn main(args: &arg_spec::Values) {
             );
         }
     };
-    let file_input = flow_command_utils::get_file_from_filename_or_stdin(
-        "type-of-name-experimental",
-        Some(&file),
-        path.as_deref(),
-    );
+    let file_input = if Path::new(&file).exists() {
+        flow_command_utils::get_file_from_filename_or_stdin(
+            "type-of-name-experimental",
+            Some(&file),
+            path.as_deref(),
+        )
+    } else {
+        // A FILE that does not exist yet is checked as an empty @flow file.
+        let path = flow_command_utils::get_path_of_file(&file);
+        FileInput::FileContent(Some(path), "// @flow\n".into())
+    };
+    let root_dir = file_input
+        .path_of_file_input()
+        .and_then(|path| Path::new(path).ancestors().find(|dir| dir.exists()))
+        .map(|dir| dir.to_string_lossy().into_owned());
     let root = flow_command_utils::find_a_root(
         &base_flags.flowconfig_name,
-        root_arg.as_deref(),
+        root_arg.as_deref().or(root_dir.as_deref()),
         Some(&file_input),
     );
     let strip_root = if strip_root { Some(root.clone()) } else { None };

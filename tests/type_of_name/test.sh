@@ -218,6 +218,16 @@ assert_ok "$FLOW" type-of-name-experimental empty_file.js Result --strip-root
 assert_ok "$FLOW" type-of-name-experimental empty_file.js ComplexComponent --strip-root --unexpand-component-props
 assert_ok "$FLOW" type-of-name-experimental empty_file.js Container --strip-root
 
+printf "\n=== File that does not exist ===\n"
+# In a directory that does not exist either
+assert_ok "$FLOW" type-of-name-experimental new/dir/new_file.js BasicComponent --strip-root --unexpand-component-props
+# Next to existing files
+assert_ok "$FLOW" type-of-name-experimental new_file.js myString --strip-root
+# Batch and member lookups
+assert_ok "$FLOW" type-of-name-experimental new/dir/new_file.js BasicComponent.title DocumentedComponent --strip-root --unexpand-component-props
+# A misspelled path is a new empty file, so names local to basic.js are not found
+assert_errors "$FLOW" type-of-name-experimental basci.js param --strip-root --exact-match-only
+
 # Batch queries
 printf "\n=== Batch Queries ===\n"
 # Multiple names from same file, all found

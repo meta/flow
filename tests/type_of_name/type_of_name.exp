@@ -586,6 +586,25 @@ where
 
 Found exact match 'Container' defined at complex_types.js:131:7,131:15 with type `class Container<T>` 
 
+=== File that does not exist ===
+Found exact match 'BasicComponent' defined at react.js:7:1,7:54 with type `component BasicComponent(count: number, title: string)` 
+Found exact match 'myString' defined at basic.js:4:7,4:14 with type `string` 
+Found exact match 'BasicComponent.title' defined at react.js:7:26,7:30 with type `string` 
+
+Found exact match 'DocumentedComponent' defined at react.js:126:1,126:56 with type
+```
+component DocumentedComponent(
+  displayName: string,
+  isOnline?: boolean,
+  userId: string
+)
+```
+Prop documentation:
+  displayName -  The user's display name
+  isOnline -  Whether the user is currently online
+  userId -  The user's unique identifier
+
+
 === Batch Queries ===
 Found exact match 'myString' defined at basic.js:4:7,4:14 with type `string` 
 
