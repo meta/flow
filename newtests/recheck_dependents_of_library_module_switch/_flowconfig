@@ -1,0 +1,6 @@
+[libs]
+decls.js
+
+[options]
+all=true
+builtin_lib=prelude

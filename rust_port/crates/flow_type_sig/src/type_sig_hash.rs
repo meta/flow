@@ -46,6 +46,8 @@ pub enum Dependency {
 
 pub struct File {
     pub dependencies: Table<Dependency>,
+    /// The hash of each module reference's specifier text, as written in the file.
+    pub module_ref_names: Table<ReadHash>,
     pub local_defs: Table<Rc<Node>>,
     pub remote_refs: Table<Rc<Node>>,
     pub pattern_defs: Table<Rc<Node>>,
@@ -156,6 +158,7 @@ fn edge_require<Loc>(
     file: &File,
     index: Index<Loc>,
 ) {
+    dep_edge(file.module_ref_names.get(index));
     match file.dependencies.get(index) {
         Dependency::Cyclic(lazy_dep) => {
             let dep = LazyCell::force(lazy_dep);
@@ -168,8 +171,9 @@ fn edge_require<Loc>(
         }
         Dependency::Resource(dep) => dep_edge(dep),
         Dependency::Unchecked => {
-            // All unchecked dependencies are equivalent. If a dependency changes from
-            // unchecked to checked, then the hash will change anyway.
+            // Unchecked dependencies differ only in the module a library declares under their
+            // name, and the name is hashed above. If a dependency changes from unchecked to
+            // checked, then the hash will change anyway.
         }
     }
 }
@@ -181,6 +185,7 @@ fn edge_import<Loc>(
     file: &File,
     index: Index<Loc>,
 ) {
+    dep_edge(file.module_ref_names.get(index));
     match file.dependencies.get(index) {
         Dependency::Cyclic(lazy_dep) => {
             let dep = LazyCell::force(lazy_dep);
@@ -193,8 +198,9 @@ fn edge_import<Loc>(
         }
         Dependency::Resource(dep) => dep_edge(dep),
         Dependency::Unchecked => {
-            // All unchecked dependencies are equivalent. If a dependency changes from
-            // unchecked to checked, then the hash will change anyway.
+            // Unchecked dependencies differ only in the module a library declares under their
+            // name, and the name is hashed above. If a dependency changes from unchecked to
+            // checked, then the hash will change anyway.
         }
     }
 }
@@ -205,6 +211,7 @@ pub fn edge_import_ns<Loc>(
     file: &File,
     index: Index<Loc>,
 ) {
+    dep_edge(file.module_ref_names.get(index));
     match file.dependencies.get(index) {
         Dependency::Cyclic(lazy_dep) => {
             let dep = LazyCell::force(lazy_dep);
@@ -217,8 +224,9 @@ pub fn edge_import_ns<Loc>(
         }
         Dependency::Resource(dep) => dep_edge(dep),
         Dependency::Unchecked => {
-            // All unchecked dependencies are equivalent. If a dependency changes from
-            // unchecked to checked, then the hash will change anyway.
+            // Unchecked dependencies differ only in the module a library declares under their
+            // name, and the name is hashed above. If a dependency changes from unchecked to
+            // checked, then the hash will change anyway.
         }
     }
 }

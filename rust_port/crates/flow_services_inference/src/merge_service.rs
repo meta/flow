@@ -515,6 +515,13 @@ pub fn sig_hash(
             }
         });
 
+        let module_ref_names: Table<ReadHash> = Table::init(module.module_refs.len(), |i| {
+            let mref = module.module_refs.get(Index::<Userland>::new(i));
+            let hash = xx::hash(mref.as_str().as_bytes(), 0);
+            let name: ReadHash = Box::new(move || hash);
+            name
+        });
+
         let file = Rc::new_cyclic(|file: &Weak<type_sig_hash::File>| {
             let local_defs = {
                 let dirty_indices = &module.dirty_local_defs;
@@ -602,6 +609,7 @@ pub fn sig_hash(
 
             type_sig_hash::File {
                 dependencies,
+                module_ref_names,
                 local_defs,
                 remote_refs,
                 pattern_defs,
