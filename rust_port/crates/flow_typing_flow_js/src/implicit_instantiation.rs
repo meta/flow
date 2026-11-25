@@ -638,19 +638,26 @@ fn t_of_use_t<'cx>(
                             let result = merge_lower_or_upper_bounds(cx, env, seen, &tout_t)?;
                             let reason_spread = reason_spread.dupe();
                             bind_use_t_result(cx, result, |cx, t: Type| {
-                                let arr_rest_result = flow_typing_tvar::mk_where(
-                                    cx,
-                                    reason_spread.dupe(),
-                                    |cx, t_prime| {
-                                        let u_inner = UseTInner::ArrRestT(Box::new(ArrRestTData {
-                                            literal: false,
-                                            use_op: unknown_use(),
-                                            reason: reason_spread.dupe(),
-                                            index: n,
-                                            tout: t_prime.dupe(),
-                                        }));
-                                        FlowJs::flow_with_env(cx, env, &t, &UseT::new(u_inner))?;
-                                        if !flow_js_utils::tvar_visitors::has_unresolved_tvars_or_placeholders(cx, &t) {
+                                let arr_rest_result =
+                                    tvar_resolver::mk_tvar_and_fully_resolve_where(
+                                        cx,
+                                        reason_spread.dupe(),
+                                        |cx, t_prime| {
+                                            let u_inner =
+                                                UseTInner::ArrRestT(Box::new(ArrRestTData {
+                                                    literal: false,
+                                                    use_op: unknown_use(),
+                                                    reason: reason_spread.dupe(),
+                                                    index: n,
+                                                    tout: t_prime.dupe(),
+                                                }));
+                                            FlowJs::flow_with_env(
+                                                cx,
+                                                env,
+                                                &t,
+                                                &UseT::new(u_inner),
+                                            )?;
+                                            if !flow_js_utils::tvar_visitors::has_unresolved_tvars_or_placeholders(cx, &t) {
                                             tvar_resolver::resolve(
                                                 cx,
                                                 tvar_resolver::default_no_lowers,
@@ -658,9 +665,9 @@ fn t_of_use_t<'cx>(
                                                 t_prime,
                                             );
                                         }
-                                        Ok::<(), FlowJsException>(())
-                                    },
-                                )?;
+                                            Ok::<(), FlowJsException>(())
+                                        },
+                                    )?;
                                 match merge_lower_bounds(cx, env, false, &arr_rest_result)? {
                                     None => Ok(UseTResult::UpperEmpty),
                                     Some(solution) => {
@@ -805,8 +812,10 @@ fn t_of_use_t<'cx>(
                     };
                     let result = merge_lower_or_upper_bounds(cx, env, seen, tout)?;
                     bind_use_t_result(cx, result, |cx, t: Type| {
-                        let arr_rest_result =
-                            flow_typing_tvar::mk_where(cx, reason.dupe(), |cx, t_prime| {
+                        let arr_rest_result = tvar_resolver::mk_tvar_and_fully_resolve_where(
+                            cx,
+                            reason.dupe(),
+                            |cx, t_prime| {
                                 let u_inner = UseTInner::ArrRestT(Box::new(ArrRestTData {
                                     literal: false,
                                     use_op: unknown_use(),
@@ -816,7 +825,8 @@ fn t_of_use_t<'cx>(
                                 }));
                                 FlowJs::flow_with_env(cx, env, &t, &UseT::new(u_inner))?;
                                 Ok::<(), FlowJsException>(())
-                            })?;
+                            },
+                        )?;
                         match merge_lower_bounds(cx, env, false, &arr_rest_result)? {
                             None => Ok(UseTResult::UpperEmpty),
                             Some(solution) => {
@@ -1087,12 +1097,13 @@ fn reverse_obj_spread<'cx>(
     tout: &Type,
     literal: ObjLiteral,
 ) -> Result<Type, FlowJsException> {
-    let mut tout_val = flow_typing_tvar::mk_where(cx, r.dupe(), |cx, t_prime| {
-        FlowJs::flow_t_with_env(cx, env, tout, t_prime)?;
-        Ok::<(), FlowJsException>(())
-    })?;
+    let mut tout_val =
+        tvar_resolver::mk_tvar_and_fully_resolve_where(cx, r.dupe(), |cx, t_prime| {
+            FlowJs::flow_t_with_env(cx, env, tout, t_prime)?;
+            Ok::<(), FlowJsException>(())
+        })?;
     for rest in spread_reversal_rests(cx, r, todo_rev, acc_elements, literal) {
-        let next = flow_typing_tvar::mk_where(cx, r.dupe(), |cx, t_prime| {
+        let next = tvar_resolver::mk_tvar_and_fully_resolve_where(cx, r.dupe(), |cx, t_prime| {
             flow_spread_reversal_rest(cx, env, r, &tout_val, rest, t_prime)
         })?;
         tout_val = next;
@@ -1132,7 +1143,7 @@ fn reverse_component_check_config<'cx>(
     if pmap.is_empty() {
         return Ok(tout.dupe());
     }
-    flow_typing_tvar::mk_where(cx, reason.dupe(), |cx, t_prime| {
+    tvar_resolver::mk_tvar_and_fully_resolve_where(cx, reason.dupe(), |cx, t_prime| {
         let rest = component_config_rest(cx, reason, pmap, literal);
         flow_spread_reversal_rest(cx, env, reason, tout, rest, t_prime)
     })
@@ -1188,13 +1199,17 @@ fn reverse_obj_kit_rest<'cx>(
     tout: &Type,
     literal: bool,
 ) -> Result<Type, FlowJsException> {
-    flow_typing_tvar::mk_no_wrap_where(cx, reason.dupe(), |cx, _r, t_prime_id| {
-        let open_t_prime = Type::new(TypeInner::OpenT(Tvar::new(
-            reason.dupe(),
-            t_prime_id as u32,
-        )));
-        flow_rest_reversal(cx, env, reason, t_rest, tout, literal, &open_t_prime)
-    })
+    tvar_resolver::mk_tvar_and_fully_resolve_no_wrap_where(
+        cx,
+        reason.dupe(),
+        |cx, _r, t_prime_id| {
+            let open_t_prime = Type::new(TypeInner::OpenT(Tvar::new(
+                reason.dupe(),
+                t_prime_id as u32,
+            )));
+            flow_rest_reversal(cx, env, reason, t_rest, tout, literal, &open_t_prime)
+        },
+    )
 }
 
 // The params as a tuple type: `[...params, ...rest]`.
@@ -1321,17 +1336,18 @@ fn reverse_resolve_spread_multiflow_subtype_full_partial_resolution<'cx>(
     let solution = match resolved.len().saturating_sub(params.len()) {
         0 => Some(params_t),
         index => {
-            let arr_rest_result = flow_typing_tvar::mk_where(cx, reason.dupe(), |cx, tout| {
-                let u_inner = UseTInner::ArrRestT(Box::new(ArrRestTData {
-                    literal: false,
-                    use_op: unknown_use(),
-                    reason: reason.dupe(),
-                    index: index as i32,
-                    tout: tout.dupe(),
-                }));
-                FlowJs::flow_with_env(cx, env, &params_t, &UseT::new(u_inner))?;
-                Ok::<(), FlowJsException>(())
-            })?;
+            let arr_rest_result =
+                tvar_resolver::mk_tvar_and_fully_resolve_where(cx, reason.dupe(), |cx, tout| {
+                    let u_inner = UseTInner::ArrRestT(Box::new(ArrRestTData {
+                        literal: false,
+                        use_op: unknown_use(),
+                        reason: reason.dupe(),
+                        index: index as i32,
+                        tout: tout.dupe(),
+                    }));
+                    FlowJs::flow_with_env(cx, env, &params_t, &UseT::new(u_inner))?;
+                    Ok::<(), FlowJsException>(())
+                })?;
             merge_lower_bounds(cx, env, false, &arr_rest_result)?
         }
     };
@@ -1989,6 +2005,9 @@ fn check_instantiation<'cx>(
         }
     };
     FlowJs::flow_with_env(cx, env, &lower_t, &use_t)?;
+    if let Some(tout) = &tout {
+        tvar_resolver::resolve(cx, tvar_resolver::default_no_lowers, true, tout);
+    }
     Ok(tout)
 }
 

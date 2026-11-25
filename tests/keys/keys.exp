@@ -164,13 +164,16 @@ References:
 
 Error --------------------------------------------------------------------------------------------- intersection.js:11:1
 
-Cannot cast `k` to `"a"` because `"b"` [1] is incompatible with `"a"` [2]. [incompatible-type]
+Cannot cast `k` to `"a"` because `"a" | "b"` [1] is incompatible with `"a"` [2]. [incompatible-type]
 
    intersection.js:11:1
    11| k as 'a'; // error: 'b' is a key too
-       ^ [1]
+       ^
 
 References:
+   intersection.js:9:18
+    9| declare const k: keyof (A & B);
+                        ^^^^^^^^^^^^^ [1]
    intersection.js:11:6
    11| k as 'a'; // error: 'b' is a key too
             ^^^ [2]
@@ -178,16 +181,20 @@ References:
 
 Error --------------------------------------------------------------------------------------------- intersection.js:12:1
 
-Cannot cast `k` to `"b"` because `"a"` [1] is incompatible with `"b"` [2]. [incompatible-type]
+Cannot cast `k` to `"b"` because in at least one member of `"a" | "b"` [1]: `"a"` [2] is incompatible with `"b"` [3].
+[incompatible-type]
 
    intersection.js:12:1
    12| k as 'b'; // error: 'a' is a key too
-       ^ [1]
+       ^ [2]
 
 References:
+   intersection.js:9:18
+    9| declare const k: keyof (A & B);
+                        ^^^^^^^^^^^^^ [1]
    intersection.js:12:6
    12| k as 'b'; // error: 'a' is a key too
-            ^^^ [2]
+            ^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------- intersection.js:16:1
@@ -220,30 +227,38 @@ References:
 
 Error -------------------------------------------------------------------------------------------- intersection.js:29:10
 
-Cannot return `key` because `"d"` [1] is incompatible with `"c"` [2]. [incompatible-type]
+Cannot return `key` because in at least one member of `"d" | "c"` [1]: `"d"` [2] is incompatible with `"c"` [3].
+[incompatible-type]
 
    intersection.js:29:10
    29|   return key; // error: 'd' is a key too
-                ^^^ [1]
+                ^^^ [2]
 
 References:
+   intersection.js:28:46
+   28| function bounded<T extends {d: number}>(key: keyof (T & {c: number})): 'c' {
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^ [1]
    intersection.js:28:72
    28| function bounded<T extends {d: number}>(key: keyof (T & {c: number})): 'c' {
-                                                                              ^^^ [2]
+                                                                              ^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------- intersection.js:36:1
 
-Cannot cast `opt` to `"c"` because `"d"` [1] is incompatible with `"c"` [2]. [incompatible-type]
+Cannot cast `opt` to `"c"` because in at least one member of `"d" | "c"` [1]: `"d"` [2] is incompatible with `"c"` [3].
+[incompatible-type]
 
    intersection.js:36:1
    36| opt as 'c'; // error: 'd' is a key too
-       ^^^ [1]
+       ^^^ [2]
 
 References:
+   intersection.js:35:20
+   35| declare const opt: keyof ((void | {d: number}) & {c: number});
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    intersection.js:36:8
    36| opt as 'c'; // error: 'd' is a key too
-              ^^^ [2]
+              ^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------- intersection.js:41:1

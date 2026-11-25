@@ -86,6 +86,7 @@ use crate::flow_js::FlowJs;
 use crate::implicit_instantiation::generalize_singletons;
 use crate::natural_inference::has_ast_syntactic_hint;
 use crate::renders_kit;
+use crate::tvar_resolver;
 
 pub fn err_incompatible<'cx>(
     cx: &mut Context<'cx>,
@@ -220,14 +221,9 @@ pub fn subtype_class_component_render<'cx>(
             method_action: Box::new(action),
         }))),
     )?;
-    FlowJs::rec_flow_t_with_env(
-        cx,
-        env,
-        trace,
-        use_op,
-        &Type::new(TypeInner::OpenT(Tvar::new(reason_op.dupe(), tvar as u32))),
-        upper_render,
-    )
+    let render_t = Type::new(TypeInner::OpenT(Tvar::new(reason_op.dupe(), tvar as u32)));
+    tvar_resolver::resolve(cx, tvar_resolver::default_no_lowers, true, &render_t);
+    FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &render_t, upper_render)
 }
 
 // Lookup the defaultProps of a component and flow with upper depending
@@ -308,6 +304,7 @@ fn get_defaults<'cx>(
         &tvar,
         Polarity::Positive,
     )?;
+    tvar_resolver::resolve(cx, tvar_resolver::default_no_lowers, true, &tvar);
     Ok(Some(tvar))
 }
 
@@ -703,7 +700,7 @@ pub fn get_config<'cx>(
     let props = {
         let reason = reason_component.dupe().replace_desc(None);
         let use_op_clone = use_op.dupe();
-        flow_typing_tvar::mk_where(cx, reason.dupe(), |cx, tout_t| {
+        tvar_resolver::mk_tvar_and_fully_resolve_where(cx, reason.dupe(), |cx, tout_t| {
             props_to_tout(
                 cx,
                 env,
@@ -1040,7 +1037,7 @@ pub(super) fn run_with_env<'cx>(
         // and ref.
         let normalized_jsx_props = {
             let use_op_clone = use_op.dupe();
-            flow_typing_tvar::mk_where(
+            tvar_resolver::mk_tvar_and_fully_resolve_where(
                 cx,
                 type_util::reason_of_t(jsx_props).dupe(),
                 |cx, normalized_config| {

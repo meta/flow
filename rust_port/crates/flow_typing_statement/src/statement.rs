@@ -7967,6 +7967,7 @@ fn expression_<'a>(
             })));
             flow_js::flow_non_speculating(cx, (&t, &call_t))?;
             let result_t = Type::new(TypeInner::OpenT(ret_tvar));
+            tvar_resolver::resolve(cx, tvar_resolver::default_no_lowers, true, &result_t);
             expression::Expression::new(ExpressionInner::TaggedTemplate {
                 loc: (loc.dupe(), result_t),
                 inner: expression::TaggedTemplate {
@@ -9474,6 +9475,7 @@ pub fn optional_chain<'a>(
             &chain_voided_out_collector,
         ))?;
         let mem_t = Type::new(TypeInner::OpenT(mem_tvar));
+        tvar_resolver::resolve(cx, tvar_resolver::default_no_lowers, true, &mem_t);
         let voided_out_ts: Vec<Type> = voided_out_collector.collect_to_vec();
         let voided_out = {
             let t = union_of_ts(reason.dupe(), voided_out_ts, None);
@@ -13715,6 +13717,7 @@ fn react_jsx_desugar<'a>(
                 }))),
             ),
         )?;
+        tvar_resolver::resolve(cx, tvar_resolver::default_no_lowers, true, &tout);
         (tout, None, None, use_op)
     } else {
         let tout_id = flow_typing_tvar::mk_no_wrap(cx, &reason);
@@ -13744,6 +13747,7 @@ fn react_jsx_desugar<'a>(
                 }))),
             ),
         )?;
+        tvar_resolver::resolve(cx, tvar_resolver::default_no_lowers, true, &tout);
         let specialized_component_t =
             flow_js_utils::callee_recorder::type_for_tast_opt(reason_c, &specialized_component);
         let inferred_props = flow_js_utils::callee_recorder::type_for_tast_opt(

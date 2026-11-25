@@ -968,9 +968,9 @@ Cannot return `'zzz'` because `"zzz"` [1] is incompatible with `empty` [2]. [inc
                  ^^^^^ [1]
 
 References:
-   generic.js:121:56
+   generic.js:121:83
    121| function keysOfUnboundedTypeParamInferUnderMaybe<T>(): keyof T extends ?infer U ? U : empty {
-                                                               ^^^^^^^ [2]
+                                                                                          ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------- infer_rest_bound.js:22:10

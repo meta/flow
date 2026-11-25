@@ -314,6 +314,7 @@ fn synthesis_speculation_call<'cx>(
     let use_op = unknown_use();
     let tout_id = flow_typing_tvar::mk_no_wrap(cx, call_reason);
     let tout = Tvar::new(call_reason.dupe(), tout_id as u32);
+    let tout_t = Type::new(TypeInner::OpenT(tout.dupe()));
     let call_speculation_hint_state =
         Rc::new(RefCell::new(SpeculationHintState::SpeculationHintUnset));
     let call_action = Box::new(CallAction::Funcalltype(Box::new(FuncallType {
@@ -332,6 +333,7 @@ fn synthesis_speculation_call<'cx>(
         return_hint: hint_unavailable(),
     })));
     flow_js::flow_with_env(cx, env, (&intersection, &use_t))?;
+    tvar_resolver::resolve(cx, tvar_resolver::default_no_lowers, true, &tout_t);
     match &*call_speculation_hint_state.borrow() {
         SpeculationHintState::SpeculationHintUnset
         | SpeculationHintState::SpeculationHintInvalid => {

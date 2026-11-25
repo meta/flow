@@ -617,6 +617,7 @@ pub(super) fn handle_bounded<'cx>(
                 let repos_bound = reposition_reason(cx, env, Some(trace), reason, false, bound)?;
                 rec_flow(cx, &bound_env, trace, (&repos_bound, &use_t))?;
                 let open_t = Type::new(TypeInner::OpenT(t_out_prime));
+                tvar_resolver::resolve(cx, tvar_resolver::default_no_lowers, true, &open_t);
                 if let Some(key) = cache_key {
                     flow_cache::narrowing::add(
                         cx,
@@ -1317,7 +1318,11 @@ pub(super) fn handle_frozen_tvar<'cx>(
             repos_bound,
             mk_use_t(rigid.dupe()),
         ) {
-            Ok(()) => Type::new(TypeInner::OpenT(rigid)),
+            Ok(()) => {
+                let t = Type::new(TypeInner::OpenT(rigid));
+                tvar_resolver::resolve(cx, tvar_resolver::default_no_lowers, true, &t);
+                t
+            }
             Err(FlowJsException::SpeculationSingletonError) => mixed_t::make(use_reason.dupe()),
             Err(e) => return Err(e),
         };
@@ -1522,6 +1527,12 @@ pub(super) fn filter_optional<'cx>(
             )),
         ),
     )?;
+    tvar_resolver::resolve(
+        cx,
+        tvar_resolver::default_no_lowers,
+        true,
+        &Type::new(TypeInner::OpenT(Tvar::new(reason.dupe(), tvar as u32))),
+    );
     Ok(tvar as u32)
 }
 

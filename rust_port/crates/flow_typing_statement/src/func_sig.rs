@@ -29,6 +29,7 @@ use flow_typing_flow_common::flow_js_utils;
 use flow_typing_flow_common::flow_js_utils::FlowJsException;
 use flow_typing_flow_common::obj_type;
 use flow_typing_flow_js::flow_js;
+use flow_typing_flow_js::tvar_resolver;
 use flow_typing_loc_env::func_class_sig_types::ConfigTypes;
 use flow_typing_loc_env::func_class_sig_types::func::Func;
 use flow_typing_loc_env::func_class_sig_types::func::Kind;
@@ -926,6 +927,10 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
                 }
             }
         }
+    }
+
+    if !has_return_annot {
+        tvar_resolver::resolve(cx, tvar_resolver::default_no_lowers, true, &return_t);
     }
 
     type_env::set_scope_kind(cx, prev_scope_kind);

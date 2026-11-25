@@ -125,7 +125,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:67:11
 
-Cannot call `ks.push` because `"zzz"` [1] is incompatible with `"a" | 1` [2]. [incompatible-type]
+Cannot call `ks.push` because in array element: `"zzz"` [1] is incompatible with `"a" | 1` [2]. [incompatible-type]
 
    test.js:67:11
    67|   ks.push('zzz'); // error

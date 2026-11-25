@@ -661,28 +661,32 @@ fn resolve_hint<'cx>(
                         }
                     })
                     .collect::<Result<_, JobError>>()?;
-                flow_typing_tvar::mk_where(cx, array_reason.dupe(), |cx, tout| {
-                    let reason_op = array_reason.dupe();
-                    let element_reason = reason_op
-                        .dupe()
-                        .replace_desc(reason::VirtualReasonDesc::RInferredUnionElemArray);
-                    let elem_t = flow_typing_tvar::mk(cx, element_reason);
-                    flow_js_exception_to_job_error(flow_js::FlowJs::resolve_spread_list(
-                        cx,
-                        type_::unknown_use(),
-                        &reason_op,
-                        elem_spread_list,
-                        type_::SpreadResolve::ResolveSpreadsToArrayLiteral {
-                            literal: ArrLiteral::NonLiteral,
-                            fresh: false,
-                            id: reason::mk_id() as i32,
-                            kind: type_::ArrayLiteralKind::Mutable,
-                            elem_t,
-                            tout: tout.dupe(),
-                        },
-                    ))?;
-                    Ok::<(), JobError>(())
-                })?
+                flow_typing_flow_js::tvar_resolver::mk_tvar_and_fully_resolve_where(
+                    cx,
+                    array_reason.dupe(),
+                    |cx, tout| {
+                        let reason_op = array_reason.dupe();
+                        let element_reason = reason_op
+                            .dupe()
+                            .replace_desc(reason::VirtualReasonDesc::RInferredUnionElemArray);
+                        let elem_t = flow_typing_tvar::mk(cx, element_reason);
+                        flow_js_exception_to_job_error(flow_js::FlowJs::resolve_spread_list(
+                            cx,
+                            type_::unknown_use(),
+                            &reason_op,
+                            elem_spread_list,
+                            type_::SpreadResolve::ResolveSpreadsToArrayLiteral {
+                                literal: ArrLiteral::NonLiteral,
+                                fresh: false,
+                                id: reason::mk_id() as i32,
+                                kind: type_::ArrayLiteralKind::Mutable,
+                                elem_t,
+                                tout: tout.dupe(),
+                            },
+                        ))?;
+                        Ok::<(), JobError>(())
+                    },
+                )?
             }
             HintNode::ComposedObjectPatternHint(hint_loc, properties) => {
                 let acc = properties.into_iter().try_fold(
@@ -1564,28 +1568,34 @@ fn resolve_binding<'cx>(
                             })
                             .collect::<Result<_, _>>()?;
                         let arr_reason = reason::mk_reason(None, loc.dupe());
-                        flow_typing_tvar::mk_where(cx, arr_reason.dupe(), |cx, tout| {
-                            let reason_op = arr_reason.dupe();
-                            let element_reason = reason_op
-                                .dupe()
-                                .replace_desc(reason::VirtualReasonDesc::RInferredUnionElemArray);
-                            let elem_t = flow_typing_tvar::mk(cx, element_reason);
-                            flow_js_exception_to_job_error(flow_js::FlowJs::resolve_spread_list(
-                                cx,
-                                type_::unknown_use(),
-                                &reason_op,
-                                elem_spread_list,
-                                type_::SpreadResolve::ResolveSpreadsToArrayLiteral {
-                                    literal: ArrLiteral::Expression,
-                                    fresh: false,
-                                    id: reason::mk_id() as i32,
-                                    kind: type_::ArrayLiteralKind::Mutable,
-                                    elem_t,
-                                    tout: tout.dupe(),
-                                },
-                            ))?;
-                            Ok::<(), JobError>(())
-                        })?
+                        flow_typing_flow_js::tvar_resolver::mk_tvar_and_fully_resolve_where(
+                            cx,
+                            arr_reason.dupe(),
+                            |cx, tout| {
+                                let reason_op = arr_reason.dupe();
+                                let element_reason = reason_op.dupe().replace_desc(
+                                    reason::VirtualReasonDesc::RInferredUnionElemArray,
+                                );
+                                let elem_t = flow_typing_tvar::mk(cx, element_reason);
+                                flow_js_exception_to_job_error(
+                                    flow_js::FlowJs::resolve_spread_list(
+                                        cx,
+                                        type_::unknown_use(),
+                                        &reason_op,
+                                        elem_spread_list,
+                                        type_::SpreadResolve::ResolveSpreadsToArrayLiteral {
+                                            literal: ArrLiteral::Expression,
+                                            fresh: false,
+                                            id: reason::mk_id() as i32,
+                                            kind: type_::ArrayLiteralKind::Mutable,
+                                            elem_t,
+                                            tout: tout.dupe(),
+                                        },
+                                    ),
+                                )?;
+                                Ok::<(), JobError>(())
+                            },
+                        )?
                     }
                     ast::expression::ExpressionInner::Assignment { .. }
                     | ast::expression::ExpressionInner::Binary { .. }
@@ -1972,7 +1982,7 @@ fn resolve_binding<'cx>(
             let t = match lazy_hint(cx, false, true, None, ctx_reason.dupe())? {
                 type_::HintEvalResult::HintAvailable(t, _) => {
                     let t = if default_expression.is_some() {
-                        flow_typing_tvar::mk_where(
+                        flow_typing_flow_js::tvar_resolver::mk_tvar_and_fully_resolve_where(
                             cx,
                             ctx_reason.dupe(),
                             |cx, tout| -> Result<(), JobError> {

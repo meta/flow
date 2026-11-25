@@ -1546,20 +1546,24 @@ fn mk_default<'cx>(
               sel: Selector|
          -> Result<Type, FlowJsException> {
             let t = t?;
-            flow_typing_tvar::mk_no_wrap_where(cx, r.dupe(), |cx, _reason, tvar_id| {
-                let tvar = Tvar::new(r.dupe(), tvar_id as u32);
-                FlowJs::eval_selector_with_env(
-                    cx,
-                    env,
-                    None,
-                    false,
-                    &r,
-                    &t,
-                    &sel,
-                    &tvar,
-                    flow_common::reason::mk_id() as i32,
-                )
-            })
+            tvar_resolver::mk_tvar_and_fully_resolve_no_wrap_where(
+                cx,
+                r.dupe(),
+                |cx, _reason, tvar_id| {
+                    let tvar = Tvar::new(r.dupe(), tvar_id as u32);
+                    FlowJs::eval_selector_with_env(
+                        cx,
+                        env,
+                        None,
+                        false,
+                        &r,
+                        &t,
+                        &sel,
+                        &tvar,
+                        flow_common::reason::mk_id() as i32,
+                    )
+                },
+            )
         },
     )
 }

@@ -1289,26 +1289,30 @@ fn __flow_impl<'cx>(
             let t1 = members.next().unwrap();
             let ts: Vec<&Type> = members.collect();
             let mut f = |t: &Type| -> Result<Type, FlowJsException> {
-                flow_typing_tvar::mk_no_wrap_where(cx, reason.dupe(), |cx, tvar_reason, tvar_id| {
-                    let tvar = Tvar::new(tvar_reason.dupe(), tvar_id as u32);
-                    rec_flow(
-                        cx,
-                        env,
-                        trace,
-                        (
-                            t,
-                            &UseT::new(OptionalIndexedAccessT(Box::new(
-                                OptionalIndexedAccessTData {
-                                    use_op: use_op.dupe(),
-                                    reason: reason.dupe(),
-                                    index: index.dupe(),
-                                    tout_tvar: Box::new(tvar),
-                                },
-                            ))),
-                        ),
-                    )?;
-                    Ok(())
-                })
+                tvar_resolver::mk_tvar_and_fully_resolve_no_wrap_where(
+                    cx,
+                    reason.dupe(),
+                    |cx, tvar_reason, tvar_id| {
+                        let tvar = Tvar::new(tvar_reason.dupe(), tvar_id as u32);
+                        rec_flow(
+                            cx,
+                            env,
+                            trace,
+                            (
+                                t,
+                                &UseT::new(OptionalIndexedAccessT(Box::new(
+                                    OptionalIndexedAccessTData {
+                                        use_op: use_op.dupe(),
+                                        reason: reason.dupe(),
+                                        index: index.dupe(),
+                                        tout_tvar: Box::new(tvar),
+                                    },
+                                ))),
+                            ),
+                        )?;
+                        Ok(())
+                    },
+                )
             };
             let ft0 = f(t0)?;
             let ft1 = f(t1)?;
@@ -1377,8 +1381,10 @@ fn __flow_impl<'cx>(
         (MaybeT(rl, t), DeepReadOnlyT(tout, dro)) => {
             let r = tout.reason();
             let ReactDro(dro_loc, dro_type) = dro;
-            let new_t =
-                flow_typing_tvar::mk_no_wrap_where(cx, r.dupe(), |cx, tvar_reason, tvar_id| {
+            let new_t = tvar_resolver::mk_tvar_and_fully_resolve_no_wrap_where(
+                cx,
+                r.dupe(),
+                |cx, tvar_reason, tvar_id| {
                     let tvar = Tvar::new(tvar_reason.dupe(), tvar_id as u32);
                     rec_flow(
                         cx,
@@ -1393,19 +1399,23 @@ fn __flow_impl<'cx>(
                         ),
                     )?;
                     Ok::<(), FlowJsException>(())
-                })?;
+                },
+            )?;
             let new_l = Type::new(MaybeT(rl.dupe(), new_t));
             let tout_t = Type::new(OpenT((**tout).dupe()));
             rec_flow_t(cx, env, trace, unknown_use(), (&new_l, &tout_t))?;
         }
         (MaybeT(rl, t), HooklikeT(tout)) => {
             let r = tout.reason();
-            let new_t =
-                flow_typing_tvar::mk_no_wrap_where(cx, r.dupe(), |cx, tvar_reason, tvar_id| {
+            let new_t = tvar_resolver::mk_tvar_and_fully_resolve_no_wrap_where(
+                cx,
+                r.dupe(),
+                |cx, tvar_reason, tvar_id| {
                     let tvar = Tvar::new(tvar_reason.dupe(), tvar_id as u32);
                     rec_flow(cx, env, trace, (t, &UseT::new(HooklikeT(Box::new(tvar)))))?;
                     Ok::<(), FlowJsException>(())
-                })?;
+                },
+            )?;
             let new_l = Type::new(MaybeT(rl.dupe(), new_t));
             let tout_t = Type::new(OpenT((**tout).dupe()));
             rec_flow_t(cx, env, trace, unknown_use(), (&new_l, &tout_t))?;
@@ -1416,8 +1426,10 @@ fn __flow_impl<'cx>(
         {
             let r = tout.reason();
             let ReactDro(dro_loc, dro_type) = dro;
-            let new_t =
-                flow_typing_tvar::mk_no_wrap_where(cx, r.dupe(), |cx, tvar_reason, tvar_id| {
+            let new_t = tvar_resolver::mk_tvar_and_fully_resolve_no_wrap_where(
+                cx,
+                r.dupe(),
+                |cx, tvar_reason, tvar_id| {
                     let tvar = Tvar::new(tvar_reason.dupe(), tvar_id as u32);
                     rec_flow(
                         cx,
@@ -1432,19 +1444,23 @@ fn __flow_impl<'cx>(
                         ),
                     )?;
                     Ok::<(), FlowJsException>(())
-                })?;
+                },
+            )?;
             let new_l = type_util::slot_value_t(&new_t, true);
             let tout_t = Type::new(OpenT((**tout).dupe()));
             rec_flow_t(cx, env, trace, unknown_use(), (&new_l, &tout_t))?;
         }
         (UnionT(..), HooklikeT(tout)) if let Some(t) = type_util::optional_slot_type(l) => {
             let r = tout.reason();
-            let new_t =
-                flow_typing_tvar::mk_no_wrap_where(cx, r.dupe(), |cx, tvar_reason, tvar_id| {
+            let new_t = tvar_resolver::mk_tvar_and_fully_resolve_no_wrap_where(
+                cx,
+                r.dupe(),
+                |cx, tvar_reason, tvar_id| {
                     let tvar = Tvar::new(tvar_reason.dupe(), tvar_id as u32);
                     rec_flow(cx, env, trace, (&t, &UseT::new(HooklikeT(Box::new(tvar)))))?;
                     Ok::<(), FlowJsException>(())
-                })?;
+                },
+            )?;
             let new_l = type_util::slot_value_t(&new_t, true);
             let tout_t = Type::new(OpenT((**tout).dupe()));
             rec_flow_t(cx, env, trace, unknown_use(), (&new_l, &tout_t))?;
@@ -3451,7 +3467,7 @@ fn __flow_impl<'cx>(
                 let t1 = members.next().unwrap();
                 let ts: Vec<_> = members.duped().collect();
                 let mut f = |t: &Type| -> Result<Type, FlowJsException> {
-                    flow_typing_tvar::mk_no_wrap_where(
+                    tvar_resolver::mk_tvar_and_fully_resolve_no_wrap_where(
                         cx,
                         reason.dupe(),
                         |cx, tvar_reason, tvar_id| {
@@ -3880,7 +3896,7 @@ fn __flow_impl<'cx>(
                 let Some(t) = object_part_of_member(cx, env, &reason, t)? else {
                     continue;
                 };
-                member_keys.push(flow_typing_tvar::mk_where(
+                member_keys.push(tvar_resolver::mk_tvar_and_fully_resolve_where(
                     cx,
                     reason.dupe(),
                     |cx, tout| {
@@ -3914,7 +3930,7 @@ fn __flow_impl<'cx>(
                 let Some(t) = object_part_of_member(cx, env, &reason, t)? else {
                     continue;
                 };
-                member_values.push(flow_typing_tvar::mk_where(
+                member_values.push(tvar_resolver::mk_tvar_and_fully_resolve_where(
                     cx,
                     reason.dupe(),
                     |cx, tout| {
@@ -5645,7 +5661,7 @@ fn __flow_impl<'cx>(
             } else {
                 static_.dupe()
             };
-            let method_type = flow_typing_tvar::mk_no_wrap_where(
+            let method_type = tvar_resolver::mk_tvar_and_fully_resolve_no_wrap_where(
                 cx,
                 reason_lookup.dupe(),
                 |cx, tvar_reason, tvar_id| {
@@ -6361,7 +6377,7 @@ fn __flow_impl<'cx>(
                 )?;
             }
             // call this.constructor(args)
-            let ret = flow_typing_tvar::mk_no_wrap_where(
+            let ret = tvar_resolver::mk_tvar_and_fully_resolve_no_wrap_where(
                 cx,
                 reason_op.dupe(),
                 |cx, tvar_reason, tvar_id| {
@@ -6481,7 +6497,7 @@ fn __flow_impl<'cx>(
                         None,
                         construct_t,
                     )?;
-                    let ret = flow_typing_tvar::mk_no_wrap_where(
+                    let ret = tvar_resolver::mk_tvar_and_fully_resolve_no_wrap_where(
                         cx,
                         reason_op.dupe(),
                         |cx, tvar_reason, tvar_id| {
@@ -7158,7 +7174,7 @@ fn __flow_impl<'cx>(
         ) => {
             let super_ = &inst_t.super_;
             let inst = &inst_t.inst;
-            let funt = flow_typing_tvar::mk_no_wrap_where(
+            let funt = tvar_resolver::mk_tvar_and_fully_resolve_no_wrap_where(
                 cx,
                 reason_lookup.dupe(),
                 |cx, reason_tout, tout| {
@@ -7237,6 +7253,7 @@ fn __flow_impl<'cx>(
                 pm_data.static_,
                 &Tvar::new(pm_data.prop_reason.dupe(), tvar as u32),
             )?;
+            tvar_resolver::resolve(cx, tvar_resolver::default_no_lowers, true, &funt);
             apply_method_action(
                 cx,
                 env,
@@ -7318,29 +7335,33 @@ fn __flow_impl<'cx>(
             let super_ = &inst_t.super_;
             let inst = &inst_t.inst;
             // Spread fields from super into an object
-            let obj_super = flow_typing_tvar::mk_where(cx, reason_op.dupe(), |cx, tvar| {
-                let use_t = UseT::new(ObjRestT(
-                    reason_op.dupe(),
-                    xs.clone(),
-                    tvar.dupe(),
-                    flow_common::reason::mk_id() as i32,
-                    *literal,
-                ));
-                rec_flow(
-                    cx,
-                    env,
-                    trace,
-                    (
-                        super_,
-                        &UseT::new(ReposLowerT {
-                            reason: reason.dupe(),
-                            use_desc: false,
-                            use_t: Box::new(use_t),
-                        }),
-                    ),
-                )?;
-                Ok::<(), FlowJsException>(())
-            })?;
+            let obj_super = tvar_resolver::mk_tvar_and_fully_resolve_where(
+                cx,
+                reason_op.dupe(),
+                |cx, tvar| {
+                    let use_t = UseT::new(ObjRestT(
+                        reason_op.dupe(),
+                        xs.clone(),
+                        tvar.dupe(),
+                        flow_common::reason::mk_id() as i32,
+                        *literal,
+                    ));
+                    rec_flow(
+                        cx,
+                        env,
+                        trace,
+                        (
+                            super_,
+                            &UseT::new(ReposLowerT {
+                                reason: reason.dupe(),
+                                use_desc: false,
+                                use_t: Box::new(use_t),
+                            }),
+                        ),
+                    )?;
+                    Ok::<(), FlowJsException>(())
+                },
+            )?;
             let xs_smol: Vec<flow_data_structure_wrapper::smol_str::FlowSmolStr> =
                 xs.iter().map(|s| s.as_str().into()).collect();
             let strictness_kind = cx.type_strictness_kind();
@@ -7376,26 +7397,30 @@ fn __flow_impl<'cx>(
                 union_t: None,
                 curr_resolve_idx: 0,
             };
-            let o2 = flow_typing_tvar::mk_where(cx, reason_op.dupe(), |cx, tvar| {
-                rec_flow(
-                    cx,
-                    &env.push_parts_marker(spread_id),
-                    trace,
-                    (
-                        &obj_super,
-                        &UseT::new(ObjKitT(
-                            use_op.dupe(),
-                            reason_op.dupe(),
-                            Box::new(spread_tool.clone()),
-                            Box::new(object::Tool::Spread(Box::new((
-                                spread_target,
-                                spread_state.clone(),
-                            )))),
-                            tvar.dupe(),
-                        )),
-                    ),
-                )
-            })?;
+            let o2 = tvar_resolver::mk_tvar_and_fully_resolve_where(
+                cx,
+                reason_op.dupe(),
+                |cx, tvar| {
+                    rec_flow(
+                        cx,
+                        &env.push_parts_marker(spread_id),
+                        trace,
+                        (
+                            &obj_super,
+                            &UseT::new(ObjKitT(
+                                use_op.dupe(),
+                                reason_op.dupe(),
+                                Box::new(spread_tool.clone()),
+                                Box::new(object::Tool::Spread(Box::new((
+                                    spread_target,
+                                    spread_state.clone(),
+                                )))),
+                                tvar.dupe(),
+                            )),
+                        ),
+                    )
+                },
+            )?;
             rec_flow_t(cx, env, trace, use_op, (&o2, t))?;
         }
         (AnyT(_, _) | ImplicitInstantiationTvar(_), ObjRestT(reason, _, t, _, _)) => {
@@ -7716,7 +7741,7 @@ fn __flow_impl<'cx>(
                 }),
             ),
         ) => {
-            let t = flow_typing_tvar::mk_no_wrap_where(
+            let t = tvar_resolver::mk_tvar_and_fully_resolve_no_wrap_where(
                 cx,
                 reason_lookup.dupe(),
                 |cx, reason_tout, tout| {
@@ -8576,8 +8601,10 @@ fn __flow_impl<'cx>(
                 }
                 loop_generic(l, flow_typing_generics::spread_empty())
             };
-            let mapped_bound =
-                flow_typing_tvar::mk_where(cx, reason_op.dupe(), |cx, tout_inner| {
+            let mapped_bound = tvar_resolver::mk_tvar_and_fully_resolve_where(
+                cx,
+                reason_op.dupe(),
+                |cx, tout_inner| {
                     rec_flow(
                         cx,
                         env,
@@ -8602,7 +8629,8 @@ fn __flow_impl<'cx>(
                         ),
                     )?;
                     Ok::<(), FlowJsException>(())
-                })?;
+                },
+            )?;
             let mapped_generic_t = match flow_typing_generics::GenericId::make_op_id(
                 flow_common::subst_name::OpKind::MappedArray,
                 t_generic_id,
@@ -9566,7 +9594,7 @@ fn __flow_impl<'cx>(
                     &UseT::new(GetStaticsT(reason.dupe(), collector.dupe())),
                 ),
             )?;
-            let method_type = flow_typing_tvar::mk_no_wrap_where(
+            let method_type = tvar_resolver::mk_tvar_and_fully_resolve_no_wrap_where(
                 cx,
                 reason_lookup.dupe(),
                 |cx, tout_reason, tout_id| {
@@ -9746,7 +9774,7 @@ fn __flow_impl<'cx>(
                 }),
             ),
         ) => {
-            let t = flow_typing_tvar::mk_no_wrap_where(
+            let t = tvar_resolver::mk_tvar_and_fully_resolve_no_wrap_where(
                 cx,
                 lookup_reason.dupe(),
                 |cx, tout_reason, tout_id| {
@@ -9933,7 +9961,7 @@ fn __flow_impl<'cx>(
                 "$EnumValueProto",
                 vec![l.dupe(), representation_t.dupe()],
             );
-            let t = flow_typing_tvar::mk_no_wrap_where(
+            let t = tvar_resolver::mk_tvar_and_fully_resolve_no_wrap_where(
                 cx,
                 lookup_reason.dupe(),
                 |cx, tout_reason, tout_id| {
