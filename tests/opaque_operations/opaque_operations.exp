@@ -48,9 +48,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:30:3
 
-Cannot cast `o` to `NonNullable<T4>` because: [incompatible-type]
- - Either `null` [1] is incompatible with `empty` [2].
- - Or `null` [1] is incompatible with `{readonly foo: string}` [2].
+Cannot cast `o` to `NonNullable<T4>` because `null` [1] is incompatible with `{readonly foo: string}` [2].
+[incompatible-type]
 
    test.js:30:3
    30|   o as NonNullable<T4>; // error
@@ -67,9 +66,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:30:3
 
-Cannot cast `o` to `NonNullable<T4>` because: [incompatible-type]
- - Either `void` [1] is incompatible with `empty` [2].
- - Or `void` [1] is incompatible with `{readonly foo: string}` [2].
+Cannot cast `o` to `NonNullable<T4>` because `void` [1] is incompatible with `{readonly foo: string}` [2].
+[incompatible-type]
 
    test.js:30:3
    30|   o as NonNullable<T4>; // error
@@ -86,12 +84,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:51:5
 
-Cannot call `f` with `null` bound to `u` because: [incompatible-type]
- - Either `null` [1] is incompatible with `void` [2].
- - Or `null` [1] is incompatible with `{readonly foo: string}` [2].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot call `f` with `null` bound to `u` because `null` [1] is incompatible with `{readonly foo: string}` [2].
+[incompatible-type]
 
    test.js:51:5
    51|   f(null); // error

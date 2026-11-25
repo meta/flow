@@ -27,6 +27,10 @@ let p4 : PFoo = b1;
 let p5 : PFoo = {x : ""};
 let p6 : PFoo = 3; // error
 
+type PMaybeFooAndBar = Partial<?Foo & {z : string}>;
+let q : PMaybeFooAndBar = {x : "", z : ""};
+let q2 : PMaybeFooAndBar = {x : 3}; // error
+
 type Err = Partial<number> // error
 3 as Err;
 

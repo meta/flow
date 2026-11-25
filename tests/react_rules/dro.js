@@ -81,3 +81,17 @@ component RefineValuesMember(x: Values<typeof Enum> | void) {
   }
   return null;
 }
+
+component RefineMaybeAliasMember(x: ?MaybeUnion) {
+  if (x != null) {
+    x as Union; // ok
+  }
+  return null;
+}
+
+component RefineMaybeValuesMember(x: ?Values<typeof Enum>) {
+  if (x) {
+    x as 'b'; // ok
+  }
+  return null;
+}

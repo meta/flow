@@ -26,3 +26,10 @@ declare const unionInUnion: Q | Id<P | null>;
 ({...unionInUnion}) as {p?: number}; // error: `q` is extra
 declare const intersectionInUnion: Q | (P & {r: boolean});
 ({...intersectionInUnion}) as {p?: number, r?: boolean}; // error: `q` is extra
+declare const maybeOfIntersection: ?(P & Q);
+({...maybeOfIntersection}).p as number; // error: no `p` when it is null
+declare const intersectionOfMaybe: ?P & Q;
+({...intersectionOfMaybe}).q as string; // ok
+type MaybeOf<T> = ?T;
+declare const unionWithMaybe: Q | MaybeOf<P>;
+({...unionWithMaybe}) as {p?: number}; // error: `q` is extra

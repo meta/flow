@@ -955,9 +955,9 @@ Cannot cast `idx(...)` to `number` because `null` [1] is incompatible with `numb
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   idx_replacement.js:55:29
-   55|   class Foo1 { a: ?Foo1; b: ?number; }
-                                   ^^^^^^^ [1]
+   idx_replacement.js:24:5
+   24| ): ?UnboxDeepRequired<T2>;
+           ^^^^^^^^^^^^^^^^^^^^^ [1]
    idx_replacement.js:59:34
    59|   idx(new Foo1(), o => o.a.b) as number; // error: result must be MaybeT
                                         ^^^^^^ [2]
@@ -972,9 +972,9 @@ Cannot cast `idx(...)` to `number` because `void` [1] is incompatible with `numb
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   idx_replacement.js:55:29
-   55|   class Foo1 { a: ?Foo1; b: ?number; }
-                                   ^^^^^^^ [1]
+   idx_replacement.js:24:5
+   24| ): ?UnboxDeepRequired<T2>;
+           ^^^^^^^^^^^^^^^^^^^^^ [1]
    idx_replacement.js:59:34
    59|   idx(new Foo1(), o => o.a.b) as number; // error: result must be MaybeT
                                         ^^^^^^ [2]

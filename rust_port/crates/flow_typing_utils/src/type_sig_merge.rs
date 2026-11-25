@@ -2142,7 +2142,7 @@ fn merge_annot<'cx>(
             let t = merge_impl(env, cx, file, t, false, false);
             let desc = type_util::desc_of_t(&t).cloned();
             let reason = reason::mk_annot_reason(desc, loc.dupe());
-            Type::new(type_::TypeInner::MaybeT(reason, t))
+            type_util::maybe_t(Some(cx.make_aloc_id(loc)), reason, t)
         }
         Annot::Union(inner) => {
             let AnnotUnion { loc, t0, t1, ts } = inner.as_ref();

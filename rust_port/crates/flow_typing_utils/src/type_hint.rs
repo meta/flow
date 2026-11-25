@@ -1666,7 +1666,7 @@ fn type_of_hint_decomposition<'cx>(
                 Ok(make_fun_t(reason, cx, vec![], None, t.dupe(), &None))
             }
             ConcrHintDecompositionInner::CompMaybeT => {
-                Ok(Type::new(TypeInner::MaybeT(reason.dupe(), t.dupe())))
+                Ok(type_util::maybe_t(None, reason.dupe(), t.dupe()))
             }
             ConcrHintDecompositionInner::DecompJsxProps => {
                 let t = t.dupe();

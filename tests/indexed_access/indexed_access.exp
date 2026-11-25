@@ -143,9 +143,9 @@ Cannot access `"b"` on `Y["a"]` because property `b` is missing in `null` [1]. [
                    ^^^
 
 References:
-   optional.js:20:6
-   20| 1 as Y["a"]["b"]?.["c"]; // Error - access `b` on undefined
-            ^^^^^^ [1]
+   optional.js:18:14
+   18| type Y = {a: ?{b: Z, opt_b: ?Z}};
+                    ^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------------ optional.js:20:13
@@ -157,9 +157,9 @@ Cannot access `"b"` on `Y["a"]` because property `b` is missing in `void` [1]. [
                    ^^^
 
 References:
-   optional.js:20:6
-   20| 1 as Y["a"]["b"]?.["c"]; // Error - access `b` on undefined
-            ^^^^^^ [1]
+   optional.js:18:14
+   18| type Y = {a: ?{b: Z, opt_b: ?Z}};
+                    ^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------------ optional.js:21:24
@@ -171,9 +171,9 @@ Cannot access `"c"` on `Y["a"]?.["opt_b"]` because property `c` is missing in `n
                               ^^^
 
 References:
-   optional.js:21:6
-   21| 1 as Y["a"]?.["opt_b"]["c"]; // Error - access `c` on undefined
-            ^^^^^^^^^^^^^^^^^ [1]
+   optional.js:18:29
+   18| type Y = {a: ?{b: Z, opt_b: ?Z}};
+                                   ^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------------ optional.js:21:24
@@ -185,9 +185,9 @@ Cannot access `"c"` on `Y["a"]?.["opt_b"]` because property `c` is missing in `v
                               ^^^
 
 References:
-   optional.js:21:6
-   21| 1 as Y["a"]?.["opt_b"]["c"]; // Error - access `c` on undefined
-            ^^^^^^^^^^^^^^^^^ [1]
+   optional.js:18:29
+   18| type Y = {a: ?{b: Z, opt_b: ?Z}};
+                                   ^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------------ optional.js:22:22

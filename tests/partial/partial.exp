@@ -153,86 +153,101 @@ References:
                             ^^^ [2]
 
 
-Error ---------------------------------------------------------------------------------------------------- test.js:30:20
+Error ---------------------------------------------------------------------------------------------------- test.js:32:33
+
+Cannot assign object literal to `q2` because in property `x`: `3` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   test.js:32:33
+   32| let q2 : PMaybeFooAndBar = {x : 3}; // error
+                                       ^ [1]
+
+References:
+   test.js:1:18
+    1| type Foo = { x : string, y : string };
+                        ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:34:20
 
 Cannot instantiate `Partial<number>` [1] because `number` [1] is not an object. [not-an-object]
 
-   30| type Err = Partial<number> // error
+   34| type Err = Partial<number> // error
                           ^^^^^^ [1]
 
 
-Error ---------------------------------------------------------------------------------------------------- test.js:45:32
+Error ---------------------------------------------------------------------------------------------------- test.js:49:32
 
 Cannot assign object literal to `d7` because in property `x`: `null` [1] is incompatible with `string` [2].
 [incompatible-type]
 
-   test.js:45:32
-   45| let d7 : Partial<IFace> = {x : null}; // error
+   test.js:49:32
+   49| let d7 : Partial<IFace> = {x : null}; // error
                                       ^^^^ [1]
 
 References:
-   test.js:34:9
-   34|     x : string,
+   test.js:38:9
+   38|     x : string,
                ^^^^^^ [2]
 
 
-Error ---------------------------------------------------------------------------------------------------- test.js:46:32
+Error ---------------------------------------------------------------------------------------------------- test.js:50:32
 
 Cannot assign object literal to `d8` because in property `x`: `3` [1] is incompatible with `string` [2].
 [incompatible-type]
 
-   test.js:46:32
-   46| let d8 : Partial<IFace> = {x : 3}; // error
+   test.js:50:32
+   50| let d8 : Partial<IFace> = {x : 3}; // error
                                       ^ [1]
 
 References:
-   test.js:34:9
-   34|     x : string,
+   test.js:38:9
+   38|     x : string,
                ^^^^^^ [2]
 
 
-Error ---------------------------------------------------------------------------------------------------- test.js:62:32
+Error ---------------------------------------------------------------------------------------------------- test.js:66:32
 
 Cannot assign object literal to `f9` because in property `x`: `null` [1] is incompatible with `string` [2].
 [incompatible-type]
 
-   test.js:62:32
-   62| let f9 : Partial<JFace> = {x : null}; // error
+   test.js:66:32
+   66| let f9 : Partial<JFace> = {x : null}; // error
                                       ^^^^ [1]
 
 References:
-   test.js:34:9
-   34|     x : string,
+   test.js:38:9
+   38|     x : string,
                ^^^^^^ [2]
 
 
-Error ---------------------------------------------------------------------------------------------------- test.js:63:33
+Error ---------------------------------------------------------------------------------------------------- test.js:67:33
 
 Cannot assign object literal to `f10` because in property `z`: `3` [1] is incompatible with `string` [2].
 [incompatible-type]
 
-   test.js:63:33
-   63| let f10 : Partial<JFace> = {z : 3}; // error
+   test.js:67:33
+   67| let f10 : Partial<JFace> = {z : 3}; // error
                                        ^ [1]
 
 References:
-   test.js:50:9
-   50|     z : string
+   test.js:54:9
+   54|     z : string
                ^^^^^^ [2]
 
 
-Error ---------------------------------------------------------------------------------------------------- test.js:64:33
+Error ---------------------------------------------------------------------------------------------------- test.js:68:33
 
 Cannot assign object literal to `f11` because in property `x`: `3` [1] is incompatible with `string` [2].
 [incompatible-type]
 
-   test.js:64:33
-   64| let f11 : Partial<JFace> = {x : 3}; // error
+   test.js:68:33
+   68| let f11 : Partial<JFace> = {x : 3}; // error
                                        ^ [1]
 
 References:
-   test.js:34:9
-   34|     x : string,
+   test.js:38:9
+   38|     x : string,
                ^^^^^^ [2]
 
 
@@ -253,4 +268,4 @@ Cannot get `x.w` because property `w` is not readable. [cannot-read]
 
 
 
-Found 18 errors
+Found 19 errors

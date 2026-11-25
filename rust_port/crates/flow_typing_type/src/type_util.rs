@@ -2444,7 +2444,7 @@ pub fn maybe_t(source_aloc: Option<ALocId>, reason: Reason, t: Type) -> Type {
 
 pub fn maybe(t: Type) -> Type {
     let reason = reason_of_t(&t).dupe();
-    Type::new(TypeInner::MaybeT(reason, t))
+    maybe_t(None, reason, t)
 }
 
 fn is_null_or_void(t: &Type) -> bool {

@@ -52,3 +52,4 @@ component MightRenderMenuItem() renders? MenuItem {
 }
 
 (<Bar />) as (renders MenuItem) | (renders BlueMenuItem) | null | void; // ERROR, `null` and `void` not tried
+(<Bar />) as ?(renders (MenuItem | BlueMenuItem)); // ERROR

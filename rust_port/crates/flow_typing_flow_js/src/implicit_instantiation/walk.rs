@@ -6242,7 +6242,7 @@ impl<'e> Walker<'e> {
                 _ => false,
             };
             if !says_nothing {
-                let maybe = Type::new(TypeInner::MaybeT(reason.dupe(), u.dupe()));
+                let maybe = type_util::maybe_t(None, reason.dupe(), u.dupe());
                 self.add_upper_at(cx, &name, &maybe, Priority::Soft);
             }
             return Ok(());

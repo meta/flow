@@ -1410,7 +1410,7 @@ fn convert_inner<'a>(
             let inner_t = t_ast.loc().1.dupe();
             let reason =
                 reason::mk_annot_reason(type_util::desc_of_t(&inner_t).cloned(), loc.dupe());
-            let rt = Type::new(type_::TypeInner::MaybeT(reason, inner_t));
+            let rt = type_util::maybe_t(Some(cx.make_aloc_id(loc)), reason, inner_t);
             ast::types::Type::new(TypeInner::Nullable {
                 loc: (loc.dupe(), rt),
                 inner: (ast::types::Nullable {

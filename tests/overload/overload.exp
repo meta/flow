@@ -225,26 +225,30 @@ References:
 Error ---------------------------------------------------------------------------------------------------- test3.js:12:1
 
 Cannot call `g` because: [incompatible-type]
- - Either `void` [1] is incompatible with `null` [2].
- - Or `null` [1] is incompatible with `void` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+ - Either `string` [1] is incompatible with `null` [2].
+ - Or `string` [1] is incompatible with `void` [3].
+ - Or `null` [4] is incompatible with `string` [5].
 
    test3.js:12:1
    12| g(x_g); // error: Flow does not split union args across overload branches
        ^
 
 References:
-   test3.js:11:20
+   test3.js:11:21
    11| declare const x_g: ?string;
-                          ^^^^^^^ [1]
+                           ^^^^^^ [1]
    test3.js:8:23
     8| declare function g(x: null): void;
                              ^^^^ [2]
    test3.js:9:23
     9| declare function g(x: void): void;
                              ^^^^ [3]
+   test3.js:11:20
+   11| declare const x_g: ?string;
+                          ^^^^^^^ [4]
+   test3.js:10:23
+   10| declare function g(x: string): void;
+                             ^^^^^^ [5]
 
 
 Error ---------------------------------------------------------------------------------------------------- test3.js:18:1

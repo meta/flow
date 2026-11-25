@@ -2,8 +2,8 @@
 Focus-check user2.js alone reports the error in dep_a.js:
 Error ---------------------------------------------------------------------------------------------------- dep_a.js:2:26
 
-Cannot use property `p` on `?{p: number}` [1] in an export position. Please provide an (alternative) annotation for
-property `p` [2]. [invalid-exported-annotation]
+Cannot use property `p` on `{p: number} & {q: string}` [1] in an export position. Please provide an (alternative)
+annotation for property `p` [2]. [invalid-exported-annotation]
 
    dep_a.js:2:26
    2| export type P = typeof o.p; // ERROR
@@ -11,8 +11,8 @@ property `p` [2]. [invalid-exported-annotation]
 
 References:
    dep_a.js:1:25
-   1| declare export const o: ?{p: number};
-                              ^^^^^^^^^^^^ [1]
+   1| declare export const o: {p: number} & {q: string};
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
 
@@ -23,8 +23,8 @@ Checked 2/5 files.
 Focus-check user1.js and user2.js in one batch reports the same error:
 Error ---------------------------------------------------------------------------------------------------- dep_a.js:2:26
 
-Cannot use property `p` on `?{p: number}` [1] in an export position. Please provide an (alternative) annotation for
-property `p` [2]. [invalid-exported-annotation]
+Cannot use property `p` on `{p: number} & {q: string}` [1] in an export position. Please provide an (alternative)
+annotation for property `p` [2]. [invalid-exported-annotation]
 
    dep_a.js:2:26
    2| export type P = typeof o.p; // ERROR
@@ -32,8 +32,8 @@ property `p` [2]. [invalid-exported-annotation]
 
 References:
    dep_a.js:1:25
-   1| declare export const o: ?{p: number};
-                              ^^^^^^^^^^^^ [1]
+   1| declare export const o: {p: number} & {q: string};
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
 

@@ -139,10 +139,18 @@ module.exports = (suite(({addFile, flowCmd}) => [
                 "reason": "cycle.js:1:13-25: \`Node\`"
               },
               "6": {
-                "kind": "Maybe",
-                "type": {
-                  "$ref": 10
-                }
+                "kind": "Union",
+                "members": [
+                  {
+                    "$ref": 10
+                  },
+                  {
+                    "$ref": 8
+                  },
+                  {
+                    "$ref": 9
+                  }
+                ]
               },
               "7": {
                 "kind": "ObjProto"

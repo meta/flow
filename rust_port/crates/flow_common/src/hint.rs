@@ -368,7 +368,7 @@ pub enum HintDecompositionInner<CX: ContextFamily, T, TArgs, Args, PropsAndChild
     /// Hint on call `f()` becomes hint on `f`. This is only meant to be used for the
     /// case of immediate function call `(function() {})()`.
     CompImmediateFuncCall,
-    /// Given t, returns MaybeT(t).
+    /// Given t, returns `?t`.
     /// This is helpful for constructing a hint for `a` in `a ?? b` when the hint on `a ?? b` is t.
     CompMaybeT,
     /// Type of C in `<C [props]/>` becomes hint on `props`

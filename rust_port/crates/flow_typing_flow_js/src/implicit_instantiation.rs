@@ -563,10 +563,7 @@ fn t_of_use_t<'cx>(
                 deref!(Destructor::NonMaybeType) => {
                     let result = merge_lower_or_upper_bounds(cx, env, seen, &tout_t)?;
                     bind_use_t_result(cx, result, |_, t: Type| {
-                        Ok(UseTResult::UpperT(Type::new(TypeInner::MaybeT(
-                            r.dupe(),
-                            t,
-                        ))))
+                        Ok(UseTResult::UpperT(type_util::maybe_t(None, r.dupe(), t)))
                     })
                 }
                 deref!(Destructor::NormalizeIntersection { .. })
