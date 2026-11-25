@@ -372,26 +372,40 @@ References:
                                    ^^^^^^ [2]
 
 
-Error ------------------------------------------------------------------------ declare_class_method_no_return.d.ts:33:12
+Error ------------------------------------------------------------------------ declare_class_method_no_return.d.ts:38:12
 
 Return type annotation is required for `declare class` methods. [unsupported-syntax]
 
-   33|   get foo(); // ERROR — getter without return type still errors (asymmetry preserved)
+   38|   get foo(); // ERROR — getter without return type still errors (asymmetry preserved)
                   
 
 
-Error ---------------------------------------------------------------------- declare_class_method_no_return_usage.js:8:9
+Error ---------------------------------------------------------------------- declare_class_method_no_return_usage.js:6:1
+
+Cannot cast `new C1()` to `empty` because `C1` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   declare_class_method_no_return_usage.js:6:1
+   6| new C1() as empty; // ERROR — C1 ~> empty
+      ^^^^^^^^ [1]
+
+References:
+   declare_class_method_no_return_usage.js:6:13
+   6| new C1() as empty; // ERROR — C1 ~> empty
+                  ^^^^^ [2]
+
+
+Error --------------------------------------------------------------------- declare_class_method_no_return_usage.js:10:9
 
 Cannot assign `'hello'` to `s.foo` because `"hello"` [1] is incompatible with `number` [2]. [incompatible-type]
 
-   declare_class_method_no_return_usage.js:8:9
-   8| s.foo = 'hello'; // ERROR — string ~> number setter parameter
-              ^^^^^^^ [1]
+   declare_class_method_no_return_usage.js:10:9
+   10| s.foo = 'hello'; // ERROR — string ~> number setter parameter
+               ^^^^^^^ [1]
 
 References:
-   declare_class_method_no_return.d.ts:8:14
-   8|   set foo(v: number);
-                   ^^^^^^ [2]
+   declare_class_method_no_return.d.ts:13:14
+   13|   set foo(v: number);
+                    ^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------- declare_type_only_export_usage.js:3:1
@@ -2031,4 +2045,4 @@ References:
 
 
 
-Found 131 errors
+Found 132 errors

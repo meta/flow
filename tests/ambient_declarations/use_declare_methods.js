@@ -41,3 +41,7 @@ destInstance.objectParam({a: 1});
 destInstance.arrayParam([1]);
 destInstance.optionalObjectParam(); // OK: optional
 destInstance.optionalArrayParam(); // OK: optional
+
+// `new` of a declared constructor gives the instance
+withCtor as empty; // ERROR: WithConstructor ~> empty
+overCtorNum as empty; // ERROR: WithOverloadedConstructor ~> empty

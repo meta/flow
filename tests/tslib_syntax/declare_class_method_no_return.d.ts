@@ -3,6 +3,11 @@ declare class M1 {
   foo(x: number);
 }
 
+// Constructor without return type: `new` gives the instance
+declare class C1 {
+  constructor(x?: number);
+}
+
 // Setter without return type
 declare class S1 {
   set foo(v: number);
@@ -33,4 +38,4 @@ declare class S6 {
   get foo(); // ERROR — getter without return type still errors (asymmetry preserved)
 }
 
-export {M1, S1, S2, S3, S4, S5, S6};
+export {M1, C1, S1, S2, S3, S4, S5, S6};

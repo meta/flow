@@ -180,7 +180,7 @@ References:
 
 Error ------------------------------------------------------------------------------------- use_declare_methods.js:26:21
 
-Cannot call `WithConstructor` because `(x: string) => any` [1] requires another argument. [incompatible-type]
+Cannot call `WithConstructor` because `(x: string) => void` [1] requires another argument. [incompatible-type]
 
    use_declare_methods.js:26:21
    26| const badCtor = new WithConstructor(); // ERROR: missing argument
@@ -195,8 +195,8 @@ References:
 Error ------------------------------------------------------------------------------------- use_declare_methods.js:31:25
 
 Cannot call `WithOverloadedConstructor` because: [incompatible-type]
- - Either `(x: string) => any` [1] requires another argument from new `WithOverloadedConstructor` [2].
- - Or `(x: number) => any` [3] requires another argument from new `WithOverloadedConstructor` [2].
+ - Either `(x: string) => void` [1] requires another argument from new `WithOverloadedConstructor` [2].
+ - Or `(x: number) => void` [3] requires another argument from new `WithOverloadedConstructor` [2].
 
    use_declare_methods.js:31:25
    31| const badOverCtor = new WithOverloadedConstructor(); // ERROR: missing argument (both overloads require one)
@@ -227,6 +227,41 @@ References:
    declare_methods.js.flow:20:25
    20|   method(...args: Array<number>): void;
                                ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------- use_declare_methods.js:46:1
+
+Cannot cast `withCtor` to `empty` because `WithConstructor` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   use_declare_methods.js:46:1
+   46| withCtor as empty; // ERROR: WithConstructor ~> empty
+       ^^^^^^^^
+
+References:
+   use_declare_methods.js:25:18
+   25| const withCtor = new WithConstructor("hello");
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   use_declare_methods.js:46:13
+   46| withCtor as empty; // ERROR: WithConstructor ~> empty
+                   ^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------- use_declare_methods.js:47:1
+
+Cannot cast `overCtorNum` to `empty` because `WithOverloadedConstructor` [1] is incompatible with `empty` [2].
+[incompatible-type]
+
+   use_declare_methods.js:47:1
+   47| overCtorNum as empty; // ERROR: WithOverloadedConstructor ~> empty
+       ^^^^^^^^^^^
+
+References:
+   use_declare_methods.js:30:21
+   30| const overCtorNum = new WithOverloadedConstructor(42);
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   use_declare_methods.js:47:16
+   47| overCtorNum as empty; // ERROR: WithOverloadedConstructor ~> empty
+                      ^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------- use_export_namespace.js:4:1
@@ -929,4 +964,4 @@ References:
 
 
 
-Found 57 errors
+Found 59 errors

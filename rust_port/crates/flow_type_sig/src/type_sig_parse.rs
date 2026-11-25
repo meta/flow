@@ -8356,7 +8356,8 @@ fn return_annot<'arena, 'ast>(
             let loc = tbls.push_loc(loc.dupe());
             // Methods in `.ts` / `.d.ts` files default to implicit `any` to match
             // TypeScript's ambient-declaration semantics; everywhere else (and all
-            // non-method callers) preserve the legacy Void default. The typing layer
+            // non-method callers, including constructors, whose `new` gives the instance)
+            // preserve the legacy Void default. The typing layer
             // in `type_annotation.rs` applies the same gate so the cross-module
             // signature stays consistent with in-file inference.
             if is_method && opts.is_ts_file {
@@ -9553,8 +9554,15 @@ fn declare_class_props<'arena, 'ast>(
                         } else {
                             let fn_loc = tbls.push_loc(fn_loc.dupe());
                             let id_loc = tbls.push_loc(id_loc);
-                            let def =
-                                function_type(true, opts, scope, scopes, tbls, xs, inner.as_ref());
+                            let def = function_type(
+                                name.as_str() != "constructor",
+                                opts,
+                                scope,
+                                scopes,
+                                tbls,
+                                xs,
+                                inner.as_ref(),
+                            );
                             acc.append_method(p.static_, name.dupe(), id_loc, fn_loc, def);
                             mark_abstract(is_abstract, &name, acc);
                         }
@@ -13054,7 +13062,7 @@ fn class_def<'arena: 'ast, 'ast>(
                                 let id_loc_node = tbls.push_loc(name_loc);
                                 let fn_loc_node = tbls.push_loc(annot_loc.dupe());
                                 let def = function_type(
-                                    true,
+                                    *kind == class::MethodKind::Method,
                                     opts,
                                     scope,
                                     scopes,
