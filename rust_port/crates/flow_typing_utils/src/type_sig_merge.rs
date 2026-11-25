@@ -16,6 +16,8 @@ use dupe::Dupe;
 use dupe::IterDupedExt;
 use dupe::OptionDupedExt;
 use flow_aloc::ALoc;
+use flow_aloc::ALocFuzzy;
+use flow_aloc::ALocFuzzyMap;
 use flow_aloc::ALocTable;
 use flow_aloc::aloc_representation_do_not_use;
 use flow_common::alpha_rename;
@@ -6598,6 +6600,27 @@ pub fn merge_cjs_export_t<'cx>(
         ),
         _ => (None, merge(FlowOrdMap::new(), cx, file, packed)),
     }
+}
+
+/// The qualified names (`React.MixedElement`) of the members of library namespaces, keyed by
+/// definition. The members of `globalThis` are the globals, which keep their own names.
+pub fn builtin_namespace_members(
+    locs: &Table<Loc>,
+    builtins: &packed_type_sig::Builtins<Loc>,
+) -> ALocFuzzyMap<FlowSmolStr> {
+    let namespaces = builtins.local_defs.iter().filter_map(|def| match def {
+        Def::NamespaceBinding(ns) if ns.name != "globalThis" => Some(ns),
+        _ => None,
+    });
+    namespaces
+        .flat_map(|ns| {
+            let members = ns.values.iter().chain(&ns.types);
+            members.map(move |(name, (loc, _))| {
+                let name = FlowSmolStr::from(format!("{}.{name}", ns.name));
+                (ALocFuzzy(ALoc::of_loc(locs.get(*loc).dupe())), name)
+            })
+        })
+        .collect()
 }
 
 pub fn merge_builtins(

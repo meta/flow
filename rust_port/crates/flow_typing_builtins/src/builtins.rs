@@ -11,6 +11,7 @@ use std::rc::Rc;
 use dupe::Dupe;
 use dupe::IterDupedExt;
 use flow_aloc::ALoc;
+use flow_aloc::ALocFuzzyMap;
 use flow_common::flow_import_specifier::Userland;
 use flow_common::reason::Reason;
 use flow_data_structure_wrapper::ord_map::FlowOrdMap;
@@ -37,6 +38,8 @@ pub struct Builtins<CX: ContextFamily> {
     original_global_umd_values: FlowOrdMap<FlowSmolStr, LazyVal<CX>>,
     read_value: ReadBuiltin<CX, LazyVal<CX>, (ALoc, Type)>,
     read_module: ReadBuiltin<CX, LazyModule<CX>, (Reason, ModuleType)>,
+    /// The qualified names of the members of library namespaces, keyed by their definitions.
+    pub namespace_members: Rc<ALocFuzzyMap<FlowSmolStr>>,
 }
 
 impl<CX: ContextFamily> std::fmt::Debug for Builtins<CX> {
@@ -125,6 +128,7 @@ impl<CX: ContextFamily> Builtins<CX> {
             types,
             modules,
             FlowOrdMap::new(),
+            Rc::default(),
         )
     }
 
@@ -137,6 +141,7 @@ impl<CX: ContextFamily> Builtins<CX> {
         types: FlowOrdMap<FlowSmolStr, LazyVal<CX>>,
         modules: FlowOrdMap<FlowSmolStr, LazyModule<CX>>,
         umd_values: FlowOrdMap<FlowSmolStr, LazyVal<CX>>,
+        namespace_members: Rc<ALocFuzzyMap<FlowSmolStr>>,
     ) -> Self {
         Builtins {
             original_global_values: values,
@@ -145,6 +150,7 @@ impl<CX: ContextFamily> Builtins<CX> {
             original_global_umd_values: umd_values,
             read_value,
             read_module,
+            namespace_members,
         }
     }
 

@@ -455,7 +455,7 @@ Cannot resolve name `ns_t`. [cannot-resolve-name]
 
 Error ----------------------------------------------------------------------------------------------- libdef_test.js:4:1
 
-Cannot cast `1` to `T1` because `1` [1] is incompatible with `T1` [2]. [incompatible-type]
+Cannot cast `1` to `ns_t.T1` because `1` [1] is incompatible with `ns_t.T1` [2]. [incompatible-type]
 
    libdef_test.js:4:1
    4| 1 as ns_t.T1; // error: number ~> string
@@ -505,8 +505,8 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- libdef_test.js:9:13
 
-Cannot cast object literal to `Box` because in property `b`: `""` [1] is incompatible with `number` [2].
-[incompatible-type]
+Cannot cast object literal to `ns_decl_merge_interface.Box` because in property `b`: `""` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    libdef_test.js:9:13
     9| ({a: "", b: ""}) as ns_decl_merge_interface.Box; // error: string ~> number
@@ -574,7 +574,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- libdef_test.js:22:1
 
-Cannot cast `1` to `A` because `1` [1] is incompatible with `A` [2]. [incompatible-type]
+Cannot cast `1` to `Inner.A` because `1` [1] is incompatible with `Inner.A` [2]. [incompatible-type]
 
    libdef_test.js:22:1
    22| 1 as ns_decl_merge_nested.Inner.A; // error: number ~> string

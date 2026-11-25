@@ -49,8 +49,8 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- strict.js:9:5
 
-Cannot call `foo` with `ref` bound to `a` because `CommonInstance` [1] is incompatible with `Component<any, any>` [2].
-[incompatible-type]
+Cannot call `foo` with `ref` bound to `a` because `CommonInstance` [1] is incompatible with
+`React.Component<any, any>` [2]. [incompatible-type]
 
    strict.js:9:5
    9| foo(ref);

@@ -689,23 +689,23 @@ Flags: --strip-root
 
 **@see**  https://react.dev/reference/react/Children
 (property) Children: {
-  count(children: ChildrenArray<any>): number,
+  count(children: React.ChildrenArray<any>): number,
   forEach<T, This>(
-    children: ChildrenArray<T>,
+    children: React.ChildrenArray<T>,
     fn: (this: This, child: T, index: number) => unknown,
     thisArg: This
   ): void,
   map<T, U, This>(
-    children: ChildrenArray<T>,
+    children: React.ChildrenArray<T>,
     fn: (this: This, child: NonNullable<T>, index: number) => U,
     thisArg: This
   ): Array<NonNullable<U>>,
-  only<T>(children: ChildrenArray<T>): NonNullable<T>,
-  toArray<T>(children: ChildrenArray<T>): Array<NonNullable<T>>,
+  only<T>(children: React.ChildrenArray<T>): NonNullable<T>,
+  toArray<T>(children: React.ChildrenArray<T>): Array<NonNullable<T>>,
   ...
 }
 
-'ChildrenArray' defined at (lib) react.js:1666:9
+'React.ChildrenArray' defined at (lib) react.js:1666:9
 
 react_api.js:3:7,3:14
 
@@ -751,9 +751,9 @@ Flags: --strip-root
 (property) createContext: <T>(
   defaultValue: T,
   calculateChangedBits: ?(a: T, b: T) => number
-) => Context<T>
+) => React.Context<T>
 
-'Context' defined at (lib) react.js:1662:9
+'React.Context' defined at (lib) react.js:1662:9
 
 react_api.js:11:7,11:19
 
@@ -798,12 +798,12 @@ Flags: --strip-root
   Config extends {...},
   Instance,
   Renders extends React$Node = React$Node
->(render: (props: Config, ref: RefSetter<Instance>) => Renders) => component(
-  ...{...Config, readonly ref?: RefSetter<Instance>}
+>(render: (props: Config, ref: React.RefSetter<Instance>) => Renders) => component(
+  ...{...Config, readonly ref?: React.RefSetter<Instance>}
 ) renders Renders
 
 'React$Node' defined at (lib) react.js:15:13
-'RefSetter' defined at (lib) react.js:1659:9
+'React.RefSetter' defined at (lib) react.js:1659:9
 
 react_api.js:17:7,17:16
 
@@ -817,10 +817,10 @@ Flags: --strip-root
 **@see**  https://react.dev/reference/react/useState
 (property) useState: hook <S>(initialState: (() => S) | S) => [
   S,
-  ReactSetStateFunction<S>
+  React.ReactSetStateFunction<S>
 ]
 
-'ReactSetStateFunction' defined at (lib) react.js:1667:9
+'React.ReactSetStateFunction' defined at (lib) react.js:1667:9
 
 react_api.js:19:7,19:14
 
@@ -835,20 +835,20 @@ Flags: --strip-root
 (property) useReducer:
   & (hook <S, A>(reducer: (state: S, action: A) => S, initialState: S) => [
       S,
-      Dispatch<A>
+      React.Dispatch<A>
     ])
   & (hook <S, A>(
       reducer: (state: S, action: A) => S,
       initialState: S,
       init: void
-    ) => [S, Dispatch<A>])
+    ) => [S, React.Dispatch<A>])
   & (hook <S, A, I>(
       reducer: (state: S, action: A) => S,
       initialArg: I,
       init: (initialArg: I) => S
-    ) => [S, Dispatch<A>])
+    ) => [S, React.Dispatch<A>])
 
-'Dispatch' defined at (lib) react.js:1810:9
+'React.Dispatch' defined at (lib) react.js:1810:9
 
 react_api.js:21:7,21:16
 

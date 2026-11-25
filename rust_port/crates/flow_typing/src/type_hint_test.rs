@@ -1198,7 +1198,7 @@ mod tests {
     #[test]
     fn jsx_props_of_abstract_component() {
         mk_eval_hint_test(
-            "{readonly bar: string, readonly foo: number, readonly ref: RefSetter<unknown>}",
+            "{readonly bar: string, readonly foo: number, readonly ref: React.RefSetter<unknown>}",
             "component(ref: React.RefSetter<mixed>, bar: string, foo: number) ",
             vec![DecompJsxProps],
         );

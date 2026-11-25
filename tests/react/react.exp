@@ -2174,9 +2174,9 @@ References:
 Error ------------------------------------------------------------------------------------------- useReducer_hook.js:4:9
 
 Cannot call `React.useReducer` because: [incompatible-type]
- - Either `(reducer: (state: void, action: any) => void, initialState: void) => [void, Dispatch<any>]` [1] requires
-   another argument from call of method `useReducer` [2].
- - Or `(reducer: (state: void, action: any) => void, initialState: void, init: void) => [void, Dispatch<any...` [3]
+ - Either `(reducer: (state: void, action: any) => void, initialState: void) => [void, React.Dispatch<any>]` [1]
+   requires another argument from call of method `useReducer` [2].
+ - Or `(reducer: (state: void, action: any) => void, initialState: void, init: void) => [void, React.Dispat...` [3]
    requires another argument from call of method `useReducer` [2].
  - Or `(reducer: (state: any, action: any) => any, initialArg: void, init: (initialArg: void) => any) => [a...` [4]
    requires another argument from call of method `useReducer` [2].

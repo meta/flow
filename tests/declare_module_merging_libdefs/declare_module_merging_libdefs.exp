@@ -148,7 +148,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:52:1
 
-Cannot cast `1` to `SecondType` because `1` [1] is incompatible with `SecondType` [2]. [incompatible-type]
+Cannot cast `1` to `TypesThenValues.SecondType` because `1` [1] is incompatible with `TypesThenValues.SecondType` [2].
+[incompatible-type]
 
    test.js:52:1
    52| 1 as TypesThenValues.SecondType; // error: number ~> string
@@ -162,7 +163,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:54:1
 
-Cannot cast empty string to `FirstType` because `""` [1] is incompatible with `FirstType` [2]. [incompatible-type]
+Cannot cast empty string to `ValuesThenTypes.FirstType` because `""` [1] is incompatible with
+`ValuesThenTypes.FirstType` [2]. [incompatible-type]
 
    test.js:54:1
    54| '' as ValuesThenTypes.FirstType; // error: string ~> number
@@ -176,7 +178,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:59:1
 
-Cannot cast `1` to `FromSecond` because `1` [1] is incompatible with `SecondType` [2]. [incompatible-type]
+Cannot cast `1` to `Nested.FromSecond` because `1` [1] is incompatible with `Nested.SecondType` [2]. [incompatible-type]
 
    test.js:59:1
    59| 1 as Nested.FromSecond; // error: number ~> string
@@ -190,7 +192,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:60:1
 
-Cannot cast empty string to `FromFirst` because `""` [1] is incompatible with `FirstType` [2]. [incompatible-type]
+Cannot cast empty string to `Nested.FromFirst` because `""` [1] is incompatible with `Nested.FirstType` [2].
+[incompatible-type]
 
    test.js:60:1
    60| '' as Nested.FromFirst; // error: string ~> number

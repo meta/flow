@@ -2357,6 +2357,10 @@ pub fn mk_builtins(
             let types: FlowOrdMap<_, _> = types.into_iter().collect();
             let modules: FlowOrdMap<_, _> = modules.into_iter().collect();
             let umd_values: FlowOrdMap<_, _> = umd_values.into_iter().collect();
+            let namespace_members = Rc::new(type_sig_merge::builtin_namespace_members(
+                &builtins.builtin_locs,
+                &builtins.builtins,
+            ));
             let source_cx = {
                 let values = values.dupe();
                 let types = types.dupe();
@@ -2407,6 +2411,7 @@ pub fn mk_builtins(
                     types.dupe(),
                     modules.dupe(),
                     umd_values.dupe(),
+                    namespace_members.dupe(),
                 )
             })
         }

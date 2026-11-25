@@ -178,7 +178,7 @@ References:
 
 Error ------------------------------------------------------------------------------- libdef_namespace_type_reads.js:2:1
 
-Cannot cast `1` to `Alias` because `1` [1] is incompatible with `Shared` [2]. [incompatible-type]
+Cannot cast `1` to `LibMulti.Alias` because `1` [1] is incompatible with `LibMulti.Shared` [2]. [incompatible-type]
 
    libdef_namespace_type_reads.js:2:1
    2| 1 as LibMulti.Alias; // err: number ~> string
@@ -192,7 +192,8 @@ References:
 
 Error ------------------------------------------------------------------------------- libdef_namespace_type_reads.js:5:1
 
-Cannot cast empty string to `Alias` because `""` [1] is incompatible with `Shared` [2]. [incompatible-type]
+Cannot cast empty string to `LibOther.Alias` because `""` [1] is incompatible with `LibOther.Shared` [2].
+[incompatible-type]
 
    libdef_namespace_type_reads.js:5:1
    5| '' as LibOther.Alias; // err: string ~> number
@@ -206,7 +207,8 @@ References:
 
 Error ------------------------------------------------------------------------------- libdef_namespace_type_reads.js:8:1
 
-Cannot cast `1` to `Alias` because `1` [1] is incompatible with `Shared` [2]. [incompatible-type]
+Cannot cast `1` to `LibSameBody.Alias` because `1` [1] is incompatible with `LibSameBody.Shared` [2].
+[incompatible-type]
 
    libdef_namespace_type_reads.js:8:1
    8| 1 as LibSameBody.Alias; // err: number ~> boolean
@@ -220,7 +222,7 @@ References:
 
 Error ------------------------------------------------------------------------------ libdef_namespace_type_reads.js:11:1
 
-Cannot cast `1` to `Alias` because `1` [1] is incompatible with `Later` [2]. [incompatible-type]
+Cannot cast `1` to `LibForward.Alias` because `1` [1] is incompatible with `LibForward.Later` [2]. [incompatible-type]
 
    libdef_namespace_type_reads.js:11:1
    11| 1 as LibForward.Alias; // err: number ~> string
@@ -234,7 +236,7 @@ References:
 
 Error ------------------------------------------------------------------------------ libdef_namespace_type_reads.js:14:1
 
-Cannot cast `LibOrder.Inner.Leaf.nearest` to `"outer"` because `Shared` [1] is incompatible with `"outer"` [2].
+Cannot cast `LibOrder.Inner.Leaf.nearest` to `"outer"` because `Inner.Shared` [1] is incompatible with `"outer"` [2].
 [incompatible-type]
 
    libdef_namespace_type_reads.js:14:1
@@ -270,7 +272,7 @@ References:
 
 Error ------------------------------------------------------------------------------ libdef_namespace_type_reads.js:20:1
 
-Cannot cast `LibNestedMerge.Inner.value` to `"other"` because `Shared` [1] is incompatible with `"other"` [2].
+Cannot cast `LibNestedMerge.Inner.value` to `"other"` because `Inner.Shared` [1] is incompatible with `"other"` [2].
 [incompatible-type]
 
    libdef_namespace_type_reads.js:20:1
@@ -450,7 +452,8 @@ References:
 
 Error ---------------------------------------------------------------------------------- merged_member_references.js:9:1
 
-Cannot cast `'c'` to `Kind` because property `c` is missing in `Options` [1]. [prop-missing]
+Cannot cast `'c'` to `LibMergedMember.Kind` because property `c` is missing in `LibMergedMember.Options` [1].
+[prop-missing]
 
    merged_member_references.js:9:1
    9| 'c' as LibMergedMember.Kind; // err: not a key of the merged `Options`

@@ -1227,8 +1227,8 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- react.js:14:3
 
-Cannot cast `b` to `Component<P>` because in type argument `Props` [1]: `{readonly a: number, ...}` [2] is incompatible
-with `empty` [3]. [incompatible-type]
+Cannot cast `b` to `React.Component<P>` because in type argument `Props` [1]: `{readonly a: number, ...}` [2] is
+incompatible with `empty` [3]. [incompatible-type]
 
    react.js:14:3
      14|   b as React.Component<P>; // nope

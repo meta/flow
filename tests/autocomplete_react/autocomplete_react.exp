@@ -174,23 +174,23 @@ Flags: --pretty
     },
     {
       "name":"AllHTMLAttributes",
-      "type":"type AllHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type AllHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"AnchorHTMLAttributes",
-      "type":"type AnchorHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type AnchorHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"AnimationEvent",
-      "type":"type AnimationEvent<T = Element> = SyntheticEvent<T>"
+      "type":"type AnimationEvent<T = Element> = React.SyntheticEvent<T>"
     },
     {
       "name":"AnimationEventHandler",
-      "type":"type AnimationEventHandler<T = Element> = EventHandler<AnimationEvent<T>>"
+      "type":"type AnimationEventHandler<T = Element> = React.EventHandler<React.AnimationEvent<T>>"
     },
     {
       "name":"AreaHTMLAttributes",
-      "type":"type AreaHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type AreaHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"AriaAttributes",
@@ -200,7 +200,7 @@ Flags: --pretty
     {"name":"Attributes","type":"type Attributes = {key?: React$Key, ...}"},
     {
       "name":"AudioHTMLAttributes",
-      "type":"type AudioHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type AudioHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {"name":"AutoFill","type":"type AutoFill = string"},
     {"name":"AutoFillAddressKind","type":"type AutoFillAddressKind = string"},
@@ -216,7 +216,7 @@ Flags: --pretty
     {"name":"AutoFillSection","type":"type AutoFillSection = string"},
     {
       "name":"BaseHTMLAttributes",
-      "type":"type BaseHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type BaseHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"BaseSyntheticEvent",
@@ -224,48 +224,51 @@ Flags: --pretty
     },
     {
       "name":"BlockquoteHTMLAttributes",
-      "type":"type BlockquoteHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type BlockquoteHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"ButtonHTMLAttributes",
-      "type":"type ButtonHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type ButtonHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"CSSProperties",
-      "type":"type CSSProperties = Properties<string | number>"
+      "type":"type CSSProperties = React$CSS.Properties<string | number>"
     },
     {
       "name":"CanvasHTMLAttributes",
-      "type":"type CanvasHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type CanvasHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"ChangeEvent",
-      "type":"type ChangeEvent<CurrentTarget = Element, Target = Element> = SyntheticEvent<CurrentTarget>"
+      "type":"type ChangeEvent<CurrentTarget = Element, Target = Element> = React.SyntheticEvent<CurrentTarget>"
     },
     {
       "name":"ChangeEventHandler",
-      "type":"type ChangeEventHandler<CurrentTarget = Element, Target = Element> = EventHandler<ChangeEvent<CurrentTarget, Target>>"
+      "type":"type ChangeEventHandler<CurrentTarget = Element, Target = Element> = React.EventHandler<React.ChangeEvent<CurrentTarget, Target>>"
     },
     {
       "name":"ChildrenArray",
-      "type":"type ChildrenArray<out T> = ReadonlyArray<ChildrenArray<T>> | T"
+      "type":"type ChildrenArray<out T> = ReadonlyArray<React.ChildrenArray<T>> | T"
     },
-    {"name":"ClassAttributes","type":"type ClassAttributes<T> = RefAttributes<T>"},
+    {
+      "name":"ClassAttributes",
+      "type":"type ClassAttributes<T> = React.RefAttributes<T>"
+    },
     {
       "name":"ClipboardEvent",
-      "type":"type ClipboardEvent<T = Element> = SyntheticEvent<T>"
+      "type":"type ClipboardEvent<T = Element> = React.SyntheticEvent<T>"
     },
     {
       "name":"ClipboardEventHandler",
-      "type":"type ClipboardEventHandler<T = Element> = EventHandler<ClipboardEvent<T>>"
+      "type":"type ClipboardEventHandler<T = Element> = React.EventHandler<React.ClipboardEvent<T>>"
     },
     {
       "name":"ColHTMLAttributes",
-      "type":"type ColHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type ColHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"ColgroupHTMLAttributes",
-      "type":"type ColgroupHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type ColgroupHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"ComponentClass",
@@ -277,11 +280,11 @@ Flags: --pretty
     },
     {
       "name":"ComponentPropsWithRef",
-      "type":"type ComponentPropsWithRef<T extends React$ElementType> = ComponentProps<T>"
+      "type":"type ComponentPropsWithRef<T extends React$ElementType> = React.ComponentProps<T>"
     },
     {
       "name":"ComponentPropsWithoutRef",
-      "type":"type ComponentPropsWithoutRef<T extends React$ElementType> = Omit<ComponentProps<T>, \"ref\">"
+      "type":"type ComponentPropsWithoutRef<T extends React$ElementType> = Omit<React.ComponentProps<T>, \"ref\">"
     },
     {
       "name":"ComponentType",
@@ -289,11 +292,11 @@ Flags: --pretty
     },
     {
       "name":"CompositionEvent",
-      "type":"type CompositionEvent<T = Element> = SyntheticEvent<T>"
+      "type":"type CompositionEvent<T = Element> = React.SyntheticEvent<T>"
     },
     {
       "name":"CompositionEventHandler",
-      "type":"type CompositionEventHandler<T = Element> = EventHandler<CompositionEvent<T>>"
+      "type":"type CompositionEventHandler<T = Element> = React.EventHandler<React.CompositionEvent<T>>"
     },
     {
       "name":"Consumer",
@@ -318,31 +321,31 @@ Flags: --pretty
     },
     {
       "name":"DataHTMLAttributes",
-      "type":"type DataHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type DataHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"Defaultize",
-      "type":"type Defaultize<P extends interface {}, D extends interface {}> = P extends any ? string extends keyof P ? P : P extends ExactObjectType ? {...Pick<P, Exclude<keyof P, keyof D>>, ...InexactPartial<Pick<P, Extract<keyof P, keyof D>>>, ...InexactPartial<Pick<D, Exclude<keyof D, keyof P>>>} : {...Pick<P, Exclude<keyof P, keyof D>>, ...InexactPartial<Pick<P, Extract<keyof P, keyof D>>>, ...InexactPartial<Pick<D, Exclude<keyof D, keyof P>>>, ...} : empty"
+      "type":"type Defaultize<P extends interface {}, D extends interface {}> = P extends any ? string extends keyof P ? P : P extends ExactObjectType ? {...Pick<P, Exclude<keyof P, keyof D>>, ...React.InexactPartial<Pick<P, Extract<keyof P, keyof D>>>, ...React.InexactPartial<Pick<D, Exclude<keyof D, keyof P>>>} : {...Pick<P, Exclude<keyof P, keyof D>>, ...React.InexactPartial<Pick<P, Extract<keyof P, keyof D>>>, ...React.InexactPartial<Pick<D, Exclude<keyof D, keyof P>>>, ...} : empty"
     },
     {
       "name":"DelHTMLAttributes",
-      "type":"type DelHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type DelHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {"name":"DependencyList","type":"type DependencyList = ReadonlyArray<unknown>"},
     {"name":"DetailedHTMLProps","type":"type DetailedHTMLProps<E, T> = E"},
     {
       "name":"DetailsHTMLAttributes",
-      "type":"type DetailsHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type DetailsHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"DialogHTMLAttributes",
-      "type":"type DialogHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type DialogHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {"name":"Dispatch","type":"type Dispatch<in A> = (action: A) => void"},
-    {"name":"DragEvent","type":"type DragEvent<T = Element> = MouseEvent<T>"},
+    {"name":"DragEvent","type":"type DragEvent<T = Element> = React.MouseEvent<T>"},
     {
       "name":"DragEventHandler",
-      "type":"type DragEventHandler<T = Element> = EventHandler<DragEvent<T>>"
+      "type":"type DragEventHandler<T = Element> = React.EventHandler<React.DragEvent<T>>"
     },
     {
       "name":"EffectCallback",
@@ -350,12 +353,12 @@ Flags: --pretty
     },
     {
       "name":"ElementRef",
-      "type":"type ElementRef<C extends string | component(...empty)> = C extends empty ? any : C extends infer S extends string ? \"ref\" extends keyof React$JSXIntrinsicElements[S] ? React$JSXIntrinsicElements[S] extends {readonly ref?: RefSetter<infer I>, ...} ? NonNullable<I> : unknown : void : C extends component(...infer Props extends {...}) ? \"ref\" extends keyof Props ? Props extends {readonly ref?: RefSetter<infer I>, ...} ? I : unknown : void : empty"
+      "type":"type ElementRef<C extends string | component(...empty)> = C extends empty ? any : C extends infer S extends string ? \"ref\" extends keyof React$JSXIntrinsicElements[S] ? React$JSXIntrinsicElements[S] extends {readonly ref?: React.RefSetter<infer I>, ...} ? NonNullable<I> : unknown : void : C extends component(...infer Props extends {...}) ? \"ref\" extends keyof Props ? Props extends {readonly ref?: React.RefSetter<infer I>, ...} ? I : unknown : void : empty"
     },
     {"name":"ElementType","type":"type ElementType = string | component(...empty)"},
     {
       "name":"EmbedHTMLAttributes",
-      "type":"type EmbedHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type EmbedHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"ErrorInfo",
@@ -369,24 +372,27 @@ Flags: --pretty
     {"name":"FC","type":"type FC<in P extends {...} = {...}> = component(...P)"},
     {
       "name":"FieldsetHTMLAttributes",
-      "type":"type FieldsetHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type FieldsetHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"FocusEvent",
-      "type":"type FocusEvent<Target = Element, RelatedTarget = Element> = SyntheticEvent<Target>"
+      "type":"type FocusEvent<Target = Element, RelatedTarget = Element> = React.SyntheticEvent<Target>"
     },
     {
       "name":"FocusEventHandler",
-      "type":"type FocusEventHandler<T = Element> = EventHandler<FocusEvent<T>>"
+      "type":"type FocusEventHandler<T = Element> = React.EventHandler<React.FocusEvent<T>>"
     },
-    {"name":"FormEvent","type":"type FormEvent<T = Element> = SyntheticEvent<T>"},
+    {
+      "name":"FormEvent",
+      "type":"type FormEvent<T = Element> = React.SyntheticEvent<T>"
+    },
     {
       "name":"FormEventHandler",
-      "type":"type FormEventHandler<T = Element> = EventHandler<FormEvent<T>>"
+      "type":"type FormEventHandler<T = Element> = React.EventHandler<React.FormEvent<T>>"
     },
     {
       "name":"FormHTMLAttributes",
-      "type":"type FormHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type FormHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"ForwardRefExoticComponent",
@@ -394,7 +400,7 @@ Flags: --pretty
     },
     {
       "name":"ForwardRefRenderFunction",
-      "type":"type ForwardRefRenderFunction<out T, in P = {...}> = (props: P, ref: RefSetter<T>) => React$Node"
+      "type":"type ForwardRefRenderFunction<out T, in P = {...}> = (props: P, ref: React.RefSetter<T>) => React$Node"
     },
     {"name":"FragmentInstance","type":"interface FragmentInstance"},
     {
@@ -419,35 +425,38 @@ Flags: --pretty
       "type":"type HTMLInputAutoCompleteAttribute = string"
     },
     {"name":"HTMLInputTypeAttribute","type":"type HTMLInputTypeAttribute = string"},
-    {"name":"HTMLProps","type":"type HTMLProps<T> = AllHTMLAttributes<T>"},
+    {"name":"HTMLProps","type":"type HTMLProps<T> = React.AllHTMLAttributes<T>"},
     {
       "name":"HtmlHTMLAttributes",
-      "type":"type HtmlHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type HtmlHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"IframeHTMLAttributes",
-      "type":"type IframeHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type IframeHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"ImgHTMLAttributes",
-      "type":"type ImgHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type ImgHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"InexactPartial",
       "type":"type InexactPartial<T> = {[K in keyof T]?: T[K] | void}"
     },
-    {"name":"InputEvent","type":"type InputEvent<T = Element> = SyntheticEvent<T>"},
+    {
+      "name":"InputEvent",
+      "type":"type InputEvent<T = Element> = React.SyntheticEvent<T>"
+    },
     {
       "name":"InputEventHandler",
-      "type":"type InputEventHandler<T = Element> = EventHandler<InputEvent<T>>"
+      "type":"type InputEventHandler<T = Element> = React.EventHandler<React.InputEvent<T>>"
     },
     {
       "name":"InputHTMLAttributes",
-      "type":"type InputHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type InputHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"InsHTMLAttributes",
-      "type":"type InsHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type InsHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"Interaction",
@@ -455,61 +464,64 @@ Flags: --pretty
     },
     {
       "name":"InvalidEvent",
-      "type":"type InvalidEvent<T = Element> = SyntheticEvent<T>"
+      "type":"type InvalidEvent<T = Element> = React.SyntheticEvent<T>"
     },
     {
       "name":"JSXElementConstructor",
       "type":"type JSXElementConstructor<in P extends {...} = {...}> = component(...P)"
     },
     {"name":"Key","type":"type Key = string | number"},
-    {"name":"KeyboardEvent","type":"type KeyboardEvent<T = Element> = UIEvent<T>"},
+    {
+      "name":"KeyboardEvent",
+      "type":"type KeyboardEvent<T = Element> = React.UIEvent<T>"
+    },
     {
       "name":"KeyboardEventHandler",
-      "type":"type KeyboardEventHandler<T = Element> = EventHandler<KeyboardEvent<T>>"
+      "type":"type KeyboardEventHandler<T = Element> = React.EventHandler<React.KeyboardEvent<T>>"
     },
     {
       "name":"KeygenHTMLAttributes",
-      "type":"type KeygenHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type KeygenHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"LabelHTMLAttributes",
-      "type":"type LabelHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type LabelHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"LazyExoticComponent",
-      "type":"type LazyExoticComponent<T extends ComponentType<any>> = component(...ComponentProps<T>)"
+      "type":"type LazyExoticComponent<T extends React.ComponentType<any>> = component(...React.ComponentProps<T>)"
     },
     {
       "name":"LiHTMLAttributes",
-      "type":"type LiHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type LiHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"LinkHTMLAttributes",
-      "type":"type LinkHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type LinkHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"MapHTMLAttributes",
-      "type":"type MapHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type MapHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"MediaHTMLAttributes",
-      "type":"type MediaHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type MediaHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"MemoExoticComponent",
-      "type":"type MemoExoticComponent<T extends ComponentType<any>> = component(...ComponentProps<T>)"
+      "type":"type MemoExoticComponent<T extends React.ComponentType<any>> = component(...React.ComponentProps<T>)"
     },
     {
       "name":"MenuHTMLAttributes",
-      "type":"type MenuHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type MenuHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"MetaHTMLAttributes",
-      "type":"type MetaHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type MetaHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"MeterHTMLAttributes",
-      "type":"type MeterHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type MeterHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"MixedElement",
@@ -518,11 +530,11 @@ Flags: --pretty
     {"name":"ModifierKey","type":"type ModifierKey = string"},
     {
       "name":"MouseEvent",
-      "type":"type MouseEvent<T = Element, E = MouseEvent> = UIEvent<T, E>"
+      "type":"type MouseEvent<T = Element, E = MouseEvent> = React.UIEvent<T, E>"
     },
     {
       "name":"MouseEventHandler",
-      "type":"type MouseEventHandler<T = Element> = EventHandler<MouseEvent<T>>"
+      "type":"type MouseEventHandler<T = Element> = React.EventHandler<React.MouseEvent<T>>"
     },
     {
       "name":"MutableRefObject",
@@ -538,19 +550,19 @@ Flags: --pretty
     },
     {
       "name":"ObjectHTMLAttributes",
-      "type":"type ObjectHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type ObjectHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"OlHTMLAttributes",
-      "type":"type OlHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type OlHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"OptgroupHTMLAttributes",
-      "type":"type OptgroupHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type OptgroupHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"OptionHTMLAttributes",
-      "type":"type OptionHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type OptionHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"OptionalPostfixToken",
@@ -562,29 +574,32 @@ Flags: --pretty
     },
     {
       "name":"OutputHTMLAttributes",
-      "type":"type OutputHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type OutputHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"ParamHTMLAttributes",
-      "type":"type ParamHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type ParamHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
-    {"name":"PointerEvent","type":"type PointerEvent<T = Element> = MouseEvent<T>"},
+    {
+      "name":"PointerEvent",
+      "type":"type PointerEvent<T = Element> = React.MouseEvent<T>"
+    },
     {
       "name":"PointerEventHandler",
-      "type":"type PointerEventHandler<T = Element> = EventHandler<PointerEvent<T>>"
+      "type":"type PointerEventHandler<T = Element> = React.EventHandler<React.PointerEvent<T>>"
     },
     {"name":"Portal","type":"type Portal = React$Portal"},
     {
       "name":"ProgressHTMLAttributes",
-      "type":"type ProgressHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type ProgressHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"PropOf",
-      "type":"type PropOf<E extends string | MixedElement | React$RendersExactly<React$ElementType>, K extends string> = PropsOf<E>[K]"
+      "type":"type PropOf<E extends string | React.MixedElement | React$RendersExactly<React$ElementType>, K extends string> = React.PropsOf<E>[K]"
     },
     {
       "name":"PropsOf",
-      "type":"type PropsOf<E extends string | MixedElement | React$RendersExactly<React$ElementType>> = E extends ExactReactElement_DEPRECATED<infer C extends React$ElementType> ? ComponentProps<C> : E extends React$RendersExactly<infer C extends React$ElementType> ? ComponentProps<C> : E extends string ? ComponentProps<E> : empty"
+      "type":"type PropsOf<E extends string | React.MixedElement | React$RendersExactly<React$ElementType>> = E extends ExactReactElement_DEPRECATED<infer C extends React$ElementType> ? React.ComponentProps<C> : E extends React$RendersExactly<infer C extends React$ElementType> ? React.ComponentProps<C> : E extends string ? React.ComponentProps<E> : empty"
     },
     {
       "name":"PropsWithChildren",
@@ -604,7 +619,7 @@ Flags: --pretty
     },
     {
       "name":"QuoteHTMLAttributes",
-      "type":"type QuoteHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type QuoteHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"ReactElement",
@@ -612,12 +627,12 @@ Flags: --pretty
     },
     {
       "name":"ReactEventHandler",
-      "type":"type ReactEventHandler<T = Element> = EventHandler<SyntheticEvent<T>>"
+      "type":"type ReactEventHandler<T = Element> = React.EventHandler<React.SyntheticEvent<T>>"
     },
     {"name":"ReactInstance","type":"type ReactInstance = any"},
     {
       "name":"ReactManagedAttributes",
-      "type":"type ReactManagedAttributes<C, P extends interface {}> = Readonly<C extends {defaultProps: infer D extends interface {}, ...} ? Defaultize<P, D> : P>"
+      "type":"type ReactManagedAttributes<C, P extends interface {}> = Readonly<C extends {defaultProps: infer D extends interface {}, ...} ? React.Defaultize<P, D> : P>"
     },
     {
       "name":"ReactNode",
@@ -629,10 +644,10 @@ Flags: --pretty
       "type":"type ReactSetStateFunction<S> = (value: ((prevState: S) => S) | S) => void"
     },
     {"name":"ReactText","type":"type ReactText = string | number"},
-    {"name":"Ref","type":"type Ref<in T> = RefSetter<T>"},
+    {"name":"Ref","type":"type Ref<in T> = React.RefSetter<T>"},
     {
       "name":"RefAttributes",
-      "type":"type RefAttributes<T> = {ref?: RefSetter<T>, ...}"
+      "type":"type RefAttributes<T> = {ref?: React.RefSetter<T>, ...}"
     },
     {
       "name":"RefCallback",
@@ -641,7 +656,7 @@ Flags: --pretty
     {"name":"RefObject","type":"type RefObject<T> = React$RefObject<T>"},
     {
       "name":"RefOf",
-      "type":"type RefOf<E extends string | MixedElement | React$RendersExactly<React$ElementType>> = E extends ExactReactElement_DEPRECATED<infer C extends React$ElementType> ? ElementRef<C> : E extends React$RendersExactly<infer C extends React$ElementType> ? ElementRef<C> : E extends string ? ElementRef<E> : empty"
+      "type":"type RefOf<E extends string | React.MixedElement | React$RendersExactly<React$ElementType>> = E extends ExactReactElement_DEPRECATED<infer C extends React$ElementType> ? React.ElementRef<C> : E extends React$RendersExactly<infer C extends React$ElementType> ? React.ElementRef<C> : E extends string ? React.ElementRef<E> : empty"
     },
     {
       "name":"RefSetter",
@@ -654,20 +669,20 @@ Flags: --pretty
     {"name":"SVGElementType","type":"type SVGElementType = string"},
     {
       "name":"SVGLineElementAttributes",
-      "type":"type SVGLineElementAttributes<T> = SVGProps<T>"
+      "type":"type SVGLineElementAttributes<T> = React.SVGProps<T>"
     },
-    {"name":"SVGProps","type":"type SVGProps<T> = SVGAttributes<T>"},
+    {"name":"SVGProps","type":"type SVGProps<T> = React.SVGAttributes<T>"},
     {
       "name":"SVGTextElementAttributes",
-      "type":"type SVGTextElementAttributes<T> = SVGProps<T>"
+      "type":"type SVGTextElementAttributes<T> = React.SVGProps<T>"
     },
     {
       "name":"ScriptHTMLAttributes",
-      "type":"type ScriptHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type ScriptHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"SelectHTMLAttributes",
-      "type":"type SelectHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type SelectHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"SetStateAction",
@@ -675,61 +690,61 @@ Flags: --pretty
     },
     {
       "name":"SlotHTMLAttributes",
-      "type":"type SlotHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type SlotHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"SourceHTMLAttributes",
-      "type":"type SourceHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type SourceHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"StyleHTMLAttributes",
-      "type":"type StyleHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type StyleHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"SubmitEvent",
-      "type":"type SubmitEvent<T = Element> = SyntheticEvent<T>"
+      "type":"type SubmitEvent<T = Element> = React.SyntheticEvent<T>"
     },
     {
       "name":"SubmitEventHandler",
-      "type":"type SubmitEventHandler<T = Element> = EventHandler<SubmitEvent<T>>"
+      "type":"type SubmitEventHandler<T = Element> = React.EventHandler<React.SubmitEvent<T>>"
     },
     {
       "name":"SyntheticEvent",
-      "type":"type SyntheticEvent<T = Element, E = Event> = BaseSyntheticEvent<E, EventTarget & T, EventTarget>"
+      "type":"type SyntheticEvent<T = Element, E = Event> = React.BaseSyntheticEvent<E, EventTarget & T, EventTarget>"
     },
     {
       "name":"TableHTMLAttributes",
-      "type":"type TableHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type TableHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"TdHTMLAttributes",
-      "type":"type TdHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type TdHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"TextareaHTMLAttributes",
-      "type":"type TextareaHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type TextareaHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"ThHTMLAttributes",
-      "type":"type ThHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type ThHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"TimeHTMLAttributes",
-      "type":"type TimeHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type TimeHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"ToggleEvent",
-      "type":"type ToggleEvent<T = Element> = SyntheticEvent<T>"
+      "type":"type ToggleEvent<T = Element> = React.SyntheticEvent<T>"
     },
     {
       "name":"ToggleEventHandler",
-      "type":"type ToggleEventHandler<T = Element> = EventHandler<ToggleEvent<T>>"
+      "type":"type ToggleEventHandler<T = Element> = React.EventHandler<React.ToggleEvent<T>>"
     },
     {"name":"Touch","type":"type Touch = {readonly [property: string]: any}"},
-    {"name":"TouchEvent","type":"type TouchEvent<T = Element> = UIEvent<T>"},
+    {"name":"TouchEvent","type":"type TouchEvent<T = Element> = React.UIEvent<T>"},
     {
       "name":"TouchEventHandler",
-      "type":"type TouchEventHandler<T = Element> = EventHandler<TouchEvent<T>>"
+      "type":"type TouchEventHandler<T = Element> = React.EventHandler<React.TouchEvent<T>>"
     },
     {
       "name":"TouchList",
@@ -737,15 +752,15 @@ Flags: --pretty
     },
     {
       "name":"TrackHTMLAttributes",
-      "type":"type TrackHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type TrackHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"TransitionEvent",
-      "type":"type TransitionEvent<T = Element> = SyntheticEvent<T>"
+      "type":"type TransitionEvent<T = Element> = React.SyntheticEvent<T>"
     },
     {
       "name":"TransitionEventHandler",
-      "type":"type TransitionEventHandler<T = Element> = EventHandler<TransitionEvent<T>>"
+      "type":"type TransitionEventHandler<T = Element> = React.EventHandler<React.TransitionEvent<T>>"
     },
     {
       "name":"TransitionStartFunction",
@@ -753,16 +768,16 @@ Flags: --pretty
     },
     {
       "name":"UIEvent",
-      "type":"type UIEvent<T = Element, E = UIEvent> = SyntheticEvent<T, E>"
+      "type":"type UIEvent<T = Element, E = UIEvent> = React.SyntheticEvent<T, E>"
     },
     {
       "name":"UIEventHandler",
-      "type":"type UIEventHandler<T = Element> = EventHandler<UIEvent<T>>"
+      "type":"type UIEventHandler<T = Element> = React.EventHandler<React.UIEvent<T>>"
     },
     {"name":"ValidationMap","type":"type ValidationMap<T> = {[key: string]: any}"},
     {
       "name":"VideoHTMLAttributes",
-      "type":"type VideoHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type VideoHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
     {
       "name":"WeakValidationMap",
@@ -770,12 +785,15 @@ Flags: --pretty
     },
     {
       "name":"WebViewHTMLAttributes",
-      "type":"type WebViewHTMLAttributes<T> = HTMLAttributes<T>"
+      "type":"type WebViewHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
-    {"name":"WheelEvent","type":"type WheelEvent<T = Element> = MouseEvent<T>"},
+    {
+      "name":"WheelEvent",
+      "type":"type WheelEvent<T = Element> = React.MouseEvent<T>"
+    },
     {
       "name":"WheelEventHandler",
-      "type":"type WheelEventHandler<T = Element> = EventHandler<WheelEvent<T>>"
+      "type":"type WheelEventHandler<T = Element> = React.EventHandler<React.WheelEvent<T>>"
     }
   ]
 }

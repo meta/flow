@@ -197,8 +197,8 @@ References:
 Error --------------------------------------------------------------------------------------------------- regexp.js:26:5
 
 Cannot call `"a".toLocaleLowerCase` because: [incompatible-type]
- - Either `1` [1], a primitive, cannot be used as a subtype of `Locale` [2]. You can wrap it in `new Number(...))` to
-   turn it into an object and attempt to use it as a subtype of an interface.
+ - Either `1` [1], a primitive, cannot be used as a subtype of `Intl.Locale` [2]. You can wrap it in `new Number(...))`
+   to turn it into an object and attempt to use it as a subtype of an interface.
  - Or `1` [1] is incompatible with `string` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are

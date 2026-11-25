@@ -40,6 +40,7 @@ use flow_common_ty::ty::BotKind;
 use flow_common_ty::ty::UpperBoundKind;
 use flow_common_ty::ty_symbol::ALocSymbol;
 use flow_common_ty::ty_symbol::ImportMode;
+use flow_common_ty::ty_symbol::ImportedIdent;
 use flow_common_ty::ty_symbol::Provenance;
 use flow_common_ty::ty_symbol::Symbol;
 use flow_common_ty::ty_symbol::builtin_symbol;
@@ -560,12 +561,15 @@ fn symbol_from_loc<'cx>(
     let sym_provenance = match symbol_source {
         Some(def_file) if current_source == def_file => Provenance::Local,
         Some(def_file) if env.cx.is_global_libdef(def_file) => {
-            Provenance::Library(flow_common_ty::ty_symbol::RemoteInfo {
-                imported_as: env
-                    .imported_names()?
-                    .get(&ALocFuzzy(sym_def_loc.dupe()))
-                    .cloned(),
-            })
+            let def_loc = ALocFuzzy(sym_def_loc.dupe());
+            let imported_as = env.imported_names()?.get(&def_loc).cloned();
+            // A member of a namespace prints as `NS.X`, unless the file imports it by a name.
+            let imported_as = imported_as.or_else(|| {
+                let builtins = env.cx.builtins();
+                let name = builtins.namespace_members.get(&def_loc)?.to_string();
+                Some(ImportedIdent(def_loc.0.dupe(), name, ImportMode::TypeMode))
+            });
+            Provenance::Library(flow_common_ty::ty_symbol::RemoteInfo { imported_as })
         }
         Some(def_file) if matches!(def_file.inner(), FileKeyInner::SourceFile(_)) => {
             Provenance::Remote(flow_common_ty::ty_symbol::RemoteInfo {

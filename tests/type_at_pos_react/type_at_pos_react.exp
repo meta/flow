@@ -10,11 +10,11 @@ lazy_ref.js:14:9
 Flags:
 const x: {
   default: component(
-    ...{...empty, readonly ref?: RefSetter<{moo(x: string): void}>}
+    ...{...empty, readonly ref?: React.RefSetter<{moo(x: string): void}>}
   ) renders null
 }
 
-'RefSetter' defined at (lib) react.js:1659:9
+'React.RefSetter' defined at (lib) react.js:1659:9
 
 lazy_ref.js:14:9,14:9
 
@@ -68,13 +68,13 @@ Flags:
 **@see**  https://react.dev/reference/react/Fragment
 component Fragment<Renders extends React$Node = void>(
   children?: Renders,
-  ref?: RefSetter<FragmentInstance>
+  ref?: React.RefSetter<React.FragmentInstance>
 ) renders Renders
 
 'Fragment' defined at (lib) react.js:1366:4
-'FragmentInstance' defined at (lib) react.js:1660:9
 'React$Node' defined at (lib) react.js:15:13
-'RefSetter' defined at (lib) react.js:1659:9
+'React.FragmentInstance' defined at (lib) react.js:1660:9
+'React.RefSetter' defined at (lib) react.js:1659:9
 
 react_component.js:34:7,34:14
 

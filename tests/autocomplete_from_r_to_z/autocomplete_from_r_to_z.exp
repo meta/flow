@@ -94,7 +94,10 @@ Flags: --lsp
 recursive.js:11:6
 Flags: --pretty
 {
-  "result":[{"name":"ab","type":"number"},{"name":"ac","type":"ComponentType<Props>"}]
+  "result":[
+    {"name":"ab","type":"number"},
+    {"name":"ac","type":"React.ComponentType<Props>"}
+  ]
 }
 
 string_literal.js:5:16
@@ -1336,7 +1339,7 @@ Flags: --pretty
     {"name":"toFixed","type":"(this: Number, fractionDigits?: number) => string"},
     {
       "name":"toLocaleString",
-      "type":"(this: Number, locales?: string | Array<string>, options?: NumberFormatOptions) => string"
+      "type":"(this: Number, locales?: string | Array<string>, options?: Intl.NumberFormatOptions) => string"
     },
     {"name":"toPrecision","type":"(this: Number, precision?: number) => string"},
     {"name":"toString","type":"(this: Number, radix?: number) => string"},

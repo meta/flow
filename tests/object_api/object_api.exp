@@ -944,10 +944,10 @@ References:
 Error --------------------------------------------------------------------------------------- object_prototype.js:150:32
 
 Cannot assign `x.toLocaleString` to `xToLocaleString` because: [incompatible-type]
- - Either `(this: Date, locales?: LocalesArgument, options?: DateTimeFormatOptions) => string` [1] is incompatible with
-   `number` [2].
- - Or `(this: Date, locales?: string | Array<string>, options?: DateTimeFormatOptions) => string` [3] is incompatible
-   with `number` [2].
+ - Either `(this: Date, locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions) => string` [1] is
+   incompatible with `number` [2].
+ - Or `(this: Date, locales?: string | Array<string>, options?: Intl.DateTimeFormatOptions) => string` [3] is
+   incompatible with `number` [2].
  - Or `(this: Date) => string` [4] is incompatible with `number` [2].
 
    object_prototype.js:150:32

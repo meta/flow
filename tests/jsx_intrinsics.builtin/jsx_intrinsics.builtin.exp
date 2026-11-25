@@ -1,6 +1,6 @@
 Error -------------------------------------------------------------------------------------------------- strings.js:12:2
 
-Cannot create `bad` element because property `bad` is missing in `IntrinsicElements` [1]. [prop-missing]
+Cannot create `bad` element because property `bad` is missing in `JSX.IntrinsicElements` [1]. [prop-missing]
 
    strings.js:12:2
      12| <Bad />; // ERROR
@@ -32,7 +32,7 @@ References:
 Error -------------------------------------------------------------------------------------------------- strings.js:13:2
 
 Cannot create string element because an index signature declaring the expected key / value type is missing in
-`IntrinsicElements` [1]. [prop-missing]
+`JSX.IntrinsicElements` [1]. [prop-missing]
 
    strings.js:13:2
      13| <Str />; // ERROR
@@ -46,7 +46,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- strings.js:16:2
 
-Cannot create `bad` element because property `bad` is missing in `IntrinsicElements` [1]. [prop-missing]
+Cannot create `bad` element because property `bad` is missing in `JSX.IntrinsicElements` [1]. [prop-missing]
 
    strings.js:16:2
      16| <bad {...empty_exact} />; // ERROR
@@ -154,7 +154,7 @@ Error --------------------------------------------------------------------------
 
 Cannot create `textarea` element because in property `onClick`: [incompatible-type]
  - Either in the first parameter: property `altKey` is missing in `Number` [1] but exists in
-   `MouseEvent<HTMLTextAreaElement, MouseEvent>` [2].
+   `React.MouseEvent<HTMLTextAreaElement, MouseEvent>` [2].
  - Or `(event: number) => void` [3] is incompatible with `void` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
@@ -288,8 +288,8 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- strings.js:38:2
 
-Cannot cast object literal to `IntrinsicElements["svg"]` because object literal [1] is incompatible with
-`SVGAttributes<SVGSVGElement>` [2]. For example, `42` [3] is incompatible with `void` [4]. [incompatible-type]
+Cannot cast object literal to `JSX.IntrinsicElements["svg"]` because object literal [1] is incompatible with
+`React.SVGAttributes<SVGSVGElement>` [2]. For example, `42` [3] is incompatible with `void` [4]. [incompatible-type]
 
    strings.js:38:2
      38| ({viewBox: 42}) as React.JSX.IntrinsicElements['svg']; // ERROR
@@ -310,7 +310,7 @@ References:
 Error -------------------------------------------------------------------------------------------------- strings.js:40:2
 
 Cannot cast object literal to `React.ButtonHTMLAttributes<HTMLButtonElement>` because object literal [1] is incompatible
-with `ButtonHTMLAttributes<HTMLButtonElement>` [2]. For example, `"invalid"` [3] is incompatible with
+with `React.ButtonHTMLAttributes<HTMLButtonElement>` [2]. For example, `"invalid"` [3] is incompatible with
 `"submit" | "reset" | "button" | void` [4]. [incompatible-type]
 
    strings.js:40:2
@@ -383,7 +383,7 @@ Error --------------------------------------------------------------------------
 Cannot cast object literal to `Readonly<React.ComponentProps<"button">>` because in property `onClick`:
 [incompatible-type]
  - Either in the first parameter: property `altKey` is missing in `Number` [1] but exists in
-   `MouseEvent<HTMLButtonElement, MouseEvent>` [2].
+   `React.MouseEvent<HTMLButtonElement, MouseEvent>` [2].
  - Or `(event: number) => void` [3] is incompatible with `void` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
@@ -451,7 +451,7 @@ Error --------------------------------------------------------------------------
 
 Cannot create `button` element because in property `onClick`: [incompatible-type]
  - Either in the first parameter: property `altKey` is missing in `Number` [1] but exists in
-   `MouseEvent<HTMLButtonElement, MouseEvent>` [2].
+   `React.MouseEvent<HTMLButtonElement, MouseEvent>` [2].
  - Or `(event: number) => void` [3] is incompatible with `void` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
@@ -509,8 +509,8 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- strings.js:60:1
 
-Cannot cast `style.opacity` to `empty` because in at least one member of `Globals` [1]: `"-moz-initial"` [1] is
-incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `style.opacity` to `empty` because in at least one member of `React$CSS.Globals` [1]: `"-moz-initial"` [1]
+is incompatible with `empty` [2]. [incompatible-type]
 
    strings.js:60:1
      60| style.opacity as empty; // ERROR

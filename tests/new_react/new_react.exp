@@ -64,7 +64,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- classes.js:23:3
 
-Cannot extend `Component<Props, State>` [1] with `Foo` [2] because in property `setState` > the first parameter:
+Cannot extend `React.Component<Props, State>` [1] with `Foo` [2] because in property `setState` > the first parameter:
 property `y_` is missing in `{readonly y?: number, ...}` [3] but exists in `{y_: string, ...}` [4]. [incompatible-type]
 
    classes.js:23:3
@@ -118,7 +118,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- classes.js:23:15
 
-Cannot extend `Component<Props, State>` [1] with `Foo` [2] because in property `setState` > the first parameter:
+Cannot extend `React.Component<Props, State>` [1] with `Foo` [2] because in property `setState` > the first parameter:
 `{y_: string, ...}` [3] is incompatible with `null` [4]. [incompatible-type]
 
    classes.js:23:15
@@ -169,7 +169,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- classes.js:23:15
 
-Cannot extend `Component<Props, State>` [1] with `Foo` [2] because in property `setState` > the first parameter:
+Cannot extend `React.Component<Props, State>` [1] with `Foo` [2] because in property `setState` > the first parameter:
 `{y_: string, ...}` [3] is incompatible with `void` [4]. [incompatible-type]
 
    classes.js:23:15
@@ -220,7 +220,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- classes.js:23:15
 
-Cannot extend `Component<Props, State>` [1] with `Foo` [2] because in property `setState` > the first parameter:
+Cannot extend `React.Component<Props, State>` [1] with `Foo` [2] because in property `setState` > the first parameter:
 `{y_: string, ...}` [3] is incompatible with `(prevState: State, props: Props) => ?Readonly<Partial<State>>` [4].
 [incompatible-type]
 
