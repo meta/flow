@@ -27,8 +27,10 @@ use flow_typing::typed_ast_finder::EnclosingNode;
 use flow_typing_context::Context;
 use flow_typing_flow_common::flow_js_utils;
 use flow_typing_statement::statement as typing_statement;
+use flow_typing_type::type_::DefTInner;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeInner;
+use flow_typing_type::type_::TypeTKind;
 use flow_typing_type::type_util;
 use flow_typing_utils::typed_ast_utils::AvailableAst;
 
@@ -80,9 +82,14 @@ fn def_loc_of_t(t: &Type) -> ALoc {
 ///
 /// for now, we only implement Go to Definition; if we want to do Go to Type
 /// Definition, it would ignore the annot loc.
-pub fn process_type_request<'cx>(cx: &mut Context<'cx>, t: &Type) -> Result<ALoc, String> {
+pub fn process_type_request<'cx>(
+    cx: &mut Context<'cx>,
+    purpose: Purpose,
+    t: &Type,
+) -> Result<ALoc, String> {
     fn loop_fn<'cx>(
         cx: &mut Context<'cx>,
+        purpose: Purpose,
         mut seen: BTreeSet<i32>,
         t: &Type,
     ) -> Result<ALoc, String> {
@@ -96,17 +103,26 @@ pub fn process_type_request<'cx>(cx: &mut Context<'cx>, t: &Type) -> Result<ALoc
                     match possible.as_slice() {
                         [t_prime] => {
                             seen.insert(root);
-                            loop_fn(cx, seen, t_prime)
+                            loop_fn(cx, purpose, seen, t_prime)
                         }
                         [] => Err("No possible types".into()),
                         _ => Err("More than one possible type".into()),
                     }
                 }
             }
+            // Go to Definition on an alias whose body only names another declaration, as in
+            // `type A = B`, goes to the end of the chain.
+            TypeInner::DefT(_, def_t)
+                if purpose == Purpose::GoToDefinition
+                    && let DefTInner::TypeT(TypeTKind::TypeAliasKind, body) = def_t.deref()
+                    && let (_, Some(loc)) = flow_js_utils::unaliased_type_alias_body(cx, body) =>
+            {
+                Ok(loc)
+            }
             _ => Ok(def_loc_of_t(t)),
         }
     }
-    loop_fn(cx, BTreeSet::new(), t)
+    loop_fn(cx, purpose, BTreeSet::new(), t)
 }
 
 /// Determines if the given expression is a [require()] call, or a member expression
@@ -696,6 +712,18 @@ impl<'a, 'ast, T: Dupe + PartialEq + 'ast, C: SearcherCallback<T>>
             }
         }
         ast_visitor::indexed_access_type_default(self, _loc, expr)
+    }
+
+    fn generic_qualified_identifier_type(
+        &mut self,
+        qual: &'ast ast::types::generic::Qualified<ALoc, T>,
+    ) -> Result<(), Found> {
+        if self.annot_covers_target(&qual.id.loc) {
+            let t = self.type_from_enclosing_node(&qual.id.loc)?;
+            self.found_loc = ProcessLocationResult::ModuleTypeDef(t);
+            return Err(Found::Found);
+        }
+        ast_visitor::generic_qualified_identifier_type_default(self, qual)
     }
 
     fn typeof_qualified_identifier(

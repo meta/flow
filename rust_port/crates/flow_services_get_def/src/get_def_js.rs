@@ -287,7 +287,7 @@ pub fn get_def<'cx>(
                         GetDefResult::Def(locs, None)
                     }
                     get_def_process_location::ProcessLocationResult::ModuleTypeDef(t) => {
-                        match get_def_process_location::process_type_request(cx, &t) {
+                        match get_def_process_location::process_type_request(cx, *purpose, &t) {
                             Ok(res_loc) => {
                                 let mut locs = BTreeSet::new();
                                 locs.insert(loc_of_aloc(&res_loc));

@@ -1,0 +1,95 @@
+test.js:13:18
+Flags:
+type C = O
+
+'C' defined at test.js:4:5
+'O' defined at test.js:1:20
+
+test.js:13:18,13:18
+
+test.js:15:18
+Flags:
+type R = {x: number}
+
+'R' defined at test.js:6:5
+
+test.js:15:18,15:18
+
+test.js:17:19
+Flags:
+type R2 = {x: number}
+
+'R2' defined at test.js:7:5
+
+test.js:17:19,17:20
+
+test.js:19:18
+Flags:
+type KAlias = K
+
+'K' defined at test.js:8:14
+'KAlias' defined at test.js:9:5
+
+test.js:19:18,19:23
+
+test.js:22:19
+Flags:
+type KAlias2 = K
+
+'K' defined at test.js:8:14
+'KAlias2' defined at test.js:21:5
+
+test.js:22:19,22:25
+
+test.js:24:18
+Flags:
+type PString = P<string>
+
+'P' defined at test.js:10:5
+'PString' defined at test.js:11:5
+
+test.js:24:18,24:24
+
+test.js:27:19
+Flags:
+type PAlias = P<string>
+
+'P' defined at test.js:10:5
+'PAlias' defined at test.js:26:5
+
+test.js:27:19,27:24
+
+test.js:33:19
+Flags:
+type CEAlias2 = CE
+
+'CE' defined at test.js:30:5
+'CEAlias2' defined at test.js:32:5
+
+test.js:33:19,33:26
+
+test.js:40:21
+Flags:
+type N = O
+
+'N' defined at test.js:37:7
+'O' defined at test.js:1:20
+
+test.js:40:21,40:21
+
+test.js:42:21
+Flags:
+type M = {x: number}
+
+'M' defined at test.js:38:7
+
+test.js:42:21,42:21
+
+test.js:47:18
+Flags:
+type X = any
+
+'X' defined at test.js:45:5
+
+test.js:47:18,47:18
+

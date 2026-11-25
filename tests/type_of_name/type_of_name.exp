@@ -537,10 +537,18 @@ Found exact match 'CacheTTL' defined at complex_types.js:190:6,190:13 with type 
 where
 'DeepConfig' is defined at complex_types.js:149:6-15 = {cache: {maxSize: number, ttl: number}, database: {credentials: {password: string, username: string}, host: string, port: number}, features: Readonly<{enableLogging: boolean, enableMetrics: boolean}>}
 
-Found exact match 'ConfigType' defined at complex_types.js:195:6,195:15 with type `type ConfigType = DeepConfig` 
-where
-'DeepConfig' is defined at complex_types.js:149:6-15 = {cache: {maxSize: number, ttl: number}, database: {credentials: {password: string, username: string}, host: string, port: number}, features: Readonly<{enableLogging: boolean, enableMetrics: boolean}>}
-
+Found exact match 'ConfigType' defined at complex_types.js:195:6,195:15 with type
+```
+type ConfigType = {
+  cache: {maxSize: number, ttl: number},
+  database: {
+    credentials: {password: string, username: string},
+    host: string,
+    port: number
+  },
+  features: Readonly<{enableLogging: boolean, enableMetrics: boolean}>
+}
+```
 
 === StringPrefix and StringSuffix ===
 Found exact match 'DataAttr' defined at complex_types.js:199:6,199:13 with type `type DataAttr = StringPrefix<"data-">` 

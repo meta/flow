@@ -51,6 +51,7 @@ use flow_parser::file_key::FileKeyInner;
 use flow_parser_utils::file_sig::FileSig;
 use flow_typing_context::Context;
 use flow_typing_context::Cx;
+use flow_typing_flow_common::flow_js_utils::unaliased_type_alias_body;
 use flow_typing_flow_common::type_subst;
 use flow_typing_type::type_::AnySource;
 use flow_typing_type::type_::ArrayATData;
@@ -4190,7 +4191,10 @@ pub mod element_converter {
         ) -> Result<ALocElt, Error> {
             match reason_utils::local_type_alias_symbol_opt(env, reason)? {
                 Some(name) => {
-                    let ty = type_converter::convert_t::<I>(env, state, true, t)?;
+                    // An alias whose body only names another alias, as in `type A = B`, shows
+                    // the type it stands for, as TypeScript does.
+                    let body = unaliased_type_alias_body(env.cx, t).0;
+                    let ty = type_converter::convert_t::<I>(env, state, true, &body)?;
                     Ok(ty::Elt::Decl(ty::Decl::TypeAliasDecl(Box::new(
                         ty::DeclTypeAliasDeclData {
                             import: false,

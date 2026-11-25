@@ -396,3 +396,23 @@ parse_error_component.js:10:30
 Flags:
 parse_error_component.js:10:30,10:30
 
+qualified_type.js:14:14
+Flags:
+qualified_type.js:1:21,1:21
+
+qualified_type.js:16:14
+Flags:
+qualified_type.js:4:6,4:8
+
+qualified_type.js:18:14
+Flags:
+qualified_type.js:10:8,10:8
+
+qualified_type.js:20:15
+Flags:
+qualified_type.js:11:8,11:12
+
+qualified_type.js:25:14
+Flags:
+helpers/exports_annot.js:3:13,3:13
+

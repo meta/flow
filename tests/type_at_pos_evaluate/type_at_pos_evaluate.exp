@@ -1,9 +1,6 @@
 test.js:11:6
 Flags:
-type T1 = Foo
-
-'Foo' defined at test.js:3:5
-
+type T1 = {bar: {baz: ?{qux: ReadonlyArray<string>}}}
 test.js:11:6,11:7
 
 test.js:14:6

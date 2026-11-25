@@ -205,6 +205,34 @@ pub fn possible_types_of_type<'cx>(cx: &mut Context<'cx>, t: &Type) -> Vec<Type>
     }
 }
 
+/// Resolves [body], the body of a type alias, to the type it stands for, through the aliases it
+/// only names, as `B` is named in `type A = B`. Returns that type, and the location of the
+/// declaration at the end of the chain: the last alias, or the opaque type (a `@flowCustomError`
+/// alias is one too), class, interface or enum it names.
+pub fn unaliased_type_alias_body<'cx>(cx: &mut Context<'cx>, body: &Type) -> (Type, Option<ALoc>) {
+    let Some(t) = cx.find_resolved(body) else {
+        return (body.dupe(), None);
+    };
+    let loc = match t.deref() {
+        TypeInner::NominalT { .. } => Some(reason_of_t(&t).def_loc().dupe()),
+        _ if let Some(VirtualReasonDesc::RTypeAlias(deref!((_, Some(name_loc), _)))) =
+            reason_of_t(&t).desc(false) =>
+        {
+            Some(name_loc.dupe())
+        }
+        TypeInner::DefT(_, def_t)
+            if matches!(
+                def_t.deref(),
+                DefTInner::InstanceT(_) | DefTInner::EnumValueT(_)
+            ) =>
+        {
+            Some(reason_of_t(&t).def_loc().dupe())
+        }
+        _ => None,
+    };
+    (t, loc)
+}
+
 pub fn possible_uses<'cx>(cx: &mut Context<'cx>, id: i32) -> Vec<UseT<Cx>> {
     let (_, constraints) = cx.find_constraints(id);
     uses_of(cx, &constraints)

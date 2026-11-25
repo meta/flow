@@ -352,7 +352,7 @@ Flags: --pretty
       "name":"ElementRef",
       "type":"type ElementRef<C extends string | component(...empty)> = C extends empty ? any : C extends infer S extends string ? \"ref\" extends keyof React$JSXIntrinsicElements[S] ? React$JSXIntrinsicElements[S] extends {readonly ref?: RefSetter<infer I>, ...} ? NonNullable<I> : unknown : void : C extends component(...infer Props extends {...}) ? \"ref\" extends keyof Props ? Props extends {readonly ref?: RefSetter<infer I>, ...} ? I : unknown : void : empty"
     },
-    {"name":"ElementType","type":"type ElementType = React$ElementType"},
+    {"name":"ElementType","type":"type ElementType = string | component(...empty)"},
     {
       "name":"EmbedHTMLAttributes",
       "type":"type EmbedHTMLAttributes<T> = HTMLAttributes<T>"
@@ -461,7 +461,7 @@ Flags: --pretty
       "name":"JSXElementConstructor",
       "type":"type JSXElementConstructor<in P extends {...} = {...}> = component(...P)"
     },
-    {"name":"Key","type":"type Key = React$Key"},
+    {"name":"Key","type":"type Key = string | number"},
     {"name":"KeyboardEvent","type":"type KeyboardEvent<T = Element> = UIEvent<T>"},
     {
       "name":"KeyboardEventHandler",
@@ -532,7 +532,10 @@ Flags: --pretty
       "name":"NamedExoticComponent",
       "type":"type NamedExoticComponent<in P extends {...} = {...}> = component(...P)"
     },
-    {"name":"Node","type":"type Node = React$Node"},
+    {
+      "name":"Node",
+      "type":"type Node = ?boolean | number | string | ExactReactElement_DEPRECATED<any> | React$Portal | Iterable<?React$Node>"
+    },
     {
       "name":"ObjectHTMLAttributes",
       "type":"type ObjectHTMLAttributes<T> = HTMLAttributes<T>"
@@ -616,7 +619,10 @@ Flags: --pretty
       "name":"ReactManagedAttributes",
       "type":"type ReactManagedAttributes<C, P extends interface {}> = Readonly<C extends {defaultProps: infer D extends interface {}, ...} ? Defaultize<P, D> : P>"
     },
-    {"name":"ReactNode","type":"type ReactNode = React$Node"},
+    {
+      "name":"ReactNode",
+      "type":"type ReactNode = ?boolean | number | string | ExactReactElement_DEPRECATED<any> | React$Portal | Iterable<?React$Node>"
+    },
     {"name":"ReactPortal","type":"type ReactPortal = React$Portal"},
     {
       "name":"ReactSetStateFunction",

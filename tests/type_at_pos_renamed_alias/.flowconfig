@@ -1,0 +1,3 @@
+[options]
+all=true
+experimental.enable_custom_error=true

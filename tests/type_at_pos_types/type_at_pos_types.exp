@@ -678,10 +678,7 @@ type B = any | null
 type-alias.js:5:6,5:6
 
 At type-alias.js:7:6
-type C = A
-
-'A' defined at type-alias.js:3:5
-
+type C = any
 type-alias.js:7:6,7:6
 
 At type-alias.js:9:6
@@ -725,10 +722,7 @@ type B = any | null
 type-alias.js:27:8,27:8
 
 At type-alias.js:29:8
-type C = A
-
-'A' defined at type-alias.js:25:7
-
+type C = X
 type-alias.js:29:8,29:8
 
 At type-alias.js:31:8
