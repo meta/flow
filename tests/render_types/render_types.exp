@@ -677,6 +677,28 @@ References:
                                                        ^^^^ [3]
 
 
+Error -------------------------------------------------------------------------------------------- renders_maybe.js:54:2
+
+Cannot cast `<Bar />` to `?renders MenuItem | renders BlueMenuItem` because: [incompatible-type]
+ - Either `Bar` element [1] does not render `MenuItem` [2].
+ - Or `Bar` element [1] does not render `BlueMenuItem` [3].
+
+   renders_maybe.js:54:2
+   54| (<Bar />) as (renders MenuItem) | (renders BlueMenuItem) | null | void; // ERROR, `null` and `void` not tried
+        ^^^^^^^
+
+References:
+   renders_maybe.js:54:3
+   54| (<Bar />) as (renders MenuItem) | (renders BlueMenuItem) | null | void; // ERROR, `null` and `void` not tried
+         ^^^ [1]
+   renders_maybe.js:54:15
+   54| (<Bar />) as (renders MenuItem) | (renders BlueMenuItem) | null | void; // ERROR, `null` and `void` not tried
+                     ^^^^^^^^^^^^^^^^ [2]
+   renders_maybe.js:54:36
+   54| (<Bar />) as (renders MenuItem) | (renders BlueMenuItem) | null | void; // ERROR, `null` and `void` not tried
+                                          ^^^^^^^^^^^^^^^^^^^^ [3]
+
+
 Error ---------------------------------------------------------------------------------------------- renders_star.js:9:1
 
 Cannot cast `true` to `renders* MenuItem` because `true` [1] does not render `MenuItem` [2]. [incompatible-type]
@@ -1883,4 +1905,4 @@ Cannot use `number` [1] as the type argument of renders type. [invalid-render]
 
 
 
-Found 144 errors
+Found 145 errors

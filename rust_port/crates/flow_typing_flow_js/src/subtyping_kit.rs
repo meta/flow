@@ -4734,7 +4734,21 @@ pub fn rec_sub_t<'cx>(
             if union_contains_instantiable_tvars
                 || !FlowJs::speculative_subtyping_succeeds_with_flow_errors(cx, env, &node, u)?
             {
-                speculation_kit::try_union(cx, env, None, trace, use_op, l.dupe(), r.dupe(), rep)?;
+                // A maybe type (a union with `null` and `void` members, as `?T` is) is not
+                // split: the type fits the rest of it, as for any other type.
+                match type_util::non_maybe_members(u) {
+                    Some(rest) => FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, l, &rest)?,
+                    None => speculation_kit::try_union(
+                        cx,
+                        env,
+                        None,
+                        trace,
+                        use_op,
+                        l.dupe(),
+                        r.dupe(),
+                        rep,
+                    )?,
+                }
             }
             Ok(())
         }

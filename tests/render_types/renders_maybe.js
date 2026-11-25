@@ -50,3 +50,5 @@ rendersMaybeMenuItem as renders (null | false | void | Bar); // invalid-render t
 component MightRenderMenuItem() renders? MenuItem {
   return Math.random() > 0.5 ? null : <MenuItem />; // OK
 }
+
+(<Bar />) as (renders MenuItem) | (renders BlueMenuItem) | null | void; // ERROR, `null` and `void` not tried
