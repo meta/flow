@@ -48,7 +48,6 @@ fn default_sig_options() -> TypeSigOptions {
         facebook_key_mirror: false,
         facebook_fbt: None,
         enable_custom_error: false,
-        declare_module_merging: false,
         enable_enums: true,
         enable_component_syntax: true,
         component_syntax_enabled_in_config: true,

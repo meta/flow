@@ -1072,7 +1072,7 @@ pub(crate) mod scope {
             types: BTreeMap<FlowSmolStr, BindingNode<'arena, 'ast>>,
             parent: ScopeId,
             exports: Rc<RefCell<Exports<'arena, 'ast>>>,
-            /// With `declare_module_merging`, the exports of every library block of the module.
+            /// The exports of every library block of the module.
             /// A name that the block doesn't declare resolves to one of them.
             module_exports: Option<Rc<RefCell<Exports<'arena, 'ast>>>>,
         },
@@ -1293,26 +1293,13 @@ pub(crate) mod scope {
         parent: ScopeId,
         loc: LocNode<'arena>,
         name: FlowSmolStr,
-        merging: bool,
     ) -> ScopeId {
         let exports = Exports::create(true, None, tbls.strictness_kind);
         let mut module_exports = None;
         match scopes.get_mut(parent) {
             Scope::Global { modules, .. } => {
-                if merging {
-                    let (_, exports) = modules.entry(name).or_insert_with(|| (loc, exports.dupe()));
-                    module_exports = Some(exports.dupe());
-                } else if let Some((override_binding_loc, _)) = modules.get(&name) {
-                    tbls.additional_errors.push(
-                        signature_error::BindingValidation::ModuleOverride {
-                            name: name.clone(),
-                            override_binding_loc: override_binding_loc.dupe(),
-                            existing_binding_loc: loc,
-                        },
-                    );
-                } else {
-                    modules.insert(name.clone(), (loc, exports.dupe()));
-                }
+                let (_, exports) = modules.entry(name).or_insert_with(|| (loc, exports.dupe()));
+                module_exports = Some(exports.dupe());
             }
             _ => {}
         }
@@ -1353,7 +1340,7 @@ pub(crate) mod scope {
         }
     }
 
-    /// With `declare_module_merging`, a name in a `declare module` block resolves to the
+    /// A name in a `declare module` block resolves to the
     /// module's export, which merges the declarations of all of its blocks, unless the block
     /// declares the name without exporting it.
     fn lookup_declare_module_export<'arena, 'ast>(
@@ -1638,7 +1625,7 @@ pub(crate) mod scope {
         }
     }
 
-    /// With `declare_module_merging`, library `declare module` blocks with the same name declare
+    /// Library `declare module` blocks with the same name declare
     /// one module, like TypeScript's ambient module declarations. Each block keeps its own scope,
     /// and its exports join the module's under declaration merging.
     pub(super) fn merge_declare_module<'arena: 'ast, 'ast>(
@@ -15952,14 +15939,7 @@ pub(super) fn statement<'arena: 'ast, 'ast>(
                 }
                 Id::Literal((loc, lit)) => (tbls.push_loc(loc.dupe()), lit.value.dupe()),
             };
-            let scope = scope::push_declare_module(
-                scopes,
-                tbls,
-                scope,
-                loc.dupe(),
-                name.dupe(),
-                opts.declare_module_merging,
-            );
+            let scope = scope::push_declare_module(scopes, tbls, scope, loc.dupe(), name.dupe());
             let (_, block) = body;
             let ast::statement::Block { body: stmts, .. } = block;
             for stmt in stmts.iter() {

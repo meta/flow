@@ -125,12 +125,8 @@ pub fn with_class_stack<'cx, A>(
     res
 }
 
-/// With `declare_module_merging`, the module of the library `declare module` block that contains
-/// the read at `loc`.
+/// The module of the library `declare module` block that contains the read at `loc`.
 fn declare_module_of_read<'cx>(cx: &mut Context<'cx>, loc: &ALoc) -> Option<FlowSmolStr> {
-    if !cx.declare_module_merging() {
-        return None;
-    }
     cx.environment()
         .var_info
         .declare_module_reads

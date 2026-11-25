@@ -636,8 +636,8 @@ where
     /// lets checking recover that namespace context after resolver traversal ends.
     pub declare_namespace_read_paths: FlowOrdMap<L, FlowVector<DeclareNamespaceReadPathElement<L>>>,
     /// For each identifier read inside a library `declare module` block, the
-    /// module. With `experimental.declare_module_merging`, a name that the block
-    /// doesn't bind reads the export of the module, which merges all of its blocks.
+    /// module. A name that the block doesn't bind reads the export of the module,
+    /// which merges all of its blocks.
     pub declare_module_reads: FlowOrdMap<L, FlowSmolStr>,
     /// Calls proven to be assertions by the targeted callee analysis, keyed
     /// by callee loc. This persisted map lets checking apply assertion
