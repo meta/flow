@@ -1410,7 +1410,8 @@ fn type_of_hint_decomposition<'cx>(
                         let env = &env.solving_implicit_instantiation();
                         speculation_flow::flow_t_unsafe(cx, env, (arr_t, t.dupe()))
                     }?;
-                    Ok(implicit_instantiation::pin_tvar(cx, env, &elem_t)?)
+                    implicit_instantiation::pin_tvar(cx, env, &elem_t)?
+                        .ok_or_else(|| UnconstrainedTvarException.into())
                 }
             }
             ConcrHintDecompositionInner::DecompAwait => {

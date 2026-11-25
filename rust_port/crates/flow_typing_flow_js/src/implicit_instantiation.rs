@@ -107,7 +107,6 @@ use flow_typing_type::type_::TypeDestructorTInner;
 use flow_typing_type::type_::TypeInner;
 use flow_typing_type::type_::TypeParam;
 use flow_typing_type::type_::TypeParamInner;
-use flow_typing_type::type_::UnifyCause;
 use flow_typing_type::type_::UnresolvedArgData;
 use flow_typing_type::type_::UnresolvedParam;
 use flow_typing_type::type_::UseOp;
@@ -2103,25 +2102,23 @@ fn marks_of_check<'cx>(
 }
 
 /// Pins `t`, the element type of an empty array literal decomposed from its hint, to the merge of
-/// its bounds, or to a fresh tvar if it has none.
+/// its bounds, or to `None` if it has none.
 pub fn pin_tvar<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     t: &Type,
-) -> Result<Type, FlowJsException> {
+) -> Result<Option<Type>, FlowJsException> {
     let bounds = match merge_lower_bounds(cx, env, false, t)? {
         Some(t) => UseTResult::UpperT(t),
         None => merge_upper_bounds(cx, env, &mut BTreeSet::new(), t)?,
     };
     match bounds {
-        UseTResult::UpperT(inferred) => Ok(inferred),
+        UseTResult::UpperT(inferred) => Ok(Some(inferred)),
         UseTResult::UpperPlaceholder(inferred) => {
             cx.set_synthesis_produced_uncacheable_result();
-            Ok(inferred)
+            Ok(Some(inferred))
         }
-        UseTResult::UpperEmpty | UseTResult::UpperNonT(_) => {
-            Ok(flow_typing_tvar::mk(cx, type_util::reason_of_t(t).dupe()))
-        }
+        UseTResult::UpperEmpty | UseTResult::UpperNonT(_) => Ok(None),
     }
 }
 
@@ -2839,6 +2836,27 @@ pub mod kit {
         })
     }
 
+    /// An `OpenT` indirection of `t`, the type `instantiate_poly_with_subst_map` substitutes for
+    /// `tparam`. A tvar is the same tvar under the type argument's reason, and any other type is
+    /// the content of a resolved tvar.
+    fn targ_indirection<'cx>(
+        cx: &mut Context<'cx>,
+        tparam: &TypeParam,
+        reason_op: &Reason,
+        reason_tapp: &Reason,
+        t: &Type,
+    ) -> Type {
+        let reason = instantiation_utils::implicit_type_argument::mk_targ_reason(
+            tparam,
+            reason_op,
+            reason_tapp,
+        );
+        match t.deref() {
+            TypeInner::OpenT(tvar) => Type::new(TypeInner::OpenT(Tvar::new(reason, tvar.id()))),
+            _ => flow_typing_tvar::mk_resolved(cx, reason, t.dupe()),
+        }
+    }
+
     fn instantiate_poly_with_subst_map<'cx>(
         cx: &mut Context<'cx>,
         env: &FlowJsEnv,
@@ -2852,42 +2870,26 @@ pub mod kit {
     ) -> Result<Type, FlowJsException> {
         let generalized_targ_map: BTreeMap<SubstName, GeneralizedTarg> = subst_map
             .iter()
-            .map(
-                |(name, gt)| -> Result<(SubstName, GeneralizedTarg), FlowJsException> {
-                    // Create an OpenT indirection of inferred result.
-                    // We specifically want the inferred type argument to have RTypeParam reason desc,
-                    // so that we can detect loops in type expansion.
-                    // See Instantiation_utils.ImplicitTypeArgument.abstract_targ.
-                    //
-                    // This OpenT indirection is also needed for performance purposes, since it prevents
-                    // unnecessary deep substitution traversals.
-                    let generalized_prime = instantiation_utils::implicit_type_argument::mk_targ(
-                        cx,
-                        &gt.tparam,
-                        reason_op,
-                        reason_tapp,
-                    );
-                    FlowJs::rec_unify_with_env(
-                        cx,
-                        env,
-                        trace,
-                        use_op.dupe(),
-                        UnifyCause::Uncategorized,
-                        Some(true),
-                        &gt.generalized,
-                        &generalized_prime,
-                    )?;
-                    Ok((
-                        name.dupe(),
-                        GeneralizedTarg {
-                            tparam: gt.tparam.dupe(),
-                            inferred: gt.inferred.dupe(),
-                            generalized: generalized_prime,
-                        },
-                    ))
-                },
-            )
-            .collect::<Result<BTreeMap<_, _>, FlowJsException>>()?;
+            .map(|(name, gt)| {
+                // Create an OpenT indirection of inferred result.
+                // We specifically want the inferred type argument to have RTypeParam reason desc,
+                // so that we can detect loops in type expansion.
+                // See Instantiation_utils.ImplicitTypeArgument.abstract_targ.
+                //
+                // This OpenT indirection is also needed for performance purposes, since it prevents
+                // unnecessary deep substitution traversals.
+                let generalized_prime =
+                    targ_indirection(cx, &gt.tparam, reason_op, reason_tapp, &gt.generalized);
+                (
+                    name.dupe(),
+                    GeneralizedTarg {
+                        tparam: gt.tparam.dupe(),
+                        inferred: gt.inferred.dupe(),
+                        generalized: generalized_prime,
+                    },
+                )
+            })
+            .collect();
 
         let final_subst_map: FlowOrdMap<SubstName, Type> = generalized_targ_map
             .iter()
@@ -2935,22 +2937,8 @@ pub mod kit {
             let mut combined_subst_map = final_subst_map.dupe();
             for (name, inward_name) in splitter.renames {
                 let gt = &subst_map[&name];
-                let inferred_prime = instantiation_utils::implicit_type_argument::mk_targ(
-                    cx,
-                    &gt.tparam,
-                    reason_op,
-                    reason_tapp,
-                );
-                FlowJs::rec_unify_with_env(
-                    cx,
-                    env,
-                    trace,
-                    use_op.dupe(),
-                    UnifyCause::Uncategorized,
-                    Some(true),
-                    &gt.inferred,
-                    &inferred_prime,
-                )?;
+                let inferred_prime =
+                    targ_indirection(cx, &gt.tparam, reason_op, reason_tapp, &gt.inferred);
                 combined_subst_map.insert(inward_name, inferred_prime);
             }
             (poly_t, combined_subst_map)
@@ -3195,13 +3183,22 @@ pub mod kit {
     ) -> Result<Type, FlowJsException> {
         let mut subst_map = BTreeMap::new();
         for tparam in tparams.iter() {
-            let targ = instantiation_utils::implicit_type_argument::mk_targ(
-                cx,
+            let targ_reason = instantiation_utils::implicit_type_argument::mk_targ_reason(
                 tparam,
                 reason_op,
                 reason_tapp,
             );
-            let inferred = pin_type(cx, env, &use_op, tparam, None, None, reason_op, &targ)?;
+            let inferred = pin_without_bounds(
+                cx,
+                env,
+                &use_op,
+                tparam,
+                tparam.default.as_ref(),
+                &tparam.bound,
+                false,
+                &targ_reason,
+                reason_op,
+            )?;
             let gt = GeneralizedTarg {
                 tparam: tparam.dupe(),
                 inferred: inferred.dupe(),

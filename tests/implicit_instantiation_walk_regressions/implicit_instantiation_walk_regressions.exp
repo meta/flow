@@ -1647,5 +1647,31 @@ References:
                       ^^^^^^^^^^^^ [2]
 
 
+Error ---------------------------------------------------------------------------------- wildcard_type_argument.js:37:21
 
-Found 89 errors
+Cannot call `table` with object literal bound to `plugins` because: [incompatible-type]
+ - in property `sortable.transformBodyCell`: `CellRender<Item, Col>` [1] is incompatible with
+   `CellRender<Item, string>` [1]
+    - in the first parameter > type argument `TColumnKey` [2]: `Col` [3] is incompatible with `string` [4]
+
+   wildcard_type_argument.js:37:21
+   37|   table({rowHeader, sortable, emptyState}); // okay
+                           ^^^^^^^^
+
+References:
+   wildcard_type_argument.js:9:8
+    9|     v: CellRender<TItem, TColumnKey>,
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   wildcard_type_argument.js:4:24
+    4| type CellRender<TItem, TColumnKey> = (
+                              ^^^^^^^^^^ [2]
+   wildcard_type_argument.js:35:38
+   35|   const sortable = useSortable<Item, Col>();
+                                            ^^^ [3]
+   wildcard_type_argument.js:34:49
+   34|   const rowHeader = useRowHeader<Item, _>({key: 'name'});
+                                                       ^^^^^^ [4]
+
+
+
+Found 90 errors

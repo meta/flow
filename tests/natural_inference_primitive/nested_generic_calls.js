@@ -144,3 +144,14 @@ function test_generic_callback() {
   const r1 = compactMap(['lit'], ident); // okay
   r1 as Array<string>; // okay
 }
+
+// Nested generic calls in an array literal argument agree with their hints on the precision of
+// their literals.
+function test_array_of_nested_calls() {
+  declare class Box<T> {}
+  declare function box<T>(x: T): Box<T>;
+  declare function wrap<S>(s: S): Box<S>;
+  declare function f<T>(x: T): T;
+
+  f([wrap(box(1)), wrap(box(0))]); // okay
+}
