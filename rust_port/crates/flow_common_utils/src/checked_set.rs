@@ -235,22 +235,6 @@ impl CheckedSet {
         }
     }
 
-    pub fn partition_dependencies(self) -> (CheckedSet, CheckedSet) {
-        let dependencies_only = CheckedSet {
-            focused: FlowOrdSet::new(),
-            dependents: FlowOrdSet::new(),
-            dependencies: self.dependencies,
-        };
-
-        let focused_and_dependents = CheckedSet {
-            focused: self.focused,
-            dependents: self.dependents,
-            dependencies: FlowOrdSet::new(),
-        };
-
-        (dependencies_only, focused_and_dependents)
-    }
-
     // Gives you a FilenameSet of all the checked files
     pub fn all(self) -> FlowOrdSet<FileKey> {
         self.focused

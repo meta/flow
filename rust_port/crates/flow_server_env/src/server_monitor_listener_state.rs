@@ -350,12 +350,6 @@ pub struct IncompatibleLibChange {
     pub changed_declaration_files: FlowOrdSet<FileKey>,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub enum Priority {
-    Priority,
-    Normal,
-}
-
 pub enum Updates {
     NormalUpdates(FlowOrdSet<FileKey>),
     RequiredFullCheckReinit {
@@ -467,7 +461,6 @@ pub fn recheck_fetch(
     queue: &RecheckQueue,
     process_updates: &dyn Fn(bool, &BTreeSet<String>) -> Updates,
     get_forced: &dyn Fn() -> CheckedSet,
-    priority: Priority,
 ) -> bool {
     let msgs: Vec<RecheckMsg> = {
         let mut stream = queue.stream.lock().unwrap();
@@ -572,17 +565,9 @@ pub fn recheck_fetch(
                     )
                 }
                 RecheckFiles::DependenciesToPrioritize(dependencies) => {
-                    let mut to_prioritize = CheckedSet::empty();
-                    to_prioritize.add(None, None, Some(dependencies));
-                    let files_to_force = match priority {
-                        Priority::Normal => to_prioritize,
-                        Priority::Priority => {
-                            let forced = get_forced();
-                            let mut result = to_prioritize;
-                            result.diff(&forced);
-                            result
-                        }
-                    };
+                    let mut files_to_force = CheckedSet::empty();
+                    files_to_force.add(None, None, Some(dependencies));
+                    files_to_force.diff(&get_forced());
                     update(workload, None, None, Some(&files_to_force), None, None)
                 }
                 RecheckFiles::FilesToReinit {
@@ -652,56 +637,12 @@ pub fn get_and_clear_recheck_workload(
     queue: &RecheckQueue,
     process_updates: &dyn Fn(bool, &BTreeSet<String>) -> Updates,
     get_forced: &dyn Fn() -> CheckedSet,
-) -> (Priority, RecheckWorkload) {
-    recheck_fetch(queue, process_updates, get_forced, Priority::Normal);
+) -> RecheckWorkload {
+    recheck_fetch(queue, process_updates, get_forced);
     let mut guard = queue.acc.lock().unwrap();
     let workload = guard.take().unwrap_or_else(empty_recheck_workload);
-    let RecheckWorkload {
-        recheck_epoch,
-        files_to_prioritize,
-        files_to_recheck,
-        files_to_force,
-        find_ref_command,
-        metadata,
-        incompatible_lib_change,
-    } = workload;
-    let (dependencies_to_force, files_to_force) = files_to_force.partition_dependencies();
-    if dependencies_to_force.is_empty() {
-        let workload = RecheckWorkload {
-            recheck_epoch,
-            files_to_prioritize,
-            files_to_recheck,
-            files_to_force,
-            find_ref_command,
-            metadata,
-            incompatible_lib_change,
-        };
-        *guard = Some(empty_recheck_workload());
-        (Priority::Normal, workload)
-    } else {
-        let priority_files_to_prioritize =
-            files_to_prioritize.dupe().union(files_to_recheck.dupe());
-        let priority_workload = RecheckWorkload {
-            recheck_epoch,
-            files_to_force: dependencies_to_force,
-            files_to_prioritize: priority_files_to_prioritize,
-            files_to_recheck: FlowOrdSet::new(),
-            find_ref_command: None,
-            metadata: empty_file_watcher_metadata(),
-            incompatible_lib_change: None,
-        };
-        let remaining_workload = RecheckWorkload {
-            recheck_epoch,
-            files_to_force,
-            files_to_prioritize: FlowOrdSet::new(),
-            files_to_recheck,
-            find_ref_command,
-            metadata,
-            incompatible_lib_change,
-        };
-        *guard = Some(remaining_workload);
-        (Priority::Priority, priority_workload)
-    }
+    *guard = Some(empty_recheck_workload());
+    workload
 }
 
 /// Blocks until a recheck message arrives.
@@ -723,10 +664,9 @@ fn fetch_recheck_changes(
     queue: &RecheckQueue,
     process_updates: &dyn Fn(bool, &BTreeSet<String>) -> Updates,
     get_forced: &dyn Fn() -> CheckedSet,
-    priority: Priority,
 ) -> Option<WorkloadChanges> {
     let before_len = recheck_workload_counts(queue);
-    if recheck_fetch(queue, process_updates, get_forced, priority) {
+    if recheck_fetch(queue, process_updates, get_forced) {
         let after_len = recheck_workload_counts(queue);
         Some(WorkloadChanges {
             num_files_to_prioritize: after_len.0 - before_len.0,
@@ -742,12 +682,11 @@ pub fn wait_for_updates_for_recheck(
     queue: &RecheckQueue,
     process_updates: &dyn Fn(bool, &BTreeSet<String>) -> Updates,
     get_forced: &dyn Fn() -> CheckedSet,
-    priority: Priority,
     stop: Option<&Receiver<()>>,
 ) -> Option<WorkloadChanges> {
     let recheck_pushes = stop.map(|_| subscribe_recheck_pushes(queue));
     loop {
-        if let Some(changes) = fetch_recheck_changes(queue, process_updates, get_forced, priority) {
+        if let Some(changes) = fetch_recheck_changes(queue, process_updates, get_forced) {
             return Some(changes);
         }
         match stop {

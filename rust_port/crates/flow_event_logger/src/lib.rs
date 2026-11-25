@@ -522,7 +522,6 @@ mod stub {
     pub fn log_typing_errors(_data: &serde_json::Value) {}
 
     pub fn recheck_canceled(
-        _priority: &str,
         _num_files_to_prioritize: i32,
         _num_files_to_recheck: i32,
         _num_files_to_force: i32,
@@ -1226,18 +1225,13 @@ mod fb_facade {
         fb::log_typing_errors(&s);
     }
 
-    // SHIM: maps OSS `priority: &str` to FB `priority: bool` by treating any
-    // non-empty string as truthy. Until callers pass a real bool, the
-    // truthiness mapping may not match OCaml semantics exactly.
+    // SHIM: forwards directly; FB and OSS share identical signature.
     pub fn recheck_canceled(
-        priority: &str,
         num_files_to_prioritize: i32,
         num_files_to_recheck: i32,
         num_files_to_force: i32,
     ) {
-        let priority = !priority.is_empty();
         fb::recheck_canceled(
-            priority,
             num_files_to_prioritize,
             num_files_to_recheck,
             num_files_to_force,

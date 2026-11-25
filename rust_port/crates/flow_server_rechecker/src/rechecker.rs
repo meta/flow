@@ -23,7 +23,6 @@ use flow_server_env::persistent_connection;
 use flow_server_env::server_env;
 use flow_server_env::server_monitor_listener_state;
 use flow_server_env::server_monitor_listener_state::FindRefCommand;
-use flow_server_env::server_monitor_listener_state::Priority;
 use flow_server_env::server_monitor_listener_state::RecheckQueue;
 use flow_server_env::server_monitor_listener_state::Updates;
 use flow_server_env::server_monitor_listener_state::WorkloadChanges;
@@ -197,7 +196,6 @@ fn run_but_cancel_on_file_changes<T, ProcessUpdates, GetForced, F, PreCancel, Po
     recheck_queue: Arc<RecheckQueue>,
     process_updates: ProcessUpdates,
     get_forced: GetForced,
-    priority: Priority,
     f: F,
     pre_cancel: PreCancel,
     post_cancel: PostCancel,
@@ -219,7 +217,6 @@ where
             &recheck_queue,
             &process_updates,
             &get_forced,
-            priority,
             Some(&stop_rx),
         ) {
             Some(WorkloadChanges {
@@ -234,10 +231,6 @@ where
                     num_files_to_recheck,
                 );
                 flow_event_logger::recheck_canceled(
-                    match priority {
-                        Priority::Priority => "true",
-                        Priority::Normal => "",
-                    },
                     num_files_to_prioritize as i32,
                     num_files_to_recheck as i32,
                     num_files_to_force as i32,
@@ -332,7 +325,7 @@ fn recheck_single_attempt(
     let options = &genv.options;
 
     let will_be_checked_files = Arc::new(RwLock::new(env.checked_files.dupe()));
-    let (priority, workload) = {
+    let workload = {
         let process_updates = |skip_incompatible: bool, updates: &BTreeSet<String>| -> Updates {
             process_updates(skip_incompatible, options, orchestrator.heap(), updates)
         };
@@ -457,7 +450,6 @@ fn recheck_single_attempt(
         orchestrator.recheck().dupe(),
         process_updates_for_cancel,
         get_forced_for_cancel,
-        priority,
         f,
         || {},
         move || {

@@ -1,2 +1,0 @@
-shell: test.sh
-wait_for_recheck: false
