@@ -1,3 +1,61 @@
+Error ---------------------------------------------------------------------------- declare_class_tparam_bound.d.ts:15:27
+
+Unexpected use of `this` type. [illegal-this]
+
+   15|   static create<T extends this>(x: T): T; // ERROR
+                                 ^^^^
+
+
+Error ---------------------------------------------------------------------------- declare_class_tparam_bound.d.ts:16:29
+
+Unexpected use of `this` type. [illegal-this]
+
+   16|   nested(): { get<T extends this>(x: T): T }; // ERROR
+                                   ^^^^
+
+
+Error ----------------------------------------------------------------------- declare_class_tparam_bound_import.ts:13:12
+
+Cannot call `sub.config` because in type argument `C`: object literal [1] is incompatible with `Config<Sub>` [2]. For
+example, property `sub` is missing in `Node` [3] but exists in `Sub` [4]. [incompatible-type]
+
+   declare_class_tparam_bound_import.ts:13:12
+   13| sub.config({ node: node }); // ERROR
+                  ^^^^^^^^^^^^^^ [1]
+
+References:
+   declare_class_tparam_bound.d.ts:13:20
+   13|   config<C extends Config<this>>(config: C): C;
+                          ^^^^^^^^^^^^ [2]
+   declare_class_tparam_bound_import.ts:10:21
+   10| declare const node: Node;
+                           ^^^^ [3]
+   declare_class_tparam_bound.d.ts:19:22
+   19| export declare class Sub extends Node { sub: string; }
+                            ^^^ [4]
+
+
+Error -------------------------------------------------------------------- declare_class_tparam_bound_same_file.ts:20:12
+
+Cannot call `sub.config` because in type argument `C`: object literal [1] is incompatible with `Config<Sub>` [2]. For
+example, property `sub` is missing in `Node` [3] but exists in `Sub` [4]. [incompatible-type]
+
+   declare_class_tparam_bound_same_file.ts:20:12
+   20| sub.config({ node: node }); // ERROR
+                  ^^^^^^^^^^^^^^ [1]
+
+References:
+   declare_class_tparam_bound_same_file.ts:12:20
+   12|   config<C extends Config<this>>(config: C): C;
+                          ^^^^^^^^^^^^ [2]
+   declare_class_tparam_bound_same_file.ts:17:21
+   17| declare const node: Node;
+                           ^^^^ [3]
+   declare_class_tparam_bound_same_file.ts:15:15
+   15| declare class Sub extends Node { sub: string; }
+                     ^^^ [4]
+
+
 Error ------------------------------------------------------------------------------------------ import_type_ts.ts:10:12
 
 Cannot implement `I` [1] with `BadCMT` because in property `clone` > the return value: `I` [2] is incompatible with
@@ -68,4 +126,4 @@ References:
 
 
 
-Found 4 errors
+Found 8 errors

@@ -1457,6 +1457,18 @@ fn func_scope_kind(
     }
 }
 
+fn is_static_member(prop: &ast::types::object::Property<ALoc, ALoc>) -> bool {
+    use ast::types::object::Property;
+
+    match prop {
+        Property::NormalProperty(p) => p.static_,
+        Property::Indexer(p) => p.static_,
+        Property::CallProperty(p) => p.static_,
+        Property::InternalSlot(p) => p.static_,
+        Property::SpreadProperty(_) | Property::MappedType(_) | Property::PrivateField(_) => false,
+    }
+}
+
 // Existing own properties on `Function` as defined in `lib/core.js`. We don't
 // want to shadow these when creating function statics.
 static FUNC_OWN_PROPS: std::sync::LazyLock<BTreeSet<&'static str>> =
@@ -3051,8 +3063,41 @@ impl<'a> DefFinder<'a> {
                 namespace_members: namespace_members.clone(),
             })),
         );
-        ast_visitor::declare_class_default(self, &loc, decl)?;
-        Ok(())
+        let ast::statement::DeclareClass {
+            id,
+            tparams,
+            body: (_, body),
+            extends,
+            mixins,
+            implements,
+            abstract_: _,
+            comments,
+        } = decl;
+        self.class_identifier(id)?;
+        if let Some(tparams) = tparams {
+            self.type_params(&ast_visitor::TypeParamsContext::DeclareClass, tparams)?;
+        }
+        for prop in body.properties.iter() {
+            if is_static_member(prop) {
+                self.object_type_property(prop)?;
+            } else {
+                self.in_new_tparams_env(true, |this| {
+                    this.add_tparam(id.loc.dupe(), FlowSmolStr::new_inline("this"));
+                    this.object_type_property(prop)
+                })?;
+            }
+        }
+        self.syntax_opt(body.comments.as_ref())?;
+        if let Some((_, ext)) = extends {
+            ast_visitor::visit_declare_class_extends(self, ext)?;
+        }
+        for (_, generic) in mixins.iter() {
+            self.generic_type(generic)?;
+        }
+        if let Some(implements) = implements {
+            self.class_implements(implements)?;
+        }
+        self.syntax_opt(comments.as_ref())
     }
 
     fn visit_class_property_value(
@@ -6048,6 +6093,31 @@ impl<'a, 'ast> AstVisitor<'ast, ALoc, ALoc, &'ast ALoc, EnvInvariant<ALoc>> for 
     ) -> Result<(), EnvInvariant<ALoc>> {
         self.in_new_tparams_env(true, |this| ast_visitor::function_type_default(this, ft))?;
         Ok(())
+    }
+
+    // The members of an object type do not see the `this` of an enclosing class or interface.
+    // A mapped type has no members, so it does.
+    fn type_(&mut self, t: &'ast ast::types::Type<ALoc, ALoc>) -> Result<(), EnvInvariant<ALoc>> {
+        match &**t {
+            ast::types::TypeInner::Object { inner, .. }
+                if !matches!(
+                    &*inner.properties,
+                    [ast::types::object::Property::MappedType(_)]
+                ) =>
+            {
+                let tparams = self
+                    .tparams
+                    .iter()
+                    .filter(|(_, name)| name.as_str() != "this")
+                    .map(|(loc, name)| (loc.dupe(), name.dupe()))
+                    .collect();
+                self.in_new_tparams_env(false, |this| {
+                    this.tparams = tparams;
+                    ast_visitor::type_default(this, t)
+                })
+            }
+            _ => ast_visitor::type_default(self, t),
+        }
     }
 
     fn object_mapped_type_property(

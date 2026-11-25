@@ -1213,8 +1213,7 @@ declare class C<S> {
     assert_eq!(
         result,
         r#"(2, 16) to (2, 17) =>
-(3, 6) to (3, 7) =>
-(2, 14) to (2, 15)"#
+legal scc: (((2, 14) to (2, 15)); ((3, 6) to (3, 7)))"#
     );
 }
 

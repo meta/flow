@@ -2747,8 +2747,10 @@ fn resolve_declare_class<'cx>(
     class_: &ast::statement::DeclareClass<ALoc, ALoc>,
 ) -> Result<Type, JobError> {
     let name_loc = class_.id.loc.dupe();
-    let (t, ast) = statement::declare_class(cx, loc.dupe(), class_)?;
-    cx.node_cache_mut().set_declared_class(loc, (t.dupe(), ast));
+    let (t, t_internal, ast) = statement::declare_class(cx, loc.dupe(), class_)?;
+    cx.node_cache_mut()
+        .set_declared_class(loc.dupe(), (t.dupe(), t_internal.dupe(), ast));
+    type_env::bind_class_self_type(cx, t_internal, loc);
     // Declaration merging: a `declare class` and same-name `interface`(s) fold the
     // interface members into the class type. The conflict map built in env_builder
     // keys the canonical class loc to the bad interface locs. Both class and
@@ -3303,6 +3305,12 @@ fn entries_of_def(
                     acc.insert(entry.dupe());
                 }
             }
+            Def::DeclaredClass(deref!(DeclaredClassDefData { loc, .. })) => {
+                acc.insert(env_api::EnvKey::new(
+                    env_api::DefLocType::ClassSelfLoc,
+                    loc.dupe(),
+                ));
+            }
             Def::Function(
                 deref!(FunctionDefData {
                     has_this_def: true,
@@ -3443,6 +3451,19 @@ fn init_type_param<'cx>(
             let self_ = type_env::read_class_self_type(cx, record_loc.dupe());
             let (this_param, this_t) =
                 flow_typing_statement::class_sig::mk_this(self_, cx, reason.dupe());
+            (
+                SubstName::name(FlowSmolStr::new("this")),
+                this_param,
+                this_t,
+            )
+        }
+        Some((Def::DeclaredClass(deref!(DeclaredClassDefData { loc, decl, .. })), _, _, _, _)) => {
+            let self_ = type_env::read_class_self_type(cx, loc.dupe());
+            let reason = reason::mk_reason(
+                reason::VirtualReasonDesc::RType(decl.id.name.dupe()),
+                decl.id.loc.dupe(),
+            );
+            let (this_param, this_t) = flow_typing_statement::class_sig::mk_this(self_, cx, reason);
             (
                 SubstName::name(FlowSmolStr::new("this")),
                 this_param,

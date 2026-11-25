@@ -3495,7 +3495,7 @@ fn statement_<'a>(
         StatementInner::DeclareClass { inner, .. } => {
             let name = &inner.id.name;
             let name_loc = inner.id.loc.dupe();
-            let (t, decl_ast) = declare_class(cx, loc.dupe(), inner)?;
+            let (t, _, decl_ast) = declare_class(cx, loc.dupe(), inner)?;
             let use_op = UseOp::Op(Arc::new(type_::RootUseOp::AssignVar {
                 var: Some(Box::new(type_::AssignVarTarget::Variable(mk_reason(
                     VirtualReasonDesc::RIdentifier(name.dupe()),
@@ -3699,7 +3699,7 @@ fn statement_<'a>(
                             loc: d_loc,
                             declaration: c,
                         } => {
-                            let (_, c_ast) = declare_class(cx, d_loc.dupe(), c)?;
+                            let (_, _, c_ast) = declare_class(cx, d_loc.dupe(), c)?;
                             D::Class {
                                 loc: d_loc.dupe(),
                                 declaration: c_ast.into(),
@@ -4974,7 +4974,7 @@ pub fn declare_class<'a>(
     cx: &mut Context<'a>,
     loc: ALoc,
     decl: &statement::DeclareClass<ALoc, ALoc>,
-) -> Result<(Type, statement::DeclareClass<ALoc, (ALoc, Type)>), JobError> {
+) -> Result<(Type, Type, statement::DeclareClass<ALoc, (ALoc, Type)>), JobError> {
     let node_cache = cx.node_cache();
     if let Some(node) = node_cache.get_declared_class(&loc) {
         flow_typing_debug::verbose::print_if_verbose_lazy(cx, None, None, None, || {
@@ -5000,10 +5000,10 @@ pub fn declare_class<'a>(
     }
     let desc = VirtualReasonDesc::RType(name.dupe());
     let reason = mk_reason(desc.clone(), name_loc.dupe());
-    let (t, class_sig, decl_ast) =
+    let (t, t_internal, class_sig, decl_ast) =
         type_annotation::mk_declare_class_sig(cx, loc.dupe(), name, reason, decl)?;
     class_sig::check_signature_compatibility(cx, mk_reason(desc, loc), &class_sig);
-    Ok((t, decl_ast))
+    Ok((t, t_internal, decl_ast))
 }
 
 fn validate_declare_component_params<'a>(

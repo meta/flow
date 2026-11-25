@@ -8563,7 +8563,7 @@ pub fn declare_class_default<'ast, Loc: Dupe, Type: Dupe, C, E>(
     Ok(())
 }
 
-fn visit_declare_class_extends<'ast, Loc: Dupe, Type: Dupe, C, E>(
+pub fn visit_declare_class_extends<'ast, Loc: Dupe, Type: Dupe, C, E>(
     visitor: &mut (impl AstVisitor<'ast, Loc, Type, C, E> + ?Sized),
     ext: &'ast ast::statement::DeclareClassExtends<Loc, Type>,
 ) -> Result<(), E> {

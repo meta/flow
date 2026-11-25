@@ -9600,6 +9600,7 @@ pub fn mk_declare_class_sig<'a>(
 ) -> Result<
     (
         Type,
+        Type,
         func_class_sig_types::class::Class<FuncTypeParamsConfig>,
         ast::statement::DeclareClass<ALoc, (ALoc, Type)>,
     ),
@@ -9915,8 +9916,8 @@ pub fn mk_declare_class_sig<'a>(
     class_t_internal
         .set(result.as_ref().map(|r| r.0.dupe()).map_err(|e| e.dupe()))
         .expect("the class signature is made once");
-    let (_, t, iface_sig, tast) = result?;
-    Ok((t, iface_sig, tast))
+    let (t_internal, t, iface_sig, tast) = result?;
+    Ok((t, t_internal, iface_sig, tast))
 }
 
 // =========================================================================

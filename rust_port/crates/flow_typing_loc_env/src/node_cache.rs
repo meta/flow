@@ -50,7 +50,7 @@ struct Cache<CX: ContextFamily + Clone> {
     aliases: ALocMap<(Type, ast::statement::TypeAlias<ALoc, (ALoc, Type)>)>,
     opaques: ALocMap<(Type, ast::statement::OpaqueType<ALoc, (ALoc, Type)>)>,
     interfaces: ALocMap<(Type, ast::statement::Interface<ALoc, (ALoc, Type)>)>,
-    declared_classes: ALocMap<(Type, ast::statement::DeclareClass<ALoc, (ALoc, Type)>)>,
+    declared_classes: ALocMap<(Type, Type, ast::statement::DeclareClass<ALoc, (ALoc, Type)>)>,
     declared_components: ALocMap<(Type, ast::statement::DeclareComponent<ALoc, (ALoc, Type)>)>,
     declared_namespaces: ALocMap<(Type, ast::statement::DeclareNamespace<ALoc, (ALoc, Type)>)>,
     class_sigs: ALocMap<(
@@ -214,7 +214,7 @@ impl<CX: ContextFamily + Clone> NodeCache<CX> {
     pub fn set_declared_class(
         &mut self,
         loc: ALoc,
-        class_: (Type, ast::statement::DeclareClass<ALoc, (ALoc, Type)>),
+        class_: (Type, Type, ast::statement::DeclareClass<ALoc, (ALoc, Type)>),
     ) {
         self.0.declared_classes.insert(loc, class_);
     }
@@ -380,7 +380,7 @@ impl<CX: ContextFamily + Clone> NodeCache<CX> {
     pub fn get_declared_class(
         &self,
         loc: &ALoc,
-    ) -> Option<(Type, ast::statement::DeclareClass<ALoc, (ALoc, Type)>)> {
+    ) -> Option<(Type, Type, ast::statement::DeclareClass<ALoc, (ALoc, Type)>)> {
         self.0.declared_classes.get(loc).cloned()
     }
 

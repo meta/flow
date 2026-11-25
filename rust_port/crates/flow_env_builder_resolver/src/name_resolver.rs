@@ -11443,14 +11443,28 @@ impl<'ast, 'a, Cx: Context, Fl: Flow<Cx = Cx>>
 
     fn declare_class(
         &mut self,
-        _loc: &ALoc,
+        loc: &ALoc,
         decl: &flow_parser::ast::statement::DeclareClass<ALoc, ALoc>,
     ) -> Result<(), AbruptCompletion> {
+        use flow_common::reason::VirtualReason;
+        use flow_common::reason::VirtualReasonDesc;
+
         self.with_class_type_params(decl.tparams.as_ref(), |this| {
             scope_builder::declare_class(this, true, decl, &|this, f| {
                 this.hoist_annotations(|this_inner| f(this_inner))
             })
-        })
+        })?;
+        let id = &decl.id;
+        if self.is_assigning_write(&env_api::EnvKey::ordinary(id.loc.dupe())) {
+            self.env_state.write_entries.insert(
+                env_api::EnvKey::new(env_api::DefLocType::ClassSelfLoc, loc.dupe()),
+                EnvEntry::AssigningWrite(VirtualReason::new(
+                    VirtualReasonDesc::RType(id.name.dupe()),
+                    id.loc.dupe(),
+                )),
+            );
+        }
+        Ok(())
     }
 
     fn declare_function(
@@ -13055,6 +13069,18 @@ impl<'ast, 'a, Cx: Context> AstVisitor<'ast, ALoc, ALoc, &'ast ALoc, !> for Dead
             loc.dupe(),
         ));
         ast_visitor::class_default(self, loc, cls)
+    }
+
+    fn declare_class(
+        &mut self,
+        loc: &ALoc,
+        decl: &flow_parser::ast::statement::DeclareClass<ALoc, ALoc>,
+    ) -> Result<(), !> {
+        self.mark_dead_write(env_api::EnvKey::new(
+            env_api::DefLocType::ClassSelfLoc,
+            loc.dupe(),
+        ));
+        ast_visitor::declare_class_default(self, loc, decl)
     }
 
     fn record_declaration(
