@@ -44,6 +44,7 @@ use flow_typing_type::type_::TypeInner;
 use flow_typing_type::type_::eval;
 use flow_typing_type::type_::inter_rep;
 use flow_typing_type::type_::unknown_use;
+use flow_typing_type::type_util;
 
 use crate::flow_js::FlowJs;
 
@@ -181,8 +182,8 @@ pub fn evaluate_annotation<'cx>(
 /// `type A = {next: A, ...}` and `type B = {next: B, ...}` gives an object
 /// whose `next` is this same `EvalT` again rather than recursing forever.
 ///
-/// `?L & ?R` becomes `?(L & R)`: as a member, a maybe concretizes to several
-/// types, which would leave the whole intersection unnormalized.
+/// `?L & ?R` becomes `?(L & R)`: as a member, a union concretizes to several types, which would
+/// leave the whole intersection unnormalized.
 fn make_recursive_eval<'cx>(
     cx: &mut Context<'cx>,
     reason: &Reason,
@@ -195,6 +196,15 @@ fn make_recursive_eval<'cx>(
             reason.dupe(),
             make_recursive_eval(cx, reason, left.dupe(), right.dupe()),
         ));
+    }
+    if let Some(left) = type_util::non_maybe_members(&left)
+        && let Some(right) = type_util::non_maybe_members(&right)
+    {
+        return type_util::maybe_t(
+            None,
+            reason.dupe(),
+            make_recursive_eval(cx, reason, left, right),
+        );
     }
     let intersection = Type::new(TypeInner::IntersectionT(
         reason.dupe(),
