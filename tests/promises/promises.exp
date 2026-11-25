@@ -355,9 +355,6 @@ Cannot call `p.finally` because: [incompatible-type]
  - Either `1` [1] is incompatible with `() => void` [2].
  - Or `1` [1] is incompatible with `() => unknown` [3].
 
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
-
    finally.js:14:3
    14| p.finally(1); // Error: not a function
          ^^^^^^^

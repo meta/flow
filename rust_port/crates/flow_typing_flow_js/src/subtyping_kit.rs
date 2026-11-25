@@ -241,6 +241,26 @@ fn flow_all_in_union<'cx>(
     )
 }
 
+/// `l` flows into `rest`, the members of a union with `null` and `void` members other than those:
+/// `mixed` without its `null` and `void`.
+fn flow_to_non_maybe_members<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    trace: DepthTrace,
+    use_op: UseOp,
+    l: &Type,
+    rest: &Type,
+) -> Result<(), FlowJsException> {
+    let l = match l.deref() {
+        DefT(r, deref!(MixedT(MixedFlavor::MixedEverything))) => Type::new(DefT(
+            r.dupe(),
+            DefT::new(MixedT(MixedFlavor::MixedNonMaybe)),
+        )),
+        _ => l.dupe(),
+    };
+    FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &l, rest)
+}
+
 fn add_output_prop_polarity_mismatch<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
@@ -3216,6 +3236,10 @@ pub fn rec_sub_t<'cx>(
             let t = type_util::push_type_alias_reason(r, t.dupe());
             FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &t, u)
         }
+        (MaybeT(r, t), UnionT(..)) if type_util::is_maybe_union(u) => {
+            let t = type_util::push_type_alias_reason(r, t.dupe());
+            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &t, u)
+        }
         (MaybeT(reason, t), _) => {
             let reason = reason.dupe().replace_desc(VirtualReasonDesc::RNullOrVoid);
             let t = type_util::push_type_alias_reason(&reason, t.dupe());
@@ -4650,6 +4674,12 @@ pub fn rec_sub_t<'cx>(
             flow_js_utils::update_lit_type_from_annot(cx, env, l);
             Ok(())
         }
+        // As `?T` is a union of `T`, `null` and `void`, a value fits it when the rest of the value,
+        // without its own `null` and `void`, fits `T`. This comes before the scan below, which
+        // would flatten `T`.
+        (_, UnionT(..)) if let Some(rest) = type_util::maybe_inner(u) => {
+            flow_to_non_maybe_members(cx, env, trace, use_op, l, &rest)
+        }
         (_, UnionT(_, rep))
             if {
                 let ts: Vec<Type> = type_mapper::union_flatten(cx, rep.members_iter().duped());
@@ -4707,6 +4737,11 @@ pub fn rec_sub_t<'cx>(
                 speculation_kit::try_union(cx, env, None, trace, use_op, l.dupe(), r.dupe(), rep)?;
             }
             Ok(())
+        }
+        // A value fits a union with `null` and `void` members, as `?T` is, when the rest of the
+        // value, without its own `null` and `void`, fits the rest of the union.
+        (_, UnionT(..)) if let Some(rest) = type_util::non_maybe_members(u) => {
+            flow_to_non_maybe_members(cx, env, trace, use_op, l, &rest)
         }
         // The following case distributes the opaque constructor over a union/maybe/optional
         // type in the super type position of the opaque type.

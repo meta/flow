@@ -84,12 +84,8 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- method.js:46:50
 
-Cannot assign `optionalResult?.info.serialize(...)` to `optionalSerialized` because: [incompatible-type]
- - Either `unknown` [1] is incompatible with `number` [2].
- - Or `unknown` [1] is incompatible with `null` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot assign `optionalResult?.info.serialize(...)` to `optionalSerialized` because `unknown` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    method.js:46:50
    46| const optionalSerialized: number | null | void = optionalResult?.info.serialize('DOG'); // ERROR
@@ -102,9 +98,6 @@ References:
    method.js:46:27
    46| const optionalSerialized: number | null | void = optionalResult?.info.serialize('DOG'); // ERROR
                                  ^^^^^^ [2]
-   method.js:46:36
-   46| const optionalSerialized: number | null | void = optionalResult?.info.serialize('DOG'); // ERROR
-                                          ^^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------------- method.js:47:1

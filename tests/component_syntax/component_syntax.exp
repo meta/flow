@@ -1032,9 +1032,6 @@ The `ref` parameter must be a subtype of `React.RefSetter`: [incompatible-type]
  - Either `number` [1] is incompatible with `{writeonly current: any | null, ...}` [2].
  - Or `number` [1] is incompatible with `(instance: any | null) => void | (() => void)` [3].
 
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
-
    declared.js:50:29
     50| declare component InlineRef(ref: number); // error
                                     ^^^
@@ -1980,9 +1977,6 @@ The `ref` parameter must be a subtype of `React.RefSetter`: [incompatible-type]
  - Either `string` [1] is incompatible with `{writeonly current: any | null, ...}` [2].
  - Or `string` [1] is incompatible with `(instance: any | null) => void | (() => void)` [3].
 
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
-
    names.js:22:24
     22| export component NoRef(ref: string) { return <div /> }; // Error
                                ^^^
@@ -2474,8 +2468,8 @@ References:
 Error ------------------------------------------------------------------------------------------------- propsof.js:28:22
 
 Cannot create `meta` element because in property `ref`: [incompatible-type]
- - Either in the first parameter: `CommonInstance` [1] is incompatible with `AInstance` [2].
- - Or in the first parameter: `CommonInstance` [1] is incompatible with `null` [3].
+ - Either in property `current`: `CommonInstance` [1] is incompatible with `AInstance` [2].
+ - Or in property `current`: `CommonInstance` [1] is incompatible with `null` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -2499,8 +2493,8 @@ References:
 Error ------------------------------------------------------------------------------------------------- propsof.js:28:22
 
 Cannot create `meta` element because in property `ref`: [incompatible-type]
- - Either in property `current`: `CommonInstance` [1] is incompatible with `AInstance` [2].
- - Or in property `current`: `CommonInstance` [1] is incompatible with `null` [3].
+ - Either in the first parameter: `CommonInstance` [1] is incompatible with `AInstance` [2].
+ - Or in the first parameter: `CommonInstance` [1] is incompatible with `null` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -2850,79 +2844,60 @@ References:
 Error ---------------------------------------------------------------------------------------------------- refs.js:64:53
 
 Cannot create `MyNestedInput` element because in property `ref`: [incompatible-type]
- - Either in the first parameter: `CommonInstance` [1] is incompatible with `InputInstance` [2].
- - Or in the first parameter: `CommonInstance` [1] is incompatible with `null` [3].
+ - Either in property `current`: `CommonInstance` [1] is incompatible with `InputInstance` [2].
+ - Or `{writeonly current: ?InputInstance, ...}` [3] is incompatible with
+   `(instance: ?CommonInstance) => void | (() => void)` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    refs.js:64:53
-   64|                 <MyNestedInput {...otherProps} ref={ref} />
-                                                           ^^^
+    64|                 <MyNestedInput {...otherProps} ref={ref} />
+                                                            ^^^
 
 References:
    refs.js:56:66
-   56|     component MyNestedInput(other: string, ref: React.RefSetter<?CommonInstance>) {
-                                                                        ^^^^^^^^^^^^^^ [1]
+    56|     component MyNestedInput(other: string, ref: React.RefSetter<?CommonInstance>) {
+                                                                         ^^^^^^^^^^^^^^ [1]
    refs.js:60:60
-   60|     component MyInput(label: string, ref: React.RefSetter<?InputInstance>, ...otherProps: { other: string}) {
-                                                                  ^^^^^^^^^^^^^ [2]
-   refs.js:60:59
-   60|     component MyInput(label: string, ref: React.RefSetter<?InputInstance>, ...otherProps: { other: string}) {
-                                                                 ^^^^^^^^^^^^^^ [3]
+    60|     component MyInput(label: string, ref: React.RefSetter<?InputInstance>, ...otherProps: { other: string}) {
+                                                                   ^^^^^^^^^^^^^ [2]
+   refs.js:60:43
+    60|     component MyInput(label: string, ref: React.RefSetter<?InputInstance>, ...otherProps: { other: string}) {
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/react.js:108:8
+   108|     | ((instance: T | null) => void | (() => void))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ---------------------------------------------------------------------------------------------------- refs.js:64:53
 
 Cannot create `MyNestedInput` element because in property `ref`: [incompatible-type]
- - Either in property `current`: `CommonInstance` [1] is incompatible with `InputInstance` [2].
- - Or in property `current`: `CommonInstance` [1] is incompatible with `null` [3].
+ - Either in the first parameter: `InputInstance` [1] is incompatible with `CommonInstance` [2].
+ - Or `(instance: ?InputInstance) => void | (() => void)` [3] is incompatible with
+   `{writeonly current: ?CommonInstance, ...}` [4].
+    - Functions without statics are not compatible with objects.
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    refs.js:64:53
-   64|                 <MyNestedInput {...otherProps} ref={ref} />
-                                                           ^^^
+    64|                 <MyNestedInput {...otherProps} ref={ref} />
+                                                            ^^^
 
 References:
-   refs.js:56:66
-   56|     component MyNestedInput(other: string, ref: React.RefSetter<?CommonInstance>) {
-                                                                        ^^^^^^^^^^^^^^ [1]
    refs.js:60:60
-   60|     component MyInput(label: string, ref: React.RefSetter<?InputInstance>, ...otherProps: { other: string}) {
-                                                                  ^^^^^^^^^^^^^ [2]
-   refs.js:60:59
-   60|     component MyInput(label: string, ref: React.RefSetter<?InputInstance>, ...otherProps: { other: string}) {
-                                                                 ^^^^^^^^^^^^^^ [3]
-
-
-Error ---------------------------------------------------------------------------------------------------- refs.js:92:13
-
-Cannot create `Foo` element because in property `ref`: [incompatible-type]
- - Either in the first parameter > property `bar`: `number` [1] is incompatible with `boolean` [2].
- - Or in the first parameter: `{bar: number, foo: string}` [3] is incompatible with `null` [4].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
-
-   refs.js:92:13
-    92|   <Foo ref={badRef} />; // error
-                    ^^^^^^
-
-References:
-   refs.js:88:66
-    88|   declare component Foo(ref?: React.RefSetter<{foo: string, bar: number}>)
-                                                                         ^^^^^^ [1]
-   refs.js:90:60
-    90|   declare const badRef: React.RefSetter<{foo: string, bar: boolean}>;
-                                                                   ^^^^^^^ [2]
-   refs.js:88:47
-    88|   declare component Foo(ref?: React.RefSetter<{foo: string, bar: number}>)
-                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
-   <BUILTINS>/react.js:108:23
-   108|     | ((instance: T | null) => void | (() => void))
-                              ^^^^ [4]
+    60|     component MyInput(label: string, ref: React.RefSetter<?InputInstance>, ...otherProps: { other: string}) {
+                                                                   ^^^^^^^^^^^^^ [1]
+   refs.js:56:66
+    56|     component MyNestedInput(other: string, ref: React.RefSetter<?CommonInstance>) {
+                                                                         ^^^^^^^^^^^^^^ [2]
+   refs.js:60:43
+    60|     component MyInput(label: string, ref: React.RefSetter<?InputInstance>, ...otherProps: { other: string}) {
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/react.js:107:7
+   107|     | { writeonly current: T | null, ... }
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ---------------------------------------------------------------------------------------------------- refs.js:92:13
@@ -2953,14 +2928,39 @@ References:
                                        ^^^^ [4]
 
 
+Error ---------------------------------------------------------------------------------------------------- refs.js:92:13
+
+Cannot create `Foo` element because in property `ref`: [incompatible-type]
+ - Either in the first parameter > property `bar`: `number` [1] is incompatible with `boolean` [2].
+ - Or in the first parameter: `{bar: number, foo: string}` [3] is incompatible with `null` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   refs.js:92:13
+    92|   <Foo ref={badRef} />; // error
+                    ^^^^^^
+
+References:
+   refs.js:88:66
+    88|   declare component Foo(ref?: React.RefSetter<{foo: string, bar: number}>)
+                                                                         ^^^^^^ [1]
+   refs.js:90:60
+    90|   declare const badRef: React.RefSetter<{foo: string, bar: boolean}>;
+                                                                   ^^^^^^^ [2]
+   refs.js:88:47
+    88|   declare component Foo(ref?: React.RefSetter<{foo: string, bar: number}>)
+                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/react.js:108:23
+   108|     | ((instance: T | null) => void | (() => void))
+                              ^^^^ [4]
+
+
 Error --------------------------------------------------------------------------------------------------- refs.js:105:23
 
 Cannot create `GenericRef1` element because in property `ref`: [incompatible-type]
  - Either `1` [1] is incompatible with `{writeonly current: unknown, ...}` [2].
  - Or `1` [1] is incompatible with `(instance: unknown) => void | (() => void)` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
 
    refs.js:105:23
    105|     <GenericRef1 ref={1} />; // error

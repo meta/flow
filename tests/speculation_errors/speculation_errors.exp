@@ -3402,12 +3402,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- nullish.js:6:1
 
-Cannot cast `42` to `?string` because: [incompatible-type]
- - Either `42` [1] is incompatible with `string` [2].
- - Or `42` [1] is incompatible with `null` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot cast `42` to `?string` because `42` [1] is incompatible with `string` [2]. [incompatible-type]
 
    nullish.js:6:1
    6| 42 as string | null | void; // Error: should only show string
@@ -3417,19 +3412,11 @@ References:
    nullish.js:6:7
    6| 42 as string | null | void; // Error: should only show string
             ^^^^^^ [2]
-   nullish.js:6:16
-   6| 42 as string | null | void; // Error: should only show string
-                     ^^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------------- nullish.js:7:1
 
-Cannot cast `42` to `?{}` because: [incompatible-type]
- - Either `42` [1] is incompatible with `{}` [2].
- - Or `42` [1] is incompatible with `null` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot cast `42` to `?{}` because `42` [1] is incompatible with `{}` [2]. [incompatible-type]
 
    nullish.js:7:1
    7| 42 as {} | null | void; // Error: should only show object
@@ -3439,19 +3426,11 @@ References:
    nullish.js:7:7
    7| 42 as {} | null | void; // Error: should only show object
             ^^ [2]
-   nullish.js:7:12
-   7| 42 as {} | null | void; // Error: should only show object
-                 ^^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------------- nullish.js:8:1
 
-Cannot cast `42` to `?Readonly<[]>` because: [incompatible-type]
- - Either `42` [1] is incompatible with `Readonly<[]>` [2].
- - Or `42` [1] is incompatible with `null` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot cast `42` to `?Readonly<[]>` because `42` [1] is incompatible with `Readonly<[]>` [2]. [incompatible-type]
 
    nullish.js:8:1
    8| 42 as [] | null | void; // Error: should only show array
@@ -3461,19 +3440,12 @@ References:
    nullish.js:8:7
    8| 42 as [] | null | void; // Error: should only show array
             ^^ [2]
-   nullish.js:8:12
-   8| 42 as [] | null | void; // Error: should only show array
-                 ^^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------------- nullish.js:9:2
 
-Cannot cast object literal to `?string` because: [incompatible-type]
- - Either object literal [1] is incompatible with `string` [2].
- - Or object literal [1] is incompatible with `null` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot cast object literal to `?string` because object literal [1] is incompatible with `string` [2].
+[incompatible-type]
 
    nullish.js:9:2
    9| ({}) as string | null | void; // Error: should only show string
@@ -3483,19 +3455,12 @@ References:
    nullish.js:9:9
    9| ({}) as string | null | void; // Error: should only show string
               ^^^^^^ [2]
-   nullish.js:9:18
-   9| ({}) as string | null | void; // Error: should only show string
-                       ^^^^ [3]
 
 
 Error -------------------------------------------------------------------------------------------------- nullish.js:10:2
 
-Cannot cast object literal to `?{p: empty}` because: [incompatible-type]
- - Either property `p` is missing in object literal [1] but exists in `{p: empty}` [2].
- - Or object literal [1] is incompatible with `null` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot cast object literal to `?{p: empty}` because property `p` is missing in object literal [1] but exists in
+`{p: empty}` [2]. [incompatible-type]
 
    nullish.js:10:2
    10| ({}) as {p: empty} | null | void; // Error: should only show object
@@ -3505,19 +3470,12 @@ References:
    nullish.js:10:9
    10| ({}) as {p: empty} | null | void; // Error: should only show object
                ^^^^^^^^^^ [2]
-   nullish.js:10:22
-   10| ({}) as {p: empty} | null | void; // Error: should only show object
-                            ^^^^ [3]
 
 
 Error -------------------------------------------------------------------------------------------------- nullish.js:11:2
 
-Cannot cast object literal to `?Readonly<[]>` because: [incompatible-type]
- - Either object literal [1] is incompatible with `Readonly<[]>` [2].
- - Or object literal [1] is incompatible with `null` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot cast object literal to `?Readonly<[]>` because object literal [1] is incompatible with `Readonly<[]>` [2].
+[incompatible-type]
 
    nullish.js:11:2
    11| ({}) as [] | null | void; // Error: should only show array
@@ -3527,19 +3485,11 @@ References:
    nullish.js:11:9
    11| ({}) as [] | null | void; // Error: should only show array
                ^^ [2]
-   nullish.js:11:14
-   11| ({}) as [] | null | void; // Error: should only show array
-                    ^^^^ [3]
 
 
 Error -------------------------------------------------------------------------------------------------- nullish.js:12:1
 
-Cannot cast array literal to `?string` because: [incompatible-type]
- - Either `Array<empty>` [1] is incompatible with `string` [2].
- - Or `Array<empty>` [1] is incompatible with `null` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot cast array literal to `?string` because `Array<empty>` [1] is incompatible with `string` [2]. [incompatible-type]
 
    nullish.js:12:1
    12| [] as string | null | void; // Error: should only show string
@@ -3549,19 +3499,11 @@ References:
    nullish.js:12:7
    12| [] as string | null | void; // Error: should only show string
              ^^^^^^ [2]
-   nullish.js:12:16
-   12| [] as string | null | void; // Error: should only show string
-                      ^^^^ [3]
 
 
 Error -------------------------------------------------------------------------------------------------- nullish.js:13:1
 
-Cannot cast array literal to `?{}` because: [incompatible-type]
- - Either `Array<empty>` [1] is incompatible with `{}` [2].
- - Or `Array<empty>` [1] is incompatible with `null` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot cast array literal to `?{}` because `Array<empty>` [1] is incompatible with `{}` [2]. [incompatible-type]
 
    nullish.js:13:1
    13| [] as {} | null | void; // Error: should only show object
@@ -3571,19 +3513,12 @@ References:
    nullish.js:13:7
    13| [] as {} | null | void; // Error: should only show object
              ^^ [2]
-   nullish.js:13:12
-   13| [] as {} | null | void; // Error: should only show object
-                  ^^^^ [3]
 
 
 Error -------------------------------------------------------------------------------------------------- nullish.js:14:1
 
-Cannot cast array literal to `?[empty]` because: [incompatible-type]
- - Either `Readonly<[]>` [1] has 0 elements but `[empty]` [2] has 1 element.
- - Or `Array<empty>` [1] is incompatible with `null` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot cast array literal to `?[empty]` because `Readonly<[]>` [1] has 0 elements but `[empty]` [2] has 1 element.
+[invalid-tuple-arity]
 
    nullish.js:14:1
    14| [] as [empty] | null | void; // Error: should only show array
@@ -3593,9 +3528,6 @@ References:
    nullish.js:14:7
    14| [] as [empty] | null | void; // Error: should only show array
              ^^^^^^^ [2]
-   nullish.js:14:17
-   14| [] as [empty] | null | void; // Error: should only show array
-                       ^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------ numeric_sentinel.js:9:3

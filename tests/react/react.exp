@@ -1291,9 +1291,6 @@ Cannot create `Foo` element because in property `ref`: [incompatible-type]
  - Either `"foo"` [1] is incompatible with `{writeonly current: Foo | null, ...}` [2].
  - Or `"foo"` [1] is incompatible with `(instance: Foo | null) => void | (() => void)` [3].
 
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
-
    ref.js:7:10
      7| <Foo ref="foo" />; // Error: string ref is banned
                  ^^^^^ [1]
@@ -1433,9 +1430,6 @@ Error --------------------------------------------------------------------------
 Cannot create `FooExact` element because in property `ref`: [incompatible-type]
  - Either `"foo"` [1] is incompatible with `{writeonly current: FooExact | null, ...}` [2].
  - Or `"foo"` [1] is incompatible with `(instance: FooExact | null) => void | (() => void)` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
 
    ref.js:21:15
     21| <FooExact ref="foo" />; // Error: string ref is banned

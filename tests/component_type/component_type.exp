@@ -38,32 +38,6 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `Foo` to `component(bar: string, ref: React.RefSetter<string>)` because in property `ref`:
 [incompatible-type]
- - Either in the first parameter: `Foo` [1] is incompatible with `string` [2].
- - Or in the first parameter: `Foo` [1] is incompatible with `null` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
-
-   class_to_component_type.js:9:1
-     9| Foo as component( // error: Foo ~> string
-        ^^^
-
-References:
-   class_to_component_type.js:3:15
-     3| declare class Foo extends React.Component<{bar: string}> {}
-                      ^^^ [1]
-   class_to_component_type.js:11:26
-    11|     ref: React.RefSetter<string>
-                                 ^^^^^^ [2]
-   <BUILTINS>/react.js:108:23
-   108|     | ((instance: T | null) => void | (() => void))
-                              ^^^^ [3]
-
-
-Error ----------------------------------------------------------------------------------- class_to_component_type.js:9:1
-
-Cannot cast `Foo` to `component(bar: string, ref: React.RefSetter<string>)` because in property `ref`:
-[incompatible-type]
  - Either in property `current`: `Foo` [1] is incompatible with `string` [2].
  - Or in property `current`: `Foo` [1] is incompatible with `null` [3].
 
@@ -86,11 +60,38 @@ References:
                                        ^^^^ [3]
 
 
+Error ----------------------------------------------------------------------------------- class_to_component_type.js:9:1
+
+Cannot cast `Foo` to `component(bar: string, ref: React.RefSetter<string>)` because in property `ref`:
+[incompatible-type]
+ - Either in the first parameter: `Foo` [1] is incompatible with `string` [2].
+ - Or in the first parameter: `Foo` [1] is incompatible with `null` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   class_to_component_type.js:9:1
+     9| Foo as component( // error: Foo ~> string
+        ^^^
+
+References:
+   class_to_component_type.js:3:15
+     3| declare class Foo extends React.Component<{bar: string}> {}
+                      ^^^ [1]
+   class_to_component_type.js:11:26
+    11|     ref: React.RefSetter<string>
+                                 ^^^^^^ [2]
+   <BUILTINS>/react.js:108:23
+   108|     | ((instance: T | null) => void | (() => void))
+                              ^^^^ [3]
+
+
 Error ---------------------------------------------------------------------------------- class_to_component_type.js:13:1
 
 Cannot cast `Foo` to `component(bar: string, ref: ImNotARefSetter)` because in property `ref`: [incompatible-type]
  - Either `ImNotARefSetter` [1] is incompatible with `(instance: Foo | null) => void | (() => void)` [2].
- - Or `ImNotARefSetter` [1] is incompatible with `null` [3].
+ - Or `ImNotARefSetter` [1] is not a subtype of `{writeonly current: Foo | null, ...}` [3]. Class instances are not
+   subtypes of object types; consider rewriting `{writeonly current: Foo | null, ...}` [3] as an interface.
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -106,9 +107,9 @@ References:
    <BUILTINS>/react.js:108:8
    108|     | ((instance: T | null) => void | (() => void))
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/react.js:109:7
-   109|     | null
-              ^^^^ [3]
+   <BUILTINS>/react.js:107:7
+   107|     | { writeonly current: T | null, ... }
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error -------------------------------------------------------------------------------------------- classes_lower.js:17:1
@@ -175,32 +176,6 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `ComponentNarrower` to `component(ref: React.RefSetter<Component>)` because in property `ref`:
 [incompatible-type]
- - Either in the first parameter: `ComponentNarrower` [1] is incompatible with `Component` [2].
- - Or in the first parameter: `ComponentNarrower` [1] is incompatible with `null` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
-
-   classes_lower.js:19:1
-    19| ComponentNarrower as component(ref: React.RefSetter<Component>, ...{...}); // Error instance type is wrong
-        ^^^^^^^^^^^^^^^^^
-
-References:
-   classes_lower.js:11:7
-    11| class ComponentNarrower extends React.Component<{foo: number, bar: number, ...}> {
-              ^^^^^^^^^^^^^^^^^ [1]
-   classes_lower.js:19:53
-    19| ComponentNarrower as component(ref: React.RefSetter<Component>, ...{...}); // Error instance type is wrong
-                                                            ^^^^^^^^^ [2]
-   <BUILTINS>/react.js:108:23
-   108|     | ((instance: T | null) => void | (() => void))
-                              ^^^^ [3]
-
-
-Error -------------------------------------------------------------------------------------------- classes_lower.js:19:1
-
-Cannot cast `ComponentNarrower` to `component(ref: React.RefSetter<Component>)` because in property `ref`:
-[incompatible-type]
  - Either in property `current`: `ComponentNarrower` [1] is incompatible with `Component` [2].
  - Or in property `current`: `ComponentNarrower` [1] is incompatible with `null` [3].
 
@@ -221,6 +196,32 @@ References:
    <BUILTINS>/react.js:107:32
    107|     | { writeonly current: T | null, ... }
                                        ^^^^ [3]
+
+
+Error -------------------------------------------------------------------------------------------- classes_lower.js:19:1
+
+Cannot cast `ComponentNarrower` to `component(ref: React.RefSetter<Component>)` because in property `ref`:
+[incompatible-type]
+ - Either in the first parameter: `ComponentNarrower` [1] is incompatible with `Component` [2].
+ - Or in the first parameter: `ComponentNarrower` [1] is incompatible with `null` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   classes_lower.js:19:1
+    19| ComponentNarrower as component(ref: React.RefSetter<Component>, ...{...}); // Error instance type is wrong
+        ^^^^^^^^^^^^^^^^^
+
+References:
+   classes_lower.js:11:7
+    11| class ComponentNarrower extends React.Component<{foo: number, bar: number, ...}> {
+              ^^^^^^^^^^^^^^^^^ [1]
+   classes_lower.js:19:53
+    19| ComponentNarrower as component(ref: React.RefSetter<Component>, ...{...}); // Error instance type is wrong
+                                                            ^^^^^^^^^ [2]
+   <BUILTINS>/react.js:108:23
+   108|     | ((instance: T | null) => void | (() => void))
+                              ^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------- component_to_component.js:22:10

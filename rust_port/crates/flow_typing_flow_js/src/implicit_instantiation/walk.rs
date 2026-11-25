@@ -1570,23 +1570,50 @@ impl<'e> Walker<'e> {
             // Null and void are absorbed; the rest is compared with the whole upper bound, so that it
             // can be evaluated or split first.
             (TypeInner::MaybeT(_, li), TypeInner::MaybeT(..)) => self.walk(cx, li, &u),
-            // Null and void fit a union with `null` and `void` members, as `?T` is, and the rest
-            // sees `empty`, as in subtyping.
-            (_, TypeInner::UnionT(..))
-                if let Some(ui) = type_util::non_maybe_members(&u)
-                    && matches!(self.head(cx, &l), Head::Null | Head::Void) =>
-            {
-                let empty = empty_t::why(type_util::reason_of_t(&l).dupe());
-                self.walk(cx, &empty, &ui)
+            (TypeInner::MaybeT(_, li), TypeInner::UnionT(..)) if type_util::is_maybe_union(&u) => {
+                self.walk(cx, li, &u)
             }
-            // So are the members of the bound of a generic or opaque type, which subtyping
-            // narrows: the rest sees the type with the rest of its bound.
-            (_, TypeInner::UnionT(..))
-                if let Some(ui) = type_util::non_maybe_members(&u)
-                    && let Some(narrowed) =
-                        self.narrowed_bounded(cx, &l, |h| matches!(h, Head::Null | Head::Void)) =>
+            // An alias below a maybe type is expanded first, absorbing the `null` and `void` it
+            // stands for.
+            (TypeInner::TypeAppT(_) | TypeInner::ThisTypeAppT(_), TypeInner::UnionT(..))
+                if type_util::is_maybe_union(&u)
+                    && let Some(expanded) = self.expand_typeapp(cx, &l)
+                    && !matches!(
+                        expanded.deref(),
+                        TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::InstanceT(_))
+                    ) =>
             {
-                self.walk(cx, &narrowed, &ui)
+                self.walk(cx, &expanded, &u)
+            }
+            (_, TypeInner::UnionT(..)) if let Some(ui) = type_util::non_maybe_members(&u) => {
+                match l.deref() {
+                    // A tvar without lower bounds yet: what it will hold, minus null and void.
+                    TypeInner::OpenT(_) => {
+                        let non_maybe = flow_cache::eval::id(
+                            cx,
+                            l.dupe(),
+                            TypeDestructorT::new(TypeDestructorTInner(
+                                unknown_use(),
+                                type_util::reason_of_t(&u).dupe(),
+                                Rc::new(Destructor::NonMaybeType),
+                            )),
+                        );
+                        self.walk(cx, &non_maybe, &ui)
+                    }
+                    // Null and void are absorbed, and the rest sees `empty`, as in subtyping.
+                    _ if matches!(self.head(cx, &l), Head::Null | Head::Void) => {
+                        let empty = empty_t::why(type_util::reason_of_t(&l).dupe());
+                        self.walk(cx, &empty, &ui)
+                    }
+                    // So are the members of the bound of a generic or opaque type, which subtyping
+                    // narrows: the rest sees the type with the rest of its bound.
+                    _ if let Some(narrowed) =
+                        self.narrowed_bounded(cx, &l, |h| matches!(h, Head::Null | Head::Void)) =>
+                    {
+                        self.walk(cx, &narrowed, &ui)
+                    }
+                    _ => self.walk(cx, &l, &ui),
+                }
             }
             // `any` fits each member of a union: see `propagate_any`.
             (TypeInner::AnyT(..), TypeInner::UnionT(..)) => {

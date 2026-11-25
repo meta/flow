@@ -118,39 +118,30 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:25:17
 
-Cannot assign `a` to `p3` because: [incompatible-type]
- - Either in property `x`: `void` [1] is incompatible with `string` [1].
-    - This property is invariantly typed. See
-      https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
- - Or `Foo` [2] is incompatible with `null` [3].
+Cannot assign `a` to `p3` because properties `x` and `y` of `Foo` [1] are not exactly the same as those of
+`{x?: string, y?: string}` [2]. [incompatible-type]
 
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+The above-mentioned two types must be the same because properties `x` and `y` are invariantly typed. To fix the error,
+- Either make `Foo` [3] and `{x?: string, y?: string}` [3] exactly the same
+- Or make properties `x` and `y` in `{x?: string, y?: string}` [2] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
 
    test.js:25:17
    25| let p3 : PFoo = a; // error
-                       ^
+                       ^ [1]
 
 References:
-   test.js:1:18
-    1| type Foo = { x : string, y : string };
-                        ^^^^^^ [1]
-   test.js:2:9
-    2| let a : Foo = {x : "", y : ""};
-               ^^^ [2]
-   test.js:22:21
+   test.js:22:22
    22| type PFoo = Partial<?Foo>;
-                           ^^^^ [3]
+                            ^^^ [2]
+   test.js:1:12
+    1| type Foo = { x : string, y : string };
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:28:17
 
-Cannot assign `3` to `p6` because: [incompatible-type]
- - Either `3` [1] is incompatible with `{x?: string, y?: string}` [2].
- - Or `3` [1] is incompatible with `null` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot assign `3` to `p6` because `3` [1] is incompatible with `{x?: string, y?: string}` [2]. [incompatible-type]
 
    test.js:28:17
    28| let p6 : PFoo = 3; // error
@@ -160,9 +151,6 @@ References:
    test.js:22:22
    22| type PFoo = Partial<?Foo>;
                             ^^^ [2]
-   test.js:22:21
-   22| type PFoo = Partial<?Foo>;
-                           ^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:30:20

@@ -147,12 +147,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:26:2
 
-Cannot cast object literal to `Required<?A>` because: [incompatible-type]
- - Either properties `x` and `y` are missing in object literal [1] but exist in `{x: number, y: number}` [2].
- - Or object literal [1] is incompatible with `null` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot cast object literal to `Required<?A>` because properties `x` and `y` are missing in object literal [1] but exist
+in `{x: number, y: number}` [2]. [incompatible-type]
 
    test.js:26:2
    26| ({}) as Required<?A>; // ERROR
@@ -162,19 +158,12 @@ References:
    test.js:26:19
    26| ({}) as Required<?A>; // ERROR
                          ^ [2]
-   test.js:26:18
-   26| ({}) as Required<?A>; // ERROR
-                        ^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:27:2
 
-Cannot cast object literal to `Required<?A>` because: [incompatible-type]
- - Either property `y` is missing in object literal [1] but exists in `{x: number, y: number}` [2].
- - Or object literal [1] is incompatible with `null` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot cast object literal to `Required<?A>` because property `y` is missing in object literal [1] but exists in
+`{x: number, y: number}` [2]. [incompatible-type]
 
    test.js:27:2
    27| ({x: 1}) as Required<?A>; // ERROR
@@ -184,19 +173,12 @@ References:
    test.js:27:23
    27| ({x: 1}) as Required<?A>; // ERROR
                              ^ [2]
-   test.js:27:22
-   27| ({x: 1}) as Required<?A>; // ERROR
-                            ^^ [3]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:28:2
 
-Cannot cast object literal to `Required<?A>` because: [incompatible-type]
- - Either property `x` is missing in object literal [1] but exists in `{x: number, y: number}` [2].
- - Or object literal [1] is incompatible with `null` [3].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
+Cannot cast object literal to `Required<?A>` because property `x` is missing in object literal [1] but exists in
+`{x: number, y: number}` [2]. [incompatible-type]
 
    test.js:28:2
    28| ({y: 1}) as Required<?A>; // ERROR
@@ -206,34 +188,36 @@ References:
    test.js:28:23
    28| ({y: 1}) as Required<?A>; // ERROR
                              ^ [2]
-   test.js:28:22
-   28| ({y: 1}) as Required<?A>; // ERROR
-                            ^^ [3]
 
 
-Error ----------------------------------------------------------------------------------------------------- test.js:29:2
+Error ----------------------------------------------------------------------------------------------------- test.js:29:6
 
-Cannot cast object literal to `Required<?A>` because: [incompatible-type]
- - Either in property `x`: `void` [1] is incompatible with `number` [2].
- - Or object literal [3] is incompatible with `null` [4].
+Cannot cast object literal to `Required<?A>` because in property `x`: `void` [1] is incompatible with `number` [2].
+[incompatible-type]
 
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
-
-   test.js:29:2
-   29| ({x: undefined, y: undefined}) as Required<?A>; // ERROR
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
-
-References:
    test.js:29:6
    29| ({x: undefined, y: undefined}) as Required<?A>; // ERROR
             ^^^^^^^^^ [1]
+
+References:
    test.js:1:15
     1| type A = {x?: number, y?: number};
                      ^^^^^^ [2]
-   test.js:29:44
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:29:20
+
+Cannot cast object literal to `Required<?A>` because in property `y`: `void` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   test.js:29:20
    29| ({x: undefined, y: undefined}) as Required<?A>; // ERROR
-                                                  ^^ [4]
+                          ^^^^^^^^^ [1]
+
+References:
+   test.js:1:27
+    1| type A = {x?: number, y?: number};
+                                 ^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- test.js:36:21
@@ -426,4 +410,4 @@ Cannot get `x.w` because property `w` is not readable. [cannot-read]
 
 
 
-Found 27 errors
+Found 28 errors

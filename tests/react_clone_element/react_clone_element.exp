@@ -144,35 +144,6 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `React.cloneElement(...)` to `ExactReactElement_DEPRECATED<Class<B>>` because in property `ref` of type
 argument `P` [1]: [incompatible-type]
- - Either in the first parameter: `B` [2] is incompatible with `A` [3].
- - Or in the first parameter: `B` [2] is incompatible with `null` [4].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
-
-   test.js:25:1
-    25| React.cloneElement(a) as ExactReactElement_DEPRECATED<Class<B>>; // Error: A ~> B
-        ^^^^^^^^^^^^^^^^^^^^^
-
-References:
-   <BUILTINS>/react.js:58:97
-    58| declare opaque type ExactReactElement_DEPRECATED<out ElementType extends React$ElementType, out P = React.ComponentProps<ElementType>>: {...};
-                                                                                                        ^ [1]
-   test.js:25:61
-    25| React.cloneElement(a) as ExactReactElement_DEPRECATED<Class<B>>; // Error: A ~> B
-                                                                    ^ [2]
-   test.js:13:53
-    13| declare const a: ExactReactElement_DEPRECATED<Class<A>>;
-                                                            ^ [3]
-   <BUILTINS>/react.js:108:23
-   108|     | ((instance: T | null) => void | (() => void))
-                              ^^^^ [4]
-
-
-Error ----------------------------------------------------------------------------------------------------- test.js:25:1
-
-Cannot cast `React.cloneElement(...)` to `ExactReactElement_DEPRECATED<Class<B>>` because in property `ref` of type
-argument `P` [1]: [incompatible-type]
  - Either in property `current`: `B` [2] is incompatible with `A` [3].
  - Or in property `current`: `B` [2] is incompatible with `null` [4].
 
@@ -196,6 +167,35 @@ References:
    <BUILTINS>/react.js:107:32
    107|     | { writeonly current: T | null, ... }
                                        ^^^^ [4]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:25:1
+
+Cannot cast `React.cloneElement(...)` to `ExactReactElement_DEPRECATED<Class<B>>` because in property `ref` of type
+argument `P` [1]: [incompatible-type]
+ - Either in the first parameter: `B` [2] is incompatible with `A` [3].
+ - Or in the first parameter: `B` [2] is incompatible with `null` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   test.js:25:1
+    25| React.cloneElement(a) as ExactReactElement_DEPRECATED<Class<B>>; // Error: A ~> B
+        ^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   <BUILTINS>/react.js:58:97
+    58| declare opaque type ExactReactElement_DEPRECATED<out ElementType extends React$ElementType, out P = React.ComponentProps<ElementType>>: {...};
+                                                                                                        ^ [1]
+   test.js:25:61
+    25| React.cloneElement(a) as ExactReactElement_DEPRECATED<Class<B>>; // Error: A ~> B
+                                                                    ^ [2]
+   test.js:13:53
+    13| declare const a: ExactReactElement_DEPRECATED<Class<A>>;
+                                                            ^ [3]
+   <BUILTINS>/react.js:108:23
+   108|     | ((instance: T | null) => void | (() => void))
+                              ^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:31:7
