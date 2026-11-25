@@ -1,0 +1,152 @@
+Error ------------------------------------------------------------------------------------------------------ test.js:8:1
+
+Cannot cast `ext.build?.(...)` to `void | string` because: [incompatible-type]
+ - Either `unknown` [1] is incompatible with `string` [2].
+ - Or `unknown` [1] is incompatible with `void` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   test.js:8:1
+   8| ext.build?.({}) as void | string; // ERROR: `Output` is `unknown`
+      ^^^^^^^^^^^^^^^
+
+References:
+   node_modules/repro/index.d.ts:7:89
+   7| export declare function defineExtension<Config extends ConfigBase, Name extends string, Output>(
+                                                                                              ^^^^^^ [1]
+   test.js:8:27
+   8| ext.build?.({}) as void | string; // ERROR: `Output` is `unknown`
+                                ^^^^^^ [2]
+   test.js:8:20
+   8| ext.build?.({}) as void | string; // ERROR: `Output` is `unknown`
+                         ^^^^ [3]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:14:1
+
+Cannot cast `anyBound().t` to `number` because `unknown` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   test.js:14:1
+   14| anyBound().t as number; // ERROR: `T` is `unknown`
+       ^^^^^^^^^^^^
+
+References:
+   node_modules/repro/index.d.ts:11:44
+   11| export declare function anyBound<T extends any>(): {t: T};
+                                                  ^^^ [1]
+   test.js:14:17
+   14| anyBound().t as number; // ERROR: `T` is `unknown`
+                       ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:23:1
+
+Cannot call `refLike` because `T` [1] is underconstrained by call of `refLike` [2]. Either add explicit type arguments
+or cast the expression to your expected type. [underconstrained-implicit-instantiation]
+
+   test.js:23:1
+   23| refLike(null); // ERROR: `T` is underconstrained
+       ^^^^^^^
+
+References:
+   node_modules/repro/index.d.ts:15:33
+   15| export declare function refLike<T>(x: T | null): {current: T | null};
+                                       ^ [1]
+   test.js:23:1
+   23| refLike(null); // ERROR: `T` is underconstrained
+       ^^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:24:1
+
+Cannot call `keyOf` because `T` [1] is underconstrained by call of `keyOf` [2]. Either add explicit type arguments or
+cast the expression to your expected type. [underconstrained-implicit-instantiation]
+
+   test.js:24:1
+   24| keyOf('a'); // ERROR: `T` is underconstrained
+       ^^^^^
+
+References:
+   node_modules/repro/index.d.ts:16:31
+   16| export declare function keyOf<T>(k: keyof T): T;
+                                     ^ [1]
+   test.js:24:1
+   24| keyOf('a'); // ERROR: `T` is underconstrained
+       ^^^^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:25:25
+
+Cannot call `empty` because `T` [1] is underconstrained by call of `empty` [2]. Either add explicit type arguments or
+cast the expression to your expected type. [underconstrained-implicit-instantiation]
+
+   test.js:25:25
+   25| const n: number = first(empty()); // ERROR: `T` of `empty` is underconstrained
+                               ^^^^^
+
+References:
+   node_modules/repro/index.d.ts:13:31
+   13| export declare function empty<T>(): Array<T>;
+                                     ^ [1]
+   test.js:25:25
+   25| const n: number = first(empty()); // ERROR: `T` of `empty` is underconstrained
+                               ^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:28:1
+
+Cannot call `linked` because `T` [1] is underconstrained by call of `linked` [2]. Either add explicit type arguments or
+cast the expression to your expected type. [underconstrained-implicit-instantiation]
+
+   test.js:28:1
+   28| linked(); // ERROR: `T` is underconstrained
+       ^^^^^^
+
+References:
+   node_modules/repro/index.d.ts:17:32
+   17| export declare function linked<T extends {next: T | null}>(): T;
+                                      ^ [1]
+   test.js:28:1
+   28| linked(); // ERROR: `T` is underconstrained
+       ^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:35:1
+
+Cannot call `defineFlow` because `Config` [1] is underconstrained by call of `defineFlow` [2]. Either add explicit type
+arguments or cast the expression to your expected type. [underconstrained-implicit-instantiation]
+
+   test.js:35:1
+   35| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
+       ^^^^^^^^^^
+
+References:
+   test.js:31:29
+   31| declare function defineFlow<Config extends {...}, Output>(extension: {
+                                   ^^^^^^ [1]
+   test.js:35:1
+   35| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
+       ^^^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:35:1
+
+Cannot call `defineFlow` because `Output` [1] is underconstrained by call of `defineFlow` [2]. Either add explicit type
+arguments or cast the expression to your expected type. [underconstrained-implicit-instantiation]
+
+   test.js:35:1
+   35| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
+       ^^^^^^^^^^
+
+References:
+   test.js:31:51
+   31| declare function defineFlow<Config extends {...}, Output>(extension: {
+                                                         ^^^^^^ [1]
+   test.js:35:1
+   35| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
+       ^^^^^^^^^^^^^^ [2]
+
+
+
+Found 8 errors

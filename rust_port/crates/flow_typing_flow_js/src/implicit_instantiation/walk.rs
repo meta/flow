@@ -648,6 +648,18 @@ struct Walker<'e> {
     tparams: BTreeMap<SubstName, TypeParam>,
     /// The pairs `l <: [...prefix, ...T]` met, for the literals they need precise.
     spread_tuple_pairs: Vec<(Type, Type)>,
+    /// The markers that a part of the arguments or of the hint reaches: those given a bound, even
+    /// one that is dropped, the bare members of a union met, and those of a pair that the walk gives
+    /// up on, that has a placeholder, or that neither the pairs met inside it nor the parts of it
+    /// that `l` lacks, such as an absent optional property, account for (see `walk`). Undoing a
+    /// walk keeps them.
+    reached: BTreeSet<SubstName>,
+    /// For each pair being walked, innermost last, the markers that the pairs met inside it and the
+    /// parts of it that `l` lacks account for.
+    accounted: Vec<BTreeSet<SubstName>>,
+    /// Whether the solve reads `reached`: for a polymorphic type that TypeScript declares, in
+    /// checking mode.
+    track_reached: bool,
 }
 
 /// The arguments of a call from its first spread of unknown length on.
@@ -874,6 +886,9 @@ impl<'e> Walker<'e> {
             defaults: BTreeMap::new(),
             tparams: BTreeMap::new(),
             spread_tuple_pairs: Vec::new(),
+            reached: BTreeSet::new(),
+            accounted: Vec::new(),
+            track_reached: false,
             in_hint: false,
             in_bound: false,
             in_args: false,
@@ -882,9 +897,9 @@ impl<'e> Walker<'e> {
     }
 
     /// A pair the walk can't read evidence from but that mentions markers: the solve keeps the
-    /// evidence it has, and the walk goes on.
+    /// evidence it has, and the walk goes on. The pair reaches the markers it mentions.
     fn give_up<'cx>(
-        &self,
+        &mut self,
         cx: &mut Context<'cx>,
         what: &str,
         l: &Type,
@@ -898,7 +913,52 @@ impl<'e> Walker<'e> {
                 flow_typing_debug::dump_t(Some(1), cx, u)
             )
         });
+        self.reach(cx, l, u);
         Ok(())
+    }
+
+    /// Records that the pair `l <: u` reaches the markers it mentions.
+    fn reach<'cx>(&mut self, cx: &mut Context<'cx>, l: &Type, u: &Type) {
+        if !self.tracks_reach() {
+            return;
+        }
+        let markers = self.markers_in(cx, l);
+        self.reached.extend(markers);
+        let markers = self.markers_in(cx, u);
+        self.reached.extend(markers);
+    }
+
+    /// Whether the solve reads `reached` and some marker is not reached yet. Once all are, they
+    /// stay reached.
+    fn tracks_reach(&self) -> bool {
+        self.track_reached && self.reached.len() < self.vars.len()
+    }
+
+    /// Records that a type met these members of a union. TypeScript infers to a bare type
+    /// parameter among them whatever the other members match, so the bare markers are reached.
+    fn reach_bare_members<'a>(&mut self, members: impl Iterator<Item = &'a Type>) {
+        let names: Vec<SubstName> = members.filter_map(|m| self.marker_of(m)).collect();
+        self.reached.extend(names);
+    }
+
+    /// Records that the pair being walked accounts for the markers of `t`: a pair met inside it
+    /// mentions them, or `l` lacks the part of it they are in, such as an absent optional property,
+    /// which reaches nothing.
+    fn account<'cx>(&mut self, cx: &mut Context<'cx>, t: &Type) {
+        if self.accounted.is_empty() || !self.tracks_reach() {
+            return;
+        }
+        let markers = self.markers_in(cx, t);
+        if let Some(accounted) = self.accounted.last_mut() {
+            accounted.extend(markers);
+        }
+    }
+
+    /// Records that a tuple of `n` elements lacks the elements of the tuple `elements` past them.
+    fn lacks_elements<'cx>(&mut self, cx: &mut Context<'cx>, n: usize, elements: &[TupleElement]) {
+        for e in elements.iter().skip(n) {
+            self.account(cx, &e.t);
+        }
     }
 
     /// The deferred pairs, at the end of a walk, and then the pending spreads.
@@ -999,6 +1059,7 @@ impl<'e> Walker<'e> {
         t: &Type,
         priority: Priority,
     ) {
+        self.reached.insert(name.dupe());
         let Some(t) = &through_tvars(cx, t) else {
             return;
         };
@@ -1047,6 +1108,7 @@ impl<'e> Walker<'e> {
     }
 
     fn add_exact<'cx>(&mut self, cx: &mut Context<'cx>, name: &SubstName, t: &Type) {
+        self.reached.insert(name.dupe());
         // A placeholder itself unifies with nothing, unlike a type variable that holds one.
         let unifies = !is_placeholder(t);
         if through_tvars(cx, t).is_none() {
@@ -1184,6 +1246,7 @@ impl<'e> Walker<'e> {
         t: &Type,
         priority: Priority,
     ) {
+        self.reached.insert(name.dupe());
         let Some(t) = &through_tvars(cx, t) else {
             return;
         };
@@ -1252,6 +1315,10 @@ impl<'e> Walker<'e> {
     }
 
     /// Records what `l <: u` says about the markers.
+    ///
+    /// The markers of the pair that neither the pairs met inside it nor the parts of it that `l`
+    /// lacks account for are reached: the walk read them some other way, by evaluating a
+    /// destructor, choosing among the members of a union, or not at all.
     fn walk<'cx>(
         &mut self,
         cx: &mut Context<'cx>,
@@ -1262,8 +1329,12 @@ impl<'e> Walker<'e> {
             return self.give_up(cx, "depth limit", l, u);
         }
         if let Some(name) = self.marker_of(u) {
-            if self.marker_of(l).is_none() {
-                self.add_lower(cx, &name, l);
+            match self.marker_of(l) {
+                None => self.add_lower(cx, &name, l),
+                Some(lname) => {
+                    self.reached.insert(name);
+                    self.reached.insert(lname);
+                }
             }
             return Ok(());
         }
@@ -1272,11 +1343,14 @@ impl<'e> Walker<'e> {
             return Ok(());
         }
         // `empty` is a subtype of anything, which subtyping finds at once (`empty_success`) for
-        // anything but a type variable: it gives evidence only to a bare marker.
+        // anything but a type variable: it gives evidence only to a bare marker, and reaches
+        // nothing else.
         if matches!(l.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::EmptyT)) {
+            self.account(cx, u);
             return Ok(());
         }
         if is_placeholder(l) || is_placeholder(u) {
+            self.reach(cx, l, u);
             return Ok(());
         }
         if !self.mentions(cx, u) && !self.mentions(cx, l) {
@@ -1284,6 +1358,8 @@ impl<'e> Walker<'e> {
         }
         let key = (addr(l), addr(u));
         if self.seen.contains_key(&key) {
+            self.account(cx, l);
+            self.account(cx, u);
             return Ok(());
         }
         self.seen.insert(key, (l.dupe(), u.dupe()));
@@ -1295,8 +1371,21 @@ impl<'e> Walker<'e> {
             return self.give_up(cx, "step limit", l, u);
         }
         self.depth += 1;
+        let tracking = self.tracks_reach();
+        if tracking {
+            self.accounted.push(BTreeSet::new());
+        }
         let result = self.walk_structural(cx, l, u);
         self.depth -= 1;
+        if tracking {
+            let accounted = self.accounted.pop().unwrap_or_default();
+            let mut markers = self.markers_in(cx, l);
+            markers.extend(self.markers_in(cx, u));
+            self.reached.extend(markers.difference(&accounted).duped());
+            if let Some(outer) = self.accounted.last_mut() {
+                outer.extend(markers);
+            }
+        }
         result
     }
 
@@ -1680,6 +1769,7 @@ impl<'e> Walker<'e> {
                 if !self.is_alias(cx, &a.type_)
                     && let Some(members) = self.same_typeapp_members(cx, &a.type_, rep) =>
             {
+                self.reach_bare_members(rep.members_iter());
                 // A member before them that `l` fits with the markers open is matched first, as
                 // in the speculative match of the flow-based solve.
                 for m in rep.members_iter() {
@@ -3431,6 +3521,9 @@ impl<'e> Walker<'e> {
                     Some((elem, optional)) => self.walk_to_slot(cx, &ut, &elem, optional)?,
                     None => into_lrest.push(ut.dupe()),
                 }
+            } else {
+                // `l` lacks the parameter.
+                self.account(cx, &ut);
             }
         }
         // `l`'s parameters that `u`'s rest parameter feeds.
@@ -3677,6 +3770,14 @@ impl<'e> Walker<'e> {
                         };
                         let ufield = field_for_indexer(uprop);
                         self.walk_property_type(cx, &lfield, &ufield, lower_is_literal)?;
+                    } else {
+                        // `l` lacks the property.
+                        for t in [property::read_t(uprop), property::write_t(uprop)]
+                            .into_iter()
+                            .flatten()
+                        {
+                            self.account(cx, &t);
+                        }
                     }
                 }
             }
@@ -4180,6 +4281,7 @@ impl<'e> Walker<'e> {
                 for (l, u) in pairs {
                     self.walk_tuple_element(cx, &l, &u, literal)?;
                 }
+                self.lacks_elements(cx, lt.elements.len(), &ut.elements);
                 Ok(())
             }
             (_, ArrType::ROArrayAT(u)) => {
@@ -4209,6 +4311,7 @@ impl<'e> Walker<'e> {
                     for (l, u) in pairs {
                         self.walk_tuple_element(cx, &l, &u, literal)?;
                     }
+                    self.lacks_elements(cx, view.elements.len(), &u.elements);
                     Ok(())
                 }
                 None => Ok(()),
@@ -4294,6 +4397,7 @@ impl<'e> Walker<'e> {
         l: &Type,
         members: Vec<Type>,
     ) -> Result<(), FlowJsException> {
+        self.reach_bare_members(members.iter());
         if members.iter().any(|m| m.ptr_eq(l)) {
             return Ok(());
         }
@@ -4334,6 +4438,7 @@ impl<'e> Walker<'e> {
         let (naked, others): (Vec<Type>, Vec<Type>) = members
             .into_iter()
             .partition(|m| self.marker_of(m).is_some());
+        self.reach_bare_members(naked.iter());
         let lhead = self.head(cx, l);
         // An instance also has the shape of its nominal ancestors.
         let ancestors: Vec<ALocId> = match self.instance_of(cx, l) {
@@ -7420,7 +7525,7 @@ fn solve_targs_in_snapshot<'cx>(
     check: &ImplicitInstantiationCheck,
 ) -> Result<Solution, FlowJsException> {
     let (_, ref reason_op, ref op) = check.operation;
-    let (ref tparams_loc, ref tparams, ref poly_body) = check.poly_t;
+    let (ref tparams_loc, ref tparams, ref poly_body, _) = check.poly_t;
     let reason_tapp = type_util::reason_of_t(&check.lhs).dupe();
 
     let explicit = match op {
@@ -7484,6 +7589,8 @@ fn solve_targs_in_snapshot<'cx>(
         reason_op.loc().dupe(),
         markers.iter().flatten().duped(),
     );
+    walker.track_reached = check.poly_t.3.is_typescript_loose()
+        && matches!(*cx.typing_mode(), TypingMode::CheckingMode);
     for (tparam, marker) in tparams.iter().zip(markers.iter()) {
         let Some(name) = marker else {
             continue;
@@ -8114,7 +8221,8 @@ fn pin_keeping_errors<'cx>(
 /// bounds or, for a type parameter that the result mentions only negatively, the most specific of
 /// its upper bounds, each with the other as the fallback, and of either the bounds of the highest
 /// priority. A type parameter with neither takes `error_fallback`, its default or its bound, or is
-/// underconstrained, as there. The evidence of a pinned type parameter is then walked against its
+/// underconstrained, as there, unless TypeScript declares the polymorphic type and nothing reaches
+/// it (see `Walker::reached`). The evidence of a pinned type parameter is then walked against its
 /// bound, as the flow-based solve flows each tvar to its bound: that gives the type parameters in
 /// the bound, which are pinned after it, their evidence from it. A solution that mentions the
 /// marker of a type parameter pinned after it takes that one's solution.
@@ -8170,14 +8278,29 @@ fn pin<'cx>(
                             // their markers, which take their solutions below.
                             let default = (tparam.default.as_ref())
                                 .map(|default| subst(cx, pinning.subst_map, default));
+                            // As in TypeScript, a type parameter of a polymorphic type that
+                            // TypeScript declares has no inference candidates when no part of the
+                            // arguments or the hint reaches it: it takes its default, or else its
+                            // bound, where a written `any` stands for `unknown`. A bound that is
+                            // `any` otherwise, as after an error, says nothing. Outside checking, it
+                            // is still undecided, as the hint of an enclosing call can decide it.
+                            let no_candidates =
+                                walker.track_reached && !walker.reached.contains(name);
+                            let (pin_bound, marked) = match walker.resolve(cx, &bound).deref() {
+                                TypeInner::AnyT(r, AnySource::AnnotatedAny) if no_candidates => {
+                                    (mixed_t::why(r.dupe()), false)
+                                }
+                                TypeInner::AnyT(..) => (bound.dupe(), polarity.is_some()),
+                                _ => (bound.dupe(), polarity.is_some() && !no_candidates),
+                            };
                             let t = pin_without_bounds(
                                 cx,
                                 env,
                                 pinning.use_op,
                                 tparam,
                                 default.as_ref(),
-                                &bound,
-                                polarity.is_some(),
+                                &pin_bound,
+                                marked,
                                 &reason,
                                 reason_op,
                             )?;

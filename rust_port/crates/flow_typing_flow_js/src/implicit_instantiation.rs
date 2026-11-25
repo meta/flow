@@ -1830,7 +1830,7 @@ fn check_instantiation<'cx>(
 ) -> Result<Option<Type>, FlowJsException> {
     let (ref use_op, ref reason_op, ref op) = check.operation;
     let reason_tapp = type_util::reason_of_t(&check.lhs);
-    let (ref tparams_loc, ref tparams, _) = check.poly_t;
+    let (ref tparams_loc, ref tparams, _, _) = check.poly_t;
 
     let merge_targs = |cx: &mut Context<'cx>,
                        explicit_targs: Option<&[Targ]>|
@@ -2060,7 +2060,7 @@ fn marks_of_check<'cx>(
     cx: &mut Context<'cx>,
     check: &ImplicitInstantiationCheck,
 ) -> Option<Marked<SubstName>> {
-    let (_, ref tparams, ref t) = check.poly_t;
+    let (_, ref tparams, ref t, _) = check.poly_t;
     let (_, _, ref op) = check.operation;
     let resolved_t = get_t(cx, t);
     let bail_out = None;
@@ -2584,6 +2584,7 @@ pub mod kit {
                         tparams_loc,
                         tparams,
                         t_out,
+                        strictness_kind,
                         ..
                     }),
                 ) = def_t.deref() =>
@@ -2593,6 +2594,7 @@ pub mod kit {
                     Vec1::try_from_vec(tparams.to_vec())
                         .expect("should have nonempty polymorphic type parameters"),
                     t_out.dupe(),
+                    *strictness_kind,
                 )
             }
             _ => return Ok(placeholders()),
@@ -2993,7 +2995,7 @@ pub mod kit {
     ) -> Result<(Type, Vec<(Type, subst_name::SubstName)>), FlowJsException> {
         // Explicit type arguments are written at the operation, so a wrong number of them is
         // reported there. Missing ones are inferred, like `_`, and the solve ignores extra ones.
-        let (ref tparams_loc, ref tparams, _) = check.poly_t;
+        let (ref tparams_loc, ref tparams, _, _) = check.poly_t;
         let explicit_targs = match &check.operation.2 {
             Operation::Call(call) => call.call_targs.as_deref(),
             Operation::Constructor(targs, _) | Operation::ReactJSX { targs, .. } => {
@@ -3044,7 +3046,7 @@ pub mod kit {
         };
 
         let env = &env.solving_implicit_instantiation();
-        let (_, _, ref t) = check.poly_t;
+        let (_, _, ref t, _) = check.poly_t;
         let (soln, inferred_targs) = solve_targs(
             cx,
             env,

@@ -593,7 +593,7 @@ fn instantiate_callee<'cx>(
                             tparams,
                             t_out,
                             id: _,
-                            strictness_kind: _,
+                            strictness_kind,
                         }),
                     ) => {
                         if let Some((class_r, inst_r, i, this, this_name)) =
@@ -766,6 +766,7 @@ fn instantiate_callee<'cx>(
                                             Vec1::try_from_vec(tparams.to_vec())
                                                 .unwrap_or_else(|_| Vec1::new(tparams[0].dupe())),
                                             t_out.dupe(),
+                                            *strictness_kind,
                                         ),
                                         unknown_use(),
                                         reason.dupe(),
@@ -993,7 +994,7 @@ fn instantiate_component<'cx>(
                     tparams,
                     t_out,
                     id: _,
-                    strictness_kind: _,
+                    strictness_kind,
                 }),
             ) if *cx.jsx() == JsxMode::JsxReact => {
                 let reason = &instantiation_hint.jsx_reason;
@@ -1030,6 +1031,7 @@ fn instantiate_component<'cx>(
                             Vec1::try_from_vec(tparams.to_vec())
                                 .unwrap_or_else(|_| Vec1::new(tparams[0].dupe())),
                             t_out.dupe(),
+                            *strictness_kind,
                         ),
                         unknown_use(),
                         reason.dupe(),

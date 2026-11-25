@@ -1300,7 +1300,7 @@ fn call_latent_pred<'cx>(
                             tparams: ids,
                             t_out: t_out_inner,
                             id: _,
-                            strictness_kind: _,
+                            strictness_kind,
                         }),
                     ) => {
                         let reason_tapp = r;
@@ -1316,12 +1316,13 @@ fn call_latent_pred<'cx>(
                         let tparams_loc_c = tparams_loc.dupe();
                         let ids_c = ids.dupe();
                         let t_out_c = t_out_inner.dupe();
+                        let strictness_kind_c = *strictness_kind;
                         let reason_c = reason.dupe();
                         let calltype_c = calltype.clone();
                         let check = move || {
                             flow_typing_implicit_instantiation_check::ImplicitInstantiationCheck::of_call(
                                 fun_t_c.dupe(),
-                                (tparams_loc_c.dupe(), Vec1::try_from_vec(ids_c.to_vec()).unwrap(), t_out_c.dupe()),
+                                (tparams_loc_c.dupe(), Vec1::try_from_vec(ids_c.to_vec()).unwrap(), t_out_c.dupe(), strictness_kind_c),
                                 unknown_use(),
                                 reason_c.dupe(),
                                 calltype_c.clone(),

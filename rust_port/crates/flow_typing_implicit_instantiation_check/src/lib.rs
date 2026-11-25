@@ -20,10 +20,12 @@ use flow_typing_type::type_::SpeculationHintState;
 use flow_typing_type::type_::Targ;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeParam;
+use flow_typing_type::type_::TypeStrictnessKind;
 use flow_typing_type::type_::UseOp;
 use vec1::Vec1;
 
-pub type PolyT = (ALoc, Vec1<TypeParam>, Type);
+/// The type parameters, the body and the strictness of a polymorphic type.
+pub type PolyT = (ALoc, Vec1<TypeParam>, Type, TypeStrictnessKind);
 
 /// Call inputs retained while solving implicit type arguments.
 #[derive(Debug, Clone)]

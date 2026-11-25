@@ -5374,7 +5374,7 @@ pub fn rec_sub_t<'cx>(
         #[rustfmt::skip]
         (
             DefT(reason_tapp, deref!(PolyT(deref!(PolyTData {
-                tparams_loc, tparams: ids, t_out: t, ..
+                tparams_loc, tparams: ids, t_out: t, strictness_kind, ..
             })))),
             _,
         ) => {
@@ -5407,7 +5407,7 @@ pub fn rec_sub_t<'cx>(
             } else {
                 let check = ImplicitInstantiationCheck {
                     lhs: l.dupe(),
-                    poly_t: (tparams_loc.dupe(), ids, t.dupe()),
+                    poly_t: (tparams_loc.dupe(), ids, t.dupe(), *strictness_kind),
                     operation: (
                         use_op.dupe(),
                         reason_op.dupe(),

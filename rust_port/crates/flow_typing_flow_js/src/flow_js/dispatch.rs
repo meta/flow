@@ -5365,7 +5365,7 @@ fn __flow_impl<'cx>(
         #[rustfmt::skip]
         (
             DefT(reason_tapp, deref!(PolyT(deref!(PolyTData {
-                tparams_loc, tparams: ids, t_out: t, ..
+                tparams_loc, tparams: ids, t_out: t, strictness_kind, ..
             })))),
             CallT(deref!(CallTData {
                 use_op,
@@ -5390,6 +5390,7 @@ fn __flow_impl<'cx>(
             let tparams_loc_c = tparams_loc.dupe();
             let ids_c = ids.dupe();
             let t_c = t.dupe();
+            let strictness_kind_c = *strictness_kind;
             let use_op_c = use_op.dupe();
             let reason_op_c = reason_op.dupe();
             let calltype_c = calltype.clone();
@@ -5400,6 +5401,7 @@ fn __flow_impl<'cx>(
                         tparams_loc_c.dupe(),
                         Vec1::try_from_vec(ids_c.to_vec()).unwrap(),
                         t_c.dupe(),
+                        strictness_kind_c,
                     ),
                     use_op_c.dupe(),
                     reason_op_c.dupe(),
@@ -5434,7 +5436,7 @@ fn __flow_impl<'cx>(
         #[rustfmt::skip]
         (
             DefT(reason_tapp, deref!(PolyT(deref!(PolyTData {
-                tparams_loc, tparams: ids, t_out: t, ..
+                tparams_loc, tparams: ids, t_out: t, strictness_kind, ..
             })))),
             ConstructorT(deref!(ctor_data)),
         ) => {
@@ -5454,6 +5456,7 @@ fn __flow_impl<'cx>(
             let tparams_loc_c = tparams_loc.dupe();
             let ids_c = ids.dupe();
             let t_c = t.dupe();
+            let strictness_kind_c = *strictness_kind;
             let use_op_c = ctor_data.use_op.dupe();
             let reason_op_c = ctor_data.reason.dupe();
             let targs_c = ctor_data.targs.dupe();
@@ -5465,6 +5468,7 @@ fn __flow_impl<'cx>(
                         tparams_loc_c.dupe(),
                         Vec1::try_from_vec(ids_c.to_vec()).unwrap(),
                         t_c.dupe(),
+                        strictness_kind_c,
                     ),
                     use_op_c.dupe(),
                     reason_op_c.dupe(),
@@ -5494,7 +5498,7 @@ fn __flow_impl<'cx>(
         #[rustfmt::skip]
         (
             DefT(reason_tapp, deref!(PolyT(deref!(PolyTData {
-                tparams_loc, tparams: ids, t_out: t, ..
+                tparams_loc, tparams: ids, t_out: t, strictness_kind, ..
             })))),
             ReactKitT(deref!(ReactKitTData {
                 use_op,
@@ -5526,6 +5530,7 @@ fn __flow_impl<'cx>(
             let tparams_loc_c = tparams_loc.dupe();
             let ids_c = ids.dupe();
             let t_c = t.dupe();
+            let strictness_kind_c = *strictness_kind;
             let use_op_c = use_op.dupe();
             let reason_op_c = reason_op.dupe();
             let jsx_props_c = jsx_props.dupe();
@@ -5537,6 +5542,7 @@ fn __flow_impl<'cx>(
                         tparams_loc_c.dupe(),
                         Vec1::try_from_vec(ids_c.to_vec()).unwrap(),
                         t_c.dupe(),
+                        strictness_kind_c,
                     ),
                     use_op_c.dupe(),
                     reason_op_c.dupe(),
@@ -5716,7 +5722,7 @@ fn __flow_impl<'cx>(
         #[rustfmt::skip]
         (
             DefT(reason_tapp, deref!(PolyT(deref!(PolyTData {
-                tparams_loc, tparams: ids, t_out: t, ..
+                tparams_loc, tparams: ids, t_out: t, strictness_kind, ..
             })))),
             _,
         ) => {
@@ -5755,7 +5761,7 @@ fn __flow_impl<'cx>(
             let (t_, _) = if let Some((data, call, return_hint, optional_chain)) = method {
                 let check = ImplicitInstantiationCheck {
                     lhs: l.dupe(),
-                    poly_t,
+                    poly_t: (poly_t.0, poly_t.1, poly_t.2, *strictness_kind),
                     operation: (
                         use_op.dupe(),
                         reason_op.dupe(),
