@@ -10341,6 +10341,7 @@ where
                     inexact,
                     resolved: resolved_rev,
                     unresolved,
+                    strictness_kind,
                 })),
                 id,
             )

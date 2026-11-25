@@ -9,6 +9,7 @@ use std::collections::VecDeque;
 use std::sync::Arc;
 
 use flow_typing_errors::error_message::EFunctionCallExtraArgData;
+use flow_typing_errors::error_message::ETupleInvalidTypeSpreadData;
 use flow_typing_errors::intermediate_error_types::FunctionReferenceData;
 use flow_typing_flow_js_env::FlowJsEnv;
 use flow_typing_type::type_::ArrRestTData;
@@ -21,6 +22,7 @@ use flow_typing_type::type_::ResolveSpreadTData;
 use flow_typing_type::type_::ResolvedArgData;
 use flow_typing_type::type_::ResolvedSpreadArgData;
 use flow_typing_type::type_::TupleViewKind;
+use flow_typing_type::type_::TypeStrictnessKind;
 use flow_typing_type::type_::UnresolvedArgData;
 
 use super::helpers::*;
@@ -527,6 +529,77 @@ pub(super) fn resolve_spread_list_rec<'cx>(
     }
 }
 
+/// Whether `param` is a spread of an unknown number of elements.
+pub(super) fn is_rest_spread(param: &ResolvedParam) -> bool {
+    use flow_typing_type::type_::ArrType;
+    use flow_typing_type::type_::ArrayATData;
+    use flow_typing_type::type_::TupleATData;
+
+    match param {
+        ResolvedParam::ResolvedSpreadArg(deref!(ResolvedSpreadArgData(_, arrtype, _))) => {
+            match arrtype {
+                ArrType::ArrayAT(deref!(ArrayATData { tuple_view, .. })) => {
+                    tuple_view.as_ref().is_none_or(|tv| tv.rest.is_some())
+                }
+                ArrType::TupleAT(deref!(TupleATData { rest, .. })) => rest.is_some(),
+                ArrType::ROArrayAT(_) => true,
+            }
+        }
+        ResolvedParam::ResolvedArg(_) | ResolvedParam::ResolvedAnySpreadArg(_) => false,
+    }
+}
+
+/// The error for `param`, a spread of an unknown number of elements in the tuple type of
+/// `reason_op`, followed by an element at `next_loc`, as it is reported when the spread is
+/// resolved.
+pub(super) fn rest_spread_error(
+    reason_op: &Reason,
+    param: &ResolvedParam,
+    next_loc: ALoc,
+) -> Option<ErrorMessage<ALoc>> {
+    use flow_typing_type::type_::ArrType;
+    use flow_typing_type::type_::ArrayATData;
+    use flow_typing_type::type_::DefT;
+
+    let ResolvedParam::ResolvedSpreadArg(deref!(ResolvedSpreadArgData(reason, arrtype, generic))) =
+        param
+    else {
+        return None;
+    };
+    Some(match arrtype {
+        ArrType::TupleAT(_)
+        | ArrType::ArrayAT(
+            deref!(ArrayATData {
+                tuple_view: Some(_),
+                ..
+            }),
+        ) => ErrorMessage::ETupleElementAfterRestSpread(next_loc),
+        ArrType::ArrayAT(_) | ArrType::ROArrayAT(_) => {
+            let arr = Type::new(TypeInner::DefT(
+                reason.dupe(),
+                DefT::new(DefTInner::ArrT(Rc::new(arrtype.clone()))),
+            ));
+            let spread_t = match generic {
+                Some(id) => Type::new(TypeInner::GenericT(Box::new(GenericTData {
+                    reason: reason.dupe(),
+                    name: id.subst_name(),
+                    bound: arr,
+                    no_infer: false,
+                    id: id.clone(),
+                }))),
+                None => arr,
+            };
+            ErrorMessage::ETupleInvalidTypeSpread(Box::new(ETupleInvalidTypeSpreadData {
+                spread_loc: reason_op.loc().dupe(),
+                argument: flow_js_utils::type_reference_with_reason_for_error(
+                    &spread_t,
+                    reason.dupe(),
+                ),
+            }))
+        }
+    })
+}
+
 // Now that everything is resolved, we can construct whatever type we're trying to resolve to.
 pub(super) fn finish_resolve_spread_list<'cx>(
     cx: &mut Context<'cx>,
@@ -762,6 +835,63 @@ pub(super) fn finish_resolve_spread_list<'cx>(
         })
     }
 
+    // A tuple type written in TypeScript can have spreads of unknown length before other spreads
+    // of unknown length and optional elements, which all go to its rest element, but a required
+    // element after them would make a leading rest element, which a tuple type cannot have.
+    // Reports that, for the last spread of unknown length, as it is reported for a tuple type
+    // written in Flow, and returns whether it did.
+    fn report_required_after_rest<'cx>(
+        cx: &mut Context<'cx>,
+        env: &FlowJsEnv,
+        reason_op: &Reason,
+        resolved: &flow_data_structure_wrapper::list::FlowOcamlList<ResolvedParam>,
+    ) -> Result<bool, FlowJsException> {
+        // Where `param` has what cannot follow a rest element: a required element, or the unknown
+        // elements of an inexact tuple.
+        fn required_loc(param: &ResolvedParam) -> Option<ALoc> {
+            match param {
+                ResolvedParam::ResolvedArg(deref!(ResolvedArgData(elem, _))) => {
+                    (!elem.optional).then(|| elem.reason.loc().dupe())
+                }
+                ResolvedParam::ResolvedSpreadArg(
+                    deref!(ResolvedSpreadArgData(reason, arrtype, _)),
+                ) => {
+                    let (elements, inexact) = match arrtype {
+                        ArrType::ArrayAT(
+                            deref!(ArrayATData {
+                                tuple_view: Some(tv),
+                                ..
+                            }),
+                        ) => (&tv.elements, tv.inexact),
+                        ArrType::TupleAT(
+                            deref!(TupleATData {
+                                elements,
+                                inexact,
+                                ..
+                            }),
+                        ) => (elements, *inexact),
+                        ArrType::ArrayAT(_) | ArrType::ROArrayAT(_) => return None,
+                    };
+                    (inexact || elements.iter().any(|elem| !elem.optional))
+                        .then(|| reason.loc().dupe())
+                }
+                ResolvedParam::ResolvedAnySpreadArg(_) => None,
+            }
+        }
+        let params: Vec<&ResolvedParam> = resolved.iter().collect();
+        let Some(last_rest) = params.iter().rposition(|param| is_rest_spread(param)) else {
+            return Ok(false);
+        };
+        let Some(loc) = params[last_rest + 1..].iter().find_map(|p| required_loc(p)) else {
+            return Ok(false);
+        };
+        let Some(error) = rest_spread_error(reason_op, params[last_rest], loc) else {
+            return Ok(false);
+        };
+        flow_js_utils::add_output_with_env(cx, env, error)?;
+        Ok(true)
+    }
+
     fn finish_array<'cx>(
         cx: &mut Context<'cx>,
         env: &FlowJsEnv,
@@ -777,6 +907,17 @@ pub(super) fn finish_resolve_spread_list<'cx>(
             SpreadArrayResolveTo::ResolveToArrayLiteral { literal, fresh, .. }
             | SpreadArrayResolveTo::ResolveToArray { literal, fresh } => (literal, fresh),
             SpreadArrayResolveTo::ResolveToTupleType { .. } => (ArrLiteral::NonLiteral, false),
+        };
+        let required_after_rest = match resolve_to {
+            SpreadArrayResolveTo::ResolveToTupleType {
+                strictness_kind: TypeStrictnessKind::TypeScriptLoose,
+                ..
+            } if spread_resolved_to_any(resolved).is_none() => {
+                report_required_after_rest(cx, env, reason_op, resolved)?
+            }
+            SpreadArrayResolveTo::ResolveToTupleType { .. }
+            | SpreadArrayResolveTo::ResolveToArrayLiteral { .. }
+            | SpreadArrayResolveTo::ResolveToArray { .. } => false,
         };
         let result = match spread_resolved_to_any(resolved) {
             Some(any) => match resolve_to {
@@ -806,6 +947,7 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                     flow_js_utils::any_result(any, reason_op.dupe())
                 }
             },
+            None if required_after_rest => any_t::error(reason_op.dupe()),
             None => {
                 let (elems, spread_after_opt, inexact_spread) =
                     flatten_spread_args(cx, env, resolved)?;
@@ -851,6 +993,89 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                                 ) if elements.is_empty() => {
                                     // Spread of empty array/tuple results
                                     // in same tuple elements as before.
+                                }
+                                // In a tuple type written in TypeScript, as in TypeScript, a
+                                // spread of unknown length and what follows it, the spreads of
+                                // unknown length and optional elements that
+                                // `report_required_after_rest` allows, are one rest element of
+                                // their union.
+                                ResolvedParam::ResolvedSpreadArg(
+                                    deref!(ResolvedSpreadArgData(
+                                        reason,
+                                        ArrType::ArrayAT(deref!(ArrayATData {
+                                            tuple_view: None,
+                                            ..
+                                        })) | ArrType::ROArrayAT(_),
+                                        _,
+                                    )),
+                                ) if matches!(
+                                    resolve_to,
+                                    SpreadArrayResolveTo::ResolveToTupleType {
+                                        strictness_kind: TypeStrictnessKind::TypeScriptLoose,
+                                        ..
+                                    }
+                                ) =>
+                                {
+                                    let rest_elems = &elems[index..];
+                                    // As for a single spread, the rest element is read-only
+                                    // with a spread of a generic with a read-only bound.
+                                    let read_only = rest_elems.iter().any(|elem| {
+                                        matches!(
+                                            elem,
+                                            ResolvedParam::ResolvedSpreadArg(deref!(
+                                                ResolvedSpreadArgData(
+                                                    _,
+                                                    ArrType::ROArrayAT(_),
+                                                    Some(_)
+                                                )
+                                            ))
+                                        )
+                                    });
+                                    let ts = rest_elems
+                                        .iter()
+                                        .filter_map(|elem| match elem {
+                                            ResolvedParam::ResolvedSpreadArg(
+                                                deref!(
+                                                    ResolvedSpreadArgData(
+                                                        _,
+                                                        arrtype @ (ArrType::ArrayAT(
+                                                            deref!(ArrayATData {
+                                                                tuple_view: None,
+                                                                ..
+                                                            }),
+                                                        )
+                                                        | ArrType::ROArrayAT(_)),
+                                                        _,
+                                                    )
+                                                ),
+                                            ) => Some(propagate_dro(
+                                                cx,
+                                                elemt_of_arrtype(arrtype),
+                                                arrtype,
+                                            )),
+                                            ResolvedParam::ResolvedArg(
+                                                deref!(ResolvedArgData(
+                                                    TupleElement { t, optional, .. },
+                                                    _
+                                                )),
+                                            ) => Some(type_util::slot_value_t(t, *optional)),
+                                            // Spreads of empty tuples
+                                            ResolvedParam::ResolvedSpreadArg(_)
+                                            | ResolvedParam::ResolvedAnySpreadArg(_) => None,
+                                        })
+                                        .collect();
+                                    rest = Some(TupleElement {
+                                        t: type_util::union_of_ts(reason.dupe(), ts, None),
+                                        name: None,
+                                        polarity: if read_only {
+                                            Polarity::Positive
+                                        } else {
+                                            Polarity::Neutral
+                                        },
+                                        optional: false,
+                                        reason: reason.dupe(),
+                                    });
+                                    break;
                                 }
                                 // The last spread of a tuple type, or of an array literal that is
                                 // not `as const`, can be an array, which becomes the rest element.
@@ -1043,6 +1268,7 @@ pub(super) fn finish_resolve_spread_list<'cx>(
 
                 let create_tuple_type = |cx: &mut Context<'cx>,
                                          inexact: bool,
+                                         strictness_kind: TypeStrictnessKind,
                                          elements: Vec<TupleElement>|
                  -> Result<Type, FlowJsException> {
                     let (valid, arity) = flow_js_utils::validate_tuple_elements(
@@ -1070,7 +1296,7 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                                     elem_t: elem_t.dupe(),
                                     tuple_view: None,
                                     react_dro: None,
-                                    strictness_kind: cx.type_strictness_kind(),
+                                    strictness_kind,
                                     literal,
                                     fresh,
                                 }))
@@ -1179,9 +1405,14 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                             ))
                         }
                     }
-                    (SpreadArrayResolveTo::ResolveToTupleType { inexact }, Some(elements), _) => {
-                        create_tuple_type(cx, inexact, elements.clone())?
-                    }
+                    (
+                        SpreadArrayResolveTo::ResolveToTupleType {
+                            inexact,
+                            strictness_kind,
+                        },
+                        Some(elements),
+                        _,
+                    ) => create_tuple_type(cx, inexact, strictness_kind, elements.clone())?,
                     (
                         SpreadArrayResolveTo::ResolveToArrayLiteral {
                             kind: ArrayLiteralKind::Const,
@@ -1189,7 +1420,10 @@ pub(super) fn finish_resolve_spread_list<'cx>(
                         },
                         Some(elements),
                         _,
-                    ) => create_tuple_type(cx, false, elements.clone())?,
+                    ) => {
+                        let strictness_kind = cx.type_strictness_kind();
+                        create_tuple_type(cx, false, strictness_kind, elements.clone())?
+                    }
                     (SpreadArrayResolveTo::ResolveToTupleType { .. }, None, _) => {
                         any_t::error(reason_op.dupe())
                     }
@@ -1544,13 +1778,17 @@ pub(super) fn finish_resolve_spread_list<'cx>(
             inexact,
             elem_t,
             tout,
+            strictness_kind,
         } => finish_array(
             cx,
             env,
             use_op,
             trace,
             reason_op,
-            SpreadArrayResolveTo::ResolveToTupleType { inexact },
+            SpreadArrayResolveTo::ResolveToTupleType {
+                inexact,
+                strictness_kind,
+            },
             &resolved,
             &elem_t,
             &tout,

@@ -1,0 +1,5 @@
+[options]
+all=false
+builtin_lib=core-only
+module.file_ext=.ts
+module.file_ext=.js

@@ -618,6 +618,7 @@ fn t_of_use_t<'cx>(
                         reason_spread,
                         resolved: resolved_rev,
                         unresolved,
+                        strictness_kind: _,
                     }
                 ))) => {
                     fn is_spread(rp: &ResolvedParam) -> bool {

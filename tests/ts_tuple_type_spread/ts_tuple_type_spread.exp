@@ -1,0 +1,140 @@
+Error ---------------------------------------------------------------------------------------- flow_tuple_spread.js:4:83
+
+Cannot spread non-tuple (`Array<string>` [1]) into tuple type. [tuple-invalid-type-spread]
+
+   flow_tuple_spread.js:4:83
+   4| type Concat<A extends ReadonlyArray<unknown>, B extends ReadonlyArray<unknown>> = [...A, ...B]; // ERROR
+                                                                                        ^^^^^^^^^^^^
+
+References:
+   flow_tuple_spread.js:5:30
+   5| declare const arrays: Concat<Array<string>, ReadonlyArray<number>>;
+                                   ^^^^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------- tuple_spread.ts:6:34
+
+Cannot assign `arrays` to `arraysBad` because in array element: `number` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   tuple_spread.ts:6:34
+   6| const arraysBad: Array<string> = arrays; // ERROR: number ~> string
+                                       ^^^^^^
+
+References:
+   tuple_spread.ts:4:59
+   4| declare const arrays: Concat<Array<string>, ReadonlyArray<number>>;
+                                                                ^^^^^^ [1]
+   tuple_spread.ts:6:24
+   6| const arraysBad: Array<string> = arrays; // ERROR: number ~> string
+                             ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- tuple_spread.ts:11:52
+
+Cannot assign `middle` to `middleBad` because in index `1`: [incompatible-type]
+ - Either `number` [1] is incompatible with `string` [2].
+ - Or `number` [1] is incompatible with `1` [3].
+
+   tuple_spread.ts:11:52
+   11| const middleBad: [boolean, ...Array<string | 1>] = middle; // ERROR: number ~> string | 1
+                                                          ^^^^^^
+
+References:
+   tuple_spread.ts:9:51
+    9| declare const middle: Middle<Array<string>, Array<number>>;
+                                                         ^^^^^^ [1]
+   tuple_spread.ts:11:37
+   11| const middleBad: [boolean, ...Array<string | 1>] = middle; // ERROR: number ~> string | 1
+                                           ^^^^^^ [2]
+   tuple_spread.ts:11:46
+   11| const middleBad: [boolean, ...Array<string | 1>] = middle; // ERROR: number ~> string | 1
+                                                    ^ [3]
+
+
+Error -------------------------------------------------------------------------------------------- tuple_spread.ts:20:97
+
+Cannot spread non-tuple (`A` [1]) into tuple type. [tuple-invalid-type-spread]
+
+   tuple_spread.ts:20:97
+   20| type ConcatOfGenerics<A extends ReadonlyArray<string>, B extends ReadonlyArray<number>> = Elems<[...A, ...B]>; // ERROR (TypeScript accepts)
+                                                                                                       ^^^^^^^^^^^^
+
+References:
+   tuple_spread.ts:20:101
+   20| type ConcatOfGenerics<A extends ReadonlyArray<string>, B extends ReadonlyArray<number>> = Elems<[...A, ...B]>; // ERROR (TypeScript accepts)
+                                                                                                           ^ [1]
+
+
+Error -------------------------------------------------------------------------------------------- tuple_spread.ts:21:72
+
+Cannot spread non-tuple (`A` [1]) into tuple type. [tuple-invalid-type-spread]
+
+   tuple_spread.ts:21:72
+   21| function concatOfGenerics<A extends unknown[], B extends unknown[]>(): [...A, ...B] {
+                                                                              ^^^^^^^^^^^^
+
+References:
+   tuple_spread.ts:21:76
+   21| function concatOfGenerics<A extends unknown[], B extends unknown[]>(): [...A, ...B] {
+                                                                                  ^ [1]
+
+
+Error -------------------------------------------------------------------------------------------- tuple_spread.ts:24:51
+
+Cannot spread non-tuple (`Array<string>` [1]) into tuple type. [tuple-invalid-type-spread]
+
+   tuple_spread.ts:24:51
+   24| function arrayThenGeneric<A extends unknown[]>(): [...string[], ...A] {
+                                                         ^^^^^^^^^^^^^^^^^^^
+
+References:
+   tuple_spread.ts:24:55
+   24| function arrayThenGeneric<A extends unknown[]>(): [...string[], ...A] {
+                                                             ^^^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------- tuple_spread.ts:27:51
+
+Cannot spread non-tuple (`A` [1]) into tuple type. [tuple-invalid-type-spread]
+
+   tuple_spread.ts:27:51
+   27| function genericThenArray<A extends unknown[]>(): [...A, ...string[]] {
+                                                         ^^^^^^^^^^^^^^^^^^^
+
+References:
+   tuple_spread.ts:27:55
+   27| function genericThenArray<A extends unknown[]>(): [...A, ...string[]] {
+                                                             ^ [1]
+
+
+Error -------------------------------------------------------------------------------------------- tuple_spread.ts:35:50
+
+Cannot spread non-tuple (`Array<string>` [1]) into tuple type. [tuple-invalid-type-spread]
+
+   tuple_spread.ts:35:50
+   35| type Leading<A extends ReadonlyArray<unknown>> = [...A, boolean]; // ERROR (TypeScript accepts)
+                                                        ^^^^^^^^^^^^^^^
+
+References:
+   tuple_spread.ts:36:32
+   36| declare const leading: Leading<Array<string>>;
+                                      ^^^^^^^^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------- tuple_spread.ts:38:59
+
+Cannot spread non-tuple (`Array<string>` [1]) into tuple type. [tuple-invalid-type-spread]
+
+   tuple_spread.ts:38:59
+   38| type LeadingFromTuple<A extends ReadonlyArray<unknown>> = [...A, ...[boolean]]; // ERROR (TypeScript accepts)
+                                                                 ^^^^^^^^^^^^^^^^^^^^
+
+References:
+   tuple_spread.ts:39:50
+   39| declare const leadingFromTuple: LeadingFromTuple<Array<string>>;
+                                                        ^^^^^^^^^^^^^ [1]
+
+
+
+Found 9 errors

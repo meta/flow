@@ -1406,6 +1406,7 @@ pub fn destructor_default<'cx, A, M: TypeMapper<'cx, A> + ?Sized>(
                 inexact,
                 resolved,
                 unresolved,
+                strictness_kind,
             }),
         ) => {
             let mut unresolved_changed = false;
@@ -1475,6 +1476,7 @@ pub fn destructor_default<'cx, A, M: TypeMapper<'cx, A> + ?Sized>(
                         inexact: *inexact,
                         resolved: resolved_prime,
                         unresolved: unresolved_prime,
+                        strictness_kind: *strictness_kind,
                     },
                 )))
             }

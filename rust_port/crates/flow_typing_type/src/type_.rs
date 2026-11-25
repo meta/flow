@@ -7006,6 +7006,8 @@ pub struct DestructorSpreadTupleTypeData {
     pub inexact: bool,
     pub resolved: flow_data_structure_wrapper::list::FlowOcamlList<ResolvedParam>,
     pub unresolved: flow_data_structure_wrapper::list::FlowOcamlList<UnresolvedParam>,
+    /// The strictness of the tuple type, by the language it is written in.
+    pub strictness_kind: TypeStrictnessKind,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -7181,6 +7183,7 @@ pub enum SpreadResolve {
         elem_t: Type,
         inexact: bool,
         tout: Type,
+        strictness_kind: TypeStrictnessKind,
     },
     /// Once we've finished resolving spreads, try to construct an array with known element types
     ResolveSpreadsToArrayLiteral {
@@ -7217,6 +7220,7 @@ pub enum SpreadArrayResolveTo {
     },
     ResolveToTupleType {
         inexact: bool,
+        strictness_kind: TypeStrictnessKind,
     },
 }
 

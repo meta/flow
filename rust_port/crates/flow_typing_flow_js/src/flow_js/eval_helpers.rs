@@ -1084,6 +1084,7 @@ pub(super) fn eval_destructor<'cx>(
                         inexact,
                         resolved: resolved_rev,
                         unresolved,
+                        strictness_kind,
                     }),
                 ) => {
                     let elem_t = flow_typing_tvar::mk(cx, reason_tuple.dupe());
@@ -1098,6 +1099,7 @@ pub(super) fn eval_destructor<'cx>(
                                 inexact: *inexact,
                                 elem_t,
                                 tout: Type::new(TypeInner::OpenT(tout.dupe())),
+                                strictness_kind: *strictness_kind,
                             },
                         }),
                     })));

@@ -4166,12 +4166,40 @@ fn __flow_impl<'cx>(
                 }
                 _ => (l.dupe(), None, false),
             };
+            // In a tuple type written in TypeScript, an earlier spread of an unknown number of
+            // elements waits to be merged into the rest element with what follows it, which can
+            // only be arrays that are known.
+            if bounded && tuple_type_inexact.is_some() {
+                // The resolved elements are in reverse order.
+                let mut resolved: Vec<&ResolvedParam> =
+                    resolve_spread.rrt_resolved.iter().collect();
+                resolved.reverse();
+                if let Some(i) = resolved.iter().position(|param| is_rest_spread(param)) {
+                    let next_loc = match resolved.get(i + 1) {
+                        Some(next) => type_util::reason_of_resolved_param(next).loc().dupe(),
+                        None => reason.loc().dupe(),
+                    };
+                    if let Some(error) = rest_spread_error(reason_op, resolved[i], next_loc) {
+                        flow_js_utils::add_output_with_env(cx, env, error)?;
+                        // Continue as if `any` was spread, which makes the tuple type `any`.
+                        return Ok(Some(TailCall::RecFlow(
+                            any_t::error(reason.dupe()),
+                            u.dupe(),
+                            DepthTrace::rec_trace(trace),
+                        )));
+                    }
+                }
+            }
             let arrtype = match lt.deref() {
                 DefT(_, deref!(ArrT(arrtype))) => {
                     // Arrays
                     match (&resolve_spread.rrt_resolve_to, arrtype.as_ref()) {
                         (
-                            SpreadResolve::ResolveSpreadsToTupleType { inexact, .. },
+                            SpreadResolve::ResolveSpreadsToTupleType {
+                                inexact,
+                                strictness_kind,
+                                ..
+                            },
                             ArrayAT(
                                 deref!(ArrayATData {
                                     tuple_view: None,
@@ -4180,9 +4208,14 @@ fn __flow_impl<'cx>(
                             )
                             | ROArrayAT(deref!(ROArrayATData { .. }))
                             | TupleAT(deref!(TupleATData { rest: Some(_), .. })),
-                        ) if *inexact || !resolve_spread.rrt_unresolved.is_empty() => {
-                            // Only the last spread of a tuple type can have an unknown number of
-                            // elements, which become its rest element.
+                        ) if *inexact
+                            || (!resolve_spread.rrt_unresolved.is_empty()
+                                && (*strictness_kind == TypeStrictnessKind::Flow || bounded)) =>
+                        {
+                            // Only the last spread of a tuple type written in Flow can have an
+                            // unknown number of elements, which become its rest element. One
+                            // written in TypeScript is checked once its spreads are resolved,
+                            // unless the spread is known only through its bound.
                             let error = match arrtype.as_ref() {
                                 TupleAT(_) => {
                                     let loc = match resolve_spread.rrt_unresolved.first() {

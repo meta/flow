@@ -1450,6 +1450,7 @@ fn json_of_destructor<'cx>(
                 inexact,
                 resolved: resolved_rev,
                 unresolved,
+                strictness_kind: _,
             }),
         ) => {
             json!({
