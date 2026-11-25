@@ -127,9 +127,12 @@ pub fn mk_object_type<'cx>(
                 ObjKind::Indexed(dict) => Some(dict.clone()),
                 _ => None,
             };
-            // The slice of an interface already includes its proto props.
+            // The slice of an interface or of a TypeScript class already includes its proto props.
             let proto_props = match inst.inst_kind {
                 InstanceKind::InterfaceKind { .. } => {
+                    cx.generate_property_map(properties::PropertiesMap::new())
+                }
+                InstanceKind::ClassKind if inst.strictness_kind.is_typescript_loose() => {
                     cx.generate_property_map(properties::PropertiesMap::new())
                 }
                 _ => inst.proto_props.dupe(),
@@ -378,6 +381,21 @@ fn object_tool_dict_polarity_override(tool: &object::Tool) -> Option<Polarity> {
         | object::Tool::ReactConfig(_)
         | object::Tool::ReactCheckComponentConfig { .. } => Some(Polarity::Neutral),
     }
+}
+
+/// The object type operations that map over every member of their operand, as mapped types do.
+/// Spreads and the other rests copy only own properties.
+fn is_type_operation(tool: &object::Tool) -> bool {
+    matches!(
+        tool,
+        object::Tool::MakeExact
+            | object::Tool::ReadOnly
+            | object::Tool::Partial
+            | object::Tool::Required
+            | object::Tool::Rest(deref!((object::rest::MergeMode::Omit, _)))
+            | object::Tool::ObjectRep
+            | object::Tool::ObjectMap(_)
+    )
 }
 
 /// Spreading a record is allowed; every other object type operation on a record is banned.
@@ -2296,8 +2314,12 @@ pub fn interface_slice<'cx>(
     let id = if include_proto_props {
         let proto_props = cx.find_props(inst.proto_props.dupe());
         let own_props = cx.find_props(id);
+        // A class keeps its constructor in its proto props, but the constructor is not a member
+        // of its instances.
+        let is_class = matches!(inst.inst_kind, InstanceKind::ClassKind);
         let props = proto_props
             .iter()
+            .filter(|(name, _)| !(is_class && name.matches_str("constructor")))
             .chain(own_props.iter())
             .map(|(name, prop)| (name.dupe(), prop.dupe()))
             .collect();
@@ -2561,20 +2583,19 @@ fn resolve_with_env<'cx, A>(
                         tool,
                         object::Tool::Spread(deref!((object::spread::Target::Value { .. }, _)))
                     ) && inst.strictness_kind.is_typescript_loose();
-                let is_type_operation = matches!(
-                    tool,
-                    object::Tool::MakeExact
-                        | object::Tool::ReadOnly
-                        | object::Tool::Partial
-                        | object::Tool::Required
-                        | object::Tool::Rest(deref!((object::rest::MergeMode::Omit, _)))
-                        | object::Tool::ObjectRep
-                        | object::Tool::ObjectMap(_)
-                );
-                let include_proto_props = matches!(inst_kind, InstanceKind::InterfaceKind { .. })
-                    && (is_type_operation
-                        || is_type_spread
-                        || is_typescript_interface_value_spread);
+                let include_proto_props = match inst_kind {
+                    InstanceKind::InterfaceKind { .. } => {
+                        is_type_operation(tool)
+                            || is_type_spread
+                            || is_typescript_interface_value_spread
+                    }
+                    // TypeScript classes are structural, and their methods are members like an
+                    // interface's. A spread copies only their own properties, as in TypeScript.
+                    InstanceKind::ClassKind => {
+                        is_type_operation(tool) && inst.strictness_kind.is_typescript_loose()
+                    }
+                    InstanceKind::RecordKind { .. } => false,
+                };
                 let resolve_tool_inner = object::ResolveTool::Super(
                     interface_slice(
                         cx,
@@ -3290,18 +3311,15 @@ pub fn super_<'cx, A>(
             let (slice, super_t) = match def_t.deref() {
                 DefTInner::InstanceT(inst_t) => {
                     let inst = &inst_t.inst;
-                    let include_proto_props =
-                        matches!(
-                            tool,
-                            object::Tool::Spread(_)
-                                | object::Tool::MakeExact
-                                | object::Tool::ReadOnly
-                                | object::Tool::Partial
-                                | object::Tool::Required
-                                | object::Tool::Rest(deref!((object::rest::MergeMode::Omit, _)))
-                                | object::Tool::ObjectRep
-                                | object::Tool::ObjectMap(_)
-                        ) && matches!(inst.inst_kind, InstanceKind::InterfaceKind { .. });
+                    let include_proto_props = match inst.inst_kind {
+                        InstanceKind::InterfaceKind { .. } => {
+                            matches!(tool, object::Tool::Spread(_)) || is_type_operation(tool)
+                        }
+                        InstanceKind::ClassKind => {
+                            is_type_operation(tool) && inst.strictness_kind.is_typescript_loose()
+                        }
+                        InstanceKind::RecordKind { .. } => false,
+                    };
                     (
                         interface_slice(
                             cx,
@@ -3356,6 +3374,18 @@ pub fn super_<'cx, A>(
                 &acc,
                 &slice,
             );
+            // The members of a TypeScript class make up the whole result, which has no
+            // prototype (see `mk_object_type`), so a Flow superclass's prototype does not come
+            // back through its interface.
+            let interface = match &acc.interface {
+                Some((_, inst))
+                    if matches!(inst.inst_kind, InstanceKind::ClassKind)
+                        && inst.strictness_kind.is_typescript_loose() =>
+                {
+                    acc.interface
+                }
+                _ => slice.interface.or(acc.interface),
+            };
             let acc = object::Slice {
                 reason: acc.reason.dupe(),
                 strictness_kind: acc.strictness_kind.join(slice.strictness_kind),
@@ -3363,7 +3393,7 @@ pub fn super_<'cx, A>(
                 flags,
                 frozen,
                 generics,
-                interface: slice.interface.or(acc.interface),
+                interface,
                 reachable_targs,
                 literal: acc.literal,
                 exact_object_type: false,

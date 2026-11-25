@@ -2872,7 +2872,8 @@ fn __flow_impl<'cx>(
         } =>
         {
             let (prop_ids, dict_keys) = flow_js_utils::key_sources_of_instance_t(
-                |reason, t| helpers::possible_concrete_types_for_inspection(cx, env, reason, t),
+                cx,
+                |cx, reason, t| helpers::possible_concrete_types_for_inspection(cx, env, reason, t),
                 instance_t,
             )?;
             if prop_ids
@@ -2920,7 +2921,8 @@ fn __flow_impl<'cx>(
             ),
         ) => {
             let (_, dict_keys) = flow_js_utils::key_sources_of_instance_t(
-                |reason, t| helpers::possible_concrete_types_for_inspection(cx, env, reason, t),
+                cx,
+                |cx, reason, t| helpers::possible_concrete_types_for_inspection(cx, env, reason, t),
                 instance_t,
             )?;
             // Same as for objects above: if we have a dictionary, try that.
@@ -3010,7 +3012,8 @@ fn __flow_impl<'cx>(
             },
         ) => {
             let (prop_ids, dict_keys) = flow_js_utils::key_sources_of_instance_t(
-                |reason, t| helpers::possible_concrete_types_for_inspection(cx, env, reason, t),
+                cx,
+                |cx, reason, t| helpers::possible_concrete_types_for_inspection(cx, env, reason, t),
                 instance_t,
             )?;
             let keylist =

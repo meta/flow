@@ -1,0 +1,90 @@
+Error ----------------------------------------------------------------------------------------------------- test.js:7:28
+
+Cannot assign `'constructor'` to `ctor` because property `constructor` is missing in `Editor` [1]. [prop-missing]
+
+   test.js:7:28
+   7| const ctor: keyof Editor = 'constructor'; // error
+                                 ^^^^^^^^^^^^^
+
+References:
+   test.js:7:19
+   7| const ctor: keyof Editor = 'constructor'; // error
+                        ^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:8:36
+
+Cannot assign `'make'` to `staticMethod` because property `make` is missing in `Editor` [1]. [prop-missing]
+
+   test.js:8:36
+   8| const staticMethod: keyof Editor = 'make'; // error
+                                         ^^^^^^
+
+References:
+   test.js:8:27
+   8| const staticMethod: keyof Editor = 'make'; // error
+                                ^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:19:9
+
+Cannot get `omitted.field` because property `field` is missing in
+`interface {baseField: number; baseMethod(this: Editor): void; getRootElement(this: Editor): null | s...` [1].
+[prop-missing]
+
+   test.js:19:9
+   19| omitted.field; // error
+               ^^^^^
+
+References:
+   test.js:17:16
+   17| const omitted: Omit<Editor, 'field'> = editor; // ok
+                      ^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:28:37
+
+Cannot assign `'n'` to `flowMethod` because property `n` is missing in `FlowClass` [1]. [prop-missing]
+
+   test.js:28:37
+   28| const flowMethod: keyof FlowClass = 'n'; // error: a Flow class's keys are its own properties
+                                           ^^^
+
+References:
+   test.js:28:25
+   28| const flowMethod: keyof FlowClass = 'n'; // error: a Flow class's keys are its own properties
+                               ^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:33:48
+
+Cannot assign `'focus'` to `methodOfFlowSuper` because property `focus` is missing in `CustomElement` [1].
+[prop-missing]
+
+   test.js:33:48
+   33| const methodOfFlowSuper: keyof CustomElement = 'focus'; // error
+                                                      ^^^^^^^
+
+References:
+   test.js:33:32
+   33| const methodOfFlowSuper: keyof CustomElement = 'focus'; // error
+                                      ^^^^^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:36:16
+
+Cannot get `readonlyCustom.focus` because property `focus` is missing in
+`interface {own(this: CustomElement): void; readonly tabIndex: number}` [1]. [prop-missing]
+
+   test.js:36:16
+   36| readonlyCustom.focus; // error
+                      ^^^^^
+
+References:
+   test.js:35:40
+   35| declare const readonlyCustom: Readonly<CustomElement>;
+                                              ^^^^^^^^^^^^^ [1]
+
+
+
+Found 6 errors

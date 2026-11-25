@@ -8878,57 +8878,64 @@ fn instance_own_key_sources(inst: &InstType) -> KeySources {
     (vec![inst.own_props.dupe()], dict_keys)
 }
 
-fn ts_interface_key_sources<E>(
-    concretize: &mut dyn FnMut(&Reason, &Type) -> Result<Vec<Type>, E>,
+fn ts_instance_key_sources<'cx, E>(
+    cx: &mut Context<'cx>,
+    concretize: &mut dyn FnMut(&mut Context<'cx>, &Reason, &Type) -> Result<Vec<Type>, E>,
     instance: &InstanceT,
 ) -> Result<KeySources, E> {
-    fn collect_type<E>(
-        concretize: &mut dyn FnMut(&Reason, &Type) -> Result<Vec<Type>, E>,
+    fn collect_type<'cx, E>(
+        cx: &mut Context<'cx>,
+        concretize: &mut dyn FnMut(&mut Context<'cx>, &Reason, &Type) -> Result<Vec<Type>, E>,
         seen: &mut BTreeSet<ALocId>,
         t: &Type,
     ) -> Result<KeySources, E> {
         use flow_typing_type::type_util::reason_of_t;
 
-        concretize(reason_of_t(t), t)?
+        concretize(cx, reason_of_t(t), t)?
             .into_iter()
             .try_fold(empty_key_sources(), |acc, t| {
                 Ok(append_key_sources(
                     acc,
-                    collect_concrete(concretize, seen, &t)?,
+                    collect_concrete(cx, concretize, seen, &t)?,
                 ))
             })
     }
 
-    fn collect_concrete<E>(
-        concretize: &mut dyn FnMut(&Reason, &Type) -> Result<Vec<Type>, E>,
+    fn collect_concrete<'cx, E>(
+        cx: &mut Context<'cx>,
+        concretize: &mut dyn FnMut(&mut Context<'cx>, &Reason, &Type) -> Result<Vec<Type>, E>,
         seen: &mut BTreeSet<ALocId>,
         t: &Type,
     ) -> Result<KeySources, E> {
         match t.deref() {
             TypeInner::DefT(_, def_t) => match def_t.deref() {
-                DefTInner::InstanceT(instance) => collect_instance(concretize, seen, instance),
-                DefTInner::ClassT(t) => collect_type(concretize, seen, t),
+                DefTInner::InstanceT(instance) => collect_instance(cx, concretize, seen, instance),
+                DefTInner::ClassT(t) => collect_type(cx, concretize, seen, t),
                 DefTInner::ObjT(obj) => Ok(obj_own_key_sources(obj)),
                 _ => Ok(empty_key_sources()),
             },
             TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance, .. })) => {
-                collect_instance(concretize, seen, instance)
+                collect_instance(cx, concretize, seen, instance)
             }
             TypeInner::IntersectionT(_, rep) => {
                 rep.members_iter().try_fold(empty_key_sources(), |acc, t| {
-                    Ok(append_key_sources(acc, collect_type(concretize, seen, t)?))
+                    Ok(append_key_sources(
+                        acc,
+                        collect_type(cx, concretize, seen, t)?,
+                    ))
                 })
             }
             _ => Ok(empty_key_sources()),
         }
     }
 
-    fn collect_instance<E>(
-        concretize: &mut dyn FnMut(&Reason, &Type) -> Result<Vec<Type>, E>,
+    fn collect_instance<'cx, E>(
+        cx: &mut Context<'cx>,
+        concretize: &mut dyn FnMut(&mut Context<'cx>, &Reason, &Type) -> Result<Vec<Type>, E>,
         seen: &mut BTreeSet<ALocId>,
         instance: &InstanceT,
     ) -> Result<KeySources, E> {
-        if !matches!(instance.inst.inst_kind, InstanceKind::InterfaceKind { .. }) {
+        if matches!(instance.inst.inst_kind, InstanceKind::RecordKind { .. }) {
             return Ok(empty_key_sources());
         }
 
@@ -8936,31 +8943,46 @@ fn ts_interface_key_sources<E>(
             return Ok(empty_key_sources());
         }
 
-        // TS `keyof` also sees methods, which interfaces keep in their proto props.
+        // TS `keyof` also sees methods, which interfaces and classes keep in their proto props. Like
+        // the object kit, it counts the methods of a class only when the class is declared in
+        // TypeScript. A class's proto props also hold its constructor, which is not a member of
+        // its instances.
         let (mut prop_ids, dict_keys) = instance_own_key_sources(&instance.inst);
-        prop_ids.push(instance.inst.proto_props.dupe());
-        let super_sources = collect_type(concretize, seen, &instance.super_)?;
+        match instance.inst.inst_kind {
+            InstanceKind::InterfaceKind { .. } => prop_ids.push(instance.inst.proto_props.dupe()),
+            InstanceKind::ClassKind if instance.inst.strictness_kind.is_typescript_loose() => {
+                let mut props = cx.find_props(instance.inst.proto_props.dupe());
+                props.remove(&Name::new(FlowSmolStr::new_inline("constructor")));
+                prop_ids.push(cx.generate_property_map(props));
+            }
+            InstanceKind::ClassKind | InstanceKind::RecordKind { .. } => {}
+        }
+        let super_sources = collect_type(cx, concretize, seen, &instance.super_)?;
         Ok(append_key_sources((prop_ids, dict_keys), super_sources))
     }
 
     let mut seen = BTreeSet::new();
-    collect_instance(concretize, &mut seen, instance)
+    collect_instance(cx, concretize, &mut seen, instance)
 }
 
 /// Returns property maps and dictionary key types that contribute to `keyof`/`$Keys`
 /// for an instance type.
 ///
-/// TS `keyof` sees inherited members, Flow `$Keys` sees only own ones. The choice is
-/// keyed on where the interface was *declared*, not on the file being checked: `keyof`
-/// resolves lazily, so a `.d.ts` interface is almost always keyed from a `.js` consumer.
-pub fn key_sources_of_instance_t<E>(
-    mut concretize: impl FnMut(&Reason, &Type) -> Result<Vec<Type>, E>,
+/// TS `keyof` sees methods and inherited members, Flow `$Keys` sees only own properties. The
+/// choice is keyed on where the class or interface was *declared*, not on the file being checked:
+/// `keyof` resolves lazily, so a `.d.ts` interface is almost always keyed from a `.js` consumer.
+pub fn key_sources_of_instance_t<'cx, E>(
+    cx: &mut Context<'cx>,
+    mut concretize: impl FnMut(&mut Context<'cx>, &Reason, &Type) -> Result<Vec<Type>, E>,
     instance: &InstanceT,
 ) -> Result<KeySources, E> {
     if instance.inst.strictness_kind.is_typescript_loose()
-        && matches!(instance.inst.inst_kind, InstanceKind::InterfaceKind { .. })
+        && matches!(
+            instance.inst.inst_kind,
+            InstanceKind::InterfaceKind { .. } | InstanceKind::ClassKind
+        )
     {
-        ts_interface_key_sources(&mut concretize, instance)
+        ts_instance_key_sources(cx, &mut concretize, instance)
     } else {
         Ok(instance_own_key_sources(&instance.inst))
     }
