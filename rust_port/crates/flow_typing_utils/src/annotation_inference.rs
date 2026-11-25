@@ -163,9 +163,10 @@ fn get_builtin_typeapp<'cx>(
     reason: Reason,
     x: &str,
     targs: Vec<Type>,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     let t = flow_js_utils::lookup_builtin_type(cx, x, reason.dupe());
-    type_util::typeapp(false, false, reason, t, targs)
+    type_util::typeapp(false, false, reason, t, targs, strictness_kind)
 }
 
 // Errors created with [error_unsupported] are actually reported. Compare this to
@@ -368,6 +369,7 @@ fn mk_typeapp_of_poly<'cx>(
     xs: Vec<type_::TypeParam>,
     t: Type,
     ts: Rc<[Type]>,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     let xs = vec1::Vec1::try_from_vec(xs).expect("tparams should be non-empty");
     flow_js_utils::instantiation_kit::mk_typeapp_of_poly::<AnnotInstantiationHelper>(
@@ -381,6 +383,7 @@ fn mk_typeapp_of_poly<'cx>(
         &xs,
         t,
         ts,
+        strictness_kind,
     )
     // Annotation inference is never speculative
     .unwrap()
@@ -1166,6 +1169,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                     type_,
                     targs,
                     from_value,
+                    strictness_kind,
                     ..
                 }),
             ),
@@ -1182,10 +1186,18 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 type_.dupe(),
                 targs.clone(),
                 op.error_operation(),
+                *strictness_kind,
             );
             elab_t(cx, Some(seen), t, op)
         }
-        (TypeInner::DefT(def_reason, def_t), OpInner::AnnotUseTTypeT { reason, kind }) => {
+        (
+            TypeInner::DefT(def_reason, def_t),
+            OpInner::AnnotUseTTypeT {
+                reason,
+                kind,
+                strictness_kind,
+            },
+        ) => {
             match def_t.deref() {
                 DefTInner::PolyT(deref!(PolyTData { tparams, t_out, .. }))
                     if matches!(kind, flow_typing_type::type_::TypeTKind::RenderTypeKind)
@@ -1290,6 +1302,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                         ids.to_vec(),
                         t_out.dupe(),
                         Rc::from([]),
+                        *strictness_kind,
                     );
                     elab_t(cx, Some(seen), t, op)
                 }
@@ -1346,7 +1359,15 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 },
                 // a component syntax value annotation becomes an element of that component
                 DefTInner::ReactAbstractComponentT(_) => {
-                    get_builtin_typeapp(cx, reason.dupe(), "React$RendersExactly", vec![t.dupe()])
+                    // As in `value_to_type_reference_transform::run_on_abstract_component`.
+                    let strictness_kind = cx.type_strictness_kind();
+                    get_builtin_typeapp(
+                        cx,
+                        reason.dupe(),
+                        "React$RendersExactly",
+                        vec![t.dupe()],
+                        strictness_kind,
+                    )
                 }
                 DefTInner::TypeT(_, l) => l.dupe(),
                 // A `unique symbol` value used in a type position resolves to its
@@ -1530,6 +1551,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                     type_,
                     targs,
                     from_value,
+                    strictness_kind,
                     ..
                 }),
             ),
@@ -1545,6 +1567,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 type_.dupe(),
                 targs.clone(),
                 op.error_operation(),
+                *strictness_kind,
             );
             elab_t(cx, Some(seen), t, op)
         }
@@ -1949,6 +1972,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 xs.to_vec(),
                 t_out.dupe(),
                 ts,
+                data.strictness_kind,
             )
         }
         (TypeInner::DefT(_, def_t), OpInner::AnnotSpecializeT(data))
@@ -2813,6 +2837,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                                 reason.dupe(),
                                 "Array",
                                 vec![elem_t.dupe()],
+                                *strictness_kind,
                             );
                             elab_t(cx, Some(seen), arr_t, op)
                         }
@@ -2824,6 +2849,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                                 reason.dupe(),
                                 "ReadonlyArray",
                                 vec![elem_t],
+                                *strictness_kind,
                             );
                             elab_t(cx, Some(seen), arr_t, op)
                         }
@@ -3307,7 +3333,17 @@ pub fn get_builtin_type<'cx>(
     let use_desc = use_desc.unwrap_or(false);
     let t = flow_js_utils::lookup_builtin_type(cx, name, reason.dupe());
     let reason_type = type_util::reason_of_t(&t);
-    mk_instance_raw(cx, None, reason, Some(use_desc), reason_type.dupe(), t)
+    // The code being merged reaches the builtin.
+    let strictness_kind = cx.type_strictness_kind();
+    mk_instance_raw(
+        cx,
+        None,
+        reason,
+        Some(use_desc),
+        reason_type.dupe(),
+        t,
+        strictness_kind,
+    )
 }
 
 pub fn specialize<'cx>(
@@ -3318,6 +3354,7 @@ pub fn specialize<'cx>(
     reason_tapp: Reason,
     ts: Option<Rc<[Type]>>,
     operation: AnnotationInferenceOperation,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     elab_t(
         cx,
@@ -3329,6 +3366,7 @@ pub fn specialize<'cx>(
             reason2: reason_tapp,
             types: ts,
             operation,
+            strictness_kind,
         }))),
     )
 }
@@ -3355,15 +3393,20 @@ fn specialize_class<'cx>(
 ) -> Type {
     match ts {
         None => c,
-        Some(ts) => specialize(
-            cx,
-            c,
-            type_::unknown_use(),
-            reason_op,
-            reason_tapp,
-            Some(ts),
-            operation,
-        ),
+        Some(ts) => {
+            // As in `instantiation_helpers::instantiate_this_class`.
+            let strictness_kind = cx.type_strictness_kind();
+            specialize(
+                cx,
+                c,
+                type_::unknown_use(),
+                reason_op,
+                reason_tapp,
+                Some(ts),
+                operation,
+                strictness_kind,
+            )
+        }
     }
 }
 
@@ -3372,6 +3415,7 @@ pub(crate) fn mk_type_reference<'cx>(
     type_t_kind: TypeTKind,
     reason: Reason,
     c: Type,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     let reason2 = reason.dupe();
     let type_t_kind2 = type_t_kind;
@@ -3384,6 +3428,7 @@ pub(crate) fn mk_type_reference<'cx>(
             Op::new(OpInner::AnnotUseTTypeT {
                 reason: reason2.dupe(),
                 kind: type_t_kind2,
+                strictness_kind,
             }),
         );
         resolve_id(cx, reason2.dupe(), id, t);
@@ -3397,6 +3442,7 @@ pub fn mk_instance<'cx>(
     instance_reason: Reason,
     use_desc: Option<bool>,
     c: Type,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     mk_instance_raw(
         cx,
@@ -3405,6 +3451,7 @@ pub fn mk_instance<'cx>(
         use_desc,
         instance_reason,
         c,
+        strictness_kind,
     )
 }
 
@@ -3415,6 +3462,7 @@ fn mk_instance_raw<'cx>(
     use_desc: Option<bool>,
     reason_type: Reason,
     c: Type,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     let type_t_kind = type_t_kind.unwrap_or(TypeTKind::InstanceKind);
     let use_desc = use_desc.unwrap_or(false);
@@ -3425,6 +3473,7 @@ fn mk_instance_raw<'cx>(
         Op::new(OpInner::AnnotUseTTypeT {
             reason: reason_type,
             kind: type_t_kind,
+            strictness_kind,
         }),
     );
     Type::new(TypeInner::AnnotT(instance_reason, source, use_desc))
@@ -3439,6 +3488,7 @@ fn mk_typeapp_instance<'cx>(
     c: Type,
     ts: Rc<[Type]>,
     operation: AnnotationInferenceOperation,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     let t = specialize(
         cx,
@@ -3448,12 +3498,21 @@ fn mk_typeapp_instance<'cx>(
         reason_tapp.dupe(),
         Some(ts),
         operation,
+        strictness_kind,
     );
     if from_value {
         type_util::mod_reason_of_t(&|_| reason_tapp.dupe(), &t)
     } else {
         let reason_type = type_util::reason_of_t(&c);
-        mk_instance_raw(cx, None, reason_tapp, None, reason_type.dupe(), t)
+        mk_instance_raw(
+            cx,
+            None,
+            reason_tapp,
+            None,
+            reason_type.dupe(),
+            t,
+            strictness_kind,
+        )
     }
 }
 

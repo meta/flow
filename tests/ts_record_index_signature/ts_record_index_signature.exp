@@ -1,0 +1,152 @@
+Error ---------------------------------------------------------------------------------------------------- test.js:30:13
+
+Cannot call `takeNumbers` with `node` bound to `values` because in property `type`: `string` [1] is incompatible with
+`number` [2]. [incompatible-type]
+
+   test.js:30:13
+   30| takeNumbers(node); // ERROR: `type` is a string
+                   ^^^^
+
+References:
+   test.js:23:32
+   23| type SerializedMyNode = {type: string};
+                                      ^^^^^^ [1]
+   node_modules/repro/index.d.ts:8:60
+    8| export declare function takeNumbers(values: Record<string, number>): void;
+                                                                  ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:45:12
+
+Cannot call `takeInFlow` with `node` bound to `values` because in property `type`: `string` [1] is not exactly the same
+as `unknown` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `type` is invariantly typed. To fix the error,
+- Either make `SerializedMyNode` [3] and `{[string]: unknown}` [4] exactly the same
+- Or make property `type` in `{[string]: unknown}` [5] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   test.js:45:12
+     45| takeInFlow(node); // ERROR
+                    ^^^^
+
+References:
+   test.js:23:32
+     23| type SerializedMyNode = {type: string};
+                                        ^^^^^^ [1]
+   <BUILTINS>/lib.es5.js:1570:15
+   1570|     [P in K]: T;
+                       ^ [2]
+   test.js:23:25
+     23| type SerializedMyNode = {type: string};
+                                 ^^^^^^^^^^^^^^ [3]
+   <BUILTINS>/lib.es5.js:1570:5
+   1570|     [P in K]: T;
+             ^^^^^^^^^^^ [4]
+   test.js:44:37
+     44| declare function takeInFlow(values: Record<string, unknown>): void;
+                                             ^^^^^^^^^^^^^^^^^^^^^^^ [5]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:52:16
+
+Cannot call `takeDictInFlow` with `node` bound to `values` because in property `type`: `string` [1] is not exactly the
+same as `unknown` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `type` is invariantly typed. To fix the error,
+- Either make `SerializedMyNode` [3] and `{[key: string]: unknown}` [4] exactly the same
+- Or make property `type` in `{[key: string]: unknown}` [5] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   test.js:52:16
+   52| takeDictInFlow(node); // ERROR
+                      ^^^^
+
+References:
+   test.js:23:32
+   23| type SerializedMyNode = {type: string};
+                                      ^^^^^^ [1]
+   test.js:51:46
+   51| declare function takeDictInFlow(values: Dict<unknown>): void;
+                                                    ^^^^^^^ [2]
+   test.js:23:25
+   23| type SerializedMyNode = {type: string};
+                               ^^^^^^^^^^^^^^ [3]
+   flow_alias.js:4:23
+    4| export type Dict<V> = {[key: string]: V};
+                             ^^^^^^^^^^^^^^^^^^ [4]
+   test.js:51:41
+   51| declare function takeDictInFlow(values: Dict<unknown>): void;
+                                               ^^^^^^^^^^^^^ [5]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:54:17
+
+Cannot call `takeDictDInFlow` with `node` bound to `values` because in property `type`: `string` [1] is not exactly the
+same as `unknown` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `type` is invariantly typed. To fix the error,
+- Either make `SerializedMyNode` [3] and `{[key: string]: unknown}` [4] exactly the same
+- Or make property `type` in `{[key: string]: unknown}` [5] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   test.js:54:17
+   54| takeDictDInFlow(node); // ERROR
+                       ^^^^
+
+References:
+   test.js:23:32
+   23| type SerializedMyNode = {type: string};
+                                      ^^^^^^ [1]
+   flow_alias.js:9:23
+    9| export type DictD<V = unknown> = {[key: string]: V};
+                             ^^^^^^^ [2]
+   test.js:23:25
+   23| type SerializedMyNode = {type: string};
+                               ^^^^^^^^^^^^^^ [3]
+   flow_alias.js:9:34
+    9| export type DictD<V = unknown> = {[key: string]: V};
+                                        ^^^^^^^^^^^^^^^^^^ [4]
+   test.js:53:42
+   53| declare function takeDictDInFlow(values: DictD): void;
+                                                ^^^^^ [5]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:66:20
+
+Cannot call `takeCatBox` with object literal bound to `box` because in property `value`: object literal [1] is
+incompatible with `Cat` [2]. [incompatible-type]
+
+   test.js:66:20
+   66| takeCatBox({value: {name: ''}}); // ERROR: not a `Cat`
+                          ^^^^^^^^^^ [1]
+
+References:
+   node_modules/repro/index.d.ts:38:45
+   38| export declare function takeCatBox(box: Box<Cat>): void;
+                                                   ^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:68:13
+
+Cannot call `takeHandler` with `stringHandler` bound to `handler` because in type argument `T` [1]: `number` [2] is
+incompatible with `string` [3]. [incompatible-type]
+
+   test.js:68:13
+   68| takeHandler(stringHandler); // ERROR: `Handler`'s type parameter is invariant
+                   ^^^^^^^^^^^^^
+
+References:
+   flow_alias.js:15:26
+   15| export interface Handler<T> {
+                                ^ [1]
+   node_modules/repro/index.d.ts:39:63
+   39| export declare function takeHandler(handler: Handler<string | number>): void;
+                                                                     ^^^^^^ [2]
+   test.js:67:38
+   67| declare const stringHandler: Handler<string>;
+                                            ^^^^^^ [3]
+
+
+
+Found 6 errors

@@ -240,7 +240,7 @@ fn visit_ref<Loc>(edge: &dyn Fn(Rc<Node>), file: &File, ref_: &P::PackedRef<Loc>
 
 fn visit_tyref<Loc>(edge: &dyn Fn(Rc<Node>), file: &File, tyref: &P::TyRef<Loc>) {
     match tyref {
-        P::TyRef::Unqualified(ref_) => visit_ref(edge, file, ref_),
+        P::TyRef::Unqualified(ref_, _) => visit_ref(edge, file, ref_),
         P::TyRef::Qualified(deref!(P::TyRefQualified { qualification, .. })) => {
             visit_tyref(edge, file, qualification);
         }
@@ -263,6 +263,7 @@ pub fn visit_packed<Loc>(
                 loc: _,
                 name,
                 targs,
+                strictness_kind: _,
             }),
         ) => {
             visit_tyref(edge, file, name);

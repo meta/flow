@@ -3317,6 +3317,7 @@ pub fn rec_sub_t<'cx>(
                 targs: ts1,
                 from_value: fv1,
                 use_desc: _,
+                strictness_kind: s1,
             })),
             TypeAppT(deref!(TypeAppTData {
                 reason: r2,
@@ -3325,6 +3326,7 @@ pub fn rec_sub_t<'cx>(
                 targs: ts2,
                 from_value: fv2,
                 use_desc: _,
+                strictness_kind: s2,
             })),
         ) => {
             if let Some(env) = instantiation_utils::type_app_expansion::push_unless_loop(
@@ -3347,8 +3349,8 @@ pub fn rec_sub_t<'cx>(
                     c2,
                     &UseT::new(ConcretizeTypeAppsT(
                         use_op.dupe(),
-                        Box::new((ts2.dupe(), *fv2, op2.dupe(), r2.dupe())),
-                        Box::new((c1.dupe(), ts1.dupe(), *fv1, op1.dupe(), r1.dupe())),
+                        Box::new((ts2.dupe(), *fv2, op2.dupe(), r2.dupe(), *s2)),
+                        Box::new((c1.dupe(), ts1.dupe(), *fv1, op1.dupe(), r1.dupe(), *s1)),
                         true,
                     )),
                 )?;
@@ -3363,6 +3365,7 @@ pub fn rec_sub_t<'cx>(
                 targs,
                 from_value,
                 use_desc: type_app_use_desc,
+                strictness_kind,
             })),
             _,
         ) => {
@@ -3384,6 +3387,7 @@ pub fn rec_sub_t<'cx>(
                     *from_value,
                     type_,
                     targs.dupe(),
+                    *strictness_kind,
                 )?;
                 let t = FlowJs::reposition_reason(
                     cx, env,
@@ -3405,6 +3409,7 @@ pub fn rec_sub_t<'cx>(
                 targs,
                 from_value,
                 use_desc: type_app_use_desc,
+                strictness_kind,
             })),
         ) => {
             let reason_op = type_util::reason_of_t(l);
@@ -3425,6 +3430,7 @@ pub fn rec_sub_t<'cx>(
                     *from_value,
                     type_,
                     targs.dupe(),
+                    *strictness_kind,
                 )?;
                 // We do the slingshot trick here so that we flow l to the results of making the typeapp
                 // instead of adding another lower bound to t. We can't use an Annot here, which would do

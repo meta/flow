@@ -215,9 +215,9 @@ pub mod exports_helper {
                     default: true,
                 })
             }
-            Some(type_sig_pack::Packed::TyRef(deref!(type_sig_pack::TyRef::Unqualified(ref_))))
-                if packed_ref_name(type_sig, ref_).as_str() == remote_name =>
-            {
+            Some(type_sig_pack::Packed::TyRef(
+                deref!(type_sig_pack::TyRef::Unqualified(ref_, _)),
+            )) if packed_ref_name(type_sig, ref_).as_str() == remote_name => {
                 let import_kind = statement::ImportKind::ImportTypeof;
                 Some(ImportInfo {
                     import_kind,

@@ -1302,6 +1302,7 @@ fn supertype<'a, C: ConfigTypes>(cx: &mut Context<'a>, x: &class_types::Class<C>
                             annot_loc.dupe(),
                             c.dupe(),
                             targs.clone(),
+                            cx.type_strictness_kind(),
                         ),
                     }
                 })
@@ -1444,6 +1445,7 @@ fn this_instance_type<'a, C: crate::func_params_intf::Config>(
                     annot_loc.dupe(),
                     c.dupe(),
                     targs.clone(),
+                    cx.type_strictness_kind(),
                 ),
             })
             .collect(),
@@ -1682,6 +1684,7 @@ fn check_implements<'a, C: crate::func_params_intf::Config>(
                         annot_loc.dupe(),
                         c.dupe(),
                         targs.clone(),
+                        cx.type_strictness_kind(),
                     ),
                 };
                 let use_op = UseOp::Op(Arc::new(RootUseOp::ClassImplementsCheck(Box::new(

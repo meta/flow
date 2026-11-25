@@ -78,6 +78,7 @@ use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeAppTData;
 use flow_typing_type::type_::TypeInner;
 use flow_typing_type::type_::TypeMap;
+use flow_typing_type::type_::TypeStrictnessKind;
 use flow_typing_type::type_::UnresolvedArgData;
 use flow_typing_type::type_::eval as type_eval;
 use flow_typing_type::type_::nominal;
@@ -312,6 +313,7 @@ pub trait NormalizerInput {
         reason: Reason,
         t: Type,
         targs: &[Type],
+        strictness_kind: TypeStrictnessKind,
     ) -> Result<A, Error> {
         match env.cx.find_resolved(&t).as_deref() {
             Some(TypeInner::DefT(_, def_t))
@@ -347,7 +349,18 @@ pub trait NormalizerInput {
                 );
                 cont(env, state, &body)
             }
-            _ => Self::typeapp_regular(env, state, cont, type_, app, from_value, reason, t, targs),
+            _ => Self::typeapp_regular(
+                env,
+                state,
+                cont,
+                type_,
+                app,
+                from_value,
+                reason,
+                t,
+                targs,
+                strictness_kind,
+            ),
         }
     }
 
@@ -362,6 +375,7 @@ pub trait NormalizerInput {
         reason: Reason,
         t: Type,
         targs: &[Type],
+        strictness_kind: TypeStrictnessKind,
     ) -> Result<A, Error>;
 
     fn builtin_type<'cx, A>(
@@ -2954,6 +2968,8 @@ mod type_converter {
             t: &Type,
         ) -> Result<ALocTy, Error> {
             if from_value && let Some(targs) = targs {
+                // The code whose type is normalized applies the value.
+                let strictness_kind = env.cx.type_strictness_kind();
                 return I::typeapp(
                     env,
                     state,
@@ -2964,6 +2980,7 @@ mod type_converter {
                     type_util::reason_of_t(t).dupe(),
                     t.dupe(),
                     targs,
+                    strictness_kind,
                 );
             }
             match t.deref() {
@@ -5884,6 +5901,7 @@ mod expand_members {
                     type_: c,
                     targs,
                     from_value,
+                    strictness_kind,
                     ..
                 }),
             ) => I::typeapp(
@@ -5920,6 +5938,7 @@ mod expand_members {
                 reason.dupe(),
                 c.dupe(),
                 targs,
+                *strictness_kind,
             ),
             TypeInner::EvalT {
                 type_: eval_type,
@@ -6093,6 +6112,7 @@ mod expand_literal_union {
                     type_: c,
                     targs,
                     from_value,
+                    strictness_kind,
                     ..
                 }),
             ) => I::typeapp(
@@ -6105,6 +6125,7 @@ mod expand_literal_union {
                 reason.dupe(),
                 c.dupe(),
                 targs,
+                *strictness_kind,
             ),
             TypeInner::EvalT {
                 type_: eval_type,

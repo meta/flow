@@ -237,7 +237,7 @@ mod eval {
             ) if (tyname.as_str() == "AbstractComponent" || tyname.as_str() == "ComponentType")
                 && matches!(
                     **qualification,
-                    TyRef::Unqualified(PackedRef::RemoteRef(_) | PackedRef::BuiltinRef(_))
+                    TyRef::Unqualified(PackedRef::RemoteRef(_) | PackedRef::BuiltinRef(_), _)
                 ) =>
             {
                 Evaled::ComponentDecl(n)
@@ -258,7 +258,7 @@ mod eval {
                     Evaled::Nothing => Evaled::Nothing,
                 }
             }
-            (TyRef::Unqualified(r), _) => ref_(export_sig, seen, r),
+            (TyRef::Unqualified(r, _), _) => ref_(export_sig, seen, r),
         }
     }
 

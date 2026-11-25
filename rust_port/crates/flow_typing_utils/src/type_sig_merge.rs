@@ -397,6 +397,7 @@ fn specialize<'cx>(
     reason_op: Reason,
     t: Type,
     operation: AnnotationInferenceOperation,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     let reason = type_util::reason_of_t(&t).dupe();
     annotation_inference::specialize(
@@ -407,6 +408,7 @@ fn specialize<'cx>(
         reason,
         None,
         operation,
+        strictness_kind,
     )
 }
 
@@ -501,7 +503,9 @@ fn eval<'cx>(
 fn async_void_return<'cx>(cx: &mut Context<'cx>, loc: ALoc) -> Type {
     let reason = reason::mk_reason(None, loc.dupe());
     let targs = vec![type_::ts_void::annot_at(cx.ts_void(), loc)];
-    flow_js_utils::lookup_builtin_typeapp(cx, reason, "Promise", targs)
+    // The async function being merged applies `Promise`.
+    let strictness_kind = cx.type_strictness_kind();
+    flow_js_utils::lookup_builtin_typeapp(cx, reason, "Promise", targs, strictness_kind)
 }
 
 fn add_default_constructor<T>(
@@ -1279,7 +1283,7 @@ fn merge_tyref<'cx, R>(
     let mut current = tyref;
     loop {
         match current {
-            Pack::TyRef::Unqualified(packed_ref) => {
+            Pack::TyRef::Unqualified(packed_ref, _) => {
                 let (mut t, mut loc, mut names) = merge_ref(
                     cx,
                     file,
@@ -1721,6 +1725,7 @@ fn merge_impl<'cx>(
         ),
         Pack::Packed::TyRef(name) => {
             let in_renders_arg = env.in_renders_arg;
+            let strictness_kind = name.strictness_kind();
             merge_tyref(
                 cx,
                 file,
@@ -1732,22 +1737,43 @@ fn merge_impl<'cx>(
                     } else {
                         type_::TypeTKind::TypeAliasKind
                     };
-                    annotation_inference::mk_type_reference(cx, type_t_kind, reason, t.dupe())
+                    annotation_inference::mk_type_reference(
+                        cx,
+                        type_t_kind,
+                        reason,
+                        t.dupe(),
+                        strictness_kind,
+                    )
                 },
                 name,
             )
         }
-        Pack::Packed::TyRefApp(deref!(Pack::PackedTyRefApp { loc, name, targs })) => {
+        Pack::Packed::TyRefApp(
+            deref!(Pack::PackedTyRefApp {
+                loc,
+                name,
+                targs,
+                strictness_kind,
+            }),
+        ) => {
             let targs: Vec<Type> = targs
                 .iter()
                 .map(|t| merge_impl(env, cx, file, t, false, false))
                 .collect();
             let loc = loc.dupe();
+            let strictness_kind = *strictness_kind;
             merge_tyref(
                 cx,
                 file,
                 move |_, t, _ref_loc, _names| {
-                    type_util::typeapp_annot(false, false, loc.dupe(), t.dupe(), targs)
+                    type_util::typeapp_annot(
+                        false,
+                        false,
+                        loc.dupe(),
+                        t.dupe(),
+                        targs,
+                        strictness_kind,
+                    )
                 },
                 name,
             )
@@ -1806,7 +1832,13 @@ fn merge_impl<'cx>(
                 *strictness_kind,
             );
             let reason = reason::mk_annot_reason(None, loc.dupe());
-            flow_js_utils::lookup_builtin_typeapp(cx, reason, "Promise", vec![ns_t])
+            flow_js_utils::lookup_builtin_typeapp(
+                cx,
+                reason,
+                "Promise",
+                vec![ns_t],
+                *strictness_kind,
+            )
         }
         Pack::Packed::ModuleRef(
             deref!(Pack::PackedLocIndex {
@@ -1817,7 +1849,13 @@ fn merge_impl<'cx>(
         ) => {
             let t = require(cx, file, loc.dupe(), *index, true, *strictness_kind);
             let reason = reason::mk_reason(None, loc.dupe());
-            flow_js_utils::lookup_builtin_typeapp(cx, reason, "$Flow$ModuleRef", vec![t])
+            flow_js_utils::lookup_builtin_typeapp(
+                cx,
+                reason,
+                "$Flow$ModuleRef",
+                vec![t],
+                *strictness_kind,
+            )
         }
         Pack::Packed::ImportTypeAnnot(
             deref!(Pack::PackedLocIndex {
@@ -2347,12 +2385,15 @@ fn merge_annot<'cx>(
             let qname_str: FlowSmolStr = qname.join(".").into();
             let reason = reason::mk_reason(None, loc.dupe());
             let t = merge_impl(env, cx, file, t, false, true);
+            // The code being merged applies the value.
+            let strictness_kind = cx.type_strictness_kind();
             let targs = targs.as_ref().map(|ts| {
                 (
                     qname_str,
                     ts.iter()
                         .map(|t| merge_impl(env, cx, file, t, false, false))
                         .collect(),
+                    strictness_kind,
                 )
             });
             type_util::typeof_annotation(reason, t, targs)
@@ -4344,9 +4385,10 @@ fn merge_interface_extends<'cx>(
         fn aux<'cx>(cx: &mut Context<'cx>, file: &SigFile, name: &Pack::TyRef<ALoc>) -> Type {
             use flow_common::reason::VirtualReasonDesc::*;
             match name {
-                Pack::TyRef::Unqualified(Pack::PackedRef::RemoteRef(
-                    deref!(Pack::PackedRefRemote { ref_loc, index }),
-                )) => {
+                Pack::TyRef::Unqualified(
+                    Pack::PackedRef::RemoteRef(deref!(Pack::PackedRefRemote { ref_loc, index })),
+                    _,
+                ) => {
                     let __rc = file.remote_refs.get(*index).dupe();
                     let entry = __rc.get_forced(cx);
                     let (_def_loc, _name, _t, t_for_extends) = entry;
@@ -4379,7 +4421,7 @@ fn merge_interface_extends<'cx>(
                         *strictness_kind,
                     )
                 }
-                Pack::TyRef::Unqualified(_) => {
+                Pack::TyRef::Unqualified(..) => {
                     merge_tyref(cx, file, |_, t, _ref_loc, _names| t, name)
                 }
             }
@@ -4387,9 +4429,10 @@ fn merge_interface_extends<'cx>(
         aux(cx, file, name)
     };
     let leaf_binding_kind = |cx: &mut Context<'cx>, name: &Pack::TyRef<ALoc>| match name {
-        Pack::TyRef::Unqualified(Pack::PackedRef::LocalRef(
-            deref!(Pack::PackedRefLocal { index, .. }),
-        )) => {
+        Pack::TyRef::Unqualified(
+            Pack::PackedRef::LocalRef(deref!(Pack::PackedRefLocal { index, .. })),
+            _,
+        ) => {
             let __rc = file.local_defs.get(*index).dupe();
             let entry = __rc.get_forced(cx);
             let (_, _, kind, _, _) = entry;
@@ -4433,7 +4476,14 @@ fn merge_interface_extends<'cx>(
                     }
                 }
             }
-            Pack::Packed::TyRefApp(deref!(Pack::PackedTyRefApp { loc, name, targs })) => {
+            Pack::Packed::TyRefApp(
+                deref!(Pack::PackedTyRefApp {
+                    loc,
+                    name,
+                    targs,
+                    strictness_kind,
+                }),
+            ) => {
                 let targs_t: Vec<Type> = targs
                     .iter()
                     .map(|t| merge_impl(env, cx, file, t, false, false))
@@ -4442,7 +4492,14 @@ fn merge_interface_extends<'cx>(
                 match kind {
                     Some(LocalDefBindingKind::DefBindingOther) => {
                         let raw = resolve_raw(cx, name);
-                        let t = type_util::typeapp_annot(false, false, loc.dupe(), raw, targs_t);
+                        let t = type_util::typeapp_annot(
+                            false,
+                            false,
+                            loc.dupe(),
+                            raw,
+                            targs_t,
+                            *strictness_kind,
+                        );
                         (t, false, None)
                     }
                     Some(LocalDefBindingKind::DefBindingClassLikePoly) => {
@@ -4451,7 +4508,14 @@ fn merge_interface_extends<'cx>(
                     }
                     Some(LocalDefBindingKind::DefBindingClassLikeMono) => {
                         let raw = resolve_raw(cx, name);
-                        let t = type_util::typeapp_annot(false, false, loc.dupe(), raw, targs_t);
+                        let t = type_util::typeapp_annot(
+                            false,
+                            false,
+                            loc.dupe(),
+                            raw,
+                            targs_t,
+                            *strictness_kind,
+                        );
                         (t, false, None)
                     }
                     None => {
@@ -4466,6 +4530,7 @@ fn merge_interface_extends<'cx>(
                                     loc.dupe(),
                                     raw,
                                     targs_t,
+                                    *strictness_kind,
                                 );
                                 (t, false, None)
                             }
@@ -4760,6 +4825,7 @@ fn merge_class_extends<'cx>(
     reason: Reason,
     extends: &ClassExtends<ALoc, Pack::Packed<ALoc>>,
     mixins: &[ClassMixins<ALoc, Pack::Packed<ALoc>>],
+    strictness_kind: TypeStrictnessKind,
 ) -> (Type, Type) {
     let super_reason = reason.dupe().replace_desc(None);
     let (super_, static_proto) = match extends {
@@ -4774,7 +4840,13 @@ fn merge_class_extends<'cx>(
         ClassExtends::ClassExplicitExtends(deref!((loc, t))) => {
             let reason_op = reason::mk_reason(None, loc.dupe());
             let t = merge_impl(env, cx, file, t, false, false);
-            let t = specialize(cx, reason_op, t, AnnotationInferenceOperation::ClassExtends);
+            let t = specialize(
+                cx,
+                reason_op,
+                t,
+                AnnotationInferenceOperation::ClassExtends,
+                strictness_kind,
+            );
             let t = type_util::this_typeapp(t, this.dupe(), None, Some(loc.dupe()));
             let static_proto = type_util::class_type(t.dupe(), None);
             (t, static_proto)
@@ -4792,7 +4864,7 @@ fn merge_class_extends<'cx>(
     };
     let mut all: Vec<Type> = mixins
         .iter()
-        .map(|m| merge_class_mixin(env, cx, file, this.dupe(), m))
+        .map(|m| merge_class_mixin(env, cx, file, this.dupe(), m, strictness_kind))
         .collect();
     all.push(super_);
     let super_ = match all.len() {
@@ -4817,6 +4889,7 @@ fn merge_class_mixin<'cx>(
     file: &SigFile,
     this: Type,
     mixin: &ClassMixins<ALoc, Pack::Packed<ALoc>>,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     use flow_common::reason::VirtualReasonDesc::*;
 
@@ -4870,7 +4943,13 @@ fn merge_class_mixin<'cx>(
         ClassMixins::ClassMixin(deref!((loc, t))) => {
             let reason_op = reason::mk_reason(None, loc.dupe());
             let t = merge_mixin_ref(cx, file, loc.dupe(), t);
-            let t = specialize(cx, reason_op, t, AnnotationInferenceOperation::ClassMixins);
+            let t = specialize(
+                cx,
+                reason_op,
+                t,
+                AnnotationInferenceOperation::ClassMixins,
+                strictness_kind,
+            );
             type_util::this_typeapp(t, this, None, Some(loc.dupe()))
         }
         ClassMixins::ClassMixinApp(deref!((loc, t, targs))) => {
@@ -4932,8 +5011,16 @@ fn merge_this_class_t<'cx>(
             });
             flow_js_utils::generic_of_tparam(cx, |_, x| x.dupe(), &this_tp)
         };
-        let (super_, static_proto) =
-            merge_class_extends(env, cx, file, this.dupe(), reason.dupe(), &extends, &[]);
+        let (super_, static_proto) = merge_class_extends(
+            env,
+            cx,
+            file,
+            this.dupe(),
+            reason.dupe(),
+            &extends,
+            &[],
+            strictness_kind,
+        );
         let implements: Vec<Type> = implements
             .iter()
             .map(|t| merge_impl(env, cx, file, t, false, false))
@@ -5664,8 +5751,16 @@ fn merge_declare_class<'cx>(
             });
             flow_js_utils::generic_of_tparam(cx, |_, x| x.dupe(), &this_tp)
         };
-        let (super_, static_proto) =
-            merge_class_extends(env, cx, file, this.dupe(), reason_c.dupe(), extends, mixins);
+        let (super_, static_proto) = merge_class_extends(
+            env,
+            cx,
+            file,
+            this.dupe(),
+            reason_c.dupe(),
+            extends,
+            mixins,
+            *strictness_kind,
+        );
         let implements: Vec<Type> = implements
             .iter()
             .map(|t| merge_impl(env, cx, file, t, false, false))

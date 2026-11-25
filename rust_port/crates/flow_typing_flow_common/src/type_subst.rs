@@ -21,11 +21,15 @@ use flow_data_structure_wrapper::ord_map::FlowOrdMap;
 use flow_data_structure_wrapper::ord_set::FlowOrdSet;
 use flow_typing_context::Context;
 use flow_typing_context::Cx;
+use flow_typing_type::type_::ArrType;
+use flow_typing_type::type_::ArrayATData;
 use flow_typing_type::type_::DefT;
 use flow_typing_type::type_::DefTInner;
 use flow_typing_type::type_::Destructor;
 use flow_typing_type::type_::DestructorConditionalTypeData;
 use flow_typing_type::type_::DestructorMappedTypeData;
+use flow_typing_type::type_::DestructorSpreadTypeData;
+use flow_typing_type::type_::FunType;
 use flow_typing_type::type_::GenericTData;
 use flow_typing_type::type_::InstanceT;
 use flow_typing_type::type_::MappedTypeHomomorphicFlag;
@@ -35,14 +39,18 @@ use flow_typing_type::type_::PolyTData;
 use flow_typing_type::type_::Predicate;
 use flow_typing_type::type_::PredicateInner;
 use flow_typing_type::type_::ThisInstanceTData;
+use flow_typing_type::type_::TupleATData;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeAppTData;
 use flow_typing_type::type_::TypeInner;
 use flow_typing_type::type_::TypeParam;
 use flow_typing_type::type_::TypeParamInner;
+use flow_typing_type::type_::TypeStrictnessKind;
+use flow_typing_type::type_::TypeTKind;
 use flow_typing_type::type_::UseOp;
 use flow_typing_type::type_::exports;
 use flow_typing_type::type_::mixed_t;
+use flow_typing_type::type_::object;
 use flow_typing_type::type_::poly;
 use flow_typing_type::type_::properties;
 use flow_typing_type::type_::property;
@@ -954,6 +962,7 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
                     targs,
                     from_value,
                     use_desc,
+                    strictness_kind,
                 }),
             ) => {
                 let type_prime = self.type_(cx, map_cx, type_inner.dupe());
@@ -977,6 +986,7 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
                         targs: targs_prime,
                         from_value: *from_value,
                         use_desc: *use_desc,
+                        strictness_kind: *strictness_kind,
                     })))
                 }
             }
@@ -1326,6 +1336,275 @@ pub fn subst<'cx>(
         ),
         t,
     )
+}
+
+/// Instantiates `t_out`, the body of the polymorphic type `id`, for a type application written
+/// with `strictness_kind` that applies it to the type arguments in `map`.
+///
+/// A type application is an operation, like a spread or an intersection: the types it produces
+/// join the strictness of its inputs, the type alias and the code that writes the application. So
+/// the types that the body of an applied type alias builds join `strictness_kind` before the type
+/// arguments, which keep their own, are substituted into it. Classes, interfaces, opaque types and
+/// values are nominal declarations, which keep the strictness they are declared with.
+pub fn subst_type_app<'cx>(
+    cx: &mut Context<'cx>,
+    use_op: Option<UseOp>,
+    placeholder_no_infer: bool,
+    map: &FlowOrdMap<SubstName, Type>,
+    id: &poly::Id,
+    t_out: Type,
+    strictness_kind: TypeStrictnessKind,
+) -> Type {
+    let join = type_app_join(&t_out, strictness_kind);
+    let t_out = if join.is_typescript_loose() {
+        joined_type_app_body(cx, id, t_out, join)
+    } else {
+        t_out
+    };
+    subst(
+        cx,
+        use_op,
+        true,
+        placeholder_no_infer,
+        Purpose::Normal,
+        map,
+        t_out,
+    )
+}
+
+/// The strictness that the types built by `t_out`, the body of a polymorphic type, join when a
+/// type application written with `strictness_kind` instantiates it, as `subst_type_app` does.
+pub fn type_app_join(t_out: &Type, strictness_kind: TypeStrictnessKind) -> TypeStrictnessKind {
+    match t_out.deref() {
+        TypeInner::DefT(_, d)
+            if matches!(d.deref(), DefTInner::TypeT(TypeTKind::TypeAliasKind, _)) =>
+        {
+            strictness_kind
+        }
+        _ => TypeStrictnessKind::Flow,
+    }
+}
+
+/// `t_out`, the body of the polymorphic type `id`, with `join` joined into the types it builds,
+/// once per file: the join does not depend on the type arguments of an application. An entry holds
+/// the body it was joined from, since renaming the type parameters of a polymorphic type to avoid
+/// capture keeps its id.
+fn joined_type_app_body<'cx>(
+    cx: &mut Context<'cx>,
+    id: &poly::Id,
+    t_out: Type,
+    join: TypeStrictnessKind,
+) -> Type {
+    let key = (id.dupe(), join);
+    if let Some((body, joined)) = cx.type_app_joined_bodies_mut().get(&key)
+        && body.ptr_eq(&t_out)
+    {
+        return joined.dupe();
+    }
+    let joined = StrictnessJoiner { join }.type_(cx, &(), t_out.dupe());
+    cx.type_app_joined_bodies_mut()
+        .insert(key, (t_out, joined.dupe()));
+    joined
+}
+
+/// Joins `join` into the strictness of every type that a type alias body builds: objects,
+/// functions, arrays, tuples, polymorphic types, mapped types, spreads and type applications.
+/// What the body refers to keeps its own strictness: the instances of classes and interfaces,
+/// opaque types, the definitions that type applications apply, and the types of type variables.
+struct StrictnessJoiner {
+    join: TypeStrictnessKind,
+}
+
+impl<'cx> TypeMapper<'cx, ()> for StrictnessJoiner {
+    fn tvar(&mut self, _cx: &mut Context<'cx>, _map_cx: &(), _r: &Reason, id: u32) -> u32 {
+        id
+    }
+
+    fn call_prop(&mut self, cx: &mut Context<'cx>, map_cx: &(), id: i32) -> i32 {
+        call_prop(self, cx, map_cx, id)
+    }
+
+    fn props(&mut self, cx: &mut Context<'cx>, map_cx: &(), id: properties::Id) -> properties::Id {
+        props(self, cx, map_cx, id)
+    }
+
+    fn exports(&mut self, cx: &mut Context<'cx>, map_cx: &(), id: exports::Id) -> exports::Id {
+        exports(self, cx, map_cx, id)
+    }
+
+    fn eval_id(
+        &mut self,
+        _cx: &mut Context<'cx>,
+        _map_cx: &(),
+        _id: flow_typing_type::type_::eval::Id,
+    ) -> flow_typing_type::type_::eval::Id {
+        unreachable!("eval_id should never be called on the strictness joiner")
+    }
+
+    fn type_(&mut self, cx: &mut Context<'cx>, map_cx: &(), t: Type) -> Type {
+        match t.deref() {
+            TypeInner::TypeAppT(deref!(data)) => {
+                let targs_prime = list_utils::ident_map(
+                    |targ| self.type_(cx, map_cx, targ.dupe()),
+                    Type::ptr_eq,
+                    data.targs.dupe(),
+                );
+                let strictness_kind = self.join.join(data.strictness_kind);
+                if Rc::ptr_eq(&data.targs, &targs_prime) && strictness_kind == data.strictness_kind
+                {
+                    t
+                } else {
+                    Type::new(TypeInner::TypeAppT(Box::new(TypeAppTData {
+                        targs: targs_prime,
+                        strictness_kind,
+                        ..data.clone()
+                    })))
+                }
+            }
+            TypeInner::EvalT {
+                type_: x,
+                defer_use_t,
+                ..
+            } => {
+                let d = &defer_use_t.2;
+                let x_prime = self.type_(cx, map_cx, x.dupe());
+                let d_prime = self.destructor(cx, map_cx, d.dupe());
+                if x.ptr_eq(&x_prime) && Rc::ptr_eq(d, &d_prime) {
+                    t
+                } else {
+                    let new_defer_use = flow_typing_type::type_::TypeDestructorT::new(
+                        flow_typing_type::type_::TypeDestructorTInner(
+                            defer_use_t.0.dupe(),
+                            defer_use_t.1.dupe(),
+                            d_prime,
+                        ),
+                    );
+                    flow_cache::eval::id(cx, x_prime, new_defer_use)
+                }
+            }
+            TypeInner::NominalT { .. }
+            | TypeInner::ThisInstanceT(..)
+            | TypeInner::ThisTypeAppT(..) => t,
+            _ => type_mapper::type_default(self, cx, map_cx, t),
+        }
+    }
+
+    fn def_type(&mut self, cx: &mut Context<'cx>, map_cx: &(), r: &Reason, t: &DefT) -> DefT {
+        let t_prime = type_mapper::def_type_default(self, cx, map_cx, r, t);
+        match t_prime.deref() {
+            DefTInner::PolyT(deref!(data))
+                if self.join.join(data.strictness_kind) != data.strictness_kind =>
+            {
+                DefT::new(DefTInner::PolyT(Box::new(PolyTData {
+                    id: poly::Id::generate_id(),
+                    strictness_kind: self.join.join(data.strictness_kind),
+                    ..data.clone()
+                })))
+            }
+            _ => t_prime,
+        }
+    }
+
+    fn instance_type(&mut self, _cx: &mut Context<'cx>, _map_cx: &(), t: &InstanceT) -> InstanceT {
+        t.dupe()
+    }
+
+    fn obj_type(&mut self, cx: &mut Context<'cx>, map_cx: &(), t: Rc<ObjType>) -> Rc<ObjType> {
+        let t_prime = type_mapper::obj_type_default(self, cx, map_cx, t);
+        let strictness_kind = self.join.join(t_prime.strictness_kind);
+        if strictness_kind == t_prime.strictness_kind {
+            t_prime
+        } else {
+            Rc::new(ObjType {
+                strictness_kind,
+                ..(*t_prime).clone()
+            })
+        }
+    }
+
+    fn fun_type(&mut self, cx: &mut Context<'cx>, map_cx: &(), t: Rc<FunType>) -> Rc<FunType> {
+        let t_prime = type_mapper::fun_type_default(self, cx, map_cx, t);
+        let strictness_kind = self.join.join(t_prime.strictness_kind);
+        if strictness_kind == t_prime.strictness_kind {
+            t_prime
+        } else {
+            Rc::new(FunType {
+                strictness_kind,
+                ..(*t_prime).clone()
+            })
+        }
+    }
+
+    fn arr_type(&mut self, cx: &mut Context<'cx>, map_cx: &(), t: Rc<ArrType>) -> Rc<ArrType> {
+        let t_prime = type_mapper::arr_type_default(self, cx, map_cx, t);
+        match t_prime.deref() {
+            ArrType::ArrayAT(deref!(a))
+                if self.join.join(a.strictness_kind) != a.strictness_kind =>
+            {
+                Rc::new(ArrType::ArrayAT(Box::new(ArrayATData {
+                    strictness_kind: self.join.join(a.strictness_kind),
+                    ..a.clone()
+                })))
+            }
+            ArrType::TupleAT(deref!(a))
+                if self.join.join(a.strictness_kind) != a.strictness_kind =>
+            {
+                Rc::new(ArrType::TupleAT(Box::new(TupleATData {
+                    strictness_kind: self.join.join(a.strictness_kind),
+                    ..a.clone()
+                })))
+            }
+            _ => t_prime,
+        }
+    }
+
+    fn destructor(
+        &mut self,
+        cx: &mut Context<'cx>,
+        map_cx: &(),
+        t: Rc<Destructor>,
+    ) -> Rc<Destructor> {
+        let t_prime = type_mapper::destructor_default(self, cx, map_cx, t);
+        match t_prime.deref() {
+            Destructor::MappedType(deref!(data))
+                if self.join.join(data.strictness_kind) != data.strictness_kind =>
+            {
+                Rc::new(Destructor::MappedType(Box::new(DestructorMappedTypeData {
+                    strictness_kind: self.join.join(data.strictness_kind),
+                    ..data.clone()
+                })))
+            }
+            // A spread produces an object with the strictness of its target.
+            Destructor::SpreadType(deref!(DestructorSpreadTypeData(target, operands, acc)))
+                if self.join.join(target.strictness_kind()) != target.strictness_kind() =>
+            {
+                let target_prime = match *target {
+                    object::spread::Target::Value {
+                        make_seal,
+                        strictness_kind,
+                        literal,
+                    } => object::spread::Target::Value {
+                        make_seal,
+                        strictness_kind: self.join.join(strictness_kind),
+                        literal,
+                    },
+                    object::spread::Target::Annot {
+                        make_exact,
+                        strictness_kind,
+                    } => object::spread::Target::Annot {
+                        make_exact,
+                        strictness_kind: self.join.join(strictness_kind),
+                    },
+                };
+                Rc::new(Destructor::SpreadType(Box::new(DestructorSpreadTypeData(
+                    target_prime,
+                    operands.dupe(),
+                    acc.clone(),
+                ))))
+            }
+            _ => t_prime,
+        }
+    }
 }
 
 pub fn subst_destructor<'cx>(

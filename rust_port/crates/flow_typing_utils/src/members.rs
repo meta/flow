@@ -1158,11 +1158,14 @@ pub fn extract_members<'cx>(
                                 let proto_members = if exclude_proto_members {
                                     BTreeMap::new()
                                 } else {
+                                    // As in `flow_js_utils::enum_proto`.
+                                    let strictness_kind = cx.type_strictness_kind();
                                     let proto = flow_js_utils::lookup_builtin_typeapp(
                                         cx,
                                         enum_reason.dupe(),
                                         "$EnumProto",
                                         vec![enum_object_t, enum_t.dupe(), representation_t.dupe()],
+                                        strictness_kind,
                                     );
                                     // `$EnumProto` has a null proto, so we set `exclude_proto_members` to true
                                     extract_members_as_map(true, cx, proto)

@@ -51,6 +51,7 @@ pub fn specialize<'a>(
 ) -> Type {
     let reason = reason_of_t(&c).dupe();
     let reason_inner = reason.dupe();
+    let strictness_kind = cx.type_strictness_kind();
     let f = move |cx: &mut Context<'_>, c: Type| -> Result<Type, JobError> {
         let collector = TypeCollector::create();
         let use_t = UseT::new(UseTInner::SpecializeT(Box::new(SpecializeTData {
@@ -60,6 +61,7 @@ pub fn specialize<'a>(
             targs: targs.map(Rc::from),
             upper: Some(Box::new(Cont::Collect(collector.dupe()))),
             from_value: true,
+            strictness_kind,
         })));
         flow_js::flow_non_speculating(cx, (&c, &use_t))?;
         Ok(collector
@@ -83,6 +85,7 @@ pub fn validate_type_args<'a>(
     from_value: bool,
 ) {
     let reason_op = reason_of_t(&c).dupe();
+    let strictness_kind = cx.type_strictness_kind();
     cx.add_post_inference_validation_flow(
         c,
         UseT::new(UseTInner::SpecializeT(Box::new(SpecializeTData {
@@ -92,6 +95,7 @@ pub fn validate_type_args<'a>(
             targs,
             upper: None,
             from_value,
+            strictness_kind,
         }))),
     );
 }
@@ -274,6 +278,7 @@ pub fn mk_instance<'a>(
                                 reason: instance_reason_clone.dupe(),
                                 kind: type_t_kind,
                                 from_typeapp: false,
+                                strictness_kind: cx.type_strictness_kind(),
                                 tout: Box::new(tvar),
                             },
                         )));

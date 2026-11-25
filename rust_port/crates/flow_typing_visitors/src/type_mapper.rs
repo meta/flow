@@ -458,6 +458,7 @@ pub fn type_default<'cx, A, M: TypeMapper<'cx, A> + ?Sized>(
                 targs,
                 from_value,
                 use_desc,
+                strictness_kind,
             }),
         ) => {
             let type_prime = mapper.type_(cx, map_cx, type_.dupe());
@@ -476,6 +477,7 @@ pub fn type_default<'cx, A, M: TypeMapper<'cx, A> + ?Sized>(
                     targs: targs_prime,
                     from_value: *from_value,
                     use_desc: *use_desc,
+                    strictness_kind: *strictness_kind,
                 })))
             }
         }

@@ -1864,6 +1864,8 @@ fn check_instantiation<'cx>(
     let explicit_targs =
         |targs: &[Type]| -> Rc<[Targ]> { targs.iter().duped().map(Targ::ExplicitArg).collect() };
     let instance = |cx: &mut Context<'cx>, targs: &[Type]| {
+        // The call being checked instantiates the definition.
+        let strictness_kind = cx.type_strictness_kind();
         FlowJs::mk_typeapp_instance_annot_with_env(
             cx,
             env,
@@ -1875,6 +1877,7 @@ fn check_instantiation<'cx>(
             None,
             &check.lhs,
             targs.iter().duped().collect(),
+            strictness_kind,
         )
     };
 
@@ -3155,12 +3158,15 @@ pub mod kit {
         let awaited = extract(cx, env, &use_op, reason, t, |cx, env, generic_t| {
             let promise_t =
                 flow_js_utils::lookup_builtin_type_with_env(cx, env, "Promise", reason.dupe());
+            // The code being checked awaits the promise.
+            let strictness_kind = cx.type_strictness_kind();
             type_util::typeapp(
                 false,
                 false,
                 reason.dupe(),
                 promise_t,
                 vec![generic_t.dupe()],
+                strictness_kind,
             )
         })?;
         let message = match awaited {

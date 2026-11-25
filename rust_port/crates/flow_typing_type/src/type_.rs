@@ -188,6 +188,9 @@ pub struct TypeAppTData {
     pub targs: Rc<[Type]>,
     pub from_value: bool,
     pub use_desc: bool,
+    /// The strictness of the code that writes the application. The types that the body of an
+    /// applied type alias builds join it.
+    pub strictness_kind: TypeStrictnessKind,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -2435,6 +2438,8 @@ pub struct SpecializeTData<CX: ContextFamily> {
     pub upper: Option<Box<Cont<CX>>>,
     /// As in `TypeAppT`: the application stays a value instead of being turned into a type.
     pub from_value: bool,
+    /// As in `TypeAppT`: the strictness of the code that writes the application.
+    pub strictness_kind: TypeStrictnessKind,
 }
 
 impl<CX: ContextFamily> Clone for SpecializeTData<CX> {
@@ -2446,6 +2451,7 @@ impl<CX: ContextFamily> Clone for SpecializeTData<CX> {
             targs: self.targs.dupe(),
             upper: self.upper.clone(),
             from_value: self.from_value,
+            strictness_kind: self.strictness_kind,
         }
     }
 }
@@ -2458,6 +2464,7 @@ impl<CX: ContextFamily> PartialEq for SpecializeTData<CX> {
             && self.targs == other.targs
             && self.upper == other.upper
             && self.from_value == other.from_value
+            && self.strictness_kind == other.strictness_kind
     }
 }
 
@@ -2471,6 +2478,7 @@ impl<CX: ContextFamily> Hash for SpecializeTData<CX> {
         self.targs.hash(state);
         self.upper.hash(state);
         self.from_value.hash(state);
+        self.strictness_kind.hash(state);
     }
 }
 
@@ -2489,6 +2497,7 @@ impl<CX: ContextFamily> Ord for SpecializeTData<CX> {
             .then_with(|| self.targs.cmp(&other.targs))
             .then_with(|| self.upper.cmp(&other.upper))
             .then_with(|| self.from_value.cmp(&other.from_value))
+            .then_with(|| self.strictness_kind.cmp(&other.strictness_kind))
     }
 }
 
@@ -2501,6 +2510,7 @@ impl<CX: ContextFamily> std::fmt::Debug for SpecializeTData<CX> {
             .field("targs", &self.targs)
             .field("upper", &self.upper)
             .field("from_value", &self.from_value)
+            .field("strictness_kind", &self.strictness_kind)
             .finish()
     }
 }
@@ -2513,6 +2523,9 @@ pub struct ValueToTypeReferenceTData {
     /// The value is an expanded type application. Whether its definition can be used as a type
     /// is checked where the application is written, so it is not reported again.
     pub from_typeapp: bool,
+    /// The strictness of the code that writes the reference. A reference without type arguments
+    /// to a definition whose type parameters all have defaults applies it to them.
+    pub strictness_kind: TypeStrictnessKind,
     pub tout: Box<Tvar>,
 }
 
@@ -3291,8 +3304,8 @@ pub enum UseTInner<CX: ContextFamily = ()> {
     ValueToTypeReferenceT(Box<ValueToTypeReferenceTData>),
     ConcretizeTypeAppsT(
         UseOp,
-        Box<(Rc<[Type]>, bool, UseOp, Reason)>,
-        Box<(Type, Rc<[Type]>, bool, UseOp, Reason)>,
+        Box<(Rc<[Type]>, bool, UseOp, Reason, TypeStrictnessKind)>,
+        Box<(Type, Rc<[Type]>, bool, UseOp, Reason, TypeStrictnessKind)>,
         bool,
     ),
 
@@ -11167,6 +11180,8 @@ pub mod aconstraint {
         pub reason2: Reason,
         pub types: Option<Rc<[Type]>>,
         pub operation: AnnotationInferenceOperation,
+        /// As in `TypeAppT`: the strictness of the code that writes the application.
+        pub strictness_kind: TypeStrictnessKind,
     }
 
     #[derive(Clone)]
@@ -11257,6 +11272,9 @@ pub mod aconstraint {
         AnnotUseTTypeT {
             reason: Reason,
             kind: TypeTKind,
+            /// As in `ValueToTypeReferenceTData`: the strictness of the code that writes the
+            /// reference.
+            strictness_kind: TypeStrictnessKind,
         },
         AnnotGetTypeFromNamespaceT(Box<AnnotGetTypeFromNamespaceTData>),
         AnnotGetEnumT(Reason),
@@ -11795,7 +11813,9 @@ impl<CX: ContextFamily> FlowSet<CX> {
     }
 }
 
-pub type SubstCacheMap<T> = FlowOrdMap<(poly::Id, Rc<[Type]>), T>;
+/// Instantiations of type applications, by the polymorphic type, its type arguments, and the
+/// strictness the instantiated body joins.
+pub type SubstCacheMap<T> = FlowOrdMap<(poly::Id, Rc<[Type]>, TypeStrictnessKind), T>;
 
 pub type EvalIdCacheMap = MultiLevelMap<eval::Id, Type>;
 

@@ -2230,6 +2230,7 @@ fn __flow_impl<'cx>(
                     targs,
                     from_value,
                     use_desc,
+                    strictness_kind,
                 }),
             ),
             MethodT(
@@ -2264,6 +2265,7 @@ fn __flow_impl<'cx>(
                 Some(*use_desc),
                 type_,
                 targs.dupe(),
+                *strictness_kind,
             )?;
             rec_flow(cx, env, trace, (&t, u))?;
         }
@@ -2281,8 +2283,8 @@ fn __flow_impl<'cx>(
             DefT(_, deref!(PolyT(_))),
             ConcretizeTypeAppsT(
                 use_op,
-                deref!((ts2, fv2, op2, r2)),
-                deref!((c1, ts1, fv1, op1, r1)),
+                deref!((ts2, fv2, op2, r2, s2)),
+                deref!((c1, ts1, fv1, op1, r1, s1)),
                 true,
             ),
         ) => {
@@ -2295,8 +2297,8 @@ fn __flow_impl<'cx>(
                     c1,
                     &UseT::new(ConcretizeTypeAppsT(
                         use_op.dupe(),
-                        Box::new((ts1.dupe(), *fv1, op1.dupe(), r1.dupe())),
-                        Box::new((c2, ts2.dupe(), *fv2, op2.dupe(), r2.dupe())),
+                        Box::new((ts1.dupe(), *fv1, op1.dupe(), r1.dupe(), *s1)),
+                        Box::new((c2, ts2.dupe(), *fv2, op2.dupe(), r2.dupe(), *s2)),
                         false,
                     )),
                 ),
@@ -2304,10 +2306,11 @@ fn __flow_impl<'cx>(
         }
         // When we have concretized the c for our lower bound TypeAppT then we can
         // finally run our TypeAppT ~> TypeAppT logic. If we have referentially the
-        // same PolyT for each TypeAppT then we want to check the type arguments
-        // only. (Checked in the match guard.) If we do not have the same PolyT
-        // for each TypeAppT then we want to expand our TypeAppTs and compare the
-        // expanded results.
+        // same PolyT for each TypeAppT (checked in the match guard) then we want to
+        // check the type arguments only, by the variance of the type parameters under
+        // the strictness that the applications produce. If we do not have the same
+        // PolyT for each TypeAppT then we want to expand our TypeAppTs and compare
+        // the expanded results.
         //
         // If the lower bound's c is not a PolyT then we will fall down to an
         // incompatible use error.
@@ -2328,7 +2331,7 @@ fn __flow_impl<'cx>(
             ),
             ConcretizeTypeAppsT(
                 use_op,
-                deref!((ts1, fv1, _, r1)),
+                deref!((ts1, fv1, _, r1, s1)),
                 deref!((
                     deref!(DefT(
                         _,
@@ -2342,6 +2345,7 @@ fn __flow_impl<'cx>(
                     fv2,
                     _,
                     r2,
+                    s2,
                 )),
                 false,
             ),
@@ -2355,6 +2359,10 @@ fn __flow_impl<'cx>(
                 .zip(ts2.iter())
                 .map(|(t1, t2)| (t1.dupe(), t2.dupe()))
                 .collect();
+            let lower_strictness_kind =
+                type_subst::type_app_join(t_out, *s1).join(*lower_strictness_kind);
+            let upper_strictness_kind =
+                type_subst::type_app_join(t_out, *s2).join(*upper_strictness_kind);
             type_app_variance_check(
                 cx,
                 env,
@@ -2365,7 +2373,7 @@ fn __flow_impl<'cx>(
                 targs,
                 tparams_loc.dupe(),
                 &Vec1::try_from_vec(tparams.to_vec()).unwrap(),
-                lower_strictness_kind.join(*upper_strictness_kind),
+                lower_strictness_kind.join(upper_strictness_kind),
             )?;
         }
         // This is the case which implements the expansion for our
@@ -2383,7 +2391,7 @@ fn __flow_impl<'cx>(
             ),
             ConcretizeTypeAppsT(
                 use_op,
-                deref!((ts1, fv1, op1, r1)),
+                deref!((ts1, fv1, op1, r1, s1)),
                 deref!((
                     deref!(DefT(
                         _,
@@ -2399,6 +2407,7 @@ fn __flow_impl<'cx>(
                     fv2,
                     op2,
                     r2,
+                    s2,
                 )),
                 false,
             ),
@@ -2420,6 +2429,7 @@ fn __flow_impl<'cx>(
                 Vec1::try_from_vec(xs1.to_vec()).unwrap(),
                 t1,
                 ts1.dupe(),
+                *s1,
             )?;
             let t2_inst = mk_typeapp_instance_of_poly(
                 cx,
@@ -2434,6 +2444,7 @@ fn __flow_impl<'cx>(
                 Vec1::try_from_vec(xs2.to_vec()).unwrap(),
                 t2,
                 ts2.dupe(),
+                *s2,
             )?;
             rec_flow(
                 cx,
@@ -2451,6 +2462,7 @@ fn __flow_impl<'cx>(
                     targs,
                     from_value,
                     use_desc: _,
+                    strictness_kind,
                 }),
             ),
             _,
@@ -2488,6 +2500,7 @@ fn __flow_impl<'cx>(
                     None,
                     type_,
                     targs.dupe(),
+                    *strictness_kind,
                 )
                 .and_then(|t| rec_flow(cx, env, trace, (&t, u)));
                 if let Some(seen) = seen {
@@ -2574,6 +2587,7 @@ fn __flow_impl<'cx>(
                 deref!(ValueToTypeReferenceTData {
                     use_op,
                     reason: reason_op,
+                    strictness_kind,
                     ..
                 }),
             ),
@@ -2592,6 +2606,7 @@ fn __flow_impl<'cx>(
                 Vec1::try_from_vec(ids.to_vec()).unwrap(),
                 t_out,
                 Rc::from([]),
+                *strictness_kind,
             )?;
             rec_flow(cx, env, trace, (&t, u))?;
         }
@@ -2603,6 +2618,7 @@ fn __flow_impl<'cx>(
                     reason: reason_op,
                     kind: type_t_kind,
                     from_typeapp,
+                    strictness_kind: _,
                     tout,
                 }),
             ),
@@ -4753,6 +4769,7 @@ fn __flow_impl<'cx>(
                 targs: ts,
                 upper,
                 from_value,
+                strictness_kind,
             })),
         ) => {
             let ts_val = ts
@@ -4774,6 +4791,7 @@ fn __flow_impl<'cx>(
                         xs,
                         t,
                         ts_val,
+                        *strictness_kind,
                     )?;
                     continue_(cx, env, trace, &t_, upper)?;
                 }
@@ -4801,6 +4819,7 @@ fn __flow_impl<'cx>(
                             reason_op,
                             false,
                             t,
+                            *strictness_kind,
                         )?;
                     }
                 }
@@ -4829,6 +4848,7 @@ fn __flow_impl<'cx>(
                     targs: None,
                     upper,
                     from_value: _,
+                    strictness_kind: _,
                 }),
             ),
         ) => {
@@ -4848,6 +4868,7 @@ fn __flow_impl<'cx>(
                     targs: Some(ts),
                     upper,
                     from_value,
+                    strictness_kind,
                 }),
             ),
         ) => {
@@ -4888,6 +4909,7 @@ fn __flow_impl<'cx>(
                                             targs: Some(ts.dupe()),
                                             upper: Some(Box::new(Cont::Collect(collector.dupe()))),
                                             from_value: true,
+                                            strictness_kind: *strictness_kind,
                                         }))),
                                     ),
                                 )?;
@@ -4925,6 +4947,7 @@ fn __flow_impl<'cx>(
                                     targs: Some(ts.dupe()),
                                     upper: None,
                                     from_value: true,
+                                    strictness_kind: *strictness_kind,
                                 }))),
                             ),
                         )?;
@@ -4938,6 +4961,7 @@ fn __flow_impl<'cx>(
                                 reason_op,
                                 false,
                                 l,
+                                *strictness_kind,
                             )?;
                         }
                     }
@@ -4981,6 +5005,7 @@ fn __flow_impl<'cx>(
                     targs: None,
                     upper,
                     from_value: _,
+                    strictness_kind: _,
                 }),
             ),
         ) => {
@@ -5020,6 +5045,7 @@ fn __flow_impl<'cx>(
                     targs: _,
                     upper,
                     from_value,
+                    strictness_kind,
                 }),
             ),
         ) => match upper {
@@ -5034,6 +5060,7 @@ fn __flow_impl<'cx>(
                     reason_op,
                     false,
                     l,
+                    *strictness_kind,
                 )?;
             }
             None => {}
@@ -8648,6 +8675,7 @@ fn __flow_impl<'cx>(
                     property_type,
                     key_t,
                     optional,
+                    *strictness_kind,
                 )
             };
             // The type of the values in a mapped position.

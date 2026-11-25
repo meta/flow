@@ -39,6 +39,7 @@ use flow_typing_type::type_::ModuleType;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeDestructorT;
 use flow_typing_type::type_::TypeDestructorTInner;
+use flow_typing_type::type_::TypeStrictnessKind;
 use flow_typing_type::type_::UseT;
 use flow_typing_type::type_::UseTInner;
 use flow_typing_type::type_::concretize_seen::ConcretizeSeen;
@@ -129,6 +130,7 @@ impl NormalizerInput for FlowInput {
         reason: Reason,
         t: Type,
         targs: &[Type],
+        strictness_kind: TypeStrictnessKind,
     ) -> Result<A, Error> {
         let t = flow_js::mk_typeapp_instance_annot_non_speculating(
             env.cx,
@@ -138,6 +140,7 @@ impl NormalizerInput for FlowInput {
             from_value,
             &t,
             Rc::from(targs),
+            strictness_kind,
         )?;
         cont(env, state, &t)
     }
@@ -164,7 +167,9 @@ impl NormalizerInput for FlowInput {
         targs: &[Type],
     ) -> Result<A, Error> {
         let t = flow_js_utils::lookup_builtin_type(env.cx, name, reason.dupe());
-        let t = type_util::typeapp(false, false, reason, t, targs.to_vec());
+        // The code whose type is normalized applies the builtin.
+        let strictness_kind = env.cx.type_strictness_kind();
+        let t = type_util::typeapp(false, false, reason, t, targs.to_vec(), strictness_kind);
         cont(env, state, t)
     }
 }

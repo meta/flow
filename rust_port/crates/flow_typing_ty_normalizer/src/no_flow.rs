@@ -28,6 +28,7 @@ use flow_typing_type::type_::DefTInner;
 use flow_typing_type::type_::Destructor;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeInner;
+use flow_typing_type::type_::TypeStrictnessKind;
 use flow_typing_type::type_::eval;
 use flow_typing_type::type_::type_or_type_desc::ErrorTypeDesc;
 
@@ -84,6 +85,7 @@ impl NormalizerInput for NoFlowInput {
         _reason: Reason,
         t: Type,
         targs: &[Type],
+        _strictness_kind: TypeStrictnessKind,
     ) -> Result<A, Error> {
         let c = type_(env, state, &t);
         let targs = targs.iter().map(|t| type_(env, state, t)).collect();
@@ -123,7 +125,16 @@ impl NormalizerInput for NoFlowInput {
             name,
             reason.dupe(),
         );
-        let t = flow_typing_type::type_util::typeapp(false, false, reason, t, targs.to_vec());
+        // The code whose type is normalized applies the builtin.
+        let strictness_kind = env.cx.type_strictness_kind();
+        let t = flow_typing_type::type_util::typeapp(
+            false,
+            false,
+            reason,
+            t,
+            targs.to_vec(),
+            strictness_kind,
+        );
         cont(env, state, t)
     }
 }

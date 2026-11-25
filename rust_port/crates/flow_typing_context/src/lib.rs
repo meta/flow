@@ -601,6 +601,7 @@ struct ContextInner {
     hint_eval_cache: MultiLevelMap<(i32, type_::HintInstantiation), Option<Type>>,
     literal_cache: LiteralCache,
     type_app_expansions: TypeAppExpansions,
+    type_app_joined_bodies: TypeAppJoinedBodies,
     environment: LocEnv<Cx>,
     typing_mode: TypingMode,
     //  A subset of all transitive dependencies of the current file as determined by import/require.
@@ -633,6 +634,10 @@ pub struct TypeAppExpansions {
     pub expansions: HashMap<usize, (Type, Type)>,
     pub expanded_from: HashMap<usize, Type>,
 }
+
+/// The bodies of applied type aliases with a strictness joined into the types they build, by the
+/// polymorphic type and the strictness: the body and the joined body.
+pub type TypeAppJoinedBodies = HashMap<(type_::poly::Id, TypeStrictnessKind), (Type, Type)>;
 
 pub type ResolveRequire =
     Rc<dyn for<'a> Fn(&mut Context<'a>, &FlowImportSpecifier) -> ResolvedRequire>;
@@ -783,6 +788,7 @@ impl ContextArena {
             hint_eval_cache: MultiLevelMap::new(),
             literal_cache: LiteralCache::default(),
             type_app_expansions: TypeAppExpansions::default(),
+            type_app_joined_bodies: TypeAppJoinedBodies::default(),
             environment: LocEnv::empty(ScopeKind::Global),
             typing_mode: TypingMode::CheckingMode,
             reachable_deps: BTreeSet::new(),
@@ -2709,6 +2715,7 @@ pub enum ElabOpenMemoTag {
     },
     UseTType {
         kind: TypeTKind,
+        strictness_kind: TypeStrictnessKind,
     },
     GetTypeFromNamespace {
         name: Name,
@@ -2799,7 +2806,14 @@ pub fn elab_open_memo_key(op: &Op<Cx>, id: i32) -> Option<ElabOpenMemoKey> {
         OpInner::AnnotAssertExportIsTypeT { name, .. } => {
             ElabOpenMemoTag::AssertExportIsType { name: name.clone() }
         }
-        OpInner::AnnotUseTTypeT { kind, .. } => ElabOpenMemoTag::UseTType { kind: *kind },
+        OpInner::AnnotUseTTypeT {
+            kind,
+            strictness_kind,
+            ..
+        } => ElabOpenMemoTag::UseTType {
+            kind: *kind,
+            strictness_kind: *strictness_kind,
+        },
         OpInner::AnnotGetTypeFromNamespaceT(data) => ElabOpenMemoTag::GetTypeFromNamespace {
             name: data.prop_ref.1.clone(),
             strictness_kind: data.strictness_kind,
@@ -3168,6 +3182,10 @@ impl<'a> Context<'a> {
 
     pub fn type_app_expansions_mut(&mut self) -> &mut TypeAppExpansions {
         &mut self.inner_mut().type_app_expansions
+    }
+
+    pub fn type_app_joined_bodies_mut(&mut self) -> &mut TypeAppJoinedBodies {
+        &mut self.inner_mut().type_app_joined_bodies
     }
 
     // utils

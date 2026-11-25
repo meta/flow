@@ -1760,7 +1760,9 @@ pub fn error_message_loc_of_upper<CX: ContextFamily>(u: &UseT<CX>) -> ALoc {
         UseTInner::SpecializeT(data) => data.reason2.loc().dupe(),
         UseTInner::ThisSpecializeT(reason, _, _) => reason.loc().dupe(),
         UseTInner::ValueToTypeReferenceT(data) => data.reason.loc().dupe(),
-        UseTInner::ConcretizeTypeAppsT(_, deref!((_, _, _, reason)), _, _) => reason.loc().dupe(),
+        UseTInner::ConcretizeTypeAppsT(_, deref!((_, _, _, reason, _)), _, _) => {
+            reason.loc().dupe()
+        }
         UseTInner::LookupT(data) => data.reason.loc().dupe(),
         UseTInner::ObjRestT(reason, ..) => reason.loc().dupe(),
         UseTInner::ObjTestProtoT(reason, _) => reason.loc().dupe(),
@@ -3334,8 +3336,9 @@ pub fn lookup_builtin_typeapp<'cx>(
     reason: Reason,
     x: &str,
     targs: Vec<Type>,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
-    lookup_builtin_typeapp_with_env(cx, &FlowJsEnv::entry(), reason, x, targs)
+    lookup_builtin_typeapp_with_env(cx, &FlowJsEnv::entry(), reason, x, targs, strictness_kind)
 }
 
 fn lookup_builtin_typeapp_with_env<'cx>(
@@ -3344,11 +3347,12 @@ fn lookup_builtin_typeapp_with_env<'cx>(
     reason: Reason,
     x: &str,
     targs: Vec<Type>,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     use flow_typing_type::type_util::typeapp;
 
     let t = lookup_builtin_type_with_env(cx, env, x, reason.dupe());
-    typeapp(false, false, reason, t, targs)
+    typeapp(false, false, reason, t, targs, strictness_kind)
 }
 
 pub fn is_builtin_class_id<'cx>(
@@ -3503,12 +3507,15 @@ pub fn enum_proto<'cx>(
     enum_value_t: Type,
     representation_t: Type,
 ) -> Type {
+    // The member access that reads the prototype applies `$EnumProto`.
+    let strictness_kind = cx.type_strictness_kind();
     lookup_builtin_typeapp_with_env(
         cx,
         env,
         reason,
         "$EnumProto",
         vec![enum_object_t, enum_value_t, representation_t],
+        strictness_kind,
     )
 }
 
@@ -3890,7 +3897,9 @@ pub mod instantiation_kit {
     use flow_typing_type::type_::Type;
     use flow_typing_type::type_::TypeInner;
     use flow_typing_type::type_::TypeParam;
+    use flow_typing_type::type_::TypeStrictnessKind;
     use flow_typing_type::type_::UseOp;
+    use flow_typing_type::type_::poly;
     use vec1::Vec1;
 
     use super::FlowJsException;
@@ -3899,15 +3908,18 @@ pub mod instantiation_kit {
     use super::poly_minimum_arity;
     use crate::type_subst::Purpose;
     use crate::type_subst::subst;
+    use crate::type_subst::subst_type_app;
+    use crate::type_subst::type_app_join;
 
     /// How instantiating a polymorphic definition checks its type arguments: their number,
     /// reported at the operation that instantiates it with them, where they are written, and each
     /// one against the bound of its type parameter.
-    #[derive(Clone, Copy)]
+    #[derive(Clone)]
     pub enum TypeArgCheck {
-        /// Not at all. The arguments of a type application are checked where it is written,
-        /// with `validate_type_args`, so expanding it does not check them again.
-        Skip,
+        /// Not at all: the instantiation expands a type application of the polymorphic type `id`,
+        /// written with this strictness. Its arguments are checked where it is written, with
+        /// `validate_type_args`, so expanding it does not check them again.
+        TypeApp(poly::Id, TypeStrictnessKind),
         /// Bounds are checked by subtyping.
         Subtype,
         /// Bounds are checked by unification.
@@ -3928,7 +3940,7 @@ pub mod instantiation_kit {
         t: Type,
         ts: Vec<Type>,
     ) -> Result<(Type, Vec<(Type, SubstName)>), FlowJsException> {
-        if !matches!(check, TypeArgCheck::Skip) {
+        if !matches!(check, TypeArgCheck::TypeApp(..)) {
             check_type_arg_count(
                 cx,
                 env,
@@ -3940,17 +3952,28 @@ pub mod instantiation_kit {
             )?;
         }
         let (map, all_ts) = type_arg_map(cx, &use_op, reason_op, xs, ts);
-        check_bounds::<H>(cx, env, trace, &use_op, check, xs, &map)?;
+        check_bounds::<H>(cx, env, trace, &use_op, &check, xs, &map)?;
 
-        let substituted_t = subst(
-            cx,
-            Some(use_op),
-            true,
-            env.in_implicit_instantiation(),
-            Purpose::Normal,
-            &map,
-            t,
-        );
+        let substituted_t = match check {
+            TypeArgCheck::TypeApp(id, strictness_kind) => subst_type_app(
+                cx,
+                Some(use_op),
+                env.in_implicit_instantiation(),
+                &map,
+                &id,
+                t,
+                strictness_kind,
+            ),
+            TypeArgCheck::Subtype | TypeArgCheck::Unify => subst(
+                cx,
+                Some(use_op),
+                true,
+                env.in_implicit_instantiation(),
+                Purpose::Normal,
+                &map,
+                t,
+            ),
+        };
         let repositioned = H::reposition(
             cx,
             env,
@@ -3976,7 +3999,7 @@ pub mod instantiation_kit {
     ) -> Result<(), FlowJsException> {
         check_type_arg_count(cx, env, reason_tapp, tparams_loc, xs, ts.len(), false)?;
         let (map, _) = type_arg_map(cx, &use_op, reason_op, xs, ts);
-        check_bounds::<H>(cx, env, trace, &use_op, TypeArgCheck::Subtype, xs, &map)
+        check_bounds::<H>(cx, env, trace, &use_op, &TypeArgCheck::Subtype, xs, &map)
     }
 
     /// Reports a wrong number of type arguments where they are written, at `reason_tapp`. With
@@ -4077,14 +4100,14 @@ pub mod instantiation_kit {
         env: &FlowJsEnv,
         trace: DepthTrace,
         use_op: &UseOp,
-        check: TypeArgCheck,
+        check: &TypeArgCheck,
         xs: &Vec1<TypeParam>,
         map: &FlowOrdMap<SubstName, Type>,
     ) -> Result<(), FlowJsException> {
         use flow_typing_type::type_::VirtualFrameUseOp;
 
         let unify = match check {
-            TypeArgCheck::Skip => return Ok(()),
+            TypeArgCheck::TypeApp(..) => return Ok(()),
             TypeArgCheck::Subtype => false,
             TypeArgCheck::Unify => true,
         };
@@ -4132,6 +4155,7 @@ pub mod instantiation_kit {
         xs: &Vec1<TypeParam>,
         t: Type,
         ts: Rc<[Type]>,
+        strictness_kind: TypeStrictnessKind,
     ) -> Result<Type, FlowJsException> {
         mk_typeapp_of_poly_with_env::<H>(
             cx,
@@ -4145,9 +4169,11 @@ pub mod instantiation_kit {
             xs,
             t,
             ts,
+            strictness_kind,
         )
     }
 
+    /// Expands a type application, written with `strictness_kind`, of the polymorphic type `id`.
     pub fn mk_typeapp_of_poly_with_env<'cx, H: InstantiationHelper>(
         cx: &mut Context<'cx>,
         env: &FlowJsEnv,
@@ -4160,8 +4186,9 @@ pub mod instantiation_kit {
         xs: &Vec1<TypeParam>,
         t: Type,
         ts: Rc<[Type]>,
+        strictness_kind: TypeStrictnessKind,
     ) -> Result<Type, FlowJsException> {
-        let key = (id.dupe(), ts.dupe());
+        let key = (id.dupe(), ts.dupe(), type_app_join(&t, strictness_kind));
         if let Some(cached_t) = cx.subst_cache().get(&key).cloned() {
             return Ok(cached_t);
         }
@@ -4173,7 +4200,7 @@ pub mod instantiation_kit {
             use_op,
             reason_op,
             reason_tapp,
-            TypeArgCheck::Skip,
+            TypeArgCheck::TypeApp(id.dupe(), strictness_kind),
             tparams_loc.dupe(),
             xs,
             t,
@@ -4399,7 +4426,8 @@ pub mod value_to_type_reference_transform {
             lookup_builtin_type_with_env(cx, env, "React$RendersExactly", elem_reason.dupe());
         let t = flow_typing_tvar::mk_fully_resolved(cx, elem_reason.dupe(), builtin_t);
 
-        type_util::typeapp(false, true, elem_reason, t, vec![l])
+        let strictness_kind = cx.type_strictness_kind();
+        type_util::typeapp(false, true, elem_reason, t, vec![l], strictness_kind)
     }
 
     pub fn run_on_concrete_type<'cx>(
@@ -4868,7 +4896,12 @@ pub mod import_type_t_kit {
                                 deref!(ThisInstanceTData { instance: i, .. }),
                             ) => {
                                 let (_, targs) = mk_tparams(cx, typeparams);
-                                let tapp = type_util::implicit_typeapp(t.dupe(), targs, None);
+                                let tapp = type_util::implicit_typeapp(
+                                    t.dupe(),
+                                    targs,
+                                    None,
+                                    *strictness_kind,
+                                );
                                 let new_id = flow_typing_type::type_::poly::Id::generate_id();
                                 let inner = match &i.inst.inst_kind {
                                     InstanceKind::InterfaceKind { .. } => {
@@ -5210,12 +5243,14 @@ pub mod cjs_require_t_kit {
 
                 let t = if standard_cjs_esm_interop {
                     let exports_namespace = mk_exports_namespace(cx);
+                    let strictness_kind = cx.type_strictness_kind();
                     lookup_builtin_typeapp_with_env(
                         cx,
                         env,
                         reason.dupe(),
                         "$Flow$EsmModuleMarkerWrapperInModuleRef",
                         vec![exports_namespace],
+                        strictness_kind,
                     )
                 } else {
                     // Use default export if option is enabled and module is not lib
@@ -9658,6 +9693,7 @@ pub fn wraps_utility_type<'cx>(cx: &mut Context<'cx>, tin: &Type) -> bool {
                     targs: _,
                     from_value: _,
                     use_desc: _,
+                    strictness_kind: _,
                 }),
             ) => loop_inner(cx, type_, seen_open_id, seen_eval_id),
             _ => false,

@@ -756,6 +756,7 @@ pub(super) fn eval_destructor<'cx>(
                 targs,
                 from_value,
                 use_desc: _,
+                strictness_kind,
             }),
         ) = bound.deref() =>
         {
@@ -775,6 +776,7 @@ pub(super) fn eval_destructor<'cx>(
                 None,
                 c,
                 targs.dupe(),
+                *strictness_kind,
             )?;
             let generic_t = Type::new(TypeInner::GenericT(Box::new(GenericTData {
                 bound: specialized_t,
@@ -806,6 +808,7 @@ pub(super) fn eval_destructor<'cx>(
                     targs,
                     from_value,
                     use_desc: _,
+                    strictness_kind,
                 }),
             ),
             _,
@@ -848,6 +851,7 @@ pub(super) fn eval_destructor<'cx>(
                 None,
                 c,
                 targs.dupe(),
+                *strictness_kind,
             )?;
             let eval_t = flow_cache::eval::id(cx, specialized_t, destructor);
             rec_flow_t(

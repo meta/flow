@@ -1484,7 +1484,7 @@ fn convert_inner<'a>(
                     let (targs_vec, targs_ast_vec) =
                         convert_list_inner(cx, env, &type_args.arguments)?;
                     (
-                        Some((name, targs_vec)),
+                        Some((name, targs_vec, cx.type_strictness_kind())),
                         Some(ast::types::TypeArgs::<ALoc, (ALoc, Type)> {
                             loc: type_args.loc.dupe(),
                             arguments: Arc::from(targs_ast_vec),
@@ -6579,7 +6579,14 @@ fn mk_nominal_type_inner<'a>(
         }
         Some(targs_node) => {
             let (targs_ts, targs_ast) = convert_list_inner(cx, env, &targs_node.arguments)?;
-            let t = type_util::typeapp_annot(false, false, annot_loc, c, targs_ts);
+            let t = type_util::typeapp_annot(
+                false,
+                false,
+                annot_loc,
+                c,
+                targs_ts,
+                cx.type_strictness_kind(),
+            );
             match t.deref() {
                 type_::TypeInner::TypeAppT(
                     deref!(TypeAppTData {

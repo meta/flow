@@ -714,6 +714,7 @@ fn __unify_inner<'cx>(
                     targs: ts1,
                     from_value: fv1,
                     use_desc: _,
+                    strictness_kind: _,
                 }),
             ),
             TypeInner::TypeAppT(
@@ -724,6 +725,7 @@ fn __unify_inner<'cx>(
                     targs: ts2,
                     from_value: fv2,
                     use_desc: _,
+                    strictness_kind: _,
                 }),
             ),
         ) if c1 == c2 && ts1.len() == ts2.len() && fv1 == fv2 => {

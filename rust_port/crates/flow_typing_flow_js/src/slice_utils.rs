@@ -3379,7 +3379,8 @@ pub fn mk_variance(variance: MappedTypeVariance, prop_polarity: Polarity) -> Pol
     }
 }
 
-/// The declared type of a mapped type's property, and whether it is optional.
+/// The declared type of a mapped type's property, and whether it is optional. The mapped type,
+/// declared with `strictness_kind`, applies its property type to the key.
 pub fn mk_mapped_prop_type<'cx>(
     cx: &mut Context<'cx>,
     filter_optional: &dyn Fn(&mut Context<'cx>, Type) -> Result<Type, FlowJsException>,
@@ -3388,6 +3389,7 @@ pub fn mk_mapped_prop_type<'cx>(
     poly_prop: &Type,
     key_t: Type,
     prop_optional: bool,
+    strictness_kind: TypeStrictnessKind,
 ) -> Result<(Type, bool), FlowJsException> {
     // We persist the original use_op here so that errors involving the typeapp are positioned
     // at the use site and not the typeapp site
@@ -3398,6 +3400,7 @@ pub fn mk_mapped_prop_type<'cx>(
         use_op.dupe(),
         poly_prop.dupe(),
         vec![key_t],
+        strictness_kind,
     );
     match mapped_type_optionality {
         MappedTypeOptionality::MakeOptional => Ok((t, true)),
@@ -3553,6 +3556,7 @@ pub fn map_object<'cx>(
             poly_prop,
             key_t,
             prop_optional,
+            strictness_kind,
         )
     };
     // A dictionary value has no optionality: an optional one may be `undefined`.

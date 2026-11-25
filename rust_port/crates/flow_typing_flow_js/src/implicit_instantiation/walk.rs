@@ -5186,19 +5186,21 @@ impl<'e> Walker<'e> {
     }
 
     fn expand_typeapp_uncached<'cx>(&self, cx: &mut Context<'cx>, t: &Type) -> Option<Type> {
-        let (type_, targs, from_value, this_t, use_op) = match t.deref() {
+        let (type_, targs, from_value, this_t, use_op, strictness_kind) = match t.deref() {
             TypeInner::TypeAppT(a) => (
                 a.type_.dupe(),
                 Some(a.targs.dupe()),
                 a.from_value,
                 None,
                 Some(a.use_op.dupe()),
+                Some(a.strictness_kind),
             ),
             TypeInner::ThisTypeAppT(a) => (
                 a.type_.dupe(),
                 a.targs.clone(),
                 false,
                 Some(a.this_t.dupe()),
+                None,
                 None,
             ),
             _ => return None,
@@ -5244,8 +5246,20 @@ impl<'e> Walker<'e> {
             map.insert(tparam.name.dupe(), targ);
         }
         // `NoInfer<T>` in the body gives no evidence, as in a signature. The expansion takes the
-        // use of the application, as in subtyping.
-        let body = subst_markers_with_use_op(cx, use_op, &map, &p.t_out);
+        // use of the application, as in subtyping, and its strictness, as in
+        // `instantiation_kit::mk_typeapp_of_poly_with_env`. A class is nominal.
+        let body = match strictness_kind {
+            Some(strictness_kind) => type_subst::subst_type_app(
+                cx,
+                use_op,
+                true,
+                &map,
+                &p.id,
+                p.t_out.dupe(),
+                strictness_kind,
+            ),
+            None => subst_markers_with_use_op(cx, use_op, &map, &p.t_out),
+        };
         let body = self.resolve(cx, &body);
         match body.deref() {
             TypeInner::DefT(_, d) => match d.deref() {

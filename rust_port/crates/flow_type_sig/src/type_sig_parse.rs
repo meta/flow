@@ -205,6 +205,7 @@ pub(super) enum Parsed<'arena, 'ast> {
         loc: LocNode<'arena>,
         name: TyName<'arena, 'ast>,
         targs: Vec<Parsed<'arena, 'ast>>,
+        strictness_kind: TypeStrictnessKind,
     },
     AsyncVoidReturn(LocNode<'arena>),
     ValRef {
@@ -215,6 +216,7 @@ pub(super) enum Parsed<'arena, 'ast> {
     BuiltinTyRef {
         ref_loc: LocNode<'arena>,
         name: FlowSmolStr,
+        strictness_kind: TypeStrictnessKind,
     },
     Pattern(PatternNode<'arena, 'ast>),
     Eval(
@@ -247,7 +249,8 @@ pub(super) enum Parsed<'arena, 'ast> {
 
 #[derive(Clone)]
 pub(super) enum TyName<'arena, 'ast> {
-    Unqualified(Box<Ref<'arena, 'ast>>),
+    /// A name and the strictness of the code that writes it.
+    Unqualified(Box<Ref<'arena, 'ast>>, TypeStrictnessKind),
     Qualified {
         loc: LocNode<'arena>,
         id_loc: LocNode<'arena>,
@@ -2965,13 +2968,19 @@ pub(crate) mod scope {
                 Parsed::Value(value) => {
                     Parsed::Value(Box::new(rename_tparams_in_value(rename_map, value)))
                 }
-                Parsed::TyRefApp { loc, name, targs } => Parsed::TyRefApp {
+                Parsed::TyRefApp {
+                    loc,
+                    name,
+                    targs,
+                    strictness_kind,
+                } => Parsed::TyRefApp {
                     loc: loc.dupe(),
                     name: name.clone(),
                     targs: targs
                         .iter()
                         .map(|t| rename_tparams_in_parsed(rename_map, t))
                         .collect(),
+                    strictness_kind: *strictness_kind,
                 },
                 Parsed::Eval(loc, t, op, strictness_kind) => Parsed::Eval(
                     loc.dupe(),
@@ -3023,13 +3032,19 @@ pub(crate) mod scope {
                     &|_, loc: &LocNode<'arena>| loc.dupe(),
                     &|_, t| override_bound_names_by_loc(loc_names, t),
                 ))),
-                Parsed::TyRefApp { loc, name, targs } => Parsed::TyRefApp {
+                Parsed::TyRefApp {
+                    loc,
+                    name,
+                    targs,
+                    strictness_kind,
+                } => Parsed::TyRefApp {
                     loc: loc.dupe(),
                     name: name.clone(),
                     targs: targs
                         .iter()
                         .map(|t| override_bound_names_by_loc(loc_names, t))
                         .collect(),
+                    strictness_kind: *strictness_kind,
                 },
                 Parsed::Eval(loc, t, op, strictness_kind) => Parsed::Eval(
                     loc.dupe(),
@@ -9835,7 +9850,12 @@ fn nominal_type<'arena, 'ast>(
                 .iter()
                 .map(|t| annot(opts, scope, scopes, tbls, xs, t))
                 .collect();
-            Parsed::TyRefApp { loc, name, targs }
+            Parsed::TyRefApp {
+                loc,
+                name,
+                targs,
+                strictness_kind: tbls.strictness_kind,
+            }
         }
     }
 }
@@ -9942,12 +9962,15 @@ fn generic_id<'arena, 'ast>(
             if xs.contains(&name) {
                 Err(ref_loc)
             } else {
-                let tyname = TyName::Unqualified(Box::new(Ref {
-                    ref_loc,
-                    name,
-                    scope,
-                    resolved: OnceCell::new(),
-                }));
+                let tyname = TyName::Unqualified(
+                    Box::new(Ref {
+                        ref_loc,
+                        name,
+                        scope,
+                        resolved: OnceCell::new(),
+                    }),
+                    tbls.strictness_kind,
+                );
                 Ok(finish(tbls, tyname, chain))
             }
         }
@@ -10059,12 +10082,15 @@ fn maybe_special_unqualified_generic<'arena, 'ast>(
 
     match name.as_str() {
         _ if !opts.for_builtins && scope::lookup_type(scopes, scope, name).is_some() => {
-            let name = TyName::Unqualified(Box::new(Ref {
-                ref_loc,
-                name: name.clone(),
-                scope,
-                resolved: OnceCell::new(),
-            }));
+            let name = TyName::Unqualified(
+                Box::new(Ref {
+                    ref_loc,
+                    name: name.clone(),
+                    scope,
+                    resolved: OnceCell::new(),
+                }),
+                tbls.strictness_kind,
+            );
             nominal_type(opts, scope, scopes, tbls, xs, loc, name, targs)
         }
         // Lowercase `object` is the builtin that rejects primitives.
@@ -10297,12 +10323,15 @@ fn maybe_special_unqualified_generic<'arena, 'ast>(
             _ => Parsed::Err(loc, Errno::CheckError),
         },
         _ => {
-            let name = TyName::Unqualified(Box::new(Ref {
-                ref_loc,
-                name: name.clone(),
-                scope,
-                resolved: OnceCell::new(),
-            }));
+            let name = TyName::Unqualified(
+                Box::new(Ref {
+                    ref_loc,
+                    name: name.clone(),
+                    scope,
+                    resolved: OnceCell::new(),
+                }),
+                tbls.strictness_kind,
+            );
             nominal_type(opts, scope, scopes, tbls, xs, loc, name, targs)
         }
     }
@@ -10980,6 +11009,7 @@ fn jsx_element<'arena, 'ast>(
             Parsed::BuiltinTyRef {
                 ref_loc,
                 name: custom_jsx_type.dupe(),
+                strictness_kind: tbls.strictness_kind,
             }
         }
         _ => Parsed::Err(

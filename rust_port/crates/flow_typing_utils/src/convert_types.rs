@@ -701,6 +701,7 @@ fn type_to_json_uncached<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, t: &Type
                 targs,
                 from_value,
                 use_desc,
+                strictness_kind: _,
             }),
         ) => json_with_type(
             "TypeApp",

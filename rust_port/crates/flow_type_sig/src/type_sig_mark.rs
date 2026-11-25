@@ -138,7 +138,9 @@ fn mark_parsed<'arena, 'ast>(
         parse::Parsed::Annot(t) => mark_annot(opts, scopes, tbls, marker, t),
         parse::Parsed::Value(def) => mark_value(opts, scopes, tbls, marker, def),
         parse::Parsed::TyRef(name) => mark_tyname(opts, scopes, tbls, marker, name),
-        parse::Parsed::TyRefApp { loc, name, targs } => {
+        parse::Parsed::TyRefApp {
+            loc, name, targs, ..
+        } => {
             mark_loc(marker, loc);
             mark_tyname(opts, scopes, tbls, marker, name);
             for t in targs {
@@ -146,7 +148,7 @@ fn mark_parsed<'arena, 'ast>(
             }
         }
         parse::Parsed::AsyncVoidReturn(loc) => mark_loc(marker, loc),
-        parse::Parsed::BuiltinTyRef { ref_loc, name: _ } => mark_loc(marker, ref_loc),
+        parse::Parsed::BuiltinTyRef { ref_loc, .. } => mark_loc(marker, ref_loc),
         parse::Parsed::Err(loc, errno) => {
             errno.iter(|loc| mark_loc(marker, loc));
             mark_loc(marker, loc);
@@ -205,7 +207,7 @@ fn mark_tyname<'arena, 'ast>(
     tyname: &parse::TyName<'arena, 'ast>,
 ) {
     match tyname {
-        parse::TyName::Unqualified(ref_) => resolve_type_ref(opts, scopes, tbls, marker, ref_),
+        parse::TyName::Unqualified(ref_, _) => resolve_type_ref(opts, scopes, tbls, marker, ref_),
         parse::TyName::Qualified {
             loc,
             id_loc,

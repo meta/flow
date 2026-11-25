@@ -220,7 +220,8 @@ impl<Loc> PackedRef<Loc> {
 
 #[derive(Debug, Clone, Hash, serde::Serialize, serde::Deserialize)]
 pub enum TyRef<Loc> {
-    Unqualified(PackedRef<Loc>),
+    /// A name and the strictness of the code that writes it.
+    Unqualified(PackedRef<Loc>, TypeStrictnessKind),
     Qualified(Box<TyRefQualified<Loc>>),
 }
 
@@ -236,7 +237,9 @@ pub struct TyRefQualified<Loc> {
 impl<Loc> TyRef<Loc> {
     pub fn map<Loc2>(&self, f: &impl Fn(&Loc) -> Loc2) -> TyRef<Loc2> {
         match self {
-            TyRef::Unqualified(r) => TyRef::Unqualified(r.map(f)),
+            TyRef::Unqualified(r, strictness_kind) => {
+                TyRef::Unqualified(r.map(f), *strictness_kind)
+            }
             TyRef::Qualified(inner) => TyRef::Qualified(Box::new(TyRefQualified {
                 loc: f(&inner.loc),
                 id_loc: f(&inner.id_loc),
@@ -244,6 +247,14 @@ impl<Loc> TyRef<Loc> {
                 qualification: Box::new(inner.qualification.map(f)),
                 strictness_kind: inner.strictness_kind,
             })),
+        }
+    }
+
+    /// The strictness of the code that writes the reference.
+    pub fn strictness_kind(&self) -> TypeStrictnessKind {
+        match self {
+            TyRef::Unqualified(_, strictness_kind) => *strictness_kind,
+            TyRef::Qualified(inner) => inner.strictness_kind,
         }
     }
 }
@@ -270,6 +281,7 @@ pub struct PackedTyRefApp<Loc> {
     pub loc: Loc,
     pub name: TyRef<Loc>,
     pub targs: Vec<Packed<Loc>>,
+    pub strictness_kind: TypeStrictnessKind,
 }
 
 #[derive(Debug, Clone, Hash, serde::Serialize, serde::Deserialize)]
@@ -310,6 +322,7 @@ impl<Loc> Packed<Loc> {
                 loc: f(&inner.loc),
                 name: inner.name.map(f),
                 targs: inner.targs.iter().map(|t| t.map(f)).collect(),
+                strictness_kind: inner.strictness_kind,
             })),
             Packed::AsyncVoidReturn(loc) => Packed::AsyncVoidReturn(Box::new(f(loc))),
             Packed::Pattern(index) => Packed::Pattern(Index {
@@ -701,17 +714,27 @@ pub(crate) fn pack_parsed<'arena, 'ast>(
         parse::Parsed::Annot(t) => Packed::Annot(Box::new(pack_annot(cx, t))),
         parse::Parsed::Value(def) => Packed::Value(Box::new(pack_value(cx, def))),
         parse::Parsed::TyRef(name) => Packed::TyRef(Box::new(pack_tyname(name))),
-        parse::Parsed::TyRefApp { loc, name, targs } => pack_tyapp(cx, loc, name, targs),
+        parse::Parsed::TyRefApp {
+            loc,
+            name,
+            targs,
+            strictness_kind,
+        } => pack_tyapp(cx, loc, name, targs, *strictness_kind),
         parse::Parsed::AsyncVoidReturn(loc) => Packed::AsyncVoidReturn(Box::new(pack_loc(loc))),
-        parse::Parsed::BuiltinTyRef { ref_loc, name } => {
+        parse::Parsed::BuiltinTyRef {
+            ref_loc,
+            name,
+            strictness_kind,
+        } => {
             let ref_loc = pack_loc(ref_loc);
-            Packed::TyRef(Box::new(TyRef::Unqualified(PackedRef::BuiltinRef(
-                Box::new(PackedRefBuiltin {
+            Packed::TyRef(Box::new(TyRef::Unqualified(
+                PackedRef::BuiltinRef(Box::new(PackedRefBuiltin {
                     ref_loc,
                     type_ref: true,
                     name: name.dupe(),
-                }),
-            ))))
+                })),
+                *strictness_kind,
+            )))
         }
         parse::Parsed::Err(loc, err) => {
             let loc = pack_loc(loc);
@@ -791,16 +814,24 @@ fn pack_tyapp<'arena, 'ast>(
     loc: &LocNode<'arena>,
     name: &parse::TyName<'arena, 'ast>,
     targs: &[parse::Parsed<'arena, 'ast>],
+    strictness_kind: TypeStrictnessKind,
 ) -> Packed<Index<Loc>> {
     let loc = pack_loc(loc);
     let name = pack_tyname(name);
     let targs = targs.iter().map(|t| pack_parsed(cx, t)).collect();
-    Packed::TyRefApp(Box::new(PackedTyRefApp { loc, name, targs }))
+    Packed::TyRefApp(Box::new(PackedTyRefApp {
+        loc,
+        name,
+        targs,
+        strictness_kind,
+    }))
 }
 
 fn pack_tyname<'arena, 'ast>(name: &parse::TyName<'arena, 'ast>) -> TyRef<Index<Loc>> {
     match name {
-        parse::TyName::Unqualified(ref_) => TyRef::Unqualified(pack_ref(true, ref_)),
+        parse::TyName::Unqualified(ref_, strictness_kind) => {
+            TyRef::Unqualified(pack_ref(true, ref_), *strictness_kind)
+        }
         parse::TyName::Qualified {
             loc,
             id_loc,

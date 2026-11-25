@@ -437,7 +437,9 @@ fn receiver_type(
     {
         return receiver_type(cx, reason, kind, &poly.t_out);
     }
-    let instance = annotation_inference::mk_instance(cx, None, reason.dupe(), None, type_);
+    let strictness_kind = cx.type_strictness_kind();
+    let instance =
+        annotation_inference::mk_instance(cx, None, reason.dupe(), None, type_, strictness_kind);
     let instance = normalized_assertion_head(cx, reason, &instance)?;
     match kind {
         CalleeRootKind::InstanceThis => Some(instance),

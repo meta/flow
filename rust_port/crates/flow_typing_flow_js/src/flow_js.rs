@@ -395,6 +395,7 @@ impl FlowJs {
         use_desc: Option<bool>,
         t: &Type,
         targs: Rc<[Type]>,
+        strictness_kind: TypeStrictnessKind,
     ) -> Result<Type, FlowJsException> {
         helpers::mk_typeapp_instance_annot(
             cx,
@@ -407,6 +408,7 @@ impl FlowJs {
             use_desc,
             t,
             targs,
+            strictness_kind,
         )
     }
 
@@ -420,6 +422,7 @@ impl FlowJs {
         from_value: bool,
         t: &Type,
         targs: Rc<[Type]>,
+        strictness_kind: TypeStrictnessKind,
     ) -> Result<Type, FlowJsException> {
         helpers::mk_typeapp_instance(
             cx,
@@ -431,6 +434,7 @@ impl FlowJs {
             from_value,
             t,
             targs,
+            strictness_kind,
         )
     }
 
@@ -754,6 +758,7 @@ impl FlowJs {
         tparams: Vec1<TypeParam>,
         t: &Type,
         targs: Rc<[Type]>,
+        strictness_kind: TypeStrictnessKind,
     ) -> Result<Type, FlowJsException> {
         flow_js_utils::instantiation_kit::mk_typeapp_of_poly_with_env::<FlowJs>(
             cx,
@@ -767,6 +772,7 @@ impl FlowJs {
             &tparams,
             t.dupe(),
             targs,
+            strictness_kind,
         )
     }
 
@@ -1617,6 +1623,7 @@ fn mk_typeapp_instance_annot_with_env<'cx>(
     from_value: bool,
     c: &Type,
     ts: Rc<[Type]>,
+    strictness_kind: TypeStrictnessKind,
 ) -> Result<Type, FlowJsException> {
     FlowJs::mk_typeapp_instance_annot_with_env(
         cx,
@@ -1629,6 +1636,7 @@ fn mk_typeapp_instance_annot_with_env<'cx>(
         None,
         c,
         ts,
+        strictness_kind,
     )
 }
 fn mk_type_destructor_with_env<'cx>(
@@ -1813,6 +1821,7 @@ pub fn mk_typeapp_instance_annot_non_speculating<'cx>(
     from_value: bool,
     c: &Type,
     ts: Rc<[Type]>,
+    strictness_kind: TypeStrictnessKind,
 ) -> Result<Type, JobError> {
     flow_js_utils::flow_js_result_to_job_error(mk_typeapp_instance_annot_with_env(
         cx,
@@ -1823,6 +1832,7 @@ pub fn mk_typeapp_instance_annot_non_speculating<'cx>(
         from_value,
         c,
         ts,
+        strictness_kind,
     ))
 }
 

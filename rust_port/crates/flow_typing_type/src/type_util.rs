@@ -355,6 +355,7 @@ pub fn mod_reason_of_t(f: &dyn Fn(Reason) -> Reason, t: &Type) -> Type {
                 targs,
                 from_value,
                 use_desc,
+                strictness_kind,
             }),
         ) => Type::new(TypeInner::TypeAppT(Box::new(TypeAppTData {
             reason: f(reason.dupe()),
@@ -363,6 +364,7 @@ pub fn mod_reason_of_t(f: &dyn Fn(Reason) -> Reason, t: &Type) -> Type {
             targs: targs.dupe(),
             from_value: *from_value,
             use_desc: *use_desc,
+            strictness_kind: *strictness_kind,
         }))),
     }
 }
@@ -764,6 +766,7 @@ pub fn util_use_op_of_use_t<T, CX: ContextFamily>(
             let ts = data.targs.clone();
             let upper = data.upper.clone();
             let from_value = data.from_value;
+            let strictness_kind = data.strictness_kind;
             call_util(&data.use_op, &move |op| {
                 UseT::new(UseTInner::SpecializeT(Box::new(SpecializeTData {
                     use_op: op,
@@ -772,6 +775,7 @@ pub fn util_use_op_of_use_t<T, CX: ContextFamily>(
                     targs: ts.clone(),
                     upper: upper.clone(),
                     from_value,
+                    strictness_kind,
                 })))
             })
         }
@@ -787,17 +791,18 @@ pub fn util_use_op_of_use_t<T, CX: ContextFamily>(
                 UseT::new(UseTInner::FilterMaybeT(op, t.dupe()))
             })
         }
-        UseTInner::ConcretizeTypeAppsT(u_inner, deref!((ts1, b1, op, r1)), x2, b2) => {
+        UseTInner::ConcretizeTypeAppsT(u_inner, deref!((ts1, b1, op, r1, s1)), x2, b2) => {
             let u_inner = u_inner.clone();
             let ts1 = ts1.clone();
             let b1 = *b1;
             let r1 = r1.dupe();
+            let s1 = *s1;
             let x2 = x2.clone();
             let b2 = *b2;
             call_util(op, &move |op| {
                 UseT::new(UseTInner::ConcretizeTypeAppsT(
                     u_inner.clone(),
-                    Box::new((ts1.clone(), b1, op, r1.dupe())),
+                    Box::new((ts1.clone(), b1, op, r1.dupe(), s1)),
                     x2.clone(),
                     b2,
                 ))
@@ -971,6 +976,7 @@ pub fn util_use_op_of_use_t<T, CX: ContextFamily>(
             let reason = data.reason.dupe();
             let kind = data.kind.clone();
             let from_typeapp = data.from_typeapp;
+            let strictness_kind = data.strictness_kind;
             let t = data.tout.clone();
             call_util(&data.use_op, &move |use_op| {
                 UseT::new(UseTInner::ValueToTypeReferenceT(Box::new(
@@ -979,6 +985,7 @@ pub fn util_use_op_of_use_t<T, CX: ContextFamily>(
                         reason: reason.dupe(),
                         kind: kind.clone(),
                         from_typeapp,
+                        strictness_kind,
                         tout: t.clone(),
                     },
                 )))
@@ -2659,6 +2666,7 @@ pub fn typeapp_with_use_op(
     use_op: UseOp,
     t: Type,
     targs: Vec<Type>,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     let reason = reason.replace_desc(desc_of_t(&t).cloned());
     Type::new(TypeInner::TypeAppT(Box::new(TypeAppTData {
@@ -2668,6 +2676,7 @@ pub fn typeapp_with_use_op(
         targs: targs.into(),
         from_value,
         use_desc,
+        strictness_kind,
     })))
 }
 
@@ -2677,11 +2686,20 @@ pub fn typeapp(
     reason: Reason,
     t: Type,
     targs: Vec<Type>,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     let use_op = UseOp::Op(Arc::new(RootUseOp::TypeApplication {
         type_: TypeApplicationTarget::Reason(reason.dupe()),
     }));
-    typeapp_with_use_op(from_value, use_desc, reason, use_op, t, targs)
+    typeapp_with_use_op(
+        from_value,
+        use_desc,
+        reason,
+        use_op,
+        t,
+        targs,
+        strictness_kind,
+    )
 }
 
 pub fn typeapp_annot(
@@ -2690,6 +2708,7 @@ pub fn typeapp_annot(
     loc: ALoc,
     t: Type,
     targs: Vec<Type>,
+    strictness_kind: TypeStrictnessKind,
 ) -> Type {
     use flow_common::reason::mk_annot_reason;
 
@@ -2705,10 +2724,16 @@ pub fn typeapp_annot(
         targs: targs.into(),
         from_value,
         use_desc,
+        strictness_kind,
     })))
 }
 
-pub fn implicit_typeapp(t: Type, targs: Vec<Type>, annot_loc: Option<ALoc>) -> Type {
+pub fn implicit_typeapp(
+    t: Type,
+    targs: Vec<Type>,
+    annot_loc: Option<ALoc>,
+    strictness_kind: TypeStrictnessKind,
+) -> Type {
     let reason = reason_of_t(&t).dupe();
     let reason = match annot_loc {
         Some(loc) => reason.reposition_and_annotate(loc),
@@ -2724,6 +2749,7 @@ pub fn implicit_typeapp(t: Type, targs: Vec<Type>, annot_loc: Option<ALoc>) -> T
         targs: targs.into(),
         from_value: false,
         use_desc: false,
+        strictness_kind,
     })))
 }
 
@@ -2746,7 +2772,11 @@ pub fn this_typeapp(
     })))
 }
 
-pub fn typeof_annotation(reason: Reason, t: Type, targs: Option<(FlowSmolStr, Vec<Type>)>) -> Type {
+pub fn typeof_annotation(
+    reason: Reason,
+    t: Type,
+    targs: Option<(FlowSmolStr, Vec<Type>, TypeStrictnessKind)>,
+) -> Type {
     use flow_common::reason::mk_annot_reason;
 
     let annot_loc = reason.loc().dupe();
@@ -2758,7 +2788,7 @@ pub fn typeof_annotation(reason: Reason, t: Type, targs: Option<(FlowSmolStr, Ve
     ));
     match targs {
         None => t_annot,
-        Some((name, targs)) => {
+        Some((name, targs, strictness_kind)) => {
             let reason_tapp = mk_annot_reason(desc_for_tapp, annot_loc.dupe());
             let use_op = UseOp::Op(Arc::new(RootUseOp::TypeApplication {
                 type_: TypeApplicationTarget::Typeof(Box::new(TypeofApplicationData {
@@ -2766,7 +2796,7 @@ pub fn typeof_annotation(reason: Reason, t: Type, targs: Option<(FlowSmolStr, Ve
                     name,
                 })),
             }));
-            typeapp_with_use_op(true, false, reason, use_op, t_annot, targs)
+            typeapp_with_use_op(true, false, reason, use_op, t_annot, targs, strictness_kind)
         }
     }
 }

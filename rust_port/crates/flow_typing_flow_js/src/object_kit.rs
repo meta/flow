@@ -266,6 +266,7 @@ fn compute_name_remap<'cx>(
     name_type: &Type,
     selected_keys: Option<&(Vec<(Name, Reason)>, Vec<Type>)>,
     slice: &object::Slice,
+    strictness_kind: TypeStrictnessKind,
 ) -> Result<slice_utils::NameRemap, FlowJsException> {
     let object::Slice { props, flags, .. } = slice;
     let source_keys: Vec<Name> = match selected_keys {
@@ -321,6 +322,7 @@ fn compute_name_remap<'cx>(
                 use_op.dupe(),
                 name_type.dupe(),
                 vec![key_t],
+                strictness_kind,
             ),
         }
     };
@@ -529,7 +531,15 @@ pub fn mapped_type_of_keys<'cx>(
     let name_remap = match name_type {
         None => None,
         Some(nt) => Some(compute_name_remap(
-            cx, env, trace, &use_op, reason, nt, None, &slice,
+            cx,
+            env,
+            trace,
+            &use_op,
+            reason,
+            nt,
+            None,
+            &slice,
+            strictness_kind,
         )?),
     };
     slice_utils::map_object(
@@ -1328,6 +1338,7 @@ pub(super) fn run_with_env<'cx>(
                         nt,
                         selected_keys.as_ref(),
                         slice,
+                        strictness_kind,
                     )?),
                 };
                 slice_utils::map_object(

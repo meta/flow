@@ -47,6 +47,7 @@ use flow_typing_type::type_::SealGenericTData;
 use flow_typing_type::type_::SpecializeTData;
 use flow_typing_type::type_::TypeAppTData;
 use flow_typing_type::type_::TypeArgCompatibilityData;
+use flow_typing_type::type_::TypeStrictnessKind;
 use flow_typing_type::type_::ValueToTypeReferenceTData;
 use flow_typing_type::type_::WriteElemData;
 use flow_typing_type::type_::WritePropData;
@@ -1824,7 +1825,9 @@ pub(super) fn get_builtin_typeapp<'cx>(
 ) -> Type {
     let t = flow_js_utils::lookup_builtin_type_with_env(cx, env, x, reason.dupe());
     let use_desc = use_desc.unwrap_or(false);
-    type_util::typeapp(false, use_desc, reason.dupe(), t, targs)
+    // The code being checked applies the builtin.
+    let strictness_kind = cx.type_strictness_kind();
+    type_util::typeapp(false, use_desc, reason.dupe(), t, targs, strictness_kind)
 }
 
 pub(super) fn get_builtin_react_typeapp<'cx>(
@@ -1851,7 +1854,16 @@ pub(super) fn get_builtin_react_typeapp<'cx>(
         purpose,
     )?;
     let use_desc = use_desc.unwrap_or(false);
-    Ok(type_util::typeapp(false, use_desc, reason.dupe(), t, targs))
+    // The code being checked applies the React type.
+    let strictness_kind = cx.type_strictness_kind();
+    Ok(type_util::typeapp(
+        false,
+        use_desc,
+        reason.dupe(),
+        t,
+        targs,
+        strictness_kind,
+    ))
 }
 
 /// Specialize a polymorphic class, make an instance of the specialized class.
@@ -1866,6 +1878,7 @@ pub(super) fn mk_typeapp_instance_annot<'cx>(
     use_desc: Option<bool>,
     c: &Type,
     ts: Rc<[Type]>,
+    strictness_kind: TypeStrictnessKind,
 ) -> Result<Type, FlowJsException> {
     let use_desc = use_desc.unwrap_or(false);
     let collector = type_collector::TypeCollector::create();
@@ -1882,6 +1895,7 @@ pub(super) fn mk_typeapp_instance_annot<'cx>(
                 targs: Some(ts),
                 upper: Some(Box::new(Cont::Collect(collector.dupe()))),
                 from_value,
+                strictness_kind,
             }))),
         ),
     )?;
@@ -1902,6 +1916,7 @@ pub(super) fn mk_typeapp_instance_annot<'cx>(
             reason_type,
             true,
             &t,
+            strictness_kind,
         )
     }
 }
@@ -1916,6 +1931,7 @@ pub(super) fn mk_typeapp_instance<'cx>(
     from_value: bool,
     c: &Type,
     ts: Rc<[Type]>,
+    strictness_kind: TypeStrictnessKind,
 ) -> Result<Type, FlowJsException> {
     let collector = type_collector::TypeCollector::create();
     flow_opt(
@@ -1931,6 +1947,7 @@ pub(super) fn mk_typeapp_instance<'cx>(
                 targs: Some(ts),
                 upper: Some(Box::new(Cont::Collect(collector.dupe()))),
                 from_value,
+                strictness_kind,
             }))),
         ),
     )?;
@@ -1950,6 +1967,7 @@ pub(super) fn mk_typeapp_instance<'cx>(
             reason_type,
             true,
             &t,
+            strictness_kind,
         )
     }
 }
@@ -1967,6 +1985,7 @@ pub(super) fn mk_typeapp_instance_of_poly<'cx>(
     xs: Vec1<TypeParam>,
     t: &Type,
     ts: Rc<[Type]>,
+    strictness_kind: TypeStrictnessKind,
 ) -> Result<Type, FlowJsException> {
     let t = FlowJs::mk_typeapp_of_poly_with_env(
         cx,
@@ -1980,6 +1999,7 @@ pub(super) fn mk_typeapp_instance_of_poly<'cx>(
         xs,
         t,
         ts,
+        strictness_kind,
     )?;
     if from_value {
         Ok(t)
@@ -1994,6 +2014,7 @@ pub(super) fn mk_typeapp_instance_of_poly<'cx>(
             reason_tapp,
             true,
             &t,
+            strictness_kind,
         )
     }
 }
@@ -2007,6 +2028,8 @@ pub(super) fn mk_instance<'cx>(
     use_desc: bool,
     c: &Type,
 ) -> Result<Type, FlowJsException> {
+    // The code being checked writes the reference.
+    let strictness_kind = cx.type_strictness_kind();
     mk_instance_raw(
         cx,
         env,
@@ -2017,6 +2040,7 @@ pub(super) fn mk_instance<'cx>(
         instance_reason,
         false,
         c,
+        strictness_kind,
     )
 }
 
@@ -2029,6 +2053,7 @@ pub(super) fn mk_instance_source<'cx>(
     reason_type: &Reason,
     from_typeapp: bool,
     c: &Type,
+    strictness_kind: TypeStrictnessKind,
 ) -> Result<Type, FlowJsException> {
     let tvar_id = flow_typing_tvar::mk_no_wrap(cx, instance_reason);
     // this part is similar to making a runtime value
@@ -2045,6 +2070,7 @@ pub(super) fn mk_instance_source<'cx>(
                     reason: reason_type.dupe(),
                     kind: type_t_kind,
                     from_typeapp,
+                    strictness_kind,
                     tout: Box::new(tvar.dupe()),
                 },
             ))),
@@ -2063,6 +2089,7 @@ pub(super) fn mk_instance_raw<'cx>(
     reason_type: &Reason,
     from_typeapp: bool,
     c: &Type,
+    strictness_kind: TypeStrictnessKind,
 ) -> Result<Type, FlowJsException> {
     // Make an annotation
     let type_t_kind = type_t_kind.unwrap_or(TypeTKind::InstanceKind);
@@ -2075,6 +2102,7 @@ pub(super) fn mk_instance_raw<'cx>(
         reason_type,
         from_typeapp,
         c,
+        strictness_kind,
     )?;
     Ok(Type::new(TypeInner::AnnotT(
         instance_reason.dupe(),
@@ -2405,6 +2433,7 @@ pub(super) fn reposition<'cx>(
                     targs,
                     from_value,
                     use_desc,
+                    strictness_kind,
                 }),
             ) => Ok(Type::new(TypeInner::TypeAppT(Box::new(TypeAppTData {
                 reason: mod_reason(reason.dupe()),
@@ -2413,6 +2442,7 @@ pub(super) fn reposition<'cx>(
                 targs: targs.dupe(),
                 from_value: *from_value,
                 use_desc: matches!(desc, Some(Some(ReasonDesc::RReactElement { .. }))) || *use_desc,
+                strictness_kind: *strictness_kind,
             })))),
             TypeInner::NominalT {
                 reason: r,

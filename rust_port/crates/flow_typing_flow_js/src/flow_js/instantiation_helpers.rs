@@ -272,6 +272,8 @@ pub(super) fn instantiate_this_class<'cx>(
             targs: Some(ts),
             upper: Some(Box::new(Cont::Upper(Box::new(this_use)))),
             from_value: true,
+            // The code being checked instantiates the class.
+            strictness_kind: cx.type_strictness_kind(),
         }))),
     };
     rec_flow(cx, &env, trace, (c, &use_t))
