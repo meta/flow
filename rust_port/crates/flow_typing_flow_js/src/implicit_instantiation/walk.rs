@@ -23,7 +23,7 @@
 //!
 //! A type destructor whose parts don't mention a marker is evaluated as usual. One that does is
 //! walked through: utilities that keep the shape of their argument (`$ReadOnly`, `Partial`, ...)
-//! as their argument, and a conditional type into both of its branches.
+//! as their argument, and a conditional type as the union of its branches.
 //!
 //! A destructor whose result the flow-based solve's pinning reverses (a spread, a rest, the config
 //! of a component) gives the marker under it the reversal of the other side, computed directly. A
@@ -4320,6 +4320,16 @@ impl<'e> Walker<'e> {
             })
             .collect();
         let members = self.flatten_aliases(cx, members);
+        // A member that is the same type as an earlier one, or applies the same alias to the same
+        // type arguments, is that member.
+        let members = members
+            .into_iter()
+            .fold(Vec::new(), |mut kept: Vec<Type>, m| {
+                if !kept.iter().any(|k| self.same_type(cx, k, &m)) {
+                    kept.push(m);
+                }
+                kept
+            });
         let n_members = members.len();
         let (naked, others): (Vec<Type>, Vec<Type>) = members
             .into_iter()
@@ -4989,6 +4999,40 @@ impl<'e> Walker<'e> {
         }
     }
 
+    /// Whether `a` and `b` are the same type: the same object, or applications of the same alias or
+    /// class to the same type arguments with the same strictness.
+    fn same_type<'cx>(&self, cx: &mut Context<'cx>, a: &Type, b: &Type) -> bool {
+        if a.ptr_eq(b) {
+            return true;
+        }
+        let (a, b) = (self.resolve(cx, a), self.resolve(cx, b));
+        match (a.deref(), b.deref()) {
+            (TypeInner::TypeAppT(x), TypeInner::TypeAppT(y))
+                if x.from_value == y.from_value
+                    && x.strictness_kind == y.strictness_kind
+                    && x.targs.len() == y.targs.len()
+                    && (x.targs.iter().zip(y.targs.iter())).all(|(s, t)| {
+                        s == t
+                            || self
+                                .marker_of(s)
+                                .is_some_and(|m| self.marker_of(t) == Some(m))
+                    }) =>
+            {
+                let (ca, cb) = (self.resolve(cx, &x.type_), self.resolve(cx, &y.type_));
+                match (ca.deref(), cb.deref()) {
+                    (TypeInner::DefT(_, dx), TypeInner::DefT(_, dy)) => {
+                        match (dx.deref(), dy.deref()) {
+                            (DefTInner::PolyT(px), DefTInner::PolyT(py)) => px.id == py.id,
+                            _ => false,
+                        }
+                    }
+                    _ => false,
+                }
+            }
+            _ => false,
+        }
+    }
+
     /// The polarities of the type parameters if `a` and `b` are the same polymorphic type.
     fn same_typeapp<'cx>(
         &self,
@@ -5492,10 +5536,13 @@ impl<'e> Walker<'e> {
                     self.deferred.push((l.dupe(), u.dupe()));
                     Ok(())
                 }
+                // An undecided conditional type is bounded by the union of its branches, as one
+                // that evaluation keeps abstract (`run_conditional`): they meet `l` as the members
+                // of a union, so a branch that is a bare marker gets evidence only when the other
+                // one does not.
                 None => {
                     let (t, f) = branches(cx, type_, c);
-                    self.walk(cx, l, &t)?;
-                    self.walk(cx, l, &f)
+                    self.walk_to_union(cx, l, vec![t, f])
                 }
             },
             // An indexed access of an object type with markers inside is indexed first:
@@ -6580,7 +6627,8 @@ impl<'e> Walker<'e> {
 
     /// Evaluates the destructor `d` on `check`, without errors or flows that outlive it. `None`
     /// if the result is not known: a tvar or a destructor, a placeholder, or a conditional type
-    /// kept abstract.
+    /// kept abstract. The evaluation runs in a speculation, so one that fails, such as `T['k']`
+    /// with the marker `T` rigid, has no result either.
     fn evaluate<'cx>(
         &mut self,
         cx: &mut Context<'cx>,
@@ -6598,22 +6646,31 @@ impl<'e> Walker<'e> {
         };
         let TypeDestructorTInner(use_op, reason, d) = defer_use_t.deref();
         let errors = cx.errors();
-        let result = run_keeping_clean_flows(cx, self.env, self.preserve, |cx| {
-            FlowJs::mk_type_destructor_with_env(
+        let env = self.env;
+        let mut evaluated = None;
+        let result = run_keeping_clean_flows(cx, env, self.preserve, |cx| {
+            speculation_kit::try_singleton_custom_throw_on_failure(
                 cx,
-                self.env,
-                DepthTrace::dummy_trace(),
-                use_op.dupe(),
-                reason,
-                type_,
-                d,
-                id.dupe(),
+                env,
+                Box::new(|cx, env| {
+                    evaluated = Some(FlowJs::mk_type_destructor_with_env(
+                        cx,
+                        env,
+                        DepthTrace::dummy_trace(),
+                        use_op.dupe(),
+                        reason,
+                        type_,
+                        d,
+                        id.dupe(),
+                    )?);
+                    Ok(())
+                }),
             )
         });
         cx.reset_errors(errors);
-        let result = match instantiation_solver::sandboxed(result)? {
-            Some(result) => self.resolve(cx, &result),
-            None => return Ok(None),
+        let result = match (instantiation_solver::sandboxed(result)?, evaluated) {
+            (Some(()), Some(result)) => self.resolve(cx, &result),
+            _ => return Ok(None),
         };
         let stuck = match result.deref() {
             TypeInner::OpenT(_) | TypeInner::EvalT { .. } => true,

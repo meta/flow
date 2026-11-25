@@ -189,6 +189,35 @@ References:
                    ^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------- conditional_indexed_marker.js:7:27
+
+Cannot get `$nodesOfType(...)[0].nope` because property `nope` is missing in `ListNode` [1]. [prop-missing]
+
+   conditional_indexed_marker.js:7:27
+    7| $nodesOfType(ListNode)[0].nope; // error: `nope` is missing in `ListNode`
+                                 ^^^^
+
+References:
+   node_modules/ts_klass/index.d.ts:11:22
+   11| export declare class ListNode extends LexicalNode {
+                            ^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------ conditional_indexed_marker.js:26:22
+
+Cannot call `i` with object literal bound to `x` because in property `b.k`: `"x"` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   conditional_indexed_marker.js:26:22
+   26| i({a: {k: 1}, b: {k: 'x'}}); // error: `b` must be `{k: number}`
+                            ^^^ [1]
+
+References:
+   conditional_indexed_marker.js:26:11
+   26| i({a: {k: 1}, b: {k: 'x'}}); // error: `b` must be `{k: number}`
+                 ^ [2]
+
+
 Error ------------------------------------------------------------------------------------ failed_operations_any.js:6:13
 
 Cannot use function type [1] with more than 1 type argument. [extra-type-arg]
@@ -1674,4 +1703,4 @@ References:
 
 
 
-Found 90 errors
+Found 92 errors
