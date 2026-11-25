@@ -1300,47 +1300,38 @@ fn merge_tyref<'cx, R>(
 
     let mut qualifications = Vec::new();
     let mut current = tyref;
-    loop {
+    let (mut t, mut loc, mut names) = loop {
         match current {
             Pack::TyRef::Unqualified(packed_ref, _) => {
-                let (mut t, mut loc, mut names) = merge_ref(
+                break merge_ref(
                     cx,
                     file,
                     |_, t, ref_loc, _def_loc, name| (t, ref_loc, vec![name.dupe()]),
                     packed_ref,
                     false,
                 );
-                for (q_loc, q_id_loc, q_name, strictness_kind) in qualifications.iter().rev() {
-                    let q_loc: &ALoc = q_loc;
-                    let q_id_loc: &ALoc = q_id_loc;
-                    let q_name: &FlowSmolStr = q_name;
-                    names.push(q_name.dupe());
-                    let qname: String = names
-                        .iter()
-                        .map(|s| s.as_str())
-                        .collect::<Vec<_>>()
-                        .join(".");
-                    let id_reason = reason::mk_reason(RType(q_name.dupe()), q_id_loc.dupe());
-                    let name = Name::new(q_name.dupe());
-                    let op_reason =
-                        reason::mk_reason(RType(FlowSmolStr::new(&qname)), q_loc.dupe());
-                    let use_op = type_::VirtualUseOp::Op(Arc::new(
-                        type_::VirtualRootUseOp::GetProperty(op_reason.dupe()),
-                    ));
-                    t = annotation_inference::qualify_type(
-                        cx,
-                        use_op,
-                        id_reason,
-                        op_reason,
-                        name,
-                        t,
-                        QualifiedMeaning::Type,
-                        *strictness_kind,
-                    );
-                    loc = q_loc.dupe();
-                }
-                names.reverse();
-                return f(cx, t, loc, names);
+            }
+            Pack::TyRef::ImportType(
+                deref!(Pack::PackedLocIndex {
+                    loc,
+                    index,
+                    strictness_kind,
+                }),
+            ) => {
+                let mref = file.dependencies.get(*index).0.dupe();
+                let ns_reason = reason::mk_reason(RModule(mref.dupe()), loc.dupe());
+                let name = mref.into_inner();
+                let t = import_ns(
+                    cx,
+                    file,
+                    ns_reason,
+                    &name,
+                    loc.dupe(),
+                    *index,
+                    *strictness_kind,
+                );
+                let name = FlowSmolStr::new(format!("import(\"{}\")", name));
+                break (t, loc.dupe(), vec![name]);
             }
             Pack::TyRef::Qualified(
                 deref!(Pack::TyRefQualified {
@@ -1355,7 +1346,37 @@ fn merge_tyref<'cx, R>(
                 current = qualification;
             }
         }
+    };
+    for (q_loc, q_id_loc, q_name, strictness_kind) in qualifications.iter().rev() {
+        let q_loc: &ALoc = q_loc;
+        let q_id_loc: &ALoc = q_id_loc;
+        let q_name: &FlowSmolStr = q_name;
+        names.push(q_name.dupe());
+        let qname: String = names
+            .iter()
+            .map(|s| s.as_str())
+            .collect::<Vec<_>>()
+            .join(".");
+        let id_reason = reason::mk_reason(RType(q_name.dupe()), q_id_loc.dupe());
+        let name = Name::new(q_name.dupe());
+        let op_reason = reason::mk_reason(RType(FlowSmolStr::new(&qname)), q_loc.dupe());
+        let use_op = type_::VirtualUseOp::Op(Arc::new(type_::VirtualRootUseOp::GetProperty(
+            op_reason.dupe(),
+        )));
+        t = annotation_inference::qualify_type(
+            cx,
+            use_op,
+            id_reason,
+            op_reason,
+            name,
+            t,
+            QualifiedMeaning::Type,
+            *strictness_kind,
+        );
+        loc = q_loc.dupe();
     }
+    names.reverse();
+    f(cx, t, loc, names)
 }
 
 pub fn merge_type_export<'cx>(
@@ -4442,7 +4463,7 @@ fn merge_interface_extends<'cx>(
                         *strictness_kind,
                     )
                 }
-                Pack::TyRef::Unqualified(..) => {
+                Pack::TyRef::Unqualified(..) | Pack::TyRef::ImportType(_) => {
                     merge_tyref(cx, file, |_, t, _ref_loc, _names| t, name)
                 }
             }

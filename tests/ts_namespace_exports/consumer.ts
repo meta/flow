@@ -117,3 +117,10 @@ value satisfies string; // ERROR
 CjsFunction('x') satisfies number;
 call('x') satisfies number;
 call(1); // ERROR
+
+// A class merged with a namespace, used as a type in a signature, is the instance type.
+import { viaImportType, viaNamespace, viaName } from './merged_class_signature';
+viaImportType().field satisfies number;
+viaImportType().field satisfies string; // ERROR
+viaNamespace().field satisfies string; // ERROR
+viaName().field satisfies string; // ERROR

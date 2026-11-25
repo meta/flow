@@ -259,6 +259,7 @@ mod eval {
                 }
             }
             (TyRef::Unqualified(r, _), _) => ref_(export_sig, seen, r),
+            (TyRef::ImportType(_), _) => Evaled::Nothing,
         }
     }
 

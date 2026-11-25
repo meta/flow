@@ -22,3 +22,14 @@ myInstance as Inner; // OK
 type T = import('./export_type_only').T; // OK
 true as T; // OK
 0 as T; // ERROR: number ~> boolean
+
+// The same types, read from signatures
+import type * as Sig from './signature';
+myInstance as Sig.ImportedClass; // OK
+0 as Sig.ImportedClass; // ERROR: number ~> MyClass
+({name: "test"}) as Sig.ImportedType; // ERROR: missing count
+myInstance as Sig.Inner; // OK
+0 as Sig.Inner; // ERROR: number ~> Inner
+0 as Sig.T; // ERROR: number ~> boolean
+[1, 2] as Sig.Pair; // OK
+['a', 'b'] as Sig.Pair; // ERROR: string ~> number

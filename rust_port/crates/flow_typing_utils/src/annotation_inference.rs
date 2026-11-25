@@ -1416,12 +1416,17 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 }
             }
         }
-        // a TS enum used as a bare type is the union of its member literal types; any
-        // other namespace value used as a type is an error (catch-all below)
+        // a TS enum used as a bare type is the union of its member literal types
         (TypeInner::NamespaceT(ns), OpInner::AnnotUseTTypeT { reason, .. })
             if flow_js_utils::is_ts_enum_symbol(&ns.namespace_symbol) =>
         {
             flow_js_utils::ts_enum_member_union(cx, reason.dupe(), ns.types_tmap.dupe())
+        }
+        // any other namespace is used as a type through its value, as in flow_js: a class
+        // merged with a namespace is its instance type, and a plain namespace is an error
+        // (catch-all below)
+        (TypeInner::NamespaceT(ns), OpInner::AnnotUseTTypeT { .. }) => {
+            elab_t(cx, Some(seen), ns.values_type.dupe(), op)
         }
         (
             TypeInner::AnyT(_, type_::AnySource::AnyError(_)),

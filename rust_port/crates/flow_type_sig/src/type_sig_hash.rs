@@ -246,11 +246,19 @@ fn visit_ref<Loc>(edge: &dyn Fn(Rc<Node>), file: &File, ref_: &P::PackedRef<Loc>
     }
 }
 
-fn visit_tyref<Loc>(edge: &dyn Fn(Rc<Node>), file: &File, tyref: &P::TyRef<Loc>) {
+fn visit_tyref<Loc>(
+    edge: &dyn Fn(Rc<Node>),
+    dep_edge: &dyn Fn(&ReadHash),
+    file: &File,
+    tyref: &P::TyRef<Loc>,
+) {
     match tyref {
         P::TyRef::Unqualified(ref_, _) => visit_ref(edge, file, ref_),
         P::TyRef::Qualified(deref!(P::TyRefQualified { qualification, .. })) => {
-            visit_tyref(edge, file, qualification);
+            visit_tyref(edge, dep_edge, file, qualification);
+        }
+        P::TyRef::ImportType(deref!(P::PackedLocIndex { loc: _, index, .. })) => {
+            edge_import_ns(edge, dep_edge, file, *index)
         }
     }
 }
@@ -265,7 +273,7 @@ pub fn visit_packed<Loc>(
         P::Packed::Annot(t) => visit_annot(edge, dep_edge, file, t),
         P::Packed::Value(t) => visit_value(edge, dep_edge, file, t),
         P::Packed::Ref(ref_) => visit_ref(edge, file, ref_),
-        P::Packed::TyRef(ref_) => visit_tyref(edge, file, ref_),
+        P::Packed::TyRef(ref_) => visit_tyref(edge, dep_edge, file, ref_),
         P::Packed::TyRefApp(
             deref!(P::PackedTyRefApp {
                 loc: _,
@@ -274,7 +282,7 @@ pub fn visit_packed<Loc>(
                 strictness_kind: _,
             }),
         ) => {
-            visit_tyref(edge, file, name);
+            visit_tyref(edge, dep_edge, file, name);
             for targ in targs {
                 visit_packed(edge, dep_edge, file, targ);
             }

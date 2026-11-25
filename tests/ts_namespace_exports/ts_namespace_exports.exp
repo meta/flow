@@ -462,6 +462,59 @@ References:
                                           ^^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------------------ consumer.ts:124:1
+
+Cannot cast `viaImportType().field` to `string` because `number` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   consumer.ts:124:1
+   124| viaImportType().field satisfies string; // ERROR
+        ^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   before.d.ts:13:10
+    13|   field: number;
+                 ^^^^^^ [1]
+   consumer.ts:124:33
+   124| viaImportType().field satisfies string; // ERROR
+                                        ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ consumer.ts:125:1
+
+Cannot cast `viaNamespace().field` to `string` because `number` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   consumer.ts:125:1
+   125| viaNamespace().field satisfies string; // ERROR
+        ^^^^^^^^^^^^^^^^^^^^
+
+References:
+   before.d.ts:13:10
+    13|   field: number;
+                 ^^^^^^ [1]
+   consumer.ts:125:32
+   125| viaNamespace().field satisfies string; // ERROR
+                                       ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ consumer.ts:126:1
+
+Cannot cast `viaName().field` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   consumer.ts:126:1
+   126| viaName().field satisfies string; // ERROR
+        ^^^^^^^^^^^^^^^
+
+References:
+   before.d.ts:13:10
+    13|   field: number;
+                 ^^^^^^ [1]
+   consumer.ts:126:27
+   126| viaName().field satisfies string; // ERROR
+                                  ^^^^^^ [2]
+
+
 Error --------------------------------------------------------------------------------------------------- local.ts:17:22
 
 Cannot resolve name `Item`. [cannot-resolve-name]
@@ -905,4 +958,4 @@ References:
 
 
 
-Found 62 errors
+Found 65 errors

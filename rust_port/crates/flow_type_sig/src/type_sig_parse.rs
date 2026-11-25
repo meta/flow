@@ -258,6 +258,12 @@ pub(super) enum TyName<'arena, 'ast> {
         qualification: Box<TyName<'arena, 'ast>>,
         strictness_kind: TypeStrictnessKind,
     },
+    /// The module `m` of `import('m').X`.
+    ImportType {
+        loc: LocNode<'arena>,
+        mref: ModuleRefNode<'arena>,
+        strictness_kind: TypeStrictnessKind,
+    },
 }
 
 pub(super) type ParsedValue<'arena, 'ast> = Value<LocNode<'arena>, Parsed<'arena, 'ast>>;
@@ -9855,66 +9861,6 @@ fn nominal_type<'arena, 'ast>(
     }
 }
 
-fn get_import_type_base<'a>(
-    id: &'a ast::types::generic::Identifier<Loc, Loc>,
-) -> Option<(
-    &'a Loc,
-    &'a ast::types::generic::ImportType<Loc, Loc>,
-    Vec<(Loc, FlowSmolStr)>,
-)> {
-    fn loop_<'a>(
-        mut chain: Vec<(Loc, FlowSmolStr)>,
-        id: &'a ast::types::generic::Identifier<Loc, Loc>,
-    ) -> Option<(
-        &'a Loc,
-        &'a ast::types::generic::ImportType<Loc, Loc>,
-        Vec<(Loc, FlowSmolStr)>,
-    )> {
-        match id {
-            ast::types::generic::Identifier::ImportTypeAnnot(import_type) => {
-                chain.reverse();
-                Some((&import_type.loc, import_type.as_ref(), chain))
-            }
-            ast::types::generic::Identifier::Qualified(q) => {
-                let id_loc = q.id.loc.dupe();
-                let name = q.id.name.dupe();
-                chain.push((id_loc, name));
-                loop_(chain, &q.qualification)
-            }
-            ast::types::generic::Identifier::Unqualified(_) => None,
-        }
-    }
-    loop_(Vec::new(), id)
-}
-
-// Handles import("module") type expressions by building ImportTypeAnnot with Eval chain
-fn handle_import_type<'arena, 'ast>(
-    tbls: &mut Tables<'arena, 'ast>,
-    import_loc: &Loc,
-    import_type: &ast::types::generic::ImportType<Loc, Loc>,
-    chain: Vec<(Loc, FlowSmolStr)>,
-) -> Parsed<'arena, 'ast> {
-    let import_loc = tbls.push_loc(import_loc.dupe());
-    let value = &import_type.source.1.value;
-    let mref = Userland::from_smol_str(value.dupe());
-    let mref = tbls.push_module_ref(mref);
-    let strictness_kind = tbls.strictness_kind;
-    let base = Parsed::ImportTypeAnnot {
-        loc: import_loc,
-        mref,
-        strictness_kind,
-    };
-    chain.into_iter().fold(base, |t, (id_loc, name)| {
-        let id_loc = tbls.push_loc(id_loc);
-        Parsed::Eval(
-            id_loc,
-            Box::new(t),
-            Box::new(Op::GetProp(Box::new(name))),
-            strictness_kind,
-        )
-    })
-}
-
 fn generic_id<'arena, 'ast>(
     scope: ScopeId,
     tbls: &mut Tables<'arena, 'ast>,
@@ -9971,7 +9917,14 @@ fn generic_id<'arena, 'ast>(
         }
         ast::types::generic::Identifier::ImportTypeAnnot(import_type) => {
             let loc = tbls.push_loc(import_type.loc.dupe());
-            Err(loc)
+            let mref = Userland::from_smol_str(import_type.source.1.value.dupe());
+            let mref = tbls.push_module_ref(mref);
+            let tyname = TyName::ImportType {
+                loc,
+                mref,
+                strictness_kind: tbls.strictness_kind,
+            };
+            Ok(finish(tbls, tyname, chain))
         }
     }
 }
@@ -9985,22 +9938,9 @@ fn generic<'arena, 'ast>(
     loc: LocNode<'arena>,
     g: &ast::types::Generic<Loc, Loc>,
 ) -> Parsed<'arena, 'ast> {
-    // First check if the generic identifier has an ImportType base
-    match get_import_type_base(&g.id) {
-        Some((import_loc, import_type, chain)) => {
-            let t = handle_import_type(tbls, import_loc, import_type, chain);
-            match &g.targs {
-                None => t,
-                Some(type_args) => {
-                    let targs_loc = tbls.push_loc(type_args.loc.dupe());
-                    Parsed::Err(targs_loc, Errno::CheckError)
-                }
-            }
-        }
-        None => match generic_id(scope, tbls, xs, Vec::new(), &g.id) {
-            Ok(tyname) => nominal_type(opts, scope, scopes, tbls, xs, loc, tyname, &g.targs),
-            Err(loc) => Parsed::Err(loc, Errno::CheckError),
-        },
+    match generic_id(scope, tbls, xs, Vec::new(), &g.id) {
+        Ok(tyname) => nominal_type(opts, scope, scopes, tbls, xs, loc, tyname, &g.targs),
+        Err(loc) => Parsed::Err(loc, Errno::CheckError),
     }
 }
 
@@ -10013,43 +9953,27 @@ fn maybe_special_generic<'arena, 'ast>(
     loc: LocNode<'arena>,
     g: &ast::types::Generic<Loc, Loc>,
 ) -> Parsed<'arena, 'ast> {
-    // First check if the generic identifier has an ImportType base
-    match get_import_type_base(&g.id) {
-        Some((import_loc, import_type, chain)) => {
-            let t = handle_import_type(tbls, import_loc, import_type, chain);
-            match &g.targs {
-                None => t,
-                Some(type_args) => {
-                    let targs_loc = tbls.push_loc(type_args.loc.dupe());
-                    Parsed::Err(targs_loc, Errno::CheckError)
-                }
+    match &g.id {
+        ast::types::generic::Identifier::Qualified(inner) => {
+            let id_loc = inner.id.loc.dupe();
+            let name = inner.id.name.dupe();
+            let qloc = tbls.push_loc(inner.loc.dupe());
+            let chain = vec![(qloc, id_loc, name)];
+            match generic_id(scope, tbls, xs, chain, &inner.qualification) {
+                Ok(tyname) => nominal_type(opts, scope, scopes, tbls, xs, loc, tyname, &g.targs),
+                Err(loc) => Parsed::Err(loc, Errno::CheckError),
             }
         }
-        None => match &g.id {
-            ast::types::generic::Identifier::Qualified(inner) => {
-                let id_loc = inner.id.loc.dupe();
-                let name = inner.id.name.dupe();
-                let qloc = tbls.push_loc(inner.loc.dupe());
-                let chain = vec![(qloc, id_loc, name)];
-                match generic_id(scope, tbls, xs, chain, &inner.qualification) {
-                    Ok(tyname) => {
-                        nominal_type(opts, scope, scopes, tbls, xs, loc, tyname, &g.targs)
-                    }
-                    Err(loc) => Parsed::Err(loc, Errno::CheckError),
-                }
-            }
-            ast::types::generic::Identifier::Unqualified(id) => {
-                let ref_loc = tbls.push_loc(id.loc.dupe());
-                let name = &id.name;
-                maybe_special_unqualified_generic(
-                    opts, scope, scopes, tbls, xs, loc, &g.targs, ref_loc, name,
-                )
-            }
-            ast::types::generic::Identifier::ImportTypeAnnot(_) => {
-                // This case is handled above by get_import_type_base, should not reach here
-                unreachable!("ImportTypeAnnot should have been handled by get_import_type_base")
-            }
-        },
+        ast::types::generic::Identifier::Unqualified(id) => {
+            let ref_loc = tbls.push_loc(id.loc.dupe());
+            let name = &id.name;
+            maybe_special_unqualified_generic(
+                opts, scope, scopes, tbls, xs, loc, &g.targs, ref_loc, name,
+            )
+        }
+        ast::types::generic::Identifier::ImportTypeAnnot(_) => {
+            generic(opts, scope, scopes, tbls, xs, loc, g)
+        }
     }
 }
 

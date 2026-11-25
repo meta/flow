@@ -223,6 +223,8 @@ pub enum TyRef<Loc> {
     /// A name and the strictness of the code that writes it.
     Unqualified(PackedRef<Loc>, TypeStrictnessKind),
     Qualified(Box<TyRefQualified<Loc>>),
+    /// The module of `import('m').X`.
+    ImportType(Box<PackedLocIndex<Loc>>),
 }
 
 #[derive(Debug, Clone, Hash, serde::Serialize, serde::Deserialize)]
@@ -247,6 +249,11 @@ impl<Loc> TyRef<Loc> {
                 qualification: Box::new(inner.qualification.map(f)),
                 strictness_kind: inner.strictness_kind,
             })),
+            TyRef::ImportType(inner) => TyRef::ImportType(Box::new(PackedLocIndex {
+                loc: f(&inner.loc),
+                index: inner.index,
+                strictness_kind: inner.strictness_kind,
+            })),
         }
     }
 
@@ -255,6 +262,7 @@ impl<Loc> TyRef<Loc> {
         match self {
             TyRef::Unqualified(_, strictness_kind) => *strictness_kind,
             TyRef::Qualified(inner) => inner.strictness_kind,
+            TyRef::ImportType(inner) => inner.strictness_kind,
         }
     }
 }
@@ -849,6 +857,15 @@ fn pack_tyname<'arena, 'ast>(name: &parse::TyName<'arena, 'ast>) -> TyRef<Index<
                 strictness_kind: *strictness_kind,
             }))
         }
+        parse::TyName::ImportType {
+            loc,
+            mref,
+            strictness_kind,
+        } => TyRef::ImportType(Box::new(PackedLocIndex {
+            loc: pack_loc(loc),
+            index: mref.0.index_exn(),
+            strictness_kind: *strictness_kind,
+        })),
     }
 }
 

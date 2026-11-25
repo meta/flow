@@ -219,6 +219,10 @@ fn mark_tyname<'arena, 'ast>(
             mark_loc(marker, id_loc);
             mark_tyname(opts, scopes, tbls, marker, qualification);
         }
+        parse::TyName::ImportType { loc, mref, .. } => {
+            mark_loc(marker, loc);
+            mark_mref(mref);
+        }
     }
 }
 
