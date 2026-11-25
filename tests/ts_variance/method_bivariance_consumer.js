@@ -62,3 +62,15 @@ declare const flowListenerObject: {
 };
 const flowListenerObjectAsTypeScriptListener: EventListenerObjectLike =
   flowListenerObject; // OK
+
+// Flow-authored overloads keep the bounds of their generic signatures.
+interface FlowOverloaded {
+  m<C extends Animal>(c: C): void;
+  m(x: number): void;
+}
+interface FlowOverloadedDog {
+  m<C extends Dog>(c: C): void;
+  m(x: number): void;
+}
+declare const flowOverloadedDog: FlowOverloadedDog;
+const flowOverloadSet: FlowOverloaded = flowOverloadedDog; // ERROR in .js

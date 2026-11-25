@@ -269,3 +269,32 @@ interface TLSSocketish extends Socketish {
     listener: (ev: TLSSocketishEventMap[K]) => void,
   ): void;
 }
+
+// Like TypeScript, compare the signatures of an overload set with their type
+// parameters erased to `any`. Lexical's `LexicalNode#config` overloads bound
+// their type parameter by a config of `this`, so the overloads of a subclass's
+// copy, like `Omit<ListItemNode, K>`, have narrower bounds.
+interface NodeConfig<T extends Animal> {
+  readonly transform?: (node: T) => void;
+  create?(): T;
+}
+interface AnimalConfigurable {
+  config<const C extends NodeConfig<Animal>>(type: symbol, config: C): C;
+  config<Type extends string, const C extends NodeConfig<Animal>>(type: Type, config: C): C;
+}
+interface DogConfigurable {
+  config<const C extends NodeConfig<Dog>>(type: symbol, config: C): C;
+  config<Type extends string, const C extends NodeConfig<Dog>>(type: Type, config: C): C;
+}
+declare const dogConfigurable: DogConfigurable;
+const overloadSetErased: AnimalConfigurable = dogConfigurable; // OK
+
+// A single generic signature keeps its bounds.
+interface AnimalConfigurableOnce {
+  config<const C extends NodeConfig<Animal>>(type: symbol, config: C): C;
+}
+interface DogConfigurableOnce {
+  config<const C extends NodeConfig<Dog>>(type: symbol, config: C): C;
+}
+declare const dogConfigurableOnce: DogConfigurableOnce;
+const singleSignature: AnimalConfigurableOnce = dogConfigurableOnce; // ERROR

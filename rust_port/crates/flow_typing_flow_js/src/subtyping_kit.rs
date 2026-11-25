@@ -1327,9 +1327,10 @@ fn funt_to_funt_method_bivariant<'cx>(
 //
 // For overloaded methods, preserve Flow's existing intersection semantics:
 // every target overload must be covered, while a source overload set may
-// satisfy a target signature with any compatible overload. The only thing we
-// swap is the per-signature compatibility predicate, from contravariant params
-// to TS-style bivariant method params.
+// satisfy a target signature with any compatible overload. The per-signature
+// compatibility predicate is TS's: bivariant method params instead of
+// contravariant ones, with the type parameters of generic signatures erased to
+// `any`.
 fn try_method_bivariant<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
@@ -1338,11 +1339,40 @@ fn try_method_bivariant<'cx>(
     lt: &Type,
     ut: &Type,
 ) -> Result<bool, FlowJsException> {
+    fn erase_type_params<'cx>(
+        cx: &mut Context<'cx>,
+        env: &FlowJsEnv,
+        trace: DepthTrace,
+        use_op: UseOp,
+        reason: &Reason,
+        poly: &PolyTData,
+    ) -> Result<Type, FlowJsException> {
+        let tparams = Vec1::try_from_vec(poly.tparams.to_vec())
+            .expect("a polymorphic type should have type parameters");
+        let targs = tparams
+            .iter()
+            .map(|tparam| any_t::untyped(tparam.reason.dupe()))
+            .collect();
+        let (t, _) = FlowJs::instantiate_poly_with_targs_with_env(
+            cx,
+            env,
+            trace,
+            use_op,
+            reason,
+            reason,
+            None,
+            (poly.tparams_loc.dupe(), tparams, poly.t_out.dupe()),
+            targs,
+        )?;
+        Ok(t)
+    }
+
     fn direct_method_bivariant<'cx>(
         cx: &mut Context<'cx>,
         env: &FlowJsEnv,
         trace: DepthTrace,
         use_op: UseOp,
+        erase: bool,
         lt: &Type,
         ut: &Type,
     ) -> Result<bool, FlowJsException> {
@@ -1351,6 +1381,37 @@ fn try_method_bivariant<'cx>(
                 funt_to_funt_method_bivariant(
                     cx, env, trace, use_op, lt, ut, lreason_f, ft1, ureason_f, ft2,
                 )?;
+                Ok(true)
+            }
+            // Like TypeScript's `signaturesRelatedTo`, compare the signatures of an overload set
+            // with their type parameters erased to `any`.
+            #[rustfmt::skip]
+            (
+                DefT(lreason, deref!(PolyT(poly1 @ deref!(PolyTData {
+                    tparams: ps1,
+                    t_out: deref!(DefT(_, deref!(FunT(_, _)))),
+                    ..
+                })))),
+                DefT(ureason, deref!(PolyT(poly2 @ deref!(PolyTData {
+                    tparams: ps2,
+                    t_out: deref!(DefT(_, deref!(FunT(_, _)))),
+                    ..
+                })))),
+            ) if erase && ps1.len() == ps2.len() => {
+                let erased1 = erase_type_params(cx, env, trace, use_op.dupe(), lreason, poly1)?;
+                let erased2 = erase_type_params(cx, env, trace, use_op.dupe(), ureason, poly2)?;
+                if !direct_method_bivariant(cx, env, trace, use_op, false, &erased1, &erased2)? {
+                    flow_js_utils::add_output_with_env(
+                        cx,
+                        env,
+                        ErrorMessage::EInternal(Box::new((
+                            type_util::loc_of_t(lt).dupe(),
+                            InternalError::MethodBivariantInvariant(FlowSmolStr::from(
+                                "PolyT with FunT inner produced non-FunT after erasure",
+                            )),
+                        ))),
+                    )?;
+                }
                 Ok(true)
             }
             #[rustfmt::skip]
@@ -1512,13 +1573,14 @@ fn try_method_bivariant<'cx>(
         env: &FlowJsEnv,
         trace: DepthTrace,
         use_op: UseOp,
+        erase: bool,
         lt: &Type,
         ut: &Type,
     ) -> Result<(), FlowJsException> {
         match (lt.deref(), ut.deref()) {
             (_, IntersectionT(_, rep)) => {
                 for ut in rep.members_iter() {
-                    apply_method_bivariant(cx, env, trace, use_op.dupe(), lt, ut)?;
+                    apply_method_bivariant(cx, env, trace, use_op.dupe(), erase, lt, ut)?;
                 }
                 Ok(())
             }
@@ -1534,7 +1596,7 @@ fn try_method_bivariant<'cx>(
                     let ut = ut.dupe();
                     let use_op = use_op.dupe();
                     cases.push(Box::new(move |cx: &mut Context<'cx>, env: &FlowJsEnv| {
-                        apply_method_bivariant(cx, env, trace, use_op, &lt, &ut)
+                        apply_method_bivariant(cx, env, trace, use_op, erase, &lt, &ut)
                     }));
                 }
                 let use_t = UseT::new(UseT(use_op.dupe(), ut.dupe()));
@@ -1548,12 +1610,26 @@ fn try_method_bivariant<'cx>(
                     cases,
                 )
             }
-            _ => direct_method_bivariant(cx, env, trace, use_op, lt, ut).map(|_| ()),
+            _ => direct_method_bivariant(cx, env, trace, use_op, erase, lt, ut).map(|_| ()),
+        }
+    }
+
+    fn signature_count(t: &Type) -> usize {
+        match t.deref() {
+            IntersectionT(_, rep) => rep.members_iter().map(signature_count).sum(),
+            DefT(_, deref!(FunT(_, _))) => 1,
+            #[rustfmt::skip]
+            DefT(_, deref!(PolyT(deref!(PolyTData {
+                t_out: deref!(DefT(_, deref!(FunT(_, _)))),
+                ..
+            })))) => 1,
+            _ => 0,
         }
     }
 
     if can_try_method_bivariant(lt, ut) {
-        apply_method_bivariant(cx, env, trace, use_op, lt, ut)?;
+        let erase = signature_count(lt) > 1 || signature_count(ut) > 1;
+        apply_method_bivariant(cx, env, trace, use_op, erase, lt, ut)?;
         Ok(true)
     } else {
         Ok(false)

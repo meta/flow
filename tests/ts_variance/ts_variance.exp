@@ -192,6 +192,31 @@ References:
                                  ^^^^^^^^^^^^^^^^^^^ [2]
 
 
+Error -------------------------------------------------------------------------------------- method_bivariance.ts:300:49
+
+Cannot assign `dogConfigurableOnce` to `singleSignature` because `DogConfigurableOnce` [1] is incompatible with
+`AnimalConfigurableOnce` [2]. For example, property `bark` is missing in `Animal` [3] but exists in `Dog` [4].
+[incompatible-type]
+
+   method_bivariance.ts:300:49
+   300| const singleSignature: AnimalConfigurableOnce = dogConfigurableOnce; // ERROR
+                                                        ^^^^^^^^^^^^^^^^^^^
+
+References:
+   method_bivariance.ts:299:36
+   299| declare const dogConfigurableOnce: DogConfigurableOnce;
+                                           ^^^^^^^^^^^^^^^^^^^ [1]
+   method_bivariance.ts:300:24
+   300| const singleSignature: AnimalConfigurableOnce = dogConfigurableOnce; // ERROR
+                               ^^^^^^^^^^^^^^^^^^^^^^ [2]
+   method_bivariance.ts:294:37
+   294|   config<const C extends NodeConfig<Animal>>(type: symbol, config: C): C;
+                                            ^^^^^^ [3]
+   method_bivariance.ts:297:37
+   297|   config<const C extends NodeConfig<Dog>>(type: symbol, config: C): C;
+                                            ^^^ [4]
+
+
 Error ------------------------------------------------------------------------------ method_bivariance_consumer.js:30:32
 
 Cannot assign object literal to `m` because in property `cb` > the first parameter: `Dog` [1] is incompatible with
@@ -205,6 +230,34 @@ References:
    method_bivariance_consumer.js:25:9
    25|   cb(x: Animal): void,
                ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------ method_bivariance_consumer.js:76:41
+
+Cannot assign `flowOverloadedDog` to `flowOverloadSet` because in property `m`: [incompatible-type]
+ - Either in the first parameter: `number` [1] is incompatible with `Animal` [2].
+ - Or `Animal` [3] is incompatible with `Dog` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   method_bivariance_consumer.js:76:41
+   76| const flowOverloadSet: FlowOverloaded = flowOverloadedDog; // ERROR in .js
+                                               ^^^^^^^^^^^^^^^^^
+
+References:
+   method_bivariance_consumer.js:73:8
+   73|   m(x: number): void;
+              ^^^^^^ [1]
+   method_bivariance_consumer.js:68:26
+   68|   m<C extends Animal>(c: C): void;
+                                ^ [2]
+   method_bivariance_consumer.js:68:15
+   68|   m<C extends Animal>(c: C): void;
+                     ^^^^^^ [3]
+   method_bivariance_consumer.js:72:15
+   72|   m<C extends Dog>(c: C): void;
+                     ^^^ [4]
 
 
 Error ---------------------------------------------------------------------------------------- optional_methods.ts:48:46
@@ -559,4 +612,4 @@ References:
 
 
 
-Found 28 errors
+Found 30 errors
