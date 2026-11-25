@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+use std::collections::HashMap;
 use std::convert::Infallible;
 use std::ops::Deref;
 use std::rc::Rc;
@@ -1756,6 +1757,9 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             collector.add(t.dupe());
             t
         }
+        // An intersection indexer key joins the key set as it is: which of its
+        // members applies is up to the use of the key set.
+        (TypeInner::IntersectionT(_, _), OpInner::AnnotGetKeysDictKeyT(_)) => t,
         (TypeInner::IntersectionT(_, _), _) => error_unsupported(cx, &t, &op),
         // *************************
         //  ConcretizeForInspection
@@ -4343,8 +4347,16 @@ fn partition_mapped_type_keys<'cx>(
     reason: &Reason,
     keys: Type,
 ) -> Option<(Vec<(Name, Reason)>, Vec<Type>)> {
-    use flow_typing_type::type_::DefTInner;
+    let keys = concrete_mapped_type_keys(cx, reason, keys);
+    let mut intersection_keys = HashMap::new();
+    let invalid_keys = keys
+        .iter()
+        .filter(|t| !is_mapped_type_key(cx, reason, &mut intersection_keys, t))
+        .count();
+    (invalid_keys == 0).then(|| split_mapped_type_keys(keys))
+}
 
+fn concrete_mapped_type_keys<'cx>(cx: &mut Context<'cx>, reason: &Reason, keys: Type) -> Vec<Type> {
     let collector = TypeCollector::create();
     elab_t(
         cx,
@@ -4355,12 +4367,24 @@ fn partition_mapped_type_keys<'cx>(
             collector: collector.clone(),
         }),
     );
-    let keys: Vec<Type> = collector
+    collector
         .collect_to_vec()
         .into_iter()
         .flat_map(|t| expand_template_literal_key(cx, t))
-        .collect();
-    let all_valid = keys.iter().all(|t| match t.deref() {
+        .collect()
+}
+
+/// Whether a concrete mapped type key is structurally a `string`, `number` or
+/// `symbol`. `intersection_keys` records the intersections already decided.
+fn is_mapped_type_key<'cx>(
+    cx: &mut Context<'cx>,
+    reason: &Reason,
+    intersection_keys: &mut HashMap<Type, bool>,
+    key: &Type,
+) -> bool {
+    use flow_typing_type::type_::DefTInner;
+
+    match key.deref() {
         TypeInner::DefT(_, def_t) => matches!(
             def_t.deref(),
             DefTInner::SingletonStrT { .. }
@@ -4372,9 +4396,46 @@ fn partition_mapped_type_keys<'cx>(
                 | DefTInner::SymbolT
         ),
         TypeInner::AnyT(..) | TypeInner::ImplicitInstantiationTvar(_) => true,
+        TypeInner::IntersectionT(_, rep) => {
+            if let Some(is_key) = intersection_keys.get(key) {
+                return *is_key;
+            }
+            // An intersection reached again while it is being decided, as through a
+            // recursive alias, is not a key.
+            intersection_keys.insert(key.dupe(), false);
+            let key_members = rep
+                .members_iter()
+                .filter(|member| is_intersection_member_key(cx, reason, intersection_keys, member))
+                .count();
+            let is_key = key_members > 0;
+            intersection_keys.insert(key.dupe(), is_key);
+            is_key
+        }
         _ => false,
-    });
-    all_valid.then(|| split_mapped_type_keys(keys))
+    }
+}
+
+/// An intersection is a subtype of `string | number | symbol` when one of its
+/// members is. Every member is concretized, so neither the result nor the errors
+/// depend on the order of the members. A member that fails to concretize, giving
+/// no type or an error `any`, is not a key.
+fn is_intersection_member_key<'cx>(
+    cx: &mut Context<'cx>,
+    reason: &Reason,
+    intersection_keys: &mut HashMap<Type, bool>,
+    member: &Type,
+) -> bool {
+    use flow_typing_type::type_::AnySource;
+
+    let member_keys = concrete_mapped_type_keys(cx, reason, member.dupe());
+    let non_keys = member_keys
+        .iter()
+        .filter(|t| {
+            let is_key = is_mapped_type_key(cx, reason, intersection_keys, t);
+            !is_key || matches!(t.deref(), TypeInner::AnyT(_, AnySource::AnyError(_)))
+        })
+        .count();
+    !member_keys.is_empty() && non_keys == 0
 }
 
 /// Maps a non-homomorphic mapped type over its keys, as

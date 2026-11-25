@@ -1,0 +1,390 @@
+Error ------------------------------------------------------------------------------------- conditional_member.d.ts:4:33
+
+Cannot use type inspection on `"x" extends string ? {} : empty` [1] in an export position. Please provide an
+(alternative) annotation for type inspection [2].. (FLOW BUG: This is a misplaced error. The original error was raised
+in file `reexport.js`) [invalid-exported-annotation]
+
+   conditional_member.d.ts:4:33
+   4| export type ConditionalFirst = {[K in C<'x'> & string]?: number};
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+References:
+   conditional_member.d.ts:3:13
+   3| type C<T> = T extends string ? {} : never;
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------- conditional_member.d.ts:5:32
+
+Cannot use type inspection on `"x" extends string ? {} : empty` [1] in an export position. Please provide an
+(alternative) annotation for type inspection [2].. (FLOW BUG: This is a misplaced error. The original error was raised
+in file `reexport.js`) [invalid-exported-annotation]
+
+   conditional_member.d.ts:5:32
+   5| export type ConditionalLast = {[K in string & C<'x'>]?: number};
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+References:
+   conditional_member.d.ts:3:13
+   3| type C<T> = T extends string ? {} : never;
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------- export_values.js:21:54
+
+Cannot get `recursiveInUnion.zz` because property `zz` is missing in
+`{[(RecursiveInUnion<string> | string) & {...}]: number}` [1]. [prop-missing]
+
+   export_values.js:21:54
+   21| export const recursiveInUnionProp = recursiveInUnion.zz;
+                                                            ^^
+
+References:
+   export_values.js:20:33
+   20| declare const recursiveInUnion: {[K in RecursiveInUnion<string>]: number};
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------- export_values.js:21:37
+
+Cannot use property `zz` on `RecursiveInUnion<string>` [1] in an export position. Please provide an (alternative)
+annotation for property `zz` [2]. [invalid-exported-annotation]
+
+   export_values.js:21:37
+   21| export const recursiveInUnionProp = recursiveInUnion.zz;
+                                           ^^^^^^^^^^^^^^^^^^^ [2]
+
+References:
+   export_values.js:20:40
+   20| declare const recursiveInUnion: {[K in RecursiveInUnion<string>]: number};
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------- export_values.js:27:62
+
+Cannot get `recursiveInUnionLast.zz` because property `zz` is missing in
+`{[(string | RecursiveInUnionLast<string>) & {...}]: number}` [1]. [prop-missing]
+
+   export_values.js:27:62
+   27| export const recursiveInUnionLastProp = recursiveInUnionLast.zz;
+                                                                    ^^
+
+References:
+   export_values.js:24:37
+                                           v
+   24| declare const recursiveInUnionLast: {
+   25|   [K in RecursiveInUnionLast<string>]: number,
+   26| };
+       ^ [1]
+
+
+Error ------------------------------------------------------------------------------------------- export_values.js:27:41
+
+Cannot use property `zz` on `RecursiveInUnionLast<string>` [1] in an export position. Please provide an (alternative)
+annotation for property `zz` [2]. [invalid-exported-annotation]
+
+   export_values.js:27:41
+   27| export const recursiveInUnionLastProp = recursiveInUnionLast.zz;
+                                               ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+References:
+   export_values.js:25:9
+   25|   [K in RecursiveInUnionLast<string>]: number,
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------- export_values.js:32:3
+
+Cannot use type inspection on `string extends string ? {...} : {...}` [1] in an export position. Please provide an
+(alternative) annotation for type inspection [2]. [invalid-exported-annotation]
+
+   export_values.js:32:3
+   32|   [K in (string extends string ? {...} : {...}) & string]: number,
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+References:
+   export_values.js:32:10
+   32|   [K in (string extends string ? {...} : {...}) & string]: number,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------- export_values.js:34:54
+
+Cannot get `conditionalFirst.abc` because property `abc` is missing in
+`{[(string extends string ? {...} : {...}) & string]: number}` [1]. [prop-missing]
+
+   export_values.js:34:54
+   34| export const conditionalFirstProp = conditionalFirst.abc;
+                                                            ^^^
+
+References:
+   export_values.js:31:33
+                                       v
+   31| declare const conditionalFirst: {
+   32|   [K in (string extends string ? {...} : {...}) & string]: number,
+   33| };
+       ^ [1]
+
+
+Error -------------------------------------------------------------------------------------------- export_values.js:36:3
+
+Cannot use type inspection on `string extends string ? {...} : {...}` [1] in an export position. Please provide an
+(alternative) annotation for type inspection [2]. [invalid-exported-annotation]
+
+   export_values.js:36:3
+   36|   [K in string & (string extends string ? {...} : {...})]: number,
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+References:
+   export_values.js:36:19
+   36|   [K in string & (string extends string ? {...} : {...})]: number,
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------- export_values.js:38:52
+
+Cannot get `conditionalLast.abc` because property `abc` is missing in
+`{[string & (string extends string ? {...} : {...})]: number}` [1]. [prop-missing]
+
+   export_values.js:38:52
+   38| export const conditionalLastProp = conditionalLast.abc;
+                                                          ^^^
+
+References:
+   export_values.js:35:32
+                                      v
+   35| declare const conditionalLast: {
+   36|   [K in string & (string extends string ? {...} : {...})]: number,
+   37| };
+       ^ [1]
+
+
+Error ------------------------------------------------------------------------------------------- export_values.js:43:39
+
+Cannot use computed property on `string & "a"` [1] in an export position. Please provide an (alternative) annotation for
+computed property [2]. [invalid-exported-annotation]
+
+   export_values.js:43:39
+   43| declare const accessedByIntersection: {a: {p: number}}[keyof IndexedByIntersection];
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+References:
+   export_values.js:42:35
+   42| type IndexedByIntersection = {[k: string & 'a']: number};
+                                         ^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------- export_values.js:54:48
+
+Cannot get `sharedMembers.zz` because property `zz` is missing in `{[Shared2]: number}` [1]. [prop-missing]
+
+   export_values.js:54:48
+   54| export const sharedMembersProp = sharedMembers.zz;
+                                                      ^^
+
+References:
+   export_values.js:53:30
+   53| declare const sharedMembers: {[K in Shared2]: number};
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------- export_values.js:57:25
+
+Invalid trivially recursive definition of this type.  [recursive-definition]
+
+   57| type SelfKeyed = {[K in keyof SelfKeyed & string]: number};
+                               ^^^^^^^^^^^^^^^
+
+
+Error -------------------------------------------------------------------------------------------- import_values.js:15:1
+
+Cannot cast `intersectionKeysProp` to `string` because `number` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   import_values.js:15:1
+   15| intersectionKeysProp as string; // ERROR
+       ^^^^^^^^^^^^^^^^^^^^
+
+References:
+   export_values.js:5:65
+    5| declare const intersectionKeys: {[K in 'a' | (string & {...})]: number};
+                                                                       ^^^^^^ [1]
+   import_values.js:15:25
+   15| intersectionKeysProp as string; // ERROR
+                               ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- import_values.js:17:1
+
+Cannot cast `intersectionIndexerKeysProp` to `string` because `number` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   import_values.js:17:1
+   17| intersectionIndexerKeysProp as string; // ERROR
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   export_values.js:10:43
+   10|   [K in keyof IntersectionIndexer | 'g']: number,
+                                                 ^^^^^^ [1]
+   import_values.js:17:32
+   17| intersectionIndexerKeysProp as string; // ERROR
+                                      ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- import_values.js:18:1
+
+Cannot cast `recursiveFirstProp` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   import_values.js:18:1
+   18| recursiveFirstProp as string; // ERROR
+       ^^^^^^^^^^^^^^^^^^
+
+References:
+   export_values.js:16:63
+   16| declare const recursiveFirst: {[K in RecursiveFirst<string>]: number};
+                                                                     ^^^^^^ [1]
+   import_values.js:18:23
+   18| recursiveFirstProp as string; // ERROR
+                             ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- import_values.js:21:1
+
+Cannot cast `conditionalFirstProp` to `string` because `number` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   import_values.js:21:1
+   21| conditionalFirstProp as string; // ERROR
+       ^^^^^^^^^^^^^^^^^^^^
+
+References:
+   export_values.js:32:60
+   32|   [K in (string extends string ? {...} : {...}) & string]: number,
+                                                                  ^^^^^^ [1]
+   import_values.js:21:25
+   21| conditionalFirstProp as string; // ERROR
+                               ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- import_values.js:22:1
+
+Cannot cast `conditionalLastProp` to `string` because `number` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   import_values.js:22:1
+   22| conditionalLastProp as string; // ERROR
+       ^^^^^^^^^^^^^^^^^^^
+
+References:
+   export_values.js:36:60
+   36|   [K in string & (string extends string ? {...} : {...})]: number,
+                                                                  ^^^^^^ [1]
+   import_values.js:22:24
+   22| conditionalLastProp as string; // ERROR
+                              ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- import_values.js:24:1
+
+Cannot cast `sharedMembersProp` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   import_values.js:24:1
+   24| sharedMembersProp as string; // ERROR
+       ^^^^^^^^^^^^^^^^^
+
+References:
+   export_values.js:53:47
+   53| declare const sharedMembers: {[K in Shared2]: number};
+                                                     ^^^^^^ [1]
+   import_values.js:24:22
+   24| sharedMembersProp as string; // ERROR
+                            ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- import_values.js:25:1
+
+Cannot cast `selfKeyedProp` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   import_values.js:25:1
+   25| selfKeyedProp as string; // ERROR
+       ^^^^^^^^^^^^^
+
+References:
+   export_values.js:57:52
+   57| type SelfKeyed = {[K in keyof SelfKeyed & string]: number};
+                                                          ^^^^^^ [1]
+   import_values.js:25:18
+   25| selfKeyedProp as string; // ERROR
+                        ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- ts_imports.js:13:1
+
+Cannot cast `DEFAULT_MIME_TYPE_CONFIG['text/html']` to `string` because `number` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   ts_imports.js:13:1
+   13| DEFAULT_MIME_TYPE_CONFIG['text/html'] as string; // ERROR
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   clipboard.d.ts:8:50
+    8|   [key in keyof ClipboardData | (string & {})]?: number | undefined;
+                                                        ^^^^^^^^^^^^^^^^^^ [1]
+   ts_imports.js:13:42
+   13| DEFAULT_MIME_TYPE_CONFIG['text/html'] as string; // ERROR
+                                                ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- ts_imports.js:13:1
+
+Cannot cast `DEFAULT_MIME_TYPE_CONFIG['text/html']` to `string` because `void` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   ts_imports.js:13:1
+   13| DEFAULT_MIME_TYPE_CONFIG['text/html'] as string; // ERROR
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   clipboard.d.ts:8:50
+    8|   [key in keyof ClipboardData | (string & {})]?: number | undefined;
+                                                        ^^^^^^^^^^^^^^^^^^ [1]
+   ts_imports.js:13:42
+   13| DEFAULT_MIME_TYPE_CONFIG['text/html'] as string; // ERROR
+                                                ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- ts_imports.js:20:16
+
+Cannot get `symbolLastKeys[s]` because `symbol` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   ts_imports.js:20:16
+   20| symbolLastKeys[s] as number;
+                      ^
+
+References:
+   ts_imports.js:19:18
+   19| declare const s: symbol;
+                        ^^^^^^ [1]
+   member_order.d.ts:8:37
+    8| export type SymbolLastKeys = {[K in keyof SymbolLast | 'g']: number};
+                                           ^^^^^^^^^^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- ts_imports.js:23:17
+
+Cannot get `symbolFirstKeys.zz` because property `zz` is missing in `{[symbol]: number, g: number}` [1]. [prop-missing]
+
+   ts_imports.js:23:17
+   23| symbolFirstKeys.zz as number;
+                       ^^
+
+References:
+   member_order.d.ts:11:39
+   11| export declare const symbolFirstKeys: SymbolFirstKeys;
+                                             ^^^^^^^^^^^^^^^ [1]
+
+
+
+Found 24 errors
