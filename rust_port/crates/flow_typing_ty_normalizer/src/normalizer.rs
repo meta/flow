@@ -1932,6 +1932,8 @@ mod type_converter {
         fn go(ty: &ALocTy, t: &Type) -> Result<Vec<ty::FunT<ALoc>>, Error> {
             match ty.as_ref() {
                 ty::Ty::Fun(ft) => Ok(vec![(**ft).clone()]),
+                // The size budget ran out within the overloads.
+                ty::Ty::Truncated => Err(terr(ErrorKind::TypeSizeLimit, None, Some(t))),
                 ty::Ty::Inter(t1, t2, ts) => {
                     let mut result = Vec::new();
                     result.extend(go(t1, t)?);

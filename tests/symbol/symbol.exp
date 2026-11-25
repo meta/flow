@@ -260,7 +260,7 @@ References:
 Error --------------------------------------------------------------------------------- collection_to_string_tag.js:15:1
 
 Cannot cast `roSet` to `Readonly<Set<string>>` because property `add` is missing in `ReadonlySet<string>` [1] but exists
-in `?` [2]. [incompatible-type]
+in `...` [2]. [incompatible-type]
 
    collection_to_string_tag.js:15:1
    15| roSet as Readonly<Set<string>>; // ERROR: missing mutating methods
@@ -278,7 +278,7 @@ References:
 Error --------------------------------------------------------------------------------- collection_to_string_tag.js:15:1
 
 Cannot cast `roSet` to `Readonly<Set<string>>` because property `clear` is missing in `ReadonlySet<string>` [1] but
-exists in `?` [2]. [incompatible-type]
+exists in `...` [2]. [incompatible-type]
 
    collection_to_string_tag.js:15:1
    15| roSet as Readonly<Set<string>>; // ERROR: missing mutating methods
@@ -296,7 +296,7 @@ References:
 Error --------------------------------------------------------------------------------- collection_to_string_tag.js:15:1
 
 Cannot cast `roSet` to `Readonly<Set<string>>` because property `delete` is missing in `ReadonlySet<string>` [1] but
-exists in `?` [2]. [incompatible-type]
+exists in `...` [2]. [incompatible-type]
 
    collection_to_string_tag.js:15:1
    15| roSet as Readonly<Set<string>>; // ERROR: missing mutating methods

@@ -1,0 +1,66 @@
+// @flow
+
+// The error printer stops at a size budget, here within the overloads of `m`.
+declare const o: interface {
+  m(x: {a1: number, b1: string, c1: boolean}): void;
+  m(x: {a2: number, b2: string, c2: boolean}): void;
+  m(x: {a3: number, b3: string, c3: boolean}): void;
+  m(x: {a4: number, b4: string, c4: boolean}): void;
+  m(x: {a5: number, b5: string, c5: boolean}): void;
+  m(x: {a6: number, b6: string, c6: boolean}): void;
+  m(x: {a7: number, b7: string, c7: boolean}): void;
+  m(x: {a8: number, b8: string, c8: boolean}): void;
+  m(x: {a9: number, b9: string, c9: boolean}): void;
+  m(x: {a10: number, b10: string, c10: boolean}): void;
+  m(x: {a11: number, b11: string, c11: boolean}): void;
+  m(x: {a12: number, b12: string, c12: boolean}): void;
+  m(x: {a13: number, b13: string, c13: boolean}): void;
+  m(x: {a14: number, b14: string, c14: boolean}): void;
+  m(x: {a15: number, b15: string, c15: boolean}): void;
+  m(x: {a16: number, b16: string, c16: boolean}): void;
+  m(x: {a17: number, b17: string, c17: boolean}): void;
+  m(x: {a18: number, b18: string, c18: boolean}): void;
+  m(x: {a19: number, b19: string, c19: boolean}): void;
+  m(x: {a20: number, b20: string, c20: boolean}): void;
+  m(x: {a21: number, b21: string, c21: boolean}): void;
+  m(x: {a22: number, b22: string, c22: boolean}): void;
+  m(x: {a23: number, b23: string, c23: boolean}): void;
+  m(x: {a24: number, b24: string, c24: boolean}): void;
+  m(x: {a25: number, b25: string, c25: boolean}): void;
+  m(x: {a26: number, b26: string, c26: boolean}): void;
+  m(x: {a27: number, b27: string, c27: boolean}): void;
+  m(x: {a28: number, b28: string, c28: boolean}): void;
+  m(x: {a29: number, b29: string, c29: boolean}): void;
+  m(x: {a30: number, b30: string, c30: boolean}): void;
+  m(x: {a31: number, b31: string, c31: boolean}): void;
+  m(x: {a32: number, b32: string, c32: boolean}): void;
+  m(x: {a33: number, b33: string, c33: boolean}): void;
+  m(x: {a34: number, b34: string, c34: boolean}): void;
+  m(x: {a35: number, b35: string, c35: boolean}): void;
+  m(x: {a36: number, b36: string, c36: boolean}): void;
+  m(x: {a37: number, b37: string, c37: boolean}): void;
+  m(x: {a38: number, b38: string, c38: boolean}): void;
+  m(x: {a39: number, b39: string, c39: boolean}): void;
+  m(x: {a40: number, b40: string, c40: boolean}): void;
+  m(x: {a41: number, b41: string, c41: boolean}): void;
+  m(x: {a42: number, b42: string, c42: boolean}): void;
+  m(x: {a43: number, b43: string, c43: boolean}): void;
+  m(x: {a44: number, b44: string, c44: boolean}): void;
+  m(x: {a45: number, b45: string, c45: boolean}): void;
+  m(x: {a46: number, b46: string, c46: boolean}): void;
+  m(x: {a47: number, b47: string, c47: boolean}): void;
+  m(x: {a48: number, b48: string, c48: boolean}): void;
+  m(x: {a49: number, b49: string, c49: boolean}): void;
+  m(x: {a50: number, b50: string, c50: boolean}): void;
+  m(x: {a51: number, b51: string, c51: boolean}): void;
+  m(x: {a52: number, b52: string, c52: boolean}): void;
+  m(x: {a53: number, b53: string, c53: boolean}): void;
+  m(x: {a54: number, b54: string, c54: boolean}): void;
+  m(x: {a55: number, b55: string, c55: boolean}): void;
+  m(x: {a56: number, b56: string, c56: boolean}): void;
+  m(x: {a57: number, b57: string, c57: boolean}): void;
+  m(x: {a58: number, b58: string, c58: boolean}): void;
+  m(x: {a59: number, b59: string, c59: boolean}): void;
+  m(x: {a60: number, b60: string, c60: boolean}): void;
+};
+o as empty; // error
