@@ -2672,12 +2672,12 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof DefaultedStringEnum) => IteratorObject<DefaultedStringEnum, BuiltinIteratorReturn, unknown>",
+  "detail":"(this: typeof DefaultedStringEnum) => IteratorObject<DefaultedStringEnum, void, unknown>",
   "insertTextFormat":1,
   "kind":3,
   "label":"members",
   "labelDetails":{
-    "detail":": (this: typeof DefaultedStringEnum) => IteratorObject<DefaultedStringEnum, Buil..."
+    "detail":": (this: typeof DefaultedStringEnum) => IteratorObject<DefaultedStringEnum, void..."
   },
   "sortText":"00000000000000000001",
   "textEdit":{
@@ -2859,7 +2859,7 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof InitializedStringEnum) => IteratorObject<InitializedStringEnum, BuiltinIteratorReturn, unknown>",
+  "detail":"(this: typeof InitializedStringEnum) => IteratorObject<InitializedStringEnum, void, unknown>",
   "insertTextFormat":1,
   "kind":3,
   "label":"members",
@@ -3042,12 +3042,12 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof NumberEnum) => IteratorObject<NumberEnum, BuiltinIteratorReturn, unknown>",
+  "detail":"(this: typeof NumberEnum) => IteratorObject<NumberEnum, void, unknown>",
   "insertTextFormat":1,
   "kind":3,
   "label":"members",
   "labelDetails":{
-    "detail":": (this: typeof NumberEnum) => IteratorObject<NumberEnum, BuiltinIteratorReturn,..."
+    "detail":": (this: typeof NumberEnum) => IteratorObject<NumberEnum, void, unknown>"
   },
   "sortText":"00000000000000000001",
   "textEdit":{
@@ -3227,12 +3227,12 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof BooleanEnum) => IteratorObject<BooleanEnum, BuiltinIteratorReturn, unknown>",
+  "detail":"(this: typeof BooleanEnum) => IteratorObject<BooleanEnum, void, unknown>",
   "insertTextFormat":1,
   "kind":3,
   "label":"members",
   "labelDetails":{
-    "detail":": (this: typeof BooleanEnum) => IteratorObject<BooleanEnum, BuiltinIteratorRetur..."
+    "detail":": (this: typeof BooleanEnum) => IteratorObject<BooleanEnum, void, unknown>"
   },
   "sortText":"00000000000000000001",
   "textEdit":{
@@ -3410,12 +3410,12 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof SymbolEnum) => IteratorObject<SymbolEnum, BuiltinIteratorReturn, unknown>",
+  "detail":"(this: typeof SymbolEnum) => IteratorObject<SymbolEnum, void, unknown>",
   "insertTextFormat":1,
   "kind":3,
   "label":"members",
   "labelDetails":{
-    "detail":": (this: typeof SymbolEnum) => IteratorObject<SymbolEnum, BuiltinIteratorReturn,..."
+    "detail":": (this: typeof SymbolEnum) => IteratorObject<SymbolEnum, void, unknown>"
   },
   "sortText":"00000000000000000001",
   "textEdit":{

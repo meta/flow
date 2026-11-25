@@ -2381,6 +2381,13 @@ fn convert_inner<'a>(
                             Ok(reconstruct_ast(empty_t::at(loc.dupe()), None, None))
                         })?
                     }
+                    // TypeScript's intrinsic: `undefined` under `strictBuiltinIteratorReturn`,
+                    // which `strict` enables.
+                    "BuiltinIteratorReturn" => {
+                        check_type_arg_arity(cx, loc.dupe(), t, inner.targs.as_ref(), 0, |_| {
+                            Ok(reconstruct_ast(void::at(loc.dupe()), None, None))
+                        })?
+                    }
                     // NoInfer intrinsic that makes every GenericT inside it no_infer
                     "NoInfer" => {
                         check_type_arg_arity(cx, loc.dupe(), t, inner.targs.as_ref(), 1, |cx| {

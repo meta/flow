@@ -10135,6 +10135,12 @@ fn maybe_special_unqualified_generic<'arena, 'ast>(
             }
             _ => Parsed::Err(loc, Errno::CheckError),
         },
+        // TypeScript's intrinsic: `undefined` under `strictBuiltinIteratorReturn`, which `strict`
+        // enables.
+        "BuiltinIteratorReturn" => match targs {
+            None => Parsed::Annot(Box::new(ParsedAnnot::Undefined(Box::new(loc)))),
+            Some(_) => Parsed::Err(loc, Errno::CheckError),
+        },
         "ExactObjectType" => match targs {
             None => Parsed::Annot(Box::new(ParsedAnnot::ExactObjectType(Box::new((
                 loc,

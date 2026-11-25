@@ -90,6 +90,42 @@ References:
                                                                      ^^^^^^ [7]
 
 
+Error -------------------------------------------------------------------------------------------------- defaults.js:5:1
+
+Cannot cast `iteratorObject.next().value` to `number` because `unknown` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   defaults.js:5:1
+    5| iteratorObject.next().value as number; // error: `TReturn` defaults to `unknown`
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   <BUILTINS>/lib.es2015.iterable.js:63:39
+   63| interface IteratorObject<T, TReturn = unknown, TNext = unknown> extends Iterator<T, TReturn, TNext> {
+                                             ^^^^^^^ [1]
+   defaults.js:5:32
+    5| iteratorObject.next().value as number; // error: `TReturn` defaults to `unknown`
+                                      ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------------- defaults.js:7:1
+
+Cannot cast `[...].values().next().value` to `number` because `void` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   defaults.js:7:1
+    7| [1].values().next().value as number; // error: built-in iterators return `undefined` when done
+       ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   <BUILTINS>/lib.es2015.iterable.js:73:54
+   73| interface ArrayIterator<T> extends IteratorObject<T, BuiltinIteratorReturn, unknown> {
+                                                            ^^^^^^^^^^^^^^^^^^^^^ [1]
+   defaults.js:7:30
+    7| [1].values().next().value as number; // error: built-in iterators return `undefined` when done
+                                    ^^^^^^ [2]
+
+
 Error ----------------------------------------------------------------------------------------- iterator_result.js:11:16
 
 Cannot return object literal because: [incompatible-type]
@@ -268,4 +304,4 @@ References:
 
 
 
-Found 9 errors
+Found 11 errors
