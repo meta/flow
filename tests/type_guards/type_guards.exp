@@ -1372,7 +1372,7 @@ Error --------------------------------------------------------------------------
 Cannot cast `u2` to `4` because `number` [1] is incompatible with `4` [2]. [incompatible-type]
 
    inferred.js:80:3
-   80|   u2 as 4; // TODO(T225771563) okay
+   80|   u2 as 4; // error number ~> 4: U is generalized, as in TypeScript
          ^^
 
 References:
@@ -1380,7 +1380,7 @@ References:
    77|   const [t2, u2] = takesPolyGuard((value: unknown) => value === 4);
                                                  ^^^^^^^ [1]
    inferred.js:80:9
-   80|   u2 as 4; // TODO(T225771563) okay
+   80|   u2 as 4; // error number ~> 4: U is generalized, as in TypeScript
                ^ [2]
 
 
@@ -1406,7 +1406,7 @@ Error --------------------------------------------------------------------------
 Cannot cast `u1` to `4` because `number` [1] is incompatible with `4` [2]. [incompatible-type]
 
    inferred.js:93:3
-   93|   u1 as 4; // TODO(T225771563) okay
+   93|   u1 as 4; // error number ~> 4: U is generalized, as in TypeScript
          ^^
 
 References:
@@ -1414,7 +1414,7 @@ References:
    91|   const [t1, u1] = takesOverloadedPolyGuard(value, x => x === 4); // picks the first overload
                                                    ^^^^^ [1]
    inferred.js:93:9
-   93|   u1 as 4; // TODO(T225771563) okay
+   93|   u1 as 4; // error number ~> 4: U is generalized, as in TypeScript
                ^ [2]
 
 
