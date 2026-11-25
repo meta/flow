@@ -982,14 +982,22 @@ impl<'e> Walker<'e> {
     ) {
         if flow_js_utils::tvar_visitors::has_placeholders(cx, t) {
             // As in the flow-based solve, the members of a union are bounds one by one, so the
-            // members that are placeholders drop out.
-            if let TypeInner::UnionT(r, rep) = self.resolve(cx, t).deref() {
+            // members that are placeholders drop out. A maybe type (a union with `null` and
+            // `void` members, as `?T` is) whose other members all drop out drops out whole, as
+            // they would.
+            let resolved = self.resolve(cx, t);
+            if let TypeInner::UnionT(r, rep) = resolved.deref() {
                 let members: Vec<Type> = rep
                     .members_iter()
                     .filter(|m| !flow_js_utils::tvar_visitors::has_placeholders(cx, m))
                     .duped()
                     .collect();
-                if !members.is_empty() && members.len() < rep.members_iter().count() {
+                let maybe_placeholder = type_util::is_maybe_union(&resolved)
+                    && members.iter().all(|m| is_nullish(m, true));
+                if !members.is_empty()
+                    && members.len() < rep.members_iter().count()
+                    && !maybe_placeholder
+                {
                     let t = type_util::union_of_ts(r.dupe(), members, None);
                     self.add_lower_at(cx, name, &t, priority);
                 }
