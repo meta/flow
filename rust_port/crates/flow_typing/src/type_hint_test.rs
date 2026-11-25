@@ -798,6 +798,51 @@ mod tests {
         );
     }
 
+    #[test]
+    fn call_spread_decomp_on_rest_parameter() {
+        mk_eval_hint_test(
+            "ReadonlyArray<number>",
+            "(...Array<number>) => number",
+            vec![DecompCallSpread(0)],
+        );
+    }
+
+    #[test]
+    fn call_spread_decomp_after_normal_parameters() {
+        mk_eval_hint_test(
+            "ReadonlyArray<string>",
+            "(string, number, ...Array<string>) => number",
+            vec![DecompCallSpread(2)],
+        );
+    }
+
+    #[test]
+    fn call_spread_decomp_overlap_with_normal_parameters() {
+        mk_eval_hint_test(
+            "ReadonlyArray<number | string>",
+            "(string, number, ...Array<string>) => number",
+            vec![DecompCallSpread(1)],
+        );
+    }
+
+    #[test]
+    fn call_spread_decomp_without_rest_parameter() {
+        mk_eval_hint_test(
+            "ReadonlyArray<number | string>",
+            "(string, number) => number",
+            vec![DecompCallSpread(0)],
+        );
+    }
+
+    #[test]
+    fn call_spread_decomp_past_all_parameters() {
+        mk_eval_hint_test(
+            "DecompositionError",
+            "(string, number) => number",
+            vec![DecompCallSpread(2)],
+        );
+    }
+
     // When we try to extract the hint for the annotated parameter in
     // ```
     // declare function f<T>(T): void;

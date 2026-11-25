@@ -157,7 +157,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- file.js:98:14
 
-Cannot call `f1` because in type argument `T`: `Readonly<[number]>` [1] is incompatible with `Array<unknown>` [2].
+Cannot call `f1` because in type argument `T`: `Readonly<[1]>` [1] is incompatible with `Array<unknown>` [2].
 [incompatible-type]
 
    file.js:98:14
@@ -173,140 +173,110 @@ References:
                                              ^^^^^^^^^^^^^^ [2]
 
 
-Error --------------------------------------------------------------------------------------------------- file.js:104:21
-
-Cannot call `f3` because in type argument `T` > array element: `number` [1] is incompatible with `1 | "a"` [2].
-[incompatible-type]
-
-   file.js:104:21
-   104|   const x3 = f3(...[1, 'a']); // TODO okay - this still requires proper hint
-                            ^ [1]
-
-References:
-   file.js:103:53
-   103|   declare function f3<const T extends ReadonlyArray<1|'a'>>(...args: T): T;
-                                                            ^^^^^ [2]
-
-
-Error --------------------------------------------------------------------------------------------------- file.js:104:24
-
-Cannot call `f3` because in type argument `T` > array element: `string` [1] is incompatible with `1 | "a"` [2].
-[incompatible-type]
-
-   file.js:104:24
-   104|   const x3 = f3(...[1, 'a']); // TODO okay - this still requires proper hint
-                               ^^^ [1]
-
-References:
-   file.js:103:53
-   103|   declare function f3<const T extends ReadonlyArray<1|'a'>>(...args: T): T;
-                                                            ^^^^^ [2]
-
-
-Error ---------------------------------------------------------------------------------------------------- file.js:122:3
+Error ---------------------------------------------------------------------------------------------------- file.js:121:3
 
 Cannot cast `polyFn` to `PolyFnWithConst` because type parameters `X` [1] and `X` [2] do not have matching
 const-modifier values. [incompatible-type-param-const]
 
-   file.js:122:3
-   122|   polyFn as PolyFnWithConst; // error const incompatible
+   file.js:121:3
+   121|   polyFn as PolyFnWithConst; // error const incompatible
           ^^^^^^
 
 References:
-   file.js:115:18
-   115|   type PolyFn = <X>(x: X) => X;
+   file.js:114:18
+   114|   type PolyFn = <X>(x: X) => X;
                          ^ [1]
-   file.js:116:33
-   116|   type PolyFnWithConst = <const X>(x: X) => X;
+   file.js:115:33
+   115|   type PolyFnWithConst = <const X>(x: X) => X;
                                         ^ [2]
 
 
-Error ---------------------------------------------------------------------------------------------------- file.js:123:3
+Error ---------------------------------------------------------------------------------------------------- file.js:122:3
 
 Cannot cast `polyFnWithConst` to `PolyFn` because type parameters `X` [1] and `X` [2] do not have matching
 const-modifier values. [incompatible-type-param-const]
 
-   file.js:123:3
-   123|   polyFnWithConst as PolyFn; // error const incompatible
+   file.js:122:3
+   122|   polyFnWithConst as PolyFn; // error const incompatible
           ^^^^^^^^^^^^^^^
 
 References:
-   file.js:116:33
-   116|   type PolyFnWithConst = <const X>(x: X) => X;
+   file.js:115:33
+   115|   type PolyFnWithConst = <const X>(x: X) => X;
                                         ^ [1]
-   file.js:115:18
-   115|   type PolyFn = <X>(x: X) => X;
+   file.js:114:18
+   114|   type PolyFn = <X>(x: X) => X;
                          ^ [2]
 
 
-Error --------------------------------------------------------------------------------------------------- file.js:128:22
+Error --------------------------------------------------------------------------------------------------- file.js:127:22
 
 Type parameter `T` [1] cannot be declared as 'const'. 'const' modifier can only appear on a function or method type
 parameter. [incompatible-type-param-const]
 
-   128|   interface I1<const T> { x: T }  // error, modifier cannot appear here
+   127|   interface I1<const T> { x: T }  // error, modifier cannot appear here
                              ^ [1]
 
 
-Error --------------------------------------------------------------------------------------------------- file.js:129:16
+Error --------------------------------------------------------------------------------------------------- file.js:128:16
 
 Type parameter `X` [1] cannot be declared as 'const'. 'const' modifier can only appear on a function or method type
 parameter. [incompatible-type-param-const]
 
-   129|   type T<const X> = X; // error, modifier cannot appear here
+   128|   type T<const X> = X; // error, modifier cannot appear here
                        ^ [1]
 
 
-Error ---------------------------------------------------------------------------------------------------- file.js:140:3
+Error ---------------------------------------------------------------------------------------------------- file.js:139:3
 
 Cannot cast `x.size` to `2` because `1` [1] is incompatible with `2` [2]. [incompatible-type]
 
-   file.js:140:3
-   140|   x.size as 2; // error 1 ~> 2
+   file.js:139:3
+   139|   x.size as 2; // error 1 ~> 2
           ^^^^^^
 
 References:
-   file.js:138:19
-   138|   const x = new A(1);
+   file.js:137:19
+   137|   const x = new A(1);
                           ^ [1]
-   file.js:140:13
-   140|   x.size as 2; // error 1 ~> 2
+   file.js:139:13
+   139|   x.size as 2; // error 1 ~> 2
                     ^ [2]
 
 
-Error ---------------------------------------------------------------------------------------------------- file.js:149:3
+Error ---------------------------------------------------------------------------------------------------- file.js:148:3
 
 Cannot cast `y1.size` to `1` because `number` [1] is incompatible with `1` [2]. [incompatible-type]
 
-   file.js:149:3
-   149|   y1.size as 1; // error number ~> 1
+   file.js:148:3
+   148|   y1.size as 1; // error number ~> 1
           ^^^^^^^
 
 References:
-   file.js:148:21
-   148|   const y1 = new B1(1);
+   file.js:147:21
+   147|   const y1 = new B1(1);
                             ^ [1]
-   file.js:149:14
-   149|   y1.size as 1; // error number ~> 1
+   file.js:148:14
+   148|   y1.size as 1; // error number ~> 1
                      ^ [2]
 
 
-Error ---------------------------------------------------------------------------------------------------- file.js:160:3
+Error ---------------------------------------------------------------------------------------------------- file.js:159:3
 
 Cannot cast `y2.size` to `2` because `1` [1] is incompatible with `2` [2]. [incompatible-type]
 
-   file.js:160:3
-   160|   y2.size as 2; // error 1 ~> 2
+   file.js:159:3
+   159|   y2.size as 2; // error 1 ~> 2
           ^^^^^^^
 
 References:
-   file.js:158:21
-   158|   const y2 = new B2(1);
+   file.js:157:21
+   157|   const y2 = new B2(1);
                             ^ [1]
-   file.js:160:14
-   160|   y2.size as 2; // error 1 ~> 2
+   file.js:159:14
+   159|   y2.size as 2; // error 1 ~> 2
                      ^ [2]
 
 
 
-Found 19 errors
+Found 17 errors

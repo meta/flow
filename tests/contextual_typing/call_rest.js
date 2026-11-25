@@ -2,12 +2,12 @@ function test0() {
     declare function outer(...x: Array<(x: number) => void>): void
     declare function inner<A>(iter: Array<A>): Array<A>;
 
-    outer(...[(x) => { // TODO okay no annotation required
-        x as string; // TODO error number ~> string
+    outer(...[(x) => { // okay no annotation required
+        x as string; // error number ~> string
     }]);
 
-    outer(...inner([(x) => { // TODO okay no annotation required
-        x as string; // TODO error number ~> string
+    outer(...inner([(x) => { // okay no annotation required
+        x as string; // error number ~> string
     }]));
 }
 

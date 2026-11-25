@@ -231,7 +231,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ optional.js:10:11
 
-Cannot call `qux` because in index `0`: `number` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot call `qux` because in index `0`: `42` [1] is incompatible with `string` [2]. [incompatible-type]
 
    optional.js:10:11
    10| qux(0,...[42, ""]); // Error, number ~> string

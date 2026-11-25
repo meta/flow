@@ -80,20 +80,38 @@ References:
                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
-Error ------------------------------------------------------------------------------------------------ call_rest.js:5:16
+Error ------------------------------------------------------------------------------------------------- call_rest.js:6:9
 
-Missing an annotation on this parameter. [missing-local-annot]
+Cannot cast `x` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
 
-   5|     outer(...[(x) => { // TODO okay no annotation required
-                     ^
+   call_rest.js:6:9
+   6|         x as string; // error number ~> string
+              ^
+
+References:
+   call_rest.js:2:44
+   2|     declare function outer(...x: Array<(x: number) => void>): void
+                                                 ^^^^^^ [1]
+   call_rest.js:6:14
+   6|         x as string; // error number ~> string
+                   ^^^^^^ [2]
 
 
-Error ------------------------------------------------------------------------------------------------ call_rest.js:9:22
+Error ------------------------------------------------------------------------------------------------ call_rest.js:10:9
 
-An annotation on this parameter is required because Flow cannot infer its type from local context. [missing-local-annot]
+Cannot cast `x` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
 
-   9|     outer(...inner([(x) => { // TODO okay no annotation required
-                           ^
+   call_rest.js:10:9
+   10|         x as string; // error number ~> string
+               ^
+
+References:
+   call_rest.js:2:44
+    2|     declare function outer(...x: Array<(x: number) => void>): void
+                                                  ^^^^^^ [1]
+   call_rest.js:10:14
+   10|         x as string; // error number ~> string
+                    ^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------ call_rest.js:29:9
@@ -111,6 +129,57 @@ References:
    call_rest.js:29:14
    29|         x as number; // error string ~> number
                     ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- call_spread.js:11:21
+
+Cannot cast `x` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   call_spread.js:11:21
+   11|   f(...[1, (x) => { x as string; }]); // error number ~> string
+                           ^
+
+References:
+   call_spread.js:9:45
+    9|   declare function f(value: number, cb: (x: number) => void): void;
+                                                   ^^^^^^ [1]
+   call_spread.js:11:26
+   11|   f(...[1, (x) => { x as string; }]); // error number ~> string
+                                ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- call_spread.js:12:21
+
+Cannot cast `x` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   call_spread.js:12:21
+   12|   f(1, ...[(x) => { x as string; }]); // error number ~> string
+                           ^
+
+References:
+   call_spread.js:9:45
+    9|   declare function f(value: number, cb: (x: number) => void): void;
+                                                   ^^^^^^ [1]
+   call_spread.js:12:26
+   12|   f(1, ...[(x) => { x as string; }]); // error number ~> string
+                                ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------- call_spread.js:34:22
+
+Cannot cast `x` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   call_spread.js:34:22
+   34|   new C(...[(x) => { x as string; }]); // error number ~> string
+                            ^
+
+References:
+   call_spread.js:31:35
+   31|     constructor(...fns: Array<(x: number) => void>): void;
+                                         ^^^^^^ [1]
+   call_spread.js:34:27
+   34|   new C(...[(x) => { x as string; }]); // error number ~> string
+                                 ^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------- destructuring_assignment.js:7:11
@@ -1316,4 +1385,4 @@ References:
 
 
 
-Found 92 errors
+Found 95 errors

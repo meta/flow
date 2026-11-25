@@ -138,6 +138,7 @@ impl<CX: ContextFamily, T, TArgs, Args, PropsAndChildren>
                     string_of_predicate_kind(pred)
                 )
             }
+            DecompCallSpread(i) => format!("Decomp_CallSpread ({})", i),
             DecompFuncReturn => "Decomp_FuncReturn".to_string(),
             CompImmediateFuncCall => "Comp_ImmediateFuncCall".to_string(),
             CompMaybeT => "Comp_MaybeT".to_string(),
@@ -204,6 +205,7 @@ impl<T, TArgs, Args, PropsAndChildren> HintDecomposition<(), T, TArgs, Args, Pro
             DecompCallSuper => DecompCallSuper,
             DecompFuncParam(i, s, p) => DecompFuncParam(i.clone(), *s, p.dupe()),
             DecompFuncRest(i, p) => DecompFuncRest(i.clone(), p.dupe()),
+            DecompCallSpread(i) => DecompCallSpread(*i),
             DecompFuncReturn => DecompFuncReturn,
             CompImmediateFuncCall => CompImmediateFuncCall,
             CompMaybeT => CompMaybeT,
@@ -363,6 +365,8 @@ pub enum HintDecompositionInner<CX: ContextFamily, T, TArgs, Args, PropsAndChild
     DecompFuncParam(Vec<Option<FlowSmolStr>>, i32, Option<PredicateKind>),
     /// Type of function becomes hint on rest argument
     DecompFuncRest(Vec<Option<FlowSmolStr>>, Option<PredicateKind>),
+    /// Type of function becomes hint on a spread argument that follows i arguments
+    DecompCallSpread(i32),
     /// Type of function becomes hint on return
     DecompFuncReturn,
     /// Hint on call `f()` becomes hint on `f`. This is only meant to be used for the

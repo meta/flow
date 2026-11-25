@@ -101,8 +101,7 @@ function test_rest_params() {
   const x2 = f2(...[1, 'a']); // okay inferred const array is readonly which is compatible with ReadonlyArray<mixed>
 
   declare function f3<const T extends ReadonlyArray<1|'a'>>(...args: T): T;
-  const x3 = f3(...[1, 'a']); // TODO okay - this still requires proper hint
-                              // propagation support in rest params (D72695560)
+  const x3 = f3(...[1, 'a']); // okay
 }
 
 function test_inferred_union() {

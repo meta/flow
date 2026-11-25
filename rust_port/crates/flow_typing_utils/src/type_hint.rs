@@ -90,6 +90,7 @@ use flow_typing_type::type_::SpeculationHintState;
 use flow_typing_type::type_::Targ;
 use flow_typing_type::type_::ThisInstanceTData;
 use flow_typing_type::type_::ThisStatus;
+use flow_typing_type::type_::TupleView;
 use flow_typing_type::type_::Tvar;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeAppTData;
@@ -106,6 +107,7 @@ use flow_typing_type::type_::empty_tuple_view;
 use flow_typing_type::type_::hint_unavailable;
 use flow_typing_type::type_::inter_rep;
 use flow_typing_type::type_::mixed_t;
+use flow_typing_type::type_::object;
 use flow_typing_type::type_::placeholder_t;
 use flow_typing_type::type_::poly;
 use flow_typing_type::type_::react;
@@ -1127,6 +1129,22 @@ fn functions_taking_param<'cx>(
     ))
 }
 
+fn is_empty_tuple(t: &Type) -> bool {
+    if let TypeInner::DefT(_, def) = t.deref()
+        && let DefTInner::ArrT(arr) = def.deref()
+        && let ArrType::ArrayAT(data) = arr.deref()
+        && let Some(TupleView {
+            elements,
+            rest: None,
+            ..
+        }) = &data.tuple_view
+    {
+        elements.is_empty()
+    } else {
+        false
+    }
+}
+
 fn type_of_hint_decomposition<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
@@ -1312,6 +1330,37 @@ fn type_of_hint_decomposition<'cx>(
                 },
             )
         }
+    };
+
+    // The rest param of `(_, ..., _, ...rest) => _`, with one placeholder per
+    // element of `xs`, collects the params of `t` that follow them.
+    let func_rest_t = |cx: &mut Context<'cx>,
+                       t: &Type,
+                       xs: Vec<Option<FlowSmolStr>>,
+                       type_guard: Option<PredicateKind>|
+     -> Result<Type, FlowJsException> {
+        let t = t.dupe();
+        let reason2 = reason.dupe();
+        flow_typing_tvar::mk_where(cx, reason.dupe(), move |cx, rest_t| {
+            let params: Vec<FunParam> = xs
+                .iter()
+                .map(|x| FunParam {
+                    name: x.as_ref().map(|s| s.dupe()),
+                    t: unsoundness::unresolved_any(reason2.dupe()),
+                    optional: false,
+                })
+                .collect();
+            let fun_type = make_fun_t(
+                &reason2,
+                cx,
+                params,
+                Some(FunRestParam(None, ALoc::default(), rest_t.dupe())),
+                unsoundness::unresolved_any(reason2.dupe()),
+                &type_guard,
+            );
+            speculation_flow::resolved_upper_flow_t_unsafe(cx, env, &reason2, (&fun_type, &t))?;
+            Ok::<(), FlowJsException>(())
+        })
     };
 
     in_sandbox_cx(cx, t, |cx, t| {
@@ -1594,35 +1643,37 @@ fn type_of_hint_decomposition<'cx>(
                 )?)
             }
             ConcrHintDecompositionInner::DecompFuncRest(xs, type_guard) => {
-                let t = t.dupe();
+                Ok(func_rest_t(cx, &t, xs.clone(), type_guard.clone())?)
+            }
+            ConcrHintDecompositionInner::DecompCallSpread(i) => {
+                // A spread only reads its elements into the params it fills, and
+                // the call does not check elements past the last param.
+                let rest_t = func_rest_t(cx, &t, vec![None; *i as usize], None)?;
+                if FlowJs::possible_concrete_types_for_inspection_with_env(
+                    cx, env, reason, &rest_t,
+                )?
+                .iter()
+                .all(is_empty_tuple)
+                {
+                    return Err(UnconstrainedTvarException.into());
+                }
                 let reason2 = reason.dupe();
-                let type_guard = type_guard.clone();
-                let xs = xs.clone();
-                Ok(flow_typing_tvar::mk_where(
+                Ok(flow_typing_tvar::mk_no_wrap_where(
                     cx,
                     reason.dupe(),
-                    move |cx, rest_t| {
-                        let params: Vec<FunParam> = xs
-                            .iter()
-                            .map(|x| FunParam {
-                                name: x.as_ref().map(|s| s.dupe()),
-                                t: unsoundness::unresolved_any(reason2.dupe()),
-                                optional: false,
-                            })
-                            .collect();
-                        let fun_type = make_fun_t(
-                            &reason2,
-                            cx,
-                            params,
-                            Some(FunRestParam(None, ALoc::default(), rest_t.dupe())),
-                            unsoundness::unresolved_any(reason2.dupe()),
-                            &type_guard,
-                        );
-                        speculation_flow::resolved_upper_flow_t_unsafe(
+                    move |cx, r, id| {
+                        let use_t = UseT::new(UseTInner::ObjKitT(
+                            unknown_use(),
+                            reason2.dupe(),
+                            Box::new(object::ResolveTool::Resolve(object::Resolve::Next)),
+                            Box::new(object::Tool::ReadOnly),
+                            Type::new(TypeInner::OpenT(Tvar::new(r.dupe(), id as u32))),
+                        ));
+                        speculation_flow::resolved_lower_flow_unsafe(
                             cx,
                             env,
                             &reason2,
-                            (&fun_type, &t),
+                            (&rest_t, &use_t),
                         )?;
                         Ok::<(), FlowJsException>(())
                     },

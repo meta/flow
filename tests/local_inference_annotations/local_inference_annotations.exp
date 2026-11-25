@@ -71,7 +71,7 @@ Missing an annotation on this parameter. [missing-local-annot]
 
 Error ----------------------------------------------------------------------------------------------------- call.js:12:9
 
-Missing an annotation on this parameter. [missing-local-annot]
+An annotation on this parameter is required because Flow cannot infer its type from local context. [missing-local-annot]
 
    12| }, ...((x) => 3));
                ^

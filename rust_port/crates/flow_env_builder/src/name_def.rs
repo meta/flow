@@ -3650,6 +3650,28 @@ impl<'a> DefFinder<'a> {
 
         let param_str_list: Vec<Option<FlowSmolStr>> = (0..arguments.len()).map(|_| None).collect();
 
+        let spread_index = arguments
+            .iter()
+            .position(|arg| matches!(arg, ast::expression::ExpressionOrSpread::Spread(_)))
+            .map(|i| i as i32);
+        let instantiated_callee_hints = |i: usize| {
+            let instantiate_decomp =
+                HintDecomposition::new(HintDecompositionInner::InstantiateCallee(
+                    flow_common::hint::FunCallImplicitInstantiationHints {
+                        reason: call_reason.clone(),
+                        return_hints: std::rc::Rc::new(flow_lazy::Lazy::new_forced(
+                            return_hints.clone(),
+                        )),
+                        targs: std::rc::Rc::new(flow_lazy::Lazy::new_forced(targs.clone())),
+                        arg_list: std::rc::Rc::new(flow_lazy::Lazy::new_forced(arg_list.clone())),
+                        arg_index: i as i32,
+                        arg_count: arguments.len() as i32,
+                        spread_index,
+                    },
+                ));
+            Hint::decompose(instantiate_decomp, call_arguments_hints.clone())
+        };
+
         for (i, arg) in arguments.iter().enumerate() {
             match arg {
                 ast::expression::ExpressionOrSpread::Expression(expr) => {
@@ -3661,52 +3683,31 @@ impl<'a> DefFinder<'a> {
                             &expr_tuple.1,
                         )?;
                     } else {
-                        let arg_list_clone = arg_list.clone();
-                        let targs_clone = targs.clone();
-                        let return_hints_clone = return_hints.clone();
-                        let hints = {
-                            let instantiate_decomp =
-                                HintDecomposition::new(HintDecompositionInner::InstantiateCallee(
-                                    flow_common::hint::FunCallImplicitInstantiationHints {
-                                        reason: call_reason.clone(),
-                                        return_hints: std::rc::Rc::new(
-                                            flow_lazy::Lazy::new_forced(return_hints_clone),
-                                        ),
-                                        targs: std::rc::Rc::new(flow_lazy::Lazy::new_forced(
-                                            targs_clone,
-                                        )),
-                                        arg_list: std::rc::Rc::new(flow_lazy::Lazy::new_forced(
-                                            arg_list_clone,
-                                        )),
-                                        arg_index: i as i32,
-                                        arg_count: arguments.len() as i32,
-                                        spread_index: arguments
-                                            .iter()
-                                            .position(|arg| {
-                                                matches!(
-                                                    arg,
-                                                    ast::expression::ExpressionOrSpread::Spread(_)
-                                                )
-                                            })
-                                            .map(|i| i as i32),
-                                    },
-                                ));
-                            let hints =
-                                Hint::decompose(instantiate_decomp, call_arguments_hints.clone());
-                            let func_param_decomp =
-                                HintDecomposition::new(HintDecompositionInner::DecompFuncParam(
-                                    param_str_list.clone(),
-                                    i as i32,
-                                    None,
-                                ));
-                            Hint::decompose(func_param_decomp, hints)
-                        };
+                        let func_param_decomp =
+                            HintDecomposition::new(HintDecompositionInner::DecompFuncParam(
+                                param_str_list.clone(),
+                                i as i32,
+                                None,
+                            ));
+                        let hints =
+                            Hint::decompose(func_param_decomp, instantiated_callee_hints(i));
                         self.visit_expression(EnclosingContext::NoContext, &hints, &expr_tuple.1)?;
                     }
                 }
                 ast::expression::ExpressionOrSpread::Spread(spread) => {
+                    // A preceding spread has unknown arity, so it is not counted.
+                    let leading = arguments[..i]
+                        .iter()
+                        .filter(|arg| {
+                            matches!(arg, ast::expression::ExpressionOrSpread::Expression(_))
+                        })
+                        .count();
+                    let call_spread_decomp = HintDecomposition::new(
+                        HintDecompositionInner::DecompCallSpread(leading as i32),
+                    );
+                    let hints = Hint::decompose(call_spread_decomp, instantiated_callee_hints(i));
                     let spread_tuple = (spread.argument.loc().dupe(), spread.argument.clone());
-                    self.visit_expression(EnclosingContext::NoContext, &vec![], &spread_tuple.1)?;
+                    self.visit_expression(EnclosingContext::NoContext, &hints, &spread_tuple.1)?;
                 }
             }
         }
