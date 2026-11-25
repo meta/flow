@@ -7661,11 +7661,12 @@ fn solve_targs_in_snapshot<'cx>(
                         loop {
                             let inner = match t.deref() {
                                 TypeInner::MaybeT(_, inner) => inner.dupe(),
-                                // The value of an optional prop: its type or `undefined`.
+                                // The value of an optional prop or of a maybe type: its type,
+                                // `null` or `undefined`.
                                 TypeInner::UnionT(_, rep)
                                     if let [inner] = rep
                                         .members_iter()
-                                        .filter(|m| !is_nullish(m, false))
+                                        .filter(|m| !is_nullish(m, true))
                                         .collect::<Vec<_>>()
                                         .as_slice() =>
                                 {

@@ -31,3 +31,9 @@ component Section() renders Header {
 
 // The props still come first: `TChildren` is `Other`.
 <Page header={<Boundary><Other /></Boundary>} />; // error
+
+// The render type expected by a prop that may also be `null`, as by an optional prop.
+component PageOrNull(header: (renders Header) | null) {
+  return null;
+}
+<PageOrNull header={<></>} />; // was an error
