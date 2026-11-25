@@ -8192,21 +8192,86 @@ fn add_interface_properties<'a>(
                                                         .push(Property::NormalProperty(error_prop));
                                                 }
                                             }
-                                            _ => {
+                                            ast::types::object::PropertyValue::Get(
+                                                accessor_loc,
+                                                func,
+                                            )
+                                            | ast::types::object::PropertyValue::Set(
+                                                accessor_loc,
+                                                func,
+                                            ) => {
                                                 flow_js_utils::add_output_non_speculating(
                                                     cx,
-                                                    ErrorMessage::EUnsupportedSyntax(Box::new((
-                                                        ck.loc.dupe(),
-                                                        intermediate_error_types::UnsupportedSyntax::IllegalName,
-                                                    ))),
+                                                    ErrorMessage::EUnsafeGettersSetters(
+                                                        np.loc.dupe(),
+                                                    ),
                                                 );
-                                                let Ok(error_prop) =
-                                                    polymorphic_ast_mapper::object_property_type(
-                                                        &mut typed_ast_utils::ErrorMapper,
-                                                        np,
-                                                    );
-                                                prop_asts
-                                                    .push(Property::NormalProperty(error_prop));
+                                                let is_getter = matches!(
+                                                    np.value,
+                                                    ast::types::object::PropertyValue::Get(..)
+                                                );
+                                                let (fsig, func_ast) = mk_method_func_sig(
+                                                    cx,
+                                                    env,
+                                                    if is_getter {
+                                                        MethodKind::GetterKind
+                                                    } else {
+                                                        MethodKind::SetterKind
+                                                    },
+                                                    np.loc.dupe(),
+                                                    func,
+                                                )?;
+                                                let add_accessor = if is_getter {
+                                                    class_sig::add_getter
+                                                } else {
+                                                    class_sig::add_setter
+                                                };
+                                                add_accessor(
+                                                    np.static_,
+                                                    abstract_on,
+                                                    override_on_declare_class,
+                                                    name.dupe(),
+                                                    id_loc.dupe(),
+                                                    None,
+                                                    fsig,
+                                                    None,
+                                                    None,
+                                                    &mut s,
+                                                );
+                                                let value = if is_getter {
+                                                    ast::types::object::PropertyValue::Get(
+                                                        accessor_loc.dupe(),
+                                                        func_ast,
+                                                    )
+                                                } else {
+                                                    ast::types::object::PropertyValue::Set(
+                                                        accessor_loc.dupe(),
+                                                        func_ast,
+                                                    )
+                                                };
+                                                prop_asts.push(Property::NormalProperty(
+                                                    ast::types::object::NormalProperty {
+                                                        loc: np.loc.dupe(),
+                                                        key: Key::Computed(ast::ComputedKey {
+                                                            loc: ck.loc.dupe(),
+                                                            expression: typed_expr,
+                                                            comments: ck.comments.dupe(),
+                                                        }),
+                                                        value,
+                                                        optional: np.optional,
+                                                        static_: np.static_,
+                                                        proto: np.proto,
+                                                        method: np.method,
+                                                        abstract_: np.abstract_,
+                                                        override_: np.override_,
+                                                        variance: np.variance.clone(),
+                                                        ts_accessibility: np
+                                                            .ts_accessibility
+                                                            .clone(),
+                                                        init: None,
+                                                        comments: np.comments.dupe(),
+                                                    },
+                                                ));
                                             }
                                         }
                                     }

@@ -17523,9 +17523,9 @@ pub fn mk_class_sig<'a>(
                             let optional = dm.optional;
                             let ts_accessibility = dm.ts_accessibility.clone();
                             let comments = dm.comments.dupe();
-                            // A computed key names the method the way it names a method with
-                            // a body: a well-known symbol, or a plain method's key that resolves
-                            // to a single literal or `unique symbol`.
+                            // A computed key names the member the way it names a method with
+                            // a body: a well-known symbol, or a key that resolves to a single
+                            // literal or `unique symbol`.
                             let resolved_key: Option<(ALoc, Name, DeclareMethodKey)> = match &dm.key
                             {
                                 ast::expression::object::Key::Identifier(id) => Some((
@@ -17547,7 +17547,7 @@ pub fn mk_class_sig<'a>(
                                             &computed_key.expression,
                                         ) {
                                         Some(Name::new(FlowSmolStr::from(name)))
-                                    } else if kind == ast::class::MethodKind::Method {
+                                    } else {
                                         let (_, kt) = k_typed.loc();
                                         let key_reason = reason_of_t(kt).dupe();
                                         let concretized_keys =
@@ -17569,8 +17569,6 @@ pub fn mk_class_sig<'a>(
                                             }
                                             _ => None,
                                         }
-                                    } else {
-                                        None
                                     };
                                     match resolved {
                                         Some(name) => Some((

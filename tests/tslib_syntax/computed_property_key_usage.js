@@ -100,3 +100,49 @@ methodSigs.classMethod() as number; // ERROR
 methodSigs.optionalMethod as void | (() => number); // OK
 methodSigs[Symbol.asyncIterator] as void | (() => AsyncIterator<string>); // OK
 methodSigs[Symbol.dispose] as () => void; // OK
+
+// Computed accessors in declare class
+import {WithComputedAccessors} from './computed_property_key';
+declare const accessors: WithComputedAccessors;
+accessors.accessor as string; // OK
+accessors.accessor = 1; // ERROR
+accessors[Symbol.toStringTag] as number; // ERROR
+accessors[Symbol.toStringTag] = 'tag'; // ERROR: no setter
+
+// Computed accessors in classes that are never evaluated
+import {AmbientAccessors, AccessorNamespace} from './computed_property_key';
+declare const ambientAccessors: AmbientAccessors;
+ambientAccessors.accessor as string; // OK
+ambientAccessors.accessor = 1; // ERROR
+declare const namespaceAccessors: AccessorNamespace.Accessors;
+namespaceAccessors.accessor = 1; // ERROR
+
+// A computed half and a written-out half of one name make one accessor
+import {ComputedGetterWrittenSetter, WrittenGetterComputedSetter} from './computed_property_key';
+import type {ComputedSetterWrittenGetter} from './computed_property_key';
+declare const computedGetter: ComputedGetterWrittenSetter;
+computedGetter.mixed as string; // OK
+computedGetter.mixed = 1; // ERROR
+declare const computedSetter: WrittenGetterComputedSetter;
+computedSetter.mixed as string; // OK
+computedSetter.mixed = 1; // ERROR
+declare const interfaceSetter: ComputedSetterWrittenGetter;
+interfaceSetter.mixed as string; // OK
+interfaceSetter.mixed = 1; // ERROR
+
+// The same accessors declared in this file
+import {MIXED_KEY} from './computed_property_key';
+declare class LocalComputedGetter {
+  get [MIXED_KEY](): string;
+  set mixed(value: string);
+}
+declare const localComputedGetter: LocalComputedGetter;
+localComputedGetter.mixed as string; // OK
+localComputedGetter.mixed = 1; // ERROR
+interface LocalComputedSetter {
+  set [MIXED_KEY](value: string);
+  get mixed(): string;
+}
+declare const localComputedSetter: LocalComputedSetter;
+localComputedSetter.mixed as string; // OK
+localComputedSetter.mixed = 1; // ERROR

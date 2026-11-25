@@ -7105,6 +7105,20 @@ mod class_acc {
             }
         }
 
+        pub(super) fn add_computed_accessor(
+            &mut self,
+            static_: bool,
+            key: Parsed<'arena, 'ast>,
+            x: Accessor<LocNode<'arena>, Parsed<'arena, 'ast>>,
+        ) {
+            let prop = ObjValueProp::ObjValueAccess(Box::new(x));
+            if static_ {
+                self.computed_static.push((key, prop));
+            } else {
+                self.computed_proto.push((key, prop));
+            }
+        }
+
         pub(super) fn class_def(
             self,
             abstract_: bool,
@@ -7329,6 +7343,20 @@ mod declare_class_acc {
             }
         }
 
+        pub(super) fn add_computed_accessor(
+            &mut self,
+            static_: bool,
+            key: Parsed<'arena, 'ast>,
+            x: Accessor<LocNode<'arena>, Parsed<'arena, 'ast>>,
+        ) {
+            let prop = InterfaceProp::InterfaceAccess(Box::new(x));
+            if static_ {
+                self.computed_static.push((key, prop));
+            } else {
+                self.computed_proto.push((key, prop));
+            }
+        }
+
         pub(super) fn append_call(&mut self, static_: bool, t: Parsed<'arena, 'ast>) {
             if static_ {
                 self.scalls.push(t);
@@ -7488,6 +7516,15 @@ mod interface_acc {
                 key,
                 InterfaceProp::InterfaceMethod(Box::new(Vec1::new((id_loc, fn_loc, def)))),
             ));
+        }
+
+        pub(super) fn add_computed_accessor(
+            &mut self,
+            key: Parsed<'arena, 'ast>,
+            x: Accessor<LocNode<'arena>, Parsed<'arena, 'ast>>,
+        ) {
+            self.computed_props
+                .push((key, InterfaceProp::InterfaceAccess(Box::new(x))));
         }
 
         pub(super) fn append_call(&mut self, t: Parsed<'arena, 'ast>) {
@@ -9317,6 +9354,16 @@ fn interface_props<'arena, 'ast>(
                         polarity(p.variance.as_ref().map(|v| (v.loc.dupe(), v.clone())));
                     acc.add_computed_field(key_ref, ref_loc, polarity_val, t);
                 }
+                (_, O::PropertyValue::Get(_, fn_expr)) => {
+                    let (key_ref, ref_loc) = build_key(tbls, scopes);
+                    let getter = getter_type(opts, scope, scopes, tbls, xs, ref_loc, fn_expr);
+                    acc.add_computed_accessor(key_ref, getter);
+                }
+                (_, O::PropertyValue::Set(_, fn_expr)) => {
+                    let (key_ref, ref_loc) = build_key(tbls, scopes);
+                    let setter = setter_type(opts, scope, scopes, tbls, xs, ref_loc, fn_expr);
+                    acc.add_computed_accessor(key_ref, setter);
+                }
                 _ => {}
             }
         }
@@ -9698,7 +9745,16 @@ fn declare_class_props<'arena, 'ast>(
                         }
                     }
                 }
-                _ => {}
+                (_, O::PropertyValue::Get(_, fn_expr)) => {
+                    let (key_ref, ref_loc) = build_key(tbls, scopes);
+                    let getter = getter_type(opts, scope, scopes, tbls, xs, ref_loc, fn_expr);
+                    acc.add_computed_accessor(p.static_, key_ref, getter);
+                }
+                (_, O::PropertyValue::Set(_, fn_expr)) => {
+                    let (key_ref, ref_loc) = build_key(tbls, scopes);
+                    let setter = setter_type(opts, scope, scopes, tbls, xs, ref_loc, fn_expr);
+                    acc.add_computed_accessor(p.static_, key_ref, setter);
+                }
             }
         }
 
@@ -13050,6 +13106,26 @@ fn class_def<'arena: 'ast, 'ast>(
                             def,
                         );
                     }
+                }
+            }
+            // A computed getter or setter signature is recorded the same way.
+            class::BodyElement::DeclareMethod(class::DeclareMethod {
+                kind: kind @ (class::MethodKind::Get | class::MethodKind::Set),
+                key: ObjKey::Computed(ck),
+                annot: ast::types::Annotation { annotation, .. },
+                static_: is_static,
+                ts_accessibility,
+                ..
+            }) if !is_ts_private(ts_accessibility) => {
+                if let TypeInner::Function { inner: f, .. } = annotation.deref() {
+                    let ref_loc = tbls.push_loc(ck.expression.loc().dupe());
+                    let key_ref = expression_for_computed_key(scope, tbls, &ck.expression);
+                    let accessor = if *kind == class::MethodKind::Get {
+                        getter_type(opts, scope, scopes, tbls, &mut xs, ref_loc, f.as_ref())
+                    } else {
+                        setter_type(opts, scope, scopes, tbls, &mut xs, ref_loc, f.as_ref())
+                    };
+                    acc.add_computed_accessor(*is_static, key_ref, accessor);
                 }
             }
             class::BodyElement::DeclareMethod(_) => {

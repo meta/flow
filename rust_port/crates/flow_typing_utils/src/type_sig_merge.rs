@@ -2038,8 +2038,9 @@ fn record_prop_loc<K: Ord + Dupe, T>(
 /// every member in one source-order pass, where a field, a getter or a setter
 /// replaces whatever else held the name, so the member written last in source
 /// wins here too. Two methods are the exception: they are overloads of one
-/// member whichever order they come in. `prop_locs` holds the source location
-/// of the current occupant of each name.
+/// member whichever order they come in. So are a getter and a setter, which
+/// make one accessor. `prop_locs` holds the source location of the current
+/// occupant of each name.
 ///
 /// `sibling` is the other map a name can be taken from, and is given only where
 /// the checker takes it: an interface is structural, so one name holds one
@@ -2063,6 +2064,12 @@ fn insert_computed_class_prop<K: Ord + Dupe>(
     {
         let merged = merge_overloaded_property(e.get(), prop);
         e.insert(merged);
+        return;
+    }
+    if let std::collections::btree_map::Entry::Occupied(mut e) = target.entry(name.dupe())
+        && let Some(accessor) = merge_accessor_pair(e.get(), &prop)
+    {
+        e.insert(accessor);
         return;
     }
     if let Some(loc) = &loc
@@ -2105,7 +2112,46 @@ fn merge_overloaded_property(
                 optional: *optional,
             })
         }
-        _ => new_prop,
+        _ => merge_accessor_pair(existing_prop, &new_prop).unwrap_or(new_prop),
+    }
+}
+
+/// The accessor a getter and a setter of one name make together, whichever of
+/// them has a computed key and whichever comes first. `None` unless one is a
+/// getter and the other a setter.
+fn merge_accessor_pair(
+    existing_prop: &type_::Property,
+    new_prop: &type_::Property,
+) -> Option<type_::Property> {
+    match (&**existing_prop, &**new_prop) {
+        (
+            type_::PropertyInner::Get {
+                key_loc: get_key_loc,
+                type_: get_type,
+            },
+            type_::PropertyInner::Set {
+                key_loc: set_key_loc,
+                type_: set_type,
+            },
+        )
+        | (
+            type_::PropertyInner::Set {
+                key_loc: set_key_loc,
+                type_: set_type,
+            },
+            type_::PropertyInner::Get {
+                key_loc: get_key_loc,
+                type_: get_type,
+            },
+        ) => Some(type_::Property::new(type_::PropertyInner::GetSet(
+            Box::new(type_::GetSetData {
+                get_key_loc: get_key_loc.dupe(),
+                get_type: get_type.dupe(),
+                set_key_loc: set_key_loc.dupe(),
+                set_type: set_type.dupe(),
+            }),
+        ))),
+        _ => None,
     }
 }
 

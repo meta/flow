@@ -372,6 +372,146 @@ References:
                                    ^^^^^^ [2]
 
 
+Error ---------------------------------------------------------------------------- computed_property_key_usage.js:108:22
+
+Cannot assign `1` to `accessors.accessor` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   computed_property_key_usage.js:108:22
+   108| accessors.accessor = 1; // ERROR
+                             ^ [1]
+
+References:
+   computed_property_key.d.ts:108:29
+   108|   set [ACCESSOR_KEY](value: string);
+                                    ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------- computed_property_key_usage.js:109:1
+
+Cannot cast `accessors[Symbol.toStringTag]` to `number` because `string` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   computed_property_key_usage.js:109:1
+   109| accessors[Symbol.toStringTag] as number; // ERROR
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   computed_property_key.d.ts:109:31
+   109|   get [Symbol.toStringTag](): string;
+                                      ^^^^^^ [1]
+   computed_property_key_usage.js:109:34
+   109| accessors[Symbol.toStringTag] as number; // ERROR
+                                         ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------- computed_property_key_usage.js:110:11
+
+Cannot assign `'tag'` to `accessors[Symbol.toStringTag]` because property `[toStringTag]` is not writable.
+[cannot-write]
+
+   110| accessors[Symbol.toStringTag] = 'tag'; // ERROR: no setter
+                  ^^^^^^^^^^^^^^^^^^
+
+
+Error ---------------------------------------------------------------------------- computed_property_key_usage.js:116:29
+
+Cannot assign `1` to `ambientAccessors.accessor` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   computed_property_key_usage.js:116:29
+   116| ambientAccessors.accessor = 1; // ERROR
+                                    ^ [1]
+
+References:
+   computed_property_key.d.ts:116:29
+   116|   set [ACCESSOR_KEY](value: string);
+                                    ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------- computed_property_key_usage.js:118:31
+
+Cannot assign `1` to `namespaceAccessors.accessor` because `1` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   computed_property_key_usage.js:118:31
+   118| namespaceAccessors.accessor = 1; // ERROR
+                                      ^ [1]
+
+References:
+   computed_property_key.d.ts:121:31
+   121|     set [ACCESSOR_KEY](value: string);
+                                      ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------- computed_property_key_usage.js:125:24
+
+Cannot assign `1` to `computedGetter.mixed` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   computed_property_key_usage.js:125:24
+   125| computedGetter.mixed = 1; // ERROR
+                               ^ [1]
+
+References:
+   computed_property_key.d.ts:130:20
+   130|   set mixed(value: string);
+                           ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------- computed_property_key_usage.js:128:24
+
+Cannot assign `1` to `computedSetter.mixed` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   computed_property_key_usage.js:128:24
+   128| computedSetter.mixed = 1; // ERROR
+                               ^ [1]
+
+References:
+   computed_property_key.d.ts:134:26
+   134|   set [MIXED_KEY](value: string);
+                                 ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------- computed_property_key_usage.js:131:25
+
+Cannot assign `1` to `interfaceSetter.mixed` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   computed_property_key_usage.js:131:25
+   131| interfaceSetter.mixed = 1; // ERROR
+                                ^ [1]
+
+References:
+   computed_property_key.d.ts:137:26
+   137|   set [MIXED_KEY](value: string);
+                                 ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------- computed_property_key_usage.js:141:29
+
+Cannot assign `1` to `localComputedGetter.mixed` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   computed_property_key_usage.js:141:29
+   141| localComputedGetter.mixed = 1; // ERROR
+                                    ^ [1]
+
+References:
+   computed_property_key_usage.js:137:20
+   137|   set mixed(value: string);
+                           ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------- computed_property_key_usage.js:148:29
+
+Cannot assign `1` to `localComputedSetter.mixed` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   computed_property_key_usage.js:148:29
+   148| localComputedSetter.mixed = 1; // ERROR
+                                    ^ [1]
+
+References:
+   computed_property_key_usage.js:143:26
+   143|   set [MIXED_KEY](value: string);
+                                 ^^^^^^ [2]
+
+
 Error ------------------------------------------------------------------------ declare_class_method_no_return.d.ts:38:12
 
 Return type annotation is required for `declare class` methods. [unsupported-syntax]
@@ -2045,4 +2185,4 @@ References:
 
 
 
-Found 132 errors
+Found 142 errors

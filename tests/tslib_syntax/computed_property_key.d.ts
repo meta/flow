@@ -97,3 +97,43 @@ export class WithComputedMethodSignatures {
   [Symbol.asyncIterator]?(): AsyncIterator<string>;
   get [Symbol.dispose](): () => void;
 }
+
+// Computed accessors in declare class
+export declare const ACCESSOR_KEY: "accessor";
+export interface Tagged {
+  readonly [Symbol.toStringTag]: string;
+}
+export declare class WithComputedAccessors implements Tagged {
+  get [ACCESSOR_KEY](): string;
+  set [ACCESSOR_KEY](value: string);
+  get [Symbol.toStringTag](): string;
+}
+
+// Computed accessors in a class in a declaration file or a `declare namespace`,
+// which is never evaluated either
+export class AmbientAccessors {
+  get [ACCESSOR_KEY](): string;
+  set [ACCESSOR_KEY](value: string);
+}
+export declare namespace AccessorNamespace {
+  class Accessors {
+    get [ACCESSOR_KEY](): string;
+    set [ACCESSOR_KEY](value: string);
+  }
+}
+
+// A computed half and a written-out half of one name make one accessor, in
+// either order
+export declare const MIXED_KEY: "mixed";
+export declare class ComputedGetterWrittenSetter {
+  get [MIXED_KEY](): string;
+  set mixed(value: string);
+}
+export declare class WrittenGetterComputedSetter {
+  get mixed(): string;
+  set [MIXED_KEY](value: string);
+}
+export interface ComputedSetterWrittenGetter {
+  set [MIXED_KEY](value: string);
+  get mixed(): string;
+}
