@@ -485,8 +485,6 @@ pub(super) fn any_propagated<'cx>(
             }
             // AnnotTs are 0->1, so there's no need to propagate any inside them
             TypeInner::AnnotT(..) => Ok(true),
-            // used to filter maybe
-            TypeInner::MaybeT(..) => Ok(false),
             // Handled in __flow
             TypeInner::ThisTypeAppT(..) | TypeInner::TypeAppT(..) => Ok(false),
             // Ideally, any would pollute every member of the union. However, it should be safe to only
@@ -669,7 +667,6 @@ pub(super) fn any_propagated_use<'cx>(
         // Handled already in __flow
         TypeInner::ThisInstanceT(..)
         | TypeInner::EvalT { .. }
-        | TypeInner::MaybeT(..)
         | TypeInner::UnionT(..)
         | TypeInner::IntersectionT(..)
         | TypeInner::ThisTypeAppT(..) => Ok(false),

@@ -396,7 +396,6 @@ pub fn type_default<'cx, Acc, V: TypeVisitor<Acc> + ?Sized>(
                 .fold(acc, |acc, targ| visitor.type_(cx, pole_todo(), acc, targ))
         }
         TypeInner::AnyT { .. } => acc,
-        TypeInner::MaybeT(_, type_) => visitor.type_(cx, pole, acc, type_),
         TypeInner::IntersectionT(_, members) => members
             .members_iter()
             .fold(acc, |acc, t| visitor.type_(cx, pole, acc, t)),

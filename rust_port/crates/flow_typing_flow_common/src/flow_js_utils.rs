@@ -983,7 +983,6 @@ pub mod invalid_cyclic_type_validation {
                 | TypeInner::ImplicitInstantiationTvar(_)
                 | TypeInner::IntersectionT(_, _)
                 | TypeInner::UnionT(_, _)
-                | TypeInner::MaybeT(_, _)
                 | TypeInner::KeysT(_, _)
                 | TypeInner::AnnotT(_, _, _)
                 | TypeInner::NominalT { .. }
@@ -1126,7 +1125,6 @@ pub fn needs_resolution(t: &Type) -> bool {
 
     match t.deref() {
         TypeInner::UnionT(_, _) => true,
-        TypeInner::MaybeT(_, _) => true,
         TypeInner::AnnotT(_, _, _) => true,
         TypeInner::NominalT { nominal_type, .. } => {
             matches!(
@@ -1617,7 +1615,6 @@ pub fn error_message_kind_of_lower(
             DefTInner::VoidT | DefTInner::TsVoidT => Some(LowerKind::PossiblyVoid),
             _ => None,
         },
-        TypeInner::MaybeT(_, _) => Some(LowerKind::PossiblyNullOrVoid),
         _ => None,
     }
 }

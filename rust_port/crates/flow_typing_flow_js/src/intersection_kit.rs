@@ -190,13 +190,6 @@ fn make_recursive_eval<'cx>(
     left: Type,
     right: Type,
 ) -> Type {
-    if let (TypeInner::MaybeT(_, left), TypeInner::MaybeT(_, right)) = (left.deref(), right.deref())
-    {
-        return Type::new(TypeInner::MaybeT(
-            reason.dupe(),
-            make_recursive_eval(cx, reason, left.dupe(), right.dupe()),
-        ));
-    }
     if let Some(left) = type_util::non_maybe_members(&left)
         && let Some(right) = type_util::non_maybe_members(&right)
     {

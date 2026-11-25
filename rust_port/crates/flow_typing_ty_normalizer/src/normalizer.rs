@@ -1167,17 +1167,6 @@ fn undefined_ty(env: &Env<'_, '_>) -> ALocTy {
     })
 }
 
-fn maybe_t<'cx>(
-    cont: impl FnOnce(&mut Env<'_, 'cx>, &mut State, Option<IdKey>, &Type) -> Result<ALocTy, Error>,
-    env: &mut Env<'_, 'cx>,
-    state: &mut State,
-    id: Option<IdKey>,
-    t: &Type,
-) -> Result<ALocTy, Error> {
-    let t = cont(env, state, id, t)?;
-    Ok(ty::mk_union(false, vec![undefined_ty(env), Arc::new(ty::Ty::Null), t]).unwrap())
-}
-
 fn keys_t<'cx, I: NormalizerInput>(
     cont: fn(&mut Env<'_, 'cx>, &mut State, Option<IdKey>, &Type) -> Result<ALocTy, Error>,
     env: &mut Env<'_, 'cx>,
@@ -1769,7 +1758,6 @@ mod type_converter {
                 };
                 Ok(Arc::new(ty::Ty::Utility(utility)))
             }
-            TypeInner::MaybeT(_, inner_t) => maybe_t(type__::<I>, env, state, id, inner_t),
             TypeInner::UnionT(_, rep) => {
                 let types: Vec<Type> = rep.members_iter().map(|t| t.dupe()).collect();
                 let max_type_size = env.max_type_size();
@@ -5833,25 +5821,6 @@ mod expand_members {
                 r,
                 "CallableFunction",
             ),
-            TypeInner::MaybeT(_, inner_t) => maybe_t(
-                |env, state, id, t| {
-                    type__::<I>(
-                        env,
-                        state,
-                        id,
-                        inherited,
-                        source.clone(),
-                        imode,
-                        force_instance,
-                        allowed_prop_names,
-                        t,
-                    )
-                },
-                env,
-                state,
-                id,
-                inner_t,
-            ),
             TypeInner::IntersectionT(_, rep) => {
                 let types: Vec<Type> = rep.members_iter().map(|t| t.dupe()).collect();
                 let max_type_size = env.max_type_size();
@@ -6160,13 +6129,6 @@ mod expand_literal_union {
                 env.seen_eval_ids = old_seen_eval_ids;
                 result
             }
-            TypeInner::MaybeT(_, inner_t) => maybe_t(
-                |env, state, id, t| type__::<I>(env, state, id, t),
-                env,
-                state,
-                id,
-                inner_t,
-            ),
             TypeInner::KeysT(reason, inner_t) => {
                 keys_t::<I>(type__::<I>, env, state, true, reason, inner_t)
             }

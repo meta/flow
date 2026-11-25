@@ -1061,12 +1061,6 @@ fn __flow_impl<'cx>(
         (UnionT(_, urep), ConcretizeT(..)) => {
             flow_all_in_union(cx, env, trace, urep, u)?;
         }
-        (MaybeT(lreason, t), ConcretizeT(..)) => {
-            let lreason = lreason.dupe().replace_desc(VirtualReasonDesc::RNullOrVoid);
-            rec_flow(cx, env, trace, (&null::make(lreason.dupe()), u))?;
-            rec_flow(cx, env, trace, (&void::make(lreason), u))?;
-            rec_flow(cx, env, trace, (t, u))?;
-        }
         (AnnotT(r, t, use_desc), ConcretizeT(..)) => {
             // TODO: directly derive loc and desc from the reason of tvar
             let loc = r.loc().dupe();
@@ -1117,36 +1111,6 @@ fn __flow_impl<'cx>(
                 (
                     l_inner,
                     &UseT::new(UseT(use_op.dupe(), Type::new(UnionT(r, rep)))),
-                ),
-            )?;
-        }
-        (
-            MaybeT(r, u_inner),
-            ReposUseT(
-                deref!(ReposUseTData {
-                    reason,
-                    use_desc,
-                    use_op,
-                    type_: l_inner,
-                }),
-            ),
-        ) => {
-            let loc = reason.loc().dupe();
-            let annot_loc = reason.annot_loc().map(|l| l.dupe());
-            let r = r.dupe().reposition_and_opt_annotate(loc, annot_loc);
-            let r = if *use_desc {
-                r.replace_desc(reason.desc(true).cloned())
-            } else {
-                r
-            };
-            let annoted_u = annot(env.in_implicit_instantiation(), *use_desc, u_inner);
-            rec_flow(
-                cx,
-                env,
-                trace,
-                (
-                    l_inner,
-                    &UseT::new(UseT(use_op.dupe(), Type::new(MaybeT(r, annoted_u)))),
                 ),
             )?;
         }
@@ -1270,9 +1234,6 @@ fn __flow_impl<'cx>(
                 ),
             )?;
         }
-        (MaybeT(_, t), OptionalIndexedAccessT(..)) => {
-            rec_flow(cx, env, trace, (t, u))?;
-        }
         (
             UnionT(_, rep),
             OptionalIndexedAccessT(
@@ -1378,48 +1339,6 @@ fn __flow_impl<'cx>(
         // ********************
         // * DRO and hooklike *
         // ********************
-        (MaybeT(rl, t), DeepReadOnlyT(tout, dro)) => {
-            let r = tout.reason();
-            let ReactDro(dro_loc, dro_type) = dro;
-            let new_t = tvar_resolver::mk_tvar_and_fully_resolve_no_wrap_where(
-                cx,
-                r.dupe(),
-                |cx, tvar_reason, tvar_id| {
-                    let tvar = Tvar::new(tvar_reason.dupe(), tvar_id as u32);
-                    rec_flow(
-                        cx,
-                        env,
-                        trace,
-                        (
-                            t,
-                            &UseT::new(DeepReadOnlyT(
-                                Box::new(tvar),
-                                ReactDro(dro_loc.dupe(), dro_type.clone()),
-                            )),
-                        ),
-                    )?;
-                    Ok::<(), FlowJsException>(())
-                },
-            )?;
-            let new_l = Type::new(MaybeT(rl.dupe(), new_t));
-            let tout_t = Type::new(OpenT((**tout).dupe()));
-            rec_flow_t(cx, env, trace, unknown_use(), (&new_l, &tout_t))?;
-        }
-        (MaybeT(rl, t), HooklikeT(tout)) => {
-            let r = tout.reason();
-            let new_t = tvar_resolver::mk_tvar_and_fully_resolve_no_wrap_where(
-                cx,
-                r.dupe(),
-                |cx, tvar_reason, tvar_id| {
-                    let tvar = Tvar::new(tvar_reason.dupe(), tvar_id as u32);
-                    rec_flow(cx, env, trace, (t, &UseT::new(HooklikeT(Box::new(tvar)))))?;
-                    Ok::<(), FlowJsException>(())
-                },
-            )?;
-            let new_l = Type::new(MaybeT(rl.dupe(), new_t));
-            let tout_t = Type::new(OpenT((**tout).dupe()));
-            rec_flow_t(cx, env, trace, unknown_use(), (&new_l, &tout_t))?;
-        }
         // The values of an optional slot: only its type is made read-only (or hook-like).
         (UnionT(..), DeepReadOnlyT(tout, dro))
             if let Some(t) = type_util::optional_slot_type(l) =>
@@ -2049,7 +1968,7 @@ fn __flow_impl<'cx>(
         // * maybe types *
         // ***************
 
-        // The type maybe(T) is the same as null | undefined | UseT<Cx>
+        // `FilterMaybeT` drops `null` and `undefined`.
         (DefT(r, deref!(NullT | VoidT | TsVoidT)), FilterMaybeT(use_op, tout)) => {
             let empty = empty_t::why(r.dupe());
             rec_flow_t(cx, env, trace, use_op.dupe(), (&empty, tout))?;
@@ -2061,65 +1980,8 @@ fn __flow_impl<'cx>(
             ));
             rec_flow_t(cx, env, trace, use_op.dupe(), (&mixed, tout))?;
         }
-        (MaybeT(_, tout), FilterMaybeT(_, _)) => {
-            rec_flow(cx, env, trace, (tout, u))?;
-        }
         (DefT(_, deref!(EmptyT)), FilterMaybeT(use_op, tout)) => {
             rec_flow_t(cx, env, trace, use_op.dupe(), (l, tout))?;
-        }
-        (
-            MaybeT(_, _),
-            ReposLowerT {
-                reason: reason_op,
-                use_desc,
-                use_t: inner_u,
-            },
-        ) => {
-            // Don't split the maybe type into its constituent members. Instead,
-            // reposition the entire maybe type.
-            let loc = reason_op.loc().dupe();
-            let desc = if *use_desc {
-                Some(reason_op.desc(true))
-            } else {
-                None
-            };
-            let repos = helpers::reposition(cx, env, Some(trace), loc, desc, None, l.dupe())?;
-            rec_flow(cx, env, trace, (&repos, inner_u))?;
-        }
-        (
-            MaybeT(_, _),
-            ResolveUnionT(
-                deref!(ResolveUnionTData {
-                    reason,
-                    resolved,
-                    unresolved,
-                    upper,
-                    id,
-                }),
-            ),
-        ) => {
-            if let Some((tc_env, tc_l, tc_u, reason)) =
-                resolve_union(cx, env, trace, reason, *id, resolved, unresolved, l, upper)?
-            {
-                return Ok(Some(TailCall::Flow(tc_env, tc_l, tc_u, reason)));
-            }
-        }
-        (MaybeT(reason, t), _)
-            if match u.deref() {
-                ConditionalT(
-                    deref!(ConditionalTData {
-                        distributive_tparam_name,
-                        ..
-                    }),
-                ) => distributive_tparam_name.is_some(),
-                _ => true,
-            } =>
-        {
-            let reason = reason.dupe().replace_desc(VirtualReasonDesc::RNullOrVoid);
-            let t = type_util::push_type_alias_reason(&reason, t.dupe());
-            rec_flow(cx, env, trace, (&null::make(reason.dupe()), u))?;
-            rec_flow(cx, env, trace, (&void::make(reason), u))?;
-            rec_flow(cx, env, trace, (&t, u))?;
         }
 
         // ******************

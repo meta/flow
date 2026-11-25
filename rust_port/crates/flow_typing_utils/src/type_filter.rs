@@ -113,18 +113,6 @@ fn resolved(cx: &mut Context<'_>, t: &Type) -> Type {
     t
 }
 
-/// The result of filtering the inner type of a maybe or optional type, which removes its `null`
-/// or `undefined`: the inner type itself if filtering leaves it as it is.
-fn filter_inner<'cx>(
-    cx: &mut Context<'cx>,
-    filter_fn: &dyn Fn(&mut Context<'cx>, Type) -> FilterResult,
-    inner: &Type,
-) -> FilterResult {
-    let resolved_inner = resolved(cx, inner);
-    let FilterResult { type_, changed } = filter_fn(cx, resolved_inner);
-    changed_result(if changed { type_ } else { inner.dupe() })
-}
-
 fn recurse_into_union<'cx>(
     cx: &mut Context<'cx>,
     filter_fn: &dyn Fn(&mut Context<'cx>, Type) -> FilterResult,
@@ -370,7 +358,6 @@ pub fn truthy<'cx>(cx: &mut Context<'cx>, t: Type) -> FilterResult {
         TypeInner::UnionT(r, rep) => {
             recurse_into_union(cx, &truthy, r.dupe(), rep.members_iter().duped().collect())
         }
-        TypeInner::MaybeT(_, inner) => filter_inner(cx, &truthy, inner),
         TypeInner::DefT(r, d) => match d.deref() {
             DefTInner::BoolGeneralT => changed_result(Type::new(TypeInner::DefT(
                 r.dupe(),
@@ -502,26 +489,6 @@ pub fn not_truthy<'cx>(cx: &mut Context<'cx>, t: Type) -> FilterResult {
         TypeInner::ThisInstanceT(deref!(ThisInstanceTData { reason, .. })) => {
             changed_result(empty_t::why(reason.dupe()))
         }
-        // unknown boolies become falsy
-        TypeInner::MaybeT(r, inner) => {
-            let FilterResult {
-                type_: t_inner,
-                changed,
-            } = not_truthy(cx, inner.dupe());
-            FilterResult {
-                type_: Type::new(TypeInner::UnionT(
-                    r.dupe(),
-                    union_rep::make(
-                        None,
-                        UnionKind::UnknownKind,
-                        null::why(r.dupe()),
-                        void::why(r.dupe()),
-                        vec![t_inner].into(),
-                    ),
-                )),
-                changed,
-            }
-        }
         // an intersection passes through iff all of its members pass through
         TypeInner::IntersectionT(r, rep) => recurse_into_intersection(
             cx,
@@ -543,16 +510,6 @@ pub fn maybe<'cx>(cx: &mut Context<'cx>, t: Type) -> FilterResult {
         TypeInner::UnionT(r, rep) => {
             recurse_into_union(cx, &maybe, r.dupe(), rep.members_iter().duped().collect())
         }
-        TypeInner::MaybeT(r, _) => changed_result(Type::new(TypeInner::UnionT(
-            r.dupe(),
-            union_rep::make(
-                None,
-                UnionKind::UnknownKind,
-                null::why(r.dupe()),
-                void::why(r.dupe()),
-                Rc::from([]),
-            ),
-        ))),
         TypeInner::DefT(r, d) => match d.deref() {
             DefTInner::MixedT(MixedFlavor::MixedEverything) => {
                 changed_result(Type::new(TypeInner::UnionT(
@@ -591,7 +548,6 @@ pub fn not_maybe<'cx>(cx: &mut Context<'cx>, t: Type) -> FilterResult {
             r.dupe(),
             rep.members_iter().duped().collect(),
         ),
-        TypeInner::MaybeT(_, inner) => filter_inner(cx, &not_maybe, inner),
         TypeInner::DefT(r, d) => match d.deref() {
             DefTInner::NullT | DefTInner::VoidT | DefTInner::TsVoidT => {
                 changed_result(empty_t::why(r.dupe()))
@@ -618,7 +574,6 @@ pub fn null_filter(t: Type) -> FilterResult {
             reason,
             nominal_type,
         } => filter_opaque(&mut null_filter, reason.dupe(), nominal_type),
-        TypeInner::MaybeT(r, _) => changed_result(null::why(r.dupe())),
         TypeInner::DefT(r, d) => match d.deref() {
             DefTInner::NullT => unchanged_result(t),
             DefTInner::MixedT(MixedFlavor::MixedEverything)
@@ -636,16 +591,6 @@ pub fn not_null<'cx>(cx: &mut Context<'cx>, t: Type) -> FilterResult {
             reason,
             nominal_type,
         } => filter_opaque(&mut |t| not_null(cx, t), reason.dupe(), nominal_type),
-        TypeInner::MaybeT(r, inner) => changed_result(Type::new(TypeInner::UnionT(
-            r.dupe(),
-            union_rep::make(
-                None,
-                UnionKind::UnknownKind,
-                void::why(r.dupe()),
-                inner.dupe(),
-                Rc::from([]),
-            ),
-        ))),
         TypeInner::UnionT(r, rep) => recurse_into_union(
             cx,
             &not_null,
@@ -678,7 +623,6 @@ pub fn undefined(t: Type) -> FilterResult {
             reason,
             nominal_type,
         } => filter_opaque(&mut undefined, reason.dupe(), nominal_type),
-        TypeInner::MaybeT(r, _) => changed_result(void::why(r.dupe())),
         TypeInner::DefT(_, d) if matches!(&**d, DefTInner::VoidT | DefTInner::TsVoidT) => {
             unchanged_result(t)
         }
@@ -698,16 +642,6 @@ pub fn not_undefined<'cx>(cx: &mut Context<'cx>, t: Type) -> FilterResult {
             reason,
             nominal_type,
         } => filter_opaque(&mut |t| not_undefined(cx, t), reason.dupe(), nominal_type),
-        TypeInner::MaybeT(r, inner) => changed_result(Type::new(TypeInner::UnionT(
-            r.dupe(),
-            union_rep::make(
-                None,
-                UnionKind::UnknownKind,
-                null::why(r.dupe()),
-                inner.dupe(),
-                Rc::from([]),
-            ),
-        ))),
         TypeInner::UnionT(r, rep) => recurse_into_union(
             cx,
             &not_undefined,

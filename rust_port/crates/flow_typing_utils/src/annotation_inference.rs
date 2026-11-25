@@ -1137,7 +1137,6 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         // UseT TypeT (runtime types derive static types through annotation)
         // *******************************************************************
         // First handle catch-all cases of subtyping_kit.rs
-        (TypeInner::MaybeT(_, _), OpInner::AnnotUseTTypeT { .. }) => error_unsupported(cx, &t, &op),
         (
             TypeInner::ThisTypeAppT(
                 deref!(ThisTypeAppTData {
@@ -1482,17 +1481,6 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 .unwrap()
         }
         (_, OpInner::AnnotConcretizeForCJSExtractNamedExportsAndTypeExports(_)) => t,
-        // **********************************
-        // Wildcards (idx, maybe, optional)
-        // **********************************
-        (TypeInner::MaybeT(r, inner), OpInner::AnnotFilterOptionalT(reason)) => {
-            let inner = elab_t(cx, Some(seen), inner.dupe(), op.dupe());
-            type_util::union_of_ts(reason.dupe(), vec![type_::null::why(r.dupe()), inner], None)
-        }
-        (TypeInner::MaybeT(_, _), _) => {
-            // These are rare in practice. Will consider adding support if we hit this error case.
-            error_unsupported(cx, &t, &op)
-        }
         // *******************
         //  Type applications
         // *******************

@@ -490,7 +490,6 @@ fn is_concrete(t: &Type) -> bool {
     match t.deref() {
         TypeInner::EvalT { .. }
         | TypeInner::AnnotT(..)
-        | TypeInner::MaybeT(..)
         | TypeInner::TypeAppT(..)
         | TypeInner::ThisTypeAppT(..) => false,
         _ => true,
@@ -940,22 +939,6 @@ pub(super) fn handle_bounded<'cx>(
                     })
                 },
                 t_out.as_ref().dupe(),
-            )?;
-            Ok(true)
-        }
-        UseTInner::UseT(use_op, t) if let TypeInner::MaybeT(r, t_out) = t.deref() => {
-            let use_op_cloned = use_op.dupe();
-            let r = r.dupe();
-            narrow_generic(
-                cx,
-                Some(use_op.dupe()),
-                &|t_out_prime: Type| -> UseT<Cx> {
-                    UseT::new(UseTInner::UseT(
-                        use_op_cloned.dupe(),
-                        Type::new(TypeInner::MaybeT(r.dupe(), t_out_prime)),
-                    ))
-                },
-                t_out,
             )?;
             Ok(true)
         }
@@ -2412,17 +2395,6 @@ pub(super) fn reposition<'cx>(
                         Ok(())
                     }),
                 }
-            }
-            TypeInner::MaybeT(r, inner_t) => {
-                // repositions both the MaybeT and the nested type. MaybeT represets `?T`.
-                // elsewhere, when we decompose into T | NullT | VoidT, we use the reason
-                // of the MaybeT for NullT and VoidT but don't reposition `t`, so that any
-                // errors on the NullT or VoidT point at ?T, but errors on the T point at T.
-                let r = mod_reason(r.dupe());
-                Ok(Type::new(TypeInner::MaybeT(
-                    r,
-                    recurse(cx, env, trace, desc, mod_reason, seen, inner_t)?,
-                )))
             }
             TypeInner::UnionT(r, rep) => {
                 let r = mod_reason(r.dupe());

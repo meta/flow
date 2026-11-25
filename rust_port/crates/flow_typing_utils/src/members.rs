@@ -58,7 +58,6 @@ use flow_typing_type::type_::nominal;
 use flow_typing_type::type_::properties;
 use flow_typing_type::type_::string_of_ctor;
 use flow_typing_type::type_::union_rep;
-use flow_typing_type::type_util::desc_of_t;
 use flow_typing_type::type_util::reason_of_t;
 use flow_typing_type::type_util::slot_value_t;
 use vec1::Vec1;
@@ -570,31 +569,6 @@ fn merge_type<'cx>(cx: &mut Context<'cx>, pair: (Type, Type)) -> Type {
         (_, TypeInner::DefT(_, d)) if matches!(d.deref(), DefTInner::EmptyT) => t1,
         (_, TypeInner::DefT(_, d)) if matches!(d.deref(), DefTInner::MixedT(_)) => t2,
         (TypeInner::DefT(_, d), _) if matches!(d.deref(), DefTInner::MixedT(_)) => t1,
-        (TypeInner::DefT(_, d), TypeInner::MaybeT(_, _))
-            if matches!(d.deref(), DefTInner::NullT | DefTInner::VoidT) =>
-        {
-            t2
-        }
-        (TypeInner::MaybeT(_, _), TypeInner::DefT(_, d))
-            if matches!(d.deref(), DefTInner::NullT | DefTInner::VoidT) =>
-        {
-            t1
-        }
-        (TypeInner::MaybeT(_, inner1), TypeInner::MaybeT(_, inner2)) => {
-            let merged = merge_type(cx, (inner1.dupe(), inner2.dupe()));
-            let reason = locationless_reason(desc_of_t(&merged).cloned());
-            Type::new(TypeInner::MaybeT(reason, merged))
-        }
-        (TypeInner::MaybeT(_, inner1), _) => {
-            let merged = merge_type(cx, (inner1.dupe(), t2));
-            let reason = locationless_reason(desc_of_t(&merged).cloned());
-            Type::new(TypeInner::MaybeT(reason, merged))
-        }
-        (_, TypeInner::MaybeT(_, inner2)) => {
-            let merged = merge_type(cx, (t1, inner2.dupe()));
-            let reason = locationless_reason(desc_of_t(&merged).cloned());
-            Type::new(TypeInner::MaybeT(reason, merged))
-        }
         (TypeInner::UnionT(_, rep1), TypeInner::UnionT(_, rep2)) => {
             let mut members: Vec<_> = rep1.members_iter().map(|t| t.dupe()).collect();
             members.reverse();
@@ -851,7 +825,6 @@ pub fn extract_type<'cx>(cx: &mut Context<'cx>, this_t: Type) -> GenericT<Type, 
             let resolved = resolve_type(cx, this_t);
             extract_type(cx, resolved)
         }
-        TypeInner::MaybeT(_, ty) => extract_type(cx, ty.dupe()),
         TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => GenericT::FailureAnyType,
         TypeInner::ThisInstanceT(
             deref!(ThisInstanceTData {

@@ -858,10 +858,6 @@ fn dump_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, t: &Type) -> Str
             };
             p(cx, t, false, &extra)
         }
-        TypeInner::MaybeT(_, arg) => {
-            let extra = kid(tvars, arg);
-            p(cx, t, true, &extra)
-        }
         TypeInner::IntersectionT(_, rep) => {
             let members: Vec<String> = rep.members_iter().map(|t| kid(tvars, t)).collect();
             let extra = format!("[{}]", members.join("; "));

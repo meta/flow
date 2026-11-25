@@ -280,8 +280,6 @@ pub enum TypeInner {
     IntersectionT(Reason, inter_rep::InterRep),
     /// | types
     UnionT(Reason, union_rep::UnionRep),
-    /// ? types
-    MaybeT(Reason, Type),
     /// collects the keys of an object
     KeysT(Reason, Type),
     /// template literal types, e.g. `hello ${string}`
@@ -12622,7 +12620,6 @@ pub fn string_of_ctor(t: &Type) -> &'static str {
         TypeInner::TypeAppT(..) => "TypeAppT",
         TypeInner::UnionT(_, _) => "UnionT",
         TypeInner::IntersectionT(_, _) => "IntersectionT",
-        TypeInner::MaybeT(_, _) => "MaybeT",
     }
 }
 

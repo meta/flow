@@ -130,9 +130,6 @@ fn check_polarity_impl<'cx>(
         TypeInner::AnnotT(..) => {}
         TypeInner::AnyT(..) => {}
         TypeInner::FunProtoT(_) | TypeInner::NullProtoT(_) | TypeInner::ObjProtoT(_) => {}
-        TypeInner::MaybeT(_, type_) => {
-            check_polarity_impl(cx, env, trace, seen, tparams, polarity, type_)?;
-        }
         TypeInner::TemplateLiteralT { types, .. } => {
             for t in types {
                 check_polarity_impl(cx, env, trace, seen, tparams, polarity, t)?;

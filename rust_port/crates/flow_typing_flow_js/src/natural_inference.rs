@@ -697,7 +697,6 @@ impl<'cx, F: Fn(&Context<'_>, &ALoc) -> SingletonAction> TypeMapper<'cx, ()>
             | TypeInner::TypeAppT(..)
             | TypeInner::GenericT(..)
             | TypeInner::NominalT { .. }
-            | TypeInner::MaybeT(..)
             | TypeInner::IntersectionT(..)
             | TypeInner::UnionT(..) => type_mapper::type_default(self, cx, map_cx, t),
             // Stop here cause we need the precision

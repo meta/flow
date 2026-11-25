@@ -1288,10 +1288,7 @@ pub mod type_at_pos {
         /// `'p'` in `T08['p']`: the index names a member of the object type,
         /// so it frames like a member reference over the access's own result
         /// type. Only string literals name members; other indices keep the
-        /// default walk. Optional access (`M?.['p']`) also reaches this hook
-        /// via `optional_indexed_access_type_default`, but a maybe-typed
-        /// object has no expandable member to frame, so that form keeps the
-        /// default walk too.
+        /// default walk.
         fn indexed_access_type(
             &mut self,
             loc: &'ast (ALoc, Type),
@@ -1305,13 +1302,6 @@ pub mod type_at_pos {
                 && let (index_aloc, _) = index_payload
                 && self.covers_target(index_aloc)
                 && let (_, object_t) = ia.object.loc()
-                && {
-                    let resolved = self
-                        .cx
-                        .find_resolved(object_t)
-                        .unwrap_or_else(|| object_t.dupe());
-                    !matches!(resolved.deref(), ConstraintTypeInner::MaybeT(..))
-                }
             {
                 return self.find_loc(
                     index_aloc,

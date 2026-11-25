@@ -3297,34 +3297,6 @@ pub fn rec_sub_t<'cx>(
             let empty = Type::new(DefT(r.dupe(), DefT::new(EmptyT)));
             FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &empty, &t)
         }
-        (DefT(r, deref!(NullT | VoidT)), MaybeT(_, tout)) => {
-            let empty = Type::new(DefT(r.dupe(), DefT::new(EmptyT)));
-            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &empty, tout)
-        }
-        (DefT(r, deref!(MixedT(MixedFlavor::MixedEverything))), MaybeT(_, tout)) => {
-            let mixed = Type::new(DefT(
-                r.dupe(),
-                DefT::new(MixedT(MixedFlavor::MixedNonMaybe)),
-            ));
-            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &mixed, tout)
-        }
-        (MaybeT(r, t), MaybeT(_, _)) => {
-            let t = type_util::push_type_alias_reason(r, t.dupe());
-            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &t, u)
-        }
-        (MaybeT(r, t), UnionT(..)) if type_util::is_maybe_union(u) => {
-            let t = type_util::push_type_alias_reason(r, t.dupe());
-            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &t, u)
-        }
-        (MaybeT(reason, t), _) => {
-            let reason = reason.dupe().replace_desc(VirtualReasonDesc::RNullOrVoid);
-            let t = type_util::push_type_alias_reason(&reason, t.dupe());
-            let null = Type::new(DefT(reason.dupe(), DefT::new(NullT)));
-            let void = Type::new(DefT(reason.dupe(), DefT::new(VoidT)));
-            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op.dupe(), &null, u)?;
-            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op.dupe(), &void, u)?;
-            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &t, u)
-        }
         (
             ThisTypeAppT(deref!(ThisTypeAppTData {
                 reason,
@@ -4517,68 +4489,6 @@ pub fn rec_sub_t<'cx>(
         (_, UnionT(..)) if let Some(rest) = type_util::optional_slot_type(u) => {
             FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, l, &rest)
         }
-        // Optimization to treat maybe and optional types as special unions for subset comparision
-        (UnionT(reason, rep), MaybeT(r, maybe)) => {
-            let void = Type::new(DefT(r.dupe(), DefT::new(VoidT)));
-            let null = Type::new(DefT(r.dupe(), DefT::new(NullT)));
-            let maybe = type_util::push_type_alias_reason(r, maybe.dupe());
-            // if the union doesn't contain void or null,
-            // then everything in it must be upper-bounded by maybe
-            match (
-                union_rep::quick_mem_enum(
-                    cx,
-                    |_, t1, t2| type_util::quick_subtype(None::<&mut fn(&Type)>, t1, t2),
-                    &void,
-                    rep,
-                ),
-                union_rep::quick_mem_enum(
-                    cx,
-                    |_, t1, t2| type_util::quick_subtype(None::<&mut fn(&Type)>, t1, t2),
-                    &null,
-                    rep,
-                ),
-            ) {
-                (union_rep::QuickMemResult::No, union_rep::QuickMemResult::No) => {
-                    FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, l, &maybe)
-                }
-                (union_rep::QuickMemResult::Yes, union_rep::QuickMemResult::No) => {
-                    let filtered = flow_js_utils::remove_predicate_from_union(
-                        reason.dupe(),
-                        cx,
-                        |t| type_util::quick_subtype(None::<&mut fn(&Type)>, t, &void),
-                        rep,
-                    );
-                    FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &filtered, &maybe)
-                }
-                (union_rep::QuickMemResult::No, union_rep::QuickMemResult::Yes) => {
-                    let filtered = flow_js_utils::remove_predicate_from_union(
-                        reason.dupe(),
-                        cx,
-                        |t| type_util::quick_subtype(None::<&mut fn(&Type)>, t, &null),
-                        rep,
-                    );
-                    FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &filtered, &maybe)
-                }
-                (union_rep::QuickMemResult::Yes, union_rep::QuickMemResult::Yes) => {
-                    let filtered = flow_js_utils::remove_predicate_from_union(
-                        reason.dupe(),
-                        cx,
-                        |t| {
-                            type_util::quick_subtype(None::<&mut fn(&Type)>, t, &void)
-                                || type_util::quick_subtype(None::<&mut fn(&Type)>, t, &null)
-                        },
-                        rep,
-                    );
-                    FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &filtered, &maybe)
-                }
-                _ => flow_all_in_union(
-                    cx, env,
-                    &trace,
-                    rep,
-                    &UseT::new(UseT(use_op, u.dupe())),
-                ),
-            }
-        }
         (UnionT(_, _), IntersectionT(_, rep)) => {
             if cx.is_verbose() {
                 eprintln!("UnionT ~> IntersectionT slow case");
@@ -4938,11 +4848,6 @@ pub fn rec_sub_t<'cx>(
                     flow_js_utils::update_lit_type_from_annot(cx, env, &l_for_annot);
                 });
             speculation_kit::try_union(cx, env, Some(on_success), trace, use_op, l.dupe(), r.dupe(), rep)
-        }
-        // maybe types are special union types
-        (_, MaybeT(r2, t2)) => {
-            let t2 = type_util::push_type_alias_reason(r2, t2.dupe());
-            FlowJs::rec_flow_with_env(cx, env, trace, l, &UseT::new(UseT(use_op, t2)))
         }
         // object types: an intersection may satisfy an object UB without
         // any particular member of the intersection doing so completely.

@@ -2020,7 +2020,6 @@ fn type_of_hint_decomposition<'cx>(
                         });
                         Ok(Type::new(TypeInner::UnionT(callee_reason.dupe(), new_rep)))
                     }
-                    TypeInner::MaybeT(_, inner_t) => Ok(simplify(inner_t)?),
                     _ => Ok(simplified.dupe()),
                 }
             }

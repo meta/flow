@@ -144,9 +144,6 @@ pub fn check_ref_use<'a>(
                 .members_iter()
                 .flat_map(|t| recur_id(cx, rrid, in_hook, usage, kind, seen, t))
                 .collect(),
-            TypeInner::MaybeT(_, inner_t) => {
-                recur_id(cx, rrid, in_hook, usage, kind, seen, inner_t)
-            }
             TypeInner::AnnotT(_, inner_t, _) => {
                 recur_id(cx, rrid, in_hook, usage, kind, seen, inner_t)
             }
@@ -347,7 +344,6 @@ fn hook_callee<'a>(cx: &mut Context<'a>, t: Type) -> HookResult {
                     inv_merge(recur_id(cx, seen, t), acc)
                 })
             }
-            TypeInner::MaybeT(_, inner_t) => recur_id(cx, seen, inner_t),
             TypeInner::AnnotT(_, inner_t, _) => recur_id(cx, seen, inner_t),
             TypeInner::TypeAppT(deref!(TypeAppTData { type_: inner_t, .. })) => {
                 recur_id(cx, seen, inner_t)

@@ -132,17 +132,6 @@ pub fn union_flatten<'cx>(cx: &mut Context<'cx>, ts: impl IntoIterator<Item = Ty
                     flatten_into(cx, seen, inner.dupe(), out);
                 }
             }
-            TypeInner::MaybeT(r, inner_t) => {
-                out.push(Type::new(TypeInner::DefT(
-                    r.dupe(),
-                    DefT::new(DefTInner::NullT),
-                )));
-                out.push(Type::new(TypeInner::DefT(
-                    r.dupe(),
-                    DefT::new(DefTInner::VoidT),
-                )));
-                flatten_into(cx, seen, inner_t.dupe(), out);
-            }
             TypeInner::DefT(_, def_t) if matches!(&**def_t, DefTInner::EmptyT) => {}
             TypeInner::NominalT { nominal_type, .. } => match &nominal_type.underlying_t {
                 nominal::UnderlyingT::CustomError(deref!(nominal::CustomErrorData { t, .. })) => {
@@ -653,14 +642,6 @@ pub fn type_default<'cx, A, M: TypeMapper<'cx, A> + ?Sized>(
             }
         }
         TypeInner::AnyT(_, _) => t,
-        TypeInner::MaybeT(r, inner_t) => {
-            let inner_t_prime = mapper.type_(cx, map_cx, inner_t.dupe());
-            if inner_t_prime.ptr_eq(inner_t) {
-                t
-            } else {
-                Type::new(TypeInner::MaybeT(r.dupe(), inner_t_prime))
-            }
-        }
         TypeInner::IntersectionT(r, irep) => {
             let mut members_prime = Vec::new();
             let mut changed = false;

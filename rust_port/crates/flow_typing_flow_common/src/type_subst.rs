@@ -355,17 +355,6 @@ where
                     flatten_into(t.dupe(), seen, out);
                 }
             }
-            TypeInner::MaybeT(r, inner_t) => {
-                let null_t = Type::new(TypeInner::DefT(r.dupe(), DefT::new(DefTInner::NullT)));
-                let void_t = Type::new(TypeInner::DefT(r.dupe(), DefT::new(DefTInner::VoidT)));
-                if seen.insert(null_t.dupe()) {
-                    out.push(null_t);
-                }
-                if seen.insert(void_t.dupe()) {
-                    out.push(void_t);
-                }
-                flatten_into(inner_t.dupe(), seen, out);
-            }
             _ => {
                 if seen.insert(t.dupe()) {
                     out.push(t);

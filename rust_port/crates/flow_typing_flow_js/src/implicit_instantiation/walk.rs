@@ -1461,10 +1461,6 @@ impl<'e> Walker<'e> {
             {
                 self.walk_to_optional(cx, &expanded, ui)
             }
-            TypeInner::MaybeT(r, li) => {
-                self.walk(cx, &null::make(r.dupe()), ui)?;
-                self.walk_to_optional(cx, li, ui)
-            }
             // `undefined` fits the slot: `ui` gets `empty`, as in subtyping.
             _ if matches!(self.head(cx, l), Head::Void) => {
                 let empty = empty_t::why(type_util::reason_of_t(l).dupe());
@@ -1632,27 +1628,6 @@ impl<'e> Walker<'e> {
             {
                 self.walk(cx, &l, &expanded)
             }
-            // As subtyping compares a union with a maybe type as a subset: a union of types that
-            // are not null or void meets the inner type whole, and one with null or void members
-            // meets it without them. The union is then one bound of a marker there, as in the
-            // flow-based solve, rather than one bound per member.
-            (TypeInner::UnionT(reason, rep), TypeInner::MaybeT(_, inner))
-                if let Some(nullish) =
-                    nullish_members(cx, type_util::reason_of_t(&u), rep, true) =>
-            {
-                let inner = inner.dupe();
-                if nullish {
-                    let filtered = flow_js_utils::remove_predicate_from_union(
-                        reason.dupe(),
-                        cx,
-                        |t| is_nullish(t, true),
-                        rep,
-                    );
-                    self.walk(cx, &filtered, &inner)
-                } else {
-                    self.walk(cx, &l, &inner)
-                }
-            }
             // As subtyping compares a union with a maybe type (a union with `null` and `void`
             // members, as `?T` is) as a subset: a maybe type meets another without its `null` and
             // `void`, which the other absorbs, and a union of types that are not null or void
@@ -1692,12 +1667,6 @@ impl<'e> Walker<'e> {
                     self.walk(cx, &m, &u)?;
                 }
                 Ok(())
-            }
-            // Null and void are absorbed; the rest is compared with the whole upper bound, so that it
-            // can be evaluated or split first.
-            (TypeInner::MaybeT(_, li), TypeInner::MaybeT(..)) => self.walk(cx, li, &u),
-            (TypeInner::MaybeT(_, li), TypeInner::UnionT(..)) if type_util::is_maybe_union(&u) => {
-                self.walk(cx, li, &u)
             }
             // An alias below a maybe type is expanded first, absorbing the `null` and `void` it
             // stands for.
@@ -1801,72 +1770,12 @@ impl<'e> Walker<'e> {
                 }
                 self.walk_to_union(cx, &l, others)
             }
-            // Nor does an application of a class meet a maybe application of the same class through
-            // its expansion: `null` and `void` play no part. (The flow-based solve expands an alias
-            // first.)
-            (TypeInner::TypeAppT(a), TypeInner::MaybeT(_, ui))
-                if !self.is_alias(cx, &a.type_)
-                    && matches!(
-                        self.resolve(cx, ui).deref(),
-                        TypeInner::TypeAppT(b) if self.same_typeapp(cx, &a.type_, &b.type_).is_some()
-                    ) =>
-            {
-                let ui = self.resolve(cx, ui);
-                self.walk(cx, &l, &ui)
-            }
             // An alias or class below a union is expanded first, so that its members or its
-            // shape pick the members of the union it matches. So is an alias below a maybe type,
-            // which absorbs the `null` and `void` it stands for.
+            // shape pick the members of the union it matches.
             (TypeInner::TypeAppT(_) | TypeInner::ThisTypeAppT(_), TypeInner::UnionT(..))
                 if let Some(expanded) = self.expand_typeapp(cx, &l) =>
             {
                 self.walk(cx, &expanded, &u)
-            }
-            (TypeInner::TypeAppT(_) | TypeInner::ThisTypeAppT(_), TypeInner::MaybeT(..))
-                if let Some(expanded) = self.expand_typeapp(cx, &l)
-                    && !matches!(expanded.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::InstanceT(_))) =>
-            {
-                self.walk(cx, &expanded, &u)
-            }
-            (_, TypeInner::MaybeT(r, ui)) => match l.deref() {
-                // A tvar without lower bounds yet: what it will hold, minus null and void.
-                TypeInner::OpenT(_) => {
-                    let non_maybe = flow_cache::eval::id(
-                        cx,
-                        l.dupe(),
-                        TypeDestructorT::new(TypeDestructorTInner(
-                            unknown_use(),
-                            r.dupe(),
-                            Rc::new(Destructor::NonMaybeType),
-                        )),
-                    );
-                    let ui = ui.dupe();
-                    self.walk(cx, &non_maybe, &ui)
-                }
-                // Null and void are absorbed, and the inner type sees `empty`, as in subtyping.
-                _ if matches!(self.head(cx, &l), Head::Null | Head::Void) => {
-                    let empty = empty_t::why(type_util::reason_of_t(&l).dupe());
-                    let ui = ui.dupe();
-                    self.walk(cx, &empty, &ui)
-                }
-                // So are the members of the bound of a generic or opaque type, which subtyping
-                // narrows: the inner type sees the type with the rest of its bound.
-                _ if let Some(narrowed) =
-                    self.narrowed_bounded(cx, &l, |h| matches!(h, Head::Null | Head::Void)) =>
-                {
-                    let ui = ui.dupe();
-                    self.walk(cx, &narrowed, &ui)
-                }
-                _ => {
-                    let ui = ui.dupe();
-                    self.walk(cx, &l, &ui)
-                }
-            },
-            // A maybe lower bound is the union of its parts.
-            (TypeInner::MaybeT(r, li), _) => {
-                self.walk(cx, &null::make(r.dupe()), &u)?;
-                self.walk(cx, &void::why(r.dupe()), &u)?;
-                self.walk(cx, li, &u)
             }
             (_, TypeInner::UnionT(_, rep)) => {
                 let members: Vec<Type> = rep.members_iter().duped().collect();
@@ -4151,7 +4060,6 @@ impl<'e> Walker<'e> {
         let targs: Vec<Type> = match t.deref() {
             TypeInner::TypeAppT(a) => a.targs.iter().duped().collect(),
             TypeInner::ThisTypeAppT(a) => a.targs.iter().flat_map(|ts| ts.iter().duped()).collect(),
-            TypeInner::MaybeT(_, t) => return self.depth_of(cx, t, level),
             TypeInner::DefT(_, d) => match d.deref() {
                 DefTInner::InstanceT(i) => return self.inst_depth(cx, i, level),
                 DefTInner::ArrT(a) => match a.deref() {
@@ -6210,8 +6118,7 @@ impl<'e> Walker<'e> {
     }
 
     /// The members of the bound of a generic or opaque type that narrowing by a maybe or optional
-    /// type sees: the members of a union, and null and void of a maybe type, at any depth, as
-    /// subtyping distributes them.
+    /// type sees: the members of a union, at any depth, as subtyping distributes them.
     fn bound_members<'cx>(&self, cx: &mut Context<'cx>, t: &Type, members: &mut Vec<Type>) {
         let resolved = self.resolve(cx, t);
         match resolved.deref() {
@@ -6219,11 +6126,6 @@ impl<'e> Walker<'e> {
                 for m in rep.members_iter() {
                     self.bound_members(cx, m, members);
                 }
-            }
-            TypeInner::MaybeT(r, inner) => {
-                members.push(null::make(r.dupe()));
-                members.push(void::why(r.dupe()));
-                self.bound_members(cx, inner, members);
             }
             _ => members.push(resolved.dupe()),
         }
@@ -7853,7 +7755,6 @@ fn solve_targs_in_snapshot<'cx>(
                         let mut t = walker.resolve(cx, hint);
                         loop {
                             let inner = match t.deref() {
-                                TypeInner::MaybeT(_, inner) => inner.dupe(),
                                 // The value of an optional prop or of a maybe type: its type,
                                 // `null` or `undefined`.
                                 TypeInner::UnionT(_, rep)

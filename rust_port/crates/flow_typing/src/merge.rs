@@ -113,11 +113,9 @@ use flow_typing_type::type_::drop_generic;
 use flow_typing_type::type_::eval;
 use flow_typing_type::type_::exports;
 use flow_typing_type::type_::nominal;
-use flow_typing_type::type_::null;
 use flow_typing_type::type_::properties;
 use flow_typing_type::type_::property;
 use flow_typing_type::type_::type_or_type_desc;
-use flow_typing_type::type_::void;
 use flow_typing_type::type_util::reason_of_t;
 use flow_typing_utils::exhaustive;
 use flow_typing_utils::module_exports_checker;
@@ -259,13 +257,6 @@ fn detect_sketchy_null_checks<'cx>(cx: &mut Context<'cx>, tast: &ast::Program<AL
                         ) && let Some(upper_t) = nominal_type.upper_t.as_ref() =>
                     {
                         make_checks(cx, seen, cur_checks, loc, upper_t)
-                    }
-                    TypeInner::MaybeT(r, t) => {
-                        let acc = make_checks(cx, seen, cur_checks, loc, t);
-                        let null_t = null::why(r.dupe());
-                        let acc = make_checks(cx, seen, acc, loc, &null_t);
-                        let void_t = void::why(r.dupe());
-                        make_checks(cx, seen, acc, loc, &void_t)
                     }
                     TypeInner::UnionT(_, rep) => {
                         let mut acc = cur_checks;
@@ -486,7 +477,6 @@ fn try_eval_concrete_type_truthyness<'cx>(cx: &mut Context<'cx>, t: &Type) -> Tr
         | TypeInner::TypeAppT(..)
         | TypeInner::GenericT(..)
         | TypeInner::AnnotT(_, _, _)
-        | TypeInner::MaybeT(_, _)
         | TypeInner::UnionT(_, _) => TruthynessResult::ConstCondUnconcretized,
         TypeInner::DefT(reason, def_t) => match def_t.deref() {
             DefTInner::NumGeneralT(literal) => match literal {
@@ -1366,9 +1356,7 @@ fn detect_non_voidable_properties<'cx>(cx: &mut Context<'cx>) {
                 rep.members_iter().all(|t| is_voidable(cx, seen_ids, t))
             }
             // trivially voidable
-            TypeInner::MaybeT(_, _)
-            | TypeInner::AnyT(_, _)
-            | TypeInner::ImplicitInstantiationTvar(_) => true,
+            TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_) => true,
             TypeInner::DefT(_, def_t) => matches!(
                 def_t.deref(),
                 DefTInner::VoidT
@@ -1666,7 +1654,6 @@ fn check_spread_prop_keys<'cx>(cx: &mut Context<'cx>, tast: &ast::Program<ALoc, 
                     find_key_prop(cx, seen, spread, t);
                 }
             }
-            TypeInner::MaybeT(_, ty) => find_key_prop(cx, seen, spread, ty),
             TypeInner::DefT(r, def_t) => {
                 if let DefTInner::ObjT(obj_t) = def_t.deref() {
                     let prop = cx.get_prop(

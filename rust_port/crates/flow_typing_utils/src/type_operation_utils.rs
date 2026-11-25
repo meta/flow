@@ -220,7 +220,6 @@ pub mod operators {
             | TypeInner::EvalT { .. }
             | TypeInner::TypeAppT(..)
             | TypeInner::UnionT(_, _)
-            | TypeInner::MaybeT(_, _)
             | TypeInner::AnnotT(_, _, _)
             | TypeInner::KeysT(_, _)
             | TypeInner::NullProtoT(_) => true,

@@ -737,9 +737,6 @@ fn type_to_json_uncached<'cx>(cx: &mut TypeJsonCx<'_, 'cx>, depth: i32, t: &Type
                 .collect();
             json_with_type("Union", vec![("members", Json::Array(members))])
         }
-        TypeInner::MaybeT(_, t) => {
-            json_with_type("Maybe", vec![("type", type_to_json(cx, depth - 1, t))])
-        }
         TypeInner::KeysT(_, t) => {
             json_with_type("Keys", vec![("type", type_to_json(cx, depth - 1, t))])
         }

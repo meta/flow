@@ -137,7 +137,6 @@ pub fn reason_of_t(t: &Type) -> &Reason {
         TypeInner::AnyT(reason, _) => reason,
         TypeInner::UnionT(reason, _) => reason,
         TypeInner::IntersectionT(reason, _) => reason,
-        TypeInner::MaybeT(reason, _) => reason,
     }
 }
 
@@ -244,9 +243,6 @@ pub fn mod_reason_of_t(f: &dyn Fn(Reason) -> Reason, t: &Type) -> Type {
         }
         TypeInner::IntersectionT(reason, rep) => {
             Type::new(TypeInner::IntersectionT(f(reason.dupe()), rep.dupe()))
-        }
-        TypeInner::MaybeT(reason, inner_t) => {
-            Type::new(TypeInner::MaybeT(f(reason.dupe()), inner_t.dupe()))
         }
         TypeInner::EvalT {
             type_,
@@ -1742,9 +1738,8 @@ where
 /// gives the same answer without allocating a temporary `Type`.
 ///
 /// Returns `None` for variants whose nested data also carries reasons
-/// that some `swap_reason` implementations recursively swap (`MaybeT`,
-/// `NominalT`); callers handle those with their own
-/// `swap_reason`-specific recursion.
+/// that some `swap_reason` implementations recursively swap (`NominalT`);
+/// callers handle those with their own `swap_reason`-specific recursion.
 ///
 /// Caller must have already verified that `inner1` and `inner2` have the
 /// same discriminant.
@@ -1820,10 +1815,9 @@ fn reasonless_compare(t1: &Type, t2: &Type) -> std::cmp::Ordering {
         return ord;
     }
 
-    // The local `swap_reason` below recurses through `MaybeT`
-    // but treats `NominalT` as opaque (top-level reason swap), so derived
-    // `Ord` on `NominalType` gives the right answer for that case without
-    // allocating either.
+    // The local `swap_reason` below treats `NominalT` as opaque (top-level
+    // reason swap), so derived `Ord` on `NominalType` gives the right answer
+    // for that case without allocating either.
     if let (
         TypeInner::NominalT {
             nominal_type: n1, ..
@@ -1836,19 +1830,10 @@ fn reasonless_compare(t1: &Type, t2: &Type) -> std::cmp::Ordering {
         return n1.cmp(n2);
     }
 
-    // Fallback (rare): mirrors the OCaml local `swap_reason` for `MaybeT`
-    // (which needs a recursive swap) and for variants whose
-    // nested data carries reasons we'd otherwise have to walk by hand.
+    // Fallback (rare): mirrors the OCaml local `swap_reason` for variants
+    // whose nested data carries reasons we'd otherwise have to walk by hand.
     fn swap_reason(t2: &Type, t1: &Type) -> Type {
-        match (t2.deref(), t1.deref()) {
-            // In reposition we also recurse and reposition some nested types. We need
-            // to make sure we swap the types for these reasons as well. Otherwise our
-            // optimized union ~> union check will not pass.
-            (TypeInner::MaybeT(_, inner_t2), TypeInner::MaybeT(r, inner_t1)) => {
-                Type::new(TypeInner::MaybeT(r.dupe(), swap_reason(inner_t2, inner_t1)))
-            }
-            _ => mod_reason_of_t(&|_| reason_of_t(t1).dupe(), t2),
-        }
+        mod_reason_of_t(&|_| reason_of_t(t1).dupe(), t2)
     }
 
     let swapped = swap_reason(t2, t1);
@@ -2022,11 +2007,6 @@ pub fn is_mixed_subtype(l: &Type, mixed_flavor: MixedFlavor) -> bool {
     match l.deref() {
         TypeInner::DefT(_, def_t) if matches!(&**def_t, D::MixedT(flavor) if *flavor == mixed_flavor) => {
             true
-        }
-        TypeInner::MaybeT(_, _)
-            if matches!(mixed_flavor, MixedNonMaybe | MixedNonVoid | MixedNonNull) =>
-        {
-            false
         }
         TypeInner::DefT(_, def_t)
             if matches!(&**def_t, D::NullT)
