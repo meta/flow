@@ -266,6 +266,10 @@ impl SliceIntersection for Normalizer<'_> {
     fn optional_prop_type(&self, t: Type) -> Type {
         type_util::slot_value_t(&t, true)
     }
+
+    fn indexer_types_other_props(&self) -> bool {
+        true
+    }
 }
 
 /// Exact objects forbid the properties they do not declare, so a required

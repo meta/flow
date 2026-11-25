@@ -1,0 +1,20 @@
+Error ------------------------------------------------------------------------------------------------------ test.js:5:1
+
+Cannot cast `props.onFocus` to `string` because `(e: string) => void` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   test.js:5:1
+   5| props.onFocus as string; // tsc: error, `(e: string) => void` is not assignable to `string`
+      ^^^^^^^^^^^^^
+
+References:
+   lib.d.ts:2:12
+   2|   onFocus: (e: string) => void;
+                 ^^^^^^^^^^^^^^^^^^^ [1]
+   test.js:5:18
+   5| props.onFocus as string; // tsc: error, `(e: string) => void` is not assignable to `string`
+                       ^^^^^^ [2]
+
+
+
+Found 1 error

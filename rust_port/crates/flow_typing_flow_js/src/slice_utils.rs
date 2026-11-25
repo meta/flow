@@ -1958,6 +1958,8 @@ pub(crate) trait SliceIntersection {
     fn dict_polarity(&self, polarity: Polarity) -> Polarity;
     /// The type of a prop that one slice declares optional and the other requires.
     fn optional_prop_type(&self, t: Type) -> Type;
+    /// Whether a slice's indexer also types the props that only the other slice declares.
+    fn indexer_types_other_props(&self) -> bool;
 }
 
 /// Spreads and rests copy props into a new object, so indexers become neutral
@@ -1987,6 +1989,34 @@ impl SliceIntersection for ObjectKitIntersection<'_> {
     fn optional_prop_type(&self, t: Type) -> Type {
         t
     }
+
+    fn indexer_types_other_props(&self) -> bool {
+        true
+    }
+}
+
+/// A class or interface merged with its super, like an intersection, except that
+/// an indexer does not type the props declared on the other side: a property
+/// lookup finds a member declared anywhere on the chain before it falls back to
+/// an indexer (see `LookupTData::indexer_fallback`).
+struct ObjectKitInheritance<'a>(ObjectKitIntersection<'a>);
+
+impl SliceIntersection for ObjectKitInheritance<'_> {
+    fn intersect(&self, cx: &mut Context<'_>, left: Type, right: Type) -> Type {
+        self.0.intersect(cx, left, right)
+    }
+
+    fn dict_polarity(&self, polarity: Polarity) -> Polarity {
+        self.0.dict_polarity(polarity)
+    }
+
+    fn optional_prop_type(&self, t: Type) -> Type {
+        self.0.optional_prop_type(t)
+    }
+
+    fn indexer_types_other_props(&self) -> bool {
+        false
+    }
 }
 
 // Intersect two object slices into one slice.
@@ -1999,22 +2029,6 @@ impl SliceIntersection for ObjectKitIntersection<'_> {
 // {...{p:T}&{p:U}} = {...{p:T&U}}
 // {...A&(B|C)} = {...(A&B)|(A&C)}
 // {...(A|B)&C} = {...(A&C)|(B&C)}
-pub fn intersect2<'cx>(
-    cx: &mut Context<'cx>,
-    env: &FlowJsEnv,
-    reason: &Reason,
-    x1: &object::Slice,
-    x2: &object::Slice,
-) -> (
-    properties::PropertiesMap,
-    Flags,
-    bool,
-    object::GenericSpreadId,
-    Rc<[(Type, Polarity)]>,
-) {
-    intersect_slice_contents(cx, &ObjectKitIntersection { env, reason }, x1, x2)
-}
-
 fn intersect_slice_contents<'cx>(
     cx: &mut Context<'cx>,
     policy: &impl SliceIntersection,
@@ -2051,6 +2065,11 @@ fn intersect_slice_contents<'cx>(
 ) {
     let dict1 = obj_type::get_dict_opt(&flags1.obj_kind);
     let dict2 = obj_type::get_dict_opt(&flags2.obj_kind);
+    let (other_dict1, other_dict2) = if policy.indexer_types_other_props() {
+        (dict1, dict2)
+    } else {
+        (None, None)
+    };
     let mut merge_props = |q1: &Property, q2: &Property| -> Property {
         let m1 = property::is_method(q1);
         let m2 = property::is_method(q2);
@@ -2087,14 +2106,14 @@ fn intersect_slice_contents<'cx>(
         let result = match (p1, p2) {
             (None, None) => None,
             (Some(p1), Some(p2)) => Some(merge_props(p1, p2)),
-            (Some(p1), None) => match dict2 {
+            (Some(p1), None) => match other_dict2 {
                 Some(d2) => Some(merge_props(
                     p1,
                     &read_dict_prop(r2, d2, property::is_optional(p1)),
                 )),
                 None => Some(p1.clone()),
             },
-            (None, Some(p2)) => match dict1 {
+            (None, Some(p2)) => match other_dict1 {
                 Some(d1) => Some(merge_props(
                     &read_dict_prop(r1, d1, property::is_optional(p2)),
                     p2,
@@ -3328,8 +3347,15 @@ pub fn super_<'cx, A>(
                 }
                 _ => return finish(cx, use_op, acc, pending),
             };
-            let (props, flags, frozen, generics, reachable_targs) =
-                intersect2(cx, env, &acc.reason, &acc, &slice);
+            let (props, flags, frozen, generics, reachable_targs) = intersect_slice_contents(
+                cx,
+                &ObjectKitInheritance(ObjectKitIntersection {
+                    env,
+                    reason: &acc.reason,
+                }),
+                &acc,
+                &slice,
+            );
             let acc = object::Slice {
                 reason: acc.reason.dupe(),
                 strictness_kind: acc.strictness_kind.join(slice.strictness_kind),
