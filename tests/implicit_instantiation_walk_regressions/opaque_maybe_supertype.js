@@ -14,3 +14,8 @@ declare const a: MaybeAlias;
 let ra = nonNull(a);
 ra = 'a'; // ok
 ra = null; // error
+// So does it to `T | null | void`.
+declare function nonNullOfUnion<T>(x: T | null | void): T;
+let ru = nonNullOfUnion(s);
+ru = 'a'; // ok
+ru = null; // error

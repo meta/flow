@@ -957,6 +957,22 @@ pub(super) fn handle_bounded<'cx>(
             )?;
             Ok(true)
         }
+        UseTInner::UseT(use_op, t) if let Some(t_out) = type_util::non_maybe_members(t) => {
+            let use_op_cloned = use_op.dupe();
+            let r = type_util::reason_of_t(t).dupe();
+            narrow_generic(
+                cx,
+                Some(use_op.dupe()),
+                &|t_out_prime: Type| -> UseT<Cx> {
+                    UseT::new(UseTInner::UseT(
+                        use_op_cloned.dupe(),
+                        type_util::maybe_t(None, r.dupe(), t_out_prime),
+                    ))
+                },
+                &t_out,
+            )?;
+            Ok(true)
+        }
         UseTInner::UseT(use_op, t) if let Some(t_out) = type_util::optional_slot_type(t) => {
             let use_op = use_op.dupe();
             narrow_generic(

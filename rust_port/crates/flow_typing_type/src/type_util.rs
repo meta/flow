@@ -2415,6 +2415,26 @@ pub fn optional_slot_type(t: &Type) -> Option<Type> {
     rep.members_iter().nth(1).map(|t| t.dupe())
 }
 
+/// `?t`: the union of `t`, `null` and `void`. Its `null` and `void` stand for the whole `?t`, at
+/// `reason`. `source_aloc` is the location of the `?t` annotation, if there is one.
+pub fn maybe_t(source_aloc: Option<ALocId>, reason: Reason, t: Type) -> Type {
+    use crate::type_::null;
+    use crate::type_::union_rep;
+    use crate::type_::void;
+
+    let null_or_void = reason.dupe().replace_desc(VirtualReasonDesc::RNullOrVoid);
+    Type::new(TypeInner::UnionT(
+        reason,
+        union_rep::make(
+            source_aloc,
+            union_rep::UnionKind::UnknownKind,
+            t,
+            null::make(null_or_void.dupe()),
+            Rc::from([void::make(null_or_void)]),
+        ),
+    ))
+}
+
 pub fn maybe(t: Type) -> Type {
     let reason = reason_of_t(&t).dupe();
     Type::new(TypeInner::MaybeT(reason, t))

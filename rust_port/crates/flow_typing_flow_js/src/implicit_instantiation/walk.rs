@@ -1579,6 +1579,15 @@ impl<'e> Walker<'e> {
                 let empty = empty_t::why(type_util::reason_of_t(&l).dupe());
                 self.walk(cx, &empty, &ui)
             }
+            // So are the members of the bound of a generic or opaque type, which subtyping
+            // narrows: the rest sees the type with the rest of its bound.
+            (_, TypeInner::UnionT(..))
+                if let Some(ui) = type_util::non_maybe_members(&u)
+                    && let Some(narrowed) =
+                        self.narrowed_bounded(cx, &l, |h| matches!(h, Head::Null | Head::Void)) =>
+            {
+                self.walk(cx, &narrowed, &ui)
+            }
             // `any` fits each member of a union: see `propagate_any`.
             (TypeInner::AnyT(..), TypeInner::UnionT(..)) => {
                 self.propagate_any(cx, &l, &u, true);
