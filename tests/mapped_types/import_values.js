@@ -46,3 +46,8 @@ requiredG as string; // OK
 requiredG as number; // ERROR
 requiredH as string | null; // OK
 requiredH as string; // ERROR
+
+import {selfKeyedProp} from './export_values';
+
+selfKeyedProp as number; // OK
+selfKeyedProp as string; // ERROR

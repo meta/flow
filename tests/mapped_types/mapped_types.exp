@@ -332,6 +332,14 @@ References:
                    ^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------------- export_values.js:38:18
+
+Invalid trivially recursive definition of this type.  [recursive-definition]
+
+   38| type SelfKeyed = {[K in 'a' | keyof SelfKeyed]: number};
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
 Error ------------------------------------------------------------------------------------------------- identity.js:13:6
 
 Cannot cast object literal to `Foo` because in property `a`: `"asd"` [1] is incompatible with `number` [2].
@@ -1676,6 +1684,23 @@ References:
    import_values.js:48:14
    48| requiredH as string; // ERROR
                     ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------- import_values.js:53:1
+
+Cannot cast `selfKeyedProp` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   import_values.js:53:1
+   53| selfKeyedProp as string; // ERROR
+       ^^^^^^^^^^^^^
+
+References:
+   export_values.js:38:49
+   38| type SelfKeyed = {[K in 'a' | keyof SelfKeyed]: number};
+                                                       ^^^^^^ [1]
+   import_values.js:53:18
+   53| selfKeyedProp as string; // ERROR
+                        ^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------- instancet.js:9:3
@@ -3109,4 +3134,4 @@ References:
 
 
 
-Found 187 errors
+Found 189 errors

@@ -34,3 +34,7 @@ declare const required: {[K in keyof Source]-?: Source[K]};
 export const requiredF = required.f;
 export const requiredG = required.g;
 export const requiredH = required.h;
+
+type SelfKeyed = {[K in 'a' | keyof SelfKeyed]: number};
+declare const selfKeyed: SelfKeyed;
+export const selfKeyedProp = selfKeyed.a;

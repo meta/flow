@@ -1090,7 +1090,7 @@ pub fn elab_t<'cx>(
             let t = elab_open(cx, &seen, tvar.reason().dupe(), tvar.id() as i32, op);
             if let TypeInner::OpenT(tvar2) = t.deref() {
                 // Force the type so that the concretized results are eagarly added to the collector
-                get_fully_resolved_type(cx, tvar2.id() as i32);
+                ensure_annot_resolved(cx, tvar2.reason().dupe(), tvar2.id() as i32);
             }
             t
         }
