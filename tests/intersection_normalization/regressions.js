@@ -83,3 +83,9 @@ import type {ImportedTypeScriptMember} from './typescript';
 type ExactAndTypeScript = {shared: string} & ImportedTypeScriptMember;
 declare const inexactShared: {shared: string, other: number, ...};
 inexactShared as ExactAndTypeScript; // ERROR
+
+interface Enableable {
+  enable(): void;
+}
+declare const MergedCtor: Class<Enableable & interface {constructor(x: number): void}>;
+new MergedCtor(1);

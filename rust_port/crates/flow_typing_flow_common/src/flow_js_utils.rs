@@ -705,6 +705,24 @@ pub fn combine_construct_ts(ts: Vec<Type>) -> Option<Type> {
     }
 }
 
+// The `constructor` method of an instance: a class keeps it on its prototype. An interface the
+// object kit builds by slicing another type has no class id and folds every member it keeps,
+// methods included, into its own props.
+pub fn instance_constructor<'cx>(
+    cx: &mut Context<'cx>,
+    inst: &InstType,
+) -> Option<flow_typing_type::type_::Property> {
+    let name = Name::new(FlowSmolStr::new_inline("constructor"));
+    cx.get_prop(inst.proto_props.dupe(), &name).or_else(|| {
+        if inst.class_id == ALocId::none() {
+            cx.get_prop(inst.own_props.dupe(), &name)
+                .filter(flow_typing_type::type_::property::is_method)
+        } else {
+            None
+        }
+    })
+}
+
 // Extract a construct sig from a class [this] (the instance type wrapped by
 // [ClassT]). Walks the class's super chain looking for "constructor" in
 // [proto_props], then normalizes: unbinds `this` (a construct sig has no
@@ -722,15 +740,13 @@ pub fn extract_class_ctor_t<'cx>(
     use flow_typing_type::type_::DefTInner;
     use flow_typing_type::type_::PolyTData;
     use flow_typing_type::type_::poly;
-    use flow_typing_type::type_::properties;
     fn lookup_ctor<'cx>(
         cx: &mut Context<'cx>,
-        proto_props: properties::Id,
+        inst: &InstType,
         super_: &Type,
         recur: impl Fn(&mut Context<'cx>, &Type) -> Result<Option<Type>, FlowJsException>,
     ) -> Result<Option<Type>, FlowJsException> {
-        let props = cx.find_props(proto_props);
-        match props.get(&Name::new(FlowSmolStr::new_inline("constructor"))) {
+        match instance_constructor(cx, inst) {
             // A setter-only "constructor" is reachable: the parser emits
             // [ConstructorCannotBeAccessor] but still produces a [Method.Set] AST
             // node which lands in [s.setters] under "constructor", and the
@@ -740,7 +756,7 @@ pub fn extract_class_ctor_t<'cx>(
             // [set constructor], so silently inheriting a parent ctor would mask
             // the parse error and produce a misleading construct sig at
             // [new C(...)] sites.
-            Some(p) => Ok(flow_typing_type::type_::property::read_t(p)),
+            Some(p) => Ok(flow_typing_type::type_::property::read_t(&p)),
             None => recur(cx, super_),
         }
     }
@@ -752,20 +768,14 @@ pub fn extract_class_ctor_t<'cx>(
         for t in concretize(cx, t)? {
             let result = match t.deref() {
                 TypeInner::DefT(_, def_t) if let DefTInner::InstanceT(inst_t) = def_t.deref() => {
-                    lookup_ctor(
-                        cx,
-                        inst_t.inst.proto_props.dupe(),
-                        &inst_t.super_,
-                        |cx, t| find_ctor(concretize, cx, t),
-                    )?
+                    lookup_ctor(cx, &inst_t.inst, &inst_t.super_, |cx, t| {
+                        find_ctor(concretize, cx, t)
+                    })?
                 }
                 TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance, .. })) => {
-                    lookup_ctor(
-                        cx,
-                        instance.inst.proto_props.dupe(),
-                        &instance.super_,
-                        |cx, t| find_ctor(concretize, cx, t),
-                    )?
+                    lookup_ctor(cx, &instance.inst, &instance.super_, |cx, t| {
+                        find_ctor(concretize, cx, t)
+                    })?
                 }
                 TypeInner::DefT(_, def_t) if let DefTInner::ClassT(inner) = def_t.deref() => {
                     find_ctor(concretize, cx, inner)?
@@ -7762,9 +7772,7 @@ pub mod get_prop_t_kit {
                     .get_prop(inst.own_props.dupe(), name)
                     .or_else(|| cx.get_prop(inst.proto_props.dupe(), name)),
             },
-            PropRef::Constructor(_) => {
-                cx.get_prop(inst.proto_props.dupe(), &Name::new("constructor"))
-            }
+            PropRef::Constructor(_) => super::instance_constructor(cx, inst),
             PropRef::Computed(_) => None,
         };
         let dict = if named_prop.is_none() {

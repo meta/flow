@@ -81,6 +81,21 @@ References:
                            ^^^^^^ [2]
 
 
+Error --------------------------------------------------------------------------------------------- constructor.js:27:18
+
+Cannot call `ReadonlyCtor` with `'x'` bound to `x` because `"x"` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   constructor.js:27:18
+   27| new ReadonlyCtor('x'); // error, string !~> number
+                        ^^^ [1]
+
+References:
+   constructor.js:25:70
+   25| declare const ReadonlyCtor: Class<Readonly<interface {constructor(x: number): void}>>;
+                                                                            ^^^^^^ [2]
+
+
 Error ---------------------------------------------------------------------- exported_nonvoid_return_constructor.js:2:18
 
 Cannot return object type because `{foo: number}` [1] is incompatible with `void` [2]. [incompatible-type]
@@ -119,4 +134,4 @@ Constructor can't be an async function. [ParseError]
 
 
 
-Found 9 errors
+Found 10 errors

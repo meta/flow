@@ -86,3 +86,7 @@ const fNeeds: new () => NeedsArg = NeedsArg;  // ERROR — arity mismatch
 class C8 { v: number = 0 }
 declare const ctorObj: new () => {v: number};
 const ctorC8: new () => C8 = ctorObj;  // ERROR — {v: number} is not C8 nominally
+
+// 8. `Readonly` keeps an interface's `constructor` method with its own props.
+declare const ReadonlyCtor: Class<Readonly<interface {constructor(x: number): void}>>;
+ReadonlyCtor as new (x: number) => unknown; // OK

@@ -20,3 +20,8 @@ declare class Baz<T> {
 }
 new Baz('x') as Baz<string>; // ok
 new Baz(123) as Baz<string>; // error, number !~> string
+
+// `Readonly` keeps an interface's `constructor` method with its own props.
+declare const ReadonlyCtor: Class<Readonly<interface {constructor(x: number): void}>>;
+new ReadonlyCtor(1); // ok
+new ReadonlyCtor('x'); // error, string !~> number
