@@ -7,4 +7,4 @@ edition = "2024"
 
 [dependencies]
 flow_common = { path = "../flow_common" }
-md-5 = "0.10"
+md-5 = "0.10.6"
