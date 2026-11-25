@@ -68,6 +68,7 @@ use flow_typing_type::type_::ModuleType;
 use flow_typing_type::type_::ModuleTypeInner;
 use flow_typing_type::type_::NamedSymbol;
 use flow_typing_type::type_::PolyTKind;
+use flow_typing_type::type_::QualifiedMeaning;
 use flow_typing_type::type_::ROArrayATData;
 use flow_typing_type::type_::ThisInstanceTData;
 use flow_typing_type::type_::TupleATData;
@@ -492,6 +493,22 @@ fn eval<'cx>(
             // TODO: use_op
             let use_op = type_::unknown_use();
             annotation_inference::get_prop(cx, use_op, reason, None, name, t, strictness_kind)
+        }
+        Op::TypeofMember(deref!(name)) => {
+            let name = Name::new(name);
+            let reason = reason::mk_reason(RProperty(Some(name.dupe())), loc);
+            // TODO: use_op
+            let use_op = type_::unknown_use();
+            annotation_inference::qualify_type(
+                cx,
+                use_op,
+                reason.dupe(),
+                reason,
+                name,
+                t,
+                QualifiedMeaning::Typeof,
+                strictness_kind,
+            )
         }
         Op::GetElem(deref!(index)) => {
             let reason = reason::mk_reason(RProperty(None), loc);
@@ -1317,6 +1334,7 @@ fn merge_tyref<'cx, R>(
                         op_reason,
                         name,
                         t,
+                        QualifiedMeaning::Type,
                         *strictness_kind,
                     );
                     loc = q_loc.dupe();
@@ -4420,6 +4438,7 @@ fn merge_interface_extends<'cx>(
                         op_reason,
                         name_r,
                         qual_t,
+                        QualifiedMeaning::Type,
                         *strictness_kind,
                     )
                 }

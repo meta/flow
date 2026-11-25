@@ -46,6 +46,7 @@ use flow_typing_type::type_::ArrayATData;
 use flow_typing_type::type_::DepthTrace;
 use flow_typing_type::type_::Destructor;
 use flow_typing_type::type_::DestructorSpreadTypeData;
+use flow_typing_type::type_::QualifiedMeaning;
 use flow_typing_type::type_::ROArrayATData;
 use flow_typing_type::type_::ThisInstanceTData;
 use flow_typing_type::type_::ThisTypeAppTData;
@@ -2619,31 +2620,46 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 reason,
                 use_op,
                 prop_ref,
+                meaning,
                 strictness_kind,
             } = data.as_ref();
             let (prop_ref_reason, prop_name) = prop_ref;
-            match cx
-                .find_props(ns.types_tmap.dupe())
-                .get(prop_name)
-                .and_then(type_::property::read_t)
-            {
-                Some(prop) => prop,
-                None => elab_t(
+            let get_value_export = {
+                let values_type = ns.values_type.dupe();
+                let op = Op::new(OpInner::AnnotGetPropT(Box::new(AnnotGetPropTData {
+                    reason: reason.dupe(),
+                    use_op: use_op.dupe(),
+                    from_annot: false,
+                    prop_ref: type_util::mk_named_prop(
+                        prop_ref_reason.dupe(),
+                        false,
+                        prop_name.dupe(),
+                    ),
+                    strictness_kind: *strictness_kind,
+                })));
+                move |cx: &mut Context<'_>| {
+                    elab_t(cx, Some(seen.dupe()), values_type.dupe(), op.dupe())
+                }
+            };
+            match (
+                flow_js_utils::namespace_type_export(cx, ns, prop_name, *meaning),
+                meaning,
+            ) {
+                (Some(prop), QualifiedMeaning::Type) => prop,
+                // `typeof` reads a type export only if it is a value.
+                (Some(prop), QualifiedMeaning::Typeof) => with_concretized_type(
                     cx,
-                    Some(seen),
-                    ns.values_type.dupe(),
-                    Op::new(OpInner::AnnotGetPropT(Box::new(AnnotGetPropTData {
-                        reason: reason.dupe(),
-                        use_op: use_op.dupe(),
-                        from_annot: false,
-                        prop_ref: type_util::mk_named_prop(
-                            prop_ref_reason.dupe(),
-                            false,
-                            prop_name.dupe(),
-                        ),
-                        strictness_kind: *strictness_kind,
-                    }))),
+                    reason.dupe(),
+                    Rc::new(move |cx: &mut Context<'_>, t: Type| {
+                        if flow_js_utils::is_type_only_export(cx, &t) {
+                            get_value_export(cx)
+                        } else {
+                            t
+                        }
+                    }),
+                    prop,
                 ),
+                (None, _) => get_value_export(cx),
             }
         }
         (TypeInner::NamespaceT(ns), _) => elab_t(cx, Some(seen), ns.values_type.dupe(), op),
@@ -2652,6 +2668,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 reason,
                 use_op,
                 prop_ref,
+                meaning: _,
                 strictness_kind,
             } = data.as_ref();
             let (prop_ref_reason, prop_name) = prop_ref;
@@ -3565,6 +3582,7 @@ pub fn qualify_type<'cx>(
     op_reason: Reason,
     prop_name: Name,
     t: Type,
+    meaning: QualifiedMeaning,
     strictness_kind: TypeStrictnessKind,
 ) -> Type {
     let op_reason2 = op_reason.dupe();
@@ -3582,6 +3600,7 @@ pub fn qualify_type<'cx>(
                     reason: op_reason2.dupe(),
                     use_op: use_op2.dupe(),
                     prop_ref: (reason2.dupe(), prop_name2.dupe()),
+                    meaning,
                     strictness_kind,
                 },
             ))),

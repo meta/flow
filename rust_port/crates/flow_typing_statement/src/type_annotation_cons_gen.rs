@@ -23,6 +23,7 @@ use flow_typing_type::type_::DefTInner;
 use flow_typing_type::type_::GetPropTData;
 use flow_typing_type::type_::PolyTData;
 use flow_typing_type::type_::PropRef;
+use flow_typing_type::type_::QualifiedMeaning;
 use flow_typing_type::type_::SpecializeTData;
 use flow_typing_type::type_::Tvar;
 use flow_typing_type::type_::Type;
@@ -33,7 +34,6 @@ use flow_typing_type::type_::UseT;
 use flow_typing_type::type_::UseTInner;
 use flow_typing_type::type_::ValueToTypeReferenceTData;
 use flow_typing_type::type_::hint_unavailable;
-use flow_typing_type::type_::property;
 use flow_typing_type::type_::type_collector::TypeCollector;
 use flow_typing_type::type_::union_rep::UnionKind;
 use flow_typing_type::type_::unknown_use;
@@ -182,6 +182,7 @@ pub fn qualify_type<'a>(
     op_reason: Reason,
     prop_name: Name,
     l: Type,
+    meaning: QualifiedMeaning,
 ) -> Type {
     let op_reason_inner = op_reason.dupe();
     let f = move |cx: &mut Context<'_>, l: Type| -> Result<Type, JobError> {
@@ -199,8 +200,27 @@ pub fn qualify_type<'a>(
                     ),
                 )? {
                     let obj_t = if let TypeInner::NamespaceT(ns) = t.deref() {
-                        let props = cx.find_props(ns.types_tmap.dupe());
-                        if let Some(prop) = props.get(&prop_name).and_then(property::read_t) {
+                        let type_export = match (
+                            flow_js_utils::namespace_type_export(cx, ns, &prop_name, meaning),
+                            meaning,
+                        ) {
+                            (Some(prop), QualifiedMeaning::Type) => Some(prop),
+                            // `typeof` reads a type export only if it is a value.
+                            (Some(prop), QualifiedMeaning::Typeof) => {
+                                let is_type_only = flow_js_utils::flow_js_result_to_job_error(
+                                    FlowJs::possible_concrete_types_for_imports_exports(
+                                        cx,
+                                        &op_reason_for_flow,
+                                        &prop,
+                                    ),
+                                )?
+                                .iter()
+                                .any(|t| flow_js_utils::is_type_only_export(cx, t));
+                                (!is_type_only).then_some(prop)
+                            }
+                            (None, _) => None,
+                        };
+                        if let Some(prop) = type_export {
                             let prop_t = flow_js::reposition_non_speculating(
                                 cx,
                                 op_reason_for_flow.loc().dupe(),
@@ -213,7 +233,11 @@ pub fn qualify_type<'a>(
                             )?;
                             continue;
                         }
-                        ns.values_type.dupe()
+                        match meaning {
+                            QualifiedMeaning::Type => ns.values_type.dupe(),
+                            // The value export is read through the namespace, as an export.
+                            QualifiedMeaning::Typeof => t.dupe(),
+                        }
                     } else {
                         t
                     };

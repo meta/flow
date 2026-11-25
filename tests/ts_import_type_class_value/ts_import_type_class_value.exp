@@ -1,3 +1,11 @@
+Error ----------------------------------------------------------------------------------------- flow_export_type.js:2:15
+
+Cannot export the value `g` as a type. [export-value-as-type]
+
+   2| export type { g }; // error: `g` is a value
+                    ^
+
+
 Error ------------------------------------------------------------------------------------------------- flow_file.js:5:1
 
 Cannot cast `(new nodeClass()).getKey()` to `number` because `string` [1] is incompatible with `number` [2].
@@ -32,40 +40,71 @@ References:
                     ^^^^^^^^^^^ [1]
 
 
-Error ------------------------------------------------------------------------------------------------------ test.js:5:1
+Error ------------------------------------------------------------------------------------------------ flow_file.js:9:47
+
+Cannot get `FlowExports.g` because property `g` is missing in `{readonly default: {}}` [1]. [missing-export]
+
+   flow_file.js:9:47
+   9| declare const notExported: typeof FlowExports.g; // error: `g` is no value export
+                                                    ^
+
+References:
+   flow_export_type.js
+   ^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------------ test.js:6:1
 
 Cannot cast `(new nodeClass()).getKey()` to `number` because `string` [1] is incompatible with `number` [2].
 [incompatible-type]
 
-   test.js:5:1
-   5| new nodeClass().getKey() as number; // tsc reports string ~> number (TS2352)
+   test.js:6:1
+   6| new nodeClass().getKey() as number; // tsc reports string ~> number (TS2352)
       ^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    node.d.ts:8:46
    8| export declare class LexicalNode { getKey(): string; }
                                                    ^^^^^^ [1]
-   test.js:5:29
-   5| new nodeClass().getKey() as number; // tsc reports string ~> number (TS2352)
+   test.js:6:29
+   6| new nodeClass().getKey() as number; // tsc reports string ~> number (TS2352)
                                   ^^^^^^ [2]
 
 
-Error ------------------------------------------------------------------------------------------------------ test.js:6:1
+Error ------------------------------------------------------------------------------------------------------ test.js:7:1
 
 Cannot cast `(new ParagraphNode()).getKey()` to `number` because `string` [1] is incompatible with `number` [2].
 [incompatible-type]
 
-   test.js:6:1
-   6| new ParagraphNode().getKey() as number; // tsc reports string ~> number (TS2352)
+   test.js:7:1
+   7| new ParagraphNode().getKey() as number; // tsc reports string ~> number (TS2352)
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    node.d.ts:8:46
    8| export declare class LexicalNode { getKey(): string; }
                                                    ^^^^^^ [1]
-   test.js:6:33
-   6| new ParagraphNode().getKey() as number; // tsc reports string ~> number (TS2352)
+   test.js:7:33
+   7| new ParagraphNode().getKey() as number; // tsc reports string ~> number (TS2352)
                                       ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------------ test.js:9:1
+
+Cannot cast `(new reexportedClass()).getKey()` to `number` because `string` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   test.js:9:1
+   9| new reexportedClass().getKey() as number; // tsc reports string ~> number (TS2352)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   node.d.ts:8:46
+   8| export declare class LexicalNode { getKey(): string; }
+                                                   ^^^^^^ [1]
+   test.js:9:35
+   9| new reexportedClass().getKey() as number; // tsc reports string ~> number (TS2352)
+                                        ^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------------ uses.ts:5:1
@@ -191,5 +230,75 @@ References:
                 ^^^^^^ [2]
 
 
+Error ----------------------------------------------------------------------------------------------------- uses.ts:22:1
 
-Found 12 errors
+Cannot cast `(new throughNamespace()).getKey()` to `number` because `string` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   uses.ts:22:1
+   22| new throughNamespace().getKey() as number; // error: string ~> number
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   node.d.ts:8:46
+    8| export declare class LexicalNode { getKey(): string; }
+                                                    ^^^^^^ [1]
+   uses.ts:22:36
+   22| new throughNamespace().getKey() as number; // error: string ~> number
+                                          ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- uses.ts:23:4
+
+Cannot get `NS.LexicalNode` because property `LexicalNode` is missing in `{readonly default: {}}` [1]. [missing-export]
+
+   uses.ts:23:4
+   23| NS.LexicalNode; // error: exported with `export type`
+          ^^^^^^^^^^^
+
+References:
+   reexport.d.ts
+   ^^^^^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------------- uses.ts:24:40
+
+Cannot get `NS.LexicalNode` because property `LexicalNode` is missing in `{readonly default: {}}` [1]. [missing-export]
+
+   uses.ts:24:40
+   24| declare class SubOfReexport extends NS.LexicalNode {} // error: `extends` reads the namespace object
+                                              ^^^^^^^^^^^
+
+References:
+   reexport.d.ts
+   ^^^^^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------------- uses.ts:25:46
+
+Cannot get `NS.I` because property `I` is missing in `{readonly default: {}}` [1]. [missing-export]
+
+   uses.ts:25:46
+   25| declare const reexportedInterface: typeof NS.I; // error: `I` is only a type
+                                                    ^
+
+References:
+   reexport.d.ts
+   ^^^^^^^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------------- uses.ts:26:36
+
+Cannot get `NS.Types` because property `Types` is missing in `{readonly default: {}}` [1]. [missing-export]
+
+   uses.ts:26:36
+   26| declare const typesOnly: typeof NS.Types; // error: `Types` has no value
+                                          ^^^^^
+
+References:
+   reexport.d.ts
+   ^^^^^^^^^^^^^ [1]
+
+
+
+Found 20 errors

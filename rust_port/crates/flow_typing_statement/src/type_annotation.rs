@@ -60,6 +60,7 @@ use flow_typing_loc_env::func_class_sig_types;
 use flow_typing_loc_env::func_class_sig_types::class::ClassLikeBindingKind;
 use flow_typing_type::type_;
 use flow_typing_type::type_::EvalMappedTypeData;
+use flow_typing_type::type_::QualifiedMeaning;
 use flow_typing_type::type_::RootUseOp;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeAppTData;
@@ -2014,6 +2015,7 @@ fn convert_inner<'a>(
                     qid_reason,
                     Name::new(name.dupe()),
                     m,
+                    QualifiedMeaning::Type,
                 );
                 let (t, targs_ast) =
                     mk_nominal_type_inner(cx, env, reason, t_unapplied.dupe(), targs.as_ref())?;
@@ -4173,6 +4175,7 @@ fn convert_qualification_with_lookup_mode<'a>(
                     op_reason,
                     Name::new(name.dupe()),
                     m,
+                    QualifiedMeaning::Type,
                 )
             } else {
                 crate::type_annotation_cons_gen::get_prop(
@@ -4311,13 +4314,14 @@ fn convert_typeof<'a>(
                     reason::VirtualReasonDesc::RType(FlowSmolStr::new(&tname)),
                     q.loc.dupe(),
                 ))));
-            let t = crate::type_annotation_cons_gen::get_prop(
+            let t = crate::type_annotation_cons_gen::qualify_type(
                 cx,
                 use_op,
+                id_reason.dupe(),
                 id_reason,
-                None,
                 Name::new(name.dupe()),
                 m,
+                QualifiedMeaning::Typeof,
             );
             let final_ast = Target::Qualified(
                 ast::types::typeof_::Qualified {

@@ -15,3 +15,12 @@ declare const notValue: typeof I; // error: `I` is only a type
 declare const fooValue: typeof Foo; // error: Flow binds the interface, tsc reads the const
 declare const foo: Foo; // the interface
 foo.a as number; // error: string ~> number
+
+// `typeof` reads a member of a namespace by its value, which an `export type` keeps.
+import * as NS from './reexport';
+declare const throughNamespace: typeof NS.LexicalNode;
+new throughNamespace().getKey() as number; // error: string ~> number
+NS.LexicalNode; // error: exported with `export type`
+declare class SubOfReexport extends NS.LexicalNode {} // error: `extends` reads the namespace object
+declare const reexportedInterface: typeof NS.I; // error: `I` is only a type
+declare const typesOnly: typeof NS.Types; // error: `Types` has no value

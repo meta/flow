@@ -82,6 +82,7 @@ use flow_typing_type::type_::NamedSymbol;
 use flow_typing_type::type_::ObjLiteral;
 use flow_typing_type::type_::ObjType;
 use flow_typing_type::type_::PolyTData;
+use flow_typing_type::type_::QualifiedMeaning;
 use flow_typing_type::type_::ROArrayATData;
 use flow_typing_type::type_::ResolveUnionTData;
 use flow_typing_type::type_::SetElemTData;
@@ -3730,6 +3731,58 @@ pub fn namespace_type<'cx>(
         ObjLiteral::NonLiteral,
     );
     namespace_type_with_values_type(cx, namespace_symbol, values_type, types)
+}
+
+/// The type export `name` of the namespace `ns` that a qualified name reads in `meaning`, or
+/// `None` if it reads the value export from `ns.values_type`.
+pub fn namespace_type_export<'cx>(
+    cx: &mut Context<'cx>,
+    ns: &flow_typing_type::type_::NamespaceType,
+    name: &Name,
+    meaning: QualifiedMeaning,
+) -> Option<Type> {
+    let has_value_export = match (meaning, ns.values_type.deref()) {
+        (QualifiedMeaning::Type, _) => false,
+        (QualifiedMeaning::Typeof, TypeInner::DefT(_, deref!(DefTInner::ObjT(obj)))) => {
+            cx.find_props(obj.props_tmap.dupe()).contains_key(name)
+        }
+        (QualifiedMeaning::Typeof, _) => true,
+    };
+    if has_value_export {
+        return None;
+    }
+    cx.find_props(ns.types_tmap.dupe())
+        .get(name)
+        .and_then(flow_typing_type::type_::property::read_t)
+}
+
+/// Whether a concrete type export is not known to be a value, so that `typeof` can't read it:
+/// a type (an alias, an interface, a namespace without values), or `any`, which `typeof` of an
+/// `import type` binding doesn't read either.
+pub fn is_type_only_export<'cx>(cx: &mut Context<'cx>, t: &Type) -> bool {
+    match t.deref() {
+        TypeInner::DefT(_, deref!(DefTInner::TypeT(..))) => true,
+        TypeInner::DefT(_, deref!(DefTInner::ClassT(inst))) => match inst.deref() {
+            TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance, .. })) => {
+                matches!(instance.inst.inst_kind, InstanceKind::InterfaceKind { .. })
+            }
+            TypeInner::DefT(_, deref!(DefTInner::InstanceT(instance))) => {
+                matches!(instance.inst.inst_kind, InstanceKind::InterfaceKind { .. })
+            }
+            _ => false,
+        },
+        TypeInner::DefT(_, deref!(DefTInner::PolyT(deref!(PolyTData { t_out, .. })))) => {
+            is_type_only_export(cx, t_out)
+        }
+        TypeInner::NamespaceT(ns) => match ns.values_type.deref() {
+            TypeInner::DefT(_, deref!(DefTInner::ObjT(obj))) => {
+                cx.find_props(obj.props_tmap.dupe()).is_empty()
+            }
+            _ => false,
+        },
+        TypeInner::AnyT(..) => true,
+        _ => false,
+    }
 }
 
 // TS enums (.ts/.d.ts) are represented as a NamespaceT whose symbol kind is

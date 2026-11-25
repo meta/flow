@@ -6019,6 +6019,17 @@ pub struct NamespaceType {
     pub types_tmap: properties::Id,
 }
 
+/// The meaning in which a qualified name `M.X` of an annotation reads the member `X` of a
+/// namespace `M`.
+#[derive(Debug, Clone, Copy, Dupe, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum QualifiedMeaning {
+    /// `M.X` as a type: the type export `X`, else the value export.
+    Type,
+    /// `typeof M.X`: the value export `X`, else the type export `X` when it is a value, as a
+    /// TypeScript `export type {X}` of a class is.
+    Typeof,
+}
+
 pub enum Cont<CX: ContextFamily = ()> {
     Lower(UseOp, Type),
     Upper(Box<UseT<CX>>),
@@ -11191,6 +11202,7 @@ pub mod aconstraint {
         pub use_op: UseOp,
         pub reason: Reason,
         pub prop_ref: (Reason, Name),
+        pub meaning: QualifiedMeaning,
         /// The language of the file the access is written in.
         pub strictness_kind: TypeStrictnessKind,
     }

@@ -10,3 +10,4 @@ export interface I { x: number }
 export declare function f(): string;
 export interface Foo { a: string }
 export declare const Foo: { b: number };
+export declare namespace Types { type T = number; }

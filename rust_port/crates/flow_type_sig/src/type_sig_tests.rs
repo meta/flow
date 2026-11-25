@@ -11530,13 +11530,13 @@ Module {
                                                     },
                                                 ),
                                             ),
-                                            op: GetProp(
+                                            op: TypeofMember(
                                                 "p",
                                             ),
                                             strictness_kind: Flow,
                                         },
                                     ),
-                                    op: GetProp(
+                                    op: TypeofMember(
                                         "q",
                                     ),
                                     strictness_kind: Flow,

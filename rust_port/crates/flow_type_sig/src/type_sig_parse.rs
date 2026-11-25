@@ -8159,7 +8159,7 @@ fn typeof_<'arena, 'ast>(
             t = Parsed::Eval(
                 id_loc,
                 Box::new(t),
-                Box::new(Op::GetProp(Box::new(x.clone()))),
+                Box::new(Op::TypeofMember(Box::new(x.clone()))),
                 tbls.strictness_kind,
             );
             qname.push(x);

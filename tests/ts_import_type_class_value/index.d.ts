@@ -9,3 +9,4 @@
 import type { LexicalNode } from './node';
 export type NodeClass = typeof LexicalNode;
 export declare class ParagraphNode extends LexicalNode {}
+export type NodeClassThroughReexport = typeof import('./reexport').LexicalNode;

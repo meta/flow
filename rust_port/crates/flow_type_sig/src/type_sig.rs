@@ -3155,6 +3155,8 @@ impl<Loc, T> Annot<Loc, T> {
 pub enum Op<T> {
     Arith(Box<(ast::expression::BinaryOperator, T)>),
     GetProp(Box<FlowSmolStr>),
+    /// The member `X` of a type query `typeof M.X`, read by its value meaning.
+    TypeofMember(Box<FlowSmolStr>),
     GetElem(Box<T>),
     Unary(ast::expression::UnaryOperator),
     Update,
@@ -3165,6 +3167,7 @@ impl<T> Op<T> {
         match self {
             Op::Arith(deref!((_, t))) => f_t(t),
             Op::GetProp(_) => {}
+            Op::TypeofMember(_) => {}
             Op::GetElem(deref!(t)) => f_t(t),
             Op::Unary(_) => {}
             Op::Update => {}
@@ -3175,6 +3178,7 @@ impl<T> Op<T> {
         match self {
             Op::Arith(deref!((op, t))) => Op::Arith(Box::new((*op, f_t(cx, t)))),
             Op::GetProp(s) => Op::GetProp(s.clone()),
+            Op::TypeofMember(s) => Op::TypeofMember(s.clone()),
             Op::GetElem(deref!(t)) => Op::GetElem(Box::new(f_t(cx, t))),
             Op::Unary(op) => Op::Unary(*op),
             Op::Update => Op::Update,
