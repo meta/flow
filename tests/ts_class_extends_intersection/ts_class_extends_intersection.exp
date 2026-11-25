@@ -1,0 +1,278 @@
+Error -------------------------------------------------------------------------------------------------- importer.js:5:1
+
+Cannot cast `assigned.a` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   importer.js:5:1
+   5| assigned.a as empty; // error: number ~> empty
+      ^^^^^^^^^^
+
+References:
+   lib.d.ts:2:6
+   2|   a: number;
+           ^^^^^^ [1]
+   importer.js:5:15
+   5| assigned.a as empty; // error: number ~> empty
+                    ^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- importer.js:9:14
+
+Cannot get `FromAssigned.nope` because property `nope` is missing in `{name: string, ...}` [1]. [prop-missing]
+
+   importer.js:9:14
+   9| FromAssigned.nope; // error
+                   ^^^^
+
+References:
+   lib.d.ts:8:22
+   8| export declare class FromAssigned extends Assigned {
+                           ^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------- importer.js:14:1
+
+Cannot cast `mixed.a` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   importer.js:14:1
+   14| mixed.a as empty; // error: number ~> empty
+       ^^^^^^^
+
+References:
+   lib.d.ts:2:6
+    2|   a: number;
+            ^^^^^^ [1]
+   importer.js:14:12
+   14| mixed.a as empty; // error: number ~> empty
+                  ^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ importer.js:17:15
+
+Cannot call `FromMixin` because no arguments are expected by default constructor [1]. [extra-arg]
+
+   importer.js:17:15
+   17| new FromMixin(1); // error: `A`'s constructor takes no argument
+                     ^
+
+References:
+   lib.d.ts:1:22
+    1| export declare class A {
+                            ^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------ importer.js:20:19
+
+Cannot call `FromOverloads` because no arguments are expected by function type [1]. [extra-arg]
+
+   importer.js:20:19
+   20| new FromOverloads('s'); // error: only the first member's signatures construct (tsc: ok)
+                         ^^^
+
+References:
+   lib.d.ts:36:28
+   36| declare const Overloads: { new (): X } & { new (s: string): X };
+                                  ^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------ importer.js:21:19
+
+Cannot call `FromOverloads` because no arguments are expected by function type [1]. [extra-arg]
+
+   importer.js:21:19
+   21| new FromOverloads(1); // error
+                         ^
+
+References:
+   lib.d.ts:36:28
+   36| declare const Overloads: { new (): X } & { new (s: string): X };
+                                  ^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------- importer.js:24:1
+
+Cannot cast `generic.g` to `empty` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   importer.js:24:1
+   24| generic.g as empty; // error: string ~> empty
+       ^^^^^^^^^
+
+References:
+   lib.d.ts:40:28
+   40| export declare class G<T = string> {
+                                  ^^^^^^ [1]
+   importer.js:24:14
+   24| generic.g as empty; // error: string ~> empty
+                    ^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- importer.js:29:1
+
+Cannot cast `objectMixed.a` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   importer.js:29:1
+   29| objectMixed.a as empty; // error: number ~> empty
+       ^^^^^^^^^^^^^
+
+References:
+   lib.d.ts:2:6
+    2|   a: number;
+            ^^^^^^ [1]
+   importer.js:29:18
+   29| objectMixed.a as empty; // error: number ~> empty
+                        ^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------- importer.js:32:6
+
+Cannot extend `FromObjectMixin` [1] with `OverridesObjectMixin` [2] because in property `o`: `number` [3] is
+incompatible with `string` [4]. [incompatible-type]
+
+   importer.js:32:6
+   32|   o: number; // error: number ~> string
+            ^^^^^^ [3]
+
+References:
+   importer.js:31:36
+   31| class OverridesObjectMixin extends FromObjectMixin {
+                                          ^^^^^^^^^^^^^^^ [1]
+   importer.js:31:1
+       v---------------------------------------------------
+   31| class OverridesObjectMixin extends FromObjectMixin {
+   32|   o: number; // error: number ~> string
+   33| }
+       ^ [2]
+   lib.d.ts:27:30
+   27|   new (...args: any[]): { o: string };
+                                    ^^^^^^ [4]
+
+
+Error ---------------------------------------------------------------------------------------------------- local.js:17:1
+
+Cannot cast `mixed.a` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   local.js:17:1
+   17| mixed.a as empty; // error: number ~> empty
+       ^^^^^^^
+
+References:
+   local.js:3:6
+    3|   a: number;
+            ^^^^^^ [1]
+   local.js:17:12
+   17| mixed.a as empty; // error: number ~> empty
+                  ^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- local.js:19:1
+
+Cannot cast `FromMixin.s` to `empty` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   local.js:19:1
+   19| FromMixin.s as empty; // error: string ~> empty
+       ^^^^^^^^^^^
+
+References:
+   local.js:4:13
+    4|   static s: string;
+                   ^^^^^^ [1]
+   local.js:19:16
+   19| FromMixin.s as empty; // error: string ~> empty
+                      ^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- local.js:25:1
+
+Cannot cast `(new FromNested()).a` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   local.js:25:1
+   25| new FromNested().a as empty; // error: number ~> empty
+       ^^^^^^^^^^^^^^^^^^
+
+References:
+   local.js:3:6
+    3|   a: number;
+            ^^^^^^ [1]
+   local.js:25:23
+   25| new FromNested().a as empty; // error: number ~> empty
+                             ^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- local.js:33:1
+
+Cannot cast `(new FromGeneric()).g` to `empty` because `string` [1] is incompatible with `empty` [2].
+[incompatible-type]
+
+   local.js:33:1
+   33| new FromGeneric().g as empty; // error: string ~> empty
+       ^^^^^^^^^^^^^^^^^^^
+
+References:
+   local.js:28:21
+   28| declare class G<T = string> {
+                           ^^^^^^ [1]
+   local.js:33:24
+   33| new FromGeneric().g as empty; // error: string ~> empty
+                              ^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- local.js:36:7
+
+Cannot extend `{a: number} & {b: string}` [1] with `FromNotCtor` [2] because `{a: number} & {b: string}` [1] is not
+inheritable. [incompatible-use]
+
+   local.js:36:7
+   36| class FromNotCtor extends NotCtor {} // error: no construct signature
+             ^^^^^^^^^^^ [2]
+
+References:
+   local.js:36:27
+   36| class FromNotCtor extends NotCtor {} // error: no construct signature
+                                 ^^^^^^^ [1]
+
+
+Error ---------------------------------------------------------------------------------------------------- local.js:43:7
+
+Cannot extend `(Class<A> | {y: string}) & {x: number}` [1] with `FromUnionWithObject` [2] because
+`(Class<A> | {y: string}) & {x: number}` [1] is not inheritable. [incompatible-use]
+
+   local.js:43:7
+   43| class FromUnionWithObject extends UnionWithObject {} // error (tsc: TS2507)
+             ^^^^^^^^^^^^^^^^^^^ [2]
+
+References:
+   local.js:43:35
+   43| class FromUnionWithObject extends UnionWithObject {} // error (tsc: TS2507)
+                                         ^^^^^^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------------- local.js:69:26
+
+Cannot call `FromDifferentReturns` because no arguments are expected by function type [1]. [extra-arg]
+
+   local.js:69:26
+   69| new FromDifferentReturns('s'); // error: no argument expected
+                                ^^^
+
+References:
+   local.js:61:3
+   61|   constructor(): void;
+         ^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------------- local.js:78:20
+
+Cannot call `FromMixinFirst` with `'s'` bound to `x` because `"s"` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   local.js:78:20
+   78| new FromMixinFirst('s'); // error: string ~> number (tsc: TS2345)
+                          ^^^ [1]
+
+References:
+   local.js:74:18
+   74|   constructor(x: number): void;
+                        ^^^^^^ [2]
+
+
+
+Found 17 errors

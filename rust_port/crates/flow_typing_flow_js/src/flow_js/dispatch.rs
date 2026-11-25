@@ -582,6 +582,76 @@ fn this_specialize_instance<'cx>(
     t
 }
 
+/// Specializes, without type arguments, a value with a construct signature (or failing that, a
+/// `prototype`): it is class-like, so it can be extended, and there is nothing to specialize.
+/// `class_sig` specializes the extends clause eagerly, which is where a value that cannot be
+/// extended is reported. The instance it contributes to the derived class is worked out by
+/// [this_specialize_constructor].
+fn specialize_constructor<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    trace: DepthTrace,
+    l: &Type,
+    use_op: &UseOp,
+    u: &UseT<Cx>,
+    upper: Option<&Cont<Cx>>,
+) -> Result<(), FlowJsException> {
+    let concretize = |cx: &mut Context<'_>, t: &Type| -> Result<Vec<Type>, FlowJsException> {
+        helpers::possible_concrete_types_for_inspection(cx, env, reason_of_t(t), t)
+    };
+    if !flow_js_utils::is_inheritable(&concretize, cx, l)? {
+        flow_js_utils::add_output_with_env(
+            cx,
+            env,
+            flow_js_utils::incompatible_type_error(
+                l,
+                IncompatibleUpperData {
+                    loc: flow_js_utils::error_message_loc_of_upper(u),
+                    kind: flow_js_utils::error_message_kind_of_upper(u),
+                },
+                Some(use_op.dupe()),
+            ),
+        )?;
+        let any = any_t::make(AnySource::AnyError(None), reason_of_t(l).dupe());
+        if let Some(upper) = upper {
+            continue_(cx, env, trace, &any, upper)?;
+        }
+    } else if let Some(upper) = upper {
+        continue_(cx, env, trace, l, upper)?;
+    }
+    Ok(())
+}
+
+/// Extends a value with a construct signature: the instance the derived class inherits from is
+/// what the signature returns. TypeScript's [resolveBaseTypesOfClass] does the same, and takes
+/// the first signature. Unlike TypeScript, a value with no construct signature falls back to its
+/// `prototype`; see [construct_base_instance].
+fn this_specialize_constructor<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    trace: DepthTrace,
+    l: &Type,
+    r: &Reason,
+    this: &Type,
+    k: &Cont<Cx>,
+) -> Result<(), FlowJsException> {
+    let concretize = |cx: &mut Context<'_>, t: &Type, this_t: Option<&Type>| match this_t {
+        Some(this_t) => {
+            helpers::possible_concrete_types_for_class_extends(cx, env, reason_of_t(t), t, this_t)
+        }
+        None => helpers::possible_concrete_types_for_inspection(cx, env, reason_of_t(t), t),
+    };
+    match flow_js_utils::construct_base_instance(&concretize, cx, l, this)? {
+        Some(base) => continue_repos(cx, env, trace, r, false, &base, k),
+        // No instance to inherit after all. The eager specialization of the extends clause has
+        // already reported that; carry on with `any` rather than reporting it twice.
+        None => {
+            let any = any_t::make(AnySource::AnyError(None), reason_of_t(l).dupe());
+            continue_repos(cx, env, trace, r, false, &any, k)
+        }
+    }
+}
+
 /// NOTE: Do not call this function directly. Instead, call the wrapper
 /// functions `rec_flow`, `join_flow`, or `flow_opt` (described below) inside
 /// this module, and the function `flow` outside this module.
@@ -2050,6 +2120,27 @@ fn __flow_impl<'cx>(
                 this_t,
                 &Cont::Upper(Box::new(u.dupe())),
             )?;
+        }
+        // A class's construct signature returns its this-abstracted instance, which the
+        // derived class's `this` specializes as when the class is extended directly.
+        (
+            ThisInstanceT(
+                deref!(ThisInstanceTData {
+                    reason: inst_r,
+                    instance: i,
+                    subst_name,
+                    ..
+                }),
+            ),
+            ConcretizeT(
+                deref!(ConcretizeTData {
+                    kind: ConcretizationKind::ConcretizeForClassExtends(this_t),
+                    ..
+                }),
+            ),
+        ) => {
+            let def_t = this_specialize_instance(cx, l, inst_r, i, subst_name, this_t);
+            rec_flow(cx, env, trace, (&def_t, u))?;
         }
         (
             ThisTypeAppT(
@@ -3927,6 +4018,59 @@ fn __flow_impl<'cx>(
                 }
             }
         }
+        // As in TypeScript, an intersection is extended as a whole, like any other value with
+        // construct signatures: its members contribute theirs, and its statics are the whole
+        // intersection. Its generic classes are specialized the way a generic class the extends
+        // clause names directly is. See [intersection_construct_base].
+        (
+            IntersectionT(_, _),
+            SpecializeT(
+                deref!(SpecializeTData {
+                    use_op,
+                    reason: reason_op,
+                    reason2: reason_tapp,
+                    targs: None,
+                    upper: Some(upper),
+                    from_value,
+                    strictness_kind,
+                }),
+            ),
+        ) => {
+            let concretize =
+                |cx: &mut Context<'_>, t: &Type| -> Result<Vec<Type>, FlowJsException> {
+                    helpers::possible_concrete_types_for_inspection(cx, env, reason_of_t(t), t)
+                };
+            let specialize = |cx: &mut Context<'_>, t: &Type| -> Result<Type, FlowJsException> {
+                let collector = type_collector::TypeCollector::create();
+                rec_flow(
+                    cx,
+                    env,
+                    trace,
+                    (
+                        t,
+                        &UseT::new(SpecializeT(Box::new(SpecializeTData {
+                            use_op: use_op.dupe(),
+                            reason: reason_op.dupe(),
+                            reason2: reason_tapp.dupe(),
+                            targs: None,
+                            upper: Some(Box::new(Cont::Collect(collector.dupe()))),
+                            from_value: *from_value,
+                            strictness_kind: *strictness_kind,
+                        }))),
+                    ),
+                )?;
+                Ok(collector
+                    .union_opt(reason_of_t(t).dupe())
+                    .unwrap_or_else(|| crate::tvar_resolver::default_no_lowers(reason_of_t(t))))
+            };
+            let l =
+                flow_js_utils::specialize_generic_class_members(&concretize, &specialize, cx, l)?
+                    .unwrap_or_else(|| l.dupe());
+            specialize_constructor(cx, env, trace, &l, use_op, u, Some(&**upper))?;
+        }
+        (IntersectionT(_, _), ThisSpecializeT(r, this, k)) => {
+            this_specialize_constructor(cx, env, trace, l, r, this, k)?;
+        }
         (IntersectionT(_, rep), _) => {
             // We only call CalleeRecorder here for sig-help information. As far as
             // the typed AST is concerned when dealing with intersections we record
@@ -4962,14 +5106,9 @@ fn __flow_impl<'cx>(
             }
         }
         // A value with a construct signature (or failing that, a `prototype`)
-        // is class-like, so it can be extended. `class_sig` specializes the
-        // extends clause eagerly, and that is the step that used to report the
-        // whole thing as "not inheritable" — an interface has nothing to
-        // specialize, so pass it through the way a non-polymorphic class goes
-        // through above. The instance it contributes to the derived class is
-        // worked out by [ThisSpecializeT] below.
+        // is class-like, so it can be extended; see [specialize_constructor].
         (
-            DefT(reason_l, deref!(InstanceT(_))),
+            DefT(_, deref!(InstanceT(_))),
             SpecializeT(
                 deref!(SpecializeTData {
                     use_op,
@@ -4982,31 +5121,7 @@ fn __flow_impl<'cx>(
                 }),
             ),
         ) => {
-            let concretize =
-                |cx: &mut Context<'_>, t: &Type| -> Result<Vec<Type>, FlowJsException> {
-                    helpers::possible_concrete_types_for_inspection(cx, env, reason_of_t(t), t)
-                };
-            if !flow_js_utils::is_inheritable(&concretize, cx, l)? {
-                // Not inheritable. Report what the fallthrough would have.
-                flow_js_utils::add_output_with_env(
-                    cx,
-                    env,
-                    flow_js_utils::incompatible_type_error(
-                        l,
-                        IncompatibleUpperData {
-                            loc: flow_js_utils::error_message_loc_of_upper(u),
-                            kind: flow_js_utils::error_message_kind_of_upper(u),
-                        },
-                        Some(use_op.dupe()),
-                    ),
-                )?;
-                let any = any_t::make(AnySource::AnyError(None), reason_l.dupe());
-                if let Some(upper) = upper {
-                    continue_(cx, env, trace, &any, upper)?;
-                }
-            } else if let Some(upper) = upper {
-                continue_(cx, env, trace, l, upper)?;
-            }
+            specialize_constructor(cx, env, trace, l, use_op, u, upper.as_deref())?;
         }
         (
             AnyT(_, _) | ImplicitInstantiationTvar(_),
@@ -5072,32 +5187,10 @@ fn __flow_impl<'cx>(
             // TODO: check that this is a subtype of i?
             continue_repos(cx, env, trace, r, false, i, k)?;
         }
-        // Extending a value with a construct signature: the instance the
-        // derived class inherits from is what the signature returns.
-        // TypeScript's [resolveBaseTypesOfClass] does the same, and takes the
-        // first signature. Unlike TypeScript, a value with no construct
-        // signature falls back to its `prototype`; see [construct_base_instance].
-        (DefT(reason_l, deref!(InstanceT(_))), ThisSpecializeT(r, this, k)) => {
-            let concretize = |cx: &mut Context<'_>, t: &Type, this_t: Option<&Type>| match this_t {
-                Some(this_t) => helpers::possible_concrete_types_for_class_extends(
-                    cx,
-                    env,
-                    reason_of_t(t),
-                    t,
-                    this_t,
-                ),
-                None => helpers::possible_concrete_types_for_inspection(cx, env, reason_of_t(t), t),
-            };
-            match flow_js_utils::construct_base_instance(&concretize, cx, l, this)? {
-                Some(base) => continue_repos(cx, env, trace, r, false, &base, k)?,
-                // No instance to inherit after all. The eager specialization
-                // of the extends clause has already reported that; carry on
-                // with `any` rather than reporting it twice.
-                None => {
-                    let any = any_t::make(AnySource::AnyError(None), reason_l.dupe());
-                    continue_repos(cx, env, trace, r, false, &any, k)?
-                }
-            }
+        // Extending a value with a construct signature; see
+        // [this_specialize_constructor].
+        (DefT(_, deref!(InstanceT(_))), ThisSpecializeT(r, this, k)) => {
+            this_specialize_constructor(cx, env, trace, l, r, this, k)?;
         }
         (AnyT(_, _) | ImplicitInstantiationTvar(_), ThisSpecializeT(r, _, k)) => {
             continue_repos(cx, env, trace, r, false, l, k)?;

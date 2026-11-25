@@ -208,21 +208,6 @@ References:
                     ^ [1]
 
 
-Error ------------------------------------------------------------------------------------- ops_on_intersection.js:11:25
-
-Cannot use class extends on `T` [1] in an export position. Please provide an (alternative) annotation for class
-extends [2]. [invalid-exported-annotation]
-
-   ops_on_intersection.js:11:25
-   11| export class x1 extends (0 as any as T) {}
-                               ^^^^^^^^^^^^^^^ [2]
-
-References:
-   ops_on_intersection.js:4:10
-    4| type T = typeof C & typeof D;
-                ^^^^^^^^^^^^^^^^^^^ [1]
-
-
 Error ------------------------------------------------------------------------------------- ops_on_intersection.js:14:19
 
 Cannot use property `f` on `T` [1] in an export position. Please provide an (alternative) annotation for property
@@ -288,21 +273,6 @@ References:
    ops_on_intersection.js:23:25
    23| declare const y6: Class<C & D>;
                                ^^^^^ [1]
-
-
-Error ------------------------------------------------------------------------------------- ops_on_intersection.js:27:25
-
-Cannot use class extends on `T` [1] in an export position. Please provide an (alternative) annotation for class
-extends [2]. [invalid-exported-annotation]
-
-   ops_on_intersection.js:27:25
-   27| export class c7 extends (0 as any as T) {}
-                               ^^^^^^^^^^^^^^^ [2]
-
-References:
-   ops_on_intersection.js:4:10
-    4| type T = typeof C & typeof D;
-                ^^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------- ops_on_intersection.js:32:39
@@ -678,4 +648,4 @@ References:
 
 
 
-Found 45 errors
+Found 43 errors

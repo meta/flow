@@ -1514,6 +1514,16 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             let t = this_specialize(cx, reason_tapp, this_t.dupe(), tc);
             elab_t(cx, Some(seen), t, op)
         }
+        // A class's construct signature returns its this-abstracted instance,
+        // which the derived class's `this` specializes as when the class is
+        // extended directly.
+        (
+            TypeInner::ThisInstanceT(_),
+            OpInner::AnnotConcretizeForClassExtends { reason, this_t, .. },
+        ) => {
+            let t = this_specialize(cx, reason.dupe(), this_t.dupe(), t.dupe());
+            elab_t(cx, Some(seen), t, op)
+        }
         (
             TypeInner::ThisTypeAppT(
                 deref!(ThisTypeAppTData {
@@ -1755,6 +1765,43 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         // An intersection indexer key joins the key set as it is: which of its
         // members applies is up to the use of the key set.
         (TypeInner::IntersectionT(_, _), OpInner::AnnotGetKeysDictKeyT(_)) => t,
+        // As in TypeScript, an intersection is extended as a whole, like any
+        // other value with construct signatures, its generic classes
+        // specialized the way a generic class the extends clause names directly
+        // is. See [flow_js_utils::intersection_construct_base].
+        (TypeInner::IntersectionT(_, _), OpInner::AnnotSpecializeT(data))
+            if data.types.is_none() =>
+        {
+            let concretize =
+                |cx: &mut Context<'_>, t: &Type| -> Result<Vec<Type>, FlowJsException> {
+                    let collector = TypeCollector::create();
+                    elab_t(
+                        cx,
+                        Some(seen.dupe()),
+                        t.dupe(),
+                        Op::new(OpInner::AnnotConcretizeForInspection {
+                            reason: type_util::reason_of_t(t).dupe(),
+                            collector: collector.clone(),
+                        }),
+                    );
+                    Ok(collector.collect_to_vec())
+                };
+            let specialize = |cx: &mut Context<'_>, t: &Type| -> Result<Type, FlowJsException> {
+                Ok(elab_t(cx, Some(seen.dupe()), t.dupe(), op.dupe()))
+            };
+            let t =
+                flow_js_utils::specialize_generic_class_members(&concretize, &specialize, cx, &t)
+                    .expect("annotation_inference closures are infallible")
+                    .unwrap_or(t);
+            specialize_constructor(cx, &seen, t, &op)
+        }
+        (
+            TypeInner::IntersectionT(_, _),
+            OpInner::AnnotThisSpecializeT {
+                reason,
+                type_: this,
+            },
+        ) => this_specialize_constructor(cx, &seen, &t, reason, this),
         (TypeInner::IntersectionT(_, _), _) => error_unsupported(cx, &t, &op),
         // *************************
         //  ConcretizeForInspection
@@ -1983,35 +2030,12 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_),
             OpInner::AnnotSpecializeT(_),
         ) => t,
-        // Mirrors the [SpecializeT] rule for a value with a construct
-        // signature or a `prototype`: it is class-like, so extending it is
-        // allowed and there is nothing to specialize. Without this a
-        // signature-verified file falls through to [general_error] and every
-        // consumer of the class sees [any].
+        // A value with a construct signature or a `prototype`; see
+        // [specialize_constructor].
         (TypeInner::DefT(_, def_t), OpInner::AnnotSpecializeT(data))
             if data.types.is_none() && matches!(def_t.deref(), DefTInner::InstanceT(_)) =>
         {
-            let concretize =
-                |cx: &mut Context<'_>, t: &Type| -> Result<Vec<Type>, FlowJsException> {
-                    let collector = TypeCollector::create();
-                    elab_t(
-                        cx,
-                        Some(seen.dupe()),
-                        t.dupe(),
-                        Op::new(OpInner::AnnotConcretizeForInspection {
-                            reason: type_util::reason_of_t(t).dupe(),
-                            collector: collector.clone(),
-                        }),
-                    );
-                    Ok(collector.collect_to_vec())
-                };
-            let inheritable = flow_js_utils::is_inheritable(&concretize, cx, &t)
-                .expect("annotation_inference concretize closure is infallible");
-            if inheritable {
-                t
-            } else {
-                general_error(cx, &t, &op)
-            }
+            specialize_constructor(cx, &seen, t, &op)
         }
         (
             TypeInner::DefT(_, def_t),
@@ -2093,10 +2117,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         {
             reposition(cx, reason.loc().dupe(), instance.dupe())
         }
-        // Mirrors the [ThisSpecializeT] rule for a value with a construct
-        // signature: the instance the derived class inherits from is what the
-        // first signature returns, carrying the constructor object's statics
-        // and construct signature.
+        // A value with a construct signature; see [this_specialize_constructor].
         (
             TypeInner::DefT(_, def_t),
             OpInner::AnnotThisSpecializeT {
@@ -2104,33 +2125,7 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 type_: this,
             },
         ) if matches!(def_t.deref(), DefTInner::InstanceT(_)) => {
-            let concretize = |cx: &mut Context<'_>,
-                              t: &Type,
-                              this_t: Option<&Type>|
-             -> Result<Vec<Type>, FlowJsException> {
-                let collector = TypeCollector::create();
-                let concretize_op = match this_t {
-                    Some(this_t) => OpInner::AnnotConcretizeForClassExtends {
-                        reason: type_util::reason_of_t(t).dupe(),
-                        collector: collector.clone(),
-                        this_t: this_t.dupe(),
-                    },
-                    None => OpInner::AnnotConcretizeForInspection {
-                        reason: type_util::reason_of_t(t).dupe(),
-                        collector: collector.clone(),
-                    },
-                };
-                elab_t(cx, Some(seen.dupe()), t.dupe(), Op::new(concretize_op));
-                Ok(collector.collect_to_vec())
-            };
-            let base = flow_js_utils::construct_base_instance(&concretize, cx, &t, this)
-                .expect("annotation_inference concretize closure is infallible");
-            match base {
-                Some(base) => reposition(cx, reason.loc().dupe(), base),
-                // No instance to inherit after all; the specialize step above has
-                // already reported it.
-                None => any_t::error(reason.dupe()),
-            }
+            this_specialize_constructor(cx, &seen, &t, reason, this)
         }
         (
             TypeInner::AnyT(_, _) | TypeInner::ImplicitInstantiationTvar(_),
@@ -3396,6 +3391,79 @@ fn this_specialize<'cx>(cx: &mut Context<'cx>, reason: Reason, this: Type, t: Ty
             type_: this,
         }),
     )
+}
+
+// Mirrors [SpecializeT] on a value with a construct signature or a `prototype`:
+// it is class-like, so extending it is allowed and there is nothing to
+// specialize. Without this a signature-verified file falls through to
+// [general_error] and every consumer of the class sees [any].
+fn specialize_constructor<'cx>(
+    cx: &mut Context<'cx>,
+    seen: &FlowOrdSet<i32>,
+    t: Type,
+    op: &Op<Cx>,
+) -> Type {
+    let concretize = |cx: &mut Context<'_>, t: &Type| -> Result<Vec<Type>, FlowJsException> {
+        let collector = TypeCollector::create();
+        elab_t(
+            cx,
+            Some(seen.dupe()),
+            t.dupe(),
+            Op::new(OpInner::AnnotConcretizeForInspection {
+                reason: type_util::reason_of_t(t).dupe(),
+                collector: collector.clone(),
+            }),
+        );
+        Ok(collector.collect_to_vec())
+    };
+    let inheritable = flow_js_utils::is_inheritable(&concretize, cx, &t)
+        .expect("annotation_inference concretize closure is infallible");
+    if inheritable {
+        t
+    } else {
+        general_error(cx, &t, op)
+    }
+}
+
+// Mirrors [ThisSpecializeT] on a value with a construct signature: the instance
+// the derived class inherits from is what the first signature returns, carrying
+// the constructor object's statics and construct signature.
+fn this_specialize_constructor<'cx>(
+    cx: &mut Context<'cx>,
+    seen: &FlowOrdSet<i32>,
+    t: &Type,
+    reason: &Reason,
+    this: &Type,
+) -> Type {
+    use flow_typing_type::type_::any_t;
+
+    let concretize = |cx: &mut Context<'_>,
+                      t: &Type,
+                      this_t: Option<&Type>|
+     -> Result<Vec<Type>, FlowJsException> {
+        let collector = TypeCollector::create();
+        let concretize_op = match this_t {
+            Some(this_t) => OpInner::AnnotConcretizeForClassExtends {
+                reason: type_util::reason_of_t(t).dupe(),
+                collector: collector.clone(),
+                this_t: this_t.dupe(),
+            },
+            None => OpInner::AnnotConcretizeForInspection {
+                reason: type_util::reason_of_t(t).dupe(),
+                collector: collector.clone(),
+            },
+        };
+        elab_t(cx, Some(seen.dupe()), t.dupe(), Op::new(concretize_op));
+        Ok(collector.collect_to_vec())
+    };
+    let base = flow_js_utils::construct_base_instance(&concretize, cx, t, this)
+        .expect("annotation_inference concretize closure is infallible");
+    match base {
+        Some(base) => reposition(cx, reason.loc().dupe(), base),
+        // No instance to inherit after all; the specialize step has already
+        // reported it.
+        None => any_t::error(reason.dupe()),
+    }
 }
 
 fn specialize_class<'cx>(

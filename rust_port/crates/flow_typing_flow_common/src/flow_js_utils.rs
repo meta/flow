@@ -463,8 +463,331 @@ pub fn is_inheritable<'cx>(
     cx: &mut Context<'cx>,
     t: &Type,
 ) -> Result<bool, FlowJsException> {
-    Ok(!collect_construct_ts(concretize, cx, t)?.is_empty()
-        || collect_prototype_t(concretize, cx, t)?.is_some())
+    let has_construct_ts = match t.deref() {
+        TypeInner::IntersectionT(_, rep) => match intersection_members(concretize, cx, rep)? {
+            IntersectionMembers::Any(_) => true,
+            IntersectionMembers::Constructors(constructors) => !constructors.is_empty(),
+        },
+        _ => !collect_construct_ts(concretize, cx, t)?.is_empty(),
+    };
+    Ok(has_construct_ts || collect_prototype_t(concretize, cx, t)?.is_some())
+}
+
+// What a class extending a value gets from the value's construct signatures:
+// the signatures, which the class inherits as its `constructor`, and the types
+// its base instance is made of.
+#[derive(Default)]
+struct ConstructBase {
+    construct_ts: Vec<Type>,
+    base_ts: Vec<Type>,
+}
+
+// TypeScript's `isMixinConstructorType`: `construct_ts` is a single signature
+// that is not generic and takes nothing but a rest parameter of type `any` or
+// `any[]`. The signatures are the ones not yet concretized, so that a generic
+// one is still a [PolyT].
+fn is_mixin_constructor<'cx>(
+    concretize: &dyn Fn(&mut Context<'_>, &Type) -> Result<Vec<Type>, FlowJsException>,
+    cx: &mut Context<'cx>,
+    construct_ts: &[Type],
+) -> Result<bool, FlowJsException> {
+    use flow_typing_type::type_::ArrType;
+    use flow_typing_type::type_::ArrayATData;
+    use flow_typing_type::type_::FunRestParam;
+
+    let overloads: Vec<Type> = construct_ts
+        .iter()
+        .flat_map(|t| match t.deref() {
+            TypeInner::IntersectionT(_, rep) => rep.members_iter().duped().collect::<Vec<_>>(),
+            _ => vec![t.dupe()],
+        })
+        .collect();
+    let [construct_t] = overloads.as_slice() else {
+        return Ok(false);
+    };
+    let TypeInner::DefT(_, def_t) = construct_t.deref() else {
+        return Ok(false);
+    };
+    let DefTInner::FunT(_, funtype) = def_t.deref() else {
+        return Ok(false);
+    };
+    let (true, Some(FunRestParam(_, _, rest_t))) = (funtype.params.is_empty(), &funtype.rest_param)
+    else {
+        return Ok(false);
+    };
+    let is_any =
+        |ts: &[Type]| !ts.is_empty() && ts.iter().all(|t| matches!(t.deref(), TypeInner::AnyT(..)));
+    let rest_ts = concretize(cx, rest_t)?;
+    if is_any(&rest_ts) {
+        return Ok(true);
+    }
+    let [rest_t] = rest_ts.as_slice() else {
+        return Ok(false);
+    };
+    let TypeInner::DefT(_, def_t) = rest_t.deref() else {
+        return Ok(false);
+    };
+    let DefTInner::ArrT(arrtype) = def_t.deref() else {
+        return Ok(false);
+    };
+    let (ArrType::ArrayAT(deref!(ArrayATData { elem_t, .. }))
+    | ArrType::ROArrayAT(deref!(ROArrayATData { elem_t, .. }))) = arrtype.deref()
+    else {
+        return Ok(false);
+    };
+    Ok(is_any(&concretize(cx, elem_t)?))
+}
+
+// A member of an intersection that has construct signatures.
+enum Constructor {
+    // A class, by the instance its `ClassT` wraps. Its construct signature is
+    // its constructor, which that instance carries. It is never looked up here:
+    // a class without a constructor of its own inherits one up its extends
+    // chain, which can lead back to the class extending the intersection.
+    Class(Type),
+    // Any other value with construct signatures ([collect_construct_ts]), not
+    // yet concretized.
+    Signatures(Vec<Type>),
+    // A union of constructors.
+    Union(Vec<Constructor>),
+}
+
+// The members of an intersection that have construct signatures, in order, an
+// intersection nested in another one, through an alias say, contributing its
+// members as in TypeScript; or the member of type `any` that, as in TypeScript,
+// makes the whole intersection `any`. A generic class among them has been
+// specialized already ([specialize_generic_class_members]).
+enum IntersectionMembers {
+    Any(Type),
+    Constructors(Vec<Constructor>),
+}
+
+fn intersection_members<'cx>(
+    concretize: &dyn Fn(&mut Context<'_>, &Type) -> Result<Vec<Type>, FlowJsException>,
+    cx: &mut Context<'cx>,
+    rep: &inter_rep::InterRep,
+) -> Result<IntersectionMembers, FlowJsException> {
+    // Each member's concretizations: one, or a union's alternatives.
+    fn flatten<'cx>(
+        concretize: &dyn Fn(&mut Context<'_>, &Type) -> Result<Vec<Type>, FlowJsException>,
+        cx: &mut Context<'cx>,
+        t: &Type,
+        members: &mut Vec<Vec<Type>>,
+    ) -> Result<(), FlowJsException> {
+        let concrete = concretize(cx, t)?;
+        match concrete.as_slice() {
+            [t] if let TypeInner::IntersectionT(_, rep) = t.deref() => {
+                for member in rep.members_iter() {
+                    flatten(concretize, cx, member, members)?;
+                }
+            }
+            _ => members.push(concrete),
+        }
+        Ok(())
+    }
+    fn constructor<'cx>(
+        concretize: &dyn Fn(&mut Context<'_>, &Type) -> Result<Vec<Type>, FlowJsException>,
+        cx: &mut Context<'cx>,
+        t: &Type,
+    ) -> Result<Option<Constructor>, FlowJsException> {
+        match t.deref() {
+            TypeInner::DefT(_, def_t) if let DefTInner::ClassT(this) = def_t.deref() => {
+                Ok(Some(Constructor::Class(this.dupe())))
+            }
+            _ => {
+                let construct_ts = collect_construct_ts(concretize, cx, t)?;
+                Ok((!construct_ts.is_empty()).then_some(Constructor::Signatures(construct_ts)))
+            }
+        }
+    }
+    let mut members = Vec::new();
+    for member in rep.members_iter() {
+        flatten(concretize, cx, member, &mut members)?;
+    }
+    let mut constructors = Vec::new();
+    for alternatives in members {
+        match alternatives.as_slice() {
+            [] => {}
+            [t] if matches!(
+                t.deref(),
+                TypeInner::AnyT(..) | TypeInner::ImplicitInstantiationTvar(_)
+            ) =>
+            {
+                return Ok(IntersectionMembers::Any(t.dupe()));
+            }
+            [t] => constructors.extend(constructor(concretize, cx, t)?),
+            // As in TypeScript, a union is a constructor when all of its
+            // alternatives are, and constructs what one of them does.
+            _ => {
+                let mut union = Vec::new();
+                for t in &alternatives {
+                    union.push(constructor(concretize, cx, t)?);
+                }
+                if let Some(union) = union.into_iter().collect::<Option<Vec<_>>>() {
+                    constructors.push(Constructor::Union(union));
+                }
+            }
+        }
+    }
+    Ok(IntersectionMembers::Constructors(constructors))
+}
+
+// The intersection a class extends, with each generic class among its members
+// specialized without type arguments by `specialize`, the way the extends clause
+// specializes a generic class it names directly; an intersection nested in it,
+// through an alias say, the same. `None` when it has no generic class.
+pub fn specialize_generic_class_members<'cx>(
+    concretize: &dyn Fn(&mut Context<'_>, &Type) -> Result<Vec<Type>, FlowJsException>,
+    specialize: &dyn Fn(&mut Context<'_>, &Type) -> Result<Type, FlowJsException>,
+    cx: &mut Context<'cx>,
+    t: &Type,
+) -> Result<Option<Type>, FlowJsException> {
+    let TypeInner::IntersectionT(r, rep) = t.deref() else {
+        return Ok(None);
+    };
+    let mut specialized_any = false;
+    let mut members = Vec::new();
+    for member in rep.members_iter() {
+        let specialized = match concretize(cx, member)?.as_slice() {
+            [c] if let TypeInner::DefT(_, def_t) = c.deref()
+                && let DefTInner::PolyT(deref!(PolyTData { t_out, .. })) = def_t.deref()
+                && let TypeInner::DefT(_, def_t) = t_out.deref()
+                && let DefTInner::ClassT(_) = def_t.deref() =>
+            {
+                Some(specialize(cx, c)?)
+            }
+            [c] => specialize_generic_class_members(concretize, specialize, cx, c)?,
+            _ => None,
+        };
+        specialized_any |= specialized.is_some();
+        members.push(specialized.unwrap_or_else(|| member.dupe()));
+    }
+    if !specialized_any {
+        return Ok(None);
+    }
+    let mut members = members.into_iter();
+    match (members.next(), members.next()) {
+        (Some(t0), Some(t1)) => Ok(Some(Type::new(TypeInner::IntersectionT(
+            r.dupe(),
+            inter_rep::make(t0, t1, members.collect::<Vec<_>>().into()),
+        )))),
+        _ => Ok(None),
+    }
+}
+
+// A member's construct signatures, concretized, and what the first one returns.
+// A class gives its instance, which carries its constructor, and a union what
+// one of its alternatives does.
+fn constructor_base<'cx>(
+    concretize: &dyn Fn(&mut Context<'_>, &Type) -> Result<Vec<Type>, FlowJsException>,
+    cx: &mut Context<'cx>,
+    constructor: &Constructor,
+) -> Result<(Vec<Type>, Option<Type>), FlowJsException> {
+    match constructor {
+        Constructor::Class(this) => Ok((Vec::new(), Some(this.dupe()))),
+        Constructor::Signatures(construct_ts) => {
+            let mut concretized = Vec::new();
+            for t in construct_ts {
+                concretized.extend(concretize(cx, t)?);
+            }
+            let base = construct_return_ts(&concretized).into_iter().next();
+            Ok((concretized, base))
+        }
+        Constructor::Union(alternatives) => {
+            let mut bases = Vec::new();
+            for alternative in alternatives {
+                bases.push(constructor_base(concretize, cx, alternative)?.1);
+            }
+            let base = bases
+                .into_iter()
+                .collect::<Option<Vec<_>>>()
+                .and_then(|bases| {
+                    let reason = flow_typing_type::type_util::reason_of_t(bases.first()?).dupe();
+                    Some(flow_typing_type::type_util::union_of_ts(
+                        reason, bases, None,
+                    ))
+                });
+            Ok((Vec::new(), base))
+        }
+    }
+}
+
+// What a class extending an intersection gets, as TypeScript resolves the
+// construct signatures of an intersection (`resolveIntersectionTypeMembers`):
+// what each mixin constructor ([is_mixin_constructor]) returns, intersected
+// with what the first other member with construct signatures returns, to make
+// up the base instance. If every such member is a mixin, the first one is not
+// treated as one. A mixin's return becomes part of a base only where Flow can
+// extend it: an instance, or, in TypeScript compatibility mode, an object type,
+// which the override check then accepts (`ObjT ~> SuperT`). A mixin returning
+// anything else is an ordinary member, as when a class extends it alone. As in
+// a `mixins` clause, and as at runtime, where a mixin's class sits between the
+// derived class and the one it is applied to, the mixins come first.
+//
+// The derived class constructs with the signatures of the member its instance
+// comes from: TypeScript takes all the members' signatures only when they
+// return the same type (TS2510), and a class's constructor already comes with
+// its instance. `None` when no member has a construct signature.
+fn intersection_construct_base<'cx>(
+    concretize: &dyn Fn(&mut Context<'_>, &Type) -> Result<Vec<Type>, FlowJsException>,
+    cx: &mut Context<'cx>,
+    rep: &inter_rep::InterRep,
+) -> Result<Option<ConstructBase>, FlowJsException> {
+    let constructors = match intersection_members(concretize, cx, rep)? {
+        IntersectionMembers::Any(any) => {
+            return Ok(Some(ConstructBase {
+                construct_ts: Vec::new(),
+                base_ts: vec![any],
+            }));
+        }
+        IntersectionMembers::Constructors(constructors) => constructors,
+    };
+    // Each member's construct signatures, concretized, and what the first one
+    // returns.
+    let mut members = Vec::new();
+    for constructor in &constructors {
+        members.push(constructor_base(concretize, cx, constructor)?);
+    }
+    let mut mixins = Vec::new();
+    for (constructor, (_, base)) in constructors.iter().zip(&members) {
+        let mixin = match (constructor, base) {
+            (Constructor::Signatures(construct_ts), Some(base)) => {
+                is_mixin_constructor(concretize, cx, construct_ts)?
+                    && match concretize(cx, base)?.as_slice() {
+                        [t] if let TypeInner::DefT(_, def_t) = t.deref() => match def_t.deref() {
+                            DefTInner::InstanceT(_) => true,
+                            DefTInner::ObjT(obj) => obj.strictness_kind.is_typescript_loose(),
+                            _ => false,
+                        },
+                        _ => false,
+                    }
+            }
+            _ => false,
+        };
+        mixins.push(mixin);
+    }
+    if mixins.iter().all(|mixin| *mixin)
+        && let Some(first) = mixins.first_mut()
+    {
+        *first = false;
+    }
+    let Some(primary) = mixins.iter().position(|mixin| !mixin) else {
+        return Ok(None);
+    };
+    let base_ts = match &members[primary].1 {
+        None => Vec::new(),
+        Some(primary_base) => members
+            .iter()
+            .zip(&mixins)
+            .filter(|(_, mixin)| **mixin)
+            .filter_map(|((_, base), _)| base.dupe())
+            .chain(std::iter::once(primary_base.dupe()))
+            .collect(),
+    };
+    Ok(Some(ConstructBase {
+        construct_ts: members.swap_remove(primary).0,
+        base_ts,
+    }))
 }
 
 // What each construct signature returns, overloads flattened out, in the source
@@ -555,6 +878,11 @@ fn void_returning(construct: &Type) -> Type {
 // A value without a construct signature contributes its `prototype` instead
 // ([collect_prototype_t]): `node.js.flow`'s `declare class $SymbolReplModeMagic
 // extends Symbol` extends TypeScript's `SymbolConstructor`, which has no `new`.
+//
+// An intersection's signatures are resolved as in TypeScript
+// ([intersection_construct_base]); with mixins, the base instance is the
+// intersection of what they and the first signature return, and every part of
+// it is re-pointed at the whole intersection.
 pub fn construct_base_instance<'cx>(
     concretize: &dyn Fn(
         &mut Context<'_>,
@@ -565,29 +893,80 @@ pub fn construct_base_instance<'cx>(
     t: &Type,
     this: &Type,
 ) -> Result<Option<Type>, FlowJsException> {
+    let concretize_fully = |cx: &mut Context<'_>, t: &Type| concretize(cx, t, None);
+    let ConstructBase {
+        construct_ts,
+        base_ts,
+    } = match t.deref() {
+        TypeInner::IntersectionT(_, rep) => {
+            intersection_construct_base(&concretize_fully, cx, rep)?.unwrap_or_default()
+        }
+        _ => {
+            let construct_ts = collect_construct_ts(&concretize_fully, cx, t)?
+                .iter()
+                .map(|t| concretize_fully(cx, t))
+                .collect::<Result<Vec<_>, _>>()?
+                .concat();
+            let base_ts = construct_return_ts(&construct_ts)
+                .into_iter()
+                .take(1)
+                .collect();
+            ConstructBase {
+                construct_ts,
+                base_ts,
+            }
+        }
+    };
+    let base_ts = if construct_ts.is_empty() && base_ts.is_empty() {
+        let Some(prototype) = collect_prototype_t(&concretize_fully, cx, t)? else {
+            return Ok(None);
+        };
+        vec![prototype]
+    } else {
+        base_ts
+    };
+    let construct = combine_construct_ts(construct_ts);
+    let mut parts = Vec::new();
+    for base in &base_ts {
+        parts.push(repoint_base_instance(
+            concretize,
+            cx,
+            base,
+            t,
+            this,
+            construct.as_ref(),
+        )?);
+    }
+    let mut parts = parts.into_iter();
+    Ok(match (parts.next(), parts.next()) {
+        (Some(t0), Some(t1)) => Some(Type::new(TypeInner::IntersectionT(
+            flow_typing_type::type_util::reason_of_t(t).dupe(),
+            inter_rep::make(t0, t1, parts.collect::<Vec<_>>().into()),
+        ))),
+        (base, _) => base,
+    })
+}
+
+// One part of the instance a class extending the constructor value `t`
+// inherits ([construct_base_instance]), re-pointed at `t`.
+fn repoint_base_instance<'cx>(
+    concretize: &dyn Fn(
+        &mut Context<'_>,
+        &Type,
+        Option<&Type>,
+    ) -> Result<Vec<Type>, FlowJsException>,
+    cx: &mut Context<'cx>,
+    base: &Type,
+    t: &Type,
+    this: &Type,
+    construct: Option<&Type>,
+) -> Result<Type, FlowJsException> {
     use flow_typing_type::type_::DefT;
     use flow_typing_type::type_::InstTypeInner;
     use flow_typing_type::type_::InstanceTInner;
     use flow_typing_type::type_::Property;
     use flow_typing_type::type_::PropertyInner;
 
-    let concretize_fully = |cx: &mut Context<'_>, t: &Type| concretize(cx, t, None);
-    let construct_ts = collect_construct_ts(&concretize_fully, cx, t)?
-        .iter()
-        .map(|t| concretize_fully(cx, t))
-        .collect::<Result<Vec<_>, _>>()?
-        .concat();
-    let base = if construct_ts.is_empty() {
-        let Some(prototype) = collect_prototype_t(&concretize_fully, cx, t)? else {
-            return Ok(None);
-        };
-        prototype
-    } else {
-        let Some(base) = construct_return_ts(&construct_ts).into_iter().next() else {
-            return Ok(None);
-        };
-        base
-    };
     // The return type arrives still wrapped in whatever the signature wrote —
     // an [AnnotT] over the interface, typically — and only the instance
     // underneath has the slots to re-point. A return that concretizes to
@@ -598,19 +977,18 @@ pub fn construct_base_instance<'cx>(
     // class. Concretize the return with the derived `this` so that any type
     // application reached through annotations, tvars, or evaluations is
     // this-specialized before it fixes its own `this`.
-    let concrete = concretize(cx, &base, Some(this))?;
+    let concrete = concretize(cx, base, Some(this))?;
     let [concrete] = concrete.as_slice() else {
-        return Ok(Some(base.dupe()));
+        return Ok(base.dupe());
     };
     let TypeInner::DefT(base_reason, def_t) = concrete.deref() else {
-        return Ok(Some(base.dupe()));
+        return Ok(base.dupe());
     };
     let DefTInner::InstanceT(instance) = def_t.deref() else {
-        return Ok(Some(base.dupe()));
+        return Ok(base.dupe());
     };
-    let construct = combine_construct_ts(construct_ts);
     let inst = InstType::new(InstTypeInner {
-        proto_props: match &construct {
+        proto_props: match construct {
             // `new Derived()` resolves `constructor` as a prototype method —
             // the slot a class writes its own constructor into — so the
             // signature has to be reachable there. The instance itself is not a
@@ -631,7 +1009,7 @@ pub fn construct_base_instance<'cx>(
         },
         ..(*instance.inst).clone()
     });
-    Ok(Some(Type::new(TypeInner::DefT(
+    Ok(Type::new(TypeInner::DefT(
         base_reason.dupe(),
         DefT::new(DefTInner::InstanceT(Rc::new(InstanceT::new(
             InstanceTInner {
@@ -641,7 +1019,7 @@ pub fn construct_base_instance<'cx>(
                 implements: instance.implements.dupe(),
             },
         )))),
-    ))))
+    )))
 }
 
 // The overloads among construct sigs that `n` type arguments can specialize:
