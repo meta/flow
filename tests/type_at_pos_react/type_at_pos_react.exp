@@ -14,7 +14,7 @@ const x: {
   ) renders null
 }
 
-'React.RefSetter' defined at (lib) react.js:1659:9
+'React.RefSetter' defined at (lib) react.js:1675:9
 
 lazy_ref.js:14:9,14:9
 
@@ -22,7 +22,7 @@ lazy_ref.js:20:9
 Flags:
 const x: Promise<{readonly default: (x: Props) => MixedElement}>
 
-'MixedElement' defined at (lib) react.js:592:22
+'MixedElement' defined at (lib) react.js:600:22
 'Promise' defined at (lib) misc.js:195:10
 'Props' defined at exports-component.js:5:5
 
@@ -47,7 +47,7 @@ Flags:
 **@see**  https://react.dev/reference/react/Component
 class Component<Props, State = void>
 
-'Component' defined at (lib) react.js:1261:18
+'Component' defined at (lib) react.js:1277:18
 
 react_component.js:14:29,14:37
 
@@ -71,10 +71,10 @@ component Fragment<Renders extends React$Node = void>(
   ref?: React.RefSetter<React.FragmentInstance>
 ) renders Renders
 
-'Fragment' defined at (lib) react.js:1366:4
+'Fragment' defined at (lib) react.js:1382:4
 'React$Node' defined at (lib) react.js:15:13
-'React.FragmentInstance' defined at (lib) react.js:1660:9
-'React.RefSetter' defined at (lib) react.js:1659:9
+'React.FragmentInstance' defined at (lib) react.js:1676:9
+'React.RefSetter' defined at (lib) react.js:1675:9
 
 react_component.js:34:7,34:14
 
@@ -96,7 +96,7 @@ Flags:
 **@see**  https://react.dev/reference/react/createElement
 (property) React.createElement: React$CreateElement
 
-'React$CreateElement' defined at (lib) react.js:357:20
+'React$CreateElement' defined at (lib) react.js:365:20
 
 react.js:4:7,4:19
 

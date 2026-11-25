@@ -71,8 +71,8 @@ References:
    test.js:10:19
      10| class Foo extends React.Component<{}> {
                            ^^^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/react.js:1322:28
-   1322|       static displayName?: ?string;
+   <BUILTINS>/react.js:1338:28
+   1338|       static displayName?: ?string;
                                     ^^^^^^^ [3]
    test.js:11:23
      11|   static displayName: string = 'Foo';
@@ -98,8 +98,8 @@ References:
    test.js:10:19
      10| class Foo extends React.Component<{}> {
                            ^^^^^^^^^^^^^^^^^^^ [1]
-   <BUILTINS>/react.js:1322:28
-   1322|       static displayName?: ?string;
+   <BUILTINS>/react.js:1338:28
+   1338|       static displayName?: ?string;
                                     ^^^^^^^ [3]
    test.js:11:23
      11|   static displayName: string = 'Foo';
@@ -123,14 +123,14 @@ https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-
          ^^^^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:1322:28
-   1322|       static displayName?: ?string;
+   <BUILTINS>/react.js:1338:28
+   1338|       static displayName?: ?string;
                                     ^^^^^^^ [1]
    test.js:14:35
      14| React.Component as {displayName?: ?string | number, ...}; // ERROR: the field is invariant.
                                            ^^^^^^^^^^^^^^^^ [2]
-   <BUILTINS>/react.js:1261:19
-   1261|     declare class Component<Props, State = void> {
+   <BUILTINS>/react.js:1277:19
+   1277|     declare class Component<Props, State = void> {
                            ^^^^^^^^^ [3]
    test.js:14:20
      14| React.Component as {displayName?: ?string | number, ...}; // ERROR: the field is invariant.

@@ -980,8 +980,8 @@ Cannot cast `props` to `empty` because `{foo: string}` [1] is incompatible with 
             ^^^^^
 
 References:
-   <BUILTINS>/react.js:588:68
-   588|   declare export type ComponentType<in P extends {...}> = component(...P);
+   <BUILTINS>/react.js:596:68
+   596|   declare export type ComponentType<in P extends {...}> = component(...P);
                                                                            ^^^^^^ [1]
    react_tests.js:19:14
     19|     props as empty; // error

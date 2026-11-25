@@ -1214,8 +1214,8 @@ with `{a: number, ...}` [3]. [incompatible-type]
           ^
 
 References:
-   <BUILTINS>/react.js:588:40
-   588|   declare export type ComponentType<in P extends {...}> = component(...P);
+   <BUILTINS>/react.js:596:40
+   596|   declare export type ComponentType<in P extends {...}> = component(...P);
                                                ^ [1]
    react.js:11:40
     11|   declare const a: React.ComponentType<P>;
@@ -1235,8 +1235,8 @@ incompatible with `empty` [3]. [incompatible-type]
            ^
 
 References:
-   <BUILTINS>/react.js:1261:29
-   1261|     declare class Component<Props, State = void> {
+   <BUILTINS>/react.js:1277:29
+   1277|     declare class Component<Props, State = void> {
                                      ^^^^^ [1]
    react.js:12:36
      12|   declare const b: React.Component<{readonly a: number, ...}>;

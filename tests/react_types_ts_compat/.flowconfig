@@ -1,0 +1,7 @@
+[options]
+all=true
+builtin_lib=default
+experimental.typescript_library_definition_support=true
+module.file_ext=.js
+module.file_ext=.ts
+node_modules_errors=true

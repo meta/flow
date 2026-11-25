@@ -252,8 +252,8 @@ Cannot return `x` because in property `ref` > type argument `T` [1]: `Subcompone
                  ^
 
 References:
-   <BUILTINS>/react.js:605:36
-   605|   declare export type RefSetter<in T> = React.RefSetter<T>;
+   <BUILTINS>/react.js:613:36
+   613|   declare export type RefSetter<in T> = React.RefSetter<T>;
                                            ^ [1]
    component_to_component.js:27:35
     27| ): component(ref: React.RefSetter<Subcomponent>, ...{...}) { // Error instance is covariant
@@ -358,8 +358,8 @@ References:
    create_element.js:21:32
      21| const refBad = React.createRef<string>();
                                         ^^^^^^ [2]
-   <BUILTINS>/react.js:1237:28
-   1237|     ): React$RefObject<T | null>;
+   <BUILTINS>/react.js:1253:28
+   1253|     ): React$RefObject<T | null>;
                                     ^^^^ [3]
 
 

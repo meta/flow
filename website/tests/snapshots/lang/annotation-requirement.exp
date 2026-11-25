@@ -170,8 +170,8 @@ References:
    -:7:30
       7|   declare const maybeString: ?string;
                                       ^^^^^^^ [1]
-   <BUILTINS>/react.js:1667:46
-   1667|     type ReactSetStateFunction<S> = (value: ((prevState: S) => S) | S) => void;
+   <BUILTINS>/react.js:1683:46
+   1683|     type ReactSetStateFunction<S> = (value: ((prevState: S) => S) | S) => void;
                                                       ^^^^^^^^^^^^^^^^^^^ [2]
    -:5:34
       5|   const [str, setStr] = useState("");
@@ -191,8 +191,8 @@ References:
    -:7:30
       7|   declare const maybeString: ?string;
                                       ^^^^^^^ [1]
-   <BUILTINS>/react.js:1667:46
-   1667|     type ReactSetStateFunction<S> = (value: ((prevState: S) => S) | S) => void;
+   <BUILTINS>/react.js:1683:46
+   1683|     type ReactSetStateFunction<S> = (value: ((prevState: S) => S) | S) => void;
                                                       ^^^^^^^^^^^^^^^^^^^ [2]
    -:5:34
       5|   const [str, setStr] = useState("");

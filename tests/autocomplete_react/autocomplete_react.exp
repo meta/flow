@@ -334,6 +334,10 @@ Flags: --pretty
     {"name":"DependencyList","type":"type DependencyList = ReadonlyArray<unknown>"},
     {"name":"DetailedHTMLProps","type":"type DetailedHTMLProps<E, T> = E"},
     {
+      "name":"DetailedReactHTMLElement",
+      "type":"type DetailedReactHTMLElement<out P extends React.HTMLAttributes<T>, out T> = React.ReactElement<P, React.HTMLElementType>"
+    },
+    {
       "name":"DetailsHTMLAttributes",
       "type":"type DetailsHTMLAttributes<T> = React.HTMLAttributes<T>"
     },
@@ -406,6 +410,10 @@ Flags: --pretty
     {
       "name":"FunctionComponent",
       "type":"type FunctionComponent<in P extends {...} = {...}> = component(...P)"
+    },
+    {
+      "name":"FunctionComponentElement",
+      "type":"type FunctionComponentElement<P extends {...}> = React.ReactElement<P, React.FunctionComponent<P>>"
     },
     {
       "name":"HTMLAttributeAnchorTarget",

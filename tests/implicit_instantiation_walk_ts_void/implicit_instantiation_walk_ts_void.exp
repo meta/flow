@@ -28,8 +28,8 @@ Cannot cast `act(...)` to `void` because `Promise<1>` [1] is incompatible with `
          ^^^^^^^^^^^^
 
 References:
-   <BUILTINS>/react.js:1166:69
-   1166|     declare export function act<T>(callback: () => T | Promise<T>): Promise<T>;
+   <BUILTINS>/react.js:1182:69
+   1182|     declare export function act<T>(callback: () => T | Promise<T>): Promise<T>;
                                                                              ^^^^^^^^^^ [1]
    promise_resolve.js:14:17
      14| act(() => 1) as void; // ERROR

@@ -7,8 +7,8 @@ Cannot create `bad` element because property `bad` is missing in `JSX.IntrinsicE
           ^^^
 
 References:
-   <BUILTINS>/react.js:1855:43
-   1855| declare type React$JSXIntrinsicElements = React.JSX.IntrinsicElements;
+   <BUILTINS>/react.js:1930:43
+   1930| declare type React$JSXIntrinsicElements = React.JSX.IntrinsicElements;
                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
@@ -39,8 +39,8 @@ Cannot create string element because an index signature declaring the expected k
           ^^^
 
 References:
-   <BUILTINS>/react.js:1855:43
-   1855| declare type React$JSXIntrinsicElements = React.JSX.IntrinsicElements;
+   <BUILTINS>/react.js:1930:43
+   1930| declare type React$JSXIntrinsicElements = React.JSX.IntrinsicElements;
                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
@@ -53,8 +53,8 @@ Cannot create `bad` element because property `bad` is missing in `JSX.IntrinsicE
           ^^^
 
 References:
-   <BUILTINS>/react.js:1855:43
-   1855| declare type React$JSXIntrinsicElements = React.JSX.IntrinsicElements;
+   <BUILTINS>/react.js:1930:43
+   1930| declare type React$JSXIntrinsicElements = React.JSX.IntrinsicElements;
                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 

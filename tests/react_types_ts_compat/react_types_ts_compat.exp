@@ -1,0 +1,143 @@
+Error ---------------------------------------------------------------------------------------------------- global.js:3:1
+
+Cannot cast `html` to `React.DetailedReactHTMLElement<{readonly role: string}, HTMLInputElement>` because in type
+argument `T` [1]: `HTMLDivElement` [2] is incompatible with `HTMLInputElement` [3]. For example, property `accept` is
+missing in `HTMLDivElement` [2] but exists in `HTMLInputElement` [3]. [incompatible-type]
+
+   global.js:3:1
+     3| html as React.DetailedReactHTMLElement<{readonly role: string}, HTMLInputElement>; // error
+        ^^^^
+
+References:
+   <BUILTINS>/react.js:203:70
+   203|   type DetailedReactHTMLElement<out P extends HTMLAttributes<T>, out T> = ReactElement<P, HTMLElementType>;
+                                                                             ^ [1]
+   global.js:1:77
+     1| declare const html: React.DetailedReactHTMLElement<{readonly role: string}, HTMLDivElement>;
+                                                                                    ^^^^^^^^^^^^^^ [2]
+   global.js:3:65
+     3| html as React.DetailedReactHTMLElement<{readonly role: string}, HTMLInputElement>; // error
+                                                                        ^^^^^^^^^^^^^^^^ [3]
+
+
+Error ------------------------------------------------------------------------------------------------------ test.js:8:1
+
+Cannot cast `1` to `JSX.Element` because `1` [1] is incompatible with `ExactReactElement_DEPRECATED<any, any>` [2].
+[incompatible-type]
+
+   test.js:8:1
+   8| 1 as JSX.Element; // error
+      ^ [1]
+
+References:
+   test.js:8:6
+   8| 1 as JSX.Element; // error
+           ^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------------ test.js:9:1
+
+Cannot call `jsx` because `React.CreateElement` [1] is not a function. [not-a-function]
+
+   test.js:9:1
+      9| jsx('div', {}); // error: like createElement, jsx cannot be called
+         ^^^
+
+References:
+   <BUILTINS>/react.js:1887:29
+   1887|   declare export const jsx: React$CreateElement;
+                                     ^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:10:1
+
+Cannot call `jsxDEV` because `React.CreateElement` [1] is not a function. [not-a-function]
+
+   test.js:10:1
+     10| jsxDEV('div', {}); // error
+         ^^^^^^
+
+References:
+   <BUILTINS>/react.js:1921:32
+   1921|   declare export const jsxDEV: React$CreateElement;
+                                        ^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:17:1
+
+Cannot cast `fce` to `React.ReactElement<{x: string}>` because in type argument `P` [1] > property `x`: `number` [2] is
+not exactly the same as `string` [3]. [incompatible-type]
+
+The above-mentioned two types must be the same because property `x` is invariantly typed. To fix the error,
+- Either make `{x: number}` [4] and `{x: string}` [5] exactly the same
+- Or make property `x` in `{x: string}` [5] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   test.js:17:1
+   17| fce as React.ReactElement<{x: string}>; // error
+       ^^^
+
+References:
+   <BUILTINS>/react.js:58:97
+   58| declare opaque type ExactReactElement_DEPRECATED<out ElementType extends React$ElementType, out P = React.ComponentProps<ElementType>>: {...};
+                                                                                                       ^ [1]
+   test.js:15:55
+   15| declare const fce: React.FunctionComponentElement<{x: number}>;
+                                                             ^^^^^^ [2]
+   test.js:17:31
+   17| fce as React.ReactElement<{x: string}>; // error
+                                     ^^^^^^ [3]
+   test.js:15:51
+   15| declare const fce: React.FunctionComponentElement<{x: number}>;
+                                                         ^^^^^^^^^^^ [4]
+   test.js:17:27
+   17| fce as React.ReactElement<{x: string}>; // error
+                                 ^^^^^^^^^^^ [5]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:21:1
+
+Cannot cast `html` to `React.ReactElement<{readonly role: string}, React.FC<{}>>` because in type argument
+`ElementType` [1] > at least one member of `React.HTMLElementType` [2]: `"a"` [2] is incompatible with
+`component()` [3]. [incompatible-type]
+
+   test.js:21:1
+    21| html as React.ReactElement<{readonly role: string}, React.FC<{}>>; // error
+        ^^^^
+
+References:
+   <BUILTINS>/react.js:58:54
+    58| declare opaque type ExactReactElement_DEPRECATED<out ElementType extends React$ElementType, out P = React.ComponentProps<ElementType>>: {...};
+                                                             ^^^^^^^^^^^ [1]
+   <BUILTINS>/react.js:203:91
+   203|   type DetailedReactHTMLElement<out P extends HTMLAttributes<T>, out T> = ReactElement<P, HTMLElementType>;
+                                                                                                  ^^^^^^^^^^^^^^^ [2]
+   test.js:21:53
+    21| html as React.ReactElement<{readonly role: string}, React.FC<{}>>; // error
+                                                            ^^^^^^^^^^^^ [3]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:25:43
+
+Cannot instantiate `React.DetailedReactHTMLElement` because in type argument `P`: `{role: number}` [1] is incompatible
+with `React.HTMLAttributes<HTMLDivElement>` [2]. For example, `number` [3] is incompatible with `void` [4].
+[incompatible-type]
+
+   test.js:25:43
+    25| type Bad = React.DetailedReactHTMLElement<{role: number}, HTMLDivElement>; // error
+                                                  ^^^^^^^^^^^^^^ [1]
+
+References:
+   <BUILTINS>/react.js:874:62
+   874|   declare export type DetailedReactHTMLElement<out P extends HTMLAttributes<T>, out T> = globalThis.React.DetailedReactHTMLElement<P, T>;
+                                                                     ^^^^^^^^^^^^^^^^^ [2]
+   test.js:25:50
+    25| type Bad = React.DetailedReactHTMLElement<{role: number}, HTMLDivElement>; // error
+                                                         ^^^^^^ [3]
+   <BUILTINS>/react-dom.d.ts:825:27
+   825|         role?: AriaRole | undefined;
+                                  ^^^^^^^^^ [4]
+
+
+
+Found 7 errors
