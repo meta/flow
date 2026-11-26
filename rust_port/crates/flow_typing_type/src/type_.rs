@@ -464,9 +464,8 @@ pub enum DefTInner {
     MixedT(MixedFlavor),
     NullT,
     VoidT,
-    /// TypeScript's `void`, under `experimental.ts_void`. It accepts `undefined`
-    /// but is assignable only to `void`, `any` and `unknown`. `VoidT` stays the
-    /// type of the value `undefined`.
+    /// TypeScript's `void`: it accepts `undefined` but is assignable only to
+    /// `void`, `any` and `unknown`. `VoidT` is the type of the value `undefined`.
     TsVoidT,
     SymbolT,
     UniqueSymbolT(UniqueSymbolTData),
@@ -12278,12 +12277,6 @@ pub mod ts_void {
 
     pub fn why(reason: Reason) -> Type {
         make(reason.replace_desc(flow_common::reason::VirtualReasonDesc::RTsVoid))
-    }
-
-    /// The type a `void` annotation at `tok` stands for: TypeScript's `void`
-    /// when `ts_void` is on, `undefined` otherwise.
-    pub fn annot_at(ts_void: bool, tok: ALoc) -> Type {
-        if ts_void { at(tok) } else { void::at(tok) }
     }
 }
 

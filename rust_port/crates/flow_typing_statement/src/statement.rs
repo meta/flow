@@ -20192,8 +20192,7 @@ pub fn mk_func_sig<'a>(
         (ast::function::ReturnAnnot::Missing(loc), _) if !has_nonvoid_return => {
             // As in TypeScript, a function that returns no value returns `void`, unless
             // its contextual return type admits `undefined`.
-            let void_t = if cx.ts_void()
-                && !matches!(kind, func::Kind::Ctor)
+            let void_t = if !matches!(kind, func::Kind::Ctor)
                 && !contextual_return_admits_undefined(cx, loc, &ret_reason)?
             {
                 type_::ts_void::why(ret_reason.dupe())
@@ -20369,11 +20368,7 @@ pub fn mk_func_sig<'a>(
                 value: type_::ValueReference::Reason(reason_of_t(return_type).dupe()),
             }));
             let void_reason = mk_reason(None, ret_loc.dupe());
-            let void_t = if cx.ts_void() {
-                type_::ts_void::make(void_reason)
-            } else {
-                type_::void::make(void_reason)
-            };
+            let void_t = type_::ts_void::make(void_reason);
             cx.add_post_inference_subtyping_check(return_type.dupe(), use_op, void_t);
         }
         _ => {}
@@ -20419,10 +20414,9 @@ pub fn mk_func_sig<'a>(
         ast::function::Effect::Hook => type_::ReactEffectType::HookDecl(cx.make_aloc_id(&loc)),
         ast::function::Effect::Arbitrary => type_::ReactEffectType::ArbitraryEffect,
     };
-    // Under `ts_void`, as in TypeScript, a function whose `return` statements have no argument
-    // returns `void` even when it can throw, unless its contextual return type admits `undefined`.
-    let ts_void_end = cx.ts_void()
-        && has_nonvoid_return
+    // As in TypeScript, a function whose `return` statements have no argument returns `void`
+    // even when it can throw, unless its contextual return type admits `undefined`.
+    let ts_void_end = has_nonvoid_return
         && matches!(kind, func::Kind::Ordinary | func::Kind::Async)
         && flow_parser_utils::signature_utils::procedure_decider::is_procedure(body)
         && match return_ {

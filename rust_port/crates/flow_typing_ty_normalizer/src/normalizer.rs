@@ -1164,14 +1164,6 @@ fn type_variable<'cx>(
     }
 }
 
-fn undefined_ty(env: &Env<'_, '_>) -> ALocTy {
-    Arc::new(if env.cx.ts_void() {
-        ty::Ty::Undefined
-    } else {
-        ty::Ty::Void
-    })
-}
-
 fn keys_t<'cx, I: NormalizerInput>(
     cont: fn(&mut Env<'_, 'cx>, &mut State, Option<IdKey>, &Type) -> Result<ALocTy, Error>,
     env: &mut Env<'_, 'cx>,
@@ -1521,7 +1513,7 @@ mod type_converter {
             }
             TypeInner::DefT(reason, def_t) => match def_t.deref() {
                 DefTInner::MixedT(_) => Ok(Arc::new(ty::Ty::Top)),
-                DefTInner::VoidT => Ok(undefined_ty(env)),
+                DefTInner::VoidT => Ok(Arc::new(ty::Ty::Undefined)),
                 DefTInner::TsVoidT => Ok(Arc::new(ty::Ty::TsVoid)),
                 DefTInner::NullT => Ok(Arc::new(ty::Ty::Null)),
                 DefTInner::NumGeneralT(_) => Ok(Arc::new(ty::Ty::Num)),

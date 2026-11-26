@@ -36,11 +36,11 @@ pub enum Ty<L> {
     Any(AnyKind<L>),
     Top,
     Bot(BotKind<L>),
-    /// `undefined`, as Flow spells it without `experimental.ts_void`.
+    /// Legacy spelling of `undefined`, retained for synthesized types.
     Void,
-    /// `undefined`, under `experimental.ts_void`.
+    /// `undefined`.
     Undefined,
-    /// TypeScript's `void`, under `experimental.ts_void`.
+    /// TypeScript's `void`.
     TsVoid,
     Null,
     Symbol,

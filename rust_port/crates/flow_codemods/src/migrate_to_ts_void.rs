@@ -5,21 +5,20 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-//! Prepares code for `experimental.ts_void`, under which `void` is TypeScript's `void`: a type
-//! that `undefined` flows into, but that flows into nothing but `void`, `any` and `unknown`.
+//! Migrates code to TypeScript's `void` semantics: `undefined` flows into `void`, but `void`
+//! flows into nothing but `void`, `any` and `unknown`.
 //!
-//! The codemod checks the code under the flag and keeps every `void` the flag accepts. It changes
-//! to `undefined` only the `void` annotations whose values the flag rejects, and annotates
-//! `: undefined` the functions that return no value whose inferred `void` is rejected. A function
-//! passed as a function type whose return type rejects its returned `void` keeps the `void`: the
-//! return type, which admits `undefined`, is changed to admit `void`, as TypeScript code types
-//! callbacks whose result is optional. Likewise, a type parameter keeps its `void` default when its
-//! bound rejects it: the bound is changed to admit `void`. Changing a `void` to `undefined` can make
-//! the values flowing into it rejected in turn, so the codemod checks again until nothing is
-//! rejected.
+//! The codemod changes to `undefined` only the `void` annotations whose values the checker
+//! rejects, and annotates `: undefined` the functions that return no value whose inferred `void`
+//! is rejected. A function passed as a function type whose return type rejects its returned
+//! `void` keeps the `void`: the return type, which admits `undefined`, is changed to admit `void`,
+//! as TypeScript code types callbacks whose result is optional. Likewise, a type parameter keeps
+//! its `void` default when its bound rejects it: the bound is changed to admit `void`. Changing a
+//! `void` to `undefined` can make the values flowing into it rejected in turn, so the codemod
+//! checks again until nothing is rejected.
 //!
-//! As in TypeScript, the flag also requires a `return` statement in a function whose return type
-//! doesn't include `void` and isn't `any` or `undefined`: such a function returns `undefined`
+//! As in TypeScript, the checker also requires a `return` statement in a function whose return
+//! type doesn't include `void` and isn't `any` or `undefined`: such a function returns `undefined`
 //! explicitly at its end, which it returned implicitly.
 
 use std::collections::BTreeMap;

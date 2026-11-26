@@ -2278,7 +2278,7 @@ pub enum Annot<Loc, T> {
     Any(Box<Loc>),
     Mixed(Box<Loc>),
     Empty(Box<Loc>),
-    /// `void`: TypeScript's `void` under `experimental.ts_void`, `undefined` otherwise.
+    /// TypeScript's `void`.
     Void(Box<Loc>),
     Undefined(Box<Loc>),
     Null(Box<Loc>),

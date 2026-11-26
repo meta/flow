@@ -671,18 +671,12 @@ fn funt_to_funt_check_this_ignore(_use_op: &UseOp) -> Result<(), FlowJsException
 }
 
 // As in TypeScript, a function type returning `void` accepts functions with
-// any return type. Without `experimental.ts_void`, only a TS-declared one
-// does, and `void` is `undefined` there. `concretize` gives the types the
-// upper return type stands for.
+// any return type. `concretize` gives the types the upper return type stands for.
 pub(crate) fn ignores_return<'cx>(
     cx: &mut Context<'cx>,
     upper: &flow_typing_type::type_::FunType,
     concretize: impl FnOnce(&mut Context<'cx>, &Type) -> Result<Vec<Type>, FlowJsException>,
 ) -> Result<bool, FlowJsException> {
-    if !cx.ts_void() {
-        return Ok(upper.strictness_kind.is_typescript_loose()
-            && matches!(upper.return_t.deref(), DefT(_, deref!(VoidT))));
-    }
     let ts = concretize(cx, &upper.return_t)?;
     Ok(!ts.is_empty()
         && ts

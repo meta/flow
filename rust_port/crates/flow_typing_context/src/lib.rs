@@ -1802,11 +1802,6 @@ impl<'a> Context<'a> {
         self.inner().metadata.frozen.tslib_syntax || self.is_global_lib_context()
     }
 
-    /// Whether `void` is TypeScript's `void` rather than `undefined`.
-    pub fn ts_void(&self) -> bool {
-        true
-    }
-
     /// Whether TypeScript's definite assignment assertions (`let x!: T`, `value!: T`) are
     /// enabled. TypeScript files always allow them.
     pub fn definite_assignment_assertions(&self) -> bool {

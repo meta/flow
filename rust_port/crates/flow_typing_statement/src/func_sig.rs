@@ -538,12 +538,8 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
                 }
                 AnnotatedOrInferred::Inferred(_) => {
                     let reason = reason.dupe().replace_desc(reason::VirtualReasonDesc::RVoid);
-                    // Under `ts_void`, as the `TNext = void` of the `Iterator` library types.
-                    if cx.ts_void() {
-                        type_::ts_void::why(reason)
-                    } else {
-                        type_::void::make(reason)
-                    }
+                    // Match the `TNext = void` default of the `Iterator` library types.
+                    type_::ts_void::why(reason)
                 }
             };
             let return_targ = flow_typing_tvar::mk(cx, reason.dupe());
@@ -893,13 +889,9 @@ pub fn toplevels<'a, C: crate::func_params_intf::Config>(
     if let Some((maybe_exhaustively_checked_ts, _, (void_t, use_op))) = &exhaust {
         let ts = maybe_exhaustively_checked_ts.borrow();
         if type_operation_utils::type_assertions::non_exhaustive(cx, &ts)? {
-            // Under `experimental.ts_void`, as in TypeScript, a function with a return annotation
-            // and no `return` statement is checked by what it returns rather than its end's
-            // `undefined`.
-            if cx.ts_void()
-                && no_return
-                && let AnnotatedOrInferred::Annotated(_) = x.return_t
-            {
+            // As in TypeScript, a function with a return annotation and no `return` statement
+            // is checked by what it returns rather than its end's `undefined`.
+            if no_return && let AnnotatedOrInferred::Annotated(_) = x.return_t {
                 if !may_end_without_return(cx, &reason, kind, &end_t)? {
                     let void_t = type_::ts_void::at(type_util::loc_of_t(&return_t).dupe());
                     flow_js_utils::add_output_non_speculating(

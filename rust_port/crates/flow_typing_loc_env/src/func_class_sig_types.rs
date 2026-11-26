@@ -161,8 +161,8 @@ pub mod func {
         pub ret_annot_loc: ALoc,
         pub statics: Option<Type>,
         pub literal: bool,
-        /// Under `experimental.ts_void`, whether the function returns `void` rather than
-        /// `undefined` at its end and from its `return` statements without an argument.
+        /// Whether the function returns `void` rather than `undefined` at its end
+        /// and from its `return` statements without an argument.
         pub ts_void_end: bool,
     }
 

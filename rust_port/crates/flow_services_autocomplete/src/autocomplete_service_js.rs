@@ -2186,17 +2186,12 @@ fn autocomplete_member(
                         ty::PropSource::PrimitiveProto(_) => 1,
                         _ => 0,
                     };
-                    let undefined = if typing.cx.ts_void() {
-                        Ty::Undefined
-                    } else {
-                        Ty::Void
-                    };
                     let opt_chain_ty = ty_utils::simplify_type(
                         true,
                         None,
                         Arc::new(Ty::Union(
                             false,
-                            Arc::new(undefined),
+                            Arc::new(Ty::Undefined),
                             info.ty.dupe(),
                             Arc::from([]),
                         )),

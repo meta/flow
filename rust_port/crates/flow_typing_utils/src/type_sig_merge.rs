@@ -521,7 +521,7 @@ fn eval<'cx>(
 
 fn async_void_return<'cx>(cx: &mut Context<'cx>, loc: ALoc) -> Type {
     let reason = reason::mk_reason(None, loc.dupe());
-    let targs = vec![type_::ts_void::annot_at(cx.ts_void(), loc)];
+    let targs = vec![type_::ts_void::at(loc)];
     // The async function being merged applies `Promise`.
     let strictness_kind = cx.type_strictness_kind();
     flow_js_utils::lookup_builtin_typeapp(cx, reason, "Promise", targs, strictness_kind)
@@ -2200,7 +2200,7 @@ fn merge_annot<'cx>(
         Annot::Any(deref!(loc)) => type_::any_t::at(type_::AnySource::AnnotatedAny, loc.dupe()),
         Annot::Mixed(deref!(loc)) => type_::mixed_t::at(loc.dupe()),
         Annot::Empty(deref!(loc)) => type_::empty_t::at(loc.dupe()),
-        Annot::Void(deref!(loc)) => type_::ts_void::annot_at(cx.ts_void(), loc.dupe()),
+        Annot::Void(deref!(loc)) => type_::ts_void::at(loc.dupe()),
         Annot::Undefined(deref!(loc)) => type_::void::at(loc.dupe()),
         Annot::Null(deref!(loc)) => type_::null::at(loc.dupe()),
         Annot::Symbol(deref!(loc)) => type_::symbol_t::at(loc.dupe()),
