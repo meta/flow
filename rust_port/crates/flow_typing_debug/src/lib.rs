@@ -1736,7 +1736,7 @@ fn dump_use_t_(depth: u32, tvars: &mut BTreeSet<i32>, cx: &Context, use_t: &UseT
                 ..
             }),
         ) => {
-            let nexts_str: Vec<String> = nexts.iter().map(|t| kid(tvars, t)).collect();
+            let nexts_str: Vec<String> = nexts.iter().map(|next| kid(tvars, &next.t)).collect();
             let extra = format!(
                 "[{}], {}, {}",
                 nexts_str.join("; "),

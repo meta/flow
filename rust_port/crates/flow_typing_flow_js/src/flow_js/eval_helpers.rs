@@ -10,6 +10,7 @@ use std::rc::Rc;
 
 use flow_typing_flow_js_env::FlowJsEnv;
 use flow_typing_type::type_::ArrRestTData;
+use flow_typing_type::type_::Chain;
 use flow_typing_type::type_::ConditionalTData;
 use flow_typing_type::type_::DestructorConditionalTypeData;
 use flow_typing_type::type_::DestructorMappedTypeData;
@@ -91,6 +92,7 @@ pub(super) fn eval_selector<'cx>(
                     lookup_action: Box::new(action),
                     method_accessible: false,
                     ids: Some(FlowOrdSet::new()),
+                    chain: Chain::new(),
                     ignore_dicts: false,
                 })))
             };

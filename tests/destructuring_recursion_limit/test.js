@@ -1,5 +1,6 @@
 declare const B: Class<C>;
 class C extends B {}
 
-C.missing; // ERROR
-const {missing} = C; // ERROR
+// The statics chain cycles: the lookup ends where it does, without an answer.
+C.missing;
+const {missing} = C;

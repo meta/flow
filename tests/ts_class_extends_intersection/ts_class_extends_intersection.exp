@@ -1,3 +1,236 @@
+Error --------------------------------------------------------------------------------------------------- cycles.js:38:7
+
+Cannot get `Cycle.nope` because property `nope` is missing in `{name: string, ...}` [1]. [prop-missing]
+
+   cycles.js:38:7
+   38| Cycle.nope; // error
+             ^^^^
+
+References:
+   cycles.d.ts:7:22
+    7| export declare class Cycle extends ROther {
+                            ^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------------- cycles.js:39:12
+
+Cannot get `LocalCycle.nope` because property `nope` is missing in `{name: string, ...}` [1]. [prop-missing]
+
+   cycles.js:39:12
+   39| LocalCycle.nope; // error
+                  ^^^^
+
+References:
+   cycles.js:23:7
+   23| class LocalCycle extends ROther {
+             ^^^^^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------------- cycles.js:40:10
+
+Cannot get `LibCycle.nope` because property `nope` is missing in `{name: string, ...}` [1]. [prop-missing]
+
+   cycles.js:40:10
+   40| LibCycle.nope; // error
+                ^^^^
+
+References:
+   lib/cycle.js:5:15
+    5| declare class LibCycle extends LibCycleBase {}
+                     ^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------------- cycles.js:41:7
+
+Cannot get `State.nope` because property `nope` is missing in `{name: string, ...}` [1]. [prop-missing]
+
+   cycles.js:41:7
+   41| State.nope; // error
+             ^^^^
+
+References:
+   record.js:4:14
+    4| export class State extends StateRecord {
+                    ^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------------- cycles.js:42:3
+
+Cannot get `C.nope` because property `nope` is missing in `{name: string, ...}` [1]. [prop-missing]
+
+   cycles.js:42:3
+   42| C.nope; // error
+         ^^^^
+
+References:
+   record.js:12:14
+   12| export class C extends R {}
+                    ^ [1]
+
+
+Error -------------------------------------------------------------------------------------------------- cycles.js:50:11
+
+Cannot get `mixesSelf.nope` because property `nope` is missing in `MixesSelf` [1]. [prop-missing]
+
+   cycles.js:50:11
+   50| mixesSelf.nope; // error
+                 ^^^^
+
+References:
+   cycles.js:48:26
+   48| declare const mixesSelf: MixesSelf;
+                                ^^^^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------------- cycles.js:57:22
+
+Cannot get `(new LocalMixesSelf()).nope` because property `nope` is missing in `LocalMixesSelf` [1]. [prop-missing]
+
+   cycles.js:57:22
+   57| new LocalMixesSelf().nope; // error
+                            ^^^^
+
+References:
+   cycles.js:57:1
+   57| new LocalMixesSelf().nope; // error
+       ^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------------- cycles.js:60:1
+
+Cannot cast `new LocalMixesSelf()` to `MI` because property `mi` is missing in `LocalMixesSelf` [1] but exists in
+`MI` [2]. [incompatible-type]
+
+   cycles.js:60:1
+   60| new LocalMixesSelf() as MI; // error
+       ^^^^^^^^^^^^^^^^^^^^ [1]
+
+References:
+   cycles.js:60:25
+   60| new LocalMixesSelf() as MI; // error
+                               ^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------------- cycles.js:62:6
+
+Cannot extend `LocalMixesSelf` [1] with `ExtendsMixesSelf` [2] because in property `o`: `string` [3] is incompatible
+with `number` [4]. [incompatible-type]
+
+   cycles.js:62:6
+   62|   o: string; // error: string ~> number
+            ^^^^^^ [3]
+
+References:
+   cycles.js:61:32
+   61| class ExtendsMixesSelf extends LocalMixesSelf {
+                                      ^^^^^^^^^^^^^^ [1]
+   cycles.js:61:1
+       v----------------------------------------------
+   61| class ExtendsMixesSelf extends LocalMixesSelf {
+   62|   o: string; // error: string ~> number
+   63| }
+       ^ [2]
+   cycles.js:14:6
+   14|   o: number;
+            ^^^^^^ [4]
+
+
+Error --------------------------------------------------------------------------------------------------- cycles.js:69:1
+
+Cannot cast `(new SubWraps(...)).w` to `number` because `string` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   cycles.js:69:1
+   69| new SubWraps(1).w as number; // error: string ~> number
+       ^^^^^^^^^^^^^^^^^
+
+References:
+   cycles.js:68:34
+   68| class SubWraps extends WrapsSelf<string> {}
+                                        ^^^^^^ [1]
+   cycles.js:69:22
+   69| new SubWraps(1).w as number; // error: string ~> number
+                            ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------------- cycles.js:70:14
+
+Cannot call `SubWraps` with `'bad'` bound to `x` because `"bad"` [1] is incompatible with `number` [2].
+[incompatible-type]
+
+   cycles.js:70:14
+   70| new SubWraps('bad'); // error: string ~> number
+                    ^^^^^ [1]
+
+References:
+   cycles.d.ts:37:34
+   37| declare const RWraps: new <U>(x: number) => U;
+                                        ^^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------------- cycles.js:108:8
+
+Cannot get `cycleA.nope` because property `nope` is missing in `CycleA` [1]. [prop-missing]
+
+   cycles.js:108:8
+   108| cycleA.nope; // error
+               ^^^^
+
+References:
+   cycles.js:105:23
+   105| declare const cycleA: CycleA;
+                              ^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------------- cycles.js:109:1
+
+Cannot cast `cycleA` to `Other` because `CycleA` [1] is incompatible with `Other` [2]. [incompatible-type]
+
+   cycles.js:109:1
+   109| cycleA as Other; // error
+        ^^^^^^
+
+References:
+   cycles.js:105:23
+   105| declare const cycleA: CycleA;
+                              ^^^^^^ [1]
+   cycles.js:109:11
+   109| cycleA as Other; // error
+                  ^^^^^ [2]
+
+
+Error -------------------------------------------------------------------------------------------------- cycles.js:127:9
+
+Cannot get `wrapped.nope` because property `nope` is missing in `Wraps<Wraps<X>>` [1]. [prop-missing]
+
+   cycles.js:127:9
+   127| wrapped.nope; // error
+                ^^^^
+
+References:
+   cycles.js:125:24
+   125| declare const wrapped: Wraps<Wraps<X>>;
+                               ^^^^^^^^^^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------------- cycles.js:128:1
+
+Cannot cast `wrapped` to `Y` because property `y` is missing in `Wraps<Wraps<X>>` [1] but exists in `Y` [2].
+[incompatible-type]
+
+   cycles.js:128:1
+   128| wrapped as Y; // error
+        ^^^^^^^
+
+References:
+   cycles.js:125:24
+   125| declare const wrapped: Wraps<Wraps<X>>;
+                               ^^^^^^^^^^^^^^^ [1]
+   cycles.js:128:12
+   128| wrapped as Y; // error
+                   ^ [2]
+
+
 Error -------------------------------------------------------------------------------------------------- importer.js:5:1
 
 Cannot cast `assigned.a` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
@@ -275,4 +508,4 @@ References:
 
 
 
-Found 17 errors
+Found 32 errors

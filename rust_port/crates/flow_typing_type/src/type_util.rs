@@ -945,6 +945,7 @@ pub fn util_use_op_of_use_t<T, CX: ContextFamily>(
         UseTInner::ExtendsUseT(data) => {
             let r = data.reason.dupe();
             let ts = data.targs.clone();
+            let chain = data.chain.dupe();
             let a = data.true_t.dupe();
             let b = data.false_t.dupe();
             call_util(&data.use_op, &move |op| {
@@ -952,6 +953,7 @@ pub fn util_use_op_of_use_t<T, CX: ContextFamily>(
                     use_op: op,
                     reason: r.dupe(),
                     targs: ts.clone(),
+                    chain: chain.dupe(),
                     true_t: a.dupe(),
                     false_t: b.dupe(),
                 })))
@@ -2580,6 +2582,7 @@ pub fn extends_use_type<CX: ContextFamily>(use_op: UseOp, l: Type, u: Type) -> U
         use_op,
         reason,
         targs: Vec::new().into(),
+        chain: crate::type_::Chain::new(),
         true_t: l,
         false_t: u,
     })))

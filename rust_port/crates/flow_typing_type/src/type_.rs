@@ -2539,13 +2539,57 @@ pub struct LookupTData {
     /// the indexer. Travels alongside `lookup_kind`, which keeps describing what should
     /// happen if nothing at all is found.
     pub indexer_fallback: Option<Box<IndexerFallbackData>>,
-    pub try_ts_on_failure: Rc<[Type]>,
+    pub try_ts_on_failure: Rc<[ChainAlternative]>,
     pub propref: Box<PropRef>,
     pub lookup_action: Box<LookupAction>,
     pub ids: Option<properties::Set>,
+    /// The prototype chain followed so far; see [ChainAlternative].
+    pub chain: Chain,
     pub method_accessible: bool,
     pub ignore_dicts: bool,
 }
+
+/// What a walk up a prototype chain ([LookupTData], [ExtendsUseTData]) moves on to when the chain
+/// it is on ends without an answer: another member of an intersection it passed, or an interface
+/// that a class it passed implements.
+///
+/// A walk records the instances and objects on its chain ([ChainLink]). One it reaches again
+/// means that the chain is cyclic: the walk still searches it, as a re-pointed copy of a base
+/// can carry properties of its own, but the rest of the chain holds nothing new. An alternative
+/// continues the chain it branched off from: the chain of an earlier alternative is not part of
+/// it.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct ChainAlternative {
+    pub t: Type,
+    pub chain: Chain,
+}
+
+/// An instance or an object on a prototype chain: its own property map, and for an instance its
+/// type arguments, since instances of one generic class can share their property map.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct ChainLink {
+    props: properties::Id,
+    type_args: Rc<[(SubstName, Reason, Type, Option<Polarity>)]>,
+}
+
+impl ChainLink {
+    pub fn of_instance(inst: &InstType) -> Self {
+        Self {
+            props: inst.own_props.dupe(),
+            type_args: inst.type_args.dupe(),
+        }
+    }
+
+    pub fn of_object(props_tmap: &properties::Id) -> Self {
+        Self {
+            props: props_tmap.dupe(),
+            type_args: Rc::from([]),
+        }
+    }
+}
+
+/// The instances and objects a walk up a prototype chain has passed; see [ChainAlternative].
+pub type Chain = FlowOrdSet<ChainLink>;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ArrRestTData {
@@ -2598,7 +2642,9 @@ pub struct CondTData {
 pub struct ExtendsUseTData {
     pub use_op: UseOp,
     pub reason: Reason,
-    pub targs: Rc<[Type]>,
+    pub targs: Rc<[ChainAlternative]>,
+    /// The prototype chain followed so far; see [ChainAlternative].
+    pub chain: Chain,
     pub true_t: Type,
     pub false_t: Type,
 }

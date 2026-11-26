@@ -38,6 +38,9 @@ use flow_typing_type::type_::CallElemTData;
 use flow_typing_type::type_::CallMData;
 use flow_typing_type::type_::CallTData;
 use flow_typing_type::type_::CalleeInstantiation;
+use flow_typing_type::type_::Chain;
+use flow_typing_type::type_::ChainAlternative;
+use flow_typing_type::type_::ChainLink;
 use flow_typing_type::type_::ClassExtendsCheckData;
 use flow_typing_type::type_::ClassImplementsCheckData;
 use flow_typing_type::type_::ConcretizeTData;
@@ -620,6 +623,32 @@ fn specialize_constructor<'cx>(
         continue_(cx, env, trace, l, upper)?;
     }
     Ok(())
+}
+
+/// Where a walk up a prototype chain ([LookupTData], [ExtendsUseTData]) goes from the instance or
+/// object `link` it has just searched: up to `next`, with `link` added to the chain. A walk that
+/// has passed `link` before has gone around a cycle, and what lies beyond holds nothing it has
+/// not seen ([ChainAlternative]): it moves on to the alternatives it has left, as at the end of a
+/// chain, and with none left it ends without an answer, as a repeated constraint does.
+fn chain_next(
+    chain: &Chain,
+    link: ChainLink,
+    reason: &Reason,
+    next: &Type,
+    alternatives_left: bool,
+) -> Option<(Type, Chain)> {
+    if chain.contains(&link) {
+        alternatives_left.then(|| {
+            (
+                Type::new(DefT(reason.dupe(), DefT::new(NullT))),
+                chain.dupe(),
+            )
+        })
+    } else {
+        let mut chain = chain.dupe();
+        chain.insert(link);
+        Some((next.dupe(), chain))
+    }
 }
 
 /// Extends a value with a construct signature: the instance the derived class inherits from is
@@ -3631,6 +3660,7 @@ fn __flow_impl<'cx>(
                     propref,
                     lookup_action,
                     ids,
+                    chain,
                     method_accessible,
                     ignore_dicts,
                 }),
@@ -3643,8 +3673,14 @@ fn __flow_impl<'cx>(
             // up in the first element of ts, pushing the rest into the list
             // try_ts_on_failure (see below).
             let hd = &ts[0];
-            let mut new_try_ts = ts[1..].to_vec();
-            new_try_ts.extend(try_ts_on_failure.iter().duped());
+            let mut new_try_ts: Vec<_> = ts[1..]
+                .iter()
+                .map(|t| ChainAlternative {
+                    t: t.dupe(),
+                    chain: chain.dupe(),
+                })
+                .collect();
+            new_try_ts.extend(try_ts_on_failure.iter().cloned());
             rec_flow(
                 cx,
                 env,
@@ -3659,6 +3695,7 @@ fn __flow_impl<'cx>(
                         propref: propref.clone(),
                         lookup_action: lookup_action.clone(),
                         ids: ids.dupe(),
+                        chain: chain.dupe(),
                         method_accessible: *method_accessible,
                         ignore_dicts: *ignore_dicts,
                     }))),
@@ -3767,6 +3804,7 @@ fn __flow_impl<'cx>(
                     use_op,
                     reason,
                     targs: try_ts_on_failure,
+                    chain,
                     true_t: ext_l,
                     false_t: ext_u,
                 }),
@@ -3774,9 +3812,13 @@ fn __flow_impl<'cx>(
         ) => {
             let mut members = rep.members_iter();
             let t = members.next().unwrap();
-            let ts: Vec<_> = members.duped().collect();
-            let mut new_try_ts = ts;
-            new_try_ts.extend(try_ts_on_failure.iter().duped());
+            let mut new_try_ts: Vec<_> = members
+                .map(|t| ChainAlternative {
+                    t: t.dupe(),
+                    chain: chain.dupe(),
+                })
+                .collect();
+            new_try_ts.extend(try_ts_on_failure.iter().cloned());
             rec_flow(
                 cx,
                 env,
@@ -3787,6 +3829,7 @@ fn __flow_impl<'cx>(
                         use_op: use_op.dupe(),
                         reason: reason.dupe(),
                         targs: new_try_ts.into(),
+                        chain: chain.dupe(),
                         true_t: ext_l.dupe(),
                         false_t: ext_u.dupe(),
                     }))),
@@ -6291,6 +6334,7 @@ fn __flow_impl<'cx>(
                 use_op,
                 reason: reason_op,
                 targs: try_ts_on_failure,
+                chain,
                 true_t: ext_l,
                 false_t: ext_u @ deref!(DefT(reason_u, deref!(InstanceT(inst_super_t)))),
             })),
@@ -6419,24 +6463,41 @@ fn __flow_impl<'cx>(
                 // implementation, thereby short-circuiting a potentially expensive
                 // structural test at the use site.
                 let mut combined = try_ts_on_failure.to_vec();
-                combined.extend(implements.iter().duped());
-                let use_t = UseT::new(ExtendsUseT(Box::new(ExtendsUseTData {
-                    use_op: use_op.dupe(),
-                    reason: reason_op.dupe(),
-                    targs: combined.into(),
-                    true_t: ext_l.dupe(),
-                    false_t: ext_u.dupe(),
-                })));
-                let repos_use = UseT::new(ReposLowerT {
-                    reason: reason.dupe(),
-                    use_desc: false,
-                    use_t: Box::new(use_t),
-                });
-                return Ok(Some(TailCall::RecFlow(
-                    super_.dupe(),
-                    repos_use,
-                    DepthTrace::rec_trace(trace),
-                )));
+                let next_chain = {
+                    let mut chain = chain.dupe();
+                    chain.insert(ChainLink::of_instance(inst));
+                    chain
+                };
+                combined.extend(implements.iter().map(|t| ChainAlternative {
+                    t: t.dupe(),
+                    chain: next_chain.dupe(),
+                }));
+                if let Some((next, chain)) = chain_next(
+                    chain,
+                    ChainLink::of_instance(inst),
+                    reason,
+                    super_,
+                    !combined.is_empty(),
+                ) {
+                    let use_t = UseT::new(ExtendsUseT(Box::new(ExtendsUseTData {
+                        use_op: use_op.dupe(),
+                        reason: reason_op.dupe(),
+                        targs: combined.into(),
+                        chain,
+                        true_t: ext_l.dupe(),
+                        false_t: ext_u.dupe(),
+                    })));
+                    let repos_use = UseT::new(ReposLowerT {
+                        reason: reason.dupe(),
+                        use_desc: false,
+                        use_t: Box::new(use_t),
+                    });
+                    return Ok(Some(TailCall::RecFlow(
+                        next,
+                        repos_use,
+                        DepthTrace::rec_trace(trace),
+                    )));
+                }
             }
         }
 
@@ -6925,6 +6986,7 @@ fn __flow_impl<'cx>(
                     propref,
                     lookup_action: action,
                     ids,
+                    chain,
                     method_accessible,
                     ignore_dicts,
                 }),
@@ -7004,25 +7066,35 @@ fn __flow_impl<'cx>(
                         new_set
                     }
                 });
-                rec_flow(
-                    cx,
-                    env,
-                    trace,
-                    (
-                        super_,
-                        &UseT::new(LookupT(Box::new(LookupTData {
-                            reason: reason_op.dupe(),
-                            lookup_kind: kind.clone(),
-                            indexer_fallback,
-                            try_ts_on_failure: try_ts_on_failure.clone(),
-                            propref: Box::new(propref),
-                            lookup_action: Box::new(action),
-                            ids: new_ids,
-                            method_accessible: *method_accessible,
-                            ignore_dicts: *ignore_dicts,
-                        }))),
-                    ),
-                )?;
+                let alternatives_left = !try_ts_on_failure.is_empty();
+                if let Some((next, chain)) = chain_next(
+                    chain,
+                    ChainLink::of_instance(inst),
+                    reason_op,
+                    super_,
+                    alternatives_left,
+                ) {
+                    rec_flow(
+                        cx,
+                        env,
+                        trace,
+                        (
+                            &next,
+                            &UseT::new(LookupT(Box::new(LookupTData {
+                                reason: reason_op.dupe(),
+                                lookup_kind: kind.clone(),
+                                indexer_fallback,
+                                try_ts_on_failure: try_ts_on_failure.clone(),
+                                propref: Box::new(propref),
+                                lookup_action: Box::new(action),
+                                ids: new_ids,
+                                chain,
+                                method_accessible: *method_accessible,
+                                ignore_dicts: *ignore_dicts,
+                            }))),
+                        ),
+                    )?;
+                }
             }
         }
         // ********************************
@@ -7086,6 +7158,7 @@ fn __flow_impl<'cx>(
                         propref: propref.clone(),
                         lookup_action: Box::new(lookup_action),
                         ids: None,
+                        chain: Chain::new(),
                         method_accessible,
                         ignore_dicts: true,
                     }))),
@@ -7579,6 +7652,7 @@ fn __flow_impl<'cx>(
                     propref,
                     lookup_action: action,
                     ids,
+                    chain,
                     method_accessible,
                     ignore_dicts,
                 }),
@@ -7627,25 +7701,34 @@ fn __flow_impl<'cx>(
                     new_set.insert(o.props_tmap.dupe());
                     new_set
                 });
-                rec_flow(
-                    cx,
-                    env,
-                    trace,
-                    (
-                        &o.proto_t,
-                        &UseT::new(LookupT(Box::new(LookupTData {
-                            reason: reason_op.dupe(),
-                            lookup_kind: lookup_kind.clone(),
-                            indexer_fallback: indexer_fallback.clone(),
-                            try_ts_on_failure: try_ts_on_failure.clone(),
-                            propref: Box::new(propref),
-                            lookup_action: Box::new(action),
-                            method_accessible: *method_accessible,
-                            ids: new_ids,
-                            ignore_dicts: *ignore_dicts,
-                        }))),
-                    ),
-                )?;
+                if let Some((next, chain)) = chain_next(
+                    chain,
+                    ChainLink::of_object(&o.props_tmap),
+                    reason_op,
+                    &o.proto_t,
+                    !try_ts_on_failure.is_empty(),
+                ) {
+                    rec_flow(
+                        cx,
+                        env,
+                        trace,
+                        (
+                            &next,
+                            &UseT::new(LookupT(Box::new(LookupTData {
+                                reason: reason_op.dupe(),
+                                lookup_kind: lookup_kind.clone(),
+                                indexer_fallback: indexer_fallback.clone(),
+                                try_ts_on_failure: try_ts_on_failure.clone(),
+                                propref: Box::new(propref),
+                                lookup_action: Box::new(action),
+                                method_accessible: *method_accessible,
+                                ids: new_ids,
+                                chain,
+                                ignore_dicts: *ignore_dicts,
+                            }))),
+                        ),
+                    )?;
+                }
             }
         }
         (
@@ -10300,6 +10383,7 @@ fn __flow_impl<'cx>(
                         }))),
                         method_accessible,
                         ids: Some(Default::default()),
+                        chain: Chain::new(),
                         ignore_dicts: false,
                     }))),
                 ),
@@ -10475,6 +10559,7 @@ fn __flow_impl<'cx>(
                     lookup_action,
                     method_accessible,
                     ids,
+                    chain: _,
                     ignore_dicts,
                 }),
             ),
@@ -10489,7 +10574,7 @@ fn __flow_impl<'cx>(
                 env,
                 trace,
                 (
-                    next,
+                    &next.t,
                     &UseT::new(LookupT(Box::new(LookupTData {
                         reason: reason.dupe(),
                         lookup_kind: lookup_kind.clone(),
@@ -10499,6 +10584,7 @@ fn __flow_impl<'cx>(
                         lookup_action: lookup_action.clone(),
                         method_accessible: *method_accessible,
                         ids: ids.dupe(),
+                        chain: next.chain.dupe(),
                         ignore_dicts: *ignore_dicts,
                     }))),
                 ),
@@ -10523,6 +10609,7 @@ fn __flow_impl<'cx>(
                     ))),
                     method_accessible,
                     ids,
+                    chain,
                     ignore_dicts,
                 }),
             ),
@@ -10560,6 +10647,7 @@ fn __flow_impl<'cx>(
                                 }),
                             )),
                             ids: ids.dupe(),
+                            chain: chain.dupe(),
                             method_accessible: *method_accessible,
                             ignore_dicts: *ignore_dicts,
                         }))),
@@ -10586,6 +10674,7 @@ fn __flow_impl<'cx>(
                         tout,
                     }))),
                     ids: _,
+                    chain: _,
                     method_accessible: _,
                     ignore_dicts: _,
                 }),
@@ -10619,6 +10708,7 @@ fn __flow_impl<'cx>(
                     lookup_action: deref!(LookupAction::WriteProp(_)),
                     method_accessible: _,
                     ids: _,
+                    chain: _,
                     ignore_dicts: _,
                 }),
             ),
@@ -10693,6 +10783,7 @@ fn __flow_impl<'cx>(
                     lookup_action: action,
                     method_accessible: _,
                     ids,
+                    chain: _,
                     ignore_dicts: _,
                 }),
             ),
@@ -10748,6 +10839,7 @@ fn __flow_impl<'cx>(
                     &UseT::new(LookupT(Box::new(LookupTData {
                         propref: Box::new(propref),
                         lookup_action: Box::new(action),
+                        chain: Chain::new(),
                         ..data.clone()
                     }))),
                 ),
@@ -10765,6 +10857,7 @@ fn __flow_impl<'cx>(
                     lookup_action: action,
                     method_accessible: _,
                     ids,
+                    chain: _,
                     ignore_dicts: _,
                 }),
             ),
@@ -10795,6 +10888,7 @@ fn __flow_impl<'cx>(
                     lookup_action: action,
                     method_accessible: _,
                     ids: _,
+                    chain: _,
                     ignore_dicts: _,
                     indexer_fallback: _,
                 }),
@@ -10816,6 +10910,7 @@ fn __flow_impl<'cx>(
                     lookup_action: action,
                     method_accessible: _,
                     ids: _,
+                    chain: _,
                     ignore_dicts: _,
                 }),
             ),
@@ -10968,32 +11063,44 @@ fn __flow_impl<'cx>(
                     use_op,
                     reason: reason_op,
                     targs: ts,
+                    chain: _,
                     true_t: t1,
                     false_t: t2,
                 }),
             ),
         ) => {
-            for t in ts.iter() {
+            for next in ts.iter() {
                 let any = flow_js_utils::any_result(l, reason_op.dupe());
-                rec_flow_t(cx, env, trace, use_op.dupe(), (&any, t))?;
+                rec_flow_t(cx, env, trace, use_op.dupe(), (&any, &next.t))?;
             }
             let any1 = flow_js_utils::any_result(l, reason_op.dupe());
             rec_flow_t(cx, env, trace, use_op.dupe(), (&any1, t1))?;
             let any2 = flow_js_utils::any_result(l, reason_op.dupe());
             rec_flow_t(cx, env, trace, use_op.dupe(), (&any2, t2))?;
         }
-        (DefT(lreason, deref!(ObjT(obj))), ExtendsUseT(..)) => {
-            let proto_t = &obj.proto_t;
-            let repositioned = helpers::reposition(
-                cx,
-                env,
-                Some(trace),
-                lreason.loc().dupe(),
-                None,
-                None,
-                proto_t.dupe(),
-            )?;
-            rec_flow(cx, env, trace, (&repositioned, u))?;
+        (DefT(lreason, deref!(ObjT(obj))), ExtendsUseT(deref!(data))) => {
+            if let Some((next, chain)) = chain_next(
+                &data.chain,
+                ChainLink::of_object(&obj.props_tmap),
+                lreason,
+                &obj.proto_t,
+                !data.targs.is_empty(),
+            ) {
+                let repositioned = helpers::reposition(
+                    cx,
+                    env,
+                    Some(trace),
+                    lreason.loc().dupe(),
+                    None,
+                    None,
+                    next,
+                )?;
+                let u = UseT::new(ExtendsUseT(Box::new(ExtendsUseTData {
+                    chain,
+                    ..data.clone()
+                })));
+                rec_flow(cx, env, trace, (&repositioned, &u))?;
+            }
         }
         (DefT(reason, deref!(ClassT(instance))), ExtendsUseT(..)) => {
             let collector = type_collector::TypeCollector::create();
@@ -11017,6 +11124,7 @@ fn __flow_impl<'cx>(
                     use_op,
                     reason: reason_ext,
                     targs: try_ts,
+                    chain: _,
                     true_t: ext_l,
                     false_t: ext_u,
                 }),
@@ -11031,11 +11139,12 @@ fn __flow_impl<'cx>(
                 env,
                 trace,
                 (
-                    next,
+                    &next.t,
                     &UseT::new(ExtendsUseT(Box::new(ExtendsUseTData {
                         use_op: use_op.dupe(),
                         reason: reason_ext.dupe(),
                         targs: rest.into(),
+                        chain: next.chain.dupe(),
                         true_t: ext_l.dupe(),
                         false_t: ext_u.dupe(),
                     }))),
@@ -11049,6 +11158,7 @@ fn __flow_impl<'cx>(
                     use_op,
                     reason: _,
                     targs: try_ts,
+                    chain: _,
                     true_t: ext_l,
                     false_t: ext_u @ deref!(DefT(_, deref!(InstanceT(inst_t)))),
                 }),
@@ -11298,6 +11408,7 @@ fn __flow_impl<'cx>(
                     use_op,
                     reason: _,
                     targs: try_ts,
+                    chain: _,
                     true_t: t,
                     false_t: tc,
                 }),

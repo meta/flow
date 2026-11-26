@@ -60,6 +60,8 @@ use flow_typing_errors::intermediate_error_types::ValueAsTypeReference;
 use flow_typing_flow_js_env::FlowJsEnv;
 use flow_typing_type::type_::ArrLiteral;
 use flow_typing_type::type_::CallElemTData;
+use flow_typing_type::type_::Chain;
+use flow_typing_type::type_::ChainLink;
 use flow_typing_type::type_::ClassExtendsCheckData;
 use flow_typing_type::type_::ClassImplementsCheckData;
 use flow_typing_type::type_::ComponentRestParamCompatibilityData;
@@ -1122,7 +1124,8 @@ pub fn extract_class_ctor_t<'cx>(
         cx: &mut Context<'cx>,
         inst: &InstType,
         super_: &Type,
-        recur: impl Fn(&mut Context<'cx>, &Type) -> Result<Option<Type>, FlowJsException>,
+        chain: &Chain,
+        recur: impl Fn(&mut Context<'cx>, &Type, Chain) -> Result<Option<Type>, FlowJsException>,
     ) -> Result<Option<Type>, FlowJsException> {
         match instance_constructor(cx, inst) {
             // A setter-only "constructor" is reachable: the parser emits
@@ -1135,28 +1138,43 @@ pub fn extract_class_ctor_t<'cx>(
             // the parse error and produce a misleading construct sig at
             // [new C(...)] sites.
             Some(p) => Ok(flow_typing_type::type_::property::read_t(&p)),
-            None => recur(cx, super_),
+            // A chain that comes back to an instance it has passed is cyclic, and has no
+            // constructor beyond the ones already passed.
+            None => {
+                let link = ChainLink::of_instance(inst);
+                if chain.contains(&link) {
+                    return Ok(None);
+                }
+                let mut chain = chain.dupe();
+                chain.insert(link);
+                recur(cx, super_, chain)
+            }
         }
     }
     fn find_ctor<'cx>(
         concretize: &dyn Fn(&mut Context<'_>, &Type) -> Result<Vec<Type>, FlowJsException>,
         cx: &mut Context<'cx>,
         t: &Type,
+        chain: Chain,
     ) -> Result<Option<Type>, FlowJsException> {
         for t in concretize(cx, t)? {
             let result = match t.deref() {
                 TypeInner::DefT(_, def_t) if let DefTInner::InstanceT(inst_t) = def_t.deref() => {
-                    lookup_ctor(cx, &inst_t.inst, &inst_t.super_, |cx, t| {
-                        find_ctor(concretize, cx, t)
+                    lookup_ctor(cx, &inst_t.inst, &inst_t.super_, &chain, |cx, t, chain| {
+                        find_ctor(concretize, cx, t, chain)
                     })?
                 }
                 TypeInner::ThisInstanceT(deref!(ThisInstanceTData { instance, .. })) => {
-                    lookup_ctor(cx, &instance.inst, &instance.super_, |cx, t| {
-                        find_ctor(concretize, cx, t)
-                    })?
+                    lookup_ctor(
+                        cx,
+                        &instance.inst,
+                        &instance.super_,
+                        &chain,
+                        |cx, t, chain| find_ctor(concretize, cx, t, chain),
+                    )?
                 }
                 TypeInner::DefT(_, def_t) if let DefTInner::ClassT(inner) = def_t.deref() => {
-                    find_ctor(concretize, cx, inner)?
+                    find_ctor(concretize, cx, inner, chain.dupe())?
                 }
                 // Preserve [PolyT] so generic classes carry their tparams through to
                 // call sites. Without this, downstream sees unsubstituted [BoundT]
@@ -1175,7 +1193,7 @@ pub fn extract_class_ctor_t<'cx>(
                         }),
                     ) = def_t.deref() =>
                 {
-                    find_ctor(concretize, cx, t_out)?.map(|ctor| {
+                    find_ctor(concretize, cx, t_out, chain.dupe())?.map(|ctor| {
                         Type::new(TypeInner::DefT(
                             r.dupe(),
                             DefT::new(DefTInner::PolyT(Box::new(PolyTData {
@@ -1190,7 +1208,7 @@ pub fn extract_class_ctor_t<'cx>(
                     })
                 }
                 TypeInner::GenericT(deref!(GenericTData { bound, .. })) => {
-                    find_ctor(concretize, cx, bound)?
+                    find_ctor(concretize, cx, bound, chain.dupe())?
                 }
                 _ => None,
             };
@@ -1200,7 +1218,7 @@ pub fn extract_class_ctor_t<'cx>(
         }
         Ok(None)
     }
-    Ok(find_ctor(concretize, cx, this)?
+    Ok(find_ctor(concretize, cx, this, Chain::new())?
         .map(|ctor| flow_typing_type::type_util::normalize_construct_sig(Some(this.dupe()), ctor)))
 }
 
@@ -7862,6 +7880,8 @@ pub struct CgLookupArgs {
     pub propref: flow_typing_type::type_::PropRef,
     pub use_op: UseOp,
     pub ids: flow_typing_type::type_::properties::Set,
+    /// The prototype chain followed so far; see [flow_typing_type::type_::ChainAlternative].
+    pub chain: Chain,
     /// The language of the file the access is written in.
     pub access_strictness_kind: TypeStrictnessKind,
 }
@@ -7963,6 +7983,7 @@ pub mod get_prop_t_kit {
     use flow_typing_errors::intermediate_error_types::InvalidObjKey;
     use flow_typing_flow_js_env::FlowJsEnv;
     use flow_typing_type::type_;
+    use flow_typing_type::type_::ChainLink;
     use flow_typing_type::type_::DefT;
     use flow_typing_type::type_::DefTInner;
     use flow_typing_type::type_::DepthTrace;
@@ -8456,6 +8477,7 @@ pub mod get_prop_t_kit {
                 propref: propref.clone(),
                 use_op: use_op.dupe(),
                 ids,
+                chain: [ChainLink::of_instance(inst)].into_iter().collect(),
                 access_strictness_kind,
             },
         )
@@ -8748,6 +8770,7 @@ pub mod get_prop_t_kit {
                         propref: propref.clone(),
                         use_op,
                         ids: [o.props_tmap.dupe()].into_iter().collect(),
+                        chain: [ChainLink::of_object(&o.props_tmap)].into_iter().collect(),
                         access_strictness_kind,
                     };
                     F::cg_lookup(cx, env, *trace, l, true, o.proto_t.dupe(), data)

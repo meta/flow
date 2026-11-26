@@ -29,6 +29,7 @@ use flow_typing_flow_common::obj_type;
 use flow_typing_flow_js_env::FlowJsEnv;
 use flow_typing_type::type_::CallMData;
 use flow_typing_type::type_::CanonicalRendersForm;
+use flow_typing_type::type_::Chain;
 use flow_typing_type::type_::ComponentKind;
 use flow_typing_type::type_::DefT;
 use flow_typing_type::type_::DefTInner;
@@ -269,6 +270,7 @@ fn lookup_defaults<'cx>(
             lookup_action: Box::new(action),
             method_accessible: true,
             ids: Some(properties::Set::new()),
+            chain: Chain::new(),
             ignore_dicts: false,
         }))),
     )?;
@@ -1116,6 +1118,7 @@ pub(super) fn run_with_env<'cx>(
                     lookup_action: Box::new(action),
                     method_accessible: true,
                     ids: Some(properties::Set::new()),
+                    chain: Chain::new(),
                     ignore_dicts: false,
                 }))),
             )?;

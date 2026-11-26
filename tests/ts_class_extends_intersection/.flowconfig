@@ -1,3 +1,6 @@
+[libs]
+lib
+
 [options]
 all=true
 builtin_lib=core-only

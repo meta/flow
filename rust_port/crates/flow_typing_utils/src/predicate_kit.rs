@@ -39,6 +39,7 @@ use flow_typing_type::type_::ArrayATData;
 use flow_typing_type::type_::BinaryTest;
 use flow_typing_type::type_::BoundedId;
 use flow_typing_type::type_::CallArg;
+use flow_typing_type::type_::Chain;
 use flow_typing_type::type_::DefT;
 use flow_typing_type::type_::DefTInner;
 use flow_typing_type::type_::DepthTrace;
@@ -3009,6 +3010,7 @@ fn instanceof_test<'cx>(
                         use_op: unknown_use(),
                         reason: r.dupe(),
                         targs: Vec::new().into(),
+                        chain: Chain::new(),
                         true_t: member.dupe(),
                         false_t: a.dupe(),
                     })));
@@ -3061,6 +3063,7 @@ fn instanceof_test<'cx>(
                     use_op: unknown_use(),
                     reason: reason.dupe(),
                     targs: Vec::new().into(),
+                    chain: Chain::new(),
                     true_t: c.dupe(),
                     false_t: a.dupe(),
                 })));

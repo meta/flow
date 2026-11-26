@@ -10,6 +10,7 @@ use flow_typing_errors::error_message::EPropNotFoundInLookupData;
 use flow_typing_errors::intermediate_error_types::InvalidObjKey;
 use flow_typing_flow_common::flow_js_utils::CgLookupArgs;
 use flow_typing_flow_js_env::FlowJsEnv;
+use flow_typing_type::type_::ChainLink;
 use flow_typing_type::type_::GenericTData;
 use flow_typing_type::type_::LookupTData;
 use flow_typing_type::type_::MethodTData;
@@ -96,6 +97,7 @@ impl flow_js_utils::GetPropHelper for FlowJs {
             propref,
             use_op,
             ids,
+            chain,
             access_strictness_kind: _,
         } = args;
         Ok(Box::new(move |cx, tout| {
@@ -118,6 +120,7 @@ impl flow_js_utils::GetPropHelper for FlowJs {
                         }))),
                         method_accessible,
                         ids: Some(ids),
+                        chain,
                         ignore_dicts: false,
                     }))),
                 ),
@@ -653,6 +656,7 @@ pub(super) fn write_obj_prop<'cx>(
                                 propref: Box::new(propref.clone()),
                                 lookup_action: Box::new(action),
                                 ids: Some([o.props_tmap.dupe()].into_iter().collect()),
+                                chain: [ChainLink::of_object(&o.props_tmap)].into_iter().collect(),
                                 method_accessible: true,
                                 ignore_dicts: false,
                             }))),

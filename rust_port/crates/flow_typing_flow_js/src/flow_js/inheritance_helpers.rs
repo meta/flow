@@ -15,6 +15,7 @@ use flow_typing_errors::error_message::EPropNotFoundInSubtypingData;
 use flow_typing_errors::intermediate_error_types::PropPolarityMismatchObject;
 use flow_typing_flow_common::flow_js_utils;
 use flow_typing_flow_js_env::FlowJsEnv;
+use flow_typing_type::type_::Chain;
 use flow_typing_type::type_::DerivedReference;
 use flow_typing_type::type_::IndexerKeyCompatibilityData;
 use flow_typing_type::type_::LookupDefaultResult;
@@ -497,6 +498,7 @@ pub(super) fn inst_structural_subtype<'cx>(
                             )),
                             method_accessible: true,
                             ids: Some(properties::Set::new()),
+                            chain: Chain::new(),
                             ignore_dicts: false,
                         }))),
                     ),
@@ -528,6 +530,7 @@ pub(super) fn inst_structural_subtype<'cx>(
                             )),
                             method_accessible: true,
                             ids: Some(properties::Set::new()),
+                            chain: Chain::new(),
                             ignore_dicts: false,
                         }))),
                     ),
@@ -561,6 +564,7 @@ pub(super) fn inst_structural_subtype<'cx>(
                     ))),
                     method_accessible: true,
                     ids: Some(properties::Set::new()),
+                    chain: Chain::new(),
                     ignore_dicts: false,
                 }))),
             ),
@@ -773,6 +777,7 @@ pub(super) fn check_super<'cx>(
                 propref: Box::new(propref),
                 lookup_action: Box::new(action),
                 ids: Some(properties::Set::new()),
+                chain: Chain::new(),
                 method_accessible: true,
                 ignore_dicts: false,
             }))),

@@ -68,6 +68,7 @@ use flow_typing_type::type_::ArrayATData;
 use flow_typing_type::type_::ArrayElementCompatibilityData;
 use flow_typing_type::type_::CallArg;
 use flow_typing_type::type_::CanonicalRendersForm;
+use flow_typing_type::type_::ChainLink;
 use flow_typing_type::type_::ComponentKind;
 use flow_typing_type::type_::Cont;
 use flow_typing_type::type_::DefT;
@@ -2572,6 +2573,7 @@ fn flow_obj_to_obj<'cx>(
                                     )),
                                     method_accessible: true,
                                     ids: None,
+                                    chain: [ChainLink::of_object(lflds)].into_iter().collect(),
                                     ignore_dicts: false,
                                 }))),
                             )?;
@@ -2612,6 +2614,7 @@ fn flow_obj_to_obj<'cx>(
                                         ),
                                         method_accessible: true,
                                         ids: None,
+                                        chain: [ChainLink::of_object(lflds)].into_iter().collect(),
                                         ignore_dicts: false,
                                     }))),
                                 )?;
@@ -5893,6 +5896,7 @@ pub fn rec_sub_t<'cx>(
                                             ids: Some(
                                                 [lown.dupe(), lproto.dupe()].into_iter().collect(),
                                             ),
+                                            chain: [ChainLink::of_instance(inst)].into_iter().collect(),
                                             ignore_dicts: false,
                                         },
                                     )))),
@@ -5929,6 +5933,7 @@ pub fn rec_sub_t<'cx>(
                             )),
                             method_accessible: false,
                             ids: Some([lown.dupe(), lproto.dupe()].into_iter().collect()),
+                            chain: [ChainLink::of_instance(inst)].into_iter().collect(),
                             ignore_dicts: false,
                         })))),
                     }),

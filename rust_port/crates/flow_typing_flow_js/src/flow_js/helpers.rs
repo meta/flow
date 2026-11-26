@@ -25,6 +25,7 @@ use flow_typing_flow_js_env::FlowJsEnv;
 use flow_typing_type::type_::BoundedId;
 use flow_typing_type::type_::CallMData;
 use flow_typing_type::type_::CallTData;
+use flow_typing_type::type_::Chain;
 use flow_typing_type::type_::ChainMData;
 use flow_typing_type::type_::ClassImplementsCheckData;
 use flow_typing_type::type_::ConcretizeTData;
@@ -2132,6 +2133,7 @@ pub(super) fn instance_lookup_kind<'cx>(
                 propref: Box::new(propref.clone()),
                 lookup_action: Box::new(lookup_action),
                 ids: None,
+                chain: Chain::new(),
                 method_accessible,
                 ignore_dicts: false,
             }));
