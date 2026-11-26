@@ -56,6 +56,11 @@ pub mod flow_constraint {
         }
     }
 
+    /// `u` with its use ops reduced to their toplevel structure, as the cache keys a use.
+    pub fn key_of_use_t(u: &UseT<Cx>) -> UseT<Cx> {
+        mod_use_op_of_use_t(toplevel_use_op, u)
+    }
+
     // attempt to read LB/UB pair from cache, add if absent
     pub fn get<'cx>(cx: &mut Context<'cx>, l: &Type, u: &UseT<Cx>) -> bool {
         match (l.deref(), u.deref()) {
@@ -114,7 +119,7 @@ pub mod flow_constraint {
                 let u_owned = if already_toplevel {
                     u.dupe()
                 } else {
-                    mod_use_op_of_use_t(toplevel_use_op, u)
+                    key_of_use_t(u)
                 };
                 let found = !cx.constraint_cache_mut().add(l.dupe(), u_owned.dupe());
                 if !found {

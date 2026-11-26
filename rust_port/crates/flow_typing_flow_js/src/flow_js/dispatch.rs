@@ -2726,7 +2726,13 @@ fn __flow_impl<'cx>(
             if let Some(t) = nominal_type.upper_t.as_ref()
                 && nominal_type.nominal_id != nominal::Id::ExactObjectType =>
         {
-            rec_flow(cx, env, trace, (t, u))?;
+            FlowJs::flow_upper_bound_unless_cycle(
+                cx,
+                env,
+                l,
+                || u.dupe(),
+                |cx| rec_flow(cx, env, trace, (t, u)),
+            )?;
         }
         (
             NominalT { nominal_type, .. },
@@ -2738,7 +2744,13 @@ fn __flow_impl<'cx>(
                 }),
             ),
         ) if let Some(t) = nominal_type.upper_t.as_ref() => {
-            rec_flow(cx, env, trace, (t, u))?;
+            FlowJs::flow_upper_bound_unless_cycle(
+                cx,
+                env,
+                l,
+                || u.dupe(),
+                |cx| rec_flow(cx, env, trace, (t, u)),
+            )?;
         }
         // Store the opaque type when doing `ToStringT`, so we can use that
         // rather than just `string` if the supertype is `string`
@@ -2750,19 +2762,28 @@ fn __flow_impl<'cx>(
                 t_out,
             },
         ) if let Some(t) = nominal_type.upper_t.as_ref() => {
-            rec_flow(
-                cx,
-                env,
-                trace,
-                (
-                    t,
-                    &UseT::new(ToStringT {
-                        orig_t: Some(l.dupe()),
-                        reason: to_string_reason.dupe(),
-                        t_out: t_out.clone(),
-                    }),
-                ),
-            )?;
+            let mk_u = || {
+                UseT::new(ToStringT {
+                    orig_t: None,
+                    reason: to_string_reason.dupe(),
+                    t_out: t_out.clone(),
+                })
+            };
+            FlowJs::flow_upper_bound_unless_cycle(cx, env, l, mk_u, |cx| {
+                rec_flow(
+                    cx,
+                    env,
+                    trace,
+                    (
+                        t,
+                        &UseT::new(ToStringT {
+                            orig_t: Some(l.dupe()),
+                            reason: to_string_reason.dupe(),
+                            t_out: t_out.clone(),
+                        }),
+                    ),
+                )
+            })?;
         }
         // If the type is still in the same file it was defined, we allow it to
         // expose its underlying type information
@@ -9466,19 +9487,27 @@ fn __flow_impl<'cx>(
                 Some(_) => then_t_opt.dupe(),
                 None => Some(l.dupe()),
             };
-            rec_flow(
+            FlowJs::flow_upper_bound_unless_cycle(
                 cx,
                 env,
-                trace,
-                (
-                    t,
-                    &UseT::new(CondT(Box::new(CondTData {
-                        loc: loc.dupe(),
-                        opt_type: new_then_t_opt,
-                        true_t: else_t.dupe(),
-                        collector: collector.dupe(),
-                    }))),
-                ),
+                l,
+                || u.dupe(),
+                |cx| {
+                    rec_flow(
+                        cx,
+                        env,
+                        trace,
+                        (
+                            t,
+                            &UseT::new(CondT(Box::new(CondTData {
+                                loc: loc.dupe(),
+                                opt_type: new_then_t_opt,
+                                true_t: else_t.dupe(),
+                                collector: collector.dupe(),
+                            }))),
+                        ),
+                    )
+                },
             )?;
         }
         // Opaque types may be treated as their supertype when they are a lower bound for a use
@@ -9501,7 +9530,13 @@ fn __flow_impl<'cx>(
                 },
                 u,
             );
-            rec_flow(cx, env, trace, (t, &u_mod))?;
+            FlowJs::flow_upper_bound_unless_cycle(
+                cx,
+                env,
+                l,
+                || u.dupe(),
+                |cx| rec_flow(cx, env, trace, (t, &u_mod)),
+            )?;
         }
         // Concretize types for type operation purpose up to this point. The rest are
         // recorded as lower bound to the target tvar.

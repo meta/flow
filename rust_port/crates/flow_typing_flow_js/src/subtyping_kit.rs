@@ -6849,6 +6849,7 @@ pub fn rec_sub_t<'cx>(
             let upper_lower = unom.lower_t.as_ref().unwrap().dupe();
             let upper_upper = unom.narrowed_upper_t().duped();
             let l_clone = l.dupe();
+            let l_clone2 = l.dupe();
             let u_clone = u.dupe();
             let opaque_u_reason_c = opaque_u_reason.dupe();
             let opaque_l_reason_c = opaque_l_reason.dupe();
@@ -6879,13 +6880,16 @@ pub fn rec_sub_t<'cx>(
                         )
                     }),
                     Box::new(move |cx: &mut Context, env: &FlowJsEnv| {
+                        let mk_u = || UseT::new(UseT(use_op_c2.dupe(), u_clone.dupe()));
                         let use_op = VirtualUseOp::Frame(
                             Arc::new(VirtualFrameUseOp::OpaqueTypeUpperBound {
                                 opaque_t_reason: opaque_l_reason_c,
                             }),
-                            Arc::new(use_op_c2),
+                            Arc::new(use_op_c2.dupe()),
                         );
-                        FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &lower_upper, &u_clone)
+                        FlowJs::flow_upper_bound_unless_cycle(cx, env, &l_clone2, mk_u, |cx| {
+                            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, &lower_upper, &u_clone)
+                        })
                     }),
                 ],
             )
@@ -6898,13 +6902,16 @@ pub fn rec_sub_t<'cx>(
             },
             _,
         ) if let Some(t) = &lnom.upper_t => {
-            let use_op = VirtualUseOp::Frame(
+            let mk_u = || UseT::new(UseT(use_op.dupe(), u.dupe()));
+            let framed_use_op = VirtualUseOp::Frame(
                 Arc::new(VirtualFrameUseOp::OpaqueTypeUpperBound {
                     opaque_t_reason: opaque_t_reason.dupe(),
                 }),
-                Arc::new(use_op),
+                Arc::new(use_op.dupe()),
             );
-            FlowJs::rec_flow_t_with_env(cx, env, trace, use_op, t, u)
+            FlowJs::flow_upper_bound_unless_cycle(cx, env, l, mk_u, |cx| {
+                FlowJs::rec_flow_t_with_env(cx, env, trace, framed_use_op, t, u)
+            })
         }
 
         // Similar to the NominalT ~> NominalT case where the lower bound has an

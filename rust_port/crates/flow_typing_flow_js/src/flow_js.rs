@@ -46,6 +46,7 @@ use flow_typing_errors::error_message::UpperKind;
 use flow_typing_errors::intermediate_error_types::ExpectedModulePurpose;
 use flow_typing_errors::intermediate_error_types::ExplanationWithLazyParts;
 use flow_typing_errors::intermediate_error_types::PropPolarityMismatchObject;
+use flow_typing_flow_common::concrete_type_eq;
 use flow_typing_flow_common::flow_cache;
 use flow_typing_flow_common::flow_js_utils;
 use flow_typing_flow_common::flow_js_utils::FlowJsException;
@@ -524,6 +525,45 @@ impl FlowJs {
         t2: &Type,
     ) -> Result<bool, FlowJsException> {
         helpers::speculative_subtyping_succeeds(cx, env, t1, t2)
+    }
+
+    /// Runs `flow`, which flows the upper bound of `l` in its place into the use `mk_u` makes,
+    /// unless `l` is a stuck conditional type and a stuck evaluation of the same conditional type
+    /// with the same type arguments is already flowing its upper bound into the same use, which
+    /// then holds for `l` too.
+    pub fn flow_upper_bound_unless_cycle<'cx>(
+        cx: &mut Context<'cx>,
+        env: &FlowJsEnv,
+        l: &Type,
+        mk_u: impl FnOnce() -> UseT<Cx>,
+        flow: impl FnOnce(&mut Context<'cx>) -> Result<(), FlowJsException>,
+    ) -> Result<(), FlowJsException> {
+        let TypeInner::NominalT { nominal_type, .. } = l.deref() else {
+            return flow(cx);
+        };
+        let nominal::Id::StuckEval(nominal::StuckEvalKind::StuckEvalForConditionalType { .. }) =
+            nominal_type.nominal_id
+        else {
+            return flow(cx);
+        };
+        let u = flow_cache::flow_constraint::key_of_use_t(&mk_u());
+        let flowing: Vec<Rc<NominalType>> = (cx.stuck_bound_flows().iter())
+            .filter(|(prev, prev_u)| prev.nominal_id == nominal_type.nominal_id && *prev_u == u)
+            .map(|(prev, _)| prev.dupe())
+            .collect();
+        if flowing.iter().any(|prev| {
+            (prev.nominal_type_args.iter())
+                .zip(nominal_type.nominal_type_args.iter())
+                .all(|((_, _, t1, _), (_, _, t2, _))| {
+                    concrete_type_eq::eq_with_env(cx, env, t1, t2)
+                })
+        }) {
+            return Ok(());
+        }
+        cx.stuck_bound_flows_mut().push((nominal_type.dupe(), u));
+        let result = flow(cx);
+        cx.stuck_bound_flows_mut().pop();
+        result
     }
 
     pub(super) fn possible_concrete_types_for_optional_chain_with_env<'cx>(

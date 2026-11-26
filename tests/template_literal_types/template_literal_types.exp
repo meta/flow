@@ -2698,6 +2698,54 @@ References:
                              ^^^ [4]
 
 
+Error ------------------------------------------------------------------------------------------- recursive_path.js:25:5
+
+Cannot get `x.foo` because property `foo` is missing in `unknown` [1]. [incompatible-use]
+
+   recursive_path.js:25:5
+   25|   x.foo; // ERROR
+           ^^^
+
+References:
+   recursive_path.js:24:18
+   24| function h<T>(x: Deep<T>) {
+                        ^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------- recursive_path.js:35:3
+
+Cannot cast `x` to `string` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   recursive_path.js:35:3
+   35|   x as string; // ERROR
+         ^
+
+References:
+   recursive_path.js:34:18
+   34| function i<T>(x: Segments<T, 'a.b.c.d.e'>) {
+                        ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   recursive_path.js:35:8
+   35|   x as string; // ERROR
+              ^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------- recursive_path.js:43:3
+
+Cannot cast `x` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   recursive_path.js:43:3
+   43|   x as string; // ERROR
+         ^
+
+References:
+   recursive_path.js:42:33
+   42| function j<P extends string>(x: Shift<any, any, P>) {
+                                       ^^^^^^^^^^^^^^^^^^ [1]
+   recursive_path.js:43:8
+   43|   x as string; // ERROR
+              ^^^^^^ [2]
+
+
 Error ----------------------------------------------------------------------------------------- substituted_keys.js:9:10
 
 Cannot call `h.onmark` with `'a'` bound to `e` because `"a"` [1] is incompatible with `number` [2]. [incompatible-type]
@@ -2787,4 +2835,4 @@ References:
 
 
 
-Found 179 errors
+Found 182 errors

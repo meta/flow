@@ -439,6 +439,9 @@ pub struct ComponentT {
     // bounds of another one is narrowed for each, so without this a chain of them is narrowed an
     // exponential number of times, into types compared afresh.
     narrowing_cache: NarrowingCacheMap,
+    // The stuck conditional types whose upper bounds are flowing into a use, each with that use,
+    // its use ops reduced to their toplevel structure.
+    stuck_bound_flows: Vec<(Rc<type_::NominalType>, type_::UseT<Cx>)>,
     spread_cache: SpreadCache,
     const_fold_cache: ConstFoldMap,
 
@@ -1140,6 +1143,7 @@ fn make_ccx() -> ComponentT {
         fix_cache: Default::default(),
         this_specialize_cache: Default::default(),
         narrowing_cache: MultiLevelMap::new(),
+        stuck_bound_flows: Vec::new(),
         spread_cache: SpreadCache::new(),
         const_fold_cache: Default::default(),
         annot_graph: IntHashMap::default(),
@@ -3534,6 +3538,14 @@ impl<'a> Context<'a> {
 
     pub fn narrowing_cache_mut(&mut self) -> &mut NarrowingCacheMap {
         &mut self.ccx_mut().narrowing_cache
+    }
+
+    pub fn stuck_bound_flows(&self) -> &[(Rc<type_::NominalType>, type_::UseT<Cx>)] {
+        &self.ccx().stuck_bound_flows
+    }
+
+    pub fn stuck_bound_flows_mut(&mut self) -> &mut Vec<(Rc<type_::NominalType>, type_::UseT<Cx>)> {
+        &mut self.ccx_mut().stuck_bound_flows
     }
 
     pub fn spread_cache(&self) -> &SpreadCache {

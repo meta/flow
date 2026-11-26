@@ -213,6 +213,20 @@ pub fn eq_with_env<'cx>(cx: &mut Context<'cx>, env: &FlowJsEnv, t1: &Type, t2: &
                     .zip(members2.iter())
                     .all(|(m1, m2)| eq_with_env(cx, env, m1, m2))
             }
+            // What a type destructor evaluates to depends only on the destructor and the type it
+            // applies to, not on the use op or the reason it carries.
+            (
+                TypeInner::EvalT {
+                    type_: inner_t1,
+                    defer_use_t: d1,
+                    ..
+                },
+                TypeInner::EvalT {
+                    type_: inner_t2,
+                    defer_use_t: d2,
+                    ..
+                },
+            ) if d1.2 == d2.2 && eq_with_env(cx, env, inner_t1, inner_t2) => true,
             (TypeInner::EvalT { id, .. }, _) => {
                 let evaluated = cx.evaluated();
                 match evaluated.get(id) {
