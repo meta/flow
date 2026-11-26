@@ -1,3 +1,83 @@
+### 0.343.0
+
+Likely to cause new Flow errors:
+* `void` follows TypeScript semantics by default and is distinct from `undefined`. `experimental.ts_void` only accepts `true`. Run `flow codemod migrate-to-ts-void` to help migrate existing code.
+* Two instantiations of an object type with an index signature are now compared by their index signatures, which can surface errors that were missed.
+* Refinements of component and hook props, and other read-only unions, now look into type alias and `Values` members; this can surface errors that were missed.
+* Exponential-spread errors no longer name the same union operand twice. An error for a spread with a maybe-typed operand can be reported at another operand, as it is for the explicit union.
+* Spreads, `Readonly`, `Partial`, React configs and object rest no longer drop the members of a union or intersection that contains another one, which can surface missed errors.
+* A generic or opaque value passed for a `T | null | void` parameter is narrowed as for `?T`: `T` no longer takes in the `null` and `void` of its bound or supertype.
+* Spread arguments of calls are now contextually typed by the params they fill, like plain arguments, so array literals and callbacks in spread position keep their precision and no longer need annotations. A spread argument can now report the errors the same expression gets as a plain argument.
+* `new` of a class whose TypeScript declaration declares a constructor now gives the instance instead of `any`
+* A type `import("m").X` read from another file is no longer `any` when `X` is a type or has type arguments, and is the instance type when `X` is a class, also a class merged with a namespace.
+* A class extending an intersection, such as tsc's mixin output, now inherits from what its construct signatures return, with the whole intersection as its statics.
+* A call can leave out the argument for a trailing element of a fixed-length tuple rest param that accepts `undefined`, like `g()` for `g(...args: [x: void])`. Too few or too many arguments for such a rest param are reported as for params (`requires another argument`, `extra-arg`) instead of `invalid-tuple-arity`.
+
+New Features:
+* Library declare-module blocks will now go through declaration merging.
+
+Notable bug fixes:
+* Props can narrow the event of a React event handler they inherit, as in TypeScript.
+* Recursive type aliases whose type arguments grow as object, intersection or template literal types no longer hit the recursion limit or overflow the stack.
+* Fixed stale errors and a crash after rechecks where a change reaches checked files through node_modules, or a file's imports stop resolving
+* Fixed stale duplicate module provider errors after a new provider takes over a Haste module
+* Fixed missing and stale package.json parse errors after rechecks
+* Values of an opaque type's lower bound now flow into the opaque type after an operation narrows it, when they fit the narrowed type.
+* Under `experimental.ts_void`, a function that returns no value in one branch of a conditional no longer drops the annotation hint of the other branch.
+* Refinements, such as sentinel property checks, `in` and `typeof`, now narrow an opaque type's upper bound and keep the opaque type, as they do for a type parameter.
+* A type parameter that a call gives no evidence for no longer mentions the other type parameters of the signature in its inferred type.
+* When library files declare overloads of the same interface method, the overloads of the one merged later, such as a `[libs]` file over a builtin, are tried first.
+* A library in `[libs]` can override a declaration of a bundled `.d.ts` builtin, as it can for the other builtins.
+* Builtin overloads are tried in TypeScript's order, and Flow's fallback overloads, such as `toSpliced<S>`, after TypeScript's.
+* Changing a file in an import cycle of two files rechecks the files that depend on the cycle
+* A `null` or `undefined` argument for a `T | null | void` parameter gives `T` an `empty` bound, as for `?T`.
+* Implicit instantiation no longer infers `null | void` from a `T | null | void` value whose `T` is not inferred yet.
+* An element passed to a prop of type `(renders T) | null` infers its type arguments from `T`, as for `?renders T` or an optional prop.
+* With `experimental.normalize_intersections`, an intersection of unions with `null` and `void` members is normalized as one of maybe types is.
+* An interface in a `declare namespace` can extend another member through the namespace's name without the namespace becoming `any`
+* Rechecks no longer miss errors in the dependents of a file whose `require` switches between modules that a library declares.
+* Overloaded generic methods declared in TypeScript are compared with their type parameters erased, as in TypeScript.
+* `Omit` and other object type utilities no longer give an interface's index signature value to props declared elsewhere on its `extends` chain, e.g. an inherited `onFocus` when the interface has a ``[key: `data-${string}`]`` signature.
+* Error messages no longer print `?` for a type with many overloads of a method.
+* Fixed a crash on a mapped type whose keys refer to the mapped type
+* Implicit instantiation infers type arguments through a conditional type whose check type indexes a type parameter, e.g. Lexical's `Klass<T>`
+* A type parameter of a TypeScript-declared generic that no part of a call reaches takes its default or bound, as in TypeScript, instead of being reported as underconstrained.
+* Exported mapped types and `keyof` over intersection keys such as `string & {}` no longer fail signature verification
+* A conditional type kept abstract over a type parameter now sees the type parameter narrowed by the extends type in its true branch
+* `keyof` and mapped types over a class declared in a `.d.ts` file now include its methods and inherited members.
+* `typeof M.X` and `typeof import("m").X` read a value that `M` exports with `export type`, as in TypeScript.
+* `new` on a `Class` of `Readonly<I>`, `Partial<I>` or another sliced interface with a `constructor` method no longer reports that `constructor` is missing.
+* `this` in the type parameter bound of a `declare class` method no longer errors with `illegal-this`.
+* A tuple type can end with a spread of a type parameter bounded by a union or intersection of arrays, or of an undecided conditional type whose branches are arrays
+* In a tuple type written in TypeScript, spreads of arrays followed by other spreads of arrays or optional elements become one rest element, as in TypeScript
+* Read-write elements of TypeScript tuples, including tuple types with spreads, are now compared covariantly, as in TypeScript.
+* Class and interface declarations accept getters and setters with computed keys, such as `get [Symbol.toStringTag]()`
+* Fixed a stack overflow on recursive conditional types that stay undecided over a type parameter, like the path types of `react-hook-form`
+* A computed key in a type can name a value imported with `import type`, as in TypeScript
+* Recursive type aliases whose type arguments grow as spread tuple types no longer overflow the stack
+* `export default <name>` inside a library `declare module`, as written in TypeScript `.d.ts` files, now declares the module's default export.
+* A type parameter bounded by `keyof T` can index an object keyed by `keyof T`, such as `Record<keyof T, V>`, when `T` has no object bound
+* An error about an argument from a spread whose type is written in another file is reported at the call instead of in that file.
+* Fixed stack overflows and recursion limit errors on property lookups through classes whose base reaches the class itself.
+* `typeof` and keys in types read the value of an export that is both a type and a value through `import type`, as in TypeScript
+* A homomorphic mapped type over an intersection with an array or tuple member, such as a type parameter bounded by `Iterable<unknown> & ReadonlyArray<unknown>`, no longer errors
+* A call of a TypeScript generic under the hint of an enclosing generic call, such as `useState(() => f())`, gives a type parameter that nothing reaches its default or bound, as in TypeScript.
+* Fixed the constructor and member precedence of a class extending a mixin applied to a class, and restored the error codes for classes extending other intersections.
+
+Misc:
+* Errors about the keys of an intersection name the union of its keys.
+
+IDE:
+* Hover on a type alias looks through aliases of other aliases, and Go to Definition on a qualified type, like `M.X` with `import * as M` or `React.Node`, goes to the member's declaration instead of staying on the reference or going to a global with the same name
+* Hover and error messages print a type declared in a library `declare namespace` under its qualified name, like `React.MixedElement` or `Intl.NumberFormatOptions`
+* Fixed autocomplete, go-to-definition and hover for members of a class extending an intersection or another value with construct signatures.
+
+Library Definitions:
+* `Iterator`, `Iterable` and `IterableIterator` now default `TReturn` and `TNext` to `any`, as in TypeScript.
+* `IteratorObject` now defaults `TReturn` and `TNext` to `unknown`, as in TypeScript.
+* Built-in iterators (arrays, maps, sets, strings, enum `members()`) return `undefined` when done, as in TypeScript with `strict`.
+* Add the `react/jsx-runtime` and `react/jsx-dev-runtime` modules and React's `FunctionComponentElement` and `DetailedReactHTMLElement` types from `@types/react`
+
 ### 0.342.0
 
 Likely to cause new Flow errors:
