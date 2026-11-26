@@ -7692,22 +7692,32 @@ pub mod import_export_utils {
         }
     }
 
+    /// The typed module `source` names, looked up without reporting errors. `in_declare_module`
+    /// says whether the import is in a `declare module`, which reads library modules.
+    pub fn imported_module_opt<'cx>(
+        cx: &mut Context<'cx>,
+        in_declare_module: bool,
+        source: &FlowImportSpecifier,
+    ) -> Option<ModuleType> {
+        if in_declare_module {
+            match source {
+                FlowImportSpecifier::Userland(mref) => cx
+                    .builtin_module_opt(mref)
+                    .map(|(_reason, m)| m.get_forced(cx).dupe()),
+            }
+        } else {
+            match cx.find_require(source) {
+                ResolvedRequire::TypedModule(f) => f(cx).ok(),
+                _ => None,
+            }
+        }
+    }
+
     pub fn is_ts_import_type_only<'cx>(cx: &mut Context<'cx>, def_loc: &ALoc) -> bool {
         match cx.find_ts_import_provenance(def_loc) {
             Some((source, remote_name)) => {
-                let module_result = if cx.in_declare_module() {
-                    match &source {
-                        FlowImportSpecifier::Userland(mref) => cx
-                            .builtin_module_opt(mref)
-                            .map(|(_reason, m)| m.get_forced(cx).dupe()),
-                    }
-                } else {
-                    match cx.find_require(&source) {
-                        ResolvedRequire::TypedModule(f) => f(cx).ok(),
-                        _ => None,
-                    }
-                };
-                match module_result {
+                let in_declare_module = cx.in_declare_module();
+                match imported_module_opt(cx, in_declare_module, &source) {
                     Some(m) => match classify_named_export(cx, &m, &remote_name) {
                         ExportClassification::FoundTypeOnly(_) => true,
                         _ => false,

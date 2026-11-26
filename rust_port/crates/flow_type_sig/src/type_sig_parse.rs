@@ -189,11 +189,13 @@ mod tparam_stack {
 // are detected while visiting the AST, and thus are encoded directly in the
 // signature. The compaction step is responsible for collating these errors.
 #[derive(Clone)]
-pub(super) enum ValRefLookup {
+pub(super) enum ValRefLookup<'arena> {
     ValueRefLookup,
     NamespaceValueRefLookup(Cell<Polarity>),
     TypeRefLookup,
-    TypeofRefLookup,
+    /// Set when the read resolves to an `import type` binding: the module, the export and the
+    /// strictness of the import.
+    TypeofRefLookup(OnceCell<(ModuleRefNode<'arena>, FlowSmolStr, TypeStrictnessKind)>),
 }
 
 #[derive(Clone)]
@@ -209,7 +211,7 @@ pub(super) enum Parsed<'arena, 'ast> {
     },
     AsyncVoidReturn(LocNode<'arena>),
     ValRef {
-        lookup: ValRefLookup,
+        lookup: ValRefLookup<'arena>,
         ref_: Ref<'arena, 'ast>,
     },
     Err(LocNode<'arena>, Errno<LocNode<'arena>>),
@@ -884,7 +886,7 @@ fn typeof_ref<'arena, 'ast>(
     name: FlowSmolStr,
 ) -> Parsed<'arena, 'ast> {
     Parsed::ValRef {
-        lookup: ValRefLookup::TypeofRefLookup,
+        lookup: ValRefLookup::TypeofRefLookup(OnceCell::new()),
         ref_: Ref {
             ref_loc,
             name,
@@ -5669,7 +5671,7 @@ pub(crate) mod scope {
                                 false,
                                 ValRefLookup::ValueRefLookup
                                     | ValRefLookup::NamespaceValueRefLookup(_)
-                                    | ValRefLookup::TypeofRefLookup,
+                                    | ValRefLookup::TypeofRefLookup(_),
                             )
                     ) =>
             {

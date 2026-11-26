@@ -6,9 +6,9 @@
  */
 
 // tsc accepts this file.
-import type { LexicalNode, KEY, BRAND, keys } from './node';
+import type { LexicalNode, KEY, BRAND, keys, PEER } from './node';
 export type NodeClass = typeof LexicalNode;
 export declare class ParagraphNode extends LexicalNode {}
 export type NodeClassThroughReexport = typeof import('./reexport').LexicalNode;
-export type Keyed = { [KEY]: number; readonly [BRAND]: true; [keys.k]: string };
+export type Keyed = { [KEY]: number; readonly [BRAND]: true; [keys.k]: string; [PEER]: boolean };
 export declare class KeyedClass { [KEY]: number; [keys.k](): string }

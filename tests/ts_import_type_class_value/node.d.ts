@@ -14,3 +14,5 @@ export declare namespace Types { type T = number; }
 export declare const KEY = "key";
 export declare const BRAND: unique symbol;
 export declare const keys: { readonly k: "k" };
+export declare const PEER: unique symbol;
+export type PEER = typeof PEER;

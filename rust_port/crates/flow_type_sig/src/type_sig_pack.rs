@@ -751,10 +751,29 @@ pub(crate) fn pack_parsed<'arena, 'ast>(
             Packed::Err(Box::new(loc))
         }
         parse::Parsed::ValRef { lookup, ref_ } => {
+            if let parse::ValRefLookup::TypeofRefLookup(import) = lookup
+                && let Some((mref, remote, strictness_kind)) = import.get()
+            {
+                // `typeof` reads an `import type` binding as it reads the export through the
+                // module, `typeof import("m").X`: the binding is the type of an export that is
+                // both a type and a value.
+                let loc = pack_loc(&ref_.ref_loc);
+                let module_ = Packed::ImportTypeAnnot(Box::new(PackedLocIndex {
+                    loc,
+                    index: mref.0.index_exn(),
+                    strictness_kind: *strictness_kind,
+                }));
+                return Packed::Eval(Box::new(PackedEval {
+                    loc,
+                    packed: Box::new(module_),
+                    op: Op::TypeofMember(Box::new(remote.dupe())),
+                    strictness_kind: *strictness_kind,
+                }));
+            }
             let type_ref = match lookup {
                 parse::ValRefLookup::ValueRefLookup
                 | parse::ValRefLookup::NamespaceValueRefLookup(_)
-                | parse::ValRefLookup::TypeofRefLookup => false,
+                | parse::ValRefLookup::TypeofRefLookup(_) => false,
                 parse::ValRefLookup::TypeRefLookup => true,
             };
             Packed::Ref(pack_ref(type_ref, ref_))

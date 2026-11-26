@@ -15,6 +15,7 @@
 // collector, the marking process is used to detect what values are reachable so
 // the remainder can be discarded.
 
+use dupe::Dupe;
 use flow_common::polarity::Polarity;
 use flow_parser::loc::Loc;
 
@@ -178,9 +179,21 @@ fn mark_parsed<'arena, 'ast>(
             ref_,
         } => resolve_type_ref(opts, scopes, tbls, marker, ref_),
         parse::Parsed::ValRef {
-            lookup: parse::ValRefLookup::TypeofRefLookup,
+            lookup: parse::ValRefLookup::TypeofRefLookup(import),
             ref_,
-        } => resolve_typeof_ref(opts, scopes, tbls, marker, ref_),
+        } => {
+            resolve_typeof_ref(opts, scopes, tbls, marker, ref_);
+            if let Some(Some(parse::BindingNode::RemoteBinding(node))) = ref_.resolved.get()
+                && let parse::RemoteBinding::ImportTypeBinding {
+                    mref,
+                    remote,
+                    strictness_kind,
+                    ..
+                } = &*node.0.data()
+            {
+                import.get_or_init(|| (mref.dupe(), remote.dupe(), *strictness_kind));
+            }
+        }
         parse::Parsed::Pattern(p) => {
             marker.mark_pattern(opts, scopes, tbls, p);
         }

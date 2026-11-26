@@ -1,4 +1,4 @@
-// tsc reports errors on the same lines, except `typeof Foo`.
+// tsc reports errors on the same lines.
 import type { LexicalNode, I, f, Foo, KEY } from './node';
 
 declare const nodeClass: typeof LexicalNode;
@@ -12,7 +12,8 @@ fn() as number; // error: string ~> number
 declare const notType: f; // error: `f` is a value
 declare const notValue: typeof I; // error: `I` is only a type
 
-declare const fooValue: typeof Foo; // error: Flow binds the interface, tsc reads the const
+declare const fooValue: typeof Foo; // the const
+fooValue.b as string; // error: number ~> string
 declare const foo: Foo; // the interface
 foo.a as number; // error: string ~> number
 

@@ -12,6 +12,8 @@ use std::sync::Arc;
 use dupe::Dupe;
 use dupe::OptionDupedExt;
 use flow_aloc::ALoc;
+use flow_common::flow_import_specifier::FlowImportSpecifier;
+use flow_common::flow_import_specifier::Userland;
 use flow_common::reason::Reason;
 use flow_common::reason::ReasonDesc;
 use flow_common::reason::VirtualReasonDesc;
@@ -144,7 +146,6 @@ fn declare_module_export_opt<'cx>(
     name: &FlowSmolStr,
     loc: ALoc,
 ) -> Option<Type> {
-    use flow_common::flow_import_specifier::Userland;
     use flow_common::reason::Name;
     use flow_typing_type::type_util;
 
@@ -749,6 +750,51 @@ pub fn import_info_at_loc<'cx>(cx: &mut Context<'cx>, use_loc: ALoc) -> Option<I
             }
             _ => None,
         },
+    }
+}
+
+/// The value of the export that the `import type` binding at `def_loc` names, when the export is
+/// a type too and the binding holds that type.
+fn import_type_binding_value<'cx>(cx: &mut Context<'cx>, def_loc: &ALoc) -> Option<Type> {
+    use flow_common::reason::Name;
+    use flow_typing_flow_common::flow_js_utils::ExportClassification;
+
+    let (remote, source, scope_kind) = match cx
+        .environment()
+        .name_defs
+        .get(&EnvKey::new(DefLocType::OrdinaryNameLoc, def_loc.dupe()))
+    {
+        Some((NameDef::Import(data), scope_kind, ..)) => {
+            let remote = match &data.import {
+                NameDefImport::Named { kind, remote, .. }
+                    if kind.unwrap_or(data.import_kind) == AstImportKind::ImportType =>
+                {
+                    remote.dupe()
+                }
+                NameDefImport::Default(_) if data.import_kind == AstImportKind::ImportType => {
+                    FlowSmolStr::new_inline("default")
+                }
+                _ => return None,
+            };
+            (remote, data.source.dupe(), *scope_kind)
+        }
+        _ => return None,
+    };
+    let source = FlowImportSpecifier::Userland(Userland::from_smol_str(source));
+    let module_ = flow_js_utils::import_export_utils::imported_module_opt(
+        cx,
+        scope_kind == ScopeKind::DeclareModule,
+        &source,
+    )?;
+    let type_exports_tmap = cx.find_exports(module_.module_export_types.type_exports_tmap);
+    if !type_exports_tmap.contains_key(&Name::new(remote.dupe())) {
+        return None;
+    }
+    match flow_js_utils::import_export_utils::classify_named_export(cx, &module_, &remote) {
+        ExportClassification::FoundValue(sym) => Some(sym.value_t()),
+        ExportClassification::FoundTypeOnly(_)
+        | ExportClassification::UnknownButAllowedByEveryNamedExport
+        | ExportClassification::ExportMissing => None,
     }
 }
 
@@ -1836,6 +1882,17 @@ fn read_entry<'cx>(
                 );
                 Ok(any_t::at(AnySource::AnyError(None), loc))
             }
+            // `import type` binds the type of an export that is both a type and a value, so
+            // `typeof` reads the value from the module.
+            (
+                ValKind::Type {
+                    imported: true,
+                    type_only_namespace: false,
+                },
+                Some(_),
+                Some(def_loc),
+                LookupMode::ForTypeof,
+            ) if let Some(t) = import_type_binding_value(cx, def_loc) => Ok(t),
             // `import type` binds every meaning of the export, so `typeof` reads it as it reads a
             // TS import.
             (
