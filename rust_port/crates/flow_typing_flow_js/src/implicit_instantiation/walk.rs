@@ -1006,6 +1006,9 @@ impl<'e> Walker<'e> {
 
     /// The markers that occur in `t`.
     fn markers_in<'cx>(&self, cx: &mut Context<'cx>, t: &Type) -> BTreeSet<SubstName> {
+        if !self.mentions(cx, t) {
+            return BTreeSet::new();
+        }
         let mut visitor = MarkerVisitor {
             names: &self.vars,
             cache: None,
