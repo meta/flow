@@ -4,40 +4,65 @@ Flags: --pretty
   "result":[
     {
       "name":"[Symbol.iterator]",
-      "type":"(this: Map<string, number>) => MapIterator<[string, number]>"
+      "type":"(this: M) => MapIterator<[string, number]>"
     },
-    {"name":"clear","type":"(this: Map<string, number>) => void"},
-    {"name":"delete","type":"(this: Map<string, number>, key: string) => boolean"},
-    {
-      "name":"entries",
-      "type":"(this: Map<string, number>) => MapIterator<[string, number]>"
-    },
+    {"name":"clear","type":"(this: M) => void"},
+    {"name":"delete","type":"(this: M, key: string) => boolean"},
+    {"name":"entries","type":"(this: M) => MapIterator<[string, number]>"},
     {
       "name":"forEach",
-      "type":"<This>(this: Map<string, number>, callbackfn: (this: This, value: number, key: string, map: Map<string, number>) => unknown, thisArg: This) => void"
+      "type":"<This>(this: M, callbackfn: (this: This, value: number, key: string, map: Map<string, number>) => unknown, thisArg: This) => void"
     },
-    {
-      "name":"get",
-      "type":"(this: Map<string, number>, key: string) => number | undefined"
-    },
-    {
-      "name":"getOrInsert",
-      "type":"(this: Map<string, number>, key: string, value: number) => number"
-    },
+    {"name":"get","type":"(this: M, key: string) => number | undefined"},
+    {"name":"getOrInsert","type":"(this: M, key: string, value: number) => number"},
     {
       "name":"getOrInsertComputed",
-      "type":"(this: Map<string, number>, key: string, callbackfn: (key: string) => number) => number"
+      "type":"(this: M, key: string, callbackfn: (key: string) => number) => number"
     },
-    {"name":"has","type":"(this: Map<string, number>, key: string) => boolean"},
-    {"name":"keys","type":"(this: Map<string, number>) => MapIterator<string>"},
-    {
-      "name":"set",
-      "type":"(this: Map<string, number>, key: string, value: number) => Map<string, number>"
-    },
+    {"name":"has","type":"(this: M, key: string) => boolean"},
+    {"name":"keys","type":"(this: M) => MapIterator<string>"},
+    {"name":"set","type":"(this: M, key: string, value: number) => M"},
     {"name":"size","type":"number"},
-    {"name":"values","type":"(this: Map<string, number>) => MapIterator<number>"}
+    {"name":"values","type":"(this: M) => MapIterator<number>"}
   ]
 }
+
+member_class_extends_constructor_static.js:4:3
+Flags: --pretty
+{
+  "result":[
+    {
+      "name":"groupBy",
+      "type":"<K, T>(this: MapConstructor, items: Iterable<T>, keySelector: (item: T, index: number) => K) => Map<K, Array<T>>"
+    },
+    {"name":"prototype","type":"Map<any, any>"},
+    {
+      "name":"apply",
+      "type":"<T, R, A extends ArrayLike<unknown> = Readonly<[]>>(this: (this: T, ...args: A) => R, thisArg: T, args?: A) => R"
+    },
+    {"name":"arguments","type":"any"},
+    {
+      "name":"bind",
+      "type":"<T, A extends ReadonlyArray<any>, B extends ReadonlyArray<any>, R>(this: (this: T, ...args: [...A, ...B]) => R, thisArg: T, ...args: A) => (...args: B) => R"
+    },
+    {
+      "name":"call",
+      "type":"<T, R, A extends ArrayLike<unknown> = Readonly<[]>>(this: (this: T, ...args: A) => R, thisArg: T, ...args: A) => R"
+    },
+    {"name":"caller","type":"Function"},
+    {"name":"length","type":"number"},
+    {"name":"name","type":"string"},
+    {"name":"toString","type":"(this: this) => string"}
+  ]
+}
+
+member_class_extends_intersection.js:8:18
+Flags: --pretty
+{"result":[{"name":"a","type":"number"}]}
+
+member_class_extends_mixin.js:14:17
+Flags: --pretty
+{"result":[{"name":"a","type":"number"},{"name":"m","type":"boolean"}]}
 
 member_class_property.js:10:5
 Flags: --lsp

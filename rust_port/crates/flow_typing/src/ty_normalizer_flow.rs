@@ -34,11 +34,14 @@ use flow_typing_ty_normalizer::normalizer::State;
 use flow_typing_ty_normalizer::normalizer::lookahead;
 use flow_typing_type::type_::ConcretizationKind;
 use flow_typing_type::type_::ConcretizeTData;
+use flow_typing_type::type_::DefTInner;
 use flow_typing_type::type_::Destructor;
 use flow_typing_type::type_::ModuleType;
+use flow_typing_type::type_::PolyTData;
 use flow_typing_type::type_::Type;
 use flow_typing_type::type_::TypeDestructorT;
 use flow_typing_type::type_::TypeDestructorTInner;
+use flow_typing_type::type_::TypeInner;
 use flow_typing_type::type_::TypeStrictnessKind;
 use flow_typing_type::type_::UseT;
 use flow_typing_type::type_::UseTInner;
@@ -171,6 +174,44 @@ impl NormalizerInput for FlowInput {
         let strictness_kind = env.cx.type_strictness_kind();
         let t = type_util::typeapp(false, false, reason, t, targs.to_vec(), strictness_kind);
         cont(env, state, t)
+    }
+
+    // What the check inherits: the extends clause instantiated as `ThisTypeAppT` instantiates it.
+    fn constructed_instance<'cx>(
+        env: &mut Env<'_, 'cx>,
+        this_typeapp: &Type,
+        c: &Type,
+        _targs: Option<&[Type]>,
+    ) -> Result<Option<Type>, Error> {
+        let is_class = |t: &Type| match t.deref() {
+            TypeInner::DefT(_, def_t) => match def_t.deref() {
+                DefTInner::ClassT(_) => true,
+                DefTInner::PolyT(deref!(PolyTData { t_out, .. })) => matches!(
+                    t_out.deref(),
+                    TypeInner::DefT(_, def_t) if matches!(def_t.deref(), DefTInner::ClassT(_))
+                ),
+                _ => false,
+            },
+            _ => false,
+        };
+        let cs = flow_js_utils::flow_js_result_to_job_error(
+            flow_js::FlowJs::possible_concrete_types_for_inspection(
+                env.cx,
+                type_util::reason_of_t(c),
+                c,
+            ),
+        )?;
+        if cs.iter().all(is_class) {
+            return Ok(None);
+        }
+        let instance = flow_js_utils::flow_js_result_to_job_error(
+            flow_js::FlowJs::singleton_concrete_type_for_inspection(
+                env.cx,
+                type_util::reason_of_t(this_typeapp),
+                this_typeapp,
+            ),
+        )?;
+        Ok(Some(instance))
     }
 }
 

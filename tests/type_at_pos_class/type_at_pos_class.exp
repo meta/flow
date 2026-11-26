@@ -509,6 +509,21 @@ Flags:
 (property) inner: number
 declare_class_members.js:18:12,18:16
 
+extends_mixin.js:15:11
+Flags:
+(property) FromMixin.m: boolean
+extends_mixin.js:15:11,15:11
+
+extends_mixin.js:17:11
+Flags:
+(property) FromMixin.a: number
+extends_mixin.js:17:11,17:11
+
+extends_cyclic.js:8:7
+Flags:
+(property) State.own: number
+extends_cyclic.js:8:7,8:9
+
 member_reference.js:17:3
 Flags:
 (property) A.p: number

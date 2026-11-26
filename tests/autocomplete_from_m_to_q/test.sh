@@ -7,6 +7,9 @@
 # shellcheck disable=SC2094
 
 queries_in_file autocomplete "member_class_extends_constructor.js" --pretty
+queries_in_file autocomplete "member_class_extends_constructor_static.js" --pretty
+queries_in_file autocomplete "member_class_extends_intersection.js" --pretty
+queries_in_file autocomplete "member_class_extends_mixin.js" --pretty
 queries_in_file autocomplete "member_class_property.js" --lsp
 queries_in_file autocomplete "member_class_static.js" --pretty
 queries_in_file autocomplete "member_interface_property.js" --lsp

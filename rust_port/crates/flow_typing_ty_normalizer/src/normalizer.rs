@@ -398,6 +398,19 @@ pub trait NormalizerInput {
         name: &str,
         targs: &[Type],
     ) -> Result<A, Error>;
+
+    /// The instance a class inherits from what its extends clause names (`this_typeapp`, a
+    /// [ThisTypeAppT] of `c`), when `c` is a value with construct signatures rather than a class.
+    /// `None` for a class, whose instance is normalized as it is. Without flows, this reads what
+    /// the construct signature of an interface returns.
+    fn constructed_instance<'cx>(
+        env: &mut Env<'_, 'cx>,
+        _this_typeapp: &Type,
+        c: &Type,
+        targs: Option<&[Type]>,
+    ) -> Result<Option<Type>, Error> {
+        Ok(expand_members::constructed_instance(env.cx, c, targs))
+    }
 }
 
 #[derive(Debug, Clone, Dupe, PartialEq, Eq, Hash)]
@@ -513,6 +526,34 @@ fn is_rec_id(state: &State, id: IdKey) -> bool {
         IdKey::TVarKey(tvar_id) => state.rec_tvar_ids.contains(&tvar_id),
         IdKey::EvalKey(eval_id) => state.rec_eval_ids.contains(&eval_id),
     }
+}
+
+// Normalizes, with `normalize`, the instance a class inherits from the value `c` its extends
+// clause names ([NormalizerInput::constructed_instance]). The instance stands for `c` there, so
+// it is reached through `c`'s tvar as `c` itself is: a base that leads back to it is recursive.
+fn inherited_instance<'cx>(
+    env: &mut Env<'_, 'cx>,
+    state: &mut State,
+    c: &Type,
+    instance: &Type,
+    normalize: impl FnOnce(&mut Env<'_, 'cx>, &mut State, &Type) -> Result<ALocTy, Error>,
+) -> Result<ALocTy, Error> {
+    let Some(node) = type_util::constraint_node_id(c) else {
+        return normalize(env, state, instance);
+    };
+    let (root_id, _) = env.cx.find_constraints(node.id());
+    if is_rec_id(state, IdKey::TVarKey(root_id)) {
+        return Ok(Arc::new(ty::Ty::Any(ty::AnyKind::Recursive)));
+    }
+    if env.seen_tvar_ids.contains(&root_id) {
+        add_rec_id(state, IdKey::TVarKey(root_id));
+        return Ok(Arc::new(ty::Ty::Any(ty::AnyKind::Recursive)));
+    }
+    let old_seen_tvar_ids = env.seen_tvar_ids.dupe();
+    env.seen_tvar_ids.insert(root_id);
+    let result = normalize(env, state, instance);
+    env.seen_tvar_ids = old_seen_tvar_ids;
+    result
 }
 
 // =============================================================================
@@ -1797,8 +1838,12 @@ mod type_converter {
                     targs: ts,
                     ..
                 }),
-            ) => match expand_members::constructed_instance(env.cx, c, ts.as_deref()) {
-                Some(inherited_t) => type__::<I>(env, state, None, &inherited_t),
+            ) => match I::constructed_instance(env, t, c, ts.as_deref())? {
+                Some(inherited_t) => {
+                    inherited_instance(env, state, c, &inherited_t, |env, state, t| {
+                        type__::<I>(env, state, None, t)
+                    })
+                }
                 None => type_app::<I>(env, state, false, c, ts.as_deref()),
             },
             TypeInner::KeysT(reason, inner_t) => {
@@ -5626,18 +5671,42 @@ mod expand_members {
                     ..
                 }),
             ) => {
-                let inherited_t = constructed_instance(env.cx, c, targs.as_deref());
-                type__::<I>(
-                    env,
-                    state,
-                    None,
-                    inherited,
-                    source,
-                    imode,
-                    force_instance,
-                    allowed_prop_names,
-                    inherited_t.as_ref().unwrap_or(c),
-                )
+                // The statics a class inherits are the members of the value it extends, not of
+                // the instance that value constructs.
+                let inherited_t = match imode {
+                    InstanceMode::IMStatic => None,
+                    InstanceMode::IMUnset | InstanceMode::IMInstance => {
+                        I::constructed_instance(env, t, c, targs.as_deref())?
+                    }
+                };
+                match inherited_t {
+                    Some(inherited_t) => {
+                        inherited_instance(env, state, c, &inherited_t, |env, state, t| {
+                            type__::<I>(
+                                env,
+                                state,
+                                None,
+                                inherited,
+                                source,
+                                imode,
+                                force_instance,
+                                allowed_prop_names,
+                                t,
+                            )
+                        })
+                    }
+                    None => type__::<I>(
+                        env,
+                        state,
+                        None,
+                        inherited,
+                        source,
+                        imode,
+                        force_instance,
+                        allowed_prop_names,
+                        c,
+                    ),
+                }
             }
             TypeInner::DefT(r, def_t) => match def_t.deref() {
                 DefTInner::NumGeneralT(_) | DefTInner::SingletonNumT { .. } => {

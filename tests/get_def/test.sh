@@ -228,6 +228,10 @@ printf "private class property assignment = "
 assert_ok "$FLOW" get-def class.js 8 15 --strip-root --pretty
 printf "members of maybe types = "
 assert_ok "$FLOW" get-def class.js 22 5 --strip-root --pretty
+printf "member of a mixin a class extends = "
+assert_ok "$FLOW" get-def class_extends_mixin.js 16 12 --strip-root --pretty
+printf "member of the class a mixin is applied to = "
+assert_ok "$FLOW" get-def class_extends_mixin.js 17 12 --strip-root --pretty
 printf "members of unions with null/void = "
 assert_ok "$FLOW" get-def class.js 26 5 --strip-root --pretty
 
