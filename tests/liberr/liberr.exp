@@ -10,6 +10,52 @@ module! [module-type-conflict]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Error --------------------------------------------------------------------------------------------- libs/exports.js:15:5
+
+Unable to determine module type (CommonJS vs ES) if both an export statement and `module.exports` are used in the same
+module! [module-type-conflict]
+
+   15|     export default a; // error
+           ^^^^^^^^^^^^^^^^^
+
+
+Error --------------------------------------------------------------------------------------------- libs/exports.js:21:5
+
+Unable to determine module type (CommonJS vs ES) if both an export statement and `module.exports` are used in the same
+module! [module-type-conflict]
+
+   21|     declare module.exports: number; // error
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Error -------------------------------------------------------------------------------------------- libs/exports.js:28:20
+
+Cannot declare `default` [1] because the name is already bound. [name-already-bound]
+
+   libs/exports.js:28:20
+   28|     declare export default typeof b; // error
+                          ^^^^^^^
+
+References:
+   libs/exports.js:27:20
+   27|     declare export default typeof a;
+                          ^^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------- libs/exports.js:29:12
+
+Cannot declare `default` [1] because the name is already bound. [name-already-bound]
+
+   libs/exports.js:29:12
+   29|     export default a; // error
+                  ^^^^^^^
+
+References:
+   libs/exports.js:27:20
+   27|     declare export default typeof a;
+                          ^^^^^^^ [1]
+
+
 Error ------------------------------------------------------------------------------ libs/ignored-statement-reads.js:4:1
 
 Cannot use expression statements in a library file. The statement will be ignored. [unsupported-syntax]
@@ -171,7 +217,7 @@ Cannot use if statements with in `declare module`. The statement will be ignored
 
 Error ------------------------------------------------------------------------------- libs/unsupported-statements.js:4:3
 
-Cannot use value export statements in a library file. The statement will be ignored. [unsupported-syntax]
+Cannot use variable declaration statements in a library file. The statement will be ignored. [unsupported-syntax]
 
    4|   export const foo = ''; // error
         ^^^^^^^^^^^^^^^^^^^^^^
@@ -275,7 +321,7 @@ References:
 
 
 
-Found 28 errors
+Found 32 errors
 
 ============================================
 With warnings:
@@ -289,6 +335,52 @@ module! [module-type-conflict]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Error --------------------------------------------------------------------------------------------- libs/exports.js:15:5
+
+Unable to determine module type (CommonJS vs ES) if both an export statement and `module.exports` are used in the same
+module! [module-type-conflict]
+
+   15|     export default a; // error
+           ^^^^^^^^^^^^^^^^^
+
+
+Error --------------------------------------------------------------------------------------------- libs/exports.js:21:5
+
+Unable to determine module type (CommonJS vs ES) if both an export statement and `module.exports` are used in the same
+module! [module-type-conflict]
+
+   21|     declare module.exports: number; // error
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Error -------------------------------------------------------------------------------------------- libs/exports.js:28:20
+
+Cannot declare `default` [1] because the name is already bound. [name-already-bound]
+
+   libs/exports.js:28:20
+   28|     declare export default typeof b; // error
+                          ^^^^^^^
+
+References:
+   libs/exports.js:27:20
+   27|     declare export default typeof a;
+                          ^^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------- libs/exports.js:29:12
+
+Cannot declare `default` [1] because the name is already bound. [name-already-bound]
+
+   libs/exports.js:29:12
+   29|     export default a; // error
+                  ^^^^^^^
+
+References:
+   libs/exports.js:27:20
+   27|     declare export default typeof a;
+                          ^^^^^^^ [1]
+
+
 Error ------------------------------------------------------------------------------ libs/ignored-statement-reads.js:4:1
 
 Cannot use expression statements in a library file. The statement will be ignored. [unsupported-syntax]
@@ -450,7 +542,7 @@ Cannot use if statements with in `declare module`. The statement will be ignored
 
 Error ------------------------------------------------------------------------------- libs/unsupported-statements.js:4:3
 
-Cannot use value export statements in a library file. The statement will be ignored. [unsupported-syntax]
+Cannot use variable declaration statements in a library file. The statement will be ignored. [unsupported-syntax]
 
    4|   export const foo = ''; // error
         ^^^^^^^^^^^^^^^^^^^^^^
@@ -554,4 +646,4 @@ References:
 
 
 
-Found 28 errors
+Found 32 errors

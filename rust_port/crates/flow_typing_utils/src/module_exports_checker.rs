@@ -10,6 +10,7 @@ use std::ops::Deref;
 use dupe::Dupe;
 use flow_aloc::ALoc;
 use flow_analysis::scope_builder;
+use flow_common::reason::Name;
 use flow_parser::ast;
 use flow_parser::ast::expression::ExpressionInner;
 use flow_parser::ast::statement::ExportKind;
@@ -18,6 +19,7 @@ use flow_parser::ast_utils;
 use flow_parser::ast_visitor;
 use flow_parser::ast_visitor::AstVisitor;
 use flow_parser_utils::file_sig::FileSig;
+use flow_typing_errors::error_message::BindingError;
 use flow_typing_errors::error_message::ErrorMessage;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -192,12 +194,86 @@ impl<'a> ExportsErrorChecker<'a> {
     fn check_declare_module_or_declare_namespace_body(
         &mut self,
         body: &[ast::statement::Statement<ALoc, ALoc>],
+        results: &[Result<(), &'static str>],
     ) {
+        enum DefaultExportKind {
+            Function,
+            Class,
+            Other,
+        }
         let mut module_kind = ModuleKind::Unknown;
-        for stmt in body {
+        let mut first_default_loc: Option<ALoc> = None;
+        let mut class_default_loc: Option<ALoc> = None;
+        let mut other_default_loc: Option<ALoc> = None;
+        for (stmt, result) in body.iter().zip(results) {
+            let default_export = match &**stmt {
+                // A rejected `export default` is ignored.
+                StatementInner::ExportDefaultDeclaration { .. } if result.is_err() => continue,
+                StatementInner::ExportDefaultDeclaration { inner, .. } => {
+                    let kind = match &inner.declaration {
+                        ast::statement::export_default_declaration::Declaration::Declaration(
+                            declaration,
+                        ) if matches!(&**declaration, StatementInner::ClassDeclaration { .. }) => {
+                            DefaultExportKind::Class
+                        }
+                        _ => DefaultExportKind::Other,
+                    };
+                    Some((&inner.default, kind))
+                }
+                StatementInner::DeclareExportDeclaration { inner, .. } => {
+                    inner.default.as_ref().map(|default_loc| {
+                        let kind = match &inner.declaration {
+                            Some(
+                                ast::statement::declare_export_declaration::Declaration::Function {
+                                    ..
+                                },
+                            ) => DefaultExportKind::Function,
+                            Some(
+                                ast::statement::declare_export_declaration::Declaration::Class {
+                                    ..
+                                },
+                            ) => DefaultExportKind::Class,
+                            _ => DefaultExportKind::Other,
+                        };
+                        (default_loc, kind)
+                    })
+                }
+                _ => None,
+            };
+            if let Some((default_loc, kind)) = default_export {
+                // Like TypeScript, default function declarations without a body are overloads,
+                // which merge with each other and with a class.
+                let existing_loc = match kind {
+                    DefaultExportKind::Function => other_default_loc.as_ref(),
+                    DefaultExportKind::Class => {
+                        other_default_loc.as_ref().or(class_default_loc.as_ref())
+                    }
+                    DefaultExportKind::Other => first_default_loc.as_ref(),
+                };
+                if let Some(existing_loc) = existing_loc {
+                    self.add_error(ErrorMessage::EBindingError(Box::new((
+                        BindingError::ENameAlreadyBound,
+                        default_loc.dupe(),
+                        Name::new("default"),
+                        existing_loc.dupe(),
+                    ))));
+                }
+                first_default_loc.get_or_insert_with(|| default_loc.dupe());
+                match kind {
+                    DefaultExportKind::Function => {}
+                    DefaultExportKind::Class => {
+                        class_default_loc.get_or_insert_with(|| default_loc.dupe());
+                    }
+                    DefaultExportKind::Other => {
+                        other_default_loc.get_or_insert_with(|| default_loc.dupe());
+                    }
+                }
+            }
             let loc = match &**stmt {
                 StatementInner::DeclareModuleExports { loc, .. } => loc.dupe(),
+                StatementInner::ExportAssignment { loc, .. } => loc.dupe(),
                 StatementInner::DeclareExportDeclaration { loc, .. } => loc.dupe(),
+                StatementInner::ExportDefaultDeclaration { loc, .. } => loc.dupe(),
                 _ => continue,
             };
             match (&module_kind, &**stmt) {
@@ -207,7 +283,11 @@ impl<'a> ExportsErrorChecker<'a> {
                 // `declare export type` and `declare export interface` are the two
                 // exceptions to this rule because they are valid in both CommonJS
                 // and ES modules (and thus do not indicate an intent for either).
-                (ModuleKind::Unknown, StatementInner::DeclareModuleExports { .. }) => {
+                (
+                    ModuleKind::Unknown,
+                    StatementInner::DeclareModuleExports { .. }
+                    | StatementInner::ExportAssignment { .. },
+                ) => {
                     module_kind = ModuleKind::CommonJS;
                 }
                 (ModuleKind::Unknown, StatementInner::DeclareExportDeclaration { inner, .. }) => {
@@ -227,15 +307,28 @@ impl<'a> ExportsErrorChecker<'a> {
                         }
                     }
                 }
+                (ModuleKind::Unknown, StatementInner::ExportDefaultDeclaration { inner, .. })
+                    if inner.export_kind() == ExportKind::ExportValue =>
+                {
+                    module_kind = ModuleKind::ES;
+                }
                 // We allow more than one `declare module.exports` statement
-                (ModuleKind::CommonJS, StatementInner::DeclareModuleExports { .. }) => {}
+                (
+                    ModuleKind::CommonJS,
+                    StatementInner::DeclareModuleExports { .. }
+                    | StatementInner::ExportAssignment { .. },
+                ) => {}
                 // It's never ok to mix and match `declare export` and
                 // `declare module.exports` in the same module because it leaves the
                 // kind of the module (CommonJS vs ES) ambiguous.
                 //
                 // The 1 exception to this rule is that `export type/interface` are
                 // both ok in CommonJS modules.
-                (ModuleKind::ES, StatementInner::DeclareModuleExports { .. }) => {
+                (
+                    ModuleKind::ES,
+                    StatementInner::DeclareModuleExports { .. }
+                    | StatementInner::ExportAssignment { .. },
+                ) => {
                     self.add_error(ErrorMessage::EIndeterminateModuleType(loc));
                 }
                 (ModuleKind::CommonJS, StatementInner::DeclareExportDeclaration { inner, .. }) => {
@@ -254,6 +347,11 @@ impl<'a> ExportsErrorChecker<'a> {
                             self.add_error(ErrorMessage::EIndeterminateModuleType(loc));
                         }
                     }
+                }
+                (ModuleKind::CommonJS, StatementInner::ExportDefaultDeclaration { inner, .. })
+                    if inner.export_kind() == ExportKind::ExportValue =>
+                {
+                    self.add_error(ErrorMessage::EIndeterminateModuleType(loc));
                 }
                 _ => {}
             }
@@ -496,7 +594,8 @@ impl<'ast, 'a> AstVisitor<'ast, ALoc> for ExportsErrorChecker<'a> {
         m: &'ast ast::statement::DeclareModule<ALoc, ALoc>,
     ) -> Result<(), !> {
         let (_, block) = &m.body;
-        self.check_declare_module_or_declare_namespace_body(&block.body);
+        let results = ast_utils::acceptable_statements_in_declare_module(&block.body);
+        self.check_declare_module_or_declare_namespace_body(&block.body, &results);
         Ok(())
     }
 
@@ -507,7 +606,20 @@ impl<'ast, 'a> AstVisitor<'ast, ALoc> for ExportsErrorChecker<'a> {
         ns: &'ast ast::statement::DeclareNamespace<ALoc, ALoc>,
     ) -> Result<(), !> {
         let (_, block) = &ns.body;
-        self.check_declare_module_or_declare_namespace_body(&block.body);
+        let context = match &ns.id {
+            ast::statement::declare_namespace::Id::Local(_) => {
+                ast_utils::DeclarationContext::DeclareNamespace
+            }
+            ast::statement::declare_namespace::Id::Global(_) => {
+                ast_utils::DeclarationContext::DeclareGlobal
+            }
+        };
+        let results: Vec<_> = block
+            .body
+            .iter()
+            .map(|stmt| ast_utils::acceptable_statement_in_declaration_context(context, stmt))
+            .collect();
+        self.check_declare_module_or_declare_namespace_body(&block.body, &results);
         Ok(())
     }
 

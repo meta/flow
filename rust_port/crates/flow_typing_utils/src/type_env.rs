@@ -2137,6 +2137,11 @@ pub fn query_var<'cx>(
         None => VirtualReasonDesc::RIdentifier(name.dupe()),
     };
     let lookup_mode = lookup_mode.unwrap_or(LookupMode::ForValue);
+    if let Some(module) = unresolved_read_declare_module(cx, &loc)
+        && let Some(t) = declare_module_export_opt(lookup_mode, cx, module, name, loc.dupe())
+    {
+        return Ok(t);
+    }
     read_entry_exn(
         lookup_mode,
         cx,
@@ -2145,40 +2150,37 @@ pub fn query_var<'cx>(
     )
 }
 
+fn is_unresolved_read<'cx>(cx: &mut Context<'cx>, loc: &ALoc) -> bool {
+    let env = cx.environment();
+    match find_var_opt(&env.var_info, loc) {
+        Err(_) => true,
+        Ok(read) => {
+            !read.write_locs.is_empty()
+                && read
+                    .write_locs
+                    .iter()
+                    .all(|write| matches!(write, WriteLoc::Global(_)))
+        }
+    }
+}
+
+fn unresolved_read_declare_module<'cx>(cx: &mut Context<'cx>, loc: &ALoc) -> Option<FlowSmolStr> {
+    let module = declare_module_of_read(cx, loc)?;
+    is_unresolved_read(cx, loc).then_some(module)
+}
+
 pub fn lookup_type_identifier<'cx>(
     lookup_mode: LookupMode,
     cx: &mut Context<'cx>,
     name: &FlowSmolStr,
     loc: ALoc,
 ) -> Result<Type, JobError> {
-    fn is_unresolved_read<'cx>(cx: &mut Context<'cx>, loc: &ALoc) -> bool {
-        let env = cx.environment();
-        match find_var_opt(&env.var_info, loc) {
-            Err(_) => true,
-            Ok(read) => {
-                !read.write_locs.is_empty()
-                    && read
-                        .write_locs
-                        .iter()
-                        .all(|write| matches!(write, WriteLoc::Global(_)))
-            }
-        }
-    }
-
     fn is_unresolved_read_in_declare_namespace<'cx>(cx: &mut Context<'cx>, loc: &ALoc) -> bool {
         let env = cx.environment();
         if env.var_info.declare_namespace_read_paths.get(loc).is_none() {
             return false;
         }
         is_unresolved_read(cx, loc)
-    }
-
-    fn unresolved_read_declare_module<'cx>(
-        cx: &mut Context<'cx>,
-        loc: &ALoc,
-    ) -> Option<FlowSmolStr> {
-        let module = declare_module_of_read(cx, loc)?;
-        is_unresolved_read(cx, loc).then_some(module)
     }
 
     fn query_var_opt<'cx>(

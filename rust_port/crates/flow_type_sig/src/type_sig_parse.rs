@@ -15995,11 +15995,9 @@ pub(super) fn statement<'arena: 'ast, 'ast>(
             let scope = scope::push_declare_module(scopes, tbls, scope, loc.dupe(), name.dupe());
             let (_, block) = body;
             let ast::statement::Block { body: stmts, .. } = block;
-            for stmt in stmts.iter() {
-                match ast_utils::acceptable_statement_in_declaration_context(
-                    ast_utils::DeclarationContext::DeclareModule,
-                    stmt,
-                ) {
+            let results = ast_utils::acceptable_statements_in_declare_module(stmts);
+            for (stmt, result) in stmts.iter().zip(results) {
+                match result {
                     Ok(_) => {
                         statement(opts, scope, scopes, tbls, stmt);
                     }

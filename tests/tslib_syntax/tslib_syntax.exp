@@ -1,3 +1,233 @@
+Error -------------------------------------------------------------------------- ambient_module_export_default.d.ts:18:3
+
+Cannot use export default statements in a library file. The statement will be ignored. [unsupported-syntax]
+
+   18|   export default f(); // ERROR
+         ^^^^^^^^^^^^^^^^^^^
+
+
+Error -------------------------------------------------------------------------- ambient_module_export_default.d.ts:18:3
+
+Cannot use export default statements with in `declare module`. The statement will be ignored. [unsupported-syntax]
+
+   18|   export default f(); // ERROR
+         ^^^^^^^^^^^^^^^^^^^
+
+
+Error -------------------------------------------------------------------------- ambient_module_export_default.d.ts:21:3
+
+Cannot use export default statements in a library file. The statement will be ignored. [unsupported-syntax]
+
+         v---------------------
+   21|   export default class {
+   22|     m(x: number) {} // ERROR
+   23|   }
+         ^
+
+
+Error -------------------------------------------------------------------------- ambient_module_export_default.d.ts:21:3
+
+Cannot use export default statements with in `declare module`. The statement will be ignored. [unsupported-syntax]
+
+         v---------------------
+   21|   export default class {
+   22|     m(x: number) {} // ERROR
+   23|   }
+         ^
+
+
+Error ------------------------------------------------------------------------- ambient_module_export_default.d.ts:45:10
+
+Cannot declare `default` [1] because the name is already bound. [name-already-bound]
+
+   ambient_module_export_default.d.ts:45:10
+   45|   export default b; // ERROR
+                ^^^^^^^
+
+References:
+   ambient_module_export_default.d.ts:44:10
+   44|   export default a;
+                ^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------- ambient_module_export_default.d.ts:50:10
+
+Cannot declare `default` [1] because the name is already bound. [name-already-bound]
+
+   ambient_module_export_default.d.ts:50:10
+   50|   export default v; // ERROR
+                ^^^^^^^
+
+References:
+   ambient_module_export_default.d.ts:49:10
+   49|   export default function f(x: string): string;
+                ^^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------- ambient_module_export_default.d.ts:55:3
+
+Unable to determine module type (CommonJS vs ES) if both an export statement and `module.exports` are used in the same
+module! [module-type-conflict]
+
+   55|   export = a; // ERROR
+         ^^^^^^^^^^^
+
+
+Error -------------------------------------------------------------------------- ambient_module_export_default.d.ts:67:3
+
+Cannot use function declaration statements in a library file. The statement will be ignored. [unsupported-syntax]
+
+         v----------------------
+   67|   function g() { // ERROR
+   68|     return 1;
+   69|   }
+         ^
+
+
+Error -------------------------------------------------------------------------- ambient_module_export_default.d.ts:67:3
+
+Cannot use function declaration statements with in `declare module`. The statement will be ignored. [unsupported-syntax]
+
+         v----------------------
+   67|   function g() { // ERROR
+   68|     return 1;
+   69|   }
+         ^
+
+
+Error -------------------------------------------------------------------------- ambient_module_export_default.d.ts:70:3
+
+Cannot use export default statements in a library file. The statement will be ignored. [unsupported-syntax]
+
+   70|   export default g;
+         ^^^^^^^^^^^^^^^^^
+
+
+Error -------------------------------------------------------------------------- ambient_module_export_default.d.ts:70:3
+
+Cannot use export default statements with in `declare module`. The statement will be ignored. [unsupported-syntax]
+
+   70|   export default g;
+         ^^^^^^^^^^^^^^^^^
+
+
+Error ---------------------------------------------------------------------- ambient_module_export_default_usage.js:11:1
+
+Cannot cast `value` to `number` because `string` [1] is incompatible with `number` [2]. [incompatible-type]
+
+   ambient_module_export_default_usage.js:11:1
+   11| value as number; // ERROR
+       ^^^^^
+
+References:
+   ambient_module_export_default.d.ts:2:18
+    2|   const content: string;
+                        ^^^^^^ [1]
+   ambient_module_export_default_usage.js:11:10
+   11| value as number; // ERROR
+                ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------- ambient_module_export_default_usage.js:13:1
+
+Cannot cast `qualified` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   ambient_module_export_default_usage.js:13:1
+   13| qualified as string; // ERROR
+       ^^^^^^^^^
+
+References:
+   ambient_module_export_default.d.ts:7:21
+    7|     export const v: number;
+                           ^^^^^^ [1]
+   ambient_module_export_default_usage.js:13:14
+   13| qualified as string; // ERROR
+                    ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------- ambient_module_export_default_usage.js:15:1
+
+Cannot cast `(new C()).x` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   ambient_module_export_default_usage.js:15:1
+   15| new C().x as string; // ERROR
+       ^^^^^^^^^
+
+References:
+   ambient_module_export_default.d.ts:13:8
+   13|     x: number;
+              ^^^^^^ [1]
+   ambient_module_export_default_usage.js:15:14
+   15| new C().x as string; // ERROR
+                    ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------- ambient_module_export_default_usage.js:17:1
+
+Cannot cast `other` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   ambient_module_export_default_usage.js:17:1
+   17| other as string; // ERROR
+       ^^^^^
+
+References:
+   ambient_module_export_default.d.ts:29:25
+   29|   export const content: number;
+                               ^^^^^^ [1]
+   ambient_module_export_default_usage.js:17:10
+   17| other as string; // ERROR
+                ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------- ambient_module_export_default_usage.js:19:1
+
+Cannot cast `(new Foo()).x` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   ambient_module_export_default_usage.js:19:1
+   19| new Foo().x as string; // ERROR
+       ^^^^^^^^^^^
+
+References:
+   ambient_module_export_default.d.ts:33:8
+   33|     x: number;
+              ^^^^^^ [1]
+   ambient_module_export_default_usage.js:19:16
+   19| new Foo().x as string; // ERROR
+                      ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------- ambient_module_export_default_usage.js:23:1
+
+Cannot cast `(new D()).b` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
+
+   ambient_module_export_default_usage.js:23:1
+   23| new D().b as string; // ERROR
+       ^^^^^^^^^
+
+References:
+   ambient_module_export_default.d.ts:63:8
+   63|     b: number;
+              ^^^^^^ [1]
+   ambient_module_export_default_usage.js:23:14
+   23| new D().b as string; // ERROR
+                    ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------- ambient_module_export_default_usage.js:24:1
+
+Cannot call `implementation` because a call signature declaring the expected parameter / return type is missing in
+`{}` [1]. [prop-missing]
+
+   ambient_module_export_default_usage.js:24:1
+   24| implementation(); // ERROR
+       ^^^^^^^^^^^^^^
+
+References:
+   ambient_module_export_default.d.ts:66:16
+   66| declare module 'export-default-implementation' {
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
 Error ------------------------------------------------------------------------------- class_index_signature_usage.js:5:1
 
 Cannot cast `obj["foo"]` to `string` because `number` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -2185,4 +2415,4 @@ References:
 
 
 
-Found 142 errors
+Found 160 errors

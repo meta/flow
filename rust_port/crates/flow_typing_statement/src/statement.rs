@@ -5131,12 +5131,10 @@ fn declare_module<'a>(
         flow_env_builder::name_def_types::ScopeKind::DeclareModule,
     );
     let elements_ast = statement_list(cx, elements)?;
-    for stmt in elements_ast.iter() {
+    let results = flow_parser::ast_utils::acceptable_statements_in_declare_module(elements);
+    for (stmt, result) in elements_ast.iter().zip(results) {
         let loc = stmt.loc();
-        match flow_parser::ast_utils::acceptable_statement_in_declaration_context(
-            flow_parser::ast_utils::DeclarationContext::DeclareModule,
-            stmt,
-        ) {
+        match result {
             Ok(()) => {}
             Err(kind) => {
                 flow_js::add_output_non_speculating(

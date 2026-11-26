@@ -32,6 +32,7 @@ use flow_parser::ast;
 use flow_parser::ast::Comment;
 use flow_parser::ast::CommentKind;
 use flow_parser::ast::statement;
+use flow_parser::ast_utils::acceptable_statements_in_declare_module;
 use flow_parser::ast_utils::pattern_has_type_annotation;
 use flow_parser::ast_visitor;
 use flow_parser::ast_visitor::AstVisitor;
@@ -987,9 +988,11 @@ struct LibDefLocMapperAndValidator<'a, 'cx> {
     cx: &'a mut Context<'cx>,
 }
 
+/// Validates a statement at the top level of a library file, or one in a `declare module` body
+/// with its result from `acceptable_statements_in_declare_module`.
 fn stmt_validator(
     cx: &mut Context,
-    in_toplevel_scope: bool,
+    declare_module_result: Option<Result<(), &'static str>>,
     stmt: &statement::Statement<ALoc, ALoc>,
 ) -> bool {
     let loc = stmt.loc().dupe();
@@ -1002,6 +1005,11 @@ fn stmt_validator(
         )))
     };
     let error_opt: Option<ErrorMessage<ALoc>> = match &**stmt {
+        // A `declare module` body allows what signature parsing reads from it.
+        _ if let Some(result) = declare_module_result => match result {
+            Ok(()) => None,
+            Err(kind) => Some(error(kind)),
+        },
         statement::StatementInner::DeclareClass { .. }
         | statement::StatementInner::DeclareComponent { .. }
         | statement::StatementInner::DeclareEnum { .. }
@@ -1033,38 +1041,24 @@ fn stmt_validator(
             Some(error("value export"))
         }
         statement::StatementInner::ImportDeclaration { .. } => {
-            if in_toplevel_scope {
-                Some(ErrorMessage::EUnsupportedSyntax(Box::new((
-                    loc.dupe(),
-                    UnsupportedSyntax::ContextDependentUnsupportedStatement(
-                        ContextDependentUnsupportedStatement::ToplevelLibraryImport,
-                    ),
-                ))))
-            } else {
-                None
-            }
+            Some(ErrorMessage::EUnsupportedSyntax(Box::new((
+                loc.dupe(),
+                UnsupportedSyntax::ContextDependentUnsupportedStatement(
+                    ContextDependentUnsupportedStatement::ToplevelLibraryImport,
+                ),
+            ))))
         }
         statement::StatementInner::ImportEqualsDeclaration { .. } => {
-            if in_toplevel_scope {
-                Some(ErrorMessage::EUnsupportedSyntax(Box::new((
-                    loc.dupe(),
-                    UnsupportedSyntax::ContextDependentUnsupportedStatement(
-                        ContextDependentUnsupportedStatement::ToplevelLibraryImport,
-                    ),
-                ))))
-            } else {
-                None
-            }
+            Some(ErrorMessage::EUnsupportedSyntax(Box::new((
+                loc.dupe(),
+                UnsupportedSyntax::ContextDependentUnsupportedStatement(
+                    ContextDependentUnsupportedStatement::ToplevelLibraryImport,
+                ),
+            ))))
         }
         statement::StatementInner::DeclareNamespace { inner, .. } => match &inner.id {
             statement::declare_namespace::Id::Local(_) => None,
-            statement::declare_namespace::Id::Global(_) => {
-                if in_toplevel_scope {
-                    Some(error("declare global"))
-                } else {
-                    None
-                }
-            }
+            statement::declare_namespace::Id::Global(_) => Some(error("declare global")),
         },
         statement::StatementInner::Block { .. } => Some(error("block")),
         statement::StatementInner::Break { .. } => Some(error("break")),
@@ -1140,7 +1134,7 @@ impl<'ast> AstVisitor<'ast, ALoc, ALoc, &'ast ALoc, !> for LibDefLocMapperAndVal
         let filtered: Arc<[statement::Statement<ALoc, ALoc>]> = Arc::from(
             stmts
                 .iter()
-                .filter(|stmt| stmt_validator(self.cx, true, stmt))
+                .filter(|stmt| stmt_validator(self.cx, None, stmt))
                 .duped()
                 .collect::<Vec<_>>(),
         );
@@ -1154,6 +1148,7 @@ impl<'ast> AstVisitor<'ast, ALoc, ALoc, &'ast ALoc, !> for LibDefLocMapperAndVal
     ) -> statement::DeclareModule<ALoc, ALoc> {
         let statement::DeclareModule { id, body, comments } = m;
         let (body_loc, body_block) = body;
+        let results = acceptable_statements_in_declare_module(&body_block.body);
         let filtered_m = statement::DeclareModule {
             id: id.clone(),
             body: (
@@ -1163,8 +1158,9 @@ impl<'ast> AstVisitor<'ast, ALoc, ALoc, &'ast ALoc, !> for LibDefLocMapperAndVal
                         body_block
                             .body
                             .iter()
-                            .filter(|s| stmt_validator(self.cx, false, s))
-                            .duped()
+                            .zip(results)
+                            .filter(|(s, result)| stmt_validator(self.cx, Some(*result), s))
+                            .map(|(s, _)| s.dupe())
                             .collect::<Vec<_>>(),
                     ),
                     comments: body_block.comments.dupe(),

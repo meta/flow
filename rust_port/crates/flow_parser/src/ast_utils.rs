@@ -6,6 +6,7 @@
  */
 
 use std::borrow::Cow;
+use std::collections::HashSet;
 use std::ops::Deref;
 use std::sync::Arc;
 
@@ -766,7 +767,24 @@ pub fn acceptable_statement_in_declaration_context<M: Dupe, T: Dupe>(
         statement::StatementInner::Continue { .. } => Err("continue"),
         statement::StatementInner::Debugger { .. } => Err("debugger"),
         statement::StatementInner::DoWhile { .. } => Err("do while"),
-        statement::StatementInner::ExportDefaultDeclaration { .. } => Err("export default"),
+        statement::StatementInner::ExportDefaultDeclaration { inner, .. } => {
+            let acceptable = context == DeclarationContext::DeclareModule
+                && match &inner.declaration {
+                    statement::export_default_declaration::Declaration::Declaration(
+                        declaration,
+                    ) => acceptable_statement_in_declaration_context(context, declaration).is_ok(),
+                    // Like TypeScript, an ambient default export of an expression must be an
+                    // identifier or a qualified name.
+                    statement::export_default_declaration::Declaration::Expression(expr) => {
+                        is_entity_name_expression(expr)
+                    }
+                };
+            if acceptable {
+                Ok(())
+            } else {
+                Err("export default")
+            }
+        }
         statement::StatementInner::ExportNamedDeclaration { inner, .. } => match context {
             DeclarationContext::DeclareGlobal => Err("export declaration"),
             _ => {
@@ -874,6 +892,89 @@ pub fn acceptable_statement_in_declaration_context<M: Dupe, T: Dupe>(
         | statement::StatementInner::OpaqueType { .. }
         | statement::StatementInner::TypeAlias { .. } => Ok(()),
     }
+}
+
+/// The names that a declaration `acceptable_statement_in_declaration_context` can reject binds.
+fn names_of_rejectable_declaration<M: Dupe, T: Dupe>(
+    stmt: &statement::Statement<M, T>,
+) -> Vec<FlowSmolStr> {
+    match stmt.deref() {
+        statement::StatementInner::FunctionDeclaration { inner, .. } => {
+            inner.id.iter().map(|id| id.name.dupe()).collect()
+        }
+        statement::StatementInner::ClassDeclaration { inner, .. } => {
+            inner.id.iter().map(|id| id.name.dupe()).collect()
+        }
+        statement::StatementInner::ComponentDeclaration { inner, .. } => vec![inner.id.name.dupe()],
+        statement::StatementInner::RecordDeclaration { inner, .. } => vec![inner.id.name.dupe()],
+        statement::StatementInner::VariableDeclaration { inner, .. } => {
+            fold_bindings_of_variable_declarations(
+                Vec::new(),
+                &inner.declarations,
+                &mut |_, mut names, id| {
+                    names.push(id.name.dupe());
+                    names
+                },
+            )
+        }
+        statement::StatementInner::ExportNamedDeclaration { inner, .. } => inner
+            .declaration
+            .iter()
+            .flat_map(|declaration| names_of_rejectable_declaration(declaration))
+            .collect(),
+        statement::StatementInner::ExportDefaultDeclaration { inner, .. } => {
+            match &inner.declaration {
+                statement::export_default_declaration::Declaration::Declaration(declaration) => {
+                    names_of_rejectable_declaration(declaration)
+                }
+                statement::export_default_declaration::Declaration::Expression(_) => Vec::new(),
+            }
+        }
+        _ => Vec::new(),
+    }
+}
+
+/// The name that an entity name expression like `a.b.c` starts from.
+fn entity_name_root<M: Dupe, T: Dupe>(expr: &expression::Expression<M, T>) -> Option<&FlowSmolStr> {
+    match expr.deref() {
+        ExpressionInner::Identifier { inner, .. } => Some(&inner.name),
+        ExpressionInner::Member { inner, .. } => entity_name_root(&inner.object),
+        _ => None,
+    }
+}
+
+/// `acceptable_statement_in_declaration_context` for each statement of a `declare module` body.
+/// An `export default` of a name that a rejected statement of the body declares is rejected with
+/// that statement, so the name doesn't resolve to something else.
+pub fn acceptable_statements_in_declare_module<M: Dupe, T: Dupe>(
+    stmts: &[statement::Statement<M, T>],
+) -> Vec<Result<(), &'static str>> {
+    let results: Vec<_> = stmts
+        .iter()
+        .map(|stmt| {
+            acceptable_statement_in_declaration_context(DeclarationContext::DeclareModule, stmt)
+        })
+        .collect();
+    let rejected_names: HashSet<FlowSmolStr> = stmts
+        .iter()
+        .zip(&results)
+        .filter(|(_, result)| result.is_err())
+        .flat_map(|(stmt, _)| names_of_rejectable_declaration(stmt))
+        .collect();
+    stmts
+        .iter()
+        .zip(results)
+        .map(|(stmt, result)| match stmt.deref() {
+            statement::StatementInner::ExportDefaultDeclaration { inner, .. }
+                if let statement::export_default_declaration::Declaration::Expression(expr) =
+                    &inner.declaration
+                    && entity_name_root(expr).is_some_and(|name| rejected_names.contains(name)) =>
+            {
+                Err("export default")
+            }
+            _ => result,
+        })
+        .collect()
 }
 
 pub fn is_type_only_declaration_statement<M: Dupe, T: Dupe>(
