@@ -379,5 +379,23 @@ References:
                                                                  ^^^^^^ [2]
 
 
+Error --------------------------------------------------------------------------------------------------- spread.js:35:1
 
-Found 22 errors
+Cannot call `takesString` with `number` bound to `s` because `number` [1] is incompatible with `string` [2].
+[incompatible-type]
+
+   spread.js:35:1
+   35| takesString(...tupleOfNumber); // Error: number ~> string
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   spread_tuple_type.js:1:28
+    1| export type NumberTuple = [number];
+                                  ^^^^^^ [1]
+   spread.js:34:33
+   34| declare function takesString(s: string): void;
+                                       ^^^^^^ [2]
+
+
+
+Found 23 errors

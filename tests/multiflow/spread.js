@@ -27,3 +27,9 @@ funWithRestArray('hi', ...arrOf123, 'bye', ...arrOf123);
 
 function funWithReadonlyObjectInRestSpread(...args: [{readonly bar: string, ... }]): void {}
 funWithReadonlyObjectInRestSpread({ bar: "" });
+
+// An error about an argument from a spread whose type is written in another file is at the call.
+import type {NumberTuple} from './spread_tuple_type';
+declare const tupleOfNumber: NumberTuple;
+declare function takesString(s: string): void;
+takesString(...tupleOfNumber); // Error: number ~> string
