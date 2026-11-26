@@ -1793,9 +1793,14 @@ fn force_type_arguments(cx: &mut Context<'_>, targs: &[Targ]) {
             cx: &mut Context<'cx>,
             pole: Polarity,
             (): (),
-            _reason: &Reason,
+            reason: &Reason,
             id: u32,
         ) {
+            // A tvar of another file, such as one of a library type, raises no error of the
+            // checked file when forced.
+            if reason.loc().source() != Some(cx.file()) {
+                return;
+            }
             let (root_id, constraints) = cx.find_constraints(id as i32);
             if cx.is_fully_forced_tvar(root_id) || !self.seen.insert(root_id) {
                 return;
