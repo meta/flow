@@ -168,8 +168,11 @@ impl LocMapper<ALoc, ALoc, ALoc, (ALoc, Type)> for PlaceholderMapper<'_, '_> {
         let reason = flow_common::reason::mk_reason(None, loc.dupe());
         Ok((
             loc.dupe(),
-            self.cx
-                .mk_placeholder(reason.dupe(), flow_typing_type::type_::mixed_t::why(reason)),
+            self.cx.mk_placeholder(
+                reason.dupe(),
+                flow_typing_type::type_::mixed_t::why(reason),
+                false,
+            ),
         ))
     }
 }

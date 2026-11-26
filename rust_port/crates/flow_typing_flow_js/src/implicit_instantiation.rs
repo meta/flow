@@ -1605,7 +1605,8 @@ fn merge_lower_bounds<'cx>(
 /// A type parameter is *marked* with its polarity when the result of the operation mentions it,
 /// and the solve does not allow underconstrained type parameters. Nothing observes the solution
 /// of an unmarked one. A marked type parameter without usable bounds or a default is always
-/// underconstrained (see `underconstrained`).
+/// underconstrained (see `underconstrained`), and `reached` says whether a part of the operation
+/// reaches it.
 fn pin_without_bounds<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
@@ -1614,6 +1615,7 @@ fn pin_without_bounds<'cx>(
     default: Option<&Type>,
     bound: &Type,
     marked: bool,
+    reached: bool,
     tparam_binder_reason: &Reason,
     instantiation_reason: &Reason,
 ) -> Result<Type, FlowJsException> {
@@ -1635,6 +1637,7 @@ fn pin_without_bounds<'cx>(
             env,
             use_op,
             tparam,
+            reached,
             tparam_binder_reason,
             instantiation_reason,
         ),
@@ -1642,12 +1645,15 @@ fn pin_without_bounds<'cx>(
 }
 
 /// A type parameter that a solve can't determine: a placeholder outside checking mode, and an
-/// `underconstrained-implicit-instantiation` error in checking mode.
+/// `underconstrained-implicit-instantiation` error in checking mode. The placeholder is `reached`
+/// when a part of the operation reaches the type parameter (see
+/// `ImplicitInstantiationTvarData::reached`).
 fn underconstrained<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
     use_op: &UseOp,
     tparam: &TypeParam,
+    reached: bool,
     tparam_binder_reason: &Reason,
     instantiation_reason: &Reason,
 ) -> Result<Type, FlowJsException> {
@@ -1655,6 +1661,7 @@ fn underconstrained<'cx>(
         return Ok(cx.mk_placeholder(
             tparam_binder_reason.dupe(),
             mixed_t::why(tparam_binder_reason.dupe()),
+            reached,
         ));
     }
     flow_js_utils::add_output_with_env(
@@ -1756,10 +1763,12 @@ fn pin_type<'cx>(
                 env,
                 use_op,
                 tparam,
+                true,
                 tparam_binder_reason,
                 instantiation_reason,
             )
         }
+        // The flow-based solve doesn't know what reaches a type parameter.
         UseTResult::UpperEmpty | UseTResult::UpperNonT(_) => pin_without_bounds(
             cx,
             env,
@@ -1768,6 +1777,7 @@ fn pin_type<'cx>(
             tparam.default.as_ref(),
             &tparam.bound,
             marked,
+            true,
             tparam_binder_reason,
             instantiation_reason,
         ),
@@ -2352,6 +2362,7 @@ pub mod instantiation_solver {
                             cx.mk_placeholder(
                                 tparam.reason.dupe(),
                                 mixed_t::why(tparam.reason.dupe()),
+                                true,
                             )
                         } else {
                             pin_type(
@@ -2537,7 +2548,11 @@ pub mod kit {
             tparams
                 .iter()
                 .map(|tparam| {
-                    cx.mk_placeholder(tparam.reason.dupe(), mixed_t::why(tparam.reason.dupe()))
+                    cx.mk_placeholder(
+                        tparam.reason.dupe(),
+                        mixed_t::why(tparam.reason.dupe()),
+                        false,
+                    )
                 })
                 .collect()
         })
@@ -3227,6 +3242,7 @@ pub mod kit {
                 tparam.default.as_ref(),
                 &tparam.bound,
                 false,
+                false,
                 &targ_reason,
                 reason_op,
             )?;
@@ -3265,9 +3281,13 @@ pub mod kit {
         false_t: &Type,
     ) -> Result<Type, FlowJsException> {
         // A conditional type that a solve can't decide is deferred, as in TypeScript: a new
-        // placeholder.
-        let deferred =
-            |cx: &mut Context<'cx>| cx.mk_placeholder(reason.dupe(), mixed_t::why(reason.dupe()));
+        // placeholder, for a type parameter that something reaches if the condition has a
+        // placeholder for one.
+        let deferred = |cx: &mut Context<'cx>| {
+            let reached = flow_js_utils::tvar_visitors::has_reached_placeholders(cx, check_t)
+                || flow_js_utils::tvar_visitors::has_reached_placeholders(cx, extends_t);
+            cx.mk_placeholder(reason.dupe(), mixed_t::why(reason.dupe()), reached)
+        };
         let nested_env = env.solving_implicit_instantiation();
         let has_unresolved_tvars = if env.in_implicit_instantiation() {
             flow_js_utils::tvar_visitors::has_unresolved_tvars(cx, check_t)

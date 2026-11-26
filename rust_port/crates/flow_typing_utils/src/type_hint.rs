@@ -740,6 +740,14 @@ fn instantiate_callee<'cx>(
                                             return_hints_val.clone(),
                                         )? {
                                             HintEvalResult::HintAvailable(t, k) => Some((t, k)),
+                                            // A partial hint, with placeholders, says what it
+                                            // reaches (see `walk_return_hint`).
+                                            HintEvalResult::EncounteredPlaceholder(Some(t))
+                                                if opts.instantiation
+                                                    == HintInstantiation::Implicit =>
+                                            {
+                                                Some((t, HintKind::BestEffortHint))
+                                            }
                                             _ => None,
                                         }
                                     };
@@ -1444,6 +1452,7 @@ fn type_of_hint_decomposition<'cx>(
                     Ok(cx.mk_placeholder(
                         reason.dupe(),
                         flow_typing_type::type_::mixed_t::why(reason.dupe()),
+                        false,
                     ))
                 } else {
                     let elem_t = flow_typing_tvar::mk(cx, reason.dupe());

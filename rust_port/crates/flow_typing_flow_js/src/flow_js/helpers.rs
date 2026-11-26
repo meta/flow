@@ -1310,7 +1310,7 @@ pub(super) fn handle_frozen_tvar<'cx>(
             Err(FlowJsException::SpeculationSingletonError) => mixed_t::make(use_reason.dupe()),
             Err(e) => return Err(e),
         };
-        let derived = cx.mk_placeholder(use_reason.dupe(), bound);
+        let derived = cx.mk_placeholder(use_reason.dupe(), bound, tvar.reached);
         rec_flow_t(cx, env, trace, use_op, (&derived, tout))?;
         Ok(true)
     };

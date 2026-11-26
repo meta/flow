@@ -1772,7 +1772,10 @@ pub mod tvar_visitors {
         props_default(visitor, cx, pole, Ok(seen), props_id)
     }
 
-    struct HasPlaceholdersVisitor;
+    struct HasPlaceholdersVisitor {
+        /// Whether only the placeholders for reached type parameters count.
+        reached_only: bool,
+    }
 
     impl HasPlaceholdersVisitor {
         fn constraint_node<'cx>(
@@ -1812,9 +1815,12 @@ pub mod tvar_visitors {
         ) -> Result<Seen, TvarVisitorResult> {
             let seen = acc?;
             match t.deref() {
-                TypeInner::ImplicitInstantiationTvar(_) => {
+                TypeInner::ImplicitInstantiationTvar(data)
+                    if !self.reached_only || data.reached =>
+                {
                     Err(TvarVisitorResult::EncounteredPlaceholderType)
                 }
+                TypeInner::ImplicitInstantiationTvar(_) => Ok(seen),
                 _ if let Some(node) = type_util::constraint_node_id(t) => {
                     self.constraint_node(cx, pole, Ok(seen), node.id())
                 }
@@ -1845,7 +1851,19 @@ pub mod tvar_visitors {
     }
 
     pub fn has_placeholders(cx: &mut Context<'_>, t: &Type) -> bool {
-        let mut visitor = HasPlaceholdersVisitor;
+        let mut visitor = HasPlaceholdersVisitor {
+            reached_only: false,
+        };
+        match visitor.type_(cx, Polarity::Positive, Ok(Seen::default()), t) {
+            Err(TvarVisitorResult::EncounteredPlaceholderType) => true,
+            _ => false,
+        }
+    }
+
+    /// Whether `t` has a placeholder for a reached type parameter (see
+    /// `ImplicitInstantiationTvarData::reached`).
+    pub fn has_reached_placeholders(cx: &mut Context<'_>, t: &Type) -> bool {
+        let mut visitor = HasPlaceholdersVisitor { reached_only: true };
         match visitor.type_(cx, Polarity::Positive, Ok(Seen::default()), t) {
             Err(TvarVisitorResult::EncounteredPlaceholderType) => true,
             _ => false,
@@ -9731,6 +9749,9 @@ pub fn any_result(l: &Type, reason: Reason) -> Type {
     use flow_typing_type::type_::placeholder_t;
     match l.deref() {
         TypeInner::AnyT(_, src) => any_t::why(*src, reason),
+        TypeInner::ImplicitInstantiationTvar(data) => {
+            placeholder_t::like(data, reason.dupe(), mixed_t::why(reason))
+        }
         _ => placeholder_t::why(reason.dupe(), mixed_t::why(reason)),
     }
 }
@@ -9741,8 +9762,8 @@ pub fn untyped_any_result(l: &Type, reason: Reason) -> Type {
     use flow_typing_type::type_::mixed_t;
     use flow_typing_type::type_::placeholder_t;
     match l.deref() {
-        TypeInner::ImplicitInstantiationTvar(_) => {
-            placeholder_t::why(reason.dupe(), mixed_t::why(reason))
+        TypeInner::ImplicitInstantiationTvar(data) => {
+            placeholder_t::like(data, reason.dupe(), mixed_t::why(reason))
         }
         _ => any_t::untyped(reason),
     }

@@ -2418,9 +2418,15 @@ impl<'a> Context<'a> {
         }
     }
 
-    pub fn mk_placeholder(&mut self, reason: Reason, bound: Type) -> Type {
+    /// A placeholder, for a type parameter that something reaches when `reached` (see
+    /// `ImplicitInstantiationTvarData::reached`).
+    pub fn mk_placeholder(&mut self, reason: Reason, bound: Type, reached: bool) -> Type {
         self.set_synthesis_produced_uncacheable_result();
-        placeholder_t::why(reason, bound)
+        if reached {
+            placeholder_t::reached(reason, bound)
+        } else {
+            placeholder_t::why(reason, bound)
+        }
     }
 
     pub fn add_post_component_tvar_forcing_state(&mut self, id: i32, state: ForcingState<Cx>) {

@@ -750,12 +750,15 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
                     Some(Replacement::TypeSubst(param_t, _)) => {
                         self.change_id = true;
                         match (*placeholder_no_infer, *no_infer, &**param_t) {
-                            (true, true, TypeInner::ImplicitInstantiationTvar(data)) => {
-                                cx.mk_placeholder(reason_of_t(param_t).dupe(), data.bound.dupe())
-                            }
+                            (true, true, TypeInner::ImplicitInstantiationTvar(data)) => cx
+                                .mk_placeholder(
+                                    reason_of_t(param_t).dupe(),
+                                    data.bound.dupe(),
+                                    false,
+                                ),
                             (true, true, _) => {
                                 let reason = reason_of_t(param_t);
-                                cx.mk_placeholder(reason.dupe(), mixed_t::why(reason.dupe()))
+                                cx.mk_placeholder(reason.dupe(), mixed_t::why(reason.dupe()), false)
                             }
                             _ => match (&mut self.obj_reachable_targs, &**param_t) {
                                 (_, TypeInner::GenericT(..)) => mod_reason_of_t(

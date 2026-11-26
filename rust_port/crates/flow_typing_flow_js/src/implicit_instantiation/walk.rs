@@ -650,16 +650,20 @@ struct Walker<'e> {
     spread_tuple_pairs: Vec<(Type, Type)>,
     /// The markers that a part of the arguments or of the hint reaches: those given a bound, even
     /// one that is dropped, the bare members of a union met, and those of a pair that the walk gives
-    /// up on, that has a placeholder, or that neither the pairs met inside it nor the parts of it
-    /// that `l` lacks, such as an absent optional property, account for (see `walk`). Undoing a
-    /// walk keeps them.
+    /// up on or that neither the pairs met inside it nor the parts of it that `l` lacks, such as an
+    /// absent optional property, account for (see `walk`), and those that a placeholder for a
+    /// reached type parameter meets. Undoing a walk keeps them.
     reached: BTreeSet<SubstName>,
     /// For each pair being walked, innermost last, the markers that the pairs met inside it and the
     /// parts of it that `l` lacks account for.
     accounted: Vec<BTreeSet<SubstName>>,
-    /// Whether the solve reads `reached`: for a polymorphic type that TypeScript declares, in
-    /// checking mode.
+    /// Whether the solve reads `reached`: for a polymorphic type that TypeScript declares, and
+    /// outside checking mode.
     track_reached: bool,
+    /// Set while an argument that isn't typed yet is walked (see `walk_arg`).
+    untyped_arg: bool,
+    /// Whether the pair being walked records what it reaches (see `walk`).
+    own_reach: bool,
 }
 
 /// The arguments of a call from its first spread of unknown length on.
@@ -889,6 +893,8 @@ impl<'e> Walker<'e> {
             reached: BTreeSet::new(),
             accounted: Vec::new(),
             track_reached: false,
+            untyped_arg: false,
+            own_reach: true,
             in_hint: false,
             in_bound: false,
             in_args: false,
@@ -919,13 +925,20 @@ impl<'e> Walker<'e> {
 
     /// Records that the pair `l <: u` reaches the markers it mentions.
     fn reach<'cx>(&mut self, cx: &mut Context<'cx>, l: &Type, u: &Type) {
-        if !self.tracks_reach() {
+        if !self.tracks_reach() || !self.own_reach {
             return;
         }
         let markers = self.markers_in(cx, l);
         self.reached.extend(markers);
         let markers = self.markers_in(cx, u);
         self.reached.extend(markers);
+    }
+
+    /// Records that the pair being walked reaches the marker `name`.
+    fn reach_marker(&mut self, name: &SubstName) {
+        if self.own_reach {
+            self.reached.insert(name.dupe());
+        }
     }
 
     /// Whether the solve reads `reached` and some marker is not reached yet. Once all are, they
@@ -937,6 +950,9 @@ impl<'e> Walker<'e> {
     /// Records that a type met these members of a union. TypeScript infers to a bare type
     /// parameter among them whatever the other members match, so the bare markers are reached.
     fn reach_bare_members<'a>(&mut self, members: impl Iterator<Item = &'a Type>) {
+        if !self.own_reach {
+            return;
+        }
         let names: Vec<SubstName> = members.filter_map(|m| self.marker_of(m)).collect();
         self.reached.extend(names);
     }
@@ -1062,7 +1078,7 @@ impl<'e> Walker<'e> {
         t: &Type,
         priority: Priority,
     ) {
-        self.reached.insert(name.dupe());
+        self.reach_marker(name);
         let Some(t) = &through_tvars(cx, t) else {
             return;
         };
@@ -1111,7 +1127,7 @@ impl<'e> Walker<'e> {
     }
 
     fn add_exact<'cx>(&mut self, cx: &mut Context<'cx>, name: &SubstName, t: &Type) {
-        self.reached.insert(name.dupe());
+        self.reach_marker(name);
         // A placeholder itself unifies with nothing, unlike a type variable that holds one.
         let unifies = !is_placeholder(t);
         if through_tvars(cx, t).is_none() {
@@ -1249,7 +1265,7 @@ impl<'e> Walker<'e> {
         t: &Type,
         priority: Priority,
     ) {
-        self.reached.insert(name.dupe());
+        self.reach_marker(name);
         let Some(t) = &through_tvars(cx, t) else {
             return;
         };
@@ -1322,7 +1338,29 @@ impl<'e> Walker<'e> {
     /// The markers of the pair that neither the pairs met inside it nor the parts of it that `l`
     /// lacks account for are reached: the walk read them some other way, by evaluating a
     /// destructor, choosing among the members of a union, or not at all.
+    ///
+    /// In an argument that isn't typed yet (see `walk_arg`), a pair with a side that has
+    /// placeholders, none for a reached type parameter, reaches nothing itself: tsc instantiates
+    /// the contextual type of an argument before it infers from what is not typed yet. The pairs
+    /// met inside it reach what they reach.
     fn walk<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        l: &Type,
+        u: &Type,
+    ) -> Result<(), FlowJsException> {
+        let untyped = |cx: &mut Context<'cx>, t: &Type| {
+            flow_js_utils::tvar_visitors::has_placeholders(cx, t)
+                && !flow_js_utils::tvar_visitors::has_reached_placeholders(cx, t)
+        };
+        let own_reach = !self.untyped_arg || !(untyped(cx, l) || untyped(cx, u));
+        let own_reach = std::mem::replace(&mut self.own_reach, own_reach);
+        let result = self.walk_pair(cx, l, u);
+        self.own_reach = own_reach;
+        result
+    }
+
+    fn walk_pair<'cx>(
         &mut self,
         cx: &mut Context<'cx>,
         l: &Type,
@@ -1331,12 +1369,30 @@ impl<'e> Walker<'e> {
         if self.depth > MAX_DEPTH {
             return self.give_up(cx, "depth limit", l, u);
         }
+        // A placeholder, or a type variable that holds one, gives no evidence. One that stands for
+        // a type parameter of an enclosing call that something reaches reaches what it meets, as
+        // TypeScript infers from that type parameter's inferences. Any other reaches nothing, as
+        // TypeScript infers nothing from `NoInfer<T>` or from an outer type parameter without
+        // inferences.
+        let placeholders = [l, u].map(|t| match through_tvars(cx, t)?.deref() {
+            TypeInner::ImplicitInstantiationTvar(data) => Some(data.reached),
+            _ => None,
+        });
+        if placeholders.iter().any(Option::is_some) {
+            if placeholders.contains(&Some(true)) {
+                self.reach(cx, l, u);
+            } else {
+                self.account(cx, l);
+                self.account(cx, u);
+            }
+            return Ok(());
+        }
         if let Some(name) = self.marker_of(u) {
             match self.marker_of(l) {
                 None => self.add_lower(cx, &name, l),
                 Some(lname) => {
-                    self.reached.insert(name);
-                    self.reached.insert(lname);
+                    self.reach_marker(&name);
+                    self.reach_marker(&lname);
                 }
             }
             return Ok(());
@@ -1350,10 +1406,6 @@ impl<'e> Walker<'e> {
         // nothing else.
         if matches!(l.deref(), TypeInner::DefT(_, d) if matches!(d.deref(), DefTInner::EmptyT)) {
             self.account(cx, u);
-            return Ok(());
-        }
-        if is_placeholder(l) || is_placeholder(u) {
-            self.reach(cx, l, u);
             return Ok(());
         }
         if !self.mentions(cx, u) && !self.mentions(cx, l) {
@@ -1384,7 +1436,9 @@ impl<'e> Walker<'e> {
             let accounted = self.accounted.pop().unwrap_or_default();
             let mut markers = self.markers_in(cx, l);
             markers.extend(self.markers_in(cx, u));
-            self.reached.extend(markers.difference(&accounted).duped());
+            if self.own_reach {
+                self.reached.extend(markers.difference(&accounted).duped());
+            }
             if let Some(outer) = self.accounted.last_mut() {
                 outer.extend(markers);
             }
@@ -2660,7 +2714,7 @@ impl<'e> Walker<'e> {
         self.in_args = true;
         let walked = others
             .iter()
-            .try_for_each(|(arg, param, optional)| self.walk_to_slot(cx, arg, param, *optional));
+            .try_for_each(|(arg, param, optional)| self.walk_arg(cx, arg, param, *optional));
         self.in_args = false;
         walked?;
         // Pairs that wait for the evidence of other arguments, such as a spread tuple
@@ -2679,9 +2733,30 @@ impl<'e> Walker<'e> {
             .iter()
             .try_for_each(|(lprop, uprop)| self.walk_prop(cx, lprop, uprop, true))?;
         for (arg, param, optional) in &generic_values {
-            self.walk_to_slot(cx, arg, param, *optional)?;
+            self.walk_arg(cx, arg, param, *optional)?;
         }
         Ok(())
+    }
+
+    /// An argument and the parameter it is passed to. An argument with placeholders isn't typed
+    /// yet: it is the one whose hint is being computed, or one after it. Its parts that aren't
+    /// typed yet give the evidence they have but reach nothing (see `walk`).
+    fn walk_arg<'cx>(
+        &mut self,
+        cx: &mut Context<'cx>,
+        arg: &Type,
+        param: &Type,
+        optional: bool,
+    ) -> Result<(), FlowJsException> {
+        let untyped =
+            self.tracks_reach() && flow_js_utils::tvar_visitors::has_placeholders(cx, arg);
+        let own_reach = !untyped || flow_js_utils::tvar_visitors::has_reached_placeholders(cx, arg);
+        let untyped = std::mem::replace(&mut self.untyped_arg, untyped);
+        let own_reach = std::mem::replace(&mut self.own_reach, own_reach);
+        let result = self.walk_to_slot(cx, arg, param, optional);
+        self.untyped_arg = untyped;
+        self.own_reach = own_reach;
+        result
     }
 
     /// The result of an operation against its hint.
@@ -2695,22 +2770,26 @@ impl<'e> Walker<'e> {
         // The flow-based solve drops a best-effort hint whose flow fails: keep its evidence
         // only if it agrees with the evidence of the arguments, if the return type fits the
         // hint with the solution so far, and if it leaves no marker standing for a type with
-        // placeholders, which it counts as placeholders leaked into the bounds.
+        // placeholders, which it counts as placeholders leaked into the bounds. The solve of a
+        // hint keeps no evidence of a partial hint, with placeholders, only what it reaches.
         let snapshot =
             (*kind == flow_common::hint::HintKind::BestEffortHint).then(|| self.snapshot());
         self.in_hint = true;
         self.walk(cx, result, hint)?;
         self.in_hint = false;
-        if let Some(snapshot) = snapshot
-            && !(self.agrees_with(cx, &snapshot.vars)?
-                && self.fits_solution_so_far(cx, result, hint)?
-                && !(flow_js_utils::tvar_visitors::has_placeholders(cx, hint)
-                    && self
-                        .vars
-                        .values()
-                        .any(|bounds| bounds.placeholder().is_some())))
-        {
-            self.restore(snapshot);
+        if let Some(snapshot) = snapshot {
+            let partial = flow_js_utils::tvar_visitors::has_placeholders(cx, hint);
+            if partial && matches!(*cx.typing_mode(), TypingMode::HintEvaluationMode)
+                || !(self.agrees_with(cx, &snapshot.vars)?
+                    && self.fits_solution_so_far(cx, result, hint)?
+                    && !(partial
+                        && self
+                            .vars
+                            .values()
+                            .any(|bounds| bounds.placeholder().is_some())))
+            {
+                self.restore(snapshot);
+            }
         }
         Ok(())
     }
@@ -7528,8 +7607,10 @@ fn solve_targs_in_snapshot<'cx>(
         reason_op.loc().dupe(),
         markers.iter().flatten().duped(),
     );
+    // Outside checking, an undecided type parameter is a placeholder whose kind says whether
+    // something reaches it.
     walker.track_reached = check.poly_t.3.is_typescript_loose()
-        && matches!(*cx.typing_mode(), TypingMode::CheckingMode);
+        || !matches!(*cx.typing_mode(), TypingMode::CheckingMode);
     for (tparam, marker) in tparams.iter().zip(markers.iter()) {
         let Some(name) = marker else {
             continue;
@@ -8206,7 +8287,12 @@ fn pin<'cx>(
                                 TypingMode::CheckingMode => any_t::error(reason),
                                 TypingMode::SynthesisMode { .. }
                                 | TypingMode::HintEvaluationMode => {
-                                    placeholder_t::why(reason.dupe(), mixed_t::why(reason))
+                                    let bound = mixed_t::why(reason.dupe());
+                                    if !walker.track_reached || walker.reached.contains(name) {
+                                        placeholder_t::reached(reason, bound)
+                                    } else {
+                                        placeholder_t::why(reason, bound)
+                                    }
                                 }
                             };
                             log_pinned(cx, tparam, &t);
@@ -8222,9 +8308,12 @@ fn pin<'cx>(
                             // arguments or the hint reaches it: it takes its default, or else its
                             // bound, where a written `any` stands for `unknown`. A bound that is
                             // `any` otherwise, as after an error, says nothing. Outside checking, it
-                            // is still undecided, as the hint of an enclosing call can decide it.
+                            // is still undecided, as the hint of an enclosing call can decide it: a
+                            // placeholder that reaches what it meets in the solve of an operation
+                            // whose hint it is in only if something reaches the type parameter.
+                            let reached = !walker.track_reached || walker.reached.contains(name);
                             let no_candidates =
-                                walker.track_reached && !walker.reached.contains(name);
+                                !reached && matches!(*cx.typing_mode(), TypingMode::CheckingMode);
                             let (pin_bound, marked) = match walker.resolve(cx, &bound).deref() {
                                 TypeInner::AnyT(r, AnySource::AnnotatedAny) if no_candidates => {
                                     (mixed_t::why(r.dupe()), false)
@@ -8240,6 +8329,7 @@ fn pin<'cx>(
                                 default.as_ref(),
                                 &pin_bound,
                                 marked,
+                                reached,
                                 &reason,
                                 reason_op,
                             )?;

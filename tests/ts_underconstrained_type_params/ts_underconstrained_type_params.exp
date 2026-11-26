@@ -1,4 +1,4 @@
-Error ------------------------------------------------------------------------------------------------------ test.js:8:1
+Error ------------------------------------------------------------------------------------------------------ test.js:9:1
 
 Cannot cast `ext.build?.(...)` to `void | string` because: [incompatible-type]
  - Either `unknown` [1] is incompatible with `string` [2].
@@ -7,128 +7,239 @@ Cannot cast `ext.build?.(...)` to `void | string` because: [incompatible-type]
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
-   test.js:8:1
-   8| ext.build?.({}) as void | string; // ERROR: `Output` is `unknown`
+   test.js:9:1
+   9| ext.build?.({}) as void | string; // ERROR: `Output` is `unknown`
       ^^^^^^^^^^^^^^^
 
 References:
    node_modules/repro/index.d.ts:7:89
    7| export declare function defineExtension<Config extends ConfigBase, Name extends string, Output>(
                                                                                               ^^^^^^ [1]
-   test.js:8:27
-   8| ext.build?.({}) as void | string; // ERROR: `Output` is `unknown`
+   test.js:9:27
+   9| ext.build?.({}) as void | string; // ERROR: `Output` is `unknown`
                                 ^^^^^^ [2]
-   test.js:8:20
-   8| ext.build?.({}) as void | string; // ERROR: `Output` is `unknown`
+   test.js:9:20
+   9| ext.build?.({}) as void | string; // ERROR: `Output` is `unknown`
                          ^^^^ [3]
 
 
-Error ----------------------------------------------------------------------------------------------------- test.js:14:1
+Error ----------------------------------------------------------------------------------------------------- test.js:15:1
 
 Cannot cast `anyBound().t` to `number` because `unknown` [1] is incompatible with `number` [2]. [incompatible-type]
 
-   test.js:14:1
-   14| anyBound().t as number; // ERROR: `T` is `unknown`
+   test.js:15:1
+   15| anyBound().t as number; // ERROR: `T` is `unknown`
        ^^^^^^^^^^^^
 
 References:
    node_modules/repro/index.d.ts:11:44
    11| export declare function anyBound<T extends any>(): {t: T};
                                                   ^^^ [1]
-   test.js:14:17
-   14| anyBound().t as number; // ERROR: `T` is `unknown`
+   test.js:15:17
+   15| anyBound().t as number; // ERROR: `T` is `unknown`
                        ^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------------- test.js:23:1
+Error ----------------------------------------------------------------------------------------------------- test.js:26:1
+
+Cannot cast `hinted.build?.(...)` to `void | string` because: [incompatible-type]
+ - Either `unknown` [1] is incompatible with `string` [2].
+ - Or `unknown` [1] is incompatible with `void` [3].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   test.js:26:1
+   26| hinted.build?.({}) as void | string; // ERROR: `Output` is `unknown`
+       ^^^^^^^^^^^^^^^^^^
+
+References:
+   node_modules/repro/index.d.ts:7:89
+    7| export declare function defineExtension<Config extends ConfigBase, Name extends string, Output>(
+                                                                                               ^^^^^^ [1]
+   test.js:26:30
+   26| hinted.build?.({}) as void | string; // ERROR: `Output` is `unknown`
+                                    ^^^^^^ [2]
+   test.js:26:23
+   26| hinted.build?.({}) as void | string; // ERROR: `Output` is `unknown`
+                             ^^^^ [3]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:30:21
+
+Cannot get `extension.config?.a` because property `a` is missing in `{}` [1]. [prop-missing]
+
+   test.js:30:21
+   30|   extension.config?.a; // ERROR: `ConfigBase` has no `a`
+                           ^
+
+References:
+   node_modules/repro/index.d.ts:7:56
+    7| export declare function defineExtension<Config extends ConfigBase, Name extends string, Output>(
+                                                              ^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:36:1
 
 Cannot call `refLike` because `T` [1] is underconstrained by call of `refLike` [2]. Either add explicit type arguments
 or cast the expression to your expected type. [underconstrained-implicit-instantiation]
 
-   test.js:23:1
-   23| refLike(null); // ERROR: `T` is underconstrained
+   test.js:36:1
+   36| refLike(null); // ERROR: `T` is underconstrained
        ^^^^^^^
 
 References:
    node_modules/repro/index.d.ts:15:33
    15| export declare function refLike<T>(x: T | null): {current: T | null};
                                        ^ [1]
-   test.js:23:1
-   23| refLike(null); // ERROR: `T` is underconstrained
+   test.js:36:1
+   36| refLike(null); // ERROR: `T` is underconstrained
        ^^^^^^^^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------------- test.js:24:1
+Error ----------------------------------------------------------------------------------------------------- test.js:37:1
 
 Cannot call `keyOf` because `T` [1] is underconstrained by call of `keyOf` [2]. Either add explicit type arguments or
 cast the expression to your expected type. [underconstrained-implicit-instantiation]
 
-   test.js:24:1
-   24| keyOf('a'); // ERROR: `T` is underconstrained
+   test.js:37:1
+   37| keyOf('a'); // ERROR: `T` is underconstrained
        ^^^^^
 
 References:
    node_modules/repro/index.d.ts:16:31
    16| export declare function keyOf<T>(k: keyof T): T;
                                      ^ [1]
-   test.js:24:1
-   24| keyOf('a'); // ERROR: `T` is underconstrained
+   test.js:37:1
+   37| keyOf('a'); // ERROR: `T` is underconstrained
        ^^^^^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------------- test.js:27:1
+Error ---------------------------------------------------------------------------------------------------- test.js:41:22
+
+Cannot call `make` because `T` [1] is underconstrained by call of `make` [2]. Either add explicit type arguments or cast
+the expression to your expected type. [underconstrained-implicit-instantiation]
+
+   test.js:41:22
+   41| keyOfWith('a', () => make()); // ERROR: `T` of `make` is underconstrained
+                            ^^^^
+
+References:
+   node_modules/repro/index.d.ts:18:30
+   18| export declare function make<T>(): T;
+                                    ^ [1]
+   test.js:41:22
+   41| keyOfWith('a', () => make()); // ERROR: `T` of `make` is underconstrained
+                            ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:42:32
+
+Cannot call `make` because `T` [1] is underconstrained by call of `make` [2]. Either add explicit type arguments or cast
+the expression to your expected type. [underconstrained-implicit-instantiation]
+
+   test.js:42:32
+   42| keyOfWith('a', () => idf(() => make())); // ERROR: `T` of `make` is underconstrained
+                                      ^^^^
+
+References:
+   node_modules/repro/index.d.ts:18:30
+   18| export declare function make<T>(): T;
+                                    ^ [1]
+   test.js:42:32
+   42| keyOfWith('a', () => idf(() => make())); // ERROR: `T` of `make` is underconstrained
+                                      ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:43:22
+
+Cannot call `make` because `T` [1] is underconstrained by call of `make` [2]. Either add explicit type arguments or cast
+the expression to your expected type. [underconstrained-implicit-instantiation]
+
+   test.js:43:22
+   43| keyOfCond('a', () => make()); // ERROR: `T` of `make` is underconstrained
+                            ^^^^
+
+References:
+   node_modules/repro/index.d.ts:18:30
+   18| export declare function make<T>(): T;
+                                    ^ [1]
+   test.js:43:22
+   43| keyOfCond('a', () => make()); // ERROR: `T` of `make` is underconstrained
+                            ^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- test.js:44:33
+
+Cannot call `make` because `T` [1] is underconstrained by call of `make` [2]. Either add explicit type arguments or cast
+the expression to your expected type. [underconstrained-implicit-instantiation]
+
+   test.js:44:33
+   44| keyOfOpts({key: 'a', make: n => make()}); // ERROR: `T` of `make` is underconstrained
+                                       ^^^^
+
+References:
+   node_modules/repro/index.d.ts:18:30
+   18| export declare function make<T>(): T;
+                                    ^ [1]
+   test.js:44:33
+   44| keyOfOpts({key: 'a', make: n => make()}); // ERROR: `T` of `make` is underconstrained
+                                       ^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------------- test.js:47:1
 
 Cannot call `linked` because `T` [1] is underconstrained by call of `linked` [2]. Either add explicit type arguments or
 cast the expression to your expected type. [underconstrained-implicit-instantiation]
 
-   test.js:27:1
-   27| linked(); // ERROR: `T` is underconstrained
+   test.js:47:1
+   47| linked(); // ERROR: `T` is underconstrained
        ^^^^^^
 
 References:
    node_modules/repro/index.d.ts:17:32
    17| export declare function linked<T extends {next: T | null}>(): T;
                                       ^ [1]
-   test.js:27:1
-   27| linked(); // ERROR: `T` is underconstrained
+   test.js:47:1
+   47| linked(); // ERROR: `T` is underconstrained
        ^^^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------------- test.js:34:1
+Error ----------------------------------------------------------------------------------------------------- test.js:54:1
 
 Cannot call `defineFlow` because `Config` [1] is underconstrained by call of `defineFlow` [2]. Either add explicit type
 arguments or cast the expression to your expected type. [underconstrained-implicit-instantiation]
 
-   test.js:34:1
-   34| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
+   test.js:54:1
+   54| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
        ^^^^^^^^^^
 
 References:
-   test.js:30:29
-   30| declare function defineFlow<Config extends {...}, Output>(extension: {
+   test.js:50:29
+   50| declare function defineFlow<Config extends {...}, Output>(extension: {
                                    ^^^^^^ [1]
-   test.js:34:1
-   34| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
+   test.js:54:1
+   54| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
        ^^^^^^^^^^^^^^ [2]
 
 
-Error ----------------------------------------------------------------------------------------------------- test.js:34:1
+Error ----------------------------------------------------------------------------------------------------- test.js:54:1
 
 Cannot call `defineFlow` because `Output` [1] is underconstrained by call of `defineFlow` [2]. Either add explicit type
 arguments or cast the expression to your expected type. [underconstrained-implicit-instantiation]
 
-   test.js:34:1
-   34| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
+   test.js:54:1
+   54| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
        ^^^^^^^^^^
 
 References:
-   test.js:30:51
-   30| declare function defineFlow<Config extends {...}, Output>(extension: {
+   test.js:50:51
+   50| declare function defineFlow<Config extends {...}, Output>(extension: {
                                                          ^^^^^^ [1]
-   test.js:34:1
-   34| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
+   test.js:54:1
+   54| defineFlow({}); // ERROR: `Config` and `Output` are underconstrained
        ^^^^^^^^^^^^^^ [2]
 
 
 
-Found 7 errors
+Found 13 errors

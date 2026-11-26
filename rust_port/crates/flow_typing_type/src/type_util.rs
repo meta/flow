@@ -274,6 +274,7 @@ pub fn mod_reason_of_t(f: &dyn Fn(Reason) -> Reason, t: &Type) -> Type {
                 name,
                 bound,
                 id,
+                reached,
             }),
         ) => Type::new(TypeInner::ImplicitInstantiationTvar(Box::new(
             ImplicitInstantiationTvarData {
@@ -281,6 +282,7 @@ pub fn mod_reason_of_t(f: &dyn Fn(Reason) -> Reason, t: &Type) -> Type {
                 name: name.dupe(),
                 bound: bound.dupe(),
                 id: *id,
+                reached: *reached,
             },
         ))),
         TypeInner::FunProtoT(reason) => Type::new(TypeInner::FunProtoT(f(reason.dupe()))),

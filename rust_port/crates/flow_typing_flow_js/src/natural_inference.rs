@@ -1058,7 +1058,7 @@ fn choose_precision<'cx>(
     ) {
         let general_t = general(cx);
         let reason = reason_of_t(&general_t);
-        return cx.mk_placeholder(reason.dupe(), mixed_t::why(reason.dupe()));
+        return cx.mk_placeholder(reason.dupe(), mixed_t::why(reason.dupe()), false);
     }
     if matches!(&typing_mode, TypingMode::SynthesisMode { .. }) {
         cx.set_synthesis_produced_uncacheable_result();

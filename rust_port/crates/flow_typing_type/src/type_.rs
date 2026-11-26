@@ -214,6 +214,12 @@ pub struct ImplicitInstantiationTvarData {
     pub name: SubstName,
     pub bound: Type,
     pub id: i32,
+    /// Whether it stands for a type parameter that a part of an operation reaches but that the
+    /// solve can't decide, such as one that only `keyof T` meets. TypeScript infers that type
+    /// parameter from what Flow can't read, so the placeholder reaches the type parameters it
+    /// meets in the solve of an operation whose hint it is in. Any other placeholder is like
+    /// TypeScript's `silentNeverType`, which gives no inference candidates.
+    pub reached: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -12181,12 +12187,28 @@ pub mod placeholder_t {
 
     /// A placeholder that a use sees through `bound`. An unknown type is bounded by `mixed`.
     pub fn why(reason: Reason, bound: Type) -> Type {
+        make(reason, bound, false)
+    }
+
+    /// A placeholder for a type parameter that a part of an operation reaches but that the solve
+    /// can't decide (see `ImplicitInstantiationTvarData::reached`).
+    pub fn reached(reason: Reason, bound: Type) -> Type {
+        make(reason, bound, true)
+    }
+
+    /// A placeholder of the kind of `like`.
+    pub fn like(like: &ImplicitInstantiationTvarData, reason: Reason, bound: Type) -> Type {
+        make(reason, bound, like.reached)
+    }
+
+    fn make(reason: Reason, bound: Type, reached: bool) -> Type {
         Type::new(TypeInner::ImplicitInstantiationTvar(Box::new(
             ImplicitInstantiationTvarData {
                 reason: reason.replace_desc(None),
                 name: SubstName::name("placeholder".into()),
                 bound,
                 id: flow_common::reason::mk_id() as i32,
+                reached,
             },
         )))
     }

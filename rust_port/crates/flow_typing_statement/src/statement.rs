@@ -7175,8 +7175,11 @@ fn expression_<'a>(
                 {
                     let reason = mk_reason(None, loc.dupe());
                     let element_reason = mk_reason(None, loc.dupe());
-                    let elem_t =
-                        cx.mk_placeholder(element_reason.dupe(), mixed_t::why(element_reason));
+                    let elem_t = cx.mk_placeholder(
+                        element_reason.dupe(),
+                        mixed_t::why(element_reason),
+                        false,
+                    );
                     let arrtype = type_::ArrType::ArrayAT(Box::new(ArrayATData {
                         elem_t,
                         tuple_view: Some(type_::empty_tuple_view()),
@@ -19382,7 +19385,7 @@ pub fn mk_component_sig<'a>(
                     flow_typing_context::TypingMode::CheckingMode
                 ) =>
             {
-                let t = cx.mk_placeholder(reason.dupe(), mixed_t::why(reason));
+                let t = cx.mk_placeholder(reason.dupe(), mixed_t::why(reason), false);
                 (
                     t.dupe(),
                     ast::types::AnnotationOrHint::Missing((loc.dupe(), t)),
@@ -19834,7 +19837,7 @@ pub fn mk_func_sig<'a>(
                     flow_typing_context::TypingMode::CheckingMode
                 ) =>
             {
-                let t = cx.mk_placeholder(reason.dupe(), mixed_t::why(reason));
+                let t = cx.mk_placeholder(reason.dupe(), mixed_t::why(reason), false);
                 (
                     t.dupe(),
                     ast::types::AnnotationOrHint::Missing((loc.dupe(), t)),
@@ -20250,7 +20253,7 @@ pub fn mk_func_sig<'a>(
                 cx.typing_mode(),
                 flow_typing_context::TypingMode::CheckingMode
             ) {
-                cx.mk_placeholder(ret_reason.dupe(), mixed_t::why(ret_reason.dupe()))
+                cx.mk_placeholder(ret_reason.dupe(), mixed_t::why(ret_reason.dupe()), false)
             } else {
                 flow_typing_tvar::mk(cx, ret_reason.dupe())
             };
