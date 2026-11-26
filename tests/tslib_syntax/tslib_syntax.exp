@@ -1877,7 +1877,8 @@ References:
 
 Error ---------------------------------------------------------------------------------- rest_destructuring_flow.js:13:6
 
-Cannot call `pair` because in index `0`: `"value"` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot call `pair` with `'value'` bound to the first parameter because `"value"` [1] is incompatible with `number` [2].
+[incompatible-type]
 
    rest_destructuring_flow.js:13:6
    13| pair('value', 1); // ERROR
@@ -1891,7 +1892,8 @@ References:
 
 Error --------------------------------------------------------------------------------- rest_destructuring_flow.js:13:15
 
-Cannot call `pair` because in index `1`: `1` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot call `pair` with `1` bound to the second parameter because `1` [1] is incompatible with `string` [2].
+[incompatible-type]
 
    rest_destructuring_flow.js:13:15
    13| pair('value', 1); // ERROR
@@ -1905,24 +1907,22 @@ References:
 
 Error ---------------------------------------------------------------------------------- rest_destructuring_flow.js:14:1
 
-Cannot call `pair` because `[1]` [1] has 1 element but `[number, string]` [2] has 2 elements. [invalid-tuple-arity]
+Cannot call `pair` because `(...[number, string]) => number` [1] requires another argument. [incompatible-type]
 
    rest_destructuring_flow.js:14:1
    14| pair(1); // ERROR
        ^^^^
 
 References:
-   rest_destructuring_flow.js:14:1
-   14| pair(1); // ERROR
-       ^^^^^^^ [1]
-   rest_destructuring_flow.js:11:42
+   rest_destructuring_flow.js:11:21
    11| declare const pair: (...[first, second]: [number, string]) => number;
-                                                ^^^^^^^^^^^^^^^^ [2]
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error --------------------------------------------------------------------------------- rest_destructuring_flow.js:18:11
 
-Cannot call `anonymous` because in index `0`: `"value"` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot call `anonymous` with `'value'` bound to the first parameter because `"value"` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    rest_destructuring_flow.js:18:11
    18| anonymous('value', 1); // ERROR
@@ -1936,7 +1936,8 @@ References:
 
 Error --------------------------------------------------------------------------------- rest_destructuring_flow.js:18:20
 
-Cannot call `anonymous` because in index `1`: `1` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot call `anonymous` with `1` bound to the second parameter because `1` [1] is incompatible with `string` [2].
+[incompatible-type]
 
    rest_destructuring_flow.js:18:20
    18| anonymous('value', 1); // ERROR

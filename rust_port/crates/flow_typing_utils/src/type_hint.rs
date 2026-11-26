@@ -942,9 +942,10 @@ fn overload_takes_call<'cx>(
     }
     // As TypeScript's `getParameterCount`, a rest param of a tuple type of fixed length stands for a
     // param per element.
-    let (params, rest_param) = subtyping_kit::subtyping_params(cx, fun, |cx, t| {
-        FlowJs::possible_concrete_types_for_inspection_with_env(cx, env, reason, t)
-    })?;
+    let (params, rest_param) =
+        subtyping_kit::subtyping_params(cx, &fun.params, fun.rest_param.as_ref(), |cx, t| {
+            FlowJs::possible_concrete_types_for_inspection_with_env(cx, env, reason, t)
+        })?;
     let has_rest = rest_param.is_some();
     // As TypeScript's `getMinArgumentCount`, trailing parameters that accept `void` can be left out.
     let mut min_arg_count = params

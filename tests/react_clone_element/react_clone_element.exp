@@ -207,9 +207,6 @@ Cannot call `React.cloneElement` because: [incompatible-type]
  - Or property `bar` is extra in object literal [1] but missing in
    `{readonly foo?: number, readonly key?: React.Key, readonly ref?: React.RefSetter<A>}` [3]. Exact objects do not
    accept extra props.
- - Or property `bar` is extra in object literal [1] but missing in
-   `{readonly foo?: number, readonly key?: React.Key, readonly ref?: React.RefSetter<A>}` [4]. Exact objects do not
-   accept extra props.
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -228,9 +225,6 @@ References:
    <BUILTINS>/react.js:379:30
    379|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
-   <BUILTINS>/react.js:384:30
-   384|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
-                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:32:7
@@ -523,8 +517,6 @@ Cannot call `React.cloneElement` because: [incompatible-type]
    `{readonly foo?: number, readonly key?: React.Key}` [2]. Exact objects do not accept extra props.
  - Or property `bar` is extra in object literal [1] but missing in
    `{readonly foo?: number, readonly key?: React.Key}` [3]. Exact objects do not accept extra props.
- - Or property `bar` is extra in object literal [1] but missing in
-   `{readonly foo?: number, readonly key?: React.Key}` [4]. Exact objects do not accept extra props.
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -543,9 +535,6 @@ References:
    <BUILTINS>/react.js:379:30
    379|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
-   <BUILTINS>/react.js:384:30
-   384|     props: ?Partial<Readonly<{...$Exact<NoInfer<Props>>, key: React$Key}>>,
-                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:99:9

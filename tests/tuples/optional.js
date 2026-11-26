@@ -140,3 +140,14 @@ type AllOptional = [a?: number, b?: string];
 [] as AllOptional; // OK
 [] as Required<AllOptional>; // ERROR
 [1, 's'] as Required<AllOptional>; // OK
+
+// In a call, the elements of a rest tuple are params: an omitted argument passes `undefined`.
+{
+  declare function voidArg(...args: [x: void]): void;
+  voidArg(); // OK
+  declare function numberArg(...args: [x: number]): void;
+  numberArg(); // ERROR
+  declare function payload<T>(cmd: {p: T}, ...args: [payload: T]): void;
+  declare const voidCmd: {p: void};
+  payload(voidCmd); // OK
+}

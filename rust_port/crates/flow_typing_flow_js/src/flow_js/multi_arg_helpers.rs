@@ -1749,13 +1749,10 @@ pub(super) fn finish_resolve_spread_list<'cx>(
         let trace = trace.expect("All multiflows show have a trace");
         let def_reason = &ft.def_reason;
         let (args, spread_arg) = flatten_call_arg(cx, env, use_op.dupe(), reason_op, resolved)?;
-        let (parlist, rest_param) = if is_strict {
-            (ft.params.to_vec(), ft.rest_param.clone())
-        } else {
-            subtyping_kit::subtyping_params(cx, ft, |cx, t| {
+        let (parlist, rest_param) =
+            subtyping_kit::subtyping_params(cx, &ft.params, ft.rest_param.as_ref(), |cx, t| {
                 possible_concrete_types_for_inspection(cx, env, reason_of_t(t), t)
-            })?
-        };
+            })?;
         multiflow_full(
             cx,
             env,

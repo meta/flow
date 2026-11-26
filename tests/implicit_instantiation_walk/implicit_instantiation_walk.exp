@@ -78,7 +78,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- core.js:46:5
 
-Cannot call `d` because in index `0`: `1` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot call `d` with `1` bound to `s` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
 
    core.js:46:5
    46|   d(1, 'a'); // error
@@ -92,7 +92,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- core.js:46:8
 
-Cannot call `d` because in index `1`: `"a"` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot call `d` with `'a'` bound to `n` because `"a"` [1] is incompatible with `number` [2]. [incompatible-type]
 
    core.js:46:8
    46|   d(1, 'a'); // error

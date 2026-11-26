@@ -1167,7 +1167,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- upper_non_t.js:118:6
 
-Cannot call `f1` because in index `0`: `""` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot call `f1` with empty string bound to `x` because `""` [1] is incompatible with `number` [2]. [incompatible-type]
 
    upper_non_t.js:118:6
    118|   f1(''); // error
@@ -1181,7 +1181,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- upper_non_t.js:123:6
 
-Cannot call `f2` because in index `0`: `""` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot call `f2` with empty string bound to `x` because `""` [1] is incompatible with `number` [2]. [incompatible-type]
 
    upper_non_t.js:123:6
    123|   f2('', 0); // error
@@ -1195,7 +1195,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- upper_non_t.js:123:10
 
-Cannot call `f2` because in index `1`: `0` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot call `f2` with `0` bound to `y` because `0` [1] is incompatible with `string` [2]. [incompatible-type]
 
    upper_non_t.js:123:10
    123|   f2('', 0); // error

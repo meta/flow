@@ -2568,7 +2568,14 @@ impl<'e> Walker<'e> {
         signature: &Signature<'_>,
         return_hint: &Option<(Type, flow_common::hint::HintKind)>,
     ) -> Result<(), FlowJsException> {
-        let params = signature.params;
+        // As in the call, a rest parameter of a tuple type of fixed length stands for a parameter
+        // per element.
+        let (params, rest_param) = crate::subtyping_kit::subtyping_params(
+            cx,
+            signature.params,
+            signature.rest_param,
+            |cx, t| self.concretize(cx, t),
+        )?;
         let Some((args, tail)) = self.flatten_args(cx, args)? else {
             // A spread of something else: the arguments before it, and the rest gets no evidence.
             let before: Vec<CallArg> = args
@@ -2577,7 +2584,7 @@ impl<'e> Walker<'e> {
                 .cloned()
                 .collect();
             let n = before.len();
-            let params: Vec<FunParam> = signature.params.iter().take(n).cloned().collect();
+            let params: Vec<FunParam> = params.into_iter().take(n).collect();
             let truncated = Signature {
                 params: &params,
                 rest_param: None,
@@ -2604,7 +2611,7 @@ impl<'e> Walker<'e> {
                 }
             }
         }
-        if let Some(FunRestParam(_, _, rest)) = signature.rest_param {
+        if let Some(FunRestParam(_, _, rest)) = &rest_param {
             if self.rest_is_array(cx, rest) {
                 let n = rest_args.len();
                 for (i, arg) in rest_args.into_iter().enumerate() {
@@ -3417,8 +3424,12 @@ impl<'e> Walker<'e> {
         lf: &FunType,
         uf: &FunType,
     ) -> Result<(), FlowJsException> {
-        let (lparams, lrest_param) =
-            crate::subtyping_kit::subtyping_params(cx, lf, |cx, t| self.concretize(cx, t))?;
+        let (lparams, lrest_param) = crate::subtyping_kit::subtyping_params(
+            cx,
+            &lf.params,
+            lf.rest_param.as_ref(),
+            |cx, t| self.concretize(cx, t),
+        )?;
         let (ln, un) = (lparams.len(), uf.params.len());
         let lrest = lrest_param.as_ref().map(|FunRestParam(_, _, t)| t.dupe());
         let urest = uf.rest_param.as_ref().map(|FunRestParam(_, _, t)| t.dupe());

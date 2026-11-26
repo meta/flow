@@ -1,19 +1,16 @@
 Error ------------------------------------------------------------------------------------------- client_optional.js:3:1
 
-Cannot call `qux` because `Readonly<[]>` [1] has 0 elements but `[string, unknown]` [2] has 2 elements.
-[invalid-tuple-arity]
+Cannot call `qux` because `(x?: number, ...y: [string, unknown]) => string` [1] requires another argument.
+[incompatible-type]
 
    client_optional.js:3:1
    3| qux(0);
       ^^^
 
 References:
-   client_optional.js:3:1
-   3| qux(0);
-      ^^^^^^ [1]
-   optional.js:7:41
+   optional.js:7:1
    7| function qux(x: number = "hello", ...y: [string, unknown]):string { foo(x); return y[0]; } // error: string ~> number
-                                              ^^^^^^^^^^^^^^^^^ [2]
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error -------------------------------------------------------------------------------------------------- generic.js:1:22
@@ -217,7 +214,8 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- optional.js:9:7
 
-Cannot call `qux` because in index `0`: `0` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot call `qux` with `0` bound to the second parameter because `0` [1] is incompatible with `string` [2].
+[incompatible-type]
 
    optional.js:9:7
    9| qux(0,0,0); // Error, number ~> string
@@ -231,7 +229,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ optional.js:10:11
 
-Cannot call `qux` because in index `0`: `42` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot call `qux` with `42` bound to the second parameter because `42` [1] is incompatible with `string` [2].
+[incompatible-type]
 
    optional.js:10:11
    10| qux(0,...[42, ""]); // Error, number ~> string

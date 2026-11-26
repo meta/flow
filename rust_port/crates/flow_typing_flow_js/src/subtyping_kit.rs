@@ -82,7 +82,6 @@ use flow_typing_type::type_::FunParam;
 use flow_typing_type::type_::FunParamData;
 use flow_typing_type::type_::FunRestParam;
 use flow_typing_type::type_::FunReturnData;
-use flow_typing_type::type_::FunType;
 use flow_typing_type::type_::GenericTData;
 use flow_typing_type::type_::HasOwnPropTData;
 use flow_typing_type::type_::IndexerKeyCompatibilityData;
@@ -685,18 +684,19 @@ pub(crate) fn ignores_return<'cx>(
             .all(|t| matches!(t.deref(), DefT(_, deref!(TsVoidT)))))
 }
 
-// The params of `ft` as function subtyping matches them against another
-// function's, and its rest param. As in TypeScript (`getParameterCount`), a
-// rest param of a tuple type of fixed length stands for a param per element,
-// so it receives no more arguments than that. `concretize` gives the types
-// the rest param's type stands for.
+// The params of a function as a call or function subtyping matches arguments
+// to them, and its rest param. As in TypeScript (`getParameterCount`), a rest
+// param of a tuple type of fixed length stands for a param per element, so it
+// receives no more arguments than that. `concretize` gives the types the rest
+// param's type stands for.
 pub fn subtyping_params<'cx>(
     cx: &mut Context<'cx>,
-    ft: &FunType,
+    params: &[FunParam],
+    rest_param: Option<&FunRestParam>,
     concretize: impl FnOnce(&mut Context<'cx>, &Type) -> Result<Vec<Type>, FlowJsException>,
 ) -> Result<(Vec<FunParam>, Option<FunRestParam>), FlowJsException> {
-    let Some(FunRestParam(_, _, rest_t)) = &ft.rest_param else {
-        return Ok((ft.params.to_vec(), None));
+    let Some(FunRestParam(_, _, rest_t)) = rest_param else {
+        return Ok((params.to_vec(), None));
     };
     match concretize(cx, rest_t)?.as_slice() {
         [t] if let DefT(
@@ -714,9 +714,9 @@ pub fn subtyping_params<'cx>(
                 t: elem.t.dupe(),
                 optional: elem.optional,
             });
-            Ok((ft.params.iter().cloned().chain(elements).collect(), None))
+            Ok((params.iter().cloned().chain(elements).collect(), None))
         }
-        _ => Ok((ft.params.to_vec(), ft.rest_param.clone())),
+        _ => Ok((params.to_vec(), rest_param.cloned())),
     }
 }
 
@@ -1133,8 +1133,10 @@ fn funt_to_funt_check_params_bivariant<'cx>(
             t,
         )
     };
-    let (positional1, rest_param1) = subtyping_params(cx, ft1, concretize)?;
-    let (positional2, rest_param2) = subtyping_params(cx, ft2, concretize)?;
+    let (positional1, rest_param1) =
+        subtyping_params(cx, &ft1.params, ft1.rest_param.as_ref(), concretize)?;
+    let (positional2, rest_param2) =
+        subtyping_params(cx, &ft2.params, ft2.rest_param.as_ref(), concretize)?;
     let mut n: i32 = 1;
     let mut params1: &[FunParam] = &positional1;
     let mut params2: &[FunParam] = &positional2;

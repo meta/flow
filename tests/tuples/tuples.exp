@@ -1456,6 +1456,20 @@ References:
                        ^^^^^^^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------------------ optional.js:149:3
+
+Cannot call `numberArg` because `(...args: [x: number]) => void` [1] requires another argument. [incompatible-type]
+
+   optional.js:149:3
+   149|   numberArg(); // ERROR
+          ^^^^^^^^^
+
+References:
+   optional.js:148:29
+   148|   declare function numberArg(...args: [x: number]): void;
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
 Error --------------------------------------------------------------------------------------------- optional_rest.js:5:1
 
 Cannot cast `rest[i]` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -2426,7 +2440,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------- spread_rest_param.js:12:7
 
-Cannot call `bound` because in index `0`: `1` [1] is incompatible with `boolean` [2]. [incompatible-type]
+Cannot call `bound` with `1` bound to `c` because `1` [1] is incompatible with `boolean` [2]. [incompatible-type]
 
    spread_rest_param.js:12:7
    12| bound(1); // error: number ~> boolean
@@ -2440,7 +2454,7 @@ References:
 
 Error --------------------------------------------------------------------------------------- spread_rest_param.js:24:13
 
-Cannot call `bound_alias` because in index `0`: `1` [1] is incompatible with `boolean` [2]. [incompatible-type]
+Cannot call `bound_alias` with `1` bound to `c` because `1` [1] is incompatible with `boolean` [2]. [incompatible-type]
 
    spread_rest_param.js:24:13
    24| bound_alias(1); // error: number ~> boolean
@@ -2454,7 +2468,8 @@ References:
 
 Error --------------------------------------------------------------------------------------- spread_rest_param.js:35:20
 
-Cannot call `bound_after_string` because in index `0`: `1` [1] is incompatible with `boolean` [2]. [incompatible-type]
+Cannot call `bound_after_string` with `1` bound to `c` because `1` [1] is incompatible with `boolean` [2].
+[incompatible-type]
 
    spread_rest_param.js:35:20
    35| bound_after_string(1); // error: number ~> boolean
@@ -2486,7 +2501,7 @@ References:
 
 Error --------------------------------------------------------------------------------------- spread_rest_param.js:46:17
 
-Cannot call `unbound` because in index `2`: `1` [1] is incompatible with `boolean` [2]. [incompatible-type]
+Cannot call `unbound` with `1` bound to `c` because `1` [1] is incompatible with `boolean` [2]. [incompatible-type]
 
    spread_rest_param.js:46:17
    46| unbound('x', 1, 1); // error: number ~> boolean
@@ -3211,4 +3226,4 @@ References:
 
 
 
-Found 201 errors
+Found 202 errors
