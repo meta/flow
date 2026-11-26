@@ -11,3 +11,6 @@ export declare function f(): string;
 export interface Foo { a: string }
 export declare const Foo: { b: number };
 export declare namespace Types { type T = number; }
+export declare const KEY = "key";
+export declare const BRAND: unique symbol;
+export declare const keys: { readonly k: "k" };

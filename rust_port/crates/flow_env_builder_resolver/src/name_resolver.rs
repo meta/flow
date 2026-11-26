@@ -9691,6 +9691,22 @@ impl<'ast, 'a, Cx: Context, Fl: Flow<Cx = Cx>>
         }
     }
 
+    // A computed key in a type is never evaluated. A name in it, or a property
+    // read off one, is only read, and the checker reads it the way `typeof` does.
+    fn object_property_type_key(
+        &mut self,
+        key: &flow_parser::ast::expression::object::Key<ALoc, ALoc>,
+    ) -> Result<(), AbruptCompletion> {
+        match key {
+            flow_parser::ast::expression::object::Key::Computed(computed)
+                if flow_parser::ast_utils::is_entity_name_expression(&computed.expression) =>
+            {
+                self.expression(&computed.expression)
+            }
+            _ => self.object_key(key),
+        }
+    }
+
     fn object_indexer_property_type(
         &mut self,
         indexer: &flow_parser::ast::types::object::Indexer<ALoc, ALoc>,

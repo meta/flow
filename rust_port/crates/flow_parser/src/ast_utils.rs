@@ -584,6 +584,73 @@ pub fn well_known_symbol_name<M: Dupe, T: Dupe>(
     }
 }
 
+/// Whether `expr` is a name or a chain of property reads off one, like `a.b.c`,
+/// what TypeScript calls an entity name expression.
+pub fn is_entity_name_expression<M: Dupe, T: Dupe>(expr: &expression::Expression<M, T>) -> bool {
+    match expr.deref() {
+        ExpressionInner::Identifier { .. } => true,
+        ExpressionInner::Member { inner, .. } => {
+            matches!(
+                inner.property,
+                expression::member::Property::PropertyIdentifier(_)
+            ) && is_entity_name_expression(&inner.object)
+        }
+        _ => false,
+    }
+}
+
+/// The `typeof` target an entity name expression spells: `a.b.c` is the target
+/// of `typeof a.b.c`.
+pub fn expression_typeof_target<M: Dupe, T: Dupe>(
+    expr: &expression::Expression<M, T>,
+) -> Option<types::typeof_::Target<M, T>> {
+    match expr.deref() {
+        ExpressionInner::Identifier { inner, .. } => {
+            Some(types::typeof_::Target::Unqualified(inner.dupe()))
+        }
+        ExpressionInner::Member { loc, inner } => {
+            let expression::member::Property::PropertyIdentifier(id) = &inner.property else {
+                return None;
+            };
+            Some(types::typeof_::Target::Qualified(Arc::new(
+                types::typeof_::Qualified {
+                    loc: loc.dupe(),
+                    qualification: expression_typeof_target(&inner.object)?,
+                    id: id.dupe(),
+                },
+            )))
+        }
+        _ => None,
+    }
+}
+
+/// The entity name expression a `typeof` target spells, the other way round
+/// from [`expression_typeof_target`]. `typeof import(...)` spells none.
+pub fn typeof_target_expression<M: Dupe, T: Dupe>(
+    target: &types::typeof_::Target<M, T>,
+) -> Option<expression::Expression<M, T>> {
+    match target {
+        types::typeof_::Target::Unqualified(id) => {
+            Some(expression::Expression::new(ExpressionInner::Identifier {
+                loc: id.loc.dupe(),
+                inner: id.dupe(),
+            }))
+        }
+        types::typeof_::Target::Qualified(qualified) => {
+            let object = typeof_target_expression(&qualified.qualification)?;
+            Some(expression::Expression::new(ExpressionInner::Member {
+                loc: qualified.loc.dupe(),
+                inner: Arc::new(expression::Member {
+                    object,
+                    property: expression::member::Property::PropertyIdentifier(qualified.id.dupe()),
+                    comments: None,
+                }),
+            }))
+        }
+        types::typeof_::Target::Import(_) => None,
+    }
+}
+
 pub fn get_call_to_jest_module_mocking_fn<'a, 'b, M: Dupe, T: Dupe>(
     callee: &'a expression::Expression<M, T>,
     arguments: &'b expression::ArgList<M, T>,

@@ -779,7 +779,20 @@ fn resolve_computed_key_name(
         };
         Ok((typed_expr, Some(Name::new(name))))
     } else {
-        let typed_expr = match crate::statement::expression(None, None, Some(true), cx, expr) {
+        // A key in a type is never evaluated, so a name in it, or a property read
+        // off one, is read as the `typeof` target it spells.
+        let typeof_key = match flow_parser::ast_utils::expression_typeof_target(expr) {
+            Some(target) => {
+                let (_, typed_target) = convert_typeof(cx, &target)?;
+                flow_parser::ast_utils::typeof_target_expression(&typed_target)
+            }
+            None => None,
+        };
+        let typed_expr = match typeof_key {
+            Some(typed_expr) => Ok(typed_expr),
+            None => crate::statement::expression(None, None, Some(true), cx, expr),
+        };
+        let typed_expr = match typed_expr {
             Ok(v) => v,
             Err(flow_typing_utils::abnormal::CheckExprError::Canceled(c)) => {
                 return Err(flow_utils_concurrency::job_error::JobError::Canceled(c));

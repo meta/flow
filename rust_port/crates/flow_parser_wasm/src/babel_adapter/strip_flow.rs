@@ -16,6 +16,7 @@ use flow_parser::ast::pattern;
 use flow_parser::ast::statement;
 use flow_parser::ast::statement::StatementInner;
 use flow_parser::ast::types;
+use flow_parser::ast_utils;
 use flow_parser::ast_visitor;
 use flow_parser::ast_visitor::AstVisitor;
 use flow_parser::loc::Loc;
@@ -81,29 +82,6 @@ impl StripFlow {
                 ))
             }
             types::generic::Identifier::ImportTypeAnnot(_) => None,
-        }
-    }
-
-    fn expression_typeof_target(
-        expression: &expression::Expression<Loc, Loc>,
-    ) -> Option<types::typeof_::Target<Loc, Loc>> {
-        match &**expression {
-            expression::ExpressionInner::Identifier { inner, .. } => {
-                Some(types::typeof_::Target::Unqualified(inner.dupe()))
-            }
-            expression::ExpressionInner::Member { loc, inner } => {
-                let expression::member::Property::PropertyIdentifier(id) = &inner.property else {
-                    return None;
-                };
-                Some(types::typeof_::Target::Qualified(Arc::new(
-                    types::typeof_::Qualified {
-                        loc: loc.dupe(),
-                        qualification: Self::expression_typeof_target(&inner.object)?,
-                        id: id.dupe(),
-                    },
-                )))
-            }
-            _ => None,
         }
     }
 
@@ -235,7 +213,7 @@ impl StripFlow {
         match &assignment.rhs {
             statement::ExportAssignmentRhs::Expression(rhs) => {
                 if self.ambient {
-                    let annotation = Self::expression_typeof_target(rhs)
+                    let annotation = ast_utils::expression_typeof_target(rhs)
                         .map(|argument| {
                             types::Type::new(types::TypeInner::Typeof {
                                 loc: loc.dupe(),

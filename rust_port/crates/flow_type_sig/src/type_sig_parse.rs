@@ -7789,9 +7789,11 @@ fn value_object_type_key<'arena, 'ast>(
 
 enum ResolvedPropKey<'ast> {
     Named(FlowSmolStr, Loc),
-    ComputedRef {
-        expr_loc: Loc,
-        ref_name: FlowSmolStr,
+    /// A name, or a property read off one: never evaluated in a type, so read
+    /// as the `typeof` target it spells.
+    ComputedTypeof {
+        loc: Loc,
+        target: ast::types::typeof_::Target<Loc, Loc>,
     },
     ComputedExpr {
         expr: &'ast ast::expression::Expression<Loc, Loc>,
@@ -7854,10 +7856,14 @@ fn resolve_prop_key<'ast>(
                         _ => ResolvedPropKey::ComputedError { loc: ck.loc.dupe() },
                     }
                 }
-                ExpressionInner::Identifier { inner, .. } => ResolvedPropKey::ComputedRef {
-                    expr_loc: inner.loc.dupe(),
-                    ref_name: inner.name.dupe(),
-                },
+                ExpressionInner::Identifier { .. } | ExpressionInner::Member { .. }
+                    if let Some(target) = ast_utils::expression_typeof_target(&ck.expression) =>
+                {
+                    ResolvedPropKey::ComputedTypeof {
+                        loc: ck.expression.loc().dupe(),
+                        target,
+                    }
+                }
                 ExpressionInner::Member { .. } => ResolvedPropKey::ComputedExpr {
                     expr: &ck.expression,
                 },
@@ -8793,6 +8799,7 @@ fn object_type<'arena, 'ast>(
             build_key: impl FnOnce(
                 &mut Tables<'arena, 'ast>,
                 &mut scope::Scopes<'arena, 'ast>,
+                &mut tparam_stack::TParamStack,
             ) -> (Parsed<'arena, 'ast>, LocNode<'arena>),
         ) {
             if p.method {
@@ -8801,7 +8808,7 @@ fn object_type<'arena, 'ast>(
                         loc: fn_loc, inner, ..
                     } => {
                         let fn_loc = tbls.push_loc(fn_loc.dupe());
-                        let (key_ref, ref_loc) = build_key(tbls, scopes);
+                        let (key_ref, ref_loc) = build_key(tbls, scopes, xs);
                         let def =
                             function_type(true, opts, scope, scopes, tbls, xs, inner.as_ref());
                         if p.optional {
@@ -8820,7 +8827,7 @@ fn object_type<'arena, 'ast>(
                     _ => unreachable!("unexpected method type"),
                 }
             } else {
-                let (key_ref, ref_loc) = build_key(tbls, scopes);
+                let (key_ref, ref_loc) = build_key(tbls, scopes, xs);
                 let mut t = annot(opts, scope, scopes, tbls, xs, t);
                 if p.optional {
                     t = Parsed::Annot(Box::new(ParsedAnnot::Optional(Box::new(t))));
@@ -8879,7 +8886,7 @@ fn object_type<'arena, 'ast>(
                             }
                         }
                     }
-                    ResolvedPropKey::ComputedRef { expr_loc, ref_name } => {
+                    ResolvedPropKey::ComputedTypeof { loc, target } => {
                         obj_add_computed_prop(
                             opts,
                             scope,
@@ -8889,12 +8896,22 @@ fn object_type<'arena, 'ast>(
                             acc,
                             p,
                             t,
-                            |tbls, _scopes| {
+                            |tbls, scopes, xs| {
                                 // Thunk defers loc pushes so callers can push fn_loc first
                                 // for methods, satisfying Packed_locs ascending-order
                                 // requirement.
-                                let ref_loc = tbls.push_loc(expr_loc);
-                                (val_ref(false, scope, ref_loc.dupe(), ref_name), ref_loc)
+                                let ref_loc = tbls.push_loc(loc);
+                                let key_ref = typeof_(
+                                    opts,
+                                    scope,
+                                    scopes,
+                                    tbls,
+                                    xs,
+                                    ref_loc.dupe(),
+                                    &target,
+                                    &None,
+                                );
+                                (key_ref, ref_loc)
                             },
                         );
                     }
@@ -8908,7 +8925,7 @@ fn object_type<'arena, 'ast>(
                             acc,
                             p,
                             t,
-                            |tbls, _scopes| {
+                            |tbls, _, _| {
                                 let ref_loc = tbls.push_loc(expr.loc().dupe());
                                 let key_ref = expression_for_computed_key(scope, tbls, expr);
                                 (key_ref, ref_loc)
@@ -8925,7 +8942,7 @@ fn object_type<'arena, 'ast>(
                             acc,
                             p,
                             t,
-                            |tbls, _scopes| {
+                            |tbls, _, _| {
                                 let loc = tbls.push_loc(loc);
                                 let key_ref = Parsed::Err(
                                     loc.dupe(),
@@ -9317,6 +9334,7 @@ fn interface_props<'arena, 'ast>(
             build_key: impl FnOnce(
                 &mut Tables<'arena, 'ast>,
                 &mut scope::Scopes<'arena, 'ast>,
+                &mut tparam_stack::TParamStack,
             ) -> (Parsed<'arena, 'ast>, LocNode<'arena>),
         ) {
             match (p.method, &p.value) {
@@ -9326,7 +9344,7 @@ fn interface_props<'arena, 'ast>(
                     } = ty.deref()
                     {
                         let fn_loc = tbls.push_loc(fn_loc.dupe());
-                        let (key_ref, ref_loc) = build_key(tbls, scopes);
+                        let (key_ref, ref_loc) = build_key(tbls, scopes, xs);
                         let def =
                             function_type(true, opts, scope, scopes, tbls, xs, inner.as_ref());
                         if p.optional {
@@ -9345,7 +9363,7 @@ fn interface_props<'arena, 'ast>(
                 }
                 (true, _) => {}
                 (false, O::PropertyValue::Init(Some(t))) => {
-                    let (key_ref, ref_loc) = build_key(tbls, scopes);
+                    let (key_ref, ref_loc) = build_key(tbls, scopes, xs);
                     let mut t = annot(opts, scope, scopes, tbls, xs, t);
                     if p.optional {
                         t = Parsed::Annot(Box::new(ParsedAnnot::Optional(Box::new(t))));
@@ -9355,12 +9373,12 @@ fn interface_props<'arena, 'ast>(
                     acc.add_computed_field(key_ref, ref_loc, polarity_val, t);
                 }
                 (_, O::PropertyValue::Get(_, fn_expr)) => {
-                    let (key_ref, ref_loc) = build_key(tbls, scopes);
+                    let (key_ref, ref_loc) = build_key(tbls, scopes, xs);
                     let getter = getter_type(opts, scope, scopes, tbls, xs, ref_loc, fn_expr);
                     acc.add_computed_accessor(key_ref, getter);
                 }
                 (_, O::PropertyValue::Set(_, fn_expr)) => {
-                    let (key_ref, ref_loc) = build_key(tbls, scopes);
+                    let (key_ref, ref_loc) = build_key(tbls, scopes, xs);
                     let setter = setter_type(opts, scope, scopes, tbls, xs, ref_loc, fn_expr);
                     acc.add_computed_accessor(key_ref, setter);
                 }
@@ -9372,21 +9390,31 @@ fn interface_props<'arena, 'ast>(
             ResolvedPropKey::Named(name, id_loc) => {
                 add_named_prop(opts, scope, scopes, tbls, xs, acc, p, name, id_loc);
             }
-            ResolvedPropKey::ComputedRef { expr_loc, ref_name } => {
-                add_computed_prop(opts, scope, scopes, tbls, xs, acc, p, |tbls, _scopes| {
-                    let ref_loc = tbls.push_loc(expr_loc);
-                    (val_ref(false, scope, ref_loc.dupe(), ref_name), ref_loc)
+            ResolvedPropKey::ComputedTypeof { loc, target } => {
+                add_computed_prop(opts, scope, scopes, tbls, xs, acc, p, |tbls, scopes, xs| {
+                    let ref_loc = tbls.push_loc(loc);
+                    let t = typeof_(
+                        opts,
+                        scope,
+                        scopes,
+                        tbls,
+                        xs,
+                        ref_loc.dupe(),
+                        &target,
+                        &None,
+                    );
+                    (t, ref_loc)
                 });
             }
             ResolvedPropKey::ComputedExpr { expr } => {
-                add_computed_prop(opts, scope, scopes, tbls, xs, acc, p, |tbls, _scopes| {
+                add_computed_prop(opts, scope, scopes, tbls, xs, acc, p, |tbls, _, _| {
                     let ref_loc = tbls.push_loc(expr.loc().dupe());
                     let t = expression_for_computed_key(scope, tbls, expr);
                     (t, ref_loc)
                 });
             }
             ResolvedPropKey::ComputedError { loc } => {
-                add_computed_prop(opts, scope, scopes, tbls, xs, acc, p, |tbls, _scopes| {
+                add_computed_prop(opts, scope, scopes, tbls, xs, acc, p, |tbls, _, _| {
                     let loc = tbls.push_loc(loc);
                     (
                         Parsed::Err(
@@ -9681,6 +9709,7 @@ fn declare_class_props<'arena, 'ast>(
             build_key: impl FnOnce(
                 &mut Tables<'arena, 'ast>,
                 &mut scope::Scopes<'arena, 'ast>,
+                &mut tparam_stack::TParamStack,
             ) -> (Parsed<'arena, 'ast>, LocNode<'arena>),
         ) {
             match (p.method, &p.value) {
@@ -9690,7 +9719,7 @@ fn declare_class_props<'arena, 'ast>(
                     } = ty.deref()
                     {
                         let fn_loc = tbls.push_loc(fn_loc.dupe());
-                        let (key_ref, ref_loc) = build_key(tbls, scopes);
+                        let (key_ref, ref_loc) = build_key(tbls, scopes, xs);
                         let def =
                             function_type(true, opts, scope, scopes, tbls, xs, inner.as_ref());
                         if p.optional {
@@ -9716,7 +9745,7 @@ fn declare_class_props<'arena, 'ast>(
                 }
                 (true, _) => {}
                 (false, O::PropertyValue::Init(Some(t))) => {
-                    let (key_ref, ref_loc) = build_key(tbls, scopes);
+                    let (key_ref, ref_loc) = build_key(tbls, scopes, xs);
                     let mut t = annot(opts, scope, scopes, tbls, xs, t);
                     if p.optional {
                         t = Parsed::Annot(Box::new(ParsedAnnot::Optional(Box::new(t))));
@@ -9727,7 +9756,7 @@ fn declare_class_props<'arena, 'ast>(
                 }
                 (false, O::PropertyValue::Init(None)) => {
                     if let Some(ref init_expr) = p.init {
-                        let (key_ref, ref_loc) = build_key(tbls, scopes);
+                        let (key_ref, ref_loc) = build_key(tbls, scopes, xs);
                         if let Some(mut t) = literal_expr_to_annot(ref_loc.dupe(), init_expr) {
                             if p.optional {
                                 t = Parsed::Annot(Box::new(ParsedAnnot::Optional(Box::new(t))));
@@ -9746,12 +9775,12 @@ fn declare_class_props<'arena, 'ast>(
                     }
                 }
                 (_, O::PropertyValue::Get(_, fn_expr)) => {
-                    let (key_ref, ref_loc) = build_key(tbls, scopes);
+                    let (key_ref, ref_loc) = build_key(tbls, scopes, xs);
                     let getter = getter_type(opts, scope, scopes, tbls, xs, ref_loc, fn_expr);
                     acc.add_computed_accessor(p.static_, key_ref, getter);
                 }
                 (_, O::PropertyValue::Set(_, fn_expr)) => {
-                    let (key_ref, ref_loc) = build_key(tbls, scopes);
+                    let (key_ref, ref_loc) = build_key(tbls, scopes, xs);
                     let setter = setter_type(opts, scope, scopes, tbls, xs, ref_loc, fn_expr);
                     acc.add_computed_accessor(p.static_, key_ref, setter);
                 }
@@ -9773,21 +9802,31 @@ fn declare_class_props<'arena, 'ast>(
                     id_loc,
                 );
             }
-            ResolvedPropKey::ComputedRef { expr_loc, ref_name } => {
-                add_computed_prop(opts, scope, scopes, tbls, xs, acc, p, |tbls, _scopes| {
-                    let ref_loc = tbls.push_loc(expr_loc);
-                    (val_ref(false, scope, ref_loc.dupe(), ref_name), ref_loc)
+            ResolvedPropKey::ComputedTypeof { loc, target } => {
+                add_computed_prop(opts, scope, scopes, tbls, xs, acc, p, |tbls, scopes, xs| {
+                    let ref_loc = tbls.push_loc(loc);
+                    let t = typeof_(
+                        opts,
+                        scope,
+                        scopes,
+                        tbls,
+                        xs,
+                        ref_loc.dupe(),
+                        &target,
+                        &None,
+                    );
+                    (t, ref_loc)
                 });
             }
             ResolvedPropKey::ComputedExpr { expr } => {
-                add_computed_prop(opts, scope, scopes, tbls, xs, acc, p, |tbls, _scopes| {
+                add_computed_prop(opts, scope, scopes, tbls, xs, acc, p, |tbls, _, _| {
                     let ref_loc = tbls.push_loc(expr.loc().dupe());
                     let t = expression_for_computed_key(scope, tbls, expr);
                     (t, ref_loc)
                 });
             }
             ResolvedPropKey::ComputedError { loc } => {
-                add_computed_prop(opts, scope, scopes, tbls, xs, acc, p, |tbls, _scopes| {
+                add_computed_prop(opts, scope, scopes, tbls, xs, acc, p, |tbls, _, _| {
                     let loc = tbls.push_loc(loc);
                     (
                         Parsed::Err(

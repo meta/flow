@@ -2152,6 +2152,14 @@ pub trait AstVisitor<'ast, Loc: Dupe, Type: Dupe = Loc, C = &'ast Loc, E = !> {
         object_property_type_default(self, opt)
     }
 
+    /// The key of an object type property, which is never evaluated.
+    fn object_property_type_key(
+        &mut self,
+        key: &'ast ast::expression::object::Key<Loc, Type>,
+    ) -> Result<(), E> {
+        self.object_key(key)
+    }
+
     fn map_object_property_type(
         &mut self,
         opt: &'ast ast::types::object::NormalProperty<Loc, Loc>,
@@ -10793,7 +10801,7 @@ pub fn object_property_type_default<'ast, Loc: Dupe, Type: Dupe, C, E>(
         init,
         comments,
     } = p;
-    visitor.object_key(key)?;
+    visitor.object_property_type_key(key)?;
     visitor.object_property_value_type(value)?;
     if let Some(variance) = variance {
         visitor.variance(variance)?;
