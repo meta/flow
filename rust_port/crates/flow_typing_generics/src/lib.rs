@@ -342,6 +342,14 @@ impl GenericId {
                 printer(&["Generics satisfied".to_string()]);
                 GenericSatResult::Satisfied
             }
+            // A generic bounded by `keyof` of a generic, such as `K` in `<T, K extends keyof T>`,
+            // satisfies what its bound does.
+            (
+                GenericId::Bound(GenericBound {
+                    super_: Some(id1), ..
+                }),
+                GenericId::Op(OpKind::Keys, _),
+            ) => id1.satisfies(printer, other),
             (GenericId::Op(OpKind::Keys, _), _) | (_, GenericId::Op(OpKind::Keys, _)) => {
                 printer(&[format!(
                     "Generics unsatisfied, with {} unmatched on upper bound",

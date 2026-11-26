@@ -68,3 +68,13 @@ function testKeysOfSameTypeParam<T>(k: keyof T): keyof T {
 function testKeysOfOtherTypeParam<T, S>(k: keyof T): keyof S {
   return k; // Error
 }
+
+type Rec<K extends string | number | symbol, V> = {[P in K]: V};
+
+function testIndexByKeysBoundedParam<T, K extends keyof T>(o: Rec<keyof T, number>, k: K): number {
+  return o[k]; // OK
+}
+
+function testIndexByOtherKeysBoundedParam<T, S, K extends keyof S>(o: Rec<keyof T, number>, k: K): number {
+  return o[k]; // Error
+}

@@ -460,6 +460,57 @@ References:
                                                             ^^^^^^^ [2]
 
 
+Error ---------------------------------------------------------------------------------------------------- keys.js:79:12
+
+Cannot get `o[k]` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   keys.js:79:12
+   79|   return o[k]; // Error
+                  ^
+
+References:
+   keys.js:78:96
+   78| function testIndexByOtherKeysBoundedParam<T, S, K extends keyof S>(o: Rec<keyof T, number>, k: K): number {
+                                                                                                      ^ [1]
+   keys.js:78:75
+   78| function testIndexByOtherKeysBoundedParam<T, S, K extends keyof S>(o: Rec<keyof T, number>, k: K): number {
+                                                                                 ^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- keys.js:79:12
+
+Cannot get `o[k]` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   keys.js:79:12
+   79|   return o[k]; // Error
+                  ^
+
+References:
+   keys.js:78:96
+   78| function testIndexByOtherKeysBoundedParam<T, S, K extends keyof S>(o: Rec<keyof T, number>, k: K): number {
+                                                                                                      ^ [1]
+   keys.js:78:75
+   78| function testIndexByOtherKeysBoundedParam<T, S, K extends keyof S>(o: Rec<keyof T, number>, k: K): number {
+                                                                                 ^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- keys.js:79:12
+
+Cannot get `o[k]` because `symbol` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   keys.js:79:12
+   79|   return o[k]; // Error
+                  ^
+
+References:
+   keys.js:78:96
+   78| function testIndexByOtherKeysBoundedParam<T, S, K extends keyof S>(o: Rec<keyof T, number>, k: K): number {
+                                                                                                      ^ [1]
+   keys.js:78:75
+   78| function testIndexByOtherKeysBoundedParam<T, S, K extends keyof S>(o: Rec<keyof T, number>, k: K): number {
+                                                                                 ^^^^^^^ [2]
+
+
 Error --------------------------------------------------------------------------------------------- suppressions.js:29:1
 
 Cannot cast `s` to `keyof ObjLit` because an index signature declaring the expected key / value type is missing in
@@ -551,4 +602,4 @@ References:
 
 
 
-Found 36 errors
+Found 39 errors
