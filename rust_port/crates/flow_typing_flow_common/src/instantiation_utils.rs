@@ -17,6 +17,7 @@ use flow_typing_context::Context;
 use flow_typing_type::type_::ArrType;
 use flow_typing_type::type_::ArrayATData;
 use flow_typing_type::type_::DefTInner;
+use flow_typing_type::type_::Destructor;
 use flow_typing_type::type_::ROArrayATData;
 use flow_typing_type::type_::TupleATData;
 use flow_typing_type::type_::Tvar;
@@ -146,6 +147,12 @@ pub mod type_app_expansion {
                 TypeInner::TemplateLiteralT { reason, .. }
                 | TypeInner::IntersectionT(reason, _) => {
                     acc.insert(Root::Written(reason.dupe()));
+                    flow_typing_visitors::type_visitor::type_default(self, cx, pole, acc, t)
+                }
+                TypeInner::EvalT { defer_use_t, .. }
+                    if let Destructor::SpreadTupleType(_) = defer_use_t.2.deref() =>
+                {
+                    acc.insert(Root::Written(defer_use_t.1.dupe()));
                     flow_typing_visitors::type_visitor::type_default(self, cx, pole, acc, t)
                 }
                 TypeInner::DefT(r, def_t) => match def_t.deref() {
