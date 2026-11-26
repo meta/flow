@@ -1,4 +1,4 @@
-import {anyBound, defineExtension, empty, first, id, keyOf, keyOfCond, keyOfOpts, keyOfWith, linked, make, refLike, withDefault} from 'repro';
+import {anyBound, defineExtension, empty, erroneousBound, first, id, keyOf, keyOfCond, keyOfOpts, keyOfWith, make, refLike, withDefault} from 'repro';
 import {useState} from 'react';
 
 // As in TypeScript, a type parameter of a TypeScript generic that no part of
@@ -44,7 +44,7 @@ keyOfCond('a', () => make()); // ERROR: `T` of `make` is underconstrained
 keyOfOpts({key: 'a', make: n => make()}); // ERROR: `T` of `make` is underconstrained
 
 // So is one whose bound is `any` after an error.
-linked(); // ERROR: `T` is underconstrained
+erroneousBound(); // ERROR: `T` is underconstrained
 
 // The type parameters of a Flow generic are still underconstrained.
 declare function defineFlow<Config extends {...}, Output>(extension: {

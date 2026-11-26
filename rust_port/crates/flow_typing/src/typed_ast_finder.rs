@@ -724,6 +724,7 @@ pub mod type_at_pos {
                 default,
                 is_this: false,
                 is_const: tparam.const_.is_some(),
+                recursive: false,
             })
         }
     }

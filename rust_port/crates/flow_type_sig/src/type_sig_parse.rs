@@ -54,7 +54,6 @@ use flow_parser_utils::record_utils;
 use flow_parser_utils::signature_utils;
 use flow_parser_utils::symbol_call;
 use flow_parser_utils::type_param_analysis::analyze_type_params;
-use flow_parser_utils::type_param_analysis::type_param_order;
 use vec1::Vec1;
 
 use crate::compact_table::Builder;
@@ -3359,6 +3358,7 @@ pub(crate) mod scope {
                         loc: poly.loc.dupe(),
                         tparams,
                         bound_order: poly.bound_order.clone(),
+                        recursive: poly.recursive.clone(),
                     }))
                 }
             }
@@ -3390,6 +3390,7 @@ pub(crate) mod scope {
                 loc: loc.dupe(),
                 tparams: Vec1::new((*tparam).clone()),
                 bound_order: vec![0],
+                recursive: Vec::new(),
             }));
             let (tparams, body_rename_map) = rename_tparams_for_nested_scope(rename_map, &tparams);
             let TParams::Poly(poly) = tparams else {
@@ -10461,13 +10462,9 @@ fn tparams<'arena, 'ast>(
         None => TParams::Mono,
         Some(tparams) => {
             let analysis = analyze_type_params(tparams);
-            let cyclic: BTreeSet<usize> = analysis
-                .components()
-                .into_iter()
-                .filter(|component| component.cyclic)
-                .flat_map(|component| component.members)
-                .collect();
-            let order = type_param_order(tparams, &cyclic);
+            let cycles = analysis.cycles();
+            let cyclic = cycles.cyclic();
+            let order = analysis.bound_order(&cycles);
             let tparams_loc = tbls.push_loc(tparams.loc.dupe());
             for tp in tparams.params.iter() {
                 xs.insert_uninitialized(tp.name.name.dupe());
@@ -10494,6 +10491,7 @@ fn tparams<'arena, 'ast>(
                     loc: tparams_loc,
                     tparams: tps,
                     bound_order: order,
+                    recursive: cycles.recursive.into_iter().collect(),
                 }))
             } else {
                 TParams::Mono
@@ -10574,6 +10572,7 @@ fn conditional_type<'arena, 'ast>(
                     loc: extends_type_loc,
                     tparams,
                     bound_order: order,
+                    recursive: Vec::new(),
                 }))
             } else {
                 TParams::Mono

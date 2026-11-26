@@ -29,6 +29,9 @@ use vec1::Vec1;
 pub struct Generic {
     pub id: ALocId,
     pub name: SubstName,
+    /// Whether the bound of the type variable refers to the type variable, as the bound of `T` in
+    /// `<T extends Comparable<T>>` does.
+    pub recursive: bool,
 }
 
 /// A bound corresponds to the upper bound annotated on a type variable,
@@ -186,9 +189,13 @@ impl GenericId {
         }
     }
 
-    pub fn make_bound_id(aloc_id: ALocId, name: SubstName) -> GenericId {
+    pub fn make_bound_id(aloc_id: ALocId, name: SubstName, recursive: bool) -> GenericId {
         GenericId::Bound(GenericBound {
-            generic: Generic { id: aloc_id, name },
+            generic: Generic {
+                id: aloc_id,
+                name,
+                recursive,
+            },
             super_: None,
         })
     }

@@ -490,6 +490,7 @@ fn use_distributive_tparam_name<'a>(
                 default: None,
                 is_this: false,
                 is_const: false,
+                recursive: false,
             });
             let generic =
                 flow_js_utils::generic_of_tparam(cx, |_, x: &Type| x.dupe(), &distributive_tparam);
@@ -2643,6 +2644,7 @@ fn convert_inner<'a>(
                                 default: None,
                                 is_this: false,
                                 is_const: false,
+                                recursive: false,
                             });
                             let property_type = type_util::poly_type_of_tparams(
                                 cx.make_source_poly_id(false, loc),
@@ -6739,6 +6741,11 @@ fn mk_type_param_inner<'a>(
             (Some(t), Some(annot_ast))
         }
     };
+    let recursive = cx
+        .environment()
+        .var_info
+        .recursive_type_param_locs
+        .contains(&name_loc);
     let tparam = TypeParam::new(type_::TypeParamInner {
         reason: reason.dupe(),
         name: subst_name,
@@ -6747,6 +6754,7 @@ fn mk_type_param_inner<'a>(
         default: default_t,
         is_this: false,
         is_const,
+        recursive,
     });
     let t = flow_js_utils::generic_of_tparam(cx, |_, x: &Type| x.dupe(), &tparam);
     let name_ast = ast::Identifier::new(ast::IdentifierInner {

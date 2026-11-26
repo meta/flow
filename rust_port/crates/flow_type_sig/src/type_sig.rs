@@ -119,6 +119,9 @@ pub struct PolyTParams<Loc, T> {
     pub tparams: Vec1<TParam<Loc, T>>,
     /// Dependency-first order for materializing type parameter bounds.
     pub bound_order: Vec<usize>,
+    /// Type parameters whose bounds refer to themselves through deferred positions, e.g. `T` in
+    /// `<T extends Array<T>>`. Their bounds are materialized lazily.
+    pub recursive: Vec<usize>,
 }
 
 #[derive(Clone, PartialEq, Hash, serde::Serialize, serde::Deserialize)]
@@ -175,6 +178,7 @@ impl<Loc, T> TParams<Loc, T> {
                 loc: f_loc(cx, &poly.loc),
                 tparams: poly.tparams.mapped_ref(|tp| tp.map(cx, &f_loc, &f_t)),
                 bound_order: poly.bound_order.clone(),
+                recursive: poly.recursive.clone(),
             })),
         }
     }

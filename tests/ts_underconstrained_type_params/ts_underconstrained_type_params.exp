@@ -189,20 +189,20 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:47:1
 
-Cannot call `linked` because `T` [1] is underconstrained by call of `linked` [2]. Either add explicit type arguments or
-cast the expression to your expected type. [underconstrained-implicit-instantiation]
+Cannot call `erroneousBound` because `T` [1] is underconstrained by call of `erroneousBound` [2]. Either add explicit
+type arguments or cast the expression to your expected type. [underconstrained-implicit-instantiation]
 
    test.js:47:1
-   47| linked(); // ERROR: `T` is underconstrained
-       ^^^^^^
+   47| erroneousBound(); // ERROR: `T` is underconstrained
+       ^^^^^^^^^^^^^^
 
 References:
-   node_modules/repro/index.d.ts:17:32
-   17| export declare function linked<T extends {next: T | null}>(): T;
-                                      ^ [1]
+   node_modules/repro/index.d.ts:17:40
+   17| export declare function erroneousBound<T extends Missing>(): T;
+                                              ^ [1]
    test.js:47:1
-   47| linked(); // ERROR: `T` is underconstrained
-       ^^^^^^^^ [2]
+   47| erroneousBound(); // ERROR: `T` is underconstrained
+       ^^^^^^^^^^^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------------------------- test.js:54:1

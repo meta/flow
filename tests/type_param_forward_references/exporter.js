@@ -12,8 +12,16 @@ export type ExportedNestedBadCheckedDefault<A extends number = <X>() => B, B = s
 
 export type ExportedCycle<A extends B, B extends A> = [A, B]; // ERROR: circular bounds
 
-export type ExportedNestedCycle<A extends Array<B>, B extends Array<A>> = [A, B]; // ERROR: nested circular bounds
+export type ExportedNestedCycle<A extends Array<B>, B extends Array<A>> = [A, B]; // OK: the bounds refer to each other through type arguments
 
 export type ExportedMixedCycle<A extends B, B = A> = [A, B]; // ERROR: bound/default cycle
 
 export declare function exportedInferForward<A extends B, B>(a: A): B; // OK: B is inferred from A's bound
+
+export interface Comparable<T> {
+  compareTo(other: T): number;
+}
+
+export declare function exportedMax<T extends Comparable<T>>(a: T, b: T): T; // OK: the bound refers to T through a type argument
+
+export type ExportedSelfBound<T extends ReadonlyArray<T>> = T; // OK: the bound refers to T through a type argument

@@ -57,6 +57,7 @@ use flow_typing_context::SigFile;
 use flow_typing_context::SigFileId;
 use flow_typing_flow_common::flow_js_utils;
 use flow_typing_flow_common::obj_type;
+use flow_typing_flow_js::flow_js::FlowJs;
 use flow_typing_flow_js::intersection_kit;
 use flow_typing_type::type_;
 use flow_typing_type::type_::ArrayATData;
@@ -2684,6 +2685,7 @@ fn merge_annot<'cx>(
                 default: None,
                 is_this: false,
                 is_const: false,
+                recursive: false,
             });
             let property_type = Type::new(type_::TypeInner::DefT(
                 reason.dupe(),
@@ -4293,6 +4295,26 @@ fn merge_tparams_targs<'cx>(
             for tp in poly.tparams.iter() {
                 current_env.tps.remove(&tp.name);
             }
+            let recursive_bounds = poly
+                .recursive
+                .iter()
+                .map(|index| {
+                    let tp = &poly.tparams[*index];
+                    let bound = Rc::new(RefCell::new(None));
+                    let tparam = FlowJs::mk_recursive_tparam(
+                        cx,
+                        reason::mk_reason(
+                            reason::VirtualReasonDesc::RType(tp.name.dupe()),
+                            tp.name_loc.dupe(),
+                        ),
+                        SubstName::name(tp.name.dupe()),
+                        bound.dupe(),
+                    );
+                    let t = flow_js_utils::generic_of_tparam(cx, |_, x: &Type| x.dupe(), &tparam);
+                    current_env.tps.insert(tp.name.dupe(), t);
+                    (*index, bound)
+                })
+                .collect::<Vec<_>>();
             let mut partials = vec![None; poly.tparams.len()];
             for index in &poly.bound_order {
                 partials[*index] = Some(merge_tparam_bound(
@@ -4301,7 +4323,14 @@ fn merge_tparams_targs<'cx>(
                     file,
                     &poly.tparams[*index],
                     false,
+                    poly.recursive.contains(index),
                 ));
+            }
+            for (index, bound) in recursive_bounds {
+                let (type_param, _) = partials[index]
+                    .as_ref()
+                    .expect("every packed type parameter should be initialized");
+                *bound.borrow_mut() = Some(type_param.bound.dupe());
             }
 
             let mut tparams_vec = Vec::with_capacity(poly.tparams.len());
@@ -4337,6 +4366,7 @@ fn merge_tparam_bound<'cx>(
     file: &SigFile,
     tp: &TParam<ALoc, Pack::Packed<ALoc>>,
     from_infer: bool,
+    recursive: bool,
 ) -> (
     type_::TypeParam,
     (SubstName, Reason, Type, Option<Polarity>),
@@ -4395,6 +4425,7 @@ fn merge_tparam_bound<'cx>(
         default: None,
         is_this: false,
         is_const: *is_const,
+        recursive,
     });
     let t = flow_js_utils::generic_of_tparam(cx, |_, x: &Type| x.dupe(), &tp);
     env.tps.insert(name.dupe(), t.dupe());
@@ -4427,6 +4458,7 @@ fn finish_merged_tparam<'cx>(
         default,
         is_this: type_param.is_this,
         is_const: type_param.is_const,
+        recursive: type_param.recursive,
     });
     (type_param, tuple)
 }
@@ -4441,7 +4473,7 @@ fn merge_tparam<'cx>(
     type_::TypeParam,
     (SubstName, Reason, Type, Option<Polarity>),
 ) {
-    let partial = merge_tparam_bound(env, cx, file, tp, from_infer);
+    let partial = merge_tparam_bound(env, cx, file, tp, from_infer, false);
     finish_merged_tparam(env, cx, file, tp, partial)
 }
 
@@ -4877,6 +4909,7 @@ fn merge_interface<'cx>(
         default: None,
         is_this: true,
         is_const: false,
+        recursive: false,
     });
     let this = flow_js_utils::generic_of_tparam(cx, |_, x: &Type| x.dupe(), &this_tp);
     let mut env = env.dupe();
@@ -5096,6 +5129,7 @@ fn merge_this_class_t<'cx>(
                 default: None,
                 is_this: true,
                 is_const: false,
+                recursive: false,
             });
             flow_js_utils::generic_of_tparam(cx, |_, x| x.dupe(), &this_tp)
         };
@@ -5836,6 +5870,7 @@ fn merge_declare_class<'cx>(
                 default: None,
                 is_this: true,
                 is_const: false,
+                recursive: false,
             });
             flow_js_utils::generic_of_tparam(cx, |_, x| x.dupe(), &this_tp)
         };

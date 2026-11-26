@@ -3111,7 +3111,7 @@ pub mod kit {
     ) -> Result<Option<Type>, FlowJsException> {
         let name = SubstName::name("T".into());
         let bound = mixed_t::make(reason.dupe());
-        let id = cx.make_generic_id(name.dupe(), reason.loc());
+        let id = cx.make_generic_id(name.dupe(), reason.loc(), false);
         let generic_t = Type::new(TypeInner::GenericT(Box::new(GenericTData {
             reason: reason.dupe(),
             name: name.dupe(),
@@ -3127,6 +3127,7 @@ pub mod kit {
             default: None,
             is_this: false,
             is_const: false,
+            recursive: false,
         });
         let env = &env.solving_implicit_instantiation();
         let extends_t = extends_t(cx, env, &generic_t);

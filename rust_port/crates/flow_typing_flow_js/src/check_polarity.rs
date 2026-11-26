@@ -345,6 +345,7 @@ fn check_polarity_impl<'cx>(
                     default: None,
                     is_this: false,
                     is_const: false,
+                    recursive: false,
                 }));
                 targs_list.push(arg_t.dupe());
             }
@@ -789,6 +790,7 @@ fn check_polarity_typeparam<'cx>(
         default,
         is_this: _,
         is_const: _,
+        recursive: _,
     } = tp.deref();
     let mult_polarity = Polarity::mult(polarity, tp_polarity.unwrap_or(Polarity::Neutral));
     check_polarity_impl(cx, env, trace, seen, tparams, mult_polarity, bound)?;

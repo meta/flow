@@ -30,9 +30,9 @@ const badCycle: Cycle<number, string> = [1, "bad"]; // ERROR: number does not sa
 
 type SelfBound<A extends A> = A; // ERROR: circular bound
 
-type NestedCycle<A extends Array<B>, B extends Array<A>> = [A, B]; // ERROR: nested circular bounds
+type NestedCycle<A extends Array<B>, B extends Array<A>> = [A, B]; // OK: the bounds refer to each other through type arguments
 
-type NestedSelfBound<A extends Array<A>> = A; // ERROR: nested circular bound
+type NestedSelfBound<A extends Array<A>> = A; // OK: the bound refers to A through a type argument
 
 type OverlappingCycle<
   A extends B,

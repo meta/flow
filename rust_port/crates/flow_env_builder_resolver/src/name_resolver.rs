@@ -1377,6 +1377,7 @@ struct NameResolverState {
     in_param_default: bool,
     invalid_type_param_default_locs: FlowOrdSet<ALoc>,
     cyclic_type_param_locs: FlowOrdSet<ALoc>,
+    recursive_type_param_locs: FlowOrdSet<ALoc>,
     /// The def locs of the type parameters of the innermost class.
     class_type_params: FlowOrdSet<ALoc>,
     /// The def locs of the class type parameters that the static member being visited cannot
@@ -1448,6 +1449,7 @@ impl NameResolverState {
             in_param_default: false,
             invalid_type_param_default_locs: FlowOrdSet::new(),
             cyclic_type_param_locs: FlowOrdSet::new(),
+            recursive_type_param_locs: FlowOrdSet::new(),
             class_type_params: FlowOrdSet::new(),
             static_hidden_type_params: FlowOrdSet::new(),
             invalid_static_type_param_locs: FlowOrdSet::new(),
@@ -2103,18 +2105,10 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> WithBindings<ALoc, AbruptCompletion>
         visit: impl FnOnce(&mut Self) -> Result<T, AbruptCompletion>,
     ) -> Result<T, AbruptCompletion> {
         let analysis = analyze_type_params(tparams);
-        for component in analysis.components() {
-            if !component.cyclic {
-                continue;
-            }
-            let target = *component.members.first();
-            let reference_loc = component
-                .members
-                .iter()
-                .find_map(|source| analysis.dependencies[*source].get(&target))
-                .expect("cyclic component should have an edge to its first member")
-                .dupe();
-            for member in component.members {
+        let cycles = analysis.cycles();
+        for (members, reference_loc) in cycles.invalid {
+            let target = *members.first();
+            for member in members {
                 self.env_state
                     .cyclic_type_param_locs
                     .insert(tparams.params[member].name.loc.dupe());
@@ -2126,6 +2120,11 @@ impl<'a, Cx: Context, Fl: Flow<Cx = Cx>> WithBindings<ALoc, AbruptCompletion>
                     tparams.params[target].name.name.dupe(),
                 ))),
             );
+        }
+        for member in cycles.recursive {
+            self.env_state
+                .recursive_type_param_locs
+                .insert(tparams.params[member].name.loc.dupe());
         }
         visit(self)
     }
@@ -13390,6 +13389,7 @@ pub struct NameResolverResult {
     pub declare_class_interface_merge_conflicts: FlowOrdMap<ALoc, Vec<ALoc>>,
     pub invalid_type_param_default_locs: FlowOrdSet<ALoc>,
     pub cyclic_type_param_locs: FlowOrdSet<ALoc>,
+    pub recursive_type_param_locs: FlowOrdSet<ALoc>,
     pub invalid_static_type_param_locs: FlowOrdSet<ALoc>,
     pub declare_namespace_read_paths:
         FlowOrdMap<ALoc, FlowVector<env_api::DeclareNamespaceReadPathElement<ALoc>>>,
@@ -13415,6 +13415,7 @@ impl NameResolverResult {
             declare_class_interface_merge_conflicts: self.declare_class_interface_merge_conflicts,
             invalid_type_param_default_locs: Rc::new(self.invalid_type_param_default_locs),
             cyclic_type_param_locs: Rc::new(self.cyclic_type_param_locs),
+            recursive_type_param_locs: Rc::new(self.recursive_type_param_locs),
             invalid_static_type_param_locs: Rc::new(self.invalid_static_type_param_locs),
             declare_namespace_read_paths: self.declare_namespace_read_paths,
             declare_module_reads: self.declare_module_reads,
@@ -13548,6 +13549,7 @@ pub fn walk_with_prepass<Cx: Context, Fl: Flow<Cx = Cx>>(
         env_walk.declare_class_interface_merge_conflicts();
     let invalid_type_param_default_locs = env_walk.env_state.invalid_type_param_default_locs.dupe();
     let cyclic_type_param_locs = env_walk.env_state.cyclic_type_param_locs.dupe();
+    let recursive_type_param_locs = env_walk.env_state.recursive_type_param_locs.dupe();
     let invalid_static_type_param_locs = env_walk.env_state.invalid_static_type_param_locs.dupe();
     let declare_namespace_read_paths = env_walk
         .env_state
@@ -13572,6 +13574,7 @@ pub fn walk_with_prepass<Cx: Context, Fl: Flow<Cx = Cx>>(
             declare_class_interface_merge_conflicts,
             invalid_type_param_default_locs,
             cyclic_type_param_locs,
+            recursive_type_param_locs,
             invalid_static_type_param_locs,
             declare_namespace_read_paths,
             declare_module_reads,

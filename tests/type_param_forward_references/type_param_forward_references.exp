@@ -76,6 +76,135 @@ References:
                                                                       ^^^^^^^^^^ [2]
 
 
+Error ------------------------------------------------------------------------------------------------ consumer.js:28:43
+
+Cannot instantiate `ExportedNestedCycle` because in type argument `A` > array element: `number` [1] is not exactly the
+same as `Array<string>` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
+- Either make `Array<number>` [3] and `Array<Array<string>>` [4] exactly the same
+- Or make `Array<Array<string>>` [4] a `ReadonlyArray`.
+See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
+
+   consumer.js:28:43
+   28| const badNestedCycle: ExportedNestedCycle<number[], string[]> = [[1], ["bad"]]; // ERROR: number[] does not satisfy Array<string[]>, nor string[] Array<number[]>
+                                                 ^^^^^^ [1]
+
+References:
+   consumer.js:28:53
+   28| const badNestedCycle: ExportedNestedCycle<number[], string[]> = [[1], ["bad"]]; // ERROR: number[] does not satisfy Array<string[]>, nor string[] Array<number[]>
+                                                           ^^^^^^^^ [2]
+   consumer.js:28:43
+   28| const badNestedCycle: ExportedNestedCycle<number[], string[]> = [[1], ["bad"]]; // ERROR: number[] does not satisfy Array<string[]>, nor string[] Array<number[]>
+                                                 ^^^^^^^^ [3]
+   exporter.js:15:43
+   15| export type ExportedNestedCycle<A extends Array<B>, B extends Array<A>> = [A, B]; // OK: the bounds refer to each other through type arguments
+                                                 ^^^^^^^^ [4]
+
+
+Error ------------------------------------------------------------------------------------------------ consumer.js:28:53
+
+Cannot instantiate `ExportedNestedCycle` because in type argument `B` > array element: `string` [1] is not exactly the
+same as `Array<number>` [2]. [incompatible-type]
+
+The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
+- Either make `Array<string>` [3] and `Array<Array<number>>` [4] exactly the same
+- Or make `Array<Array<number>>` [4] a `ReadonlyArray`.
+See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
+
+   consumer.js:28:53
+   28| const badNestedCycle: ExportedNestedCycle<number[], string[]> = [[1], ["bad"]]; // ERROR: number[] does not satisfy Array<string[]>, nor string[] Array<number[]>
+                                                           ^^^^^^ [1]
+
+References:
+   consumer.js:28:43
+   28| const badNestedCycle: ExportedNestedCycle<number[], string[]> = [[1], ["bad"]]; // ERROR: number[] does not satisfy Array<string[]>, nor string[] Array<number[]>
+                                                 ^^^^^^^^ [2]
+   consumer.js:28:53
+   28| const badNestedCycle: ExportedNestedCycle<number[], string[]> = [[1], ["bad"]]; // ERROR: number[] does not satisfy Array<string[]>, nor string[] Array<number[]>
+                                                           ^^^^^^^^ [3]
+   exporter.js:15:63
+   15| export type ExportedNestedCycle<A extends Array<B>, B extends Array<A>> = [A, B]; // OK: the bounds refer to each other through type arguments
+                                                                     ^^^^^^^^ [4]
+
+
+Error ------------------------------------------------------------------------------------------------ consumer.js:47:13
+
+Cannot call `exportedMax` because in type argument `T`: `number` [1], a primitive, cannot be used as a subtype of
+`Comparable<number>` [2]. You can wrap it in `new Number(...))` to turn it into an object and attempt to use it as a
+subtype of an interface. [incompatible-type]
+
+   consumer.js:47:13
+   47| exportedMax(1, 2); // ERROR: number is not a Comparable<number>
+                   ^ [1]
+
+References:
+   exporter.js:25:47
+   25| export declare function exportedMax<T extends Comparable<T>>(a: T, b: T): T; // OK: the bound refers to T through a type argument
+                                                     ^^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ consumer.js:47:16
+
+Cannot call `exportedMax` because in type argument `T`: `number` [1], a primitive, cannot be used as a subtype of
+`Comparable<number>` [2]. You can wrap it in `new Number(...))` to turn it into an object and attempt to use it as a
+subtype of an interface. [incompatible-type]
+
+   consumer.js:47:16
+   47| exportedMax(1, 2); // ERROR: number is not a Comparable<number>
+                      ^ [1]
+
+References:
+   exporter.js:25:47
+   25| export declare function exportedMax<T extends Comparable<T>>(a: T, b: T): T; // OK: the bound refers to T through a type argument
+                                                     ^^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ consumer.js:51:53
+
+Cannot instantiate `ExportedSelfBound` because in type argument `T` > array element: `number` [1] is incompatible with
+`ReadonlyArray<number>` [2]. [incompatible-type]
+
+   consumer.js:51:53
+   51| const badSelfBound: ExportedSelfBound<ReadonlyArray<number>> = []; // ERROR: number does not satisfy ReadonlyArray<number>
+                                                           ^^^^^^ [1]
+
+References:
+   consumer.js:51:39
+   51| const badSelfBound: ExportedSelfBound<ReadonlyArray<number>> = []; // ERROR: number does not satisfy ReadonlyArray<number>
+                                             ^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- event_map.js:27:17
+
+Cannot call `local.listeners` because in type argument `E`: property `bar` is missing in `{foo: [number]}` [1].
+[prop-missing]
+
+   event_map.js:27:17
+   27| local.listeners('bar'); // ERROR
+                       ^^^^^
+
+References:
+   event_map.js:24:35
+   24| declare const local: EventEmitter<{foo: [number]}>;
+                                         ^^^^^^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------- event_map_consumer.js:9:19
+
+Cannot call `emitter.listeners` because in type argument `E`: property `bar` is missing in `{foo: [number]}` [1].
+[prop-missing]
+
+   event_map_consumer.js:9:19
+   9| emitter.listeners('bar'); // ERROR
+                        ^^^^^
+
+References:
+   event_map_consumer.js:6:37
+   6| declare const emitter: EventEmitter<{foo: [number]}>;
+                                          ^^^^^^^^^^^^^^^ [1]
+
+
 Error ------------------------------------------------------------------------------------------------- exporter.js:7:51
 
 Cannot use variable `B` [1] because the declaration either comes later or was skipped. [reference-before-declaration]
@@ -124,14 +253,6 @@ Invalid trivially recursive definition of `A`.  [recursive-definition]
 
    13| export type ExportedCycle<A extends B, B extends A> = [A, B]; // ERROR: circular bounds
                                                         ^
-
-
-Error ------------------------------------------------------------------------------------------------ exporter.js:15:69
-
-Invalid trivially recursive definition of `A`.  [recursive-definition]
-
-   15| export type ExportedNestedCycle<A extends Array<B>, B extends Array<A>> = [A, B]; // ERROR: nested circular bounds
-                                                                           ^
 
 
 Error ------------------------------------------------------------------------------------------------ exporter.js:17:49
@@ -341,22 +462,6 @@ Invalid trivially recursive definition of `A`.  [recursive-definition]
                                 ^
 
 
-Error --------------------------------------------------------------------------------------------------- local.js:33:54
-
-Invalid trivially recursive definition of `A`.  [recursive-definition]
-
-   33| type NestedCycle<A extends Array<B>, B extends Array<A>> = [A, B]; // ERROR: nested circular bounds
-                                                            ^
-
-
-Error --------------------------------------------------------------------------------------------------- local.js:35:38
-
-Invalid trivially recursive definition of `A`.  [recursive-definition]
-
-   35| type NestedSelfBound<A extends Array<A>> = A; // ERROR: nested circular bound
-                                            ^
-
-
 Error --------------------------------------------------------------------------------------------------- local.js:39:13
 
 Invalid trivially recursive definition of `A`.  [recursive-definition]
@@ -413,6 +518,247 @@ References:
                       ^^^^^^ [2]
 
 
+Error ----------------------------------------------------------------------------------------------- recursive.js:11:10
+
+Cannot return `x` because `Array<T>` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   recursive.js:11:10
+   11|   return x; // ERROR
+                ^
+
+References:
+   recursive.js:10:45
+   10| function arrayToSelf<T extends Array<T>>(x: Array<T>): T {
+                                                   ^^^^^^^^ [1]
+   recursive.js:10:56
+   10| function arrayToSelf<T extends Array<T>>(x: Array<T>): T {
+                                                              ^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- recursive.js:20:10
+
+Cannot return `a` because `ReadonlyArray<B>` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   recursive.js:20:10
+   20|   return a; // ERROR
+                ^
+
+References:
+   recursive.js:19:79
+   19| function mutualBad<A extends ReadonlyArray<B>, B extends ReadonlyArray<A>>(a: A): B {
+                                                                                     ^ [1]
+   recursive.js:19:83
+   19| function mutualBad<A extends ReadonlyArray<B>, B extends ReadonlyArray<A>>(a: A): B {
+                                                                                         ^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ recursive.js:34:5
+
+Cannot call `max` because: [incompatible-type]
+ - in type argument `T`: `Bad` [1] is incompatible with `Comparable` [2]
+    - in property `compareTo` > the first parameter: `string` [3] is incompatible with `Bad` [1]
+
+   recursive.js:34:5
+   34| max(new Bad(), new Bad()); // ERROR
+           ^^^^^^^^^ [1]
+
+References:
+   recursive.js:26:32
+   26| declare function max<T extends Comparable<T>>(a: T, b: T): T;
+                                      ^^^^^^^^^^^^^ [2]
+   recursive.js:31:20
+   31|   compareTo(other: string): number;
+                          ^^^^^^ [3]
+
+
+Error ------------------------------------------------------------------------------------------------ recursive.js:34:5
+
+Cannot call `max` because: [incompatible-type]
+ - in type argument `T`: `Bad` [1] is incompatible with `Comparable` [2]
+    - in property `compareTo` > the first parameter: `string` [3] is incompatible with `Bad` [4]
+
+   recursive.js:34:5
+   34| max(new Bad(), new Bad()); // ERROR
+           ^^^^^^^^^ [1]
+
+References:
+   recursive.js:26:32
+   26| declare function max<T extends Comparable<T>>(a: T, b: T): T;
+                                      ^^^^^^^^^^^^^ [2]
+   recursive.js:31:20
+   31|   compareTo(other: string): number;
+                          ^^^^^^ [3]
+   recursive.js:34:16
+   34| max(new Bad(), new Bad()); // ERROR
+                      ^^^^^^^^^ [4]
+
+
+Error ----------------------------------------------------------------------------------------------- recursive.js:39:13
+
+Cannot call `strings` because in type argument `T` > property `a`: `number` [1] is not exactly the same as `string` [2].
+[incompatible-type]
+
+The above-mentioned two types must be the same because property `a` is invariantly typed. To fix the error,
+- Either annotate object literal [3] with `{a: string}` [4]
+- Or make property `a` in `{a: string}` [5] readonly. See
+https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+
+   recursive.js:39:13
+   39| strings({a: 1}); // ERROR
+                   ^ [1]
+
+References:
+   recursive.js:36:67
+   36| type RecordOf<K extends string | number | symbol, V> = {[P in K]: V};
+                                                                         ^ [2]
+   recursive.js:39:9
+   39| strings({a: 1}); // ERROR
+               ^^^^^^ [3]
+   recursive.js:36:56
+   36| type RecordOf<K extends string | number | symbol, V> = {[P in K]: V};
+                                                              ^^^^^^^^^^^^^ [4]
+   recursive.js:37:36
+   37| declare function strings<T extends RecordOf<keyof T, string>>(x: T): T;
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^ [5]
+
+
+Error ------------------------------------------------------------------------------------------------ recursive.js:48:3
+
+Cannot cast `a` to `ReadonlyArray<ReadonlyArray<ReadonlyArray<ReadonlyArray<B>>>>` because in array element > array
+element > array element > array element: `ReadonlyArray<B>` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   recursive.js:48:3
+   48|   a as ReadonlyArray<ReadonlyArray<ReadonlyArray<ReadonlyArray<B>>>>; // ERROR
+         ^
+
+References:
+   recursive.js:45:27
+   45|   D extends ReadonlyArray<A>,
+                                 ^ [1]
+   recursive.js:48:64
+   48|   a as ReadonlyArray<ReadonlyArray<ReadonlyArray<ReadonlyArray<B>>>>; // ERROR
+                                                                      ^ [2]
+
+
+Error ------------------------------------------------------------------------------------------------ recursive.js:53:3
+
+Cannot cast `x[0][0][0][0][0]` to `T` because `ReadonlyArray<T>` [1] is incompatible with `empty` [2].
+[incompatible-type]
+
+   recursive.js:53:3
+   53|   x[0][0][0][0][0] as T; // ERROR
+         ^^^^^^^^^^^^^^^^
+
+References:
+   recursive.js:51:53
+   51| function deep<T extends ReadonlyArray<ReadonlyArray<ReadonlyArray<T>>>>(x: T): void {
+                                                           ^^^^^^^^^^^^^^^^ [1]
+   recursive.js:53:23
+   53|   x[0][0][0][0][0] as T; // ERROR
+                             ^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- recursive.js:61:31
+
+Cannot instantiate `TreeNode` because in type argument `T`: `number` [1] is incompatible with `TreeNode<number>` [2].
+[incompatible-type]
+
+   recursive.js:61:31
+   61| declare var badTree: TreeNode<number>; // ERROR
+                                     ^^^^^^ [1]
+
+References:
+   recursive.js:56:34
+   56| declare class TreeNode<T extends TreeNode<T>> {
+                                        ^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- recursive.js:73:12
+
+Cannot call `nodeSchema` because in type argument `N`: `{[key: string]: number}` [1] is incompatible with `empty` [2].
+[incompatible-type]
+
+   recursive.js:73:12
+   73| nodeSchema<{[key: string]: number}>(); // ERROR
+                  ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+References:
+   recursive.js:71:39
+   71| declare function nodeSchema<N extends Checkable<N>>(): void;
+                                             ^^^^^^^^^^^^ [2]
+
+
+Error ----------------------------------------------------------------------------------------------- recursive.js:80:26
+
+Invalid trivially recursive definition of `T`.  [recursive-definition]
+
+   80| function union<T extends T | string>(): void {} // ERROR
+                                ^
+
+
+Error ----------------------------------------------------------------------------------------------- recursive.js:81:28
+
+Invalid trivially recursive definition of `T`.  [recursive-definition]
+
+   81| function indexed<T extends T[keyof T]>(): void {} // ERROR
+                                  ^
+
+
+Error ----------------------------------------------------------------------------------------------- recursive.js:82:31
+
+Invalid trivially recursive definition of `T`.  [recursive-definition]
+
+   82| function spread<T extends {...T}>(): void {} // ERROR
+                                     ^
+
+
+Error ----------------------------------------------------------------------------------------------- recursive.js:84:22
+
+Invalid trivially recursive definition of this type.  [recursive-definition]
+
+   84| function aliasedSelf<T extends Id<T>>(x: T): void { // ERROR
+                            ^
+
+
+Error ----------------------------------------------------------------------------------------------- recursive.js:92:17
+
+Invalid trivially recursive definition of this type.  [recursive-definition]
+
+   92| function mapped<T extends {[K in keyof T]: string}>(): void {} // ERROR
+                       ^
+
+
+Error ----------------------------------------------------------------------------------------------- recursive.js:98:12
+
+Cannot access `{next: T}` [1] with computed property using `keyof T` [2]. [invalid-computed-prop]
+
+   recursive.js:98:12
+   98|   return t[k]; // ERROR, which TypeScript accepts, as for a type parameter without a bound
+                  ^
+
+References:
+   recursive.js:97:46
+   97| function indexByKeys<T extends {next: T}>(t: T, k: keyof T): unknown {
+                                                    ^ [1]
+   recursive.js:97:52
+   97| function indexByKeys<T extends {next: T}>(t: T, k: keyof T): unknown {
+                                                          ^^^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------- recursive.js:101:10
+
+Cannot return `'next'` because `"next"` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   recursive.js:101:10
+   101|   return 'next'; // ERROR, which TypeScript accepts, as for a type parameter without a bound
+                 ^^^^^^ [1]
+
+References:
+   recursive.js:100:51
+   100| function keyOfBound<T extends {next: T}>(): keyof T {
+                                                          ^ [2]
+
+
 Error ----------------------------------------------------------------------------------------------- subtyping.js:22:57
 
 Cannot assign `polyBounded` to `looserTarget` because `unknown` [1] is incompatible with `string` [2].
@@ -447,4 +793,4 @@ References:
 
 
 
-Found 35 errors
+Found 55 errors

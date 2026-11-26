@@ -1289,6 +1289,7 @@ pub fn type_param_default<'cx, A, M: TypeMapper<'cx, A> + ?Sized>(
             default: default_prime,
             is_this: t.is_this,
             is_const: t.is_const,
+            recursive: t.recursive,
         })
     }
 }

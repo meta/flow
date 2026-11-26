@@ -368,7 +368,7 @@ fn passes_through(d: &Destructor) -> bool {
 /// holds whatever the type argument.
 fn mk_marker<'cx>(cx: &mut Context<'cx>, tparam: &TypeParam) -> (SubstName, Type) {
     let name = SubstName::id(mk_id() as i32, tparam.name.string_of_subst_name().dupe());
-    let id = cx.make_generic_id(name.dupe(), tparam.reason.loc());
+    let id = cx.make_generic_id(name.dupe(), tparam.reason.loc(), false);
     let t = Type::new(TypeInner::GenericT(Box::new(GenericTData {
         reason: tparam.reason.dupe(),
         name: name.dupe(),
@@ -2881,7 +2881,7 @@ impl<'e> Walker<'e> {
     ) -> Result<Option<Type>, FlowJsException> {
         let reason = type_util::reason_of_t(t).dupe();
         let name = SubstName::id(mk_id() as i32, FlowSmolStr::new("E"));
-        let id = cx.make_generic_id(name.dupe(), reason.loc());
+        let id = cx.make_generic_id(name.dupe(), reason.loc(), false);
         let elem = Type::new(TypeInner::GenericT(Box::new(GenericTData {
             reason: reason.dupe(),
             name: name.dupe(),

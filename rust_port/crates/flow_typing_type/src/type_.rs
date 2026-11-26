@@ -6984,6 +6984,9 @@ pub struct TypeParamInner {
     pub default: Option<Type>,
     pub is_this: bool,
     pub is_const: bool,
+    /// Whether the bound refers to the parameter, directly or through a sibling, as the bound of
+    /// `T` in `<T extends Comparable<T>>` does.
+    pub recursive: bool,
 }
 
 #[derive(Debug, Clone, Dupe, PartialEq, Eq, PartialOrd, Ord, Hash)]

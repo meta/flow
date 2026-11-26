@@ -32,6 +32,7 @@ use flow_typing_type::type_::ConcretizeTData;
 use flow_typing_type::type_::DerivedReference;
 use flow_typing_type::type_::EvalTypeDestructorTData;
 use flow_typing_type::type_::GenericTData;
+use flow_typing_type::type_::HasOwnPropTData;
 use flow_typing_type::type_::ImplicitInstantiationTvarData;
 use flow_typing_type::type_::LookupActionMatchPropData;
 use flow_typing_type::type_::LookupDefaultResult;
@@ -497,8 +498,9 @@ fn is_concrete(t: &Type) -> bool {
     }
 }
 
-/// `keyof t` when `t` is a type parameter whose bound is not an object: as in TypeScript, a
-/// generic of its own, bounded by `string | number | symbol`.
+/// `keyof t` when `t` is a type parameter whose bound cannot stand for its keys: a bound that is
+/// not an object, or one that refers to the parameter, whose keys it is made from. As in
+/// TypeScript, a generic of its own, bounded by `string | number | symbol`.
 fn keys_of_type_param<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
@@ -529,7 +531,7 @@ fn keys_of_type_param<'cx>(
     let Some(id) = GenericId::make_op_id(subst_name::OpKind::Keys, vec![param.clone()]) else {
         return Ok(None);
     };
-    if !dispatch::is_not_object(cx, env, keys_reason, &t)? {
+    if !param.generic.recursive && !dispatch::is_not_object(cx, env, keys_reason, &t)? {
         return Ok(None);
     }
     let name = SubstName::name(format!("keyof {}", name.string_of_subst_name()).into());
@@ -1248,6 +1250,17 @@ pub(super) fn handle_bounded<'cx>(
         {
             let l = make_generic(bound.dupe());
             rec_flow_t(cx, env, trace, use_op.dupe(), (&l, &keys))?;
+            Ok(true)
+        }
+        // A key is a key of a generic whose keys are a generic of their own if it is one of those.
+        UseTInner::HasOwnPropT(
+            deref!(HasOwnPropTData {
+                use_op,
+                type_: key,
+                ..
+            }),
+        ) if let Some(keys) = keys_of_type_param(cx, env, reason, &make_generic(bound.dupe()))? => {
+            rec_flow_t(cx, env, trace, use_op.dupe(), (key, &keys))?;
             Ok(true)
         }
         UseTInner::UseT(_, t) if matches!(t.deref(), TypeInner::KeysT(..)) => {

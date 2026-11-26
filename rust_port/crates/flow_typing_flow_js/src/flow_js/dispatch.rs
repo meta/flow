@@ -27,6 +27,7 @@ use flow_typing_errors::error_message::EnumModificationData;
 use flow_typing_errors::error_message::EnumReferenceData;
 use flow_typing_errors::error_message::IncompatibleUpperData;
 use flow_typing_flow_common::flow_js_utils::get_prop_t_kit::IndexerFallbackMode;
+use flow_typing_flow_common::flow_js_utils::instantiation_kit::TypeArgCheck;
 use flow_typing_flow_js_env::FlowJsEnv;
 use flow_typing_implicit_instantiation_check::ImplicitInstantiationCheck;
 use flow_typing_implicit_instantiation_check::MethodOptionalChain;
@@ -4870,6 +4871,7 @@ fn __flow_impl<'cx>(
                         default: tparam.default.dupe(),
                         is_this: tparam.is_this,
                         is_const: tparam.is_const,
+                        recursive: tparam.recursive,
                     })
                 })
                 .collect();
@@ -5505,22 +5507,19 @@ fn __flow_impl<'cx>(
                 ..
             })),
         ) => {
-            let targs: Vec<Targ> = ids
-                .iter()
-                .map(|tparam| Targ::ExplicitArg(tparam.bound.dupe()))
-                .collect();
-            let t_ = instantiation_helpers::instantiate_with_targs(
+            let ids = Vec1::try_from_vec(ids.to_vec()).unwrap();
+            let targs = ids.iter().map(|tparam| tparam.bound.dupe()).collect();
+            let (t_, _) = flow_js_utils::instantiation_kit::instantiate_poly_with_targs::<FlowJs>(
                 cx,
                 env,
                 trace,
                 use_op.dupe(),
                 reason_op,
                 reason_tapp,
-                (
-                    tparams_loc.dupe(),
-                    Vec1::try_from_vec(ids.to_vec()).unwrap(),
-                    t.dupe(),
-                ),
+                TypeArgCheck::Bounds,
+                tparams_loc.dupe(),
+                &ids,
+                t.dupe(),
                 targs,
             )?;
             rec_flow(cx, env, trace, (&t_, u))?;
@@ -5550,15 +5549,17 @@ fn __flow_impl<'cx>(
             let use_op = use_op_of_use_t(u).unwrap_or_else(unknown_use);
             let ids = Vec1::try_from_vec(ids.to_vec()).unwrap();
             let targs = flow_js_utils::instantiate_poly_param_upper_bounds(cx, &ids);
-            let (t_, _) = FlowJs::instantiate_poly_with_targs_with_env(
+            let (t_, _) = flow_js_utils::instantiation_kit::instantiate_poly_with_targs::<FlowJs>(
                 cx,
                 env,
                 trace,
                 use_op,
                 &reason_op,
                 reason_tapp,
-                None,
-                (tparams_loc.dupe(), ids, t.dupe()),
+                TypeArgCheck::Bounds,
+                tparams_loc.dupe(),
+                &ids,
+                t.dupe(),
                 targs,
             )?;
             rec_flow(cx, env, trace, (&t_, u))?;

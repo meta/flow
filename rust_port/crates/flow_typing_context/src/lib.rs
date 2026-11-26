@@ -3251,8 +3251,8 @@ impl<'a> Context<'a> {
         ALocId::of_aloc(aloc, move || LazyCell::force(&*table).dupe())
     }
 
-    pub fn make_generic_id(&self, name: SubstName, loc: &ALoc) -> GenericId {
-        GenericId::make_bound_id(self.make_aloc_id(loc), name)
+    pub fn make_generic_id(&self, name: SubstName, loc: &ALoc, recursive: bool) -> GenericId {
+        GenericId::make_bound_id(self.make_aloc_id(loc), name, recursive)
     }
 
     pub fn generate_property_map(

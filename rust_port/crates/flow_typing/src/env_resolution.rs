@@ -11,6 +11,7 @@
 //! predicate function resolution, and component resolution in the name definition
 //! ordering graph.
 
+use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::ops::Deref;
@@ -3533,6 +3534,7 @@ fn resolve_component_type_params<'cx>(
                     default: None,
                     is_this: false,
                     is_const: false,
+                    recursive: false,
                 });
                 cx.environment_mut().tparams.insert(
                     env_api::EnvKey::ordinary(loc.dupe()),
@@ -3554,6 +3556,7 @@ fn resolve_component_type_params<'cx>(
                     default: None,
                     is_this: true,
                     is_const: false,
+                    recursive: false,
                 });
                 cx.environment_mut().tparams.insert(
                     env_api::EnvKey::ordinary(loc.dupe()),
@@ -3575,6 +3578,7 @@ fn resolve_component_type_params<'cx>(
                     default: None,
                     is_this: true,
                     is_const: false,
+                    recursive: false,
                 });
                 cx.environment_mut().tparams.insert(
                     env_api::EnvKey::ordinary(loc.dupe()),
@@ -3586,23 +3590,52 @@ fn resolve_component_type_params<'cx>(
     };
 
     let cyclic_type_param_locs = cx.environment().var_info.cyclic_type_param_locs.dupe();
-    let seed_cyclic_type_param = |cx: &mut Context<'cx>, elt: &name_def_ordering::Element| {
+    let recursive_type_param_locs = cx.environment().var_info.recursive_type_param_locs.dupe();
+    let mut recursive_bounds = Vec::new();
+    let mut seed_type_param = |cx: &mut Context<'cx>, elt: &name_def_ordering::Element| {
         let key = match elt {
             name_def_ordering::Element::Normal(key)
             | name_def_ordering::Element::Resolvable(key) => key,
             name_def_ordering::Element::Illegal(_) => return,
         };
-        if cyclic_type_param_locs.contains(&key.loc)
-            && let Some(def_data) = graph.get(key)
-        {
+        let Some(def_data) = graph.get(key) else {
+            return;
+        };
+        if cyclic_type_param_locs.contains(&key.loc) {
             resolve_illegal(cx, key.loc.dupe(), def_data);
+        } else if recursive_type_param_locs.contains(&key.loc)
+            && let (
+                Def::TypeParam(
+                    deref!(TypeParamData {
+                        tparam: (_, tparam),
+                        ..
+                    }),
+                ),
+                _,
+                _,
+                _,
+                _,
+            ) = def_data
+        {
+            let name = SubstName::name(tparam.name.name.dupe());
+            let reason = reason::mk_annot_reason(
+                reason::VirtualReasonDesc::RType(tparam.name.name.dupe()),
+                tparam.name.loc.dupe(),
+            );
+            let bound = Rc::new(RefCell::new(None));
+            let tp = flow_js::FlowJs::mk_recursive_tparam(cx, reason, name.dupe(), bound.dupe());
+            let t = flow_js_utils::generic_of_tparam(cx, |_, x: &Type| x.dupe(), &tp);
+            cx.environment_mut()
+                .tparams
+                .insert(env_api::EnvKey::ordinary(key.loc.dupe()), (name, tp, t));
+            recursive_bounds.push((key.loc.dupe(), bound));
         }
     };
     match component {
-        name_def_ordering::OrderingResult::Singleton(elt) => seed_cyclic_type_param(cx, elt),
+        name_def_ordering::OrderingResult::Singleton(elt) => seed_type_param(cx, elt),
         name_def_ordering::OrderingResult::ResolvableSCC(elts) => {
             for elt in elts.iter() {
-                seed_cyclic_type_param(cx, elt);
+                seed_type_param(cx, elt);
             }
         }
         name_def_ordering::OrderingResult::IllegalSCC(_) => {}
@@ -3650,6 +3683,14 @@ fn resolve_component_type_params<'cx>(
                 resolve_element(cx, elt)?;
             }
         }
+    }
+    for (loc, bound) in recursive_bounds {
+        let tparam_bound = cx
+            .environment()
+            .tparams
+            .get_ordinary(&loc)
+            .map(|(_, tparam, _)| tparam.bound.dupe());
+        *bound.borrow_mut() = tparam_bound;
     }
     Ok(())
 }

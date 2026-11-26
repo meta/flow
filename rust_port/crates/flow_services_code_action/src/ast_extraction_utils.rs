@@ -70,6 +70,7 @@ pub mod insertion_point_collectors {
             default,
             is_this: false,
             is_const: tparam.const_.is_some(),
+            recursive: false,
         })
     }
 
@@ -104,6 +105,7 @@ pub mod insertion_point_collectors {
             default: None,
             is_this: true,
             is_const: false,
+            recursive: false,
         })
     }
 

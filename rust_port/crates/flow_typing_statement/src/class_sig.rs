@@ -1211,6 +1211,7 @@ pub fn mk_this<'a>(self_: Type, cx: &mut Context<'a>, reason: Reason) -> (TypePa
         default: None,
         is_this: true,
         is_const: false,
+        recursive: false,
     });
     let generic = flow_js_utils::generic_of_tparam(cx, |_, x: &Type| x.dupe(), &this_tp);
     (this_tp, generic)

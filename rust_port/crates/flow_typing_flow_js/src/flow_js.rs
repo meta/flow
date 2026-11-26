@@ -18,6 +18,7 @@
 //! subtyping. This process continues till a fixpoint is reached---which itself
 //! is guaranteed to exist, and is usually reached in very few steps.
 
+use std::cell::RefCell;
 use std::collections::BTreeSet;
 use std::ops::Deref;
 use std::rc::Rc;
@@ -92,6 +93,7 @@ use flow_typing_type::type_::FunParam;
 use flow_typing_type::type_::FunRestParam;
 use flow_typing_type::type_::FunType;
 use flow_typing_type::type_::FuncallType;
+use flow_typing_type::type_::GenericTData;
 use flow_typing_type::type_::GetEnumKind;
 use flow_typing_type::type_::GetPrivatePropTData;
 use flow_typing_type::type_::GetPropTData;
@@ -1195,6 +1197,63 @@ impl FlowJs {
             flow_js_utils::flow_js_result_to_job_error(Self::infer_type_implied_bound(
                 cx, &reason, &name, &extends_t,
             ))
+        })
+    }
+
+    /// The type parameter named `name` whose bound refers to the parameter itself through deferred
+    /// positions, as `T` in `<T extends Array<T>>`, for the references in bounds made before its
+    /// own. Its bound is a type variable resolved lazily to the type that `bound` holds once that
+    /// bound is made, and forced once the component that makes it is resolved, before anything
+    /// looks into the bound. Like a reference to a recursive type alias, resolving it looks into
+    /// the bound, and into the bounds of the type parameters it is, so a bound that needs itself to
+    /// be looked into, as `T extends Get<T>` with `type Get<X> = X['a']`, or that is a parameter of
+    /// its own cycle, as `T extends Id<T>` with `type Id<X> = X`, is a trivially recursive
+    /// definition.
+    pub fn mk_recursive_tparam<'cx>(
+        cx: &mut Context<'cx>,
+        reason: Reason,
+        name: SubstName,
+        bound: Rc<RefCell<Option<Type>>>,
+    ) -> TypeParam {
+        let bound_reason = reason.dupe();
+        let bound = flow_typing_tvar::mk_fully_resolved_lazy(cx, reason.dupe(), true, move |cx| {
+            let Some(bound) = bound.borrow().dupe() else {
+                return Ok(cx.on_cyclic_tvar_error(bound_reason));
+            };
+            let mut pending = flow_js_utils::flow_js_result_to_job_error(
+                Self::possible_concrete_types_for_inspection(cx, &bound_reason, &bound),
+            )?;
+            let mut seen = BTreeSet::new();
+            while let Some(t) = pending.pop() {
+                if let TypeInner::GenericT(
+                    deref!(GenericTData {
+                        id,
+                        bound: generic_bound,
+                        ..
+                    }),
+                ) = t.deref()
+                    && seen.insert(id.clone())
+                {
+                    pending.extend(flow_js_utils::flow_js_result_to_job_error(
+                        Self::possible_concrete_types_for_inspection(
+                            cx,
+                            &bound_reason,
+                            generic_bound,
+                        ),
+                    )?);
+                }
+            }
+            Ok(bound)
+        });
+        TypeParam::new(TypeParamInner {
+            reason,
+            name,
+            bound,
+            polarity: None,
+            default: None,
+            is_this: false,
+            is_const: false,
+            recursive: true,
         })
     }
 

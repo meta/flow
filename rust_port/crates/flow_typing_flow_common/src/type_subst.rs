@@ -863,6 +863,7 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
                                     default,
                                     is_this: typeparam.is_this,
                                     is_const: typeparam.is_const,
+                                    recursive: typeparam.recursive,
                                 }));
                             } else {
                                 xs_new.push(typeparam.dupe());
@@ -878,6 +879,7 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
                                 default,
                                 is_this: typeparam.is_this,
                                 is_const: typeparam.is_const,
+                                recursive: typeparam.recursive,
                             }));
                             xs_new = Some(new_xs);
                         }
@@ -1157,6 +1159,7 @@ impl<'cx> TypeMapper<'cx, MapCx> for Substituter {
                         default: typeparam.default.dupe(),
                         is_this: typeparam.is_this,
                         is_const: typeparam.is_const,
+                        recursive: typeparam.recursive,
                     }));
                 }
                 let extends_t_prime = self.type_(

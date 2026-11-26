@@ -3396,7 +3396,7 @@ where
 
     let param_loc = tparam.reason.loc().dupe();
     let bound = f(cx, &tparam.bound);
-    let id = cx.make_generic_id(tparam.name.dupe(), &param_loc);
+    let id = cx.make_generic_id(tparam.name.dupe(), &param_loc, tparam.recursive);
 
     let bound = mod_reason_of_t(
         &|bound_reason: Reason| {
@@ -4387,7 +4387,7 @@ pub fn fix_this_instance<'cx>(
     );
     let this_generic = if is_this {
         Type::new(TypeInner::GenericT(Box::new(GenericTData {
-            id: cx.make_generic_id(this_name.dupe(), reason_i.def_loc()),
+            id: cx.make_generic_id(this_name.dupe(), reason_i.def_loc(), false),
             reason,
             name: this_name.dupe(),
             bound: this,
@@ -4492,6 +4492,11 @@ pub mod instantiation_kit {
         /// written with this strictness. Its arguments are checked where it is written, with
         /// `validate_type_args`, so expanding it does not check them again.
         TypeApp(poly::Id, TypeStrictnessKind),
+        /// Not at all: the type arguments are the bounds of the type parameters, which stand in
+        /// for arguments that nothing constrains, as when the statics of a polymorphic class are
+        /// read. The bound of a parameter that refers to the parameter does not satisfy itself,
+        /// e.g. `Comparable<T>` is no `Comparable<Comparable<T>>` for `T extends Comparable<T>`.
+        Bounds,
         /// Bounds are checked by subtyping.
         Subtype,
         /// Bounds are checked by unification.
@@ -4536,7 +4541,7 @@ pub mod instantiation_kit {
                 t,
                 strictness_kind,
             ),
-            TypeArgCheck::Subtype | TypeArgCheck::Unify => subst(
+            TypeArgCheck::Bounds | TypeArgCheck::Subtype | TypeArgCheck::Unify => subst(
                 cx,
                 Some(use_op),
                 true,
@@ -4679,7 +4684,7 @@ pub mod instantiation_kit {
         use flow_typing_type::type_::VirtualFrameUseOp;
 
         let unify = match check {
-            TypeArgCheck::TypeApp(..) => return Ok(()),
+            TypeArgCheck::TypeApp(..) | TypeArgCheck::Bounds => return Ok(()),
             TypeArgCheck::Subtype => false,
             TypeArgCheck::Unify => true,
         };
