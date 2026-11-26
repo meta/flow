@@ -18,7 +18,7 @@ size(true);    // Error!
 
 ## When to use this {#toc-when-to-use}
 
-Use unions when a value can be one of several types, such as a function that handles different kinds of events or responses. For unions of string or number literals (e.g. `'success' | 'error'`), consider using [Flow Enums](../enums/index.md) instead, which provide exhaustiveness checking and a more structured API. If you need a nullable type, use the [maybe type](./maybe.md) shorthand `?T` rather than writing `T | null | void`. For values that must satisfy multiple types at once rather than one of them, use [intersections](./intersections.md) instead.
+Use unions when a value can be one of several types, such as a function that handles different kinds of events or responses. For unions of string or number literals (e.g. `'success' | 'error'`), consider using [Flow Enums](../enums/index.md) instead, which provide exhaustiveness checking and a more structured API. If you need a nullable type, use the [maybe type](./maybe.md) shorthand `?T` rather than writing `T | null | undefined`. For values that must satisfy multiple types at once rather than one of them, use [intersections](./intersections.md) instead.
 
 ## Union type syntax {#toc-union-type-syntax}
 
@@ -52,7 +52,7 @@ If you have enabled [Flow Enums](../enums/index.md), they may be an alternative 
 
 ## Union shorthands
 
-The union of some type `T` with `null` or `void` is common, so we provide a shorthand called [maybe types](./maybe.md), by using the `?` prefix. The type `?T` is equivalent to `T | null | void`:
+The union of some type `T` with `null` or `undefined` is common, so we provide a shorthand called [maybe types](./maybe.md), by using the `?` prefix. The type `?T` is equivalent to `T | null | undefined`:
 
 ```js flow-check
 function maybeString(x: ?string) { /* ... */ }
@@ -329,7 +329,7 @@ prettyPrint("currency", true); // ERROR - wrong type arg
 
 - [Intersections](./intersections.md) — the dual of unions: values that are *all of* a set of types
 - [Refinements](../lang/refinements.md) — how to narrow union types to specific members
-- [Maybe Types](./maybe.md) — shorthand for `T | null | void`
+- [Maybe Types](./maybe.md) — shorthand for `T | null | undefined`
 - [Literal Types](./literals.md) — using specific values as types, commonly combined with unions
 - [Flow Enums](../enums/index.md) — a structured alternative to unions of literal types
 - [Match Expressions](../match/index.md) — pattern matching for exhaustively handling union members

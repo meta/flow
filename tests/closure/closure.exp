@@ -219,7 +219,7 @@ Cannot resolve name `x`. [cannot-resolve-name]
 
 Error ----------------------------------------------------------------------------------------- callback_writes.js:20:15
 
-Cannot assign object literal to `initialState` because in property `field.data`: `void` [1] is incompatible with
+Cannot assign object literal to `initialState` because in property `field.data`: `undefined` [1] is incompatible with
 `string` [2]. [incompatible-type]
 
 All writes to `initialState` must be compatible with the type of its initial assignment [3]. Add an annotation to
@@ -266,7 +266,7 @@ References:
 Error ----------------------------------------------------------------------------------------- callback_writes.js:28:21
 
 Cannot cast `withDefaults(...)` to `(args: {b: string}) => () => string` because in the return value > the return value:
-`void` [1] is incompatible with `string` [2]. [incompatible-type]
+`undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    callback_writes.js:28:21
    28|   ({a, b}) => () => b,
@@ -331,7 +331,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- const.js:20:38
 
-Cannot assign `var_x` to `y` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot assign `var_x` to `y` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    const.js:20:38
    20|     call_me = () => { var y:number = var_x; };  // error

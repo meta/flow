@@ -394,7 +394,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- this_subst.js:1:23
 
-Cannot extend `void` [1] with `InstrumentedContainer` [2] because `void` [1] is not inheritable. [incompatible-use]
+Cannot extend `undefined` [1] with `InstrumentedContainer` [2] because `undefined` [1] is not inheritable.
+[incompatible-use]
 
    this_subst.js:1:23
    1| var container = class InstrumentedContainer extends container {

@@ -91,7 +91,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- finally-jumps.js:23:12
 
-Cannot get `x.length` because property `length` is missing in `void` [1]. [incompatible-use]
+Cannot get `x.length` because property `length` is missing in `undefined` [1]. [incompatible-use]
 
    finally-jumps.js:23:12
    23|   return x.length; // error

@@ -19,9 +19,9 @@ class A {}
 '' as $Exact<string>;
 true as $Exact<boolean>;
 new A() as $Exact<A>;
-(() => {}) as $Exact<() => {}>;
+((): undefined => {}) as $Exact<() => {}>;
 
-let foo = () => {};
-(() => {}) as $Exact<typeof foo>;
+let foo = (): undefined => {};
+((): undefined => {}) as $Exact<typeof foo>;
 let bar = new A();
 new A() as $Exact<typeof bar>;

@@ -45,7 +45,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------------- B.js:4:28
 
-Cannot assign `React.unstable_AsyncMode` to `AsyncMode` because `void` [1] is incompatible with `boolean` [2].
+Cannot assign `React.unstable_AsyncMode` to `AsyncMode` because `undefined` [1] is incompatible with `boolean` [2].
 [incompatible-type]
 
    B.js:4:28

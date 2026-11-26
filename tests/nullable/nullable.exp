@@ -14,7 +14,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- error.js:8:8
 
-Cannot cast `any` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `any` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    error.js:8:8
    8| any as ?number as number;
@@ -28,7 +28,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- error.js:9:8
 
-Cannot cast `any` to `null` because `void` [1] is incompatible with `null` [2]. [incompatible-type]
+Cannot cast `any` to `null` because `undefined` [1] is incompatible with `null` [2]. [incompatible-type]
 
    error.js:9:8
    9| any as ?number as null;
@@ -56,37 +56,37 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- error.js:10:8
 
-Cannot cast `any` to `void` because `null` [1] is incompatible with `void` [2]. [incompatible-type]
+Cannot cast `any` to `undefined` because `null` [1] is incompatible with `undefined` [2]. [incompatible-type]
 
    error.js:10:8
-   10| any as ?number as void;
+   10| any as ?number as undefined;
               ^^^^^^^ [1]
 
 References:
    error.js:10:19
-   10| any as ?number as void;
-                         ^^^^ [2]
+   10| any as ?number as undefined;
+                         ^^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- error.js:10:9
 
-Cannot cast `any` to `void` because `number` [1] is incompatible with `void` [2]. [incompatible-type]
+Cannot cast `any` to `undefined` because `number` [1] is incompatible with `undefined` [2]. [incompatible-type]
 
    error.js:10:9
-   10| any as ?number as void;
+   10| any as ?number as undefined;
                ^^^^^^ [1]
 
 References:
    error.js:10:19
-   10| any as ?number as void;
-                         ^^^^ [2]
+   10| any as ?number as undefined;
+                         ^^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- error.js:16:8
 
 Cannot cast `any` to `number | null` because: [incompatible-type]
- - Either `void` [1] is incompatible with `null` [2].
- - Or `void` [1] is incompatible with `number` [3].
+ - Either `undefined` [1] is incompatible with `null` [2].
+ - Or `undefined` [1] is incompatible with `number` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -106,23 +106,23 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- error.js:17:8
 
-Cannot cast `any` to `number | void` because: [incompatible-type]
- - Either `null` [1] is incompatible with `void` [2].
+Cannot cast `any` to `number | undefined` because: [incompatible-type]
+ - Either `null` [1] is incompatible with `undefined` [2].
  - Or `null` [1] is incompatible with `number` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
 
    error.js:17:8
-   17| any as ?number as number | void;
+   17| any as ?number as number | undefined;
               ^^^^^^^ [1]
 
 References:
    error.js:17:28
-   17| any as ?number as number | void;
-                                  ^^^^ [2]
+   17| any as ?number as number | undefined;
+                                  ^^^^^^^^^ [2]
    error.js:17:19
-   17| any as ?number as number | void;
+   17| any as ?number as number | undefined;
                          ^^^^^^ [3]
 
 

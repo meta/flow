@@ -195,7 +195,7 @@ Cannot determine type of empty array literal. Please provide an annotation. [mis
 
 Error --------------------------------------------------------------------------------------------------- globals.js:4:1
 
-Cannot cast `x` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `x` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    globals.js:4:1
    4| x as empty;
@@ -280,7 +280,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- havoc.js:13:47
 
-Cannot call `mandatory` with `externalProps.s` bound to `s` because `void` [1] is incompatible with
+Cannot call `mandatory` with `externalProps.s` bound to `s` because `undefined` [1] is incompatible with
 `{field: string}` [2]. [incompatible-type]
 
    havoc.js:13:47

@@ -6,12 +6,12 @@ type Item = {name: string};
 declare function key(item: Item): string;
 const s = useSelection(key);
 s as Selection<Item>; // ok
-// A `null` argument for `T | null | void` gives `T` only `empty`, as for `?T`.
-declare function boxOf<T>(x: T | null | void): {v: T};
+// A `null` argument for `T | null | undefined` gives `T` only `empty`, as for `?T`.
+declare function boxOf<T>(x: T | null | undefined): {v: T};
 boxOf(null).v as string; // ok
-// The `null` and `void` of a union argument are absorbed instead, and give `T` nothing.
-declare function nullthrows<T>(x: T | null | void): T;
-declare function getMaybe<P extends {...}>(): {p: P} | null | void;
+// The `null` and `undefined` of a union argument are absorbed instead, and give `T` nothing.
+declare function nullthrows<T>(x: T | null | undefined): T;
+declare function getMaybe<P extends {...}>(): {p: P} | null | undefined;
 function fromMaybe<P extends {...}>(): {p: P} {
   return nullthrows(getMaybe()); // ok
 }

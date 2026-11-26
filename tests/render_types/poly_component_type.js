@@ -8,7 +8,7 @@ const el = <Poly><Button /></Poly>;
 el as renders NotAButton; // ERROR
 el as renders Button; // OK
 
-declare const Poly2: component<T extends React.Node = void>(children?: T) renders? T;
+declare const Poly2: component<T extends React.Node = undefined>(children?: T) renders? T;
 
 <Poly2 /> as renders? NotAButton; // OK
 <Poly2 /> as renders? Button; // OK
@@ -17,4 +17,4 @@ declare const Poly2: component<T extends React.Node = void>(children?: T) render
 <Poly2><Button /></Poly2> as renders* NotAButton; // ERROR
 <Poly2><Button /></Poly2> as renders* Button; // OK
 
-declare const Poly3: component<T extends React.Node = void>(children?: T) renders* T; // banned
+declare const Poly3: component<T extends React.Node = undefined>(children?: T) renders* T; // banned

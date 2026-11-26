@@ -188,7 +188,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- test.js:130:55
 
-Cannot create `Class_ManyProps` element because in property `number`: `void` [1] is incompatible with `number` [2].
+Cannot create `Class_ManyProps` element because in property `number`: `undefined` [1] is incompatible with `number` [2].
 [incompatible-type]
 
    test.js:130:55
@@ -394,8 +394,8 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- test.js:192:55
 
-Cannot create `ClassExact_ManyProps` element because in property `number`: `void` [1] is incompatible with `number` [2].
-[incompatible-type]
+Cannot create `ClassExact_ManyProps` element because in property `number`: `undefined` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    test.js:192:55
    192|   {...{string1: 'foo', string2: 'bar', number: any as ?number}}
@@ -543,8 +543,8 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- test.js:254:55
 
-Cannot create `ClassPure_ManyProps` element because in property `number`: `void` [1] is incompatible with `number` [2].
-[incompatible-type]
+Cannot create `ClassPure_ManyProps` element because in property `number`: `undefined` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    test.js:254:55
    254|   {...{string1: 'foo', string2: 'bar', number: any as ?number}}
@@ -689,8 +689,8 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- test.js:316:55
 
-Cannot create `Function_ManyProps` element because in property `number`: `void` [1] is incompatible with `number` [2].
-[incompatible-type]
+Cannot create `Function_ManyProps` element because in property `number`: `undefined` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    test.js:316:55
    316|   {...{string1: 'foo', string2: 'bar', number: any as ?number}}
@@ -893,7 +893,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- test.js:378:55
 
-Cannot create `FunctionExact_ManyProps` element because in property `number`: `void` [1] is incompatible with
+Cannot create `FunctionExact_ManyProps` element because in property `number`: `undefined` [1] is incompatible with
 `number` [2]. [incompatible-type]
 
    test.js:378:55
@@ -1042,8 +1042,8 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- test.js:440:55
 
-Cannot create `Abstract_ManyProps` element because in property `number`: `void` [1] is incompatible with `number` [2].
-[incompatible-type]
+Cannot create `Abstract_ManyProps` element because in property `number`: `undefined` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    test.js:440:55
    440|   {...{string1: 'foo', string2: 'bar', number: any as ?number}}
@@ -1248,7 +1248,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- test.js:503:55
 
-Cannot create `AbstractExact_ManyProps` element because in property `number`: `void` [1] is incompatible with
+Cannot create `AbstractExact_ManyProps` element because in property `number`: `undefined` [1] is incompatible with
 `number` [2]. [incompatible-type]
 
    test.js:503:55
@@ -1397,7 +1397,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- test.js:565:55
 
-Cannot create `Member_ManyProps.prop` element because in property `number`: `void` [1] is incompatible with
+Cannot create `Member_ManyProps.prop` element because in property `number`: `undefined` [1] is incompatible with
 `number` [2]. [incompatible-type]
 
    test.js:565:55
@@ -1546,7 +1546,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- test.js:627:55
 
-Cannot create `EnhancedClass_ManyProps` element because in property `number`: `void` [1] is incompatible with
+Cannot create `EnhancedClass_ManyProps` element because in property `number`: `undefined` [1] is incompatible with
 `number` [2]. [incompatible-type]
 
    test.js:627:55
@@ -1695,7 +1695,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- test.js:689:55
 
-Cannot create `EnhancedFunction_ManyProps` element because in property `number`: `void` [1] is incompatible with
+Cannot create `EnhancedFunction_ManyProps` element because in property `number`: `undefined` [1] is incompatible with
 `number` [2]. [incompatible-type]
 
    test.js:689:55

@@ -16,7 +16,7 @@ component GenericProvider<TChildren extends React.Node>(
   );
 }
 
-component OptionalGenericProvider<TChildren extends React.Node = void>(
+component OptionalGenericProvider<TChildren extends React.Node = undefined>(
   children?: TChildren,
 ) renders? TChildren {
   return <Context.Provider value="value">{children}</Context.Provider>;

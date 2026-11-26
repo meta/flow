@@ -3405,12 +3405,12 @@ Error --------------------------------------------------------------------------
 Cannot cast `42` to `?string` because `42` [1] is incompatible with `string` [2]. [incompatible-type]
 
    nullish.js:6:1
-   6| 42 as string | null | void; // Error: should only show string
+   6| 42 as string | null | undefined; // Error: should only show string
       ^^ [1]
 
 References:
    nullish.js:6:7
-   6| 42 as string | null | void; // Error: should only show string
+   6| 42 as string | null | undefined; // Error: should only show string
             ^^^^^^ [2]
 
 
@@ -3419,12 +3419,12 @@ Error --------------------------------------------------------------------------
 Cannot cast `42` to `?{}` because `42` [1] is incompatible with `{}` [2]. [incompatible-type]
 
    nullish.js:7:1
-   7| 42 as {} | null | void; // Error: should only show object
+   7| 42 as {} | null | undefined; // Error: should only show object
       ^^ [1]
 
 References:
    nullish.js:7:7
-   7| 42 as {} | null | void; // Error: should only show object
+   7| 42 as {} | null | undefined; // Error: should only show object
             ^^ [2]
 
 
@@ -3433,12 +3433,12 @@ Error --------------------------------------------------------------------------
 Cannot cast `42` to `?Readonly<[]>` because `42` [1] is incompatible with `Readonly<[]>` [2]. [incompatible-type]
 
    nullish.js:8:1
-   8| 42 as [] | null | void; // Error: should only show array
+   8| 42 as [] | null | undefined; // Error: should only show array
       ^^ [1]
 
 References:
    nullish.js:8:7
-   8| 42 as [] | null | void; // Error: should only show array
+   8| 42 as [] | null | undefined; // Error: should only show array
             ^^ [2]
 
 
@@ -3448,12 +3448,12 @@ Cannot cast object literal to `?string` because object literal [1] is incompatib
 [incompatible-type]
 
    nullish.js:9:2
-   9| ({}) as string | null | void; // Error: should only show string
+   9| ({}) as string | null | undefined; // Error: should only show string
        ^^ [1]
 
 References:
    nullish.js:9:9
-   9| ({}) as string | null | void; // Error: should only show string
+   9| ({}) as string | null | undefined; // Error: should only show string
               ^^^^^^ [2]
 
 
@@ -3463,12 +3463,12 @@ Cannot cast object literal to `?{p: empty}` because property `p` is missing in o
 `{p: empty}` [2]. [incompatible-type]
 
    nullish.js:10:2
-   10| ({}) as {p: empty} | null | void; // Error: should only show object
+   10| ({}) as {p: empty} | null | undefined; // Error: should only show object
         ^^ [1]
 
 References:
    nullish.js:10:9
-   10| ({}) as {p: empty} | null | void; // Error: should only show object
+   10| ({}) as {p: empty} | null | undefined; // Error: should only show object
                ^^^^^^^^^^ [2]
 
 
@@ -3478,12 +3478,12 @@ Cannot cast object literal to `?Readonly<[]>` because object literal [1] is inco
 [incompatible-type]
 
    nullish.js:11:2
-   11| ({}) as [] | null | void; // Error: should only show array
+   11| ({}) as [] | null | undefined; // Error: should only show array
         ^^ [1]
 
 References:
    nullish.js:11:9
-   11| ({}) as [] | null | void; // Error: should only show array
+   11| ({}) as [] | null | undefined; // Error: should only show array
                ^^ [2]
 
 
@@ -3492,12 +3492,12 @@ Error --------------------------------------------------------------------------
 Cannot cast array literal to `?string` because `Array<empty>` [1] is incompatible with `string` [2]. [incompatible-type]
 
    nullish.js:12:1
-   12| [] as string | null | void; // Error: should only show string
+   12| [] as string | null | undefined; // Error: should only show string
        ^^ [1]
 
 References:
    nullish.js:12:7
-   12| [] as string | null | void; // Error: should only show string
+   12| [] as string | null | undefined; // Error: should only show string
              ^^^^^^ [2]
 
 
@@ -3506,12 +3506,12 @@ Error --------------------------------------------------------------------------
 Cannot cast array literal to `?{}` because `Array<empty>` [1] is incompatible with `{}` [2]. [incompatible-type]
 
    nullish.js:13:1
-   13| [] as {} | null | void; // Error: should only show object
+   13| [] as {} | null | undefined; // Error: should only show object
        ^^ [1]
 
 References:
    nullish.js:13:7
-   13| [] as {} | null | void; // Error: should only show object
+   13| [] as {} | null | undefined; // Error: should only show object
              ^^ [2]
 
 
@@ -3521,12 +3521,12 @@ Cannot cast array literal to `?[empty]` because `Readonly<[]>` [1] has 0 element
 [invalid-tuple-arity]
 
    nullish.js:14:1
-   14| [] as [empty] | null | void; // Error: should only show array
+   14| [] as [empty] | null | undefined; // Error: should only show array
        ^^ [1]
 
 References:
    nullish.js:14:7
-   14| [] as [empty] | null | void; // Error: should only show array
+   14| [] as [empty] | null | undefined; // Error: should only show array
              ^^^^^^^ [2]
 
 

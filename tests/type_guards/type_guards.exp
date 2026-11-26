@@ -591,7 +591,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- consistency.js:60:5
 
-Cannot return `x !== null` because `void` [1] is incompatible with `number` [2]. [incompatible-type-guard]
+Cannot return `x !== null` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type-guard]
 
 The type of `x` [3] at the return expression `x !== null` [4] needs to be compatible with the guard type `number` [2].
 See 1. in https://flow.org/en/docs/types/type-guards/#toc-consistency-checks-of-type-guard-functions.
@@ -652,7 +652,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- consistency.js:76:5
 
-Cannot return `x !== null` because `void` [1] is incompatible with `number` [2]. [incompatible-type-guard]
+Cannot return `x !== null` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type-guard]
 
 The type of `x` [3] at the return expression `x !== null` [4] needs to be compatible with the guard type `number` [2].
 See 1. in https://flow.org/en/docs/types/type-guards/#toc-consistency-checks-of-type-guard-functions.
@@ -1531,8 +1531,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ inferred.js:161:3
 
-Cannot cast `fn1` to `(x: ?number) => implies x is number` because in the type predicate: `void` [1] is incompatible
-with `number` [2]. [incompatible-type]
+Cannot cast `fn1` to `(x: ?number) => implies x is number` because in the type predicate: `undefined` [1] is
+incompatible with `number` [2]. [incompatible-type]
 
    inferred.js:161:3
    161|   fn1 as typeof fn; // error ?number ~> number
@@ -1549,7 +1549,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ inferred.js:186:3
 
-Cannot cast `fn` to `(x: unknown) => implies x is unknown` because `(x: unknown) => void | false | boolean` [1], a
+Cannot cast `fn` to `(x: unknown) => implies x is unknown` because `(x: unknown) => undefined | false | boolean` [1], a
 non-type-guard function, is incompatible with `(x: unknown) => implies x is unknown` [2], which is a type-guard
 function. [function-predicate]
 
@@ -1568,8 +1568,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ inferred.js:186:3
 
-Cannot cast `fn` to `(x: unknown) => implies x is unknown` because in the return value: `void` [1] is incompatible with
-`boolean` [2]. [incompatible-type]
+Cannot cast `fn` to `(x: unknown) => implies x is unknown` because in the return value: `undefined` [1] is incompatible
+with `boolean` [2]. [incompatible-type]
 
    inferred.js:186:3
    186|   fn as (x: unknown) => implies x is unknown; // error non-type guard function
@@ -2324,7 +2324,7 @@ Cannot cast `x3` to `number` because `string` [1] is incompatible with `number` 
 
 References:
    refinement.js:15:7
-   15|   x3: string | void,
+   15|   x3: string | undefined,
              ^^^^^^ [1]
    refinement.js:28:11
    28|     x3 as number; // error string ~> number
@@ -2913,9 +2913,9 @@ Cannot cast `x` to `empty` because `$FbtResultBase` [1] is incompatible with `em
             ^
 
 References:
-   refinement.js:198:27
-   198|   declare const x: void | Fbt;
-                                  ^^^ [1]
+   refinement.js:198:32
+   198|   declare const x: undefined | Fbt;
+                                       ^^^ [1]
    refinement.js:202:10
    202|     x as empty; // error Fbt ~> empty
                  ^^^^^ [2]
@@ -2930,9 +2930,9 @@ Cannot cast `x` to `empty` because `string` [1] is incompatible with `empty` [2]
             ^
 
 References:
-   refinement.js:198:27
-   198|   declare const x: void | Fbt;
-                                  ^^^ [1]
+   refinement.js:198:32
+   198|   declare const x: undefined | Fbt;
+                                       ^^^ [1]
    refinement.js:202:10
    202|     x as empty; // error Fbt ~> empty
                  ^^^^^ [2]
@@ -2947,9 +2947,9 @@ Cannot cast `x` to `empty` because `string` [1] is incompatible with `empty` [2]
             ^
 
 References:
-   refinement.js:221:27
-   221|   declare const x: void | string | any;
-                                  ^^^^^^ [1]
+   refinement.js:221:32
+   221|   declare const x: undefined | string | any;
+                                       ^^^^^^ [1]
    refinement.js:225:10
    225|     x as empty; // error string ~> empty
                  ^^^^^ [2]
@@ -5873,18 +5873,18 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- union_guard.js:19:5
 
-Cannot cast `x` to `"" | 0` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `x` to `"" | 0` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    union_guard.js:19:5
-   19|     x as '' | 0; // error void ~> '' | 0
+   19|     x as '' | 0; // error undefined ~> '' | 0
            ^
 
 References:
    union_guard.js:15:37
-   15| function falsy(x: string | number | void) {
-                                           ^^^^ [1]
+   15| function falsy(x: string | number | undefined) {
+                                           ^^^^^^^^^ [1]
    union_guard.js:19:10
-   19|     x as '' | 0; // error void ~> '' | 0
+   19|     x as '' | 0; // error undefined ~> '' | 0
                 ^^^^^^ [2]
 
 

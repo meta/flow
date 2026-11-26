@@ -114,19 +114,10 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ logical.js:117:10
 
-This condition is likely falsy.
-[WARNING]: Flow's type inference may be incorrect that it could be null at runtime (due to `any` annotations,
-out-of-bounds array accesses, etc.). If the check is valid, you might want to make [1] nullable (`T` -> `?T`).
-[constant-condition]
+An expression of type `void` cannot be tested for truthiness. [constant-condition]
 
-   logical.js:117:10
    117|   return x && 'foo'; // constant-condition error
                  ^
-
-References:
-   logical.js:116:23
-   116| function logical2n(x: $Exact<void>): void | string {
-                              ^^^^^^^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------------ logical.js:126:10
@@ -293,19 +284,10 @@ This condition is truthy. [constant-condition]
 
 Error ------------------------------------------------------------------------------------------------ logical.js:250:10
 
-This condition is likely falsy.
-[WARNING]: Flow's type inference may be incorrect that it could be null at runtime (due to `any` annotations,
-out-of-bounds array accesses, etc.). If the check is valid, you might want to make [1] nullable (`T` -> `?T`).
-[constant-condition]
+An expression of type `void` cannot be tested for truthiness. [constant-condition]
 
-   logical.js:250:10
    250|   return x || 'foo'; // constant-condition error
                  ^
-
-References:
-   logical.js:249:23
-   249| function logical6i(x: $Exact<void>): string {
-                              ^^^^^^^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------------ logical.js:297:11

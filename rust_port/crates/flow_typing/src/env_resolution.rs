@@ -2880,10 +2880,7 @@ fn resolve_generator_next<'cx>(
     gen_info: Option<&name_def_types::GeneratorAnnot>,
 ) -> Result<Type, JobError> {
     match gen_info {
-        None => {
-            let r = reason.dupe().replace_desc(reason::VirtualReasonDesc::RVoid);
-            Ok(type_::void::make(r))
-        }
+        None => Ok(type_::ts_void::why(reason)),
         Some(gen_info) => {
             let tparams_map = mk_tparams_map(cx, &gen_info.tparams_map);
             let (t, anno) = type_annotation::mk_type_available_annotation(

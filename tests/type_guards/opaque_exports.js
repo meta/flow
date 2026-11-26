@@ -13,7 +13,7 @@ export type As = A<string>;
 export opaque type OpaqueB = B;
 export opaque type OpaqueC = C;
 export opaque type OpaqueAs = As;
-export opaque type OpaqueT = void | OpaqueB | OpaqueC | OpaqueAs;
+export opaque type OpaqueT = undefined | OpaqueB | OpaqueC | OpaqueAs;
 export type OpaqueOrString = OpaqueT | string;
 
 export opaque type Animal: string = string;

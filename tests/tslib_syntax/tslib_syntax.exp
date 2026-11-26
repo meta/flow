@@ -204,7 +204,7 @@ References:
 
 Error ------------------------------------------------------------------------------ computed_property_key_usage.js:32:1
 
-Cannot cast `optMethodObj.myMethod` to `string` because `void` [1] is incompatible with `string` [2].
+Cannot cast `optMethodObj.myMethod` to `string` because `undefined` [1] is incompatible with `string` [2].
 [incompatible-type]
 
    computed_property_key_usage.js:32:1
@@ -1464,7 +1464,7 @@ References:
 
 Error ------------------------------------------------------------------------------------ optional_class_field.js:13:12
 
-Cannot return `this.#label` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot return `this.#label` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    optional_class_field.js:13:12
    13|     return this.#label; // ERROR
@@ -1481,7 +1481,7 @@ References:
 
 Error ------------------------------------------------------------------------------------- optional_class_field.js:19:3
 
-Cannot cast `box.value` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `box.value` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    optional_class_field.js:19:3
    19|   box.value as number; // ERROR
@@ -1498,7 +1498,7 @@ References:
 
 Error ------------------------------------------------------------------------------------- optional_class_field.js:28:3
 
-Cannot cast `Box.count` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `Box.count` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    optional_class_field.js:28:3
    28|   Box.count as number; // ERROR
@@ -1515,7 +1515,7 @@ References:
 
 Error ------------------------------------------------------------------------------------- optional_class_field.js:33:3
 
-Cannot cast `exported.value` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `exported.value` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    optional_class_field.js:33:3
    33|   exported.value as number; // ERROR
@@ -1532,7 +1532,7 @@ References:
 
 Error ------------------------------------------------------------------------------------- optional_class_field.js:41:3
 
-Cannot cast `box.value` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `box.value` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    optional_class_field.js:41:3
    41|   box.value as number; // ERROR
@@ -1566,7 +1566,7 @@ References:
 
 Error ---------------------------------------------------------------------------------- optional_class_property.js:10:1
 
-Cannot cast `foo.a` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `foo.a` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    optional_class_property.js:10:1
    10| foo.a as empty; // ERROR

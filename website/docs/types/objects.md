@@ -46,7 +46,7 @@ obj.foo = 'hello'; // Error!
 ```
 
 In addition to their set value type, these optional properties can either be
-`void` or omitted altogether. However, they cannot be `null`.
+`undefined` or omitted altogether. However, they cannot be `null`.
 
 ```js flow-check
 function acceptsObject(value: {foo?: string}) { /* ... */ }
@@ -206,7 +206,7 @@ const obj: {
   bar: true,
 };
 
-const n: number | void = obj.foo; // Works!
+const n: number | undefined = obj.foo; // Works!
 const b: boolean = obj.bar; // Works!
 
 if (b) {

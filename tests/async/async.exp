@@ -38,11 +38,11 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- async.js:43:31
 
-Cannot expect `void` as the return type of async function because `void` [1] is incompatible with `Promise<void>` [1].
+Cannot expect `number` as the return type of async function because `number` [1] is incompatible with `void` [1].
 [incompatible-type]
 
-   43|   static async m(a: unknown): void { await a; } // error, void != Promise<void>
-                                     ^^^^ [1]
+   43|   static async m(a: unknown): number { await a; } // error, number != Promise<void>
+                                     ^^^^^^ [1]
 
 
 Error -------------------------------------------------------------------------------------------------- async2.js:11:21
@@ -62,49 +62,40 @@ References:
                   ^^^^^^ [2]
 
 
-Error -------------------------------------------------------------------------------------------------- async2.js:30:30
+Error -------------------------------------------------------------------------------------------------- async2.js:30:35
 
-Cannot assign `voidoid1` to `voidoid3` because in the return value: `Promise<void>` [1] is incompatible with `void` [2].
-[incompatible-type]
+Cannot assign `voidoid1` to `voidoid3` because in the return value: `Promise<void>` [1] is incompatible with
+`undefined` [2]. [incompatible-type]
 
-   async2.js:30:30
-   30|   var voidoid3: () => void = voidoid1; // error, void != Promise<void>
-                                    ^^^^^^^^
+   async2.js:30:35
+   30|   var voidoid3: () => undefined = voidoid1; // error, undefined != Promise<void>
+                                         ^^^^^^^^
 
 References:
    async2.js:24:28
    24|   async function voidoid1() {
                                   ^ [1]
    async2.js:30:23
-   30|   var voidoid3: () => void = voidoid1; // error, void != Promise<void>
-                             ^^^^ [2]
+   30|   var voidoid3: () => undefined = voidoid1; // error, undefined != Promise<void>
+                             ^^^^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------------- async2.js:48:30
 
-Cannot expect `void` as the return type of async function because `void` [1] is incompatible with `Promise<void>` [1].
+Cannot expect `number` as the return type of async function because `number` [1] is incompatible with `void` [1].
 [incompatible-type]
 
-   48|   async function voidoid5(): void { // error, void != Promise<void>
-                                    ^^^^ [1]
+   48|   async function voidoid5(): number { // error, number != Promise<void>
+                                    ^^^^^^ [1]
 
 
 Error --------------------------------------------------------------------------------------------------- async2.js:55:5
 
-Cannot expect `Promise<number>` as the return type of async function because in type argument `T` [1]: `number` [2] is
-incompatible with `void` [3]. [incompatible-type]
+Cannot expect `Promise<number>` as the return type of async function because `Promise<number>` [1] is incompatible with
+`void` [1]. [incompatible-type]
 
-   async2.js:55:5
-    55|   : Promise<number> { // error, number != void
-            ^^^^^^^^^^^^^^^ [3]
-
-References:
-   <BUILTINS>/misc.js:195:23
-   195| interface Promise<out T = unknown> {}
-                              ^ [1]
-   async2.js:55:13
-    55|   : Promise<number> { // error, number != void
-                    ^^^^^^ [2]
+   55|   : Promise<number> { // error, number != void
+           ^^^^^^^^^^^^^^^ [1]
 
 
 Error -------------------------------------------------------------------------------------------------- async3.js:29:19
@@ -134,7 +125,7 @@ Cannot use `await P` [1] as a superclass. Only variables and member expressions 
 
 Error ----------------------------------------------------------------------------------------- async_return_void.js:2:3
 
-Cannot return undefined because in type argument `T` [1]: `void` [2] is incompatible with `string` [3].
+Cannot return undefined because in type argument `T` [1]: `undefined` [2] is incompatible with `string` [3].
 [incompatible-type]
 
    async_return_void.js:2:3
@@ -152,7 +143,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------- async_return_void.js:6:10
 
-Cannot return `undefined` because in type argument `T` [1]: `void` [2] is incompatible with `string` [3].
+Cannot return `undefined` because in type argument `T` [1]: `undefined` [2] is incompatible with `string` [3].
 [incompatible-type]
 
    async_return_void.js:6:10

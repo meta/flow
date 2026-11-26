@@ -204,7 +204,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- arg_order.js:74:40
 
-Cannot get `value.name` because property `name` is missing in `void` [1]. [incompatible-use]
+Cannot get `value.name` because property `name` is missing in `undefined` [1]. [incompatible-use]
 
    arg_order.js:74:40
    74|   assertCondition(value != null, value.name); // ERROR
@@ -232,7 +232,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- arg_order.js:92:34
 
-Cannot get `prop.value.expression.value` because property `value` is missing in `void` [1]. [incompatible-use]
+Cannot get `prop.value.expression.value` because property `value` is missing in `undefined` [1]. [incompatible-use]
 
    arg_order.js:92:34
    92|     typeof prop.value.expression.value, // ERROR
@@ -401,7 +401,7 @@ References:
 Error -------------------------------------------------------------------------------------------- consistency.js:128:48
 
 Cannot return from assertion function at the end of its body because `value` [1] may still be falsy here: it may be
-`false | void` [2]. Throw an error or call another assertion function on every path where it is falsy.
+`false | undefined` [2]. Throw an error or call another assertion function on every path where it is falsy.
 [incompatible-type-guard]
 
    consistency.js:128:48
@@ -2360,7 +2360,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------- receiver_scoping.js:16:16
 
-Cannot get `x.length` because property `length` is missing in `void` [1]. [incompatible-use]
+Cannot get `x.length` because property `length` is missing in `undefined` [1]. [incompatible-use]
 
    receiver_scoping.js:16:16
    16|       return x.length; // ERROR
@@ -2388,7 +2388,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------- receiver_scoping.js:21:16
 
-Cannot get `x.length` because property `length` is missing in `void` [1]. [incompatible-use]
+Cannot get `x.length` because property `length` is missing in `undefined` [1]. [incompatible-use]
 
    receiver_scoping.js:21:16
    21|       return x.length; // ERROR
@@ -2419,7 +2419,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------- receiver_scoping.js:40:7
 
-Cannot cast `x` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `x` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    receiver_scoping.js:40:7
    40|       x as string;
@@ -2436,7 +2436,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------- receiver_scoping.js:41:7
 
-Cannot cast `x` to `null` because `void` [1] is incompatible with `null` [2]. [incompatible-type]
+Cannot cast `x` to `null` because `undefined` [1] is incompatible with `null` [2]. [incompatible-type]
 
    receiver_scoping.js:41:7
    41|       x as null; // ERROR
@@ -2484,7 +2484,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------- receiver_scoping.js:52:14
 
-Cannot get `x.length` because property `length` is missing in `void` [1]. [incompatible-use]
+Cannot get `x.length` because property `length` is missing in `undefined` [1]. [incompatible-use]
 
    receiver_scoping.js:52:14
    52|     return x.length; // ERROR
@@ -3075,7 +3075,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- requires.js:73:3
 
-Cannot cast `value` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `value` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    requires.js:73:3
    73|   value as number; // error: a local `require` is not the module loader
@@ -3106,7 +3106,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- scoping.js:9:14
 
-Cannot get `x.length` because property `length` is missing in `void` [1]. [incompatible-use]
+Cannot get `x.length` because property `length` is missing in `undefined` [1]. [incompatible-use]
 
    scoping.js:9:14
    9|     return x.length; // ERROR
@@ -3134,7 +3134,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- scoping.js:20:14
 
-Cannot get `x.length` because property `length` is missing in `void` [1]. [incompatible-use]
+Cannot get `x.length` because property `length` is missing in `undefined` [1]. [incompatible-use]
 
    scoping.js:20:14
    20|     return x.length; // ERROR
@@ -3162,7 +3162,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- scoping.js:29:12
 
-Cannot get `x.length` because property `length` is missing in `void` [1]. [incompatible-use]
+Cannot get `x.length` because property `length` is missing in `undefined` [1]. [incompatible-use]
 
    scoping.js:29:12
    29|   return x.length; // ERROR
@@ -3210,7 +3210,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- spreads.js:20:3
 
-Cannot cast `value` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `value` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    spreads.js:20:3
    20|   value as string; // error: spread shifts positional arguments

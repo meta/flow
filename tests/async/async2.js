@@ -27,7 +27,7 @@ function test2() {
 
   var voidoid2: () => Promise<void> = voidoid1; // ok
 
-  var voidoid3: () => void = voidoid1; // error, void != Promise<void>
+  var voidoid3: () => undefined = voidoid1; // error, undefined != Promise<void>
 }
 
 // annotated return type of Promise<void> should work
@@ -45,7 +45,7 @@ function test3() {
 //
 
 function test4() {
-  async function voidoid5(): void { // error, void != Promise<void>
+  async function voidoid5(): number { // error, number != Promise<void>
     console.log("HEY");
   }
 }

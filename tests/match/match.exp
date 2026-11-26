@@ -700,7 +700,7 @@ References:
 Error ------------------------------------------------------------------------------------------------ matching.js:48:14
 
 `match` hasn't checked all possible cases of the input type. To fix, add the missing pattern: `undefined` to match
-`void` [1]. [match-not-exhaustive]
+`undefined` [1]. [match-not-exhaustive]
 
    matching.js:48:14
    48|   const e2 = match (x) { // ERROR: `undefined` not checked
@@ -708,15 +708,15 @@ Error --------------------------------------------------------------------------
 
 References:
    matching.js:41:24
-   41|   declare const x: 1 | void;
-                              ^^^^ [1]
+   41|   declare const x: 1 | undefined;
+                              ^^^^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------------ matching.js:63:14
 
 `match` hasn't checked all possible cases of the input type. To fix, add the missing patterns:
 - `null` to match `null` [1]
-- `undefined` to match `void` [1] [match-not-exhaustive]
+- `undefined` to match `undefined` [1] [match-not-exhaustive]
 
    matching.js:63:14
    63|   const e2 = match (x) { // ERROR: `null` and `undefined` not checked
@@ -1012,7 +1012,7 @@ References:
 
 Error ------------------------------------------------------------------------------ nested-instance-properties.js:111:5
 
-Cannot cast `name` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `name` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    nested-instance-properties.js:111:5
    111|     name as number; // ERROR: retain the declared property type
@@ -1069,7 +1069,7 @@ References:
 
 Error ----------------------------------------------------------------------------- nested-instance-properties.js:168:12
 
-Cannot get `maybeNamed.name` because property `name` is missing in `void` [1]. [incompatible-use]
+Cannot get `maybeNamed.name` because property `name` is missing in `undefined` [1]. [incompatible-use]
 
    nested-instance-properties.js:168:12
    168| maybeNamed.name; // ERROR: nullable property access
@@ -1097,7 +1097,7 @@ References:
 
 Error ------------------------------------------------------------------------------ nested-instance-properties.js:176:5
 
-Property `name` is missing in `void` [1]. [incompatible-use]
+Property `name` is missing in `undefined` [1]. [incompatible-use]
 
    nested-instance-properties.js:176:5
    176|   [{const name, ...}] => name, // ERROR: the property is not readable
@@ -1141,7 +1141,7 @@ References:
 
 Error ------------------------------------------------------------------------------ nested-instance-properties.js:188:5
 
-Property `name` is missing in `void` [1]. [incompatible-use]
+Property `name` is missing in `undefined` [1]. [incompatible-use]
 
    nested-instance-properties.js:188:5
    188|   [{const name, ...}] => name, // ERROR: an indexer does not make the inherited field readable
@@ -1177,7 +1177,7 @@ References:
 
 Error ------------------------------------------------------------------------------ nested-instance-properties.js:201:5
 
-Property `name` is missing in `void` [1]. [incompatible-use]
+Property `name` is missing in `undefined` [1]. [incompatible-use]
 
    nested-instance-properties.js:201:5
    201|   [{const name, ...}] => name, // ERROR: named declarations take precedence over indexers
@@ -1213,7 +1213,7 @@ References:
 
 Error ------------------------------------------------------------------------------ nested-instance-properties.js:205:5
 
-Property `name` is missing in `void` [1]. [incompatible-use]
+Property `name` is missing in `undefined` [1]. [incompatible-use]
 
    nested-instance-properties.js:205:5
    205|   [{const name, ...}] => name, // ERROR: parent order must not make the field readable
@@ -1297,7 +1297,7 @@ References:
 
 Error ------------------------------------------------------------------------------ nested-instance-properties.js:239:5
 
-Property `unknown` is missing in `void` [1]. [incompatible-use]
+Property `unknown` is missing in `undefined` [1]. [incompatible-use]
 
    nested-instance-properties.js:239:5
    239|   [{unknown: const unknown, ...}] => unknown, // ERROR: unknown property
@@ -1369,7 +1369,7 @@ References:
 
 Error ------------------------------------------------------------------------------ nested-instance-properties.js:257:5
 
-Property `constructor` is missing in `void` [1]. [incompatible-use]
+Property `constructor` is missing in `undefined` [1]. [incompatible-use]
 
    nested-instance-properties.js:257:5
    257|   [{constructor: const ctor, ...}] => ctor(), // ERROR: preserve the special constructor read
@@ -1483,7 +1483,7 @@ References:
 
 Error ----------------------------------------------------------------------------- nested-instance-properties.js:287:29
 
-Cannot cast `value` to `Named` because `void` [1] is incompatible with `Named` [2]. [incompatible-type]
+Cannot cast `value` to `Named` because `undefined` [1] is incompatible with `Named` [2]. [incompatible-type]
 
    nested-instance-properties.js:287:29
    287|   [{...} as const value] => value as Named, // ERROR: still nullable
@@ -1530,7 +1530,7 @@ References:
 
 Error ------------------------------------------------------------------------------ nested-instance-properties.js:303:5
 
-Property `name` is missing in `void` [1]. [incompatible-use]
+Property `name` is missing in `undefined` [1]. [incompatible-use]
 
    nested-instance-properties.js:303:5
    303|   [{const name, ...}] => name, // ERROR: an aliased indexer cannot hide the named field
@@ -1566,7 +1566,7 @@ References:
 
 Error ------------------------------------------------------------------------------ nested-instance-properties.js:307:5
 
-Property `name` is missing in `void` [1]. [incompatible-use]
+Property `name` is missing in `undefined` [1]. [incompatible-use]
 
    nested-instance-properties.js:307:5
    307|   [{const name, ...}] => name, // ERROR: alias member order does not affect readability
@@ -2205,7 +2205,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ refining.js:53:19
 
-Cannot cast `test` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `test` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    refining.js:53:19
    53|     const test => test as empty, // ERROR: void
@@ -2239,7 +2239,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ refining.js:63:19
 
-Cannot cast `test` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `test` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    refining.js:63:19
    63|     const test => test as empty, // `null | undefined`
@@ -2526,7 +2526,7 @@ Error --------------------------------------------------------------------------
 - `false` to match `false` [1]
 - `true` to match `true` [1]
 - `null` to match `null` [1]
-- `undefined` to match `void` [1]
+- `undefined` to match `undefined` [1]
 - `Iterable {...}` to match `Iterable<?React.Node, any, any>` [1]
 and 2 others. [match-not-exhaustive]
 

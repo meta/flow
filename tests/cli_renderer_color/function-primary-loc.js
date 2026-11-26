@@ -18,7 +18,7 @@ declare function myFn2(x: number): void;
 ({
   fn1: myFn1, // Error: We should point to just the `myFn1` property.
 }) as {
-  fn1: () => void,
+  fn1: () => undefined,
 };
 
 ({

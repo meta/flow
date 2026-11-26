@@ -288,15 +288,15 @@ At file.js:218:5
 file.js:218:3,218:5
 
 At file.js:227:14
-(x: number) => void
+(x: number) => undefined
 file.js:227:18,227:18
 
 At file.js:229:17
-(x: number) => void
+(x: number) => undefined
 file.js:229:18,229:18
 
 At file.js:231:18
-(x: number) => void
+(x: number) => undefined
 file.js:231:18,231:18
 
 At file.js:241:13

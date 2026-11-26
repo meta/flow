@@ -354,7 +354,7 @@ References:
 
 Error -------------------------------------------------------------------------- -:3:10
 
-Cannot return `x` because `void` [1] is incompatible with `boolean` [2]. [incompatible-type]
+Cannot return `x` because `undefined` [1] is incompatible with `boolean` [2]. [incompatible-type]
 
    -:3:10
    3|   return x; // Error

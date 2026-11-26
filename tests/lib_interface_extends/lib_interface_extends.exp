@@ -1,7 +1,7 @@
 Error ----------------------------------------------------------------------------------------------------- test.js:13:1
 
-Cannot extend `Options` [1] with `Locale` [2] because in property `name`: `void` [3] is incompatible with `string` [4].
-[incompatible-type]
+Cannot extend `Options` [1] with `Locale` [2] because in property `name`: `undefined` [3] is incompatible with
+`string` [4]. [incompatible-type]
 
 This property is invariantly typed. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.

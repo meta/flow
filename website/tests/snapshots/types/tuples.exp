@@ -75,22 +75,22 @@ References:
 Found 3 errors
 
 === block 8 ===
-Error ------------------------------------------------------------------------------- -:4:41
+Error ------------------------------------------------------------------------------- -:4:46
 
-Cannot assign `tuple1` to `tuple2` because `[number, boolean]` [1] has 2 elements but `[number, boolean, void]` [2] has
-3 elements. [invalid-tuple-arity]
+Cannot assign `tuple1` to `tuple2` because `[number, boolean]` [1] has 2 elements but `[number, boolean, undefined]` [2]
+has 3 elements. [invalid-tuple-arity]
 
-   -:4:41
-   4| const tuple2: [number, boolean, void] = tuple1; // Error!
-                                              ^^^^^^
+   -:4:46
+   4| const tuple2: [number, boolean, undefined] = tuple1; // Error!
+                                                   ^^^^^^
 
 References:
    -:2:15
    2| const tuple1: [number, boolean] = [1, true];
                     ^^^^^^^^^^^^^^^^^ [1]
    -:4:15
-   4| const tuple2: [number, boolean, void] = tuple1; // Error!
-                    ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   4| const tuple2: [number, boolean, undefined] = tuple1; // Error!
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Found 1 error
@@ -98,8 +98,8 @@ Found 1 error
 === block 9 ===
 Error ------------------------------------------------------------------------------- -:4:35
 
-Cannot assign `tuple1` to `tuple2` because `[number, boolean, void]` [1] has 3 elements but `[number, boolean]` [2] has
-2 elements. [invalid-tuple-arity]
+Cannot assign `tuple1` to `tuple2` because `[number, boolean, undefined]` [1] has 3 elements but `[number, boolean]` [2]
+has 2 elements. [invalid-tuple-arity]
 
    -:4:35
    4| const tuple2: [number, boolean] = tuple1; // Error!
@@ -107,8 +107,8 @@ Cannot assign `tuple1` to `tuple2` because `[number, boolean, void]` [1] has 3 e
 
 References:
    -:2:15
-   2| const tuple1: [number, boolean, void] = [1, true, undefined];
-                    ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   2| const tuple1: [number, boolean, undefined] = [1, true, undefined];
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    -:4:15
    4| const tuple2: [number, boolean] = tuple1; // Error!
                     ^^^^^^^^^^^^^^^^^ [2]
@@ -221,7 +221,7 @@ No errors!
 === block 20 ===
 Error -------------------------------------------------------------------------------- -:4:8
 
-Cannot assign `undefined` to `x[0]` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot assign `undefined` to `x[0]` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    -:4:8
    4| x[0] = undefined; // ERROR
@@ -229,12 +229,13 @@ Cannot assign `undefined` to `x[0]` because `void` [1] is incompatible with `num
 
 References:
    -:2:17
-   2| type T = [foo?: number, bar?: number | void];
+   2| type T = [foo?: number, bar?: number | undefined];
                       ^^^^^^ [2]
 
 Error -------------------------------------------------------------------------------- -:5:2
 
-Cannot cast array literal to `T` because in index `0`: `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast array literal to `T` because in index `0`: `undefined` [1] is incompatible with `number` [2].
+[incompatible-type]
 
    -:5:2
    5| [undefined] as T; // ERROR
@@ -242,7 +243,7 @@ Cannot cast array literal to `T` because in index `0`: `void` [1] is incompatibl
 
 References:
    -:2:17
-   2| type T = [foo?: number, bar?: number | void];
+   2| type T = [foo?: number, bar?: number | undefined];
                       ^^^^^^ [2]
 
 
@@ -272,11 +273,11 @@ No errors!
 === block 23 ===
 Error -------------------------------------------------------------------------------- -:4:1
 
-Cannot cast `b` to `[0, 1 | void, 2]` because array literal [1] has an unknown number of elements, so is incompatible
-with `[0, 1 | void, 2]` [2]. [invalid-tuple-arity]
+Cannot cast `b` to `[0, 1 | undefined, 2]` because array literal [1] has an unknown number of elements, so is
+incompatible with `[0, 1 | undefined, 2]` [2]. [invalid-tuple-arity]
 
    -:4:1
-   4| b as [0, 1 | void, 2]; // ERROR
+   4| b as [0, 1 | undefined, 2]; // ERROR
       ^
 
 References:
@@ -284,8 +285,8 @@ References:
    3| const b = [0, ...a, 2]; // At runtime this is `[0, 2]`
                 ^^^^^^^^^^^^ [1]
    -:4:6
-   4| b as [0, 1 | void, 2]; // ERROR
-           ^^^^^^^^^^^^^^^^ [2]
+   4| b as [0, 1 | undefined, 2]; // ERROR
+           ^^^^^^^^^^^^^^^^^^^^^ [2]
 
 Error ------------------------------------------------------------------------------- -:10:1
 

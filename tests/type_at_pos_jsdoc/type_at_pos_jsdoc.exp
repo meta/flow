@@ -37,7 +37,7 @@ variable_declaration.js:43:4
 Flags: --strip-root
 
  this is beta!
-var beta: void
+var beta: undefined
 variable_declaration.js:43:3,43:6
 
 variable_declaration.js:48:4
@@ -51,7 +51,7 @@ class_declaration.js:8:14
 Flags: --strip-root
 
  this is Foo!
-constructor Foo(): void
+constructor Foo(): undefined
 class_declaration.js:8:13,8:15
 
 function_declaration.js:8:4
@@ -72,7 +72,7 @@ declare.js:16:6
 Flags: --strip-root
 
  declaration of Bar
-constructor Bar(): void
+constructor Bar(): undefined
 declare.js:16:5,16:7
 
 declare.js:24:4
@@ -739,7 +739,7 @@ react_api.js:7:7,7:15
 
 react_api.js:9:10
 Flags: --strip-root
-void
+undefined
 react_api.js:9:7,9:17
 
 react_api.js:11:10
@@ -840,7 +840,7 @@ Flags: --strip-root
   & (hook <S, A>(
       reducer: (state: S, action: A) => S,
       initialState: S,
-      init: void
+      init: undefined
     ) => [S, React.Dispatch<A>])
   & (hook <S, A, I>(
       reducer: (state: S, action: A) => S,

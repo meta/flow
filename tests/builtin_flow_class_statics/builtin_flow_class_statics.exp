@@ -81,8 +81,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:10:1
 
-Cannot extend `React.Component<{}>` [1] with `Foo` [2] because in property `displayName`: `void` [3] is incompatible
-with `string` [4]. [incompatible-type]
+Cannot extend `React.Component<{}>` [1] with `Foo` [2] because in property `displayName`: `undefined` [3] is
+incompatible with `string` [4]. [incompatible-type]
 
 This property is invariantly typed. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.

@@ -249,7 +249,7 @@ type RefSetter<in T> =
   | { writeonly current: T | null, ... }
   | ((instance: T | null) => unknown)
   | null
-  | void;
+  | undefined;
 ```
 
 Here `in` and `writeonly` are [contravariance](../lang/variance.md#toc-contravariance) annotations, which are rarely seen in everyday code.
@@ -260,7 +260,7 @@ See [Accepting a ref with `React.RefSetter`](./refs.md#toc-accepting-a-ref) for 
 
 When using [Component Syntax](./component-syntax.md), `React.RefOf<Component>` will give you
 the type of the `current` field on the `ref` prop of the component. If there is no `ref` prop
-on the component it will return `void`.
+on the component it will return `undefined`.
 
 ```js flow-check
 import * as React from 'react';
@@ -288,7 +288,7 @@ various component types:
   `React.ElementRef<typeof Foo>` then the type would be the instance of `Foo`.
 - React function components do not have a backing instance and so
   `React.ElementRef<typeof Bar>` (when `Bar` is `function Bar() {}`) will give
-  you the void type.
+  you the `undefined` type.
 - JSX intrinsics like `div` will give you their DOM instance. For
   `React.ElementRef<'div'>` that would be `HTMLDivElement`. For
   `React.ElementRef<'input'>` that would be `HTMLInputElement`.

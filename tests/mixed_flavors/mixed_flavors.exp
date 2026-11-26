@@ -42,7 +42,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ test.js:6:9
 
-Cannot cast `42` to `NonNullable<unknown>` because `void` [1] is incompatible with `unknown` [2]. [incompatible-type]
+Cannot cast `42` to `NonNullable<unknown>` because `undefined` [1] is incompatible with `unknown` [2].
+[incompatible-type]
 
    test.js:6:9
    6|   42 as ?number as NonNullable<unknown>; // error null | undefined ~> MixedT (NonMaybe)
@@ -84,7 +85,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:33:3
 
-Cannot cast `obj.a` to `NonNullable<unknown>` because `void` [1] is incompatible with `unknown` [2]. [incompatible-type]
+Cannot cast `obj.a` to `NonNullable<unknown>` because `undefined` [1] is incompatible with `unknown` [2].
+[incompatible-type]
 
    test.js:33:3
    33|   obj.a as NonNullable<unknown>; // error undefined ~> MixedT (non-maybe)
@@ -101,7 +103,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:34:3
 
-Cannot cast `obj.a` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `obj.a` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    test.js:34:3
    34|   obj.a as number; // error

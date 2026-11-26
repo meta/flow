@@ -39,7 +39,7 @@ match (value) {
 }
 ```
 
-Flow will never output an “unused pattern” error for the `undefined` pattern, so you can always add it even if the input type does not contain `void`. This is to cover the case where Flow does not compute a type that is 100% accurate to the runtime value (for example, from indexed access of an array past its length).
+Flow will never output an “unused pattern” error for the `undefined` pattern, so you can always add it even if the input type does not contain `undefined`. This is to cover the case where Flow does not compute a type that is 100% accurate to the runtime value (for example, from indexed access of an array past its length).
 
 At runtime, these checks are done using triple equals `===`.
 

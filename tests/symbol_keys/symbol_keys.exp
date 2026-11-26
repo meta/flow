@@ -794,7 +794,7 @@ References:
 
 Error --------------------------------------------------------------------------------------- mapped_homomorphic.js:18:1
 
-Cannot cast `p[Keys.a]` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `p[Keys.a]` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    mapped_homomorphic.js:18:1
    18| p[Keys.a] as number; // ERROR: the property is optional, so it may be void

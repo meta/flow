@@ -19,7 +19,7 @@ component BannedGenericRenders1<T extends Error>(children: T) renders? T { retur
 component BannedGenericRenders2<T extends React.Node>(children: T) renders? (T | GoodComponentRenders) { return children } // error
 type AllowedGenericRenders<T extends React.Node> = renders T; // ok
 
-type BadSpecificRenders1 = renders (false | null | void); // error
+type BadSpecificRenders1 = renders (false | null | undefined); // error
 type BadSpecificRenders2 = renders (Array<Foo>); // error
 type BadSpecificRenders3 = renders (ReadonlyArray<Foo>); // error
 type BadSpecificRenders4 = renders (Iterable<Foo>); // error

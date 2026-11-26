@@ -221,7 +221,6 @@ pub struct FrozenMetadata {
     pub stylex_shorthand_prop: Option<String>,
     pub export_star_excludes_default: bool,
     pub ts_syntax: bool,
-    pub ts_void: bool,
     pub tslib_syntax: bool,
     pub typescript_library_definition_support: bool,
     pub type_expansion_recursion_limit: i32,
@@ -282,7 +281,6 @@ impl Default for FrozenMetadata {
             stylex_shorthand_prop: None,
             export_star_excludes_default: false,
             ts_syntax: false,
-            ts_void: false,
             tslib_syntax: false,
             typescript_library_definition_support: false,
             type_expansion_recursion_limit: 3,
@@ -994,7 +992,6 @@ pub fn mk_context_metadata(options: &Options, global_libdefs: Arc<BTreeSet<FileK
             stylex_shorthand_prop: options.stylex_shorthand_prop.clone(),
             export_star_excludes_default: options.export_star_excludes_default,
             ts_syntax: options.ts_syntax,
-            ts_void: options.ts_void,
             tslib_syntax: options.tslib_syntax,
             typescript_library_definition_support: options.typescript_library_definition_support,
             assert_operator: options.assert_operator,
@@ -1803,7 +1800,7 @@ impl<'a> Context<'a> {
 
     /// Whether `void` is TypeScript's `void` rather than `undefined`.
     pub fn ts_void(&self) -> bool {
-        self.inner().metadata.frozen.ts_void
+        true
     }
 
     /// Whether TypeScript's definite assignment assertions (`let x!: T`, `value!: T`) are

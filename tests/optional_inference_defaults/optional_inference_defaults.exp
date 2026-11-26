@@ -85,7 +85,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:24:1
 
-Cannot call `required` because in type argument `T`: `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot call `required` because in type argument `T`: `undefined` [1] is incompatible with `number` [2].
+[incompatible-type]
 
    test.js:24:1
    24| required(); // ERROR
@@ -102,7 +103,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:29:1
 
-Cannot cast `suppliedVoid` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `suppliedVoid` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    test.js:29:1
    29| suppliedVoid as string; // ERROR

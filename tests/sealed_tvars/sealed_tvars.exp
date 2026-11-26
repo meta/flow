@@ -208,7 +208,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------- regression_tests.js:20:12
 
-Cannot return `42` because `number` [1] is incompatible with `void` [2]. [incompatible-type]
+Cannot return `42` because `number` [1] is incompatible with `undefined` [2]. [incompatible-type]
 
    regression_tests.js:20:12
    20|     return 42;

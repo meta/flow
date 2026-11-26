@@ -58,7 +58,7 @@ Found 1 error
 === block 8 ===
 Error ------------------------------------------------------------------------------ -:10:27
 
-Cannot assign `response.value` to `value` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot assign `response.value` to `value` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    -:10:27
    10|     const value: number = response.value; // Error!
@@ -74,7 +74,7 @@ References:
 
 Error ------------------------------------------------------------------------------ -:12:27
 
-Cannot assign `response.error` to `error` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot assign `response.error` to `error` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    -:12:27
    12|     const error: string = response.error; // Error!

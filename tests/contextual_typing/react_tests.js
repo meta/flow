@@ -17,6 +17,7 @@ function react_abstract_component_subtyping() {
   const _: React.ComponentType<{foo: string}> = (props) => {
     props.foo as string; // ok
     props as empty; // error
+    return null;
   };
 }
 

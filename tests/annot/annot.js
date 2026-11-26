@@ -56,5 +56,5 @@ var toz : null = 3;
 
 var zer : null = null;
 
-function foobar(n : ?number) : number | null | void { return n; }
-function barfoo(n : number | null | void) : ?number { return n; }
+function foobar(n : ?number) : number | null | undefined { return n; }
+function barfoo(n : number | null | undefined) : ?number { return n; }

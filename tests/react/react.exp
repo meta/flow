@@ -32,7 +32,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast object literal to `React.ComponentProps<typeof A>` because in property `p`: [incompatible-type]
  - Either `"foo"` [1] is incompatible with `number` [2].
- - Or `"foo"` [1] is incompatible with `void` [3].
+ - Or `"foo"` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -54,7 +54,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast object literal to `React.ComponentProps<typeof B>` because in property `p`: [incompatible-type]
  - Either `"foo"` [1] is incompatible with `number` [2].
- - Or `"foo"` [1] is incompatible with `void` [3].
+ - Or `"foo"` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -75,7 +75,7 @@ References:
 Error ------------------------------------------------------------------------------------------ component_props.js:58:9
 
 Cannot cast `{...}` to `React.ComponentProps<typeof C>` because properties `p` and `ref` are missing in `{...}` [1] but
-exist in `{readonly p?: {p: {p: ?number, ref?: React.RefSetter<C>, ...}["p"]}["p"] | void, readonly ref?: {p: ...` [2].
+exist in `{readonly p?: {p: {p: ?number, ref?: React.RefSetter<C>, ...}["p"]}["p"] | undefined, readonly ref?:...` [2].
 [incompatible-type]
 
    component_props.js:58:9
@@ -92,7 +92,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast object literal to `React.ComponentProps<typeof C>` because in property `p`: [incompatible-type]
  - Either `"foo"` [1] is incompatible with `number` [2].
- - Or `"foo"` [1] is incompatible with `void` [3].
+ - Or `"foo"` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -113,7 +113,7 @@ References:
 Error ------------------------------------------------------------------------------------------ component_props.js:62:9
 
 Cannot cast `{...}` to `React.ComponentProps<typeof D>` because properties `p` and `ref` are missing in `{...}` [1] but
-exist in `{readonly p?: {p: {p: ?number, ref?: React.RefSetter<D>, ...}["p"]}["p"] | void, readonly ref?: {p: ...` [2].
+exist in `{readonly p?: {p: {p: ?number, ref?: React.RefSetter<D>, ...}["p"]}["p"] | undefined, readonly ref?:...` [2].
 [incompatible-type]
 
    component_props.js:62:9
@@ -130,7 +130,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast object literal to `React.ComponentProps<typeof D>` because in property `p`: [incompatible-type]
  - Either `"foo"` [1] is incompatible with `number` [2].
- - Or `"foo"` [1] is incompatible with `void` [3].
+ - Or `"foo"` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -184,7 +184,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast object literal to `React.ComponentProps<typeof G>` because in property `p`: [incompatible-type]
  - Either `"foo"` [1] is incompatible with `number` [2].
- - Or `"foo"` [1] is incompatible with `void` [3].
+ - Or `"foo"` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -206,7 +206,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast object literal to `React.ComponentProps<typeof H>` because in property `p`: [incompatible-type]
  - Either `"foo"` [1] is incompatible with `number` [2].
- - Or `"foo"` [1] is incompatible with `void` [3].
+ - Or `"foo"` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -228,7 +228,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast object literal to `React.ComponentProps<typeof I>` because in property `p`: [incompatible-type]
  - Either `"foo"` [1] is incompatible with `number` [2].
- - Or `"foo"` [1] is incompatible with `void` [3].
+ - Or `"foo"` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -250,7 +250,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast object literal to `React.ComponentProps<typeof J>` because in property `p`: [incompatible-type]
  - Either `"foo"` [1] is incompatible with `number` [2].
- - Or `"foo"` [1] is incompatible with `void` [3].
+ - Or `"foo"` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -439,7 +439,7 @@ Error --------------------------------------------------------------------------
 
 Cannot create `Foo` element because in property `bar`: [incompatible-type]
  - Either `"42"` [1] is incompatible with `number` [2].
- - Or `"42"` [1] is incompatible with `void` [3].
+ - Or `"42"` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -535,15 +535,15 @@ Cannot call `myHOC` with function bound to `Component` because in property `foo`
 `string` [2]. [incompatible-type]
 
    hoc.js:34:7
-   34| myHOC(function Empty(props: {foo: string, ...}) {}); // Error
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   34| myHOC(function Empty(props: {foo: string, ...}) { return undefined; }); // Error
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    hoc.js:4:61
     4|   Component: component(ref?: React.RefSetter<unknown>, foo: number, bar: number),
                                                                    ^^^^^^ [1]
    hoc.js:34:35
-   34| myHOC(function Empty(props: {foo: string, ...}) {}); // Error
+   34| myHOC(function Empty(props: {foo: string, ...}) { return undefined; }); // Error
                                          ^^^^^^ [2]
 
 
@@ -843,7 +843,7 @@ Error --------------------------------------------------------------------------
 
 Cannot create `MyComponent1` element because in property `foo`: [incompatible-type]
  - Either `100` [1] is incompatible with `string` [2].
- - Or `100` [1] is incompatible with `void` [3].
+ - Or `100` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -899,7 +899,7 @@ Error --------------------------------------------------------------------------
 
 Cannot create `MyEnhancedComponent1` element because in property `foo`: [incompatible-type]
  - Either `100` [1] is incompatible with `string` [2].
- - Or `100` [1] is incompatible with `void` [3].
+ - Or `100` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -963,7 +963,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- import_react.js:7:17
 
-Cannot assign `new react.Component()` to `b` because `Component<void, void>` [1] is incompatible with `number` [2].
+Cannot assign `new react.Component()` to `b` because `Component<undefined, void>` [1] is incompatible with `number` [2].
 [incompatible-type]
 
    import_react.js:7:17
@@ -1397,34 +1397,6 @@ References:
                                        ^^^^ [3]
 
 
-Error ----------------------------------------------------------------------------------------------------- ref.js:16:11
-
-Cannot create `Foo` element because in property `ref`: [incompatible-type]
- - Either in the return value > the return value: `42` [1] is incompatible with `void` [2].
- - Or in the return value: `() => 42` [3] is incompatible with `void` [4].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
-
-   ref.js:16:11
-    16| <Foo ref={(foo: Foo | null) => () => 42} />; // Error: cleanup functions may not return values.
-                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-References:
-   ref.js:16:38
-    16| <Foo ref={(foo: Foo | null) => () => 42} />; // Error: cleanup functions may not return values.
-                                             ^^ [1]
-   <BUILTINS>/react.js:108:46
-   108|     | ((instance: T | null) => void | (() => void))
-                                                     ^^^^ [2]
-   ref.js:16:32
-    16| <Foo ref={(foo: Foo | null) => () => 42} />; // Error: cleanup functions may not return values.
-                                       ^^^^^^^^ [3]
-   <BUILTINS>/react.js:108:32
-   108|     | ((instance: T | null) => void | (() => void))
-                                       ^^^^ [4]
-
-
 Error ----------------------------------------------------------------------------------------------------- ref.js:21:15
 
 Cannot create `FooExact` element because in property `ref`: [incompatible-type]
@@ -1523,7 +1495,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- undefined_prop.js:5:21
 
-Cannot create `MyComponent` element because in property `title`: `void` [1] is incompatible with `string` [2].
+Cannot create `MyComponent` element because in property `title`: `undefined` [1] is incompatible with `string` [2].
 [incompatible-type]
 
    undefined_prop.js:5:21
@@ -1538,7 +1510,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ useCallback_hook.js:4:9
 
-Cannot call `React.useCallback` because in type argument `T`: `void` [1] is incompatible with
+Cannot call `React.useCallback` because in type argument `T`: `undefined` [1] is incompatible with
 `(...args: empty) => unknown` [2]. [incompatible-type]
 
    useCallback_hook.js:4:9
@@ -1814,31 +1786,6 @@ References:
                                         ^^^^ [3]
 
 
-Error ------------------------------------------------------------------------------------------ useEffect_hook.js:23:25
-
-Cannot call `React.useEffect` with function bound to `create` because in the return value: [incompatible-type]
- - Either in the return value: `123` [1] is incompatible with `void` [2].
- - Or `() => 123` [3] is incompatible with `void` [4].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
-
-   useEffect_hook.js:23:25
-    23|   React.useEffect(() => () => 123) // Error: cleanup function should not return a value
-                                ^^^^^^^^^ [3]
-
-References:
-   useEffect_hook.js:23:31
-    23|   React.useEffect(() => () => 123) // Error: cleanup function should not return a value
-                                      ^^^ [1]
-   <BUILTINS>/react.js:685:47
-   685|   declare type MaybeCleanUpFn = void | (() => void);
-                                                      ^^^^ [2]
-   <BUILTINS>/react.js:685:33
-   685|   declare type MaybeCleanUpFn = void | (() => void);
-                                        ^^^^ [4]
-
-
 Error ---------------------------------------------------------------------------------- useImperativeHandle_hook.js:4:9
 
 Cannot call `React.useImperativeHandle` because
@@ -1981,31 +1928,6 @@ References:
    <BUILTINS>/react.js:685:33
    685|   declare type MaybeCleanUpFn = void | (() => void);
                                         ^^^^ [3]
-
-
-Error ------------------------------------------------------------------------------------ useLayoutEffect_hook.js:23:31
-
-Cannot call `React.useLayoutEffect` with function bound to `create` because in the return value: [incompatible-type]
- - Either in the return value: `123` [1] is incompatible with `void` [2].
- - Or `() => 123` [3] is incompatible with `void` [4].
-
-Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
-not shown. To see all branches, re-run Flow with --show-all-branches.
-
-   useLayoutEffect_hook.js:23:31
-    23|   React.useLayoutEffect(() => () => 123) // Error: cleanup function should not return a value
-                                      ^^^^^^^^^ [3]
-
-References:
-   useLayoutEffect_hook.js:23:37
-    23|   React.useLayoutEffect(() => () => 123) // Error: cleanup function should not return a value
-                                            ^^^ [1]
-   <BUILTINS>/react.js:685:47
-   685|   declare type MaybeCleanUpFn = void | (() => void);
-                                                      ^^^^ [2]
-   <BUILTINS>/react.js:685:33
-   685|   declare type MaybeCleanUpFn = void | (() => void);
-                                        ^^^^ [4]
 
 
 Error ---------------------------------------------------------------------------------------------- useMemo_hook.js:4:9
@@ -2174,11 +2096,11 @@ References:
 Error ------------------------------------------------------------------------------------------- useReducer_hook.js:4:9
 
 Cannot call `React.useReducer` because: [incompatible-type]
- - Either `(reducer: (state: void, action: any) => void, initialState: void) => [void, React.Dispatch<any>]` [1]
+ - Either `(reducer: (state: undefined, action: any) => undefined, initialState: undefined) => [undefined, Reac...` [1]
    requires another argument from call of method `useReducer` [2].
- - Or `(reducer: (state: void, action: any) => void, initialState: void, init: void) => [void, React.Dispat...` [3]
+ - Or `(reducer: (state: undefined, action: any) => undefined, initialState: undefined, init: undefined) =>...` [3]
    requires another argument from call of method `useReducer` [2].
- - Or `(reducer: (state: any, action: any) => any, initialArg: void, init: (initialArg: void) => any) => [a...` [4]
+ - Or `(reducer: (state: any, action: any) => any, initialArg: undefined, init: (initialArg: undefined) => ...` [4]
    requires another argument from call of method `useReducer` [2].
 
    useReducer_hook.js:4:9
@@ -2514,8 +2436,8 @@ References:
 Error ------------------------------------------------------------------------------------------------- use_hook.js:25:7
 
 Cannot call `use` with `undefined` bound to `usable` because: [incompatible-type]
- - Either `void` [1] is incompatible with `Thenable<any>` [2].
- - Or `void` [1] is incompatible with `React.Context<any>` [3].
+ - Either `undefined` [1] is incompatible with `Thenable<any>` [2].
+ - Or `undefined` [1] is incompatible with `React.Context<any>` [3].
 
    use_hook.js:25:7
     25|   use(undefined);
@@ -2574,4 +2496,4 @@ References:
 
 
 
-Found 138 errors
+Found 135 errors

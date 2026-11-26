@@ -25,7 +25,7 @@ type WithReadOnlyOpt = [a: number, readonly b?: string];
   withOpt.length as 2; // ERROR
 
   withOpt[0] as number; // OK
-  withOpt[1] as string | void; // OK
+  withOpt[1] as string | undefined; // OK
   withOpt[1] as string; // ERROR
 
   withOpt[1] = undefined; // ERROR
@@ -44,7 +44,7 @@ type WithReadOnlyOpt = [a: number, readonly b?: string];
 }
 {
   declare const f11: (...args: [readonly foo?: string]) => number;
-  declare const f12: (...args: [readonly foo: string | void]) => number;
+  declare const f12: (...args: [readonly foo: string | undefined]) => number;
   declare const f2: (foo?: string) => number;
 
   f11 as typeof f2; // ok
@@ -126,7 +126,7 @@ type InvalidReqAfterOptMultiple = [a: number, b?: string, c: string, d: boolean]
 
 // `undefined` values
 {
-  [1, undefined] as [number, b?: string | void]; // OK
+  [1, undefined] as [number, b?: string | undefined]; // OK
   type O = {a?: string};
   [1, undefined] as [number, b?: O['a']]; // OK
 }

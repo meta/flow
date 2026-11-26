@@ -385,7 +385,7 @@ References:
 Error ---------------------------------------------------------------------------------------------- destructors.js:9:13
 
 Cannot create `C` element because property `bar` is missing in `{baz: 3}` [1] but exists in
-`{readonly bar: number, readonly foo?: number, readonly ref?: React.RefSetter<void>, ...}` [2]. [incompatible-type]
+`{readonly bar: number, readonly foo?: number, readonly ref?: React.RefSetter<undefined>, ...}` [2]. [incompatible-type]
 
    destructors.js:9:13
    9| const _b = <C baz={3} />; // Error, bar missing
@@ -395,31 +395,32 @@ References:
    destructors.js:9:12
    9| const _b = <C baz={3} />; // Error, bar missing
                  ^^^^^^^^^^^^^ [1]
-   destructors.js:5:87
-   5| declare const C: component(bar: number, foo?: number, ref?: React.RefSetter<void>, ...{...});
-                                                                                            ^^^^^ [2]
+   destructors.js:5:92
+   5| declare const C: component(bar: number, foo?: number, ref?: React.RefSetter<undefined>, ...{...});
+                                                                                                 ^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------- destructors.js:14:1
 
-Cannot cast `3` to `React.ElementRef<component(bar: number, foo?: number, ref?: React.RefSetter<void>)>` because `3` [1]
-is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `3` to `React.ElementRef<component(bar: number, foo?: number, ref?: React.RefSetter<undefined>)>` because
+`3` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    destructors.js:14:1
-   14| 3 as React.ElementRef<typeof C>; // Error, 3 is not void.
+   14| 3 as React.ElementRef<typeof C>; // Error, 3 is not undefined.
        ^ [1]
 
 References:
    destructors.js:14:6
-   14| 3 as React.ElementRef<typeof C>; // Error, 3 is not void.
+   14| 3 as React.ElementRef<typeof C>; // Error, 3 is not undefined.
             ^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------- destructors.js:19:2
 
-Cannot cast object literal to `React.ComponentProps<component(bar: number, foo?: number, ref?: React.RefSetter<void>)>`
-because property `bar` is missing in object literal [1] but exists in
-`{readonly bar: number, readonly foo?: number, readonly ref?: React.RefSetter<void>, ...}` [2]. [incompatible-type]
+Cannot cast object literal to
+`React.ComponentProps<component(bar: number, foo?: number, ref?: React.RefSetter<undefined>)>` because property `bar` is
+missing in object literal [1] but exists in
+`{readonly bar: number, readonly foo?: number, readonly ref?: React.RefSetter<undefined>, ...}` [2]. [incompatible-type]
 
    destructors.js:19:2
    19| ({baz: 3}) as React.ComponentProps<typeof C>; // Error, bar missing
@@ -620,7 +621,7 @@ References:
    5| Foo as component(bar: number); // error: number ~> string
                             ^^^^^^ [1]
    function_to_component_type.js:1:35
-   1| declare function Foo(props: {bar: string}): void;
+   1| declare function Foo(props: {bar: string}): undefined;
                                         ^^^^^^ [2]
 
 
@@ -638,7 +639,7 @@ References:
    6| Foo as component(...{bar: number}); // error: number ~> string
                                 ^^^^^^ [1]
    function_to_component_type.js:1:35
-   1| declare function Foo(props: {bar: string}): void;
+   1| declare function Foo(props: {bar: string}): undefined;
                                         ^^^^^^ [2]
 
 
@@ -657,7 +658,7 @@ References:
    7| Foo as component(bar: string, ref: React.RefSetter<void>); // error: extra ref prop
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    function_to_component_type.js:1:29
-   1| declare function Foo(props: {bar: string}): void;
+   1| declare function Foo(props: {bar: string}): undefined;
                                   ^^^^^^^^^^^^^ [2]
 
 
@@ -680,7 +681,7 @@ References:
    11| );
        ^ [1]
    function_to_component_type.js:1:29
-    1| declare function Foo(props: {bar: string}): void;
+    1| declare function Foo(props: {bar: string}): undefined;
                                    ^^^^^^^^^^^^^ [2]
 
 
@@ -703,7 +704,7 @@ References:
    15| );
        ^ [1]
    function_to_component_type.js:1:29
-    1| declare function Foo(props: {bar: string}): void;
+    1| declare function Foo(props: {bar: string}): undefined;
                                    ^^^^^^^^^^^^^ [2]
 
 
@@ -771,7 +772,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- get_set_props.js:8:17
 
-Cannot call `x.displayName.toString` because property `toString` is missing in `void` [1]. [incompatible-use]
+Cannot call `x.displayName.toString` because property `toString` is missing in `undefined` [1]. [incompatible-use]
 
    get_set_props.js:8:17
     8|   x.displayName.toString(); // Error maybe null or undefined
@@ -1038,7 +1039,7 @@ References:
 
 Error -------------------------------------------------------------------------- ref_prop_implicit_instantiation.js:11:1
 
-Cannot cast `refSetter` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `refSetter` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    ref_prop_implicit_instantiation.js:11:1
     11| refSetter as empty; // error

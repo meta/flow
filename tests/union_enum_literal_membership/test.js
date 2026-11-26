@@ -3,7 +3,7 @@
 type Nums = 1 | 2 | 3 | 4.5 | -1;
 type Bools = true | false;
 type BigInts = 1n | 2n;
-type Mixed = 1 | 'a' | true | 1n | null | void;
+type Mixed = 1 | 'a' | true | 1n | null | undefined;
 
 1 as Nums; // ok
 4.5 as Nums; // ok

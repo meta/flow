@@ -756,7 +756,7 @@ mod tests {
     #[test]
     fn fun_decomp_on_nonexistent_argument_of_hint() {
         mk_eval_hint_test(
-            "void",
+            "undefined",
             "() => number",
             vec![DecompFuncParam(vec![None], 0, None)],
         );
@@ -953,7 +953,7 @@ mod tests {
     #[test]
     fn obj_prop_union_some_without_prop() {
         mk_eval_hint_test(
-            "number | string | void",
+            "number | string | undefined",
             "{foo: number} | {[string]: string} | {bar: string}",
             vec![DecompObjProp(FlowSmolStr::from("foo"))],
         );
@@ -1062,7 +1062,7 @@ mod tests {
     #[test]
     fn instance_private_method_call_from_method() {
         mk_private_method_eval_hint_test(
-            "() => void",
+            "() => undefined",
             false,
             None,
             None,
@@ -1078,7 +1078,7 @@ mod tests {
     #[test]
     fn instance_private_method_call_from_static_method() {
         mk_private_method_eval_hint_test(
-            "() => void",
+            "() => undefined",
             true,
             None,
             None,
@@ -1094,7 +1094,7 @@ mod tests {
     #[test]
     fn instance_private_method_call_from_field() {
         mk_private_method_eval_hint_test(
-            "() => void",
+            "() => undefined",
             false,
             Some(Property::new(PropertyInner::Field(Box::new(FieldData {
                 preferred_def_locs: None,
@@ -1112,7 +1112,7 @@ mod tests {
     #[test]
     fn instance_private_method_call_from_static_field() {
         mk_private_method_eval_hint_test(
-            "() => void",
+            "() => undefined",
             true,
             None,
             Some(Property::new(PropertyInner::Field(Box::new(FieldData {
@@ -1225,7 +1225,7 @@ mod tests {
     #[test]
     fn jsx_fragment_ref() {
         mk_eval_hint_test_with_type_setup(
-            "void",
+            "undefined",
             "import {Fragment} from 'react'; Fragment",
             vec![DecompJsxProps, DecompObjProp(FlowSmolStr::from("children"))],
         );

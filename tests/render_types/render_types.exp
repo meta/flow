@@ -330,11 +330,12 @@ renders. If you want to express the idea of rendering zero or one item, please u
 
 Error ---------------------------------------------------------------------------------------------------- poly.js:11:15
 
-Cannot use `void` [1] as the type argument of renders type. Only elements of a component-syntax components can appear in
-renders. If you want to express the idea of rendering zero or one item, please use `renders?` instead. [invalid-render]
+Cannot use `undefined` [1] as the type argument of renders type. Only elements of a component-syntax components can
+appear in renders. If you want to express the idea of rendering zero or one item, please use `renders?` instead.
+[invalid-render]
 
-   11| el as renders void; // error
-                     ^^^^ [1]
+   11| el as renders undefined; // error
+                     ^^^^^^^^^ [1]
 
 
 Error ----------------------------------------------------------------------------------------------------- poly.js:33:6
@@ -397,13 +398,13 @@ References:
                                     ^^^^^^^^^^^^^^^^^^^ [2]
 
 
-Error ------------------------------------------------------------------------------------- poly_component_type.js:20:84
+Error ------------------------------------------------------------------------------------- poly_component_type.js:20:89
 
 Cannot use `T` [1] as the type argument of renders type. Generic render types are not allowed with `renders*`.
 [invalid-render]
 
-   20| declare const Poly3: component<T extends React.Node = void>(children?: T) renders* T; // banned
-                                                                                          ^ [1]
+   20| declare const Poly3: component<T extends React.Node = undefined>(children?: T) renders* T; // banned
+                                                                                               ^ [1]
 
 
 Error --------------------------------------------------------------------------------------------- poly_no_args.js:4:10
@@ -635,46 +636,46 @@ References:
 
 Error ------------------------------------------------------------------------------------------- renders_maybe.js:46:34
 
-Cannot use `false` [1], `null` [2] and `void` [3] as the type argument of renders type. Only elements of a
+Cannot use `false` [1], `null` [2] and `undefined` [3] as the type argument of renders type. Only elements of a
 component-syntax components can appear in renders. If you want to express the idea of rendering zero or one item, please
 use `renders?` instead. [invalid-render]
 
    renders_maybe.js:46:34
-   46| rendersMaybeMenuItem as renders (null | false | void | MenuItem); // invalid-render turns RHS any
-                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   46| rendersMaybeMenuItem as renders (null | false | undefined | MenuItem); // invalid-render turns RHS any
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    renders_maybe.js:46:41
-   46| rendersMaybeMenuItem as renders (null | false | void | MenuItem); // invalid-render turns RHS any
+   46| rendersMaybeMenuItem as renders (null | false | undefined | MenuItem); // invalid-render turns RHS any
                                                ^^^^^ [1]
    renders_maybe.js:46:34
-   46| rendersMaybeMenuItem as renders (null | false | void | MenuItem); // invalid-render turns RHS any
+   46| rendersMaybeMenuItem as renders (null | false | undefined | MenuItem); // invalid-render turns RHS any
                                         ^^^^ [2]
    renders_maybe.js:46:49
-   46| rendersMaybeMenuItem as renders (null | false | void | MenuItem); // invalid-render turns RHS any
-                                                       ^^^^ [3]
+   46| rendersMaybeMenuItem as renders (null | false | undefined | MenuItem); // invalid-render turns RHS any
+                                                       ^^^^^^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------- renders_maybe.js:48:34
 
-Cannot use `false` [1], `null` [2] and `void` [3] as the type argument of renders type. Only elements of a
+Cannot use `false` [1], `null` [2] and `undefined` [3] as the type argument of renders type. Only elements of a
 component-syntax components can appear in renders. If you want to express the idea of rendering zero or one item, please
 use `renders?` instead. [invalid-render]
 
    renders_maybe.js:48:34
-   48| rendersMaybeMenuItem as renders (null | false | void | Bar); // invalid-render turns RHS any
-                                        ^^^^^^^^^^^^^^^^^^^^^^^^^
+   48| rendersMaybeMenuItem as renders (null | false | undefined | Bar); // invalid-render turns RHS any
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    renders_maybe.js:48:41
-   48| rendersMaybeMenuItem as renders (null | false | void | Bar); // invalid-render turns RHS any
+   48| rendersMaybeMenuItem as renders (null | false | undefined | Bar); // invalid-render turns RHS any
                                                ^^^^^ [1]
    renders_maybe.js:48:34
-   48| rendersMaybeMenuItem as renders (null | false | void | Bar); // invalid-render turns RHS any
+   48| rendersMaybeMenuItem as renders (null | false | undefined | Bar); // invalid-render turns RHS any
                                         ^^^^ [2]
    renders_maybe.js:48:49
-   48| rendersMaybeMenuItem as renders (null | false | void | Bar); // invalid-render turns RHS any
-                                                       ^^^^ [3]
+   48| rendersMaybeMenuItem as renders (null | false | undefined | Bar); // invalid-render turns RHS any
+                                                       ^^^^^^^^^ [3]
 
 
 Error -------------------------------------------------------------------------------------------- renders_maybe.js:54:2
@@ -684,18 +685,18 @@ Cannot cast `<Bar />` to `?renders MenuItem | renders BlueMenuItem` because: [in
  - Or `Bar` element [1] does not render `BlueMenuItem` [3].
 
    renders_maybe.js:54:2
-   54| (<Bar />) as (renders MenuItem) | (renders BlueMenuItem) | null | void; // ERROR, `null` and `void` not tried
+   54| (<Bar />) as (renders MenuItem) | (renders BlueMenuItem) | null | undefined; // ERROR, `null` and `undefined` not tried
         ^^^^^^^
 
 References:
    renders_maybe.js:54:3
-   54| (<Bar />) as (renders MenuItem) | (renders BlueMenuItem) | null | void; // ERROR, `null` and `void` not tried
+   54| (<Bar />) as (renders MenuItem) | (renders BlueMenuItem) | null | undefined; // ERROR, `null` and `undefined` not tried
          ^^^ [1]
    renders_maybe.js:54:15
-   54| (<Bar />) as (renders MenuItem) | (renders BlueMenuItem) | null | void; // ERROR, `null` and `void` not tried
+   54| (<Bar />) as (renders MenuItem) | (renders BlueMenuItem) | null | undefined; // ERROR, `null` and `undefined` not tried
                      ^^^^^^^^^^^^^^^^ [2]
    renders_maybe.js:54:36
-   54| (<Bar />) as (renders MenuItem) | (renders BlueMenuItem) | null | void; // ERROR, `null` and `void` not tried
+   54| (<Bar />) as (renders MenuItem) | (renders BlueMenuItem) | null | undefined; // ERROR, `null` and `undefined` not tried
                                           ^^^^^^^^^^^^^^^^^^^^ [3]
 
 
@@ -749,27 +750,27 @@ Cannot resolve name `RendersHuh`. [cannot-resolve-name]
 
 Error -------------------------------------------------------------------------------------------- renders_star.js:29:33
 
-Cannot use `false` [1], `ReadonlyArray<renders* MenuItem>` [2], `null` [3] and `void` [4] as the type argument of
+Cannot use `false` [1], `ReadonlyArray<renders* MenuItem>` [2], `null` [3] and `undefined` [4] as the type argument of
 renders type. Only elements of a component-syntax components can appear in renders. If you want to express the idea of
 rendering zero or more items, please use `renders*` instead. [invalid-render]
 
    renders_star.js:29:33
-   29| rendersStarMenuItem as renders (null | false | void | MenuItem | ReadonlyArray<renders* MenuItem>); // type checks, but invalid-render
-                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   29| rendersStarMenuItem as renders (null | false | undefined | MenuItem | ReadonlyArray<renders* MenuItem>); // type checks, but invalid-render
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    renders_star.js:29:40
-   29| rendersStarMenuItem as renders (null | false | void | MenuItem | ReadonlyArray<renders* MenuItem>); // type checks, but invalid-render
+   29| rendersStarMenuItem as renders (null | false | undefined | MenuItem | ReadonlyArray<renders* MenuItem>); // type checks, but invalid-render
                                               ^^^^^ [1]
-   renders_star.js:29:66
-   29| rendersStarMenuItem as renders (null | false | void | MenuItem | ReadonlyArray<renders* MenuItem>); // type checks, but invalid-render
-                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   renders_star.js:29:71
+   29| rendersStarMenuItem as renders (null | false | undefined | MenuItem | ReadonlyArray<renders* MenuItem>); // type checks, but invalid-render
+                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
    renders_star.js:29:33
-   29| rendersStarMenuItem as renders (null | false | void | MenuItem | ReadonlyArray<renders* MenuItem>); // type checks, but invalid-render
+   29| rendersStarMenuItem as renders (null | false | undefined | MenuItem | ReadonlyArray<renders* MenuItem>); // type checks, but invalid-render
                                        ^^^^ [3]
    renders_star.js:29:48
-   29| rendersStarMenuItem as renders (null | false | void | MenuItem | ReadonlyArray<renders* MenuItem>); // type checks, but invalid-render
-                                                      ^^^^ [4]
+   29| rendersStarMenuItem as renders (null | false | undefined | MenuItem | ReadonlyArray<renders* MenuItem>); // type checks, but invalid-render
+                                                      ^^^^^^^^^ [4]
 
 
 Error -------------------------------------------------------------------------------------------- renders_star.js:31:35
@@ -807,9 +808,9 @@ Cannot use `ExactReactElement_DEPRECATED<any, React.ComponentProps<any>>` [1] as
 
 Error --------------------------------------------------------------------------------------- renders_to_renders.js:5:28
 
-Cannot use `Iterable<?React.Node, any, any>` [1], `null` [1] and `void` [1] as the type argument of renders type. Only
-elements of a component-syntax components can appear in renders. If you want to express the idea of rendering zero or
-more items, please use `renders*` instead. [invalid-render]
+Cannot use `Iterable<?React.Node, any, any>` [1], `null` [1] and `undefined` [1] as the type argument of renders type.
+Only elements of a component-syntax components can appear in renders. If you want to express the idea of rendering zero
+or more items, please use `renders*` instead. [invalid-render]
 
    5| component BarBad() renders React.Node { /* invalid-render */ return null; }
                                  ^^^^^^^^^^ [1]
@@ -858,9 +859,9 @@ Cannot use `ExactReactElement_DEPRECATED<any, React.ComponentProps<any>>` [1] as
 
 Error -------------------------------------------------------------------------------------- renders_to_renders.js:20:36
 
-Cannot use `Iterable<?React.Node, any, any>` [1], `null` [1] and `void` [1] as the type argument of renders type. Only
-elements of a component-syntax components can appear in renders. If you want to express the idea of rendering zero or
-more items, please use `renders*` instead. [invalid-render]
+Cannot use `Iterable<?React.Node, any, any>` [1], `null` [1] and `undefined` [1] as the type argument of renders type.
+Only elements of a component-syntax components can appear in renders. If you want to express the idea of rendering zero
+or more items, please use `renders*` instead. [invalid-render]
 
    20| declare const rendersNode: renders React.Node; // invalid-render
                                           ^^^^^^^^^^ [1]
@@ -909,9 +910,9 @@ Cannot use `ExactReactElement_DEPRECATED<any, React.ComponentProps<any>>` [1] as
 
 Error -------------------------------------------------------------------------------------- renders_to_renders.js:37:26
 
-Cannot use `Iterable<?React.Node, any, any>` [1], `null` [1] and `void` [1] as the type argument of renders type. Only
-elements of a component-syntax components can appear in renders. If you want to express the idea of rendering zero or
-more items, please use `renders*` instead. [invalid-render]
+Cannot use `Iterable<?React.Node, any, any>` [1], `null` [1] and `undefined` [1] as the type argument of renders type.
+Only elements of a component-syntax components can appear in renders. If you want to express the idea of rendering zero
+or more items, please use `renders*` instead. [invalid-render]
 
    37|   rendersNode as renders React.Node; // type checks, but invalid-render
                                 ^^^^^^^^^^ [1]
@@ -1378,7 +1379,7 @@ References:
 
 Error ------------------------------------------------------------------------------------- renders_to_renders.js:120:15
 
-Cannot get `rendersNode.props` because property `props` is missing in `void` [1]. [incompatible-use]
+Cannot get `rendersNode.props` because property `props` is missing in `undefined` [1]. [incompatible-use]
 
    renders_to_renders.js:120:15
    120|   rendersNode.props; // ERROR
@@ -1517,24 +1518,24 @@ References:
 
 Error ----------------------------------------------------------------------------------- validation/autofixable.js:7:23
 
-Cannot use `false` [1], `null` [2] and `void` [3] as the type argument of renders type. Only elements of a
+Cannot use `false` [1], `null` [2] and `undefined` [3] as the type argument of renders type. Only elements of a
 component-syntax components can appear in renders. If you want to express the idea of rendering zero or one item, please
 use `renders?` instead. [invalid-render]
 
    validation/autofixable.js:7:23
-   7| type RBad1 = renders (Foo | null | void | false);
-                            ^^^^^^^^^^^^^^^^^^^^^^^^^
+   7| type RBad1 = renders (Foo | null | undefined | false);
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   validation/autofixable.js:7:43
-   7| type RBad1 = renders (Foo | null | void | false);
-                                                ^^^^^ [1]
+   validation/autofixable.js:7:48
+   7| type RBad1 = renders (Foo | null | undefined | false);
+                                                     ^^^^^ [1]
    validation/autofixable.js:7:29
-   7| type RBad1 = renders (Foo | null | void | false);
+   7| type RBad1 = renders (Foo | null | undefined | false);
                                   ^^^^ [2]
    validation/autofixable.js:7:36
-   7| type RBad1 = renders (Foo | null | void | false);
-                                         ^^^^ [3]
+   7| type RBad1 = renders (Foo | null | undefined | false);
+                                         ^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------- validation/autofixable.js:8:23
@@ -1613,7 +1614,7 @@ References:
 
 Error ---------------------------------------------------------------------------------- validation/autofixable.js:12:23
 
-Cannot use `void` [1] and `null` [1] as the type argument of renders type. Only elements of a component-syntax
+Cannot use `undefined` [1] and `null` [1] as the type argument of renders type. Only elements of a component-syntax
 components can appear in renders. `renders?` already includes React nodes that render nothing. [invalid-render]
 
    12| type RBad6 = renders? ?Foo;
@@ -1729,9 +1730,9 @@ Cannot use `ExactReactElement_DEPRECATED<any, React.ComponentProps<any>>` [1] as
 
 Error ----------------------------------------------------------------------------------- validation/validation.js:10:25
 
-Cannot use `Iterable<?React.Node, any, any>` [1], `null` [1] and `void` [1] as the type argument of renders type. Only
-elements of a component-syntax components can appear in renders. If you want to express the idea of rendering zero or
-more items, please use `renders*` instead. [invalid-render]
+Cannot use `Iterable<?React.Node, any, any>` [1], `null` [1] and `undefined` [1] as the type argument of renders type.
+Only elements of a component-syntax components can appear in renders. If you want to express the idea of rendering zero
+or more items, please use `renders*` instead. [invalid-render]
 
    10| type RBadNode = renders React.Node; // error
                                ^^^^^^^^^^ [1]
@@ -1820,24 +1821,24 @@ References:
 
 Error ----------------------------------------------------------------------------------- validation/validation.js:22:37
 
-Cannot use `false` [1], `null` [2] and `void` [3] as the type argument of renders type. Only elements of a
+Cannot use `false` [1], `null` [2] and `undefined` [3] as the type argument of renders type. Only elements of a
 component-syntax components can appear in renders. If you want to express the idea of rendering zero or one item, please
 use `renders?` instead. [invalid-render]
 
    validation/validation.js:22:37
-   22| type BadSpecificRenders1 = renders (false | null | void); // error
-                                           ^^^^^^^^^^^^^^^^^^^
+   22| type BadSpecificRenders1 = renders (false | null | undefined); // error
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
    validation/validation.js:22:37
-   22| type BadSpecificRenders1 = renders (false | null | void); // error
+   22| type BadSpecificRenders1 = renders (false | null | undefined); // error
                                            ^^^^^ [1]
    validation/validation.js:22:45
-   22| type BadSpecificRenders1 = renders (false | null | void); // error
+   22| type BadSpecificRenders1 = renders (false | null | undefined); // error
                                                    ^^^^ [2]
    validation/validation.js:22:52
-   22| type BadSpecificRenders1 = renders (false | null | void); // error
-                                                          ^^^^ [3]
+   22| type BadSpecificRenders1 = renders (false | null | undefined); // error
+                                                          ^^^^^^^^^ [3]
 
 
 Error ----------------------------------------------------------------------------------- validation/validation.js:23:37

@@ -207,7 +207,6 @@ pub struct Options {
     pub temp_dir: FlowSmolStr,
     pub export_star_excludes_default: bool,
     pub ts_syntax: bool,
-    pub ts_void: bool,
     pub tslib_syntax: bool,
     pub typescript_library_definition_support: bool,
     pub type_expansion_recursion_limit: i32,

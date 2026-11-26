@@ -7,7 +7,7 @@ declare class Box<T> {
 }
 declare function nonnull<T>(x: ?T): T;
 declare function box<T>(values: ReadonlyArray<T>): Box<T>;
-declare function first<V>(value: Box<V>): V | void;
+declare function first<V>(value: Box<V>): V | undefined;
 declare const items: ReadonlyArray<{id: string}>;
 
 nonnull(first(box(items.map(x => x.id)))) as string; // was an error

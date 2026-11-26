@@ -72,18 +72,18 @@ Flow cannot use these keys to quickly check this union because the same supporte
    file.js:42:15
                      v----------------------------------------------
    42| type Error5 = $Flow$EnforceOptimized< // error no unique keys
-   43|   | { f: 1, g: "a", h: true, k: void, l: null, m: 1n }
-   44|   | { f: 1, g: "a", h: true, k: void, l: null, m: 1n }
+   43|   | { f: 1, g: "a", h: true, k: undefined, l: null, m: 1n }
+   44|   | { f: 1, g: "a", h: true, k: undefined, l: null, m: 1n }
    45| >;
        ^
 
 References:
    file.js:43:5
-   43|   | { f: 1, g: "a", h: true, k: void, l: null, m: 1n }
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   43|   | { f: 1, g: "a", h: true, k: undefined, l: null, m: 1n }
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    file.js:44:5
-   44|   | { f: 1, g: "a", h: true, k: void, l: null, m: 1n }
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   44|   | { f: 1, g: "a", h: true, k: undefined, l: null, m: 1n }
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------------- file.js:47:16

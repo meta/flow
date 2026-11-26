@@ -1,7 +1,7 @@
 import * as IP from '../include_provider';
 import * as XP from '../exclude_provider';
 
-function FunctionComponent() {
+function FunctionComponent(): undefined {
     IP.useFoo(); // error
     IP.useBar(); // error: it's assumed to be hook
     XP.useFoo(); // error

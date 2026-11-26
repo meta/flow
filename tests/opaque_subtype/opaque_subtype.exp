@@ -212,7 +212,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- distribute.js:15:1
 
-Cannot cast `maybeStr` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `maybeStr` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    distribute.js:15:1
    15| maybeStr as string; // error - ?string not <: string
@@ -246,7 +246,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- distribute.js:26:1
 
-Cannot cast `plainMaybe` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `plainMaybe` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    distribute.js:26:1
    26| plainMaybe as string; // error - ?string not <: string
@@ -399,7 +399,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- importtest.js:72:13
 
-Cannot assign `y` to `z` because `void` [1] is incompatible with `{readonly foo: string}` [2]. [incompatible-type]
+Cannot assign `y` to `z` because `undefined` [1] is incompatible with `{readonly foo: string}` [2]. [incompatible-type]
 
 All writes to `z` must be compatible with the type of its initializer [3]. Add an annotation to `z` [3] if a different
 type is desired.

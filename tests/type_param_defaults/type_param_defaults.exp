@@ -17,19 +17,19 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- classes.js:16:1
 
-Cannot cast `b_void.p` to `boolean` because `void` [1] is incompatible with `boolean` [2]. [incompatible-type]
+Cannot cast `b_undefined.p` to `boolean` because `undefined` [1] is incompatible with `boolean` [2]. [incompatible-type]
 
    classes.js:16:1
-   16| b_void.p as boolean; // Error void ~> boolean
-       ^^^^^^^^
+   16| b_undefined.p as boolean; // Error undefined ~> boolean
+       ^^^^^^^^^^^^^
 
 References:
-   classes.js:12:15
-   12| var b_void: B<void> = new B();
-                     ^^^^ [1]
-   classes.js:16:13
-   16| b_void.p as boolean; // Error void ~> boolean
-                   ^^^^^^^ [2]
+   classes.js:12:20
+   12| var b_undefined: B<undefined> = new B();
+                          ^^^^^^^^^ [1]
+   classes.js:16:18
+   16| b_undefined.p as boolean; // Error undefined ~> boolean
+                        ^^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------------- classes.js:17:1
@@ -82,19 +82,19 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- classes.js:25:1
 
-Cannot cast `c_void.p` to `boolean` because `void` [1] is incompatible with `boolean` [2]. [incompatible-type]
+Cannot cast `c_undefined.p` to `boolean` because `undefined` [1] is incompatible with `boolean` [2]. [incompatible-type]
 
    classes.js:25:1
-   25| c_void.p as boolean; // Error void ~> boolean
-       ^^^^^^^^
+   25| c_undefined.p as boolean; // Error undefined ~> boolean
+       ^^^^^^^^^^^^^
 
 References:
-   classes.js:22:15
-   22| var c_void: C<void> = new C();
-                     ^^^^ [1]
-   classes.js:25:13
-   25| c_void.p as boolean; // Error void ~> boolean
-                   ^^^^^^^ [2]
+   classes.js:22:20
+   22| var c_undefined: C<undefined> = new C();
+                          ^^^^^^^^^ [1]
+   classes.js:25:18
+   25| c_undefined.p as boolean; // Error undefined ~> boolean
+                        ^^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------------- classes.js:26:1
@@ -161,19 +161,19 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- classes.js:36:1
 
-Cannot cast `d_void.p` to `boolean` because `void` [1] is incompatible with `boolean` [2]. [incompatible-type]
+Cannot cast `d_undefined.p` to `boolean` because `undefined` [1] is incompatible with `boolean` [2]. [incompatible-type]
 
    classes.js:36:1
-   36| d_void.p as boolean; // Error void ~> boolean
-       ^^^^^^^^
+   36| d_undefined.p as boolean; // Error undefined ~> boolean
+       ^^^^^^^^^^^^^
 
 References:
-   classes.js:30:24
-   30| var d_void: D<unknown, void> = new D();
-                              ^^^^ [1]
-   classes.js:36:13
-   36| d_void.p as boolean; // Error void ~> boolean
-                   ^^^^^^^ [2]
+   classes.js:30:29
+   30| var d_undefined: D<unknown, undefined> = new D();
+                                   ^^^^^^^^^ [1]
+   classes.js:36:18
+   36| d_undefined.p as boolean; // Error undefined ~> boolean
+                        ^^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------------- classes.js:37:1

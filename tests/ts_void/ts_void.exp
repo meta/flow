@@ -227,7 +227,7 @@ References:
    generators.js:3:15
                      v
     3| function* g() {
-    4|   yield 1;
+    4|   (yield 1) as void;
     5| }
        ^ [4]
    generators.js:8:33

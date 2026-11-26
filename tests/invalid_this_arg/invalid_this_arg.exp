@@ -175,7 +175,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- rejected.js:12:1
 
-Cannot call `o.m.call` because in the `this` parameter: `{x: number, ...}` [1] is incompatible with `void` [2].
+Cannot call `o.m.call` because in the `this` parameter: `{x: number, ...}` [1] is incompatible with `undefined` [2].
 [incompatible-type]
 
    rejected.js:12:1
@@ -210,7 +210,7 @@ References:
 Error ------------------------------------------------------------------------------------------------- rejected.js:13:5
 
 Cannot call `o.m.bind` because: [incompatible-type]
- - Either in the `this` parameter: `{x: number, ...}` [1] is incompatible with `void` [2].
+ - Either in the `this` parameter: `{x: number, ...}` [1] is incompatible with `undefined` [2].
  - Or `(this: (this: {x: number, ...}, y: number) => void, thisArg: ThisParameterType<(this: {x: number, .....` [3]
    requires another argument from call of method `bind` [2].
 

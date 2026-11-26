@@ -566,7 +566,7 @@ const FooStore = {
     useFeatureFlag() { }
 }
 class Foo extends React.Component<any> {
-  render() {
+  render(): undefined {
     if (cond) {
       FooStore.useFeatureFlag();
     }
@@ -973,7 +973,7 @@ const browserHistory = useBasename(createHistory)({
 
 hook useFeatureFlag() { }
 class ClassComponentWithFeatureFlag extends React.Component<any> {
-  render() {
+  render(): undefined {
     if (foo) {
       useFeatureFlag(); // error
     }
@@ -982,7 +982,7 @@ class ClassComponentWithFeatureFlag extends React.Component<any> {
 /* [classError('useFeatureFlag')] */
 
 class ClassComponentWithHook extends React.Component<any> {
-  render() {
+  render(): undefined {
     ReactWithHooks.useState(); // error
   }
 }

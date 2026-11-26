@@ -39,7 +39,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- undefined.js:13:11
 
-Cannot get `undefined['foo']` because `void` [1] does not have properties. [incompatible-use]
+Cannot get `undefined['foo']` because `undefined` [1] does not have properties. [incompatible-use]
 
    undefined.js:13:11
    13| undefined['foo']; // Error
@@ -95,7 +95,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ undefined2.js:5:5
 
-Cannot cast `name` to `boolean` because `void` [1] is incompatible with `boolean` [2]. [incompatible-type]
+Cannot cast `name` to `boolean` because `undefined` [1] is incompatible with `boolean` [2]. [incompatible-type]
 
    undefined2.js:5:5
    5|     name as boolean; // error, string or void
@@ -112,7 +112,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- undefined2.js:11:5
 
-Cannot cast `bar[x]` to `boolean` because `void` [1] is incompatible with `boolean` [2]. [incompatible-type]
+Cannot cast `bar[x]` to `boolean` because `undefined` [1] is incompatible with `boolean` [2]. [incompatible-type]
 
    undefined2.js:11:5
    11|     bar[x] as boolean; // error, string or void

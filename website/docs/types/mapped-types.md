@@ -161,7 +161,7 @@ combined.value as number | string; // OK
 combined.value as number; // ERROR: the value can also be a string
 ```
 
-Without explicit property modifiers, a merged property is optional if any contributor is optional. It remains read-only if any contributor is `readonly`. You can omit an optional merged property, and reading it includes `void` in the value type. Use the [property modifiers](#toc-property-modifiers) to change these attributes.
+Without explicit property modifiers, a merged property is optional if any contributor is optional. It remains read-only if any contributor is `readonly`. You can omit an optional merged property, and reading it includes `undefined` in the value type. Use the [property modifiers](#toc-property-modifiers) to change these attributes.
 
 Identity remapping (`as K`) over an inline `keyof` preserves an inexact source's open shape and dictionary indexers. A nonidentity remapping produces an exact object when no destination indexer survives. Dropping every indexer and property with `as empty` produces `{}`. Do not assume that remapping an open-ended string pattern behaves the same as remapping a finite union of names.
 

@@ -254,8 +254,8 @@ Cannot cast `opt` to `"c"` because in at least one member of `"d" | "c"` [1]: `"
 
 References:
    intersection.js:35:20
-   35| declare const opt: keyof ((void | {d: number}) & {c: number});
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   35| declare const opt: keyof ((undefined | {d: number}) & {c: number});
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    intersection.js:36:8
    36| opt as 'c'; // error: 'd' is a key too
               ^^^ [3]

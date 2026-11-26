@@ -69,7 +69,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- class.js:39:44
 
-Cannot assign `foo.propWithSubtypingGetterAndSetter` to `testSubtypingGetterAndSetter` because `void` [1] is
+Cannot assign `foo.propWithSubtypingGetterAndSetter` to `testSubtypingGetterAndSetter` because `undefined` [1] is
 incompatible with `number` [2]. [incompatible-type]
 
    class.js:39:44
@@ -180,7 +180,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- declare_class.js:44:44
 
-Cannot assign `foo.propWithSubtypingGetterAndSetter` to `testSubtypingGetterAndSetter` because `void` [1] is
+Cannot assign `foo.propWithSubtypingGetterAndSetter` to `testSubtypingGetterAndSetter` because `undefined` [1] is
 incompatible with `number` [2]. [incompatible-type]
 
    declare_class.js:44:44
@@ -268,7 +268,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- object.js:65:44
 
-Cannot assign `obj.propWithSubtypingGetterAndSetter` to `testSubtypingGetterAndSetter` because `void` [1] is
+Cannot assign `obj.propWithSubtypingGetterAndSetter` to `testSubtypingGetterAndSetter` because `undefined` [1] is
 incompatible with `number` [2]. [incompatible-type]
 
    object.js:65:44
@@ -403,7 +403,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- object_type.js:43:46
 
-Cannot assign `obj.propWithSubtypingGetterAndSetter` to `testSubtypingGetterAndSetter` because `void` [1] is
+Cannot assign `obj.propWithSubtypingGetterAndSetter` to `testSubtypingGetterAndSetter` because `undefined` [1] is
 incompatible with `number` [2]. [incompatible-type]
 
    object_type.js:43:46

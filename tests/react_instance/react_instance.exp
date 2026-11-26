@@ -56,7 +56,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- function.js:5:39
 
-Cannot get `any.nope` because property `nope` is missing in `void` [1]. [incompatible-use]
+Cannot get `any.nope` because property `nope` is missing in `undefined` [1]. [incompatible-use]
 
    function.js:5:39
    5| (any as React.ElementRef<typeof Foo>).nope; // Error

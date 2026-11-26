@@ -120,7 +120,7 @@ References:
 Error ---------------------------------------------------------------------------------------------------- test.js:25:43
 
 Cannot instantiate `React.DetailedReactHTMLElement` because in type argument `P`: `{role: number}` [1] is incompatible
-with `React.HTMLAttributes<HTMLDivElement>` [2]. For example, `number` [3] is incompatible with `void` [4].
+with `React.HTMLAttributes<HTMLDivElement>` [2]. For example, `number` [3] is incompatible with `undefined` [4].
 [incompatible-type]
 
    test.js:25:43

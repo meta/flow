@@ -34,7 +34,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- basic_types.js:1:1
 
-Cannot cast `null` to `void` because `null` [1] is incompatible with `void` [2]. [incompatible-type]
+Cannot cast `null` to `undefined` because `null` [1] is incompatible with `undefined` [2]. [incompatible-type]
 
    basic_types.js:1:1
    1| null as undefined; // error
@@ -236,7 +236,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ optional_indexer.js:3:1
 
-Cannot cast `t["foo"]` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `t["foo"]` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    optional_indexer.js:3:1
    3| t["foo"] as number; // ERROR - undefined is not number
@@ -253,7 +253,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ optional_indexer.js:7:1
 
-Cannot cast `s["foo"]` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `s["foo"]` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    optional_indexer.js:7:1
    7| s["foo"] as number; // ERROR - undefined is not number
@@ -270,7 +270,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------- optional_indexer.js:13:1
 
-Cannot cast `c["foo"]` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `c["foo"]` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    optional_indexer.js:13:1
    13| c["foo"] as number; // ERROR - undefined is not number
@@ -287,7 +287,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------- optional_indexer.js:19:1
 
-Cannot cast `i["foo"]` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `i["foo"]` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    optional_indexer.js:19:1
    19| i["foo"] as number; // ERROR - undefined is not number
@@ -720,7 +720,7 @@ References:
 
 Error -------------------------------------------------------------------------------------- private_constructor.js:13:5
 
-Cannot call `Singleton` because `(x: number) => void` [1] requires another argument. [incompatible-type]
+Cannot call `Singleton` because `(x: number) => undefined` [1] requires another argument. [incompatible-type]
 
    private_constructor.js:13:5
    13| new Singleton(); // ERROR: requires `x` arg

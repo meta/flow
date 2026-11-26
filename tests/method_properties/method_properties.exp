@@ -29,7 +29,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:13:5
 
-Cannot call `foo.bar` because `void` [1] is not a function. [not-a-function]
+Cannot call `foo.bar` because `undefined` [1] is not a function. [not-a-function]
 
    test.js:13:5
    13| foo.bar() as string; // error, could be undefined
@@ -43,7 +43,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:16:5
 
-Cannot call `x.bar` because `void` [1] is not a function. [not-a-function]
+Cannot call `x.bar` because `undefined` [1] is not a function. [not-a-function]
 
    test.js:16:5
    16|   x.bar() as string; // error. caused by `f(foo)`; annotate x to track it down.

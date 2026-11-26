@@ -62,7 +62,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- object.ts:25:20
 
-Cannot assign `undefined` to `p2` because `void` [1] is incompatible with `interface {}` [2]. [incompatible-type]
+Cannot assign `undefined` to `p2` because `undefined` [1] is incompatible with `interface {}` [2]. [incompatible-type]
 
    object.ts:25:20
    25| const p2: object = undefined; // ERROR -- void is not an object

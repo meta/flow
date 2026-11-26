@@ -814,7 +814,7 @@ References:
 
 Error -------------------------------------------------------------------------------------- use_optional_methods.js:7:1
 
-Cannot cast `instance.optionalMethod` to `(x: number) => void` because `void` [1] is incompatible with
+Cannot cast `instance.optionalMethod` to `(x: number) => void` because `undefined` [1] is incompatible with
 `(x: number) => void` [2]. [incompatible-type]
 
    use_optional_methods.js:7:1
@@ -832,7 +832,7 @@ References:
 
 Error ------------------------------------------------------------------------------------- use_optional_methods.js:11:1
 
-Cannot cast `OptionalMethods.optionalStaticMethod` to `() => string` because `void` [1] is incompatible with
+Cannot cast `OptionalMethods.optionalStaticMethod` to `() => string` because `undefined` [1] is incompatible with
 `() => string` [2]. [incompatible-type]
 
    use_optional_methods.js:11:1
@@ -850,8 +850,8 @@ References:
 
 Error ------------------------------------------------------------------------------------- use_optional_methods.js:15:1
 
-Cannot cast `instance.optionalGeneric` to `<T>(x: T) => T` because `void` [1] is incompatible with `(x: T) => T` [2].
-[incompatible-type]
+Cannot cast `instance.optionalGeneric` to `<T>(x: T) => T` because `undefined` [1] is incompatible with
+`(x: T) => T` [2]. [incompatible-type]
 
    use_optional_methods.js:15:1
    15| instance.optionalGeneric as <T>(x: T) => T; // ERROR: could be void

@@ -252,17 +252,17 @@ References:
 
 Error ----------------------------------------------------------------------------------- failed_operations_any.js:42:28
 
-Cannot call `map` with function bound to `fn` because in the return value: `string` [1] is incompatible with `void` [2].
-[incompatible-type]
+Cannot call `map` with function bound to `fn` because in the return value: `string` [1] is incompatible with
+`undefined` [2]. [incompatible-type]
 
    failed_operations_any.js:42:28
-   42|   map(x, child => child as string); // error (2): `child` is `unknown`; callback must return `void`
+   42|   map(x, child => child as string); // error (2): `child` is `unknown`; callback must return `undefined`
                                   ^^^^^^ [1]
 
 References:
    failed_operations_any.js:39:55
-   39|   declare function map<T>(c: CA<T>, fn: (child: T) => void): void;
-                                                             ^^^^ [2]
+   39|   declare function map<T>(c: CA<T>, fn: (child: T) => undefined): void;
+                                                             ^^^^^^^^^ [2]
 
 
 Error ----------------------------------------------------------------------------------- failed_operations_any.js:42:19
@@ -270,25 +270,25 @@ Error --------------------------------------------------------------------------
 Cannot cast `child` to `string` because `unknown` [1] is incompatible with `string` [2]. [incompatible-type]
 
    failed_operations_any.js:42:19
-   42|   map(x, child => child as string); // error (2): `child` is `unknown`; callback must return `void`
+   42|   map(x, child => child as string); // error (2): `child` is `unknown`; callback must return `undefined`
                          ^^^^^
 
 References:
    failed_operations_any.js:39:24
-   39|   declare function map<T>(c: CA<T>, fn: (child: T) => void): void;
+   39|   declare function map<T>(c: CA<T>, fn: (child: T) => undefined): void;
                               ^ [1]
    failed_operations_any.js:42:28
-   42|   map(x, child => child as string); // error (2): `child` is `unknown`; callback must return `void`
+   42|   map(x, child => child as string); // error (2): `child` is `unknown`; callback must return `undefined`
                                   ^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------- filter_optional_property.js:8:7
 
-Cannot cast `[...].filter(...)` to `Array<string>` because in array element: `void` [1] is not exactly the same as
+Cannot cast `[...].filter(...)` to `Array<string>` because in array element: `undefined` [1] is not exactly the same as
 `string` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
-- Either make `Array<void>` [3] and `Array<string>` [4] exactly the same
+- Either make `Array<undefined>` [3] and `Array<string>` [4] exactly the same
 - Or make `Array<string>` [4] a `ReadonlyArray`.
 See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
 
@@ -1009,7 +1009,7 @@ Cannot cast `fromUnion` to `string` because `number` [1] is incompatible with `s
 
 References:
    optional_slot.js:16:28
-   16| declare const maybeNumber: number | void;
+   16| declare const maybeNumber: number | undefined;
                                   ^^^^^^ [1]
    optional_slot.js:19:14
    19| fromUnion as string; // error
@@ -1072,7 +1072,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- optional_slot.js:95:1
 
-Cannot cast `fromCallback` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `fromCallback` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    optional_slot.js:95:1
    95| fromCallback as number; // error
@@ -1124,11 +1124,11 @@ References:
 Error ------------------------------------------------------------------------------------------ optional_slot.js:139:32
 
 Cannot call `unifyRequired` with `optionalElements` bound to `x` because in array element: `[a?: number]` [1] is not
-exactly the same as `[a: void | number]` [2]. [incompatible-type]
+exactly the same as `[a: undefined | number]` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
-- Either make `Array<[a?: number]>` [3] and `Array<[a: void | number]>` [4] exactly the same
-- Or make `Array<[a: void | number]>` [4] a `ReadonlyArray`.
+- Either make `Array<[a?: number]>` [3] and `Array<[a: undefined | number]>` [4] exactly the same
+- Or make `Array<[a: undefined | number]>` [4] a `ReadonlyArray`.
 See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
 
    optional_slot.js:139:32
@@ -1169,7 +1169,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- optional_slot.js:140:1
 
-Cannot cast `required` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `required` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    optional_slot.js:140:1
    140| required as empty; // error
@@ -1186,11 +1186,11 @@ References:
 
 Error ------------------------------------------------------------------------------------------ optional_slot.js:143:32
 
-Cannot call `unifyOptional` with `requiredElements` bound to `x` because in array element: `[a: number | void]` [1] is
-not exactly the same as `[a?: number]` [2]. [incompatible-type]
+Cannot call `unifyOptional` with `requiredElements` bound to `x` because in array element: `[a: number | undefined]` [1]
+is not exactly the same as `[a?: number]` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because arrays are invariantly typed. To fix the error,
-- Either make `Array<[a: number | void]>` [3] and `Array<[a?: number]>` [4] exactly the same
+- Either make `Array<[a: number | undefined]>` [3] and `Array<[a?: number]>` [4] exactly the same
 - Or make `Array<[a?: number]>` [4] a `ReadonlyArray`.
 See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-that-takes-an-arraystring-number.
 
@@ -1200,14 +1200,14 @@ See https://flow.org/en/docs/faq/#why-cant-i-pass-an-arraystring-to-a-function-t
 
 References:
    optional_slot.js:142:39
-   142| declare const requiredElements: Array<[a: number | void]>;
-                                              ^^^^^^^^^^^^^^^^^^ [1]
+   142| declare const requiredElements: Array<[a: number | undefined]>;
+                                              ^^^^^^^^^^^^^^^^^^^^^^^ [1]
    optional_slot.js:141:44
    141| declare function unifyOptional<T>(x: Array<[a?: T]>): T;
                                                    ^^^^^^^ [2]
    optional_slot.js:142:33
-   142| declare const requiredElements: Array<[a: number | void]>;
-                                        ^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   142| declare const requiredElements: Array<[a: number | undefined]>;
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
    optional_slot.js:141:38
    141| declare function unifyOptional<T>(x: Array<[a?: T]>): T;
                                              ^^^^^^^^^^^^^^ [4]
@@ -1223,7 +1223,7 @@ Cannot cast `optional` to `empty` because `number` [1] is incompatible with `emp
 
 References:
    optional_slot.js:142:43
-   142| declare const requiredElements: Array<[a: number | void]>;
+   142| declare const requiredElements: Array<[a: number | undefined]>;
                                                   ^^^^^^ [1]
    optional_slot.js:144:13
    144| optional as empty; // error
@@ -1317,7 +1317,7 @@ References:
 Error ----------------------------------------------------------------------------------- partial_bound_reversal.js:11:7
 
 Cannot call `mergeWithDefaults` because in type argument `TDefaults` > property `a`: `number` [1] is not exactly the
-same as `void | number` [2]. [incompatible-type]
+same as `undefined | number` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `a` is invariantly typed. To fix the error,
 - Either annotate object literal [3] with `{a?: number, b?: string}` [4]

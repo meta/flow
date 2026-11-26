@@ -17,7 +17,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- bound.js:9:22
 
-Cannot assign `x` to `y` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot assign `x` to `y` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    bound.js:9:22
    9|     var y : string = x;  // not ok
@@ -51,7 +51,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- bound.js:47:22
 
-Cannot assign `x` to `y` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot assign `x` to `y` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    bound.js:47:22
    47|     var y : string = x;  // not ok
@@ -85,7 +85,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- bound.js:53:24
 
-Cannot assign `x` to `y` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot assign `x` to `y` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    bound.js:53:24
    53|       var y : string = x;  // not ok
@@ -175,7 +175,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- heap.js:5:22
 
-Cannot assign `x.p` to `y` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot assign `x.p` to `y` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    heap.js:5:22
    5|     var y : string = x.p;  // not ok
@@ -209,7 +209,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- heap.js:40:24
 
-Cannot assign `x.p` to `y` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot assign `x.p` to `y` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    heap.js:40:24
    40|       var y : string = x.p;  // not ok
@@ -260,7 +260,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- heap.js:55:22
 
-Cannot assign `x.p` to `y` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot assign `x.p` to `y` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    heap.js:55:22
    55|     var y : string = x.p;  // not ok
@@ -294,7 +294,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- heap.js:62:24
 
-Cannot assign `x.p` to `y` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot assign `x.p` to `y` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    heap.js:62:24
    62|       var y : string = x.p;  // not ok
@@ -645,7 +645,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- local.js:5:22
 
-Cannot assign `x` to `y` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot assign `x` to `y` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    local.js:5:22
    5|     var y : string = x;  // not ok
@@ -679,7 +679,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- local.js:47:22
 
-Cannot assign `x` to `y` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot assign `x` to `y` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    local.js:47:22
    47|     var y : string = x;  // not ok
@@ -713,7 +713,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- local.js:54:24
 
-Cannot assign `x` to `y` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot assign `x` to `y` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    local.js:54:24
    54|       var y : string = x;  // not ok
@@ -747,7 +747,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- null_tests.js:168:14
 
-Cannot return `super.p` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot return `super.p` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    null_tests.js:168:14
    168|       return super.p;  // not ok

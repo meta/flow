@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-declare var undefined: void;
+declare var undefined: undefined;
 
 type TypedPropertyDescriptor<T> = any;
 

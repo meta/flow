@@ -17,11 +17,11 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"string | void",
+  "detail":"string | undefined",
   "insertTextFormat":1,
   "kind":13,
   "label":"'bar'",
-  "labelDetails":{"detail":"?: string | void"},
+  "labelDetails":{"detail":"?: string | undefined"},
   "sortText":"00000000000000000000",
   "textEdit":{
     "newText":"'bar'",
@@ -106,11 +106,11 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"string | void",
+  "detail":"string | undefined",
   "insertTextFormat":1,
   "kind":13,
   "label":"\"bar\"",
-  "labelDetails":{"detail":"?: string | void"},
+  "labelDetails":{"detail":"?: string | undefined"},
   "sortText":"00000000000000000000",
   "textEdit":{
     "newText":"\"bar\"",
@@ -658,11 +658,11 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"void | number",
+  "detail":"undefined | number",
   "insertTextFormat":1,
   "kind":13,
   "label":"?.['bar']",
-  "labelDetails":{"detail":": void | number"},
+  "labelDetails":{"detail":": undefined | number"},
   "sortText":"00000000000000000000",
   "textEdit":{
     "newText":"?.['bar']",
@@ -686,11 +686,11 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"void | number",
+  "detail":"undefined | number",
   "insertTextFormat":1,
   "kind":13,
   "label":"?.['foo']",
-  "labelDetails":{"detail":": void | number"},
+  "labelDetails":{"detail":": undefined | number"},
   "sortText":"00000000000000000000",
   "textEdit":{
     "newText":"?.['foo']",
@@ -832,11 +832,11 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"void | number",
+  "detail":"undefined | number",
   "insertTextFormat":1,
   "kind":13,
   "label":"?.['foo.bar.baz']",
-  "labelDetails":{"detail":": void | number"},
+  "labelDetails":{"detail":": undefined | number"},
   "sortText":"00000000000000000000",
   "textEdit":{
     "newText":"?.['foo.bar.baz']",
@@ -860,11 +860,11 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"void | number",
+  "detail":"undefined | number",
   "insertTextFormat":1,
   "kind":13,
   "label":"?.foo",
-  "labelDetails":{"detail":": void | number"},
+  "labelDetails":{"detail":": undefined | number"},
   "sortText":"00000000000000000000",
   "textEdit":{
     "newText":"?.foo",

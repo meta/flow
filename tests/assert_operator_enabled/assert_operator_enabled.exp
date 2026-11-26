@@ -178,7 +178,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:30:3
 
-Cannot cast `a?.b!.c` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `a?.b!.c` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    test.js:30:3
    30|   a?.b!.c as number; // LHS is ?number
@@ -280,7 +280,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:42:3
 
-Cannot cast `a?.b()!['c']` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `a?.b()!['c']` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    test.js:42:3
    42|   a?.b()!['c'] as number; // LHS is ?number
@@ -348,7 +348,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:54:3
 
-Cannot cast `a?.b()!['c']` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `a?.b()!['c']` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    test.js:54:3
    54|   a?.b()!['c'] as number; // LHS is ?number
@@ -382,7 +382,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:60:3
 
-Cannot cast `a?.().b?.c` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `a?.().b?.c` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    test.js:60:3
    60|   a?.().b?.c as number // LHS is ?number from both nulls
@@ -399,7 +399,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:60:3
 
-Cannot cast `a?.().b?.c` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `a?.().b?.c` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    test.js:60:3
    60|   a?.().b?.c as number // LHS is ?number from both nulls
@@ -416,7 +416,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:61:3
 
-Cannot cast `a?.().b!.c` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `a?.().b!.c` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    test.js:61:3
    61|   a?.().b!.c as number // LHS is ?number from only a's null
@@ -540,7 +540,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:80:7
 
-Cannot get `x.f.d` because property `d` is missing in `void` [1]. [incompatible-use]
+Cannot get `x.f.d` because property `d` is missing in `undefined` [1]. [incompatible-use]
 
    test.js:80:7
    80|   x.f.d += 42; // error addition
@@ -554,7 +554,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:80:7
 
-Cannot update `x.f.d` because property `d` is missing in `void` [1]. [incompatible-use]
+Cannot update `x.f.d` because property `d` is missing in `undefined` [1]. [incompatible-use]
 
    test.js:80:7
    80|   x.f.d += 42; // error addition

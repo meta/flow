@@ -51,13 +51,16 @@ Flags: --pretty
   "result":[
     {"name":"[Symbol.iterator]","type":"(this: String) => StringIterator<string>"},
     {"name":"anchor","type":"(this: String, name: string) => string"},
-    {"name":"at","type":"(this: String, index: number) => string | void"},
+    {"name":"at","type":"(this: String, index: number) => string | undefined"},
     {"name":"big","type":"(this: String) => string"},
     {"name":"blink","type":"(this: String) => string"},
     {"name":"bold","type":"(this: String) => string"},
     {"name":"charAt","type":"(this: String, pos: number) => string"},
     {"name":"charCodeAt","type":"(this: String, index: number) => number"},
-    {"name":"codePointAt","type":"(this: String, pos: number) => number | void"},
+    {
+      "name":"codePointAt",
+      "type":"(this: String, pos: number) => number | undefined"
+    },
     {"name":"concat","type":"(this: String, ...strings: Array<string>) => string"},
     {
       "name":"endsWith",
@@ -199,11 +202,11 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"string | void",
+  "detail":"string | undefined",
   "insertTextFormat":1,
   "kind":13,
   "label":"'bar'",
-  "labelDetails":{"detail":"?: string | void"},
+  "labelDetails":{"detail":"?: string | undefined"},
   "sortText":"00000000000000000000",
   "textEdit":{
     "newText":"'bar'",
@@ -1254,11 +1257,11 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"string | void",
+  "detail":"string | undefined",
   "insertTextFormat":1,
   "kind":13,
   "label":"\"bar\"",
-  "labelDetails":{"detail":"?: string | void"},
+  "labelDetails":{"detail":"?: string | undefined"},
   "sortText":"00000000000000000000",
   "textEdit":{
     "newText":"\"bar\"",
@@ -1375,11 +1378,11 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"void | string",
+  "detail":"undefined | string",
   "insertTextFormat":1,
   "kind":13,
   "label":"'bar'",
-  "labelDetails":{"detail":"?: void | string"},
+  "labelDetails":{"detail":"?: undefined | string"},
   "sortText":"00000000000000000000",
   "textEdit":{
     "newText":"'bar'",
@@ -2426,11 +2429,11 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"void | string",
+  "detail":"undefined | string",
   "insertTextFormat":1,
   "kind":13,
   "label":"\"bar\"",
-  "labelDetails":{"detail":"?: void | string"},
+  "labelDetails":{"detail":"?: undefined | string"},
   "sortText":"00000000000000000000",
   "textEdit":{
     "newText":"\"bar\"",
@@ -2472,127 +2475,136 @@ Flags: --pretty
   "result":[
     {
       "name":"?.[Symbol.iterator]",
-      "type":"void | ((this: this) => ArrayIterator<T>)"
+      "type":"undefined | ((this: this) => ArrayIterator<T>)"
     },
-    {"name":"?.at","type":"void | ((this: this, index: number) => T | void)"},
+    {
+      "name":"?.at",
+      "type":"undefined | ((this: this, index: number) => T | undefined)"
+    },
     {
       "name":"?.concat",
-      "type":"void | (<S = T>(this: this, ...items: Array<ReadonlyArray<S> | S>) => Array<T | S>)"
+      "type":"undefined | (<S = T>(this: this, ...items: Array<ReadonlyArray<S> | S>) => Array<T | S>)"
     },
     {
       "name":"?.copyWithin",
-      "type":"void | ((this: this, target: number, start: number, end?: number) => this)"
+      "type":"undefined | ((this: this, target: number, start: number, end?: number) => this)"
     },
     {
       "name":"?.entries",
-      "type":"void | ((this: this) => ArrayIterator<[number, T]>)"
+      "type":"undefined | ((this: this) => ArrayIterator<[number, T]>)"
     },
     {
       "name":"?.every",
-      "type":"void | (<This>(this: this, predicate: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => boolean)"
+      "type":"undefined | (<This>(this: this, predicate: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => boolean)"
     },
     {
       "name":"?.fill",
-      "type":"void | ((this: this, value: T, start?: number, end?: number) => Array<T>)"
+      "type":"undefined | ((this: this, value: T, start?: number, end?: number) => Array<T>)"
     },
     {
       "name":"?.filter",
-      "type":"void | (<This>(this: this, predicate: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => Array<T>)"
+      "type":"undefined | (<This>(this: this, predicate: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => Array<T>)"
     },
     {
       "name":"?.find",
-      "type":"void | (<This>(this: this, predicate: (this: This, value: T, index: number, obj: Array<T>) => unknown, thisArg: This) => T | void)"
+      "type":"undefined | (<This>(this: this, predicate: (this: This, value: T, index: number, obj: Array<T>) => unknown, thisArg: This) => T | undefined)"
     },
     {
       "name":"?.findIndex",
-      "type":"void | (<This>(this: this, predicate: (this: This, value: T, index: number, obj: Array<T>) => unknown, thisArg: This) => number)"
+      "type":"undefined | (<This>(this: this, predicate: (this: This, value: T, index: number, obj: Array<T>) => unknown, thisArg: This) => number)"
     },
     {
       "name":"?.findLast",
-      "type":"void | ((this: this, predicate: (value: T, index: number, array: Array<T>) => unknown, thisArg?: any) => T | void)"
+      "type":"undefined | ((this: this, predicate: (value: T, index: number, array: Array<T>) => unknown, thisArg?: any) => T | undefined)"
     },
     {
       "name":"?.findLastIndex",
-      "type":"void | ((this: this, predicate: (value: T, index: number, array: Array<T>) => unknown, thisArg?: any) => number)"
+      "type":"undefined | ((this: this, predicate: (value: T, index: number, array: Array<T>) => unknown, thisArg?: any) => number)"
     },
     {
       "name":"?.flat",
-      "type":"void | (<A, D extends number = 1>(this: A, depth?: D) => Array<FlatArray<A, D>>)"
+      "type":"undefined | (<A, D extends number = 1>(this: A, depth?: D) => Array<FlatArray<A, D>>)"
     },
     {
       "name":"?.flatMap",
-      "type":"void | (<U, This = void>(this: this, callback: (this: This, value: T, index: number, array: Array<T>) => ReadonlyArray<U> | U, thisArg?: This) => Array<U>)"
+      "type":"undefined | (<U, This = undefined>(this: this, callback: (this: This, value: T, index: number, array: Array<T>) => ReadonlyArray<U> | U, thisArg?: This) => Array<U>)"
     },
     {
       "name":"?.forEach",
-      "type":"void | (<This>(this: this, callbackfn: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => void)"
+      "type":"undefined | (<This>(this: this, callbackfn: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => void)"
     },
     {
       "name":"?.includes",
-      "type":"void | ((this: this, searchElement: T, fromIndex?: number) => implies searchElement is T)"
+      "type":"undefined | ((this: this, searchElement: T, fromIndex?: number) => implies searchElement is T)"
     },
     {
       "name":"?.indexOf",
-      "type":"void | ((this: this, searchElement: T, fromIndex?: number) => number)"
+      "type":"undefined | ((this: this, searchElement: T, fromIndex?: number) => number)"
     },
-    {"name":"?.join","type":"void | ((this: this, separator?: string) => string)"},
-    {"name":"?.keys","type":"void | ((this: this) => ArrayIterator<number>)"},
+    {
+      "name":"?.join",
+      "type":"undefined | ((this: this, separator?: string) => string)"
+    },
+    {"name":"?.keys","type":"undefined | ((this: this) => ArrayIterator<number>)"},
     {
       "name":"?.lastIndexOf",
-      "type":"void | ((this: this, searchElement: T, fromIndex?: number) => number)"
+      "type":"undefined | ((this: this, searchElement: T, fromIndex?: number) => number)"
     },
-    {"name":"?.length","type":"void | number"},
+    {"name":"?.length","type":"undefined | number"},
     {
       "name":"?.map",
-      "type":"void | (<U, This>(this: this, callbackfn: (this: This, value: T, index: number, array: Array<T>) => U, thisArg: This) => Array<U>)"
+      "type":"undefined | (<U, This>(this: this, callbackfn: (this: This, value: T, index: number, array: Array<T>) => U, thisArg: This) => Array<U>)"
     },
-    {"name":"?.pop","type":"void | ((this: this) => T | void)"},
-    {"name":"?.push","type":"void | ((this: this, ...items: Array<T>) => number)"},
+    {"name":"?.pop","type":"undefined | ((this: this) => T | undefined)"},
+    {
+      "name":"?.push",
+      "type":"undefined | ((this: this, ...items: Array<T>) => number)"
+    },
     {
       "name":"?.reduce",
-      "type":"void | (<U>(this: this, callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: Array<T>) => U, initialValue: U) => U)"
+      "type":"undefined | (<U>(this: this, callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: Array<T>) => U, initialValue: U) => U)"
     },
     {
       "name":"?.reduceRight",
-      "type":"void | (<U>(this: this, callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: Array<T>) => U, initialValue: U) => U)"
+      "type":"undefined | (<U>(this: this, callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: Array<T>) => U, initialValue: U) => U)"
     },
-    {"name":"?.reverse","type":"void | ((this: this) => Array<T>)"},
-    {"name":"?.shift","type":"void | ((this: this) => T | void)"},
+    {"name":"?.reverse","type":"undefined | ((this: this) => Array<T>)"},
+    {"name":"?.shift","type":"undefined | ((this: this) => T | undefined)"},
     {
       "name":"?.slice",
-      "type":"void | ((this: this, start?: number, end?: number) => Array<T>)"
+      "type":"undefined | ((this: this, start?: number, end?: number) => Array<T>)"
     },
     {
       "name":"?.some",
-      "type":"void | (<This>(this: this, predicate: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => boolean)"
+      "type":"undefined | (<This>(this: this, predicate: (this: This, value: T, index: number, array: Array<T>) => unknown, thisArg: This) => boolean)"
     },
     {
       "name":"?.sort",
-      "type":"void | ((this: this, compareFn?: (a: T, b: T) => number) => this)"
+      "type":"undefined | ((this: this, compareFn?: (a: T, b: T) => number) => this)"
     },
     {
       "name":"?.splice",
-      "type":"void | ((this: this, start: number, deleteCount: number, ...items: Array<T>) => Array<T>)"
+      "type":"undefined | ((this: this, start: number, deleteCount: number, ...items: Array<T>) => Array<T>)"
     },
-    {"name":"?.toLocaleString","type":"void | ((this: this) => string)"},
-    {"name":"?.toReversed","type":"void | ((this: this) => Array<T>)"},
+    {"name":"?.toLocaleString","type":"undefined | ((this: this) => string)"},
+    {"name":"?.toReversed","type":"undefined | ((this: this) => Array<T>)"},
     {
       "name":"?.toSorted",
-      "type":"void | ((this: this, compareFn?: (a: T, b: T) => number) => Array<T>)"
+      "type":"undefined | ((this: this, compareFn?: (a: T, b: T) => number) => Array<T>)"
     },
     {
       "name":"?.toSpliced",
-      "type":"void | (<S>(this: this, start: number, deleteCount?: number, ...items: Array<S>) => Array<T | S>)"
+      "type":"undefined | (<S>(this: this, start: number, deleteCount?: number, ...items: Array<S>) => Array<T | S>)"
     },
-    {"name":"?.toString","type":"void | ((this: this) => string)"},
+    {"name":"?.toString","type":"undefined | ((this: this) => string)"},
     {
       "name":"?.unshift",
-      "type":"void | ((this: this, ...items: Array<T>) => number)"
+      "type":"undefined | ((this: this, ...items: Array<T>) => number)"
     },
-    {"name":"?.values","type":"void | ((this: this) => ArrayIterator<T>)"},
+    {"name":"?.values","type":"undefined | ((this: this) => ArrayIterator<T>)"},
     {
       "name":"?.with",
-      "type":"void | ((this: this, index: number, value: T) => Array<T>)"
+      "type":"undefined | ((this: this, index: number, value: T) => Array<T>)"
     }
   ]
 }
@@ -2602,7 +2614,7 @@ Flags: --pretty
 {
   "result":[
     {"name":"[Symbol.iterator]","type":"(this: this) => ArrayIterator<T>"},
-    {"name":"at","type":"(this: this, index: number) => T | void"},
+    {"name":"at","type":"(this: this, index: number) => T | undefined"},
     {
       "name":"concat",
       "type":"<S = T>(this: this, ...items: Array<ReadonlyArray<S> | S>) => Array<T | S>"
@@ -2626,7 +2638,7 @@ Flags: --pretty
     },
     {
       "name":"find",
-      "type":"<This>(this: this, predicate: (this: This, value: T, index: number, obj: Array<T>) => unknown, thisArg: This) => T | void"
+      "type":"<This>(this: this, predicate: (this: This, value: T, index: number, obj: Array<T>) => unknown, thisArg: This) => T | undefined"
     },
     {
       "name":"findIndex",
@@ -2634,7 +2646,7 @@ Flags: --pretty
     },
     {
       "name":"findLast",
-      "type":"(this: this, predicate: (value: T, index: number, array: Array<T>) => unknown, thisArg?: any) => T | void"
+      "type":"(this: this, predicate: (value: T, index: number, array: Array<T>) => unknown, thisArg?: any) => T | undefined"
     },
     {
       "name":"findLastIndex",
@@ -2646,7 +2658,7 @@ Flags: --pretty
     },
     {
       "name":"flatMap",
-      "type":"<U, This = void>(this: this, callback: (this: This, value: T, index: number, array: Array<T>) => ReadonlyArray<U> | U, thisArg?: This) => Array<U>"
+      "type":"<U, This = undefined>(this: this, callback: (this: This, value: T, index: number, array: Array<T>) => ReadonlyArray<U> | U, thisArg?: This) => Array<U>"
     },
     {
       "name":"forEach",
@@ -2671,7 +2683,7 @@ Flags: --pretty
       "name":"map",
       "type":"<U, This>(this: this, callbackfn: (this: This, value: T, index: number, array: Array<T>) => U, thisArg: This) => Array<U>"
     },
-    {"name":"pop","type":"(this: this) => T | void"},
+    {"name":"pop","type":"(this: this) => T | undefined"},
     {"name":"push","type":"(this: this, ...items: Array<T>) => number"},
     {
       "name":"reduce",
@@ -2682,7 +2694,7 @@ Flags: --pretty
       "type":"<U>(this: this, callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: Array<T>) => U, initialValue: U) => U"
     },
     {"name":"reverse","type":"(this: this) => Array<T>"},
-    {"name":"shift","type":"(this: this) => T | void"},
+    {"name":"shift","type":"(this: this) => T | undefined"},
     {
       "name":"slice",
       "type":"(this: this, start?: number, end?: number) => Array<T>"

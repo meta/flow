@@ -206,7 +206,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- holes.js:5:3
 
-Cannot cast array literal to `Tuple` because in index `0`: `void` [1] is incompatible with `number` [2].
+Cannot cast array literal to `Tuple` because in index `0`: `undefined` [1] is incompatible with `number` [2].
 [incompatible-type]
 
    holes.js:5:3
@@ -221,7 +221,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- holes.js:6:5
 
-Cannot cast array literal to `Tuple` because in index `1`: `void` [1] is incompatible with `string` [2].
+Cannot cast array literal to `Tuple` because in index `1`: `undefined` [1] is incompatible with `string` [2].
 [incompatible-type]
 
    holes.js:6:5
@@ -236,7 +236,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- holes.js:7:15
 
-Cannot cast array literal to `Tuple` because in index `2`: `void` [1] is incompatible with `boolean` [2].
+Cannot cast array literal to `Tuple` because in index `2`: `undefined` [1] is incompatible with `boolean` [2].
 [incompatible-type]
 
    holes.js:7:15
@@ -251,7 +251,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- holes.js:8:3
 
-Cannot cast array literal to `Tuple` because in index `0`: `void` [1] is incompatible with `number` [2].
+Cannot cast array literal to `Tuple` because in index `0`: `undefined` [1] is incompatible with `number` [2].
 [incompatible-type]
 
    holes.js:8:3
@@ -266,7 +266,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- holes.js:8:5
 
-Cannot cast array literal to `Tuple` because in index `1`: `void` [1] is incompatible with `string` [2].
+Cannot cast array literal to `Tuple` because in index `1`: `undefined` [1] is incompatible with `string` [2].
 [incompatible-type]
 
    holes.js:8:5
@@ -281,7 +281,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- holes.js:8:7
 
-Cannot cast array literal to `Tuple` because in index `2`: `void` [1] is incompatible with `boolean` [2].
+Cannot cast array literal to `Tuple` because in index `2`: `undefined` [1] is incompatible with `boolean` [2].
 [incompatible-type]
 
    holes.js:8:7
@@ -1013,7 +1013,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- optional.js:29:3
 
-Cannot cast `withOpt[1]` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `withOpt[1]` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    optional.js:29:3
    29|   withOpt[1] as string; // ERROR
@@ -1030,7 +1030,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ optional.js:31:16
 
-Cannot assign `undefined` to `withOpt[1]` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot assign `undefined` to `withOpt[1]` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    optional.js:31:16
    31|   withOpt[1] = undefined; // ERROR
@@ -1089,7 +1089,7 @@ Cannot assign `undefined` to `withReadOnlyOpt[1]` because tuple element at index
 
 Error ------------------------------------------------------------------------------------------------ optional.js:37:24
 
-Cannot assign `undefined` to `withReadOnlyOpt[1]` because `void` [1] is incompatible with `string` [2].
+Cannot assign `undefined` to `withReadOnlyOpt[1]` because `undefined` [1] is incompatible with `string` [2].
 [incompatible-type]
 
    optional.js:37:24
@@ -1156,7 +1156,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- optional.js:64:5
 
-Cannot cast array literal to `WithOpt` because in index `1`: `void` [1] is incompatible with `string` [2].
+Cannot cast array literal to `WithOpt` because in index `1`: `undefined` [1] is incompatible with `string` [2].
 [incompatible-type]
 
    optional.js:64:5
@@ -1186,7 +1186,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- optional.js:69:5
 
-Cannot cast array literal to `WithReadOnlyOpt` because in index `1`: `void` [1] is incompatible with `string` [2].
+Cannot cast array literal to `WithReadOnlyOpt` because in index `1`: `undefined` [1] is incompatible with `string` [2].
 [incompatible-type]
 
    optional.js:69:5
@@ -1458,7 +1458,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- optional_rest.js:5:1
 
-Cannot cast `rest[i]` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `rest[i]` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    optional_rest.js:5:1
    5| rest[i] as string; // error
@@ -1475,7 +1475,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- optional_rest.js:7:3
 
-Cannot cast `v` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `v` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    optional_rest.js:7:3
    7|   v as string; // error
@@ -2812,7 +2812,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- value-spread.js:24:3
 
-Cannot cast `z` to `Readonly<[0, 1, 2, 3]>` because `ReadonlyArray<0 | 2 | 3 | void | 1>` [1] is incompatible with
+Cannot cast `z` to `Readonly<[0, 1, 2, 3]>` because `ReadonlyArray<0 | 2 | 3 | undefined | 1>` [1] is incompatible with
 `Readonly<[0, 1, 2, 3]>` [2]. [incompatible-type]
 
    value-spread.js:24:3
@@ -2830,7 +2830,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- value-spread.js:31:3
 
-Cannot cast `z` to `[a?: 0, b?: 1, c?: 2]` because `ReadonlyArray<void | 0 | 1 | 2>` [1] is incompatible with
+Cannot cast `z` to `[a?: 0, b?: 1, c?: 2]` because `ReadonlyArray<undefined | 0 | 1 | 2>` [1] is incompatible with
 `[a?: 0, b?: 1, c?: 2]` [2]. [incompatible-type]
 
    value-spread.js:31:3

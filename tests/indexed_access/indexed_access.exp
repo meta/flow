@@ -16,7 +16,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `1` to `B` because: [incompatible-type]
  - Either `1` [1] is incompatible with `boolean` [2].
- - Or `1` [1] is incompatible with `void` [3].
+ - Or `1` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -38,7 +38,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `true` to `N` because: [incompatible-type]
  - Either `true` [1] is incompatible with `number` [2].
- - Or `true` [1] is incompatible with `void` [3].
+ - Or `true` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -60,7 +60,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `true` to `S` because: [incompatible-type]
  - Either `true` [1] is incompatible with `string` [2].
- - Or `true` [1] is incompatible with `void` [3].
+ - Or `true` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -97,7 +97,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ optional.js:10:21
 
-Cannot access `"bar"` on `Obj["foo"]` because property `bar` is missing in `void` [1]. [incompatible-use]
+Cannot access `"bar"` on `Obj["foo"]` because property `bar` is missing in `undefined` [1]. [incompatible-use]
 
    optional.js:10:21
    10| type X = Obj['foo']['bar']; // Error - access `bar` on undefined
@@ -116,7 +116,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `true` to `T` because: [incompatible-type]
  - Either `true` [1] is incompatible with `number` [2].
- - Or `true` [1] is incompatible with `void` [3].
+ - Or `true` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -150,7 +150,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ optional.js:20:13
 
-Cannot access `"b"` on `Y["a"]` because property `b` is missing in `void` [1]. [incompatible-use]
+Cannot access `"b"` on `Y["a"]` because property `b` is missing in `undefined` [1]. [incompatible-use]
 
    optional.js:20:13
    20| 1 as Y["a"]["b"]?.["c"]; // Error - access `b` on undefined
@@ -178,7 +178,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ optional.js:21:24
 
-Cannot access `"c"` on `Y["a"]?.["opt_b"]` because property `c` is missing in `void` [1]. [incompatible-use]
+Cannot access `"c"` on `Y["a"]?.["opt_b"]` because property `c` is missing in `undefined` [1]. [incompatible-use]
 
    optional.js:21:24
    21| 1 as Y["a"]?.["opt_b"]["c"]; // Error - access `c` on undefined
@@ -192,7 +192,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ optional.js:22:22
 
-Cannot access `"c"` on `Y["a"]?.["b"]` because property `c` is missing in `void` [1]. [incompatible-use]
+Cannot access `"c"` on `Y["a"]?.["b"]` because property `c` is missing in `undefined` [1]. [incompatible-use]
 
    optional.js:22:22
    22| 1 as (Y["a"]?.["b"])["c"]; // Error - access `c` on undefined
@@ -222,7 +222,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `true` to `Z?.["c"]` because: [incompatible-type]
  - Either `true` [1] is incompatible with `number` [2].
- - Or `true` [1] is incompatible with `void` [3].
+ - Or `true` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -244,7 +244,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `true` to `Y["a"]?.["b"]["c"]` because: [incompatible-type]
  - Either `true` [1] is incompatible with `number` [2].
- - Or `true` [1] is incompatible with `void` [3].
+ - Or `true` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -266,7 +266,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `true` to `Y["a"]?.["b"]?.["c"]` because: [incompatible-type]
  - Either `true` [1] is incompatible with `number` [2].
- - Or `true` [1] is incompatible with `void` [3].
+ - Or `true` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -288,7 +288,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `true` to `Y["a"]?.["opt_b"]?.["c"]` because: [incompatible-type]
  - Either `true` [1] is incompatible with `number` [2].
- - Or `true` [1] is incompatible with `void` [3].
+ - Or `true` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -310,7 +310,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `true` to `Z?.["c"]` because: [incompatible-type]
  - Either `true` [1] is incompatible with `number` [2].
- - Or `true` [1] is incompatible with `void` [3].
+ - Or `true` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -332,7 +332,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `true` to `U["a"]?.["b"]["c"]` because: [incompatible-type]
  - Either `true` [1] is incompatible with `number` [2].
- - Or `true` [1] is incompatible with `void` [3].
+ - Or `true` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -354,7 +354,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `true` to `U["a"]?.["b"]?.["c"]` because: [incompatible-type]
  - Either `true` [1] is incompatible with `number` [2].
- - Or `true` [1] is incompatible with `void` [3].
+ - Or `true` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -376,7 +376,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `true` to `U["a"]?.["opt_b"]?.["c"]` because: [incompatible-type]
  - Either `true` [1] is incompatible with `number` [2].
- - Or `true` [1] is incompatible with `void` [3].
+ - Or `true` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -398,7 +398,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `true` to `MaybeZ?.["c"]` because: [incompatible-type]
  - Either `true` [1] is incompatible with `number` [2].
- - Or `true` [1] is incompatible with `void` [3].
+ - Or `true` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -420,7 +420,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `true` to `VoidZ?.["c"]` because: [incompatible-type]
  - Either `true` [1] is incompatible with `number` [2].
- - Or `true` [1] is incompatible with `void` [3].
+ - Or `true` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -440,7 +440,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- optional.js:68:1
 
-Cannot cast `1` to `void?.["c"]` because `1` [1] is incompatible with `void` [2]. [incompatible-type]
+Cannot cast `1` to `void?.["c"]` because `1` [1] is incompatible with `undefined` [2]. [incompatible-type]
 
    optional.js:68:1
    68| 1 as void?.['c']; // Error
@@ -454,7 +454,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- optional.js:71:1
 
-Cannot cast `1` to `empty?.["x"]` because `1` [1] is incompatible with `void` [2]. [incompatible-type]
+Cannot cast `1` to `empty?.["x"]` because `1` [1] is incompatible with `undefined` [2]. [incompatible-type]
 
    optional.js:71:1
    71| 1 as empty?.['x']; // Error
@@ -485,7 +485,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- optional.js:79:1
 
-Cannot cast `f(...)` to `true` because `void` [1] is incompatible with `true` [2]. [incompatible-type]
+Cannot cast `f(...)` to `true` because `undefined` [1] is incompatible with `true` [2]. [incompatible-type]
 
    optional.js:79:1
    79| f(z, 'c') as true; // Error - wrong type
@@ -533,7 +533,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- optional.js:84:1
 
-Cannot cast `f(...)` to `true` because `void` [1] is incompatible with `true` [2]. [incompatible-type]
+Cannot cast `f(...)` to `true` because `undefined` [1] is incompatible with `true` [2]. [incompatible-type]
 
    optional.js:84:1
    84| f(mz, 'c') as true; // Error - wrong type
@@ -566,7 +566,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `'s'` to `Before` because: [incompatible-type]
  - Either `"s"` [1] is incompatible with `number` [2].
- - Or `"s"` [1] is incompatible with `void` [3].
+ - Or `"s"` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -588,7 +588,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `'xx'` to `O?.["bar"]` because: [incompatible-type]
  - Either `"xx"` [1] is incompatible with `number` [2].
- - Or `"xx"` [1] is incompatible with `void` [3].
+ - Or `"xx"` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -610,7 +610,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `'xx'` to `C?.["bar"]` because: [incompatible-type]
  - Either `"xx"` [1] is incompatible with `number` [2].
- - Or `"xx"` [1] is incompatible with `void` [3].
+ - Or `"xx"` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -644,7 +644,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ optional.js:123:1
 
-Cannot cast `undefined` to `NonMaybeNumber` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `undefined` to `NonMaybeNumber` because `undefined` [1] is incompatible with `number` [2].
+[incompatible-type]
 
    optional.js:123:1
    123| undefined as NonMaybeNumber; // Error
@@ -660,7 +661,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast `true` to `MaybeZ?.["c"]` because: [incompatible-type]
  - Either `true` [1] is incompatible with `number` [2].
- - Or `true` [1] is incompatible with `void` [3].
+ - Or `true` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.

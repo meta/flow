@@ -444,7 +444,7 @@ Cannot use `in` because on the right-hand side, `string` [1] must be an object o
 
 Error ---------------------------------------------------------------------------------------------------- test.js:27:15
 
-Cannot use `in` because on the right-hand side, `void` [1] must be an object or array. [invalid-in-rhs]
+Cannot use `in` because on the right-hand side, `undefined` [1] must be an object or array. [invalid-in-rhs]
 
    27|     ('foo' in void 0); // error
                      ^^^^^^ [1]
@@ -468,7 +468,7 @@ Cannot use `in` because on the left-hand side, `null` [1] must be a string or nu
 
 Error ----------------------------------------------------------------------------------------------------- test.js:34:6
 
-Cannot use `in` because on the left-hand side, `void` [1] must be a string or number. [invalid-in-lhs]
+Cannot use `in` because on the left-hand side, `undefined` [1] must be a string or number. [invalid-in-lhs]
 
    34|     (void 0 in {}); // error
             ^^^^^^ [1]

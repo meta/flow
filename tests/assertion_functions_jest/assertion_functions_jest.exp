@@ -34,7 +34,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:55:5
 
-Cannot cast `object.property` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `object.property` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    test.js:55:5
    55|     object.property as string; // error: expression-position calls are ordinary calls

@@ -154,7 +154,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- base_class.js:47:1
 
-Cannot cast `o.annotatedInitializedFieldValid` to `number` because `void` [1] is incompatible with `number` [2].
+Cannot cast `o.annotatedInitializedFieldValid` to `number` because `undefined` [1] is incompatible with `number` [2].
 [incompatible-type]
 
    base_class.js:47:1
@@ -190,7 +190,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- base_class.js:49:1
 
-Cannot cast `Base.annotatedInitializedFieldValid` to `number` because `void` [1] is incompatible with `number` [2].
+Cannot cast `Base.annotatedInitializedFieldValid` to `number` because `undefined` [1] is incompatible with `number` [2].
 [incompatible-type]
 
    base_class.js:49:1
@@ -778,8 +778,8 @@ References:
 
 Error -------------------------------------------------------------------------------------------- derived_class.js:82:1
 
-Cannot cast `o.base_annotatedInitializedFieldValid` to `number` because `void` [1] is incompatible with `number` [2].
-[incompatible-type]
+Cannot cast `o.base_annotatedInitializedFieldValid` to `number` because `undefined` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    derived_class.js:82:1
    82| o.base_annotatedInitializedFieldValid as number; // Error: ?number ~> number
@@ -814,7 +814,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- derived_class.js:84:1
 
-Cannot cast `Child.base_annotatedInitializedFieldValid` to `number` because `void` [1] is incompatible with
+Cannot cast `Child.base_annotatedInitializedFieldValid` to `number` because `undefined` [1] is incompatible with
 `number` [2]. [incompatible-type]
 
    derived_class.js:84:1
@@ -850,8 +850,8 @@ References:
 
 Error -------------------------------------------------------------------------------------------- derived_class.js:87:1
 
-Cannot cast `o.child_annotatedInitializedFieldValid` to `number` because `void` [1] is incompatible with `number` [2].
-[incompatible-type]
+Cannot cast `o.child_annotatedInitializedFieldValid` to `number` because `undefined` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    derived_class.js:87:1
    87| o.child_annotatedInitializedFieldValid as number; // Error: ?number ~> number
@@ -886,7 +886,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- derived_class.js:89:1
 
-Cannot cast `Child.child_annotatedInitializedFieldValid` to `number` because `void` [1] is incompatible with
+Cannot cast `Child.child_annotatedInitializedFieldValid` to `number` because `undefined` [1] is incompatible with
 `number` [2]. [incompatible-type]
 
    derived_class.js:89:1

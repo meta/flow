@@ -15,7 +15,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------------- a.js:8:17
 
-`void` [1] is not an object. [not-an-object]
+`undefined` [1] is not an object. [not-an-object]
 
    a.js:8:17
    8| export type A = Values<T>;

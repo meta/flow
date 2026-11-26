@@ -119,7 +119,7 @@ interface.js:79:4,79:8
 
 interface.js:83:14
 Flags:
-(index) [k: string]: number | void
+(index) [k: string]: number | undefined
 interface.js:83:14,83:18
 
 object_members.js:7:3
@@ -139,7 +139,7 @@ object_members.js:11:12,11:13
 
 object_members.js:13:3
 Flags:
-(property) Named.op: void | number
+(property) Named.op: undefined | number
 object_members.js:13:3,13:4
 
 object_members.js:15:12

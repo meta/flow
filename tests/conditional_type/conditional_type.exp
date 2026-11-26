@@ -1856,7 +1856,7 @@ References:
 Error ------------------------------------------------------------------------------------- reversed_rest_params.js:52:1
 
 Cannot cast array literal to `Params<(a?: string, b: number) => void>` because array literal [1] has 1 element but
-`[a: void | string, b: number]` [2] has 2 elements. [invalid-tuple-arity]
+`[a: undefined | string, b: number]` [2] has 2 elements. [invalid-tuple-arity]
 
    reversed_rest_params.js:52:1
    52| [1] as Params<typeof non_trailing_optional>; // error: arity

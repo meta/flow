@@ -17,8 +17,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- deep_types.js:16:3
 
-Cannot cast `b` to `{readonly foo: {readonly bar?: {readonly baz?: string}}}` because in property `foo`: `void` [1] is
-incompatible with `{readonly bar?: {readonly baz?: string}}` [2]. [incompatible-type]
+Cannot cast `b` to `{readonly foo: {readonly bar?: {readonly baz?: string}}}` because in property `foo`: `undefined` [1]
+is incompatible with `{readonly bar?: {readonly baz?: string}}` [2]. [incompatible-type]
 
    deep_types.js:16:3
    16|   b as {readonly foo: {readonly bar?: {readonly baz?: string}}}; // error: foo not optional
@@ -35,8 +35,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- deep_types.js:17:3
 
-Cannot cast `b` to `{readonly foo?: {readonly bar: {readonly baz?: string}}}` because in property `foo.bar`: `void` [1]
-is incompatible with `{readonly baz?: string}` [2]. [incompatible-type]
+Cannot cast `b` to `{readonly foo?: {readonly bar: {readonly baz?: string}}}` because in property `foo.bar`:
+`undefined` [1] is incompatible with `{readonly baz?: string}` [2]. [incompatible-type]
 
    deep_types.js:17:3
    17|   b as {readonly foo?: {readonly bar: {readonly baz?: string}}}; // error: bar not optional
@@ -54,7 +54,7 @@ References:
 Error ----------------------------------------------------------------------------------------------- deep_types.js:18:3
 
 Cannot cast `b` to `{readonly foo?: {readonly bar?: {readonly baz: string}}}` because in property `foo.bar.baz`:
-`void` [1] is incompatible with `string` [2]. [incompatible-type]
+`undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    deep_types.js:18:3
    18|   b as {readonly foo?: {readonly bar?: {readonly baz: string}}}; // error: baz not optional
@@ -316,8 +316,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------- distributivity.js:29:3
 
-Cannot cast `oMaybe` to `{writeonly foo: number}` because `void` [1] is incompatible with `{writeonly foo: number}` [2].
-[incompatible-type]
+Cannot cast `oMaybe` to `{writeonly foo: number}` because `undefined` [1] is incompatible with
+`{writeonly foo: number}` [2]. [incompatible-type]
 
    distributivity.js:29:3
    29|   oMaybe as {writeonly foo: number}; // ERROR
@@ -531,7 +531,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------- idx_replacement.js:30:10
 
-Cannot get `obj1.a.b` because property `b` is missing in `void` [1]. [incompatible-use]
+Cannot get `obj1.a.b` because property `b` is missing in `undefined` [1]. [incompatible-use]
 
    idx_replacement.js:30:10
    30|   obj1.a.b.c; // error
@@ -562,7 +562,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ idx_replacement.js:33:3
 
-Cannot cast `idx(...)` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `idx(...)` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    idx_replacement.js:33:3
    33|   idx(obj1, obj => obj.a.b.c) as number; // error: result must be MaybeT
@@ -613,7 +613,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ idx_replacement.js:35:3
 
-Cannot cast `idx(...)` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `idx(...)` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    idx_replacement.js:35:3
    35|   idx(obj1, obj => obj["a"].b.c) as number; // error: result must be MaybeT
@@ -670,7 +670,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ idx_replacement.js:40:3
 
-Cannot cast `idx(...)` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `idx(...)` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    idx_replacement.js:40:3
    40|   idx(obj2, obj => obj.a.b.c) as number; // error: result must be MaybeT
@@ -704,7 +704,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ idx_replacement.js:43:3
 
-Cannot cast `idx(...)` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `idx(...)` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    idx_replacement.js:43:3
    43|   idx(obj3, obj => obj.a.b.c) as number; // error: result must be MaybeT
@@ -738,7 +738,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ idx_replacement.js:50:3
 
-Cannot cast `idx(...)` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `idx(...)` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    idx_replacement.js:50:3
    50|   idx(ab, _ => _.a) as empty; // error
@@ -772,7 +772,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ idx_replacement.js:50:3
 
-Cannot cast `idx(...)` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `idx(...)` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    idx_replacement.js:50:3
    50|   idx(ab, _ => _.a) as empty; // error
@@ -806,7 +806,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ idx_replacement.js:51:3
 
-Cannot cast `idx(...)` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `idx(...)` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    idx_replacement.js:51:3
    51|   idx(ab, _ => _.b) as empty; // error
@@ -840,7 +840,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ idx_replacement.js:51:3
 
-Cannot cast `idx(...)` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `idx(...)` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    idx_replacement.js:51:3
    51|   idx(ab, _ => _.b) as empty; // error
@@ -874,7 +874,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ idx_replacement.js:52:3
 
-Cannot cast `idx(...)` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `idx(...)` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    idx_replacement.js:52:3
    52|   idx(ab, _ => _.c) as empty; // error
@@ -891,7 +891,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ idx_replacement.js:52:3
 
-Cannot cast `idx(...)` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `idx(...)` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    idx_replacement.js:52:3
    52|   idx(ab, _ => _.c) as empty; // error
@@ -939,7 +939,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ idx_replacement.js:59:3
 
-Cannot cast `idx(...)` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `idx(...)` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    idx_replacement.js:59:3
    59|   idx(new Foo1(), o => o.a.b) as number; // error: result must be MaybeT
@@ -973,7 +973,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ idx_replacement.js:59:3
 
-Cannot cast `idx(...)` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `idx(...)` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    idx_replacement.js:59:3
    59|   idx(new Foo1(), o => o.a.b) as number; // error: result must be MaybeT
@@ -1015,7 +1015,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ idx_replacement.js:72:3
 
-Cannot cast `idx(...)` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `idx(...)` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    idx_replacement.js:72:3
    72|   idx(42, n => n) as number; // error: result must be MaybeT
@@ -1552,7 +1552,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- import_values.js:36:1
 
-Cannot cast `optionalProp` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `optionalProp` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    import_values.js:36:1
    36| optionalProp as string; // ERROR
@@ -1586,7 +1586,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- import_values.js:40:1
 
-Cannot cast `pickedG` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `pickedG` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    import_values.js:40:1
      40| pickedG as string; // ERROR 2x
@@ -1603,7 +1603,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- import_values.js:40:1
 
-Cannot cast `pickedG` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `pickedG` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    import_values.js:40:1
    40| pickedG as string; // ERROR 2x
@@ -2960,7 +2960,7 @@ Cannot assign `'str'` to `readonlyIndexer.qux` because property `qux` is not wri
 
 Error ---------------------------------------------------------------------------------------------------- test.js:111:3
 
-Cannot cast `partial.foo` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `partial.foo` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    test.js:111:3
    111|   partial.foo as number; // ERROR
@@ -2977,7 +2977,8 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:115:3
 
-Cannot cast `partialIndexer.qux` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `partialIndexer.qux` to `string` because `undefined` [1] is incompatible with `string` [2].
+[incompatible-type]
 
    test.js:115:3
    115|   partialIndexer.qux as string; // ERROR
@@ -2994,7 +2995,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:119:3
 
-Cannot cast `partialArr[0]` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `partialArr[0]` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    test.js:119:3
    119|   partialArr[0] as number; // ERROR;
@@ -3011,7 +3012,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:121:3
 
-Cannot cast `partialTuple[0]` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `partialTuple[0]` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    test.js:121:3
    121|   partialTuple[0] as number; // ERROR;

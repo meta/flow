@@ -1,7 +1,7 @@
 function no_missing_env_entry_for_delete() {
-  declare const foo: {bar: string | void};
+  declare const foo: {bar: string | undefined};
   delete foo.bar; // ok
-  foo.bar as void; // ok
+  foo.bar as undefined; // ok
 }
 
 function no_missing_env_entry_for_illegal_type_binding() {

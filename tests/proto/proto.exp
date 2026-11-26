@@ -93,7 +93,8 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- annot.js:16:1
 
-Cannot cast `o_optional.__proto__` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `o_optional.__proto__` to `empty` because `undefined` [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    annot.js:16:1
    16| o_optional.__proto__ as empty; // error: void ~> empty, object type ~> empty
@@ -290,7 +291,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- literal.js:6:1
 
-Cannot cast `o_get.q` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `o_get.q` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    literal.js:6:1
    6| o_get.q as empty; // error: property `q` not found
@@ -344,7 +345,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- literal.js:17:1
 
-Cannot cast `o_shorthand.q` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `o_shorthand.q` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    literal.js:17:1
    17| o_shorthand.q as empty; // error: property `q` not found
@@ -420,7 +421,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- literal.js:25:1
 
-Cannot cast `o_loop.q` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `o_loop.q` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    literal.js:25:1
    25| o_loop.q as empty; // error: property `q` not found

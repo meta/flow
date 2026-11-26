@@ -2,7 +2,8 @@
 
 var x = 42;
 declare export default class C { }
-if (((x: unknown) => 42) === console.log) { // constant-condition error
+declare const returnsString: (x: unknown) => string;
+if (((x: unknown): number => 42) === returnsString) { // constant-condition error
 }
 
 f = function() {

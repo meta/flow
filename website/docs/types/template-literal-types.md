@@ -26,13 +26,13 @@ Use template literal types for event names, string-based protocols, or strings w
 
 ## Literal Interpolation and Unions {#toc-literal-interpolation}
 
-Each interpolated literal contributes its string representation. Flow formats numbers by their value, not their source spelling, and omits the `n` suffix from bigints. Booleans contribute `'true'` or `'false'`; `null` becomes `'null'`, and `void` becomes `'undefined'`.
+Each interpolated literal contributes its string representation. Flow formats numbers by their value, not their source spelling, and omits the `n` suffix from bigints. Booleans contribute `'true'` or `'false'`; `null` becomes `'null'`, and `undefined` becomes `'undefined'`.
 
 ```js flow-check
 type Label = `${'item'}-${0xff}`;
 type State = `enabled:${true | false}`;
 type Id = `id:${42n}`;
-type Missing = `${null | void}`;
+type Missing = `${null | undefined}`;
 
 'item-255' as Label; // OK
 'enabled:false' as State; // OK
@@ -134,7 +134,7 @@ Use a template literal type in a mapped type's `as` clause to rename properties,
 
 ## Limits {#toc-limits}
 
-Placeholders must be compatible with `string | number | bigint | boolean | null | void`. Flow does not support object-like types or `unknown` as placeholders:
+Placeholders must be compatible with `string | number | bigint | boolean | null | undefined`. Flow does not support object-like types or `unknown` as placeholders:
 
 ```js flow-check
 type ObjectText = `${{name: string}}`; // ERROR

@@ -2,7 +2,7 @@ Error --------------------------------------------------------------------------
 
 Cannot call `iterator.reduce` because: [incompatible-type]
  - Either in the return value: `string` [1] is incompatible with `number` [2].
- - Or in the first parameter: `void` [3] is incompatible with `string` [4].
+ - Or in the first parameter: `undefined` [3] is incompatible with `string` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.

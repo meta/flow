@@ -323,25 +323,26 @@ References:
 
 Error --------------------------------------------------------------------------------------------- internal_slot.js:6:2
 
-Cannot cast function to `O` because in the return value: `0` [1] is incompatible with `void` [2]. [incompatible-type]
+Cannot cast function to `O` because in the return value: `0` [1] is incompatible with `undefined` [2].
+[incompatible-type]
 
    internal_slot.js:6:2
-   6| (function() { return 0 }) as O; // err: number ~> void
+   6| (function() { return 0 }) as O; // err: number ~> undefined
        ^^^^^^^^^^
 
 References:
    internal_slot.js:6:22
-   6| (function() { return 0 }) as O; // err: number ~> void
+   6| (function() { return 0 }) as O; // err: number ~> undefined
                            ^ [1]
    internal_slot.js:2:15
-   2|   [[call]](): void;
-                    ^^^^ [2]
+   2|   [[call]](): undefined;
+                    ^^^^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------- internal_slot.js:13:2
 
 Cannot cast object literal to `I` because a call signature declaring the expected parameter / return type is missing in
-object literal [1] but exists in `{(): void, ...}` [2]. [incompatible-type]
+object literal [1] but exists in `{(): undefined, ...}` [2]. [incompatible-type]
 
    internal_slot.js:13:2
    13| ({}) as I; // err: no callable property
@@ -355,19 +356,20 @@ References:
 
 Error -------------------------------------------------------------------------------------------- internal_slot.js:14:2
 
-Cannot cast function to `I` because in the return value: `0` [1] is incompatible with `void` [2]. [incompatible-type]
+Cannot cast function to `I` because in the return value: `0` [1] is incompatible with `undefined` [2].
+[incompatible-type]
 
    internal_slot.js:14:2
-   14| (function() { return 0 }) as I; // err: number ~> void
+   14| (function() { return 0 }) as I; // err: number ~> undefined
         ^^^^^^^^^^
 
 References:
    internal_slot.js:14:22
-   14| (function() { return 0 }) as I; // err: number ~> void
+   14| (function() { return 0 }) as I; // err: number ~> undefined
                             ^ [1]
    internal_slot.js:10:15
-   10|   [[call]](): void;
-                     ^^^^ [2]
+   10|   [[call]](): undefined;
+                     ^^^^^^^^^ [2]
 
 
 Error -------------------------------------------------------------------------------------------- internal_slot.js:20:1

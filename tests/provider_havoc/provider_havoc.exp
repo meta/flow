@@ -27,7 +27,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- empty.js:14:17
 
-Cannot assign `si.add(...)` to `si` because in type argument `T` [1]: `void` [2] is incompatible with `empty` [3].
+Cannot assign `si.add(...)` to `si` because in type argument `T` [1]: `undefined` [2] is incompatible with `empty` [3].
 [incompatible-type]
 
 All writes to `si` must be compatible with the type of its initializer [4]. Add an annotation to `si` [4] if a different
@@ -213,52 +213,52 @@ References:
              ^^ [4]
 
 
-Error --------------------------------------------------------------------------------------- provider_edge_cases.js:5:5
+Error --------------------------------------------------------------------------------------- provider_edge_cases.js:6:5
 
-Cannot compare `(x: unknown) => number` [1] to `(...data: Array<any>) => void` [2], because `(x: unknown) => number` [1]
-is not a subtype of `(...data: Array<any>) => void` [3] and `(...data: Array<any>) => void` [3] is not a subtype of
+Cannot compare `(x: unknown) => number` [1] to `(x: unknown) => string` [2], because `(x: unknown) => number` [1] is not
+a subtype of `(x: unknown) => string` [3] and `(x: unknown) => string` [3] is not a subtype of
 `(x: unknown) => number` [1]. In **rare** cases, these types may have overlapping values but lack a subtyping
 relationship. If that happens, you can cast one side to the union of both types to pass the flow check. 
 [invalid-compare]
 
-   provider_edge_cases.js:5:5
-    5| if (((x: unknown) => 42) === console.log) { // constant-condition error
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   provider_edge_cases.js:6:5
+   6| if (((x: unknown): number => 42) === returnsString) { // constant-condition error
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 References:
-   provider_edge_cases.js:5:6
-    5| if (((x: unknown) => 42) === console.log) { // constant-condition error
-            ^^^^^^^^^^^^^^^^^^ [1]
+   provider_edge_cases.js:6:6
+   6| if (((x: unknown): number => 42) === returnsString) { // constant-condition error
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   provider_edge_cases.js:5:15
+   5| declare const returnsString: (x: unknown) => string;
+                    ^^^^^^^^^^^^^ [2]
    provider_edge_cases.js:5:30
-    5| if (((x: unknown) => 42) === console.log) { // constant-condition error
-                                    ^^^^^^^^^^^ [2]
-   <BUILTINS>/dom_extra_to_be_removed.js:29:5
-   29|     log(...data: Array<any>): void,
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   5| declare const returnsString: (x: unknown) => string;
+                                   ^^^^^^^^^^^^^^^^^^^^^^ [3]
 
 
-Error --------------------------------------------------------------------------------------- provider_edge_cases.js:8:1
+Error --------------------------------------------------------------------------------------- provider_edge_cases.js:9:1
 
 Cannot resolve name `f`. [cannot-resolve-name]
 
-   8| f = function() {
+   9| f = function() {
       ^
 
 
-Error --------------------------------------------------------------------------------------- provider_edge_cases.js:8:1
+Error --------------------------------------------------------------------------------------- provider_edge_cases.js:9:1
 
 The following definitions recursively depend on each other, and Flow cannot compute their types:
  - `f` [1] depends on other definition [2]
 Please add type annotations to these definitions [definition-cycle]
 
-   provider_edge_cases.js:8:1
-   8| f = function() {
-      ^ [1]
+   provider_edge_cases.js:9:1
+    9| f = function() {
+       ^ [1]
 
 References:
-   provider_edge_cases.js:9:3
-   9|   f = 42;
-        ^ [2]
+   provider_edge_cases.js:10:3
+   10|   f = 42;
+         ^ [2]
 
 
 Error ---------------------------------------------------------------------------------------- providers_closure.js:17:3
@@ -399,7 +399,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:10:23
 
-Cannot assign `var_x` to `y` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot assign `var_x` to `y` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    test.js:10:23
    10|       var y: number = var_x;

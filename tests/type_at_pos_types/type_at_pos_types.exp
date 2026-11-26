@@ -571,11 +571,11 @@ opaque.js:83:13,83:19
 
 optional.js
 At optional.js:4:10
-void | string
+undefined | string
 optional.js:4:10,4:10
 
 At optional.js:8:3
-(x?: string) => void | string
+(x?: string) => undefined | string
 optional.js:8:1,8:3
 
 At optional.js:12:11
@@ -583,11 +583,11 @@ At optional.js:12:11
 optional.js:12:10,12:12
 
 At optional.js:14:6
-void | string
+undefined | string
 optional.js:14:6,14:6
 
 At optional.js:19:10
-void
+undefined
 optional.js:19:10,19:10
 
 recursive.js
@@ -869,7 +869,7 @@ At unions.js:66:5
 unions.js:66:5,66:5
 
 At unions.js:69:15
-void | null
+undefined | null
 unions.js:69:15,69:25
 
 At unions.js:78:4

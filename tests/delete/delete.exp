@@ -1,6 +1,6 @@
 Error ---------------------------------------------------------------------------------------------------- delete.js:4:8
 
-Cannot delete `obj1.f` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot delete `obj1.f` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    delete.js:4:8
    4| delete obj1.f; // error, f is required
@@ -17,7 +17,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- delete.js:11:1
 
-Cannot cast `x` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `x` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    delete.js:11:1
    11| x as number;
@@ -34,7 +34,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- delete.js:15:8
 
-Cannot delete `y` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot delete `y` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    delete.js:15:8
    15| delete y;
@@ -59,7 +59,7 @@ Cannot delete `b[0]` because read-only arrays cannot be written to. [cannot-writ
 
 Error --------------------------------------------------------------------------------------------------- delete.js:27:8
 
-Cannot delete `c[1]` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot delete `c[1]` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    delete.js:27:8
    27| delete c[1];
@@ -180,7 +180,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- delete.js:60:8
 
-Cannot delete `index.a` because `void` [1] is incompatible with `boolean` [2]. [incompatible-type]
+Cannot delete `index.a` because `undefined` [1] is incompatible with `boolean` [2]. [incompatible-type]
 
    delete.js:60:8
    60| delete index.a;
@@ -197,7 +197,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- delete.js:61:8
 
-Cannot delete `index['a']` because `void` [1] is incompatible with `boolean` [2]. [incompatible-type]
+Cannot delete `index['a']` because `undefined` [1] is incompatible with `boolean` [2]. [incompatible-type]
 
    delete.js:61:8
    61| delete index['a'];

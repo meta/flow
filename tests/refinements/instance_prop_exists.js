@@ -47,15 +47,15 @@
     p: 'b';
     b: string;
   }
-  interface VoidP {
-    p: void;
+  interface UndefinedP {
+    p: undefined;
     c: boolean;
   }
-  declare const x: NullP | StrP | VoidP;
+  declare const x: NullP | StrP | UndefinedP;
   if (x.p != null) {
     x as StrP; // OK
   } else {
-    x as NullP | VoidP; // OK
+    x as NullP | UndefinedP; // OK
   }
 }
 

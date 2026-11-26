@@ -14,6 +14,6 @@ if (x instanceof Symbol) {
 // throws at runtime, and is an error.
 declare class SymbolSubclass extends Symbol {}
 declare const subclassInstance: SymbolSubclass;
-subclassInstance.description as string | void;
+subclassInstance.description as string | undefined;
 subclassInstance as Symbol;
 new SymbolSubclass(); // Error: no constructor to inherit

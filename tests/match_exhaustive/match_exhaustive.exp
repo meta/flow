@@ -289,7 +289,7 @@ References:
 Error ---------------------------------------------------------------------------------------------------- basic.js:73:3
 
 `match` hasn't checked all possible cases of the input type. To fix, add the missing pattern: `undefined` to match
-`void` [1]. [match-not-exhaustive]
+`undefined` [1]. [match-not-exhaustive]
 
    basic.js:73:3
    73|   match (x) { // ERROR: missing `undefined`
@@ -297,14 +297,14 @@ Error --------------------------------------------------------------------------
 
 References:
    basic.js:66:27
-   66|   declare const x: null | void;
-                                 ^^^^ [1]
+   66|   declare const x: null | undefined;
+                                 ^^^^^^^^^ [1]
 
 
 Error ---------------------------------------------------------------------------------------------------- basic.js:87:3
 
 `match` hasn't checked all possible cases of the input type. To fix, add the missing pattern: `undefined` to match
-`void` [1]. [match-not-exhaustive]
+`undefined` [1]. [match-not-exhaustive]
 
    basic.js:87:3
    87|   match (obj.prop) { // ERROR: missing `undefined`
@@ -334,7 +334,7 @@ References:
 Error --------------------------------------------------------------------------------------------------- basic.js:107:3
 
 `match` hasn't checked all possible cases of the input type. To fix, add the missing pattern: `undefined` to match
-`void` [1]. [match-not-exhaustive]
+`undefined` [1]. [match-not-exhaustive]
 
    basic.js:107:3
    107|   match (x) { // ERROR: missing `undefined`
@@ -357,7 +357,7 @@ Error --------------------------------------------------------------------------
 
 References:
    basic.js:124:42
-   124|   declare const x: 'foo' | 1 | -2 | 3n | boolean | null | void;
+   124|   declare const x: 'foo' | 1 | -2 | 3n | boolean | null | undefined;
                                                  ^^^^^^^ [1]
 
 
@@ -372,7 +372,7 @@ Error --------------------------------------------------------------------------
 
 References:
    basic.js:161:42
-   161|   declare const x: 'foo' | 1 | -2 | 3n | boolean | null | void;
+   161|   declare const x: 'foo' | 1 | -2 | 3n | boolean | null | undefined;
                                                  ^^^^^^^ [1]
 
 
@@ -714,7 +714,7 @@ References:
 Error ---------------------------------------------------------------------------------------------------- enums.js:95:3
 
 `match` hasn't checked all possible cases of the input type. To fix, add the missing pattern: `undefined` to match
-`void` [1]. [match-not-exhaustive]
+`undefined` [1]. [match-not-exhaustive]
 
    enums.js:95:3
    95|   match (x) { // ERROR: missing `undefined`

@@ -89,7 +89,7 @@ References:
 Error ----------------------------------------------------------------------------------------------------- api.js:18:25
 
 Cannot call `Children.forEach` with function bound to `fn` because in the first parameter: `number` [1] is incompatible
-with `void` [2]. [incompatible-type]
+with `undefined` [2]. [incompatible-type]
 
    api.js:18:25
    18| Children.forEach(a, (x: number) => {}); // Error
@@ -119,7 +119,7 @@ References:
 Error ----------------------------------------------------------------------------------------------------- api.js:20:25
 
 Cannot call `Children.forEach` with function bound to `fn` because in the first parameter: `string` [1] is incompatible
-with `void` [2]. [incompatible-type]
+with `undefined` [2]. [incompatible-type]
 
    api.js:20:25
    20| Children.forEach(a, (x: string) => {}); // Error
@@ -470,7 +470,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ fun.js:49:7
 
-Cannot create `Fun` element because in property `children`: `void` [1] is incompatible with `Fn` [2].
+Cannot create `Fun` element because in property `children`: `undefined` [1] is incompatible with `Fn` [2].
 [incompatible-type]
 
    fun.js:49:7
@@ -840,8 +840,8 @@ References:
 Error ---------------------------------------------------------------------------------------------------- fun.js:142:12
 
 Cannot create `FunArray` element because in property `children`: [incompatible-type]
- - Either `void` [1] is incompatible with `Fn` [2].
- - Or `void` [1] is incompatible with `Array<Fn>` [3].
+ - Either `undefined` [1] is incompatible with `Fn` [2].
+ - Or `undefined` [1] is incompatible with `Array<Fn>` [3].
 
    fun.js:142:12
    142| <FunArray>{undefined}</FunArray>; // Error: `undefined` is not allowed.
@@ -1073,7 +1073,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- text.js:20:8
 
-Cannot create `Text` element because in property `children`: `void` [1] is incompatible with `string` [2].
+Cannot create `Text` element because in property `children`: `undefined` [1] is incompatible with `string` [2].
 [incompatible-type]
 
    text.js:20:8

@@ -352,7 +352,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- exported.js:81:1
 
-Cannot cast `exported_ns.CONSTANT` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `exported_ns.CONSTANT` to `empty` because `undefined` [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    exported.js:81:1
    81| exported_ns.CONSTANT as empty; // prop-missing
@@ -1048,7 +1049,8 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- typing_test.js:40:1
 
-Cannot cast `exported_ns.CONSTANT` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `exported_ns.CONSTANT` to `empty` because `undefined` [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    typing_test.js:40:1
    40| exported_ns.CONSTANT as empty; // error: prop-missing

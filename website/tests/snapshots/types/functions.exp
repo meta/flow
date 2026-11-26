@@ -106,7 +106,7 @@ No errors!
 === block 16 ===
 Error ---------------------------------------------------------------------------- -:2:18
 
-Cannot expect `boolean` as the return type of function because `boolean` [1] is incompatible with `void` [1].
+Cannot expect `boolean` as the return type of function because `boolean` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    2| function func(): boolean { // Error
@@ -122,9 +122,62 @@ No errors!
 No errors!
 
 === block 19 ===
-No errors!
+Error ---------------------------------------------------------------------------- -:6:26
+
+Cannot assign `returnsNothing()` to `value` because `void` [1] is incompatible with `undefined` [2]. [incompatible-type]
+
+   -:6:26
+   6| const value: undefined = returnsNothing(); // Error! `void` is not `undefined`
+                               ^^^^^^^^^^^^^^^^
+
+References:
+   -:2:28
+   2| function returnsNothing(): void {}
+                                 ^^^^ [1]
+   -:6:14
+   6| const value: undefined = returnsNothing(); // Error! `void` is not `undefined`
+                   ^^^^^^^^^ [2]
+
+
+Found 1 error
 
 === block 20 ===
+Error ---------------------------------------------------------------------------- -:3:27
+
+Cannot assign `callback()` to `result` because `void` [1] is incompatible with `undefined` [2]. [incompatible-type]
+
+   -:3:27
+   3| const result: undefined = callback(); // Error! The result has type `void`
+                                ^^^^^^^^^^
+
+References:
+   -:2:23
+   2| const callback: () => void = () => 123; // Works: the result is ignored
+                            ^^^^ [1]
+   -:3:15
+   3| const result: undefined = callback(); // Error! The result has type `void`
+                    ^^^^^^^^^ [2]
+
+Error ---------------------------------------------------------------------------- -:6:10
+
+Cannot return `123` because `123` [1] is incompatible with `void` [2]. [incompatible-type]
+
+   -:6:10
+   6|   return 123; // Error!
+               ^^^ [1]
+
+References:
+   -:5:23
+   5| function annotated(): void {
+                            ^^^^ [2]
+
+
+Found 2 errors
+
+=== block 21 ===
+No errors!
+
+=== block 22 ===
 Error ---------------------------------------------------------------------------- -:11:7
 
 Cannot call `C` with `123` bound to `name` because `123` [1] is incompatible with `string` [2]. [incompatible-type]
@@ -174,7 +227,7 @@ References:
 
 Found 3 errors
 
-=== block 21 ===
+=== block 23 ===
 Error --------------------------------------------------------------------------- -:19:13
 
 Cannot call `instantiate` with `Point` bound to `C` because in the first argument: `string` [1] is incompatible with
@@ -195,7 +248,7 @@ References:
 
 Found 1 error
 
-=== block 22 ===
+=== block 24 ===
 Error --------------------------------------------------------------------------- -:10:31
 
 Cannot assign `OtherItem` to `wrong` because in the return value: `OtherItem` [1] is incompatible with `Item` [2].
@@ -216,7 +269,7 @@ References:
 
 Found 1 error
 
-=== block 23 ===
+=== block 25 ===
 Error ----------------------------------------------------------------------------- -:4:5
 
 Cannot use `new` on `{new(): {value: number}}` [1]. Only classes and interfaces with a construct signature can be
@@ -234,7 +287,7 @@ References:
 
 Found 1 error
 
-=== block 24 ===
+=== block 26 ===
 Error ---------------------------------------------------------------------------- -:13:1
 
 Cannot instantiate an `abstract` class. [invalid-abstract]
@@ -259,10 +312,10 @@ Cannot assign an `abstract` constructor type to a non-`abstract` constructor typ
 
 Found 3 errors
 
-=== block 25 ===
+=== block 27 ===
 No errors!
 
-=== block 26 ===
+=== block 28 ===
 Error --------------------------------------------------------------------------- -:10:38
 
 Cannot assign function to `badFormat` because in the first parameter: `number` [1] is incompatible with `string` [2].
@@ -280,7 +333,7 @@ References:
 
 Found 1 error
 
-=== block 27 ===
+=== block 29 ===
 Error ---------------------------------------------------------------------------- -:6:10
 
 Cannot assign `"runs later"` to `callback.description` because property `description` is missing in `{...}` [1].
@@ -298,11 +351,11 @@ References:
 
 Found 1 error
 
-=== block 28 ===
-No errors!
-
-=== block 29 ===
-No errors!
-
 === block 30 ===
+No errors!
+
+=== block 31 ===
+No errors!
+
+=== block 32 ===
 No errors!

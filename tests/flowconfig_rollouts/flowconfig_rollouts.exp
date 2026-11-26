@@ -20,7 +20,7 @@ Group names may only contain [a-zA-Z0-9._]:
 100% on should always be on:
 Error ------------------------------------------------------------------------------------- error_unchecked_index.js:4:1
 
-Cannot cast `roArray[0]` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `roArray[0]` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    error_unchecked_index.js:4:1
    4| roArray[0] as string; // error when no_unchecked_indexed_access=true
@@ -50,7 +50,7 @@ Unknown group:
 Disable a .*.js ignore via rollout:
 Error ------------------------------------------------------------------------------------- error_unchecked_index.js:4:1
 
-Cannot cast `roArray[0]` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `roArray[0]` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    error_unchecked_index.js:4:1
    4| roArray[0] as string; // error when no_unchecked_indexed_access=true

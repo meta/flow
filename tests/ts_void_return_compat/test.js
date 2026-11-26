@@ -11,4 +11,4 @@ takeTsProps({onEvent: returnsUnknown}); // OK
 
 takeTsVoidHandler((event: number) => {}); // ERROR: params are still checked.
 takeTsNumberHandler(returnsUnknown); // ERROR: only `void` returns are relaxed.
-takeFlowVoidHandler(returnsUnknown); // ERROR: a Flow `=> void` keeps Flow's rule.
+takeFlowVoidHandler(returnsUnknown); // OK: Flow `=> void` also accepts any return type.

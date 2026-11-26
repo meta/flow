@@ -82,7 +82,7 @@ function test5() {
   const c1: C<(s: string)=>string> = new C(x => x); // OK
   const c2: C<(s: string)=>string> = new C(x => x, 1); // OK
 
-  declare function Component<T>(x: {v: T, f: (x: T) => void}): void;
+  declare function Component<T>(x: {v: T, f: (x: T) => void}): undefined;
   <Component v="1" f={(v) => {v as string}} />; // OK
   <PolyComponent v="1" f={(v) => {v as string}} />; // OK
 }

@@ -2,7 +2,7 @@ export type T = {
   f: boolean,
  ...};
 
-declare const xs: T | void;
+declare const xs: T | undefined;
 
 const ys: T | typeof undefined = xs;
 

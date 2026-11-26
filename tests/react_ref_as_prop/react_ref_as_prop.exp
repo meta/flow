@@ -95,8 +95,8 @@ References:
 
 Error ----------------------------------------------------------------------------------- implicit_instantiation.js:18:1
 
-Cannot cast `null` to `React.ElementRef<component(foo: string)>` because `null` [1] is incompatible with `void` [2].
-[incompatible-type]
+Cannot cast `null` to `React.ElementRef<component(foo: string)>` because `null` [1] is incompatible with
+`undefined` [2]. [incompatible-type]
 
    implicit_instantiation.js:18:1
    18| null as React.ElementRef<typeof IdMappedFnWithoutRefProp>; // error: null ~> void
@@ -189,8 +189,8 @@ References:
 
 Error ----------------------------------------------------------------------------------- implicit_instantiation.js:37:1
 
-Cannot cast `null` to `React.ElementRef<component(foo: string)>` because `null` [1] is incompatible with `void` [2].
-[incompatible-type]
+Cannot cast `null` to `React.ElementRef<component(foo: string)>` because `null` [1] is incompatible with
+`undefined` [2]. [incompatible-type]
 
    implicit_instantiation.js:37:1
    37| null as React.ElementRef<typeof IdMappedCompWithoutRefProp>; // error: null ~> empty

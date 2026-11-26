@@ -80,7 +80,7 @@ function isPositive(n: ?number): boolean {
   return n != null && n > 0;
 }
 ```
-If we declared `n is number` as the type guard of this function then in the following code we would be able to establish that `n` is `null | void` in the else-branch. This is not true, however, since `n` could just be a non-negative number:
+If we declared `n is number` as the type guard of this function then in the following code we would be able to establish that `n` is `null | undefined` in the else-branch. This is not true, however, since `n` could just be a non-negative number:
 ```js flow-check
 function isPositiveUnsound(n: ?number): n is number {
   return n != null && n > 0; // Error
@@ -90,7 +90,7 @@ declare const n: ?number;
 if (isPositiveUnsound(n)) {
   // n is number here
 } else {
-  // n would be inferred as null | void, but could actually be a non-negative number
+  // n would be inferred as null | undefined, but could actually be a non-negative number
 }
 ```
 

@@ -175,7 +175,7 @@ test.js:53:7,53:7
 
 test.js:58:3
 Flags:
-(method) E.cast(this: typeof E, input: ?string): void | E
+(method) E.cast(this: typeof E, input: ?string): undefined | E
 
 'E' defined at test.js:5:5
 

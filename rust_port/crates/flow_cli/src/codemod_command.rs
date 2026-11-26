@@ -1059,13 +1059,13 @@ mod migrate_to_ts_void_command {
     static CHANGED: Mutex<Option<Stats>> = Mutex::new(None);
 
     fn spec() -> flow_command_spec::Spec {
-        let doc = "Changes `void` to `undefined` where `experimental.ts_void` would reject it.";
+        let doc = "Migrates legacy uses of `void` to `undefined`.";
         codemod_common_spec(
             "migrate-to-ts-void",
             doc,
             flow_command_spec::Visibility::Public,
             format!(
-                "Usage: {} codemod migrate-to-ts-void [OPTION]... [FILE]\n\nUnder `experimental.ts_void`, `void` is TypeScript's `void`, which flows into nothing but `void`, `any` and `unknown`. Checks the code under the flag and changes to `undefined` only the `void` annotations whose values it rejects, and annotates `: undefined` the functions returning no value whose inferred `void` it rejects. A function type's return type that rejects the `void` returned by a function passed as it is changed to admit `void` instead, unless it is in a library definition. A function without a `return` statement whose return type doesn't include `void` and isn't `any` or `undefined` returns `undefined` at its end. With --write, checks again until nothing more is rejected.\n",
+                "Usage: {} codemod migrate-to-ts-void [OPTION]... [FILE]\n\nFlow uses TypeScript's `void`, which flows into nothing but `void`, `any` and `unknown`. The codemod changes to `undefined` only the `void` annotations whose values the checker rejects, and annotates `: undefined` the functions returning no value whose inferred `void` it rejects. A function type's return type that rejects the `void` returned by a function passed as it is changed to admit `void` instead, unless it is in a library definition. A function without a `return` statement whose return type doesn't include `void` and isn't `any` or `undefined` returns `undefined` at its end. With --write, checks again until nothing more is rejected.\n",
                 flow_command_utils::exe_name()
             ),
         )
@@ -1169,8 +1169,7 @@ mod migrate_to_ts_void_command {
     }
 
     fn main(args: &arg_spec::Values) {
-        let mut prepared = prepare_codemod(args, false);
-        prepared.options.ts_void = true;
+        let prepared = prepare_codemod(args, false);
         let in_scope = prepared.roots.clone();
         let mut roots = prepared.roots;
         let mut seen: BTreeSet<Loc> = BTreeSet::new();

@@ -253,7 +253,7 @@ No errors!
 Error -------------------------------------------------------------------------- -:8:5
 
 Cannot assign array literal to `fullName` because array literal [1] has an unknown number of elements, so is
-incompatible with `[string, string | void, string]` [2]. [invalid-tuple-arity]
+incompatible with `[string, string | undefined, string]` [2]. [invalid-tuple-arity]
 
    -:8:5
    8| ] = ["Ada", ...middle, "Lovelace"]; // ERROR
@@ -264,7 +264,7 @@ References:
                       v
    4| const fullName: [
    5|   string,
-   6|   string | void,
+   6|   string | undefined,
    7|   string,
    8| ] = ["Ada", ...middle, "Lovelace"]; // ERROR
       ^ [2]
@@ -499,7 +499,24 @@ Found 2 errors
 No errors!
 
 === block 26 ===
-No errors!
+Error ------------------------------------------------------------------------- -:6:27
+
+Cannot assign `f()` to `result` because `void` [1] is incompatible with `undefined` [2]. [incompatible-type]
+
+   -:6:27
+   6| const result: undefined = f(); // ERROR: a `void` result is not `undefined`
+                                ^^^
+
+References:
+   -:3:15
+   3| function f(): void {
+                    ^^^^ [1]
+   -:6:15
+   6| const result: undefined = f(); // ERROR: a `void` result is not `undefined`
+                    ^^^^^^^^^ [2]
+
+
+Found 1 error
 
 === block 27 ===
 No errors!
@@ -649,7 +666,7 @@ References:
 
 Error ------------------------------------------------------------------------ -:17:23
 
-Cannot assign `obj.x` to `a` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot assign `obj.x` to `a` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    -:17:23
    17|     const a: number = obj.x; // ERROR: callee could have mutated `obj.x`

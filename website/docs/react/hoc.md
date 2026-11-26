@@ -67,7 +67,9 @@ function MyComponent(props: {
   b: number,
   ...InjectedProps,
   ...
-}): React.Node {}
+}): React.Node {
+  return <div>{props.foo}</div>;
+}
 
 const MyEnhancedComponent = injectProp(MyComponent);
 
@@ -93,7 +95,9 @@ function trivialHOC<Config extends {...}>(
 
 type Props = Readonly<{bar: number, foo?: number}>;
 
-function MyComponent({bar, foo = 3}: Props): React.Node {}
+function MyComponent({bar, foo = 3}: Props): React.Node {
+  return <div>{bar + foo}</div>;
+}
 
 export const MyEnhancedComponent = trivialHOC(MyComponent); // ERROR
 ```
@@ -111,7 +115,9 @@ function trivialHOC<Config extends {...}>(
 
 type Props = Readonly<{bar: number, foo?: number}>;
 
-function MyComponent({bar, foo = 3}: Props): React.Node {}
+function MyComponent({bar, foo = 3}: Props): React.Node {
+  return <div>{bar + foo}</div>;
+}
 
 export const MyEnhancedComponent: component(...Props) = trivialHOC(MyComponent); // OK
 ```

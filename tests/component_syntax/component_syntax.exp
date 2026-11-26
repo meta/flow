@@ -1567,7 +1567,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- import.js:21:1
 
-Cannot cast `Foo.displayName` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `Foo.displayName` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    import.js:21:1
    21| Foo.displayName as empty; // error, displayName is a string
@@ -2418,7 +2418,8 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- propsof.js:14:1
 
-Cannot cast `intrinsicProp.children` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `intrinsicProp.children` to `empty` because `undefined` [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    propsof.js:14:1
    14| intrinsicProp.children as empty; // children is ?React.Node
@@ -2603,8 +2604,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- refs.js:12:1
 
-Cannot cast `Foo` to `component(ref: React.RefSetter<string>)` because in property `ref`: `void` [1] is incompatible
-with `{current: typeof Reffed}` [2]. [incompatible-type]
+Cannot cast `Foo` to `component(ref: React.RefSetter<string>)` because in property `ref`: `undefined` [1] is
+incompatible with `{current: typeof Reffed}` [2]. [incompatible-type]
 
    refs.js:12:1
    12| Foo as component(ref: React.RefSetter<string>); // err: React.RefSetter<string> ~> {current: typeof Reffed}
@@ -2721,7 +2722,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- refs.js:13:1
 
-Cannot cast `Foo` to `component(ref: React.RefSetter<typeof Reffed>)` because in property `ref`: `void` [1] is
+Cannot cast `Foo` to `component(ref: React.RefSetter<typeof Reffed>)` because in property `ref`: `undefined` [1] is
 incompatible with `{current: typeof Reffed}` [2]. [incompatible-type]
 
    refs.js:13:1
@@ -3044,8 +3045,8 @@ Error --------------------------------------------------------------------------
 
 Error ----------------------------------------------------------------------------------------- rest_constraints.js:2:22
 
-Cannot use `void | number` [1] as a component rest param. Component rest params must use an object type and cannot be
-optional. [incompatible-type]
+Cannot use `undefined | number` [1] as a component rest param. Component rest params must use an object type and cannot
+be optional. [incompatible-type]
 
    2| component Bar(...x?: number) {return null; } // ERROR optional
                            ^^^^^^ [1]
@@ -3053,7 +3054,7 @@ optional. [incompatible-type]
 
 Error ----------------------------------------------------------------------------------------- rest_constraints.js:3:22
 
-Cannot use `void | {foo: number}` [1] as a component rest param. Component rest params must use an object type and
+Cannot use `undefined | {foo: number}` [1] as a component rest param. Component rest params must use an object type and
 cannot be optional. [incompatible-type]
 
    3| component Baz(...x?: {foo: number}) {return null; } // ERROR optional
@@ -3372,7 +3373,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- signature.js:46:13
 
-Cannot use `void | {foo: number}` [1] as a component rest param. Component rest params must use an object type and
+Cannot use `undefined | {foo: number}` [1] as a component rest param. Component rest params must use an object type and
 cannot be optional. [incompatible-type]
 
    46|   ...rest?: {foo: number} // ERROR, rest params can't be optional
@@ -3381,7 +3382,7 @@ cannot be optional. [incompatible-type]
 
 Error ------------------------------------------------------------------------------------------------ signature.js:48:3
 
-Cannot cast `x` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `x` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    signature.js:48:3
    48|   x as number; // ERROR
@@ -3398,7 +3399,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ signature.js:50:3
 
-Cannot cast `rest` to `{foo: number}` because `void` [1] is incompatible with `{foo: number}` [2]. [incompatible-type]
+Cannot cast `rest` to `{foo: number}` because `undefined` [1] is incompatible with `{foo: number}` [2].
+[incompatible-type]
 
    signature.js:50:3
    50|   rest as {foo: number}; // ERROR, rest is optional in the body, as typed
@@ -3415,7 +3417,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ signature.js:67:3
 
-Cannot cast `bar` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `bar` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    signature.js:67:3
    67|   bar as number; // ERROR, bar is optional
@@ -3447,7 +3449,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ signature.js:78:3
 
-Cannot cast `ariaLabel` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `ariaLabel` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    signature.js:78:3
    78|   ariaLabel as string; // ERROR, ariaLabel is optional

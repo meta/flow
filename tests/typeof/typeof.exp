@@ -534,7 +534,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- optional.js:9:1
 
-Cannot cast `null` to `void | number` because `null` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `null` to `undefined | number` because `null` [1] is incompatible with `number` [2]. [incompatible-type]
 
    optional.js:9:1
    9| null as typeof x; // error: null ~> $Optional<number> (i.e., void|number)

@@ -18,7 +18,7 @@ Flags: --pretty
     },
     {
       "name":"get",
-      "type":"(this: Map<string, number>, key: string) => number | void"
+      "type":"(this: Map<string, number>, key: string) => number | undefined"
     },
     {
       "name":"getOrInsert",
@@ -467,7 +467,7 @@ Flags: --pretty
     {"name":"Uint32Array","type":"Uint32ArrayConstructor"},
     {"name":"Uint8Array","type":"Uint8ArrayConstructor"},
     {"name":"Uint8ClampedArray","type":"Uint8ClampedArrayConstructor"},
-    {"name":"undefined","type":"void"},
+    {"name":"undefined","type":"undefined"},
     {"name":"unescape","type":"(string: string) => string"},
     {"name":"URIError","type":"URIErrorConstructor"},
     {"name":"WeakMap","type":"WeakMapConstructor"},
@@ -539,13 +539,19 @@ Flags: --pretty
 object_literal.js:12:4
 Flags: --pretty
 {
-  "result":[{"name":"baz","type":"boolean | void"},{"name":"foo","type":"string | void"}]
+  "result":[
+    {"name":"baz","type":"boolean | undefined"},
+    {"name":"foo","type":"string | undefined"}
+  ]
 }
 
 object_literal.js:15:4
 Flags: --pretty
 {
-  "result":[{"name":"baz","type":"boolean | void"},{"name":"foo","type":"string | void"}]
+  "result":[
+    {"name":"baz","type":"boolean | undefined"},
+    {"name":"foo","type":"string | undefined"}
+  ]
 }
 
 object_literal.js:21:4
@@ -582,15 +588,15 @@ Flags: --pretty
 
 optional_chaining_continue.js:13:19
 Flags: --pretty
-{"result":[{"name":"baz","type":"void | number"}]}
+{"result":[{"name":"baz","type":"undefined | number"}]}
 
 optional_chaining_middle.js:9:16
 Flags: --pretty
-{"result":[{"name":"bar","type":"void | number"}]}
+{"result":[{"name":"bar","type":"undefined | number"}]}
 
 optional_chaining_new.js:9:15
 Flags: --pretty
-{"result":[{"name":"bar","type":"void | number"}]}
+{"result":[{"name":"bar","type":"undefined | number"}]}
 
 optional.js:4:14
 Flags: --pretty
@@ -598,13 +604,13 @@ Flags: --pretty
   "result":[
     {"name":"f","type":"(x?: string) => void"},
     {"name":"o","type":"{x?: string}"},
-    {"name":"x","type":"string | void"}
+    {"name":"x","type":"string | undefined"}
   ]
 }
 
 optional_object.js:3:5
 Flags: --pretty
-{"result":[{"name":"?.z","type":"void | number"}]}
+{"result":[{"name":"?.z","type":"undefined | number"}]}
 
 override.js:10:16
 Flags: --pretty

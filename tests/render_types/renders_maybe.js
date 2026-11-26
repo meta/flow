@@ -43,13 +43,13 @@ component RendersMaybeMenuItem() renders MaybeMenuItem {
 }
 (<RendersMaybeMenuItem />) as renders? MenuItem; // OK
 
-rendersMaybeMenuItem as renders (null | false | void | MenuItem); // invalid-render turns RHS any
+rendersMaybeMenuItem as renders (null | false | undefined | MenuItem); // invalid-render turns RHS any
 
-rendersMaybeMenuItem as renders (null | false | void | Bar); // invalid-render turns RHS any
+rendersMaybeMenuItem as renders (null | false | undefined | Bar); // invalid-render turns RHS any
 
 component MightRenderMenuItem() renders? MenuItem {
   return Math.random() > 0.5 ? null : <MenuItem />; // OK
 }
 
-(<Bar />) as (renders MenuItem) | (renders BlueMenuItem) | null | void; // ERROR, `null` and `void` not tried
+(<Bar />) as (renders MenuItem) | (renders BlueMenuItem) | null | undefined; // ERROR, `null` and `undefined` not tried
 (<Bar />) as ?(renders (MenuItem | BlueMenuItem)); // ERROR

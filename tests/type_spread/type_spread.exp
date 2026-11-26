@@ -34,8 +34,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ all_cases.js:93:1
 
-Cannot cast `X7` to `C7` because in property `p`: `void | string | number` [1] is not exactly the same as
-`void | string` [2]. [incompatible-type]
+Cannot cast `X7` to `C7` because in property `p`: `undefined | string | number` [1] is not exactly the same as
+`undefined | string` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
 - Either make `D7` [3] and `{[string]: number, p?: string}` [4] exactly the same
@@ -66,8 +66,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ all_cases.js:94:1
 
-Cannot cast `Y7` to `D7` because in property `p`: `void | string` [1] is not exactly the same as
-`void | string | number` [2]. [incompatible-type]
+Cannot cast `Y7` to `D7` because in property `p`: `undefined | string` [1] is not exactly the same as
+`undefined | string | number` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
 - Either make `{[string]: number, p?: string}` [3] and `D7` [4] exactly the same
@@ -98,8 +98,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- all_cases.js:182:1
 
-Cannot cast `X15` to `C15` because in property `p`: `void | string | number` [1] is not exactly the same as
-`void | string` [2]. [incompatible-type]
+Cannot cast `X15` to `C15` because in property `p`: `undefined | string | number` [1] is not exactly the same as
+`undefined | string` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
 - Either make `D15` [3] and `{[string]: number, p?: string}` [4] exactly the same
@@ -130,8 +130,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- all_cases.js:183:1
 
-Cannot cast `Y15` to `D15` because in property `p`: `void | string` [1] is not exactly the same as
-`void | string | number` [2]. [incompatible-type]
+Cannot cast `Y15` to `D15` because in property `p`: `undefined | string` [1] is not exactly the same as
+`undefined | string | number` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
 - Either make `{[string]: number, p?: string}` [3] and `D15` [4] exactly the same
@@ -162,8 +162,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- all_cases.js:193:1
 
-Cannot cast `X16` to `C16` because in property `p`: `void | string | number` [1] is not exactly the same as
-`void | string` [2]. [incompatible-type]
+Cannot cast `X16` to `C16` because in property `p`: `undefined | string | number` [1] is not exactly the same as
+`undefined | string` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
 - Either make `D16` [3] and `{p?: string, ...}` [4] exactly the same
@@ -209,8 +209,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- all_cases.js:194:1
 
-Cannot cast `Y16` to `D16` because in property `p`: `void | string` [1] is not exactly the same as
-`void | string | number` [2]. [incompatible-type]
+Cannot cast `Y16` to `D16` because in property `p`: `undefined | string` [1] is not exactly the same as
+`undefined | string | number` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
 - Either make `{p?: string, ...}` [3] and `D16` [4] exactly the same
@@ -241,8 +241,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- all_cases.js:273:1
 
-Cannot cast `X23` to `C23` because in property `p`: `void | string | number` [1] is not exactly the same as
-`void | string` [2]. [incompatible-type]
+Cannot cast `X23` to `C23` because in property `p`: `undefined | string | number` [1] is not exactly the same as
+`undefined | string` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
 - Either make `D23` [3] and `{[string]: number, p?: string}` [4] exactly the same
@@ -273,8 +273,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- all_cases.js:274:1
 
-Cannot cast `Y23` to `D23` because in property `p`: `void | string` [1] is not exactly the same as
-`void | string | number` [2]. [incompatible-type]
+Cannot cast `Y23` to `D23` because in property `p`: `undefined | string` [1] is not exactly the same as
+`undefined | string | number` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
 - Either make `{[string]: number, p?: string}` [3] and `D23` [4] exactly the same
@@ -305,8 +305,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- all_cases.js:365:1
 
-Cannot cast `X31` to `C31` because in property `p`: `void | string | number` [1] is not exactly the same as
-`void | string` [2]. [incompatible-type]
+Cannot cast `X31` to `C31` because in property `p`: `undefined | string | number` [1] is not exactly the same as
+`undefined | string` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
 - Either make `D31` [3] and `{[string]: number, p?: string}` [4] exactly the same
@@ -337,8 +337,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- all_cases.js:366:1
 
-Cannot cast `Y31` to `D31` because in property `p`: `void | string` [1] is not exactly the same as
-`void | string | number` [2]. [incompatible-type]
+Cannot cast `Y31` to `D31` because in property `p`: `undefined | string` [1] is not exactly the same as
+`undefined | string | number` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
 - Either make `{[string]: number, p?: string}` [3] and `D31` [4] exactly the same

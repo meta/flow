@@ -804,13 +804,16 @@ Flags: --pretty
   "result":[
     {"name":"[Symbol.iterator]","type":"(this: String) => StringIterator<string>"},
     {"name":"anchor","type":"(this: String, name: string) => string"},
-    {"name":"at","type":"(this: String, index: number) => string | void"},
+    {"name":"at","type":"(this: String, index: number) => string | undefined"},
     {"name":"big","type":"(this: String) => string"},
     {"name":"blink","type":"(this: String) => string"},
     {"name":"bold","type":"(this: String) => string"},
     {"name":"charAt","type":"(this: String, pos: number) => string"},
     {"name":"charCodeAt","type":"(this: String, index: number) => number"},
-    {"name":"codePointAt","type":"(this: String, pos: number) => number | void"},
+    {
+      "name":"codePointAt",
+      "type":"(this: String, pos: number) => number | undefined"
+    },
     {"name":"concat","type":"(this: String, ...strings: Array<string>) => string"},
     {
       "name":"endsWith",
@@ -927,11 +930,11 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"void | string",
+  "detail":"undefined | string",
   "insertTextFormat":1,
   "kind":13,
   "label":"?.foo",
-  "labelDetails":{"detail":": void | string"},
+  "labelDetails":{"detail":": undefined | string"},
   "sortText":"00000000000000000000",
   "textEdit":{
     "newText":"?.foo",
@@ -958,11 +961,11 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"void | number",
+  "detail":"undefined | number",
   "insertTextFormat":1,
   "kind":13,
   "label":"?.bar",
-  "labelDetails":{"detail":": void | number"},
+  "labelDetails":{"detail":": undefined | number"},
   "sortText":"00000000000000000000",
   "textEdit":{
     "newText":"?.bar",
@@ -1017,11 +1020,11 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"void | number | string",
+  "detail":"undefined | number | string",
   "insertTextFormat":1,
   "kind":13,
   "label":"?.foo",
-  "labelDetails":{"detail":": void | number | string"},
+  "labelDetails":{"detail":": undefined | number | string"},
   "sortText":"00000000000000000000",
   "textEdit":{
     "newText":"?.foo",

@@ -53,6 +53,7 @@ type Props = {
 function MyComponent({foo = 42, bar}: Props) {
   // Flow knows that foo is not null or undefined
   const baz = foo + 1;
+  return <div>{bar}: {baz}</div>;
 }
 
 // And we don't need to include foo.

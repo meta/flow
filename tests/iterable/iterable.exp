@@ -110,7 +110,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- defaults.js:7:1
 
-Cannot cast `[...].values().next().value` to `number` because `void` [1] is incompatible with `number` [2].
+Cannot cast `[...].values().next().value` to `number` because `undefined` [1] is incompatible with `number` [2].
 [incompatible-type]
 
    defaults.js:7:1

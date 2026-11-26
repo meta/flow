@@ -60,7 +60,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- maybe.js:6:5
 
-Cannot get `x['bar']` because `void` [1] does not have properties. [incompatible-use]
+Cannot get `x['bar']` because `undefined` [1] does not have properties. [incompatible-use]
 
    maybe.js:6:5
    6|   x['bar']; // Error
@@ -88,7 +88,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- nullable.js:17:5
 
-Cannot perform arithmetic operation because `void` [1] is not a number or bigint. [unsafe-arithmetic]
+Cannot perform arithmetic operation because `undefined` [1] is not a number or bigint. [unsafe-arithmetic]
 
    nullable.js:17:5
    17|     x.y++; // should error
@@ -116,7 +116,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- nullable.js:23:5
 
-Cannot perform arithmetic operation because `void` [1] is not a number or bigint. [unsafe-arithmetic]
+Cannot perform arithmetic operation because `undefined` [1] is not a number or bigint. [unsafe-arithmetic]
 
    nullable.js:23:5
    23|     x.y++; // should error
@@ -144,7 +144,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- nullable.js:29:5
 
-Cannot perform arithmetic operation because `void` [1] is not a number or bigint. [unsafe-arithmetic]
+Cannot perform arithmetic operation because `undefined` [1] is not a number or bigint. [unsafe-arithmetic]
 
    nullable.js:29:5
    29|     x.y++; // should error
@@ -172,7 +172,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- nullable.js:35:5
 
-Cannot perform arithmetic operation because `void` [1] is not a number or bigint. [unsafe-arithmetic]
+Cannot perform arithmetic operation because `undefined` [1] is not a number or bigint. [unsafe-arithmetic]
 
    nullable.js:35:5
    35|     x.y++; // should error
@@ -186,7 +186,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- optional.js:1:41
 
-Cannot use operator `*` with operands `void` [1] and `number` [2] [unsafe-arithmetic]
+Cannot use operator `*` with operands `undefined` [1] and `number` [2] [unsafe-arithmetic]
 
    optional.js:1:41
    1| function bar(x?: number, y?: unknown) { x * 0; }
@@ -245,7 +245,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ optional_param2.js:7:31
 
-Cannot call `i.map` with function bound to `mapper` because in the return value: `void` [1] is incompatible with
+Cannot call `i.map` with function bound to `mapper` because in the return value: `undefined` [1] is incompatible with
 `number` [2]. [incompatible-type]
 
    optional_param2.js:7:31
@@ -291,7 +291,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ undefined.js:3:38
 
-Cannot assign `void` to `bar` because `void` [1] is incompatible with `{duck: unknown}` [2]. [incompatible-type]
+Cannot assign `undefined` to `bar` because `undefined` [1] is incompatible with `{duck: unknown}` [2].
+[incompatible-type]
 
    undefined.js:3:38
    3| function foo(bar?: {duck: unknown} = undefined) {
@@ -305,7 +306,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- undefined2.js:8:14
 
-Cannot get `x.duck` because property `duck` is missing in `void` [1]. [incompatible-use]
+Cannot get `x.duck` because property `duck` is missing in `undefined` [1]. [incompatible-use]
 
    undefined2.js:8:14
    8|     return x.duck;

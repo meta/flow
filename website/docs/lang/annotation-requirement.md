@@ -388,7 +388,7 @@ with a specific sub-message:
   ```js flow-check
   export const arr = [1, , 3]; // Error: Unexpected array hole
   ```
-  Fix: fill in the hole or annotate the export, e.g., `export const arr: Array<number | void> = [1, , 3]`.
+  Fix: fill in the hole or annotate the export, e.g., `export const arr: Array<number | undefined> = [1, , 3]`.
 
 - **Empty array** — an empty array `[]` in an export position has no elements
   for Flow to infer an element type from.

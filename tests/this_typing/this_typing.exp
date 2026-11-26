@@ -1204,7 +1204,7 @@ References:
 Error ----------------------------------------------------------------------------------------- declare_function.js:19:7
 
 Cannot call `myFun.bind` because: [incompatible-type]
- - Either in the `this` parameter: `{readonly prop: number, ...}` [1] is incompatible with `void` [2].
+ - Either in the `this` parameter: `{readonly prop: number, ...}` [1] is incompatible with `undefined` [2].
  - Or `(this: (this: {readonly prop: number, ...}) => string, thisArg: ThisParameterType<(this: {readonly p...` [3]
    requires another argument from call of method `bind` [2].
 
@@ -1246,7 +1246,7 @@ References:
 Error ----------------------------------------------------------------------------------------- declare_function.js:20:1
 
 Cannot call `myFun.apply` because in the `this` parameter: `{readonly prop: number, ...}` [1] is incompatible with
-`void` [2]. [incompatible-type]
+`undefined` [2]. [incompatible-type]
 
    declare_function.js:20:1
    20| myFun.apply(); // Error - void ~> number
@@ -1280,7 +1280,7 @@ References:
 Error ----------------------------------------------------------------------------------------- declare_function.js:21:1
 
 Cannot call `myFun.call` because in the `this` parameter: `{readonly prop: number, ...}` [1] is incompatible with
-`void` [2]. [incompatible-type]
+`undefined` [2]. [incompatible-type]
 
    declare_function.js:21:1
    21| myFun.call(); // Error - void ~> number
@@ -1314,7 +1314,7 @@ References:
 Error ---------------------------------------------------------------------------------------- declare_function.js:22:11
 
 Cannot call `myPolyFun.bind` because: [incompatible-type]
- - Either in the `this` parameter: `{readonly prop: number, ...}` [1] is incompatible with `void` [2].
+ - Either in the `this` parameter: `{readonly prop: number, ...}` [1] is incompatible with `undefined` [2].
  - Or `(this: <T>(this: {readonly prop: number, ...}, x: T) => T, thisArg: ThisParameterType<<T>(this: {rea...` [3]
    requires another argument from call of method `bind` [2].
 
@@ -1356,7 +1356,7 @@ References:
 Error ----------------------------------------------------------------------------------------- declare_function.js:23:1
 
 Cannot call `myPolyFun.apply` because in the `this` parameter: `{readonly prop: number, ...}` [1] is incompatible with
-`void` [2]. [incompatible-type]
+`undefined` [2]. [incompatible-type]
 
    declare_function.js:23:1
    23| myPolyFun.apply(); // Error - void ~> number
@@ -1390,7 +1390,7 @@ References:
 Error ----------------------------------------------------------------------------------------- declare_function.js:24:1
 
 Cannot call `myPolyFun.call` because in the `this` parameter: `{readonly prop: number, ...}` [1] is incompatible with
-`void` [2]. [incompatible-type]
+`undefined` [2]. [incompatible-type]
 
    declare_function.js:24:1
    24| myPolyFun.call(); // Error - void ~> number

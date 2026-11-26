@@ -108,7 +108,7 @@ A `ref` parameter typed [`React.RefSetter<T>`](./types.md#toc-react-refsetter) a
 To name the type behind a ref without spelling it out, Flow provides two utilities:
 
 - [`React.ElementRef<typeof Component>`](./types.md#toc-react-elementref) gives the instance type a component exposes (for example `HTMLInputElement` for an `'input'`, or a class instance for a class component).
-- [`React.RefOf<Component>`](./types.md#toc-react-refof) gives the type of the `current` field on a component's `ref` prop, or `void` if it has none.
+- [`React.RefOf<Component>`](./types.md#toc-react-refof) gives the type of the `current` field on a component's `ref` prop, or `undefined` if it has none.
 
 ## See Also {#toc-see-also}
 

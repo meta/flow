@@ -1,6 +1,6 @@
 Error ---------------------------------------------------------------------------------------------------- driver.js:8:1
 
-Cannot cast `b1.x` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `b1.x` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    driver.js:8:1
    8| b1.x as string; // Error number ~> string
@@ -31,7 +31,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- driver.js:9:1
 
-Cannot cast `b1.y` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `b1.y` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    driver.js:9:1
    9| b1.y as string; // Error, y may not exist, number ~> string
@@ -147,7 +147,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test1.js:5:1
 
-Cannot cast `b.x` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `b.x` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    test1.js:5:1
    5| b.x as string; // Error, might not be on b or will be number
@@ -178,7 +178,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test1.js:6:1
 
-Cannot cast `b.y` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `b.y` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    test1.js:6:1
    6| b.y as string; // Error, might not be on b or will be number

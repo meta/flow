@@ -374,7 +374,7 @@ References:
 Error ------------------------------------------------------------------------------------------------- finally.js:18:22
 
 Cannot extend `Promise<R>` [1] with `NarrowFinally<R>` [2] because in property `finally` > the first parameter:
-`() => unknown` [3] is incompatible with `void` [4]. [incompatible-type]
+`() => unknown` [3] is incompatible with `undefined` [4]. [incompatible-type]
 
    finally.js:18:22
    18|   finally(onFinally: () => unknown): NarrowFinally<R>; // Error: `null` and `undefined` are not functions
@@ -398,7 +398,7 @@ References:
 Error ------------------------------------------------------------------------------------------------- finally.js:18:22
 
 Cannot extend `Promise<R>` [1] with `NarrowFinally<R>` [2] because in property `finally` > the first parameter:
-`() => unknown` [3] is incompatible with `void` [4]. [incompatible-type]
+`() => unknown` [3] is incompatible with `undefined` [4]. [incompatible-type]
 
    finally.js:18:22
    18|   finally(onFinally: () => unknown): NarrowFinally<R>; // Error: `null` and `undefined` are not functions
@@ -446,7 +446,7 @@ References:
 Error ------------------------------------------------------------------------------------------------- finally.js:18:22
 
 Cannot extend `Promise<R>` [1] with `NarrowFinally<R>` [2] because in property `finally` > the first parameter:
-`() => unknown` [3] is incompatible with `void` [4]. [incompatible-type]
+`() => unknown` [3] is incompatible with `undefined` [4]. [incompatible-type]
 
    finally.js:18:22
    18|   finally(onFinally: () => unknown): NarrowFinally<R>; // Error: `null` and `undefined` are not functions
@@ -470,7 +470,7 @@ References:
 Error ------------------------------------------------------------------------------------------------- finally.js:18:22
 
 Cannot extend `Promise<R>` [1] with `NarrowFinally<R>` [2] because in property `finally` > the first parameter:
-`() => unknown` [3] is incompatible with `void` [4]. [incompatible-type]
+`() => unknown` [3] is incompatible with `undefined` [4]. [incompatible-type]
 
    finally.js:18:22
    18|   finally(onFinally: () => unknown): NarrowFinally<R>; // Error: `null` and `undefined` are not functions
@@ -941,8 +941,8 @@ References:
 
 Error --------------------------------------------------------------------------------------------- resolve_void.js:3:17
 
-Cannot cast `Promise.resolve(...)` to `Promise<number>` because in type argument `T` [1]: `void` [2] is incompatible
-with `number` [3]. [incompatible-type]
+Cannot cast `Promise.resolve(...)` to `Promise<number>` because in type argument `T` [1]: `undefined` [2] is
+incompatible with `number` [3]. [incompatible-type]
 
    resolve_void.js:3:17
      3| Promise.resolve(undefined) as Promise<number>; // error

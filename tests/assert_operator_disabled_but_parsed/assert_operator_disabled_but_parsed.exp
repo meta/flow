@@ -80,7 +80,7 @@ Flow doesn't support non-null assertions (the postfix `!` operator). [unsupporte
 
 Error ---------------------------------------------------------------------------------------------------- test.js:13:10
 
-Cannot delete `(c!).x` because `void` [1] is incompatible with object literal [2]. [incompatible-type]
+Cannot delete `(c!).x` because `undefined` [1] is incompatible with object literal [2]. [incompatible-type]
 
    test.js:13:10
    13|   delete c!.x;

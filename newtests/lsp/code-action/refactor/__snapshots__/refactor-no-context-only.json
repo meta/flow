@@ -20,7 +20,7 @@
         "arguments": [
           "textDocument/codeAction",
           "add_optional_chaining",
-          "Add optional chaining for object that might be `undefined`"
+          "Add optional chaining for object that might be `void`"
         ],
         "command": "log:org.flow:<PLACEHOLDER_PROJECT_URL>",
         "title": ""
@@ -46,7 +46,7 @@
         }
       },
       "kind": "quickfix",
-      "title": "Add optional chaining for object that might be `undefined`"
+      "title": "Add optional chaining for object that might be `void`"
     },
     {
       "command": {

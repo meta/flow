@@ -74,7 +74,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:12:6
 
-Cannot cast object literal to `Required<A>` because in property `x`: `void` [1] is incompatible with `number` [2].
+Cannot cast object literal to `Required<A>` because in property `x`: `undefined` [1] is incompatible with `number` [2].
 [incompatible-type]
 
    test.js:12:6
@@ -89,7 +89,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:12:20
 
-Cannot cast object literal to `Required<A>` because in property `y`: `void` [1] is incompatible with `number` [2].
+Cannot cast object literal to `Required<A>` because in property `y`: `undefined` [1] is incompatible with `number` [2].
 [incompatible-type]
 
    test.js:12:20
@@ -133,7 +133,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:23:1
 
-Cannot cast `undefined` to `Required<null>` because `void` [1] is incompatible with `null` [2]. [incompatible-type]
+Cannot cast `undefined` to `Required<null>` because `undefined` [1] is incompatible with `null` [2]. [incompatible-type]
 
    test.js:23:1
    23| undefined as Required<null>; // ERROR
@@ -192,7 +192,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:29:6
 
-Cannot cast object literal to `Required<?A>` because in property `x`: `void` [1] is incompatible with `number` [2].
+Cannot cast object literal to `Required<?A>` because in property `x`: `undefined` [1] is incompatible with `number` [2].
 [incompatible-type]
 
    test.js:29:6
@@ -207,7 +207,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:29:20
 
-Cannot cast object literal to `Required<?A>` because in property `y`: `void` [1] is incompatible with `number` [2].
+Cannot cast object literal to `Required<?A>` because in property `y`: `undefined` [1] is incompatible with `number` [2].
 [incompatible-type]
 
    test.js:29:20
@@ -275,8 +275,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:54:6
 
-Cannot cast object literal to `Required<IFace>` because in property `x`: `void` [1] is incompatible with `number` [2].
-[incompatible-type]
+Cannot cast object literal to `Required<IFace>` because in property `x`: `undefined` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    test.js:54:6
    54| ({x: undefined, y: undefined}) as Required<IFace>; // ERROR
@@ -290,8 +290,8 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:54:20
 
-Cannot cast object literal to `Required<IFace>` because in property `y`: `void` [1] is incompatible with `number` [2].
-[incompatible-type]
+Cannot cast object literal to `Required<IFace>` because in property `y`: `undefined` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    test.js:54:20
    54| ({x: undefined, y: undefined}) as Required<IFace>; // ERROR
@@ -350,8 +350,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:71:6
 
-Cannot cast object literal to `Required<JFace>` because in property `x`: `void` [1] is incompatible with `number` [2].
-[incompatible-type]
+Cannot cast object literal to `Required<JFace>` because in property `x`: `undefined` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    test.js:71:6
    71| ({x: undefined, y: undefined, z: undefined}) as Required<JFace>; // ERROR
@@ -365,8 +365,8 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:71:20
 
-Cannot cast object literal to `Required<JFace>` because in property `y`: `void` [1] is incompatible with `number` [2].
-[incompatible-type]
+Cannot cast object literal to `Required<JFace>` because in property `y`: `undefined` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    test.js:71:20
    71| ({x: undefined, y: undefined, z: undefined}) as Required<JFace>; // ERROR
@@ -380,8 +380,8 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:71:34
 
-Cannot cast object literal to `Required<JFace>` because in property `z`: `void` [1] is incompatible with `number` [2].
-[incompatible-type]
+Cannot cast object literal to `Required<JFace>` because in property `z`: `undefined` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    test.js:71:34
    71| ({x: undefined, y: undefined, z: undefined}) as Required<JFace>; // ERROR

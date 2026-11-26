@@ -150,7 +150,7 @@ Cannot create `ComponentWithBound` element because in type argument `T`: `true` 
 
 References:
    contextual_jsx.js:17:39
-   17| function ComponentWithBound<T extends number>(pprops: {a:T, ...}): React.Node {}
+   17| function ComponentWithBound<T extends number>(pprops: {a:T, ...}): undefined {}
                                              ^^^^^^ [2]
 
 

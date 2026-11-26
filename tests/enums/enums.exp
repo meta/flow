@@ -2144,7 +2144,7 @@ References:
 
 Error ----------------------------------------------------------------------- exhaustive-check-implicit-return.js:160:19
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    160| function q(x: E): number { // Error: switch isn't exhaustive
@@ -2168,7 +2168,7 @@ References:
 
 Error ----------------------------------------------------------------------- exhaustive-check-implicit-return.js:167:19
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    167| function r(x: E): number { // Error
@@ -2177,7 +2177,7 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 
 Error ----------------------------------------------------------------------- exhaustive-check-implicit-return.js:178:19
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    178| function s(x: E): number { // Error: second switch isn't exhaustive
@@ -2201,7 +2201,7 @@ References:
 
 Error ----------------------------------------------------------------------- exhaustive-check-implicit-return.js:194:21
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    194| function t(x: any): number { // Error
@@ -2211,7 +2211,7 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 Error ----------------------------------------------------------------------- exhaustive-check-implicit-return.js:201:20
 
 Cannot expect `Generator<void, number, void>` as the return type of generator function because in type argument
-`TReturn` [1]: `number` [2] is incompatible with `void` [3]. [incompatible-type]
+`TReturn` [1]: `number` [2] is incompatible with `undefined` [3]. [incompatible-type]
 
    exhaustive-check-implicit-return.js:201:20
    201| function* u(x: E): Generator<void, number, void> { // Error: switch isn't exhaustive
@@ -2244,7 +2244,7 @@ References:
 Error ----------------------------------------------------------------------- exhaustive-check-implicit-return.js:208:25
 
 Cannot expect `Promise<number>` as the return type of async function because in type argument `T` [1]: `number` [2] is
-incompatible with `void` [3]. [incompatible-type]
+incompatible with `undefined` [3]. [incompatible-type]
 
    exhaustive-check-implicit-return.js:208:25
    208| async function v(x: E): Promise<number> { // Error: switch isn't exhaustive
@@ -2276,7 +2276,7 @@ References:
 
 Error ----------------------------------------------------------------------- exhaustive-check-implicit-return.js:215:19
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    215| function w(x: E): number { // Error: number not compatible with implicitly returned undefined
@@ -2579,7 +2579,7 @@ References:
 
 Error --------------------------------------------------------------------------------------- exhaustive-check.js:122:10
 
-Invalid check of case test against switch discriminant [1] because `void` [2] is incompatible with `E` [3].
+Invalid check of case test against switch discriminant [1] because `undefined` [2] is incompatible with `E` [3].
 [incompatible-type]
 
    exhaustive-check.js:122:10
@@ -2600,7 +2600,7 @@ References:
 
 Error --------------------------------------------------------------------------------------- exhaustive-check.js:123:10
 
-Invalid check of case test against switch discriminant [1] because `void` [2] is incompatible with `E` [3].
+Invalid check of case test against switch discriminant [1] because `undefined` [2] is incompatible with `E` [3].
 [incompatible-type]
 
    exhaustive-check.js:123:10
@@ -2642,7 +2642,7 @@ References:
 
 Error --------------------------------------------------------------------------------------- exhaustive-check.js:129:10
 
-Invalid check of case test against switch discriminant [1] because `void` [2] is incompatible with `E` [3].
+Invalid check of case test against switch discriminant [1] because `undefined` [2] is incompatible with `E` [3].
 [incompatible-type]
 
    exhaustive-check.js:129:10
@@ -2684,7 +2684,7 @@ References:
 
 Error --------------------------------------------------------------------------------------- exhaustive-check.js:130:10
 
-Invalid check of case test against switch discriminant [1] because `void` [2] is incompatible with `E` [3].
+Invalid check of case test against switch discriminant [1] because `undefined` [2] is incompatible with `E` [3].
 [incompatible-type]
 
    exhaustive-check.js:130:10
@@ -2741,7 +2741,7 @@ References:
 
 Error --------------------------------------------------------------------------------------- exhaustive-check.js:136:10
 
-Invalid check of case test against switch discriminant [1] because `void` [2] is incompatible with `E` [3].
+Invalid check of case test against switch discriminant [1] because `undefined` [2] is incompatible with `E` [3].
 [incompatible-type]
 
    exhaustive-check.js:136:10
@@ -3073,7 +3073,7 @@ References:
 Error -------------------------------------------------------------------------------------------------- methods.js:29:3
 
 Cannot get `E.nonExistent` because property `nonExistent` is missing in
-`{cast(this: typeof E, input: ?string): void | E, getName(this: typeof E, input: E): string, isValid(...` [1].
+`{cast(this: typeof E, input: ?string): undefined | E, getName(this: typeof E, input: E): string, isV...` [1].
 [prop-missing]
 
    methods.js:29:3
@@ -3096,7 +3096,7 @@ References:
 Error -------------------------------------------------------------------------------------------------- methods.js:32:3
 
 Cannot call `E.nonExistent` because property `nonExistent` is missing in
-`{cast(this: typeof E, input: ?string): void | E, getName(this: typeof E, input: E): string, isValid(...` [1].
+`{cast(this: typeof E, input: ?string): undefined | E, getName(this: typeof E, input: E): string, isV...` [1].
 [prop-missing]
 
    methods.js:32:3
@@ -3133,7 +3133,7 @@ References:
 Error -------------------------------------------------------------------------------------------------- methods.js:38:3
 
 Cannot call `E.A` because property `A` is missing in
-`{cast(this: typeof E, input: ?string): void | E, getName(this: typeof E, input: E): string, isValid(...` [1].
+`{cast(this: typeof E, input: ?string): undefined | E, getName(this: typeof E, input: E): string, isV...` [1].
 [prop-missing]
 
    methods.js:38:3
@@ -3156,7 +3156,7 @@ References:
 Error -------------------------------------------------------------------------------------------------- methods.js:41:3
 
 Cannot call `E.toString` because property `toString` is missing in
-`{cast(this: typeof E, input: ?string): void | E, getName(this: typeof E, input: E): string, isValid(...` [1].
+`{cast(this: typeof E, input: ?string): undefined | E, getName(this: typeof E, input: E): string, isV...` [1].
 [prop-missing]
 
    methods.js:41:3
@@ -3388,7 +3388,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- refinement.js:47:3
 
-Cannot cast `bMaybe` to `B` because `void` [1] is incompatible with `B` [2]. [incompatible-type]
+Cannot cast `bMaybe` to `B` because `undefined` [1] is incompatible with `B` [2]. [incompatible-type]
 
    refinement.js:47:3
    47|   bMaybe as B; // Error
@@ -3456,7 +3456,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- refinement.js:58:3
 
-Cannot cast `bMaybe` to `B` because `void` [1] is incompatible with `B` [2]. [incompatible-type]
+Cannot cast `bMaybe` to `B` because `undefined` [1] is incompatible with `B` [2]. [incompatible-type]
 
    refinement.js:58:3
    58|   bMaybe as B; // Error
@@ -3852,7 +3852,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- refinement.js:171:3
 
-Cannot cast `nMaybe` to `N` because `void` [1] is incompatible with `N` [2]. [incompatible-type]
+Cannot cast `nMaybe` to `N` because `undefined` [1] is incompatible with `N` [2]. [incompatible-type]
 
    refinement.js:171:3
    171|   nMaybe as N; // Error
@@ -4180,7 +4180,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- refinement.js:257:3
 
-Cannot cast `sMaybe` to `S` because `void` [1] is incompatible with `S` [2]. [incompatible-type]
+Cannot cast `sMaybe` to `S` because `undefined` [1] is incompatible with `S` [2]. [incompatible-type]
 
    refinement.js:257:3
    257|   sMaybe as S; // Error
@@ -4650,7 +4650,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- refinement.js:383:3
 
-Cannot cast `bigMaybe` to `Big` because `void` [1] is incompatible with `Big` [2]. [incompatible-type]
+Cannot cast `bigMaybe` to `Big` because `undefined` [1] is incompatible with `Big` [2]. [incompatible-type]
 
    refinement.js:383:3
    383|   bigMaybe as Big; // Error

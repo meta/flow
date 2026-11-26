@@ -85,7 +85,7 @@ Found 1 error
 Error ------------------------------------------------------------------------- -:11:29
 
 Cannot call `args.map` because in the first argument: `hook (x: number) => number` [1] is a React hook but
-`(this: void, value: number, index: number, array: ReadonlyArray<number>) => number` [2] is not a hook.
+`(this: undefined, value: number, index: number, array: ReadonlyArray<number>) => number` [2] is not a hook.
 [react-rule-hook-incompatible]
 
 React component properties [3] and their nested props and elements cannot be written to.

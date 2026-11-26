@@ -567,7 +567,7 @@
     "path":"test.js",
     "reasons":[],
     "start":24,
-    "type":"(val: ?any | string) => any | void | string"
+    "type":"(val: ?any | string) => any | undefined | string"
   },
   {
     "end":27,
@@ -627,7 +627,7 @@
     "path":"test.js",
     "reasons":[],
     "start":29,
-    "type":"any | void | string"
+    "type":"any | undefined | string"
   },
   {
     "end":35,
@@ -687,7 +687,7 @@
     "path":"test.js",
     "reasons":[],
     "start":33,
-    "type":"any | void | string"
+    "type":"any | undefined | string"
   },
   {
     "end":44,
@@ -717,7 +717,7 @@
     "path":"test.js",
     "reasons":[],
     "start":48,
-    "type":"void"
+    "type":"undefined"
   },
   {
     "end":56,
@@ -732,7 +732,7 @@
     "path":"test.js",
     "reasons":[],
     "start":48,
-    "type":"void"
+    "type":"undefined"
   },
   {
     "end":62,
@@ -747,7 +747,7 @@
     "path":"test.js",
     "reasons":[],
     "start":60,
-    "type":"any | void | string"
+    "type":"any | undefined | string"
   },
   {
     "end":62,
@@ -762,7 +762,7 @@
     "path":"test.js",
     "reasons":[],
     "start":60,
-    "type":"any | void | string"
+    "type":"any | undefined | string"
   }
 ]
 === predicates.js ===
@@ -1275,7 +1275,7 @@
     "path":"predicates.js",
     "reasons":[],
     "start":14,
-    "type":"void"
+    "type":"undefined"
   },
   {
     "end":22,
@@ -1290,7 +1290,7 @@
     "path":"predicates.js",
     "reasons":[],
     "start":14,
-    "type":"void"
+    "type":"undefined"
   },
   {
     "end":9,
@@ -1449,7 +1449,7 @@ elem_call.js:7:1-5: ?{[key: string]: () => T}
 elem_call.js:7:1-5: ?{[key: string]: () => T}
 elem_call.js:7:1-12: () => T
 elem_call.js:7:1-12: ?{[key: string]: () => T}
-elem_call.js:7:1-14: void | T
+elem_call.js:7:1-14: undefined | T
 elem_call.js:7:1-14: T
 elem_call.js:7:9-11: string
 elem_call.js:7:9-11: string
@@ -1457,7 +1457,7 @@ elem_call.js:10:1-5: ?{[key: string]: () => T}
 elem_call.js:10:1-5: ?{[key: string]: () => T}
 elem_call.js:10:1-12: () => T
 elem_call.js:10:1-12: ?{[key: string]: () => T}
-elem_call.js:10:1-16: void | T
+elem_call.js:10:1-16: undefined | T
 elem_call.js:10:1-16: T
 elem_call.js:10:9-11: string
 elem_call.js:10:9-11: string
@@ -1477,14 +1477,14 @@ elem_call.js:17:7: "b"
 === optional_calls.js ===
 optional_calls.js:7:3: F | void
 optional_calls.js:7:3: F | void
-optional_calls.js:7:3-12: void
+optional_calls.js:7:3-12: void | undefined
 optional_calls.js:7:3-12: void
 optional_calls.js:7:7-11: "abc"
 optional_calls.js:12:3: ?{m: F, ...}
 optional_calls.js:12:3: ?{m: F, ...}
 optional_calls.js:12:3-6: F
 optional_calls.js:12:3-6: ?{m: F, ...}
-optional_calls.js:12:3-13: void
+optional_calls.js:12:3-13: undefined | void
 optional_calls.js:12:3-13: void
 optional_calls.js:12:6: F
 optional_calls.js:12:8-12: "abc"
@@ -1492,25 +1492,25 @@ optional_calls.js:17:3: ?{[key: string]: F}
 optional_calls.js:17:3: ?{[key: string]: F}
 optional_calls.js:17:3-12: F
 optional_calls.js:17:3-12: ?{[key: string]: F}
-optional_calls.js:17:3-19: void
+optional_calls.js:17:3-19: undefined | void
 optional_calls.js:17:3-19: void
 optional_calls.js:17:7-11: "abc"
 optional_calls.js:17:14-18: "abc"
 optional_calls.js:22:3: ?{m: {n: F, ...}, ...}
 optional_calls.js:22:3: ?{m: {n: F, ...}, ...}
-optional_calls.js:22:3-6: {n: F, ...} | void
+optional_calls.js:22:3-6: {n: F, ...} | undefined
 optional_calls.js:22:3-6: {n: F, ...}
 optional_calls.js:22:3-8: F
 optional_calls.js:22:3-8: {n: F, ...}
+optional_calls.js:22:3-15: undefined | void
 optional_calls.js:22:3-15: void
-optional_calls.js:22:3-15: void
-optional_calls.js:22:6: {n: F, ...} | void
+optional_calls.js:22:6: {n: F, ...} | undefined
 optional_calls.js:22:8: F
 optional_calls.js:22:10-14: "abc"
 optional_calls.js:27:3: {m: ?F, ...}
 optional_calls.js:27:3: {m: ?F, ...}
 optional_calls.js:27:3-5: ?F
-optional_calls.js:27:3-14: void
+optional_calls.js:27:3-14: void | undefined
 optional_calls.js:27:3-14: void
 optional_calls.js:27:5: ?F
 optional_calls.js:27:9-13: "abc"

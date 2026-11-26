@@ -339,8 +339,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- ts_imports.js:13:1
 
-Cannot cast `DEFAULT_MIME_TYPE_CONFIG['text/html']` to `string` because `void` [1] is incompatible with `string` [2].
-[incompatible-type]
+Cannot cast `DEFAULT_MIME_TYPE_CONFIG['text/html']` to `string` because `undefined` [1] is incompatible with
+`string` [2]. [incompatible-type]
 
    ts_imports.js:13:1
    13| DEFAULT_MIME_TYPE_CONFIG['text/html'] as string; // ERROR

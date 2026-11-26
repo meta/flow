@@ -13,7 +13,7 @@ declare function useRef<T>(initial?: T): {current: T};
 const ref = useRef(); // ok
 
 // A union with `undefined` meets the slot's type without it.
-declare const maybeNumber: number | void;
+declare const maybeNumber: number | undefined;
 const fromUnion = param(maybeNumber);
 fromUnion as number; // ok
 fromUnion as string; // error
@@ -22,25 +22,25 @@ const fromMaybe = param(nullable);
 fromMaybe as number; // error: null
 
 // Types that stand for a union with `undefined` are normalized first.
-type Alias<X> = void | X;
+type Alias<X> = undefined | X;
 declare const alias: Alias<string>;
 const fromAlias = param(alias);
 fromAlias as string; // ok
 
 // A union of only `undefined` members: the slot takes `empty`.
-declare const voids: void | void;
+declare const voids: undefined | undefined;
 const fromVoids = param(voids);
 fromVoids as empty; // ok
-declare const aliasOfVoid: Alias<void>;
+declare const aliasOfVoid: Alias<undefined>;
 const fromAliasOfVoid = param(aliasOfVoid);
 fromAliasOfVoid as empty; // ok
-declare const propOfVoid: {p?: Alias<void>};
+declare const propOfVoid: {p?: Alias<undefined>};
 const fromPropOfVoid = prop(propOfVoid);
 fromPropOfVoid as empty; // ok
-declare const elementOfVoid: [a?: void | void];
+declare const elementOfVoid: [a?: undefined | undefined];
 const fromElementOfVoid = first(elementOfVoid);
 fromElementOfVoid as empty; // ok
-opaque type Local = void | number;
+opaque type Local = undefined | number;
 declare const local: Local;
 const fromLocal = param(local);
 fromLocal as number; // ok
@@ -51,7 +51,7 @@ declare const nullish: Nullish;
 const fromNullish = param(nullish);
 fromNullish as ?string; // ok
 fromNullish as Nullish; // error
-type Cond<X> = X extends string ? void | number : boolean;
+type Cond<X> = X extends string ? undefined | number : boolean;
 declare const cond: Cond<string>;
 const fromCond = param(cond);
 fromCond as number; // ok
@@ -73,7 +73,7 @@ fromInstance as number; // ok
 // through optional tuple elements and properties.
 declare function first<T>(t: Readonly<[a?: T]>): T;
 declare function rw<T>(o: {p?: T}): T;
-function narrowedBound<X extends number | void>(x: X, t: [a?: X], o: {p?: X}) {
+function narrowedBound<X extends number | undefined>(x: X, t: [a?: X], o: {p?: X}) {
   const fromParam = param(x);
   fromParam as number; // ok
   const fromElement = first(t);
@@ -91,7 +91,7 @@ readOnlyCallback((x?: {a: number}) => {}) as {a: number}; // error
 // A callback's optional property receives a type parameter.
 declare function callback<T>(cb: (o: {p: T}) => void): T;
 const fromCallback = callback((o: {readonly p?: number}) => {});
-fromCallback as void | number; // ok
+fromCallback as undefined | number; // ok
 fromCallback as number; // error
 
 // A recursive alias.
@@ -110,7 +110,7 @@ declare function passOn<A>(c: component(...{tier: number, ...} & A), a?: A): voi
 function passOnOptional<A>(c: component(...{tier: number, ...} & A), a?: A) {
   passOn(c, a); // ok
 }
-function passOnUnion<A>(c: component(...{tier: number, ...} & A), a: void | A) {
+function passOnUnion<A>(c: component(...{tier: number, ...} & A), a: undefined | A) {
   passOn(c, a); // ok
 }
 
@@ -122,14 +122,14 @@ fromTuple as number; // ok
 fromTuple as string; // error
 
 // Optional tuple elements whose type admits `undefined`.
-declare const voidable: [a?: number | void];
+declare const voidable: [a?: number | undefined];
 const fromVoidable = first(voidable);
 fromVoidable as number; // ok
 declare function rwTuple<T>(x: [a?: T]): T;
 const fromRwTuple = rwTuple(voidable);
 fromRwTuple as number; // ok
 declare function tupleArray<T>(x: Array<[a?: T]>): T;
-declare const voidables: Array<[a?: number | void]>;
+declare const voidables: Array<[a?: number | undefined]>;
 const fromTupleArray = tupleArray(voidables);
 fromTupleArray as number; // ok
 
@@ -139,7 +139,7 @@ declare const optionalElements: Array<[a?: number]>;
 const required = unifyRequired(optionalElements); // error
 required as empty; // error
 declare function unifyOptional<T>(x: Array<[a?: T]>): T;
-declare const requiredElements: Array<[a: number | void]>;
+declare const requiredElements: Array<[a: number | undefined]>;
 const optional = unifyOptional(requiredElements); // error
 optional as empty; // error
 

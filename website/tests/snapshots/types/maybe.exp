@@ -20,8 +20,8 @@ Found 1 error
 Error --------------------------------------------------------------------------------- -:8:1
 
 Cannot call `acceptsNull` because: [incompatible-type]
- - Either `void` [1] is incompatible with `null` [2].
- - Or `void` [1] is incompatible with `number` [3].
+ - Either `undefined` [1] is incompatible with `null` [2].
+ - Or `undefined` [1] is incompatible with `number` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.

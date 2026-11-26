@@ -36,7 +36,7 @@ declare function id<T>(x: T): T;
 
 const C1 = () => { useH() }; // no error
 const c1 = () => { useH() }; // error
-const C2 = React.forwardRef<_, unknown, _>(({}: {}, ref: unknown) => { useH() }); // no error
+const C2 = React.forwardRef<_, unknown, _>(({}: {}, ref: unknown): undefined => { useH() }); // no error
 const C3 = id(({}: {}, ref: unknown) => { useH() }); // error
 
 const myHOC = () => () => { useH() }; // no error;

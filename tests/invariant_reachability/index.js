@@ -52,11 +52,11 @@ function foo9(c: boolean): string {
 
 
 function foo10(c: boolean): string {
-  return c ? invariant() : invariant(); // Error: invariant must be a top-level statement call
+  return c ? invariant() : 'a'; // Error: cannot use a void result as a string
 }
 
 function foo11(): string {
-  return invariant() ? 1 : 2; // Error: invariant must be a top-level statement call
+  return invariant() ? 1 : 2; // Error: a void result cannot be tested for truthiness
 }
 
 // `||`
@@ -119,7 +119,7 @@ function foo23(c: boolean): string {
 }
 
 function foo24(c: boolean): string {
-  invariant() ?? c; // Error: invariant must be a top-level statement call
+  invariant() ?? c; // OK: `??` does not test the result for truthiness
   return "default string"; // OK: reachable (invariant in ?? operand does not throw)
 }
 

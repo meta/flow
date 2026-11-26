@@ -74,7 +74,7 @@ Status.Active;
 const status: Status = Status.Active;
 
 // Cast from the representation type (in this case, a `string`) to the enum type:
-const maybeStatus: Status | void = Status.cast(someString);
+const maybeStatus: Status | undefined = Status.cast(someString);
 
 // Provide a default value with the `??` operator:
 const statusWithDefault: Status = Status.cast(someString) ?? Status.Off;

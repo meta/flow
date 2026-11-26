@@ -1567,7 +1567,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- undefined.js:9:1
 
-Cannot cast `libReturnsUndefined()` to `string` because `void` [1] is incompatible with `string` [2].
+Cannot cast `libReturnsUndefined()` to `string` because `undefined` [1] is incompatible with `string` [2].
 [incompatible-type]
 
    undefined.js:9:1

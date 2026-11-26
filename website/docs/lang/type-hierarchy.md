@@ -17,7 +17,8 @@ maybe["Maybe:
   ?string"]
 maybe --> unknown
 null --> maybe
-void --> maybe
+undefined --> maybe
+undefined --> void
 void --> unknown
 string --> maybe
 string --> unknown
@@ -70,6 +71,7 @@ inter --> some-func2
 
 empty --> inter
 empty --> null
+empty --> undefined
 empty --> void
 empty --> true
 empty --> false
@@ -94,7 +96,8 @@ click string "../../types/primitives/#toc-strings"
 click symbol "../../types/primitives/#toc-symbols"
 click bigint "../../types/primitives/#toc-bigints"
 click null "../../types/primitives/#toc-null-and-void"
-click void "../../types/primitives/#toc-null-and-void"
+click undefined "../../types/primitives/#toc-null-and-void"
+click void "../../types/functions/#toc-void-and-undefined"
 click true "../../types/literals"
 click false "../../types/literals"
 click union "../../types/unions"

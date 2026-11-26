@@ -91,13 +91,13 @@ This means that a shorter tuple can't be used in place of a longer one:
 ```js flow-check
 const tuple1: [number, boolean] = [1, true];
 
-const tuple2: [number, boolean, void] = tuple1; // Error!
+const tuple2: [number, boolean, undefined] = tuple1; // Error!
 ```
 
 Also, a longer tuple can't be used in place of a shorter one:
 
 ```js flow-check
-const tuple1: [number, boolean, void] = [1, true, undefined];
+const tuple1: [number, boolean, undefined] = [1, true, undefined];
 
 const tuple2: [number, boolean] = tuple1; // Error!
 ```
@@ -208,15 +208,15 @@ type T = [foo: number, bar?: string];
 [1] as T; // OK: skipping optional element
 ```
 
-You cannot write `undefined` to the optional element - add `| void` to the element type if you want to do so:
+You cannot write `undefined` to the optional element - add `| undefined` to the element type if you want to do so:
 
 ```js flow-check
-type T = [foo?: number, bar?: number | void];
+type T = [foo?: number, bar?: number | undefined];
 declare const x: T;
 x[0] = undefined; // ERROR
 [undefined] as T; // ERROR
 
-x[1] = undefined; // OK: we've added `| void` to the element type
+x[1] = undefined; // OK: we've added `| undefined` to the element type
 ```
 
 You can also use the [`Partial`](./utilities.md#toc-partial) and [`Required`](./utilities.md#toc-required) utility types to make all elements optional or required respectively:
@@ -250,14 +250,14 @@ You can still type this value as the appropriate `Array<T>` type - only the tupl
 ```js flow-check
 const a: [foo?: 1] = [];
 const b = [0, ...a, 2]; // At runtime this is `[0, 2]`
-b as [0, 1 | void, 2]; // ERROR
-b as ReadonlyArray<number | void>; // OK
+b as [0, 1 | undefined, 2]; // ERROR
+b as ReadonlyArray<number | undefined>; // OK
 
 const c: [0, foo?: 1] = [0];
 const d: [bar?: 2] = [2];
 const e = [...c, ...d]; // At runtime this is `[0, 2]`
 e as [0, foo?: 1, bar?: 2]; // ERROR
-e as ReadonlyArray<number | void>; // OK
+e as ReadonlyArray<number | undefined>; // OK
 ```
 
 Flow reports this as `[invalid-tuple-arity]` ("array literal has an unknown number of elements"). The underlying reason is soundness: when the optional element is absent at runtime, the trailing positions shift left, so the static tuple shape no longer matches the runtime layout.

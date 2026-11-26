@@ -297,7 +297,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast object literal to `DataAttributes` because in property `data-testid`: [incompatible-type]
  - Either `1` [1] is incompatible with `string` [2].
- - Or `1` [1] is incompatible with `void` [3].
+ - Or `1` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -318,7 +318,7 @@ References:
 Error -------------------------------------------------------------------------------- indexer_key_pattern_usage.js:24:2
 
 Cannot cast object literal to `ButtonProps` because object literal [1] is incompatible with `ButtonProps` [2]. For
-example, `1` [3] is incompatible with `void` [4]. [incompatible-type]
+example, `1` [3] is incompatible with `undefined` [4]. [incompatible-type]
 
    indexer_key_pattern_usage.js:24:2
    24| ({label: 'x', 'data-testid': 1}) as ButtonProps; // ERROR: number vs string
@@ -431,7 +431,7 @@ References:
 Error -------------------------------------------------------------------------- interface_extends_indexed_usage.js:12:2
 
 Cannot cast object literal to `InputProps` because object literal [1] is incompatible with `InputProps` [2]. For
-example, `1` [3] is incompatible with `void` [4]. [incompatible-type]
+example, `1` [3] is incompatible with `undefined` [4]. [incompatible-type]
 
    interface_extends_indexed_usage.js:12:2
    12| ({label: 'x', 'data-testid': 1}) as InputProps; // ERROR: number vs string

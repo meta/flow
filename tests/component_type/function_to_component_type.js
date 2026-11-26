@@ -1,4 +1,4 @@
-declare function Foo(props: {bar: string}): void;
+declare function Foo(props: {bar: string}): undefined;
 declare class ImNotARefSetter {}
 
 Foo as component(bar: string); // ok

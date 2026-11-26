@@ -626,7 +626,7 @@ References:
 
 Error ---------------------------------------------------------------------------------- implicit_instantiation.js:170:9
 
-Cannot call `acc.set` because property `set` is missing in `void` [1]. [incompatible-use]
+Cannot call `acc.set` because property `set` is missing in `undefined` [1]. [incompatible-use]
 
    implicit_instantiation.js:170:9
    170|     acc.set("", ""); // error
@@ -900,7 +900,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- param_default.js:2:19
 
-Cannot cast `a` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `a` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    param_default.js:2:19
    2| context = (a) => {a as number}; // error: number | void ~> number
@@ -917,7 +917,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- param_default.js:3:20
 
-Cannot cast `a` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `a` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    param_default.js:3:20
    3| context = (a?) => {a as number}; // error: number | void ~> number
@@ -934,7 +934,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- param_default.js:3:20
 
-Cannot cast `a` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `a` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    param_default.js:3:20
    3| context = (a?) => {a as number}; // error: number | void ~> number
@@ -951,7 +951,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- param_default.js:8:16
 
-Cannot assign `void` to `a` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot assign `undefined` to `a` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    param_default.js:8:16
    8| context = (a = undefined) => {a as number}; // error: void ~> number
@@ -988,20 +988,20 @@ References:
                      ^^^^^ [2]
 
 
-Error --------------------------------------------------------------------------------------------- react_tests.js:37:23
+Error --------------------------------------------------------------------------------------------- react_tests.js:38:23
 
 Cannot cast `n` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
 
-   react_tests.js:37:23
-   37|     {n => <Child foo={n as empty} /> /* ERROR */}
+   react_tests.js:38:23
+   38|     {n => <Child foo={n as empty} /> /* ERROR */}
                              ^
 
 References:
-   react_tests.js:34:45
-   34|   declare function Parent(x: {children: (n: number) => React.Node}): React.Node;
+   react_tests.js:35:45
+   35|   declare function Parent(x: {children: (n: number) => React.Node}): React.Node;
                                                    ^^^^^^ [1]
-   react_tests.js:37:28
-   37|     {n => <Child foo={n as empty} /> /* ERROR */}
+   react_tests.js:38:28
+   38|     {n => <Child foo={n as empty} /> /* ERROR */}
                                   ^^^^^ [2]
 
 
@@ -1024,7 +1024,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- refinements.js:10:7
 
-Cannot call `x.m` because `void` [1] is not a function. [not-a-function]
+Cannot call `x.m` because `undefined` [1] is not a function. [not-a-function]
 
    refinements.js:10:7
    10|     x.m(u => { u as string; });  // error: undefined not a function & mising local annotation
@@ -1080,7 +1080,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- refinements.js:29:8
 
-Cannot call `x?.m` because `void` [1] is not a function. [not-a-function]
+Cannot call `x?.m` because `undefined` [1] is not a function. [not-a-function]
 
    refinements.js:29:8
    29|     x?.m(u => { u as string; });  // error: undefined not a function & mising local annotation

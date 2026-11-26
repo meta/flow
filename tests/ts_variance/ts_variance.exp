@@ -373,7 +373,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------- optional_methods.ts:65:50
 
-Cannot assign `optionalNarrow` to `missingMethod` because in property `cb`: `void` [1] is incompatible with
+Cannot assign `optionalNarrow` to `missingMethod` because in property `cb`: `undefined` [1] is incompatible with
 `(value: Animal) => void` [2]. [incompatible-type]
 
    optional_methods.ts:65:50

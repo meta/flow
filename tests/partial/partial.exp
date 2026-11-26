@@ -104,7 +104,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:19:16
 
-Cannot assign `undefined` to `n` because `void` [1] is incompatible with `null` [2]. [incompatible-type]
+Cannot assign `undefined` to `n` because `undefined` [1] is incompatible with `null` [2]. [incompatible-type]
 
    test.js:19:16
    19| let n : Null = undefined; // error

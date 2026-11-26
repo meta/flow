@@ -1,6 +1,6 @@
 declare const x: 1 | 2;
 
-hook useHook() {}
+hook useHook(): undefined {}
 
 component WithMatchStatement() {
   match (x) {

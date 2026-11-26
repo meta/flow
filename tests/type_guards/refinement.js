@@ -12,7 +12,7 @@ function nonMaybe(
   fn: <T>(x: ?T) => x is T,
   x1: string,
   x2: string | null,
-  x3: string | void,
+  x3: string | undefined,
   x4: ?string,
 ) {
   if (fn(x1)) {
@@ -195,7 +195,7 @@ function opaque_types() {
   declare type FbtWithoutString = FbtString | FbtElement;
   declare type Fbt = string | FbtWithoutString;
 
-  declare const x: void | Fbt;
+  declare const x: undefined | Fbt;
 
   if (isTruthy(x)) {
     x as Fbt; // okay
@@ -208,7 +208,7 @@ import type {OpaqueOrString} from './opaque_exports';
 function opaque_types_imported() {
   declare function isTruthy<A>(value: ?A): value is A;
 
-  declare const x: void | OpaqueOrString;
+  declare const x: undefined | OpaqueOrString;
 
   if (isTruthy(x)) {
     x as OpaqueOrString; // okay
@@ -218,10 +218,10 @@ function opaque_types_imported() {
 function union_with_any() {
   declare function isTruthy<A>(value: ?A): value is A;
 
-  declare const x: void | string | any;
+  declare const x: undefined | string | any;
 
   if (isTruthy(x)) {
-    x as string; // okay, type guard filters out void
+    x as string; // okay, type guard filters out undefined
     x as empty; // error string ~> empty
   }
 }
@@ -306,7 +306,7 @@ function negation2() {
 }
 
 function negation3() {
-  declare function isFalsey(value: ?unknown): value is null | void | false | '' | 0;
+  declare function isFalsey(value: ?unknown): value is null | undefined | false | '' | 0;
 
   function foo(arr: ?Array<unknown> | ReadonlyArray<unknown>): void {
     if (isFalsey(arr)) {

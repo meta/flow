@@ -25,7 +25,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- test.js:104:10
 
-Cannot return `field.a` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot return `field.a` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    test.js:104:10
    104|   return field.a;

@@ -378,8 +378,8 @@
 [0m[0m
 [0m[31mError ------------------------------------------------------------------------------------- function-primary-loc.js:19:8[0m[0m
 [0m[0m
-[0m[0mCannot[0m[0m [0m[0mcast[0m[0m [0m[0m[0m[0mobject[0m[0m [0m[0mliteral[0m[0m[0m[0m [0m[0mto[0m[0m [0m[0m[0m[0;1m{fn1: () => void}[0m[0m[0m[0m [0m[0mbecause[0m[0m [0m[0m[0m[0min[0m[0m [0m[0m[0m[0mproperty[0m[0m [0m[0m[0m[0;1mfn1[0m[0m[0m[0m [0m[0m>[0m[0m [0m[0m[0m[0mthe[0m[0m [0m[0mreturn[0m[0m [0m[0mvalue[0m[0m:[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mnumber[0m[0;4m[0m[0m [0m[0;2m[[0m[36m1[0m[0;2m][0m[0m[0m[0m [0m[0mis[0m[0m [0m[0mincompatible[0m[0m
-[0m[0mwith[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mvoid[0m[0;4m[0m[0m [0m[0;2m[[0m[36m2[0m[0;2m][0m[0m.[0m[0m[0m[0m [0m[0m[[0m[0mincompatible-type[0m[0m][0m[0m
+[0m[0mCannot[0m[0m [0m[0mcast[0m[0m [0m[0m[0m[0mobject[0m[0m [0m[0mliteral[0m[0m[0m[0m [0m[0mto[0m[0m [0m[0m[0m[0;1m{fn1: () => undefined}[0m[0m[0m[0m [0m[0mbecause[0m[0m [0m[0m[0m[0min[0m[0m [0m[0m[0m[0mproperty[0m[0m [0m[0m[0m[0;1mfn1[0m[0m[0m[0m [0m[0m>[0m[0m [0m[0m[0m[0mthe[0m[0m [0m[0mreturn[0m[0m [0m[0mvalue[0m[0m:[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mnumber[0m[0;4m[0m[0m [0m[0;2m[[0m[36m1[0m[0;2m][0m[0m[0m[0m [0m[0mis[0m[0m
+[0m[0mincompatible[0m[0m [0m[0mwith[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mundefined[0m[0;4m[0m[0m [0m[0;2m[[0m[36m2[0m[0;2m][0m[0m.[0m[0m[0m[0m [0m[0m[[0m[0mincompatible-type[0m[0m][0m[0m
 [0m[0m
 [0m[0m [0m[0;2m[[0m[36m1[0m[0;2m][0m[0m [0m[0m[0m[0;2m15[0m[0;2m|[0m[0m [0m[0;2mdeclare function myFn1(): [0m[36mnumber[0m[0;2m;[0m[0m
 [0m[0m     [0m[0m[0m[0;2m16[0m[0;2m|[0m[0m [0m[0;2mdeclare function myFn2(x: number): void;[0m[0m
@@ -387,7 +387,7 @@
 [0m[0m     [0m[0m[0m[0;2m18[0m[0;2m|[0m[0m [0m[0;2m({[0m[0m
 [0m[0m     [0m[0m[0m[0;2m19[0m[0;2m|[0m[0m [0m[0;2m  fn1: [0m[31mmyFn1[0m[0;2m, // Error: We should point to just the `myFn1` property.[0m[0m
 [0m[0m     [0m[0m[0m[0;2m20[0m[0;2m|[0m[0m [0m[0;2m}) as {[0m[0m
-[0m[0m [0m[0;2m[[0m[36m2[0m[0;2m][0m[0m [0m[0m[0m[0;2m21[0m[0;2m|[0m[0m [0m[0;2m  fn1: () => [0m[36mvoid[0m[0;2m,[0m[0m
+[0m[0m [0m[0;2m[[0m[36m2[0m[0;2m][0m[0m [0m[0m[0m[0;2m21[0m[0;2m|[0m[0m [0m[0;2m  fn1: () => [0m[36mundefined[0m[0;2m,[0m[0m
 [0m[0m     [0m[0m[0m[0;2m22[0m[0;2m|[0m[0m [0m[0;2m};[0m[0m
 [0m[0m
 [0m[0m
@@ -3205,7 +3205,7 @@
 [0m[0m
 [0m[31mError ------------------------------------------------------------------------------------------ underline_spaces.js:6:7[0m[0m
 [0m[0m
-[0m[0mCannot[0m[0m [0m[0mcast[0m[0m [0m[0m[0m[0;1m42[0m[0m[0m[0m [0m[0mto[0m[0m [0m[0m[0m[0;1mnumber[0m[0m[0m[0m [0m[0mbecause[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mvoid[0m[0;4m[0m[0m [0m[0;2m[[0m[31m1[0m[0;2m][0m[0m[0m[0m [0m[0mis[0m[0m [0m[0mincompatible[0m[0m [0m[0mwith[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mnumber[0m[0;4m[0m[0m [0m[0;2m[[0m[36m2[0m[0;2m][0m[0m.[0m[0m[0m[0m [0m[0m[[0m[0mincompatible-type[0m[0m][0m[0m
+[0m[0mCannot[0m[0m [0m[0mcast[0m[0m [0m[0m[0m[0;1m42[0m[0m[0m[0m [0m[0mto[0m[0m [0m[0m[0m[0;1mnumber[0m[0m[0m[0m [0m[0mbecause[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mundefined[0m[0;4m[0m[0m [0m[0;2m[[0m[31m1[0m[0;2m][0m[0m[0m[0m [0m[0mis[0m[0m [0m[0mincompatible[0m[0m [0m[0mwith[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mnumber[0m[0;4m[0m[0m [0m[0;2m[[0m[36m2[0m[0;2m][0m[0m.[0m[0m[0m[0m [0m[0m[[0m[0mincompatible-type[0m[0m][0m[0m
 [0m[0m
 [0m[0m        [0m[0m[0m[0;2m3[0m[0;2m|[0m[0m [0m[0;2m * @flow[0m[0m
 [0m[0m        [0m[0m[0m[0;2m4[0m[0;2m|[0m[0m [0m[0;2m */[0m[0m
@@ -4600,8 +4600,8 @@ References:
 [0m[0m
 [0m[31mError ------------------------------------------------------------------------------------- function-primary-loc.js:19:8[0m[0m
 [0m[0m
-[0m[0mCannot[0m[0m [0m[0mcast[0m[0m [0m[0m[0m[0mobject[0m[0m [0m[0mliteral[0m[0m[0m[0m [0m[0mto[0m[0m [0m[0m[0m[0;1m{fn1: () => void}[0m[0m[0m[0m [0m[0mbecause[0m[0m [0m[0m[0m[0min[0m[0m [0m[0m[0m[0mproperty[0m[0m [0m[0m[0m[0;1mfn1[0m[0m[0m[0m [0m[0m>[0m[0m [0m[0m[0m[0mthe[0m[0m [0m[0mreturn[0m[0m [0m[0mvalue[0m[0m:[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mnumber[0m[0;4m[0m[0m [0m[0;2m[[0m[36m1[0m[0;2m][0m[0m[0m[0m [0m[0mis[0m[0m [0m[0mincompatible[0m[0m
-[0m[0mwith[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mvoid[0m[0;4m[0m[0m [0m[0;2m[[0m[36m2[0m[0;2m][0m[0m.[0m[0m[0m[0m [0m[0m[[0m[0mincompatible-type[0m[0m][0m[0m
+[0m[0mCannot[0m[0m [0m[0mcast[0m[0m [0m[0m[0m[0mobject[0m[0m [0m[0mliteral[0m[0m[0m[0m [0m[0mto[0m[0m [0m[0m[0m[0;1m{fn1: () => undefined}[0m[0m[0m[0m [0m[0mbecause[0m[0m [0m[0m[0m[0min[0m[0m [0m[0m[0m[0mproperty[0m[0m [0m[0m[0m[0;1mfn1[0m[0m[0m[0m [0m[0m>[0m[0m [0m[0m[0m[0mthe[0m[0m [0m[0mreturn[0m[0m [0m[0mvalue[0m[0m:[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mnumber[0m[0;4m[0m[0m [0m[0;2m[[0m[36m1[0m[0;2m][0m[0m[0m[0m [0m[0mis[0m[0m
+[0m[0mincompatible[0m[0m [0m[0mwith[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mundefined[0m[0;4m[0m[0m [0m[0;2m[[0m[36m2[0m[0;2m][0m[0m.[0m[0m[0m[0m [0m[0m[[0m[0mincompatible-type[0m[0m][0m[0m
 [0m[0m
 [0m[0m   [0m[0mfunction-primary-loc.js:19:8[0m[0m
 [0m[0m   [0m[0;2m19[0m[0;2m|[0m[0m [0m[0;2m  fn1: [0m[31mmyFn1[0m[0;2m, // Error: We should point to just the `myFn1` property.[0m[0m
@@ -4612,8 +4612,8 @@ References:
 [0m[0m   [0m[0;2m15[0m[0;2m|[0m[0m [0m[0;2mdeclare function myFn1(): [0m[36mnumber[0m[0;2m;[0m[0m
 [0m[0m       [0m[36m                          ^^^^^^[0m[36m [1][0m[0m
 [0m[0m   [0m[0mfunction-primary-loc.js:21:14[0m[0m
-[0m[0m   [0m[0;2m21[0m[0;2m|[0m[0m [0m[0;2m  fn1: () => [0m[36mvoid[0m[0;2m,[0m[0m
-[0m[0m       [0m[36m             ^^^^[0m[36m [2][0m[0m
+[0m[0m   [0m[0;2m21[0m[0;2m|[0m[0m [0m[0;2m  fn1: () => [0m[36mundefined[0m[0;2m,[0m[0m
+[0m[0m       [0m[36m             ^^^^^^^^^[0m[36m [2][0m[0m
 [0m[0m
 [0m[0m
 [0m[31mError ------------------------------------------------------------------------------------- function-primary-loc.js:25:8[0m[0m
@@ -7628,7 +7628,7 @@ References:
 [0m[0m
 [0m[31mError ------------------------------------------------------------------------------------------ underline_spaces.js:6:7[0m[0m
 [0m[0m
-[0m[0mCannot[0m[0m [0m[0mcast[0m[0m [0m[0m[0m[0;1m42[0m[0m[0m[0m [0m[0mto[0m[0m [0m[0m[0m[0;1mnumber[0m[0m[0m[0m [0m[0mbecause[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mvoid[0m[0;4m[0m[0m [0m[0;2m[[0m[31m1[0m[0;2m][0m[0m[0m[0m [0m[0mis[0m[0m [0m[0mincompatible[0m[0m [0m[0mwith[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mnumber[0m[0;4m[0m[0m [0m[0;2m[[0m[36m2[0m[0;2m][0m[0m.[0m[0m[0m[0m [0m[0m[[0m[0mincompatible-type[0m[0m][0m[0m
+[0m[0mCannot[0m[0m [0m[0mcast[0m[0m [0m[0m[0m[0;1m42[0m[0m[0m[0m [0m[0mto[0m[0m [0m[0m[0m[0;1mnumber[0m[0m[0m[0m [0m[0mbecause[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mundefined[0m[0;4m[0m[0m [0m[0;2m[[0m[31m1[0m[0;2m][0m[0m[0m[0m [0m[0mis[0m[0m [0m[0mincompatible[0m[0m [0m[0mwith[0m[0m [0m[0m[0m[0;4m[0m[0;1;4mnumber[0m[0;4m[0m[0m [0m[0;2m[[0m[36m2[0m[0;2m][0m[0m.[0m[0m[0m[0m [0m[0m[[0m[0mincompatible-type[0m[0m][0m[0m
 [0m[0m
 [0m[0m   [0m[0munderline_spaces.js:6:7[0m[0m
 [0m[0m   [0m[0;2m6[0m[0;2m|[0m[0m [0m[0;2m42 as [0m[31m?number[0m[0;2m as number;[0m[0m

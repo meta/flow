@@ -3,7 +3,7 @@ import * as React from 'react';
 
 const RC = <T />;
 
-function T(): void {}
+function T(): undefined {}
 
 declare function Wrap(_: {children: unknown}): React.Node;
 

@@ -40,7 +40,7 @@ if (x) {
   e.foo = '';
 }
 
-let f: { a?: void } = {};
+let f: { a?: undefined } = {};
 let field: string = f.a;
 
 const obj = (() => {

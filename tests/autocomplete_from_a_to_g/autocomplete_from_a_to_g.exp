@@ -167,11 +167,11 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof E, input: ?string) => void | E",
+  "detail":"(this: typeof E, input: ?string) => undefined | E",
   "insertTextFormat":1,
   "kind":3,
   "label":"cast",
-  "labelDetails":{"detail":": (this: typeof E, input: ?string) => void | E"},
+  "labelDetails":{"detail":": (this: typeof E, input: ?string) => undefined | E"},
   "sortText":"00000000000000000001",
   "textEdit":{
     "newText":"cast",
@@ -251,11 +251,11 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof E) => IteratorObject<E, void, unknown>",
+  "detail":"(this: typeof E) => IteratorObject<E, undefined, unknown>",
   "insertTextFormat":1,
   "kind":3,
   "label":"members",
-  "labelDetails":{"detail":": (this: typeof E) => IteratorObject<E, void, unknown>"},
+  "labelDetails":{"detail":": (this: typeof E) => IteratorObject<E, undefined, unknown>"},
   "sortText":"00000000000000000001",
   "textEdit":{
     "newText":"members",

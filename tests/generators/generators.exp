@@ -90,9 +90,9 @@ Cannot assign `yield` to `x` because `string` [1] is incompatible with `number` 
                              ^^^^^
 
 References:
-   class.js:48:52
-   48|     function *inner(): Generator<unknown, unknown, string> {
-                                                          ^^^^^^ [1]
+   class.js:48:54
+   48|     function *inner(): Generator<unknown, undefined, string> {
+                                                            ^^^^^^ [1]
    class.js:49:14
    49|       var x: number = yield; // error: string ~> number
                     ^^^^^^ [2]

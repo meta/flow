@@ -42,14 +42,14 @@ This might not look very useful, since you already know what type it will evalua
 ```js flow-check
 type TypeOf<T> =
   T extends null ? 'null' :
-  T extends void ? 'undefined' :
+  T extends undefined ? 'undefined' :
   T extends string ? 'string' :
   T extends number ? 'number' :
   T extends boolean ? 'boolean' :
   T extends (...args: ReadonlyArray<empty>)=>unknown ? 'function' : 'object'
 
 type T1 = TypeOf<null>; // evaluates to 'null'
-type T2 = TypeOf<void>; // evaluates to 'undefined'
+type T2 = TypeOf<undefined>; // evaluates to 'undefined'
 type T3 = TypeOf<string>; // evaluates to 'string'
 type T4 = TypeOf<number>; // evaluates to 'number'
 type T5 = TypeOf<boolean>; // evaluates to 'boolean'
@@ -163,7 +163,7 @@ When a generic conditional type is given a union type as a type argument, the co
 ```js flow-check
 type TypeOf<T> =
   T extends null ? 'null' :
-  T extends void ? 'undefined' :
+  T extends undefined ? 'undefined' :
   T extends string ? 'string' : 'other';
 
 type StringOrNull = TypeOf<string | null>; // evaluates to 'string' | 'null'
@@ -182,13 +182,13 @@ If you want to avoid this behavior, you can wrap the check type and extends type
 ```js flow-check
 type NonDistributiveTypeOf<T> =
   [T] extends [null] ? 'null' :
-  [T] extends [void] ? 'undefined' :
+  [T] extends [undefined] ? 'undefined' :
   [T] extends [string] ? 'string' : 'other';
 
 type Other = NonDistributiveTypeOf<string | null>; // evaluates to 'other'
 ```
 
-This trick works because Flow will only enable the distributive behavior of conditional type if the check type is a generic type. The example above does not choose any true branch of the conditional type, because `[string | null]` is not a subtype of `[null]`, `[void]`, or `[string]`, since tuples are [invariantly](../lang/variance.md#toc-invariance) typed.
+This trick works because Flow will only enable the distributive behavior of conditional type if the check type is a generic type. The example above does not choose any true branch of the conditional type, because `[string | null]` is not a subtype of `[null]`, `[undefined]`, or `[string]`, since tuples are [invariantly](../lang/variance.md#toc-invariance) typed.
 
 ## Adoption {#toc-adoption}
 

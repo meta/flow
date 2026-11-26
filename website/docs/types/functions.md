@@ -220,6 +220,29 @@ function isString(x: unknown): x is string {
 }
 ```
 
+### `void` and `undefined` {#toc-void-and-undefined}
+
+Use `void` when callers should ignore a function's return value, and `undefined` when the function specifically returns `undefined`. These are distinct types, as in TypeScript:
+
+```js flow-check
+function returnsNothing(): void {}
+function returnsUndefined(): undefined {}
+
+const ignored: void = returnsUndefined(); // Works!
+const value: undefined = returnsNothing(); // Error! `void` is not `undefined`
+```
+
+A function type returning `void` accepts a function with any return type: the caller does not use its result. This does not allow a function with an explicit `: void` return annotation to return another value:
+
+```js flow-check
+const callback: () => void = () => 123; // Works: the result is ignored
+const result: undefined = callback(); // Error! The result has type `void`
+
+function annotated(): void {
+  return 123; // Error!
+}
+```
+
 ## Constructor Types <SinceVersion version="0.339" /> {#toc-constructor-types}
 
 A constructor type `new (...) => T` describes a value that you can call with `new` to produce `T`. Use it to accept a class constructor in a function, such as this generic factory:

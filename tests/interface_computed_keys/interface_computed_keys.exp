@@ -172,7 +172,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ imp.js:61:1
 
-Cannot cast `opt.a` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `opt.a` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    imp.js:61:1
    61| opt.a as number; // ERROR: the property is optional, so `void` is not a number
@@ -1183,7 +1183,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- value_keys.js:223:1
 
-Cannot cast `optValue.foo` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `optValue.foo` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    value_keys.js:223:1
    223| optValue.foo as number; // ERROR: the property is optional, so `void` is not a number
@@ -1322,7 +1322,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- within.js:66:1
 
-Cannot cast `opt.a` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `opt.a` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    within.js:66:1
    66| opt.a as number; // ERROR: the property is optional, so `void` is not a number

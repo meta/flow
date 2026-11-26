@@ -14,10 +14,10 @@ declare const maybeStr: Client<?string>;
 maybeStr as ?string; // okay - opaque maybe unwrapped via upper bound
 maybeStr as string; // error - ?string not <: string
 
-declare const optVoid: Client<string | void>;
-optVoid as string | void; // okay
-optVoid as ?string; // okay - union upper retains void against nullable target
-optVoid as string | void | null; // okay
+declare const optUndefined: Client<string | undefined>;
+optUndefined as string | undefined; // okay
+optUndefined as ?string; // okay - union upper retains undefined against nullable target
+optUndefined as string | undefined | null; // okay
 
 // Plain opaque type with nullable upper - not just generic Client
 declare opaque type OMaybe: ?string;
@@ -49,7 +49,7 @@ const inferredIDs: Result<?StringID | OtherStringID> = inferOptional([
   parseOtherStringID,
 ]); // okay - non-nullish aliases preserve nominal inference
 
-declare opaque type OOptional: string | void;
+declare opaque type OOptional: string | undefined;
 declare const opaqueOptional: OOptional;
 declare function takesOptional(value?: string): void;
-takesOptional(opaqueOptional); // okay - opaque union upper retains void
+takesOptional(opaqueOptional); // okay - opaque union upper retains undefined

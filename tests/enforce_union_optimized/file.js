@@ -1,7 +1,7 @@
 type Ok1 = $Flow$EnforceOptimized<0 | 1>;
 type Ok2 = $Flow$EnforceOptimized<"a" | "b">;
 type Ok3 = $Flow$EnforceOptimized<true | false>;
-type Ok4 = $Flow$EnforceOptimized<void | null>;
+type Ok4 = $Flow$EnforceOptimized<undefined | null>;
 type Ok5 = $Flow$EnforceOptimized<0 | "a">;
 
 type Ok6 = $Flow$EnforceOptimized<{f: 1} | {f: 2}>;
@@ -40,8 +40,8 @@ type Error4 = $Flow$EnforceOptimized< // error unsupported form (TypeAppT)
 >;
 
 type Error5 = $Flow$EnforceOptimized< // error no unique keys
-  | { f: 1, g: "a", h: true, k: void, l: null, m: 1n }
-  | { f: 1, g: "a", h: true, k: void, l: null, m: 1n }
+  | { f: 1, g: "a", h: true, k: undefined, l: null, m: 1n }
+  | { f: 1, g: "a", h: true, k: undefined, l: null, m: 1n }
 >;
 
 type Error6a = $Flow$EnforceOptimized<1>; // error non-union argument

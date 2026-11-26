@@ -282,7 +282,7 @@ Cannot assign `'new'` to `readonly[0.5]` because property `0.5` is not writable.
 
 Error ---------------------------------------------------------------------------------------------- annotations.js:96:3
 
-Cannot cast `optional[0.5]` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `optional[0.5]` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    annotations.js:96:3
    96|   optional[0.5] as string; // ERROR
@@ -3305,7 +3305,7 @@ Cannot assign `false` to `builtinReadonly['-0.5']` because property `-0.5` is no
 
 Error ----------------------------------------------------------------------------------------------- typescript.ts:96:1
 
-Cannot cast `optional['0.5']` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `optional['0.5']` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    typescript.ts:96:1
    96| optional['0.5'] as string; // ERROR

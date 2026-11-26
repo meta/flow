@@ -26,7 +26,7 @@ declare const rendersHuhBad: RendersHuh<Bad>;
 rendersHuhBad as renders* MenuItem; // ERROR
 
 declare const rendersStarMenuItem: renders* MenuItem;
-rendersStarMenuItem as renders (null | false | void | MenuItem | ReadonlyArray<renders* MenuItem>); // type checks, but invalid-render
+rendersStarMenuItem as renders (null | false | undefined | MenuItem | ReadonlyArray<renders* MenuItem>); // type checks, but invalid-render
 
 [<MenuItem />, <BlueMenuItem />, <Bad />] as renders* MenuItem; // ERROR
 

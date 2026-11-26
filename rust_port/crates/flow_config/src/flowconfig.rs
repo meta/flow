@@ -252,7 +252,6 @@ pub mod opts {
         pub strict_property_initialization: bool,
         pub export_star_excludes_default: Option<bool>,
         pub ts_syntax: Option<bool>,
-        pub ts_void: bool,
         pub tslib_syntax: Option<bool>,
         pub typescript_library_definition_support: bool,
         pub typescript_library_definition_support_includes: Vec<FlowconfigGlobPattern>,
@@ -407,7 +406,6 @@ pub mod opts {
             strict_property_initialization: false,
             export_star_excludes_default: None,
             ts_syntax: None,
-            ts_void: false,
             tslib_syntax: None,
             typescript_library_definition_support: false,
             typescript_library_definition_support_includes: Vec::new(),
@@ -2277,14 +2275,7 @@ pub mod opts {
                 )
             }),
             ("experimental.ts_void", |values, config| {
-                parse_boolean(
-                    |opts, v| {
-                        opts.ts_void = v;
-                        Ok(())
-                    },
-                    values,
-                    config,
-                )
+                enum_parser(&[("true", ())], |_opts, ()| Ok(()), values, config)
             }),
             ("experimental.tslib_syntax", |values, config| {
                 parse_boolean(

@@ -657,18 +657,18 @@ The default value for `no_implicit_override` is `false`. See [override adoption]
 
 Type: `boolean`
 
-Set this to `true` to make Flow include `void` in the result type of indexing
+Set this to `true` to make Flow include `undefined` in the result type of indexing
 into an array or object with a dictionary. This catches cases where you access
 an element that may not exist at runtime, such as an out-of-bounds array index
 or an absent dictionary key.
 
 By default, accessing an element of an `Array<string>` returns `string`. With
-this option enabled, the same access returns `string | void`, forcing you to
+this option enabled, the same access returns `string | undefined`, forcing you to
 handle the `undefined` case:
 
 ```js
 const items: Array<string> = ["hello", "world"];
-const item = items[0]; // type is `string | void` when enabled
+const item = items[0]; // type is `string | undefined` when enabled
 
 // You must refine before using it as a string:
 if (item != null) {
@@ -679,31 +679,31 @@ if (item != null) {
 This option affects the following indexed access patterns:
 
 **Arrays** — accessing elements by index on `Array<T>` or `ReadonlyArray<T>`
-returns `T | void` instead of `T`:
+returns `T | undefined` instead of `T`:
 
 ```js
 declare const arr: Array<string>;
-const x = arr[0]; // string | void
-const y = arr[someIndex]; // string | void
+const x = arr[0]; // string | undefined
+const y = arr[someIndex]; // string | undefined
 ```
 
 **Objects with indexers** — accessing properties on dictionary objects (objects
-with an indexer like `{[string]: T}`) returns `T | void` instead of `T`, for
+with an indexer like `{[string]: T}`) returns `T | undefined` instead of `T`, for
 both bracket and dot access on keys not explicitly present in the type:
 
 ```js
 declare const dict: {[string]: number};
-const a = dict["key"]; // number | void
-const b = dict.key; // number | void
+const a = dict["key"]; // number | undefined
+const b = dict.key; // number | undefined
 ```
 
 **Tuples with dynamic keys** — accessing a tuple with a non-literal key returns
-`T | void`:
+`T | undefined`:
 
 ```js
 declare const tuple: [number, string, boolean];
 declare const i: number;
-const val = tuple[i]; // number | string | boolean | void
+const val = tuple[i]; // number | string | boolean | undefined
 ```
 
 Note that tuple access with a *literal* index is unaffected — `tuple[0]`
@@ -711,19 +711,19 @@ still returns the precise element type (or an out-of-bounds error):
 
 ```js
 declare const tuple: [number, string, boolean];
-tuple[0]; // number (not number | void)
+tuple[0]; // number (not number | undefined)
 tuple[1]; // string
 ```
 
 **Type-level indexed access is not affected.** Using indexed access types like
-`T[K]` in type annotations continues to return the element type without `void`:
+`T[K]` in type annotations continues to return the element type without `undefined`:
 
 ```js
 type Items = Array<string>;
-type Item = Items[number]; // string, not string | void
+type Item = Items[number]; // string, not string | undefined
 ```
 
-Writing `undefined` into an array or dictionary that does not include `void` in
+Writing `undefined` into an array or dictionary that does not include `undefined` in
 its value type is still an error, regardless of this option. The option only
 affects *reads*.
 
@@ -945,6 +945,13 @@ Flow to error on startup.
 
 The following `[options]` settings are listed here so existing `.flowconfig`
 files can be migrated. Each entry notes the Flow version in which it changed.
+
+### experimental.ts_void {#toc-experimental-ts-void}
+
+Flow always distinguishes `void` from `undefined`, following TypeScript's
+return-value semantics. See [function returns](../types/functions.md#toc-void-and-undefined).
+`experimental.ts_void=true` is accepted for compatibility but has no effect;
+`false` is unsupported. Remove this setting from your `.flowconfig`.
 
 ### exact_by_default {#toc-exact-by-default}
 

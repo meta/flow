@@ -180,7 +180,7 @@ No errors!
 === block 16 ===
 Error --------------------------------------------------------------------------- -:5:13
 
-Cannot call `acceptsNull` with `undefined` bound to `value` because `void` [1] is incompatible with `null` [2].
+Cannot call `acceptsNull` with `undefined` bound to `value` because `undefined` [1] is incompatible with `null` [2].
 [incompatible-type]
 
    -:5:13
@@ -194,7 +194,7 @@ References:
 
 Error -------------------------------------------------------------------------- -:10:18
 
-Cannot call `acceptsUndefined` with `null` bound to `value` because `null` [1] is incompatible with `void` [2].
+Cannot call `acceptsUndefined` with `null` bound to `value` because `null` [1] is incompatible with `undefined` [2].
 [incompatible-type]
 
    -:10:18
@@ -203,8 +203,8 @@ Cannot call `acceptsUndefined` with `null` bound to `value` because `null` [1] i
 
 References:
    -:7:34
-    7| function acceptsUndefined(value: void) { /* ... */ }
-                                        ^^^^ [2]
+    7| function acceptsUndefined(value: undefined) { /* ... */ }
+                                        ^^^^^^^^^ [2]
 
 
 Found 2 errors

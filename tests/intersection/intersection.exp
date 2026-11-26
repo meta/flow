@@ -17,8 +17,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- pred.js:17:8
 
-Cannot return `options.objectMode || options.readableObjectMode || options.writableObjectMode` because `void` [1] is
-incompatible with `boolean` [2]. [incompatible-type]
+Cannot return `options.objectMode || options.readableObjectMode || options.writableObjectMode` because `undefined` [1]
+is incompatible with `boolean` [2]. [incompatible-type]
 
    pred.js:17:8
    17|     || options.writableObjectMode; // error, undefined ~> boolean

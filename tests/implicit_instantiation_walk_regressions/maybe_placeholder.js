@@ -10,10 +10,10 @@ function throughIdentity<P extends {...}>(): ?{p: P} {
   return identity(get()); // OK
 }
 
-declare function getMaybeUnion<P extends {...}>(): {p: P} | null | void;
+declare function getMaybeUnion<P extends {...}>(): {p: P} | null | undefined;
 
-// A union with `null` and `void` members whose other members are placeholders drops out whole,
+// A union with `null` and `undefined` members whose other members are placeholders drops out whole,
 // as a maybe type does.
-function throughIdentityOfUnion<P extends {...}>(): {p: P} | null | void {
+function throughIdentityOfUnion<P extends {...}>(): {p: P} | null | undefined {
   return identity(getMaybeUnion()); // OK
 }

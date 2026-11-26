@@ -663,7 +663,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- maybe.js:15:3
 
-Cannot cast `x` to `X` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `x` to `X` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    maybe.js:15:3
    15|   x as X; //nope
@@ -680,7 +680,9 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- maybe.js:20:5
 
-Cannot cast `x` to `null | void` because `number` [1] is incompatible with `null | void` [2]. [incompatible-type]
+Cannot cast `x` to `null | void` because: [incompatible-type]
+ - Either `number` [1] is incompatible with `null` [2].
+ - Or `number` [1] is incompatible with `void` [3].
 
    maybe.js:20:5
    20|     x as null | void; // nope
@@ -692,12 +694,17 @@ References:
              ^ [1]
    maybe.js:20:10
    20|     x as null | void; // nope
-                ^^^^^^^^^^^ [2]
+                ^^^^ [2]
+   maybe.js:20:17
+   20|     x as null | void; // nope
+                       ^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- maybe.js:31:5
 
-Cannot cast `y` to `null | void` because `number` [1] is incompatible with `null | void` [2]. [incompatible-type]
+Cannot cast `y` to `null | void` because: [incompatible-type]
+ - Either `number` [1] is incompatible with `null` [2].
+ - Or `number` [1] is incompatible with `void` [3].
 
    maybe.js:31:5
    31|     y as null | void; // nope
@@ -709,7 +716,10 @@ References:
             ^ [1]
    maybe.js:31:10
    31|     y as null | void; // nope
-                ^^^^^^^^^^^ [2]
+                ^^^^ [2]
+   maybe.js:31:17
+   31|     y as null | void; // nope
+                       ^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- maybe.js:38:3
@@ -731,7 +741,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- maybe.js:38:3
 
-Cannot cast `z` to `X` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `z` to `X` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    maybe.js:38:3
    38|   z as X; // nope
@@ -748,7 +758,9 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- maybe.js:44:5
 
-Cannot cast `z` to `null | void` because `number` [1] is incompatible with `null | void` [2]. [incompatible-type]
+Cannot cast `z` to `null | void` because: [incompatible-type]
+ - Either `number` [1] is incompatible with `null` [2].
+ - Or `number` [1] is incompatible with `void` [3].
 
    maybe.js:44:5
    44|     z as null | void; // nope
@@ -760,12 +772,15 @@ References:
             ^ [1]
    maybe.js:44:10
    44|     z as null | void; // nope
-                ^^^^^^^^^^^ [2]
+                ^^^^ [2]
+   maybe.js:44:17
+   44|     z as null | void; // nope
+                       ^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- maybe.js:50:3
 
-Cannot cast `xu` to `X` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `xu` to `X` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    maybe.js:50:3
    50|   xu as X; //nope
@@ -824,7 +839,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- maybe.js:60:3
 
-Cannot cast `yu` to `Y` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `yu` to `Y` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    maybe.js:60:3
    60|   yu as Y; // nope
@@ -842,8 +857,8 @@ References:
 Error ---------------------------------------------------------------------------------------------------- maybe.js:61:3
 
 Cannot cast `yu` to `Y | X` because: [incompatible-type]
- - Either `void` [1] is incompatible with `empty` [2].
- - Or `void` [1] is incompatible with `empty` [3].
+ - Either `undefined` [1] is incompatible with `empty` [2].
+ - Or `undefined` [1] is incompatible with `empty` [3].
 
    maybe.js:61:3
    61|   yu as Y | X; // nope
@@ -863,7 +878,9 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- maybe.js:67:5
 
-Cannot cast `yu` to `null | void` because `number` [1] is incompatible with `null | void` [2]. [incompatible-type]
+Cannot cast `yu` to `null | void` because: [incompatible-type]
+ - Either `number` [1] is incompatible with `null` [2].
+ - Or `number` [1] is incompatible with `void` [3].
 
    maybe.js:67:5
    67|     yu as null | void; // nope
@@ -875,7 +892,10 @@ References:
               ^ [1]
    maybe.js:67:11
    67|     yu as null | void; // nope
-                 ^^^^^^^^^^^ [2]
+                 ^^^^ [2]
+   maybe.js:67:18
+   67|     yu as null | void; // nope
+                        ^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- maybe.js:74:3
@@ -897,7 +917,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- maybe.js:74:3
 
-Cannot cast `zu` to `X` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `zu` to `X` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    maybe.js:74:3
    74|   zu as X; // nope
@@ -914,7 +934,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- maybe.js:76:3
 
-Cannot cast `zu` to `Z` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `zu` to `Z` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    maybe.js:76:3
    76|   zu as Z; // nope
@@ -931,7 +951,9 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- maybe.js:81:5
 
-Cannot cast `zu` to `null | void` because `number` [1] is incompatible with `null | void` [2]. [incompatible-type]
+Cannot cast `zu` to `null | void` because: [incompatible-type]
+ - Either `number` [1] is incompatible with `null` [2].
+ - Or `number` [1] is incompatible with `void` [3].
 
    maybe.js:81:5
    81|     zu as null | void; // nope
@@ -943,7 +965,10 @@ References:
               ^ [1]
    maybe.js:81:11
    81|     zu as null | void; // nope
-                 ^^^^^^^^^^^ [2]
+                 ^^^^ [2]
+   maybe.js:81:18
+   81|     zu as null | void; // nope
+                        ^^^^ [3]
 
 
 Error ---------------------------------------------------------------------------------------------------- maybe.js:88:3
@@ -973,7 +998,9 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- maybe.js:94:3
 
-Cannot cast `c` to `null | void` because `number` [1] is incompatible with `null | void` [2]. [incompatible-type]
+Cannot cast `c` to `null | void` because: [incompatible-type]
+ - Either `number` [1] is incompatible with `null` [2].
+ - Or `number` [1] is incompatible with `void` [3].
 
    maybe.js:94:3
    94|   c as null | void; // nope
@@ -985,7 +1012,10 @@ References:
                                       ^ [1]
    maybe.js:94:8
    94|   c as null | void; // nope
-              ^^^^^^^^^^^ [2]
+              ^^^^ [2]
+   maybe.js:94:15
+   94|   c as null | void; // nope
+                     ^^^^ [3]
 
 
 Error ------------------------------------------------------------------------------------------------------ misc.js:3:3

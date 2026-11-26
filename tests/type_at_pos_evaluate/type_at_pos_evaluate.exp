@@ -15,12 +15,12 @@ test.js:17:6,17:7
 
 test.js:20:6
 Flags:
-type T4 = ReadonlyArray<string> | void
+type T4 = ReadonlyArray<string> | undefined
 test.js:20:6,20:7
 
 test.js:23:6
 Flags:
-type T5 = string | void
+type T5 = string | undefined
 test.js:23:6,23:7
 
 test.js:26:6

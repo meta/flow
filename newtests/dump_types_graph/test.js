@@ -855,10 +855,10 @@ module.exports = (suite(({addFile, flowCmd}) => [
               },
               "2": {
                 "def": {
-                  "kind": "Void"
+                  "kind": "TsVoid"
                 },
                 "kind": "Def",
-                "reason": "calls.js:1:15-18: undefined"
+                "reason": "calls.js:1:15-18: void"
               },
               "3": {
                 "def": {
@@ -872,10 +872,10 @@ module.exports = (suite(({addFile, flowCmd}) => [
               },
               "4": {
                 "def": {
-                  "kind": "Void"
+                  "kind": "TsVoid"
                 },
                 "kind": "Def",
-                "reason": "calls.js:3:7-10: undefined"
+                "reason": "calls.js:3:7-10: void"
               },
               "5": {
                 "def": {
@@ -1466,7 +1466,9 @@ module.exports = (suite(({addFile, flowCmd}) => [
             ]
           }
         `,
-        {normalize: ['json']},
+        {
+          normalize: ['json'],
+        },
       )
       .exitCodes([0]),
   ]),

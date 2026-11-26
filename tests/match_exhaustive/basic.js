@@ -61,9 +61,9 @@
   }
 }
 
-// Null and void
+// Null and undefined
 {
-  declare const x: null | void;
+  declare const x: null | undefined;
 
   match (x) { // OK
     null => {}
@@ -119,9 +119,9 @@
   declare const t: true;
   declare const f: false;
   declare const nll: null;
-  declare const u: void;
+  declare const u: undefined;
 
-  declare const x: 'foo' | 1 | -2 | 3n | boolean | null | void;
+  declare const x: 'foo' | 1 | -2 | 3n | boolean | null | undefined;
 
   match (x) { // OK
     str => {}
@@ -155,10 +155,10 @@
     t: true,
     f: false,
     nll: null,
-    u: void,
+    u: undefined,
   }
 
-  declare const x: 'foo' | 1 | -2 | 3n | boolean | null | void;
+  declare const x: 'foo' | 1 | -2 | 3n | boolean | null | undefined;
 
   match (x) { // OK
     obj.str => {}

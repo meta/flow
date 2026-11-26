@@ -1,7 +1,7 @@
 //@flow
 import * as React from 'react';
 
-function Foo(): React.Node {}
+function Foo(): React.Node { return undefined; }
 
 component Bar() renders typeof Foo { // invalid-render, turned into any
   return <Foo />; // OK

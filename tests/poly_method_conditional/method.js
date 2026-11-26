@@ -43,7 +43,7 @@ const serialized: number | null = result.info.serialize('DOG'); // ERROR
 result.info.serialize('DOG') as string; // ERROR
 
 const optionalResult = EnumCreator.from?.(field)?.create();
-const optionalSerialized: number | null | void = optionalResult?.info.serialize('DOG'); // ERROR
+const optionalSerialized: number | null | undefined = optionalResult?.info.serialize('DOG'); // ERROR
 optionalResult?.info.serialize('DOG') as string; // ERROR
 
 const plainField = new FieldInfo(new EnumInfo({DOG: 1}));

@@ -44,7 +44,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- element_type.js:24:8
 
-Cannot access `"c"` on `Z` because property `c` is missing in `void` [1]. [incompatible-use]
+Cannot access `"c"` on `Z` because property `c` is missing in `undefined` [1]. [incompatible-use]
 
    element_type.js:24:8
    24| 1 as Z['c']; // Error - access 'c' on `void`/`null`
@@ -100,7 +100,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- non_maybe_type.js:18:1
 
-Cannot cast `undefined` to `NonNullable<unknown>` because `void` [1] is incompatible with `unknown` [2].
+Cannot cast `undefined` to `NonNullable<unknown>` because `undefined` [1] is incompatible with `unknown` [2].
 [incompatible-type]
 
    non_maybe_type.js:18:1
@@ -143,7 +143,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------- non_maybe_type.js:54:1
 
-Cannot cast `undefined` to `NonMaybeNumber` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `undefined` to `NonMaybeNumber` because `undefined` [1] is incompatible with `number` [2].
+[incompatible-type]
 
    non_maybe_type.js:54:1
    54| undefined as NonMaybeNumber; // Error

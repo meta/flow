@@ -17,7 +17,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- defaulting.js:10:3
 
-Cannot cast `a` to `true` because `void` [1] is incompatible with `true` [2]. [incompatible-type]
+Cannot cast `a` to `true` because `undefined` [1] is incompatible with `true` [2]. [incompatible-type]
 
    defaulting.js:10:3
    10|   a as true; // ERROR
@@ -34,7 +34,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- defaulting.js:11:3
 
-Cannot cast `a` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `a` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    defaulting.js:11:3
    11|   a as number; // ERROR
@@ -82,7 +82,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- defaulting.js:18:3
 
-Cannot cast `prop` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `prop` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    defaulting.js:18:3
    18|   prop as number; // ERROR
@@ -116,7 +116,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- defaulting.js:28:3
 
-Cannot cast `a` to `true` because `void` [1] is incompatible with `true` [2]. [incompatible-type]
+Cannot cast `a` to `true` because `undefined` [1] is incompatible with `true` [2]. [incompatible-type]
 
    defaulting.js:28:3
    28|   a as true; // ERROR
@@ -133,7 +133,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- defaulting.js:29:3
 
-Cannot cast `a` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `a` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    defaulting.js:29:3
    29|   a as number; // ERROR
@@ -181,7 +181,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- defaulting.js:36:3
 
-Cannot cast `prop` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `prop` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    defaulting.js:36:3
    36|   prop as number; // ERROR
@@ -215,7 +215,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- defaulting.js:46:3
 
-Cannot cast `a` to `true` because `void` [1] is incompatible with `true` [2]. [incompatible-type]
+Cannot cast `a` to `true` because `undefined` [1] is incompatible with `true` [2]. [incompatible-type]
 
    defaulting.js:46:3
    46|   a as true; // ERROR
@@ -232,7 +232,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- defaulting.js:47:3
 
-Cannot cast `a` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `a` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    defaulting.js:47:3
    47|   a as number; // ERROR
@@ -280,7 +280,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- defaulting.js:54:3
 
-Cannot cast `prop` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `prop` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    defaulting.js:54:3
    54|   prop as number; // ERROR
@@ -314,7 +314,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- defaulting.js:70:3
 
-Cannot cast `a` to `true` because `void` [1] is incompatible with `true` [2]. [incompatible-type]
+Cannot cast `a` to `true` because `undefined` [1] is incompatible with `true` [2]. [incompatible-type]
 
    defaulting.js:70:3
    70|   a as true; // ERROR
@@ -331,7 +331,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- defaulting.js:71:3
 
-Cannot cast `a` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `a` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    defaulting.js:71:3
    71|   a as number; // ERROR
@@ -397,7 +397,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- defaulting.js:78:3
 
-Cannot cast `prop` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `prop` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    defaulting.js:78:3
    78|   prop as number; // ERROR
@@ -431,7 +431,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- defaulting.js:94:3
 
-Cannot cast `a` to `true` because `void` [1] is incompatible with `true` [2]. [incompatible-type]
+Cannot cast `a` to `true` because `undefined` [1] is incompatible with `true` [2]. [incompatible-type]
 
    defaulting.js:94:3
    94|   a as true; // ERROR
@@ -448,7 +448,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- defaulting.js:95:3
 
-Cannot cast `a` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `a` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    defaulting.js:95:3
    95|   a as number; // ERROR
@@ -510,7 +510,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- defaulting.js:102:3
 
-Cannot cast `prop` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `prop` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    defaulting.js:102:3
    102|   prop as number; // ERROR
@@ -704,7 +704,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:35:3
 
-Cannot cast `a` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `a` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    test.js:35:3
    35|   a as empty; // ERROR

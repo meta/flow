@@ -27,17 +27,17 @@ if (v) {
 declare const nn: NonNullable<void>;
 nn as empty; // OK
 
-// A `void` property is tested against a literal as `undefined` is. The test
-// prelude declares `undefined` as `void`, so `void 0` stands in for it.
+// A `void` property is tested against a literal as `undefined` is.
+// Comparisons with `undefined` can still narrow the surrounding object union.
 declare const ab: {a: string, type?: void} | {type: 'b'};
 declare const cb: {type: void, c: string} | {type: 'b'};
-if (ab.type !== void 0) {
+if (ab.type !== undefined) {
   ab as {type: 'b'}; // OK
 }
 if (cb.type === 'b') {
   cb as {type: 'b'}; // OK
 }
-if (cb.type === void 0) {
+if (cb.type === undefined) {
   cb.c as string; // OK
 }
 declare const bu: 'b' | undefined;

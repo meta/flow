@@ -18,4 +18,4 @@ declare class Client {
 declare const c: Client;
 
 c.query('SELECT 1');
-c.query({submit: () => undefined});
+c.query({submit: (): void => undefined});

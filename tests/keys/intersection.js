@@ -32,7 +32,7 @@ declare const none: keyof (number & 'lit');
 none as empty; // ok
 declare const arr: keyof (Array<number> & {[key: string]: number});
 arr as string; // ok
-declare const opt: keyof ((void | {d: number}) & {c: number});
+declare const opt: keyof ((undefined | {d: number}) & {c: number});
 opt as 'c'; // error: 'd' is a key too
 
 // An element of an intersection is read key by key.

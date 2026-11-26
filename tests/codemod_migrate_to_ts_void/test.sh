@@ -10,5 +10,5 @@ printf "\ntypes.js\n"
 cat types.js
 printf "\nuses.js\n"
 cat uses.js
-printf "\nflow check under experimental.ts_void\n"
-assert_errors "$FLOW" check --flowconfig-name .flowconfig.ts_void
+printf "\nflow full-check\n"
+assert_errors "$FLOW" full-check --strip-root --show-all-errors .

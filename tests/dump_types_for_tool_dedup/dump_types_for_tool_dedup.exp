@@ -12,7 +12,7 @@
             }
           ],
           "rest_param":null,
-          "return_t":{"def":{"kind":"Void"},"kind":"Def","reason":"test.js:3:24: undefined"},
+          "return_t":{"def":{"kind":"TsVoid"},"kind":"Def","reason":"test.js:3:24: void"},
           "this_t":{
             "status":{"kind":"This_Function"},
             "type":{"def":{"kind":"Mixed"},"kind":"Def","reason":"test.js:3:13-23: function"}
@@ -49,7 +49,7 @@
             }
           ],
           "rest_param":null,
-          "return_t":{"def":{"kind":"Void"},"kind":"Def","reason":"test.js:3:24: undefined"},
+          "return_t":{"def":{"kind":"TsVoid"},"kind":"Def","reason":"test.js:3:24: void"},
           "this_t":{
             "status":{"kind":"This_Function"},
             "type":{"def":{"kind":"Mixed"},"kind":"Def","reason":"test.js:3:13-23: function"}
@@ -112,7 +112,7 @@
           "effect":{"kind":"ArbitraryEffect"},
           "params":[{"name":"f","optional":false,"type":{"$ref":4}}],
           "rest_param":null,
-          "return_t":{"def":{"kind":"Void"},"kind":"Def","reason":"test.js:7:79: undefined"},
+          "return_t":{"def":{"kind":"TsVoid"},"kind":"Def","reason":"test.js:7:79: void"},
           "this_t":{
             "status":{"kind":"This_Function"},
             "type":{"def":{"kind":"Mixed"},"kind":"Def","reason":"test.js:7:32-78: function"}
@@ -638,7 +638,7 @@
           "effect":{"kind":"ArbitraryEffect"},
           "params":[{"name":"f","optional":false,"type":{"$ref":4}}],
           "rest_param":null,
-          "return_t":{"def":{"kind":"Void"},"kind":"Def","reason":"test.js:7:79: undefined"},
+          "return_t":{"def":{"kind":"TsVoid"},"kind":"Def","reason":"test.js:7:79: void"},
           "this_t":{
             "status":{"kind":"This_Function"},
             "type":{"def":{"kind":"Mixed"},"kind":"Def","reason":"test.js:7:32-78: function"}
@@ -869,7 +869,7 @@
       "path":"test.js",
       "reasons":[],
       "start":24,
-      "type":"{\"expression_type\":{\"def\":{\"kind\":\"Void\"},\"kind\":\"Def\",\"reason\":\"test.js:3:24: undefined\"}}"
+      "type":"{\"expression_type\":{\"def\":{\"kind\":\"TsVoid\"},\"kind\":\"Def\",\"reason\":\"test.js:3:24: void\"}}"
     },
     {
       "end":3,
@@ -914,7 +914,7 @@
       "path":"test.js",
       "reasons":[],
       "start":1,
-      "type":"{\"expression_type\":{\"def\":{\"kind\":\"Void\"},\"kind\":\"Def\",\"reason\":\"test.js:4:1-6: undefined\"}}"
+      "type":"{\"expression_type\":{\"def\":{\"kind\":\"TsVoid\"},\"kind\":\"Def\",\"reason\":\"test.js:4:1-6: void\"}}"
     },
     {
       "end":5,
@@ -1124,7 +1124,7 @@
       "path":"test.js",
       "reasons":[],
       "start":79,
-      "type":"{\"expression_type\":{\"def\":{\"kind\":\"Void\"},\"kind\":\"Def\",\"reason\":\"test.js:7:79: undefined\"}}"
+      "type":"{\"expression_type\":{\"def\":{\"kind\":\"TsVoid\"},\"kind\":\"Def\",\"reason\":\"test.js:7:79: void\"}}"
     },
     {
       "end":22,
@@ -1169,7 +1169,7 @@
       "path":"test.js",
       "reasons":[],
       "start":1,
-      "type":"{\"expression_type\":{\"def\":{\"kind\":\"Void\"},\"kind\":\"Def\",\"reason\":\"test.js:8:1-63: undefined\"}}"
+      "type":"{\"expression_type\":{\"def\":{\"kind\":\"TsVoid\"},\"kind\":\"Def\",\"reason\":\"test.js:8:1-63: void\"}}"
     },
     {
       "end":62,
@@ -1387,7 +1387,7 @@
   "$defs":{
     "0":{"def":{"kind":"StrGeneral"},"kind":"Def","reason":"test.js:2:24-30: string"},
     "1":{"def":{"kind":"NumGeneral"},"kind":"Def","reason":"exp.js:1: `Foo`"},
-    "10":{"def":{"kind":"Void"},"kind":"Def","reason":"test.js:3:24: undefined"},
+    "10":{"def":{"kind":"TsVoid"},"kind":"Def","reason":"test.js:3:24: void"},
     "100":{
       "def":{"kind":"Null"},
       "kind":"Def",
@@ -1462,7 +1462,7 @@
         {"$ref":58}
       ]
     },
-    "11":{"def":{"kind":"Void"},"kind":"Def","reason":"test.js:4:1-6: undefined"},
+    "11":{"def":{"kind":"TsVoid"},"kind":"Def","reason":"test.js:4:1-6: void"},
     "110":{"def":{"kind":"Null"},"kind":"Def","reason":"test.js:8:41-44: null"},
     "111":{"def":{"kind":"Void"},"kind":"Def","reason":"test.js:8:48-56: undefined"},
     "112":{
@@ -1600,7 +1600,7 @@
       "reason":"test.js:7:36-77: function type"
     },
     "32":{"def":{"kind":"Mixed"},"kind":"Def","reason":"test.js:7:32-78: function"},
-    "33":{"def":{"kind":"Void"},"kind":"Def","reason":"test.js:7:79: undefined"},
+    "33":{"def":{"kind":"TsVoid"},"kind":"Def","reason":"test.js:7:79: void"},
     "34":{
       "def":{
         "funtype":{
@@ -1735,8 +1735,8 @@
     "64":{"kind":"Union","members":[{"$ref":52},{"$ref":55},{"$ref":56}]},
     "65":{"def":{"kind":"StrGeneral"},"kind":"Def","reason":"test.js:7:60-65: string"},
     "66":{"def":{"kind":"Mixed"},"kind":"Def","reason":"test.js:7:71-77: `unknown`"},
-    "67":{"def":{"kind":"Void"},"kind":"Def","reason":"test.js:7:79: undefined"},
-    "68":{"def":{"kind":"Void"},"kind":"Def","reason":"test.js:8:1-63: undefined"},
+    "67":{"def":{"kind":"TsVoid"},"kind":"Def","reason":"test.js:7:79: void"},
+    "68":{"def":{"kind":"TsVoid"},"kind":"Def","reason":"test.js:8:1-63: void"},
     "69":{
       "def":{
         "funtype":{
@@ -1753,7 +1753,7 @@
       "kind":"Def",
       "reason":"test.js:8:1-22: function"
     },
-    "7":{"def":{"kind":"Void"},"kind":"Def","reason":"test.js:3:24: undefined"},
+    "7":{"def":{"kind":"TsVoid"},"kind":"Def","reason":"test.js:3:24: void"},
     "70":{"kind":"FunProto"},
     "71":{
       "def":{

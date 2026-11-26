@@ -83,7 +83,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ variables.js:44:1
 
-Cannot cast `maybe` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `maybe` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    variables.js:44:1
    44| maybe as number; // error: null or undefined is incompatible with number

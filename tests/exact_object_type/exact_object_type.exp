@@ -86,7 +86,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:24:1
 
-Cannot cast `maybe` to `ExactObjectType` because `void` [1] is incompatible with `ExactObjectType` [2].
+Cannot cast `maybe` to `ExactObjectType` because `undefined` [1] is incompatible with `ExactObjectType` [2].
 [incompatible-type]
 
    test.js:24:1

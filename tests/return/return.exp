@@ -1,6 +1,6 @@
 Error ------------------------------------------------------------------------------------------ function_return.js:7:24
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    7| function f(x: number): number {
@@ -9,7 +9,7 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 
 Error ------------------------------------------------------------------------------------------ function_return.js:23:3
 
-Cannot return undefined because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot return undefined because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    function_return.js:23:3
    23|   return;
@@ -23,8 +23,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- implicit.js:6:22
 
-Cannot expect `number` as the return type of async function because `number` [1] is incompatible with
-`Promise<void>` [1]. [incompatible-type]
+Cannot expect `number` as the return type of async function because `number` [1] is incompatible with `void` [1].
+[incompatible-type]
 
    6| async function g1(): number {}
                            ^^^^^^ [1]
@@ -32,20 +32,11 @@ Cannot expect `number` as the return type of async function because `number` [1]
 
 Error ------------------------------------------------------------------------------------------------- implicit.js:7:22
 
-Cannot expect `Promise<number>` as the return type of async function because in type argument `T` [1]: `number` [2] is
-incompatible with `void` [3]. [incompatible-type]
+Cannot expect `Promise<number>` as the return type of async function because `Promise<number>` [1] is incompatible with
+`void` [1]. [incompatible-type]
 
-   implicit.js:7:22
-     7| async function g2(): Promise<number> {}
-                             ^^^^^^^^^^^^^^^ [3]
-
-References:
-   <BUILTINS>/misc.js:195:23
-   195| interface Promise<out T = unknown> {}
-                              ^ [1]
-   implicit.js:7:30
-     7| async function g2(): Promise<number> {}
-                                     ^^^^^^ [2]
+   7| async function g2(): Promise<number> {}
+                           ^^^^^^^^^^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------ implicit_void.js:173:17
@@ -59,19 +50,10 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 
 Error ------------------------------------------------------------------------------------------- implicit_void.js:174:9
 
-This condition is likely falsy.
-[WARNING]: Flow's type inference may be incorrect that it could be null at runtime (due to `any` annotations,
-out-of-bounds array accesses, etc.). If the check is valid, you might want to make [1] nullable (`T` -> `?T`).
-[constant-condition]
+An expression of type `void` cannot be tested for truthiness. [constant-condition]
 
-   implicit_void.js:174:9
    174|   while(invariant()) { // Error: invariant must be a top-level statement call
                 ^^^^^^^^^^^
-
-References:
-   implicit_void.js:1:68
-     1| declare function invariant(condition?: unknown, message?: string): asserts condition;
-                                                                           ^^^^^^^^^^^^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------ implicit_void.js:179:17
@@ -111,19 +93,10 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 
 Error ------------------------------------------------------------------------------------------- implicit_void.js:191:7
 
-This condition is likely falsy.
-[WARNING]: Flow's type inference may be incorrect that it could be null at runtime (due to `any` annotations,
-out-of-bounds array accesses, etc.). If the check is valid, you might want to make [1] nullable (`T` -> `?T`).
-[constant-condition]
+An expression of type `void` cannot be tested for truthiness. [constant-condition]
 
-   implicit_void.js:191:7
    191|   if (invariant()) { // Error: invariant must be a top-level statement call
               ^^^^^^^^^^^
-
-References:
-   implicit_void.js:1:68
-     1| declare function invariant(condition?: unknown, message?: string): asserts condition;
-                                                                           ^^^^^^^^^^^^^^^^^ [1]
 
 
 Error ------------------------------------------------------------------------------------------ implicit_void.js:196:17
@@ -146,7 +119,7 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 
 Error ------------------------------------------------------------------------------------------ implicit_void.js:234:16
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    234| function g1(): number { // Error
@@ -155,7 +128,7 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 
 Error ------------------------------------------------------------------------------------------ implicit_void.js:241:16
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    241| function g2(): number { // Error
@@ -164,7 +137,7 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 
 Error ------------------------------------------------------------------------------------------ implicit_void.js:249:16
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    249| function g3(): number { // Error
@@ -173,7 +146,7 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 
 Error ------------------------------------------------------------------------------------------ implicit_void.js:257:16
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    257| function g4(): number { // Error
@@ -182,7 +155,7 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 
 Error ------------------------------------------------------------------------------------------ implicit_void.js:265:16
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    265| function g5(): number { // Error
@@ -191,7 +164,7 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 
 Error ------------------------------------------------------------------------------------------ implicit_void.js:274:16
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    274| function g6(): number { // Error
@@ -200,7 +173,7 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 
 Error ------------------------------------------------------------------------------------------ implicit_void.js:282:16
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    282| function g7(): number { // Error
@@ -209,7 +182,7 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 
 Error ------------------------------------------------------------------------------------------ implicit_void.js:295:16
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    295| function g8(): number { // Error
@@ -218,7 +191,7 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 
 Error ------------------------------------------------------------------------------------------ implicit_void.js:308:16
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    308| function g9(): number { // Error
@@ -245,7 +218,7 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 
 Error ------------------------------------------------------------------------------------------ implicit_void.js:336:17
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    336| function g12(): number { // Error
@@ -299,7 +272,7 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 
 Error ------------------------------------------------------------------------------------------ implicit_void.js:386:35
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    386| function g18(x: 'a' | 'b' | 'c'): number { // Error
@@ -308,7 +281,7 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 
 Error ------------------------------------------------------------------------------------------ implicit_void.js:395:26
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    395| function g19(x: string): number { // Error
@@ -317,7 +290,7 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 
 Error ------------------------------------------------------------------------------------------ implicit_void.js:403:38
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    403| function g20(x: number, y: boolean): number { // Error
@@ -326,7 +299,7 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 
 Error ------------------------------------------------------------------------------------------ implicit_void.js:415:38
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    415| function g21(x: number, b: boolean): number { // Error
@@ -335,7 +308,7 @@ Cannot expect `number` as the return type of function because `number` [1] is in
 
 Error ------------------------------------------------------------------------------------------ implicit_void.js:427:27
 
-Cannot expect `number` as the return type of function because `number` [1] is incompatible with `void` [1].
+Cannot expect `number` as the return type of function because `number` [1] is incompatible with `undefined` [1].
 [incompatible-type]
 
    427| function g22(b: boolean): number { // Error

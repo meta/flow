@@ -56,40 +56,27 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- index.js:55:14
 
-Cannot return `c ? invariant() : invariant()` because in at least one member of `void` [1]: `void` [2] is incompatible
-with `string` [3]. [incompatible-type]
+Cannot return `c ? invariant() : 'a'` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
 
    index.js:55:14
-   55|   return c ? invariant() : invariant(); // Error: invariant must be a top-level statement call
+   55|   return c ? invariant() : 'a'; // Error: cannot use a void result as a string
                     ^^^^^^^^^^^
-
-References:
-   index.js:55:10
-   55|   return c ? invariant() : invariant(); // Error: invariant must be a top-level statement call
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
-   index.js:3:68
-    3| declare function invariant(condition?: unknown, message?: string): asserts condition; // raises
-                                                                          ^^^^^^^^^^^^^^^^^ [2]
-   index.js:54:29
-   54| function foo10(c: boolean): string {
-                                   ^^^^^^ [3]
-
-
-Error --------------------------------------------------------------------------------------------------- index.js:59:10
-
-This condition is likely falsy.
-[WARNING]: Flow's type inference may be incorrect that it could be null at runtime (due to `any` annotations,
-out-of-bounds array accesses, etc.). If the check is valid, you might want to make [1] nullable (`T` -> `?T`).
-[constant-condition]
-
-   index.js:59:10
-   59|   return invariant() ? 1 : 2; // Error: invariant must be a top-level statement call
-                ^^^^^^^^^^^
 
 References:
    index.js:3:68
     3| declare function invariant(condition?: unknown, message?: string): asserts condition; // raises
                                                                           ^^^^^^^^^^^^^^^^^ [1]
+   index.js:54:29
+   54| function foo10(c: boolean): string {
+                                   ^^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------------- index.js:59:10
+
+An expression of type `void` cannot be tested for truthiness. [constant-condition]
+
+   59|   return invariant() ? 1 : 2; // Error: a void result cannot be tested for truthiness
+                ^^^^^^^^^^^
 
 
 Error --------------------------------------------------------------------------------------------------- index.js:59:24
@@ -97,7 +84,7 @@ Error --------------------------------------------------------------------------
 Cannot return `invariant() ? 1 : 2` because `1` [1] is incompatible with `string` [2]. [incompatible-type]
 
    index.js:59:24
-   59|   return invariant() ? 1 : 2; // Error: invariant must be a top-level statement call
+   59|   return invariant() ? 1 : 2; // Error: a void result cannot be tested for truthiness
                               ^ [1]
 
 References:
@@ -111,7 +98,7 @@ Error --------------------------------------------------------------------------
 Cannot return `invariant() ? 1 : 2` because `2` [1] is incompatible with `string` [2]. [incompatible-type]
 
    index.js:59:28
-   59|   return invariant() ? 1 : 2; // Error: invariant must be a top-level statement call
+   59|   return invariant() ? 1 : 2; // Error: a void result cannot be tested for truthiness
                                   ^ [1]
 
 References:
@@ -122,19 +109,10 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- index.js:74:3
 
-This condition is likely falsy.
-[WARNING]: Flow's type inference may be incorrect that it could be null at runtime (due to `any` annotations,
-out-of-bounds array accesses, etc.). If the check is valid, you might want to make [1] nullable (`T` -> `?T`).
-[constant-condition]
+An expression of type `void` cannot be tested for truthiness. [constant-condition]
 
-   index.js:74:3
    74|   invariant() || c; // Error: invariant must be a top-level statement call
          ^^^^^^^^^^^
-
-References:
-   index.js:3:68
-    3| declare function invariant(condition?: unknown, message?: string): asserts condition; // raises
-                                                                          ^^^^^^^^^^^^^^^^^ [1]
 
 
 Error --------------------------------------------------------------------------------------------------- index.js:79:10
@@ -173,19 +151,10 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- index.js:83:10
 
-This condition is likely falsy.
-[WARNING]: Flow's type inference may be incorrect that it could be null at runtime (due to `any` annotations,
-out-of-bounds array accesses, etc.). If the check is valid, you might want to make [1] nullable (`T` -> `?T`).
-[constant-condition]
+An expression of type `void` cannot be tested for truthiness. [constant-condition]
 
-   index.js:83:10
    83|   return invariant() || invariant(); // Error: invariant must be a top-level statement call
                 ^^^^^^^^^^^
-
-References:
-   index.js:3:68
-    3| declare function invariant(condition?: unknown, message?: string): asserts condition; // raises
-                                                                          ^^^^^^^^^^^^^^^^^ [1]
 
 
 Error --------------------------------------------------------------------------------------------------- index.js:83:25
@@ -207,19 +176,10 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- index.js:98:3
 
-This condition is likely falsy.
-[WARNING]: Flow's type inference may be incorrect that it could be null at runtime (due to `any` annotations,
-out-of-bounds array accesses, etc.). If the check is valid, you might want to make [1] nullable (`T` -> `?T`).
-[constant-condition]
+An expression of type `void` cannot be tested for truthiness. [constant-condition]
 
-   index.js:98:3
    98|   invariant() && c; // Error: invariant must be a top-level statement call
          ^^^^^^^^^^^
-
-References:
-   index.js:3:68
-    3| declare function invariant(condition?: unknown, message?: string): asserts condition; // raises
-                                                                          ^^^^^^^^^^^^^^^^^ [1]
 
 
 Error -------------------------------------------------------------------------------------------------- index.js:103:10
@@ -258,19 +218,10 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- index.js:107:10
 
-This condition is likely falsy.
-[WARNING]: Flow's type inference may be incorrect that it could be null at runtime (due to `any` annotations,
-out-of-bounds array accesses, etc.). If the check is valid, you might want to make [1] nullable (`T` -> `?T`).
-[constant-condition]
+An expression of type `void` cannot be tested for truthiness. [constant-condition]
 
-   index.js:107:10
    107|   return invariant() && invariant(); // Error: invariant must be a top-level statement call
                  ^^^^^^^^^^^
-
-References:
-   index.js:3:68
-     3| declare function invariant(condition?: unknown, message?: string): asserts condition; // raises
-                                                                           ^^^^^^^^^^^^^^^^^ [1]
 
 
 Error -------------------------------------------------------------------------------------------------- index.js:107:10
@@ -288,23 +239,6 @@ References:
    index.js:106:29
    106| function foo21(c: boolean): string {
                                     ^^^^^^ [2]
-
-
-Error --------------------------------------------------------------------------------------------------- index.js:122:3
-
-This condition is likely falsy.
-[WARNING]: Flow's type inference may be incorrect that it could be null at runtime (due to `any` annotations,
-out-of-bounds array accesses, etc.). If the check is valid, you might want to make [1] nullable (`T` -> `?T`).
-[constant-condition]
-
-   index.js:122:3
-   122|   invariant() ?? c; // Error: invariant must be a top-level statement call
-          ^^^^^^^^^^^
-
-References:
-   index.js:3:68
-     3| declare function invariant(condition?: unknown, message?: string): asserts condition; // raises
-                                                                           ^^^^^^^^^^^^^^^^^ [1]
 
 
 Error -------------------------------------------------------------------------------------------------- index.js:127:10
@@ -360,19 +294,10 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- index.js:135:10
 
-This condition is likely falsy.
-[WARNING]: Flow's type inference may be incorrect that it could be null at runtime (due to `any` annotations,
-out-of-bounds array accesses, etc.). If the check is valid, you might want to make [1] nullable (`T` -> `?T`).
-[constant-condition]
+An expression of type `void` cannot be tested for truthiness. [constant-condition]
 
-   index.js:135:10
    135|   return invariant() && invariant(); // Error: invariant must be a top-level statement call
                  ^^^^^^^^^^^
-
-References:
-   index.js:3:68
-     3| declare function invariant(condition?: unknown, message?: string): asserts condition; // raises
-                                                                           ^^^^^^^^^^^^^^^^^ [1]
 
 
 Error -------------------------------------------------------------------------------------------------- index.js:135:10
@@ -393,4 +318,4 @@ References:
 
 
 
-Found 24 errors
+Found 23 errors

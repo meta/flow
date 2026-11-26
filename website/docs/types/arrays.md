@@ -225,11 +225,11 @@ const value: number = array[1]; // Works
 
 In both cases Flow accepts the code and types `value` as `number`, even though the value is `undefined` at runtime.
 
-To catch this, enable the [`no_unchecked_indexed_access`](../config/options.md#toc-no-unchecked-indexed-access) option. With it on, every array (and dictionary) element access returns `T | void` instead of `T`, so Flow makes you handle the `undefined` case before using the value:
+To catch this, enable the [`no_unchecked_indexed_access`](../config/options.md#toc-no-unchecked-indexed-access) option. With it on, every array (and dictionary) element access returns `T | undefined` instead of `T`, so Flow makes you handle the `undefined` case before using the value:
 
 ```js flow-check
 const array: Array<number> = [0, 1, 2];
-const value: number | void = array[1];
+const value: number | undefined = array[1];
 
 if (value !== undefined) {
   // number

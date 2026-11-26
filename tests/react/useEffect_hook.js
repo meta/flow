@@ -20,5 +20,5 @@ import React from 'react';
   React.useEffect(1); // Error: number is incompatible with function type
   React.useEffect(() => {}, 1); // Error: number is incompatible with function react-only array
   React.useEffect(async () => {}) // Error: promise is incompatible with function return type
-  React.useEffect(() => () => 123) // Error: cleanup function should not return a value
+  React.useEffect(() => () => 123) // OK: cleanup return value is ignored
 }

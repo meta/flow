@@ -2,18 +2,18 @@
 No errors!
 
 === block 2 ===
-Error ---------------------------------------------------------------------------------- -:29:2
+Error ---------------------------------------------------------------------------------- -:31:2
 
 Cannot create `MyEnhancedComponent` element because property `b` is missing in `{a: 1}` [1] but exists in
 `{readonly a: number, readonly b: number, ...}` [2]. [incompatible-type]
 
-   -:29:2
-   29| <MyEnhancedComponent a={1} />; // ERROR
+   -:31:2
+   31| <MyEnhancedComponent a={1} />; // ERROR
         ^^^^^^^^^^^^^^^^^^^
 
 References:
-   -:29:1
-   29| <MyEnhancedComponent a={1} />; // ERROR
+   -:31:1
+   31| <MyEnhancedComponent a={1} />; // ERROR
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    -:16:29
                                    v
@@ -22,20 +22,20 @@ References:
    18|   b: number,
    19|   ...InjectedProps,
    20|   ...
-   21| }): React.Node {}
+   21| }): React.Node {
        ^ [2]
 
 
 Found 1 error
 
 === block 3 ===
-Error --------------------------------------------------------------------------------- -:14:36
+Error --------------------------------------------------------------------------------- -:16:36
 
 Cannot build a typed interface for this module. You should annotate the exports of this module with types. Cannot
 determine the type of this call expression. Please provide an annotation, e.g., by adding a type cast around this
 expression. [signature-verification-failure]
 
-   14| export const MyEnhancedComponent = trivialHOC(MyComponent); // ERROR
+   16| export const MyEnhancedComponent = trivialHOC(MyComponent); // ERROR
                                           ^^^^^^^^^^^^^^^^^^^^^^^
 
 

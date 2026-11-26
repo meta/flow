@@ -241,9 +241,9 @@ type ExactMissingInexactRequired = {exactKey: string} & {
   ...,
 }; // ERROR: the exact object lacks a required property
 
-type MaybeUnionProps = {p: {l: number} | null | void, ...} & {p: {r: string} | null | void, ...};
+type MaybeUnionProps = {p: {l: number} | null | undefined, ...} & {p: {r: string} | null | undefined, ...};
 declare const maybeUnionProps: MaybeUnionProps;
 if (maybeUnionProps.p != null) {
-  maybeUnionProps.p.l as number; // ok: `p` is `({l: number} & {r: string}) | null | void`
+  maybeUnionProps.p.l as number; // ok: `p` is `({l: number} & {r: string}) | null | undefined`
   maybeUnionProps.p.r as string; // ok
 }

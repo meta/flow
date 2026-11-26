@@ -12,7 +12,7 @@ declare const s: symbol;
 {
   const x: string = s.toString(); // OK
   const y: ?symbol = s.valueOf(); // OK
-  const z: string | void = s.description; // OK
+  const z: string | undefined = s.description; // OK
 }
 
 // Refinement

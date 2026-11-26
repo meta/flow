@@ -1,7 +1,7 @@
 ---
 title: Primitive Types
 slug: /types/primitives
-description: "Reference for Flow's primitive types: boolean, string, number, null, void, symbol (including unique symbols), and bigint."
+description: "Reference for Flow's primitive types: boolean, string, number, null, undefined, symbol (including unique symbols), and bigint."
 ---
 
 import {SinceVersion} from '../../components/VersionTags';
@@ -15,7 +15,7 @@ JavaScript has a number of different primitive types
 | **Strings** | `'foo'` | `string`
 | **Numbers** | `123` | `number`
 | **Null** | `null` | `null`
-| **Undefined** | `undefined` | `void` or `undefined`
+| **Undefined** | `undefined` | `undefined`
 | **Symbols** <small>*(new in ES2015)*</small> | `Symbol('foo')` | `symbol`
 | **BigInts** <small>*(new in ES2020)*</small> | `123n` | `bigint`
 
@@ -230,7 +230,7 @@ Remember that `string` and `String` are different types.
 ## `null` and `undefined` {#toc-null-and-void}
 
 JavaScript has both `null` and `undefined`. Flow treats these as separate
-types: `null` and `void` (for `undefined`).
+types: `null` and `undefined`.
 
 ```js flow-check
 function acceptsNull(value: null) { /* ... */ }
@@ -238,17 +238,17 @@ function acceptsNull(value: null) { /* ... */ }
 acceptsNull(null);      // Works!
 acceptsNull(undefined); // Error!
 
-function acceptsUndefined(value: void) { /* ... */ }
+function acceptsUndefined(value: undefined) { /* ... */ }
 
 acceptsUndefined(undefined); // Works!
 acceptsUndefined(null);      // Error!
 ```
 
 :::info TypeScript comparison
-Flow's `undefined` type is another name for `void`, so TypeScript's `T | undefined` means the same as Flow's `T | void`. See [void vs undefined](../flow-vs-typescript.md#toc-void-vs-undefined) for the full comparison.
+As in TypeScript, `void` is distinct from `undefined`: it marks a function return value that callers should ignore. A `void` value cannot be used where `undefined` is required. See [void vs undefined](../flow-vs-typescript.md#toc-void-vs-undefined) and [function returns](./functions.md#toc-void-and-undefined) for examples.
 :::
 
-You can [refine](../lang/refinements.md) a value to `null` or `void` using equality checks:
+You can [refine](../lang/refinements.md) a value to `null` or `undefined` using equality checks:
 
 ```js flow-check
 function acceptsNull(value: null) { /* ... */ }
@@ -261,23 +261,23 @@ function func(value: unknown) {
 ```
 
 ```js flow-check
-function acceptsUndefined(value: void) { /* ... */ }
+function acceptsUndefined(value: undefined) { /* ... */ }
 
 function func(value: unknown) {
   if (value === undefined) {
-    acceptsUndefined(value); // Works: `value` is `void`
+    acceptsUndefined(value); // Works: `value` is `undefined`
   }
 }
 ```
 
-`null` and `void` also appear in other types:
+`null` and `undefined` also appear in other types:
 
 ### Maybe types {#toc-maybe-types}
 
 [Maybe types](./maybe.md) are for places where a value is optional and you can create them by
 adding a question mark in front of the type such as `?string` or `?number`.
 
-`?T` is equivalent to `T | null | void`.
+`?T` is equivalent to `T | null | undefined`.
 
 ```js flow-check
 function acceptsMaybeString(value: ?string) { /* ... */ }
@@ -302,7 +302,7 @@ the property name.
 ```
 
 In addition to their set value type, these optional properties can either be
-`void` or omitted altogether. However, they cannot be `null`.
+`undefined` or omitted altogether. However, they cannot be `null`.
 
 ```js flow-check
 function acceptsObject(value: {foo?: string}) { /* ... */ }
@@ -323,7 +323,7 @@ the parameter name.
 function func(param?: string) { /* ... */ }
 ```
 
-In addition to their set type, these optional parameters can either be `void`
+In addition to their set type, these optional parameters can either be `undefined`
 or omitted altogether. However, they cannot be `null`.
 
 ```js flow-check
@@ -344,7 +344,7 @@ Function parameters can also have defaults. This is a feature of ES2015.
 function func(value: string = "default") { /* ... */ }
 ```
 
-In addition to their set type, default parameters can also be `void` or omitted
+In addition to their set type, default parameters can also be `undefined` or omitted
 altogether. However, they cannot be `null`.
 
 ```js flow-check

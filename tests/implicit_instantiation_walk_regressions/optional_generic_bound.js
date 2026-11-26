@@ -4,11 +4,11 @@ type Color = 'blue' | 'red';
 declare function inner<T extends Color>(props: Readonly<{color?: T}>): void;
 declare function innerMaybe<T extends Color>(color: ?T): void;
 
-function outer<TColor extends Color | void>(props: Readonly<{color?: TColor}>) {
+function outer<TColor extends Color | undefined>(props: Readonly<{color?: TColor}>) {
   inner(props); // was an error
 }
 
-function outerMaybe<TColor extends Color | null | void>(color: TColor) {
+function outerMaybe<TColor extends Color | null | undefined>(color: TColor) {
   innerMaybe(color); // was an error
 }
 

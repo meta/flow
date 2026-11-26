@@ -362,7 +362,7 @@ References:
 Error ------------------------------------------------------------------------------------------------ notcalls.js:22:22
 
 Cannot use `keyOf` [1] to assign a computed property. Computed properties may only be numeric or string literal values,
-but this one is a `void` [2]. Can you add an appropriate type annotation to `keyOf` [1]? See
+but this one is a `undefined` [2]. Can you add an appropriate type annotation to `keyOf` [1]? See
 https://flow.org/en/docs/types/literals/ for more information on literal types. [invalid-computed-prop]
 
    notcalls.js:22:22

@@ -34,7 +34,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.ts:13:33
 
-Cannot assign `value` to `stillNullable` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot assign `value` to `stillNullable` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    test.ts:13:33
    13|   const stillNullable: number = value; // ERROR: assertion does not refine value
@@ -51,7 +51,8 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.ts:27:27
 
-Cannot assign `value?.method!()` to `missing` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot assign `value?.method!()` to `missing` because `undefined` [1] is incompatible with `number` [2].
+[incompatible-type]
 
    test.ts:27:27
    27|   const missing: number = value?.method!(); // ERROR: optional chain can short-circuit
@@ -68,7 +69,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.ts:30:35
 
-Cannot assign `(value?.method!)!()` to `repeatedMissing` because `void` [1] is incompatible with `number` [2].
+Cannot assign `(value?.method!)!()` to `repeatedMissing` because `undefined` [1] is incompatible with `number` [2].
 [incompatible-type]
 
    test.ts:30:35
@@ -86,8 +87,8 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.ts:33:40
 
-Cannot assign `(value?.child!)?.prop` to `optionalAgainMissing` because `void` [1] is incompatible with `number` [2].
-[incompatible-type]
+Cannot assign `(value?.child!)?.prop` to `optionalAgainMissing` because `undefined` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    test.ts:33:40
    33|   const optionalAgainMissing: number = value?.child!?.prop; // ERROR: original chain can short-circuit

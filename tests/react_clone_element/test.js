@@ -70,7 +70,7 @@ function SFC(props: { p: number, ... }) { return null };
 React.cloneElement(<SFC p={0} />, { p: "bad" }); // ok
 
 // Exact
-declare function Exact(x: {foo: number}): void;
+declare function Exact(x: {foo: number}): undefined;
 declare const exact: ExactReactElement_DEPRECATED<typeof Exact>;
 React.cloneElement(exact, {foo: 1}); // OK
 React.cloneElement(exact, {foo: 1, bar: 2}); // ERROR

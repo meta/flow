@@ -4,7 +4,7 @@ import * as React from 'react';
 
 component Foo() {return 0}
 
-type RBad1 = renders (Foo | null | void | false);
+type RBad1 = renders (Foo | null | undefined | false);
 type RBad2 = renders (Foo | Array<Foo> | Foo[] | ReadonlyArray<Foo> | Set<Foo> | Iterable<Foo>);
 type RBad3 = renders (Foo | Array<Foo> | null);
 type RBad4 = renders Array<Foo>;

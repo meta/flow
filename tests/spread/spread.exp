@@ -243,7 +243,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- nested_unions.js:30:1
 
-Cannot cast `{...}.p` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `{...}.p` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    nested_unions.js:30:1
    30| ({...maybeOfIntersection}).p as number; // error: no `p` when it is null

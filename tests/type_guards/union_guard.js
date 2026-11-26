@@ -1,6 +1,6 @@
 // A union guard is intersected with the refined type one member at a time.
 
-type Falsy = false | 0 | 0n | '' | null | void;
+type Falsy = false | 0 | 0n | '' | null | undefined;
 
 function literals(x: string | number) {
   declare function isLit(x: unknown): x is 'a' | 1 | true;
@@ -12,11 +12,11 @@ function literals(x: string | number) {
   }
 }
 
-function falsy(x: string | number | void) {
+function falsy(x: string | number | undefined) {
   declare function isFalsy(x: unknown): x is Falsy;
   if (isFalsy(x)) {
-    x as '' | 0 | void; // okay
-    x as '' | 0; // error void ~> '' | 0
+    x as '' | 0 | undefined; // okay
+    x as '' | 0; // error undefined ~> '' | 0
   } else {
     x as string | number; // okay
   }

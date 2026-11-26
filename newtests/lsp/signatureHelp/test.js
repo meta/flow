@@ -531,7 +531,7 @@ module.exports = suite(
                     kind: 'markdown',
                     value: '\n constructor docs',
                   },
-                  label: '(x: string, y: number): void',
+                  label: '(x: string, y: number): undefined',
                   parameters: [
                     {
                       documentation: {
@@ -2059,16 +2059,17 @@ module.exports = suite(
               activeSignature: 0,
               signatures: [
                 {
-                  label: '(x: void, y: void, z: Array<void>): void',
+                  label:
+                    '(x: undefined, y: undefined, z: Array<undefined>): void',
                   parameters: [
                     {
-                      label: 'x: void',
+                      label: 'x: undefined',
                     },
                     {
-                      label: 'y: void',
+                      label: 'y: undefined',
                     },
                     {
-                      label: 'z: Array<void>',
+                      label: 'z: Array<undefined>',
                     },
                   ],
                 },
@@ -2097,16 +2098,16 @@ module.exports = suite(
               signatures: [
                 {
                   label:
-                    '(x: number | void, y: number | void, z: Array<number | void>): void',
+                    '(x: number | undefined, y: number | undefined, z: Array<number | undefined>): void',
                   parameters: [
                     {
-                      label: 'x: number | void',
+                      label: 'x: number | undefined',
                     },
                     {
-                      label: 'y: number | void',
+                      label: 'y: number | undefined',
                     },
                     {
-                      label: 'z: Array<number | void>',
+                      label: 'z: Array<number | undefined>',
                     },
                   ],
                 },
@@ -2172,16 +2173,17 @@ module.exports = suite(
               activeSignature: 0,
               signatures: [
                 {
-                  label: '(x: void, y: void, z: Array<void>): void',
+                  label:
+                    '(x: undefined, y: undefined, z: Array<undefined>): void',
                   parameters: [
                     {
-                      label: 'x: void',
+                      label: 'x: undefined',
                     },
                     {
-                      label: 'y: void',
+                      label: 'y: undefined',
                     },
                     {
-                      label: 'z: Array<void>',
+                      label: 'z: Array<undefined>',
                     },
                   ],
                 },
@@ -2210,16 +2212,16 @@ module.exports = suite(
               signatures: [
                 {
                   label:
-                    '(x: number | void, y: number | void, z: Array<number | void>): void',
+                    '(x: number | undefined, y: number | undefined, z: Array<number | undefined>): void',
                   parameters: [
                     {
-                      label: 'x: number | void',
+                      label: 'x: number | undefined',
                     },
                     {
-                      label: 'y: number | void',
+                      label: 'y: number | undefined',
                     },
                     {
-                      label: 'z: Array<number | void>',
+                      label: 'z: Array<number | undefined>',
                     },
                   ],
                 },
@@ -2286,16 +2288,17 @@ module.exports = suite(
               activeSignature: 0,
               signatures: [
                 {
-                  label: '(x: void, y: void, z: Array<void>): void',
+                  label:
+                    '(x: undefined, y: undefined, z: Array<undefined>): void',
                   parameters: [
                     {
-                      label: 'x: void',
+                      label: 'x: undefined',
                     },
                     {
-                      label: 'y: void',
+                      label: 'y: undefined',
                     },
                     {
-                      label: 'z: Array<void>',
+                      label: 'z: Array<undefined>',
                     },
                   ],
                 },
@@ -2324,16 +2327,16 @@ module.exports = suite(
               signatures: [
                 {
                   label:
-                    '(x: number | void, y: number | void, z: Array<number | void>): void',
+                    '(x: number | undefined, y: number | undefined, z: Array<number | undefined>): void',
                   parameters: [
                     {
-                      label: 'x: number | void',
+                      label: 'x: number | undefined',
                     },
                     {
-                      label: 'y: number | void',
+                      label: 'y: number | undefined',
                     },
                     {
-                      label: 'z: Array<number | void>',
+                      label: 'z: Array<number | undefined>',
                     },
                   ],
                 },
@@ -2400,16 +2403,17 @@ module.exports = suite(
               activeSignature: 0,
               signatures: [
                 {
-                  label: '(x: void, y: void, z: Array<void>): void',
+                  label:
+                    '(x: undefined, y: undefined, z: Array<undefined>): void',
                   parameters: [
                     {
-                      label: 'x: void',
+                      label: 'x: undefined',
                     },
                     {
-                      label: 'y: void',
+                      label: 'y: undefined',
                     },
                     {
-                      label: 'z: Array<void>',
+                      label: 'z: Array<undefined>',
                     },
                   ],
                 },
@@ -2438,16 +2442,16 @@ module.exports = suite(
               signatures: [
                 {
                   label:
-                    '(x: number | void, y: number | void, z: Array<number | void>): void',
+                    '(x: number | undefined, y: number | undefined, z: Array<number | undefined>): void',
                   parameters: [
                     {
-                      label: 'x: number | void',
+                      label: 'x: number | undefined',
                     },
                     {
-                      label: 'y: number | void',
+                      label: 'y: number | undefined',
                     },
                     {
-                      label: 'z: Array<number | void>',
+                      label: 'z: Array<number | undefined>',
                     },
                   ],
                 },
@@ -2514,16 +2518,17 @@ module.exports = suite(
               activeSignature: 0,
               signatures: [
                 {
-                  label: '(x: void, y: void, z: Array<void>): void',
+                  label:
+                    '(x: undefined, y: undefined, z: Array<undefined>): void',
                   parameters: [
                     {
-                      label: 'x: void',
+                      label: 'x: undefined',
                     },
                     {
-                      label: 'y: void',
+                      label: 'y: undefined',
                     },
                     {
-                      label: 'z: Array<void>',
+                      label: 'z: Array<undefined>',
                     },
                   ],
                 },
@@ -2552,16 +2557,16 @@ module.exports = suite(
               signatures: [
                 {
                   label:
-                    '(x: number | void, y: number | void, z: Array<number | void>): void',
+                    '(x: number | undefined, y: number | undefined, z: Array<number | undefined>): void',
                   parameters: [
                     {
-                      label: 'x: number | void',
+                      label: 'x: number | undefined',
                     },
                     {
-                      label: 'y: number | void',
+                      label: 'y: number | undefined',
                     },
                     {
-                      label: 'z: Array<number | void>',
+                      label: 'z: Array<number | undefined>',
                     },
                   ],
                 },
@@ -2628,16 +2633,17 @@ module.exports = suite(
               activeSignature: 0,
               signatures: [
                 {
-                  label: '(x: void, y: void, z: Array<void>): void',
+                  label:
+                    '(x: undefined, y: undefined, z: Array<undefined>): void',
                   parameters: [
                     {
-                      label: 'x: void',
+                      label: 'x: undefined',
                     },
                     {
-                      label: 'y: void',
+                      label: 'y: undefined',
                     },
                     {
-                      label: 'z: Array<void>',
+                      label: 'z: Array<undefined>',
                     },
                   ],
                 },
@@ -2666,16 +2672,16 @@ module.exports = suite(
               signatures: [
                 {
                   label:
-                    '(x: number | void, y: number | void, z: Array<number | void>): void',
+                    '(x: number | undefined, y: number | undefined, z: Array<number | undefined>): void',
                   parameters: [
                     {
-                      label: 'x: number | void',
+                      label: 'x: number | undefined',
                     },
                     {
-                      label: 'y: number | void',
+                      label: 'y: number | undefined',
                     },
                     {
-                      label: 'z: Array<number | void>',
+                      label: 'z: Array<number | undefined>',
                     },
                   ],
                 },
@@ -2742,16 +2748,17 @@ module.exports = suite(
               activeSignature: 0,
               signatures: [
                 {
-                  label: '(x: void, y: void, z: Array<void>): void',
+                  label:
+                    '(x: undefined, y: undefined, z: Array<undefined>): void',
                   parameters: [
                     {
-                      label: 'x: void',
+                      label: 'x: undefined',
                     },
                     {
-                      label: 'y: void',
+                      label: 'y: undefined',
                     },
                     {
-                      label: 'z: Array<void>',
+                      label: 'z: Array<undefined>',
                     },
                   ],
                 },
@@ -2780,16 +2787,16 @@ module.exports = suite(
               signatures: [
                 {
                   label:
-                    '(x: number | void, y: number | void, z: Array<number | void>): void',
+                    '(x: number | undefined, y: number | undefined, z: Array<number | undefined>): void',
                   parameters: [
                     {
-                      label: 'x: number | void',
+                      label: 'x: number | undefined',
                     },
                     {
-                      label: 'y: number | void',
+                      label: 'y: number | undefined',
                     },
                     {
-                      label: 'z: Array<number | void>',
+                      label: 'z: Array<number | undefined>',
                     },
                   ],
                 },
@@ -3491,7 +3498,7 @@ module.exports = suite(
 
       ...[
         {line: 94, character: 36, label: 'onChange: (number) => void'},
-        {line: 101, character: 30, label: 'bar?: string | void'},
+        {line: 101, character: 30, label: 'bar?: string | undefined'},
       ].map(({line, character, label}) =>
         lspRequestAndWaitUntilResponse('textDocument/signatureHelp', {
           textDocument: {uri: '<PLACEHOLDER_PROJECT_URL>/jsx_attr.js'},
@@ -3509,7 +3516,8 @@ module.exports = suite(
           ],
           [
             'textDocument/publishDiagnostics',
-            ...lspIgnoreStatusAndCancellation,
+            'window/showStatus',
+            '$/cancelRequest',
           ],
         ),
       ),

@@ -155,7 +155,7 @@ declare const read: Read<>;
 const readValue: ?string = read;
 const commented = (x /*: undefined | string */) /*: ?string */ => x; // changed in the comment
 
-flow check under experimental.ts_void
+flow full-check
 Error ---------------------------------------------------------------------------------------------------- uses.js:69:30
 
 Cannot assign `confirm()` to `confirmed` because `void` [1] is incompatible with `undefined` [2]. [incompatible-type]

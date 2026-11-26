@@ -31,7 +31,7 @@ function UnwrappedFun(props: {foo: number, bar: number, ...}) {
 }
 
 myHOC(class Empty extends React.Component<{foo: string, ...}, void> {}); // Error
-myHOC(function Empty(props: {foo: string, ...}) {}); // Error
+myHOC(function Empty(props: {foo: string, ...}) { return undefined; }); // Error
 
 const Wrapped: component(ref?: React.RefSetter<unknown>, foo: number) = myHOC(Unwrapped);
 const WrappedFun = myHOC(UnwrappedFun);

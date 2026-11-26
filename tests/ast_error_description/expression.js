@@ -10,7 +10,7 @@ const f = (x: unknown): unknown => x;
 const o = {p: 42};
 
 declare const React: {createElement: React$CreateElement, ...};
-function MyComponent() {}
+function MyComponent() { return null; }
 
 (([] as empty) as T).p as empty;
 (([1] as empty) as T).p as empty;

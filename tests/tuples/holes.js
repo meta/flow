@@ -8,4 +8,4 @@ type Tuple = [number, string, boolean];
 [ , , , ] as Tuple;  // ERROR
 
 
-[,] as [void]; // OK
+[,] as [undefined]; // OK

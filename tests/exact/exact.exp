@@ -202,7 +202,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------- nonstrict-access.js:18:3
 
-Cannot cast `x.some` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `x.some` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    nonstrict-access.js:18:3
    18|   x.some as string; // ERROR
@@ -216,7 +216,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------- nonstrict-access.js:19:3
 
-Cannot cast `x['some']` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `x['some']` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    nonstrict-access.js:19:3
    19|   x['some'] as string; // ERROR
@@ -258,7 +258,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------- nonstrict-access.js:28:3
 
-Cannot cast `some` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `some` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    nonstrict-access.js:28:3
    28|   some as string; // ERROR
@@ -289,7 +289,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------- nonstrict-access.js:47:3
 
-Cannot cast `obj.some` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `obj.some` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    nonstrict-access.js:47:3
    47|   obj.some as string; // ERROR
@@ -303,7 +303,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------- nonstrict-access.js:54:3
 
-Cannot cast `some` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `some` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    nonstrict-access.js:54:3
    54|   some as string; // ERROR
@@ -491,20 +491,20 @@ Cannot create exact type from `{name: string, ...}` [1]. [invalid-exact]
                          ^ [1]
 
 
-Error ---------------------------------------------------------------------------------------------- not_object.js:22:22
+Error ---------------------------------------------------------------------------------------------- not_object.js:22:33
 
 Cannot create exact type from `() => {}` [1]. [invalid-exact]
 
-   22| (() => {}) as $Exact<() => {}>;
-                            ^^^^^^^^ [1]
+   22| ((): undefined => {}) as $Exact<() => {}>;
+                                       ^^^^^^^^ [1]
 
 
-Error ---------------------------------------------------------------------------------------------- not_object.js:25:22
+Error ---------------------------------------------------------------------------------------------- not_object.js:25:33
 
-Cannot create exact type from `() => void` [1]. [invalid-exact]
+Cannot create exact type from `() => undefined` [1]. [invalid-exact]
 
-   25| (() => {}) as $Exact<typeof foo>;
-                            ^^^^^^^^^^ [1]
+   25| ((): undefined => {}) as $Exact<typeof foo>;
+                                       ^^^^^^^^^^ [1]
 
 
 Error ---------------------------------------------------------------------------------------------- not_object.js:27:19
@@ -638,7 +638,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- prop_test.js:28:10
 
-Cannot return `pc.state` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot return `pc.state` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    prop_test.js:28:10
    28|   return pc.state;      // error, since (pc: $Exact<Person>).first may be ""

@@ -4,7 +4,7 @@ slug: /types/maybe
 description: "How to use maybe types (?T) in Flow to represent values that can be null or undefined."
 ---
 
-`?T` is shorthand for the [union](./unions.md) `T | null | void`. It accepts the value, `null`, or `undefined`.
+`?T` is shorthand for the [union](./unions.md) `T | null | undefined`. It accepts the value, `null`, or `undefined`.
 
 ```js flow-check
 function acceptsMaybeNumber(value: ?number) {
@@ -19,7 +19,7 @@ acceptsMaybeNumber("42");      // Error!
 ```
 
 :::info TypeScript comparison
-Flow's `?T` shorthand has no equivalent TypeScript shorthand — it expands to `T | null | void`, the Flow spelling of TypeScript's `T | null | undefined`. See [Flow and TypeScript type spellings](../flow-vs-typescript.md#toc-type-spellings) for the full comparison.
+Flow's `?T` shorthand has no equivalent TypeScript shorthand — it expands to `T | null | undefined`. See [Flow and TypeScript type spellings](../flow-vs-typescript.md#toc-type-spellings) for the full comparison.
 :::
 
 ## When to use this {#toc-when-to-use}
@@ -28,7 +28,7 @@ Prefer `?T` for values that may be absent entirely (optional config, uninitializ
 
 ## Maybe types as function parameters {#toc-maybe-types-as-function-parameters}
 
-Because `?T` includes `void`, using it as a function parameter type makes the argument implicitly optional — callers can omit it entirely. If you want to require callers to always pass an argument while still accepting `null`, use `T | null` instead:
+Flow allows callers to omit an argument whose parameter type includes `undefined`, including `?T`. This differs from TypeScript, where a required parameter typed `T | null | undefined` still requires an argument. If you want to require callers to always pass an argument while still accepting `null`, use `T | null` instead:
 
 ```js flow-check
 function acceptsNull(value: number | null) {
@@ -99,6 +99,6 @@ and how you can avoid this common pitfall.
 
 ## See Also {#toc-see-also}
 
-- [Unions](./unions.md) — the general form: `?T` is shorthand for `T | null | void`
+- [Unions](./unions.md) — the general form: `?T` is shorthand for `T | null | undefined`
 - [Refinements](../lang/refinements.md) — how to narrow maybe types before use
-- [Primitives](./primitives.md) — `null` and `void` types, and optional parameters
+- [Primitives](./primitives.md) — `null` and `undefined` types, and optional parameters

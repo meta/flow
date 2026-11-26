@@ -22,8 +22,8 @@ References:
 
 Error ---------------------------------------------------------------------------------- imported_omit_inference.js:5:15
 
-Cannot cast `action(...)` to `(x: {b: string}) => string` because in the return value: `void` [1] is incompatible with
-`string` [2]. [incompatible-type]
+Cannot cast `action(...)` to `(x: {b: string}) => string` because in the return value: `undefined` [1] is incompatible
+with `string` [2]. [incompatible-type]
 
    imported_omit_inference.js:5:15
    5|   ({a, b}) => b,
@@ -76,8 +76,8 @@ References:
 
 Error --------------------------------------------------------------------------------- namespace_omit_inference.js:5:15
 
-Cannot cast `actionNamespace.tools.action(...)` to `(x: {b: string}) => string` because in the return value: `void` [1]
-is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `actionNamespace.tools.action(...)` to `(x: {b: string}) => string` because in the return value:
+`undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    namespace_omit_inference.js:5:15
    5|   ({a, b}) => b,
@@ -276,7 +276,7 @@ References:
 Error ------------------------------------------------------------------------------------- omit_alias_return_fn.js:19:7
 
 Cannot call `mergeWithDefaults` because in type argument `TDefaults` > property `a`: `number` [1] is not exactly the
-same as `void | number` [2]. [incompatible-type]
+same as `undefined | number` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `a` is invariantly typed. To fix the error,
 - Either annotate object literal [3] with `{a?: number, b?: string}` [4]
@@ -349,7 +349,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ omit_inference.js:20:15
 
-Cannot cast `actionWithDefaults(...)` to `(x: {b: string}) => string` because in the return value: `void` [1] is
+Cannot cast `actionWithDefaults(...)` to `(x: {b: string}) => string` because in the return value: `undefined` [1] is
 incompatible with `string` [2]. [incompatible-type]
 
    omit_inference.js:20:15
@@ -404,7 +404,7 @@ Cannot assign `3` to `pickedO1.foo` because property `foo` is not writable. [can
 
 Error ------------------------------------------------------------------------------------------------------ pick.js:9:1
 
-Cannot cast `pickedO1.bar` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `pickedO1.bar` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    pick.js:9:1
       9| pickedO1.bar as string; // ERROR bar is optional
@@ -421,7 +421,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ pick.js:9:1
 
-Cannot cast `pickedO1.bar` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `pickedO1.bar` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    pick.js:9:1
    9| pickedO1.bar as string; // ERROR bar is optional

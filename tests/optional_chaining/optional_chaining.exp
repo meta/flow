@@ -1,6 +1,6 @@
 Error -------------------------------------------------------------------------------------- computed_properties.js:12:1
 
-Cannot cast `x1?.['foo']` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `x1?.['foo']` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    computed_properties.js:12:1
    12| x1?.['foo'] as empty;
@@ -66,7 +66,8 @@ References:
 
 Error -------------------------------------------------------------------------------------- computed_properties.js:15:1
 
-Cannot cast `y1?.['bar']?.['foo']` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `y1?.['bar']?.['foo']` to `empty` because `undefined` [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    computed_properties.js:15:1
    15| y1?.['bar']?.['foo'] as empty;
@@ -162,7 +163,8 @@ References:
 
 Error -------------------------------------------------------------------------------------- computed_properties.js:17:1
 
-Cannot cast `y1?.['baz']?.['foo']` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `y1?.['baz']?.['foo']` to `empty` because `undefined` [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    computed_properties.js:17:1
    17| y1?.['baz']?.['foo'] as empty;
@@ -179,7 +181,8 @@ References:
 
 Error -------------------------------------------------------------------------------------- computed_properties.js:17:1
 
-Cannot cast `y1?.['baz']?.['foo']` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `y1?.['baz']?.['foo']` to `empty` because `undefined` [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    computed_properties.js:17:1
    17| y1?.['baz']?.['foo'] as empty;
@@ -228,7 +231,8 @@ References:
 
 Error -------------------------------------------------------------------------------------- computed_properties.js:18:1
 
-Cannot cast `y2?.['baz']?.['foo']` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `y2?.['baz']?.['foo']` to `empty` because `undefined` [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    computed_properties.js:18:1
    18| y2?.['baz']?.['foo'] as empty;
@@ -262,7 +266,8 @@ References:
 
 Error -------------------------------------------------------------------------------------- computed_properties.js:20:1
 
-Cannot cast `y1?.['bar']['foo']` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `y1?.['bar']['foo']` to `empty` because `undefined` [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    computed_properties.js:20:1
    20| y1?.['bar']['foo'] as empty;
@@ -328,7 +333,8 @@ References:
 
 Error -------------------------------------------------------------------------------------- computed_properties.js:22:1
 
-Cannot cast `y1?.['baz']['foo']` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `y1?.['baz']['foo']` to `empty` because `undefined` [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    computed_properties.js:22:1
    22| y1?.['baz']['foo'] as empty;
@@ -376,7 +382,7 @@ References:
 
 Error ------------------------------------------------------------------------------------- computed_properties.js:22:13
 
-Cannot get `y1?.['baz']['foo']` because `void` [1] does not have properties. [incompatible-use]
+Cannot get `y1?.['baz']['foo']` because `undefined` [1] does not have properties. [incompatible-use]
 
    computed_properties.js:22:13
    22| y1?.['baz']['foo'] as empty;
@@ -436,7 +442,7 @@ References:
 
 Error ------------------------------------------------------------------------------------- computed_properties.js:23:13
 
-Cannot get `y2?.['baz']['foo']` because `void` [1] does not have properties. [incompatible-use]
+Cannot get `y2?.['baz']['foo']` because `undefined` [1] does not have properties. [incompatible-use]
 
    computed_properties.js:23:13
    23| y2?.['baz']['foo'] as empty;
@@ -464,7 +470,7 @@ References:
 
 Error -------------------------------------------------------------------------------------- computed_properties.js:25:4
 
-Cannot get `y1['bar']` because `void` [1] does not have properties. [incompatible-use]
+Cannot get `y1['bar']` because `undefined` [1] does not have properties. [incompatible-use]
 
    computed_properties.js:25:4
    25| y1['bar']?.['foo'] as empty;
@@ -556,7 +562,7 @@ References:
 
 Error -------------------------------------------------------------------------------------- computed_properties.js:27:4
 
-Cannot get `y1['baz']` because `void` [1] does not have properties. [incompatible-use]
+Cannot get `y1['baz']` because `undefined` [1] does not have properties. [incompatible-use]
 
    computed_properties.js:27:4
    27| y1['baz']?.['foo'] as empty;
@@ -570,7 +576,8 @@ References:
 
 Error -------------------------------------------------------------------------------------- computed_properties.js:27:1
 
-Cannot cast `y1['baz']?.['foo']` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `y1['baz']?.['foo']` to `empty` because `undefined` [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    computed_properties.js:27:1
    27| y1['baz']?.['foo'] as empty;
@@ -604,7 +611,8 @@ References:
 
 Error -------------------------------------------------------------------------------------- computed_properties.js:28:1
 
-Cannot cast `y2['baz']?.['foo']` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `y2['baz']?.['foo']` to `empty` because `undefined` [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    computed_properties.js:28:1
    28| y2['baz']?.['foo'] as empty;
@@ -655,7 +663,7 @@ References:
 
 Error ------------------------------------------------------------------------------------- computed_properties.js:30:15
 
-Cannot get `y1?.['bar']['foo']` because `void` [1] does not have properties. [incompatible-use]
+Cannot get `y1?.['bar']['foo']` because `undefined` [1] does not have properties. [incompatible-use]
 
    computed_properties.js:30:15
    30| (y1?.['bar'])['foo'] as empty;
@@ -732,7 +740,7 @@ References:
 
 Error ------------------------------------------------------------------------------------- computed_properties.js:32:15
 
-Cannot get `y1?.['baz']['foo']` because `void` [1] does not have properties. [incompatible-use]
+Cannot get `y1?.['baz']['foo']` because `undefined` [1] does not have properties. [incompatible-use]
 
    computed_properties.js:32:15
    32| (y1?.['baz'])['foo'] as empty;
@@ -746,7 +754,7 @@ References:
 
 Error ------------------------------------------------------------------------------------- computed_properties.js:32:15
 
-Cannot get `y1?.['baz']['foo']` because `void` [1] does not have properties. [incompatible-use]
+Cannot get `y1?.['baz']['foo']` because `undefined` [1] does not have properties. [incompatible-use]
 
    computed_properties.js:32:15
    32| (y1?.['baz'])['foo'] as empty;
@@ -791,7 +799,7 @@ References:
 
 Error ------------------------------------------------------------------------------------- computed_properties.js:33:15
 
-Cannot get `y2?.['baz']['foo']` because `void` [1] does not have properties. [incompatible-use]
+Cannot get `y2?.['baz']['foo']` because `undefined` [1] does not have properties. [incompatible-use]
 
    computed_properties.js:33:15
    33| (y2?.['baz'])['foo'] as empty;
@@ -820,7 +828,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- deletion.js:9:8
 
-Cannot delete `x?.a` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot delete `x?.a` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    deletion.js:9:8
    9| delete x?.a; // error from writing undefined to number, otherwise ok
@@ -837,7 +845,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- deletion.js:10:8
 
-Cannot delete `x?.b?.c` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot delete `x?.b?.c` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    deletion.js:10:8
    10| delete x?.b?.c; // error from writing undefined to number, otherwise ok
@@ -854,7 +862,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- deletion.js:12:8
 
-Cannot delete `z.d?.c` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot delete `z.d?.c` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    deletion.js:12:8
    12| delete z.d?.c; // error from writing undefined to number, otherwise ok
@@ -948,7 +956,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- deletion.js:20:1
 
-Cannot cast `a.a` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `a.a` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    deletion.js:20:1
    20| a.a as empty; // don't refine a.a to definitely exist
@@ -996,7 +1004,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- deletion.js:20:3
 
-Cannot get `a.a` because property `a` is missing in `void` [1]. [incompatible-use]
+Cannot get `a.a` because property `a` is missing in `undefined` [1]. [incompatible-use]
 
    deletion.js:20:3
    20| a.a as empty; // don't refine a.a to definitely exist
@@ -1010,7 +1018,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- deletion.js:23:8
 
-Cannot assign `42` to `w?.g.e` because property `e` is missing in `void` [1]. [incompatible-use]
+Cannot assign `42` to `w?.g.e` because property `e` is missing in `undefined` [1]. [incompatible-use]
 
    deletion.js:23:8
    23| (w?.g).e = 42; // should fail
@@ -1024,7 +1032,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ deletion.js:24:15
 
-Cannot delete `w?.g.e` because property `e` is missing in `void` [1]. [incompatible-use]
+Cannot delete `w?.g.e` because property `e` is missing in `undefined` [1]. [incompatible-use]
 
    deletion.js:24:15
    24| delete (w?.g).e; // should fail
@@ -1038,7 +1046,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- function_calls.js:8:1
 
-Cannot cast `x1?.()` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `x1?.()` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    function_calls.js:8:1
    8| x1?.() as empty;
@@ -1104,7 +1112,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- function_calls.js:13:2
 
-Cannot call `x3?.()` because `void` [1] is not a function. [not-a-function]
+Cannot call `x3?.()` because `undefined` [1] is not a function. [not-a-function]
 
    function_calls.js:13:2
    13| (x3?.())();
@@ -1157,7 +1165,7 @@ References:
 
 Error ------------------------------------------------------------------------------------- in_line_refinements.js:24:14
 
-Cannot get `x.a` because property `a` is missing in `void` [1]. [incompatible-use]
+Cannot get `x.a` because property `a` is missing in `undefined` [1]. [incompatible-use]
 
    in_line_refinements.js:24:14
    24| x?.f2(x.a)(x.a); // havoc refinements
@@ -1210,7 +1218,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- method_calls.js:9:1
 
-Cannot cast `foo?.bar?.()` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `foo?.bar?.()` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    method_calls.js:9:1
    9| foo?.bar?.() as empty;
@@ -1227,7 +1235,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- method_calls.js:9:1
 
-Cannot cast `foo?.bar?.()` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `foo?.bar?.()` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    method_calls.js:9:1
    9| foo?.bar?.() as empty;
@@ -1275,7 +1283,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- method_calls.js:10:5
 
-Cannot call `foo.bar` because property `bar` is missing in `void` [1]. [incompatible-use]
+Cannot call `foo.bar` because property `bar` is missing in `undefined` [1]. [incompatible-use]
 
    method_calls.js:10:5
    10| foo.bar?.() as empty;
@@ -1289,7 +1297,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- method_calls.js:10:1
 
-Cannot cast `foo.bar?.()` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `foo.bar?.()` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    method_calls.js:10:1
    10| foo.bar?.() as empty;
@@ -1337,7 +1345,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- method_calls.js:11:6
 
-Cannot call `foo?.bar` because `void` [1] is not a function. [not-a-function]
+Cannot call `foo?.bar` because `undefined` [1] is not a function. [not-a-function]
 
    method_calls.js:11:6
    11| foo?.bar() as empty;
@@ -1351,7 +1359,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- method_calls.js:11:1
 
-Cannot cast `foo?.bar()` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `foo?.bar()` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    method_calls.js:11:1
    11| foo?.bar() as empty;
@@ -1399,7 +1407,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- method_calls.js:12:2
 
-Cannot call `foo?.bar` because `void` [1] is not a function. [not-a-function]
+Cannot call `foo?.bar` because `undefined` [1] is not a function. [not-a-function]
 
    method_calls.js:12:2
    12| (foo?.bar)() as empty;
@@ -1413,7 +1421,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- method_calls.js:12:2
 
-Cannot call `foo?.bar` because `void` [1] is not a function. [not-a-function]
+Cannot call `foo?.bar` because `undefined` [1] is not a function. [not-a-function]
 
    method_calls.js:12:2
    12| (foo?.bar)() as empty;
@@ -1444,7 +1452,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- method_calls.js:19:16
 
-Cannot assign `a.b?.()?.c?.d` to `y` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot assign `a.b?.()?.c?.d` to `y` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    method_calls.js:19:16
    19| var y: empty = a.b?.()?.c?.d;
@@ -1461,7 +1469,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- method_calls.js:19:16
 
-Cannot assign `a.b?.()?.c?.d` to `y` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot assign `a.b?.()?.c?.d` to `y` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    method_calls.js:19:16
    19| var y: empty = a.b?.()?.c?.d;
@@ -1478,7 +1486,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- method_calls.js:19:16
 
-Cannot assign `a.b?.()?.c?.d` to `y` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot assign `a.b?.()?.c?.d` to `y` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    method_calls.js:19:16
    19| var y: empty = a.b?.()?.c?.d;
@@ -1512,7 +1520,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- method_calls.js:20:16
 
-Cannot assign `a.c?.d?.e` to `x` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot assign `a.c?.d?.e` to `x` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    method_calls.js:20:16
    20| var x: empty = a.c?.d?.e;
@@ -1529,7 +1537,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- method_calls.js:20:16
 
-Cannot assign `a.c?.d?.e` to `x` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot assign `a.c?.d?.e` to `x` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    method_calls.js:20:16
    20| var x: empty = a.c?.d?.e;
@@ -1563,7 +1571,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- method_calls.js:21:16
 
-Cannot assign `a.d?.e.f().g` to `w` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot assign `a.d?.e.f().g` to `w` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    method_calls.js:21:16
    21| var w: empty = a.d?.e.f().g;
@@ -1597,7 +1605,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- method_calls.js:24:37
 
-Cannot assign `b.onClick !== null ? b.onClick?.() : 42` to `f` because `void` [1] is incompatible with `empty` [2].
+Cannot assign `b.onClick !== null ? b.onClick?.() : 42` to `f` because `undefined` [1] is incompatible with `empty` [2].
 [incompatible-type]
 
    method_calls.js:24:37
@@ -1648,7 +1656,8 @@ References:
 
 Error -------------------------------------------------------------------------------------------- method_calls.js:27:16
 
-Cannot assign `c?.[0]?.()?.[0]?.[0]` to `z` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot assign `c?.[0]?.()?.[0]?.[0]` to `z` because `undefined` [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    method_calls.js:27:16
    27| var z: empty = c?.[0]?.()?.[0]?.[0];
@@ -1665,7 +1674,8 @@ References:
 
 Error -------------------------------------------------------------------------------------------- method_calls.js:27:16
 
-Cannot assign `c?.[0]?.()?.[0]?.[0]` to `z` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot assign `c?.[0]?.()?.[0]?.[0]` to `z` because `undefined` [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    method_calls.js:27:16
    27| var z: empty = c?.[0]?.()?.[0]?.[0];
@@ -1682,7 +1692,8 @@ References:
 
 Error -------------------------------------------------------------------------------------------- method_calls.js:27:16
 
-Cannot assign `c?.[0]?.()?.[0]?.[0]` to `z` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot assign `c?.[0]?.()?.[0]?.[0]` to `z` because `undefined` [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    method_calls.js:27:16
    27| var z: empty = c?.[0]?.()?.[0]?.[0];
@@ -1699,7 +1710,8 @@ References:
 
 Error -------------------------------------------------------------------------------------------- method_calls.js:27:16
 
-Cannot assign `c?.[0]?.()?.[0]?.[0]` to `z` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot assign `c?.[0]?.()?.[0]?.[0]` to `z` because `undefined` [1] is incompatible with `empty` [2].
+[incompatible-type]
 
    method_calls.js:27:16
    27| var z: empty = c?.[0]?.()?.[0]?.[0];
@@ -1829,7 +1841,7 @@ References:
 
 Error --------------------------------------------------------------------------------------- private_properties.js:15:5
 
-Cannot cast `this?.#baz` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `this?.#baz` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    private_properties.js:15:5
    15|     this?.#baz as empty;
@@ -1878,7 +1890,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- refinements.js:17:9
 
-Cannot get `a.b.c.d` because property `d` is missing in `void` [1]. [incompatible-use]
+Cannot get `a.b.c.d` because property `d` is missing in `undefined` [1]. [incompatible-use]
 
    refinements.js:17:9
    17|   a.b.c.d; // bad
@@ -1966,7 +1978,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- refinements.js:24:8
 
-Cannot call `a.b?.f` because `void` [1] is not a function. [not-a-function]
+Cannot call `a.b?.f` because `undefined` [1] is not a function. [not-a-function]
 
    refinements.js:24:8
    24|   a.b?.f() as ?number; // unneeded chain and bad
@@ -2075,7 +2087,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- refinements.js:50:3
 
-Cannot cast `a` to `{...}` because `void` [1] is incompatible with `{...}` [2]. [incompatible-type]
+Cannot cast `a` to `{...}` because `undefined` [1] is incompatible with `{...}` [2]. [incompatible-type]
 
    refinements.js:50:3
    50|   a as {...}; // should fail, sanity check
@@ -2095,12 +2107,12 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- refinements.js:51:3
 
-Cannot cast `a` to `null | void` because
+Cannot cast `a` to `null | undefined` because
 `{b?: {c?: {d: number, ...}, e: number, f: ?() => number, g: ?() => number, ...}, ...}` [1] is incompatible with
-`null | void` [2]. [incompatible-type]
+`null | undefined` [2]. [incompatible-type]
 
    refinements.js:51:3
-   51|   a as null | void; // should fail, sanity check
+   51|   a as null | undefined; // should fail, sanity check
          ^
 
 References:
@@ -2111,14 +2123,14 @@ References:
    11|  ...};
         ---^ [1]
    refinements.js:51:8
-   51|   a as null | void; // should fail, sanity check
-              ^^^^^^^^^^^ [2]
+   51|   a as null | undefined; // should fail, sanity check
+              ^^^^^^^^^^^^^^^^ [2]
 
 
 Error ---------------------------------------------------------------------------------------------- refinements.js:55:7
 
-Cannot compare `any | void` [1] to `null` [2], because [2] is null and `void | any` [1] does not contain null. Perhaps
-you meant to use `==`, which checks for both `undefined` and `null`? [invalid-compare]
+Cannot compare `any | undefined` [1] to `null` [2], because [2] is null and `undefined | any` [1] does not contain null.
+Perhaps you meant to use `==`, which checks for both `undefined` and `null`? [invalid-compare]
 
    refinements.js:55:7
    55|   if (x?.a === null) { // constant-condition error
@@ -2149,7 +2161,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- refinements.js:61:5
 
-Cannot get `x.a` because property `a` is missing in `void` [1]. [incompatible-use]
+Cannot get `x.a` because property `a` is missing in `undefined` [1]. [incompatible-use]
 
    refinements.js:61:5
    61|   x.a as empty; // should fail
@@ -2163,7 +2175,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- refinements.js:68:9
 
-Cannot get `a.b.c.d` because property `d` is missing in `void` [1]. [incompatible-use]
+Cannot get `a.b.c.d` because property `d` is missing in `undefined` [1]. [incompatible-use]
 
    refinements.js:68:9
    68|   a.b.c.d; // bad
@@ -2251,7 +2263,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- refinements.js:75:8
 
-Cannot call `a.b?.f` because `void` [1] is not a function. [not-a-function]
+Cannot call `a.b?.f` because `undefined` [1] is not a function. [not-a-function]
 
    refinements.js:75:8
    75|   a.b?.f() as ?number; // unneeded chain and bad
@@ -2360,7 +2372,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements.js:101:3
 
-Cannot cast `a` to `{...}` because `void` [1] is incompatible with `{...}` [2]. [incompatible-type]
+Cannot cast `a` to `{...}` because `undefined` [1] is incompatible with `{...}` [2]. [incompatible-type]
 
    refinements.js:101:3
    101|   a as {...}; // should fail, sanity check
@@ -2380,12 +2392,12 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements.js:102:3
 
-Cannot cast `a` to `null | void` because
+Cannot cast `a` to `null | undefined` because
 `{b?: {c?: {d: number, ...}, e: number, f: ?() => number, g: ?() => number, ...}, ...}` [1] is incompatible with
-`null | void` [2]. [incompatible-type]
+`null | undefined` [2]. [incompatible-type]
 
    refinements.js:102:3
-   102|   a as null | void; // should fail, sanity check
+   102|   a as null | undefined; // should fail, sanity check
           ^
 
 References:
@@ -2396,8 +2408,8 @@ References:
     11|  ...};
          ---^ [1]
    refinements.js:102:8
-   102|   a as null | void; // should fail, sanity check
-               ^^^^^^^^^^^ [2]
+   102|   a as null | undefined; // should fail, sanity check
+               ^^^^^^^^^^^^^^^^ [2]
 
 
 Error --------------------------------------------------------------------------------------------- refinements.js:110:3
@@ -2433,7 +2445,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements.js:110:5
 
-Cannot get `b.x` because property `x` is missing in `void` [1]. [incompatible-use]
+Cannot get `b.x` because property `x` is missing in `undefined` [1]. [incompatible-use]
 
    refinements.js:110:5
    110|   b.x as false; // nope
@@ -2447,7 +2459,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- refinements.js:113:10
 
-Cannot get `b?.w.u` because property `u` is missing in `void` [1]. [incompatible-use]
+Cannot get `b?.w.u` because property `u` is missing in `undefined` [1]. [incompatible-use]
 
    refinements.js:113:10
    113| if (b?.w.u) {
@@ -2461,7 +2473,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- refinements.js:119:14
 
-Cannot get `b.w.u` because property `u` is missing in `void` [1]. [incompatible-use]
+Cannot get `b.w.u` because property `u` is missing in `undefined` [1]. [incompatible-use]
 
    refinements.js:119:14
    119| if (b && b.w.u) {
@@ -2489,7 +2501,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements.js:127:5
 
-Cannot get `b.z` because property `z` is missing in `void` [1]. [incompatible-use]
+Cannot get `b.z` because property `z` is missing in `undefined` [1]. [incompatible-use]
 
    refinements.js:127:5
    127|   b.z.value as string; // error
@@ -2552,7 +2564,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements.js:134:3
 
-Cannot cast `b.y` to `false` because `void` [1] is incompatible with `false` [2]. [incompatible-type]
+Cannot cast `b.y` to `false` because `undefined` [1] is incompatible with `false` [2]. [incompatible-type]
 
    refinements.js:134:3
    134|   b.y as false; // nope
@@ -2583,7 +2595,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements.js:134:5
 
-Cannot get `b.y` because property `y` is missing in `void` [1]. [incompatible-use]
+Cannot get `b.y` because property `y` is missing in `undefined` [1]. [incompatible-use]
 
    refinements.js:134:5
    134|   b.y as false; // nope
@@ -2611,7 +2623,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements.js:141:8
 
-Cannot get `c[1][0]` because `void` [1] does not have properties. [incompatible-use]
+Cannot get `c[1][0]` because `undefined` [1] does not have properties. [incompatible-use]
 
    refinements.js:141:8
    141|   c[1][0] as {...}; // no
@@ -2625,7 +2637,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements.js:147:5
 
-Cannot call `d.a` because `void` [1] is not a function. [not-a-function]
+Cannot call `d.a` because `undefined` [1] is not a function. [not-a-function]
 
    refinements.js:147:5
    147|   d.a().b.c as number; // nope, never was a refinement in the first place
@@ -2653,7 +2665,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements.js:147:5
 
-Cannot call `d.a` because property `a` is missing in `void` [1]. [incompatible-use]
+Cannot call `d.a` because property `a` is missing in `undefined` [1]. [incompatible-use]
 
    refinements.js:147:5
    147|   d.a().b.c as number; // nope, never was a refinement in the first place
@@ -2667,7 +2679,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- refinements.js:147:11
 
-Cannot get `d.a().b.c` because property `c` is missing in `void` [1]. [incompatible-use]
+Cannot get `d.a().b.c` because property `c` is missing in `undefined` [1]. [incompatible-use]
 
    refinements.js:147:11
    147|   d.a().b.c as number; // nope, never was a refinement in the first place
@@ -2736,7 +2748,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- refinements.js:153:28
 
-Cannot assign `a11?.a || b11?.a` to `x11` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot assign `a11?.a || b11?.a` to `x11` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    refinements.js:153:28
    153| var x11: empty = a11?.a || b11?.a;
@@ -2767,7 +2779,9 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- refinements2.js:9:3
 
-Cannot cast `t` to `null | void` because `T` [1] is incompatible with `null | void` [2]. [incompatible-type]
+Cannot cast `t` to `null | void` because: [incompatible-type]
+ - Either `T` [1] is incompatible with `null` [2].
+ - Or `T` [1] is incompatible with `void` [3].
 
    refinements2.js:9:3
    9|   t as null | void; // no
@@ -2779,7 +2793,10 @@ References:
                         ^ [1]
    refinements2.js:9:8
    9|   t as null | void; // no
-             ^^^^^^^^^^^ [2]
+             ^^^^ [2]
+   refinements2.js:9:15
+   9|   t as null | void; // no
+                    ^^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:10:3
@@ -2815,7 +2832,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:10:5
 
-Cannot get `t.a` because property `a` is missing in `void` [1]. [incompatible-use]
+Cannot get `t.a` because property `a` is missing in `undefined` [1]. [incompatible-use]
 
    refinements2.js:10:5
    10|   t.a as number; // no for two reasons
@@ -2829,7 +2846,9 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:13:3
 
-Cannot cast `t` to `null | void` because `T` [1] is incompatible with `null | void` [2]. [incompatible-type]
+Cannot cast `t` to `null | void` because: [incompatible-type]
+ - Either `T` [1] is incompatible with `null` [2].
+ - Or `T` [1] is incompatible with `void` [3].
 
    refinements2.js:13:3
    13|   t as null | void; // no
@@ -2841,7 +2860,10 @@ References:
                          ^ [1]
    refinements2.js:13:8
    13|   t as null | void; // no
-              ^^^^^^^^^^^ [2]
+              ^^^^ [2]
+   refinements2.js:13:15
+   13|   t as null | void; // no
+                     ^^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:14:3
@@ -2877,7 +2899,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:14:5
 
-Cannot get `t.a` because property `a` is missing in `void` [1]. [incompatible-use]
+Cannot get `t.a` because property `a` is missing in `undefined` [1]. [incompatible-use]
 
    refinements2.js:14:5
    14|   t.a as number; // no for two reasons
@@ -2908,7 +2930,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:23:3
 
-Cannot cast `s` to `S` because `void` [1] is incompatible with `S` [2]. [incompatible-type]
+Cannot cast `s` to `S` because `undefined` [1] is incompatible with `S` [2]. [incompatible-type]
 
    refinements2.js:23:3
    23|   s as S; // no, may be nulled
@@ -2925,7 +2947,9 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:24:3
 
-Cannot cast `s.a` to `null | void` because `number` [1] is incompatible with `null | void` [2]. [incompatible-type]
+Cannot cast `s.a` to `null | void` because: [incompatible-type]
+ - Either `number` [1] is incompatible with `null` [2].
+ - Or `number` [1] is incompatible with `void` [3].
 
    refinements2.js:24:3
    24|   s.a as null | void; // no for two reasons
@@ -2937,7 +2961,10 @@ References:
                      ^^^^^^ [1]
    refinements2.js:24:10
    24|   s.a as null | void; // no for two reasons
-                ^^^^^^^^^^^ [2]
+                ^^^^ [2]
+   refinements2.js:24:17
+   24|   s.a as null | void; // no for two reasons
+                       ^^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:24:5
@@ -2956,7 +2983,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:24:5
 
-Cannot get `s.a` because property `a` is missing in `void` [1]. [incompatible-use]
+Cannot get `s.a` because property `a` is missing in `undefined` [1]. [incompatible-use]
 
    refinements2.js:24:5
    24|   s.a as null | void; // no for two reasons
@@ -2987,7 +3014,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:33:3
 
-Cannot cast `s` to `S` because `void` [1] is incompatible with `S` [2]. [incompatible-type]
+Cannot cast `s` to `S` because `undefined` [1] is incompatible with `S` [2]. [incompatible-type]
 
    refinements2.js:33:3
    33|   s as S; // no, may be nulled
@@ -3004,7 +3031,9 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:34:3
 
-Cannot cast `s.a` to `null | void` because `number` [1] is incompatible with `null | void` [2]. [incompatible-type]
+Cannot cast `s.a` to `null | void` because: [incompatible-type]
+ - Either `number` [1] is incompatible with `null` [2].
+ - Or `number` [1] is incompatible with `void` [3].
 
    refinements2.js:34:3
    34|   s.a as null | void; // no for two reasons
@@ -3016,7 +3045,10 @@ References:
                      ^^^^^^ [1]
    refinements2.js:34:10
    34|   s.a as null | void; // no for two reasons
-                ^^^^^^^^^^^ [2]
+                ^^^^ [2]
+   refinements2.js:34:17
+   34|   s.a as null | void; // no for two reasons
+                       ^^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:34:5
@@ -3035,7 +3067,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:34:5
 
-Cannot get `s.a` because property `a` is missing in `void` [1]. [incompatible-use]
+Cannot get `s.a` because property `a` is missing in `undefined` [1]. [incompatible-use]
 
    refinements2.js:34:5
    34|   s.a as null | void; // no for two reasons
@@ -3066,7 +3098,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:37:3
 
-Cannot cast `s` to `S` because `void` [1] is incompatible with `S` [2]. [incompatible-type]
+Cannot cast `s` to `S` because `undefined` [1] is incompatible with `S` [2]. [incompatible-type]
 
    refinements2.js:37:3
    37|   s as S; // no, may be nulled
@@ -3083,7 +3115,9 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:38:3
 
-Cannot cast `s.a` to `null | void` because `number` [1] is incompatible with `null | void` [2]. [incompatible-type]
+Cannot cast `s.a` to `null | void` because: [incompatible-type]
+ - Either `number` [1] is incompatible with `null` [2].
+ - Or `number` [1] is incompatible with `void` [3].
 
    refinements2.js:38:3
    38|   s.a as null | void; // no for two reasons
@@ -3095,7 +3129,10 @@ References:
                      ^^^^^^ [1]
    refinements2.js:38:10
    38|   s.a as null | void; // no for two reasons
-                ^^^^^^^^^^^ [2]
+                ^^^^ [2]
+   refinements2.js:38:17
+   38|   s.a as null | void; // no for two reasons
+                       ^^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:38:5
@@ -3114,7 +3151,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:38:5
 
-Cannot get `s.a` because property `a` is missing in `void` [1]. [incompatible-use]
+Cannot get `s.a` because property `a` is missing in `undefined` [1]. [incompatible-use]
 
    refinements2.js:38:5
    38|   s.a as null | void; // no for two reasons
@@ -3162,7 +3199,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:45:3
 
-Cannot cast `s` to `S` because `void` [1] is incompatible with `S` [2]. [incompatible-type]
+Cannot cast `s` to `S` because `undefined` [1] is incompatible with `S` [2]. [incompatible-type]
 
    refinements2.js:45:3
    45|   s as S; // no, may be nulled
@@ -3179,7 +3216,9 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:46:3
 
-Cannot cast `s.a` to `null | void` because `number` [1] is incompatible with `null | void` [2]. [incompatible-type]
+Cannot cast `s.a` to `null | void` because: [incompatible-type]
+ - Either `number` [1] is incompatible with `null` [2].
+ - Or `number` [1] is incompatible with `void` [3].
 
    refinements2.js:46:3
    46|   s.a as null | void; // no for two reasons
@@ -3191,7 +3230,10 @@ References:
                      ^^^^^^ [1]
    refinements2.js:46:10
    46|   s.a as null | void; // no for two reasons
-                ^^^^^^^^^^^ [2]
+                ^^^^ [2]
+   refinements2.js:46:17
+   46|   s.a as null | void; // no for two reasons
+                       ^^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:46:5
@@ -3210,7 +3252,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:46:5
 
-Cannot get `s.a` because property `a` is missing in `void` [1]. [incompatible-use]
+Cannot get `s.a` because property `a` is missing in `undefined` [1]. [incompatible-use]
 
    refinements2.js:46:5
    46|   s.a as null | void; // no for two reasons
@@ -3241,7 +3283,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:59:3
 
-Cannot cast `w` to `W` because `void` [1] is incompatible with `W` [2]. [incompatible-type]
+Cannot cast `w` to `W` because `undefined` [1] is incompatible with `W` [2]. [incompatible-type]
 
    refinements2.js:59:3
    59|   w as W; // no
@@ -3272,7 +3314,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:60:5
 
-Cannot get `w.a` because property `a` is missing in `void` [1]. [incompatible-use]
+Cannot get `w.a` because property `a` is missing in `undefined` [1]. [incompatible-use]
 
    refinements2.js:60:5
    60|   w.a; // no
@@ -3300,7 +3342,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:68:5
 
-Cannot get `a.b` because property `b` is missing in `void` [1]. [incompatible-use]
+Cannot get `a.b` because property `b` is missing in `undefined` [1]. [incompatible-use]
 
    refinements2.js:68:5
    68|   a.b; // nope
@@ -3314,8 +3356,9 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:69:3
 
-Cannot cast `a` to `null | void` because `{b: number | string, ...}` [1] is incompatible with `null | void` [2].
-[incompatible-type]
+Cannot cast `a` to `null | void` because: [incompatible-type]
+ - Either `{b: number | string, ...}` [1] is incompatible with `null` [2].
+ - Or `{b: number | string, ...}` [1] is incompatible with `void` [3].
 
    refinements2.js:69:3
    69|   a as null | void; // nope
@@ -3327,7 +3370,10 @@ References:
                          ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    refinements2.js:69:8
    69|   a as null | void; // nope
-              ^^^^^^^^^^^ [2]
+              ^^^^ [2]
+   refinements2.js:69:15
+   69|   a as null | void; // nope
+                     ^^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:74:5
@@ -3346,7 +3392,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:74:5
 
-Cannot get `b.a` because property `a` is missing in `void` [1]. [incompatible-use]
+Cannot get `b.a` because property `a` is missing in `undefined` [1]. [incompatible-use]
 
    refinements2.js:74:5
    74|   b.a; //nope
@@ -3360,8 +3406,9 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:75:3
 
-Cannot cast `b` to `null | void` because `{a?: number, ...}` [1] is incompatible with `null | void` [2].
-[incompatible-type]
+Cannot cast `b` to `null | void` because: [incompatible-type]
+ - Either `{a?: number, ...}` [1] is incompatible with `null` [2].
+ - Or `{a?: number, ...}` [1] is incompatible with `void` [3].
 
    refinements2.js:75:3
    75|   b as null | void; // nope
@@ -3373,7 +3420,10 @@ References:
                          ^^^^^^^^^^^^^^^^^ [1]
    refinements2.js:75:8
    75|   b as null | void; // nope
-              ^^^^^^^^^^^ [2]
+              ^^^^ [2]
+   refinements2.js:75:15
+   75|   b as null | void; // nope
+                     ^^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:85:5
@@ -3392,7 +3442,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:85:5
 
-Cannot get `b.a` because property `a` is missing in `void` [1]. [incompatible-use]
+Cannot get `b.a` because property `a` is missing in `undefined` [1]. [incompatible-use]
 
    refinements2.js:85:5
    85|   b.a; // nope
@@ -3406,8 +3456,9 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:86:3
 
-Cannot cast `b` to `null | void` because `{a?: number, ...}` [1] is incompatible with `null | void` [2].
-[incompatible-type]
+Cannot cast `b` to `null | void` because: [incompatible-type]
+ - Either `{a?: number, ...}` [1] is incompatible with `null` [2].
+ - Or `{a?: number, ...}` [1] is incompatible with `void` [3].
 
    refinements2.js:86:3
    86|   b as null | void; // nope
@@ -3419,7 +3470,10 @@ References:
                          ^^^^^^^^^^^^^^^^^ [1]
    refinements2.js:86:8
    86|   b as null | void; // nope
-              ^^^^^^^^^^^ [2]
+              ^^^^ [2]
+   refinements2.js:86:15
+   86|   b as null | void; // nope
+                     ^^^^ [3]
 
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:94:5
@@ -3438,7 +3492,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:94:5
 
-Cannot get `c.d` because property `d` is missing in `void` [1]. [incompatible-use]
+Cannot get `c.d` because property `d` is missing in `undefined` [1]. [incompatible-use]
 
    refinements2.js:94:5
    94|   c.d; //nope
@@ -3452,8 +3506,9 @@ References:
 
 Error --------------------------------------------------------------------------------------------- refinements2.js:95:3
 
-Cannot cast `c` to `null | void` because `{d?: Array<number>, ...}` [1] is incompatible with `null | void` [2].
-[incompatible-type]
+Cannot cast `c` to `null | void` because: [incompatible-type]
+ - Either `{d?: Array<number>, ...}` [1] is incompatible with `null` [2].
+ - Or `{d?: Array<number>, ...}` [1] is incompatible with `void` [3].
 
    refinements2.js:95:3
    95|   c as null | void; //nope
@@ -3465,12 +3520,15 @@ References:
                          ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    refinements2.js:95:8
    95|   c as null | void; //nope
-              ^^^^^^^^^^^ [2]
+              ^^^^ [2]
+   refinements2.js:95:15
+   95|   c as null | void; //nope
+                     ^^^^ [3]
 
 
 Error -------------------------------------------------------------------------------------------- refinements2.js:102:3
 
-Cannot cast `b1.a` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `b1.a` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    refinements2.js:102:3
    102|   b1.a as number; // b1.a may not exist and may not be number
@@ -3709,7 +3767,7 @@ References:
 
 Error ----------------------------------------------------------------------------------- short_circuit_writes.js:119:16
 
-Cannot get `getMap?.()[String(...)]` because `void` [1] does not have properties. [incompatible-use]
+Cannot get `getMap?.()[String(...)]` because `undefined` [1] does not have properties. [incompatible-use]
 
    short_circuit_writes.js:119:16
    119|   (getMap?.())[String((value = 1))]; // error: `getMap?.()` may be undefined
@@ -3771,7 +3829,7 @@ References:
 
 Error ----------------------------------------------------------------------------------- short_circuit_writes.js:140:18
 
-Cannot get `current['key']` because `void` [1] does not have properties. [incompatible-use]
+Cannot get `current['key']` because `undefined` [1] does not have properties. [incompatible-use]
 
    short_circuit_writes.js:140:18
    140|   return current['key']; // error: `current` is still null or undefined when the key is skipped
@@ -3785,7 +3843,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- static_members.js:12:1
 
-Cannot cast `x1?.foo` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `x1?.foo` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    static_members.js:12:1
    12| x1?.foo as empty;
@@ -3851,7 +3909,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- static_members.js:15:1
 
-Cannot cast `y1?.bar?.foo` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `y1?.bar?.foo` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    static_members.js:15:1
    15| y1?.bar?.foo as empty;
@@ -3947,7 +4005,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- static_members.js:17:1
 
-Cannot cast `y1?.baz?.foo` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `y1?.baz?.foo` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    static_members.js:17:1
    17| y1?.baz?.foo as empty;
@@ -3964,7 +4022,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- static_members.js:17:1
 
-Cannot cast `y1?.baz?.foo` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `y1?.baz?.foo` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    static_members.js:17:1
    17| y1?.baz?.foo as empty;
@@ -4013,7 +4071,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- static_members.js:18:1
 
-Cannot cast `y2?.baz?.foo` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `y2?.baz?.foo` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    static_members.js:18:1
    18| y2?.baz?.foo as empty;
@@ -4047,7 +4105,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- static_members.js:20:1
 
-Cannot cast `y1?.bar.foo` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `y1?.bar.foo` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    static_members.js:20:1
    20| y1?.bar.foo as empty;
@@ -4113,7 +4171,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- static_members.js:22:1
 
-Cannot cast `y1?.baz.foo` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `y1?.baz.foo` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    static_members.js:22:1
    22| y1?.baz.foo as empty;
@@ -4161,7 +4219,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- static_members.js:22:9
 
-Cannot get `y1?.baz.foo` because property `foo` is missing in `void` [1]. [incompatible-use]
+Cannot get `y1?.baz.foo` because property `foo` is missing in `undefined` [1]. [incompatible-use]
 
    static_members.js:22:9
    22| y1?.baz.foo as empty;
@@ -4221,7 +4279,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- static_members.js:23:9
 
-Cannot get `y2?.baz.foo` because property `foo` is missing in `void` [1]. [incompatible-use]
+Cannot get `y2?.baz.foo` because property `foo` is missing in `undefined` [1]. [incompatible-use]
 
    static_members.js:23:9
    23| y2?.baz.foo as empty;
@@ -4249,7 +4307,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- static_members.js:25:4
 
-Cannot get `y1.bar` because property `bar` is missing in `void` [1]. [incompatible-use]
+Cannot get `y1.bar` because property `bar` is missing in `undefined` [1]. [incompatible-use]
 
    static_members.js:25:4
    25| y1.bar?.foo as empty;
@@ -4341,7 +4399,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- static_members.js:27:4
 
-Cannot get `y1.baz` because property `baz` is missing in `void` [1]. [incompatible-use]
+Cannot get `y1.baz` because property `baz` is missing in `undefined` [1]. [incompatible-use]
 
    static_members.js:27:4
    27| y1.baz?.foo as empty;
@@ -4355,7 +4413,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- static_members.js:27:1
 
-Cannot cast `y1.baz?.foo` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `y1.baz?.foo` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    static_members.js:27:1
    27| y1.baz?.foo as empty;
@@ -4389,7 +4447,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------- static_members.js:28:1
 
-Cannot cast `y2.baz?.foo` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `y2.baz?.foo` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    static_members.js:28:1
    28| y2.baz?.foo as empty;
@@ -4440,7 +4498,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ static_members.js:30:11
 
-Cannot get `y1?.bar.foo` because property `foo` is missing in `void` [1]. [incompatible-use]
+Cannot get `y1?.bar.foo` because property `foo` is missing in `undefined` [1]. [incompatible-use]
 
    static_members.js:30:11
    30| (y1?.bar).foo as empty;
@@ -4517,7 +4575,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ static_members.js:32:11
 
-Cannot get `y1?.baz.foo` because property `foo` is missing in `void` [1]. [incompatible-use]
+Cannot get `y1?.baz.foo` because property `foo` is missing in `undefined` [1]. [incompatible-use]
 
    static_members.js:32:11
    32| (y1?.baz).foo as empty;
@@ -4531,7 +4589,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ static_members.js:32:11
 
-Cannot get `y1?.baz.foo` because property `foo` is missing in `void` [1]. [incompatible-use]
+Cannot get `y1?.baz.foo` because property `foo` is missing in `undefined` [1]. [incompatible-use]
 
    static_members.js:32:11
    32| (y1?.baz).foo as empty;
@@ -4576,7 +4634,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------ static_members.js:33:11
 
-Cannot get `y2?.baz.foo` because property `foo` is missing in `void` [1]. [incompatible-use]
+Cannot get `y2?.baz.foo` because property `foo` is missing in `undefined` [1]. [incompatible-use]
 
    static_members.js:33:11
    33| (y2?.baz).foo as empty;
@@ -4606,8 +4664,8 @@ References:
 Error ------------------------------------------------------------------------------------------ static_members.js:36:26
 
 Cannot assign `a?.a` to `b` because: [incompatible-type]
- - Either `void` [1] is incompatible with `null` [2].
- - Or `void` [1] is incompatible with `string` [3].
+ - Either `undefined` [1] is incompatible with `null` [2].
+ - Or `undefined` [1] is incompatible with `string` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -4631,8 +4689,8 @@ References:
 Error ------------------------------------------------------------------------------------------ static_members.js:38:26
 
 Cannot assign `c?.c` to `d` because: [incompatible-type]
- - Either `void` [1] is incompatible with `null` [2].
- - Or `void` [1] is incompatible with `string` [3].
+ - Either `undefined` [1] is incompatible with `null` [2].
+ - Or `undefined` [1] is incompatible with `string` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -4655,7 +4713,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ super_call.js:4:5
 
-Cannot cast `super()?.a` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `super()?.a` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    super_call.js:4:5
    4|     super()?.a as empty; // error
@@ -4672,7 +4730,7 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- typeof.js:6:23
 
-Cannot access `0` on `ReadonlyArray<{c: number, ...}> | void` because `void` [1] does not have properties.
+Cannot access `0` on `ReadonlyArray<{c: number, ...}> | undefined` because `undefined` [1] does not have properties.
 [incompatible-use]
 
    typeof.js:6:23

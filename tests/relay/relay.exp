@@ -309,8 +309,8 @@ References:
 Error --------------------------------------------------------------------------------------------------- more.js:145:17
 
 Cannot create `SingularTest` element because in property `optionalUser`: [incompatible-type]
- - Either `null` [1] is incompatible with `void` [2].
- - Or `null` [1] is incompatible with `void` [3].
+ - Either `null` [1] is incompatible with `undefined` [2].
+ - Or `null` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -413,8 +413,8 @@ References:
 Error --------------------------------------------------------------------------------------------------- more.js:194:66
 
 Cannot create `PluralTest` element because in property `optionalUsers`: [incompatible-type]
- - Either `null` [1] is incompatible with `void` [2].
- - Or `null` [1] is incompatible with `void` [3].
+ - Either `null` [1] is incompatible with `undefined` [2].
+ - Or `null` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.

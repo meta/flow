@@ -23,7 +23,7 @@ Flags:
 ): Array<S>
 
 Instantiation:
-This = void
+This = undefined
 S = 0
 decls.js:9:15,9:20
 

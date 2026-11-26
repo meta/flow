@@ -42,7 +42,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:20:5
 
-Property `_private` is missing in `void` [1]. [incompatible-use]
+Property `_private` is missing in `undefined` [1]. [incompatible-use]
 
    test.js:20:5
    20|   [{_private: const privateValue, ...}] => privateValue, // ERROR: inherited munged property

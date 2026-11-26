@@ -1,20 +1,20 @@
 jsx1.js:7:4
 Flags: --pretty
 {
-  "result":[{"name":"ref","type":"RefSetter<C> | void"},{"name":"x","type":"number"}]
+  "result":[{"name":"ref","type":"RefSetter<C> | undefined"},{"name":"x","type":"number"}]
 }
 
 jsx2.js:7:9
 Flags: --pretty
 {
-  "result":[{"name":"ref","type":"RefSetter<C> | void"},{"name":"y","type":"string"}]
+  "result":[{"name":"ref","type":"RefSetter<C> | undefined"},{"name":"y","type":"string"}]
 }
 
 jsx3.js:9:4
 Flags: --pretty
 {
   "result":[
-    {"name":"ref","type":"RefSetter<C> | void"},
+    {"name":"ref","type":"RefSetter<C> | undefined"},
     {"name":"x","type":"number"},
     {"name":"y","type":"string"}
   ]
@@ -87,7 +87,7 @@ Flags: --pretty
 
 jsx-intersection-component.js:6:4
 Flags: --pretty
-{"result":[{"name":"y","type":"string | void"}]}
+{"result":[{"name":"y","type":"string | undefined"}]}
 
 jsx-with-children.js:10:4
 Flags: --pretty
@@ -101,9 +101,9 @@ component_members.js:7:11
 Flags: --pretty
 {
   "result":[
-    {"name":"displayName","type":"(?string) | void"},
-    {"name":"name","type":"(?string) | void"},
-    {"name":"propTypes","type":"{[key: string]: any} | void"}
+    {"name":"displayName","type":"(?string) | undefined"},
+    {"name":"name","type":"(?string) | undefined"},
+    {"name":"propTypes","type":"{[key: string]: any} | undefined"}
   ]
 }
 
@@ -111,9 +111,9 @@ component_members_poly.js:7:11
 Flags: --pretty
 {
   "result":[
-    {"name":"displayName","type":"(?string) | void"},
-    {"name":"name","type":"(?string) | void"},
-    {"name":"propTypes","type":"{[key: string]: any} | void"}
+    {"name":"displayName","type":"(?string) | undefined"},
+    {"name":"name","type":"(?string) | undefined"},
+    {"name":"propTypes","type":"{[key: string]: any} | undefined"}
   ]
 }
 
@@ -357,7 +357,7 @@ Flags: --pretty
     },
     {
       "name":"ElementRef",
-      "type":"type ElementRef<C extends string | component(...empty)> = C extends empty ? any : C extends infer S extends string ? \"ref\" extends keyof React$JSXIntrinsicElements[S] ? React$JSXIntrinsicElements[S] extends {readonly ref?: React.RefSetter<infer I>, ...} ? NonNullable<I> : unknown : void : C extends component(...infer Props extends {...}) ? \"ref\" extends keyof Props ? Props extends {readonly ref?: React.RefSetter<infer I>, ...} ? I : unknown : void : empty"
+      "type":"type ElementRef<C extends string | component(...empty)> = C extends empty ? any : C extends infer S extends string ? \"ref\" extends keyof React$JSXIntrinsicElements[S] ? React$JSXIntrinsicElements[S] extends {readonly ref?: React.RefSetter<infer I>, ...} ? NonNullable<I> : unknown : undefined : C extends component(...infer Props extends {...}) ? \"ref\" extends keyof Props ? Props extends {readonly ref?: React.RefSetter<infer I>, ...} ? I : unknown : undefined : empty"
     },
     {"name":"ElementType","type":"type ElementType = string | component(...empty)"},
     {
@@ -448,7 +448,7 @@ Flags: --pretty
     },
     {
       "name":"InexactPartial",
-      "type":"type InexactPartial<T> = {[K in keyof T]?: T[K] | void}"
+      "type":"type InexactPartial<T> = {[K in keyof T]?: T[K] | undefined}"
     },
     {
       "name":"InputEvent",

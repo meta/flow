@@ -21,8 +21,8 @@ null as React.ElementRef<typeof IdMappedFnWithOptionalRefProp>; // error: null ~
 new HTMLElement() as React.ElementRef<typeof IdMappedFnWithRequiredRefProp>; // ok
 null as React.ElementRef<typeof IdMappedFnWithRequiredRefProp>; // error: null ~> HTMLElement
 
-id((props) => { props as {readonly foo: string} }) as React.ComponentType<{foo: string}>; // ok
-id((props) => { props as {readonly foo: string} }) as component(foo: string); // ok
+id((props) => { props as {readonly foo: string}; return undefined; }) as React.ComponentType<{foo: string}>; // ok
+id((props) => { props as {readonly foo: string}; return undefined; }) as component(foo: string); // ok
 
 const IdMappedCompWithoutRefProp = id(CompWithoutRefProp); // ok
 const IdMappedCompWithOptionalRefProp = id(CompWithOptionalRefProp); // ok

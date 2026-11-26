@@ -62,7 +62,7 @@ Error --------------------------------------------------------------------------
 
 Cannot create `Div` element because in property `id`: [incompatible-type]
  - Either `42` [1] is incompatible with `string` [2].
- - Or `42` [1] is incompatible with `void` [3].
+ - Or `42` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -84,7 +84,7 @@ Error --------------------------------------------------------------------------
 
 Cannot create `input` element because in property `disabled`: [incompatible-type]
  - Either `"yes"` [1] is incompatible with `boolean` [2].
- - Or `"yes"` [1] is incompatible with `void` [3].
+ - Or `"yes"` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -106,7 +106,7 @@ Error --------------------------------------------------------------------------
 
 Cannot create `input` element because in property `id`: [incompatible-type]
  - Either `42` [1] is incompatible with `string` [2].
- - Or `42` [1] is incompatible with `void` [3].
+ - Or `42` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -155,7 +155,7 @@ Error --------------------------------------------------------------------------
 Cannot create `textarea` element because in property `onClick`: [incompatible-type]
  - Either in the first parameter: property `altKey` is missing in `Number` [1] but exists in
    `React.MouseEvent<HTMLTextAreaElement, MouseEvent>` [2].
- - Or `(event: number) => void` [3] is incompatible with `void` [4].
+ - Or `(event: number) => void` [3] is incompatible with `undefined` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -179,7 +179,7 @@ References:
 Error ------------------------------------------------------------------------------------------------- strings.js:26:14
 
 Cannot create `button` element because in property `type`: `"invalid"` [1] is incompatible with
-`"submit" | "reset" | "button" | void` [2]. [incompatible-type]
+`"submit" | "reset" | "button" | undefined` [2]. [incompatible-type]
 
    strings.js:26:14
      26| <button type="invalid" />; // ERROR
@@ -195,7 +195,7 @@ Error --------------------------------------------------------------------------
 
 Cannot create `svg` element because in property `viewBox`: [incompatible-type]
  - Either `42` [1] is incompatible with `string` [2].
- - Or `42` [1] is incompatible with `void` [3].
+ - Or `42` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -268,7 +268,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast object literal to `React.ComponentProps<"input">` because in property `disabled`: [incompatible-type]
  - Either `"yes"` [1] is incompatible with `boolean` [2].
- - Or `"yes"` [1] is incompatible with `void` [3].
+ - Or `"yes"` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -289,7 +289,8 @@ References:
 Error -------------------------------------------------------------------------------------------------- strings.js:38:2
 
 Cannot cast object literal to `JSX.IntrinsicElements["svg"]` because object literal [1] is incompatible with
-`React.SVGAttributes<SVGSVGElement>` [2]. For example, `42` [3] is incompatible with `void` [4]. [incompatible-type]
+`React.SVGAttributes<SVGSVGElement>` [2]. For example, `42` [3] is incompatible with `undefined` [4].
+[incompatible-type]
 
    strings.js:38:2
      38| ({viewBox: 42}) as React.JSX.IntrinsicElements['svg']; // ERROR
@@ -311,7 +312,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast object literal to `React.ButtonHTMLAttributes<HTMLButtonElement>` because object literal [1] is incompatible
 with `React.ButtonHTMLAttributes<HTMLButtonElement>` [2]. For example, `"invalid"` [3] is incompatible with
-`"submit" | "reset" | "button" | void` [4]. [incompatible-type]
+`"submit" | "reset" | "button" | undefined` [4]. [incompatible-type]
 
    strings.js:40:2
      40| ({type: 'invalid'}) as React.ButtonHTMLAttributes<HTMLButtonElement>; // ERROR
@@ -333,7 +334,7 @@ Error --------------------------------------------------------------------------
 
 Cannot cast object literal to `Readonly<React.ComponentProps<"svg">>` because in property `viewBox`: [incompatible-type]
  - Either `42` [1] is incompatible with `string` [2].
- - Or `42` [1] is incompatible with `void` [3].
+ - Or `42` [1] is incompatible with `undefined` [3].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -384,7 +385,7 @@ Cannot cast object literal to `Readonly<React.ComponentProps<"button">>` because
 [incompatible-type]
  - Either in the first parameter: property `altKey` is missing in `Number` [1] but exists in
    `React.MouseEvent<HTMLButtonElement, MouseEvent>` [2].
- - Or `(event: number) => void` [3] is incompatible with `void` [4].
+ - Or `(event: number) => void` [3] is incompatible with `undefined` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -452,7 +453,7 @@ Error --------------------------------------------------------------------------
 Cannot create `button` element because in property `onClick`: [incompatible-type]
  - Either in the first parameter: property `altKey` is missing in `Number` [1] but exists in
    `React.MouseEvent<HTMLButtonElement, MouseEvent>` [2].
- - Or `(event: number) => void` [3] is incompatible with `void` [4].
+ - Or `(event: number) => void` [3] is incompatible with `undefined` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.
@@ -475,7 +476,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- strings.js:60:1
 
-Cannot cast `style.opacity` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `style.opacity` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    strings.js:60:1
      60| style.opacity as empty; // ERROR
@@ -492,7 +493,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- strings.js:60:1
 
-Cannot cast `style.opacity` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `style.opacity` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    strings.js:60:1
      60| style.opacity as empty; // ERROR
@@ -580,7 +581,7 @@ Error --------------------------------------------------------------------------
 Cannot create `Union` element because in property `id` of at least one member of `"div" | "input"` [1]:
 [incompatible-type]
  - Either `false` [2] is incompatible with `string` [3].
- - Or `false` [2] is incompatible with `void` [4].
+ - Or `false` [2] is incompatible with `undefined` [4].
 
 Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
 not shown. To see all branches, re-run Flow with --show-all-branches.

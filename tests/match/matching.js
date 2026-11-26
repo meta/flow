@@ -38,7 +38,7 @@
 
 // `undefined`
 {
-  declare const x: 1 | void;
+  declare const x: 1 | undefined;
 
   const e1 = match (x) {
     1 => 0,
@@ -166,7 +166,7 @@
 
 // Property exists
 {
-  declare const x: {foo: void, a: 0} | {bar: void, a: 1};
+  declare const x: {foo: undefined, a: 0} | {bar: undefined, a: 1};
 
   const e1 = match (x) {
     {foo: _, const a} => a as 0, // OK
@@ -175,13 +175,13 @@
 }
 {
   declare const x:
-    | {foo: void, a: 0}
-    | {bar: void, a: 1}
-    | {baz: void, a: 2}
-    | {zap: void, a: 3};
+    | {foo: undefined, a: 0}
+    | {bar: undefined, a: 1}
+    | {baz: undefined, a: 2}
+    | {zap: undefined, a: 3};
 
-  declare const u: void;
-  declare const o: {u: void};
+  declare const u: undefined;
+  declare const o: {u: undefined};
 
   const e1 = match (x) {
     {foo: u, const a} => a as 0, // OK

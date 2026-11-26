@@ -4,7 +4,7 @@
 
 // Basic class with [Symbol.iterator] method
 class MyIterable {
-  *[Symbol.iterator](): IteratorObject<number> {
+  *[Symbol.iterator](): IteratorObject<number, undefined> {
     yield 1;
     yield 2;
     yield 3;
@@ -32,7 +32,7 @@ const asyncIterable: AsyncIterable<string> = new MyAsyncIterable();
 
 // Error case - wrong type parameter
 class BadIterable {
-  *[Symbol.iterator](): IteratorObject<string> {
+  *[Symbol.iterator](): IteratorObject<string, undefined> {
     yield "a";
   }
 }

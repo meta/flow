@@ -14,7 +14,7 @@ const z = (
   </Wrapper>
 );
 
-function ComponentWithBound<T extends number>(pprops: {a:T, ...}): React.Node {}
+function ComponentWithBound<T extends number>(pprops: {a:T, ...}): undefined {}
 <div><ComponentWithBound a={true} /></div>; // error: bool ~> number
 
 component ComponentSyntaxNoRenders() {

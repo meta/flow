@@ -62,7 +62,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- type.js:23:1
 
-Cannot cast `o2` to `{p: T, ...}` because in property `p`: `void | T` [1] is not exactly the same as `T` [2].
+Cannot cast `o2` to `{p: T, ...}` because in property `p`: `undefined | T` [1] is not exactly the same as `T` [2].
 [incompatible-type]
 
 The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
@@ -256,8 +256,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- type.js:74:1
 
-Cannot cast `o9` to `{p?: T, q: U, ...}` because in property `p`: `T` [1] is not exactly the same as `void | T` [2].
-[incompatible-type]
+Cannot cast `o9` to `{p?: T, q: U, ...}` because in property `p`: `T` [1] is not exactly the same as
+`undefined | T` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
 - Either make `{p: T, q: U, ...}` [3] and `{p?: T, q: U, ...}` [4] exactly the same
@@ -317,8 +317,8 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- type_contra.js:6:1
 
-Cannot cast `o1` to `{p?: T, ...}` because in property `p`: `unknown` [1] is not exactly the same as `void | T` [2].
-[incompatible-type]
+Cannot cast `o1` to `{p?: T, ...}` because in property `p`: `unknown` [1] is not exactly the same as
+`undefined | T` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
 - Either make `{p: unknown, ...}` [3] and `{p?: T, ...}` [4] exactly the same
@@ -453,7 +453,7 @@ References:
 Error ------------------------------------------------------------------------------------------------- type_dict.js:5:1
 
 Cannot cast `o1` to `{[key: string]: T, p?: T | U}` because in property `p`: `U` [1] is not exactly the same as
-`void | T | U` [2]. [incompatible-type]
+`undefined | T | U` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
 - Either make `{[string]: T, p: U}` [3] and `{[key: string]: T, p?: T | U}` [4] exactly the same
@@ -558,7 +558,7 @@ References:
 Error --------------------------------------------------------------------------------------------- type_instance.js:6:1
 
 Cannot cast `o1` to `{p?: number, ...}` because in property `p`: `number & (string | number)` [1] is not exactly the
-same as `void | number` [2]. [incompatible-type]
+same as `undefined | number` [2]. [incompatible-type]
 
 The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,
 - Either make `{p: number & (string | number), ...}` [3] and `{p?: number, ...}` [4] exactly the same
@@ -614,7 +614,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ type_mixed.js:7:1
 
-Cannot cast `o2.someProp` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `o2.someProp` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    type_mixed.js:7:1
    7| o2.someProp as empty; // Error someProp does not exist
@@ -676,7 +676,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- type_mixed.js:12:1
 
-Cannot cast `o3.b` to `empty` because `void` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `o3.b` to `empty` because `undefined` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    type_mixed.js:12:1
    12| o3.b as empty; // Error: mixed ~> empty, number ~> empty, and undefined ~> empty
@@ -930,7 +930,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ type_void.js:50:1
 
-Cannot cast `o6` to `{p?: T, ...}` because in property `p`: `T` [1] is not exactly the same as `void | T` [2].
+Cannot cast `o6` to `{p?: T, ...}` because in property `p`: `T` [1] is not exactly the same as `undefined | T` [2].
 [incompatible-type]
 
 The above-mentioned two types must be the same because property `p` is invariantly typed. To fix the error,

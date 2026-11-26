@@ -67,8 +67,8 @@ References:
 
 Error -------------------------------------------------------------------------------- let_var_widen_with_spread.js:12:6
 
-Cannot assign object literal to `newState` because in property `b.header`: `string` [1] is incompatible with `void` [2].
-[incompatible-type]
+Cannot assign object literal to `newState` because in property `b.header`: `string` [1] is incompatible with
+`undefined` [2]. [incompatible-type]
 
 All writes to `newState` must be compatible with the type of its initial assignment [3]. Add an annotation to
 `newState` [4] if a different type is desired.
@@ -86,8 +86,8 @@ References:
    11| const MOCK_HEADER = 'HEADER';
                            ^^^^^^^^ [1]
    <BUILTINS>/prelude.js:8:24
-    8| declare var undefined: void;
-                              ^^^^ [2]
+    8| declare var undefined: undefined;
+                              ^^^^^^^^^ [2]
    let_var_widen_with_spread.js:7:1
     7| newState = InitialState;
        ^^^^^^^^ [3]
@@ -163,7 +163,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- type_widening.js:32:1
 
-Cannot cast `a.foo` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `a.foo` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    type_widening.js:32:1
    32| a.foo as number; // Error, foo does not appear in all branches
@@ -177,7 +177,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- type_widening.js:33:1
 
-Cannot cast `a.bar` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `a.bar` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    type_widening.js:33:1
    33| a.bar as number; // Error, bar does not appear in all branches
@@ -191,7 +191,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- type_widening.js:34:1
 
-Cannot cast `a.baz` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `a.baz` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    type_widening.js:34:1
    34| a.baz as number; // Error, baz does not appear in all branches
@@ -205,7 +205,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- type_widening.js:35:1
 
-Cannot cast `a.qux` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `a.qux` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    type_widening.js:35:1
    35| a.qux as number; // Error, qux does not appear in all branches
@@ -219,7 +219,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- type_widening.js:62:1
 
-Cannot cast `b.foo` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `b.foo` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    type_widening.js:62:1
    62| b.foo as number; // Error, foo does not appear in all branches
@@ -233,7 +233,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- type_widening.js:63:1
 
-Cannot cast `b.bar` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `b.bar` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    type_widening.js:63:1
    63| b.bar as number; // Error, bar does not appear in all branches
@@ -247,7 +247,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- type_widening.js:64:1
 
-Cannot cast `b.baz` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `b.baz` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    type_widening.js:64:1
    64| b.baz as number; // Error, baz does not appear in all branches
@@ -261,7 +261,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- type_widening.js:65:1
 
-Cannot cast `b.qux` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `b.qux` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    type_widening.js:65:1
    65| b.qux as number; // Error, qux does not appear in all branches
@@ -359,7 +359,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------- type_widening.js:131:1
 
-Cannot cast `optional_spread.foo` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `optional_spread.foo` to `number` because `undefined` [1] is incompatible with `number` [2].
+[incompatible-type]
 
    type_widening.js:131:1
    131| optional_spread.foo as number; // Error, foo does not appear in all branches, might be undefined
@@ -390,7 +391,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------- type_widening.js:132:1
 
-Cannot cast `optional_spread.bar` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `optional_spread.bar` to `number` because `undefined` [1] is incompatible with `number` [2].
+[incompatible-type]
 
    type_widening.js:132:1
    132| optional_spread.bar as number; // Error, bar does not appear in all branches, might be undefined
@@ -436,7 +438,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------- type_widening.js:133:1
 
-Cannot cast `optional_spread.baz` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `optional_spread.baz` to `number` because `undefined` [1] is incompatible with `number` [2].
+[incompatible-type]
 
    type_widening.js:133:1
    133| optional_spread.baz as number; // Error, baz does not appear in all branches, might be undefined
@@ -482,7 +485,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------- type_widening.js:134:1
 
-Cannot cast `optional_spread.qux` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `optional_spread.qux` to `number` because `undefined` [1] is incompatible with `number` [2].
+[incompatible-type]
 
    type_widening.js:134:1
    134| optional_spread.qux as number; // Error, qux does not appear in all branches, might be undefined

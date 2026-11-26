@@ -27,7 +27,7 @@ type Mapped<O extends {...} | ReadonlyArray<unknown>> = {
   declare const c: Mapped<Tuple>;
   a as Array<{contents: number}>; // OK
   b as ReadonlyArray<{contents: number}>; // OK
-  c as [a: {contents: number}, readonly b?: {contents: string | void}]; // OK
+  c as [a: {contents: number}, readonly b?: {contents: string | undefined}]; // OK
   a as empty; // ERROR
   b as empty; // ERROR
   c as empty; // ERROR
@@ -49,7 +49,7 @@ type Mapped<O extends {...} | ReadonlyArray<unknown>> = {
 {
   declare const a: Array<{contents: number}>;
   declare const b: ReadonlyArray<{contents: number}>;
-  declare const c: [a: {contents: number}, readonly b?: {contents: string | void}];
+  declare const c: [a: {contents: number}, readonly b?: {contents: string | undefined}];
   declare const badA: Array<{contents: string}>;
   declare const badB: ReadonlyArray<{contents: string}>;
   declare const badC: [a: {contents: number}, readonly b: {contents: string}];
@@ -113,7 +113,7 @@ type Mapped<O extends {...} | ReadonlyArray<unknown>> = {
 
   declare const partialIndexer: Partial<WithIndexer>;
   partialIndexer.qux as string; // ERROR
-  partialIndexer.qux as string | void; // OK
+  partialIndexer.qux as string | undefined; // OK
 
   declare const partialArr: Partial<Arr>;
   partialArr[0] as number; // ERROR;

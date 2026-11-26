@@ -374,13 +374,6 @@ flowDotJsExports.configSchema = `[
     "desc": "Make Flow accept and translate some TS syntax automatically."
   },
   {
-    "key": "experimental.ts_void",
-    "kind": "option",
-    "type": "bool",
-    "default": false,
-    "desc": "Distinguish void from undefined and allow ignored callback returns."
-  },
-  {
     "key": "react.runtime",
     "kind": "option",
     "type": "enum",

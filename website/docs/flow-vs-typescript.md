@@ -459,7 +459,7 @@ The TS type is statically known (`fullName` is annotated as `[string, string | u
 const middle: [middleName?: string] = [];
 const fullName: [
   string,
-  string | void,
+  string | undefined,
   string,
 ] = ["Ada", ...middle, "Lovelace"]; // ERROR
 ```
@@ -776,13 +776,13 @@ The rewrite when you hit this is to name the class explicitly in the input/field
 
 ### Type spellings {#toc-type-spellings}
 
-How Flow spells absent or nullable types and the top and bottom of the type hierarchy. These are name-only divergences: same concepts, different spellings.
+How Flow spells absent or nullable types and the top and bottom of the type hierarchy. `void` and `undefined` match TypeScript; `?T` and `empty` are Flow-specific spellings.
 
 | Concept | TypeScript | Flow | Note |
 |---|---|---|---|
-| Type inhabited only by `undefined` | `undefined` | `void` or `undefined` | Flow's `undefined` type is another name for `void`. ([details](#toc-void-vs-undefined)) |
-| "No useful value" return marker | `void` | `void` | Same name; Flow's `void` is the same type as `undefined` (see above). |
-| Nullable value (`T \| null \| undefined`) | `T \| null \| undefined` | [`?T`](./types/maybe.md) (shorthand for `T \| null \| void`) | `T \| void` alone lacks `null`. |
+| Type inhabited only by `undefined` | `undefined` | `undefined` | Same type in both languages. ([details](#toc-void-vs-undefined)) |
+| "No useful value" return marker | `void` | `void` | Distinct from `undefined`; callers ignore the return value. |
+| Nullable value (`T \| null \| undefined`) | `T \| null \| undefined` | [`?T`](./types/maybe.md) (shorthand for `T \| null \| undefined`) | `T \| undefined` alone lacks `null`. |
 | Bottom type | `never` | [`empty`](./types/empty.md) | `never` is the natural TS reach when Flow expects `empty`. |
 | Top type | `unknown` | [`unknown`](./types/unknown.md) | Same name. |
 
@@ -790,7 +790,7 @@ See [type hierarchy](./lang/type-hierarchy.md) for where these sit relative to t
 
 #### `void` vs `undefined` {#toc-void-vs-undefined}
 
-`undefined` as an annotation is another name for `void` in Flow:
+`undefined` is the type of the value `undefined`. `void` instead marks a return value that callers should ignore, as in TypeScript:
 
 ```js flow-check
 // Flow:
@@ -802,22 +802,23 @@ function f(): undefined {
 ```js flow-check
 // Flow:
 function f(): void {
-  return undefined; // OK - `undefined` is the value inhabiting `void`
+  return undefined; // OK
 }
+const result: undefined = f(); // ERROR: a `void` result is not `undefined`
 ```
 
-So a TS-shaped function signature and TS utility-typed code (`Exclude<T, undefined>`, `T extends undefined ? ...`) can keep their `undefined` types. `T | undefined` is the same type as `T | void`; use `?T` if `null` is also intended (most JS APIs).
+`undefined` is assignable to `void`, but not vice versa. Likewise, a function returning `undefined` satisfies `() => void`, but a function returning `void` does not satisfy `() => undefined`. A `() => void` callback can even return another type, since its caller ignores the result; see [function returns](./types/functions.md#toc-void-and-undefined).
 
-A related TS quirk worth flagging: TypeScript's `() => undefined` and `() => void` are assignably asymmetric (`undefined` returns satisfy `void` slots but not vice versa). Flow has no equivalent since `undefined` and `void` are the same type.
+Use `T | undefined` for a possibly absent value, or `?T` if `null` is also intended. `T | void` is not equivalent to `T | undefined`.
 
-A parameter type that includes `void` (whether spelled `T | void`, `?T`, or `T | null | void`) makes the argument implicitly optional, so callers can omit it entirely. This differs from TypeScript, where `(x: T | undefined)` still requires the call site to pass `undefined`.
+Flow still permits omitting an argument whose parameter type includes `undefined`, including `?T`. This differs from TypeScript, where a required parameter typed `T | undefined` or `T | null | undefined` still requires an argument.
 
 ```js flow-check
 // Flow:
 function f(x: ?number) {}
 f(null);      // OK
 f(undefined); // OK
-f();          // OK - `?T` includes `void`, which makes the arg optional
+f();          // OK - Flow permits omission because `?T` includes `undefined`
 ```
 
 ### Refinement and module-level validation {#toc-validation}
@@ -1417,7 +1418,7 @@ See the [Flow Enums docs](./enums/index.md) for full mechanics.
 
 A predicate function whose return type is `implies param is T` refines the parameter to `T` only when the function returns `true`, and leaves it unchanged when the function returns `false`. This is the escape hatch for the [body-validation rule](#toc-type-guard-validation) covered above when only the positive direction holds. TypeScript has no equivalent.
 
-For example, `isPositive(n: ?number)` returns `true` only for positive numbers. A two-sided `n is number` would be unsound here: the false branch can be `null`, `void`, or a non-positive number like `0` or `-1`, but `?number` minus `number` only leaves `null | void` - silently losing the non-positive case. The `implies` form says only the positive direction refines, so the else branch keeps the original `?number` type.
+For example, `isPositive(n: ?number)` returns `true` only for positive numbers. A two-sided `n is number` would be unsound here: the false branch can be `null`, `undefined`, or a non-positive number like `0` or `-1`, but `?number` minus `number` only leaves `null | undefined` - silently losing the non-positive case. The `implies` form says only the positive direction refines, so the else branch keeps the original `?number` type.
 
 ```js flow-check
 // Flow:
@@ -1431,7 +1432,7 @@ declare const n: ?number;
 if (isPositive(n)) {
   n as number; // OK: refined to number
 } else {
-  n as ?number; // OK: stays ?number (not narrowed to null | void)
+  n as ?number; // OK: stays ?number (not narrowed to null | undefined)
 }
 ```
 
@@ -1495,13 +1496,13 @@ A handful of [utility types](./types/utilities.md) have no TypeScript counterpar
 A handful of Flow type-annotation forms have no TypeScript spelling - `tsc` rejects them at parse time. They are alternate syntax for existing Flow concepts.
 
 - **Inline `interface` type annotation** - `type T = interface { foo: number }`. Lets an interface appear inside a type expression instead of as a top-level declaration. TypeScript requires a separate `interface I { ... }` statement.
-- **Optional indexed access type** - `Obj?.['prop']` mirrors the runtime `?.` operator at the type level: if `Obj` is nullish, the result is `void`; otherwise it is `Obj['prop']`. TypeScript has no type-level `?.`.
+- **Optional indexed access type** - `Obj?.['prop']` mirrors the runtime `?.` operator at the type level: if `Obj` is nullish, the result is `undefined`; otherwise it is `Obj['prop']`. TypeScript has no type-level `?.`.
 
 ```js flow-check
 // Flow:
 type Inline = interface { foo: number };
 type Opt = ?{foo: number};
-type Pulled = Opt?.['foo']; // number | void
+type Pulled = Opt?.['foo']; // number | undefined
 ```
 
 ### Relay / GraphQL integration {#toc-relay-integration}
@@ -1715,7 +1716,7 @@ Flow has no `strict` options umbrella. Each of these flags defaults to `false` a
 | TypeScript option | Flow option | Description |
 | --- | --- | --- |
 | `noImplicitOverride` | `no_implicit_override` | Requires `override` on concrete class members that replace inherited concrete members. The default is `false`. Flow exempts abstract-member implementations and ambient declarations. See [config](./config/options.md#toc-no-implicit-override) and [`override` docs](./types/classes.md#toc-override). |
-| `noUncheckedIndexedAccess` | `no_unchecked_indexed_access` | Indexed access through an array or dictionary widens the result type with `undefined` (Flow: `void`), so reading `arr[i]` or `dict[k]` returns `T \| void` instead of `T` and forces the caller to refine before use. Tuple access with a *literal* index is unaffected in both languages. See [docs](./config/options.md#toc-no-unchecked-indexed-access) for more. |
+| `noUncheckedIndexedAccess` | `no_unchecked_indexed_access` | Indexed access through an array or dictionary widens the result type with `undefined`, so reading `arr[i]` or `dict[k]` returns `T \| undefined` instead of `T` and forces the caller to refine before use. Tuple access with a *literal* index is unaffected in both languages. See [docs](./config/options.md#toc-no-unchecked-indexed-access) for more. |
 | `useUnknownInCatchVariables` | `use_unknown_in_catch_variables` | Changes the default type of an un-annotated `catch` binding from `any` to `unknown`. The caller has to narrow the value (`instanceof Error`, `typeof e === 'string'`, …) before using it. See [docs](./config/options.md#toc-use-unknown-in-catch-variables) for more. |
 
 ## Typing external code {#toc-declaration-mechanisms}

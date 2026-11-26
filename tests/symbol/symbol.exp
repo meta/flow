@@ -1,7 +1,8 @@
 Error ------------------------------------------------------------------------------------------ class_iterator.js:39:31
 
 Cannot assign `new BadIterable()` to `bad` because: [incompatible-type]
- - in property `@@iterator`: `IteratorObject<string>` [1] is incompatible with `Iterator<number, any, any>` [2]
+ - in property `@@iterator`: `IteratorObject<string, undefined>` [1] is incompatible with
+   `Iterator<number, any, any>` [2]
     - in the return value > type argument `T` [3]: `string` [4] is incompatible with `number` [5]
 
    class_iterator.js:39:31
@@ -10,8 +11,8 @@ Cannot assign `new BadIterable()` to `bad` because: [incompatible-type]
 
 References:
    class_iterator.js:35:25
-    35|   *[Symbol.iterator](): IteratorObject<string> {
-                                ^^^^^^^^^^^^^^^^^^^^^^ [1]
+    35|   *[Symbol.iterator](): IteratorObject<string, undefined> {
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
    <BUILTINS>/lib.es2015.iterable.js:50:26
     50|     [Symbol.iterator](): Iterator<T, TReturn, TNext>;
                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
@@ -19,7 +20,7 @@ References:
    269| interface Iterator<out T, out TReturn, in TNext> {}
                                ^ [3]
    class_iterator.js:35:40
-    35|   *[Symbol.iterator](): IteratorObject<string> {
+    35|   *[Symbol.iterator](): IteratorObject<string, undefined> {
                                                ^^^^^^ [4]
    class_iterator.js:39:21
     39| const bad: Iterable<number> = new BadIterable(); // Error: string vs number

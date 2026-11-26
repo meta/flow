@@ -20,12 +20,12 @@ test.js:16:7,16:7
 
 test.js:19:7
 Flags:
-(property) key: void
+(property) key: undefined
 test.js:19:7,19:9
 
 test.js:22:7
 Flags:
-(property) ref: void
+(property) ref: undefined
 test.js:22:7,22:9
 
 test.js:27:8
@@ -274,7 +274,7 @@ test.js:162:19,162:29
 
 test.js:172:15
 Flags:
-(property) label: void | React.Node
+(property) label: undefined | React.Node
 
 'React.Node' defined at (lib) react.js:614:22
 

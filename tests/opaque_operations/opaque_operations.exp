@@ -66,7 +66,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:30:3
 
-Cannot cast `o` to `NonNullable<T4>` because `void` [1] is incompatible with `{readonly foo: string}` [2].
+Cannot cast `o` to `NonNullable<T4>` because `undefined` [1] is incompatible with `{readonly foo: string}` [2].
 [incompatible-type]
 
    test.js:30:3

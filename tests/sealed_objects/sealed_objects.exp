@@ -1,6 +1,6 @@
 Error ----------------------------------------------------------------------------------------------------- test.js:2:18
 
-Cannot assign `o1.y` to `s1` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot assign `o1.y` to `s1` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    test.js:2:18
    2| var s1: string = o1.y; // error
@@ -48,7 +48,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:14:18
 
-Cannot assign `o5.y` to `s5` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot assign `o5.y` to `s5` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    test.js:14:18
    14| var s5: string = o5.y; // error

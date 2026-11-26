@@ -29,7 +29,7 @@ function testOptionalNullableProperty(obj: {x?: ?string}): string {
     return obj.x;
 }
 
-function testOptionalNullableFlowingToNullable(x?: ?string): ?string {
+function testOptionalNullableFlowingToNullable(x?: ?string): void {
   var f = function(y: ?string) {};
   f(x);
 }

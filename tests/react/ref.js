@@ -13,7 +13,7 @@ class Bar extends React.Component<{...}, void> {}
 <Foo ref={foo => { foo as Bar | null }} />; // Error: `Foo` is not `Bar`.
 <Foo ref={(foo: Foo | null) => foo ? () => {} : undefined} />; // OK
 <Foo ref={foo => 42} />; // Error: ref callbacks may only return cleanup functions.
-<Foo ref={(foo: Foo | null) => () => 42} />; // Error: cleanup functions may not return values.
+<Foo ref={(foo: Foo | null) => () => 42} />; // OK: cleanup return value is ignored.
 
 class FooExact extends React.Component<{}, void> {}
 

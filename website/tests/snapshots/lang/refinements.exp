@@ -25,10 +25,11 @@ No errors!
 === block 9 ===
 Error ---------------------------------------------------------------------------- -:6:5
 
-Cannot cast `value` to `null | void` because `""` [1] is incompatible with `null | void` [2]. [incompatible-type]
+Cannot cast `value` to `null | undefined` because `""` [1] is incompatible with `null | undefined` [2].
+[incompatible-type]
 
    -:6:5
-   6|     value as null | void; // Error! Could still be the empty string ""
+   6|     value as null | undefined; // Error! Could still be the empty string ""
           ^^^^^
 
 References:
@@ -36,8 +37,8 @@ References:
    2| function func(value: ?string) {
                             ^^^^^^ [1]
    -:6:14
-   6|     value as null | void; // Error! Could still be the empty string ""
-                   ^^^^^^^^^^^ [2]
+   6|     value as null | undefined; // Error! Could still be the empty string ""
+                   ^^^^^^^^^^^^^^^^ [2]
 
 
 Found 1 error
@@ -95,7 +96,7 @@ No errors!
 === block 16 ===
 Error -------------------------------------------------------------------------- -:13:16
 
-Cannot call `value.prop.charAt` because property `charAt` is missing in `void` [1]. [incompatible-use]
+Cannot call `value.prop.charAt` because property `charAt` is missing in `undefined` [1]. [incompatible-use]
 
    -:13:16
    13|     value.prop.charAt(0); // Error!

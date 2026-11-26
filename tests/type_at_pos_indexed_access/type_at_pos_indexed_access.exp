@@ -5,7 +5,7 @@ test.js:5:6,5:6
 
 test.js:10:6
 Flags:
-type S = number | void
+type S = number | undefined
 test.js:10:6,10:6
 
 test.js:15:12

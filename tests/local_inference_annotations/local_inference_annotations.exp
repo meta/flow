@@ -79,19 +79,10 @@ An annotation on this parameter is required because Flow cannot infer its type f
 
 Error ----------------------------------------------------------------------------------------------------- call.js:18:1
 
-This condition is likely falsy.
-[WARNING]: Flow's type inference may be incorrect that it could be null at runtime (due to `any` annotations,
-out-of-bounds array accesses, etc.). If the check is valid, you might want to make [1] nullable (`T` -> `?T`).
-[constant-condition]
+An expression of type `void` cannot be tested for truthiness. [constant-condition]
 
-   call.js:18:1
    18| f((x) => 3, (x: number) => 3) || []; // no annot, constant-condition error
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-References:
-   call.js:4:45
-    4| function f(x: (n: number) => number, y: any) {}
-                                                   ^ [1]
 
 
 Error ----------------------------------------------------------------------------------------------------- cast.js:6:15
@@ -216,7 +207,7 @@ Missing an annotation on return. [missing-local-annot]
 
 Error --------------------------------------------------------------------------------------------------- class.js:37:26
 
-Cannot return `10` because `number` [1] is incompatible with `void` [2]. [incompatible-type]
+Cannot return `10` because `number` [1] is incompatible with `undefined` [2]. [incompatible-type]
 
    class.js:37:26
    37|   constructor() { return 10; } // no annotation required, but error on non-void return
@@ -363,19 +354,10 @@ References:
 
 Error ---------------------------------------------------------------------------------------------- conditional.js:39:5
 
-This condition is likely falsy.
-[WARNING]: Flow's type inference may be incorrect that it could be null at runtime (due to `any` annotations,
-out-of-bounds array accesses, etc.). If the check is valid, you might want to make [1] nullable (`T` -> `?T`).
-[constant-condition]
+An expression of type `void` cannot be tested for truthiness. [constant-condition]
 
-   conditional.js:39:5
    39|     foo(value) && value.id != null && value.id // okay, no definition-cycle error, but constant-condition error
            ^^^^^^^^^^
-
-References:
-   conditional.js:35:33
-   35|   declare function foo(x: any): void;
-                                       ^^^^ [1]
 
 
 Error ---------------------------------------------------------------------------------------- destructuring_init.js:3:6

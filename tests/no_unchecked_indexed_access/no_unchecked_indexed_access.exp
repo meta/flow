@@ -1,6 +1,6 @@
 Error -------------------------------------------------------------------------------------------------- arr_test.js:4:1
 
-Cannot cast `roArray[0]` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `roArray[0]` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    arr_test.js:4:1
    4| roArray[0] as string; // error: void ~> string
@@ -17,7 +17,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- arr_test.js:5:1
 
-Cannot cast `roArray[key]` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `roArray[key]` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    arr_test.js:5:1
    5| roArray[key] as string; // error: void ~> string
@@ -34,7 +34,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- arr_test.js:7:1
 
-Cannot cast `rwArray[0]` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `rwArray[0]` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    arr_test.js:7:1
    7| rwArray[0] as string; // error: void ~> string
@@ -51,7 +51,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- arr_test.js:8:1
 
-Cannot cast `rwArray[key]` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `rwArray[key]` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    arr_test.js:8:1
    8| rwArray[key] as string; // error: void ~> string
@@ -68,7 +68,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- arr_test.js:9:14
 
-Cannot assign `undefined` to `rwArray[0]` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot assign `undefined` to `rwArray[0]` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    arr_test.js:9:14
    9| rwArray[0] = undefined; // error: void ~> string
@@ -96,7 +96,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- arr_test.js:15:1
 
-Cannot cast `tuple[key]` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `tuple[key]` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    arr_test.js:15:1
    15| tuple[key] as number; // error: void ~> number
@@ -166,7 +166,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- obj_test.js:7:1
 
-Cannot cast `dictObj[key]` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `dictObj[key]` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    obj_test.js:7:1
    7| dictObj[key] as string; // error: void ~> string
@@ -183,7 +183,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- obj_test.js:8:1
 
-Cannot cast `dictObj.hahaha` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `dictObj.hahaha` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    obj_test.js:8:1
    8| dictObj.hahaha as string; // error: void ~> string
@@ -200,7 +200,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------- obj_test.js:9:16
 
-Cannot assign `undefined` to `dictObj[key]` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot assign `undefined` to `dictObj[key]` because `undefined` [1] is incompatible with `string` [2].
+[incompatible-type]
 
    obj_test.js:9:16
    9| dictObj[key] = undefined; // error: void ~> string
@@ -214,7 +215,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ obj_test.js:10:18
 
-Cannot assign `undefined` to `dictObj.hahaha` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot assign `undefined` to `dictObj.hahaha` because `undefined` [1] is incompatible with `string` [2].
+[incompatible-type]
 
    obj_test.js:10:18
    10| dictObj.hahaha = undefined; // error: void ~> string

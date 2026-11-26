@@ -79,7 +79,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- Arith.js:26:7
 
-Cannot use operator `+` with operands `void` [1] and `number` [2] [unsafe-addition]
+Cannot use operator `+` with operands `undefined` [1] and `number` [2] [unsafe-addition]
 
    Arith.js:26:7
    26|   num(x + y);
@@ -96,7 +96,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- Arith.js:29:7
 
-Cannot use operator `+` with operands `number` [1] and `void` [2] [unsafe-addition]
+Cannot use operator `+` with operands `number` [1] and `undefined` [2] [unsafe-addition]
 
    Arith.js:29:7
    29|   num(x + y);
@@ -113,7 +113,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- Arith.js:34:7
 
-Cannot use operator `+` with operands `void` [1] and `number` [2] [unsafe-addition]
+Cannot use operator `+` with operands `undefined` [1] and `number` [2] [unsafe-addition]
 
    Arith.js:34:7
    34|   num(x + y);
@@ -147,7 +147,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- Arith.js:37:7
 
-Cannot use operator `+` with operands `number` [1] and `void` [2] [unsafe-addition]
+Cannot use operator `+` with operands `number` [1] and `undefined` [2] [unsafe-addition]
 
    Arith.js:37:7
    37|   num(x + y);
@@ -198,7 +198,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- Arith.js:41:5
 
-Cannot use operator `+` with operands `void` [1] and `void` [2] [unsafe-addition]
+Cannot use operator `+` with operands `undefined` [1] and `undefined` [2] [unsafe-addition]
 
    Arith.js:41:5
    41| num(undefined + undefined); // === NaN
@@ -249,7 +249,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- Arith.js:45:5
 
-Cannot use operator `+` with operands `void` [1] and `number` [2] [unsafe-addition]
+Cannot use operator `+` with operands `undefined` [1] and `number` [2] [unsafe-addition]
 
    Arith.js:45:5
    45| num(undefined + 1); // === NaN
@@ -266,7 +266,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- Arith.js:46:5
 
-Cannot use operator `+` with operands `number` [1] and `void` [2] [unsafe-addition]
+Cannot use operator `+` with operands `number` [1] and `undefined` [2] [unsafe-addition]
 
    Arith.js:46:5
    46| num(1 + undefined); // === NaN
@@ -317,7 +317,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- Arith.js:50:5
 
-Cannot use operator `+` with operands `void` [1] and `boolean` [2] [unsafe-addition]
+Cannot use operator `+` with operands `undefined` [1] and `boolean` [2] [unsafe-addition]
 
    Arith.js:50:5
    50| num(undefined + true); // === NaN
@@ -334,7 +334,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- Arith.js:51:5
 
-Cannot use operator `+` with operands `boolean` [1] and `void` [2] [unsafe-addition]
+Cannot use operator `+` with operands `boolean` [1] and `undefined` [2] [unsafe-addition]
 
    Arith.js:51:5
    51| num(true + undefined); // === NaN
@@ -419,7 +419,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- Arith.js:57:5
 
-Cannot use operator `+` with operands `string` [1] and `void` [2] [unsafe-addition]
+Cannot use operator `+` with operands `string` [1] and `undefined` [2] [unsafe-addition]
 
    Arith.js:57:5
    57| str("foo" + undefined); // error
@@ -436,7 +436,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- Arith.js:58:5
 
-Cannot use operator `+` with operands `void` [1] and `string` [2] [unsafe-addition]
+Cannot use operator `+` with operands `undefined` [1] and `string` [2] [unsafe-addition]
 
    Arith.js:58:5
    58| str(undefined + "foo"); // error
@@ -960,7 +960,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- relational.js:14:1
 
-Cannot compare `number` [1] to `void` [2]. [invalid-compare]
+Cannot compare `number` [1] to `undefined` [2]. [invalid-compare]
 
    relational.js:14:1
    14| 1 < x; // 2 errors: null !~> number; undefined !~> number
@@ -974,7 +974,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- relational.js:15:1
 
-Cannot compare `void` [1] to `number` [2]. [invalid-compare]
+Cannot compare `undefined` [1] to `number` [2]. [invalid-compare]
 
    relational.js:15:1
    15| x < 1; // 2 errors: null !~> number; undefined !~> number
@@ -1005,7 +1005,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- relational.js:18:1
 
-Cannot compare `void` [1] to `null` [2]. [invalid-compare]
+Cannot compare `undefined` [1] to `null` [2]. [invalid-compare]
 
    relational.js:18:1
    18| undefined < null; // error
@@ -1019,7 +1019,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- relational.js:19:1
 
-Cannot compare `null` [1] to `void` [2]. [invalid-compare]
+Cannot compare `null` [1] to `undefined` [2]. [invalid-compare]
 
    relational.js:19:1
    19| null < undefined; // error
@@ -1033,7 +1033,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- relational.js:20:1
 
-Cannot compare `void` [1] to `void` [2]. [invalid-compare]
+Cannot compare `undefined` [1] to `undefined` [2]. [invalid-compare]
 
    relational.js:20:1
    20| undefined < undefined; // error
@@ -1061,7 +1061,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------- unary_maybe.js:2:2
 
-Cannot perform arithmetic operation because `void` [1] is not a number or bigint. [unsafe-arithmetic]
+Cannot perform arithmetic operation because `undefined` [1] is not a number or bigint. [unsafe-arithmetic]
 
    unary_maybe.js:2:2
    2| -x; // error for null and for void

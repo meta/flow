@@ -1,17 +1,17 @@
 type O = {
-  [[call]](): void;
+  [[call]](): undefined;
  ...}
 
 ({}) as O; // err: no callable property
-(function() { return 0 }) as O; // err: number ~> void
+(function() { return 0 }) as O; // err: number ~> undefined
 (function() {}) as O; // ok
 
 interface I {
-  [[call]](): void;
+  [[call]](): undefined;
 }
 
 ({}) as I; // err: no callable property
-(function() { return 0 }) as I; // err: number ~> void
+(function() { return 0 }) as I; // err: number ~> undefined
 (function() {}) as I; // ok
 
 declare class C1 {

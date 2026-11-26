@@ -4,7 +4,7 @@ import * as React from 'react';
  * Basic render: Class component tests
  */
 class A extends React.Component<{...}, void> {
-  render = (): React.Node => {};
+  render = (): React.Node => undefined;
 }
 class B extends React.Component<{...}, void> {
   render = (): React.Node => null;
@@ -19,9 +19,9 @@ class B extends React.Component<{...}, void> {
 /**
  * Basic render: stateless functional component tests
  */
-const C: React.ComponentType<{...}> = props => {};
+const C: React.ComponentType<{...}> = props => undefined;
 const D: React.ComponentType<{...}> = props => {
-  return;
+  return undefined;
 };
 const E: React.ComponentType<{...}> = props => {
   return null;

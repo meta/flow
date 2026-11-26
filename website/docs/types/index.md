@@ -43,7 +43,7 @@ you can have in Flow.
 
 ## See Also {#toc-see-also}
 
-- [Primitive Types](./primitives.md) — `boolean`, `string`, `number`, `null`, `void`, `symbol`, `bigint`
+- [Primitive Types](./primitives.md) — `boolean`, `string`, `number`, `null`, `undefined`, `symbol`, `bigint`
 - [Literal Types](./literals.md) — using specific values like `2` or `"foo"` as types
 - [Template Literal Types](./template-literal-types.md) — constructing string types and matching string patterns
 - [Objects](./objects.md) — typing the shape of JavaScript objects

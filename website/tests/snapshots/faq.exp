@@ -17,7 +17,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------- -:8:12
 
-Cannot return `foo.bar` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot return `foo.bar` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    -:8:12
    8|     return foo.bar; // Error: if you remove the console.log, it works
@@ -79,7 +79,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------- -:6:67
 
-Cannot coerce `oldPerson.age` to string because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot coerce `oldPerson.age` to string because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    -:6:67
    6|     console.log(`The person is ${person.age} and the old one is ${oldPerson.age}`); // Error

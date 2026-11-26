@@ -984,7 +984,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- destructuring.js:45:3
 
-Cannot cast `x.baz` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `x.baz` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    destructuring.js:45:3
    45|   x.baz as string; // error, baz doesn't exist
@@ -1012,7 +1012,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------- destructuring.js:46:3
 
-Cannot cast `rest.baz` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `rest.baz` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    destructuring.js:46:3
    46|   rest.baz as string; // error, rest is sealed
@@ -1092,7 +1092,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------- destructuring.js:70:19
 
-Cannot assign `others.childprop1` to `cp2` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot assign `others.childprop1` to `cp2` because `undefined` [1] is incompatible with `number` [2].
+[incompatible-type]
 
    destructuring.js:70:19
    70| var cp2: number = others.childprop1; // Error: `childprop1` is not in `others` as it was separately destructured
@@ -1319,7 +1320,7 @@ References:
 
 Error ------------------------------------------------------------------------------ destructuring_missing_props.js:34:3
 
-Cannot cast `regularProp` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `regularProp` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    destructuring_missing_props.js:34:3
    34|   regularProp as number;
@@ -1598,7 +1599,7 @@ References:
 Error ----------------------------------------------------------------------------------------- poly_concretize.js:64:11
 
 Cannot assign `item` to `{...Item, name?: string, ...}` because: [incompatible-type]
- - Either in property `name`: `void` [1] is incompatible with `string` [2].
+ - Either in property `name`: `undefined` [1] is incompatible with `string` [2].
     - This property is invariantly typed. See
       https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
  - Or in property `label`: `string` [3] is incompatible with `void` [4].
@@ -1628,33 +1629,36 @@ References:
 Error ----------------------------------------------------------------------------------------- poly_concretize.js:64:11
 
 Cannot assign `item` to `{...Item, name?: string, ...}` because: [incompatible-type]
- - Either in property `label` > at least one member of `void` [1]: `void` [1] is incompatible with `string` [2].
- - Or in property `name`: `void` [3] is incompatible with `string` [4].
+ - Either in property `name`: `undefined` [1] is incompatible with `string` [2].
     - This property is invariantly typed. See
       https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
+ - Or in property `label`: `undefined` [3] is incompatible with `string` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
 
    poly_concretize.js:64:11
    64|  ...  } = item;
                  ^^^^
 
 References:
-   poly_concretize.js:10:14
-   10|   | {label?: void, labelledby: string, ...};
-                    ^^^^ [1]
-   poly_concretize.js:9:13
-    9|   | {label: string, labelledby?: void, ...}
-                   ^^^^^^ [2]
    poly_concretize.js:63:12
    63|     name?: string,
-                  ^^^^^^ [3]
+                  ^^^^^^ [1]
    poly_concretize.js:13:9
    13|   name: string,
-               ^^^^^^ [4]
+               ^^^^^^ [2]
+   poly_concretize.js:10:14
+   10|   | {label?: void, labelledby: string, ...};
+                    ^^^^ [3]
+   poly_concretize.js:9:13
+    9|   | {label: string, labelledby?: void, ...}
+                   ^^^^^^ [4]
 
 
 Error ----------------------------------------------------------------------------------------- poly_concretize.js:64:11
 
-Cannot assign `item` to `{...Item, name?: string, ...}` because in property `name`: `void` [1] is incompatible with
+Cannot assign `item` to `{...Item, name?: string, ...}` because in property `name`: `undefined` [1] is incompatible with
 `string` [2]. [incompatible-type]
 
 This property is invariantly typed. See

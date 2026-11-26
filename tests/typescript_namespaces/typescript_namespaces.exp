@@ -161,7 +161,7 @@ References:
 
 Error ----------------------------------------------------------------------------- declare_class_then_interface.js:10:1
 
-Cannot cast `d.y` to `string` because `void` [1] is incompatible with `string` [2]. [incompatible-type]
+Cannot cast `d.y` to `string` because `undefined` [1] is incompatible with `string` [2]. [incompatible-type]
 
    declare_class_then_interface.js:10:1
    10| d.y as string; // ERROR

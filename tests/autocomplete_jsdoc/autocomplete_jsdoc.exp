@@ -1705,11 +1705,11 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"RefSetter<ClassComponent> | void",
+  "detail":"RefSetter<ClassComponent> | undefined",
   "insertTextFormat":1,
   "kind":13,
   "label":"ref",
-  "labelDetails":{"detail":"?: RefSetter<ClassComponent> | void"},
+  "labelDetails":{"detail":"?: RefSetter<ClassComponent> | undefined"},
   "sortText":"00000000000000000000",
   "textEdit":{
     "newText":"ref=",
@@ -2400,12 +2400,12 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"void | 2",
+  "detail":"undefined | 2",
   "documentation":{"kind":"markdown","value":"bar is a getter property"},
   "insertTextFormat":1,
   "kind":13,
   "label":"?.bar",
-  "labelDetails":{"detail":": void | 2"},
+  "labelDetails":{"detail":": undefined | 2"},
   "sortText":"00000000000000000000",
   "textEdit":{
     "newText":"?.bar",
@@ -2429,12 +2429,12 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"void | 3",
+  "detail":"undefined | 3",
   "documentation":{"kind":"markdown","value":"baz is an identifier property with variance"},
   "insertTextFormat":1,
   "kind":13,
   "label":"?.baz",
-  "labelDetails":{"detail":": void | 3"},
+  "labelDetails":{"detail":": undefined | 3"},
   "sortText":"00000000000000000000",
   "textEdit":{
     "newText":"?.baz",
@@ -2458,12 +2458,12 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"void | 1",
+  "detail":"undefined | 1",
   "documentation":{"kind":"markdown","value":"foo is an identifier property"},
   "insertTextFormat":1,
   "kind":13,
   "label":"?.foo",
-  "labelDetails":{"detail":": void | 1"},
+  "labelDetails":{"detail":": undefined | 1"},
   "sortText":"00000000000000000000",
   "textEdit":{
     "newText":"?.foo",
@@ -2487,12 +2487,12 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"void | 4",
+  "detail":"undefined | 4",
   "documentation":{"kind":"markdown","value":"qux is a literal property"},
   "insertTextFormat":1,
   "kind":13,
   "label":"?.qux",
-  "labelDetails":{"detail":": void | 4"},
+  "labelDetails":{"detail":": undefined | 4"},
   "sortText":"00000000000000000000",
   "textEdit":{
     "newText":"?.qux",
@@ -2579,12 +2579,12 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof DefaultedStringEnum, input: ?string) => void | DefaultedStringEnum",
+  "detail":"(this: typeof DefaultedStringEnum, input: ?string) => undefined | DefaultedStringEnum",
   "insertTextFormat":1,
   "kind":3,
   "label":"cast",
   "labelDetails":{
-    "detail":": (this: typeof DefaultedStringEnum, input: ?string) => void | DefaultedStringEn..."
+    "detail":": (this: typeof DefaultedStringEnum, input: ?string) => undefined | DefaultedStr..."
   },
   "sortText":"00000000000000000001",
   "textEdit":{
@@ -2672,12 +2672,12 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof DefaultedStringEnum) => IteratorObject<DefaultedStringEnum, void, unknown>",
+  "detail":"(this: typeof DefaultedStringEnum) => IteratorObject<DefaultedStringEnum, undefined, unknown>",
   "insertTextFormat":1,
   "kind":3,
   "label":"members",
   "labelDetails":{
-    "detail":": (this: typeof DefaultedStringEnum) => IteratorObject<DefaultedStringEnum, void..."
+    "detail":": (this: typeof DefaultedStringEnum) => IteratorObject<DefaultedStringEnum, unde..."
   },
   "sortText":"00000000000000000001",
   "textEdit":{
@@ -2766,12 +2766,12 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof InitializedStringEnum, input: ?string) => void | InitializedStringEnum",
+  "detail":"(this: typeof InitializedStringEnum, input: ?string) => undefined | InitializedStringEnum",
   "insertTextFormat":1,
   "kind":3,
   "label":"cast",
   "labelDetails":{
-    "detail":": (this: typeof InitializedStringEnum, input: ?string) => void | InitializedStri..."
+    "detail":": (this: typeof InitializedStringEnum, input: ?string) => undefined | Initialize..."
   },
   "sortText":"00000000000000000001",
   "textEdit":{
@@ -2859,7 +2859,7 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof InitializedStringEnum) => IteratorObject<InitializedStringEnum, void, unknown>",
+  "detail":"(this: typeof InitializedStringEnum) => IteratorObject<InitializedStringEnum, undefined, unknown>",
   "insertTextFormat":1,
   "kind":3,
   "label":"members",
@@ -2953,11 +2953,13 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof NumberEnum, input: ?number) => void | NumberEnum",
+  "detail":"(this: typeof NumberEnum, input: ?number) => undefined | NumberEnum",
   "insertTextFormat":1,
   "kind":3,
   "label":"cast",
-  "labelDetails":{"detail":": (this: typeof NumberEnum, input: ?number) => void | NumberEnum"},
+  "labelDetails":{
+    "detail":": (this: typeof NumberEnum, input: ?number) => undefined | NumberEnum"
+  },
   "sortText":"00000000000000000001",
   "textEdit":{
     "insert":{"end":{"character":11,"line":14},"start":{"character":11,"line":14}},
@@ -3042,12 +3044,12 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof NumberEnum) => IteratorObject<NumberEnum, void, unknown>",
+  "detail":"(this: typeof NumberEnum) => IteratorObject<NumberEnum, undefined, unknown>",
   "insertTextFormat":1,
   "kind":3,
   "label":"members",
   "labelDetails":{
-    "detail":": (this: typeof NumberEnum) => IteratorObject<NumberEnum, void, unknown>"
+    "detail":": (this: typeof NumberEnum) => IteratorObject<NumberEnum, undefined, unknown>"
   },
   "sortText":"00000000000000000001",
   "textEdit":{
@@ -3136,12 +3138,12 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof BooleanEnum, input: ?boolean) => void | BooleanEnum",
+  "detail":"(this: typeof BooleanEnum, input: ?boolean) => undefined | BooleanEnum",
   "insertTextFormat":1,
   "kind":3,
   "label":"cast",
   "labelDetails":{
-    "detail":": (this: typeof BooleanEnum, input: ?boolean) => void | BooleanEnum"
+    "detail":": (this: typeof BooleanEnum, input: ?boolean) => undefined | BooleanEnum"
   },
   "sortText":"00000000000000000001",
   "textEdit":{
@@ -3227,12 +3229,12 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof BooleanEnum) => IteratorObject<BooleanEnum, void, unknown>",
+  "detail":"(this: typeof BooleanEnum) => IteratorObject<BooleanEnum, undefined, unknown>",
   "insertTextFormat":1,
   "kind":3,
   "label":"members",
   "labelDetails":{
-    "detail":": (this: typeof BooleanEnum) => IteratorObject<BooleanEnum, void, unknown>"
+    "detail":": (this: typeof BooleanEnum) => IteratorObject<BooleanEnum, undefined, unknown>"
   },
   "sortText":"00000000000000000001",
   "textEdit":{
@@ -3321,11 +3323,13 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof SymbolEnum, input: ?symbol) => void | SymbolEnum",
+  "detail":"(this: typeof SymbolEnum, input: ?symbol) => undefined | SymbolEnum",
   "insertTextFormat":1,
   "kind":3,
   "label":"cast",
-  "labelDetails":{"detail":": (this: typeof SymbolEnum, input: ?symbol) => void | SymbolEnum"},
+  "labelDetails":{
+    "detail":": (this: typeof SymbolEnum, input: ?symbol) => undefined | SymbolEnum"
+  },
   "sortText":"00000000000000000001",
   "textEdit":{
     "insert":{"end":{"character":11,"line":18},"start":{"character":11,"line":18}},
@@ -3410,12 +3414,12 @@ Flags: --lsp
     "command":"log:<PLACEHOLDER_PROJECT_URL>",
     "title":""
   },
-  "detail":"(this: typeof SymbolEnum) => IteratorObject<SymbolEnum, void, unknown>",
+  "detail":"(this: typeof SymbolEnum) => IteratorObject<SymbolEnum, undefined, unknown>",
   "insertTextFormat":1,
   "kind":3,
   "label":"members",
   "labelDetails":{
-    "detail":": (this: typeof SymbolEnum) => IteratorObject<SymbolEnum, void, unknown>"
+    "detail":": (this: typeof SymbolEnum) => IteratorObject<SymbolEnum, undefined, unknown>"
   },
   "sortText":"00000000000000000001",
   "textEdit":{

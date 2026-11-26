@@ -217,11 +217,11 @@ Promise.reject<string>(0)
     var b: number = str; // Error: string ~> number
   });
 
-// resolvedPromise<T> -> catch() -> then():?T
+// resolvedPromise<T> -> catch() -> then():T | void
 Promise.resolve(0)
   .catch(function(err) {})
   .then(function(num) {
-    var a: ?number = num;
+    var a: number | void = num;
     var b: string = num; // Error: string ~> number
   });
 

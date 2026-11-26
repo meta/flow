@@ -157,7 +157,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ map.js:34:5
 
-Cannot cast `x.get(...)` to `boolean` because `void` [1] is incompatible with `boolean` [2]. [incompatible-type]
+Cannot cast `x.get(...)` to `boolean` because `undefined` [1] is incompatible with `boolean` [2]. [incompatible-type]
 
    map.js:34:5
    34|     x.get('foo') as boolean; // error, string | void
@@ -450,7 +450,7 @@ References:
 
 Error -------------------------------------------------------------------------------------------------- reflect.js:8:12
 
-Cannot get `descriptor.value` because property `value` is missing in `void` [1]. [incompatible-use]
+Cannot get `descriptor.value` because property `value` is missing in `undefined` [1]. [incompatible-use]
 
    reflect.js:8:12
     8| descriptor.value; // ERROR: a descriptor can be absent

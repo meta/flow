@@ -111,15 +111,15 @@ function func(value: "A" | "B" | "C") {
 ```
 
 While in general it is not recommended to use `==` in JavaScript, due to the coercions it performs,
-doing `value == null` (or `value != null`) checks `value` exactly for `null` and `void`.
-This works well with Flow's [maybe](../types/maybe.md) types, which create a union with `null` and `void`.
+doing `value == null` (or `value != null`) checks `value` exactly for `null` and `undefined`.
+This works well with Flow's [maybe](../types/maybe.md) types, which create a union with `null` and `undefined`.
 
 ```js flow-check
 function func(value: ?string) {
   if (value != null) {
     value as string;
   } else {
-    value as null | void;
+    value as null | undefined;
   }
 }
 ```
@@ -152,7 +152,7 @@ function func(value: ?string) {
   if (value) {
     value as string; // Works
   } else {
-    value as null | void; // Error! Could still be the empty string ""
+    value as null | undefined; // Error! Could still be the empty string ""
   }
 }
 ```

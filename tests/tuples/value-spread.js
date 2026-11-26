@@ -15,21 +15,21 @@
   y as [1, 2]; // ERROR
   const z = [0, ...x, 3];
   z as Readonly<[0, 1, 2, 3]>; // ERROR
-  z as ReadonlyArray<number | void>; // OK
+  z as ReadonlyArray<number | undefined>; // OK
 }
 {
   declare const x: [b: 0, c?: 1];
   declare const y: [2, 3];
   const z = [...x, ...y] as const;
   z as Readonly<[0, 1, 2, 3]>; // ERROR
-  z as ReadonlyArray<number | void>; // OK
+  z as ReadonlyArray<number | undefined>; // OK
 }
 {
   const x: [0, b?: 1] = [0];
   const y: [c?: 2] = [2];
   const z = [...x, ...y] as const;
   z as [a?: 0, b?: 1, c?: 2]; // ERROR
-  z as ReadonlyArray<number | void>; // OK
+  z as ReadonlyArray<number | undefined>; // OK
 }
 
 // Variance is not preserved when doing value spread as the result is a copy

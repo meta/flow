@@ -3,4 +3,3 @@ lib.d.ts
 
 [options]
 all=true
-experimental.ts_void=true

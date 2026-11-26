@@ -170,7 +170,7 @@ References:
 Error ------------------------------------------------------------------------------------------------- classes.js:23:15
 
 Cannot extend `React.Component<Props, State>` [1] with `Foo` [2] because in property `setState` > the first parameter:
-`{y_: string, ...}` [3] is incompatible with `void` [4]. [incompatible-type]
+`{y_: string, ...}` [3] is incompatible with `undefined` [4]. [incompatible-type]
 
    classes.js:23:15
      23|   setState(o: { y_: string, ... }): void { }
@@ -390,7 +390,7 @@ References:
 
 Error ---------------------------------------------------------------------------------------- object_component.js:19:47
 
-Cannot assign `null` to `_y` because `null` [1] is incompatible with `void` [2]. [incompatible-type]
+Cannot assign `null` to `_y` because `null` [1] is incompatible with `undefined` [2]. [incompatible-type]
 
    object_component.js:19:47
    19| const _y: React.ElementRef<ObjectComponent> = null; // Error, ref is undefined

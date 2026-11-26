@@ -6,13 +6,13 @@ f(x_f); // error: Flow does not split union args across overload branches
 
 // maybe
 declare function g(x: null): void;
-declare function g(x: void): void;
+declare function g(x: undefined): void;
 declare function g(x: string): void;
 declare const x_g: ?string;
 g(x_g); // error: Flow does not split union args across overload branches
 
 // optional
-declare function h(x: void): void;
+declare function h(x: undefined): void;
 declare function h(x: string): void;
 declare const x_h: {p?: string};
 h(x_h.p); // error: Flow does not split union args across overload branches

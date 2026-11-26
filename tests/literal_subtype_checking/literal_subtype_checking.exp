@@ -539,10 +539,10 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:58:5
 
-Cannot compare `Literal | void` [1] to `"bar"` [2], because `void | Literal` [1] is not a subtype of `"bar"` [2] and
-`"bar"` [2] is not a subtype of `void | Literal` [1]. In **rare** cases, these types may have overlapping values but
-lack a subtyping relationship. If that happens, you can cast one side to the union of both types to pass the flow check.
- [invalid-compare]
+Cannot compare `Literal | undefined` [1] to `"bar"` [2], because `undefined | Literal` [1] is not a subtype of
+`"bar"` [2] and `"bar"` [2] is not a subtype of `undefined | Literal` [1]. In **rare** cases, these types may have
+overlapping values but lack a subtyping relationship. If that happens, you can cast one side to the union of both types
+to pass the flow check.  [invalid-compare]
 
    test.js:58:5
    58|     case 'bar': // Error
@@ -559,10 +559,10 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:59:5
 
-Cannot compare `Literal | void` [1] to `1` [2], because `void | Literal` [1] is not a subtype of `1` [2] and `1` [2] is
-not a subtype of `void | Literal` [1]. In **rare** cases, these types may have overlapping values but lack a subtyping
-relationship. If that happens, you can cast one side to the union of both types to pass the flow check. 
-[invalid-compare]
+Cannot compare `Literal | undefined` [1] to `1` [2], because `undefined | Literal` [1] is not a subtype of `1` [2] and
+`1` [2] is not a subtype of `undefined | Literal` [1]. In **rare** cases, these types may have overlapping values but
+lack a subtyping relationship. If that happens, you can cast one side to the union of both types to pass the flow check.
+ [invalid-compare]
 
    test.js:59:5
    59|     case 1: // Error
@@ -618,10 +618,10 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:70:7
 
-Cannot compare `Literal | void` [1] to `"bar"` [2], because `void | Literal` [1] is not a subtype of `"bar"` [2] and
-`"bar"` [2] is not a subtype of `void | Literal` [1]. In **rare** cases, these types may have overlapping values but
-lack a subtyping relationship. If that happens, you can cast one side to the union of both types to pass the flow check.
- [invalid-compare]
+Cannot compare `Literal | undefined` [1] to `"bar"` [2], because `undefined | Literal` [1] is not a subtype of
+`"bar"` [2] and `"bar"` [2] is not a subtype of `undefined | Literal` [1]. In **rare** cases, these types may have
+overlapping values but lack a subtyping relationship. If that happens, you can cast one side to the union of both types
+to pass the flow check.  [invalid-compare]
 
    test.js:70:7
    70|   if (nullableO?.p === 'bar') {} // Error
@@ -638,10 +638,10 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:71:7
 
-Cannot compare `Literal | void` [1] to `1` [2], because `void | Literal` [1] is not a subtype of `1` [2] and `1` [2] is
-not a subtype of `void | Literal` [1]. In **rare** cases, these types may have overlapping values but lack a subtyping
-relationship. If that happens, you can cast one side to the union of both types to pass the flow check. 
-[invalid-compare]
+Cannot compare `Literal | undefined` [1] to `1` [2], because `undefined | Literal` [1] is not a subtype of `1` [2] and
+`1` [2] is not a subtype of `undefined | Literal` [1]. In **rare** cases, these types may have overlapping values but
+lack a subtyping relationship. If that happens, you can cast one side to the union of both types to pass the flow check.
+ [invalid-compare]
 
    test.js:71:7
    71|   if (nullableO?.p === 1) {} // Error
@@ -678,10 +678,10 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:77:25
 
-Cannot compare `Literal | void` [1] to `"bar"` [2], because `void | Literal` [1] is not a subtype of `"bar"` [2] and
-`"bar"` [2] is not a subtype of `void | Literal` [1]. In **rare** cases, these types may have overlapping values but
-lack a subtyping relationship. If that happens, you can cast one side to the union of both types to pass the flow check.
- [invalid-compare]
+Cannot compare `Literal | undefined` [1] to `"bar"` [2], because `undefined | Literal` [1] is not a subtype of
+`"bar"` [2] and `"bar"` [2] is not a subtype of `undefined | Literal` [1]. In **rare** cases, these types may have
+overlapping values but lack a subtyping relationship. If that happens, you can cast one side to the union of both types
+to pass the flow check.  [invalid-compare]
 
    test.js:77:25
    77|   if (true && (false || nullableO?.p === 'bar')) {} // Error
@@ -717,10 +717,10 @@ References:
 
 Error ---------------------------------------------------------------------------------------------------- test.js:79:25
 
-Cannot compare `Literal | void` [1] to `1` [2], because `void | Literal` [1] is not a subtype of `1` [2] and `1` [2] is
-not a subtype of `void | Literal` [1]. In **rare** cases, these types may have overlapping values but lack a subtyping
-relationship. If that happens, you can cast one side to the union of both types to pass the flow check. 
-[invalid-compare]
+Cannot compare `Literal | undefined` [1] to `1` [2], because `undefined | Literal` [1] is not a subtype of `1` [2] and
+`1` [2] is not a subtype of `undefined | Literal` [1]. In **rare** cases, these types may have overlapping values but
+lack a subtyping relationship. If that happens, you can cast one side to the union of both types to pass the flow check.
+ [invalid-compare]
 
    test.js:79:25
    79|   if (true && (false || nullableO?.p === 1)) {} // Error

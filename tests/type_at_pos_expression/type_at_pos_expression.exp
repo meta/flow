@@ -258,7 +258,7 @@ object.js:3:15,3:17
 
 object.js:3:21
 Flags:
-(property) a: void | {b: ?{c: null | {d: number, ...}, ...}, ...}
+(property) a: undefined | {b: ?{c: null | {d: number, ...}, ...}, ...}
 object.js:3:21,3:21
 
 object.js:3:26
@@ -283,7 +283,7 @@ object.js:12:3,12:5
 
 object.js:12:7
 Flags:
-(property) a: void | {b: ?{c: null | {d: number, ...}, ...}, ...}
+(property) a: undefined | {b: ?{c: null | {d: number, ...}, ...}, ...}
 object.js:12:7,12:7
 
 object.js:15:10
@@ -400,7 +400,7 @@ object.js:68:5,68:15
 
 optional_chaining.js:16:7
 Flags:
-const n: number | void
+const n: number | undefined
 optional_chaining.js:16:7,16:7
 
 optional_chaining.js:16:11
@@ -413,7 +413,7 @@ optional_chaining.js:16:11,16:13
 
 optional_chaining.js:16:16
 Flags:
-(property) Foo.bar: Bar | void
+(property) Foo.bar: Bar | undefined
 
 'Bar' defined at optional_chaining.js:7:6
 
@@ -421,7 +421,7 @@ optional_chaining.js:16:16,16:18
 
 optional_chaining.js:16:20
 Flags:
-(property) Bar.baz: Baz | void
+(property) Bar.baz: Baz | undefined
 
 'Baz' defined at optional_chaining.js:11:6
 
@@ -429,7 +429,7 @@ optional_chaining.js:16:20,16:22
 
 optional_chaining.js:16:24
 Flags:
-(property) Baz.qux: number | void
+(property) Baz.qux: number | undefined
 optional_chaining.js:16:24,16:26
 
 identifier.js:5:4

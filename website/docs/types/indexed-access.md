@@ -12,7 +12,7 @@ type Age = Person['age']; // number
 ```
 
 :::info TypeScript comparison
-`T[K]` indexed access works the same as TypeScript, including the use of `keyof` and unions of literal keys as the index. The [Optional Indexed Access Type](#toc-optional-indexed-access-types) `Obj?.['prop']` is Flow-only — it mirrors the runtime `?.` operator at the type level, returning `void` when the source is nullish. See [Flow-only syntactic forms](../flow-vs-typescript.md#toc-flow-only-syntax) for the full comparison.
+`T[K]` indexed access works the same as TypeScript, including the use of `keyof` and unions of literal keys as the index. The [Optional Indexed Access Type](#toc-optional-indexed-access-types) `Obj?.['prop']` is Flow-only — it mirrors the runtime `?.` operator at the type level, returning `undefined` when the source is nullish. See [Flow-only syntactic forms](../flow-vs-typescript.md#toc-flow-only-syntax) for the full comparison.
 :::
 
 ## When to use this {#toc-when-to-use}
@@ -112,8 +112,8 @@ Optional Indexed Access Types work like optional chaining. They allow you to acc
 type T = Obj?.['prop'];
 ```
 
-Like optional chaining, the resulting types of Optional Indexed Access Types include `void`.
-If you have a long chain of nested optional accesses, you can wrap the entire thing with a `NonNullable<...>` if you don't want `void` in your resulting type.
+Like optional chaining, the resulting types of Optional Indexed Access Types include `undefined`.
+If you have a long chain of nested optional accesses, you can wrap the entire thing with a `NonNullable<...>` if you don't want `undefined` in your resulting type.
 
 Example:
 
@@ -133,8 +133,8 @@ type TaskData = TasksContent?.['tasks']?.[number]?.['items']?.['metadata'];
 ```
 
 There is one small difference between optional chaining and Optional Indexed Access Types.
-If the object type you access is not nullable, the resulting type in optional chaining will not include `void`.
-With Optional Indexed Access Types, for implementation reasons, the resulting type will always include `void`.
+If the object type you access is not nullable, optional chaining does not add `undefined` to the property's type.
+With Optional Indexed Access Types, for implementation reasons, the resulting type will always include `undefined`.
 However, if your object type is not nullable then you don't need to use an Optional Indexed Access Type, but should just use a regular Indexed Access Type.
 
 

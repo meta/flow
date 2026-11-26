@@ -81,7 +81,7 @@ Enum declarations also define some helpful methods.
 Below, `TEnum` is the type of the enum (e.g. `Status`), and `TRepresentationType` is the type of the representation type for that enum (e.g. `string`).
 
 #### .cast {#toc-cast}
-Type: `cast(input: ?TRepresentationType): TEnum | void`
+Type: `cast(input: ?TRepresentationType): TEnum | undefined`
 
 The `cast` method allows you to safely convert a primitive value, like a `string`, to the enum type (if it is a valid value of the enum), and `undefined` otherwise. You can set a default value in one line with the `??` operator:
 
@@ -90,7 +90,7 @@ enum Status {Active, Paused, Off}
 declare function getData(): string;
 const data: string = getData();
 
-const maybeStatus: Status | void = Status.cast(data);
+const maybeStatus: Status | undefined = Status.cast(data);
 if (maybeStatus != null) {
   const status: Status = maybeStatus;
   // do stuff with status
@@ -108,7 +108,7 @@ enum Status {Active, Paused, Off}
 declare const data: unknown;
 
 if (typeof data === 'string') {
-  const maybeStatus: Status | void = Status.cast(data);
+  const maybeStatus: Status | undefined = Status.cast(data);
 }
 ```
 
@@ -578,7 +578,7 @@ const counts = new Map<Status, number>([
   [Status.Active, 2],
   [Status.Off, 5],
 ]);
-const activeCount: number | void = counts.get(Status.Active);
+const activeCount: number | undefined = counts.get(Status.Active);
 ```
 
 You can use enum members as computed keys in object literals if you type the object with an [indexer type](../types/objects.md#toc-objects-as-maps), as [explained later on this page](#toc-enum-members-as-distinct-object-keys).

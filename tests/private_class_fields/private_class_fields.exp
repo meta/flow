@@ -93,7 +93,7 @@ References:
 
 Error ----------------------------------------------------------------------------------------------------- test.js:69:7
 
-Cannot cast `this.#p` to `number` because `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `this.#p` to `number` because `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
    test.js:69:7
    69|       this.#p as number; // Error #p is null or undefined
@@ -491,8 +491,8 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- test.js:211:41
 
-Cannot assign `this.#optionalFoo?.(...)` to `optionalFooInvalid1` because `void` [1] is incompatible with `number` [2].
-[incompatible-type]
+Cannot assign `this.#optionalFoo?.(...)` to `optionalFooInvalid1` because `undefined` [1] is incompatible with
+`number` [2]. [incompatible-type]
 
    test.js:211:41
    211|     const optionalFooInvalid1: number = this.#optionalFoo?.('');
@@ -542,8 +542,8 @@ References:
 
 Error --------------------------------------------------------------------------------------------------- test.js:216:41
 
-Cannot assign `Calls.#optionalBar?.(...)` to `optionalBarInvalid1` because `void` [1] is incompatible with `string` [2].
-[incompatible-type]
+Cannot assign `Calls.#optionalBar?.(...)` to `optionalBarInvalid1` because `undefined` [1] is incompatible with
+`string` [2]. [incompatible-type]
 
    test.js:216:41
    216|     const optionalBarInvalid1: string = Calls.#optionalBar?.(0);

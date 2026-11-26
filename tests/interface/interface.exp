@@ -530,16 +530,17 @@ References:
 
 Error ------------------------------------------------------------------------------------------------------ fun.js:5:19
 
-Cannot assign function to `f0` because in the return value: `0` [1] is incompatible with `void` [2]. [incompatible-type]
+Cannot assign function to `f0` because in the return value: `0` [1] is incompatible with `undefined` [2].
+[incompatible-type]
 
    fun.js:5:19
-   5| var f0: F = () => 0; // error: number ~> void
+   5| var f0: F = () => 0; // error: number ~> undefined
                         ^ [1]
 
 References:
    fun.js:2:7
-   2|   (): void;
-            ^^^^ [2]
+   2|   (): undefined;
+            ^^^^^^^^^ [2]
 
 
 Error ------------------------------------------------------------------------------------------------------ fun.js:11:1
@@ -1170,7 +1171,8 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ interface.js:29:2
 
-Cannot cast `new D` to `J` because in property `x`: `void` [1] is incompatible with `number` [2]. [incompatible-type]
+Cannot cast `new D` to `J` because in property `x`: `undefined` [1] is incompatible with `number` [2].
+[incompatible-type]
 
 This property is invariantly typed. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.
@@ -1471,7 +1473,7 @@ References:
 
 Error ------------------------------------------------------------------------------------------------ primitives.js:1:1
 
-Cannot cast `undefined` to `interface {}` because `void` [1] is incompatible with `interface {}` [2].
+Cannot cast `undefined` to `interface {}` because `undefined` [1] is incompatible with `interface {}` [2].
 [incompatible-type]
 
    primitives.js:1:1

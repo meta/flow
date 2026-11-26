@@ -193,7 +193,7 @@ References:
 Error ----------------------------------------------------------------------------------------------------- test.js:62:1
 
 Cannot cast `flowMappedInterface` to `interface {a: PartialNode | Node; b: Node}` because in property `a` > property
-`version`: `void` [1] is incompatible with `number` [2]. [incompatible-type]
+`version`: `undefined` [1] is incompatible with `number` [2]. [incompatible-type]
 
 This property is invariantly typed. See
 https://flow.org/en/docs/faq/#why-cant-i-pass-a-string-to-a-function-that-takes-a-string-number.

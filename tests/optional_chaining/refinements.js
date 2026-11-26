@@ -48,7 +48,7 @@ if (a && a.b && a.b.g) {
   a.b?.g?.() as number; // ok, two unneeded chains
 } else {
   a as {...}; // should fail, sanity check
-  a as null | void; // should fail, sanity check
+  a as null | undefined; // should fail, sanity check
 }
 
 function f<T extends any>(x: ?T) {
@@ -99,7 +99,7 @@ if (a?.b?.g) {
   a.b?.g?.() as number; // ok, two unneeded chains
 } else {
   a as {...}; // should fail, sanity check
-  a as null | void; // should fail, sanity check
+  a as null | undefined; // should fail, sanity check
 }
 type Z = {a: 'hello ', value: number} | {b: 'goodbye', value: string};
 declare const b: ?{x: boolean, y?: boolean, z: Z, w?: {u: () => number, ...}, ...};

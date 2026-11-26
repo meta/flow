@@ -36,8 +36,8 @@ function case4() {
 function case5() {
   type CA<T> = ReadonlyArray<CA<T>> | T;
 
-  declare function map<T>(c: CA<T>, fn: (child: T) => void): void;
+  declare function map<T>(c: CA<T>, fn: (child: T) => undefined): void;
   declare const x: any;
 
-  map(x, child => child as string); // error (2): `child` is `unknown`; callback must return `void`
+  map(x, child => child as string); // error (2): `child` is `unknown`; callback must return `undefined`
 }

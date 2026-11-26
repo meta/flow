@@ -226,7 +226,7 @@ Error --------------------------------------------------------------------------
 
 Cannot call `g` because: [incompatible-type]
  - Either `string` [1] is incompatible with `null` [2].
- - Or `string` [1] is incompatible with `void` [3].
+ - Or `string` [1] is incompatible with `undefined` [3].
  - Or `null` [4] is incompatible with `string` [5].
 
    test3.js:12:1
@@ -241,8 +241,8 @@ References:
     8| declare function g(x: null): void;
                              ^^^^ [2]
    test3.js:9:23
-    9| declare function g(x: void): void;
-                             ^^^^ [3]
+    9| declare function g(x: undefined): void;
+                             ^^^^^^^^^ [3]
    test3.js:11:20
    11| declare const x_g: ?string;
                           ^^^^^^^ [4]
@@ -254,8 +254,8 @@ References:
 Error ---------------------------------------------------------------------------------------------------- test3.js:18:1
 
 Cannot call `h` because: [incompatible-type]
- - Either `string` [1] is incompatible with `void` [2].
- - Or `void` [1] is incompatible with `string` [3].
+ - Either `string` [1] is incompatible with `undefined` [2].
+ - Or `undefined` [1] is incompatible with `string` [3].
 
    test3.js:18:1
    18| h(x_h.p); // error: Flow does not split union args across overload branches
@@ -266,8 +266,8 @@ References:
    17| declare const x_h: {p?: string};
                                ^^^^^^ [1]
    test3.js:15:23
-   15| declare function h(x: void): void;
-                             ^^^^ [2]
+   15| declare function h(x: undefined): void;
+                             ^^^^^^^^^ [2]
    test3.js:16:23
    16| declare function h(x: string): void;
                              ^^^^^^ [3]
