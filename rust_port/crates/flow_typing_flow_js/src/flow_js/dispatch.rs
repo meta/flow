@@ -4160,12 +4160,13 @@ fn __flow_impl<'cx>(
                 }
             }
         }
-        // As in TypeScript, an intersection is extended as a whole, like any other value with
-        // construct signatures: its members contribute theirs, and its statics are the whole
-        // intersection. Its generic classes are specialized the way a generic class the extends
-        // clause names directly is. See [intersection_construct_base].
+        // As in TypeScript, an intersection with construct signatures is extended as a whole,
+        // like any other value with construct signatures: its members contribute theirs, and its
+        // statics are the whole intersection. Its generic classes are specialized the way a
+        // generic class the extends clause names directly is. See [intersection_construct_base].
+        // An intersection without any is extended like any other intersection is used.
         (
-            IntersectionT(_, _),
+            IntersectionT(_, rep),
             SpecializeT(
                 deref!(SpecializeTData {
                     use_op,
@@ -4205,13 +4206,27 @@ fn __flow_impl<'cx>(
                     .union_opt(reason_of_t(t).dupe())
                     .unwrap_or_else(|| crate::tvar_resolver::default_no_lowers(reason_of_t(t))))
             };
-            let l =
+            let specialized =
                 flow_js_utils::specialize_generic_class_members(&concretize, &specialize, cx, l)?
                     .unwrap_or_else(|| l.dupe());
-            specialize_constructor(cx, env, trace, &l, use_op, u, Some(&**upper))?;
+            if flow_js_utils::is_inheritable(&concretize, cx, &specialized)? {
+                continue_(cx, env, trace, &specialized, upper)?;
+            } else {
+                callee_recorder::add_callee_use(env, callee_recorder::Kind::SigHelp, l.dupe(), u);
+                speculation_kit::try_intersection(cx, env, trace, u.dupe(), l.dupe(), rep)?;
+            }
         }
-        (IntersectionT(_, _), ThisSpecializeT(r, this, k)) => {
-            this_specialize_constructor(cx, env, trace, l, r, this, k)?;
+        (IntersectionT(_, rep), ThisSpecializeT(r, this, k)) => {
+            let concretize =
+                |cx: &mut Context<'_>, t: &Type| -> Result<Vec<Type>, FlowJsException> {
+                    helpers::possible_concrete_types_for_inspection(cx, env, reason_of_t(t), t)
+                };
+            if flow_js_utils::is_inheritable(&concretize, cx, l)? {
+                this_specialize_constructor(cx, env, trace, l, r, this, k)?;
+            } else {
+                callee_recorder::add_callee_use(env, callee_recorder::Kind::SigHelp, l.dupe(), u);
+                speculation_kit::try_intersection(cx, env, trace, u.dupe(), l.dupe(), rep)?;
+            }
         }
         (IntersectionT(_, rep), _) => {
             // We only call CalleeRecorder here for sig-help information. As far as

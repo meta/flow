@@ -1765,10 +1765,12 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
         // An intersection indexer key joins the key set as it is: which of its
         // members applies is up to the use of the key set.
         (TypeInner::IntersectionT(_, _), OpInner::AnnotGetKeysDictKeyT(_)) => t,
-        // As in TypeScript, an intersection is extended as a whole, like any
-        // other value with construct signatures, its generic classes
-        // specialized the way a generic class the extends clause names directly
-        // is. See [flow_js_utils::intersection_construct_base].
+        // As in TypeScript, an intersection with construct signatures is
+        // extended as a whole, like any other value with construct signatures,
+        // its generic classes specialized the way a generic class the extends
+        // clause names directly is. See
+        // [flow_js_utils::intersection_construct_base]. An intersection without
+        // any is unsupported, as other uses of an intersection are.
         (TypeInner::IntersectionT(_, _), OpInner::AnnotSpecializeT(data))
             if data.types.is_none() =>
         {
@@ -1789,11 +1791,17 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
             let specialize = |cx: &mut Context<'_>, t: &Type| -> Result<Type, FlowJsException> {
                 Ok(elab_t(cx, Some(seen.dupe()), t.dupe(), op.dupe()))
             };
-            let t =
+            let specialized =
                 flow_js_utils::specialize_generic_class_members(&concretize, &specialize, cx, &t)
                     .expect("annotation_inference closures are infallible")
-                    .unwrap_or(t);
-            specialize_constructor(cx, &seen, t, &op)
+                    .unwrap_or_else(|| t.dupe());
+            if flow_js_utils::is_inheritable(&concretize, cx, &specialized)
+                .expect("annotation_inference closures are infallible")
+            {
+                specialized
+            } else {
+                error_unsupported(cx, &t, &op)
+            }
         }
         (
             TypeInner::IntersectionT(_, _),
@@ -1801,7 +1809,29 @@ fn elab_t_concrete<'cx>(cx: &mut Context<'cx>, seen: FlowOrdSet<i32>, t: Type, o
                 reason,
                 type_: this,
             },
-        ) => this_specialize_constructor(cx, &seen, &t, reason, this),
+        ) => {
+            let concretize =
+                |cx: &mut Context<'_>, t: &Type| -> Result<Vec<Type>, FlowJsException> {
+                    let collector = TypeCollector::create();
+                    elab_t(
+                        cx,
+                        Some(seen.dupe()),
+                        t.dupe(),
+                        Op::new(OpInner::AnnotConcretizeForInspection {
+                            reason: type_util::reason_of_t(t).dupe(),
+                            collector: collector.clone(),
+                        }),
+                    );
+                    Ok(collector.collect_to_vec())
+                };
+            if flow_js_utils::is_inheritable(&concretize, cx, &t)
+                .expect("annotation_inference closures are infallible")
+            {
+                this_specialize_constructor(cx, &seen, &t, reason, this)
+            } else {
+                error_unsupported(cx, &t, &op)
+            }
+        }
         (TypeInner::IntersectionT(_, _), _) => error_unsupported(cx, &t, &op),
         // *************************
         //  ConcretizeForInspection

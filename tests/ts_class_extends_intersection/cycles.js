@@ -26,11 +26,13 @@ class LocalCycle extends ROther {
 new LocalCycle().c as number; // ok
 declare const RMixin: Class<LocalMixin> & MC;
 class LocalMixin extends RMixin {}
-new LocalMixin().mi;
+// The walk for the constructor stops where the class comes back, and moves on
+// to the mixin, which declares none (tsc: TS2506 and a default constructor).
+new LocalMixin().mi; // error
 declare const RIndirect: Class<LocalSecond> & MC;
 class LocalFirst extends RIndirect {}
 class LocalSecond extends LocalFirst {}
-new LocalFirst().mi;
+new LocalFirst().mi; // error
 
 // A walk up a chain that cycles stops where it cycles, and moves on to the
 // other members of an intersection it passed, whose chains report a property

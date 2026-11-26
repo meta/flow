@@ -1,9 +1,37 @@
-Error --------------------------------------------------------------------------------------------------- cycles.js:38:7
+Error --------------------------------------------------------------------------------------------------- cycles.js:31:5
+
+Cannot call `LocalMixin` because property `constructor` is missing in `LocalMixin` [1]. [prop-missing]
+
+   cycles.js:31:5
+   31| new LocalMixin().mi; // error
+           ^^^^^^^^^^
+
+References:
+   cycles.js:28:7
+   28| class LocalMixin extends RMixin {}
+             ^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------------- cycles.js:35:5
+
+Cannot call `LocalFirst` because property `constructor` is missing in `LocalFirst` [1]. [prop-missing]
+
+   cycles.js:35:5
+   35| new LocalFirst().mi; // error
+           ^^^^^^^^^^
+
+References:
+   cycles.js:33:7
+   33| class LocalFirst extends RIndirect {}
+             ^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------------- cycles.js:40:7
 
 Cannot get `Cycle.nope` because property `nope` is missing in `{name: string, ...}` [1]. [prop-missing]
 
-   cycles.js:38:7
-   38| Cycle.nope; // error
+   cycles.js:40:7
+   40| Cycle.nope; // error
              ^^^^
 
 References:
@@ -12,12 +40,12 @@ References:
                             ^^^^^ [1]
 
 
-Error -------------------------------------------------------------------------------------------------- cycles.js:39:12
+Error -------------------------------------------------------------------------------------------------- cycles.js:41:12
 
 Cannot get `LocalCycle.nope` because property `nope` is missing in `{name: string, ...}` [1]. [prop-missing]
 
-   cycles.js:39:12
-   39| LocalCycle.nope; // error
+   cycles.js:41:12
+   41| LocalCycle.nope; // error
                   ^^^^
 
 References:
@@ -26,12 +54,12 @@ References:
              ^^^^^^^^^^ [1]
 
 
-Error -------------------------------------------------------------------------------------------------- cycles.js:40:10
+Error -------------------------------------------------------------------------------------------------- cycles.js:42:10
 
 Cannot get `LibCycle.nope` because property `nope` is missing in `{name: string, ...}` [1]. [prop-missing]
 
-   cycles.js:40:10
-   40| LibCycle.nope; // error
+   cycles.js:42:10
+   42| LibCycle.nope; // error
                 ^^^^
 
 References:
@@ -40,12 +68,12 @@ References:
                      ^^^^^^^^ [1]
 
 
-Error --------------------------------------------------------------------------------------------------- cycles.js:41:7
+Error --------------------------------------------------------------------------------------------------- cycles.js:43:7
 
 Cannot get `State.nope` because property `nope` is missing in `{name: string, ...}` [1]. [prop-missing]
 
-   cycles.js:41:7
-   41| State.nope; // error
+   cycles.js:43:7
+   43| State.nope; // error
              ^^^^
 
 References:
@@ -54,12 +82,12 @@ References:
                     ^^^^^ [1]
 
 
-Error --------------------------------------------------------------------------------------------------- cycles.js:42:3
+Error --------------------------------------------------------------------------------------------------- cycles.js:44:3
 
 Cannot get `C.nope` because property `nope` is missing in `{name: string, ...}` [1]. [prop-missing]
 
-   cycles.js:42:3
-   42| C.nope; // error
+   cycles.js:44:3
+   44| C.nope; // error
          ^^^^
 
 References:
@@ -68,98 +96,98 @@ References:
                     ^ [1]
 
 
-Error -------------------------------------------------------------------------------------------------- cycles.js:50:11
+Error -------------------------------------------------------------------------------------------------- cycles.js:52:11
 
 Cannot get `mixesSelf.nope` because property `nope` is missing in `MixesSelf` [1]. [prop-missing]
 
-   cycles.js:50:11
-   50| mixesSelf.nope; // error
+   cycles.js:52:11
+   52| mixesSelf.nope; // error
                  ^^^^
 
 References:
-   cycles.js:48:26
-   48| declare const mixesSelf: MixesSelf;
+   cycles.js:50:26
+   50| declare const mixesSelf: MixesSelf;
                                 ^^^^^^^^^ [1]
 
 
-Error -------------------------------------------------------------------------------------------------- cycles.js:57:22
+Error -------------------------------------------------------------------------------------------------- cycles.js:59:22
 
 Cannot get `(new LocalMixesSelf()).nope` because property `nope` is missing in `LocalMixesSelf` [1]. [prop-missing]
 
-   cycles.js:57:22
-   57| new LocalMixesSelf().nope; // error
+   cycles.js:59:22
+   59| new LocalMixesSelf().nope; // error
                             ^^^^
 
 References:
-   cycles.js:57:1
-   57| new LocalMixesSelf().nope; // error
+   cycles.js:59:1
+   59| new LocalMixesSelf().nope; // error
        ^^^^^^^^^^^^^^^^^^^^ [1]
 
 
-Error --------------------------------------------------------------------------------------------------- cycles.js:60:1
+Error --------------------------------------------------------------------------------------------------- cycles.js:62:1
 
 Cannot cast `new LocalMixesSelf()` to `MI` because property `mi` is missing in `LocalMixesSelf` [1] but exists in
 `MI` [2]. [incompatible-type]
 
-   cycles.js:60:1
-   60| new LocalMixesSelf() as MI; // error
+   cycles.js:62:1
+   62| new LocalMixesSelf() as MI; // error
        ^^^^^^^^^^^^^^^^^^^^ [1]
 
 References:
-   cycles.js:60:25
-   60| new LocalMixesSelf() as MI; // error
+   cycles.js:62:25
+   62| new LocalMixesSelf() as MI; // error
                                ^^ [2]
 
 
-Error --------------------------------------------------------------------------------------------------- cycles.js:62:6
+Error --------------------------------------------------------------------------------------------------- cycles.js:64:6
 
 Cannot extend `LocalMixesSelf` [1] with `ExtendsMixesSelf` [2] because in property `o`: `string` [3] is incompatible
 with `number` [4]. [incompatible-type]
 
-   cycles.js:62:6
-   62|   o: string; // error: string ~> number
+   cycles.js:64:6
+   64|   o: string; // error: string ~> number
             ^^^^^^ [3]
 
 References:
-   cycles.js:61:32
-   61| class ExtendsMixesSelf extends LocalMixesSelf {
+   cycles.js:63:32
+   63| class ExtendsMixesSelf extends LocalMixesSelf {
                                       ^^^^^^^^^^^^^^ [1]
-   cycles.js:61:1
+   cycles.js:63:1
        v----------------------------------------------
-   61| class ExtendsMixesSelf extends LocalMixesSelf {
-   62|   o: string; // error: string ~> number
-   63| }
+   63| class ExtendsMixesSelf extends LocalMixesSelf {
+   64|   o: string; // error: string ~> number
+   65| }
        ^ [2]
    cycles.js:14:6
    14|   o: number;
             ^^^^^^ [4]
 
 
-Error --------------------------------------------------------------------------------------------------- cycles.js:69:1
+Error --------------------------------------------------------------------------------------------------- cycles.js:71:1
 
 Cannot cast `(new SubWraps(...)).w` to `number` because `string` [1] is incompatible with `number` [2].
 [incompatible-type]
 
-   cycles.js:69:1
-   69| new SubWraps(1).w as number; // error: string ~> number
+   cycles.js:71:1
+   71| new SubWraps(1).w as number; // error: string ~> number
        ^^^^^^^^^^^^^^^^^
 
 References:
-   cycles.js:68:34
-   68| class SubWraps extends WrapsSelf<string> {}
+   cycles.js:70:34
+   70| class SubWraps extends WrapsSelf<string> {}
                                         ^^^^^^ [1]
-   cycles.js:69:22
-   69| new SubWraps(1).w as number; // error: string ~> number
+   cycles.js:71:22
+   71| new SubWraps(1).w as number; // error: string ~> number
                             ^^^^^^ [2]
 
 
-Error -------------------------------------------------------------------------------------------------- cycles.js:70:14
+Error -------------------------------------------------------------------------------------------------- cycles.js:72:14
 
 Cannot call `SubWraps` with `'bad'` bound to `x` because `"bad"` [1] is incompatible with `number` [2].
 [incompatible-type]
 
-   cycles.js:70:14
-   70| new SubWraps('bad'); // error: string ~> number
+   cycles.js:72:14
+   72| new SubWraps('bad'); // error: string ~> number
                     ^^^^^ [1]
 
 References:
@@ -168,123 +196,123 @@ References:
                                         ^^^^^^ [2]
 
 
-Error -------------------------------------------------------------------------------------------------- cycles.js:108:8
+Error -------------------------------------------------------------------------------------------------- cycles.js:110:8
 
 Cannot get `cycleA.nope` because property `nope` is missing in `CycleA` [1]. [prop-missing]
 
-   cycles.js:108:8
-   108| cycleA.nope; // error
+   cycles.js:110:8
+   110| cycleA.nope; // error
                ^^^^
 
 References:
-   cycles.js:105:23
-   105| declare const cycleA: CycleA;
+   cycles.js:107:23
+   107| declare const cycleA: CycleA;
                               ^^^^^^ [1]
 
 
-Error -------------------------------------------------------------------------------------------------- cycles.js:109:1
+Error -------------------------------------------------------------------------------------------------- cycles.js:111:1
 
 Cannot cast `cycleA` to `Other` because `CycleA` [1] is incompatible with `Other` [2]. [incompatible-type]
 
-   cycles.js:109:1
-   109| cycleA as Other; // error
+   cycles.js:111:1
+   111| cycleA as Other; // error
         ^^^^^^
 
 References:
-   cycles.js:105:23
-   105| declare const cycleA: CycleA;
+   cycles.js:107:23
+   107| declare const cycleA: CycleA;
                               ^^^^^^ [1]
-   cycles.js:109:11
-   109| cycleA as Other; // error
+   cycles.js:111:11
+   111| cycleA as Other; // error
                   ^^^^^ [2]
 
 
-Error -------------------------------------------------------------------------------------------------- cycles.js:127:9
+Error -------------------------------------------------------------------------------------------------- cycles.js:129:9
 
 Cannot get `wrapped.nope` because property `nope` is missing in `Wraps<Wraps<X>>` [1]. [prop-missing]
 
-   cycles.js:127:9
-   127| wrapped.nope; // error
+   cycles.js:129:9
+   129| wrapped.nope; // error
                 ^^^^
 
 References:
-   cycles.js:125:24
-   125| declare const wrapped: Wraps<Wraps<X>>;
+   cycles.js:127:24
+   127| declare const wrapped: Wraps<Wraps<X>>;
                                ^^^^^^^^^^^^^^^ [1]
 
 
-Error -------------------------------------------------------------------------------------------------- cycles.js:128:1
+Error -------------------------------------------------------------------------------------------------- cycles.js:130:1
 
 Cannot cast `wrapped` to `Y` because property `y` is missing in `Wraps<Wraps<X>>` [1] but exists in `Y` [2].
 [incompatible-type]
 
-   cycles.js:128:1
-   128| wrapped as Y; // error
+   cycles.js:130:1
+   130| wrapped as Y; // error
         ^^^^^^^
 
 References:
-   cycles.js:125:24
-   125| declare const wrapped: Wraps<Wraps<X>>;
+   cycles.js:127:24
+   127| declare const wrapped: Wraps<Wraps<X>>;
                                ^^^^^^^^^^^^^^^ [1]
-   cycles.js:128:12
-   128| wrapped as Y; // error
+   cycles.js:130:12
+   130| wrapped as Y; // error
                    ^ [2]
 
 
-Error -------------------------------------------------------------------------------------------------- importer.js:5:1
+Error ------------------------------------------------------------------------------------------------- importer.js:18:1
 
 Cannot cast `assigned.a` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
 
-   importer.js:5:1
-   5| assigned.a as empty; // error: number ~> empty
-      ^^^^^^^^^^
+   importer.js:18:1
+   18| assigned.a as empty; // error: number ~> empty
+       ^^^^^^^^^^
 
 References:
    lib.d.ts:2:6
-   2|   a: number;
-           ^^^^^^ [1]
-   importer.js:5:15
-   5| assigned.a as empty; // error: number ~> empty
-                    ^^^^^ [2]
+    2|   a: number;
+            ^^^^^^ [1]
+   importer.js:18:15
+   18| assigned.a as empty; // error: number ~> empty
+                     ^^^^^ [2]
 
 
-Error ------------------------------------------------------------------------------------------------- importer.js:9:14
+Error ------------------------------------------------------------------------------------------------ importer.js:22:14
 
 Cannot get `FromAssigned.nope` because property `nope` is missing in `{name: string, ...}` [1]. [prop-missing]
 
-   importer.js:9:14
-   9| FromAssigned.nope; // error
-                   ^^^^
+   importer.js:22:14
+   22| FromAssigned.nope; // error
+                    ^^^^
 
 References:
    lib.d.ts:8:22
-   8| export declare class FromAssigned extends Assigned {
-                           ^^^^^^^^^^^^ [1]
+    8| export declare class FromAssigned extends Assigned {
+                            ^^^^^^^^^^^^ [1]
 
 
-Error ------------------------------------------------------------------------------------------------- importer.js:14:1
+Error ------------------------------------------------------------------------------------------------- importer.js:27:1
 
 Cannot cast `mixed.a` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
 
-   importer.js:14:1
-   14| mixed.a as empty; // error: number ~> empty
+   importer.js:27:1
+   27| mixed.a as empty; // error: number ~> empty
        ^^^^^^^
 
 References:
    lib.d.ts:2:6
     2|   a: number;
             ^^^^^^ [1]
-   importer.js:14:12
-   14| mixed.a as empty; // error: number ~> empty
+   importer.js:27:12
+   27| mixed.a as empty; // error: number ~> empty
                   ^^^^^ [2]
 
 
-Error ------------------------------------------------------------------------------------------------ importer.js:17:15
+Error ------------------------------------------------------------------------------------------------ importer.js:30:15
 
 Cannot call `FromMixin` because no arguments are expected by default constructor [1]. [extra-arg]
 
-   importer.js:17:15
-   17| new FromMixin(1); // error: `A`'s constructor takes no argument
+   importer.js:30:15
+   30| new FromMixin(1); // error: `A`'s constructor takes no argument
                      ^
 
 References:
@@ -293,12 +321,12 @@ References:
                             ^ [1]
 
 
-Error ------------------------------------------------------------------------------------------------ importer.js:20:19
+Error ------------------------------------------------------------------------------------------------ importer.js:33:19
 
 Cannot call `FromOverloads` because no arguments are expected by function type [1]. [extra-arg]
 
-   importer.js:20:19
-   20| new FromOverloads('s'); // error: only the first member's signatures construct (tsc: ok)
+   importer.js:33:19
+   33| new FromOverloads('s'); // error: only the first member's signatures construct (tsc: ok)
                          ^^^
 
 References:
@@ -307,12 +335,12 @@ References:
                                   ^^^^^^^^^ [1]
 
 
-Error ------------------------------------------------------------------------------------------------ importer.js:21:19
+Error ------------------------------------------------------------------------------------------------ importer.js:34:19
 
 Cannot call `FromOverloads` because no arguments are expected by function type [1]. [extra-arg]
 
-   importer.js:21:19
-   21| new FromOverloads(1); // error
+   importer.js:34:19
+   34| new FromOverloads(1); // error
                          ^
 
 References:
@@ -321,191 +349,318 @@ References:
                                   ^^^^^^^^^ [1]
 
 
-Error ------------------------------------------------------------------------------------------------- importer.js:24:1
+Error ------------------------------------------------------------------------------------------------- importer.js:37:1
 
 Cannot cast `generic.g` to `empty` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
 
-   importer.js:24:1
-   24| generic.g as empty; // error: string ~> empty
+   importer.js:37:1
+   37| generic.g as empty; // error: string ~> empty
        ^^^^^^^^^
 
 References:
    lib.d.ts:40:28
    40| export declare class G<T = string> {
                                   ^^^^^^ [1]
-   importer.js:24:14
-   24| generic.g as empty; // error: string ~> empty
+   importer.js:37:14
+   37| generic.g as empty; // error: string ~> empty
                     ^^^^^ [2]
 
 
-Error ------------------------------------------------------------------------------------------------- importer.js:29:1
+Error ------------------------------------------------------------------------------------------------- importer.js:42:1
 
 Cannot cast `objectMixed.a` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
 
-   importer.js:29:1
-   29| objectMixed.a as empty; // error: number ~> empty
+   importer.js:42:1
+   42| objectMixed.a as empty; // error: number ~> empty
        ^^^^^^^^^^^^^
 
 References:
    lib.d.ts:2:6
     2|   a: number;
             ^^^^^^ [1]
-   importer.js:29:18
-   29| objectMixed.a as empty; // error: number ~> empty
+   importer.js:42:18
+   42| objectMixed.a as empty; // error: number ~> empty
                         ^^^^^ [2]
 
 
-Error ------------------------------------------------------------------------------------------------- importer.js:32:6
+Error ------------------------------------------------------------------------------------------------- importer.js:45:6
 
 Cannot extend `FromObjectMixin` [1] with `OverridesObjectMixin` [2] because in property `o`: `number` [3] is
 incompatible with `string` [4]. [incompatible-type]
 
-   importer.js:32:6
-   32|   o: number; // error: number ~> string
+   importer.js:45:6
+   45|   o: number; // error: number ~> string
             ^^^^^^ [3]
 
 References:
-   importer.js:31:36
-   31| class OverridesObjectMixin extends FromObjectMixin {
+   importer.js:44:36
+   44| class OverridesObjectMixin extends FromObjectMixin {
                                           ^^^^^^^^^^^^^^^ [1]
-   importer.js:31:1
+   importer.js:44:1
        v---------------------------------------------------
-   31| class OverridesObjectMixin extends FromObjectMixin {
-   32|   o: number; // error: number ~> string
-   33| }
+   44| class OverridesObjectMixin extends FromObjectMixin {
+   45|   o: number; // error: number ~> string
+   46| }
        ^ [2]
    lib.d.ts:27:30
    27|   new (...args: any[]): { o: string };
                                     ^^^^^^ [4]
 
 
-Error ---------------------------------------------------------------------------------------------------- local.js:17:1
+Error ------------------------------------------------------------------------------------------------- importer.js:50:5
 
-Cannot cast `mixed.a` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot call `FromMixinOverClass` because `(x: number) => void` [1] requires another argument. [incompatible-type]
 
-   local.js:17:1
-   17| mixed.a as empty; // error: number ~> empty
-       ^^^^^^^
+   importer.js:50:5
+   50| new FromMixinOverClass(); // error: `A5`'s constructor takes `x` (tsc: TS2554)
+           ^^^^^^^^^^^^^^^^^^
 
 References:
-   local.js:3:6
-    3|   a: number;
-            ^^^^^^ [1]
-   local.js:17:12
-   17| mixed.a as empty; // error: number ~> empty
-                  ^^^^^ [2]
+   lib.d.ts:50:3
+   50|   constructor(x: number);
+         ^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------- importer.js:57:5
+
+Cannot call `FromClassMixin` because `(x: number) => void` [1] requires another argument. [incompatible-type]
+
+   importer.js:57:5
+   57| new FromClassMixin(); // error: `A5`'s constructor takes `x` (tsc: TS2554)
+           ^^^^^^^^^^^^^^
+
+References:
+   lib.d.ts:50:3
+   50|   constructor(x: number);
+         ^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------------- importer.js:61:5
+
+Cannot call `FromMixinThenClass` because `(x: number) => void` [1] requires another argument. [incompatible-type]
+
+   importer.js:61:5
+   61| new FromMixinThenClass(); // error: `AOverridden`'s constructor takes `x` (tsc: TS2554)
+           ^^^^^^^^^^^^^^^^^^
+
+References:
+   lib.d.ts:85:3
+   85|   constructor(x: number);
+         ^^^^^^^^^^^^^^^^^^^^^^ [1]
 
 
 Error ---------------------------------------------------------------------------------------------------- local.js:19:1
 
-Cannot cast `FromMixin.s` to `empty` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
+Cannot cast `mixed.a` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
 
    local.js:19:1
-   19| FromMixin.s as empty; // error: string ~> empty
+   19| mixed.a as empty; // error: number ~> empty
+       ^^^^^^^
+
+References:
+   local.js:5:6
+    5|   a: number;
+            ^^^^^^ [1]
+   local.js:19:12
+   19| mixed.a as empty; // error: number ~> empty
+                  ^^^^^ [2]
+
+
+Error ---------------------------------------------------------------------------------------------------- local.js:21:1
+
+Cannot cast `FromMixin.s` to `empty` because `string` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   local.js:21:1
+   21| FromMixin.s as empty; // error: string ~> empty
        ^^^^^^^^^^^
 
 References:
-   local.js:4:13
-    4|   static s: string;
+   local.js:6:13
+    6|   static s: string;
                    ^^^^^^ [1]
-   local.js:19:16
-   19| FromMixin.s as empty; // error: string ~> empty
+   local.js:21:16
+   21| FromMixin.s as empty; // error: string ~> empty
                       ^^^^^ [2]
 
 
-Error ---------------------------------------------------------------------------------------------------- local.js:25:1
+Error ---------------------------------------------------------------------------------------------------- local.js:27:1
 
 Cannot cast `(new FromNested()).a` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
 
-   local.js:25:1
-   25| new FromNested().a as empty; // error: number ~> empty
+   local.js:27:1
+   27| new FromNested().a as empty; // error: number ~> empty
        ^^^^^^^^^^^^^^^^^^
 
 References:
-   local.js:3:6
-    3|   a: number;
+   local.js:5:6
+    5|   a: number;
             ^^^^^^ [1]
-   local.js:25:23
-   25| new FromNested().a as empty; // error: number ~> empty
+   local.js:27:23
+   27| new FromNested().a as empty; // error: number ~> empty
                              ^^^^^ [2]
 
 
-Error ---------------------------------------------------------------------------------------------------- local.js:33:1
+Error ---------------------------------------------------------------------------------------------------- local.js:35:1
 
 Cannot cast `(new FromGeneric()).g` to `empty` because `string` [1] is incompatible with `empty` [2].
 [incompatible-type]
 
-   local.js:33:1
-   33| new FromGeneric().g as empty; // error: string ~> empty
+   local.js:35:1
+   35| new FromGeneric().g as empty; // error: string ~> empty
        ^^^^^^^^^^^^^^^^^^^
 
 References:
-   local.js:28:21
-   28| declare class G<T = string> {
+   local.js:30:21
+   30| declare class G<T = string> {
                            ^^^^^^ [1]
-   local.js:33:24
-   33| new FromGeneric().g as empty; // error: string ~> empty
+   local.js:35:24
+   35| new FromGeneric().g as empty; // error: string ~> empty
                               ^^^^^ [2]
 
 
-Error ---------------------------------------------------------------------------------------------------- local.js:36:7
+Error ---------------------------------------------------------------------------------------------------- local.js:38:7
 
-Cannot extend `{a: number} & {b: string}` [1] with `FromNotCtor` [2] because `{a: number} & {b: string}` [1] is not
-inheritable. [incompatible-use]
+Cannot extend `{a: number} & {b: string}` [1] with `FromNotCtor` [2] because: [incompatible-type]
+ - Either `{a: number}` [3] is not a polymorphic type.
+ - Or `{b: string}` [4] is not a polymorphic type.
 
-   local.js:36:7
-   36| class FromNotCtor extends NotCtor {} // error: no construct signature
+   local.js:38:7
+   38| class FromNotCtor extends NotCtor {} // error: no construct signature
              ^^^^^^^^^^^ [2]
 
 References:
-   local.js:36:27
-   36| class FromNotCtor extends NotCtor {} // error: no construct signature
+   local.js:38:27
+   38| class FromNotCtor extends NotCtor {} // error: no construct signature
                                  ^^^^^^^ [1]
+   local.js:37:24
+   37| declare const NotCtor: {a: number} & {b: string};
+                              ^^^^^^^^^^^ [3]
+   local.js:37:38
+   37| declare const NotCtor: {a: number} & {b: string};
+                                            ^^^^^^^^^^^ [4]
 
 
-Error ---------------------------------------------------------------------------------------------------- local.js:43:7
+Error ---------------------------------------------------------------------------------------------------- local.js:45:7
 
-Cannot extend `(Class<A> | {y: string}) & {x: number}` [1] with `FromUnionWithObject` [2] because
-`(Class<A> | {y: string}) & {x: number}` [1] is not inheritable. [incompatible-use]
+Cannot extend `(Class<A> | {y: string}) & {x: number}` [1] with `FromUnionWithObject` [2] because: [incompatible-type]
+ - Either `{y: string}` [3] is not a polymorphic type.
+ - Or `{x: number}` [4] is not a polymorphic type.
 
-   local.js:43:7
-   43| class FromUnionWithObject extends UnionWithObject {} // error (tsc: TS2507)
+   local.js:45:7
+   45| class FromUnionWithObject extends UnionWithObject {} // error (tsc: TS2507)
              ^^^^^^^^^^^^^^^^^^^ [2]
 
 References:
-   local.js:43:35
-   43| class FromUnionWithObject extends UnionWithObject {} // error (tsc: TS2507)
+   local.js:45:35
+   45| class FromUnionWithObject extends UnionWithObject {} // error (tsc: TS2507)
                                          ^^^^^^^^^^^^^^^ [1]
+   local.js:44:44
+   44| declare const UnionWithObject: (Class<A> | {y: string}) & {x: number};
+                                                  ^^^^^^^^^^^ [3]
+   local.js:44:59
+   44| declare const UnionWithObject: (Class<A> | {y: string}) & {x: number};
+                                                                 ^^^^^^^^^^^ [4]
 
 
-Error --------------------------------------------------------------------------------------------------- local.js:69:26
+Error --------------------------------------------------------------------------------------------------- local.js:71:26
 
 Cannot call `FromDifferentReturns` because no arguments are expected by function type [1]. [extra-arg]
 
-   local.js:69:26
-   69| new FromDifferentReturns('s'); // error: no argument expected
+   local.js:71:26
+   71| new FromDifferentReturns('s'); // error: no argument expected
                                 ^^^
 
 References:
-   local.js:61:3
-   61|   constructor(): void;
+   local.js:63:3
+   63|   constructor(): void;
          ^^^^^^^^^^^^^^^^^^^ [1]
 
 
-Error --------------------------------------------------------------------------------------------------- local.js:78:20
+Error --------------------------------------------------------------------------------------------------- local.js:80:20
 
 Cannot call `FromMixinFirst` with `'s'` bound to `x` because `"s"` [1] is incompatible with `number` [2].
 [incompatible-type]
 
-   local.js:78:20
-   78| new FromMixinFirst('s'); // error: string ~> number (tsc: TS2345)
+   local.js:80:20
+   80| new FromMixinFirst('s'); // error: string ~> number (tsc: TS2345)
                           ^^^ [1]
 
 References:
-   local.js:74:18
-   74|   constructor(x: number): void;
+   local.js:76:18
+   76|   constructor(x: number): void;
                         ^^^^^^ [2]
 
 
+Error ---------------------------------------------------------------------------------------------------- local.js:94:5
 
-Found 32 errors
+Cannot call `FromMixinOverClass` because `(x: number) => void` [1] requires another argument. [incompatible-type]
+
+   local.js:94:5
+   94| new FromMixinOverClass(); // error: `A5`'s constructor takes `x` (tsc: TS2554)
+           ^^^^^^^^^^^^^^^^^^
+
+References:
+   local.js:76:3
+   76|   constructor(x: number): void;
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error --------------------------------------------------------------------------------------------------- local.js:100:1
+
+Cannot cast `(new FromOpaque()).a` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   local.js:100:1
+   100| new FromOpaque().a as empty; // error: number ~> empty
+        ^^^^^^^^^^^^^^^^^^
+
+References:
+   opaque.js:2:6
+     2|   a: number;
+             ^^^^^^ [1]
+   local.js:100:23
+   100| new FromOpaque().a as empty; // error: number ~> empty
+                              ^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------------- local.js:103:3
+
+Cannot cast `(new FromGenericMember()).a` to `empty` because `number` [1] is incompatible with `empty` [2].
+[incompatible-type]
+
+   local.js:103:3
+   103|   new FromGenericMember().a as empty; // error: number ~> empty
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   opaque.js:2:6
+     2|   a: number;
+             ^^^^^^ [1]
+   local.js:103:32
+   103|   new FromGenericMember().a as empty; // error: number ~> empty
+                                       ^^^^^ [2]
+
+
+Error --------------------------------------------------------------------------------------------------- local.js:113:7
+
+Cannot extend `(?Class<A>) & {x: number}` [1] with `FromMaybeClass` [2] because: [incompatible-type]
+ - Either `null` [3] is not a polymorphic type.
+ - Or `{x: number}` [4] is not a polymorphic type.
+
+   local.js:113:7
+   113| class FromMaybeClass extends MaybeClass {} // error
+              ^^^^^^^^^^^^^^ [2]
+
+References:
+   local.js:113:30
+   113| class FromMaybeClass extends MaybeClass {} // error
+                                     ^^^^^^^^^^ [1]
+   local.js:112:27
+   112| declare const MaybeClass: ?Class<A> & {x: number};
+                                  ^^^^^^^^^ [3]
+   local.js:112:39
+   112| declare const MaybeClass: ?Class<A> & {x: number};
+                                              ^^^^^^^^^^^ [4]
+
+
+
+Found 41 errors

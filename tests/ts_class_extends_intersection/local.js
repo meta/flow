@@ -1,3 +1,5 @@
+import type {OpaqueClass} from './opaque';
+
 // The same rules for a class checked in this file.
 declare class A {
   a: number;
@@ -78,3 +80,34 @@ class FromMixinFirst extends MixinFirst {}
 new FromMixinFirst('s'); // error: string ~> number (tsc: TS2345)
 new FromMixinFirst(1).m as boolean; // ok
 new FromMixinFirst(1).a as number; // ok
+
+// A mixin applied to a class whose constructor takes an argument.
+declare class MIClass {
+  mi: boolean;
+}
+interface MIClassCtor {
+  new (...args: Array<any>): MIClass;
+}
+declare const MixinOverClass: MIClassCtor & Class<A5>;
+class FromMixinOverClass extends MixinOverClass {}
+new FromMixinOverClass(1).mi as boolean; // ok
+new FromMixinOverClass(); // error: `A5`'s constructor takes `x` (tsc: TS2554)
+
+// An opaque or generic member stands for its bound, as when a class extends it
+// alone.
+declare const Opaque: OpaqueClass & {x: number};
+class FromOpaque extends Opaque {}
+new FromOpaque().a as empty; // error: number ~> empty
+function fromGeneric<T extends OpaqueClass>(b: T & {x: number}) {
+  class FromGenericMember extends b {}
+  new FromGenericMember().a as empty; // error: number ~> empty
+}
+
+// As in TypeScript, a union with `any` makes the intersection `any`.
+declare const UnionWithAny: (Class<A> | any) & {x: number};
+class FromUnionWithAny extends UnionWithAny {} // ok
+
+// An intersection without construct signatures is extended as other uses of an
+// intersection are.
+declare const MaybeClass: ?Class<A> & {x: number};
+class FromMaybeClass extends MaybeClass {} // error
