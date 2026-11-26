@@ -1,3 +1,31 @@
+Error -------------------------------------------------------------------------------------- array_intersection.js:30:10
+
+Cannot return `m` because: [incompatible-type]
+ - Either in array element: `Array<T[number]>` [1] is incompatible with `number` [2].
+ - Or `interface {readonly "@@iterator": Array<T["@@iterator"]>}` [3] is incompatible with `ReadonlyArray<number>` [4].
+
+Flow is showing the union/intersection branches that got closest to passing. Other branches were less compatible and are
+not shown. To see all branches, re-run Flow with --show-all-branches.
+
+   array_intersection.js:30:10
+   30|   return m; // ERROR
+                ^
+
+References:
+   array_intersection.js:28:23
+   28|   m: {[K in keyof T]: Array<T[K]>},
+                             ^^^^^^^^^^^ [1]
+   array_intersection.js:29:18
+   29| ): ReadonlyArray<number> {
+                        ^^^^^^ [2]
+   array_intersection.js:28:6
+   28|   m: {[K in keyof T]: Array<T[K]>},
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   array_intersection.js:29:4
+   29| ): ReadonlyArray<number> {
+          ^^^^^^^^^^^^^^^^^^^^^ [4]
+
+
 Error ----------------------------------------------------------------------------------------------- deep_types.js:12:3
 
 Cannot cast `a` to `empty` because `number` [1] is incompatible with `empty` [2]. [incompatible-type]
@@ -3135,4 +3163,4 @@ References:
 
 
 
-Found 189 errors
+Found 190 errors

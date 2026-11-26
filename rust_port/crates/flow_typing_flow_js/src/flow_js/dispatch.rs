@@ -91,6 +91,7 @@ use flow_typing_type::type_::UseTInner::*;
 use flow_typing_type::type_::ValueReference;
 use flow_typing_type::type_::ValueToTypeReferenceTData;
 use flow_typing_type::type_::WriteElemData;
+use flow_typing_type::type_::inter_rep::InterRep;
 use flow_typing_type::type_::object::ObjectToolObjectMapData;
 use flow_typing_type::type_::type_or_type_desc::ErrorTypeDesc;
 use flow_typing_type::type_::type_or_type_desc::TypeOrTypeDescT;
@@ -554,6 +555,40 @@ fn reaches_marker(t: &Type, markers: &BTreeSet<SubstName>) -> bool {
             type_, defer_use_t, ..
         } => acts_on_marker(type_, &defer_use_t.2, markers),
         _ => false,
+    }
+}
+
+/// Whether a member of the intersection `rep` is mapped as an array by a homomorphic mapped type.
+fn has_array_member<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    reason: &Reason,
+    rep: &InterRep,
+) -> Result<bool, FlowJsException> {
+    for member in rep.members_iter() {
+        if maps_as_array(cx, env, reason, member)? {
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+/// Whether a homomorphic mapped type maps `t` as an array: an array or a tuple, a type parameter
+/// bounded by one, or an intersection with one.
+fn maps_as_array<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    reason: &Reason,
+    t: &Type,
+) -> Result<bool, FlowJsException> {
+    match possible_concrete_types_for_inspection(cx, env, reason, t)?.as_slice() {
+        [t] => match t.deref() {
+            DefT(_, deref!(ArrT(_))) => Ok(true),
+            GenericT(deref!(GenericTData { bound, .. })) => maps_as_array(cx, env, reason, bound),
+            IntersectionT(_, rep) => has_array_member(cx, env, reason, rep),
+            _ => Ok(false),
+        },
+        _ => Ok(false),
     }
 }
 
@@ -3994,6 +4029,49 @@ fn __flow_impl<'cx>(
         ) => {
             let repos_l = helpers::reposition_reason(cx, env, Some(trace), reason, *use_desc, l)?;
             rec_flow(cx, env, trace, (&repos_l, u_inner))?;
+        }
+        // A homomorphic mapped type maps each member of an intersection with an array or tuple
+        // member on its own and intersects the results, as TypeScript maps an intersection of
+        // arrays and tuples. The object kit would join the members into one object, which an
+        // array is not.
+        (
+            IntersectionT(_, rep),
+            ObjKitT(
+                use_op,
+                reason_op,
+                resolve_tool @ deref!(object::ResolveTool::Resolve(object::Resolve::Next)),
+                tool @ deref!(object::Tool::ObjectMap(deref!(ObjectToolObjectMapData {
+                    name_type: None,
+                    selected_keys_opt: None,
+                    ..
+                }))),
+                tout,
+            ),
+        ) if has_array_member(cx, env, reason_op, rep)? => {
+            let mapped = flow_js_utils::map_inter(
+                |cx, trace, t, tout| {
+                    rec_flow(
+                        cx,
+                        env,
+                        *trace,
+                        (
+                            t,
+                            &UseT::new(ObjKitT(
+                                use_op.dupe(),
+                                reason_op.dupe(),
+                                resolve_tool.clone(),
+                                tool.clone(),
+                                tout,
+                            )),
+                        ),
+                    )
+                },
+                cx,
+                &trace,
+                rep,
+                reason_op.dupe(),
+            )?;
+            rec_flow_t(cx, env, trace, unknown_use(), (&mapped, tout))?;
         }
         (IntersectionT(_, _), ObjKitT(use_op, reason, resolve_tool, tool, tout)) => {
             object_kit::run_with_env(
