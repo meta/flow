@@ -253,6 +253,10 @@ impl ErrorSet {
     where
         F: Fn(&FlowError<ALoc>) -> bool,
     {
+        // Collecting allocates a new set, even an empty one.
+        if self.0.is_empty() {
+            return self;
+        }
         Self(self.0.into_iter().filter(|e| f(e)).collect())
     }
 
