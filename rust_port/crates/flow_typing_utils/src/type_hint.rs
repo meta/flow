@@ -986,6 +986,58 @@ fn overload_takes_call<'cx>(
     }
 }
 
+/// A generic member of a union or intersection is instantiated as a lone generic component is.
+fn instantiate_components<'cx>(
+    cx: &mut Context<'cx>,
+    env: &FlowJsEnv,
+    opts: &HintOptions,
+    component: &Type,
+    instantiation_hint: &ConcrJsxHints,
+) -> Result<Type, SandboxError> {
+    let component_resolved = get_t(cx, component.dupe());
+    let (component, component_resolved) = match component_resolved.deref() {
+        TypeInner::TypeAppT(deref!(TypeAppTData { reason, .. })) => {
+            let concrete = FlowJs::singleton_concrete_type_for_inspection_with_env(
+                cx,
+                env,
+                reason,
+                &component_resolved,
+            )?;
+            (concrete.dupe(), concrete)
+        }
+        _ => (component.dupe(), component_resolved.dupe()),
+    };
+    match component_resolved.deref() {
+        TypeInner::UnionT(r, rep) => {
+            let mut error = None;
+            let rep = rep.ident_map(false, |t| {
+                instantiate_component(cx, env, opts, t, instantiation_hint).unwrap_or_else(|e| {
+                    error.get_or_insert(e);
+                    t.dupe()
+                })
+            });
+            match error {
+                Some(e) => Err(e),
+                None => Ok(Type::new(TypeInner::UnionT(r.dupe(), rep))),
+            }
+        }
+        TypeInner::IntersectionT(r, rep) => {
+            let mut error = None;
+            let rep = rep.ident_map(|t| {
+                instantiate_component(cx, env, opts, t, instantiation_hint).unwrap_or_else(|e| {
+                    error.get_or_insert(e);
+                    t.dupe()
+                })
+            });
+            match error {
+                Some(e) => Err(e),
+                None => Ok(Type::new(TypeInner::IntersectionT(r.dupe(), rep))),
+            }
+        }
+        _ => instantiate_component(cx, env, opts, &component, instantiation_hint),
+    }
+}
+
 fn instantiate_component<'cx>(
     cx: &mut Context<'cx>,
     env: &FlowJsEnv,
@@ -2037,7 +2089,7 @@ fn type_of_hint_decomposition<'cx>(
                 Ok(instantiate_callee(cx, env, opts, reason, &t, instantiation_hint)?.0)
             }
             ConcrHintDecompositionInner::InstantiateComponent(instantiation_hint) => Ok(
-                instantiate_component(cx, env, opts, &t, instantiation_hint)?,
+                instantiate_components(cx, env, opts, &t, instantiation_hint)?,
             ),
             ConcrHintDecompositionInner::DecompPromise => {
                 let t = t.dupe();
