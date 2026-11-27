@@ -1,0 +1,198 @@
+Error ------------------------------------------------------------------------------------ <BUILTINS>/lib.es5.js:1576:22
+
+`{b: 1}` [1] is incompatible with `empty` [2]. (FLOW BUG: This is a misplaced error. The original error was raised in
+file `recursive_empty.js`). [incompatible-type]
+
+   <BUILTINS>/lib.es5.js:1576:22
+   1576| type Exclude<T, U> = T extends U ? never : T;
+                              ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+References:
+   recursive_empty.js:29:48
+     29|   T extends [infer H] ? (H extends 1 ? Exclude<ExcludeRecur<H>, {b: 1}> : {b: 1}) : {b: 2};
+                                                        ^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------ <BUILTINS>/lib.es5.js:1576:22
+
+`{b: 2}` [1] is incompatible with `empty` [2]. (FLOW BUG: This is a misplaced error. The original error was raised in
+file `recursive_empty.js`). [incompatible-type]
+
+   <BUILTINS>/lib.es5.js:1576:22
+   1576| type Exclude<T, U> = T extends U ? never : T;
+                              ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+References:
+   recursive_empty.js:29:48
+     29|   T extends [infer H] ? (H extends 1 ? Exclude<ExcludeRecur<H>, {b: 1}> : {b: 1}) : {b: 2};
+                                                        ^^^^^^^^^^^^^^^ [1]
+
+
+Error -------------------------------------------------------------------------------------------- generic_tuple.ts:8:60
+
+Cannot spread non-tuple (`S` [1]) into tuple type. [tuple-invalid-type-spread]
+
+   generic_tuple.ts:8:60
+   8| type BeforeElement<S extends ReadonlyArray<number>> = Nums<[...S, number]>; // ERROR (TypeScript accepts)
+                                                                 ^^^^^^^^^^^^^^
+
+References:
+   generic_tuple.ts:8:64
+   8| type BeforeElement<S extends ReadonlyArray<number>> = Nums<[...S, number]>; // ERROR (TypeScript accepts)
+                                                                     ^ [1]
+
+
+Error -------------------------------------------------------------------------------------------- generic_tuple.ts:9:92
+
+Cannot spread non-tuple (`S` [1]) into tuple type. [tuple-invalid-type-spread]
+
+   generic_tuple.ts:9:92
+   9| type BeforeSpread<S extends ReadonlyArray<number>, U extends ReadonlyArray<number>> = Nums<[...S, ...U]>; // ERROR (TypeScript accepts)
+                                                                                                 ^^^^^^^^^^^^
+
+References:
+   generic_tuple.ts:9:96
+   9| type BeforeSpread<S extends ReadonlyArray<number>, U extends ReadonlyArray<number>> = Nums<[...S, ...U]>; // ERROR (TypeScript accepts)
+                                                                                                     ^ [1]
+
+
+Error -------------------------------------------------------------------------------------------- generic_tuple.ts:15:9
+
+Cannot spread non-tuple (`S` [1]) into tuple type. [tuple-invalid-type-spread]
+
+   generic_tuple.ts:15:9
+   15|       ? [...S, ...Collect<Parents>] // ERROR (TypeScript accepts)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+References:
+   generic_tuple.ts:15:13
+   15|       ? [...S, ...Collect<Parents>] // ERROR (TypeScript accepts)
+                   ^ [1]
+
+
+Error ------------------------------------------------------------------------------------------ recursive_empty.js:6:19
+
+Cannot instantiate `B6` because
+`[0, ...Array<(H extends [infer H] ? H extends 1 ? [0, ...B6<H>] : [1] : Readonly<[]>)[number]>]` [1] is incompatible
+with `empty` [2]. [incompatible-type]
+
+   recursive_empty.js:6:19
+   6| function b6<X>(x: B6<X>): ReadonlyArray<0 | 1> {
+                        ^^^^^
+
+References:
+   recursive_empty.js:5:51
+   5| type B6<T> = T extends [infer H] ? (H extends 1 ? [0, ...B6<H>] : [1]) : [];
+                                                        ^^^^^^^^^^^^^ [1]
+   recursive_empty.js:5:37
+   5| type B6<T> = T extends [infer H] ? (H extends 1 ? [0, ...B6<H>] : [1]) : [];
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------ recursive_empty.js:6:19
+
+Cannot instantiate `B6` because `[1]` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   recursive_empty.js:6:19
+   6| function b6<X>(x: B6<X>): ReadonlyArray<0 | 1> {
+                        ^^^^^
+
+References:
+   recursive_empty.js:5:67
+   5| type B6<T> = T extends [infer H] ? (H extends 1 ? [0, ...B6<H>] : [1]) : [];
+                                                                        ^^^ [1]
+   recursive_empty.js:5:37
+   5| type B6<T> = T extends [infer H] ? (H extends 1 ? [0, ...B6<H>] : [1]) : [];
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+
+Error ------------------------------------------------------------------------------------------ recursive_empty.js:13:5
+
+`[number, ...Array<(Parents extends [infer Own, ...infer Parents] ? Own extends {s: infer S} ? S exte...` [1] is
+incompatible with `empty` [2]. [incompatible-type]
+
+   recursive_empty.js:13:5
+           v-----------------------
+   13|   ? Own extends {s: infer S}
+   14|     ? S extends [number]
+   15|       ? [...S, ...C2<Parents>]
+   16|       : C2<Parents>
+   17|     : C2<Parents>
+           ------------^ [2]
+
+References:
+   recursive_empty.js:15:9
+   15|       ? [...S, ...C2<Parents>]
+               ^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------ recursive_empty.js:13:5
+
+`Readonly<[]>` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   recursive_empty.js:13:5
+           v-----------------------
+   13|   ? Own extends {s: infer S}
+   14|     ? S extends [number]
+   15|       ? [...S, ...C2<Parents>]
+   16|       : C2<Parents>
+   17|     : C2<Parents>
+           ------------^ [2]
+
+References:
+   recursive_empty.js:16:9
+   16|       : C2<Parents>
+               ^^^^^^^^^^^ [1]
+
+
+Error ------------------------------------------------------------------------------------------ recursive_empty.js:13:5
+
+`Readonly<[]>` [1] is incompatible with `empty` [2]. [incompatible-type]
+
+   recursive_empty.js:13:5
+           v-----------------------
+   13|   ? Own extends {s: infer S}
+   14|     ? S extends [number]
+   15|       ? [...S, ...C2<Parents>]
+   16|       : C2<Parents>
+   17|     : C2<Parents>
+           ------------^ [2]
+
+References:
+   recursive_empty.js:17:7
+   17|     : C2<Parents>
+             ^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- recursive_empty.js:22:51
+
+`[0, ...Array<(P extends [infer O, ...infer P] ? O extends 1 ? [0, ...Bits<P>] : [1, ...Bits<P>] : Re...` [1] is
+incompatible with `empty` [2]. [incompatible-type]
+
+   recursive_empty.js:22:51
+   22| type Bits<X> = X extends [infer O, ...infer P] ? (O extends 1 ? [0, ...Bits<P>] : [1, ...Bits<P>]) : [];
+                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+References:
+   recursive_empty.js:22:65
+   22| type Bits<X> = X extends [infer O, ...infer P] ? (O extends 1 ? [0, ...Bits<P>] : [1, ...Bits<P>]) : [];
+                                                                       ^^^^^^^^^^^^^^^ [1]
+
+
+Error ----------------------------------------------------------------------------------------- recursive_empty.js:22:51
+
+`[1, ...Array<(P extends [infer O, ...infer P] ? O extends 1 ? [0, ...Bits<P>] : [1, ...Bits<P>] : Re...` [1] is
+incompatible with `empty` [2]. [incompatible-type]
+
+   recursive_empty.js:22:51
+   22| type Bits<X> = X extends [infer O, ...infer P] ? (O extends 1 ? [0, ...Bits<P>] : [1, ...Bits<P>]) : [];
+                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+References:
+   recursive_empty.js:22:83
+   22| type Bits<X> = X extends [infer O, ...infer P] ? (O extends 1 ? [0, ...Bits<P>] : [1, ...Bits<P>]) : [];
+                                                                                         ^^^^^^^^^^^^^^^ [1]
+
+
+
+Found 12 errors
